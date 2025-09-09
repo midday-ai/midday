@@ -69,6 +69,35 @@ export interface SummarySection {
   metadata?: Record<string, any>;
 }
 
+// Table configuration
+export interface TableConfig {
+  id: string;
+  title: string;
+  columns: TableColumn[];
+  data: TableRow[];
+  metadata?: Record<string, any>;
+}
+
+export interface TableColumn {
+  key: string;
+  label: string;
+  type: "text" | "number" | "currency" | "date" | "badge" | "percentage";
+  align?: "left" | "right" | "center";
+  width?: string;
+  format?: {
+    currency?: string;
+    decimals?: number;
+    dateFormat?: string;
+    badgeVariant?: "default" | "secondary" | "outline";
+  };
+}
+
+export interface TableRow {
+  id: string;
+  data: Record<string, any>;
+  metadata?: Record<string, any>;
+}
+
 // Dashboard layout configuration
 export interface DashboardLayout {
   id: string;
@@ -80,6 +109,7 @@ export interface DashboardLayout {
     config: ChartConfig;
     data: TimeSeriesPoint[];
   };
+  table?: TableConfig;
 }
 
 // Period information
@@ -166,20 +196,73 @@ export function createMetricCard(
 export function createSummary(
   title: string,
   description: string,
-  insights: (string | null)[],
-  recommendations: (string | null)[],
+  insights?: (string | null)[],
+  recommendations?: (string | null)[],
   metadata?: Record<string, any>,
 ): SummarySection {
   return {
     title,
     description,
-    insights: insights.filter(Boolean) as string[],
-    recommendations: recommendations.filter(Boolean) as string[],
+    insights: insights?.filter(Boolean) as string[],
+    recommendations: recommendations?.filter(Boolean) as string[],
     metadata,
   };
 }
 
 // Create a dashboard layout with enhanced configuration
+// Create table column
+export function createTableColumn(
+  key: string,
+  label: string,
+  type: TableColumn["type"],
+  options?: {
+    align?: "left" | "right" | "center";
+    width?: string;
+    format?: TableColumn["format"];
+  },
+): TableColumn {
+  return {
+    key,
+    label,
+    type,
+    align: options?.align || "left",
+    width: options?.width,
+    format: options?.format,
+  };
+}
+
+// Create table row
+export function createTableRow(
+  id: string,
+  data: Record<string, any>,
+  metadata?: Record<string, any>,
+): TableRow {
+  return {
+    id,
+    data,
+    metadata,
+  };
+}
+
+// Create table configuration
+export function createTableConfig(
+  title: string,
+  columns: TableColumn[],
+  data: TableRow[],
+  options?: {
+    id?: string;
+    metadata?: Record<string, any>;
+  },
+): TableConfig {
+  return {
+    id: options?.id || generateId(),
+    title,
+    columns,
+    data,
+    metadata: options?.metadata,
+  };
+}
+
 export function createDashboardLayout(
   title: string,
   cards: MetricCard[],
@@ -191,6 +274,7 @@ export function createDashboardLayout(
       config: ChartConfig;
       data: TimeSeriesPoint[];
     };
+    table?: TableConfig;
   },
 ): DashboardLayout {
   return {
@@ -200,6 +284,7 @@ export function createDashboardLayout(
     cards,
     summary,
     chart: options?.chart,
+    table: options?.table,
   };
 }
 

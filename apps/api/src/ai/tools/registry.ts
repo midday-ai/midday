@@ -43,11 +43,6 @@ export type MessageDataParts = {
   title: {
     title: string;
   };
-  "data-canvas-title": {
-    presentation: "canvas";
-    type: "canvas-title";
-    title: string;
-  };
   "data-canvas": CanvasData;
 };
 
