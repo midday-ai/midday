@@ -38,8 +38,8 @@ export function calculateTotal({
   // Calculate Total: Subtotal + VAT - Discount
   const total = subTotal + (includeVat ? totalVAT : 0) - safeDiscount;
 
-  // Calculate tax (if included)
-  const tax = includeTax ? (total * safeTaxRate) / 100 : 0;
+  // Calculate tax (if included) - tax should be calculated on subtotal, not total
+  const tax = includeTax ? (subTotal * safeTaxRate) / 100 : 0;
 
   return {
     subTotal,

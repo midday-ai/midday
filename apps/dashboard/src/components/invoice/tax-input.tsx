@@ -1,8 +1,17 @@
+import { useTRPC } from "@/trpc/client";
 import { CurrencyInput } from "@midday/ui/currency-input";
+import { useMutation } from "@tanstack/react-query";
+import { useRef } from "react";
 import { useController, useFormContext } from "react-hook-form";
 
 export function TaxInput() {
   const { control } = useFormContext();
+  const trpc = useTRPC();
+  const lastSavedValueRef = useRef<number | undefined>(undefined);
+  const updateTemplateMutation = useMutation(
+    trpc.invoiceTemplate.upsert.mutationOptions(),
+  );
+
   const {
     field: { value, onChange },
   } = useController({
@@ -17,7 +26,16 @@ export function TaxInput() {
       autoComplete="off"
       value={value}
       onValueChange={(values) => {
-        onChange(values.floatValue);
+        const newValue = values.floatValue ?? 0;
+        onChange(newValue);
+      }}
+      onBlur={() => {
+        const currentValue = value ?? 0;
+        // Only save if the value has actually changed
+        if (currentValue !== lastSavedValueRef.current) {
+          lastSavedValueRef.current = currentValue;
+          updateTemplateMutation.mutate({ taxRate: currentValue });
+        }
       }}
       className="p-0 border-0 h-6 text-xs !bg-transparent font-mono flex-shrink-0 w-16 text-[11px] text-[#878787]"
       thousandSeparator={false}

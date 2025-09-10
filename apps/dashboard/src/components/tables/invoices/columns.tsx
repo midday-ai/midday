@@ -193,6 +193,7 @@ export const columns: ColumnDef<Invoice>[] = [
         <FormatAmount
           amount={(row.original?.vat as number) ?? null}
           currency={row.original.currency ?? "USD"}
+          maximumFractionDigits={2}
         />
       </span>
     ),
@@ -228,6 +229,7 @@ export const columns: ColumnDef<Invoice>[] = [
         <FormatAmount
           amount={(row.original.tax as number) ?? null}
           currency={row.original.currency ?? "USD"}
+          maximumFractionDigits={2}
         />
       </span>
     ),
