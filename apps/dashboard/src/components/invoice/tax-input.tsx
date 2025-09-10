@@ -27,8 +27,9 @@ export function TaxInput() {
         const newValue = values.floatValue ?? 0;
         onChange(newValue);
 
-        // Save to template
-        updateTemplateMutation.mutate({ taxRate: newValue });
+        if (newValue > 0) {
+          updateTemplateMutation.mutate({ taxRate: newValue });
+        }
       }}
       className="p-0 border-0 h-6 text-xs !bg-transparent font-mono flex-shrink-0 w-16 text-[11px] text-[#878787]"
       thousandSeparator={false}
