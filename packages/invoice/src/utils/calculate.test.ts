@@ -48,7 +48,8 @@ describe("calculateTotal", () => {
       includeVat: true,
       vatRate: 10,
     });
-    expect(result.tax).toBe(41.25); // (250 + 25) * 0.15
+    expect(result.tax).toBe(37.5); // 250 * 0.15 (tax calculated on subtotal, not total)
+    expect(result.total).toBe(312.5); // 250 + 25 + 37.5
   });
 
   it("should handle empty line items", () => {

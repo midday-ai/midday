@@ -79,6 +79,7 @@ export function Summary() {
     lineItems,
     taxRate,
     vatRate,
+    includeVat,
     includeTax,
     discount: discount ?? 0,
   });
@@ -174,7 +175,7 @@ export function Summary() {
           <span className="text-right font-mono text-[11px] text-[#878787]">
             <FormatAmount
               amount={totalVAT}
-              maximumFractionDigits={maximumFractionDigits}
+              maximumFractionDigits={2}
               currency={currency}
               locale={locale}
             />
@@ -199,8 +200,9 @@ export function Summary() {
           <span className="text-right font-mono text-[11px] text-[#878787]">
             <FormatAmount
               amount={totalTax}
-              maximumFractionDigits={maximumFractionDigits}
+              maximumFractionDigits={2}
               currency={currency}
+              locale={locale}
             />
           </span>
         </div>
@@ -217,7 +219,9 @@ export function Summary() {
           <AnimatedNumber
             value={total}
             currency={currency}
-            maximumFractionDigits={maximumFractionDigits}
+            maximumFractionDigits={
+              includeTax || includeVat ? 2 : maximumFractionDigits
+            }
           />
         </span>
       </div>

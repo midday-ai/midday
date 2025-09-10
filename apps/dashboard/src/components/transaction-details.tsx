@@ -279,6 +279,7 @@ export function TransactionDetails() {
                     <FormatAmount
                       amount={data.taxAmount}
                       currency={data.currency}
+                      maximumFractionDigits={2}
                     />
                   </span>
                 ) : null}

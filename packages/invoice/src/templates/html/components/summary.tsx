@@ -94,7 +94,7 @@ export function Summary({
               new Intl.NumberFormat(locale, {
                 style: "currency",
                 currency: currency,
-                maximumFractionDigits,
+                maximumFractionDigits: 2,
               }).format(totalVAT)}
           </span>
         </div>
@@ -110,7 +110,7 @@ export function Summary({
               new Intl.NumberFormat(locale, {
                 style: "currency",
                 currency: currency,
-                maximumFractionDigits,
+                maximumFractionDigits: 2,
               }).format(totalTax)}
           </span>
         </div>
@@ -125,7 +125,8 @@ export function Summary({
             new Intl.NumberFormat(locale, {
               style: "currency",
               currency: currency,
-              maximumFractionDigits,
+              maximumFractionDigits:
+                includeTax || includeVat ? 2 : maximumFractionDigits,
             }).format(total)}
         </span>
       </div>

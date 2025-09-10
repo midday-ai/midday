@@ -296,6 +296,7 @@ export const columns: ColumnDef<Transaction>[] = [
       <FormatAmount
         amount={row.original.taxAmount}
         currency={row.original.currency}
+        maximumFractionDigits={2}
       />
     ),
   },

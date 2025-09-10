@@ -1,8 +1,15 @@
+import { useTRPC } from "@/trpc/client";
 import { CurrencyInput } from "@midday/ui/currency-input";
+import { useMutation } from "@tanstack/react-query";
 import { useController, useFormContext } from "react-hook-form";
 
 export function VATInput() {
   const { control } = useFormContext();
+  const trpc = useTRPC();
+  const updateTemplateMutation = useMutation(
+    trpc.invoiceTemplate.upsert.mutationOptions(),
+  );
+
   const {
     field: { value, onChange },
   } = useController({
@@ -17,7 +24,11 @@ export function VATInput() {
       autoComplete="off"
       value={value}
       onValueChange={(values) => {
-        onChange(values.floatValue);
+        const newValue = values.floatValue ?? 0;
+        onChange(newValue);
+
+        // Save to template
+        updateTemplateMutation.mutate({ vatRate: newValue });
       }}
       className="p-0 border-0 h-6 text-xs !bg-transparent font-mono flex-shrink-0 w-16 text-[11px] text-[#878787]"
       thousandSeparator={false}

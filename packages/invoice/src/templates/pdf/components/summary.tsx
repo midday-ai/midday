@@ -98,7 +98,7 @@ export function Summary({
                 amount: displayVat,
                 currency,
                 locale,
-                maximumFractionDigits,
+                maximumFractionDigits: 2,
               })}
           </Text>
         </View>
@@ -115,7 +115,7 @@ export function Summary({
                 amount: displayTax,
                 currency,
                 locale,
-                maximumFractionDigits,
+                maximumFractionDigits: 2,
               })}
           </Text>
         </View>
@@ -140,7 +140,8 @@ export function Summary({
               amount: displayTotal,
               currency,
               locale,
-              maximumFractionDigits,
+              maximumFractionDigits:
+                includeTax || includeVat ? 2 : maximumFractionDigits,
             })}
         </Text>
       </View>
