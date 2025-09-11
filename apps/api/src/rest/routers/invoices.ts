@@ -258,34 +258,11 @@ app.openapi(
 
     // Generate invoice ID and number if not provided
     const invoiceId = uuidv4();
-    const invoiceNumber =
+    const finalInvoiceNumber =
       input.invoiceNumber || (await getNextInvoiceNumber(db, teamId));
 
-    // Validate customer exists if customerId is provided
-    if (input.customerId) {
-      const customer = await getCustomerById(db, {
-        id: input.customerId,
-        teamId,
-      });
-
-      if (!customer) {
-        throw new HTTPException(404, {
-          message: `Customer with ID '${input.customerId}' not found. Please provide a valid customer ID or create the customer first.`,
-        });
-      }
-    }
-
-    // Set default dates if not provided
-    const issueDate = input.issueDate || new Date().toISOString();
-    const dueDate = input.dueDate || addMonths(new Date(), 1).toISOString();
-
-    // Handle invoice number generation and validation
-    let finalInvoiceNumber = invoiceNumber;
-    if (!finalInvoiceNumber) {
-      // Generate a new invoice number if not provided
-      finalInvoiceNumber = await getNextInvoiceNumber(db, teamId);
-    } else {
-      // Check if the provided invoice number is already used
+    // Check if the provided invoice number is already used
+    if (input.invoiceNumber) {
       const isUsed = await isInvoiceNumberUsed(db, teamId, finalInvoiceNumber);
       if (isUsed) {
         throw new HTTPException(409, {
@@ -293,6 +270,10 @@ app.openapi(
         });
       }
     }
+
+    // Set default dates if not provided
+    const issueDate = input.issueDate || new Date().toISOString();
+    const dueDate = input.dueDate || addMonths(new Date(), 1).toISOString();
 
     // Fetch customer and generate customerDetails
     const customer = await getCustomerById(db, {

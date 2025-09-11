@@ -437,8 +437,13 @@ export const invoiceRouter = createTRPCRouter({
   draft: protectedProcedure
     .input(draftInvoiceSchema)
     .mutation(async ({ input, ctx: { db, teamId, session } }) => {
+      // Generate invoice number if not provided
+      const invoiceNumber =
+        input.invoiceNumber || (await getNextInvoiceNumber(db, teamId!));
+
       return draftInvoice(db, {
         ...input,
+        invoiceNumber,
         teamId: teamId!,
         userId: session?.user.id!,
         paymentDetails: parseInputValue(input.paymentDetails),
