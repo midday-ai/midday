@@ -208,9 +208,11 @@ app.openapi(
         ? JSON.stringify(result.bottomBlock)
         : null,
       pdfUrl: token
-        ? `https://app.midday.ai/api/download/invoice?token=${token}`
+        ? `${process.env.MIDDAY_DASHBOARD_URL}/api/download/invoice?token=${token}`
         : null,
-      previewUrl: token ? `https://app.midday.ai/i/${token}` : null,
+      previewUrl: token
+        ? `${process.env.MIDDAY_DASHBOARD_URL}/i/${token}`
+        : null,
     };
 
     return c.json(validateResponse(response, invoiceResponseSchema));
@@ -381,9 +383,11 @@ app.openapi(
         ? JSON.stringify(result.bottomBlock)
         : null,
       pdfUrl: token
-        ? `https://app.midday.ai/api/download/invoice?token=${token}`
+        ? `${process.env.MIDDAY_DASHBOARD_URL}/api/download/invoice?token=${token}`
         : null,
-      previewUrl: token ? `https://app.midday.ai/i/${token}` : null,
+      previewUrl: token
+        ? `${process.env.MIDDAY_DASHBOARD_URL}/i/${token}`
+        : null,
     };
 
     return c.json(validateResponse(response, draftInvoiceResponseSchema), 201);
@@ -461,9 +465,11 @@ app.openapi(
         ? JSON.stringify(result.bottomBlock)
         : null,
       pdfUrl: token
-        ? `https://app.midday.ai/api/download/invoice?token=${token}`
+        ? `${process.env.MIDDAY_DASHBOARD_URL}/api/download/invoice?token=${token}`
         : null,
-      previewUrl: token ? `https://app.midday.ai/i/${token}` : null,
+      previewUrl: token
+        ? `${process.env.MIDDAY_DASHBOARD_URL}/i/${token}`
+        : null,
     };
 
     return c.json(validateResponse(response, updateInvoiceResponseSchema));
