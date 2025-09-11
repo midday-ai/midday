@@ -20,6 +20,7 @@ export const useTokenModalStore = create<TokenModalState>()((set) => ({
   type: undefined,
   data: undefined,
   createdKey: undefined,
-  setData: (data, type) => set({ data, type }),
+  setData: (data, type) =>
+    set({ data, type, createdKey: type === "create" ? undefined : undefined }),
   setCreatedKey: (key) => set({ createdKey: key }),
 }));
