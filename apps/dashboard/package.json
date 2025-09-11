@@ -45,6 +45,7 @@
     "@trpc/client": "^11.5.1",
     "@trpc/tanstack-react-query": "^11.5.1",
     "ai": "^5.0.37",
+    "ai-sdk-devtools": "^0.4.0",
     "change-case": "^5.4.4",
     "date-fns": "^4.1.0",
     "file-saver": "^2.0.5",

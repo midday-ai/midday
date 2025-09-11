@@ -30,6 +30,7 @@ import { Response } from "@midday/ui/response";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Geo } from "@vercel/functions";
 import { DefaultChatTransport, generateId } from "ai";
+import { AIDevtools } from "ai-sdk-devtools";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMemo } from "react";
@@ -406,6 +407,14 @@ export function ChatInterface({
           />
         )}
       </div>
+
+      {process.env.NODE_ENV === "development" && (
+        <AIDevtools
+          config={{
+            position: "bottom",
+          }}
+        />
+      )}
     </div>
   );
 }
