@@ -2,6 +2,8 @@ import type { Context } from "@api/rest/types";
 import {
   deleteInvoiceResponseSchema,
   deleteInvoiceSchema,
+  draftInvoiceRequestSchema,
+  draftInvoiceResponseSchema,
   getInvoiceByIdSchema,
   getInvoicesSchema,
   getPaymentStatusResponseSchema,
@@ -9,16 +11,30 @@ import {
   invoiceSummaryResponseSchema,
   invoiceSummarySchema,
   invoicesResponseSchema,
+  updateInvoiceRequestSchema,
+  updateInvoiceResponseSchema,
 } from "@api/schemas/invoice";
+
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import {
   deleteInvoice,
+  draftInvoice,
+  getCustomerById,
   getInvoiceById,
   getInvoiceSummary,
   getInvoices,
+  getNextInvoiceNumber,
   getPaymentStatus,
+  isInvoiceNumberUsed,
+  updateInvoice,
 } from "@midday/db/queries";
+import { transformCustomerToContent } from "@midday/invoice/utils";
+import type { GenerateInvoicePayload } from "@midday/jobs/schema";
+import { tasks } from "@trigger.dev/sdk";
+import { addMonths } from "date-fns";
+import { HTTPException } from "hono/http-exception";
+import { v4 as uuidv4 } from "uuid";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();
@@ -167,7 +183,290 @@ app.openapi(
       teamId,
     });
 
-    return c.json(validateResponse(result, invoiceResponseSchema));
+    if (!result) {
+      throw new HTTPException(404, { message: "Invoice not found" });
+    }
+
+    // Add PDF download and preview URLs and serialize objects like tRPC does with superjson
+    const { token, ...resultWithoutToken } = result;
+    const response = {
+      ...resultWithoutToken,
+      paymentDetails: result.paymentDetails
+        ? JSON.stringify(result.paymentDetails)
+        : null,
+      customerDetails: result.customerDetails
+        ? JSON.stringify(result.customerDetails)
+        : null,
+      fromDetails: result.fromDetails
+        ? JSON.stringify(result.fromDetails)
+        : null,
+      noteDetails: result.noteDetails
+        ? JSON.stringify(result.noteDetails)
+        : null,
+      topBlock: result.topBlock ? JSON.stringify(result.topBlock) : null,
+      bottomBlock: result.bottomBlock
+        ? JSON.stringify(result.bottomBlock)
+        : null,
+      pdfUrl: token
+        ? `https://app.midday.ai/api/download/invoice?token=${token}`
+        : null,
+      previewUrl: token ? `https://app.midday.ai/i/${token}` : null,
+    };
+
+    return c.json(validateResponse(response, invoiceResponseSchema));
+  },
+);
+
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/",
+    summary: "Create a draft invoice",
+    operationId: "createInvoice",
+    "x-speakeasy-name-override": "create",
+    description:
+      "Create a draft invoice for the authenticated team. Use the convert endpoint to finalize it.",
+    tags: ["Invoices"],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: draftInvoiceRequestSchema,
+          },
+        },
+      },
+    },
+    responses: {
+      201: {
+        description: "Draft invoice created successfully.",
+        content: {
+          "application/json": {
+            schema: draftInvoiceResponseSchema,
+          },
+        },
+      },
+    },
+    middleware: [withRequiredScope("invoices.write")],
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const userId = c.get("session").user.id;
+    const input = c.req.valid("json");
+
+    // Generate invoice ID and number if not provided
+    const invoiceId = uuidv4();
+    const invoiceNumber =
+      input.invoiceNumber || (await getNextInvoiceNumber(db, teamId));
+
+    // Validate customer exists if customerId is provided
+    if (input.customerId) {
+      const customer = await getCustomerById(db, {
+        id: input.customerId,
+        teamId,
+      });
+
+      if (!customer) {
+        throw new HTTPException(404, {
+          message: `Customer with ID '${input.customerId}' not found. Please provide a valid customer ID or create the customer first.`,
+        });
+      }
+    }
+
+    // Set default dates if not provided
+    const issueDate = input.issueDate || new Date().toISOString();
+    const dueDate = input.dueDate || addMonths(new Date(), 1).toISOString();
+
+    // Handle invoice number generation and validation
+    let finalInvoiceNumber = invoiceNumber;
+    if (!finalInvoiceNumber) {
+      // Generate a new invoice number if not provided
+      finalInvoiceNumber = await getNextInvoiceNumber(db, teamId);
+    } else {
+      // Check if the provided invoice number is already used
+      const isUsed = await isInvoiceNumberUsed(db, teamId, finalInvoiceNumber);
+      if (isUsed) {
+        throw new HTTPException(409, {
+          message: `Invoice number '${finalInvoiceNumber}' is already used. Please provide a different invoice number or omit it to auto-generate one.`,
+        });
+      }
+    }
+
+    // Fetch customer and generate customerDetails
+    const customer = await getCustomerById(db, {
+      id: input.customerId,
+      teamId,
+    });
+
+    if (!customer) {
+      throw new HTTPException(404, { message: "Customer not found" });
+    }
+
+    const customerDetails = transformCustomerToContent(customer);
+
+    const result = await draftInvoice(db, {
+      id: invoiceId,
+      teamId,
+      userId,
+      invoiceNumber: finalInvoiceNumber,
+      issueDate,
+      dueDate,
+      template: input.template,
+      paymentDetails: input.paymentDetails,
+      fromDetails: input.fromDetails,
+      customerDetails: customerDetails ? JSON.stringify(customerDetails) : null,
+      noteDetails: input.noteDetails,
+      customerId: input.customerId,
+      customerName: customer.name,
+      logoUrl: input.logoUrl,
+      vat: input.vat,
+      tax: input.tax,
+      discount: input.discount,
+      topBlock: input.topBlock,
+      bottomBlock: input.bottomBlock,
+      amount: input.amount,
+      lineItems: input.lineItems?.map((item) => ({
+        ...item,
+        name: JSON.stringify(item.name),
+      })),
+    });
+
+    if (!result) {
+      throw new HTTPException(500, { message: "Failed to create invoice" });
+    }
+
+    let finalResult = result;
+
+    if (
+      input.deliveryType === "create" ||
+      input.deliveryType === "create_and_send"
+    ) {
+      // Update invoice status to unpaid (similar to tRPC)
+      const updatedInvoice = await updateInvoice(db, {
+        id: result.id,
+        status: "unpaid",
+        teamId,
+        userId,
+      });
+
+      if (updatedInvoice) {
+        finalResult = updatedInvoice;
+      }
+
+      // Trigger invoice generation (and sending if create_and_send)
+      await tasks.trigger("generate-invoice", {
+        invoiceId: result.id,
+        deliveryType: input.deliveryType,
+      } satisfies GenerateInvoicePayload);
+    }
+
+    // Add PDF download and preview URLs and serialize objects like tRPC does with superjson
+    const { token, ...resultWithoutToken } = finalResult;
+    const response = {
+      ...resultWithoutToken,
+      paymentDetails: result.paymentDetails
+        ? JSON.stringify(result.paymentDetails)
+        : null,
+      customerDetails: result.customerDetails
+        ? JSON.stringify(result.customerDetails)
+        : null,
+      fromDetails: result.fromDetails
+        ? JSON.stringify(result.fromDetails)
+        : null,
+      noteDetails: result.noteDetails
+        ? JSON.stringify(result.noteDetails)
+        : null,
+      topBlock: result.topBlock ? JSON.stringify(result.topBlock) : null,
+      bottomBlock: result.bottomBlock
+        ? JSON.stringify(result.bottomBlock)
+        : null,
+      pdfUrl: token
+        ? `https://app.midday.ai/api/download/invoice?token=${token}`
+        : null,
+      previewUrl: token ? `https://app.midday.ai/i/${token}` : null,
+    };
+
+    return c.json(validateResponse(response, draftInvoiceResponseSchema), 201);
+  },
+);
+
+app.openapi(
+  createRoute({
+    method: "put",
+    path: "/{id}",
+    summary: "Update an invoice",
+    operationId: "updateInvoice",
+    "x-speakeasy-name-override": "update",
+    description:
+      "Update an invoice by its unique identifier for the authenticated team.",
+    tags: ["Invoices"],
+    request: {
+      params: getInvoiceByIdSchema.pick({ id: true }),
+      body: {
+        content: {
+          "application/json": {
+            schema: updateInvoiceRequestSchema,
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        description: "Invoice updated successfully.",
+        content: {
+          "application/json": {
+            schema: updateInvoiceResponseSchema,
+          },
+        },
+      },
+    },
+    middleware: [withRequiredScope("invoices.write")],
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const userId = c.get("session").user.id;
+    const { id } = c.req.valid("param");
+    const input = c.req.valid("json");
+
+    const result = await updateInvoice(db, {
+      id,
+      teamId,
+      userId,
+      ...input,
+    });
+
+    if (!result) {
+      throw new HTTPException(404, { message: "Invoice not found" });
+    }
+
+    // Add PDF download and preview URLs and serialize objects like tRPC does with superjson
+    const { token, ...resultWithoutToken } = result;
+    const response = {
+      ...resultWithoutToken,
+      paymentDetails: result.paymentDetails
+        ? JSON.stringify(result.paymentDetails)
+        : null,
+      customerDetails: result.customerDetails
+        ? JSON.stringify(result.customerDetails)
+        : null,
+      fromDetails: result.fromDetails
+        ? JSON.stringify(result.fromDetails)
+        : null,
+      noteDetails: result.noteDetails
+        ? JSON.stringify(result.noteDetails)
+        : null,
+      topBlock: result.topBlock ? JSON.stringify(result.topBlock) : null,
+      bottomBlock: result.bottomBlock
+        ? JSON.stringify(result.bottomBlock)
+        : null,
+      pdfUrl: token
+        ? `https://app.midday.ai/api/download/invoice?token=${token}`
+        : null,
+      previewUrl: token ? `https://app.midday.ai/i/${token}` : null,
+    };
+
+    return c.json(validateResponse(response, updateInvoiceResponseSchema));
   },
 );
 

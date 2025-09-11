@@ -400,13 +400,34 @@ export async function getNextInvoiceNumber(
   return row.next_invoice_number as string;
 }
 
+export async function isInvoiceNumberUsed(
+  db: Database,
+  teamId: string,
+  invoiceNumber: string,
+): Promise<boolean> {
+  const [result] = await db
+    .select({
+      id: invoices.id,
+    })
+    .from(invoices)
+    .where(
+      and(
+        eq(invoices.teamId, teamId),
+        eq(invoices.invoiceNumber, invoiceNumber),
+      ),
+    )
+    .limit(1);
+
+  return !!result;
+}
+
 type DraftInvoiceLineItemParams = {
-  name?: string;
+  name?: string | null; // Stringified TipTap JSONContent
   quantity?: number;
   unit?: string | null;
   price?: number;
-  vat?: number;
-  tax?: number;
+  vat?: number | null;
+  tax?: number | null;
 };
 
 type DraftInvoiceTemplateParams = {
