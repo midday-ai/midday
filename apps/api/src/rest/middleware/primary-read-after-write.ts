@@ -25,7 +25,7 @@ export const withPrimaryReadAfterWrite: MiddlewareHandler = async (c, next) => {
 
   // For OAuth sessions, use the token's team, not the user's current team
   if (session?.oauth) {
-    teamId = session.teamId;
+    teamId = session.teamId || null;
   }
   // For non-OAuth sessions, get user's current team
   else if (session?.user?.id) {

@@ -159,26 +159,39 @@ export const oauthApplicationsRouter = createTRPCRouter({
         throw new Error("Failed to create authorization code");
       }
 
-      // Send app installation email
+      // Send app installation email only if this is the first time authorizing this app
       try {
-        // Get team information
-        const userTeam = userTeams.find((team) => team.id === teamId);
+        // Check if user has previously authorized this application for this team
+        const existingAuthorizations = await getUserAuthorizedApplications(
+          db,
+          session.user.id,
+          teamId,
+        );
 
-        if (userTeam && session.user.email) {
-          const html = await render(
-            AppInstalledEmail({
-              email: session.user.email,
-              teamName: userTeam.name!,
-              appName: application.name,
-            }),
-          );
+        const isFirstAuthorization = !existingAuthorizations.some(
+          (auth) => auth.id === application.id,
+        );
 
-          await resend.emails.send({
-            from: "Midday <middaybot@midday.ai>",
-            to: session.user.email,
-            subject: "An app has been added to your team",
-            html,
-          });
+        if (isFirstAuthorization) {
+          // Get team information
+          const userTeam = userTeams.find((team) => team.id === teamId);
+
+          if (userTeam && session.user.email) {
+            const html = await render(
+              AppInstalledEmail({
+                email: session.user.email,
+                teamName: userTeam.name!,
+                appName: application.name,
+              }),
+            );
+
+            await resend.emails.send({
+              from: "Midday <middaybot@midday.ai>",
+              to: session.user.email,
+              subject: "An app has been added to your team",
+              html,
+            });
+          }
         }
       } catch (error) {
         // Log error but don't fail the OAuth flow
