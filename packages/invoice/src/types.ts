@@ -34,7 +34,6 @@ export type Invoice = {
   token: string;
   sentTo: string | null;
   discount: number | null;
-  subtotal: number | null;
   topBlock: EditorDoc | null;
   bottomBlock: EditorDoc | null;
   customer: {

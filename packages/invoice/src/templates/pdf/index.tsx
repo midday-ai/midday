@@ -67,7 +67,6 @@ export async function PdfTemplate({
   vat,
   tax,
   amount,
-  subtotal,
   topBlock,
   bottomBlock,
   token,
@@ -185,7 +184,7 @@ export async function PdfTemplate({
             includeTax={template.includeTax}
             includeDecimals={template.includeDecimals}
             subtotalLabel={template.subtotalLabel}
-            subtotal={subtotal || 0}
+            lineItems={lineItems}
           />
 
           <View style={{ flexDirection: "row", marginTop: 20 }}>
