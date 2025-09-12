@@ -116,7 +116,7 @@ export const upsertInvoiceTemplateSchema = baseInvoiceTemplateSchema.extend({
   fromDetails: z.any().nullable().optional(),
 });
 
-// REST-compatible template schema (uses proper TipTap schema for editor fields)
+// Template schema with TipTap validation for editor fields
 export const restUpsertInvoiceTemplateSchema = baseInvoiceTemplateSchema.extend(
   {
     paymentDetails: editorFieldSchema.openapi({
@@ -142,7 +142,7 @@ export const draftLineItemSchema = baseDraftLineItemSchema.extend({
   name: z.string().nullable().optional(),
 });
 
-// REST-compatible line item schema (uses proper TipTap schema for name field)
+// Line item schema with TipTap validation for name field
 export const restDraftLineItemSchema = baseDraftLineItemSchema.extend({
   name: editorFieldSchema.openapi({
     description: "Line item description in TipTap JSONContent format",
@@ -251,7 +251,7 @@ export const draftInvoiceSchema = baseDraftInvoiceSchema.extend({
   }),
 });
 
-// REST-compatible draft invoice schema (uses proper TipTap schema for editor fields)
+// Draft invoice schema with TipTap validation for editor fields
 export const restDraftInvoiceSchema = baseDraftInvoiceSchema.extend({
   template: restUpsertInvoiceTemplateSchema.openapi({
     description: "Invoice template details for the draft invoice",
@@ -596,10 +596,10 @@ export const getInvoiceByTokenSchema = z.object({
   token: z.string(),
 });
 
-// REST API specific template schema that accepts TipTap objects (alias for compatibility)
+// Template schema alias for compatibility
 export const restInvoiceTemplateSchema = restUpsertInvoiceTemplateSchema;
 
-// REST API specific schemas
+// Invoice creation schemas with TipTap validation
 export const createInvoiceRequestSchema = z
   .object({
     template: restInvoiceTemplateSchema.openapi({
@@ -1046,7 +1046,7 @@ export const createInvoiceRequestSchema = z
 
 export const draftInvoiceRequestSchema = createInvoiceRequestSchema.openapi({
   description:
-    "Schema for creating an invoice via REST API. The deliveryType determines if it stays as a draft, gets finalized immediately, or gets scheduled for later processing.",
+    "Schema for creating an invoice. The deliveryType determines if it stays as a draft, gets finalized immediately, or gets scheduled for later processing.",
 });
 
 export const draftInvoiceResponseSchema = z
@@ -1235,7 +1235,7 @@ export const updateInvoiceRequestSchema = z
     }),
   })
   .openapi({
-    description: "Schema for updating an invoice via REST API",
+    description: "Schema for updating an invoice",
   });
 
 export const updateInvoiceResponseSchema = invoiceResponseSchema.openapi({
