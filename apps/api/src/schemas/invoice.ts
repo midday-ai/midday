@@ -1,6 +1,79 @@
 import { z } from "@hono/zod-openapi";
 
-export const upsertInvoiceTemplateSchema = z.object({
+// TipTap JSONContent schema for editor fields
+export const tiptapContentSchema: z.ZodType<any> = z
+  .object({
+    type: z.string().optional(),
+    attrs: z.record(z.any()).optional(),
+    content: z.array(z.any()).optional(),
+    marks: z
+      .array(
+        z.object({
+          type: z.enum(["bold", "italic", "strike", "link", "underline"]),
+          attrs: z.record(z.any()).optional(),
+        }),
+      )
+      .optional(),
+    text: z.string().optional(),
+  })
+  .openapi({
+    description: "TipTap editor JSON content structure",
+    type: "object",
+    example: {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "Acme Inc",
+              marks: [{ type: "bold" }],
+            },
+          ],
+        },
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "123 Main St, City, Country",
+            },
+          ],
+        },
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "Visit our website: ",
+            },
+            {
+              type: "text",
+              text: "https://acme.com",
+              marks: [
+                {
+                  type: "link",
+                  attrs: { href: "https://acme.com" },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  });
+
+// Schema for editor fields that must be TipTap JSONContent
+export const editorFieldSchema = tiptapContentSchema
+  .nullable()
+  .optional()
+  .openapi({
+    description: "Editor field in TipTap JSONContent format",
+  });
+
+// Base template schema with common fields
+const baseInvoiceTemplateSchema = z.object({
   customerLabel: z.string().optional(),
   title: z.string().optional(),
   fromLabel: z.string().optional(),
@@ -21,11 +94,9 @@ export const upsertInvoiceTemplateSchema = z.object({
   noteLabel: z.string().optional(),
   logoUrl: z.string().optional().nullable(),
   currency: z.string().optional(),
-  paymentDetails: z.string().optional().nullable(),
-  fromDetails: z.string().optional().nullable(),
   dateFormat: z.string().optional(),
-  includeVat: z.boolean().optional().optional(),
-  includeTax: z.boolean().optional().optional(),
+  includeVat: z.boolean().optional(),
+  includeTax: z.boolean().optional(),
   includeDiscount: z.boolean().optional(),
   includeDecimals: z.boolean().optional(),
   includePdf: z.boolean().optional(),
@@ -39,179 +110,268 @@ export const upsertInvoiceTemplateSchema = z.object({
   locale: z.string().optional(),
 });
 
-export const draftLineItemSchema = z.object({
-  name: z.string().optional(),
+// tRPC-compatible template schema (uses z.any() for editor fields)
+export const upsertInvoiceTemplateSchema = baseInvoiceTemplateSchema.extend({
+  paymentDetails: z.any().nullable().optional(),
+  fromDetails: z.any().nullable().optional(),
+});
+
+// Template schema with TipTap validation for editor fields
+export const restUpsertInvoiceTemplateSchema = baseInvoiceTemplateSchema.extend(
+  {
+    paymentDetails: editorFieldSchema.openapi({
+      description: "Payment details in TipTap JSONContent format",
+    }),
+    fromDetails: editorFieldSchema.openapi({
+      description: "Sender details in TipTap JSONContent format",
+    }),
+  },
+);
+
+// Base line item schema with common fields
+const baseDraftLineItemSchema = z.object({
   quantity: z.number().min(0, "Quantity must be at least 0").optional(),
   unit: z.string().optional().nullable(),
   price: z.number().safe().optional(),
-  vat: z.number().min(0, "VAT must be at least 0").optional(),
-  tax: z.number().min(0, "Tax must be at least 0").optional(),
+  vat: z.number().min(0, "VAT must be at least 0").nullable().optional(),
+  tax: z.number().min(0, "Tax must be at least 0").nullable().optional(),
 });
 
-export const draftInvoiceSchema = z
-  .object({
-    id: z.string().uuid().openapi({
-      description: "Unique identifier for the draft invoice",
-      example: "b3b7e6e2-8c2a-4e2a-9b1a-2e4b5c6d7f8a",
-    }),
-    template: upsertInvoiceTemplateSchema.openapi({
-      description: "Invoice template details for the draft invoice",
-    }),
-    fromDetails: z.string().nullable().optional().openapi({
-      description: "Sender details in stringified format",
-      example: "Acme Inc, 123 Main St, City, Country",
-    }),
-    customerDetails: z.string().nullable().optional().openapi({
-      description: "Customer details in stringified format",
-      example: "John Doe, johndoe@email.com",
-    }),
-    customerId: z.string().uuid().nullable().optional().openapi({
-      description: "Unique identifier for the customer",
-      example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-    }),
-    customerName: z.string().nullable().optional().openapi({
-      description: "Name of the customer",
-      example: "Acme Corporation",
-    }),
-    paymentDetails: z.string().nullable().optional().openapi({
-      description: "Payment details in stringified format",
-      example: "Bank: 123456, IBAN: DE1234567890",
-    }),
-    noteDetails: z.string().nullable().optional().openapi({
-      description: "Additional notes for the invoice",
-      example: "Thank you for your business.",
-    }),
-    dueDate: z.string().openapi({
-      description: "Due date of the invoice in ISO 8601 format",
-      example: "2024-06-30T23:59:59.000Z",
-    }),
-    issueDate: z.string().openapi({
-      description: "Issue date of the invoice in ISO 8601 format",
-      example: "2024-06-01T00:00:00.000Z",
-    }),
-    invoiceNumber: z.string().openapi({
-      description: "Invoice number as shown to the customer",
-      example: "INV-2024-001",
-    }),
-    logoUrl: z.string().optional().nullable().openapi({
-      description: "URL of the logo to display on the invoice",
-      example: "https://example.com/logo.png",
-    }),
-    vat: z.number().nullable().optional().openapi({
-      description: "VAT amount for the invoice",
-      example: 150.0,
-    }),
-    tax: z.number().nullable().optional().openapi({
-      description: "Tax amount for the invoice",
-      example: 50.0,
-    }),
-    discount: z.number().nullable().optional().openapi({
-      description: "Discount applied to the invoice",
-      example: 100.0,
-    }),
-    subtotal: z.number().nullable().optional().openapi({
-      description: "Subtotal amount before taxes and discounts",
-      example: 1400.0,
-    }),
-    topBlock: z.any().nullable().optional().openapi({
-      description: "Custom content block to display at the top of the invoice",
-    }),
-    bottomBlock: z.any().nullable().optional().openapi({
-      description:
-        "Custom content block to display at the bottom of the invoice",
-    }),
-    amount: z.number().nullable().optional().openapi({
-      description: "Total amount of the invoice",
-      example: 1500.75,
-    }),
-    lineItems: z.array(draftLineItemSchema).optional().openapi({
-      description: "List of line items for the invoice",
-    }),
-    token: z.string().optional().openapi({
-      description:
-        "Unique token for the draft invoice (for sharing or public access)",
-      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    }),
-    scheduledAt: z.string().nullable().optional().openapi({
-      description: "Scheduled date of the invoice in ISO 8601 format",
-      example: "2024-06-30T23:59:59.000Z",
-    }),
-    scheduledJobId: z.string().nullable().optional().openapi({
-      description: "Scheduled job ID of the invoice",
-      example: "1234567890",
-    }),
-  })
-  .openapi({
-    description: "Schema for creating or updating a draft invoice",
+// tRPC-compatible line item schema (uses string for name field)
+export const draftLineItemSchema = baseDraftLineItemSchema.extend({
+  name: z.string().nullable().optional(),
+});
+
+// Line item schema with TipTap validation for name field
+export const restDraftLineItemSchema = baseDraftLineItemSchema.extend({
+  name: editorFieldSchema.openapi({
+    description: "Line item description in TipTap JSONContent format",
     example: {
-      id: "b3b7e6e2-8c2a-4e2a-9b1a-2e4b5c6d7f8a",
-      template: {
-        title: "Invoice",
-        customerLabel: "To",
-        fromLabel: "From",
-        invoiceNoLabel: "Invoice No",
-        issueDateLabel: "Issue Date",
-        dueDateLabel: "Due Date",
-        descriptionLabel: "Description",
-        priceLabel: "Price",
-        quantityLabel: "Quantity",
-        totalLabel: "Total",
-        totalSummaryLabel: "Total",
-        vatLabel: "VAT",
-        taxLabel: "Tax",
-        paymentLabel: "Payment Details",
-        noteLabel: "Note",
-        logoUrl: "https://example.com/logo.png",
-        currency: "USD",
-        paymentDetails: "Bank: 123456, IBAN: DE1234567890",
-        fromDetails: "Acme Inc, 123 Main St, City, Country",
-        size: "a4",
-        includeVat: true,
-        includeTax: true,
-        discountLabel: "Discount",
-        includeDiscount: false,
-        includeUnits: false,
-        includeDecimals: false,
-        includePdf: false,
-        sendCopy: false,
-        includeQr: true,
-        dateFormat: "dd/MM/yyyy",
-        taxRate: 0,
-        vatRate: 0,
-        deliveryType: "create",
-        timezone: "UTC",
-        locale: "en-US",
-      },
-      fromDetails: "Acme Inc, 123 Main St, City, Country",
-      customerDetails: "John Doe, johndoe@email.com",
-      customerId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-      customerName: "Acme Corporation",
-      paymentDetails: "Bank: 123456, IBAN: DE1234567890",
-      noteDetails: "Thank you for your business.",
-      dueDate: "2024-06-30T23:59:59.000Z",
-      issueDate: "2024-06-01T00:00:00.000Z",
-      invoiceNumber: "INV-2024-001",
-      logoUrl: "https://example.com/logo.png",
-      vat: 150.0,
-      tax: 50.0,
-      discount: 100.0,
-      subtotal: 1400.0,
-      topBlock: null,
-      bottomBlock: null,
-      amount: 1500.75,
-      lineItems: [
+      type: "doc",
+      content: [
         {
-          name: "Consulting Services",
-          quantity: 10,
-          unit: "hours",
-          price: 100.0,
-          vat: 15.0,
-          tax: 5.0,
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "Web Development Services",
+            },
+          ],
         },
       ],
-      token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     },
-  });
+  }),
+});
+
+// Base draft invoice schema with common fields
+const baseDraftInvoiceSchema = z.object({
+  id: z.string().uuid().openapi({
+    description: "Unique identifier for the draft invoice",
+    example: "b3b7e6e2-8c2a-4e2a-9b1a-2e4b5c6d7f8a",
+  }),
+  customerDetails: z.string().nullable().optional().openapi({
+    description: "Customer details in stringified format",
+    example: "John Doe, johndoe@email.com",
+  }),
+  customerId: z.string().uuid().nullable().optional().openapi({
+    description: "Unique identifier for the customer",
+    example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  }),
+  customerName: z.string().nullable().optional().openapi({
+    description: "Name of the customer",
+    example: "Acme Corporation",
+  }),
+  noteDetails: z.string().nullable().optional().openapi({
+    description: "Additional notes for the invoice",
+    example: "Thank you for your business.",
+  }),
+  dueDate: z.string().openapi({
+    description: "Due date of the invoice in ISO 8601 format",
+    example: "2024-06-30T23:59:59.000Z",
+  }),
+  issueDate: z.string().openapi({
+    description: "Issue date of the invoice in ISO 8601 format",
+    example: "2024-06-01T00:00:00.000Z",
+  }),
+  invoiceNumber: z.string().optional().openapi({
+    description:
+      "Invoice number as shown to the customer (auto-generated if not provided)",
+    example: "INV-2024-001",
+  }),
+  logoUrl: z.string().optional().nullable().openapi({
+    description: "URL of the logo to display on the invoice",
+    example: "https://example.com/logo.png",
+  }),
+  vat: z.number().nullable().optional().openapi({
+    description: "VAT amount for the invoice",
+    example: 150.0,
+  }),
+  tax: z.number().nullable().optional().openapi({
+    description: "Tax amount for the invoice",
+    example: 50.0,
+  }),
+  discount: z.number().nullable().optional().openapi({
+    description: "Discount applied to the invoice",
+    example: 100.0,
+  }),
+  amount: z.number().nullable().optional().openapi({
+    description: "Total amount of the invoice",
+    example: 1500.75,
+  }),
+  token: z.string().optional().openapi({
+    description:
+      "Unique token for the draft invoice (for sharing or public access)",
+    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  }),
+  scheduledAt: z.string().nullable().optional().openapi({
+    description: "Scheduled date of the invoice in ISO 8601 format",
+    example: "2024-06-30T23:59:59.000Z",
+  }),
+  scheduledJobId: z.string().nullable().optional().openapi({
+    description: "Scheduled job ID of the invoice",
+    example: "1234567890",
+  }),
+});
+
+// tRPC-compatible draft invoice schema (uses z.any() for editor fields)
+export const draftInvoiceSchema = baseDraftInvoiceSchema.extend({
+  template: upsertInvoiceTemplateSchema.openapi({
+    description: "Invoice template details for the draft invoice",
+  }),
+  paymentDetails: z.string().optional().nullable(),
+  fromDetails: z.string().optional().nullable(),
+  topBlock: z.any().nullable().optional().openapi({
+    description: "Custom content block to display at the top of the invoice",
+  }),
+  bottomBlock: z.any().nullable().optional().openapi({
+    description: "Custom content block to display at the bottom of the invoice",
+  }),
+  lineItems: z.array(draftLineItemSchema).optional().openapi({
+    description: "List of line items for the invoice",
+  }),
+});
+
+// Draft invoice schema with TipTap validation for editor fields
+export const restDraftInvoiceSchema = baseDraftInvoiceSchema.extend({
+  template: restUpsertInvoiceTemplateSchema.openapi({
+    description: "Invoice template details for the draft invoice",
+  }),
+  paymentDetails: editorFieldSchema.openapi({
+    description: "Payment details in TipTap JSONContent format",
+    example: {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "Bank: 123456, IBAN: DE1234567890",
+            },
+          ],
+        },
+      ],
+    },
+  }),
+  fromDetails: editorFieldSchema.openapi({
+    description: "Sender details in TipTap JSONContent format",
+    example: {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "Acme Inc, 123 Main St, City, Country",
+            },
+          ],
+        },
+      ],
+    },
+  }),
+  topBlock: editorFieldSchema.openapi({
+    description:
+      "Custom content block to display at the top of the invoice in TipTap JSONContent format",
+  }),
+  bottomBlock: editorFieldSchema.openapi({
+    description:
+      "Custom content block to display at the bottom of the invoice in TipTap JSONContent format",
+  }),
+  lineItems: z.array(restDraftLineItemSchema).optional().openapi({
+    description: "List of line items for the invoice",
+  }),
+});
+
+export const draftInvoiceSchemaWithOpenApi = draftInvoiceSchema.openapi({
+  description: "Schema for creating or updating a draft invoice",
+  example: {
+    id: "b3b7e6e2-8c2a-4e2a-9b1a-2e4b5c6d7f8a",
+    template: {
+      title: "Invoice",
+      customerLabel: "To",
+      fromLabel: "From",
+      invoiceNoLabel: "Invoice No",
+      issueDateLabel: "Issue Date",
+      dueDateLabel: "Due Date",
+      descriptionLabel: "Description",
+      priceLabel: "Price",
+      quantityLabel: "Quantity",
+      totalLabel: "Total",
+      totalSummaryLabel: "Total",
+      vatLabel: "VAT",
+      taxLabel: "Tax",
+      paymentLabel: "Payment Details",
+      noteLabel: "Note",
+      logoUrl: "https://example.com/logo.png",
+      currency: "USD",
+      paymentDetails: "Bank: 123456, IBAN: DE1234567890",
+      fromDetails: "Acme Inc, 123 Main St, City, Country",
+      size: "a4",
+      includeVat: true,
+      includeTax: true,
+      discountLabel: "Discount",
+      includeDiscount: false,
+      includeUnits: false,
+      includeDecimals: false,
+      includePdf: false,
+      sendCopy: false,
+      includeQr: true,
+      dateFormat: "dd/MM/yyyy",
+      taxRate: 0,
+      vatRate: 0,
+      deliveryType: "create",
+      timezone: "UTC",
+      locale: "en-US",
+    },
+    fromDetails: "Acme Inc, 123 Main St, City, Country",
+    customerDetails: "John Doe, johndoe@email.com",
+    customerId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    paymentDetails: "Bank: 123456, IBAN: DE1234567890",
+    noteDetails: "Thank you for your business.",
+    dueDate: "2024-06-30T23:59:59.000Z",
+    issueDate: "2024-06-01T00:00:00.000Z",
+    invoiceNumber: "INV-2024-001",
+    logoUrl: "https://example.com/logo.png",
+    vat: 150.0,
+    tax: 50.0,
+    discount: 100.0,
+    topBlock: null,
+    bottomBlock: null,
+    amount: 1500.75,
+    lineItems: [
+      {
+        name: "Consulting Services",
+        quantity: 10,
+        unit: "hours",
+        price: 100.0,
+        vat: 15.0,
+        tax: 5.0,
+      },
+    ],
+    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  },
+});
 
 export const lineItemSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -436,6 +596,492 @@ export const getInvoiceByTokenSchema = z.object({
   token: z.string(),
 });
 
+// Template schema alias for compatibility
+export const restInvoiceTemplateSchema = restUpsertInvoiceTemplateSchema;
+
+// Invoice creation schemas with TipTap validation
+export const createInvoiceRequestSchema = z
+  .object({
+    template: restInvoiceTemplateSchema.openapi({
+      description: "Invoice template details",
+    }),
+    fromDetails: editorFieldSchema.openapi({
+      description: "Sender details in TipTap JSONContent format",
+      example: {
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: "Acme Inc, 123 Main St, City, Country",
+              },
+            ],
+          },
+        ],
+      },
+    }),
+    customerId: z.string().uuid().openapi({
+      description: "Unique identifier for the customer (required)",
+      example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    }),
+    paymentDetails: editorFieldSchema.openapi({
+      description: "Payment details in TipTap JSONContent format",
+      example: {
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: "Bank: 123456, IBAN: DE1234567890",
+              },
+            ],
+          },
+        ],
+      },
+    }),
+    noteDetails: editorFieldSchema.openapi({
+      description:
+        "Additional notes for the invoice in TipTap JSONContent format",
+      example: {
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: "Thank you for your business.",
+              },
+            ],
+          },
+        ],
+      },
+    }),
+    dueDate: z.string().openapi({
+      description: "Due date of the invoice in ISO 8601 format",
+      example: "2024-06-30T23:59:59.000Z",
+    }),
+    issueDate: z.string().openapi({
+      description: "Issue date of the invoice in ISO 8601 format",
+      example: "2024-06-01T00:00:00.000Z",
+    }),
+    invoiceNumber: z.string().optional().openapi({
+      description:
+        "Invoice number as shown to the customer (auto-generated if not provided)",
+      example: "INV-2024-001",
+    }),
+    logoUrl: z.string().optional().nullable().openapi({
+      description: "URL of the logo to display on the invoice",
+      example: "https://example.com/logo.png",
+    }),
+    vat: z.number().nullable().optional().openapi({
+      description: "VAT amount for the invoice",
+      example: 150.0,
+    }),
+    tax: z.number().nullable().optional().openapi({
+      description: "Tax amount for the invoice",
+      example: 50.0,
+    }),
+    discount: z.number().nullable().optional().openapi({
+      description: "Discount applied to the invoice",
+      example: 100.0,
+    }),
+    topBlock: editorFieldSchema.openapi({
+      description:
+        "Custom content block to display at the top of the invoice in TipTap JSONContent format",
+    }),
+    bottomBlock: editorFieldSchema.openapi({
+      description:
+        "Custom content block to display at the bottom of the invoice in TipTap JSONContent format",
+    }),
+    amount: z.number().nullable().optional().openapi({
+      description: "Total amount of the invoice",
+      example: 1500.75,
+    }),
+    lineItems: z.array(restDraftLineItemSchema).optional().openapi({
+      description: "List of line items for the invoice",
+    }),
+    deliveryType: z.enum(["create", "create_and_send", "scheduled"]).openapi({
+      description:
+        "How the invoice should be processed: 'create' - finalize immediately, 'create_and_send' - finalize and send to customer, 'scheduled' - schedule for automatic processing at specified date",
+      example: "create",
+    }),
+    scheduledAt: z.string().datetime().optional().openapi({
+      description:
+        "Scheduled date of the invoice in ISO 8601 format. Required when deliveryType is 'scheduled'. Must be in the future.",
+      example: "2024-06-30T23:59:59.000Z",
+    }),
+  })
+  .openapi({
+    description: "Base schema for invoice creation",
+    example: {
+      template: {
+        title: "Invoice",
+        customerLabel: "Bill To",
+        fromLabel: "From",
+        invoiceNoLabel: "Invoice #",
+        issueDateLabel: "Issue Date",
+        dueDateLabel: "Due Date",
+        descriptionLabel: "Description",
+        priceLabel: "Rate",
+        quantityLabel: "Qty",
+        totalLabel: "Amount",
+        totalSummaryLabel: "Total",
+        vatLabel: "VAT",
+        taxLabel: "Sales Tax",
+        paymentLabel: "Payment Information",
+        noteLabel: "Notes",
+        logoUrl: "https://example.com/logo.png",
+        currency: "USD",
+        paymentDetails: {
+          type: "doc",
+          content: [
+            {
+              type: "paragraph",
+              content: [
+                {
+                  type: "text",
+                  text: "Wire Transfer: Chase Bank, Account: 1234567890, Routing: 021000021",
+                },
+              ],
+            },
+          ],
+        },
+        fromDetails: {
+          type: "doc",
+          content: [
+            {
+              type: "paragraph",
+              content: [
+                {
+                  type: "text",
+                  text: "TechCorp Inc, 123 Business Ave, San Francisco, CA 94105",
+                },
+              ],
+            },
+          ],
+        },
+        size: "letter",
+        includeVat: false,
+        includeTax: true,
+        discountLabel: "Discount",
+        includeDiscount: false,
+        includeUnits: true,
+        includeDecimals: true,
+        includePdf: true,
+        sendCopy: true,
+        includeQr: false,
+        dateFormat: "MM/dd/yyyy",
+        taxRate: 8.5,
+        vatRate: 0,
+        deliveryType: "create",
+        timezone: "America/Los_Angeles",
+        locale: "en-US",
+      },
+      fromDetails: {
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: "TechCorp Inc",
+                marks: [{ type: "strong" }],
+              },
+            ],
+          },
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: "123 Business Ave",
+              },
+            ],
+          },
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: "San Francisco, CA 94105",
+              },
+            ],
+          },
+        ],
+      },
+      customerId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      paymentDetails: {
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: "Wire Transfer:",
+                marks: [{ type: "strong" }],
+              },
+            ],
+          },
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: "Chase Bank, Account: 1234567890",
+              },
+            ],
+          },
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: "Routing: 021000021",
+              },
+            ],
+          },
+        ],
+      },
+      noteDetails: {
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: "Payment is due within 30 days of invoice date.",
+              },
+            ],
+          },
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: "Thank you for your business!",
+                marks: [{ type: "italic" }],
+              },
+            ],
+          },
+        ],
+      },
+      dueDate: "2024-07-15T23:59:59.000Z",
+      issueDate: "2024-06-15T00:00:00.000Z",
+      invoiceNumber: "INV-2024-001",
+      logoUrl: "https://example.com/logo.png",
+      vat: undefined,
+      tax: 85.0,
+      discount: undefined,
+      topBlock: {
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: "Thank you for choosing TechCorp for your software development needs.",
+                marks: [{ type: "strong" }],
+              },
+            ],
+          },
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: "This invoice covers the development work completed in June 2024.",
+              },
+            ],
+          },
+        ],
+      },
+      bottomBlock: {
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: "Terms & Conditions:",
+                marks: [{ type: "strong" }],
+              },
+            ],
+          },
+          {
+            type: "bulletList",
+            content: [
+              {
+                type: "listItem",
+                content: [
+                  {
+                    type: "paragraph",
+                    content: [
+                      {
+                        type: "text",
+                        text: "Payment is due within 30 days of invoice date",
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                type: "listItem",
+                content: [
+                  {
+                    type: "paragraph",
+                    content: [
+                      {
+                        type: "text",
+                        text: "Late payments may incur a 1.5% monthly service charge",
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                type: "listItem",
+                content: [
+                  {
+                    type: "paragraph",
+                    content: [
+                      {
+                        type: "text",
+                        text: "All work is subject to our standard terms of service",
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: "Questions? Contact us at billing@techcorp.com or (555) 123-4567",
+                marks: [{ type: "italic" }],
+              },
+            ],
+          },
+        ],
+      },
+      amount: 1085.0,
+      lineItems: [
+        {
+          name: {
+            type: "doc",
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    text: "Web Development Services",
+                    marks: [{ type: "strong" }],
+                  },
+                ],
+              },
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    text: "Custom React application with TypeScript",
+                    marks: [{ type: "italic" }],
+                  },
+                ],
+              },
+            ],
+          },
+          quantity: 40,
+          price: 75.0,
+          tax: 8.5,
+        },
+        {
+          name: {
+            type: "doc",
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    text: "UI/UX Design",
+                    marks: [{ type: "strong" }],
+                  },
+                ],
+              },
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    text: "User interface design and user experience optimization",
+                    marks: [{ type: "italic" }],
+                  },
+                ],
+              },
+            ],
+          },
+          quantity: 20,
+          price: 50.0,
+          tax: 8.5,
+        },
+      ],
+      deliveryType: "create",
+      scheduledAt: "2024-07-01T09:00:00.000Z", // Only required for deliveryType: "scheduled"
+    },
+  });
+
+export const draftInvoiceRequestSchema = createInvoiceRequestSchema.openapi({
+  description:
+    "Schema for creating an invoice. The deliveryType determines if it stays as a draft, gets finalized immediately, or gets scheduled for later processing.",
+});
+
+export const draftInvoiceResponseSchema = z
+  .object({
+    id: z.string().uuid().openapi({
+      description: "Unique identifier for the draft invoice",
+      example: "b3b7e6e2-8c2a-4e2a-9b1a-2e4b5c6d7f8a",
+    }),
+    status: z
+      .enum(["draft", "overdue", "paid", "unpaid", "canceled", "scheduled"])
+      .openapi({
+        description: "Current status of the invoice",
+        example: "draft",
+      }),
+    createdAt: z.string().openapi({
+      description: "Timestamp when the invoice was created (ISO 8601)",
+      example: "2024-06-01T07:00:00.000Z",
+    }),
+    updatedAt: z.string().openapi({
+      description: "Timestamp when the invoice was last updated (ISO 8601)",
+      example: "2024-06-01T07:00:00.000Z",
+    }),
+    pdfUrl: z.string().nullable().openapi({
+      description: "Direct URL to download the invoice PDF",
+      example: "https://app.midday.ai/api/download/invoice?token=eyJ...",
+    }),
+    previewUrl: z.string().nullable().openapi({
+      description: "Direct URL to preview the invoice in browser",
+      example: "https://app.midday.ai/i/eyJ...",
+    }),
+  })
+  .openapi({
+    description: "Response after creating a draft invoice",
+  });
+
 export const invoiceResponseSchema = z
   .object({
     id: z.string().uuid().openapi({
@@ -456,8 +1102,9 @@ export const invoiceResponseSchema = z
       description: "Issue date of the invoice in ISO 8601 format",
       example: "2024-06-01T00:00:00.000Z",
     }),
-    invoiceNumber: z.string().openapi({
-      description: "Invoice number as shown to the customer",
+    invoiceNumber: z.string().optional().openapi({
+      description:
+        "Invoice number as shown to the customer (auto-generated if not provided)",
       example: "INV-2024-001",
     }),
     amount: z.number().openapi({
@@ -549,10 +1196,51 @@ export const invoiceResponseSchema = z
       description: "Timestamp when the invoice was last updated (ISO 8601)",
       example: "2024-06-15T10:00:00.000Z",
     }),
+    pdfUrl: z.string().url().nullable().openapi({
+      description: "URL to download the invoice PDF, or null if not generated",
+      example:
+        "https://app.midday.ai/api/download/invoice?token=eyJhbGciOiJIUzI1NiJ9.eyJpZCI6ImM1NTEwNDA3LTkyMmQtNDllZC05MjZiLTE2NzhkNTQ4ZmQ5MCJ9.12X3Wb5UJ5I6yZ5l6-6U8TxIPqnySKUb0NMwSL4p44s",
+    }),
+    previewUrl: z.string().url().nullable().openapi({
+      description:
+        "URL to preview the invoice in the browser, or null if not generated",
+      example:
+        "https://app.midday.ai/i/eyJhbGciOiJIUzI1NiJ9.eyJpZCI6IjBiNWM2MmIxLTgxMjYtNDdhMS1iNjNmLWM0NjhlM2Y5MTgzNiJ9.jvwUP4PXVUWyKZAgav5SV7wjAaf8biDXMDEYHLGA5qE",
+    }),
   })
   .openapi({
     description: "Invoice object",
   });
+
+export const createInvoiceResponseSchema = invoiceResponseSchema.openapi({
+  description: "Response after creating an invoice",
+});
+
+export const updateInvoiceRequestSchema = z
+  .object({
+    status: z
+      .enum(["paid", "canceled", "unpaid", "scheduled", "draft"])
+      .optional()
+      .openapi({
+        description: "New status for the invoice",
+        example: "paid",
+      }),
+    paidAt: z.string().datetime().nullable().optional().openapi({
+      description: "Timestamp when the invoice was paid (ISO 8601)",
+      example: "2024-06-15T12:00:00.000Z",
+    }),
+    internalNote: z.string().nullable().optional().openapi({
+      description: "Internal note for the invoice",
+      example: "Payment received via bank transfer",
+    }),
+  })
+  .openapi({
+    description: "Schema for updating an invoice",
+  });
+
+export const updateInvoiceResponseSchema = invoiceResponseSchema.openapi({
+  description: "Response after updating an invoice",
+});
 
 export const invoicesResponseSchema = z
   .object({

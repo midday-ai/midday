@@ -2,6 +2,8 @@ import type { Context } from "@api/rest/types";
 import {
   deleteInvoiceResponseSchema,
   deleteInvoiceSchema,
+  draftInvoiceRequestSchema,
+  draftInvoiceResponseSchema,
   getInvoiceByIdSchema,
   getInvoicesSchema,
   getPaymentStatusResponseSchema,
@@ -9,16 +11,29 @@ import {
   invoiceSummaryResponseSchema,
   invoiceSummarySchema,
   invoicesResponseSchema,
+  updateInvoiceRequestSchema,
+  updateInvoiceResponseSchema,
 } from "@api/schemas/invoice";
 import { validateResponse } from "@api/utils/validate-response";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import {
   deleteInvoice,
+  draftInvoice,
+  getCustomerById,
   getInvoiceById,
   getInvoiceSummary,
   getInvoices,
+  getNextInvoiceNumber,
   getPaymentStatus,
+  isInvoiceNumberUsed,
+  updateInvoice,
 } from "@midday/db/queries";
+import { transformCustomerToContent } from "@midday/invoice/utils";
+import type { GenerateInvoicePayload } from "@midday/jobs/schema";
+import { tasks } from "@trigger.dev/sdk";
+import { addMonths } from "date-fns";
+import { HTTPException } from "hono/http-exception";
+import { v4 as uuidv4 } from "uuid";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();
@@ -167,7 +182,388 @@ app.openapi(
       teamId,
     });
 
-    return c.json(validateResponse(result, invoiceResponseSchema));
+    if (!result) {
+      throw new HTTPException(404, { message: "Invoice not found" });
+    }
+
+    // Add PDF download and preview URLs and serialize objects like tRPC does with superjson
+    const { token, ...resultWithoutToken } = result;
+    const response = {
+      ...resultWithoutToken,
+      paymentDetails: result.paymentDetails
+        ? JSON.stringify(result.paymentDetails)
+        : null,
+      customerDetails: result.customerDetails
+        ? JSON.stringify(result.customerDetails)
+        : null,
+      fromDetails: result.fromDetails
+        ? JSON.stringify(result.fromDetails)
+        : null,
+      noteDetails: result.noteDetails
+        ? JSON.stringify(result.noteDetails)
+        : null,
+      topBlock: result.topBlock ? JSON.stringify(result.topBlock) : null,
+      bottomBlock: result.bottomBlock
+        ? JSON.stringify(result.bottomBlock)
+        : null,
+      pdfUrl: token
+        ? `${process.env.MIDDAY_DASHBOARD_URL}/api/download/invoice?token=${token}`
+        : null,
+      previewUrl: token
+        ? `${process.env.MIDDAY_DASHBOARD_URL}/i/${token}`
+        : null,
+    };
+
+    return c.json(validateResponse(response, invoiceResponseSchema));
+  },
+);
+
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/",
+    summary: "Create an invoice",
+    operationId: "createInvoice",
+    "x-speakeasy-name-override": "create",
+    description:
+      "Create an invoice for the authenticated team. The behavior depends on deliveryType: 'create' generates and finalizes the invoice immediately, 'create_and_send' also sends it to the customer, 'scheduled' schedules the invoice for automatic processing at the specified date.",
+    tags: ["Invoices"],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: draftInvoiceRequestSchema,
+          },
+        },
+      },
+    },
+    responses: {
+      201: {
+        description:
+          "Invoice created successfully. Status depends on deliveryType: 'scheduled' for scheduled invoices, 'unpaid' for create/create_and_send.",
+        content: {
+          "application/json": {
+            schema: draftInvoiceResponseSchema,
+          },
+        },
+      },
+      400: {
+        description: "Bad request. Invalid input data or validation errors.",
+        content: {
+          "application/json": {
+            schema: z.object({
+              message: z.string().openapi({
+                description: "Error message describing the validation failure",
+                examples: [
+                  "scheduledAt is required for scheduled delivery",
+                  "scheduledAt must be in the future",
+                  "Invoice number 'INV-001' is already used. Please provide a different invoice number or omit it to auto-generate one.",
+                ],
+              }),
+            }),
+          },
+        },
+      },
+      404: {
+        description: "Customer not found.",
+        content: {
+          "application/json": {
+            schema: z.object({
+              message: z.string().openapi({
+                description: "Error message",
+                example: "Customer not found",
+              }),
+            }),
+          },
+        },
+      },
+      409: {
+        description: "Conflict. Invoice number already exists.",
+        content: {
+          "application/json": {
+            schema: z.object({
+              message: z.string().openapi({
+                description: "Error message about the conflict",
+                example:
+                  "Invoice number 'INV-2024-001' is already used. Please provide a different invoice number or omit it to auto-generate one.",
+              }),
+            }),
+          },
+        },
+      },
+      500: {
+        description: "Internal server error.",
+        content: {
+          "application/json": {
+            schema: z.object({
+              message: z.string().openapi({
+                description: "Error message",
+                example: "Failed to create invoice",
+              }),
+            }),
+          },
+        },
+      },
+    },
+    middleware: [withRequiredScope("invoices.write")],
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const userId = c.get("session").user.id;
+    const input = c.req.valid("json");
+
+    // Generate invoice ID and number if not provided
+    const invoiceId = uuidv4();
+    const finalInvoiceNumber =
+      input.invoiceNumber || (await getNextInvoiceNumber(db, teamId));
+
+    // Check if the provided invoice number is already used
+    if (input.invoiceNumber) {
+      const isUsed = await isInvoiceNumberUsed(db, teamId, finalInvoiceNumber);
+      if (isUsed) {
+        throw new HTTPException(409, {
+          message: `Invoice number '${finalInvoiceNumber}' is already used. Please provide a different invoice number or omit it to auto-generate one.`,
+        });
+      }
+    }
+
+    // Set default dates if not provided
+    const issueDate = input.issueDate || new Date().toISOString();
+    const dueDate = input.dueDate || addMonths(new Date(), 1).toISOString();
+
+    // Fetch customer and generate customerDetails
+    const customer = await getCustomerById(db, {
+      id: input.customerId,
+      teamId,
+    });
+
+    if (!customer) {
+      throw new HTTPException(404, { message: "Customer not found" });
+    }
+
+    const customerDetails = transformCustomerToContent(customer);
+
+    const result = await draftInvoice(db, {
+      id: invoiceId,
+      teamId,
+      userId,
+      invoiceNumber: finalInvoiceNumber,
+      issueDate,
+      dueDate,
+      template: input.template,
+      paymentDetails: input.paymentDetails,
+      fromDetails: input.fromDetails,
+      customerDetails: customerDetails ? JSON.stringify(customerDetails) : null,
+      noteDetails: input.noteDetails,
+      customerId: input.customerId,
+      customerName: customer.name,
+      logoUrl: input.logoUrl,
+      vat: input.vat,
+      tax: input.tax,
+      discount: input.discount,
+      topBlock: input.topBlock,
+      bottomBlock: input.bottomBlock,
+      amount: input.amount,
+      lineItems: input.lineItems?.map((item) => ({
+        ...item,
+        name: JSON.stringify(item.name),
+      })),
+    });
+
+    if (!result) {
+      throw new HTTPException(500, { message: "Failed to create invoice" });
+    }
+
+    let finalResult = result;
+
+    if (
+      input.deliveryType === "create" ||
+      input.deliveryType === "create_and_send"
+    ) {
+      // Update invoice status to unpaid (similar to tRPC)
+      const updatedInvoice = await updateInvoice(db, {
+        id: result.id,
+        status: "unpaid",
+        teamId,
+        userId,
+      });
+
+      if (updatedInvoice) {
+        finalResult = updatedInvoice;
+      }
+
+      // Trigger invoice generation (and sending if create_and_send)
+      await tasks.trigger("generate-invoice", {
+        invoiceId: result.id,
+        deliveryType: input.deliveryType,
+      } satisfies GenerateInvoicePayload);
+    } else if (input.deliveryType === "scheduled") {
+      // Handle scheduled invoices
+      if (!input.scheduledAt) {
+        throw new HTTPException(400, {
+          message: "scheduledAt is required for scheduled delivery",
+        });
+      }
+
+      // Convert to Date object and validate it's in the future
+      const scheduledDate = new Date(input.scheduledAt);
+      const now = new Date();
+
+      if (scheduledDate <= now) {
+        throw new HTTPException(400, {
+          message: "scheduledAt must be in the future",
+        });
+      }
+
+      // Create a scheduled job
+      const scheduledRun = await tasks.trigger(
+        "schedule-invoice",
+        {
+          invoiceId: result.id,
+          scheduledAt: input.scheduledAt,
+        },
+        {
+          delay: scheduledDate,
+        },
+      );
+
+      // Update the invoice with scheduling information
+      const updatedInvoice = await updateInvoice(db, {
+        id: result.id,
+        status: "scheduled",
+        scheduledAt: input.scheduledAt,
+        scheduledJobId: scheduledRun.id,
+        teamId,
+        userId,
+      });
+
+      if (updatedInvoice) {
+        finalResult = updatedInvoice;
+      }
+
+      // Send notification
+      await tasks.trigger("notification", {
+        type: "invoice_scheduled",
+        teamId,
+        invoiceId: result.id,
+        invoiceNumber: finalResult.invoiceNumber,
+        scheduledAt: input.scheduledAt,
+        customerName: finalResult.customerName,
+      });
+    }
+
+    // Add PDF download and preview URLs and serialize objects like tRPC does with superjson
+    const { token, ...resultWithoutToken } = finalResult;
+    const response = {
+      ...resultWithoutToken,
+      paymentDetails: result.paymentDetails
+        ? JSON.stringify(result.paymentDetails)
+        : null,
+      customerDetails: result.customerDetails
+        ? JSON.stringify(result.customerDetails)
+        : null,
+      fromDetails: result.fromDetails
+        ? JSON.stringify(result.fromDetails)
+        : null,
+      noteDetails: result.noteDetails
+        ? JSON.stringify(result.noteDetails)
+        : null,
+      topBlock: result.topBlock ? JSON.stringify(result.topBlock) : null,
+      bottomBlock: result.bottomBlock
+        ? JSON.stringify(result.bottomBlock)
+        : null,
+      pdfUrl: token
+        ? `${process.env.MIDDAY_DASHBOARD_URL}/api/download/invoice?token=${token}`
+        : null,
+      previewUrl: token
+        ? `${process.env.MIDDAY_DASHBOARD_URL}/i/${token}`
+        : null,
+    };
+
+    return c.json(validateResponse(response, draftInvoiceResponseSchema), 201);
+  },
+);
+
+app.openapi(
+  createRoute({
+    method: "put",
+    path: "/{id}",
+    summary: "Update an invoice",
+    operationId: "updateInvoice",
+    "x-speakeasy-name-override": "update",
+    description:
+      "Update an invoice by its unique identifier for the authenticated team.",
+    tags: ["Invoices"],
+    request: {
+      params: getInvoiceByIdSchema.pick({ id: true }),
+      body: {
+        content: {
+          "application/json": {
+            schema: updateInvoiceRequestSchema,
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        description: "Invoice updated successfully.",
+        content: {
+          "application/json": {
+            schema: updateInvoiceResponseSchema,
+          },
+        },
+      },
+    },
+    middleware: [withRequiredScope("invoices.write")],
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const userId = c.get("session").user.id;
+    const { id } = c.req.valid("param");
+    const input = c.req.valid("json");
+
+    const result = await updateInvoice(db, {
+      id,
+      teamId,
+      userId,
+      ...input,
+    });
+
+    if (!result) {
+      throw new HTTPException(404, { message: "Invoice not found" });
+    }
+
+    // Add PDF download and preview URLs and serialize objects like tRPC does with superjson
+    const { token, ...resultWithoutToken } = result;
+    const response = {
+      ...resultWithoutToken,
+      paymentDetails: result.paymentDetails
+        ? JSON.stringify(result.paymentDetails)
+        : null,
+      customerDetails: result.customerDetails
+        ? JSON.stringify(result.customerDetails)
+        : null,
+      fromDetails: result.fromDetails
+        ? JSON.stringify(result.fromDetails)
+        : null,
+      noteDetails: result.noteDetails
+        ? JSON.stringify(result.noteDetails)
+        : null,
+      topBlock: result.topBlock ? JSON.stringify(result.topBlock) : null,
+      bottomBlock: result.bottomBlock
+        ? JSON.stringify(result.bottomBlock)
+        : null,
+      pdfUrl: token
+        ? `${process.env.MIDDAY_DASHBOARD_URL}/api/download/invoice?token=${token}`
+        : null,
+      previewUrl: token
+        ? `${process.env.MIDDAY_DASHBOARD_URL}/i/${token}`
+        : null,
+    };
+
+    return c.json(validateResponse(response, updateInvoiceResponseSchema));
   },
 );
 

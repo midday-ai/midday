@@ -1,4 +1,5 @@
 import { Text, View } from "@react-pdf/renderer";
+import { calculateTotal } from "../../../utils/calculate";
 import { formatCurrencyForPDF } from "../../../utils/pdf-format";
 
 interface SummaryProps {
@@ -19,7 +20,7 @@ interface SummaryProps {
   includeTax: boolean;
   includeDecimals: boolean;
   subtotalLabel: string;
-  subtotal: number;
+  lineItems: { price?: number; quantity?: number }[];
 }
 
 export function Summary({
@@ -40,12 +41,22 @@ export function Summary({
   includeTax,
   includeDecimals,
   subtotalLabel,
-  subtotal,
+  lineItems,
 }: SummaryProps) {
   const maximumFractionDigits = includeDecimals ? 2 : 0;
 
+  // Calculate subtotal dynamically from line items (same as HTML template)
+  const { subTotal: calculatedSubtotal } = calculateTotal({
+    lineItems,
+    taxRate: taxRate ?? 0,
+    vatRate: vatRate ?? 0,
+    discount: discount ?? 0,
+    includeVat,
+    includeTax,
+  });
+
   const displayTotal = amount ?? 0;
-  const displaySubtotal = subtotal ?? 0;
+  const displaySubtotal = calculatedSubtotal;
   const displayVat = vat ?? 0;
   const displayTax = tax ?? 0;
 
