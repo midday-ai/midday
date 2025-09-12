@@ -105,6 +105,18 @@ export const getDocumentPreSignedUrlSchema = z.object({
         name: "id",
       },
     }),
+  download: z.coerce
+    .boolean()
+    .optional()
+    .openapi({
+      description:
+        "Whether to force download the file. If true, the file will be downloaded. If false or omitted, the file will be displayed in the browser if possible.",
+      example: true,
+      param: {
+        in: "query",
+        name: "download",
+      },
+    }),
 });
 
 export const preSignedUrlResponseSchema = z.object({
@@ -112,7 +124,7 @@ export const preSignedUrlResponseSchema = z.object({
     description:
       "Pre-signed URL for accessing the document, valid for 60 seconds",
     example:
-      "https://supabase.example.com/storage/v1/object/sign/vault/documents/2024/invoice.pdf?token=abc123&expires=1640995200",
+      "https://service.midday.ai/storage/v1/object/sign/vault/documents/2024/invoice.pdf?token=abc123&expires=1640995200",
   }),
   expiresAt: z.string().datetime().openapi({
     description: "ISO 8601 timestamp when the URL expires",

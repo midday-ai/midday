@@ -7,24 +7,30 @@ import {
   deleteTransactionSchema,
   deleteTransactionsResponseSchema,
   deleteTransactionsSchema,
+  getTransactionAttachmentPreSignedUrlSchema,
   getTransactionByIdSchema,
   getTransactionsSchema,
+  transactionAttachmentPreSignedUrlResponseSchema,
   transactionResponseSchema,
   transactionsResponseSchema,
   updateTransactionSchema,
   updateTransactionsSchema,
 } from "@api/schemas/transactions";
+import { createAdminClient } from "@api/services/supabase";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { z } from "@hono/zod-openapi";
 import {
   createTransaction,
   createTransactions,
   deleteTransactions,
+  getTransactionAttachment,
   getTransactionById,
   getTransactions,
   updateTransaction,
   updateTransactions,
 } from "@midday/db/queries";
+import { signedUrl } from "@midday/supabase/storage";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();
@@ -100,6 +106,124 @@ app.openapi(
     const result = await getTransactionById(db, { id, teamId });
 
     return c.json(validateResponse(result, transactionResponseSchema));
+  },
+);
+
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/{transactionId}/attachments/{attachmentId}/presigned-url",
+    summary: "Generate pre-signed URL for transaction attachment",
+    operationId: "getTransactionAttachmentPreSignedUrl",
+    "x-speakeasy-name-override": "getAttachmentPreSignedUrl",
+    description:
+      "Generate a pre-signed URL for accessing a transaction attachment. The URL is valid for 60 seconds and allows secure temporary access to the attachment file.",
+    tags: ["Transactions"],
+    request: {
+      params: getTransactionAttachmentPreSignedUrlSchema.pick({
+        transactionId: true,
+        attachmentId: true,
+      }),
+      query: getTransactionAttachmentPreSignedUrlSchema.pick({
+        download: true,
+      }),
+    },
+    responses: {
+      200: {
+        description: "Pre-signed URL generated successfully",
+        content: {
+          "application/json": {
+            schema: transactionAttachmentPreSignedUrlResponseSchema,
+          },
+        },
+      },
+      400: {
+        description: "Bad request - Attachment file path not available",
+        content: {
+          "application/json": {
+            schema: z.object({
+              error: z.string(),
+            }),
+          },
+        },
+      },
+      404: {
+        description: "Transaction or attachment not found",
+        content: {
+          "application/json": {
+            schema: z.object({
+              error: z.string(),
+            }),
+          },
+        },
+      },
+      500: {
+        description:
+          "Internal server error - Failed to generate pre-signed URL",
+        content: {
+          "application/json": {
+            schema: z.object({
+              error: z.string(),
+            }),
+          },
+        },
+      },
+    },
+    middleware: [withRequiredScope("transactions.read")],
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const { transactionId, attachmentId } = c.req.valid("param");
+    const { download = true } = c.req.valid("query");
+
+    // First, verify the attachment exists and belongs to the team/transaction
+    const attachment = await getTransactionAttachment(db, {
+      transactionId,
+      attachmentId,
+      teamId,
+    });
+
+    if (!attachment) {
+      return c.json({ error: "Transaction attachment not found" }, 404);
+    }
+
+    if (!attachment.path || attachment.path.length === 0) {
+      return c.json({ error: "Attachment file path not available" }, 400);
+    }
+
+    // Create admin supabase client
+    const supabase = await createAdminClient();
+
+    // Generate the pre-signed URL with 60-second expiration
+    const filePath = attachment.path.join("/");
+    const expireIn = 60; // 60 seconds
+
+    const { data, error } = await signedUrl(supabase, {
+      bucket: "vault",
+      path: filePath,
+      expireIn,
+      options: {
+        download,
+      },
+    });
+
+    if (error || !data?.signedUrl) {
+      return c.json({ error: "Failed to generate pre-signed URL" }, 500);
+    }
+
+    // Calculate expiration timestamp
+    const expiresAt = new Date(Date.now() + expireIn * 1000).toISOString();
+
+    const result = {
+      url: data.signedUrl,
+      expiresAt,
+      fileName: attachment.name || attachment.path.at(-1) || null,
+    };
+
+    return c.json(
+      validateResponse(result, transactionAttachmentPreSignedUrlResponseSchema),
+    );
   },
 );
 

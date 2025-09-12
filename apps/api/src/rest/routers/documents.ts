@@ -9,7 +9,7 @@ import {
   getDocumentsSchema,
   preSignedUrlResponseSchema,
 } from "@api/schemas/documents";
-import { createClient } from "@api/services/supabase";
+import { createAdminClient } from "@api/services/supabase";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { z } from "@hono/zod-openapi";
@@ -113,7 +113,8 @@ app.openapi(
       "Generate a pre-signed URL for accessing a document. The URL is valid for 60 seconds and allows secure temporary access to the document file.",
     tags: ["Documents"],
     request: {
-      params: getDocumentPreSignedUrlSchema,
+      params: getDocumentPreSignedUrlSchema.pick({ id: true }),
+      query: getDocumentPreSignedUrlSchema.pick({ download: true }),
     },
     responses: {
       200: {
@@ -160,9 +161,9 @@ app.openapi(
   }),
   async (c) => {
     const db = c.get("db");
-    const session = c.get("session");
     const teamId = c.get("teamId");
     const { id } = c.req.valid("param");
+    const { download = true } = c.req.valid("query");
 
     // First, verify the document exists and belongs to the team
     const document = await getDocumentById(db, {
@@ -178,9 +179,8 @@ app.openapi(
       return c.json({ error: "Document file path not available" }, 400);
     }
 
-    // Create supabase client with the user's access token
-    const accessToken = c.req.header("Authorization")?.split(" ")[1];
-    const supabase = await createClient(accessToken);
+    // Create admin supabase client
+    const supabase = await createAdminClient();
 
     // Generate the pre-signed URL with 60-second expiration
     const filePath = document.pathTokens.join("/");
@@ -191,7 +191,7 @@ app.openapi(
       path: filePath,
       expireIn,
       options: {
-        download: true,
+        download,
       },
     });
 
@@ -205,7 +205,8 @@ app.openapi(
     const result = {
       url: data.signedUrl,
       expiresAt,
-      fileName: document.name,
+      fileName:
+        document.pathTokens?.at(-1) || document.name?.split("/").at(-1) || null,
     };
 
     return c.json(validateResponse(result, preSignedUrlResponseSchema));

@@ -732,6 +732,61 @@ export const createTransactionsSchema = z
     description: "List of transactions to create.",
   });
 
+export const getTransactionAttachmentPreSignedUrlSchema = z.object({
+  transactionId: z
+    .string()
+    .uuid()
+    .openapi({
+      description: "Unique identifier of the transaction",
+      example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
+      param: {
+        in: "path",
+        name: "transactionId",
+      },
+    }),
+  attachmentId: z
+    .string()
+    .uuid()
+    .openapi({
+      description:
+        "Unique identifier of the attachment to generate a pre-signed URL for",
+      example: "a43dc3a5-6925-4d91-ac9c-4c1a34bdb388",
+      param: {
+        in: "path",
+        name: "attachmentId",
+      },
+    }),
+  download: z.coerce
+    .boolean()
+    .optional()
+    .openapi({
+      description:
+        "Whether to force download the file. If true, the file will be downloaded. If false or omitted, the file will be displayed in the browser if possible.",
+      example: true,
+      param: {
+        in: "query",
+        name: "download",
+      },
+    }),
+});
+
+export const transactionAttachmentPreSignedUrlResponseSchema = z.object({
+  url: z.string().url().openapi({
+    description:
+      "Pre-signed URL for accessing the attachment, valid for 60 seconds",
+    example:
+      "https://service.midday.ai/storage/v1/object/sign/vault/transactions/receipt.pdf?token=abc123&expires=1640995200",
+  }),
+  expiresAt: z.string().datetime().openapi({
+    description: "ISO 8601 timestamp when the URL expires",
+    example: "2024-04-15T10:01:00.000Z",
+  }),
+  fileName: z.string().nullable().openapi({
+    description: "Original filename of the attachment",
+    example: "receipt.pdf",
+  }),
+});
+
 export const createTransactionsResponseSchema = z.array(
   transactionResponseSchema,
 );
