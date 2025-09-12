@@ -441,6 +441,28 @@ export async function getUserAuthorizedApplications(
     .orderBy(desc(oauthAccessTokens.lastUsedAt));
 }
 
+// Check if user has ever authorized an application (including expired/revoked tokens)
+export async function hasUserEverAuthorizedApp(
+  db: Database,
+  userId: string,
+  teamId: string,
+  applicationId: string,
+): Promise<boolean> {
+  const [token] = await db
+    .select({ id: oauthAccessTokens.id })
+    .from(oauthAccessTokens)
+    .where(
+      and(
+        eq(oauthAccessTokens.userId, userId),
+        eq(oauthAccessTokens.teamId, teamId),
+        eq(oauthAccessTokens.applicationId, applicationId),
+      ),
+    )
+    .limit(1);
+
+  return !!token;
+}
+
 // Revoke all user tokens for an application
 export async function revokeUserApplicationTokens(
   db: Database,

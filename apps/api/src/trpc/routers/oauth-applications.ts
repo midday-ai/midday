@@ -20,6 +20,7 @@ import {
   getOAuthApplicationsByTeam,
   getTeamsByUserId,
   getUserAuthorizedApplications,
+  hasUserEverAuthorizedApp,
   regenerateClientSecret,
   revokeUserApplicationTokens,
   updateOAuthApplication,
@@ -161,18 +162,15 @@ export const oauthApplicationsRouter = createTRPCRouter({
 
       // Send app installation email only if this is the first time authorizing this app
       try {
-        // Check if user has previously authorized this application for this team
-        const existingAuthorizations = await getUserAuthorizedApplications(
+        // Check if user has ever authorized this application for this team (including expired tokens)
+        const hasAuthorizedBefore = await hasUserEverAuthorizedApp(
           db,
           session.user.id,
           teamId,
+          application.id,
         );
 
-        const isFirstAuthorization = !existingAuthorizations.some(
-          (auth) => auth.id === application.id,
-        );
-
-        if (isFirstAuthorization) {
+        if (!hasAuthorizedBefore) {
           // Get team information
           const userTeam = userTeams.find((team) => team.id === teamId);
 
