@@ -706,12 +706,13 @@ export const createInvoiceRequestSchema = z
       description: "List of line items for the invoice",
     }),
     deliveryType: z.enum(["create", "create_and_send", "scheduled"]).openapi({
-      description: "How the invoice should be delivered",
+      description:
+        "How the invoice should be processed: 'create' - finalize immediately, 'create_and_send' - finalize and send to customer, 'scheduled' - schedule for automatic processing at specified date",
       example: "create",
     }),
     scheduledAt: z.string().datetime().optional().openapi({
       description:
-        "Scheduled date of the invoice in ISO 8601 format (required for scheduled delivery)",
+        "Scheduled date of the invoice in ISO 8601 format. Required when deliveryType is 'scheduled'. Must be in the future.",
       example: "2024-06-30T23:59:59.000Z",
     }),
   })
@@ -1039,16 +1040,14 @@ export const createInvoiceRequestSchema = z
         },
       ],
       deliveryType: "create",
+      scheduledAt: "2024-07-01T09:00:00.000Z", // Only required for deliveryType: "scheduled"
     },
   });
 
-export const draftInvoiceRequestSchema = createInvoiceRequestSchema
-  .omit({
-    scheduledAt: true,
-  })
-  .openapi({
-    description: "Schema for creating a draft invoice via REST API",
-  });
+export const draftInvoiceRequestSchema = createInvoiceRequestSchema.openapi({
+  description:
+    "Schema for creating an invoice via REST API. The deliveryType determines if it stays as a draft, gets finalized immediately, or gets scheduled for later processing.",
+});
 
 export const draftInvoiceResponseSchema = z
   .object({

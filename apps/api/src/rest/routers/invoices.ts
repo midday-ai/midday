@@ -14,9 +14,8 @@ import {
   updateInvoiceRequestSchema,
   updateInvoiceResponseSchema,
 } from "@api/schemas/invoice";
-
 import { validateResponse } from "@api/utils/validate-response";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import {
   deleteInvoice,
   draftInvoice,
@@ -223,11 +222,11 @@ app.openapi(
   createRoute({
     method: "post",
     path: "/",
-    summary: "Create a draft invoice",
+    summary: "Create an invoice",
     operationId: "createInvoice",
     "x-speakeasy-name-override": "create",
     description:
-      "Create a draft invoice for the authenticated team. Use the convert endpoint to finalize it.",
+      "Create an invoice for the authenticated team. The behavior depends on deliveryType: 'create' generates and finalizes the invoice immediately, 'create_and_send' also sends it to the customer, 'scheduled' schedules the invoice for automatic processing at the specified date.",
     tags: ["Invoices"],
     request: {
       body: {
@@ -240,10 +239,68 @@ app.openapi(
     },
     responses: {
       201: {
-        description: "Draft invoice created successfully.",
+        description:
+          "Invoice created successfully. Status depends on deliveryType: 'scheduled' for scheduled invoices, 'unpaid' for create/create_and_send.",
         content: {
           "application/json": {
             schema: draftInvoiceResponseSchema,
+          },
+        },
+      },
+      400: {
+        description: "Bad request. Invalid input data or validation errors.",
+        content: {
+          "application/json": {
+            schema: z.object({
+              message: z.string().openapi({
+                description: "Error message describing the validation failure",
+                examples: [
+                  "scheduledAt is required for scheduled delivery",
+                  "scheduledAt must be in the future",
+                  "Invoice number 'INV-001' is already used. Please provide a different invoice number or omit it to auto-generate one.",
+                ],
+              }),
+            }),
+          },
+        },
+      },
+      404: {
+        description: "Customer not found.",
+        content: {
+          "application/json": {
+            schema: z.object({
+              message: z.string().openapi({
+                description: "Error message",
+                example: "Customer not found",
+              }),
+            }),
+          },
+        },
+      },
+      409: {
+        description: "Conflict. Invoice number already exists.",
+        content: {
+          "application/json": {
+            schema: z.object({
+              message: z.string().openapi({
+                description: "Error message about the conflict",
+                example:
+                  "Invoice number 'INV-2024-001' is already used. Please provide a different invoice number or omit it to auto-generate one.",
+              }),
+            }),
+          },
+        },
+      },
+      500: {
+        description: "Internal server error.",
+        content: {
+          "application/json": {
+            schema: z.object({
+              message: z.string().openapi({
+                description: "Error message",
+                example: "Failed to create invoice",
+              }),
+            }),
           },
         },
       },
@@ -341,6 +398,59 @@ app.openapi(
         invoiceId: result.id,
         deliveryType: input.deliveryType,
       } satisfies GenerateInvoicePayload);
+    } else if (input.deliveryType === "scheduled") {
+      // Handle scheduled invoices
+      if (!input.scheduledAt) {
+        throw new HTTPException(400, {
+          message: "scheduledAt is required for scheduled delivery",
+        });
+      }
+
+      // Convert to Date object and validate it's in the future
+      const scheduledDate = new Date(input.scheduledAt);
+      const now = new Date();
+
+      if (scheduledDate <= now) {
+        throw new HTTPException(400, {
+          message: "scheduledAt must be in the future",
+        });
+      }
+
+      // Create a scheduled job
+      const scheduledRun = await tasks.trigger(
+        "schedule-invoice",
+        {
+          invoiceId: result.id,
+          scheduledAt: input.scheduledAt,
+        },
+        {
+          delay: scheduledDate,
+        },
+      );
+
+      // Update the invoice with scheduling information
+      const updatedInvoice = await updateInvoice(db, {
+        id: result.id,
+        status: "scheduled",
+        scheduledAt: input.scheduledAt,
+        scheduledJobId: scheduledRun.id,
+        teamId,
+        userId,
+      });
+
+      if (updatedInvoice) {
+        finalResult = updatedInvoice;
+      }
+
+      // Send notification
+      await tasks.trigger("notification", {
+        type: "invoice_scheduled",
+        teamId,
+        invoiceId: result.id,
+        invoiceNumber: finalResult.invoiceNumber,
+        scheduledAt: input.scheduledAt,
+        customerName: finalResult.customerName,
+      });
     }
 
     // Add PDF download and preview URLs and serialize objects like tRPC does with superjson
