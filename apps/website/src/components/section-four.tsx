@@ -26,13 +26,13 @@ export function SectionFour() {
             balance, track overdue payments and send reminders.
           </p>
 
-          <div className="flex flex-col space-y-2">
-            <div className="flex space-x-2 items-center mt-8 text-sm">
+          <div className="flex flex-col space-y-2 mt-8">
+            <div className="flex space-x-2 text-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={18}
-                height={13}
+                viewBox="0 0 18 13"
                 fill="none"
+                className="flex-none w-[1.125rem] h-[1lh]"
               >
                 <path
                   fill="currentColor"
@@ -41,12 +41,12 @@ export function SectionFour() {
               </svg>
               <span className="text-primary">Create Customers</span>
             </div>
-            <div className="flex space-x-2 items-center text-sm">
+            <div className="flex space-x-2 text-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={18}
-                height={13}
+                viewBox="0 0 18 13"
                 fill="none"
+                className="flex-none w-[1.125rem] h-[1lh]"
               >
                 <path
                   fill="currentColor"
@@ -56,12 +56,12 @@ export function SectionFour() {
               <span className="text-primary">Add Vat & Sales tax</span>
             </div>
 
-            <div className="flex space-x-2 items-center text-sm">
+            <div className="flex space-x-2 text-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={18}
-                height={13}
+                viewBox="0 0 18 13"
                 fill="none"
+                className="flex-none w-[1.125rem] h-[1lh]"
               >
                 <path
                   fill="currentColor"
@@ -71,12 +71,12 @@ export function SectionFour() {
               <span className="text-primary">Add discount</span>
             </div>
 
-            <div className="flex space-x-2 items-center text-sm">
+            <div className="flex space-x-2 text-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={18}
-                height={13}
+                viewBox="0 0 18 13"
                 fill="none"
+                className="flex-none w-[1.125rem] h-[1lh]"
               >
                 <path
                   fill="currentColor"
@@ -86,12 +86,12 @@ export function SectionFour() {
               <span className="text-primary">Add Logo</span>
             </div>
 
-            <div className="flex space-x-2 items-center text-sm">
+            <div className="flex space-x-2 text-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={18}
-                height={13}
+                viewBox="0 0 18 13"
                 fill="none"
+                className="flex-none w-[1.125rem] h-[1lh]"
               >
                 <path
                   fill="currentColor"
@@ -101,12 +101,12 @@ export function SectionFour() {
               <span className="text-primary">Send web invoices</span>
             </div>
 
-            <div className="flex space-x-2 items-center text-sm">
+            <div className="flex space-x-2 text-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={18}
-                height={13}
+                viewBox="0 0 18 13"
                 fill="none"
+                className="flex-none w-[1.125rem] h-[1lh]"
               >
                 <path
                   fill="currentColor"
@@ -116,12 +116,12 @@ export function SectionFour() {
               <span className="text-primary">Export as PDF</span>
             </div>
 
-            <div className="flex space-x-2 items-center text-sm">
+            <div className="flex space-x-2 text-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={18}
-                height={13}
+                viewBox="0 0 18 13"
                 fill="none"
+                className="flex-none w-[1.125rem] h-[1lh]"
               >
                 <path
                   fill="currentColor"
@@ -202,13 +202,13 @@ export function SectionFour() {
           </li>
         </ul>
 
-        <div className="flex flex-col space-y-2 mb-6">
-          <div className="flex space-x-2 items-center mt-8 text-sm">
+        <div className="flex flex-col space-y-2 mb-6 mt-8">
+          <div className="flex space-x-2 text-sm">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width={18}
-              height={13}
+              viewBox="0 0 18 13"
               fill="none"
+              className="flex-none w-[1.125rem] h-[1lh]"
             >
               <path
                 fill="currentColor"
@@ -217,12 +217,12 @@ export function SectionFour() {
             </svg>
             <span className="text-primary">Personalized email</span>
           </div>
-          <div className="flex space-x-2 items-center text-sm">
+          <div className="flex space-x-2 text-sm">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width={18}
-              height={13}
+              viewBox="0 0 18 13"
               fill="none"
+              className="flex-none w-[1.125rem] h-[1lh]"
             >
               <path
                 fill="currentColor"
@@ -234,12 +234,12 @@ export function SectionFour() {
             </span>
           </div>
 
-          <div className="flex space-x-2 items-center text-sm">
+          <div className="flex space-x-2 text-sm">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width={18}
-              height={13}
+              viewBox="0 0 18 13"
               fill="none"
+              className="flex-none w-[1.125rem] h-[1lh]"
             >
               <path
                 fill="currentColor"
