@@ -92,6 +92,38 @@ export const signedUrlSchema = z.object({
 
 export const signedUrlsSchema = z.array(z.string());
 
+export const getDocumentPreSignedUrlSchema = z.object({
+  id: z
+    .string()
+    .uuid()
+    .openapi({
+      description:
+        "Unique identifier of the document to generate a pre-signed URL for",
+      example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
+      param: {
+        in: "path",
+        name: "id",
+      },
+    }),
+});
+
+export const preSignedUrlResponseSchema = z.object({
+  url: z.string().url().openapi({
+    description:
+      "Pre-signed URL for accessing the document, valid for 60 seconds",
+    example:
+      "https://supabase.example.com/storage/v1/object/sign/vault/documents/2024/invoice.pdf?token=abc123&expires=1640995200",
+  }),
+  expiresAt: z.string().datetime().openapi({
+    description: "ISO 8601 timestamp when the URL expires",
+    example: "2024-04-15T10:01:00.000Z",
+  }),
+  fileName: z.string().nullable().openapi({
+    description: "Original filename of the document",
+    example: "invoice-april-2024.pdf",
+  }),
+});
+
 export const documentResponseSchema = z
   .object({
     id: z.string().openapi({

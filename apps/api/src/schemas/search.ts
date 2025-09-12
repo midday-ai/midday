@@ -10,15 +10,15 @@ export const globalSearchSchema = z
       description: "Language code to use for search relevance and results.",
       example: "en",
     }),
-    limit: z.number().default(30).openapi({
+    limit: z.coerce.number().min(1).max(1000).default(30).openapi({
       description: "Maximum number of results to return.",
       example: 30,
     }),
-    itemsPerTableLimit: z.number().default(5).openapi({
+    itemsPerTableLimit: z.coerce.number().min(1).max(100).default(5).openapi({
       description: "Maximum number of results to return per table/entity.",
       example: 5,
     }),
-    relevanceThreshold: z.number().default(0.01).openapi({
+    relevanceThreshold: z.coerce.number().min(0).max(1).default(0.01).openapi({
       description: "Minimum relevance score threshold for including a result.",
       example: 0.01,
     }),

@@ -42,9 +42,7 @@ export const getCustomerById = async (
       countryCode: customers.countryCode,
       token: customers.token,
       contact: customers.contact,
-      invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`.as(
-        "invoice_count",
-      ),
+      invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
       projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
       tags: sql<CustomerTag[]>`
         coalesce(
@@ -130,9 +128,7 @@ export const getCustomers = async (
       countryCode: customers.countryCode,
       token: customers.token,
       contact: customers.contact,
-      invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`.as(
-        "invoice_count",
-      ),
+      invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
       projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
       tags: sql<CustomerTag[]>`
         coalesce(
@@ -379,6 +375,8 @@ export const upsertCustomer = async (
       countryCode: customers.countryCode,
       token: customers.token,
       contact: customers.contact,
+      invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
+      projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
       tags: sql<CustomerTag[]>`
           coalesce(
             json_agg(
@@ -393,6 +391,8 @@ export const upsertCustomer = async (
     })
     .from(customers)
     .where(and(eq(customers.id, customerId), eq(customers.teamId, teamId)))
+    .leftJoin(invoices, eq(invoices.customerId, customers.id))
+    .leftJoin(trackerProjects, eq(trackerProjects.customerId, customers.id))
     .leftJoin(customerTags, eq(customerTags.customerId, customers.id))
     .leftJoin(tags, eq(tags.id, customerTags.tagId))
     .groupBy(customers.id);
@@ -410,8 +410,19 @@ export const deleteCustomer = async (
   params: DeleteCustomerParams,
 ) => {
   const { id, teamId } = params;
+
+  // First, get the customer data before deleting it
+  const customerToDelete = await getCustomerById(db, { id, teamId });
+
+  if (!customerToDelete) {
+    throw new Error("Customer not found");
+  }
+
+  // Delete the customer
   await db
     .delete(customers)
-    .where(and(eq(customers.id, id), eq(customers.teamId, teamId)))
-    .returning();
+    .where(and(eq(customers.id, id), eq(customers.teamId, teamId)));
+
+  // Return the deleted customer data
+  return customerToDelete;
 };
