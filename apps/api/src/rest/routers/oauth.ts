@@ -410,11 +410,8 @@ app.openapi(
     if (grant_type === "authorization_code") {
       if (!code || !redirect_uri) {
         throw new HTTPException(400, {
-          message: JSON.stringify({
-            error: "invalid_request",
-            error_description:
-              "Missing required parameters: code and redirect_uri are required",
-          }),
+          message:
+            "Missing required parameters: code and redirect_uri are required",
         });
       }
 
@@ -444,51 +441,34 @@ app.openapi(
         // Handle specific OAuth errors with proper error codes
         if (errorMessage.includes("Authorization code expired")) {
           throw new HTTPException(400, {
-            message: JSON.stringify({
-              error: "invalid_grant",
-              error_description:
-                "The authorization code has expired. Please restart the OAuth flow.",
-            }),
+            message:
+              "The authorization code has expired. Please restart the OAuth flow.",
           });
         }
 
         if (errorMessage.includes("Authorization code already used")) {
           throw new HTTPException(400, {
-            message: JSON.stringify({
-              error: "invalid_grant",
-              error_description:
-                "The authorization code has already been used. All related tokens have been revoked for security.",
-            }),
+            message:
+              "The authorization code has already been used. All related tokens have been revoked for security.",
           });
         }
 
         if (errorMessage.includes("Invalid authorization code")) {
           throw new HTTPException(400, {
-            message: JSON.stringify({
-              error: "invalid_grant",
-              error_description:
-                "The authorization code is invalid or malformed.",
-            }),
+            message: "The authorization code is invalid or malformed.",
           });
         }
 
         if (errorMessage.includes("redirect_uri")) {
           throw new HTTPException(400, {
-            message: JSON.stringify({
-              error: "invalid_grant",
-              error_description:
-                "The redirect_uri does not match the one used in the authorization request.",
-            }),
+            message:
+              "The redirect_uri does not match the one used in the authorization request.",
           });
         }
 
         // Generic fallback for other errors
         throw new HTTPException(400, {
-          message: JSON.stringify({
-            error: "invalid_grant",
-            error_description:
-              "Failed to exchange authorization code for access token.",
-          }),
+          message: "Failed to exchange authorization code for access token.",
         });
       }
     }
