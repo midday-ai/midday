@@ -59,6 +59,45 @@ type DeleteAttachmentParams = {
   teamId: string;
 };
 
+type GetTransactionAttachmentParams = {
+  transactionId: string;
+  attachmentId: string;
+  teamId: string;
+};
+
+export async function getTransactionAttachment(
+  db: Database,
+  params: GetTransactionAttachmentParams,
+) {
+  const { transactionId, attachmentId, teamId } = params;
+
+  const [result] = await db
+    .select({
+      id: transactionAttachments.id,
+      name: transactionAttachments.name,
+      path: transactionAttachments.path,
+      type: transactionAttachments.type,
+      size: transactionAttachments.size,
+      transactionId: transactionAttachments.transactionId,
+      teamId: transactionAttachments.teamId,
+    })
+    .from(transactionAttachments)
+    .innerJoin(
+      transactions,
+      eq(transactionAttachments.transactionId, transactions.id),
+    )
+    .where(
+      and(
+        eq(transactionAttachments.id, attachmentId),
+        eq(transactionAttachments.transactionId, transactionId),
+        eq(transactionAttachments.teamId, teamId),
+        eq(transactions.teamId, teamId),
+      ),
+    );
+
+  return result;
+}
+
 export async function deleteAttachment(
   db: Database,
   params: DeleteAttachmentParams,

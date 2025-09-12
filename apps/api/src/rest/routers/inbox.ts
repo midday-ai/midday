@@ -3,19 +3,24 @@ import {
   deleteInboxResponseSchema,
   deleteInboxSchema,
   getInboxByIdSchema,
+  getInboxPreSignedUrlSchema,
   getInboxSchema,
   inboxItemResponseSchema,
+  inboxPreSignedUrlResponseSchema,
   inboxResponseSchema,
   updateInboxSchema,
 } from "@api/schemas/inbox";
+import { createAdminClient } from "@api/services/supabase";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { z } from "@hono/zod-openapi";
 import {
   deleteInbox,
   getInbox,
   getInboxById,
   updateInbox,
 } from "@midday/db/queries";
+import { signedUrl } from "@midday/supabase/storage";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();
@@ -98,6 +103,116 @@ app.openapi(
     });
 
     return c.json(validateResponse(result, inboxItemResponseSchema));
+  },
+);
+
+app.openapi(
+  createRoute({
+    method: "post",
+    path: "/{id}/presigned-url",
+    summary: "Generate pre-signed URL for inbox attachment",
+    operationId: "getInboxPreSignedUrl",
+    "x-speakeasy-name-override": "getPreSignedUrl",
+    description:
+      "Generate a pre-signed URL for accessing an inbox attachment. The URL is valid for 60 seconds and allows secure temporary access to the attachment file.",
+    tags: ["Inbox"],
+    request: {
+      params: getInboxPreSignedUrlSchema.pick({ id: true }),
+      query: getInboxPreSignedUrlSchema.pick({ download: true }),
+    },
+    responses: {
+      200: {
+        description: "Pre-signed URL generated successfully",
+        content: {
+          "application/json": {
+            schema: inboxPreSignedUrlResponseSchema,
+          },
+        },
+      },
+      400: {
+        description: "Bad request - Attachment file path not available",
+        content: {
+          "application/json": {
+            schema: z.object({
+              error: z.string(),
+            }),
+          },
+        },
+      },
+      404: {
+        description: "Inbox item not found",
+        content: {
+          "application/json": {
+            schema: z.object({
+              error: z.string(),
+            }),
+          },
+        },
+      },
+      500: {
+        description:
+          "Internal server error - Failed to generate pre-signed URL",
+        content: {
+          "application/json": {
+            schema: z.object({
+              error: z.string(),
+            }),
+          },
+        },
+      },
+    },
+    middleware: [withRequiredScope("inbox.read")],
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const teamId = c.get("teamId");
+    const { id } = c.req.valid("param");
+    const { download = true } = c.req.valid("query");
+
+    // First, verify the inbox item exists and belongs to the team
+    const inboxItem = await getInboxById(db, {
+      id,
+      teamId,
+    });
+
+    if (!inboxItem) {
+      return c.json({ error: "Inbox item not found" }, 404);
+    }
+
+    if (!inboxItem.filePath || inboxItem.filePath.length === 0) {
+      return c.json({ error: "Attachment file path not available" }, 400);
+    }
+
+    // Create admin supabase client
+    const supabase = await createAdminClient();
+
+    // Generate the pre-signed URL with 60-second expiration
+    const filePath = inboxItem.filePath.join("/");
+    const expireIn = 60; // 60 seconds
+
+    const { data, error } = await signedUrl(supabase, {
+      bucket: "vault",
+      path: filePath,
+      expireIn,
+      options: {
+        download,
+      },
+    });
+
+    if (error || !data?.signedUrl) {
+      return c.json({ error: "Failed to generate pre-signed URL" }, 500);
+    }
+
+    // Calculate expiration timestamp
+    const expiresAt = new Date(Date.now() + expireIn * 1000).toISOString();
+
+    const result = {
+      url: data.signedUrl,
+      expiresAt,
+      fileName: inboxItem.fileName || inboxItem.filePath.at(-1) || null,
+    };
+
+    return c.json(validateResponse(result, inboxPreSignedUrlResponseSchema));
   },
 );
 
