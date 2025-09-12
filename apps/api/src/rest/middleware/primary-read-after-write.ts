@@ -23,8 +23,12 @@ export const withPrimaryReadAfterWrite: MiddlewareHandler = async (c, next) => {
 
   let teamId: string | null = null;
 
-  // Try to get teamId from session/user context
-  if (session?.user?.id) {
+  // For OAuth sessions, use the token's team, not the user's current team
+  if (session?.oauth) {
+    teamId = session.teamId || null;
+  }
+  // For non-OAuth sessions, get user's current team
+  else if (session?.user?.id) {
     const cacheKey = `user:${session.user.id}:team`;
     teamId = (await teamPermissionsCache.get(cacheKey)) || null;
 

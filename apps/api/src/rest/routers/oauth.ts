@@ -21,6 +21,7 @@ import {
   exchangeAuthorizationCode,
   getOAuthApplicationByClientId,
   getTeamsByUserId,
+  hasUserEverAuthorizedApp,
   refreshAccessToken,
   revokeAccessToken,
 } from "@midday/db/queries";
@@ -264,26 +265,36 @@ app.openapi(
       });
     }
 
-    // Send app installation email
+    // Send app installation email only if this is the first time authorizing this app
     try {
-      // Get team information
-      const userTeam = userTeams.find((team) => team.id === teamId);
+      // Check if user has ever authorized this application for this team (including expired tokens)
+      const hasAuthorizedBefore = await hasUserEverAuthorizedApp(
+        db,
+        session.user.id,
+        teamId,
+        application.id,
+      );
 
-      if (userTeam && session.user.email) {
-        const html = await render(
-          AppInstalledEmail({
-            email: session.user.email,
-            teamName: userTeam.name!,
-            appName: application.name,
-          }),
-        );
+      if (!hasAuthorizedBefore) {
+        // Get team information
+        const userTeam = userTeams.find((team) => team.id === teamId);
 
-        await resend.emails.send({
-          from: "Midday <middaybot@midday.ai>",
-          to: session.user.email,
-          subject: "An app has been added to your team",
-          html,
-        });
+        if (userTeam && session.user.email) {
+          const html = await render(
+            AppInstalledEmail({
+              email: session.user.email,
+              teamName: userTeam.name!,
+              appName: application.name,
+            }),
+          );
+
+          await resend.emails.send({
+            from: "Midday <middaybot@midday.ai>",
+            to: session.user.email,
+            subject: "An app has been added to your team",
+            html,
+          });
+        }
       }
     } catch (error) {
       // Log error but don't fail the OAuth flow
@@ -396,28 +407,67 @@ app.openapi(
     if (grant_type === "authorization_code") {
       if (!code || !redirect_uri) {
         throw new HTTPException(400, {
-          message: "Missing required parameters",
+          message:
+            "Missing required parameters: code and redirect_uri are required",
         });
       }
 
-      // Exchange authorization code for access token
-      const tokenResponse = await exchangeAuthorizationCode(
-        db,
-        code,
-        redirect_uri,
-        application.id,
-        code_verifier,
-      );
+      try {
+        // Exchange authorization code for access token
+        const tokenResponse = await exchangeAuthorizationCode(
+          db,
+          code,
+          redirect_uri,
+          application.id,
+          code_verifier,
+        );
 
-      const response = {
-        access_token: tokenResponse.accessToken,
-        token_type: tokenResponse.tokenType,
-        expires_in: tokenResponse.expiresIn,
-        refresh_token: tokenResponse.refreshToken || "",
-        scope: tokenResponse.scopes.join(" "),
-      };
+        const response = {
+          access_token: tokenResponse.accessToken,
+          token_type: tokenResponse.tokenType,
+          expires_in: tokenResponse.expiresIn,
+          refresh_token: tokenResponse.refreshToken || "",
+          scope: tokenResponse.scopes.join(" "),
+        };
 
-      return c.json(validateResponse(response, oauthTokenResponseSchema));
+        return c.json(validateResponse(response, oauthTokenResponseSchema));
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+
+        // Handle specific OAuth errors with proper error codes
+        if (errorMessage.includes("Authorization code expired")) {
+          throw new HTTPException(400, {
+            message:
+              "The authorization code has expired. Please restart the OAuth flow.",
+          });
+        }
+
+        if (errorMessage.includes("Authorization code already used")) {
+          throw new HTTPException(400, {
+            message:
+              "The authorization code has already been used. All related tokens have been revoked for security.",
+          });
+        }
+
+        if (errorMessage.includes("Invalid authorization code")) {
+          throw new HTTPException(400, {
+            message: "The authorization code is invalid or malformed.",
+          });
+        }
+
+        if (errorMessage.includes("redirect_uri")) {
+          throw new HTTPException(400, {
+            message:
+              "The redirect_uri does not match the one used in the authorization request.",
+          });
+        }
+
+        // Generic fallback for other errors
+        throw new HTTPException(400, {
+          message: "Failed to exchange authorization code for access token.",
+        });
+      }
     }
 
     if (grant_type === "refresh_token") {
