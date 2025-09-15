@@ -218,25 +218,30 @@ export class EnableBankingApi {
   async getAccounts({
     id,
   }: GetAccountsRequest): Promise<GetAccountDetailsResponse[]> {
-    const session = await this.getSession(id);
+    try {
+      const session = await this.getSession(id);
 
-    const accountDetails = await Promise.all(
-      session.accounts.map(async (id) => {
-        const [details, balance] = await Promise.all([
-          this.getAccountDetails(id),
-          this.getAccountBalance(id),
-        ]);
+      const accountDetails = await Promise.all(
+        session.accounts.map(async (id) => {
+          const [details, balance] = await Promise.all([
+            this.getAccountDetails(id),
+            this.getAccountBalance(id),
+          ]);
 
-        return {
-          ...details,
-          institution: session.aspsp,
-          valid_until: session.access.valid_until,
-          balance,
-        };
-      }),
-    );
+          return {
+            ...details,
+            institution: session.aspsp,
+            valid_until: session.access.valid_until,
+            balance,
+          };
+        }),
+      );
 
-    return accountDetails;
+      return accountDetails;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 
   async getAccountBalance(

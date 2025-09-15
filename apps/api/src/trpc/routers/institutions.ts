@@ -5,6 +5,7 @@ import {
 } from "@api/schemas/institutions";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { client } from "@midday/engine-client";
+import { TRPCError } from "@trpc/server";
 
 export const institutionsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -32,17 +33,25 @@ export const institutionsRouter = createTRPCRouter({
   accounts: protectedProcedure
     .input(getAccountsSchema)
     .query(async ({ input }) => {
-      const accountsResponse = await client.accounts.$get({
-        query: input,
-      });
+      try {
+        const accountsResponse = await client.accounts.$get({
+          query: input,
+        });
 
-      if (!accountsResponse.ok) {
-        throw new Error("Failed to get accounts");
+        if (!accountsResponse.ok) {
+          throw new Error("Failed to get accounts");
+        }
+
+        const { data } = await accountsResponse.json();
+
+        return data.sort((a, b) => b.balance.amount - a.balance.amount);
+      } catch (error) {
+        console.log(error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to get accounts",
+        });
       }
-
-      const { data } = await accountsResponse.json();
-
-      return data.sort((a, b) => b.balance.amount - a.balance.amount);
     }),
 
   updateUsage: protectedProcedure
