@@ -6,7 +6,6 @@ import { ActiveToolCall, ThinkingMessage } from "@/components/message";
 import { Overview } from "@/components/overview/overview";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
-import { useChat } from "@ai-sdk/react";
 import type { ToolName } from "@api/ai/tools/registry";
 import type { UIChatMessage } from "@api/ai/types";
 import { createClient } from "@midday/supabase/client";
@@ -31,6 +30,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { Geo } from "@vercel/functions";
 import { DefaultChatTransport, generateId } from "ai";
 import { AIDevtools } from "ai-sdk-devtools";
+import {
+  useChat,
+  useChatMessages,
+  useChatProperty,
+  useChatSendMessage,
+  useChatStatus,
+} from "ai-sdk-zustand";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMemo } from "react";
@@ -94,63 +100,67 @@ export function ChatInterface({
     window.history.pushState({ chatId }, "", `/${chatId}`);
   };
 
-  const { messages, sendMessage, setMessages, status } = useChat<UIChatMessage>(
-    {
-      id: chatId,
-      messages: initialMessages,
-      transport: new DefaultChatTransport({
-        api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
-        fetch: authenticatedFetch,
-        prepareSendMessagesRequest({ messages, id }) {
-          return {
-            body: {
-              id,
-              message: messages[messages.length - 1],
-              country: geo?.country,
-              city: geo?.city,
-              region: geo?.region,
-              timezone: new Intl.DateTimeFormat().resolvedOptions().timeZone,
-            },
-          };
-        },
-      }),
-      onData: (dataPart) => {
-        // Handle title data parts as they stream in (before main response is done)
-        if (dataPart.type === "data-title") {
-          // @ts-ignore
-          setChatTitle(dataPart.data.title);
-
-          if (typeof document !== "undefined") {
-            // @ts-ignore
-            document.title = `${dataPart.data.title} | Midday`;
-          }
-
-          // Invalidate chats list
-          queryClient.invalidateQueries({
-            queryKey: trpc.chats.list.queryKey(),
-          });
-        }
+  // Initialize chat with ai-sdk-zustand
+  const { setMessages } = useChat<UIChatMessage>({
+    id: chatId,
+    messages: initialMessages,
+    transport: new DefaultChatTransport({
+      api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
+      fetch: authenticatedFetch,
+      prepareSendMessagesRequest({ messages, id }) {
+        return {
+          body: {
+            id,
+            message: messages[messages.length - 1],
+            country: geo?.country,
+            city: geo?.city,
+            region: geo?.region,
+            timezone: new Intl.DateTimeFormat().resolvedOptions().timeZone,
+          },
+        };
       },
-    },
-  );
+    }),
+    onData: (dataPart) => {
+      // Handle title data parts as they stream in (before main response is done)
+      if (dataPart.type === "data-title") {
+        // @ts-ignore
+        setChatTitle(dataPart.data.title);
 
-  // Extract canvas data directly from current messages
-  const canvasData = useMemo(() => {
-    const allMessages = [...(initialMessages || []), ...messages];
+        if (typeof document !== "undefined") {
+          // @ts-ignore
+          document.title = `${dataPart.data.title} | Midday`;
+        }
+
+        // Invalidate chats list
+        queryClient.invalidateQueries({
+          queryKey: trpc.chats.list.queryKey(),
+        });
+      }
+    },
+  });
+
+  // Use selective hooks for optimal performance
+  const messages = useChatMessages();
+  const sendMessage = useChatSendMessage();
+  const status = useChatStatus();
+
+  // Extract canvas data using optimized selector
+  const canvasData = useChatProperty((state) => {
+    const allMessages = [...(initialMessages || []), ...state.messages];
     let latestCanvasData: any = null;
 
     // Find the latest canvas data from all messages
     for (const message of allMessages) {
       if (message.parts) {
         for (const part of message.parts) {
-          if (part.type === "data-canvas") {
+          if (part.type === "data-data-canvas") {
             latestCanvasData = (part as any).data;
           }
         }
       }
     }
     return latestCanvasData;
-  }, [initialMessages, messages]);
+  });
 
   // Simple canvas logic: show canvas if we have canvas data
   const hasCanvasContent = !!canvasData;
@@ -273,7 +283,7 @@ export function ChatInterface({
                           <MessageContent>
                             {message.parts?.map((part, partIndex) => {
                               // Canvas parts are handled by the canvas sidebar, not rendered inline
-                              if (part.type === "data-canvas") {
+                              if (part.type === "data-data-canvas") {
                                 return null; // Canvas content is rendered in sidebar
                               }
 
@@ -344,11 +354,13 @@ export function ChatInterface({
                   );
                 })}
 
-                {status === "submitted" &&
-                  messages.length > 0 &&
-                  messages[messages.length - 1]?.role === "user" && (
-                    <ThinkingMessage />
-                  )}
+                {/* Optimized thinking message display */}
+                {useChatProperty(
+                  (state) =>
+                    state.status === "submitted" &&
+                    state.messages.length > 0 &&
+                    state.messages[state.messages.length - 1]?.role === "user",
+                ) && <ThinkingMessage />}
               </ConversationContent>
               <ConversationScrollButton
                 className={cn(
