@@ -6,6 +6,7 @@ import { ActiveToolCall, ThinkingMessage } from "@/components/message";
 import { Overview } from "@/components/overview/overview";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import { AIDevtools } from "@ai-sdk-tools/devtools";
 import type { ToolName } from "@api/ai/tools/registry";
 import type { UIChatMessage } from "@api/ai/types";
 import { createClient } from "@midday/supabase/client";
@@ -29,7 +30,6 @@ import { Response } from "@midday/ui/response";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Geo } from "@vercel/functions";
 import { DefaultChatTransport, generateId } from "ai";
-import { AIDevtools } from "ai-sdk-devtools";
 import {
   useChat,
   useChatMessages,
@@ -423,7 +423,11 @@ export function ChatInterface({
       {process.env.NODE_ENV === "development" && (
         <AIDevtools
           config={{
-            position: "bottom",
+            streamCapture: {
+              enabled: true,
+              endpoint: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
+              autoConnect: true,
+            },
           }}
         />
       )}
