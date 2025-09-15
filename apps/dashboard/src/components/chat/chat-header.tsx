@@ -10,12 +10,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { OverviewHeader } from "../overview/overview-header";
 
-type Props = {
-  title?: string;
-  hasCanvas?: boolean;
-};
-
-export function ChatHeader({ title, hasCanvas }: Props) {
+export function ChatHeader() {
   const router = useRouter();
   const [showTitle, setShowTitle] = useState(false);
 
@@ -23,14 +18,14 @@ export function ChatHeader({ title, hasCanvas }: Props) {
 
   const isOnRootPath = pathname === "/" || pathname === "";
 
-  useEffect(() => {
-    if (!title) {
-      setShowTitle(false);
-      return;
-    }
+  // useEffect(() => {
+  //   if (!title) {
+  //     setShowTitle(false);
+  //     return;
+  //   }
 
-    setShowTitle(true);
-  }, [title]);
+  //   setShowTitle(true);
+  // }, [title]);
 
   return (
     <div className="absolute top-0 left-0 right-0 z-10 bg-background py-6">
@@ -53,13 +48,13 @@ export function ChatHeader({ title, hasCanvas }: Props) {
       <div
         className={cn(
           "flex items-center justify-center transition-all duration-300 ease-in-out",
-          hasCanvas ? "mr-[604px]" : "", // Account for canvas width + margin when centering
+          // hasCanvas ? "mr-[604px]" : "", // Account for canvas width + margin when centering
         )}
         style={{
           marginLeft: !isOnRootPath ? "64px" : "16px", // Account for back button width
         }}
       >
-        {title ? (
+        {/* {title ? (
           <h1
             className={`text-primary text-sm font-regular truncate transition-all duration-150 ease-out transform ${
               showTitle
@@ -93,16 +88,16 @@ export function ChatHeader({ title, hasCanvas }: Props) {
           </h1>
         ) : (
           <div />
-        )}
+        )} */}
       </div>
 
       {/* Right section - positioned relative to canvas edge */}
       <div
         className={cn(
           "absolute top-6 flex items-center space-x-4 transition-all duration-300 ease-in-out",
-          hasCanvas
-            ? "right-[634px]" // 600px canvas width + 4px margin
-            : "right-4", // Normal right margin when no canvas
+          // hasCanvas
+          //   ? "right-[634px]" // 600px canvas width + 4px margin
+          //   : "right-4", // Normal right margin when no canvas
         )}
       >
         <NewChat />
