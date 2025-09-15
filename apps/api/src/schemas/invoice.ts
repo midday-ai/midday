@@ -1134,6 +1134,7 @@ export const invoiceResponseSchema = z
           example: "info@acme.com",
         }),
       })
+      .nullable()
       .openapi({
         description: "Customer details",
       }),

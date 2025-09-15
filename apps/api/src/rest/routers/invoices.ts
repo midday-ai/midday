@@ -28,6 +28,7 @@ import {
   isInvoiceNumberUsed,
   updateInvoice,
 } from "@midday/db/queries";
+import { calculateTotal } from "@midday/invoice/calculate";
 import { transformCustomerToContent } from "@midday/invoice/utils";
 import type { GenerateInvoicePayload } from "@midday/jobs/schema";
 import { tasks } from "@trigger.dev/sdk";
@@ -80,8 +81,42 @@ app.openapi(
       ...result,
       data: result.data.map((invoice) => {
         const { token, ...invoiceWithoutToken } = invoice;
+
+        // Calculate amounts if lineItems exist
+        let calculatedAmounts = {};
+        if (
+          invoice.lineItems &&
+          Array.isArray(invoice.lineItems) &&
+          invoice.lineItems.length > 0
+        ) {
+          const {
+            subTotal,
+            total,
+            vat: calculatedVAT,
+            tax: calculatedTax,
+          } = calculateTotal({
+            lineItems: invoice.lineItems.map((item: any) => ({
+              price: item.price,
+              quantity: item.quantity,
+            })),
+            taxRate: (invoice.template as any)?.taxRate ?? 0,
+            vatRate: (invoice.template as any)?.vatRate ?? 0,
+            discount: invoice.discount ?? 0,
+            includeVat: (invoice.template as any)?.includeVat ?? true,
+            includeTax: (invoice.template as any)?.includeTax ?? true,
+          });
+
+          calculatedAmounts = {
+            subtotal: subTotal,
+            amount: total,
+            vat: calculatedVAT,
+            tax: calculatedTax,
+          };
+        }
+
         return {
           ...invoiceWithoutToken,
+          ...calculatedAmounts,
           paymentDetails: invoice.paymentDetails
             ? JSON.stringify(invoice.paymentDetails)
             : null,
@@ -221,8 +256,42 @@ app.openapi(
 
     // Add PDF download and preview URLs and serialize objects like tRPC does with superjson
     const { token, ...resultWithoutToken } = result;
+
+    // Calculate amounts if lineItems exist
+    let calculatedAmounts = {};
+    if (
+      result.lineItems &&
+      Array.isArray(result.lineItems) &&
+      result.lineItems.length > 0
+    ) {
+      const {
+        subTotal,
+        total,
+        vat: calculatedVAT,
+        tax: calculatedTax,
+      } = calculateTotal({
+        lineItems: result.lineItems.map((item: any) => ({
+          price: item.price,
+          quantity: item.quantity,
+        })),
+        taxRate: (result.template as any)?.taxRate ?? 0,
+        vatRate: (result.template as any)?.vatRate ?? 0,
+        discount: result.discount ?? 0,
+        includeVat: (result.template as any)?.includeVat ?? true,
+        includeTax: (result.template as any)?.includeTax ?? true,
+      });
+
+      calculatedAmounts = {
+        subtotal: subTotal,
+        amount: total,
+        vat: calculatedVAT,
+        tax: calculatedTax,
+      };
+    }
+
     const response = {
       ...resultWithoutToken,
+      ...calculatedAmounts,
       paymentDetails: result.paymentDetails
         ? JSON.stringify(result.paymentDetails)
         : null,
