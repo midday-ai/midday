@@ -13,11 +13,11 @@
     "./trpc/routers/_app": "./src/trpc/routers/_app.ts"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^2.0.27",
-    "@ai-sdk/react": "^2.0.36",
+    "@ai-sdk/openai": "^2.0.30",
+    "@ai-sdk/react": "^2.0.44",
     "@hono/trpc-server": "^0.4.0",
-    "@hono/zod-openapi": "^1.1.0",
-    "@hono/zod-validator": "^0.7.2",
+    "@hono/zod-openapi": "^1.1.1",
+    "@hono/zod-validator": "^0.7.3",
     "@midday/cache": "workspace:*",
     "@midday/categories": "workspace:*",
     "@midday/db": "workspace:*",
@@ -33,14 +33,14 @@
     "@midday/notifications": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@polar-sh/sdk": "^0.34.9",
-    "@scalar/hono-api-reference": "^0.9.16",
+    "@scalar/hono-api-reference": "^0.9.18",
     "@sindresorhus/slugify": "^2.2.1",
     "@trigger.dev/sdk": "4.0.2",
     "@trpc/server": "^11.5.1",
-    "ai": "^5.0.37",
+    "ai": "^5.0.44",
     "camelcase-keys": "^9.1.3",
     "date-fns": "^4.1.0",
-    "hono": "^4.9.6",
+    "hono": "^4.9.7",
     "hono-rate-limiter": "^0.4.2",
     "jose": "^6.0.11",
     "nanoid": "^5.1.5",
@@ -49,8 +49,8 @@
     "snakecase-keys": "^8.0.1",
     "superjson": "^2.2.2",
     "uuid": "^11.1.0",
-    "zod": "^4.1.5",
-    "zod-openapi": "^5.4.0"
+    "zod": "^4.1.9",
+    "zod-openapi": "^5.4.1"
   },
   "devDependencies": {
     "@types/bun": "^1.2.21"

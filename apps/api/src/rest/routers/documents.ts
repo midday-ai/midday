@@ -13,6 +13,10 @@ import { createAdminClient } from "@api/services/supabase";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { z } from "@hono/zod-openapi";
+
+const errorResponseSchema = z.object({
+  error: z.string(),
+});
 import {
   deleteDocument,
   getDocumentById,
@@ -129,9 +133,7 @@ app.openapi(
         description: "Bad request - Document file path not available",
         content: {
           "application/json": {
-            schema: z.object({
-              error: z.string(),
-            }),
+            schema: errorResponseSchema,
           },
         },
       },
@@ -139,9 +141,7 @@ app.openapi(
         description: "Document not found",
         content: {
           "application/json": {
-            schema: z.object({
-              error: z.string(),
-            }),
+            schema: errorResponseSchema,
           },
         },
       },
@@ -150,9 +150,7 @@ app.openapi(
           "Internal server error - Failed to generate pre-signed URL",
         content: {
           "application/json": {
-            schema: z.object({
-              error: z.string(),
-            }),
+            schema: errorResponseSchema,
           },
         },
       },
@@ -165,51 +163,57 @@ app.openapi(
     const { id } = c.req.valid("param");
     const { download = true } = c.req.valid("query");
 
-    // First, verify the document exists and belongs to the team
-    const document = await getDocumentById(db, {
-      id,
-      teamId,
-    });
+    try {
+      // First, verify the document exists and belongs to the team
+      const document = await getDocumentById(db, {
+        id,
+        teamId,
+      });
 
-    if (!document) {
-      return c.json({ error: "Document not found" }, 404);
-    }
+      if (!document) {
+        return c.json({ error: "Document not found" }, 404);
+      }
 
-    if (!document.pathTokens || document.pathTokens.length === 0) {
-      return c.json({ error: "Document file path not available" }, 400);
-    }
+      if (!document.pathTokens || document.pathTokens.length === 0) {
+        return c.json({ error: "Document file path not available" }, 400);
+      }
 
-    // Create admin supabase client
-    const supabase = await createAdminClient();
+      // Create admin supabase client
+      const supabase = await createAdminClient();
 
-    // Generate the pre-signed URL with 60-second expiration
-    const filePath = document.pathTokens.join("/");
-    const expireIn = 60; // 60 seconds
+      // Generate the pre-signed URL with 60-second expiration
+      const filePath = document.pathTokens.join("/");
+      const expireIn = 60; // 60 seconds
 
-    const { data, error } = await signedUrl(supabase, {
-      bucket: "vault",
-      path: filePath,
-      expireIn,
-      options: {
-        download,
-      },
-    });
+      const { data, error } = await signedUrl(supabase, {
+        bucket: "vault",
+        path: filePath,
+        expireIn,
+        options: {
+          download,
+        },
+      });
 
-    if (error || !data?.signedUrl) {
+      if (error || !data?.signedUrl) {
+        return c.json({ error: "Failed to generate pre-signed URL" }, 500);
+      }
+
+      // Calculate expiration timestamp
+      const expiresAt = new Date(Date.now() + expireIn * 1000).toISOString();
+
+      const result = {
+        url: data.signedUrl,
+        expiresAt,
+        fileName:
+          document.pathTokens?.at(-1) ||
+          document.name?.split("/").at(-1) ||
+          null,
+      };
+
+      return c.json(validateResponse(result, preSignedUrlResponseSchema), 200);
+    } catch (error) {
       return c.json({ error: "Failed to generate pre-signed URL" }, 500);
     }
-
-    // Calculate expiration timestamp
-    const expiresAt = new Date(Date.now() + expireIn * 1000).toISOString();
-
-    const result = {
-      url: data.signedUrl,
-      expiresAt,
-      fileName:
-        document.pathTokens?.at(-1) || document.name?.split("/").at(-1) || null,
-    };
-
-    return c.json(validateResponse(result, preSignedUrlResponseSchema));
   },
 );
 
@@ -245,7 +249,7 @@ app.openapi(
 
     const result = await deleteDocument(db, { teamId, id });
 
-    return c.json(validateResponse(result, documentResponseSchema));
+    return c.json(validateResponse(result, deleteDocumentResponseSchema));
   },
 );
 

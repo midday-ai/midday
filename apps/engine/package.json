@@ -15,13 +15,13 @@
   "dependencies": {
     "@hono/zod-openapi": "^1.1.0",
     "@hono/zod-validator": "^0.7.2",
-    "hono": "^4.9.6",
+    "hono": "^4.9.7",
     "jose": "^6.1.0",
     "plaid": "^38.1.0",
     "typesense": "^2.1.0",
     "workers-ai-provider": "^2.0.0",
     "xior": "^0.7.8",
-    "zod": "^4.1.5"
+    "zod": "^4.1.9"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250904.0",

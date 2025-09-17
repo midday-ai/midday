@@ -212,7 +212,10 @@ app.openapi(
       fileName: inboxItem.fileName || inboxItem.filePath.at(-1) || null,
     };
 
-    return c.json(validateResponse(result, inboxPreSignedUrlResponseSchema));
+    return c.json(
+      validateResponse(result, inboxPreSignedUrlResponseSchema),
+      200,
+    );
   },
 );
 
