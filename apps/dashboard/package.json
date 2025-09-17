@@ -37,7 +37,7 @@
     "@react-google-maps/api": "^2.20.6",
     "@react-pdf/renderer": "^4.3.0",
     "@sentry/nextjs": "^10",
-    "@tanstack/react-query": "^5.87.1",
+    "@tanstack/react-query": "^5.89.0",
     "@tanstack/react-table": "^8.21.3",
     "@team-plain/typescript-sdk": "^5.9.0",
     "@trigger.dev/react-hooks": "4.0.2",
