@@ -53,6 +53,6 @@
     "zod-openapi": "^5.4.1"
   },
   "devDependencies": {
-    "@types/bun": "^1.2.21"
+    "@types/bun": "latest"
   }
 }

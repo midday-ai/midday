@@ -20,10 +20,6 @@ export const ActiveToolCall = ({ toolName }: ActiveToolCallProps) => {
   let text = "";
 
   switch (toolName) {
-    case "getRevenue":
-      icon = Icons.AIOutline;
-      text = "Getting revenue data";
-      break;
     case "web_search_preview":
       icon = Icons.Search;
       text = "Searching the web";
