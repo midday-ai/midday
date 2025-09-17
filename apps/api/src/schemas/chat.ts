@@ -12,10 +12,21 @@ const messageSchema = z
     if (typeof msg.id !== "string") return false;
     if (!["user", "assistant", "system"].includes(msg.role)) return false;
 
-    // Optional fields validation
-    if (msg.content !== undefined && typeof msg.content !== "string")
-      return false;
-    if (msg.parts !== undefined && !Array.isArray(msg.parts)) return false;
+    // Must have either content or parts
+    const hasContent =
+      msg.content !== undefined && typeof msg.content === "string";
+    const hasParts = msg.parts !== undefined && Array.isArray(msg.parts);
+
+    if (!hasContent && !hasParts) return false;
+
+    // If parts exist, validate structure
+    if (hasParts) {
+      for (const part of msg.parts) {
+        if (typeof part !== "object" || part === null) return false;
+        if (typeof part.type !== "string") return false;
+        // Allow various part types with different structures
+      }
+    }
 
     return true;
   })

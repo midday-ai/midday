@@ -1,35 +1,49 @@
-import { ChatInput } from "@/components/chat/chat-input";
+import { ChatInterface } from "@/components/chat/chat-interface";
 import { ChatProvider } from "@/components/chat/provider";
-import { OverviewModal } from "@/components/modals/overview-modal";
 import { Widgets } from "@/components/widgets";
-import { HydrateClient } from "@/trpc/server";
-import { Cookies } from "@/utils/constants";
+import { loadChatParams } from "@/hooks/use-chat-params";
+import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
 import { geolocation } from "@vercel/functions";
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import type { SearchParams } from "nuqs";
 
 export const metadata: Metadata = {
   title: "Overview | Midday",
 };
 
-export default async function Overview() {
-  const cookieStore = await cookies();
-  const hideConnectFlow =
-    cookieStore.get(Cookies.HideConnectFlow)?.value === "true";
+type Props = {
+  searchParams: Promise<SearchParams>;
+};
+
+export default async function Overview(props: Props) {
+  const searchParams = await props.searchParams;
+  const { chatId: currentChatId } = loadChatParams(searchParams);
 
   const headersList = await headers();
   const geo = geolocation({
     headers: headersList,
   });
 
+  const queryClient = getQueryClient();
+
+  const chat = currentChatId
+    ? await queryClient.fetchQuery(
+        trpc.chats.get.queryOptions({ chatId: currentChatId }),
+      )
+    : null;
+
+  if (currentChatId && !chat?.messages) {
+    redirect("/");
+  }
+
   return (
     <HydrateClient>
       <Widgets />
-      <ChatProvider geo={geo}>
-        <ChatInput />
+      <ChatProvider id={currentChatId} geo={geo}>
+        <ChatInterface />
       </ChatProvider>
-      <OverviewModal hideConnectFlow={hideConnectFlow} />
     </HydrateClient>
   );
 }

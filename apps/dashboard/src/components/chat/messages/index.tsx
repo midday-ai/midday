@@ -4,7 +4,6 @@ import { ActiveToolCall, ThinkingMessage } from "@/components/message";
 import { useUserQuery } from "@/hooks/use-user";
 import { useChatMessages, useChatProperty } from "@ai-sdk-tools/store";
 import type { ToolName } from "@api/ai/tools/registry";
-import { cn } from "@midday/ui/cn";
 import {
   Conversation,
   ConversationContent,
@@ -18,12 +17,7 @@ export function Messages() {
   const { data: user } = useUserQuery();
 
   return (
-    <div
-      className={cn(
-        "w-full mx-auto pb-0 relative size-full h-[calc(100vh-86px)]",
-        // showOverview && "h-[calc(100vh-677px)]",
-      )}
-    >
+    <div className="w-full mx-auto pb-0 relative size-full h-[calc(100vh-86px)]">
       <div className="flex flex-col h-full w-full">
         <Conversation className="h-full w-full">
           <ConversationContent className="px-6 mx-auto mt-16 mb-28 max-w-[770px]">
@@ -115,11 +109,7 @@ export function Messages() {
                 state.messages[state.messages.length - 1]?.role === "user",
             ) && <ThinkingMessage />}
           </ConversationContent>
-          <ConversationScrollButton
-          // className={cn(
-          //   hasCanvasContent && "left-[calc(50%-150px)]", // Adjust position when canvas is open
-          // )}
-          />
+          <ConversationScrollButton />
         </Conversation>
       </div>
     </div>
