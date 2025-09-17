@@ -1,4 +1,4 @@
-import type { UIChatMessage } from "@api/ai/types";
+// import type { UIChatMessage } from "@api/ai/types";
 import { type SQL, relations, sql } from "drizzle-orm";
 import {
   bigint,
@@ -2520,7 +2520,7 @@ export const chatMessages = pgTable(
       .references(() => users.id, {
         onDelete: "cascade",
       }),
-    content: jsonb("content").$type<UIChatMessage>().notNull(), // Store individual message as JSONB
+    // content: jsonb("content").$type<UIChatMessage>().notNull(), // Store individual message as JSONB
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -3324,7 +3324,7 @@ export const notificationSettings = pgTable(
   ],
 );
 
-export const chatsRelations: any = relations(chats, ({ one, many }) => ({
+export const chatsRelations = relations(chats, ({ one, many }) => ({
   team: one(teams, {
     fields: [chats.teamId],
     references: [teams.id],
@@ -3336,20 +3336,17 @@ export const chatsRelations: any = relations(chats, ({ one, many }) => ({
   chatMessages: many(chatMessages),
 }));
 
-export const chatMessagesRelations: any = relations(
-  chatMessages,
-  ({ one }) => ({
-    chat: one(chats, {
-      fields: [chatMessages.chatId],
-      references: [chats.id],
-    }),
-    team: one(teams, {
-      fields: [chatMessages.teamId],
-      references: [teams.id],
-    }),
-    user: one(users, {
-      fields: [chatMessages.userId],
-      references: [users.id],
-    }),
+export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
+  chat: one(chats, {
+    fields: [chatMessages.chatId],
+    references: [chats.id],
   }),
-);
+  team: one(teams, {
+    fields: [chatMessages.teamId],
+    references: [teams.id],
+  }),
+  user: one(users, {
+    fields: [chatMessages.userId],
+    references: [users.id],
+  }),
+}));
