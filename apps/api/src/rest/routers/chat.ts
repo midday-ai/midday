@@ -142,6 +142,7 @@ app.post(
                 chatId: id,
                 teamId,
                 userId,
+                // @ts-ignore
                 message: responseMessage,
               });
             } else {
@@ -160,6 +161,7 @@ app.post(
                   chatId: id,
                   teamId,
                   userId,
+                  // @ts-ignore
                   message: userMessage,
                 });
               }
@@ -169,6 +171,7 @@ app.post(
                 chatId: id,
                 teamId,
                 userId,
+                // @ts-ignore
                 message: responseMessage,
               });
             }
