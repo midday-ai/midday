@@ -15,7 +15,7 @@
     "test:watch": "bun test --watch"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^2.0.30",
+    "@ai-sdk/openai": "^2.0.31",
     "@ai-sdk/rsc": "^1.0.44",
     "@date-fns/tz": "^1.4.1",
     "@date-fns/utc": "^2.1.1",
@@ -44,7 +44,7 @@
     "@trigger.dev/sdk": "4.0.2",
     "@trpc/client": "^11.5.1",
     "@trpc/tanstack-react-query": "^11.5.1",
-    "ai": "^5.0.44",
+    "ai": "^5.0.45",
     "@ai-sdk-tools/devtools": "^0.6.1",
     "@ai-sdk-tools/store": "^0.1.2",
     "@ai-sdk-tools/artifacts": "^0.3.0",
