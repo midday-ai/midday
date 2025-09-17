@@ -42,7 +42,13 @@ export async function getTrackerRecordsByDate(
       description: true,
     },
     with: {
-      user: true,
+      user: {
+        columns: {
+          id: true,
+          fullName: true,
+          avatarUrl: true,
+        },
+      },
       trackerProject: {
         columns: {
           id: true,
@@ -123,16 +129,12 @@ export async function getTrackerRecordsByRange(
           name: true,
           rate: true,
           currency: true,
-          billable: true,
-          status: true,
-          description: true,
         },
         with: {
           customer: {
             columns: {
               id: true,
               name: true,
-              website: true,
             },
           },
         },
@@ -170,10 +172,9 @@ export async function getTrackerRecordsByRange(
 
   // Calculate total amount
   const totalAmount = data.reduce((amount, item) => {
-    const trackerProject = Array.isArray(item.trackerProject)
-      ? null
-      : item.trackerProject;
-    const rate = trackerProject?.rate ?? 0;
+    const project = item.trackerProject;
+    if (!project || Array.isArray(project)) return amount;
+    const rate = project.rate ?? 0;
     const duration = item.duration ?? 0;
     return amount + (Number(rate) * duration) / 3600;
   }, 0);
@@ -288,9 +289,6 @@ export async function upsertTrackerEntries(
           name: true,
           rate: true,
           currency: true,
-          billable: true,
-          status: true,
-          description: true,
         },
         with: {
           customer: {
@@ -376,9 +374,6 @@ export async function bulkCreateTrackerEntries(
           name: true,
           rate: true,
           currency: true,
-          billable: true,
-          status: true,
-          description: true,
         },
         with: {
           customer: {
@@ -495,9 +490,6 @@ export async function startTimer(db: Database, params: StartTimerParams) {
           name: true,
           rate: true,
           currency: true,
-          billable: true,
-          status: true,
-          description: true,
         },
         with: {
           customer: {
@@ -603,9 +595,6 @@ export async function stopTimer(db: Database, params: StopTimerParams) {
           name: true,
           rate: true,
           currency: true,
-          billable: true,
-          status: true,
-          description: true,
         },
         with: {
           customer: {
@@ -673,9 +662,6 @@ export async function getCurrentTimer(
           name: true,
           rate: true,
           currency: true,
-          billable: true,
-          status: true,
-          description: true,
         },
         with: {
           customer: {
@@ -732,16 +718,18 @@ export async function getTimerStatus(
       start: currentTimer.start,
       description: currentTimer.description,
       projectId: currentTimer.projectId ?? null,
-      trackerProject: (() => {
-        const project = currentTimer.trackerProject;
-        if (Array.isArray(project) || !project) {
-          return { id: null, name: null };
-        }
-        return {
-          id: project.id ?? null,
-          name: project.name ?? null,
-        };
-      })(),
+      trackerProject: {
+        id:
+          currentTimer.trackerProject &&
+          !Array.isArray(currentTimer.trackerProject)
+            ? currentTimer.trackerProject.id
+            : null,
+        name:
+          currentTimer.trackerProject &&
+          !Array.isArray(currentTimer.trackerProject)
+            ? currentTimer.trackerProject.name
+            : null,
+      },
     },
     elapsedTime,
   };
