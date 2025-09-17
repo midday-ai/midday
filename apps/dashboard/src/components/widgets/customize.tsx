@@ -4,7 +4,7 @@ import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { usePathname } from "next/navigation";
 
-export function OverviewCustomize() {
+export function Customize() {
   const pathname = usePathname();
 
   const isOnRootPath = pathname === "/" || pathname === "";

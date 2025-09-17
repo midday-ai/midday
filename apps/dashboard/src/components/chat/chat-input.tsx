@@ -1,6 +1,10 @@
 "use client";
 
-import { useChatSendMessage, useChatStatus } from "@ai-sdk-tools/store";
+import {
+  useChatId,
+  useChatSendMessage,
+  useChatStatus,
+} from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import {
   PromptInput,
@@ -10,28 +14,27 @@ import {
   PromptInputToolbar,
   PromptInputTools,
 } from "@midday/ui/prompt-input";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function ChatInput() {
   const [input, setInput] = useState("");
   const sendMessage = useChatSendMessage();
   const status = useChatStatus();
+  const chatId = useChatId();
+  const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (input.trim()) {
-      // Start header animation immediately when user sends first message
-      //   if (isOnRootPath && messages.length === 0 && showOverview) {
-      //     setShowOverview(false);
-      //   }
+      router.push(`/${chatId}`);
 
-      //   // If we're on the root path and this is the first message, update URL
-      //   if (isOnRootPath && messages.length === 0) {
-      //     updateUrl(chatId);
-      //   }
+      sendMessage({
+        role: "user",
+        parts: [{ type: "text", text: input }],
+      });
 
-      sendMessage({ role: "user", parts: [{ type: "text", text: input }] });
       setInput("");
     }
   };

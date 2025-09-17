@@ -1,6 +1,5 @@
 "use client";
 
-import { ChatInput } from "@/components/chat/chat-input";
 import { ActiveToolCall, ThinkingMessage } from "@/components/message";
 import { useUserQuery } from "@/hooks/use-user";
 import { useChatMessages, useChatProperty } from "@ai-sdk-tools/store";
@@ -122,8 +121,6 @@ export function Messages() {
           // )}
           />
         </Conversation>
-
-        <ChatInput />
       </div>
     </div>
   );
