@@ -22,7 +22,7 @@ function getTimeBasedGreeting(timezone?: string): string {
   return "Night";
 }
 
-export function OverviewHeader() {
+export function WidgetsHeader() {
   const { data: user } = useUserQuery();
   const greeting = getTimeBasedGreeting(user?.timezone ?? undefined);
 
