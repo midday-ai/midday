@@ -155,7 +155,7 @@ export function TrackerTimer({
 
         toast({
           title: "Timer stopped",
-          description: `${secondsToHoursAndMinutes(context?.currentElapsedTime)} added to ${context?.currentProjectName}`,
+          description: `${secondsToHoursAndMinutes(context?.currentElapsedTime ?? 0)} added to ${context?.currentProjectName}`,
           variant: "success",
         });
       },

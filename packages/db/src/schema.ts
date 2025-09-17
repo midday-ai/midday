@@ -1,4 +1,4 @@
-// import type { UIChatMessage } from "@api/ai/types";
+import type { UIChatMessage } from "@api/ai/types";
 import { type SQL, relations, sql } from "drizzle-orm";
 import {
   bigint,
@@ -2520,7 +2520,7 @@ export const chatMessages = pgTable(
       .references(() => users.id, {
         onDelete: "cascade",
       }),
-    // content: jsonb("content").$type<UIChatMessage>().notNull(), // Store individual message as JSONB
+    content: jsonb("content").$type<UIChatMessage>().notNull(), // Store individual message as JSONB
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
