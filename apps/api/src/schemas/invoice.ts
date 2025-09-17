@@ -4,13 +4,13 @@ import { z } from "@hono/zod-openapi";
 export const tiptapContentSchema: z.ZodType<any> = z
   .object({
     type: z.string().optional(),
-    attrs: z.record(z.any()).optional(),
+    attrs: z.record(z.any(), z.any()).optional(),
     content: z.array(z.any()).optional(),
     marks: z
       .array(
         z.object({
           type: z.enum(["bold", "italic", "strike", "link", "underline"]),
-          attrs: z.record(z.any()).optional(),
+          attrs: z.record(z.any(), z.any()).optional(),
         }),
       )
       .optional(),
