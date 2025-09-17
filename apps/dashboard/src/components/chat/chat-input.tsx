@@ -1,5 +1,6 @@
 "use client";
 
+import { useChatInterface } from "@/hooks/use-chat-interface";
 import {
   useChatId,
   useChatSendMessage,
@@ -14,7 +15,6 @@ import {
   PromptInputToolbar,
   PromptInputTools,
 } from "@midday/ui/prompt-input";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function ChatInput() {
@@ -22,13 +22,14 @@ export function ChatInput() {
   const sendMessage = useChatSendMessage();
   const status = useChatStatus();
   const chatId = useChatId();
-  const router = useRouter();
+  const { setChatId } = useChatInterface();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (input.trim()) {
-      router.push(`/${chatId}`);
+      // Set chatId as query parameter using nuqs
+      setChatId(chatId);
 
       sendMessage({
         role: "user",
@@ -39,8 +40,12 @@ export function ChatInput() {
     }
   };
 
+  const handleOnFocus = () => {
+    // router.prefetch(`/${chatId}`);
+  };
+
   return (
-    <div className="absolute bottom-4 left-0 right-0 z-20 px-6">
+    <div className="fixed bottom-8 left-[70px] right-0 z-20 px-6">
       <div className="mx-auto w-full bg-[#F7F7F7] dark:bg-[#131313] pt-2 max-w-[770px]">
         <PromptInput onSubmit={handleSubmit}>
           <PromptInputTextarea
@@ -49,6 +54,8 @@ export function ChatInput() {
             minHeight={30}
             value={input}
             placeholder="Ask me anything"
+            onFocus={handleOnFocus}
+            autoFocus
           />
           <PromptInputToolbar className="pb-1 px-4">
             <PromptInputTools>

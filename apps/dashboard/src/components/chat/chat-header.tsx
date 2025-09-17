@@ -2,6 +2,7 @@
 
 import { ChatHistory } from "@/components/chat/chat-history";
 import { NewChat } from "@/components/chat/new-chat";
+import { useChatInterface } from "@/hooks/use-chat-interface";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -11,7 +12,7 @@ import { useState } from "react";
 
 export function ChatHeader({ title }: { title?: string | null }) {
   const router = useRouter();
-
+  const { isHome } = useChatInterface();
   const [showTitle, setShowTitle] = useState(false);
 
   useEffect(() => {
@@ -20,11 +21,15 @@ export function ChatHeader({ title }: { title?: string | null }) {
     }
   }, [title]);
 
+  if (isHome) {
+    return null;
+  }
+
   return (
     <div className="absolute top-0 left-0 right-0 z-10 bg-background py-6 w-full flex justify-between">
       {/* Left section - back button stays in place */}
       <div className="flex items-center">
-        <Button variant="outline" size="icon" onClick={() => router.back()}>
+        <Button variant="outline" size="icon" onClick={() => router.push("/")}>
           <Icons.ArrowBack size={16} />
         </Button>
       </div>
