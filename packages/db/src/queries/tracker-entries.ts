@@ -118,11 +118,21 @@ export async function getTrackerRecordsByRange(
         },
       },
       trackerProject: {
+        columns: {
+          id: true,
+          name: true,
+          rate: true,
+          currency: true,
+          billable: true,
+          status: true,
+          description: true,
+        },
         with: {
           customer: {
             columns: {
               id: true,
               name: true,
+              website: true,
             },
           },
         },
@@ -160,7 +170,10 @@ export async function getTrackerRecordsByRange(
 
   // Calculate total amount
   const totalAmount = data.reduce((amount, item) => {
-    const rate = item.trackerProject?.rate ?? 0;
+    const trackerProject = Array.isArray(item.trackerProject)
+      ? null
+      : item.trackerProject;
+    const rate = trackerProject?.rate ?? 0;
     const duration = item.duration ?? 0;
     return amount + (Number(rate) * duration) / 3600;
   }, 0);
@@ -270,6 +283,15 @@ export async function upsertTrackerEntries(
         },
       },
       trackerProject: {
+        columns: {
+          id: true,
+          name: true,
+          rate: true,
+          currency: true,
+          billable: true,
+          status: true,
+          description: true,
+        },
         with: {
           customer: {
             columns: {
@@ -349,6 +371,15 @@ export async function bulkCreateTrackerEntries(
         },
       },
       trackerProject: {
+        columns: {
+          id: true,
+          name: true,
+          rate: true,
+          currency: true,
+          billable: true,
+          status: true,
+          description: true,
+        },
         with: {
           customer: {
             columns: {
@@ -459,6 +490,15 @@ export async function startTimer(db: Database, params: StartTimerParams) {
         },
       },
       trackerProject: {
+        columns: {
+          id: true,
+          name: true,
+          rate: true,
+          currency: true,
+          billable: true,
+          status: true,
+          description: true,
+        },
         with: {
           customer: {
             columns: {
@@ -558,6 +598,15 @@ export async function stopTimer(db: Database, params: StopTimerParams) {
         },
       },
       trackerProject: {
+        columns: {
+          id: true,
+          name: true,
+          rate: true,
+          currency: true,
+          billable: true,
+          status: true,
+          description: true,
+        },
         with: {
           customer: {
             columns: {
@@ -619,6 +668,15 @@ export async function getCurrentTimer(
         },
       },
       trackerProject: {
+        columns: {
+          id: true,
+          name: true,
+          rate: true,
+          currency: true,
+          billable: true,
+          status: true,
+          description: true,
+        },
         with: {
           customer: {
             columns: {
@@ -674,10 +732,16 @@ export async function getTimerStatus(
       start: currentTimer.start,
       description: currentTimer.description,
       projectId: currentTimer.projectId ?? null,
-      trackerProject: {
-        id: currentTimer.trackerProject?.id ?? null,
-        name: currentTimer.trackerProject?.name ?? null,
-      },
+      trackerProject: (() => {
+        const project = currentTimer.trackerProject;
+        if (Array.isArray(project) || !project) {
+          return { id: null, name: null };
+        }
+        return {
+          id: project.id ?? null,
+          name: project.name ?? null,
+        };
+      })(),
     },
     elapsedTime,
   };
