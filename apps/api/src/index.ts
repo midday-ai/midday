@@ -9,6 +9,10 @@ import type { Context } from "./rest/types";
 import { createTRPCContext } from "./trpc/init";
 import { appRouter } from "./trpc/routers/_app";
 import { checkHealth } from "./utils/health";
+import { validateEnvironment } from "./utils/env-validation";
+
+// Validate environment variables on startup
+validateEnvironment();
 
 const app = new OpenAPIHono<Context>();
 
