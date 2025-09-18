@@ -4,6 +4,7 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DASHBOARD }}
   TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
+  NODE_OPTIONS="--max-old-space-size=8192"
 on:
   push:
     branches-ignore:
@@ -27,7 +28,7 @@ jobs:
         run: bun run lint
         working-directory: ./apps/dashboard
       - name: 🪐 Check TypeScript
-        run: NODE_OPTIONS="--max-old-space-size=8192" bun run typecheck
+        run: bun run typecheck
         working-directory: ./apps/dashboard
       # - name: 🧪 Run unit tests
       #   run: bunx run test

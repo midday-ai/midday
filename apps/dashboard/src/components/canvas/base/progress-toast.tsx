@@ -4,13 +4,14 @@ import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Spinner } from "@midday/ui/spinner";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface ProgressToastProps {
   isVisible: boolean;
   currentStep?: number;
   totalSteps?: number;
   currentLabel?: string;
+  stepDescription?: string;
   completed?: boolean;
   completedMessage?: string;
   onComplete?: () => void;
@@ -46,41 +47,58 @@ export function ProgressToast({
   currentStep = 0,
   totalSteps = 6,
   currentLabel,
+  stepDescription,
   completed = false,
   completedMessage,
   onComplete,
 }: ProgressToastProps) {
   const [showComplete, setShowComplete] = useState(false);
   const [shouldStayVisible, setShouldStayVisible] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
+  const hasHandledCompletion = useRef(false);
+  const prevVisible = useRef(isVisible);
 
   useEffect(() => {
-    if (!isVisible && !shouldStayVisible) {
-      setShowComplete(false);
+    console.log("ProgressToast effect:", {
+      isVisible,
+      completed,
+      hasHandledCompletion: hasHandledCompletion.current,
+      shouldStayVisible,
+      isCompleting,
+    });
+
+    // Show completion when completed is true and not already handled
+    if (completed && !hasHandledCompletion.current) {
+      console.log("Showing completion step");
+      hasHandledCompletion.current = true;
+      setIsCompleting(true);
+      setShouldStayVisible(true);
+      setShowComplete(true);
+
+      // Auto-hide after showing completion for 3 seconds
+      const timer = setTimeout(() => {
+        console.log("Timer fired, hiding completion");
+        setShouldStayVisible(false);
+        setShowComplete(false);
+        setIsCompleting(false);
+        // Don't reset hasHandledCompletion - keep it true to prevent re-showing
+        onComplete?.();
+      }, 3000);
+
+      // Don't clear the timer on subsequent effect runs
       return;
     }
 
-    // Show complete state when all steps are done or completed is true
-    if (currentStep >= totalSteps || completed) {
-      setShouldStayVisible(true);
-      // Show the last step for a shorter duration before showing completion
-      const timer = setTimeout(() => {
-        setShowComplete(true);
-        // After showing completion for 1.5 seconds, allow hiding
-        setTimeout(() => {
-          setShouldStayVisible(false);
-          onComplete?.();
-        }, 1500);
-      }, 1500);
-      return () => clearTimeout(timer);
+    // Reset when not visible and not completing
+    if (!isVisible && !shouldStayVisible && !isCompleting) {
+      setShowComplete(false);
+      hasHandledCompletion.current = false;
+      setIsCompleting(false);
     }
-  }, [
-    isVisible,
-    currentStep,
-    totalSteps,
-    completed,
-    onComplete,
-    shouldStayVisible,
-  ]);
+
+    // Update previous visible state
+    prevVisible.current = isVisible;
+  }, [isVisible, completed, onComplete, shouldStayVisible, isCompleting]);
 
   return (
     <AnimatePresence>
@@ -130,8 +148,8 @@ export function ProgressToast({
                 </div>
               </div>
             ) : (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between mb-1">
+              <div>
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {/* Loading Spinner */}
                     <Spinner size={16} className="text-[#878787]" />
@@ -145,7 +163,7 @@ export function ProgressToast({
                 </div>
                 <div className="pl-6">
                   <span className="text-[12px] leading-[17px] text-[#707070] dark:text-[#666666]">
-                    Computing
+                    {stepDescription || "Computing"}
                   </span>
                 </div>
               </div>
