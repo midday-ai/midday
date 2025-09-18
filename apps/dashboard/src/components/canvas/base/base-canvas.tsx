@@ -31,6 +31,7 @@ export function BaseCanvas({ children }: { children: React.ReactNode }) {
               currentStep={toastData.currentStep}
               totalSteps={toastData.totalSteps}
               currentLabel={toastData.currentLabel}
+              stepDescription={toastData.stepDescription}
               completed={toastData.completed}
               completedMessage={toastData.completedMessage}
             />
