@@ -13,7 +13,7 @@
     "./trpc/routers/_app": "./src/trpc/routers/_app.ts"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^2.0.31",
+    "@ai-sdk/openai": "^2.0.32",
     "@ai-sdk/react": "^2.0.45",
     "@hono/trpc-server": "^0.4.0",
     "@hono/zod-openapi": "^1.1.1",
