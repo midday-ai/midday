@@ -5,11 +5,6 @@ export const toolMetadata = {
     description:
       "Get burn rate analysis with runway projections and optimization recommendations",
   },
-  getExpenses: {
-    name: "getExpenses",
-    description:
-      "Get comprehensive expense analysis with transaction breakdown and spending insights",
-  },
 } as const;
 
 export type ToolName = keyof typeof toolMetadata;

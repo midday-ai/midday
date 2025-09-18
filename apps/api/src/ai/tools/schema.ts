@@ -1,6 +1,17 @@
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { z } from "zod";
 
+export const toastSchema = z
+  .object({
+    visible: z.boolean(),
+    currentStep: z.number().min(0),
+    totalSteps: z.number().min(1),
+    currentLabel: z.string(),
+    completed: z.boolean().optional(),
+    completedMessage: z.string().optional(),
+  })
+  .optional();
+
 export const getBurnRateSchema = z.object({
   from: z
     .string()

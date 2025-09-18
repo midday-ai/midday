@@ -1,4 +1,4 @@
-import { type CanvasType, useCanvasState } from "@/hooks/use-canvas-state";
+import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { BalanceSheetCanvas } from "./balance-sheet-canvas";
 import { BurnRateCanvas } from "./burn-rate-canvas";
 import { CashFlowCanvas } from "./cash-flow-canvas";
@@ -12,9 +12,10 @@ import { RunwayCanvas } from "./runway-canvas";
 import { SpendingCanvas } from "./spending-canvas";
 
 export function Canvas() {
-  const { canvasType } = useCanvasState();
-  switch (canvasType) {
-    case "burn-rate-canvas":
+  const { current } = useArtifacts();
+
+  switch (current?.type) {
+    case "burn-rate":
       return <BurnRateCanvas />;
     case "revenue-canvas":
       return <RevenueCanvas />;
@@ -37,6 +38,6 @@ export function Canvas() {
     case "spending-canvas":
       return <SpendingCanvas />;
     default:
-      return <BurnRateCanvas />;
+      return null;
   }
 }
