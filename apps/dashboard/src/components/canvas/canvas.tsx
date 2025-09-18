@@ -3,7 +3,6 @@ import { BalanceSheetCanvas } from "./balance-sheet-canvas";
 import { BurnRateCanvas } from "./burn-rate-canvas";
 import { CashFlowCanvas } from "./cash-flow-canvas";
 import { CategoryExpensesCanvas } from "./category-expenses-canvas";
-import { ExpensesCanvas } from "./expenses-canvas";
 import { HealthReportCanvas } from "./health-report-canvas";
 import { ProfitAnalysisCanvas } from "./profit-analysis-canvas";
 import { ProfitCanvas } from "./profit-canvas";
@@ -21,8 +20,6 @@ export function Canvas() {
       return <RevenueCanvas />;
     case "profit-canvas":
       return <ProfitCanvas />;
-    case "expenses-canvas":
-      return <ExpensesCanvas />;
     case "runway-canvas":
       return <RunwayCanvas />;
     case "cash-flow-canvas":
