@@ -18,11 +18,7 @@ export function ProfitCanvas() {
           </p>
         </div>
         <div className="h-96">
-          <ProfitChart
-            data={profitData}
-            showAnimation={true}
-            showExpenses={true}
-          />
+          <ProfitChart data={profitData} showAnimation={true} />
         </div>
       </div>
     </BaseCanvas>

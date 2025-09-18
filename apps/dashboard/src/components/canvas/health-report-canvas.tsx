@@ -20,13 +20,11 @@ import {
 
 export function HealthReportCanvas() {
   const [isLoading, setIsLoading] = useState(true);
-  const [showAnimation, setShowAnimation] = useState(false);
 
   useEffect(() => {
     // Simulate loading
     const timer = setTimeout(() => {
       setIsLoading(false);
-      setShowAnimation(true);
     }, 2000);
 
     return () => clearTimeout(timer);
@@ -79,15 +77,9 @@ export function HealthReportCanvas() {
           title="Health Report"
           description="Financial health metrics and KPIs"
           isLoading={isLoading}
-          showAnimation={showAnimation}
         />
 
-        <CanvasGrid
-          items={healthMetrics}
-          layout="2/2"
-          isLoading={isLoading}
-          showAnimation={showAnimation}
-        />
+        <CanvasGrid items={healthMetrics} layout="2/2" isLoading={isLoading} />
 
         <CanvasChart
           title="Health Score Trend"
@@ -97,7 +89,6 @@ export function HealthReportCanvas() {
             ],
           }}
           isLoading={isLoading}
-          showAnimation={showAnimation}
           height="16rem"
         >
           <ResponsiveContainer width="100%" height="100%">
@@ -134,11 +125,7 @@ export function HealthReportCanvas() {
           </ResponsiveContainer>
         </CanvasChart>
 
-        <CanvasSection
-          title="Analysis"
-          isLoading={isLoading}
-          showAnimation={showAnimation}
-        >
+        <CanvasSection title="Analysis" isLoading={isLoading}>
           <p>
             Overall financial health is strong with a composite score of 8.5/10.
             Growth metrics are particularly impressive at 9.1/10, while

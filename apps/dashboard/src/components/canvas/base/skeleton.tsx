@@ -18,12 +18,8 @@ export function Skeleton({
 }: SkeletonProps) {
   return (
     <UISkeleton
-      className={cn(
-        `w-[${width}]`,
-        `h-[${height}]`,
-        rounded ? "rounded" : "rounded-none",
-        className,
-      )}
+      className={cn("w-full", rounded ? "rounded" : "rounded-none", className)}
+      style={{ width, height }}
     />
   );
 }
@@ -37,7 +33,8 @@ export function SkeletonLine({
 }) {
   return (
     <UISkeleton
-      className={cn(`mb-2 h-3 w-[${width}] rounded-none`, className)}
+      className={cn("mb-2 h-3 w-full rounded-none", className)}
+      style={{ width }}
     />
   );
 }
@@ -86,7 +83,10 @@ export function SkeletonChart({
       </div>
 
       {/* Chart Area Skeleton */}
-      <UISkeleton className={`opacity-20 w-full h-[${height}] rounded-none`} />
+      <UISkeleton
+        className="opacity-20 w-full rounded-none"
+        style={{ height }}
+      />
     </div>
   );
 }

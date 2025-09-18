@@ -1,7 +1,7 @@
 "use client";
 
-import { useCanvasState } from "@/hooks/use-canvas-state";
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import {
   useChatId,
   useChatSendMessage,
@@ -25,7 +25,8 @@ export function ChatInput() {
   const status = useChatStatus();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { isVisible: isCanvasVisible } = useCanvasState();
+  const { current } = useArtifacts();
+  const isCanvasVisible = !!current;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
