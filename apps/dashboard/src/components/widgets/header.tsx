@@ -1,7 +1,10 @@
 "use client";
 
+import { ChatHistory } from "@/components/chat/chat-history";
+import { Customize } from "@/components/widgets/customize";
 import { useUserQuery } from "@/hooks/use-user";
 import { TZDate } from "@date-fns/tz";
+import { useEffect, useState } from "react";
 
 function getTimeBasedGreeting(timezone?: string): string {
   const userTimezone =
@@ -24,17 +27,45 @@ function getTimeBasedGreeting(timezone?: string): string {
 
 export function WidgetsHeader() {
   const { data: user } = useUserQuery();
-  const greeting = getTimeBasedGreeting(user?.timezone ?? undefined);
+  const [greeting, setGreeting] = useState(() =>
+    getTimeBasedGreeting(user?.timezone ?? undefined),
+  );
+
+  useEffect(() => {
+    // Update greeting immediately when user timezone changes
+    setGreeting(getTimeBasedGreeting(user?.timezone ?? undefined));
+
+    // Set up interval to update greeting every 5 minutes
+    // This ensures the greeting changes naturally as time passes
+    const interval = setInterval(
+      () => {
+        const newGreeting = getTimeBasedGreeting(user?.timezone ?? undefined);
+        setGreeting(newGreeting);
+      },
+      5 * 60 * 1000,
+    ); // 5 minutes
+
+    return () => clearInterval(interval);
+  }, [user?.timezone]);
 
   return (
-    <div>
-      <h1 className="text-[30px] font-serif leading-normal mb-1">
-        <span>{greeting} </span>
-        <span className="text-[#666666]">{user?.fullName?.split(" ")[0]},</span>
-      </h1>
-      <p className="text-[#666666] text-[14px]">
-        here's a quick look at how things are going.
-      </p>
+    <div className="flex justify-between items-center">
+      <div>
+        <h1 className="text-[30px] font-serif leading-normal mb-1">
+          <span>{greeting} </span>
+          <span className="text-[#666666]">
+            {user?.fullName?.split(" ")[0]},
+          </span>
+        </h1>
+        <p className="text-[#666666] text-[14px]">
+          here's a quick look at how things are going.
+        </p>
+      </div>
+
+      <div className="flex items-center space-x-4">
+        <Customize />
+        <ChatHistory />
+      </div>
     </div>
   );
 }

@@ -72,11 +72,7 @@ export function ChatHeader({ title }: { title?: string | null }) {
       </div>
 
       {/* Right section - positioned relative to canvas edge */}
-      <div
-        className={cn(
-          "flex items-center space-x-4 transition-all duration-300 ease-in-out",
-        )}
-      >
+      <div className="flex items-center space-x-4 transition-all duration-300 ease-in-out">
         <NewChat />
         <ChatHistory />
       </div>
