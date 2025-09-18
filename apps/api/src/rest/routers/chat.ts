@@ -40,8 +40,7 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
   }
 
   const db = c.get("db");
-  const { message, id, country, city, region, timezone } =
-    validationResult.data;
+  const { message, id, country, city, timezone } = validationResult.data;
   const teamId = c.get("teamId");
   const session = c.get("session");
   const userId = session.user.id;
@@ -54,7 +53,6 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
         teamId,
         country,
         city,
-        region,
         timezone,
       }),
       getChatById(db, id, teamId),
@@ -105,7 +103,6 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
           country: userContext.country,
           baseCurrency: userContext.baseCurrency,
           city: userContext.city,
-          region: userContext.region,
           timezone: userContext.timezone,
         });
 

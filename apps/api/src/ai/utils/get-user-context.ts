@@ -11,7 +11,6 @@ interface GetUserContextParams {
   teamId: string;
   country?: string;
   city?: string;
-  region?: string;
   timezone?: string;
 }
 
@@ -25,7 +24,6 @@ export async function getUserContext({
   teamId,
   country,
   city,
-  region,
   timezone,
 }: GetUserContextParams): Promise<ChatUserContext> {
   // Try to get cached context first
@@ -56,7 +54,6 @@ export async function getUserContext({
     dateFormat: user.dateFormat,
     country,
     city,
-    region,
     timezone,
   };
 

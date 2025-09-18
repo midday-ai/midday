@@ -41,7 +41,7 @@ export default async function Overview(props: Props) {
   return (
     <HydrateClient>
       <Widgets />
-      <ChatProvider id={currentChatId} geo={geo}>
+      <ChatProvider id={currentChatId} geo={geo} messages={chat?.messages}>
         <ChatInterface />
       </ChatProvider>
     </HydrateClient>

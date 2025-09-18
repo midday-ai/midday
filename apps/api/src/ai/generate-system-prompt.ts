@@ -47,7 +47,6 @@ const generateBasePrompt = (userContext: ChatUserContext) => {
     Base currency: ${userContext.baseCurrency}
     User full name: ${userContext.fullName}
     User current city: ${userContext.city}
-    User current region: ${userContext.region}
     User current country: ${userContext.country}
     User local timezone: ${userTimezone}`;
 };
