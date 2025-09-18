@@ -14,7 +14,7 @@ import { burnRateArtifact } from "@api/ai/artifacts/burn-rate";
 import { BurnRateChart } from "../charts";
 
 export function BurnRateCanvas() {
-  const { data, status, error } = useArtifact(burnRateArtifact);
+  const { data, status } = useArtifact(burnRateArtifact);
   const { data: user } = useUserQuery();
 
   const isLoading = status === "loading";
@@ -26,8 +26,11 @@ export function BurnRateCanvas() {
       month: item.month,
       amount: item.currentBurn,
       average: item.averageBurn,
+      currentBurn: item.currentBurn,
+      averageBurn: item.averageBurn,
     })) || [];
 
+  console.log(burnRateData);
   const burnRateMetrics = data?.metrics
     ? [
         {
@@ -113,6 +116,8 @@ export function BurnRateCanvas() {
                 height={320}
                 chartReadyToAnimate={true}
                 showLegend={false}
+                currency={data?.currency || "USD"}
+                locale={user?.locale ?? undefined}
               />
             </CanvasChart>
           )}

@@ -1,7 +1,7 @@
 import { openai } from "@ai-sdk/openai";
 import { getBurnRate, getRunway, getSpending } from "@db/queries";
 import { formatAmount } from "@midday/utils/format";
-import { generateText, tool } from "ai";
+import { generateText, smoothStream, streamText, tool } from "ai";
 import {
   eachMonthOfInterval,
   endOfMonth,
@@ -19,7 +19,7 @@ export const getBurnRateTool = tool({
   description: `Get burn rate analysis with runway projections and optimization recommendations. 
 Shows current burn rate, monthly trends, cash runway, future projections, and actionable insights for financial planning.`,
   inputSchema: getBurnRateSchema,
-  execute: async ({ from, to, currency, showCanvas }) => {
+  execute: async function* ({ from, to, currency, showCanvas }) {
     try {
       const context = getContext();
 
@@ -60,6 +60,32 @@ Shows current burn rate, monthly trends, cash runway, future projections, and ac
         }),
       ]);
 
+      // Generate and stream the initial conversational message early
+      const initialMessageStream = streamText({
+        model: openai("gpt-4o-mini"),
+        messages: [
+          {
+            role: "user",
+            content:
+              "Generate a brief, conversational message that explains you're analyzing their burn rate data step by step. Keep it natural and explain the process transparently, like: 'Got it! Let's analyze your cash burn rate and runway. I'll break down what I'm doing as I go along so it's transparent. First, I'm analyzing your monthly expenses...'",
+          },
+        ],
+        experimental_transform: smoothStream({
+          chunking: "word",
+        }),
+      });
+
+      // Stream the text as parts and collect for the main LLM
+      let completeMessage = "";
+      for await (const chunk of initialMessageStream.textStream) {
+        completeMessage += chunk;
+        // Yield the accumulated text so far for streaming effect
+        yield completeMessage;
+      }
+
+      // Yield the complete message for the main LLM to use
+      yield completeMessage;
+
       // Early return if no data
       if (burnRateData.length === 0) {
         await analysis.update({
@@ -90,6 +116,7 @@ Shows current burn rate, monthly trends, cash runway, future projections, and ac
             ],
           },
         });
+
         return {
           currentMonthlyBurn: 0,
           runway: 0,
@@ -97,9 +124,6 @@ Shows current burn rate, monthly trends, cash runway, future projections, and ac
           topCategoryPercentage: 0,
           burnRateChange: 0,
           summary: "No data available",
-          // Special instruction for the LLM
-          _LLM_INSTRUCTIONS_:
-            "Generate a brief, conversational message that explains you're analyzing their burn rate data step by step. Since there's no data available, mention that you're looking for their monthly expenses and cash outflows to calculate burn rate and runway. Keep it natural and explain the process transparently, like: 'Got it! Let's analyze your cash burn rate and runway. I'll break down what I'm doing as I go along so it's transparent. First, I'm analyzing your monthly expenses...'",
         };
       }
 
@@ -127,6 +151,8 @@ Shows current burn rate, monthly trends, cash runway, future projections, and ac
 
         return {
           month: format(month, "MMM"),
+          amount: currentBurn,
+          average: averageBurn,
           currentBurn,
           averageBurn,
         };
