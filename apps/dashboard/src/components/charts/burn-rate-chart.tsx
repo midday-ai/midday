@@ -1,5 +1,6 @@
 "use client";
 
+import { formatAmount } from "@/utils/format";
 import {
   Area,
   CartesianGrid,
@@ -16,6 +17,8 @@ interface BurnRateData {
   month: string;
   amount: number;
   average: number;
+  currentBurn: number;
+  averageBurn: number;
 }
 
 interface BurnRateChartProps {
@@ -23,24 +26,42 @@ interface BurnRateChartProps {
   height?: number;
   chartReadyToAnimate?: boolean;
   showLegend?: boolean;
+  currency?: string;
+  locale?: string;
 }
 
 // Custom tooltip component
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+  currency = "USD",
+  locale,
+}: any) => {
   if (active && Array.isArray(payload) && payload.length > 0) {
     const current = payload[0]?.value;
     const average = payload[1]?.value;
+
+    // Format amounts using proper currency formatting
+    const formatCurrency = (amount: number) =>
+      formatAmount({
+        amount,
+        currency,
+        locale: locale ?? undefined,
+        maximumFractionDigits: 0,
+      }) ?? `${currency}${amount.toLocaleString()}`;
+
     return (
       <div className="border p-2 text-[10px] font-hedvig-sans bg-white dark:bg-[#0c0c0c] border-[#e6e6e6] dark:border-[#1d1d1d] text-black dark:text-white shadow-sm">
         <p className="mb-1 text-[#707070] dark:text-[#666666]">{label}</p>
         {typeof current === "number" && (
           <p className="text-black dark:text-white">
-            Current: ${current.toLocaleString()}
+            Current: {formatCurrency(current)}
           </p>
         )}
         {typeof average === "number" && (
           <p className="text-black dark:text-white">
-            Average: ${average.toLocaleString()}
+            Average: {formatCurrency(average)}
           </p>
         )}
       </div>
@@ -53,11 +74,24 @@ export function BurnRateChart({
   data,
   height = 320,
   chartReadyToAnimate = false,
+  currency = "USD",
+  locale,
 }: BurnRateChartProps) {
-  const tickFormatter = (value: number) => `$${(value / 1000).toFixed(0)}k`;
+  // Format tick values using proper currency formatting
+  const tickFormatter = (value: number) => {
+    return (
+      formatAmount({
+        amount: value,
+        currency,
+        locale: locale ?? undefined,
+        maximumFractionDigits: 0,
+      }) ?? `${currency}${(value / 1000).toFixed(0)}k`
+    );
+  };
+
   const { marginLeft } = useChartMargin(
     data,
-    ["amount", "average"],
+    ["amount", "amount"],
     tickFormatter,
   );
 
@@ -132,11 +166,10 @@ export function BurnRateChart({
                 className: "dark:fill-[#666666]",
               }}
               tickFormatter={tickFormatter}
-              domain={[0, 15000]}
-              ticks={[0, 3000, 6000, 9000, 12000, 15000]}
+              dataKey="amount"
             />
             <Tooltip
-              content={<CustomTooltip />}
+              content={<CustomTooltip currency={currency} locale={locale} />}
               wrapperStyle={{ zIndex: 9999 }}
             />
             <Area
