@@ -28,8 +28,9 @@ Shows current burn rate, monthly trends, cash runway, future projections, and ac
         toast: {
           visible: true,
           currentStep: 0,
-          totalSteps: 6,
+          totalSteps: 4,
           currentLabel: "Loading burn rate data",
+          stepDescription: "Fetching financial data from your accounts",
         },
       });
 
@@ -141,6 +142,8 @@ Shows current burn rate, monthly trends, cash runway, future projections, and ac
           currentStep: 1,
           totalSteps: 4,
           currentLabel: "Preparing chart data",
+          stepDescription:
+            "Processing transaction data and calculating metrics",
         },
       });
 
@@ -208,6 +211,7 @@ Shows current burn rate, monthly trends, cash runway, future projections, and ac
           currentStep: 2,
           totalSteps: 4,
           currentLabel: "Metrics ready",
+          stepDescription: "Generating visual charts and analytics",
         },
       });
 
@@ -224,6 +228,7 @@ Shows current burn rate, monthly trends, cash runway, future projections, and ac
           currentStep: 3,
           totalSteps: 4,
           currentLabel: "Generating insights",
+          stepDescription: "Running AI analysis and generating insights",
         },
       });
 
@@ -278,22 +283,9 @@ Provide a concise 2-sentence summary and 2-3 brief recommendations.`,
             amount: highestCategory?.amount || 0,
           },
         },
-        analysis: {
-          burnRateChange: {
-            percentage: burnRateChangePercentage,
-            period: burnRateChangePeriod,
-            startValue: burnRateStartValue,
-            endValue: burnRateEndValue,
-          },
-          summary: summaryText,
-          recommendations,
-        },
       };
 
-      // Add delay before final completion
-      await delay(300);
-
-      // Update to analysis_ready stage to show summary with completion
+      // Final update with all data and completion
       await analysis.update({
         stage: "analysis_ready",
         chart: finalData.chart,
@@ -309,10 +301,11 @@ Provide a concise 2-sentence summary and 2-3 brief recommendations.`,
           recommendations,
         },
         toast: {
-          visible: true,
+          visible: false,
           currentStep: 4,
           totalSteps: 4,
           currentLabel: "Analysis complete",
+          stepDescription: "Burn rate analysis complete",
           completed: true,
           completedMessage: "Burn rate analysis complete",
         },

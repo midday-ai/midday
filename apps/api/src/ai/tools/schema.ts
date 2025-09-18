@@ -7,6 +7,7 @@ export const toastSchema = z
     currentStep: z.number().min(0),
     totalSteps: z.number().min(1),
     currentLabel: z.string(),
+    stepDescription: z.string().optional(),
     completed: z.boolean().optional(),
     completedMessage: z.string().optional(),
   })
