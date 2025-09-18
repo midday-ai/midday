@@ -24,6 +24,8 @@ export const burnRateArtifact = artifact(
         monthlyData: z.array(
           z.object({
             month: z.string(),
+            amount: z.number(),
+            average: z.number(),
             currentBurn: z.number(),
             averageBurn: z.number(),
           }),
