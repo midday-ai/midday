@@ -1,9 +1,8 @@
 "use client";
 
-import { ActiveToolCall, ThinkingMessage } from "@/components/message";
+import { ThinkingMessage } from "@/components/message";
 import { useUserQuery } from "@/hooks/use-user";
 import { useChatMessages, useChatProperty } from "@ai-sdk-tools/store";
-import type { ToolName } from "@api/ai/tools/registry";
 import {
   Conversation,
   ConversationContent,
@@ -17,7 +16,7 @@ export function Messages() {
   const { data: user } = useUserQuery();
 
   return (
-    <div className="w-full mx-auto pb-0 relative size-full h-[calc(100vh-86px)]">
+    <div className="w-full mx-auto relative size-full h-[calc(100vh-86px)] pb-28">
       <div className="flex flex-col h-full w-full">
         <Conversation className="h-full w-full">
           <ConversationContent className="px-6 mx-auto mt-16 mb-28 max-w-[770px]">
@@ -43,29 +42,6 @@ export function Messages() {
 
                             // Check if tool output should be displayed (existing logic)
                             const toolOutput = (part as any).output;
-                            const shouldHide = toolOutput?.display === "hidden";
-
-                            if (shouldHide) {
-                              // Check if this message has text content - if so, don't show the pill
-                              const hasTextContent = message.parts?.some(
-                                (p) => p.type === "text" && p.text?.trim(),
-                              );
-
-                              if (hasTextContent) {
-                                return null; // Hide pill when we have AI analysis
-                              }
-
-                              const toolName = part.type.replace("tool-", "") as
-                                | ToolName
-                                | "web_search_preview";
-
-                              return (
-                                <ActiveToolCall
-                                  key={`tool-call-${partIndex.toString()}`}
-                                  toolName={toolName}
-                                />
-                              );
-                            }
 
                             // Show full tool output for tools that want to be displayed
                             return (
