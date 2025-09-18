@@ -8,6 +8,7 @@ export function BaseCanvas({ children }: { children: React.ReactNode }) {
   const { current } = useArtifacts();
   const isCanvasVisible = !!current;
 
+  // @ts-ignore TODO: fix this
   const toastData = current?.payload?.toast;
 
   return (
