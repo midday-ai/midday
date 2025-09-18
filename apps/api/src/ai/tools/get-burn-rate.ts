@@ -1,5 +1,6 @@
 import { openai } from "@ai-sdk/openai";
 import { getBurnRate, getRunway, getSpending } from "@db/queries";
+import { formatAmount } from "@midday/utils/format";
 import { generateText, tool } from "ai";
 import {
   eachMonthOfInterval,
@@ -9,10 +10,10 @@ import {
 } from "date-fns";
 import { burnRateArtifact } from "../artifacts/burn-rate";
 import { getContext } from "../context";
+import { delay } from "../utils/delay";
 import { getBurnRateSchema } from "./schema";
 
 // Utility function for delays
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const getBurnRateTool = tool({
   description: `Get burn rate analysis with runway projections and optimization recommendations. 
@@ -90,12 +91,15 @@ Shows current burn rate, monthly trends, cash runway, future projections, and ac
           },
         });
         return {
-          burnRate: [],
-          runway: 0,
           currentMonthlyBurn: 0,
-          averageBurnRate: 0,
+          runway: 0,
+          topCategory: "No data",
+          topCategoryPercentage: 0,
+          burnRateChange: 0,
           summary: "No data available",
-          recommendations: [],
+          // Special instruction for the LLM
+          _LLM_INSTRUCTIONS_:
+            "Generate a brief, conversational message that explains you're analyzing their burn rate data step by step. Since there's no data available, mention that you're looking for their monthly expenses and cash outflows to calculate burn rate and runway. Keep it natural and explain the process transparently, like: 'Got it! Let's analyze your cash burn rate and runway. I'll break down what I'm doing as I go along so it's transparent. First, I'm analyzing your monthly expenses...'",
         };
       }
 
@@ -129,7 +133,7 @@ Shows current burn rate, monthly trends, cash runway, future projections, and ac
       });
 
       // Add delay to show loading
-      await delay(500);
+      await delay(300);
 
       // Update with chart data first
       await analysis.update({
@@ -216,7 +220,7 @@ Shows current burn rate, monthly trends, cash runway, future projections, and ac
       });
 
       // Add delay to show metrics step
-      await delay(400);
+      await delay(300);
 
       // Get the target currency for display
       const targetCurrency = currency ?? context.user.baseCurrency ?? "USD";
@@ -232,9 +236,6 @@ Shows current burn rate, monthly trends, cash runway, future projections, and ac
         },
       });
 
-      // Add short delay to show AI processing step
-      await delay(300);
-
       // Generate AI summary with a simpler, faster prompt
       const analysisResult = await generateText({
         model: openai("gpt-4o-mini"),
@@ -243,7 +244,7 @@ Shows current burn rate, monthly trends, cash runway, future projections, and ac
             role: "user",
             content: `Analyze this burn rate data:
 
-Monthly Burn: ${currentMonthlyBurn.toLocaleString()} ${targetCurrency}
+Monthly Burn: ${formatAmount({ amount: currentMonthlyBurn, currency: targetCurrency, locale: context.user.locale ?? undefined })}
 Runway: ${runway} months
 Change: ${burnRateChangePercentage}% over ${burnRateChangePeriod}
 Top Category: ${highestCategory?.name || "Uncategorized"} (${highestCategoryPercentage}%)
@@ -261,7 +262,7 @@ Provide a concise 2-sentence summary and 2-3 brief recommendations.`,
 
       const summaryText =
         lines[0] ||
-        `Current monthly burn: ${currentMonthlyBurn.toLocaleString()} ${targetCurrency} with ${runway}-month runway.`;
+        `Current monthly burn: ${formatAmount({ amount: currentMonthlyBurn, currency: targetCurrency, locale: context.user.locale ?? undefined })} with ${runway}-month runway.`;
       const recommendations = lines
         .slice(1, 4)
         .map((line) => line.replace(/^[-•*]\s*/, "").trim())
@@ -312,15 +313,15 @@ Provide a concise 2-sentence summary and 2-3 brief recommendations.`,
       });
 
       return {
-        burnRate: burnRateData,
-        runway,
+        // Essential data for LLM context
         currentMonthlyBurn,
-        averageBurnRate,
-        highestCategoryPercentage,
-        highestCategoryAmount: highestCategory?.amount || 0,
-        highestCategoryName: highestCategory?.name || "Uncategorized",
+        runway,
+        topCategory: highestCategory?.name || "Uncategorized",
+        topCategoryPercentage: highestCategoryPercentage,
+        burnRateChange: burnRateChangePercentage,
         summary: summaryText,
-        recommendations: recommendations,
+        // Special instruction for the LLM
+        _LLM_INSTRUCTIONS_: `Generate a brief, conversational message that explains you're analyzing their burn rate data step by step. Mention the key findings: current monthly burn of ${formatAmount({ amount: currentMonthlyBurn, currency: targetCurrency, locale: context.user.locale ?? undefined })}, runway of ${runway} months, and that ${highestCategory?.name || "Uncategorized"} is their top expense category at ${highestCategoryPercentage}%. Keep it natural and explain the process transparently, like: 'Got it! Let's analyze your cash burn rate and runway. I'll break down what I'm doing as I go along so it's transparent. First, I'm analyzing your monthly expenses...'`,
       };
     } catch (error) {
       console.error(error);
