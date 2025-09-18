@@ -10,10 +10,10 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useState } from "react";
 
-export function ChatHeader({ title }: { title?: string | null }) {
+export function ChatHeader({ title = "Hello" }: { title?: string | null }) {
   const router = useRouter();
   const { isHome } = useChatInterface();
-  const [showTitle, setShowTitle] = useState(false);
+  const [showTitle, setShowTitle] = useState(true);
 
   useEffect(() => {
     if (title) {
@@ -26,7 +26,7 @@ export function ChatHeader({ title }: { title?: string | null }) {
   }
 
   return (
-    <div className="absolute top-0 left-0 right-0 z-10 bg-background py-6 w-full flex justify-between">
+    <div className="relative z-10 bg-background py-6 flex justify-between w-full px-6">
       {/* Left section - back button stays in place */}
       <div className="flex items-center">
         <Button variant="outline" size="icon" onClick={() => router.push("/")}>

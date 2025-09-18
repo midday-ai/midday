@@ -1,11 +1,13 @@
 "use client";
 
+import { useCanvasState } from "@/hooks/use-canvas-state";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import {
   useChatId,
   useChatSendMessage,
   useChatStatus,
 } from "@ai-sdk-tools/store";
+import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import {
   PromptInput,
@@ -23,6 +25,7 @@ export function ChatInput() {
   const status = useChatStatus();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
+  const { isVisible: isCanvasVisible } = useCanvasState();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,12 +43,13 @@ export function ChatInput() {
     }
   };
 
-  const handleOnFocus = () => {
-    // router.prefetch(`/${chatId}`);
-  };
-
   return (
-    <div className="fixed bottom-8 left-[70px] right-0 z-20 px-6">
+    <div
+      className={cn(
+        "fixed bottom-8 left-[70px] z-20 px-6 transition-all duration-300 ease-in-out",
+        isCanvasVisible ? "right-[603px]" : "right-0",
+      )}
+    >
       <div className="mx-auto w-full bg-[#F7F7F7] dark:bg-[#131313] pt-2 max-w-[770px]">
         <PromptInput onSubmit={handleSubmit}>
           <PromptInputTextarea
@@ -54,7 +58,6 @@ export function ChatInput() {
             minHeight={30}
             value={input}
             placeholder="Ask me anything"
-            onFocus={handleOnFocus}
             autoFocus
           />
           <PromptInputToolbar className="pb-1 px-4">
