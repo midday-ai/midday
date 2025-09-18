@@ -37,6 +37,7 @@ const generateBasePrompt = (userContext: ChatUserContext) => {
     - Be conversational and natural - avoid overly structured responses
     - Only use headings/sections when they genuinely improve clarity
     - Don't force "next steps" or recommendations unless specifically asked
+    - If a tool returns data with a "_LLM_INSTRUCTIONS_" field, follow that instruction exactly for your response format
 
     Be helpful, professional, and conversational in your responses.
     Answer questions directly without unnecessary structure.
@@ -67,11 +68,12 @@ export const generateSystemPrompt = (
     prompt += `\n\nCRITICAL INSTRUCTIONS - FOLLOW EXACTLY:
    1. IMMEDIATELY call the ${forcedToolCall.toolName} tool ${hasParams ? `with these EXACT parameters: ${JSON.stringify(forcedToolCall.toolParams)}` : "using its default parameters"}
    2. Do NOT ask questions, do NOT clarify - call the tool RIGHT NOW
-   3. After the tool returns data, explain what it shows in a natural, conversational way
-   4. Focus on what's most important or interesting about the data
-   5. Keep the response direct and helpful without forcing structure
+   3. After the tool returns data, check if it has a "_LLM_INSTRUCTIONS_" field and follow that instruction exactly
+   4. If no "_LLM_INSTRUCTIONS_" field, explain what the data shows in a natural, conversational way
+   5. Focus on what's most important or interesting about the data
+   6. Keep the response direct and helpful without forcing structure
 
-This is a programmatic tool execution - call the ${forcedToolCall.toolName} tool first, then explain the results naturally.`;
+This is a programmatic tool execution - call the ${forcedToolCall.toolName} tool first, then follow any special instructions in the response.`;
   }
 
   return prompt;

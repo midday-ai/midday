@@ -1,6 +1,7 @@
 "use client";
 
-import { useChatSendMessage } from "@ai-sdk-tools/store";
+import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useChatId, useChatSendMessage } from "@ai-sdk-tools/store";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { endOfMonth, subMonths } from "date-fns";
@@ -14,12 +15,16 @@ import {
 
 export function SuggestedActions() {
   const sendMessage = useChatSendMessage();
+  const { setChatId } = useChatInterface();
+  const chatId = useChatId();
 
   const handleToolCall = (params: {
     toolName: string;
     toolParams: Record<string, any>;
     text: string;
   }) => {
+    setChatId(chatId);
+
     sendMessage({
       role: "user",
       parts: [{ type: "text", text: params.text }],
@@ -32,34 +37,6 @@ export function SuggestedActions() {
       },
     });
   };
-
-  // const handleToolCall = ({
-  //   toolName,
-  //   toolParams,
-  //   text,
-  // }: { toolName: string; toolParams: Record<string, any>; text: string }) => {
-  //   // Start header animation immediately when user sends first message
-  //   if (isOnRootPath && messages.length === 0 && showOverview) {
-  //     setShowOverview(false);
-  //   }
-
-  //   // If we're on the root path and this is the first message, update URL
-  //   if (isOnRootPath && messages.length === 0) {
-  //     updateUrl(chatId);
-  //   }
-
-  //   sendMessage({
-  //     role: "user",
-  //     parts: [{ type: "text", text }],
-  //     metadata: {
-  //       internal: true,
-  //       toolCall: {
-  //         toolName,
-  //         toolParams,
-  //       },
-  //     } as any,
-  //   });
-  // };
 
   const SUGGESTED_ACTIONS = [
     {
