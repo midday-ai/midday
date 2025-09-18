@@ -59,7 +59,7 @@
     },
     {
       "group": "Open source",
-      "pages": ["local-development", "self-hosting"]
+      "pages": ["local-development", "auth", "self-hosting"]
     },
 
     {

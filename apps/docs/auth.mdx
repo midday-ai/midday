@@ -1,0 +1,77 @@
+---
+title: "Authentication"
+"og:title": "Authentication Setup for Midday"
+description: "Configure authentication providers for your Midday installation."
+icon: shield-check
+---
+
+## Introduction
+
+Midday supports multiple authentication methods through Supabase Auth. This guide will walk you through setting up different authentication providers for your local development or self-hosted installation.
+
+## Email Authentication
+
+Midday uses passwordless email authentication as the primary method. Users receive a magic link or OTP code to sign in.
+
+### Configuration
+
+Go to Email Templates in the [Supabase Dashboard](https://supabase.com/dashboard).
+
+Modify the template to include the `{{ .Token }}` variable, for example:
+
+```html
+<h2>One time login code</h2>
+<p>Please enter this code: {{ .Token }}</p>
+```
+
+For detailed configuration steps, refer to the [Supabase Email OTP documentation](https://supabase.com/docs/guides/auth/auth-email-passwordless#enabling-email-otp).
+
+## Apple Authentication
+
+*This section will be updated with Apple Sign-In configuration steps.*
+
+### Prerequisites
+
+- Apple Developer Account
+- Configured App ID with Sign In with Apple capability
+
+### Configuration Steps
+
+*Coming soon...*
+
+## Google Authentication
+
+*This section will be updated with Google OAuth configuration steps.*
+
+### Prerequisites
+
+- Google Cloud Console project
+- OAuth 2.0 credentials
+
+### Configuration Steps
+
+*Coming soon...*
+
+## GitHub Authentication
+
+*This section will be updated with GitHub OAuth configuration steps.*
+
+### Prerequisites
+
+- GitHub account
+- OAuth App registration
+
+### Configuration Steps
+
+*Coming soon...*
+
+## Next Steps
+
+After configuring your authentication providers:
+
+1. Test each authentication method in your development environment
+2. Update your environment variables with the provider credentials
+3. Ensure proper redirect URLs are configured
+4. Test the complete authentication flow
+
+For additional authentication features and advanced configuration, refer to the [Supabase Auth documentation](https://supabase.com/docs/guides/auth).
