@@ -84,6 +84,24 @@ First, clone the [midday.ai repo](https://d.to/github) into a public GitHub repo
 
   </Step>
 
+  <Step title="Install Bun">
+
+    First, install Bun if you haven't already:
+
+    ```bash Terminal
+    curl -fsSL https://bun.sh/install | bash
+    ```
+
+    Or on Windows:
+
+    ```powershell Terminal
+    powershell -c "irm bun.sh/install.ps1 | iex"
+    ```
+
+    Restart your terminal after installation.
+
+  </Step>
+
   <Step title="Install dependencies">
 
     Run the following command to install the dependencies:
@@ -91,6 +109,47 @@ First, clone the [midday.ai repo](https://d.to/github) into a public GitHub repo
     ```bash Terminal
     bun i
     ```
+
+  </Step>
+
+  <Step title="Configure environment variables">
+
+    Copy the environment example file and configure your local environment:
+
+    ```bash Terminal
+    cp apps/dashboard/.env-example apps/dashboard/.env.local
+    ```
+
+    Open `apps/dashboard/.env.local` and configure the required variables:
+
+    **Supabase Configuration (Required):**
+    ```bash
+    NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+    SUPABASE_SERVICE_KEY=your-service-key
+    ```
+
+    **Upstash Redis Configuration (Required):**
+    ```bash
+    UPSTASH_REDIS_REST_URL=https://your-redis.upstash.io
+    UPSTASH_REDIS_REST_TOKEN=your-redis-token
+    ```
+
+    Get your Supabase keys from your [Supabase project dashboard](https://app.supabase.com) under Settings → API.
+
+    Get your Upstash Redis credentials from your [Upstash console](https://console.upstash.com/).
+
+  </Step>
+
+  <Step title="Start the dashboard">
+
+    Run the dashboard in development mode:
+
+    ```bash Terminal
+    bun dev:dashboard
+    ```
+
+    The dashboard will be available at [http://localhost:3001](http://localhost:3001).
 
   </Step>
 
