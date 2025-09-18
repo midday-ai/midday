@@ -10,13 +10,11 @@ import { useEffect, useState } from "react";
 
 export function BalanceSheetCanvas() {
   const [isLoading, setIsLoading] = useState(true);
-  const [showAnimation, setShowAnimation] = useState(false);
 
   useEffect(() => {
     // Simulate loading
     const timer = setTimeout(() => {
       setIsLoading(false);
-      setShowAnimation(true);
     }, 1500);
 
     return () => clearTimeout(timer);
@@ -60,21 +58,15 @@ export function BalanceSheetCanvas() {
           title="Balance Sheet"
           description="Assets, liabilities, and equity overview"
           isLoading={isLoading}
-          showAnimation={showAnimation}
         />
 
         <CanvasGrid
           items={balanceSheetItems}
           layout="2/2"
           isLoading={isLoading}
-          showAnimation={showAnimation}
         />
 
-        <CanvasSection
-          title="Summary"
-          isLoading={isLoading}
-          showAnimation={showAnimation}
-        >
+        <CanvasSection title="Summary" isLoading={isLoading}>
           <p>
             The company maintains a healthy balance sheet with strong asset
             growth of 12.5% and controlled liability expansion. The

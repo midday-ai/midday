@@ -49,7 +49,9 @@ export function RevenueChart({
           title="Monthly Revenue"
           items={[
             { label: "Revenue", type: "solid" },
-            ...(showTarget ? [{ label: "Target", type: "dashed" }] : []),
+            ...(showTarget
+              ? [{ label: "Target", type: "dashed" as const }]
+              : []),
           ]}
         />
       )}

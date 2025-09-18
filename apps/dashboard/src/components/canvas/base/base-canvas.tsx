@@ -1,10 +1,14 @@
 "use client";
 
-import { useCanvasState } from "@/hooks/use-canvas-state";
+import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { cn } from "@midday/ui/cn";
+import { ProgressToast } from "./progress-toast";
 
 export function BaseCanvas({ children }: { children: React.ReactNode }) {
-  const { isVisible: isCanvasVisible } = useCanvasState();
+  const { current } = useArtifacts();
+  const isCanvasVisible = !!current;
+
+  const toastData = current?.payload?.toast;
 
   return (
     <>
@@ -19,6 +23,17 @@ export function BaseCanvas({ children }: { children: React.ReactNode }) {
       >
         <div className="h-full flex flex-col relative px-6 py-4">
           {children}
+
+          {toastData && (
+            <ProgressToast
+              isVisible={toastData.visible}
+              currentStep={toastData.currentStep}
+              totalSteps={toastData.totalSteps}
+              currentLabel={toastData.currentLabel}
+              completed={toastData.completed}
+              completedMessage={toastData.completedMessage}
+            />
+          )}
         </div>
       </div>
     </>

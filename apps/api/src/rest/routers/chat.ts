@@ -1,4 +1,5 @@
 import { openai } from "@ai-sdk/openai";
+import { setContext } from "@api/ai/context";
 import { generateSystemPrompt } from "@api/ai/generate-system-prompt";
 import {
   extractTextContent,
@@ -186,6 +187,12 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
             });
           }
 
+          setContext({
+            db,
+            user: userContext,
+            writer,
+          });
+
           const result = streamText({
             model: openai("gpt-4o-mini"),
             system: generateSystemPrompt(userContext, isToolCallMessage),
@@ -195,11 +202,7 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
             experimental_transform: smoothStream({
               chunking: "word",
             }),
-            tools: createToolRegistry({
-              db,
-              writer,
-              user: userContext,
-            }),
+            tools: createToolRegistry(),
             onError: (error) => {
               console.error(error);
               logger.error({

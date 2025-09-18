@@ -28,7 +28,6 @@ export function RunwayCanvas() {
             data={runwayData}
             showAnimation={true}
             showProjection={true}
-            criticalThreshold={50000}
           />
         </div>
       </div>

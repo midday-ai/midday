@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "@midday/ui/cn";
 import type * as React from "react";
 import * as RechartsPrimitive from "recharts";
 import { commonChartConfig } from "./chart-utils";
@@ -8,10 +7,9 @@ import { commonChartConfig } from "./chart-utils";
 // Base Chart Wrapper with common styling
 export function BaseChart({
   data,
-  height = 320,
+
   margin = { top: 5, right: 5, left: -20, bottom: 5 },
   children,
-  config = {},
 }: {
   data: any[];
   height?: number;
