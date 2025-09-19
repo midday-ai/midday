@@ -21,7 +21,7 @@
     "@midday/supabase": "workspace:*",
     "@sindresorhus/slugify": "^2.2.1",
     "@zip.js/zip.js": "^2.7.62",
-    "ai": "^5.0.45",
+    "ai": "^5.0.47",
     "camelcase-keys": "^10.0.0",
     "heic-convert": "1.2.4",
     "node-xlsx": "^0.24.0",
