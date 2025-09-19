@@ -30,7 +30,6 @@ export function BurnRateCanvas() {
       averageBurn: item.averageBurn,
     })) || [];
 
-  console.log(burnRateData);
   const burnRateMetrics = data?.metrics
     ? [
         {
@@ -82,14 +81,12 @@ export function BurnRateCanvas() {
       ]
     : [];
 
-  // Determine what to show based on stage
   const showChart =
     stage &&
     ["loading", "chart_ready", "metrics_ready", "analysis_ready"].includes(
       stage,
     );
-  // Always show metrics section
-  // Always show summary section
+
   const showSummarySkeleton = !stage || stage !== "analysis_ready";
 
   return (
@@ -104,8 +101,8 @@ export function BurnRateCanvas() {
               title="Monthly Burn Rate"
               legend={{
                 items: [
-                  { label: "Current", type: "solid", color: "#000000" },
-                  { label: "Average", type: "pattern", color: "#707070" },
+                  { label: "Current", type: "solid" },
+                  { label: "Average", type: "pattern" },
                 ],
               }}
               isLoading={stage === "loading"}
@@ -131,7 +128,7 @@ export function BurnRateCanvas() {
 
           {/* Always show summary section */}
           <CanvasSection title="Summary" isLoading={showSummarySkeleton}>
-            <p>{data?.analysis?.summary || "Loading burn rate analysis..."}</p>
+            {data?.analysis?.summary}
           </CanvasSection>
         </div>
       </div>

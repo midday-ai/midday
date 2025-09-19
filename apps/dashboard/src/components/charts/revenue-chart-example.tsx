@@ -11,6 +11,7 @@ import {
   StyledYAxis,
 } from "./base-charts";
 import type { BaseChartProps } from "./chart-utils";
+import { createCompactTickFormatter, useChartMargin } from "./chart-utils";
 
 interface RevenueData {
   month: string;
@@ -41,6 +42,15 @@ export function RevenueChart({
   showTarget = true,
   showLegend = true,
 }: RevenueChartProps) {
+  // Use the compact tick formatter
+  const tickFormatter = createCompactTickFormatter();
+
+  // Calculate margin for proper spacing
+  const { marginLeft } = useChartMargin(data, "revenue", tickFormatter, {
+    charWidth: 5,
+    padding: 8,
+  });
+
   return (
     <div className={`w-full ${className}`}>
       {/* Legend */}
@@ -57,28 +67,28 @@ export function RevenueChart({
       )}
 
       {/* Chart */}
-      <BaseChart data={data} height={height}>
-        <StyledXAxis dataKey="month" />
-        <StyledYAxis
-          tickFormatter={(value: number) => `$${(value / 1000).toFixed(0)}k`}
-        />
+      <div style={{ marginLeft }}>
+        <BaseChart data={data} height={height}>
+          <StyledXAxis dataKey="month" />
+          <StyledYAxis tickFormatter={tickFormatter} />
 
-        <Tooltip
-          content={<StyledTooltip formatter={revenueTooltipFormatter} />}
-          wrapperStyle={{ zIndex: 9999 }}
-        />
+          <Tooltip
+            content={<StyledTooltip formatter={revenueTooltipFormatter} />}
+            wrapperStyle={{ zIndex: 9999 }}
+          />
 
-        <StyledArea dataKey="revenue" usePattern={false} useGradient />
+          <StyledArea dataKey="revenue" usePattern={false} useGradient />
 
-        {showTarget && <StyledLine dataKey="target" strokeDasharray="5 5" />}
+          {showTarget && <StyledLine dataKey="target" strokeDasharray="5 5" />}
 
-        {/* Reference line at zero */}
-        <ReferenceLine
-          y={0}
-          stroke="hsl(var(--border))"
-          strokeDasharray="2 2"
-        />
-      </BaseChart>
+          {/* Reference line at zero */}
+          <ReferenceLine
+            y={0}
+            stroke="hsl(var(--border))"
+            strokeDasharray="2 2"
+          />
+        </BaseChart>
+      </div>
     </div>
   );
 }

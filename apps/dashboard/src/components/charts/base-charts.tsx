@@ -19,7 +19,11 @@ export function BaseChart({
 }) {
   return (
     <RechartsPrimitive.ComposedChart data={data} margin={margin}>
-      <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
+      <RechartsPrimitive.CartesianGrid
+        strokeDasharray="3 3"
+        stroke="#e6e6e6"
+        className="dark:stroke-[#1d1d1d]"
+      />
       {children}
     </RechartsPrimitive.ComposedChart>
   );

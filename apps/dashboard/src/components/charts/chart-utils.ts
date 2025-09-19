@@ -42,24 +42,63 @@ export const formatNumber = (value: number): string => {
   return value.toString();
 };
 
-// Dynamic margin calculation based on data values
+// Compact tick formatter for charts (600k, 1.2M, etc.)
+export const createCompactTickFormatter = () => {
+  return (value: number): string => {
+    if (value >= 1000000) {
+      return `${(value / 1000000).toFixed(1)}M`;
+    }
+    if (value >= 1000) {
+      return `${(value / 1000).toFixed(0)}k`;
+    }
+    return value.toString();
+  };
+};
+
+// Font properties for axis labels
+export const AXIS_FONT_PROPS = {
+  fontSize: 10,
+  className: "font-hedvig-sans",
+};
+
+// Calculate Y-axis width based on font size and character count
+export function getYAxisWidth(value: string | undefined | null) {
+  const charLength = AXIS_FONT_PROPS.fontSize * 0.6;
+
+  if (!value || value.length === 0) {
+    return charLength * 3;
+  }
+
+  return charLength * value.length + charLength * 2;
+}
+
+// Utility hook for calculating chart margins based on tick text length
 export const useChartMargin = (
   data: any[],
-  dataKeys: string[],
+  dataKey: string,
   tickFormatter: (value: number) => string,
 ) => {
-  // Calculate the maximum value from the specified data keys
-  const values = data
-    .flatMap((d) => dataKeys.map((key) => d[key]))
-    .filter((v) => typeof v === "number");
-  const maxValue = values.length > 0 ? Math.max(...values) : 1000; // Default to 1000 if no data
+  // Calculate the maximum value from the data
+  const maxValue = Math.max(...data.map((d) => d[dataKey]));
 
-  // Calculate the longest possible formatted value
-  const longestText = tickFormatter(maxValue);
-  const charCount = longestText.length;
+  // Generate realistic tick values that Recharts would actually use
+  const tickValues = [];
+  for (let i = 0; i <= 4; i++) {
+    tickValues.push((maxValue / 4) * i);
+  }
+
+  // Format all ticks and find the longest one
+  const formattedTicks = tickValues.map(tickFormatter);
+  const longestTick = formattedTicks.reduce((a, b) =>
+    a.length > b.length ? a : b,
+  );
+
+  // Calculate dynamic margin based on actual longest tick
+  // Adjusted to match target values: 100k=28, 10k=35
+  const marginLeft = 48 - longestTick.length * 5;
 
   return {
-    marginLeft: `calc(-1 * (${charCount}ch))`,
+    marginLeft,
   };
 };
 

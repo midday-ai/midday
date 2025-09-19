@@ -13,8 +13,6 @@ import { getContext } from "../context";
 import { delay } from "../utils/delay";
 import { getBurnRateSchema } from "./schema";
 
-// Utility function for delays
-
 export const getBurnRateTool = tool({
   description: `Get burn rate analysis with runway projections and optimization recommendations. 
 Shows current burn rate, monthly trends, cash runway, future projections, and actionable insights for financial planning.`,
@@ -34,6 +32,41 @@ Shows current burn rate, monthly trends, cash runway, future projections, and ac
           stepDescription: "Fetching financial data from your accounts",
         },
       });
+
+      // Generate a contextual initial message based on the analysis request
+      const initialMessageStream = streamText({
+        model: openai("gpt-4o-mini"),
+        system: `You are a financial assistant generating a brief initial message for a burn rate analysis. 
+
+The user has requested a burn rate analysis for the period ${from} to ${to}. Create a message that:
+- Acknowledges the specific time period being analyzed
+- Explains what you're currently doing (gathering financial data)
+- Mentions the specific insights they'll receive (monthly burn rate, cash runway, expense breakdown)
+- Uses a professional but conversational tone
+- Avoids generic phrases like "Got it! Let's dive into..." or "Thanks for reaching out"
+- Keep it concise (1-2 sentences max)
+
+Example format: "I'm analyzing your burn rate data for [period] to show your monthly spending patterns, cash runway, and expense breakdown."`,
+        messages: [
+          {
+            role: "user",
+            content: `Generate a brief initial message for a burn rate analysis request for the period ${from} to ${to}.`,
+          },
+        ],
+        experimental_transform: smoothStream({
+          chunking: "word",
+        }),
+      });
+
+      let completeMessage = "";
+      for await (const chunk of initialMessageStream.textStream) {
+        completeMessage += chunk;
+        // Yield the accumulated text so far for streaming effect
+        yield completeMessage;
+      }
+
+      // Add line breaks to prepare for the detailed analysis
+      completeMessage += "\n";
 
       // Add initial delay to show loading step
       await delay(100);
@@ -59,32 +92,6 @@ Shows current burn rate, monthly trends, cash runway, future projections, and ac
           currency: currency ?? undefined,
         }),
       ]);
-
-      // Generate and stream the initial conversational message early
-      const initialMessageStream = streamText({
-        model: openai("gpt-4o-mini"),
-        messages: [
-          {
-            role: "user",
-            content:
-              "Generate a brief, conversational message that explains you're analyzing their burn rate data step by step. Keep it natural and explain the process transparently, like: 'Got it! Let's analyze your cash burn rate and runway. I'll break down what I'm doing as I go along so it's transparent. First, I'm analyzing your monthly expenses...'",
-          },
-        ],
-        experimental_transform: smoothStream({
-          chunking: "word",
-        }),
-      });
-
-      // Stream the text as parts and collect for the main LLM
-      let completeMessage = "";
-      for await (const chunk of initialMessageStream.textStream) {
-        completeMessage += chunk;
-        // Yield the accumulated text so far for streaming effect
-        yield completeMessage;
-      }
-
-      // Yield the complete message for the main LLM to use
-      yield completeMessage;
 
       // Early return if no data
       if (burnRateData.length === 0) {
@@ -132,6 +139,7 @@ Shows current burn rate, monthly trends, cash runway, future projections, and ac
         burnRateData.length > 0
           ? burnRateData[burnRateData.length - 1]?.value || 0
           : 0;
+
       const averageBurnRate =
         burnRateData.length > 0
           ? Math.round(
@@ -338,16 +346,78 @@ Provide a concise 2-sentence summary and 2-3 brief recommendations.`,
         },
       });
 
-      return {
-        // Essential data for LLM context
-        currentMonthlyBurn,
-        runway,
+      // Prepare data for streaming response
+      const burnRateAnalysisData = {
+        currentMonthlyBurn: formatAmount({
+          amount: currentMonthlyBurn,
+          currency: targetCurrency,
+          locale: context.user.locale ?? undefined,
+        }),
+        runway: runway,
         topCategory: highestCategory?.name || "Uncategorized",
         topCategoryPercentage: highestCategoryPercentage,
         burnRateChange: burnRateChangePercentage,
-        summary: summaryText,
-        // Special instruction for the LLM
-        _LLM_INSTRUCTIONS_: `Generate a brief, conversational message that explains you're analyzing their burn rate data step by step. Mention the key findings: current monthly burn of ${formatAmount({ amount: currentMonthlyBurn, currency: targetCurrency, locale: context.user.locale ?? undefined })}, runway of ${runway} months, and that ${highestCategory?.name || "Uncategorized"} is their top expense category at ${highestCategoryPercentage}%. Keep it natural and explain the process transparently, like: 'Got it! Let's analyze your cash burn rate and runway. I'll break down what I'm doing as I go along so it's transparent. First, I'm analyzing your monthly expenses...'`,
+        burnRateChangePeriod: burnRateChangePeriod,
+        runwayStatus:
+          runway >= 12 ? "healthy" : runway >= 6 ? "concerning" : "critical",
+      };
+
+      // Stream the detailed analysis to extend the initial message
+      const responseStream = streamText({
+        model: openai("gpt-4o-mini"),
+        system: `You are a financial assistant providing a burn rate analysis. Generate ONLY the detailed analysis section using the exact data provided.
+
+CRITICAL INSTRUCTIONS:
+- Generate ONLY the analysis content below, do NOT repeat any initial message
+- Use ONLY the data provided in the burnRateData object
+- Format the response EXACTLY as shown below
+- Do NOT add greetings, introductions, or repeat the initial message
+- Do NOT generate your own calculations or estimates
+
+REQUIRED FORMAT:
+## Monthly Burn Rate
+
+Your current monthly burn rate is {currentMonthlyBurn} per month, representing your average monthly spending.
+
+## Cash Runway
+
+Your cash runway is approximately {runway} months, meaning you can sustain operations for the next {runway} months before needing additional funding. This is {runwayStatus} for your business planning.
+
+## Expense Breakdown
+
+Your largest expense category is {topCategory}, accounting for {topCategoryPercentage}% of your total monthly burn rate.
+
+## Trends and Insights
+
+Your burn rate has {burnRateChange > 0 ? "increased" : burnRateChange < 0 ? "decreased" : "remained stable"} by {Math.abs(burnRateChange)}% over the past {burnRateChangePeriod}.
+
+The chart on the right shows your monthly burn rate trends with current vs average spending patterns, while the metrics provide additional context about your financial runway and expense breakdown.`,
+        messages: [
+          {
+            role: "user",
+            content: `Generate a burn rate analysis using this exact data: ${JSON.stringify(burnRateAnalysisData)}`,
+          },
+        ],
+        experimental_transform: smoothStream({
+          chunking: "word",
+        }),
+      });
+
+      // Yield the streamed response
+      let analysisText = "";
+      for await (const chunk of responseStream.textStream) {
+        analysisText += chunk;
+        // Yield the initial message plus the new analysis text
+        yield completeMessage + analysisText;
+      }
+
+      // Update completeMessage with the final analysis
+      completeMessage += analysisText;
+
+      // Yield the final response with forceStop flag
+      yield {
+        content: completeMessage,
+        forceStop: true,
       };
     } catch (error) {
       console.error(error);
