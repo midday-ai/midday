@@ -10,7 +10,6 @@ import {
 } from "date-fns";
 import { burnRateArtifact } from "../artifacts/burn-rate";
 import { getContext } from "../context";
-import { delay } from "../utils/delay";
 import { getBurnRateSchema } from "./schema";
 
 export const getBurnRateTool = tool({
@@ -68,8 +67,8 @@ Example format: "I'm analyzing your burn rate data for [period] to show your mon
       // Add line breaks to prepare for the detailed analysis
       completeMessage += "\n";
 
-      // Add initial delay to show loading step
-      await delay(100);
+      // Yield to continue processing while showing loading step
+      yield completeMessage;
 
       // Run all database queries in parallel for maximum performance
       const [burnRateData, runway, spendingData] = await Promise.all([
@@ -166,9 +165,6 @@ Example format: "I'm analyzing your burn rate data for [period] to show your mon
         };
       });
 
-      // Add delay to show loading
-      await delay(300);
-
       // Update with chart data first
       await analysis.update({
         stage: "chart_ready",
@@ -185,8 +181,8 @@ Example format: "I'm analyzing your burn rate data for [period] to show your mon
         },
       });
 
-      // Add delay to show chart step
-      await delay(300);
+      // Yield to continue processing while showing chart step
+      yield completeMessage;
 
       // Get the highest spending category (first item is highest)
       const highestCategory =
@@ -253,8 +249,8 @@ Example format: "I'm analyzing your burn rate data for [period] to show your mon
         },
       });
 
-      // Add delay to show metrics step
-      await delay(300);
+      // Yield to continue processing while showing metrics step
+      yield completeMessage;
 
       // Get the target currency for display
       const targetCurrency = currency ?? context.user.baseCurrency ?? "USD";
@@ -269,6 +265,9 @@ Example format: "I'm analyzing your burn rate data for [period] to show your mon
           stepDescription: "Running AI analysis and generating insights",
         },
       });
+
+      // Yield to continue processing while showing AI processing step
+      yield completeMessage;
 
       // Generate AI summary with a simpler, faster prompt
       const analysisResult = await generateText({
