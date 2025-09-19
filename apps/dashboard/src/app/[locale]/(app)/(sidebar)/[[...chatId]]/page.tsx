@@ -1,7 +1,8 @@
 import { ChatInterface } from "@/components/chat/chat-interface";
-import { ChatProvider } from "@/components/chat/provider";
+import { ChatProvider as MiddayChatProvider } from "@/components/chat/provider";
 import { Widgets } from "@/components/widgets";
 import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
+import { Provider as ChatProvider } from "@ai-sdk-tools/store";
 import { geolocation } from "@vercel/functions";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
@@ -40,9 +41,12 @@ export default async function Overview(props: Props) {
 
   return (
     <HydrateClient>
-      <Widgets />
-      <ChatProvider id={currentChatId} geo={geo} messages={chat?.messages}>
-        <ChatInterface />
+      <ChatProvider initialMessages={chat?.messages}>
+        <Widgets />
+
+        <MiddayChatProvider geo={geo} id={currentChatId}>
+          <ChatInterface />
+        </MiddayChatProvider>
       </ChatProvider>
     </HydrateClient>
   );

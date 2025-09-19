@@ -2,11 +2,7 @@
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
-import {
-  useChatId,
-  useChatSendMessage,
-  useChatStatus,
-} from "@ai-sdk-tools/store";
+import { useChatActions, useChatId, useChatStatus } from "@ai-sdk-tools/store";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -21,7 +17,7 @@ import { useState } from "react";
 
 export function ChatInput() {
   const [input, setInput] = useState("");
-  const sendMessage = useChatSendMessage();
+  const { sendMessage } = useChatActions();
   const status = useChatStatus();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
@@ -31,7 +27,7 @@ export function ChatInput() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (input.trim()) {
+    if (input.trim() && chatId) {
       // Set chatId as query parameter using nuqs
       setChatId(chatId);
 

@@ -13,10 +13,9 @@ type Props = {
   children: React.ReactNode;
   id?: string | null;
   geo?: Geo;
-  messages?: UIChatMessage[];
 };
 
-export function ChatProvider({ children, id, geo, messages }: Props) {
+export function ChatProvider({ children, id, geo }: Props) {
   const { chatId: routeChatId } = useChatInterface();
 
   // Use provided id, or get from route, or generate new one
@@ -49,7 +48,7 @@ export function ChatProvider({ children, id, geo, messages }: Props) {
 
   useChat<UIChatMessage>({
     id: chatId,
-    messages: messages ?? [],
+    enableBatching: true,
     transport: new DefaultChatTransport({
       api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
       fetch: authenticatedFetch,

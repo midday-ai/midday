@@ -2,7 +2,7 @@
 
 import { ThinkingMessage } from "@/components/message";
 import { useUserQuery } from "@/hooks/use-user";
-import { useChatMessages, useChatProperty } from "@ai-sdk-tools/store";
+import { useChatMessages, useChatStatus } from "@ai-sdk-tools/store";
 import {
   Conversation,
   ConversationContent,
@@ -13,6 +13,7 @@ import { Response } from "@midday/ui/response";
 
 export function Messages() {
   const messages = useChatMessages();
+  const status = useChatStatus();
   const { data: user } = useUserQuery();
 
   return (
@@ -77,13 +78,7 @@ export function Messages() {
               );
             })}
 
-            {/* Optimized thinking message display */}
-            {useChatProperty(
-              (state) =>
-                state.status === "submitted" &&
-                state.messages.length > 0 &&
-                state.messages[state.messages.length - 1]?.role === "user",
-            ) && <ThinkingMessage />}
+            {status === "submitted" && <ThinkingMessage />}
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
