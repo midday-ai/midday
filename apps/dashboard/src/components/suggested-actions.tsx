@@ -1,7 +1,7 @@
 "use client";
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useChatId, useChatSendMessage } from "@ai-sdk-tools/store";
+import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { endOfMonth, subMonths } from "date-fns";
@@ -14,7 +14,7 @@ import {
 } from "react-icons/md";
 
 export function SuggestedActions() {
-  const sendMessage = useChatSendMessage();
+  const { sendMessage } = useChatActions();
   const { setChatId } = useChatInterface();
   const chatId = useChatId();
 
@@ -23,6 +23,8 @@ export function SuggestedActions() {
     toolParams: Record<string, any>;
     text: string;
   }) => {
+    if (!chatId) return;
+
     setChatId(chatId);
 
     sendMessage({

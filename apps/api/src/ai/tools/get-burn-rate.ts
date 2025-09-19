@@ -52,9 +52,7 @@ Example format: "I'm analyzing your burn rate data for [period] to show your mon
             content: `Generate a brief initial message for a burn rate analysis request for the period ${from} to ${to}.`,
           },
         ],
-        experimental_transform: smoothStream({
-          chunking: "word",
-        }),
+        experimental_transform: smoothStream({ chunking: "word" }),
       });
 
       let completeMessage = "";
@@ -397,9 +395,7 @@ The chart on the right shows your monthly burn rate trends with current vs avera
             content: `Generate a burn rate analysis using this exact data: ${JSON.stringify(burnRateAnalysisData)}`,
           },
         ],
-        experimental_transform: smoothStream({
-          chunking: "word",
-        }),
+        experimental_transform: smoothStream({ chunking: "word" }),
       });
 
       // Yield the streamed response

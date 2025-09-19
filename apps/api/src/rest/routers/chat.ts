@@ -208,9 +208,7 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
               // Force stop if any tool has completed its full streaming response
               return shouldForceStop(step);
             },
-            experimental_transform: smoothStream({
-              chunking: "word",
-            }),
+            experimental_transform: smoothStream({ chunking: "word" }),
             tools: createToolRegistry(),
             onError: (error) => {
               console.error(error);
