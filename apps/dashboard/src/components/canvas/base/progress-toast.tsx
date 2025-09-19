@@ -4,7 +4,7 @@ import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Spinner } from "@midday/ui/spinner";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface ProgressToastProps {
   isVisible: boolean;
@@ -55,8 +55,89 @@ export function ProgressToast({
   const [showComplete, setShowComplete] = useState(false);
   const [shouldStayVisible, setShouldStayVisible] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [displayedStep, setDisplayedStep] = useState(currentStep);
+  const [displayedLabel, setDisplayedLabel] = useState(currentLabel);
+  const [displayedDescription, setDisplayedDescription] =
+    useState(stepDescription);
   const hasHandledCompletion = useRef(false);
   const prevVisible = useRef(isVisible);
+  const stepTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const stepQueueRef = useRef<
+    Array<{ step: number; label?: string; description?: string }>
+  >([]);
+  const isProcessingQueueRef = useRef(false);
+
+  // Process the step queue sequentially
+  const processStepQueue = useCallback(() => {
+    if (isProcessingQueueRef.current || stepQueueRef.current.length === 0) {
+      return;
+    }
+
+    isProcessingQueueRef.current = true;
+    const nextStep = stepQueueRef.current.shift();
+
+    if (nextStep) {
+      setDisplayedStep(nextStep.step);
+      setDisplayedLabel(nextStep.label);
+      setDisplayedDescription(nextStep.description);
+
+      // Schedule next step after minimum duration
+      stepTimeoutRef.current = setTimeout(() => {
+        isProcessingQueueRef.current = false;
+        processStepQueue(); // Process next step in queue
+      }, 800); // 800ms minimum per step
+    } else {
+      isProcessingQueueRef.current = false;
+    }
+  }, []);
+
+  // Add step to queue when props change
+  useEffect(() => {
+    if (isVisible && !completed) {
+      // Add to queue if it's a new step
+      const lastQueuedStep =
+        stepQueueRef.current[stepQueueRef.current.length - 1];
+      if (!lastQueuedStep || lastQueuedStep.step !== currentStep) {
+        stepQueueRef.current.push({
+          step: currentStep,
+          label: currentLabel,
+          description: stepDescription,
+        });
+
+        // Start processing if not already processing
+        if (!isProcessingQueueRef.current) {
+          processStepQueue();
+        }
+      }
+    }
+  }, [
+    currentStep,
+    currentLabel,
+    stepDescription,
+    isVisible,
+    completed,
+    processStepQueue,
+  ]);
+
+  // Initialize displayed values
+  useEffect(() => {
+    if (isVisible) {
+      setDisplayedStep(currentStep);
+      setDisplayedLabel(currentLabel);
+      setDisplayedDescription(stepDescription);
+      stepQueueRef.current = []; // Clear queue on visibility change
+      isProcessingQueueRef.current = false;
+    }
+  }, [isVisible]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (stepTimeoutRef.current) {
+        clearTimeout(stepTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     console.log("ProgressToast effect:", {
@@ -154,16 +235,16 @@ export function ProgressToast({
                     {/* Loading Spinner */}
                     <Spinner size={16} className="text-[#878787]" />
                     <span className="text-[12px] leading-[17px] text-black dark:text-white">
-                      {currentLabel || "Processing..."}
+                      {displayedLabel || "Processing..."}
                     </span>
                   </div>
                   <span className="text-[12px] leading-[17px] text-[#707070] dark:text-[#666666]">
-                    {currentStep + 1}/{totalSteps}
+                    {displayedStep + 1}/{totalSteps}
                   </span>
                 </div>
                 <div className="pl-6">
                   <span className="text-[12px] leading-[17px] text-[#707070] dark:text-[#666666]">
-                    {stepDescription || "Computing"}
+                    {displayedDescription || "Computing"}
                   </span>
                 </div>
               </div>
