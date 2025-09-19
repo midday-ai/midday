@@ -12,6 +12,7 @@ import { formatToolCallTitle } from "@api/ai/utils/format-tool-call-title";
 import { getUserContext } from "@api/ai/utils/get-user-context";
 import type { Context } from "@api/rest/types";
 import { chatRequestSchema } from "@api/schemas/chat";
+import { shouldForceStop } from "@api/utils/streaming-utils";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { getChatById, saveChat, saveChatMessage } from "@midday/db/queries";
 import { logger } from "@midday/logger";
@@ -198,7 +199,15 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
             system: generateSystemPrompt(userContext, isToolCallMessage),
             messages: convertToModelMessages(originalMessages),
             temperature: 0.7,
-            stopWhen: stepCountIs(10),
+            stopWhen: (step) => {
+              // Stop if we've reached 10 steps (original condition)
+              if (stepCountIs(10)(step)) {
+                return true;
+              }
+
+              // Force stop if any tool has completed its full streaming response
+              return shouldForceStop(step);
+            },
             experimental_transform: smoothStream({
               chunking: "word",
             }),
