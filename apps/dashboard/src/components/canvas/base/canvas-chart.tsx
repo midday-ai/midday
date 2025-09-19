@@ -50,14 +50,27 @@ export function CanvasChart({
                 className="flex gap-2 items-center"
               >
                 <div
-                  className="w-2 h-2"
+                  className={cn(
+                    "w-2 h-2",
+                    item.type === "solid" &&
+                      !item.color &&
+                      "bg-black dark:bg-white",
+                    item.type === "dashed" &&
+                      !item.color &&
+                      "bg-[#707070] dark:bg-[#666666]",
+                    item.type === "pattern" &&
+                      !item.color &&
+                      "bg-[repeating-linear-gradient(45deg,#707070,#707070_1px,transparent_1px,transparent_2px)] dark:bg-[repeating-linear-gradient(45deg,#666666,#666666_1px,transparent_1px,transparent_2px)]",
+                  )}
                   style={{
                     background:
                       item.type === "solid"
-                        ? item.color || "#000000"
+                        ? item.color || undefined
                         : item.type === "pattern"
-                          ? "repeating-linear-gradient(45deg, #707070, #707070 1px, transparent 1px, transparent 2px)"
-                          : item.color || "#707070",
+                          ? item.color
+                            ? `repeating-linear-gradient(45deg, ${item.color}, ${item.color} 1px, transparent 1px, transparent 2px)`
+                            : undefined
+                          : item.color || undefined,
                     borderRadius: "0",
                   }}
                 />

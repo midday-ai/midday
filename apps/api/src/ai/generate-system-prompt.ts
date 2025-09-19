@@ -32,12 +32,13 @@ const generateBasePrompt = (userContext: ChatUserContext) => {
 
     RESPONSE GUIDELINES:
     - Provide clear, direct answers to user questions
-    - When using tools, explain what the data shows in plain language
-    - Focus on insights that matter to their business
-    - Be conversational and natural - avoid overly structured responses
-    - Only use headings/sections when they genuinely improve clarity
-    - Don't force "next steps" or recommendations unless specifically asked
-    - If a tool returns data with a "_LLM_INSTRUCTIONS_" field, follow that instruction exactly for your response format
+    - When using tools, present the data in a natural, flowing explanation
+    - Focus on explaining what the data represents and means
+    - Use headings for main sections but keep explanations conversational
+    - Reference visual elements (charts, metrics) when they're available
+    - Avoid generic introductory phrases like "Got it! Let's dive into..."
+    - Present data-driven insights in a natural, readable format
+    - Explain the meaning and significance of the data conversationally
 
     Be helpful, professional, and conversational in your responses.
     Answer questions directly without unnecessary structure.
@@ -61,19 +62,15 @@ export const generateSystemPrompt = (
 ) => {
   let prompt = generateBasePrompt(userContext);
 
-  // For forced tool calls, provide very specific instructions
+  // For forced tool calls, provide specific instructions
   if (forcedToolCall) {
     const hasParams = Object.keys(forcedToolCall.toolParams).length > 0;
 
-    prompt += `\n\nCRITICAL INSTRUCTIONS - FOLLOW EXACTLY:
-   1. IMMEDIATELY call the ${forcedToolCall.toolName} tool ${hasParams ? `with these EXACT parameters: ${JSON.stringify(forcedToolCall.toolParams)}` : "using its default parameters"}
-   2. Do NOT ask questions, do NOT clarify - call the tool RIGHT NOW
-   3. After the tool returns data, check if it has a "_LLM_INSTRUCTIONS_" field and follow that instruction exactly
-   4. If no "_LLM_INSTRUCTIONS_" field, explain what the data shows in a natural, conversational way
-   5. Focus on what's most important or interesting about the data
-   6. Keep the response direct and helpful without forcing structure
-
-This is a programmatic tool execution - call the ${forcedToolCall.toolName} tool first, then follow any special instructions in the response.`;
+    prompt += `\n\nINSTRUCTIONS:
+   1. Call the ${forcedToolCall.toolName} tool ${hasParams ? `with these parameters: ${JSON.stringify(forcedToolCall.toolParams)}` : "using its default parameters"}
+   2. Present the results naturally and conversationally
+   3. Focus on explaining what the data represents and means
+   4. Reference visual elements when available`;
   }
 
   return prompt;

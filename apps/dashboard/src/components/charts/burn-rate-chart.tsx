@@ -11,7 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useChartMargin } from "./chart-utils";
+import { createCompactTickFormatter, useChartMargin } from "./chart-utils";
 
 interface BurnRateData {
   month: string;
@@ -77,32 +77,20 @@ export function BurnRateChart({
   currency = "USD",
   locale,
 }: BurnRateChartProps) {
-  // Format tick values using proper currency formatting
-  const tickFormatter = (value: number) => {
-    return (
-      formatAmount({
-        amount: value,
-        currency,
-        locale: locale ?? undefined,
-        maximumFractionDigits: 0,
-      }) ?? `${currency}${(value / 1000).toFixed(0)}k`
-    );
-  };
+  // Use the compact tick formatter
+  const tickFormatter = createCompactTickFormatter();
 
-  const { marginLeft } = useChartMargin(
-    data,
-    ["amount", "amount"],
-    tickFormatter,
-  );
+  // Calculate margin using the utility hook
+  const { marginLeft } = useChartMargin(data, "amount", tickFormatter);
 
   return (
     <div className="w-full">
       {/* Chart */}
-      <div style={{ height, marginLeft }}>
+      <div style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={data}
-            margin={{ top: 0, right: 6, left: 0, bottom: 0 }}
+            margin={{ top: 0, right: 6, left: -marginLeft, bottom: 0 }}
           >
             <defs>
               <pattern

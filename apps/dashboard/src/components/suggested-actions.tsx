@@ -29,7 +29,6 @@ export function SuggestedActions() {
       role: "user",
       parts: [{ type: "text", text: params.text }],
       metadata: {
-        internal: true,
         toolCall: {
           toolName: params.toolName,
           toolParams: params.toolParams,
@@ -66,7 +65,7 @@ export function SuggestedActions() {
           toolParams: {
             showCanvas: true,
           },
-          text: "Get my burn rate data",
+          text: "Analyze my burn rate",
         });
       },
     },
