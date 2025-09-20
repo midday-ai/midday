@@ -8,22 +8,13 @@ import { chatTitleArtifact } from "@api/ai/artifacts/chat-title";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
+import { TextEffect } from "@midday/ui/text-effect";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { useState } from "react";
 
 export function ChatHeader() {
   const router = useRouter();
   const { isHome } = useChatInterface();
   const { data } = useArtifact(chatTitleArtifact);
-  const [showTitle, setShowTitle] = useState(true);
-  console.log("title", data);
-
-  useEffect(() => {
-    if (data?.title) {
-      setShowTitle(true);
-    }
-  }, [data]);
 
   if (isHome) {
     return null;
@@ -31,51 +22,30 @@ export function ChatHeader() {
 
   return (
     <div className="relative z-10 bg-background py-6 flex justify-between w-full px-6">
-      {/* Left section - back button stays in place */}
       <div className="flex items-center">
         <Button variant="outline" size="icon" onClick={() => router.push("/")}>
           <Icons.ArrowBack size={16} />
         </Button>
       </div>
 
-      {/* Center section - title centered in available space */}
       <div
         className={cn(
           "flex items-center justify-center transition-all duration-300 ease-in-out",
         )}
       >
-        <h1
-          className={`text-primary text-sm font-regular truncate transition-all duration-150 ease-out transform ${
-            showTitle ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
-          }`}
-        >
-          {data?.title?.split("").map((char, index) => {
-            const centerIndex = Math.floor(data?.title?.length / 2);
-            const distanceFromCenter = Math.abs(index - centerIndex);
-            const delay = distanceFromCenter * 3 + 20;
-
-            return (
-              <span
-                key={`${data?.title}-${index}-${char}`}
-                className={`inline-block transform transition-all duration-100 ${
-                  showTitle
-                    ? "opacity-100 translate-y-0 rotate-0"
-                    : "opacity-0 translate-y-2 -rotate-12"
-                }`}
-                style={{
-                  transitionDelay: `${delay}ms`,
-                  transitionTimingFunction:
-                    "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                }}
-              >
-                {char === " " ? "\u00A0" : char}
-              </span>
-            );
-          })}
-        </h1>
+        {data && (
+          <TextEffect
+            per="char"
+            preset="fade"
+            speedReveal={3}
+            speedSegment={2}
+            className="text-sm font-regular truncate"
+          >
+            {data.title}
+          </TextEffect>
+        )}
       </div>
 
-      {/* Right section - positioned relative to canvas edge */}
       <div className="flex items-center space-x-4 transition-all duration-300 ease-in-out">
         <NewChat />
         <ChatHistory />
