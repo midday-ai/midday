@@ -3,6 +3,8 @@
 import { ChatHistory } from "@/components/chat/chat-history";
 import { NewChat } from "@/components/chat/new-chat";
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { chatTitleArtifact } from "@api/ai/artifacts/chat-title";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -10,16 +12,18 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useState } from "react";
 
-export function ChatHeader({ title = "Hello" }: { title?: string | null }) {
+export function ChatHeader() {
   const router = useRouter();
   const { isHome } = useChatInterface();
+  const { data } = useArtifact(chatTitleArtifact);
   const [showTitle, setShowTitle] = useState(true);
+  console.log("title", data);
 
   useEffect(() => {
-    if (title) {
+    if (data?.title) {
       setShowTitle(true);
     }
-  }, [title]);
+  }, [data]);
 
   if (isHome) {
     return null;
@@ -45,14 +49,14 @@ export function ChatHeader({ title = "Hello" }: { title?: string | null }) {
             showTitle ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
           }`}
         >
-          {title?.split("").map((char, index) => {
-            const centerIndex = Math.floor(title.length / 2);
+          {data?.title?.split("").map((char, index) => {
+            const centerIndex = Math.floor(data?.title?.length / 2);
             const distanceFromCenter = Math.abs(index - centerIndex);
             const delay = distanceFromCenter * 3 + 20;
 
             return (
               <span
-                key={`${title}-${index}-${char}`}
+                key={`${data?.title}-${index}-${char}`}
                 className={`inline-block transform transition-all duration-100 ${
                   showTitle
                     ? "opacity-100 translate-y-0 rotate-0"

@@ -1,4 +1,5 @@
 import { openai } from "@ai-sdk/openai";
+import { chatTitleArtifact } from "@api/ai/artifacts/chat-title";
 import { setContext } from "@api/ai/context";
 import { generateSystemPrompt } from "@api/ai/generate-system-prompt";
 import {
@@ -177,22 +178,20 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
           }
         },
         execute: ({ writer }) => {
-          // Stream title immediately if generated
-          if (generatedTitle) {
-            writer.write({
-              type: "data-title",
-              id: "chat-title",
-              data: {
-                title: generatedTitle,
-              },
-            });
-          }
-
           setContext({
             db,
             user: userContext,
             writer,
           });
+
+          // Generate chat title artifact if we have a title
+          if (generatedTitle) {
+            const titleStream = chatTitleArtifact.stream({
+              title: generatedTitle,
+            });
+
+            titleStream.complete();
+          }
 
           const result = streamText({
             model: openai("gpt-4o-mini"),

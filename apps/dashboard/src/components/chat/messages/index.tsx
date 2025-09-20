@@ -22,11 +22,6 @@ export function Messages() {
         <Conversation className="h-full w-full">
           <ConversationContent className="px-6 mx-auto mb-28 max-w-[770px]">
             {messages.map((message) => {
-              // Skip rendering internal/hidden messages
-              if ((message.metadata as any)?.internal) {
-                return null;
-              }
-
               return (
                 <div key={message.id} className="w-full">
                   {message.role !== "system" && (
