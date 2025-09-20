@@ -19,7 +19,7 @@ import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { Switch } from "@midday/ui/switch";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { z } from "zod";
+import { z } from "zod/v3";
 import { InputColor } from "../input-color";
 import { SelectTaxType } from "../select-tax-type";
 import { TaxRateInput } from "../tax-rate-input";

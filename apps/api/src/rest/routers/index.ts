@@ -1,6 +1,7 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { protectedMiddleware } from "../middleware";
 import { bankAccountsRouter } from "./bank-accounts";
+import { chatRouter } from "./chat";
 import { customersRouter } from "./customers";
 import { documentsRouter } from "./documents";
 import { inboxRouter } from "./inbox";
@@ -39,5 +40,6 @@ routers.route("/search", searchRouter);
 routers.route("/reports", reportsRouter);
 routers.route("/tracker-projects", trackerProjectsRouter);
 routers.route("/tracker-entries", trackerEntriesRouter);
+routers.route("/chat", chatRouter);
 
 export { routers };

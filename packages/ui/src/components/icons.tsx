@@ -1,6 +1,7 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
 import { FaXTwitter } from "react-icons/fa6";
 import { FiGithub } from "react-icons/fi";
+import type { IconType as BaseIconType } from "react-icons/lib";
 import {
   MdArrowBack,
   MdArrowDownward,
@@ -42,6 +43,7 @@ import {
   MdOutlineConfirmationNumber,
   MdOutlineContentCopy,
   MdOutlineCropFree,
+  MdOutlineDashboardCustomize,
   MdOutlineEditNote,
   MdOutlineEmail,
   MdOutlineEqualizer,
@@ -94,6 +96,8 @@ type SVGIconProps = {
   children?: React.ReactNode;
   viewBox?: string;
 };
+
+export type IconType = BaseIconType;
 
 const SVGIcon: React.FC<SVGIconProps> = ({
   size = 20,
@@ -585,4 +589,5 @@ export const Icons = {
   OutgoingMail: MdOutlineSignpost,
   AttachEmail: MdOutlineAttachEmail,
   SyncAlt: MdOutlineSyncAlt,
+  DashboardCustomize: MdOutlineDashboardCustomize,
 };

@@ -112,10 +112,11 @@ export async function getProfit(db: Database, params: GetReportsParams) {
     .select({
       month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
       value: sql<number>`COALESCE(SUM(
-        CASE
-          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL THEN ${transactions.amount}
-          ELSE COALESCE(${transactions.baseAmount}, 0)
-        END
+${
+  inputCurrency
+    ? transactions.amount
+    : sql`COALESCE(${transactions.baseAmount}, 0)`
+}
       ), 0)`,
     })
     .from(transactions)
@@ -192,12 +193,9 @@ export async function getRevenue(db: Database, params: GetReportsParams) {
   const monthlyData = await db
     .select({
       month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
-      value: sql<number>`COALESCE(SUM(
-        CASE
-          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL THEN ${transactions.amount}
-          ELSE COALESCE(${transactions.baseAmount}, 0)
-        END
-      ), 0)`,
+      value: inputCurrency
+        ? sql<number>`COALESCE(SUM(${transactions.amount}), 0)`
+        : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
     })
     .from(transactions)
     .leftJoin(
@@ -277,6 +275,7 @@ export async function getReports(db: Database, params: GetReportsParams) {
   const prevTotal = Number(
     (prevData?.reduce((value, item) => item.value + value, 0) ?? 0).toFixed(2),
   );
+
   const currentTotal = Number(
     (currentData?.reduce((value, item) => item.value + value, 0) ?? 0).toFixed(
       2,
@@ -383,16 +382,14 @@ export async function getBurnRate(db: Database, params: GetBurnRateParams) {
   const monthlyData = await db
     .select({
       month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
-      totalAmount: sql<number>`COALESCE(ABS(SUM(
-        CASE
-          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL THEN
+      totalAmount: inputCurrency
+        ? sql<number>`COALESCE(ABS(SUM(
             CASE
               WHEN ${transactions.currency} = ${targetCurrency} THEN ${transactions.amount}
               ELSE COALESCE(${transactions.baseAmount}, 0)
             END
-          ELSE COALESCE(${transactions.baseAmount}, 0)
-        END
-      )), 0)`,
+          )), 0)`
+        : sql<number>`COALESCE(ABS(SUM(COALESCE(${transactions.baseAmount}, 0))), 0)`,
     })
     .from(transactions)
     .leftJoin(
@@ -494,20 +491,32 @@ export async function getExpenses(db: Database, params: GetExpensesParams) {
   const monthlyData = await db
     .select({
       month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
-      value: sql<number>`COALESCE(SUM(
-        CASE
-          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL AND (${transactions.recurring} = false OR ${transactions.recurring} IS NULL) THEN ABS(${transactions.amount})
-          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NULL AND (${transactions.recurring} = false OR ${transactions.recurring} IS NULL) THEN ABS(COALESCE(${transactions.baseAmount}, 0))
-          ELSE 0
-        END
-      ), 0)`,
-      recurringValue: sql<number>`COALESCE(SUM(
-        CASE
-          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL AND ${transactions.recurring} = true THEN ABS(${transactions.amount})
-          WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NULL AND ${transactions.recurring} = true THEN ABS(COALESCE(${transactions.baseAmount}, 0))
-          ELSE 0
-        END
-      ), 0)`,
+      value: inputCurrency
+        ? sql<number>`COALESCE(SUM(
+            CASE
+              WHEN (${transactions.recurring} = false OR ${transactions.recurring} IS NULL) THEN ABS(${transactions.amount})
+              ELSE 0
+            END
+          ), 0)`
+        : sql<number>`COALESCE(SUM(
+            CASE
+              WHEN (${transactions.recurring} = false OR ${transactions.recurring} IS NULL) THEN ABS(COALESCE(${transactions.baseAmount}, 0))
+              ELSE 0
+            END
+          ), 0)`,
+      recurringValue: inputCurrency
+        ? sql<number>`COALESCE(SUM(
+            CASE
+              WHEN ${transactions.recurring} = true THEN ABS(${transactions.amount})
+              ELSE 0
+            END
+          ), 0)`
+        : sql<number>`COALESCE(SUM(
+            CASE
+              WHEN ${transactions.recurring} = true THEN ABS(COALESCE(${transactions.baseAmount}, 0))
+              ELSE 0
+            END
+          ), 0)`,
     })
     .from(transactions)
     .leftJoin(
@@ -645,10 +654,11 @@ export async function getSpending(
 
   const totalAmountResult = await db
     .select({
-      total: sql<number>`SUM(CASE
-        WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL THEN ${transactions.amount}
-        ELSE COALESCE(${transactions.baseAmount}, 0)
-      END)`,
+      total: sql<number>`SUM(${
+        inputCurrency
+          ? transactions.amount
+          : sql`COALESCE(${transactions.baseAmount}, 0)`
+      })`,
     })
     .from(transactions)
     .leftJoin(
@@ -696,10 +706,11 @@ export async function getSpending(
       name: transactionCategories.name,
       slug: transactionCategories.slug,
       color: transactionCategories.color,
-      amount: sql<number>`ABS(SUM(CASE
-        WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL THEN ${transactions.amount}
-        ELSE COALESCE(${transactions.baseAmount}, 0)
-      END))`,
+      amount: sql<number>`ABS(SUM(${
+        inputCurrency
+          ? transactions.amount
+          : sql`COALESCE(${transactions.baseAmount}, 0)`
+      }))`,
     })
     .from(transactions)
     .innerJoin(
@@ -723,10 +734,13 @@ export async function getSpending(
       transactionCategories.slug,
       transactionCategories.color,
     )
-    .having(sql`SUM(CASE
-      WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL THEN ${transactions.amount}
-      ELSE COALESCE(${transactions.baseAmount}, 0)
-    END) < 0`)
+    .having(
+      sql`SUM(${
+        inputCurrency
+          ? transactions.amount
+          : sql`COALESCE(${transactions.baseAmount}, 0)`
+      }) < 0`,
+    )
     .then((results) =>
       results.map((item) => {
         const percentage =
@@ -773,10 +787,11 @@ export async function getSpending(
 
   const uncategorizedResult = await db
     .select({
-      amount: sql<number>`SUM(CASE
-        WHEN ${inputCurrency ? sql`${inputCurrency}` : sql`NULL`} IS NOT NULL THEN ${transactions.amount}
-        ELSE COALESCE(${transactions.baseAmount}, 0)
-      END)`,
+      amount: sql<number>`SUM(${
+        inputCurrency
+          ? transactions.amount
+          : sql`COALESCE(${transactions.baseAmount}, 0)`
+      })`,
     })
     .from(transactions)
     .where(and(...uncategorizedConditions));

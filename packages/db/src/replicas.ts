@@ -7,6 +7,7 @@ export type ReplicatedDatabase<Q extends PgDatabase<any, any, any>> = Q & {
   executeOnReplica: Q["execute"];
   transactionOnReplica: Q["transaction"];
   usePrimaryOnly: () => ReplicatedDatabase<Q>;
+  query: Q["query"];
 };
 
 export const withReplicas = <
