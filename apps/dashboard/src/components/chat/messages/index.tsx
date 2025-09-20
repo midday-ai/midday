@@ -20,7 +20,7 @@ export function Messages() {
     <div className="w-full mx-auto relative size-full h-[calc(100vh-86px)] pb-28">
       <div className="flex flex-col h-full w-full">
         <Conversation className="h-full w-full">
-          <ConversationContent className="px-6 mx-auto mb-28 max-w-[770px]">
+          <ConversationContent className="px-6 mx-auto mb-40 max-w-[770px]">
             {messages.map((message) => {
               return (
                 <div key={message.id} className="w-full">

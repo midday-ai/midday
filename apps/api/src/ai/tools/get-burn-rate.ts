@@ -9,7 +9,9 @@ import {
   startOfMonth,
 } from "date-fns";
 import { burnRateArtifact } from "../artifacts/burn-rate";
+import { followupQuestionsArtifact } from "../artifacts/followup-questions";
 import { getContext } from "../context";
+import { generateFollowupQuestions } from "../utils/generate-followup-questions";
 import { getBurnRateSchema } from "./schema";
 
 export const getBurnRateTool = tool({
@@ -408,6 +410,20 @@ The chart on the right shows your monthly burn rate trends with current vs avera
 
       // Update completeMessage with the final analysis
       completeMessage += analysisText;
+
+      // Generate follow-up questions based on the analysis output
+      const burnRateFollowupQuestions = await generateFollowupQuestions(
+        "getBurnRate",
+        completeMessage,
+      );
+
+      // Stream follow-up questions artifact
+      const followupStream = followupQuestionsArtifact.stream({
+        questions: burnRateFollowupQuestions,
+        context: "burn_rate_analysis",
+      });
+
+      followupStream.complete();
 
       // Yield the final response with forceStop flag
       yield {

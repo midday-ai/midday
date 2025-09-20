@@ -11,7 +11,9 @@ import { RunwayCanvas } from "./runway-canvas";
 import { SpendingCanvas } from "./spending-canvas";
 
 export function Canvas() {
-  const { current } = useArtifacts();
+  const { current } = useArtifacts({
+    exclude: ["chat-title", "followup-questions"],
+  });
 
   switch (current?.type) {
     case "burn-rate":
