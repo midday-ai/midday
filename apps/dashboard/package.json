@@ -15,7 +15,7 @@
     "test:watch": "bun test --watch"
   },
   "dependencies": {
-    "@ai-sdk-tools/artifacts": "beta",
+    "@ai-sdk-tools/artifacts": "^0.7.0-beta.3",
     "@ai-sdk-tools/devtools": "beta",
     "@ai-sdk-tools/store": "beta",
     "@ai-sdk/openai": "^2.0.32",

@@ -1,5 +1,6 @@
 "use client";
 
+import { FollowupQuestions } from "@/components/chat/followup-questions";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { useChatActions, useChatId, useChatStatus } from "@ai-sdk-tools/store";
@@ -47,7 +48,9 @@ export function ChatInput() {
         isCanvasVisible ? "right-[603px]" : "right-0",
       )}
     >
-      <div className="mx-auto w-full bg-[#F7F7F7] dark:bg-[#131313] pt-2 max-w-[770px]">
+      <div className="mx-auto w-full bg-[#F7F7F7] dark:bg-[#131313] pt-2 max-w-[770px] relative">
+        <FollowupQuestions />
+
         <PromptInput onSubmit={handleSubmit}>
           <PromptInputTextarea
             onChange={(e) => setInput(e.target.value)}
