@@ -1,5 +1,4 @@
 import { ChatInterface } from "@/components/chat/chat-interface";
-import { ChatProvider as MiddayChatProvider } from "@/components/chat/provider";
 import { Widgets } from "@/components/widgets";
 import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
 import { Provider as ChatProvider } from "@ai-sdk-tools/store";
@@ -44,9 +43,7 @@ export default async function Overview(props: Props) {
       <ChatProvider initialMessages={chat?.messages}>
         <Widgets />
 
-        <MiddayChatProvider geo={geo} id={currentChatId}>
-          <ChatInterface />
-        </MiddayChatProvider>
+        <ChatInterface geo={geo} id={currentChatId} />
       </ChatProvider>
     </HydrateClient>
   );
