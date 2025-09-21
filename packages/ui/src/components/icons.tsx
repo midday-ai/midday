@@ -50,9 +50,11 @@ import {
   MdOutlineFace,
   MdOutlineFactCheck,
   MdOutlineFilterList,
+  MdOutlineGraphicEq,
   MdOutlineGridView,
   MdOutlineInfo,
   MdOutlineInventory2,
+  MdOutlineLanguage,
   MdOutlineLaunch,
   MdOutlineLink,
   MdOutlineMoreTime,
@@ -603,4 +605,6 @@ export const Icons = {
   ThumbDownOutline: MdOutlineThumbDown,
   RefreshOutline: MdOutlineRefresh,
   InfoOutline: MdOutlineInfo,
+  Globle: MdOutlineLanguage,
+  Record: MdOutlineGraphicEq,
 };

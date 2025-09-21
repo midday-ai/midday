@@ -38,53 +38,42 @@ export const generateTitle = async ({
         title: z.string().describe("The title of the chat"),
       }),
       temperature: 0.7,
-      system: `You are a financial analyst and title generator specializing in financial management conversations for SMBs. Generate concise, finance-focused titles that capture the core financial intent and business value.
+      system: `
+      You will generate a short title based on the first message a user begins a conversation with.
+      - Ensure the title is not more than 50 characters long.
+      - The title should be a summary of the user's message.
+      - Do not use quotes or colons in the title.
+      - Return only the title, nothing else.
 
-Context: You're creating titles for conversations in Midday, a comprehensive financial management platform for SMBs handling accounting, invoicing, expense tracking, and financial analytics.
+      Fallback Rules:
+      - If the message is too vague or generic (like "hello", "hi", "help"), return "New Chat"
+      - Only generate a financial title if there's clear financial intent or context in the message
 
-Financial Focus Guidelines:
-- Generate a short, finance-centric title based on the user's message
-- Maximum 60 characters
-- Prioritize financial terminology: P&L, EBITDA, ROI, burn rate, runway, margins, KPIs, forecasting, budgeting
-- Focus on financial actions: analyze, reconcile, track, forecast, optimize, audit, categorize, report
-- Emphasize financial outcomes: profitability, liquidity, efficiency, compliance, growth metrics
-- Use accounting terminology: AR/AP, depreciation, accruals, write-offs, provisions, allocations
-- Include financial periods: fiscal quarters (FY24/Q1), tax years, reporting periods
-- Avoid generic business terms - make it financially specific
-- Do not use quotes, colons, or unnecessary punctuation
-- Return only the title, nothing else
+      Examples of financial-focused titles:
+      - "January 2024 Expense Reconciliation"
+      - "2023-2024 Revenue Growth Analysis"
+      - "Q1 Cash Flow Forecasting"  
+      - "2023 Tax Optimization Review"
+      - "December AR Aging Report"
+      - "Q3 Margin Analysis & KPIs"
+      - "Monthly Burn Rate Tracking"
+      - "Budget vs Actual Reporting"
 
-Fallback Rules:
-- If the message is too vague or generic (like "hello", "hi", "help"), return "New Chat"
-- Only generate a financial title if there's clear financial intent or context in the message
-
-Examples of financial-focused titles:
-- "January 2024 Expense Reconciliation"
-- "2023-2024 Revenue Growth Analysis"
-- "Q1 Cash Flow Forecasting"  
-- "2023 Tax Optimization Review"
-- "December AR Aging Report"
-- "Q3 Margin Analysis & KPIs"
-- "Monthly Burn Rate Tracking"
-- "Budget vs Actual Reporting"
-
-    Current date and time: ${tzDate.toISOString()}
-    Team name: ${teamName}
-    Company registered in: ${countryCode}
-    Base currency: ${baseCurrency}
-    User full name: ${fullName}
-    User current city: ${city}
-    User current region: ${region}
-    User current country: ${country}
-    User local timezone: ${userTimezone}
-`,
-
+      Current date and time: ${tzDate.toISOString()}
+      Team name: ${teamName}
+      Company registered in: ${countryCode}
+      Base currency: ${baseCurrency}
+      User full name: ${fullName}
+      User current city: ${city}
+      User current country: ${country}
+      User local timezone: ${userTimezone}
+      `,
       prompt: message,
     });
 
     const cleanTitle = titleResult.object.title;
 
-    return cleanTitle.slice(0, 60);
+    return cleanTitle.slice(0, 50);
   } catch (error) {
     logger.warn({
       msg: "Failed to generate chat title",
@@ -94,7 +83,7 @@ Examples of financial-focused titles:
     const trimmedMessage = message.trim();
 
     if (trimmedMessage) {
-      return trimmedMessage.slice(0, 60);
+      return trimmedMessage.slice(0, 50);
     }
 
     return null;

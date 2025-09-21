@@ -3,6 +3,7 @@
 import { BookIcon, ChevronDownIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 import { cn } from "../utils";
+import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import {
   Collapsible,
   CollapsibleContent,
@@ -57,21 +58,68 @@ export const SourcesContent = ({
   />
 );
 
-export type SourceProps = ComponentProps<"a">;
+export type SourceProps = ComponentProps<"a"> & {
+  domain?: string;
+  showAvatar?: boolean;
+};
 
-export const Source = ({ href, title, children, ...props }: SourceProps) => (
-  <a
-    className="flex items-center gap-2"
-    href={href}
-    rel="noreferrer"
-    target="_blank"
-    {...props}
-  >
-    {children ?? (
-      <>
-        <BookIcon className="h-4 w-4" />
-        <span className="block font-medium">{title}</span>
-      </>
-    )}
-  </a>
-);
+function extractDomainFromUrl(url: string): string {
+  try {
+    const urlObj = new URL(url);
+    return urlObj.hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+export const Source = ({
+  href,
+  title,
+  domain,
+  showAvatar = true,
+  children,
+  ...props
+}: SourceProps) => {
+  const sourceDomain = domain || (href ? extractDomainFromUrl(href) : "");
+
+  return (
+    <a
+      className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+      href={href}
+      rel="noreferrer"
+      target="_blank"
+      {...props}
+    >
+      {children ?? (
+        <>
+          {showAvatar && sourceDomain ? (
+            <Avatar className="h-6 w-6">
+              <AvatarImage
+                src={`https://img.logo.dev/${sourceDomain}?token=pk_BQw8Qo2gQeGk5LGKGGMUxA&format=png&size=24&theme=light`}
+                alt={`${sourceDomain} logo`}
+                onError={(e) => {
+                  // Fallback to favicon if Logo.dev fails
+                  (e.target as HTMLImageElement).src =
+                    `https://${sourceDomain}/favicon.ico`;
+                }}
+              />
+              <AvatarFallback className="text-xs bg-muted text-muted-foreground">
+                {sourceDomain.split(".")[0]?.charAt(0).toUpperCase() || "?"}
+              </AvatarFallback>
+            </Avatar>
+          ) : (
+            <BookIcon className="h-4 w-4 text-muted-foreground" />
+          )}
+          <div className="flex-1 min-w-0">
+            <span className="block font-medium text-sm truncate">{title}</span>
+            {sourceDomain && (
+              <span className="block text-xs text-muted-foreground truncate">
+                {sourceDomain}
+              </span>
+            )}
+          </div>
+        </>
+      )}
+    </a>
+  );
+};

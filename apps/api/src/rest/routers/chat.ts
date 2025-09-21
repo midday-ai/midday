@@ -68,10 +68,27 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
     const previousMessagesList = previousMessages?.messages || [];
     const allMessagesForValidation = [...previousMessagesList, message];
 
-    // Validate messages to ensure they're properly formatted
-    const validatedMessages = await validateUIMessages({
-      messages: allMessagesForValidation,
-    });
+    // Check if any message has blob URLs or data URLs (which would cause validateUIMessages to fail)
+    const hasUnsupportedUrls = allMessagesForValidation.some((msg) =>
+      msg.parts?.some(
+        (part: any) =>
+          part.type === "file" &&
+          typeof part.url === "string" &&
+          (part.url.startsWith("blob:") || part.url.startsWith("data:")),
+      ),
+    );
+
+    let validatedMessages: typeof allMessagesForValidation;
+    if (hasUnsupportedUrls) {
+      // Skip validation for messages with blob URLs or data URLs to avoid download errors
+      // The AI SDK will handle the files appropriately during processing
+      validatedMessages = allMessagesForValidation;
+    } else {
+      // Validate messages to ensure they're properly formatted
+      validatedMessages = await validateUIMessages({
+        messages: allMessagesForValidation,
+      });
+    }
 
     // Use only the last MAX_MESSAGES_IN_CONTEXT messages for context
     const originalMessages = validatedMessages.slice(-MAX_MESSAGES_IN_CONTEXT);
@@ -222,9 +239,12 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
           });
 
           result.consumeStream();
+
           writer.merge(
             result.toUIMessageStream({
               sendStart: false,
+              sendSources: true,
+              sendReasoning: true,
             }),
           );
         },
