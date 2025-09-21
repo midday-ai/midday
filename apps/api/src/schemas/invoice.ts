@@ -1200,13 +1200,12 @@ export const invoiceResponseSchema = z
     pdfUrl: z.string().url().nullable().openapi({
       description: "URL to download the invoice PDF, or null if not generated",
       example:
-        "https://app.midday.ai/api/download/invoice?token=eyJhbGciOiJIUzI1NiJ9.eyJpZCI6ImM1NTEwNDA3LTkyMmQtNDllZC05MjZiLTE2NzhkNTQ4ZmQ5MCJ9.12X3Wb5UJ5I6yZ5l6-6U8TxIPqnySKUb0NMwSL4p44s",
+        "https://app.midday.ai/api/download/invoice?token=eef58951-1682-4062-b010-425866032390",
     }),
     previewUrl: z.string().url().nullable().openapi({
       description:
         "URL to preview the invoice in the browser, or null if not generated",
-      example:
-        "https://app.midday.ai/i/eyJhbGciOiJIUzI1NiJ9.eyJpZCI6IjBiNWM2MmIxLTgxMjYtNDdhMS1iNjNmLWM0NjhlM2Y5MTgzNiJ9.jvwUP4PXVUWyKZAgav5SV7wjAaf8biDXMDEYHLGA5qE",
+      example: "https://app.midday.ai/i/eef58951-1682-4062-b010-425866032390",
     }),
   })
   .openapi({
