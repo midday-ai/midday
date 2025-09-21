@@ -1,6 +1,7 @@
 "use client";
 
 import { FollowupQuestions } from "@/components/chat/followup-questions";
+import { useAudioRecording } from "@/hooks/use-audio-recording";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { useChatActions, useChatId, useChatStatus } from "@ai-sdk-tools/store";
@@ -8,16 +9,25 @@ import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import {
   PromptInput,
+  PromptInputActionAddAttachments,
+  PromptInputAttachment,
+  PromptInputAttachments,
+  PromptInputBody,
   PromptInputButton,
+  type PromptInputMessage,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputToolbar,
   PromptInputTools,
 } from "@midday/ui/prompt-input";
-import { useState } from "react";
+import { Spinner } from "@midday/ui/spinner";
+import { useCallback, useState } from "react";
 
 export function ChatInput() {
   const [input, setInput] = useState("");
+  const [webSearch, setWebSearch] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
   const { sendMessage } = useChatActions();
   const status = useChatStatus();
   const chatId = useChatId();
@@ -27,52 +37,166 @@ export function ChatInput() {
   });
   const isCanvasVisible = !!current;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    isRecording,
+    isProcessing,
+    startRecording,
+    stopRecording,
+    transcribeAudio,
+  } = useAudioRecording();
 
-    if (input.trim() && chatId) {
-      // Set chatId as query parameter using nuqs
-      setChatId(chatId);
+  const handleSubmit = async (message: PromptInputMessage) => {
+    const hasText = Boolean(message.text);
+    const hasAttachments = Boolean(message.files?.length);
 
-      sendMessage({
-        role: "user",
-        parts: [{ type: "text", text: input }],
-      });
-
-      setInput("");
+    if (!(hasText || hasAttachments)) {
+      return;
     }
+
+    if (!chatId) {
+      return;
+    }
+
+    // Set chatId as query parameter using nuqs
+    setChatId(chatId);
+
+    let processedFiles = message.files;
+
+    // Convert blob URLs to data URLs for server compatibility
+    if (message.files && message.files.length > 0) {
+      setIsUploading(true);
+      try {
+        processedFiles = await Promise.all(
+          message.files.map(async (file) => {
+            // If it's a blob URL, convert to data URL
+            if (file.url.startsWith("blob:")) {
+              const response = await fetch(file.url);
+              const blob = await response.blob();
+
+              // Convert blob to data URL
+              const dataUrl = await new Promise<string>((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.readAsDataURL(blob);
+              });
+
+              return {
+                ...file,
+                url: dataUrl,
+              };
+            }
+
+            // Return file as-is if not a blob URL
+            return file;
+          }),
+        );
+      } catch (error) {
+        console.error("Failed to process files:", error);
+        setIsUploading(false);
+        return;
+      }
+      setIsUploading(false);
+    }
+
+    sendMessage(
+      {
+        text: message.text || "Sent with attachments",
+        files: processedFiles,
+      },
+      // {
+      //   webSearch,
+      // },
+    );
+
+    setInput("");
   };
+
+  const handleRecordClick = useCallback(async () => {
+    if (isRecording) {
+      // Stop recording and transcribe
+      try {
+        const audioBlob = await stopRecording();
+
+        if (audioBlob) {
+          const transcribedText = await transcribeAudio(audioBlob);
+
+          if (transcribedText.trim()) {
+            setInput((prev) =>
+              prev ? `${prev} ${transcribedText}` : transcribedText,
+            );
+          }
+        }
+      } catch (error) {
+        console.error("Failed to process recording:", error);
+      }
+    } else {
+      // Start recording
+      try {
+        await startRecording();
+      } catch (error) {
+        console.error("Failed to start recording:", error);
+      }
+    }
+  }, [isRecording, stopRecording, startRecording, transcribeAudio]);
 
   return (
     <div
       className={cn(
-        "fixed bottom-8 left-[70px] z-20 px-6 transition-all duration-300 ease-in-out",
+        "fixed bottom-6 left-[70px] z-20 px-6 transition-all duration-300 ease-in-out",
         isCanvasVisible ? "right-[603px]" : "right-0",
       )}
     >
-      <div className="mx-auto w-full bg-[#F7F7F7] dark:bg-[#131313] pt-2 max-w-[770px] relative">
+      <div className="mx-auto w-full pt-2 max-w-[770px] relative">
         <FollowupQuestions />
 
-        <PromptInput onSubmit={handleSubmit}>
-          <PromptInputTextarea
-            onChange={(e) => setInput(e.target.value)}
-            maxHeight={30}
-            minHeight={30}
-            value={input}
-            placeholder="Ask me anything"
-            autoFocus
-          />
-          <PromptInputToolbar className="pb-1 px-4">
+        <PromptInput onSubmit={handleSubmit} globalDrop multiple>
+          <PromptInputBody>
+            <PromptInputAttachments>
+              {(attachment) => <PromptInputAttachment data={attachment} />}
+            </PromptInputAttachments>
+            <PromptInputTextarea
+              autoFocus
+              onChange={(e) => setInput(e.target.value)}
+              value={input}
+            />
+          </PromptInputBody>
+          <PromptInputToolbar>
             <PromptInputTools>
-              <PromptInputButton className="-ml-2">
-                <Icons.Add className="size-4" />
+              <PromptInputActionAddAttachments />
+              <PromptInputButton
+                onClick={() => setWebSearch(!webSearch)}
+                className={cn("size-6", webSearch && "text-primary")}
+              >
+                <Icons.Globle size={16} />
               </PromptInputButton>
             </PromptInputTools>
-            <PromptInputSubmit
-              status={status}
-              className="mr-0 mb-2"
-              size="icon"
-            />
+
+            <PromptInputTools>
+              <PromptInputButton
+                onClick={handleRecordClick}
+                disabled={isProcessing}
+                className={cn(
+                  "size-6 mr-2 transition-all duration-300",
+                  isRecording && "text-red-500",
+                  isProcessing && "opacity-50",
+                )}
+              >
+                {isProcessing ? (
+                  <Spinner size={16} />
+                ) : (
+                  <Icons.Record size={16} />
+                )}
+              </PromptInputButton>
+              <PromptInputSubmit
+                disabled={
+                  (!input && !status) ||
+                  isUploading ||
+                  isRecording ||
+                  isProcessing
+                }
+                status={status}
+              />
+            </PromptInputTools>
           </PromptInputToolbar>
         </PromptInput>
       </div>

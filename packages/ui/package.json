@@ -79,7 +79,8 @@
     "./suggestion": "./src/components/suggestion.tsx",
     "./text-shimmer": "./src/components/text-shimmer.tsx",
     "./text-effect": "./src/components/text-effect.tsx",
-    "./tool-call-indicator": "./src/components/tool-call-indicator.tsx"
+    "./tool-call-indicator": "./src/components/tool-call-indicator.tsx",
+    "./web-search-sources": "./src/components/web-search-sources.tsx"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",
@@ -121,6 +122,7 @@
     "cmdk": "1.1.1",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
+    "framer-motion": "^11.15.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.542.0",
     "postcss": "^8.5.3",

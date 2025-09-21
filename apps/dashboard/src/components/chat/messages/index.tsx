@@ -2,6 +2,10 @@
 
 import { MessageActions } from "@/components/chat/messages/message-indicators";
 import { ActiveToolCall, ThinkingMessage } from "@/components/message";
+import {
+  WebSearchSources,
+  extractWebSearchSources,
+} from "@/components/web-search-sources";
 import { useUserQuery } from "@/hooks/use-user";
 import { useChatMessages, useChatStatus } from "@ai-sdk-tools/store";
 import {
@@ -24,6 +28,39 @@ export function Messages() {
           <ConversationContent className="px-6 mx-auto mb-40 max-w-[770px]">
             {messages.map((message, messageIndex) => {
               const isLastMessage = messageIndex === messages.length - 1;
+
+              // Extract web search sources from assistant messages
+              const hasWebSearch =
+                message.role === "assistant" &&
+                message.parts?.some((part) =>
+                  part.type?.includes("web_search"),
+                );
+
+              const webSearchSources =
+                message.role === "assistant"
+                  ? message.parts?.flatMap((part) => {
+                      // Try multiple possible part type names
+                      if (
+                        (part.type === "tool-web_search" ||
+                          part.type === "tool-web_search_preview" ||
+                          part.type === "tool-webSearchPreview" ||
+                          part.type?.includes("web_search")) &&
+                        (part as any).output
+                      ) {
+                        return extractWebSearchSources((part as any).output);
+                      }
+
+                      // Also try to extract from text content if web search was used
+                      if (part.type === "text" && hasWebSearch) {
+                        const textSources = extractWebSearchSources(part.text);
+                        if (textSources.length > 0) {
+                          return textSources;
+                        }
+                      }
+
+                      return [];
+                    }) || []
+                  : [];
 
               return (
                 <div key={message.id} className="w-full">
@@ -53,7 +90,12 @@ export function Messages() {
                               }
 
                               // Show full tool output for tools that want to be displayed
-                              if (toolOutput) {
+                              // Hide web search tool output as we'll show sources separately
+                              if (
+                                toolOutput &&
+                                toolName !== "web_search" &&
+                                toolName !== "web_search_preview"
+                              ) {
                                 return (
                                   <Response
                                     key={`tool-result-${partIndex.toString()}`}
@@ -74,6 +116,12 @@ export function Messages() {
 
                             return null;
                           })}
+
+                          {/* Show web search sources at the end of assistant messages */}
+                          {message.role === "assistant" &&
+                            webSearchSources.length > 0 && (
+                              <WebSearchSources sources={webSearchSources} />
+                            )}
                         </MessageContent>
 
                         {message.role === "user" && user && (

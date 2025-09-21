@@ -15,6 +15,7 @@ import { teamsRouter } from "./teams";
 import { trackerEntriesRouter } from "./tracker-entries";
 import { trackerProjectsRouter } from "./tracker-projects";
 import { transactionsRouter } from "./transactions";
+import { transcriptionRouter } from "./transcription";
 import { usersRouter } from "./users";
 
 const routers = new OpenAPIHono();
@@ -41,5 +42,6 @@ routers.route("/reports", reportsRouter);
 routers.route("/tracker-projects", trackerProjectsRouter);
 routers.route("/tracker-entries", trackerEntriesRouter);
 routers.route("/chat", chatRouter);
+routers.route("/transcription", transcriptionRouter);
 
 export { routers };
