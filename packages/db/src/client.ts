@@ -3,7 +3,6 @@ import { Pool } from "pg";
 import { withReplicas } from "./replicas";
 import * as schema from "./schema";
 
-// Optimized connection configuration for stateful Fly VMs (3 instances)
 const isDevelopment = process.env.NODE_ENV === "development";
 
 const connectionConfig = {
