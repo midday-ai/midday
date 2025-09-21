@@ -20,7 +20,7 @@ import {
   PromptInputToolbar,
   PromptInputTools,
 } from "@midday/ui/prompt-input";
-import { Spinner } from "@midday/ui/spinner";
+import { RecordButton } from "@midday/ui/record-button";
 import { useCallback, useState } from "react";
 
 export function ChatInput() {
@@ -130,8 +130,9 @@ export function ChatInput() {
         console.error("Failed to process recording:", error);
       }
     } else {
-      // Start recording
+      // Start recording and reset input
       try {
+        setInput(""); // Reset input when starting to record
         await startRecording();
       } catch (error) {
         console.error("Failed to start recording:", error);
@@ -172,21 +173,12 @@ export function ChatInput() {
             </PromptInputTools>
 
             <PromptInputTools>
-              <PromptInputButton
+              <RecordButton
+                isRecording={isRecording}
+                isProcessing={isProcessing}
                 onClick={handleRecordClick}
-                disabled={isProcessing}
-                className={cn(
-                  "size-6 mr-2 transition-all duration-300",
-                  isRecording && "text-red-500",
-                  isProcessing && "opacity-50",
-                )}
-              >
-                {isProcessing ? (
-                  <Spinner size={16} />
-                ) : (
-                  <Icons.Record size={16} />
-                )}
-              </PromptInputButton>
+                size={16}
+              />
               <PromptInputSubmit
                 disabled={
                   (!input && !status) ||

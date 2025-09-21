@@ -490,7 +490,7 @@ export const PromptInputTextarea = ({
       className={cn(
         "w-full resize-none rounded-none border-none p-3 pt-4 shadow-none outline-none ring-0 text-sm",
         "field-sizing-content bg-transparent dark:bg-transparent placeholder:text-[rgba(102,102,102,0.5)]",
-        "max-h-[50px] min-h-[50px]",
+        "max-h-[55px] min-h-[55px]",
         "focus-visible:ring-0",
         className,
       )}
