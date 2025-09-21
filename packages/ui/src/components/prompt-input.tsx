@@ -17,15 +17,7 @@ import {
 } from "@midday/ui/select";
 import { Textarea } from "@midday/ui/textarea";
 import type { ChatStatus, FileUIPart } from "ai";
-import {
-  ImageIcon,
-  Loader2Icon,
-  PaperclipIcon,
-  PlusIcon,
-  SendIcon,
-  SquareIcon,
-  XIcon,
-} from "lucide-react";
+import { PaperclipIcon, PlusIcon, XIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 import {
   type ChangeEventHandler,
@@ -47,7 +39,6 @@ import {
   useState,
 } from "react";
 import { Icons } from "./icons";
-import { Spinner } from "./spinner";
 
 type AttachmentsContext = {
   files: (FileUIPart & { id: string })[];
@@ -610,9 +601,7 @@ export const PromptInputSubmit = ({
 }: PromptInputSubmitProps) => {
   let Icon = <Icons.ArrowUpward className="size-4" />;
 
-  if (status === "submitted") {
-    Icon = <Spinner className="size-3" />;
-  } else if (status === "streaming") {
+  if (status === "streaming") {
     Icon = <Icons.Stop className="size-4" />;
   } else if (status === "error") {
     Icon = <XIcon className="size-4" />;

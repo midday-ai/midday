@@ -45,26 +45,31 @@ export function CanvasChart({
         {legend && (
           <div className="flex gap-4 items-center" data-hide-in-pdf="true">
             {legend.items.map((item, index) => {
-              const getSquareStyle = () => {
-                const baseColor = item.color || "#707070";
+              const getSquareClasses = (type: string, color?: string) => {
+                const baseColor = color || "#707070";
 
-                switch (item.type) {
+                switch (type) {
                   case "solid":
-                    return {
-                      backgroundColor: item.color || "#000000",
-                    };
+                    return "w-2 h-2 flex-shrink-0 bg-primary";
                   case "dashed":
-                    return {
-                      backgroundColor: "transparent",
-                      border: `1px dashed ${baseColor}`,
-                    };
+                    return `w-2 h-2 flex-shrink-0 bg-transparent border border-dashed border-[${baseColor}]`;
+                  case "pattern":
+                    return "w-2 h-2 flex-shrink-0 bg-transparent";
+                  default:
+                    return `w-2 h-2 flex-shrink-0 bg-[${baseColor}]`;
+                }
+              };
+
+              const getSquareStyle = (type: string, color?: string) => {
+                const baseColor = color || "#707070";
+
+                switch (type) {
                   case "pattern":
                     return {
-                      backgroundColor: "transparent",
                       backgroundImage: `repeating-linear-gradient(45deg, ${baseColor}, ${baseColor} 1px, transparent 1px, transparent 2px)`,
                     };
                   default:
-                    return { backgroundColor: baseColor };
+                    return {};
                 }
               };
 
@@ -74,8 +79,8 @@ export function CanvasChart({
                   className="flex gap-2 items-center"
                 >
                   <div
-                    className="w-2 h-2 flex-shrink-0 border-0"
-                    style={getSquareStyle()}
+                    className={getSquareClasses(item.type, item.color)}
+                    style={getSquareStyle(item.type, item.color)}
                   />
                   <span className="text-[12px] text-[#707070] dark:text-[#666666] leading-none">
                     {item.label}
