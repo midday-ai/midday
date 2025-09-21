@@ -21,7 +21,9 @@ type Props = {
 };
 
 export function ChatInterface({ id, geo }: Props) {
-  const { current } = useArtifacts();
+  const { current } = useArtifacts({
+    exclude: ["chat-title", "followup-questions"],
+  });
   const isCanvasVisible = !!current;
   const { isHome, isChatPage, chatId: routeChatId } = useChatInterface();
 

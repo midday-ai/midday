@@ -78,7 +78,8 @@
     "./sources": "./src/components/sources.tsx",
     "./suggestion": "./src/components/suggestion.tsx",
     "./text-shimmer": "./src/components/text-shimmer.tsx",
-    "./text-effect": "./src/components/text-effect.tsx"
+    "./text-effect": "./src/components/text-effect.tsx",
+    "./tool-call-indicator": "./src/components/tool-call-indicator.tsx"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",
