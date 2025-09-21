@@ -5,7 +5,9 @@ import { cn } from "@midday/ui/cn";
 import { ProgressToast } from "./progress-toast";
 
 export function BaseCanvas({ children }: { children: React.ReactNode }) {
-  const { current } = useArtifacts();
+  const { current } = useArtifacts({
+    exclude: ["chat-title", "followup-questions"],
+  });
   const isCanvasVisible = !!current;
 
   // @ts-ignore TODO: fix this

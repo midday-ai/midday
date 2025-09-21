@@ -22,7 +22,9 @@ export function ChatInput() {
   const status = useChatStatus();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { current } = useArtifacts();
+  const { current } = useArtifacts({
+    exclude: ["chat-title", "followup-questions"],
+  });
   const isCanvasVisible = !!current;
 
   const handleSubmit = (e: React.FormEvent) => {

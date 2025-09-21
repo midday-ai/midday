@@ -7,6 +7,7 @@ import {
   CanvasHeader,
   CanvasSection,
 } from "@/components/canvas/base";
+import { CanvasContent } from "@/components/canvas/base/canvas-content";
 import { useUserQuery } from "@/hooks/use-user";
 import { formatAmount } from "@/utils/format";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
@@ -93,7 +94,7 @@ export function BurnRateCanvas() {
     <BaseCanvas>
       <CanvasHeader title="Analysis" isLoading={isLoading} />
 
-      <div className="flex-1 overflow-y-auto">
+      <CanvasContent>
         <div className="space-y-8">
           {/* Show chart as soon as we have burn rate data */}
           {showChart && (
@@ -131,7 +132,7 @@ export function BurnRateCanvas() {
             {data?.analysis?.summary}
           </CanvasSection>
         </div>
-      </div>
+      </CanvasContent>
     </BaseCanvas>
   );
 }

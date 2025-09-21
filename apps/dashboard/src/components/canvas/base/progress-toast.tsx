@@ -140,25 +140,15 @@ export function ProgressToast({
   }, []);
 
   useEffect(() => {
-    console.log("ProgressToast effect:", {
-      isVisible,
-      completed,
-      hasHandledCompletion: hasHandledCompletion.current,
-      shouldStayVisible,
-      isCompleting,
-    });
-
     // Show completion when completed is true and not already handled
     if (completed && !hasHandledCompletion.current) {
-      console.log("Showing completion step");
       hasHandledCompletion.current = true;
       setIsCompleting(true);
       setShouldStayVisible(true);
       setShowComplete(true);
 
       // Auto-hide after showing completion for 3 seconds
-      const timer = setTimeout(() => {
-        console.log("Timer fired, hiding completion");
+      setTimeout(() => {
         setShouldStayVisible(false);
         setShowComplete(false);
         setIsCompleting(false);
