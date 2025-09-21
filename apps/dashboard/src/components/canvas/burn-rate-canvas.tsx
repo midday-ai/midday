@@ -112,7 +112,6 @@ export function BurnRateCanvas() {
               <BurnRateChart
                 data={burnRateData}
                 height={320}
-                chartReadyToAnimate={true}
                 showLegend={false}
                 currency={data?.currency || "USD"}
                 locale={user?.locale ?? undefined}

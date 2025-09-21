@@ -24,7 +24,6 @@ interface BurnRateData {
 interface BurnRateChartProps {
   data: BurnRateData[];
   height?: number;
-  chartReadyToAnimate?: boolean;
   showLegend?: boolean;
   currency?: string;
   locale?: string;
@@ -73,7 +72,6 @@ const CustomTooltip = ({
 export function BurnRateChart({
   data,
   height = 320,
-  chartReadyToAnimate = false,
   currency = "USD",
   locale,
 }: BurnRateChartProps) {
@@ -190,10 +188,6 @@ export function BurnRateChart({
               strokeDasharray="5 5"
               dot={false}
               isAnimationActive={false}
-              style={{
-                opacity: chartReadyToAnimate ? 1 : 0,
-                transition: "opacity 0.3s ease-out",
-              }}
             />
           </ComposedChart>
         </ResponsiveContainer>
