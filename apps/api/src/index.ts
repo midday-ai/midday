@@ -64,10 +64,11 @@ app.get("/health/pools", async (c) => {
   try {
     const stats = getConnectionPoolStats();
 
-    // Determine health status
+    // Determine health status with proper priority
     let status = "healthy";
     const issues = [];
 
+    // Check for degraded conditions (highest priority)
     if (stats.summary.hasExhaustedPools) {
       status = "degraded";
       issues.push("Connection pools exhausted");
@@ -78,7 +79,8 @@ app.get("/health/pools", async (c) => {
       issues.push(`${stats.summary.totalWaiting} connections waiting`);
     }
 
-    if (stats.summary.utilizationPercent >= 80) {
+    // Only set warning if not already degraded
+    if (status !== "degraded" && stats.summary.utilizationPercent >= 80) {
       status = "warning";
       issues.push(
         `High connection usage: ${stats.summary.utilizationPercent}%`,
@@ -128,7 +130,7 @@ app.get("/health/db", async (c) => {
     return c.json({
       status: "healthy",
       timing: {
-        connectionTime: `${totalTime}ms`,
+        connectionTime: `${testStart - startTime}ms`,
         queryTime: `${queryTime}ms`,
         total: `${totalTime}ms`,
       },

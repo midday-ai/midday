@@ -191,12 +191,14 @@ if (process.env.NODE_ENV === "development") {
     const stats = getConnectionPoolStats();
     const primary = stats.pools.primary;
 
-    if (primary.active > 4) {
-      // Alert if more than half connections active
+    // Alert if more than half connections are active
+    const halfThreshold = Math.floor(primary.total / 2);
+    if (primary.active > halfThreshold) {
       console.warn("⚠️  High connection usage:", {
         active: primary.active,
         idle: primary.idle,
         total: primary.total,
+        threshold: halfThreshold,
         utilization: `${Math.round((primary.active / primary.total) * 100)}%`,
       });
     }
