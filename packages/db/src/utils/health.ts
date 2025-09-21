@@ -1,7 +1,6 @@
-import { connectDb } from "@db/client";
 import { sql } from "drizzle-orm";
+import { db } from "../client";
 
 export async function checkHealth() {
-  const db = await connectDb();
   await db.executeOnReplica(sql`SELECT 1`);
 }

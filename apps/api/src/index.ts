@@ -1,6 +1,7 @@
 import { trpcServer } from "@hono/trpc-server";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { getConnectionPoolStats } from "@midday/db/client";
+import { db } from "@midday/db/client";
 import { Scalar } from "@scalar/hono-api-reference";
 import { sql } from "drizzle-orm";
 import { cors } from "hono/cors";
@@ -116,9 +117,6 @@ app.get("/health/db", async (c) => {
   const startTime = Date.now();
 
   try {
-    const { connectDb } = await import("@midday/db/client");
-    const db = await connectDb();
-
     // Test with a simple query
     const testStart = Date.now();
     await db.execute(sql`SELECT 1 as test`);
