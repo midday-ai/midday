@@ -74,7 +74,7 @@ type CreateTeamParams = {
 
 // Helper function to create system categories for a new team
 async function createSystemCategoriesForTeam(
-  db: Database,
+  db: Database | any, // Accept both Database and transaction
   teamId: string,
   countryCode: string | null | undefined,
 ) {
@@ -152,45 +152,55 @@ async function createSystemCategoriesForTeam(
 }
 
 export const createTeam = async (db: Database, params: CreateTeamParams) => {
-  try {
-    const [newTeam] = await db
-      .insert(teams)
-      .values({
-        name: params.name,
-        baseCurrency: params.baseCurrency,
-        countryCode: params.countryCode,
-        logoUrl: params.logoUrl,
-        email: params.email,
-      })
-      .returning({ id: teams.id });
+  // Use transaction to ensure atomicity and prevent race conditions
+  return await db.transaction(async (tx) => {
+    try {
+      // Create the team
+      const [newTeam] = await tx
+        .insert(teams)
+        .values({
+          name: params.name,
+          baseCurrency: params.baseCurrency,
+          countryCode: params.countryCode,
+          logoUrl: params.logoUrl,
+          email: params.email,
+        })
+        .returning({ id: teams.id });
 
-    if (!newTeam?.id) {
-      throw new Error("Failed to create team.");
+      if (!newTeam?.id) {
+        throw new Error("Failed to create team.");
+      }
+
+      // Add user to team membership (atomic with team creation)
+      await tx.insert(usersOnTeam).values({
+        userId: params.userId,
+        teamId: newTeam.id,
+        role: "owner",
+      });
+
+      // Create system categories for the new team (atomic)
+      await createSystemCategoriesForTeam(tx, newTeam.id, params.countryCode);
+
+      // Optionally switch user to the new team (atomic)
+      if (params.switchTeam) {
+        await tx
+          .update(users)
+          .set({ teamId: newTeam.id })
+          .where(eq(users.id, params.userId));
+      }
+
+      return newTeam.id;
+    } catch (error) {
+      console.error("Team creation failed:", error);
+
+      // Re-throw with more specific error messages
+      if (error instanceof Error) {
+        throw error;
+      }
+
+      throw new Error("Failed to create team due to an unexpected error.");
     }
-
-    // Add user to team membership
-    await db.insert(usersOnTeam).values({
-      userId: params.userId,
-      teamId: newTeam.id,
-      role: "owner",
-    });
-
-    // Create system categories for the new team
-    await createSystemCategoriesForTeam(db, newTeam.id, params.countryCode);
-
-    // Optionally switch user to the new team
-    if (params.switchTeam) {
-      await db
-        .update(users)
-        .set({ teamId: newTeam.id })
-        .where(eq(users.id, params.userId));
-    }
-
-    return newTeam.id;
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to create team.");
-  }
+  });
 };
 
 export async function getTeamMembers(db: Database, teamId: string) {
