@@ -56,7 +56,7 @@ export function CanvasHeader({
   }
 
   return (
-    <div className={cn("flex items-center justify-between mb-8", className)}>
+    <div className={cn("flex items-center justify-between mb-4", className)}>
       <div>
         <h2 className="text-[12px] leading-[23px] text-[#707070] dark:text-[#666666]">
           {title}

@@ -45,6 +45,29 @@ export async function generateCanvasPdf(
       logging: false,
       removeContainer: true,
       imageTimeout: 0,
+      onclone: (clonedDoc) => {
+        // Inject fonts and fix chart text rendering
+
+        // Apply font directly to all SVG text elements
+        const allTextElements = clonedDoc.querySelectorAll(
+          "svg text, svg tspan",
+        );
+
+        for (const element of allTextElements) {
+          (element as HTMLElement).style.fontFamily =
+            "Hedvig Letters Sans, system-ui, sans-serif";
+          (element as HTMLElement).style.fontSize = "10px";
+        }
+
+        // Hide elements marked for PDF hiding
+        const hideElements = clonedDoc.querySelectorAll(
+          '[data-hide-in-pdf="true"]',
+        );
+
+        for (const element of hideElements) {
+          (element as HTMLElement).style.display = "none";
+        }
+      },
     });
 
     // Create PDF with the captured content
