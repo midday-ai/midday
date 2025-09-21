@@ -9,7 +9,7 @@ export const createToolRegistry = () => {
 
   return {
     getBurnRate: getBurnRateTool,
-    web_search_preview: openai.tools.webSearchPreview({
+    web_search: openai.tools.webSearch({
       searchContextSize: "medium",
       userLocation: {
         type: "approximate",

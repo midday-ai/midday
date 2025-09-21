@@ -9,7 +9,7 @@ export const toolDisplayConfig = {
     displayText: "Getting Burn Rate Data",
     icon: Icons.TrendingUp,
   },
-  web_search_preview: {
+  web_search: {
     displayText: "Searching the Web",
     icon: Icons.Search,
   },
