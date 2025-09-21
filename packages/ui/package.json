@@ -73,6 +73,7 @@
     "./loader": "./src/components/loader.tsx",
     "./message": "./src/components/message.tsx",
     "./prompt-input": "./src/components/prompt-input.tsx",
+    "./record-button": "./src/components/record-button.tsx",
     "./reasoning": "./src/components/reasoning.tsx",
     "./response": "./src/components/response.tsx",
     "./sources": "./src/components/sources.tsx",
