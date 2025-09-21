@@ -33,6 +33,12 @@ const iadPool = new Pool({
   ...connectionConfig,
 });
 
+const hasReplicas = Boolean(
+  process.env.DATABASE_FRA_URL &&
+    process.env.DATABASE_SJC_URL &&
+    process.env.DATABASE_IAD_URL,
+);
+
 // Connection pool monitoring function
 export const getConnectionPoolStats = () => {
   const getPoolStats = (pool: Pool, name: string) => {
@@ -125,37 +131,28 @@ const getReplicaIndexForRegion = () => {
 // Create the database instance once and export it
 const replicaIndex = getReplicaIndexForRegion();
 
-// For local development, check if we have replica URLs configured
-const hasReplicas =
-  process.env.DATABASE_FRA_URL &&
-  process.env.DATABASE_SJC_URL &&
-  process.env.DATABASE_IAD_URL;
-
-export const db = hasReplicas
-  ? withReplicas(
-      primaryDb,
-      [
-        // Order of replicas is important
-        drizzle(fraPool, {
-          schema,
-          casing: "snake_case",
-        }),
-        drizzle(iadPool, {
-          schema,
-          casing: "snake_case",
-        }),
-        drizzle(sjcPool, {
-          schema,
-          casing: "snake_case",
-        }),
-      ],
-      (replicas) => replicas[replicaIndex]!,
-    )
-  : withReplicas(primaryDb, [primaryDb], () => primaryDb); // Always use replicated wrapper for consistent API
+export const db = withReplicas(
+  primaryDb,
+  [
+    // Order of replicas is important
+    drizzle(fraPool, {
+      schema,
+      casing: "snake_case",
+    }),
+    drizzle(iadPool, {
+      schema,
+      casing: "snake_case",
+    }),
+    drizzle(sjcPool, {
+      schema,
+      casing: "snake_case",
+    }),
+  ],
+  (replicas) => replicas[replicaIndex]!,
+);
 
 // Keep connectDb for backward compatibility, but just return the singleton
 export const connectDb = async () => {
-  console.log("🔌 Using singleton DB instance");
   return db;
 };
 

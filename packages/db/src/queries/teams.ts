@@ -74,7 +74,7 @@ type CreateTeamParams = {
 
 // Helper function to create system categories for a new team
 async function createSystemCategoriesForTeam(
-  db: Database | any, // Accept both Database and transaction
+  db: Database,
   teamId: string,
   countryCode: string | null | undefined,
 ) {
@@ -179,6 +179,7 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
       });
 
       // Create system categories for the new team (atomic)
+      // @ts-expect-error - tx is a PgTransaction
       await createSystemCategoriesForTeam(tx, newTeam.id, params.countryCode);
 
       // Optionally switch user to the new team (atomic)
