@@ -12,11 +12,13 @@ import * as schema from "./schema";
  * - Separate disconnect function for lifecycle management
  */
 export const createJobDb = () => {
+  const isDevelopment = process.env.NODE_ENV === "development";
+
   const jobPool = new Pool({
     connectionString: process.env.DATABASE_PRIMARY_URL!,
     max: 1, // Critical: only 1 connection per job to avoid flooding Supabase pooler
-    idleTimeoutMillis: 10000, // Free idle clients very quickly (10 seconds)
-    connectionTimeoutMillis: 10000, // 10 second connection timeout
+    idleTimeoutMillis: isDevelopment ? 5000 : 60000, // Match main client config
+    connectionTimeoutMillis: 15000, // Match main client config
     maxUses: 0, // No limit on connection reuse for jobs
     allowExitOnIdle: true,
   });
