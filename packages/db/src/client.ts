@@ -1,5 +1,5 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import { withReplicas } from "./replicas";
 import * as schema from "./schema";
 
@@ -7,66 +7,43 @@ import * as schema from "./schema";
 const isDevelopment = process.env.NODE_ENV === "development";
 
 const connectionConfig = {
-  prepare: false,
-  max: isDevelopment ? 3 : 4, // CONSERVATIVE: 2→4 for production (was 8)
-  idle_timeout: isDevelopment ? 30 : 90, // Keep longer timeout in prod
-  max_lifetime: isDevelopment ? 60 * 2 : 0, // Keep infinite lifetime in prod initially
-  connect_timeout: 15, // Longer timeout for better reliability
-  // Enhanced connection lifecycle logging
-  onnotice: (notice: any) => {
-    console.log("🔔 DB Notice:", notice);
-  },
-  onconnect: (connection: any) => {
-    console.log("🔗 Connection opened:", {
-      processID: connection.processID,
-      timestamp: new Date().toISOString(),
-      stack: new Error().stack?.split("\n").slice(1, 4).join("\n"), // Show call stack
-    });
-  },
-  onclose: (connection: any) => {
-    console.log("🔒 Connection closed:", {
-      processID: connection.processID,
-      timestamp: new Date().toISOString(),
-    });
-  },
-  debug:
-    process.env.NODE_ENV === "development"
-      ? (connection: any, query: string) => {
-          if (
-            query.includes("SELECT") ||
-            query.includes("INSERT") ||
-            query.includes("UPDATE")
-          ) {
-            console.log("🔍 Query executed:", {
-              processID: connection.processID,
-              query:
-                query.substring(0, 100) + (query.length > 100 ? "..." : ""),
-              timestamp: new Date().toISOString(),
-            });
-          }
-        }
-      : undefined,
+  max: isDevelopment ? 8 : 12,
+  idleTimeoutMillis: isDevelopment ? 5000 : 60000,
+  connectionTimeoutMillis: 15000,
+  maxUses: isDevelopment ? 100 : 0,
+  allowExitOnIdle: true,
 };
 
-const primaryPool = postgres(
-  process.env.DATABASE_PRIMARY_URL!,
-  connectionConfig,
-);
+const primaryPool = new Pool({
+  connectionString: process.env.DATABASE_PRIMARY_URL!,
+  ...connectionConfig,
+});
 
-const fraPool = postgres(process.env.DATABASE_FRA_URL!, connectionConfig);
-const sjcPool = postgres(process.env.DATABASE_SJC_URL!, connectionConfig);
-const iadPool = postgres(process.env.DATABASE_IAD_URL!, connectionConfig);
+const fraPool = new Pool({
+  connectionString: process.env.DATABASE_FRA_URL!,
+  ...connectionConfig,
+});
+
+const sjcPool = new Pool({
+  connectionString: process.env.DATABASE_SJC_URL!,
+  ...connectionConfig,
+});
+
+const iadPool = new Pool({
+  connectionString: process.env.DATABASE_IAD_URL!,
+  ...connectionConfig,
+});
 
 // Connection pool monitoring function
 export const getConnectionPoolStats = () => {
-  const getPoolStats = (pool: any, name: string) => {
+  const getPoolStats = (pool: Pool, name: string) => {
     try {
       return {
         name,
-        total: pool.options?.max || 0,
-        idle: pool.idle?.length || 0,
-        active: (pool.options?.max || 0) - (pool.idle?.length || 0),
-        waiting: pool.waiting?.length || 0,
+        total: pool.options.max || 0,
+        idle: pool.idleCount || 0,
+        active: pool.totalCount - pool.idleCount,
+        waiting: pool.waitingCount || 0,
         ended: pool.ended || false,
       };
     } catch (error) {
@@ -108,7 +85,7 @@ export const getConnectionPoolStats = () => {
       (pool.active || 0) >= (pool.total || 0) || (pool.waiting || 0) > 0,
   );
 
-  const connectionsPerPool = isDevelopment ? 3 : 4; // Match the actual config
+  const connectionsPerPool = isDevelopment ? 8 : 12; // Match the actual config
   const totalConnections = hasReplicas
     ? connectionsPerPool * 4
     : connectionsPerPool;
@@ -182,28 +159,6 @@ export const connectDb = async () => {
   console.log("🔌 Using singleton DB instance");
   return db;
 };
-
-// Start periodic monitoring in development
-if (process.env.NODE_ENV === "development") {
-  console.log("🔍 Starting connection monitoring in development mode");
-
-  setInterval(() => {
-    const stats = getConnectionPoolStats();
-    const primary = stats.pools.primary;
-
-    // Alert if more than half connections are active
-    const halfThreshold = Math.floor(primary.total / 2);
-    if (primary.active > halfThreshold) {
-      console.warn("⚠️  High connection usage:", {
-        active: primary.active,
-        idle: primary.idle,
-        total: primary.total,
-        threshold: halfThreshold,
-        utilization: `${Math.round((primary.active / primary.total) * 100)}%`,
-      });
-    }
-  }, 10000); // Every 10 seconds
-}
 
 export type Database = Awaited<ReturnType<typeof connectDb>>;
 
