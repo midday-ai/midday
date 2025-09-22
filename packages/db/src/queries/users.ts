@@ -1,5 +1,6 @@
 import type { Database } from "@db/client";
 import { teams, users, usersOnTeam } from "@db/schema";
+import { teamPermissionsCache } from "@midday/cache/team-permissions-cache";
 import { eq, inArray, sql } from "drizzle-orm";
 
 export const getUserById = async (db: Database, id: string) => {
@@ -68,6 +69,12 @@ export const updateUser = async (db: Database, data: UpdateUserParams) => {
       timezoneAutoSync: users.timezoneAutoSync,
       teamId: users.teamId,
     });
+
+  // If teamId was updated, invalidate the team permissions cache
+  if (updateData.teamId !== undefined) {
+    const cacheKey = `user:${id}:team`;
+    await teamPermissionsCache.delete(cacheKey);
+  }
 
   return result;
 };

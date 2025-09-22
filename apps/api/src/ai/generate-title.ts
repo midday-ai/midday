@@ -1,4 +1,5 @@
 import { openai } from "@ai-sdk/openai";
+import { safeValue } from "@api/ai/utils/safe-value";
 import { TZDate } from "@date-fns/tz";
 import type { ChatUserContext } from "@midday/cache/chat-cache";
 import { logger } from "@midday/logger";
@@ -60,12 +61,12 @@ export const generateTitle = async ({
       - "Budget vs Actual Reporting"
 
       Current date and time: ${tzDate.toISOString()}
-      Team name: ${teamName}
-      Company registered in: ${countryCode}
-      Base currency: ${baseCurrency}
-      User full name: ${fullName}
-      User current city: ${city}
-      User current country: ${country}
+      Team name: ${safeValue(teamName)}
+      Company registered in: ${safeValue(countryCode)}
+      Base currency: ${safeValue(baseCurrency)}
+      User full name: ${safeValue(fullName)}
+      User current city: ${safeValue(city)}
+      User current country: ${safeValue(country)}
       User local timezone: ${userTimezone}
       `,
       prompt: message,
