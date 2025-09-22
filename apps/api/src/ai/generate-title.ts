@@ -20,7 +20,6 @@ export const generateTitle = async ({
   fullName,
   baseCurrency,
   city,
-  region,
   timezone,
   countryCode,
 }: Params) => {
@@ -38,27 +37,33 @@ export const generateTitle = async ({
       schema: z.object({
         title: z.string().describe("The title of the chat"),
       }),
-      temperature: 0.7,
+      temperature: 0.2,
       system: `
-      You will generate a short title based on the first message a user begins a conversation with.
-      - Ensure the title is not more than 50 characters long.
-      - The title should be a summary of the user's message.
-      - Do not use quotes or colons in the title.
-      - Return only the title, nothing else.
+      You will generate a short, natural title based on the user's message.
+      - Keep titles under 50 characters
+      - Use natural, conversational language that sounds like what a user would say
+      - Avoid technical jargon, "advanced", "comprehensive", or "sophisticated" terminology
+      - Make titles simple and clear
+      - Return only the title, nothing else
 
-      Fallback Rules:
-      - If the message is too vague or generic (like "hello", "hi", "help"), return "New Chat"
-      - Only generate a financial title if there's clear financial intent or context in the message
+      Examples of good natural titles:
+      - "Latest transactions"
+      - "Monthly expenses" 
+      - "Burn rate analysis"
+      - "Q1 spending review"
+      - "Recent payments"
+      - "Cash flow overview"
+      - "Expense breakdown"
+      - "Financial summary"
+      - "Transaction search"
+      - "Pending transactions"
 
-      Examples of financial-focused titles:
-      - "January 2024 Expense Reconciliation"
-      - "2023-2024 Revenue Growth Analysis"
-      - "Q1 Cash Flow Forecasting"  
-      - "2023 Tax Optimization Review"
-      - "December AR Aging Report"
-      - "Q3 Margin Analysis & KPIs"
-      - "Monthly Burn Rate Tracking"
-      - "Budget vs Actual Reporting"
+      Avoid these patterns:
+      - "Advanced transaction analysis"
+      - "Comprehensive financial reporting"
+      - "Detailed expense reconciliation"
+      - "Sophisticated burn rate metrics"
+      - "Complex financial insights"
 
       Current date and time: ${tzDate.toISOString()}
       Team name: ${safeValue(teamName)}

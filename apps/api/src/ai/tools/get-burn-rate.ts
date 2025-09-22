@@ -7,14 +7,9 @@ import { generateFollowupQuestions } from "../utils/generate-followup-questions"
 import { getBurnRateSchema } from "./schema";
 
 export const getBurnRateTool = tool({
-  description: `Get current burn rate data and basic financial metrics.
-  
-Returns simple data including:
-- Current monthly burn rate
-- Cash runway in months
-- Top spending category
-- Burn rate change percentage`,
-  inputSchema: getBurnRateSchema.omit({ showCanvas: true }), // Remove showCanvas since this is data-only
+  description:
+    "Calculate and analyze monthly cash burn rate, showing how much money the business spends each month. Use this tool when users ask about spending patterns, cash flow analysis, or want to understand their monthly expenses and financial runway.",
+  inputSchema: getBurnRateSchema.omit({ showCanvas: true }),
   execute: async function* ({ from, to, currency }) {
     try {
       const context = getContext();

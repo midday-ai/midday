@@ -15,6 +15,7 @@ import {
 } from "@midday/ui/conversation";
 import { Message, MessageAvatar, MessageContent } from "@midday/ui/message";
 import { Response } from "@midday/ui/response";
+import { Fragment } from "react";
 
 export function Messages() {
   const messages = useChatMessages();
@@ -26,122 +27,104 @@ export function Messages() {
       <div className="flex flex-col h-full w-full">
         <Conversation className="h-full w-full">
           <ConversationContent className="px-6 mx-auto mb-40 max-w-[770px]">
-            {messages.map((message, messageIndex) => {
-              const isLastMessage = messageIndex === messages.length - 1;
-
-              // Extract web search sources from assistant messages
-              const hasWebSearch =
-                message.role === "assistant" &&
-                message.parts?.some((part) =>
-                  part.type?.includes("web_search"),
-                );
-
-              const webSearchSources =
-                message.role === "assistant"
-                  ? message.parts?.flatMap((part) => {
-                      // Try multiple possible part type names
-                      if (
-                        (part.type === "tool-web_search" ||
-                          part.type === "tool-web_search_preview" ||
-                          part.type === "tool-webSearchPreview" ||
-                          part.type?.includes("web_search")) &&
-                        (part as any).output
-                      ) {
-                        return extractWebSearchSources((part as any).output);
+            {messages.map((message) => (
+              <div key={message.id}>
+                {/* {message.role === 'assistant' && message.parts.filter((part) => part.type === 'source-url').length > 0 && (
+                  <Sources>
+                    <SourcesTrigger
+                      count={
+                        message.parts.filter(
+                          (part) => part.type === 'source-url',
+                        ).length
                       }
+                    />
+                    {message.parts.filter((part) => part.type === 'source-url').map((part, i) => (
+                      <SourcesContent key={`${message.id}-${i}`}>
+                        <Source
+                          key={`${message.id}-${i}`}
+                          href={part.url}
+                          title={part.url}
+                        />
+                      </SourcesContent>
+                    ))}
+                  </Sources>
+                )} */}
+                {message.parts.map((part, i) => {
+                  switch (part.type) {
+                    case "data-data-canvas":
+                      return null; // Canvas content is rendered in sidebar
 
-                      // Also try to extract from text content if web search was used
-                      if (part.type === "text" && hasWebSearch) {
-                        const textSources = extractWebSearchSources(part.text);
-                        if (textSources.length > 0) {
-                          return textSources;
-                        }
-                      }
-
-                      return [];
-                    }) || []
-                  : [];
-
-              return (
-                <div key={message.id} className="w-full">
-                  {message.role !== "system" && (
-                    <>
-                      <Message from={message.role} key={message.id}>
-                        <MessageContent>
-                          {message.parts?.map((part, partIndex) => {
-                            // Canvas parts are handled by the canvas sidebar, not rendered inline
-                            if (part.type === "data-data-canvas") {
-                              return null; // Canvas content is rendered in sidebar
-                            }
-
-                            if (part.type?.startsWith("tool-")) {
-                              const toolOutput = (part as any).output;
-                              // Extract tool name from part.type (e.g., "tool-getBurnRate" -> "getBurnRate")
-                              const toolName = part.type.replace("tool-", "");
-
-                              // Show tool call indicator if no output yet (tool is still running)
-                              if (toolName && !toolOutput) {
-                                return (
-                                  <ActiveToolCall
-                                    key={`tool-call-${partIndex.toString()}`}
-                                    toolName={toolName}
-                                  />
-                                );
-                              }
-
-                              // Show full tool output for tools that want to be displayed
-                              // Hide web search tool output as we'll show sources separately
-                              if (
-                                toolOutput &&
-                                toolName !== "web_search" &&
-                                toolName !== "web_search_preview"
-                              ) {
-                                return (
-                                  <Response
-                                    key={`tool-result-${partIndex.toString()}`}
-                                  >
-                                    {toolOutput?.content || toolOutput}
-                                  </Response>
-                                );
-                              }
-                            }
-
-                            if (part.type === "text") {
-                              return (
-                                <Response key={`text-${partIndex.toString()}`}>
-                                  {part.text}
-                                </Response>
-                              );
-                            }
-
-                            return null;
-                          })}
-
-                          {/* Show web search sources at the end of assistant messages */}
+                    case "text":
+                      return (
+                        <Fragment key={`${message.id}-${i}`}>
+                          <Message from={message.role}>
+                            <MessageContent>
+                              <Response>{part.text}</Response>
+                            </MessageContent>
+                          </Message>
                           {message.role === "assistant" &&
-                            webSearchSources.length > 0 && (
-                              <WebSearchSources sources={webSearchSources} />
+                            i === messages.length - 1 && (
+                              // <Actions className="mt-2">
+                              //   <Action
+                              //     onClick={() => regenerate()}
+                              //     label="Retry"
+                              //   >
+                              //     <RefreshCcwIcon className="size-3" />
+                              //   </Action>
+                              //   <Action
+                              //     onClick={() =>
+                              //       navigator.clipboard.writeText(part.text)
+                              //     }
+                              //     label="Copy"
+                              //   >
+                              //     <CopyIcon className="size-3" />
+                              //   </Action>
+                              // </Actions>
+                              <MessageActions />
                             )}
-                        </MessageContent>
+                        </Fragment>
+                      );
+                    // case 'reasoning':
+                    //   return (
+                    //     <Reasoning
+                    //       key={`${message.id}-${i}`}
+                    //       className="w-full"
+                    //       isStreaming={status === 'streaming' && i === message.parts.length - 1 && message.id === messages.at(-1)?.id}
+                    //     >
+                    //       <ReasoningTrigger />
+                    //       <ReasoningContent>{part.text}</ReasoningContent>
+                    //     </Reasoning>
+                    //   );
+                    // case "tool-getTransactions":
+                    //   return (
+                    //     <Fragment key={`${message.id}-${i}`}>
+                    //       <Message from={message.role}>
+                    //         <MessageContent>
+                    //           <Response>{part.output as string}</Response>
+                    //         </MessageContent>
+                    //       </Message>
+                    //     </Fragment>
+                    //   );
+                    default: {
+                      if (part.type?.startsWith("tool-")) {
+                        console.log(part);
+                        return (
+                          <Fragment key={`${message.id}-${i}`}>
+                            <Message from={message.role}>
+                              <MessageContent>
+                                <Response>{part.output as string}</Response>
+                              </MessageContent>
+                            </Message>
+                          </Fragment>
+                        );
+                      }
 
-                        {message.role === "user" && user && (
-                          <MessageAvatar
-                            src={user.avatarUrl!}
-                            name={user.fullName!}
-                          />
-                        )}
-                      </Message>
-
-                      {message.role === "assistant" &&
-                        (!isLastMessage ||
-                          (isLastMessage && status !== "streaming")) && (
-                          <MessageActions />
-                        )}
-                    </>
-                  )}
-                </div>
-              );
-            })}
+                      return null;
+                    }
+                  }
+                })}
+              </div>
+            ))}
 
             {status === "submitted" && <ThinkingMessage />}
           </ConversationContent>

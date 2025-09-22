@@ -1,4 +1,3 @@
-import type { ToolName } from "@api/ai/tools/registry";
 import { TextShimmer } from "@midday/ui/text-shimmer";
 import {
   type SupportedToolName,

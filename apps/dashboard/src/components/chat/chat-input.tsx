@@ -98,15 +98,13 @@ export function ChatInput() {
       setIsUploading(false);
     }
 
-    sendMessage(
-      {
-        text: message.text || "Sent with attachments",
-        files: processedFiles,
+    sendMessage({
+      text: message.text || "Sent with attachments",
+      files: processedFiles,
+      metadata: {
+        webSearch,
       },
-      // {
-      //   webSearch,
-      // },
-    );
+    });
 
     setInput("");
   };
