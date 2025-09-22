@@ -20,6 +20,9 @@ if (process.env.NODE_ENV === "production") {
 
     // Disable debug
     debug: false,
+
+    replaysSessionSampleRate: 0.1, // 10% of sessions
+    replaysOnErrorSampleRate: 1.0, // 100% of sessions with errors
   });
 
   onRouterTransitionStart = Sentry.captureRouterTransitionStart;

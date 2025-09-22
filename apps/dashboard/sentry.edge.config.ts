@@ -19,5 +19,9 @@ if (process.env.NODE_ENV === "production") {
 
     // Disable debug
     debug: false,
+
+    // Enable session replay for debugging team creation issues
+    replaysSessionSampleRate: 0.1, // 10% of sessions
+    replaysOnErrorSampleRate: 1.0, // 100% of sessions with errors
   });
 }
