@@ -214,7 +214,7 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
             model: openai("gpt-4o-mini"),
             system: generateSystemPrompt(userContext, isToolCallMessage),
             messages: convertToModelMessages(originalMessages),
-            temperature: 0.7,
+            temperature: 0.6,
             stopWhen: (step) => {
               // Stop if we've reached 10 steps (original condition)
               if (stepCountIs(10)(step)) {
