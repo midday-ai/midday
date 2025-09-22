@@ -3,6 +3,7 @@
 import { type ComponentProps, memo } from "react";
 import { Streamdown } from "streamdown";
 import { cn } from "../utils";
+import { Table } from "./table";
 
 type ResponseProps = ComponentProps<typeof Streamdown>;
 
@@ -97,6 +98,7 @@ export const Response = memo(
             {children}
           </h4>
         ),
+        table: (props) => <Table {...props} className="border" />,
       }}
       {...props}
     />
