@@ -44,7 +44,6 @@
     "jose": "^6.0.11",
     "nanoid": "^5.1.5",
     "pino": "^9.7.0",
-    "postgres": "^3.4.7",
     "resend": "^4.6.0",
     "snakecase-keys": "^8.0.1",
     "superjson": "^2.2.2",

@@ -3,7 +3,7 @@ import { verifyAccessToken } from "@api/utils/auth";
 import type { Session } from "@api/utils/auth";
 import { getGeoContext } from "@api/utils/geo";
 import type { Database } from "@midday/db/client";
-import { connectDb } from "@midday/db/client";
+import { db } from "@midday/db/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { TRPCError, initTRPC } from "@trpc/server";
 import type { Context } from "hono";
@@ -26,7 +26,8 @@ export const createTRPCContext = async (
   const accessToken = c.req.header("Authorization")?.split(" ")[1];
   const session = await verifyAccessToken(accessToken);
   const supabase = await createClient(accessToken);
-  const db = await connectDb();
+
+  // Use the singleton database instance - no need for caching
   const geo = getGeoContext(c.req);
 
   return {

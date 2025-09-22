@@ -1,5 +1,5 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import type { Database } from "./client";
 import * as schema from "./schema";
 
@@ -12,12 +12,15 @@ import * as schema from "./schema";
  * - Separate disconnect function for lifecycle management
  */
 export const createJobDb = () => {
-  const jobPool = postgres(process.env.DATABASE_PRIMARY_POOLER_URL!, {
-    prepare: false,
+  const isDevelopment = process.env.NODE_ENV === "development";
+
+  const jobPool = new Pool({
+    connectionString: process.env.DATABASE_PRIMARY_POOLER_URL!,
     max: 1, // Critical: only 1 connection per job to avoid flooding Supabase pooler
-    idle_timeout: 10, // Free idle clients very quickly (10 seconds)
-    max_lifetime: 60 * 30, // Close connections after 30 minutes
-    connect_timeout: 10, // 10 second connection timeout
+    idleTimeoutMillis: isDevelopment ? 5000 : 60000, // Match main client config
+    connectionTimeoutMillis: 15000, // Match main client config
+    maxUses: 0, // No limit on connection reuse for jobs
+    allowExitOnIdle: true,
   });
 
   const db = drizzle(jobPool, {

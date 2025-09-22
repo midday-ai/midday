@@ -4,7 +4,11 @@ import type { PgDatabase } from "drizzle-orm/pg-core";
 import type { TablesRelationalConfig } from "drizzle-orm/relations";
 
 export type ReplicatedDatabase<Q extends PgDatabase<any, any, any>> = Q & {
-  executeOnReplica: Q["execute"];
+  executeOnReplica: <
+    TRow extends Record<string, unknown> = Record<string, unknown>,
+  >(
+    query: string | any,
+  ) => Promise<TRow[]>;
   transactionOnReplica: Q["transaction"];
   usePrimaryOnly: () => ReplicatedDatabase<Q>;
 };
@@ -29,55 +33,72 @@ export const withReplicas = <
   const createDatabase = (usePrimary = false): ReplicatedDatabase<Q> => {
     const getDbForRead = () => (usePrimary ? primary : getReplica(replicas));
 
-    const select: Q["select"] = (...args: []) => getDbForRead().select(...args);
-    const selectDistinct: Q["selectDistinct"] = (...args: []) =>
-      getDbForRead().selectDistinct(...args);
-    const selectDistinctOn: Q["selectDistinctOn"] = (...args: [any]) =>
-      getDbForRead().selectDistinctOn(...args);
-    const $count: Q["$count"] = (...args: [any]) =>
-      getDbForRead().$count(...args);
-    const _with: Q["with"] = (...args: any) => getDbForRead().with(...args);
-    const $with: Q["$with"] = (arg: any) => getDbForRead().$with(arg) as any;
+    const executeOnReplica = async <
+      TRow extends Record<string, unknown> = Record<string, unknown>,
+    >(
+      query: string | any,
+    ): Promise<TRow[]> => {
+      const result = await getDbForRead().execute(query);
+      // Handle both QueryResult and direct array results
+      if (Array.isArray(result)) {
+        return result as TRow[];
+      }
+      return (result as any).rows as TRow[];
+    };
 
-    const executeOnReplica: Q["execute"] = (...args: [any]) =>
-      getDbForRead().execute(...args);
-    const transactionOnReplica: Q["transaction"] = (...args: [any]) =>
-      getDbForRead().transaction(...args);
-
-    const update: Q["update"] = (...args: [any]) => primary.update(...args);
-    const insert: Q["insert"] = (...args: [any]) => primary.insert(...args);
-    const $delete: Q["delete"] = (...args: [any]) => primary.delete(...args);
-    const execute: Q["execute"] = (...args: [any]) => primary.execute(...args);
-    const transaction: Q["transaction"] = (...args: [any]) =>
-      primary.transaction(...args);
-    const refreshMaterializedView: Q["refreshMaterializedView"] = (
-      ...args: [any]
-    ) => primary.refreshMaterializedView(...args);
+    const transactionOnReplica = getDbForRead().transaction;
 
     const usePrimaryOnly = (): ReplicatedDatabase<Q> => createDatabase(true);
 
     return {
       ...primary,
-      update,
-      insert,
-      delete: $delete,
-      execute,
-      transaction,
-      executeOnReplica,
-      transactionOnReplica,
-      refreshMaterializedView,
-      $primary: primary,
-      usePrimaryOnly,
-      select,
-      selectDistinct,
-      selectDistinctOn,
-      $count,
-      $with,
-      with: _with,
+      // Override methods to route to appropriate database
+      get select() {
+        return getDbForRead().select;
+      },
+      get selectDistinct() {
+        return getDbForRead().selectDistinct;
+      },
+      get selectDistinctOn() {
+        return getDbForRead().selectDistinctOn;
+      },
+      get $count() {
+        return getDbForRead().$count;
+      },
+      get with() {
+        return getDbForRead().with;
+      },
+      get $with() {
+        return getDbForRead().$with;
+      },
       get query() {
         return getDbForRead().query;
       },
-    };
+      // Write operations always go to primary
+      get update() {
+        return primary.update;
+      },
+      get insert() {
+        return primary.insert;
+      },
+      get delete() {
+        return primary.delete;
+      },
+      get execute() {
+        return primary.execute;
+      },
+      get transaction() {
+        return primary.transaction;
+      },
+      get refreshMaterializedView() {
+        return primary.refreshMaterializedView;
+      },
+      // Replica-specific methods
+      executeOnReplica,
+      transactionOnReplica,
+      $primary: primary,
+      usePrimaryOnly,
+    } as ReplicatedDatabase<Q>;
   };
 
   return createDatabase(false);
