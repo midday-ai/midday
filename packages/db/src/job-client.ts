@@ -15,7 +15,7 @@ export const createJobDb = () => {
   const isDevelopment = process.env.NODE_ENV === "development";
 
   const jobPool = new Pool({
-    connectionString: process.env.DATABASE_PRIMARY_URL!,
+    connectionString: process.env.DATABASE_PRIMARY_POOLER_URL!,
     max: 1, // Critical: only 1 connection per job to avoid flooding Supabase pooler
     idleTimeoutMillis: isDevelopment ? 5000 : 60000, // Match main client config
     connectionTimeoutMillis: 15000, // Match main client config
