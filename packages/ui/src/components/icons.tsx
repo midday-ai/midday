@@ -604,7 +604,6 @@ export const Icons = {
   ThumbUpOutline: MdOutlineThumbUp,
   ThumbDownOutline: MdOutlineThumbDown,
   RefreshOutline: MdOutlineRefresh,
-  InfoOutline: MdOutlineInfo,
   Globle: MdOutlineLanguage,
   Record: MdOutlineGraphicEq,
 };
