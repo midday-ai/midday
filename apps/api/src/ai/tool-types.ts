@@ -2,6 +2,7 @@ import { openai } from "@ai-sdk/openai";
 import type { InferUITools } from "ai";
 import { getContext } from "./context";
 import { getBurnRateTool } from "./tools/get-burn-rate";
+import { getBurnRateAnalysisTool } from "./tools/get-burn-rate-analysis";
 
 // Tool registry function - this creates the actual tool implementations
 export const createToolRegistry = () => {
@@ -9,6 +10,7 @@ export const createToolRegistry = () => {
 
   return {
     getBurnRate: getBurnRateTool,
+    getBurnRateAnalysis: getBurnRateAnalysisTool,
     web_search: openai.tools.webSearch({
       searchContextSize: "medium",
       userLocation: {
