@@ -16,21 +16,8 @@ import { safeValue } from "../utils/safe-value";
 import { getBurnRateSchema } from "./schema";
 
 export const getBurnRateAnalysisTool = tool({
-  description: `Generate comprehensive burn rate analysis with visual dashboard, charts, and detailed insights.
-  
-This tool provides rich visual analytics including:
-- Interactive charts showing monthly burn rate trends
-- Key metrics and KPIs
-- Detailed analysis and recommendations
-- Visual breakdown of spending categories
-- Cash runway projections
-
-Use this for analysis requests like:
-- "Analyze my burn rate"
-- "Show me burn rate trends" 
-- "Generate a burn rate report"
-- "Create a burn rate dashboard"
-- "Break down my spending patterns"`,
+  description:
+    "Generate comprehensive burn rate analysis with interactive visualizations, spending trends, runway projections, and actionable insights. Use this tool when users want detailed financial analysis, visual charts, spending breakdowns, or need to understand their business's financial health and future projections.",
   inputSchema: getBurnRateSchema.omit({ showCanvas: true }), // Remove showCanvas since this always shows canvas
   execute: async function* ({ from, to, currency }) {
     try {

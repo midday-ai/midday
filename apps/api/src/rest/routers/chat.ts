@@ -65,6 +65,8 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
     const messageMetadata = message.metadata as ChatMessageMetadata;
     const isToolCallMessage = messageMetadata?.toolCall;
 
+    const isWebSearchMessage = messageMetadata?.webSearch;
+
     const previousMessagesList = previousMessages?.messages || [];
     const allMessagesForValidation = [...previousMessagesList, message];
 
@@ -108,9 +110,9 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
         let messageContent: string;
 
         if (isToolCallMessage) {
-          const { toolName, toolParams } = messageMetadata.toolCall!;
+          const { toolName } = messageMetadata.toolCall!;
           // Generate a descriptive title for tool calls using registry metadata
-          messageContent = formatToolCallTitle(toolName, toolParams);
+          messageContent = formatToolCallTitle(toolName);
         } else {
           // Use combined text from all messages for better context
           messageContent = extractTextContent(allMessages);
@@ -211,10 +213,14 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
           }
 
           const result = streamText({
-            model: openai("gpt-4o-mini"),
-            system: generateSystemPrompt(userContext, isToolCallMessage),
+            model: openai("gpt-4o"),
+            system: generateSystemPrompt(
+              userContext,
+              isToolCallMessage,
+              isWebSearchMessage,
+            ),
             messages: convertToModelMessages(originalMessages),
-            temperature: 0.6,
+            temperature: 0.7,
             stopWhen: (step) => {
               // Stop if we've reached 10 steps (original condition)
               if (stepCountIs(10)(step)) {

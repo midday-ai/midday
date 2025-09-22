@@ -8,6 +8,7 @@ import { endOfMonth, subMonths } from "date-fns";
 import {
   MdBarChart,
   MdHealthAndSafety,
+  MdReceipt,
   MdSchedule,
   MdTask,
   MdTrendingUp,
@@ -118,6 +119,21 @@ export function SuggestedActions() {
           toolName: "healthReport",
           toolParams: {},
           text: "Health report",
+        });
+      },
+    },
+    {
+      id: "latest-transactions",
+      title: "Latest transactions",
+      icon: MdReceipt,
+      onClick: () => {
+        handleToolCall({
+          toolName: "getTransactions",
+          toolParams: {
+            pageSize: 10,
+            sort: ["date", "desc"],
+          },
+          text: "Show me my latest transactions",
         });
       },
     },
