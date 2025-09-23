@@ -13,6 +13,20 @@ import {
 } from "@midday/categories";
 import { and, eq } from "drizzle-orm";
 
+export const hasTeamAccess = async (
+  db: Database,
+  teamId: string,
+  userId: string,
+): Promise<boolean> => {
+  const result = await db
+    .select({ teamId: usersOnTeam.teamId })
+    .from(usersOnTeam)
+    .where(and(eq(usersOnTeam.teamId, teamId), eq(usersOnTeam.userId, userId)))
+    .limit(1);
+
+  return result.length > 0;
+};
+
 export const getTeamById = async (db: Database, id: string) => {
   const [result] = await db
     .select({

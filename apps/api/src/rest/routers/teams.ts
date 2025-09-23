@@ -12,6 +12,7 @@ import {
   getTeamById,
   getTeamMembers,
   getTeamsByUserId,
+  hasTeamAccess,
   updateTeamById,
 } from "@midday/db/queries";
 import { withRequiredScope } from "../middleware";
@@ -75,7 +76,14 @@ app.openapi(
   }),
   async (c) => {
     const db = c.get("db");
+    const session = c.get("session");
     const teamId = c.req.param("id");
+
+    // First verify the user has access to this team
+    const hasAccess = await hasTeamAccess(db, teamId, session.user.id);
+    if (!hasAccess) {
+      throw new Error("Team not found or access denied");
+    }
 
     const result = await getTeamById(db, teamId);
 
@@ -155,7 +163,14 @@ app.openapi(
   }),
   async (c) => {
     const db = c.get("db");
+    const session = c.get("session");
     const teamId = c.req.param("id");
+
+    // First verify the user has access to this team
+    const hasAccess = await hasTeamAccess(db, teamId, session.user.id);
+    if (!hasAccess) {
+      throw new Error("Team not found or access denied");
+    }
 
     const result = await getTeamMembers(db, teamId);
 
