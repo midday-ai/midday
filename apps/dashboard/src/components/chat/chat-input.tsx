@@ -38,13 +38,14 @@ export function ChatInput() {
 
   const {
     input,
-    webSearch,
+    isWebSearch,
     isUploading,
+    isRecording,
+    isProcessing,
     showCommands,
     selectedCommandIndex,
     filteredCommands,
     setInput,
-    setWebSearch,
     setIsUploading,
     handleInputChange,
     handleKeyDown,
@@ -106,7 +107,7 @@ export function ChatInput() {
       text: message.text || "Sent with attachments",
       files: processedFiles,
       metadata: {
-        webSearch,
+        webSearch: isWebSearch,
       },
     });
 
@@ -179,7 +180,7 @@ export function ChatInput() {
                         text: input,
                         files: [],
                         metadata: {
-                          webSearch,
+                          webSearch: isWebSearch,
                         },
                       });
 
@@ -194,7 +195,7 @@ export function ChatInput() {
                 }}
                 value={input}
                 placeholder={
-                  webSearch
+                  isWebSearch
                     ? "Search the web"
                     : "Ask anything or press ´/´ for commands..."
                 }
@@ -203,16 +204,18 @@ export function ChatInput() {
             <PromptInputToolbar>
               <PromptInputTools>
                 <PromptInputActionAddAttachments />
-                <WebSearchButton
-                  webSearch={webSearch}
-                  onWebSearch={() => setWebSearch(!webSearch)}
-                />
+                <WebSearchButton />
               </PromptInputTools>
 
               <PromptInputTools>
                 <RecordButton size={16} />
                 <PromptInputSubmit
-                  disabled={(!input && !status) || isUploading}
+                  disabled={
+                    (!input && !status) ||
+                    isUploading ||
+                    isRecording ||
+                    isProcessing
+                  }
                   status={status}
                 />
               </PromptInputTools>
