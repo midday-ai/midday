@@ -1,19 +1,20 @@
 "use client";
 
+import { useChatStore } from "@/store/chat";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
+import React from "react";
 
-export function WebSearchButton({
-  onWebSearch,
-  webSearch,
-}: { onWebSearch: () => void; webSearch: boolean }) {
+export function WebSearchButton() {
+  const { isWebSearch, setIsWebSearch } = useChatStore();
+
   return (
     <button
       type="button"
-      onClick={() => onWebSearch(!webSearch)}
+      onClick={() => setIsWebSearch(!isWebSearch)}
       className={cn(
         "flex items-center h-6 cursor-pointer transition-colors duration-200",
-        webSearch
+        isWebSearch
           ? "bg-[rgba(0,0,0,0.05)] hover:bg-[rgba(0,0,0,0.08)] dark:bg-[rgba(255,255,255,0.05)] dark:hover:bg-[rgba(255,255,255,0.08)] rounded-full pr-2"
           : "hover:bg-[rgba(0,0,0,0.05)] dark:hover:bg-[rgba(255,255,255,0.05)]",
       )}
@@ -23,7 +24,7 @@ export function WebSearchButton({
           size={16}
           className={cn(
             "transition-colors",
-            webSearch
+            isWebSearch
               ? "text-black dark:text-white"
               : "text-[#707070] hover:text-[#999999] dark:text-[#666666] dark:hover:text-[#999999]",
           )}
@@ -32,7 +33,7 @@ export function WebSearchButton({
       <span
         className={cn(
           "overflow-hidden transition-all duration-200 text-[12px] leading-[14px] font-medium whitespace-nowrap text-black dark:text-white",
-          webSearch
+          isWebSearch
             ? "max-w-[100px] opacity-100 ml-0.5"
             : "max-w-0 opacity-0 ml-0",
         )}

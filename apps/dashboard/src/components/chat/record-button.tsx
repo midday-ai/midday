@@ -146,19 +146,22 @@ export function RecordButton({
   className,
   size = 16,
 }: RecordButtonProps) {
-  const { input, setInput } = useChatStore();
   const {
+    input,
+    setInput,
     isRecording,
     isProcessing,
-    startRecording,
-    stopRecording,
-    transcribeAudio,
-  } = useAudioRecording();
+    setIsRecording,
+    setIsProcessing,
+  } = useChatStore();
+  const { startRecording, stopRecording, transcribeAudio } =
+    useAudioRecording();
 
   const handleRecordClick = useCallback(async () => {
     if (isRecording) {
       // Stop recording and transcribe
       try {
+        setIsProcessing(true);
         const audioBlob = await stopRecording();
 
         if (audioBlob) {
@@ -170,12 +173,16 @@ export function RecordButton({
         }
       } catch (error) {
         console.error("Failed to process recording:", error);
+      } finally {
+        setIsRecording(false);
+        setIsProcessing(false);
       }
     } else {
       // Start recording and reset input
       try {
         setInput(""); // Reset input when starting to record
         await startRecording();
+        setIsRecording(true);
       } catch (error) {
         console.error("Failed to start recording:", error);
       }
@@ -187,6 +194,8 @@ export function RecordButton({
     transcribeAudio,
     setInput,
     input,
+    setIsRecording,
+    setIsProcessing,
   ]);
 
   if (isProcessing) {
