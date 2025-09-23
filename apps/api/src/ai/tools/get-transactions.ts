@@ -1,16 +1,15 @@
 import { getTransactions } from "@db/queries";
-import { formatAmount } from "@midday/utils/format";
+import { getAppUrl } from "@midday/utils/envs";
+import { formatAmount, formatDate } from "@midday/utils/format";
 import { tool } from "ai";
-import { followupQuestionsArtifact } from "../artifacts/followup-questions";
 import { getContext } from "../context";
-import { generateFollowupQuestions } from "../utils/generate-followup-questions";
 import { getTransactionsSchema } from "./schema";
 
 export const getTransactionsTool = tool({
   description:
     "Retrieve and analyze financial transactions with advanced filtering, search, and sorting capabilities. Use this tool when users ask about specific transactions, want to see recent activity, search for particular payments, or need transaction data for analysis.",
   inputSchema: getTransactionsSchema,
-  execute: async ({
+  execute: async function* ({
     cursor,
     sort,
     pageSize = 10,
@@ -28,7 +27,7 @@ export const getTransactionsTool = tool({
     amountRange,
     amount,
     currency,
-  }) => {
+  }) {
     try {
       const context = getContext();
 
@@ -59,7 +58,7 @@ export const getTransactionsTool = tool({
 
       // Early return if no data
       if (result.data.length === 0) {
-        return "No transactions found matching your criteria.";
+        yield { text: "No transactions found matching your criteria." };
       }
 
       // Get the target currency for display
@@ -77,25 +76,18 @@ export const getTransactionsTool = tool({
           id: transaction.id,
           name: transaction.name,
           amount: formattedAmount,
-          date: new Date(transaction.date).toLocaleDateString(
-            context.user.locale ?? "en-US",
-            {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            },
-          ),
-          status: `${transaction.status}`,
-          account: transaction.account?.name || "Unknown Account",
+          date: formatDate(transaction.date),
           category: transaction.category?.name || "Uncategorized",
         };
       });
 
       // Calculate summary statistics
       const totalAmount = result.data.reduce((sum, t) => sum + t.amount, 0);
+
       const incomeAmount = result.data
         .filter((t) => t.amount > 0)
         .reduce((sum, t) => sum + t.amount, 0);
+
       const expenseAmount = Math.abs(
         result.data
           .filter((t) => t.amount < 0)
@@ -123,18 +115,19 @@ export const getTransactionsTool = tool({
       // Table format
       const response = `**${result.data.length} transactions** | Net: ${formattedTotalAmount} | Income: ${formattedIncomeAmount} | Expenses: ${formattedExpenseAmount}
 
-| Date | Name | Amount | Status | Account | Category |
-|------|------|--------|--------|---------|----------|
+| Date | Name | Amount | Category |
+|------|------|--------|--------|
 ${formattedTransactions
-  .map(
-    (tx) =>
-      `| ${tx.date} | ${tx.name} | ${tx.amount} | ${tx.status} | ${tx.account} | ${tx.category} |`,
-  )
+  .map((tx) => `| ${tx.date} | ${tx.name} | ${tx.amount} | ${tx.category} |`)
   .join("\n")}`;
 
-      // Return the data
-      return {
-        data: response,
+      // Return the data with link
+      yield {
+        text: response,
+        link: {
+          text: "View all transactions",
+          url: `${getAppUrl()}/transactions}`,
+        },
       };
     } catch (error) {
       console.error(error);

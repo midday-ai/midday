@@ -11,6 +11,7 @@ export * from "./document-tag-embedings";
 export * from "./document-tags";
 export * from "./documents";
 export * from "./exhange-rates";
+export * from "./feedback";
 export * from "./inbox";
 export * from "./inbox-accounts";
 export * from "./inbox-embeddings";

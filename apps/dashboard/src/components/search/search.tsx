@@ -11,7 +11,6 @@ import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
 import { useSearchStore } from "@/store/search";
 import { useTRPC } from "@/trpc/client";
-import { formatDate } from "@/utils/format";
 import { Window, emit, invoke, listen } from "@midday/desktop-client/core";
 import { isDesktopApp } from "@midday/desktop-client/platform";
 import {
@@ -24,6 +23,7 @@ import {
 } from "@midday/ui/command";
 import { Icons } from "@midday/ui/icons";
 import { Spinner } from "@midday/ui/spinner";
+import { formatDate } from "@midday/utils/format";
 import { useQuery } from "@tanstack/react-query";
 import { formatISO } from "date-fns";
 import { useRouter } from "next/navigation";

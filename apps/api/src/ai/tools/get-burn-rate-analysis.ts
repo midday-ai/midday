@@ -66,14 +66,14 @@ Example format: "I'm analyzing your burn rate data for [period] to show your mon
       for await (const chunk of initialMessageStream.textStream) {
         completeMessage += chunk;
         // Yield the accumulated text so far for streaming effect
-        yield completeMessage;
+        yield { text: completeMessage };
       }
 
       // Add line breaks to prepare for the detailed analysis
       completeMessage += "\n";
 
       // Yield to continue processing while showing loading step
-      yield completeMessage;
+      yield { text: completeMessage };
 
       // Run all database queries in parallel for maximum performance
       const [burnRateData, runway, spendingData] = await Promise.all([
@@ -187,7 +187,7 @@ Example format: "I'm analyzing your burn rate data for [period] to show your mon
       });
 
       // Yield to continue processing while showing chart step
-      yield completeMessage;
+      yield { text: completeMessage };
 
       // Get the highest spending category (first item is highest)
       const highestCategory =
@@ -255,7 +255,7 @@ Example format: "I'm analyzing your burn rate data for [period] to show your mon
       });
 
       // Yield to continue processing while showing metrics step
-      yield completeMessage;
+      yield { text: completeMessage };
 
       // Get the target currency for display
       const targetCurrency = currency ?? context.user.baseCurrency ?? "USD";
@@ -272,7 +272,7 @@ Example format: "I'm analyzing your burn rate data for [period] to show your mon
       });
 
       // Yield to continue processing while showing AI processing step
-      yield completeMessage;
+      yield { text: completeMessage };
 
       // Generate AI summary with a simpler, faster prompt
       const analysisResult = await generateText({
@@ -410,7 +410,7 @@ The chart on the right shows your monthly burn rate trends with current vs avera
       for await (const chunk of responseStream.textStream) {
         analysisText += chunk;
         // Yield the initial message plus the new analysis text
-        yield completeMessage + analysisText;
+        yield { text: completeMessage + analysisText };
       }
 
       // Update completeMessage with the final analysis
@@ -433,7 +433,7 @@ The chart on the right shows your monthly burn rate trends with current vs avera
       // Yield the final response with forceStop flag
       // Always stop for analysis tool since canvas is complete
       yield {
-        content: completeMessage,
+        text: completeMessage,
         forceStop: true,
       };
     } catch (error) {
