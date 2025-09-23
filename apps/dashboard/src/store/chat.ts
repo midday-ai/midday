@@ -126,12 +126,18 @@ interface ChatState {
   clearInput: () => void;
 
   // Web search state
-  webSearch: boolean;
-  setWebSearch: (webSearch: boolean) => void;
+  isWebSearch: boolean;
+  setIsWebSearch: (isWebSearch: boolean) => void;
 
   // Upload state
   isUploading: boolean;
   setIsUploading: (isUploading: boolean) => void;
+
+  // Recording state
+  isRecording: boolean;
+  isProcessing: boolean;
+  setIsRecording: (isRecording: boolean) => void;
+  setIsProcessing: (isProcessing: boolean) => void;
 
   // Command suggestions state
   showCommands: boolean;
@@ -159,8 +165,10 @@ interface ChatState {
 export const useChatStore = create<ChatState>()((set, get) => ({
   // Initial state
   input: "",
-  webSearch: false,
+  isWebSearch: false,
   isUploading: false,
+  isRecording: false,
+  isProcessing: false,
   showCommands: false,
   selectedCommandIndex: 0,
   commandQuery: "",
@@ -170,8 +178,10 @@ export const useChatStore = create<ChatState>()((set, get) => ({
   // Basic setters
   setInput: (input) => set({ input }),
   clearInput: () => set({ input: "", cursorPosition: 0 }),
-  setWebSearch: (webSearch) => set({ webSearch }),
+  setIsWebSearch: (isWebSearch) => set({ isWebSearch }),
   setIsUploading: (isUploading) => set({ isUploading }),
+  setIsRecording: (isRecording) => set({ isRecording }),
+  setIsProcessing: (isProcessing) => set({ isProcessing }),
   setShowCommands: (showCommands) => set({ showCommands }),
   setSelectedCommandIndex: (selectedCommandIndex) =>
     set({ selectedCommandIndex }),
