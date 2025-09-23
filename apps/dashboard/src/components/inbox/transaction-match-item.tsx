@@ -1,6 +1,5 @@
 "use client";
 
-import { formatDate } from "@/utils/format";
 import { Badge } from "@midday/ui/badge";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -9,6 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import { formatDate } from "@midday/utils/format";
 import { FormatAmount } from "../format-amount";
 
 type Props = {

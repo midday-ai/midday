@@ -2,7 +2,6 @@
 
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
-import { getInitials } from "@/utils/format";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
   AlertDialog,
@@ -27,6 +26,7 @@ import {
 import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
 import { Switch } from "@midday/ui/switch";
+import { getInitials } from "@midday/utils/format";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MoreHorizontal } from "lucide-react";
 import { Loader2 } from "lucide-react";

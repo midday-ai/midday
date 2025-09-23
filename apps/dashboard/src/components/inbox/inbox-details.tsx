@@ -6,8 +6,6 @@ import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
-import { formatDate } from "@/utils/format";
-import { getInitials } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
@@ -28,6 +26,7 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
+import { formatDate, getInitials } from "@midday/utils/format";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { MoreVertical, Trash2 } from "lucide-react";

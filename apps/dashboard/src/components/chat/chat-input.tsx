@@ -1,6 +1,7 @@
 "use client";
 
 import { FollowupQuestions } from "@/components/chat/followup-questions";
+import { WebSearchButton } from "@/components/web-search-button";
 import { useAudioRecording } from "@/hooks/use-audio-recording";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
@@ -157,17 +158,16 @@ export function ChatInput() {
               autoFocus
               onChange={(e) => setInput(e.target.value)}
               value={input}
+              placeholder={webSearch ? "Search the web" : "Ask anything"}
             />
           </PromptInputBody>
           <PromptInputToolbar>
             <PromptInputTools>
               <PromptInputActionAddAttachments />
-              <PromptInputButton
-                onClick={() => setWebSearch(!webSearch)}
-                className={cn("size-6", webSearch && "text-primary")}
-              >
-                <Icons.Globle size={16} />
-              </PromptInputButton>
+              <WebSearchButton
+                webSearch={webSearch}
+                onWebSearch={setWebSearch}
+              />
             </PromptInputTools>
 
             <PromptInputTools>
