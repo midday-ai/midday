@@ -1,13 +1,14 @@
 "use client";
 
+import { CommandMenu } from "@/components/chat/command-menu";
 import { FollowupQuestions } from "@/components/chat/followup-questions";
 import { WebSearchButton } from "@/components/web-search-button";
 import { useAudioRecording } from "@/hooks/use-audio-recording";
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { type CommandSuggestion, useChatStore } from "@/store/chat";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { useChatActions, useChatId, useChatStatus } from "@ai-sdk-tools/store";
 import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
 import {
   PromptInput,
   PromptInputActionAddAttachments,
@@ -22,21 +23,48 @@ import {
   PromptInputTools,
 } from "@midday/ui/prompt-input";
 import { RecordButton } from "@midday/ui/record-button";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 export function ChatInput() {
-  const [input, setInput] = useState("");
-  const [webSearch, setWebSearch] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const commandListRef = useRef<HTMLDivElement>(null);
 
-  const { sendMessage } = useChatActions();
   const status = useChatStatus();
+  const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
   const { current } = useArtifacts({
     exclude: ["chat-title", "followup-questions"],
   });
   const isCanvasVisible = !!current;
+
+  const {
+    input,
+    webSearch,
+    isUploading,
+    showCommands,
+    selectedCommandIndex,
+    filteredCommands,
+    setInput,
+    setWebSearch,
+    setIsUploading,
+    handleInputChange,
+    handleKeyDown,
+    handleCommandSelect,
+    resetCommandState,
+  } = useChatStore();
+
+  // Scroll selected command into view
+  useEffect(() => {
+    if (commandListRef.current && showCommands) {
+      const selectedElement = commandListRef.current.querySelector(
+        `[data-index="${selectedCommandIndex}"]`,
+      );
+      if (selectedElement) {
+        selectedElement.scrollIntoView({ block: "nearest" });
+      }
+    }
+  }, [selectedCommandIndex, showCommands]);
 
   const {
     isRecording,
@@ -46,6 +74,26 @@ export function ChatInput() {
     transcribeAudio,
   } = useAudioRecording();
 
+  const handleCommandExecution = (command: CommandSuggestion) => {
+    if (!chatId) return;
+
+    setChatId(chatId);
+
+    sendMessage({
+      role: "user",
+      parts: [{ type: "text", text: command.title }],
+      metadata: {
+        toolCall: {
+          toolName: command.toolName,
+          toolParams: command.toolParams,
+        },
+      },
+    });
+
+    setInput("");
+    resetCommandState();
+  };
+
   const handleSubmit = async (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
     const hasAttachments = Boolean(message.files?.length);
@@ -53,13 +101,6 @@ export function ChatInput() {
     if (!(hasText || hasAttachments)) {
       return;
     }
-
-    if (!chatId) {
-      return;
-    }
-
-    // Set chatId as query parameter using nuqs
-    setChatId(chatId);
 
     let processedFiles = message.files;
 
@@ -99,6 +140,11 @@ export function ChatInput() {
       setIsUploading(false);
     }
 
+    // Set chat ID to ensure proper URL routing
+    if (chatId) {
+      setChatId(chatId);
+    }
+
     sendMessage({
       text: message.text || "Sent with attachments",
       files: processedFiles,
@@ -108,6 +154,7 @@ export function ChatInput() {
     });
 
     setInput("");
+    resetCommandState();
   };
 
   const handleRecordClick = useCallback(async () => {
@@ -140,56 +187,108 @@ export function ChatInput() {
   }, [isRecording, stopRecording, startRecording, transcribeAudio]);
 
   return (
-    <div
-      className={cn(
-        "fixed bottom-6 left-[70px] z-20 px-6 transition-all duration-300 ease-in-out",
-        isCanvasVisible ? "right-[603px]" : "right-0",
-      )}
-    >
-      <div className="mx-auto w-full pt-2 max-w-[770px] relative">
-        <FollowupQuestions />
+    <>
+      <div
+        className={cn(
+          "fixed bottom-6 left-[70px] z-20 px-6 transition-all duration-300 ease-in-out",
+          isCanvasVisible ? "right-[603px]" : "right-0",
+        )}
+      >
+        <div className="mx-auto w-full pt-2 max-w-[770px] relative">
+          <FollowupQuestions />
 
-        <PromptInput onSubmit={handleSubmit} globalDrop multiple>
-          <PromptInputBody>
-            <PromptInputAttachments>
-              {(attachment) => <PromptInputAttachment data={attachment} />}
-            </PromptInputAttachments>
-            <PromptInputTextarea
-              autoFocus
-              onChange={(e) => setInput(e.target.value)}
-              value={input}
-              placeholder={webSearch ? "Search the web" : "Ask anything"}
+          {/* Command Suggestions Menu */}
+          {showCommands && (
+            <CommandMenu
+              commands={filteredCommands}
+              selectedIndex={selectedCommandIndex}
+              onSelect={handleCommandSelect}
+              onClose={resetCommandState}
+              commandListRef={commandListRef}
+              onExecute={handleCommandExecution}
             />
-          </PromptInputBody>
-          <PromptInputToolbar>
-            <PromptInputTools>
-              <PromptInputActionAddAttachments />
-              <WebSearchButton
-                webSearch={webSearch}
-                onWebSearch={setWebSearch}
-              />
-            </PromptInputTools>
+          )}
 
-            <PromptInputTools>
-              <RecordButton
-                isRecording={isRecording}
-                isProcessing={isProcessing}
-                onClick={handleRecordClick}
-                size={16}
-              />
-              <PromptInputSubmit
-                disabled={
-                  (!input && !status) ||
-                  isUploading ||
-                  isRecording ||
-                  isProcessing
+          <PromptInput onSubmit={handleSubmit} globalDrop multiple>
+            <PromptInputBody>
+              <PromptInputAttachments>
+                {(attachment) => <PromptInputAttachment data={attachment} />}
+              </PromptInputAttachments>
+              <PromptInputTextarea
+                ref={textareaRef}
+                autoFocus
+                onChange={handleInputChange}
+                onKeyDown={(e) => {
+                  // Handle Enter key for commands
+                  if (e.key === "Enter" && showCommands) {
+                    e.preventDefault();
+                    const selectedCommand =
+                      filteredCommands[selectedCommandIndex];
+                    if (selectedCommand) {
+                      handleCommandExecution(selectedCommand);
+                    }
+                    return;
+                  }
+
+                  // Handle other keys normally
+                  handleKeyDown(e, () => {
+                    if (input.trim()) {
+                      // Set chat ID to ensure proper URL routing
+                      if (chatId) {
+                        setChatId(chatId);
+                      }
+
+                      sendMessage({
+                        text: input,
+                        files: [],
+                        metadata: {
+                          webSearch,
+                        },
+                      });
+
+                      setInput("");
+                      resetCommandState();
+                    }
+                  });
+                }}
+                value={input}
+                placeholder={
+                  webSearch
+                    ? "Search the web"
+                    : "Type / to see commands or ask anything..."
                 }
-                status={status}
               />
-            </PromptInputTools>
-          </PromptInputToolbar>
-        </PromptInput>
+            </PromptInputBody>
+            <PromptInputToolbar>
+              <PromptInputTools>
+                <PromptInputActionAddAttachments />
+                <WebSearchButton
+                  webSearch={webSearch}
+                  onWebSearch={() => setWebSearch(!webSearch)}
+                />
+              </PromptInputTools>
+
+              <PromptInputTools>
+                <RecordButton
+                  isRecording={isRecording}
+                  isProcessing={isProcessing}
+                  onClick={handleRecordClick}
+                  size={16}
+                />
+                <PromptInputSubmit
+                  disabled={
+                    (!input && !status) ||
+                    isUploading ||
+                    isRecording ||
+                    isProcessing
+                  }
+                  status={status}
+                />
+              </PromptInputTools>
+            </PromptInputToolbar>
+          </PromptInput>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
