@@ -1,32 +1,61 @@
 "use client";
 
-import type { CommandSuggestion } from "@/store/chat";
+import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useChatStore } from "@/store/chat";
+import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
+import { useEffect, useRef } from "react";
 
-interface CommandMenuProps {
-  commands: CommandSuggestion[];
-  selectedIndex: number;
-  onSelect: (command: CommandSuggestion) => void;
-  onClose: () => void;
-  commandListRef: React.RefObject<HTMLDivElement>;
-  onExecute: (command: CommandSuggestion) => void;
-}
+export function CommandMenu() {
+  const commandListRef = useRef<HTMLDivElement>(null);
+  const {
+    filteredCommands,
+    selectedCommandIndex,
+    showCommands,
+    handleCommandSelect,
+    resetCommandState,
+    setInput,
+  } = useChatStore();
 
-export function CommandMenu({
-  commands,
-  selectedIndex,
-  onSelect,
-  onClose,
-  commandListRef,
-  onExecute,
-}: CommandMenuProps) {
-  const handleCommandExecution = (command: CommandSuggestion) => {
-    onExecute(command);
+  const { sendMessage } = useChatActions();
+  const chatId = useChatId();
+  const { setChatId } = useChatInterface();
+
+  const handleCommandExecution = (command: any) => {
+    if (!chatId) return;
+
+    setChatId(chatId);
+
+    sendMessage({
+      role: "user",
+      parts: [{ type: "text", text: command.title }],
+      metadata: {
+        toolCall: {
+          toolName: command.toolName,
+          toolParams: command.toolParams,
+        },
+      },
+    });
+
+    setInput("");
+    resetCommandState();
   };
 
-  if (commands.length === 0) return null;
+  // Scroll selected command into view
+  useEffect(() => {
+    if (commandListRef.current && showCommands) {
+      const selectedElement = commandListRef.current.querySelector(
+        `[data-index="${selectedCommandIndex}"]`,
+      );
+      if (selectedElement) {
+        selectedElement.scrollIntoView({ block: "nearest" });
+      }
+    }
+  }, [selectedCommandIndex, showCommands]);
+
+  if (!showCommands || filteredCommands.length === 0) return null;
 
   return (
     <div
@@ -47,8 +76,8 @@ export function CommandMenu({
         }}
       >
         <div className="p-2">
-          {commands.map((command, index) => {
-            const isActive = selectedIndex === index;
+          {filteredCommands.map((command, index) => {
+            const isActive = selectedCommandIndex === index;
             return (
               <div
                 key={`${command.command}-${index}`}
@@ -62,9 +91,7 @@ export function CommandMenu({
                 data-index={index}
               >
                 <div>
-                  <span className="text-gray-600 dark:text-gray-400 ml-2">
-                    {command.title}
-                  </span>
+                  <span className="text-[#666] ml-2">{command.title}</span>
                 </div>
                 {isActive && (
                   <span className="material-icons-outlined text-sm opacity-50 group-hover:opacity-100 text-gray-600 dark:text-gray-400 group-hover:text-black dark:group-hover:text-white">
