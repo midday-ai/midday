@@ -10,7 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
@@ -31,7 +31,6 @@ export function MessageActions({
   const [copied, setCopied] = useState(false);
 
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
 
   const createFeedbackMutation = useMutation(
     trpc.chatFeedback.create.mutationOptions(),
@@ -49,6 +48,9 @@ export function MessageActions({
     }
 
     setFeedbackGiven("positive");
+
+    if (!chatId) return;
+
     createFeedbackMutation.mutate({
       chatId,
       messageId,
@@ -64,6 +66,9 @@ export function MessageActions({
     }
 
     setFeedbackGiven("negative");
+
+    if (!chatId) return;
+
     createFeedbackMutation.mutate({
       chatId,
       messageId,

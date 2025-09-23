@@ -2,7 +2,7 @@
 
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
-import { formatDate, getDueDateStatus } from "@/utils/format";
+import { getDueDateStatus } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
@@ -11,6 +11,7 @@ import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { TooltipProvider } from "@midday/ui/tooltip";
+import { formatDate } from "@midday/utils/format";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format, formatDistanceToNow } from "date-fns";
 import * as React from "react";
