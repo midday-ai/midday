@@ -26,7 +26,7 @@ export function TableRow({ row }: Props) {
       },
       onSuccess: async () => {
         await queryClient.invalidateQueries();
-        router.push("/teams");
+        router.push("/");
       },
       onError: () => {
         setIsLoading(false);

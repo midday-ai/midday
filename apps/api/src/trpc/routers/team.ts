@@ -25,7 +25,6 @@ import {
   getInvitesByEmail,
   getTeamById,
   getTeamInvites,
-  getTeamMembers,
   getTeamMembersByTeamId,
   getTeamsByUserId,
   leaveTeam,
@@ -148,8 +147,11 @@ export const teamRouter = createTRPCRouter({
 
   delete: protectedProcedure
     .input(deleteTeamSchema)
-    .mutation(async ({ ctx: { db }, input }) => {
-      const data = await deleteTeam(db, input.teamId);
+    .mutation(async ({ ctx: { db, session }, input }) => {
+      const data = await deleteTeam(db, {
+        teamId: input.teamId,
+        userId: session.user.id,
+      });
 
       if (!data) {
         throw new TRPCError({
