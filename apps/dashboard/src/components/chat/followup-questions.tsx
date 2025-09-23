@@ -1,6 +1,7 @@
 "use client";
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useChatStore } from "@/store/chat";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { useChatActions, useChatId, useChatStatus } from "@ai-sdk-tools/store";
 import { followupQuestionsArtifact } from "@api/ai/artifacts/followup-questions";
@@ -13,6 +14,7 @@ export function FollowupQuestions() {
   const [isVisible, setIsVisible] = useState(false);
   const { sendMessage } = useChatActions();
   const { setChatId } = useChatInterface();
+  const { resetCommandState } = useChatStore();
   const status = useChatStatus();
   const chatId = useChatId();
 
@@ -24,6 +26,8 @@ export function FollowupQuestions() {
         role: "user",
         parts: [{ type: "text", text: question }],
       });
+
+      resetCommandState();
     }
   };
 
