@@ -2,8 +2,8 @@
 
 import { CommandMenu } from "@/components/chat/command-menu";
 import { FollowupQuestions } from "@/components/chat/followup-questions";
+import { RecordButton } from "@/components/chat/record-button";
 import { WebSearchButton } from "@/components/web-search-button";
-import { useAudioRecording } from "@/hooks/use-audio-recording";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { type CommandSuggestion, useChatStore } from "@/store/chat";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
@@ -22,12 +22,10 @@ import {
   PromptInputToolbar,
   PromptInputTools,
 } from "@midday/ui/prompt-input";
-import { RecordButton } from "@midday/ui/record-button";
-import { useCallback, useEffect, useRef } from "react";
+import { useRef } from "react";
 
 export function ChatInput() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const commandListRef = useRef<HTMLDivElement>(null);
 
   const status = useChatStatus();
   const { sendMessage } = useChatActions();
@@ -50,49 +48,8 @@ export function ChatInput() {
     setIsUploading,
     handleInputChange,
     handleKeyDown,
-    handleCommandSelect,
     resetCommandState,
   } = useChatStore();
-
-  // Scroll selected command into view
-  useEffect(() => {
-    if (commandListRef.current && showCommands) {
-      const selectedElement = commandListRef.current.querySelector(
-        `[data-index="${selectedCommandIndex}"]`,
-      );
-      if (selectedElement) {
-        selectedElement.scrollIntoView({ block: "nearest" });
-      }
-    }
-  }, [selectedCommandIndex, showCommands]);
-
-  const {
-    isRecording,
-    isProcessing,
-    startRecording,
-    stopRecording,
-    transcribeAudio,
-  } = useAudioRecording();
-
-  const handleCommandExecution = (command: CommandSuggestion) => {
-    if (!chatId) return;
-
-    setChatId(chatId);
-
-    sendMessage({
-      role: "user",
-      parts: [{ type: "text", text: command.title }],
-      metadata: {
-        toolCall: {
-          toolName: command.toolName,
-          toolParams: command.toolParams,
-        },
-      },
-    });
-
-    setInput("");
-    resetCommandState();
-  };
 
   const handleSubmit = async (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
@@ -157,35 +114,6 @@ export function ChatInput() {
     resetCommandState();
   };
 
-  const handleRecordClick = useCallback(async () => {
-    if (isRecording) {
-      // Stop recording and transcribe
-      try {
-        const audioBlob = await stopRecording();
-
-        if (audioBlob) {
-          const transcribedText = await transcribeAudio(audioBlob);
-
-          if (transcribedText.trim()) {
-            setInput((prev) =>
-              prev ? `${prev} ${transcribedText}` : transcribedText,
-            );
-          }
-        }
-      } catch (error) {
-        console.error("Failed to process recording:", error);
-      }
-    } else {
-      // Start recording and reset input
-      try {
-        setInput(""); // Reset input when starting to record
-        await startRecording();
-      } catch (error) {
-        console.error("Failed to start recording:", error);
-      }
-    }
-  }, [isRecording, stopRecording, startRecording, transcribeAudio]);
-
   return (
     <>
       <div
@@ -198,16 +126,7 @@ export function ChatInput() {
           <FollowupQuestions />
 
           {/* Command Suggestions Menu */}
-          {showCommands && (
-            <CommandMenu
-              commands={filteredCommands}
-              selectedIndex={selectedCommandIndex}
-              onSelect={handleCommandSelect}
-              onClose={resetCommandState}
-              commandListRef={commandListRef}
-              onExecute={handleCommandExecution}
-            />
-          )}
+          <CommandMenu />
 
           <PromptInput onSubmit={handleSubmit} globalDrop multiple>
             <PromptInputBody>
@@ -225,13 +144,31 @@ export function ChatInput() {
                     const selectedCommand =
                       filteredCommands[selectedCommandIndex];
                     if (selectedCommand) {
-                      handleCommandExecution(selectedCommand);
+                      // Execute command through the store
+                      if (!chatId) return;
+
+                      setChatId(chatId);
+
+                      sendMessage({
+                        role: "user",
+                        parts: [{ type: "text", text: selectedCommand.title }],
+                        metadata: {
+                          toolCall: {
+                            toolName: selectedCommand.toolName,
+                            toolParams: selectedCommand.toolParams,
+                          },
+                        },
+                      });
+
+                      setInput("");
+                      resetCommandState();
                     }
                     return;
                   }
 
-                  // Handle other keys normally
-                  handleKeyDown(e, () => {
+                  // Handle Enter key for normal messages
+                  if (e.key === "Enter" && !showCommands) {
+                    e.preventDefault();
                     if (input.trim()) {
                       // Set chat ID to ensure proper URL routing
                       if (chatId) {
@@ -249,13 +186,17 @@ export function ChatInput() {
                       setInput("");
                       resetCommandState();
                     }
-                  });
+                    return;
+                  }
+
+                  // Handle other keys normally
+                  handleKeyDown(e);
                 }}
                 value={input}
                 placeholder={
                   webSearch
                     ? "Search the web"
-                    : "Type / to see commands or ask anything..."
+                    : "Ask anything or press ´/´ for commands..."
                 }
               />
             </PromptInputBody>
@@ -269,19 +210,9 @@ export function ChatInput() {
               </PromptInputTools>
 
               <PromptInputTools>
-                <RecordButton
-                  isRecording={isRecording}
-                  isProcessing={isProcessing}
-                  onClick={handleRecordClick}
-                  size={16}
-                />
+                <RecordButton size={16} />
                 <PromptInputSubmit
-                  disabled={
-                    (!input && !status) ||
-                    isUploading ||
-                    isRecording ||
-                    isProcessing
-                  }
+                  disabled={(!input && !status) || isUploading}
                   status={status}
                 />
               </PromptInputTools>
