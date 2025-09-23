@@ -74,7 +74,9 @@ export function Messages() {
                           <Fragment key={`${message.id}-${i}`}>
                             <Message from={message.role}>
                               <MessageContent>
-                                <Response>{part.output?.text}</Response>
+                                <Response>
+                                  {(part as any)?.output?.text}
+                                </Response>
                               </MessageContent>
                             </Message>
                           </Fragment>

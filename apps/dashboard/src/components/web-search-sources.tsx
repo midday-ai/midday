@@ -13,8 +13,8 @@ import type { ComponentProps } from "react";
 import { useEffect, useState } from "react";
 
 interface WebSearchSource {
-  title: string;
-  url: string;
+  title?: string;
+  url?: string;
   domain?: string;
 }
 
@@ -36,7 +36,6 @@ export const WebSearchSources = ({
   sources: providedSources,
   showSourceCount = true,
   className,
-  ...props
 }: WebSearchSourcesProps) => {
   const [animatedSources, setAnimatedSources] = useState<WebSearchSource[]>([]);
 
@@ -123,7 +122,7 @@ const WebSearchSourceAvatar = ({
   zIndex = 0,
   index = 0,
 }: WebSearchSourceAvatarProps) => {
-  const domain = source.domain || extractDomainFromUrl(source.url);
+  const domain = source.domain || extractDomainFromUrl(source.url || "");
 
   return (
     <Tooltip delayDuration={100}>
