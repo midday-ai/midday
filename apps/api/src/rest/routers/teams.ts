@@ -125,8 +125,14 @@ app.openapi(
   }),
   async (c) => {
     const db = c.get("db");
+    const session = c.get("session");
     const teamId = c.req.param("id");
     const params = c.req.valid("json");
+
+    const hasAccess = await hasTeamAccess(db, teamId, session.user.id);
+    if (!hasAccess) {
+      throw new Error("Team not found or access denied");
+    }
 
     const result = await updateTeamById(db, {
       id: teamId,
