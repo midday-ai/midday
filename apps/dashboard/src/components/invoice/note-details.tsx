@@ -35,6 +35,11 @@ export function NoteDetails() {
               key={id}
               initialContent={field.value}
               onChange={field.onChange}
+              onBlur={(content) => {
+                updateTemplateMutation.mutate({
+                  noteDetails: content ? JSON.stringify(content) : null,
+                });
+              }}
               className="min-h-[78px]"
             />
           );

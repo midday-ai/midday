@@ -87,6 +87,7 @@ export async function getInvoiceTemplate(db: Database, teamId: string) {
       subtotalLabel: invoiceTemplates.subtotalLabel,
       paymentDetails: invoiceTemplates.paymentDetails,
       fromDetails: invoiceTemplates.fromDetails,
+      noteDetails: invoiceTemplates.noteDetails,
       size: invoiceTemplates.size,
       dateFormat: invoiceTemplates.dateFormat,
       includeVat: invoiceTemplates.includeVat,

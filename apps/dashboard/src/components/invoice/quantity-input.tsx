@@ -17,7 +17,7 @@ export function QuantityInput({
     control,
   });
 
-  const isPlaceholder = !value && !isFocused;
+  const isPlaceholder = (value === 0 || !value) && !isFocused;
 
   return (
     <div className="relative">

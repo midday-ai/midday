@@ -74,6 +74,7 @@ const defaultTemplate = {
   paymentLabel: "Payment Details",
   paymentDetails: undefined,
   noteLabel: "Note",
+  noteDetails: undefined,
   logoUrl: undefined,
   currency: "USD",
   fromDetails: undefined,
@@ -371,6 +372,7 @@ export const invoiceRouter = createTRPCRouter({
         fromDetails: template?.fromDetails ?? defaultTemplate.fromDetails,
         paymentDetails:
           template?.paymentDetails ?? defaultTemplate.paymentDetails,
+        noteDetails: template?.noteDetails ?? defaultTemplate.noteDetails,
         timezone,
         locale,
       };
@@ -395,7 +397,7 @@ export const invoiceRouter = createTRPCRouter({
         fromDetails: savedTemplate.fromDetails,
         paymentDetails: savedTemplate.paymentDetails,
         customerDetails: undefined,
-        noteDetails: undefined,
+        noteDetails: savedTemplate.noteDetails,
         customerId: undefined,
         issueDate: new UTCDate().toISOString(),
         dueDate: addMonths(new UTCDate(), 1).toISOString(),
