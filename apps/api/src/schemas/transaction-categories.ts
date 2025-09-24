@@ -20,6 +20,7 @@ export const createManyTransactionCategorySchema = z.array(
     taxType: z.string().optional(),
     taxReportingCode: z.string().optional(),
     excluded: z.boolean().optional(),
+    parentId: z.string().optional(),
   }),
 );
 
@@ -32,6 +33,7 @@ export const updateTransactionCategorySchema = z.object({
   taxType: z.string().nullable(),
   taxReportingCode: z.string().nullable(),
   excluded: z.boolean().nullable(),
+  parentId: z.string().nullable(),
 });
 
 export const deleteTransactionCategorySchema = z.object({ id: z.string() });

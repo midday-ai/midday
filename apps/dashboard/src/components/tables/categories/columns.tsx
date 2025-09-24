@@ -1,6 +1,5 @@
 "use client";
 
-import { CreateSubCategoryModal } from "@/components/modals/create-sub-category-modal";
 import { EditCategoryModal } from "@/components/modals/edit-category-modal";
 import { useI18n } from "@/locales/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
@@ -182,8 +181,6 @@ export const columns: ColumnDef<any>[] = [
     id: "actions",
     cell: ({ row, table }) => {
       const [isEditOpen, setIsEditOpen] = React.useState(false);
-      const [isCreateSubcategoryOpen, setIsCreateSubcategoryOpen] =
-        React.useState(false);
 
       return (
         <div className="text-right">
@@ -197,14 +194,6 @@ export const columns: ColumnDef<any>[] = [
               <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
                 Edit
               </DropdownMenuItem>
-
-              {!row.original.isChild && (
-                <DropdownMenuItem
-                  onClick={() => setIsCreateSubcategoryOpen(true)}
-                >
-                  Add Subcategory
-                </DropdownMenuItem>
-              )}
 
               {!row.original.system && (
                 <DropdownMenuItem
@@ -220,20 +209,18 @@ export const columns: ColumnDef<any>[] = [
 
           <EditCategoryModal
             id={row.original.id}
-            defaultValue={row.original}
+            defaultValue={{
+              ...row.original,
+              color: row.original.color || null,
+              description: row.original.description || null,
+              taxRate: row.original.taxRate || null,
+              taxType: row.original.taxType || null,
+              taxReportingCode: row.original.taxReportingCode || null,
+              excluded: row.original.excluded || null,
+              parentId: row.original.parentId || null,
+            }}
             isOpen={isEditOpen}
             onOpenChange={setIsEditOpen}
-          />
-
-          <CreateSubCategoryModal
-            isOpen={isCreateSubcategoryOpen}
-            onOpenChange={setIsCreateSubcategoryOpen}
-            parentId={row.original.id}
-            defaultTaxRate={row.original.taxRate}
-            defaultTaxType={row.original.taxType}
-            defaultColor={row.original.color}
-            defaultTaxReportingCode={row.original.taxReportingCode}
-            defaultExcluded={row.original.excluded}
           />
         </div>
       );

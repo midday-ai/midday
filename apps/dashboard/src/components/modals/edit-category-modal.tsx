@@ -22,6 +22,7 @@ import { taxTypes } from "@midday/utils/tax";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { InputColor } from "../input-color";
+import { SelectParentCategory } from "../select-parent-category";
 import { SelectTaxType } from "../select-tax-type";
 import { TaxRateInput } from "../tax-rate-input";
 
@@ -37,6 +38,7 @@ type Props = {
     taxType?: string | null;
     taxReportingCode?: string | null;
     excluded?: boolean | null;
+    parentId?: string | null;
   };
 };
 
@@ -49,6 +51,7 @@ const formSchema = z.object({
   taxType: z.string().optional().nullable(),
   taxReportingCode: z.string().optional().nullable(),
   excluded: z.boolean().optional().nullable(),
+  parentId: z.string().optional().nullable(),
 });
 
 type UpdateCategoriesFormValues = z.infer<typeof formSchema>;
@@ -83,6 +86,7 @@ export function EditCategoryModal({
       taxType: defaultValue?.taxType ?? undefined,
       taxReportingCode: defaultValue?.taxReportingCode ?? undefined,
       excluded: defaultValue?.excluded ?? false,
+      parentId: defaultValue?.parentId ?? undefined,
     },
   });
 
@@ -99,6 +103,7 @@ export function EditCategoryModal({
       color: values.color ?? null,
       taxReportingCode: values.taxReportingCode ?? null,
       excluded: values.excluded ?? false,
+      parentId: values.parentId ?? null,
     });
   }
 
@@ -113,71 +118,98 @@ export function EditCategoryModal({
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="mt-2 mb-6">
               <div className="flex flex-col space-y-2">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem className="flex-1 space-y-1">
-                      <FormLabel className="text-xs text-[#878787] font-normal">
-                        Name
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <InputColor
-                            placeholder="Category"
-                            onChange={({ name, color }) => {
-                              form.setValue("color", color);
-                              field.onChange(name);
-                            }}
-                            defaultValue={field.value}
-                            defaultColor={form.watch("color") ?? undefined}
+                <div className="flex relative gap-2">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem className="flex-1 space-y-1">
+                        <FormLabel className="text-xs text-[#878787] font-normal">
+                          Name
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <InputColor
+                              placeholder="Category"
+                              onChange={({ name, color }) => {
+                                form.setValue("color", color);
+                                field.onChange(name);
+                              }}
+                              defaultValue={field.value}
+                              defaultColor={form.watch("color") ?? undefined}
+                            />
+                            <FormMessage />
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  {defaultValue.parentId && (
+                    <FormField
+                      control={form.control}
+                      name="parentId"
+                      render={({ field }) => (
+                        <FormItem className="flex-1 space-y-1">
+                          <FormLabel className="text-xs text-[#878787] font-normal">
+                            Parent Category
+                          </FormLabel>
+                          <FormControl>
+                            <SelectParentCategory
+                              parentId={field.value}
+                              onChange={(parent) => {
+                                field.onChange(parent?.id ?? null);
+                              }}
+                              excludeIds={[id]}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
+
+                <div className="flex relative gap-2">
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem className="flex-1 space-y-1">
+                        <FormLabel className="text-xs text-[#878787] font-normal">
+                          Description
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            autoFocus={false}
+                            placeholder="Description"
+                            value={field.value ?? ""}
                           />
-                          <FormMessage />
-                        </div>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem className="flex-1 space-y-1">
-                      <FormLabel className="text-xs text-[#878787] font-normal">
-                        Description
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          autoFocus={false}
-                          placeholder="Description"
-                          value={field.value ?? ""}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="taxReportingCode"
-                  render={({ field }) => (
-                    <FormItem className="flex-1 space-y-1">
-                      <FormLabel className="text-xs text-[#878787] font-normal">
-                        Report Code
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          autoFocus={false}
-                          placeholder="Report Code"
-                          value={field.value ?? ""}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="taxReportingCode"
+                    render={({ field }) => (
+                      <FormItem className="flex-1 space-y-1">
+                        <FormLabel className="text-xs text-[#878787] font-normal">
+                          Report Code
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            autoFocus={false}
+                            placeholder="Report Code"
+                            value={field.value ?? ""}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <div className="flex relative gap-2">
                   <FormField

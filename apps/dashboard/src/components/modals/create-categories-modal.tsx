@@ -26,6 +26,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useFieldArray } from "react-hook-form";
 import { z } from "zod";
+import { SelectParentCategory } from "../select-parent-category";
 import { SelectTaxType } from "../select-tax-type";
 import { TaxRateInput } from "../tax-rate-input";
 
@@ -33,20 +34,6 @@ type Props = {
   onOpenChange: (isOpen: boolean) => void;
   isOpen: boolean;
 };
-
-interface CategoryFormValues {
-  name: string;
-  description?: string;
-  color?: string;
-  taxRate?: number;
-  taxType?: string;
-  taxReportingCode?: string;
-  excluded?: boolean;
-}
-
-interface CreateCategoriesFormValues {
-  categories: CategoryFormValues[];
-}
 
 const formSchema = z.object({
   categories: z.array(
@@ -58,9 +45,12 @@ const formSchema = z.object({
       taxType: z.string().optional(),
       taxReportingCode: z.string().optional(),
       excluded: z.boolean().optional(),
+      parentId: z.string().optional(),
     }),
   ),
 });
+
+type CreateCategoriesFormValues = z.infer<typeof formSchema>;
 
 export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
   const trpc = useTRPC();
@@ -87,6 +77,7 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
     taxRate: undefined,
     taxReportingCode: "",
     excluded: false,
+    parentId: undefined,
   };
 
   const form = useZodForm(formSchema, {
@@ -125,69 +116,97 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
             <div className="flex flex-col space-y-6 max-h-[420px] overflow-auto">
               {fields.map((field, index) => (
                 <div key={field.id} className="flex flex-col space-y-2">
-                  <FormField
-                    control={form.control}
-                    name={`categories.${index}.name`}
-                    render={({ field }) => (
-                      <FormItem className="flex-1 space-y-1">
-                        <FormLabel className="text-xs text-[#878787] font-normal">
-                          Name
-                        </FormLabel>
-                        <FormControl>
-                          <InputColor
-                            autoFocus
-                            placeholder="Name"
-                            onChange={({ name, color }) => {
-                              field.onChange(name);
-                              form.setValue(`categories.${index}.color`, color);
-                            }}
-                            defaultValue={field.value}
-                            defaultColor={form.watch(
-                              `categories.${index}.color`,
-                            )}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                  <div className="flex relative gap-2">
+                    <FormField
+                      control={form.control}
+                      name={`categories.${index}.name`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1 space-y-1">
+                          <FormLabel className="text-xs text-[#878787] font-normal">
+                            Name
+                          </FormLabel>
+                          <FormControl>
+                            <InputColor
+                              autoFocus
+                              placeholder="Name"
+                              onChange={({ name, color }) => {
+                                field.onChange(name);
+                                form.setValue(
+                                  `categories.${index}.color`,
+                                  color,
+                                );
+                              }}
+                              defaultValue={field.value}
+                              defaultColor={form.watch(
+                                `categories.${index}.color`,
+                              )}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name={`categories.${index}.description`}
-                    render={({ field }) => (
-                      <FormItem className="flex-1 space-y-1">
-                        <FormLabel className="text-xs text-[#878787] font-normal">
-                          Description
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            autoFocus={false}
-                            placeholder="Description"
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name={`categories.${index}.parentId`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1 space-y-1">
+                          <FormLabel className="text-xs text-[#878787] font-normal">
+                            Parent Category (Optional)
+                          </FormLabel>
+                          <FormControl>
+                            <SelectParentCategory
+                              parentId={field.value}
+                              onChange={(parent) => {
+                                field.onChange(parent?.id ?? undefined);
+                              }}
+                              excludeIds={[]}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-                  <FormField
-                    control={form.control}
-                    name={`categories.${index}.taxReportingCode`}
-                    render={({ field }) => (
-                      <FormItem className="flex-1 space-y-1">
-                        <FormLabel className="text-xs text-[#878787] font-normal">
-                          Report Code
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            autoFocus={false}
-                            placeholder="Report Code"
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                  <div className="flex relative gap-2">
+                    <FormField
+                      control={form.control}
+                      name={`categories.${index}.description`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1 space-y-1">
+                          <FormLabel className="text-xs text-[#878787] font-normal">
+                            Description
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              autoFocus={false}
+                              placeholder="Description"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name={`categories.${index}.taxReportingCode`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1 space-y-1">
+                          <FormLabel className="text-xs text-[#878787] font-normal">
+                            Report Code
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              autoFocus={false}
+                              placeholder="Report Code"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
                   <div className="flex relative gap-2">
                     <FormField
