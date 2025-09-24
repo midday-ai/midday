@@ -87,18 +87,6 @@ export function SuggestedActions() {
       },
     },
     {
-      id: "time-track",
-      title: "Time track",
-      icon: MdSchedule,
-      onClick: () => {
-        handleToolCall({
-          toolName: "getTimeTrack",
-          toolParams: {},
-          text: "Get my time track data",
-        });
-      },
-    },
-    {
       id: "new-task",
       title: "New task",
       icon: MdTask,
