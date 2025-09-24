@@ -12,6 +12,7 @@ import { DocumentSheet } from "@/components/sheets/document-sheet";
 import { InboxDetailsSheet } from "@/components/sheets/inbox-details-sheet";
 import { InvoiceDetailsSheet } from "@/components/sheets/invoice-details-sheet";
 import { InvoiceSheet } from "@/components/sheets/invoice-sheet";
+import { ProductEditSheet } from "@/components/sheets/product-edit-sheet";
 import { TrackerCreateSheet } from "@/components/sheets/tracker-create-sheet";
 import { TrackerScheduleSheet } from "@/components/sheets/tracker-schedule-sheet";
 import { TrackerUpdateSheet } from "@/components/sheets/tracker-update-sheet";
@@ -37,6 +38,8 @@ export function GlobalSheets({ currencyPromise, countryCodePromise }: Props) {
 
       <CustomerCreateSheet />
       <CustomerEditSheet />
+
+      <ProductEditSheet />
 
       <TransactionSheet />
       <TransactionCreateSheet />

@@ -422,6 +422,14 @@ export const getInvoiceProductSchema = z.object({
   id: z.string().uuid(),
 });
 
+export const getInvoiceProductsSchema = z
+  .object({
+    sortBy: z.enum(["popular", "recent"]).default("popular"),
+    limit: z.number().min(1).max(100).default(50),
+  })
+  .optional()
+  .default({});
+
 export const deleteInvoiceProductSchema = z.object({
   id: z.string().uuid(),
 });

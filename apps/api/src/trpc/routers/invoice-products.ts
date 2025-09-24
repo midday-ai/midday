@@ -2,8 +2,8 @@ import {
   createInvoiceProductSchema,
   deleteInvoiceProductSchema,
   getInvoiceProductSchema,
+  getInvoiceProductsSchema,
   saveLineItemAsProductSchema,
-  searchInvoiceProductsSchema,
   updateInvoiceProductSchema,
   upsertInvoiceProductSchema,
 } from "@api/schemas/invoice";
@@ -12,24 +12,21 @@ import {
   createInvoiceProduct,
   deleteInvoiceProduct,
   getInvoiceProductById,
-  getPopularInvoiceProducts,
-  getRecentInvoiceProducts,
+  getInvoiceProducts,
   incrementProductUsage,
   saveLineItemAsProduct,
-  searchInvoiceProducts,
   updateInvoiceProduct,
   upsertInvoiceProduct,
 } from "@midday/db/queries";
+import { TRPCError } from "@trpc/server";
 
 export const invoiceProductsRouter = createTRPCRouter({
-  search: protectedProcedure
-    .input(searchInvoiceProductsSchema)
+  get: protectedProcedure
+    .input(getInvoiceProductsSchema)
     .query(async ({ input, ctx: { db, teamId } }) => {
-      return searchInvoiceProducts(db, {
-        teamId: teamId!,
-        query: input.query,
-        limit: input.limit,
-      });
+      const { sortBy = "popular", limit = 50 } = input || {};
+
+      return getInvoiceProducts(db, teamId!, { sortBy, limit });
     }),
 
   getById: protectedProcedure
@@ -37,14 +34,6 @@ export const invoiceProductsRouter = createTRPCRouter({
     .query(async ({ input, ctx: { db, teamId } }) => {
       return getInvoiceProductById(db, input.id, teamId!);
     }),
-
-  getPopular: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
-    return getPopularInvoiceProducts(db, teamId!, 20);
-  }),
-
-  getRecent: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
-    return getRecentInvoiceProducts(db, teamId!, 10);
-  }),
 
   create: protectedProcedure
     .input(createInvoiceProductSchema)
@@ -69,10 +58,16 @@ export const invoiceProductsRouter = createTRPCRouter({
   updateProduct: protectedProcedure
     .input(updateInvoiceProductSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
-      return updateInvoiceProduct(db, {
-        ...input,
-        teamId: teamId!,
-      });
+      try {
+        return await updateInvoiceProduct(db, {
+          ...input,
+          teamId: teamId!,
+        });
+      } catch (error: any) {
+        throw new TRPCError({
+          code: "CONFLICT",
+        });
+      }
     }),
 
   delete: protectedProcedure

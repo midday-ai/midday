@@ -33,7 +33,7 @@ export function ProductAwareAmountInput({
       onSuccess: () => {
         // Invalidate products query to get fresh data
         queryClient.invalidateQueries({
-          queryKey: trpc.invoiceProducts.getPopular.queryKey(),
+          queryKey: trpc.invoiceProducts.get.queryKey(),
         });
       },
     }),

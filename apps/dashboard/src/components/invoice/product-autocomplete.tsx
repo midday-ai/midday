@@ -1,5 +1,6 @@
 "use client";
 
+import { useProductParams } from "@/hooks/use-product-params";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
 import type { InvoiceProduct } from "@midday/invoice/types";
@@ -26,11 +27,13 @@ export function ProductAutocomplete({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [hoveredIndex, setHoveredIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const { setValue, watch } = useFormContext();
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { setParams: setProductParams } = useProductParams();
 
   // Get current line item data for learning
   const currentPrice = watch(`lineItems.${index}.price`);
@@ -48,7 +51,7 @@ export function ProductAutocomplete({
       onSuccess: (result) => {
         // Invalidate products query to get fresh data
         queryClient.invalidateQueries({
-          queryKey: trpc.invoiceProducts.getPopular.queryKey(),
+          queryKey: trpc.invoiceProducts.get.queryKey(),
         });
 
         if (result.shouldClearProductId) {
@@ -82,7 +85,7 @@ export function ProductAutocomplete({
       onSuccess: () => {
         // Invalidate products query to get fresh usage counts
         queryClient.invalidateQueries({
-          queryKey: trpc.invoiceProducts.getPopular.queryKey(),
+          queryKey: trpc.invoiceProducts.get.queryKey(),
         });
       },
     }),
@@ -90,7 +93,7 @@ export function ProductAutocomplete({
 
   // Get all products for client-side filtering
   const { data: allProducts = [] } = useQuery(
-    trpc.invoiceProducts.getPopular.queryOptions(undefined, {
+    trpc.invoiceProducts.get.queryOptions(undefined, {
       staleTime: 300000, // Cache for 5 minutes
     }),
   );
@@ -108,12 +111,20 @@ export function ProductAutocomplete({
       onChange(newValue);
       setSelectedIndex(-1); // Reset selection when typing
 
+      // If the input is cleared/erased and we have a productId, remove it
+      if (newValue.trim() === "" && currentProductId) {
+        setValue(`lineItems.${index}.productId`, undefined, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+      }
+
       // Show suggestions when typing (productId check is in render condition)
       if (isFocused) {
         setShowSuggestions(true);
       }
     },
-    [onChange, isFocused],
+    [onChange, isFocused, currentProductId, setValue, index],
   );
 
   const handleProductSelect = useCallback(
@@ -164,6 +175,9 @@ export function ProductAutocomplete({
   }, [currentProductId]);
 
   const handleBlur = useCallback(() => {
+    // Let's not save if the value is empty
+    if (!value || value.trim().length === 0) return;
+
     setIsFocused(false);
     // Delay hiding suggestions to allow for clicks
     setTimeout(() => setShowSuggestions(false), 200);
@@ -316,15 +330,21 @@ export function ProductAutocomplete({
                 id={`product-option-${suggestionIndex}`}
                 aria-selected={selectedIndex === suggestionIndex}
                 className={cn(
-                  "w-full cursor-pointer px-3 py-2 hover:bg-muted/50 transition-colors",
+                  "w-full cursor-pointer px-3 py-2 transition-colors",
                   selectedIndex === suggestionIndex &&
+                    "bg-accent text-accent-foreground",
+                  hoveredIndex === suggestionIndex &&
                     "bg-accent text-accent-foreground",
                 )}
                 onMouseDown={(e) => {
                   e.preventDefault(); // Prevent blur from firing before click
                   handleProductSelect(product);
                 }}
-                onMouseEnter={() => setSelectedIndex(suggestionIndex)}
+                onMouseEnter={() => {
+                  setSelectedIndex(suggestionIndex);
+                  setHoveredIndex(suggestionIndex);
+                }}
+                onMouseLeave={() => setHoveredIndex(-1)}
               >
                 <div className="flex items-center justify-between w-full">
                   <div className="flex flex-col">
@@ -336,18 +356,44 @@ export function ProductAutocomplete({
                     )}
                   </div>
 
-                  <div className="text-xs text-muted-foreground">
-                    {product.price && product.currency && (
-                      <span>
-                        {formatAmount({
-                          amount: product.price,
-                          currency: product.currency,
-                          locale,
-                          maximumFractionDigits,
-                        })}
-                        {product.unit && `/${product.unit}`}
-                      </span>
-                    )}
+                  <div className="flex items-center gap-2">
+                    <div className="text-xs text-muted-foreground">
+                      {product.price && product.currency && (
+                        <span>
+                          {formatAmount({
+                            amount: product.price,
+                            currency: product.currency,
+                            locale,
+                            maximumFractionDigits,
+                          })}
+                          {product.unit && `/${product.unit}`}
+                        </span>
+                      )}
+                    </div>
+                    <div
+                      className={cn(
+                        "flex justify-end transition-all duration-150 ease-out",
+                        hoveredIndex === suggestionIndex ? "w-8" : "w-0",
+                      )}
+                    >
+                      <button
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault(); // Prevent blur from firing before click
+                          e.stopPropagation();
+                          setProductParams({ productId: product.id });
+                          setShowSuggestions(false);
+                        }}
+                        className={cn(
+                          "text-xs px-1 transition-all duration-150 ease-out",
+                          hoveredIndex === suggestionIndex
+                            ? "opacity-50 hover:opacity-100"
+                            : "opacity-0 pointer-events-none",
+                        )}
+                      >
+                        Edit
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

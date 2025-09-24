@@ -84,7 +84,7 @@ export function QuantityInput({
           max={max}
           autoComplete="off"
           step={step}
-          value={rawValue === "0" ? undefined : rawValue}
+          value={rawValue === "0" ? "" : rawValue}
           placeholder={placeholder}
           onInput={handleInput}
           onBlur={onBlur}

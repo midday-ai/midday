@@ -271,6 +271,42 @@ export async function getRecentInvoiceProducts(
     .limit(limit);
 }
 
+export type GetInvoiceProductsParams = {
+  sortBy?: "popular" | "recent";
+  limit?: number;
+};
+
+export async function getInvoiceProducts(
+  db: Database,
+  teamId: string,
+  params: GetInvoiceProductsParams = {},
+): Promise<InvoiceProduct[]> {
+  const { sortBy = "popular", limit = 50 } = params;
+
+  const query = db
+    .select()
+    .from(invoiceProducts)
+    .where(
+      and(
+        eq(invoiceProducts.teamId, teamId),
+        eq(invoiceProducts.isActive, true),
+      ),
+    );
+
+  // Apply sorting based on sortBy parameter
+  if (sortBy === "recent") {
+    query.orderBy(desc(invoiceProducts.lastUsedAt));
+  } else {
+    // Default to popular (usage count first, then recency)
+    query.orderBy(
+      desc(invoiceProducts.usageCount),
+      desc(invoiceProducts.lastUsedAt),
+    );
+  }
+
+  return await query.limit(limit);
+}
+
 export async function deleteInvoiceProduct(
   db: Database,
   id: string,
