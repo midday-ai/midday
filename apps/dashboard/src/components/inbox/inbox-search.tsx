@@ -1,4 +1,6 @@
 import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
+import { useInboxParams } from "@/hooks/use-inbox-params";
+import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
@@ -14,7 +16,8 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
-import { useState } from "react";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 const statusFilters = [
@@ -22,15 +25,35 @@ const statusFilters = [
   { id: "done", name: "Matched" },
   { id: "pending", name: "Pending" },
   { id: "suggested_match", name: "Suggested Match" },
+  { id: "no_match", name: "Unmatched" },
 ];
 
 export function InboxSearch() {
   const [isOpen, setIsOpen] = useState(false);
-  const { params, setParams, hasFilter } = useInboxFilterParams();
+  const { params: filterParams, setParams, hasFilter } = useInboxFilterParams();
+  const { params: inboxParams } = useInboxParams();
+  const trpc = useTRPC();
+
+  const infiniteQueryOptions = trpc.inbox.get.infiniteQueryOptions(
+    {
+      order: inboxParams.order,
+      sort: inboxParams.sort,
+      ...filterParams,
+    },
+    {
+      getNextPageParam: ({ meta }) => meta?.cursor,
+    },
+  );
+
+  const { data } = useSuspenseInfiniteQuery(infiniteQueryOptions);
+
+  const totalCount = useMemo(() => {
+    return data?.pages?.[0]?.meta?.totalCount;
+  }, [data]);
 
   useHotkeys("esc", () => setParams({ q: null }), {
     enableOnFormTags: true,
-    enabled: Boolean(params.q),
+    enabled: Boolean(filterParams.q),
   });
 
   const handleSearch = (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,9 +78,13 @@ export function InboxSearch() {
         >
           <Icons.Search className="absolute pointer-events-none left-3 top-[11px]" />
           <Input
-            placeholder="Search or filter"
+            placeholder={
+              totalCount !== undefined
+                ? `Search or filter ${totalCount} items`
+                : "Search or filter"
+            }
             className="pl-9 w-full"
-            value={params.q ?? ""}
+            value={filterParams.q ?? ""}
             onChange={handleSearch}
             autoComplete="off"
             autoCapitalize="none"
@@ -101,13 +128,17 @@ export function InboxSearch() {
                 className="p-0"
               >
                 <DropdownMenuRadioGroup
-                  value={params.status ?? "all"}
+                  value={filterParams.status ?? "all"}
                   onValueChange={(value) =>
                     setParams({
                       status:
                         value === "all"
                           ? null
-                          : (value as "done" | "pending" | "suggested_match"),
+                          : (value as
+                              | "done"
+                              | "pending"
+                              | "suggested_match"
+                              | "no_match"),
                     })
                   }
                 >

@@ -175,21 +175,23 @@ export function ProductAutocomplete({
   }, [currentProductId]);
 
   const handleBlur = useCallback(() => {
-    // Let's not save if the value is empty
-    if (!value || value.trim().length === 0) return;
-
     setIsFocused(false);
     // Delay hiding suggestions to allow for clicks
     setTimeout(() => setShowSuggestions(false), 200);
 
-    // Always save the line item (even if empty) to handle productId clearing
-    saveLineItemAsProductMutation.mutate({
-      name: value || "",
-      price: currentPrice !== undefined ? currentPrice : null,
-      unit: currentUnit || null,
-      productId: currentProductId || undefined,
-      currency: currency || null,
-    });
+    // Only save if there's content OR if we need to clear a productId
+    const hasContent = value && value.trim().length > 0;
+    const needsToClearProductId = !hasContent && currentProductId;
+
+    if (hasContent || needsToClearProductId) {
+      saveLineItemAsProductMutation.mutate({
+        name: value || "",
+        price: currentPrice !== undefined ? currentPrice : null,
+        unit: currentUnit || null,
+        productId: currentProductId || undefined,
+        currency: currency || null,
+      });
+    }
   }, [
     value,
     currentPrice,

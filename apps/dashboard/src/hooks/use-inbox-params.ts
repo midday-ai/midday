@@ -10,6 +10,7 @@ export const inboxParamsSchema = {
   inboxId: parseAsString,
   type: parseAsStringLiteral(["list", "details"]),
   order: parseAsStringLiteral(["asc", "desc"]).withDefault("asc"),
+  sort: parseAsStringLiteral(["date", "alphabetical"]).withDefault("date"),
   connected: parseAsBoolean,
 };
 

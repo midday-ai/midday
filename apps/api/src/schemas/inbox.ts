@@ -3,9 +3,13 @@ import { z } from "@hono/zod-openapi";
 export const getInboxSchema = z.object({
   cursor: z.string().nullable().optional(),
   order: z.string().nullable().optional(),
+  sort: z.string().nullable().optional(),
   pageSize: z.coerce.number().min(1).max(100).optional(),
   q: z.string().nullable().optional(),
-  status: z.enum(["done", "pending", "suggested_match"]).nullable().optional(),
+  status: z
+    .enum(["done", "pending", "suggested_match", "no_match"])
+    .nullable()
+    .optional(),
 });
 
 export const inboxItemResponseSchema = z
