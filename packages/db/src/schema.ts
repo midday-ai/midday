@@ -1627,8 +1627,13 @@ export const invoiceProducts = pgTable(
     index("invoice_products_last_used_at_idx").on(table.lastUsedAt),
     // Composite index for team + active status for fast filtering
     index("invoice_products_team_active_idx").on(table.teamId, table.isActive),
-    // Unique constraint for upsert operations (team + name combination)
-    unique("invoice_products_team_name_unique").on(table.teamId, table.name),
+    // Unique constraint for upsert operations (team + name + currency + price combination)
+    unique("invoice_products_team_name_currency_price_unique").on(
+      table.teamId,
+      table.name,
+      table.currency,
+      table.price,
+    ),
     pgPolicy("Enable read access for team members", {
       as: "permissive",
       for: "select",

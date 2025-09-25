@@ -186,7 +186,7 @@ export function ProductForm({ data, defaultCurrency }: Props) {
                 />
               </FormControl>
               <FormDescription>
-                Optional description of the product.
+                This is for internal use only and won't appear on invoices.
               </FormDescription>
               <FormMessage />
             </FormItem>

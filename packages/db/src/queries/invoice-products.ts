@@ -1,7 +1,7 @@
 import type { Database } from "@db/client";
 import { invoiceProducts } from "@db/schema";
 import type { LineItem } from "@midday/invoice/types";
-import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, isNull, or, sql } from "drizzle-orm";
 
 export type InvoiceProduct = {
   id: string;
@@ -92,14 +92,17 @@ export async function upsertInvoiceProduct(
       lastUsedAt: now,
     })
     .onConflictDoUpdate({
-      target: [invoiceProducts.teamId, invoiceProducts.name],
+      target: [
+        invoiceProducts.teamId,
+        invoiceProducts.name,
+        invoiceProducts.currency,
+        invoiceProducts.price,
+      ],
       set: {
         // Update product details with latest information (only if provided)
         ...(params.description !== undefined && {
           description: params.description,
         }),
-        ...(params.price !== undefined && { price: params.price }),
-        ...(params.currency !== undefined && { currency: params.currency }),
         ...(params.unit !== undefined && { unit: params.unit }),
         usageCount: sql`${invoiceProducts.usageCount} + 1`,
         lastUsedAt: now,
@@ -178,46 +181,6 @@ export async function searchInvoiceProducts(
       desc(invoiceProducts.lastUsedAt),
     )
     .limit(limit);
-}
-
-export async function findSimilarInvoiceProduct(
-  db: Database,
-  teamId: string,
-  name: string,
-): Promise<InvoiceProduct | null> {
-  // Try exact match first
-  const [exactMatch] = await db
-    .select()
-    .from(invoiceProducts)
-    .where(
-      and(
-        eq(invoiceProducts.teamId, teamId),
-        eq(invoiceProducts.isActive, true),
-        sql`LOWER(${invoiceProducts.name}) = LOWER(${name})`,
-      ),
-    )
-    .limit(1);
-
-  if (exactMatch) {
-    return exactMatch;
-  }
-
-  // Try similarity match (using trigram similarity if available)
-  const [similarMatch] = await db
-    .select()
-    .from(invoiceProducts)
-    .where(
-      and(
-        eq(invoiceProducts.teamId, teamId),
-        eq(invoiceProducts.isActive, true),
-        // Use ILIKE for basic similarity matching
-        ilike(invoiceProducts.name, `%${name}%`),
-      ),
-    )
-    .orderBy(desc(invoiceProducts.usageCount))
-    .limit(1);
-
-  return similarMatch || null;
 }
 
 export async function incrementProductUsage(
@@ -352,7 +315,7 @@ export async function saveLineItemAsProduct(
   const trimmedName = lineItem.name.trim();
 
   try {
-    // If line item has a productId, check if the name still matches
+    // If line item has a productId, update the existing product
     if (lineItem.productId) {
       const existingProduct = await getInvoiceProductById(
         db,
@@ -360,12 +323,12 @@ export async function saveLineItemAsProduct(
         teamId,
       );
 
-      if (existingProduct && existingProduct.name === trimmedName) {
-        // Name matches - just update price/unit (don't increment usage)
-        // Use new values if provided, otherwise keep existing ones
+      if (existingProduct) {
+        // Update the existing product with new values
         const updatedProduct = await updateInvoiceProduct(db, {
           id: lineItem.productId,
           teamId,
+          name: trimmedName,
           price:
             lineItem.price !== undefined
               ? lineItem.price
@@ -381,26 +344,9 @@ export async function saveLineItemAsProduct(
           shouldClearProductId: false,
         };
       }
-
-      // Name changed - break the connection and treat as new product
-      // Don't update the original product, create/find a different one
-      const product = await upsertInvoiceProduct(db, {
-        teamId,
-        createdBy: userId,
-        name: trimmedName,
-        description: null,
-        price: lineItem.price !== undefined ? lineItem.price : null,
-        currency: currency || null,
-        unit: lineItem.unit !== undefined ? lineItem.unit : null,
-      });
-
-      return {
-        product,
-        shouldClearProductId: true,
-      }; // Clear old productId
     }
 
-    // No productId - use upsert based on team + name
+    // No productId or product not found - create new product based on team + name + currency + price
     const product = await upsertInvoiceProduct(db, {
       teamId,
       createdBy: userId,
