@@ -103,10 +103,15 @@ export async function getInbox(db: Database, params: GetInboxParams) {
     if (!Number.isNaN(Number.parseInt(q))) {
       whereConditions.push(sql`${inbox.amount}::text LIKE '%' || ${q} || '%'`);
     } else {
+      // Use both FTS and ILIKE for better special character support
       const query = buildSearchQuery(q);
-      // Search using full-text search
       whereConditions.push(
-        sql`to_tsquery('english', ${query}) @@ ${inbox.fts}`,
+        sql`(
+          to_tsquery('english', ${query}) @@ ${inbox.fts}
+          OR ${inbox.displayName} ILIKE '%' || ${q} || '%'
+          OR ${inbox.fileName} ILIKE '%' || ${q} || '%'
+          OR ${inbox.description} ILIKE '%' || ${q} || '%'
+        )`,
       );
     }
   }
@@ -166,28 +171,7 @@ export async function getInbox(db: Database, params: GetInboxParams) {
   const offset = cursor ? Number.parseInt(cursor, 10) : 0;
   query.limit(pageSize).offset(offset);
 
-  // Get total count with same filters (but without pagination and search query)
-  const countWhereConditions: SQL[] = [
-    eq(inbox.teamId, teamId),
-    ne(inbox.status, "deleted"),
-  ];
-
-  // Apply only status filter for count (not search query)
-  if (status) {
-    countWhereConditions.push(eq(inbox.status, status));
-  }
-
-  const countQuery = db
-    .select({
-      count: sql<number>`COUNT(*)::int`,
-    })
-    .from(inbox)
-    .where(and(...countWhereConditions));
-
-  // Execute both queries concurrently
-  const [data, [countResult]] = await Promise.all([query, countQuery]);
-
-  const totalCount = countResult?.count ?? 0;
+  const data = await query;
 
   // Calculate next cursor
   const nextCursor =
@@ -200,7 +184,6 @@ export async function getInbox(db: Database, params: GetInboxParams) {
       cursor: nextCursor,
       hasPreviousPage: offset > 0,
       hasNextPage: data && data.length === pageSize,
-      totalCount,
     },
     data: data ?? [],
   };
@@ -407,12 +390,20 @@ export async function getInboxSearch(
           sql`(
             to_tsquery('english', ${searchQuery}) @@ ${inbox.fts}
             OR ABS(COALESCE(${inbox.amount}, 0) - ${numericSearch}) <= ${tolerance}
+            OR ${inbox.displayName} ILIKE '%' || ${searchTerm} || '%'
+            OR ${inbox.fileName} ILIKE '%' || ${searchTerm} || '%'
+            OR ${inbox.description} ILIKE '%' || ${searchTerm} || '%'
           )`,
         );
       } else {
-        // Text-only search using FTS
+        // Text-only search using both FTS and ILIKE for better special character support
         whereConditions.push(
-          sql`to_tsquery('english', ${searchQuery}) @@ ${inbox.fts}`,
+          sql`(
+            to_tsquery('english', ${searchQuery}) @@ ${inbox.fts}
+            OR ${inbox.displayName} ILIKE '%' || ${searchTerm} || '%'
+            OR ${inbox.fileName} ILIKE '%' || ${searchTerm} || '%'
+            OR ${inbox.description} ILIKE '%' || ${searchTerm} || '%'
+          )`,
         );
       }
 

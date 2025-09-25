@@ -1,6 +1,4 @@
 import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
-import { useInboxParams } from "@/hooks/use-inbox-params";
-import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
@@ -16,8 +14,7 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
-import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 const statusFilters = [
@@ -31,25 +28,6 @@ const statusFilters = [
 export function InboxSearch() {
   const [isOpen, setIsOpen] = useState(false);
   const { params: filterParams, setParams, hasFilter } = useInboxFilterParams();
-  const { params: inboxParams } = useInboxParams();
-  const trpc = useTRPC();
-
-  const infiniteQueryOptions = trpc.inbox.get.infiniteQueryOptions(
-    {
-      order: inboxParams.order,
-      sort: inboxParams.sort,
-      ...filterParams,
-    },
-    {
-      getNextPageParam: ({ meta }) => meta?.cursor,
-    },
-  );
-
-  const { data } = useSuspenseInfiniteQuery(infiniteQueryOptions);
-
-  const totalCount = useMemo(() => {
-    return data?.pages?.[0]?.meta?.totalCount;
-  }, [data]);
 
   useHotkeys("esc", () => setParams({ q: null }), {
     enableOnFormTags: true,
@@ -78,11 +56,7 @@ export function InboxSearch() {
         >
           <Icons.Search className="absolute pointer-events-none left-3 top-[11px]" />
           <Input
-            placeholder={
-              totalCount !== undefined
-                ? `Search or filter ${totalCount} items`
-                : "Search or filter"
-            }
+            placeholder="Search or filter"
             className="pl-9 w-full"
             value={filterParams.q ?? ""}
             onChange={handleSearch}

@@ -7,7 +7,7 @@ import type {
   RealtimePostgresChangesPayload,
   SupabaseClient,
 } from "@supabase/supabase-js";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 type PublicSchema = Database[Extract<keyof Database, "public">];
 type Tables = PublicSchema["Tables"];
@@ -29,6 +29,12 @@ export function useRealtime<TN extends TableName>({
   onEvent,
 }: UseRealtimeProps<TN>) {
   const supabase: SupabaseClient = createClient();
+  const onEventRef = useRef(onEvent);
+
+  // Update the ref when onEvent changes
+  useEffect(() => {
+    onEventRef.current = onEvent;
+  }, [onEvent]);
 
   useEffect(() => {
     const filterConfig: RealtimePostgresChangesFilter<"*"> = {
@@ -44,7 +50,7 @@ export function useRealtime<TN extends TableName>({
         "postgres_changes",
         filterConfig,
         (payload: RealtimePostgresChangesPayload<Tables[TN]["Row"]>) => {
-          onEvent(payload);
+          onEventRef.current(payload);
         },
       )
       .subscribe();
@@ -52,5 +58,7 @@ export function useRealtime<TN extends TableName>({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [channelName]);
+    // Note: supabase is intentionally not included in dependencies to avoid
+    // dependency array size changes between renders
+  }, [channelName, event, table, filter]);
 }
