@@ -17,6 +17,7 @@ type Props = {
   value?: string | null;
   onSelect: (value: number) => void;
   onSuggestionReceived?: (taxRate: number) => void;
+  userHasSetValue?: boolean;
 };
 
 export function TaxRateAssistant({
@@ -24,27 +25,29 @@ export function TaxRateAssistant({
   onSelect,
   onSuggestionReceived,
   value,
+  userHasSetValue = false,
 }: Props) {
   const [result, setResult] = useState<
     { taxRate: number; country?: string } | undefined
   >();
   const [isLoading, setLoading] = useState(false);
-  const lastProcessedName = useRef<string | undefined>(undefined);
 
-  const getVatRate = useAction(getTaxRateAction, {
-    onSuccess: ({ data }) => {
-      setLoading(false);
+  // const getVatRate = useAction(getTaxRateAction, {
+  //   onSuccess: ({ data }) => {
+  //     setLoading(false);
 
-      if (data) {
-        setResult(data);
-        // Auto-update the input with the AI suggestion
-        onSuggestionReceived?.(data.taxRate);
-      }
-    },
-    onError: () => {
-      setLoading(false);
-    },
-  });
+  //     if (data) {
+  //       setResult(data);
+  //       // Only auto-update if user hasn't manually set a value
+  //       if (!userHasSetValue) {
+  //         onSuggestionReceived?.(data.taxRate);
+  //       }
+  //     }
+  //   },
+  //   onError: () => {
+  //     setLoading(false);
+  //   },
+  // });
 
   const handleOnSelect = () => {
     if (result?.taxRate) {
@@ -55,19 +58,19 @@ export function TaxRateAssistant({
   // Use debounced name value with 500ms delay
   const [debouncedName] = useDebounceValue(name, 500);
 
-  useEffect(() => {
-    // Only trigger API call if debounced name is different from last processed name
-    if (
-      debouncedName &&
-      debouncedName.length > 2 &&
-      debouncedName !== lastProcessedName.current
-    ) {
-      lastProcessedName.current = debouncedName;
-      setResult(undefined);
-      setLoading(true);
-      getVatRate.execute({ name: debouncedName });
-    }
-  }, [debouncedName, getVatRate]);
+  // useEffect(() => {
+  //   // Only trigger API call if debounced name is different from last processed name
+  //   if (
+  //     debouncedName &&
+  //     debouncedName.length > 2 &&
+  //     debouncedName !== lastProcessedName.current
+  //   ) {
+  //     lastProcessedName.current = debouncedName;
+  //     setResult(undefined);
+  //     setLoading(true);
+  //     getVatRate.execute({ name: debouncedName });
+  //   }
+  // }, [debouncedName, getVatRate]);
 
   return (
     <TooltipProvider delayDuration={0}>

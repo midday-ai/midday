@@ -1,6 +1,6 @@
 "use client";
 
-import { useCategoryParams } from "@/hooks/use-category-params";
+import { useProductParams } from "@/hooks/use-product-params";
 import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import {
@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@midday/ui/table";
+import { toast } from "@midday/ui/use-toast";
 import {
   useMutation,
   useQueryClient,
@@ -20,65 +21,61 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
+  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import React from "react";
-import { columns, flattenCategories } from "./columns";
+import { columns } from "./columns";
 import { Header } from "./header";
 
 export function DataTable() {
-  const [expandedCategories, setExpandedCategories] = React.useState<
-    Set<string>
-  >(new Set());
-
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const { setParams } = useCategoryParams();
+  const { setParams } = useProductParams();
 
   const { data } = useSuspenseQuery(
-    trpc.transactionCategories.get.queryOptions(),
+    trpc.invoiceProducts.get.queryOptions({
+      sortBy: "recent",
+      limit: 100,
+      includeInactive: true,
+    }),
   );
 
-  const deleteCategoryMutation = useMutation(
-    trpc.transactionCategories.delete.mutationOptions({
+  const deleteProductMutation = useMutation(
+    trpc.invoiceProducts.delete.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.transactionCategories.get.queryKey(),
+          queryKey: trpc.invoiceProducts.get.queryKey(),
+        });
+        toast({
+          title: "Product deleted",
+          variant: "success",
+        });
+      },
+      onError: () => {
+        toast({
+          title: "Failed to delete product",
+          variant: "error",
         });
       },
     }),
   );
 
-  // Flatten categories and filter based on expanded state
-  const flattenedData = React.useMemo(() => {
-    const flattened = flattenCategories(data ?? []);
-
-    // Filter to only show parent categories and children of expanded parents
-    return flattened.filter((category) => {
-      // Always show parent categories
-      if (!category.isChild) {
-        return true;
-      }
-      // Only show children if their parent is expanded
-      return category.parentId && expandedCategories.has(category.parentId);
-    });
-  }, [data, expandedCategories]);
-
   const table = useReactTable({
-    data: flattenedData,
-    getRowId: ({ id }) => id,
+    data: data ?? [],
+    getRowId: (row) => row.id,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    globalFilterFn: "includesString",
     meta: {
-      deleteCategory: (id: string) => {
-        deleteCategoryMutation.mutate({ id });
+      handleDelete: (id: string) => {
+        deleteProductMutation.mutate({ id });
       },
-      editCategory: (id: string) => {
-        setParams({ categoryId: id });
+      onEdit: (id: string) => {
+        setParams({ productId: id });
       },
-      expandedCategories,
-      setExpandedCategories,
     },
   });
 
@@ -111,12 +108,14 @@ export function DataTable() {
             <TableRow
               className="hover:bg-muted/50 cursor-pointer"
               key={row.id}
-              onClick={() => setParams({ categoryId: row.original.id })}
+              onClick={() => setParams({ productId: row.original.id })}
             >
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell
                   key={cell.id}
-                  className={cn(index === 3 && "w-[50px]")}
+                  className={cn(
+                    index === table.getAllColumns().length - 1 && "w-[50px]",
+                  )}
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>
@@ -125,6 +124,12 @@ export function DataTable() {
           ))}
         </TableBody>
       </Table>
+
+      {table.getRowModel().rows.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No products found</p>
+        </div>
+      )}
     </div>
   );
 }

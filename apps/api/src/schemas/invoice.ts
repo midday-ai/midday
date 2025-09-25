@@ -401,6 +401,7 @@ export const createInvoiceProductSchema = z.object({
   price: z.number().safe().optional().nullable(),
   currency: z.string().optional().nullable(),
   unit: z.string().optional().nullable(),
+  isActive: z.boolean().optional(),
 });
 
 export const updateInvoiceProductSchema = z.object({
@@ -426,6 +427,7 @@ export const getInvoiceProductsSchema = z
   .object({
     sortBy: z.enum(["popular", "recent"]).default("popular"),
     limit: z.number().min(1).max(100).default(50),
+    includeInactive: z.boolean().default(false),
   })
   .optional()
   .default({});

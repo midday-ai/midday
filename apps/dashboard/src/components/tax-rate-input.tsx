@@ -16,9 +16,11 @@ export function TaxRateInput({
   value: defaultValue,
 }: Props) {
   const [value, setValue] = useState(defaultValue);
+  const [userHasSetValue, setUserHasSetValue] = useState(false);
 
   const handleOnSelect = (vat: number) => {
     setValue(vat);
+    setUserHasSetValue(true);
     onSelect(vat);
   };
 
@@ -30,6 +32,7 @@ export function TaxRateInput({
         value={value ?? ""}
         onValueChange={(values) => {
           setValue(values.floatValue);
+          setUserHasSetValue(true);
           onChange(values.value);
         }}
         placeholder="Tax Rate"
@@ -48,9 +51,12 @@ export function TaxRateInput({
         name={name}
         value={value?.toString() ?? ""}
         onSelect={handleOnSelect}
+        userHasSetValue={userHasSetValue}
         onSuggestionReceived={(taxRate) => {
-          setValue(taxRate);
-          onChange(taxRate.toString());
+          if (!userHasSetValue) {
+            setValue(taxRate);
+            onChange(taxRate.toString());
+          }
         }}
       />
     </div>

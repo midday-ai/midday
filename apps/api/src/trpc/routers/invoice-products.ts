@@ -24,9 +24,17 @@ export const invoiceProductsRouter = createTRPCRouter({
   get: protectedProcedure
     .input(getInvoiceProductsSchema)
     .query(async ({ input, ctx: { db, teamId } }) => {
-      const { sortBy = "popular", limit = 50 } = input || {};
+      const {
+        sortBy = "popular",
+        limit = 50,
+        includeInactive = false,
+      } = input || {};
 
-      return getInvoiceProducts(db, teamId!, { sortBy, limit });
+      return getInvoiceProducts(db, teamId!, {
+        sortBy,
+        limit,
+        includeInactive,
+      });
     }),
 
   getById: protectedProcedure
@@ -38,11 +46,17 @@ export const invoiceProductsRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createInvoiceProductSchema)
     .mutation(async ({ input, ctx: { db, teamId, session } }) => {
-      return createInvoiceProduct(db, {
-        ...input,
-        teamId: teamId!,
-        createdBy: session.user.id,
-      });
+      try {
+        return await createInvoiceProduct(db, {
+          ...input,
+          teamId: teamId!,
+          createdBy: session.user.id,
+        });
+      } catch (error) {
+        throw new TRPCError({
+          code: "CONFLICT",
+        });
+      }
     }),
 
   upsert: protectedProcedure

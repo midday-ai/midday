@@ -16,6 +16,7 @@ import {
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { Switch } from "@midday/ui/switch";
 import { Textarea } from "@midday/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
@@ -27,6 +28,7 @@ const formSchema = z.object({
   price: z.number().min(0).optional(),
   unit: z.string().optional(),
   currency: z.string().optional(),
+  isActive: z.boolean().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -43,21 +45,36 @@ export function ProductForm({ data }: Props) {
   const form = useZodForm(formSchema, {
     defaultValues: {
       id: data?.id,
-      name: data?.name || undefined,
-      description: data?.description || undefined,
+      name: data?.name || "",
+      description: data?.description || "",
       price: data?.price || undefined,
-      unit: data?.unit || undefined,
+      unit: data?.unit || "",
       currency: data?.currency || "USD",
+      isActive: data?.isActive ?? true,
     },
   });
 
   const createProductMutation = useMutation(
     trpc.invoiceProducts.create.mutationOptions({
-      onSuccess: (result) => {
+      onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: trpc.invoiceProducts.get.queryKey(),
         });
         setParams(null);
+      },
+      onError: (error) => {
+        // Handle different error types based on tRPC error codes
+        let message = error.message;
+
+        if (error.data?.code === "CONFLICT") {
+          message =
+            "A product with this name already exists. Please choose a different name.";
+        }
+
+        form.setError("name", {
+          type: "manual",
+          message,
+        });
       },
     }),
   );
@@ -98,10 +115,11 @@ export function ProductForm({ data }: Props) {
 
     const formattedData = {
       ...productData,
-      description: productData.description || undefined,
-      price: productData.price || undefined,
-      unit: productData.unit || undefined,
+      description: productData.description?.trim() || null,
+      price: productData.price || null,
+      unit: productData.unit?.trim() || null,
       currency: productData.currency || undefined,
+      isActive: productData.isActive ?? true,
     };
 
     // If ID exists, update; otherwise create
@@ -155,8 +173,10 @@ export function ProductForm({ data }: Props) {
               <FormControl>
                 <Textarea
                   {...field}
+                  value={field.value || ""}
                   placeholder="Product description (optional)"
                   rows={3}
+                  onChange={(e) => field.onChange(e.target.value)}
                 />
               </FormControl>
               <FormDescription>
@@ -180,8 +200,9 @@ export function ProductForm({ data }: Props) {
                     value={field.value}
                     placeholder="0.00"
                     onValueChange={(values) => {
-                      field.onChange(values.floatValue);
+                      field.onChange(values.floatValue || undefined);
                     }}
+                    allowNegative={false}
                   />
                 </FormControl>
                 <FormDescription>
@@ -201,8 +222,10 @@ export function ProductForm({ data }: Props) {
                 <FormControl>
                   <Input
                     {...field}
+                    value={field.value || ""}
                     placeholder="e.g., hour, piece, kg"
                     autoComplete="off"
+                    onChange={(e) => field.onChange(e.target.value)}
                   />
                 </FormControl>
                 <FormDescription>
@@ -214,6 +237,36 @@ export function ProductForm({ data }: Props) {
           />
         </div>
 
+        <FormField
+          control={form.control}
+          name="isActive"
+          render={({ field }) => (
+            <FormItem>
+              <div className="border border-border p-3">
+                <div className="flex items-center justify-between space-x-2">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-sm font-medium">
+                      Active Status
+                    </FormLabel>
+                    <FormDescription className="text-xs text-muted-foreground">
+                      {field.value
+                        ? "Product is active and can be used in invoices"
+                        : "Product is inactive and won't appear in invoice suggestions"}
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value ?? true}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </div>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="flex-1" />
         <div className="pt-6 border-t mt-auto">
           <SubmitButton
@@ -222,7 +275,7 @@ export function ProductForm({ data }: Props) {
             }
             className="w-full"
           >
-            {data ? "Update" : "Create Product"}
+            {data ? "Update" : "Create"}
           </SubmitButton>
         </div>
       </form>

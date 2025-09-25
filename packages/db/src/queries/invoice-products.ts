@@ -27,6 +27,7 @@ export type CreateInvoiceProductParams = {
   price?: number | null;
   currency?: string | null;
   unit?: string | null;
+  isActive?: boolean;
 };
 
 export type UpdateInvoiceProductParams = {
@@ -56,7 +57,6 @@ export async function createInvoiceProduct(
     .insert(invoiceProducts)
     .values({
       ...params,
-      usageCount: 1,
       lastUsedAt: new Date().toISOString(),
     })
     .returning();
@@ -274,6 +274,7 @@ export async function getRecentInvoiceProducts(
 export type GetInvoiceProductsParams = {
   sortBy?: "popular" | "recent";
   limit?: number;
+  includeInactive?: boolean;
 };
 
 export async function getInvoiceProducts(
@@ -281,17 +282,19 @@ export async function getInvoiceProducts(
   teamId: string,
   params: GetInvoiceProductsParams = {},
 ): Promise<InvoiceProduct[]> {
-  const { sortBy = "popular", limit = 50 } = params;
+  const { sortBy = "popular", limit = 50, includeInactive = false } = params;
+
+  const whereConditions = [eq(invoiceProducts.teamId, teamId)];
+
+  // Only filter by isActive if includeInactive is false
+  if (!includeInactive) {
+    whereConditions.push(eq(invoiceProducts.isActive, true));
+  }
 
   const query = db
     .select()
     .from(invoiceProducts)
-    .where(
-      and(
-        eq(invoiceProducts.teamId, teamId),
-        eq(invoiceProducts.isActive, true),
-      ),
-    );
+    .where(and(...whereConditions));
 
   // Apply sorting based on sortBy parameter
   if (sortBy === "recent") {

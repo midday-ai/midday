@@ -84,7 +84,6 @@ export function SelectParentCategory({
       placeholder="Select parent category"
       searchPlaceholder="Search parent category"
       items={parentCategories}
-      className="font-normal"
       selectedItem={selectedValue}
       onSelect={(item) => {
         if (item.id === "none") {

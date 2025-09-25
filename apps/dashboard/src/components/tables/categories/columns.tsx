@@ -1,6 +1,5 @@
 "use client";
 
-import { EditCategoryModal } from "@/components/modals/edit-category-modal";
 import { useI18n } from "@/locales/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Button } from "@midday/ui/button";
@@ -22,6 +21,13 @@ import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import * as React from "react";
+
+interface CategoriesTableMeta {
+  deleteCategory: (id: string) => void;
+  editCategory: (id: string) => void;
+  expandedCategories: Set<string>;
+  setExpandedCategories: (categories: Set<string>) => void;
+}
 
 export type Category = RouterOutputs["transactionCategories"]["get"][number];
 
@@ -79,22 +85,18 @@ export const columns: ColumnDef<any>[] = [
     header: "Name",
     accessorKey: "name",
     cell: ({ row, table }) => {
-      const [expandedCategories, setExpandedCategories] = React.useState<
-        Set<string>
-      >(new Set());
-
-      // Get expanded state from table meta or use local state as fallback
-      const tableExpandedCategories =
-        (table.options.meta as any)?.expandedCategories || expandedCategories;
-      const setTableExpandedCategories =
-        (table.options.meta as any)?.setExpandedCategories ||
-        setExpandedCategories;
+      // Get expanded state from table meta
+      const meta = table.options.meta as CategoriesTableMeta;
+      const tableExpandedCategories = meta?.expandedCategories || new Set();
+      const setTableExpandedCategories = meta?.setExpandedCategories;
 
       const isExpanded = tableExpandedCategories.has(row.original.id);
       const hasChildren = row.original.hasChildren;
       const isChild = row.original.isChild;
 
       const toggleExpanded = () => {
+        if (!setTableExpandedCategories) return;
+
         const newExpanded = new Set(tableExpandedCategories);
         if (isExpanded) {
           newExpanded.delete(row.original.id);
@@ -111,7 +113,10 @@ export const columns: ColumnDef<any>[] = [
               variant="ghost"
               size="sm"
               className="h-4 w-4 p-0 hover:bg-transparent"
-              onClick={toggleExpanded}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleExpanded();
+              }}
             >
               {isExpanded ? (
                 <ChevronDown className="h-3 w-3" />
@@ -134,7 +139,14 @@ export const columns: ColumnDef<any>[] = [
                       ? "cursor-pointer"
                       : "cursor-default",
                   )}
-                  onClick={hasChildren && !isChild ? toggleExpanded : undefined}
+                  onClick={
+                    hasChildren && !isChild
+                      ? (e) => {
+                          e.stopPropagation();
+                          toggleExpanded();
+                        }
+                      : undefined
+                  }
                 >
                   {row.getValue("name")}
                 </span>
@@ -180,48 +192,39 @@ export const columns: ColumnDef<any>[] = [
   {
     id: "actions",
     cell: ({ row, table }) => {
-      const [isEditOpen, setIsEditOpen] = React.useState(false);
+      const meta = table.options.meta as CategoriesTableMeta;
 
       return (
         <div className="text-right">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
+              <Button
+                variant="ghost"
+                className="h-8 w-8 p-0"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <DotsHorizontalIcon className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
+            <DropdownMenuContent
+              align="end"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <DropdownMenuItem
+                onClick={() => meta?.editCategory?.(row.original.id)}
+              >
                 Edit
               </DropdownMenuItem>
 
               {!row.original.system && (
                 <DropdownMenuItem
-                  onClick={() =>
-                    table.options.meta?.deleteCategory?.(row.original.id)
-                  }
+                  onClick={() => meta?.deleteCategory?.(row.original.id)}
                 >
                   Remove
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-
-          <EditCategoryModal
-            id={row.original.id}
-            defaultValue={{
-              ...row.original,
-              color: row.original.color || null,
-              description: row.original.description || null,
-              taxRate: row.original.taxRate || null,
-              taxType: row.original.taxType || null,
-              taxReportingCode: row.original.taxReportingCode || null,
-              excluded: row.original.excluded || null,
-              parentId: row.original.parentId || null,
-            }}
-            isOpen={isEditOpen}
-            onOpenChange={setIsEditOpen}
-          />
         </div>
       );
     },

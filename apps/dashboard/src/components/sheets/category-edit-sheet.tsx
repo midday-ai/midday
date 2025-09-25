@@ -1,6 +1,6 @@
 "use client";
 
-import { useProductParams } from "@/hooks/use-product-params";
+import { useCategoryParams } from "@/hooks/use-category-params";
 import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
@@ -22,38 +22,40 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ProductForm } from "../forms/product-form";
+import { CategoryEditForm } from "../forms/category-edit-form";
 
-export function ProductEditSheet() {
+export function CategoryEditSheet() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const { setParams, productId } = useProductParams();
+  const { setParams, categoryId } = useCategoryParams();
 
-  const isOpen = Boolean(productId);
+  const isOpen = Boolean(categoryId);
 
-  const { data: product } = useQuery(
-    trpc.invoiceProducts.getById.queryOptions(
-      { id: productId! },
+  const { data: category } = useQuery(
+    trpc.transactionCategories.getById.queryOptions(
+      { id: categoryId! },
       {
         enabled: isOpen,
         initialData: () => {
           const pages = queryClient
-            .getQueriesData({ queryKey: trpc.invoiceProducts.get.queryKey() })
+            .getQueriesData({
+              queryKey: trpc.transactionCategories.get.queryKey(),
+            })
             // @ts-expect-error
             .flatMap(([, data]) => data?.pages ?? [])
             .flatMap((page) => page.data ?? []);
 
-          return pages.find((d) => d.id === productId);
+          return pages.find((d) => d.id === categoryId);
         },
       },
     ),
   );
 
-  const deleteProductMutation = useMutation(
-    trpc.invoiceProducts.delete.mutationOptions({
+  const deleteCategoryMutation = useMutation(
+    trpc.transactionCategories.delete.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.invoiceProducts.get.queryKey(),
+          queryKey: trpc.transactionCategories.get.queryKey(),
         });
         setParams(null);
       },
@@ -62,11 +64,11 @@ export function ProductEditSheet() {
 
   return (
     <Sheet open={isOpen} onOpenChange={() => setParams(null)}>
-      <SheetContent className="max-w-[455px]">
+      <SheetContent>
         <SheetHeader className="mb-6 flex justify-between items-center flex-row">
-          <h2 className="text-xl">Edit Product</h2>
+          <h2 className="text-xl">Edit Category</h2>
 
-          {productId && (
+          {categoryId && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button type="button">
@@ -90,14 +92,15 @@ export function ProductEditSheet() {
                       </AlertDialogTitle>
                       <AlertDialogDescription>
                         This action cannot be undone. This will permanently
-                        delete the product and remove its data from our servers.
+                        delete the category and remove its data from our
+                        servers.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() =>
-                          deleteProductMutation.mutate({ id: productId })
+                          deleteCategoryMutation.mutate({ id: categoryId })
                         }
                       >
                         Delete
@@ -110,7 +113,7 @@ export function ProductEditSheet() {
           )}
         </SheetHeader>
 
-        <ProductForm data={product} key={product?.id} />
+        <CategoryEditForm data={category} key={category?.id} />
       </SheetContent>
     </Sheet>
   );
