@@ -21,7 +21,7 @@ export function BottomBar({ data }: Props) {
 
   return (
     <motion.div
-      className="h-12 fixed bottom-4 left-0 right-0 pointer-events-none flex justify-center"
+      className="h-12 fixed bottom-4 left-0 right-0 pointer-events-none flex justify-center z-50"
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 100, opacity: 0 }}

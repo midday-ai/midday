@@ -1,18 +1,17 @@
 import type { Database } from "@db/client";
-import {
-  transactionCategories,
-  transactionCategoryEmbeddings,
-} from "@db/schema";
-import { and, asc, desc, eq, isNotNull, isNull } from "drizzle-orm";
-import {
-  generateCategoryEmbedding,
-  generateCategoryEmbeddingsBatch,
-} from "../utils/embeddings";
+import { transactionCategories } from "@db/schema";
+import { and, asc, desc, eq, isNotNull, isNull, sql } from "drizzle-orm";
+import { generateCategoryEmbedding } from "../utils/embeddings";
 import { createActivity } from "./activities";
 
 export type GetCategoriesParams = {
   teamId: string;
   limit?: number;
+};
+
+export type GetCategoryByIdParams = {
+  id: string;
+  teamId: string;
 };
 
 export const getCategories = async (
@@ -89,6 +88,70 @@ export const getCategories = async (
     ...parent,
     children: childrenByParentId.get(parent.id) || [],
   }));
+};
+
+export const getCategoryById = async (
+  db: Database,
+  params: GetCategoryByIdParams,
+) => {
+  const { id, teamId } = params;
+
+  const [result] = await db
+    .select({
+      id: transactionCategories.id,
+      name: transactionCategories.name,
+      color: transactionCategories.color,
+      slug: transactionCategories.slug,
+      description: transactionCategories.description,
+      system: transactionCategories.system,
+      taxRate: transactionCategories.taxRate,
+      taxType: transactionCategories.taxType,
+      taxReportingCode: transactionCategories.taxReportingCode,
+      excluded: transactionCategories.excluded,
+      parentId: transactionCategories.parentId,
+      createdAt: transactionCategories.createdAt,
+    })
+    .from(transactionCategories)
+    .where(
+      and(
+        eq(transactionCategories.id, id),
+        eq(transactionCategories.teamId, teamId),
+      ),
+    )
+    .limit(1);
+
+  if (!result) {
+    return result;
+  }
+
+  // Get children for this category
+  const children = await db
+    .select({
+      id: transactionCategories.id,
+      name: transactionCategories.name,
+      color: transactionCategories.color,
+      slug: transactionCategories.slug,
+      description: transactionCategories.description,
+      system: transactionCategories.system,
+      taxRate: transactionCategories.taxRate,
+      taxType: transactionCategories.taxType,
+      taxReportingCode: transactionCategories.taxReportingCode,
+      excluded: transactionCategories.excluded,
+      parentId: transactionCategories.parentId,
+    })
+    .from(transactionCategories)
+    .where(
+      and(
+        eq(transactionCategories.parentId, id),
+        eq(transactionCategories.teamId, teamId),
+      ),
+    )
+    .orderBy(asc(transactionCategories.name));
+
+  return {
+    ...result,
+    children,
+  };
 };
 
 export type CreateTransactionCategoryParams = {
@@ -168,104 +231,6 @@ export const createTransactionCategory = async (
   return result;
 };
 
-export type CreateTransactionCategoriesParams = {
-  teamId: string;
-  userId?: string;
-  categories: {
-    name: string;
-    color?: string | null;
-    description?: string | null;
-    taxRate?: number | null;
-    taxType?: string | null;
-    taxReportingCode?: string | null;
-    parentId?: string | null;
-  }[];
-};
-
-export const createTransactionCategories = async (
-  db: Database,
-  params: CreateTransactionCategoriesParams,
-) => {
-  const { teamId, userId, categories } = params;
-
-  if (categories.length === 0) {
-    return [];
-  }
-
-  const result = await db
-    .insert(transactionCategories)
-    .values(
-      categories.map((category) => ({
-        ...category,
-        teamId,
-      })),
-    )
-    .returning();
-
-  // Create activity for each category created
-  for (const category of result) {
-    createActivity(db, {
-      teamId,
-      userId,
-      type: "transaction_category_created",
-      source: "user",
-      priority: 7,
-      metadata: {
-        categoryId: category.id,
-        categoryName: category.name,
-        categoryColor: category.color,
-        categoryDescription: category.description,
-        taxRate: category.taxRate,
-        taxType: category.taxType,
-        taxReportingCode: category.taxReportingCode,
-        parentId: category.parentId,
-      },
-    });
-  }
-
-  // Generate embeddings for all new categories (async, don't block the response)
-  if (result.length > 0) {
-    const categoryNames = result.map((category) => ({
-      name: category.name,
-      system: false, // User-created categories
-    }));
-
-    generateCategoryEmbeddingsBatch(db, categoryNames).catch((error) => {
-      console.error(
-        "Failed to generate embeddings for batch categories:",
-        error,
-      );
-    });
-  }
-
-  return result;
-};
-
-/**
- * Clean up unused category embedding
- * Only deletes the embedding if no other categories use the same name
- */
-async function cleanupUnusedCategoryEmbedding(
-  db: Database,
-  categoryName: string,
-): Promise<void> {
-  // Check if any other categories still use this name
-  const categoriesWithSameName = await db
-    .select({ id: transactionCategories.id })
-    .from(transactionCategories)
-    .where(eq(transactionCategories.name, categoryName))
-    .limit(1);
-
-  // If no categories use this name anymore, delete the embedding
-  if (categoriesWithSameName.length === 0) {
-    await db
-      .delete(transactionCategoryEmbeddings)
-      .where(eq(transactionCategoryEmbeddings.name, categoryName));
-
-    console.log(`Cleaned up unused embedding for category: "${categoryName}"`);
-  }
-}
-
 export type UpdateTransactionCategoryParams = {
   id: string;
   teamId: string;
@@ -283,6 +248,23 @@ export const updateTransactionCategory = async (
   params: UpdateTransactionCategoryParams,
 ) => {
   const { id, teamId, ...updates } = params;
+
+  // If parentId is being changed, check if the category has children
+  if (updates.parentId !== undefined) {
+    const childrenCount = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(transactionCategories)
+      .where(
+        and(
+          eq(transactionCategories.parentId, id),
+          eq(transactionCategories.teamId, teamId),
+        ),
+      );
+
+    if (childrenCount[0]?.count && childrenCount[0].count > 0) {
+      throw new Error("Cannot change parent of a category that has children");
+    }
+  }
 
   // If name is being updated, get the current category first
   let oldName: string | undefined;

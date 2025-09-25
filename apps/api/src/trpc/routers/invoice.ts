@@ -74,6 +74,7 @@ const defaultTemplate = {
   paymentLabel: "Payment Details",
   paymentDetails: undefined,
   noteLabel: "Note",
+  noteDetails: undefined,
   logoUrl: undefined,
   currency: "USD",
   fromDetails: undefined,
@@ -371,6 +372,7 @@ export const invoiceRouter = createTRPCRouter({
         fromDetails: template?.fromDetails ?? defaultTemplate.fromDetails,
         paymentDetails:
           template?.paymentDetails ?? defaultTemplate.paymentDetails,
+        noteDetails: template?.noteDetails ?? defaultTemplate.noteDetails,
         timezone,
         locale,
       };
@@ -395,7 +397,7 @@ export const invoiceRouter = createTRPCRouter({
         fromDetails: savedTemplate.fromDetails,
         paymentDetails: savedTemplate.paymentDetails,
         customerDetails: undefined,
-        noteDetails: undefined,
+        noteDetails: savedTemplate.noteDetails,
         customerId: undefined,
         issueDate: new UTCDate().toISOString(),
         dueDate: addMonths(new UTCDate(), 1).toISOString(),
@@ -482,28 +484,48 @@ export const invoiceRouter = createTRPCRouter({
           teamId: teamId!,
         });
 
-        let scheduledJobId: string;
+        let scheduledJobId: string | null = null;
 
-        if (existingInvoice?.scheduledJobId) {
-          // Reschedule the existing job instead of creating a new one
-          await runs.reschedule(existingInvoice.scheduledJobId, {
-            delay: scheduledDate,
-          });
-          scheduledJobId = existingInvoice.scheduledJobId;
-        } else {
-          // Create a new scheduled job
-          const scheduledRun = await tasks.trigger(
-            "schedule-invoice",
-            {
-              invoiceId: input.id,
-              scheduledAt: input.scheduledAt,
-            },
-            {
+        try {
+          if (existingInvoice?.scheduledJobId) {
+            // Reschedule the existing job instead of creating a new one
+            await runs.reschedule(existingInvoice.scheduledJobId, {
               delay: scheduledDate,
-            },
-          );
+            });
+            scheduledJobId = existingInvoice.scheduledJobId;
+          } else {
+            // Create a new scheduled job
+            const scheduledRun = await tasks.trigger(
+              "schedule-invoice",
+              {
+                invoiceId: input.id,
+                scheduledAt: input.scheduledAt,
+              },
+              {
+                delay: scheduledDate,
+              },
+            );
 
-          scheduledJobId = scheduledRun.id;
+            if (!scheduledRun?.id) {
+              throw new Error(
+                "Failed to create scheduled job - no job ID returned",
+              );
+            }
+
+            scheduledJobId = scheduledRun.id;
+          }
+        } catch (error) {
+          throw new TRPCError({
+            code: "SERVICE_UNAVAILABLE",
+            cause: error,
+          });
+        }
+
+        // Only update the invoice status to "scheduled" if we successfully created/rescheduled the job
+        if (!scheduledJobId) {
+          throw new TRPCError({
+            code: "SERVICE_UNAVAILABLE",
+          });
         }
 
         // Update the invoice with scheduling information
@@ -634,15 +656,17 @@ export const invoiceRouter = createTRPCRouter({
         teamId: teamId!,
       });
 
-      if (!invoice || !invoice.scheduledJobId) {
+      if (!invoice) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Scheduled invoice not found",
         });
       }
 
-      // Cancel the scheduled job
-      await runs.cancel(invoice.scheduledJobId);
+      if (invoice.scheduledJobId) {
+        // Cancel the scheduled job
+        await runs.cancel(invoice.scheduledJobId);
+      }
 
       // Update the invoice status back to draft and clear scheduling fields
       const updatedInvoice = await updateInvoice(db, {

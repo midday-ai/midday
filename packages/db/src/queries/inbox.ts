@@ -69,6 +69,7 @@ export type GetInboxParams = {
   teamId: string;
   cursor?: string | null;
   order?: string | null;
+  sort?: string | null;
   pageSize?: number;
   q?: string | null;
   status?:
@@ -79,11 +80,12 @@ export type GetInboxParams = {
     | "pending"
     | "analyzing"
     | "suggested_match"
+    | "no_match"
     | null;
 };
 
 export async function getInbox(db: Database, params: GetInboxParams) {
-  const { teamId, cursor, order, pageSize = 20, q, status } = params;
+  const { teamId, cursor, order, sort, pageSize = 20, q, status } = params;
 
   const whereConditions: SQL[] = [
     eq(inbox.teamId, teamId),
@@ -145,18 +147,47 @@ export async function getInbox(db: Database, params: GetInboxParams) {
     .where(and(...whereConditions));
 
   // Apply sorting
-  if (order === "desc") {
-    query.orderBy(asc(inbox.createdAt)); // Reverse order for desc
+  if (sort === "alphabetical") {
+    if (order === "desc") {
+      query.orderBy(desc(inbox.displayName));
+    } else {
+      query.orderBy(asc(inbox.displayName));
+    }
   } else {
-    query.orderBy(desc(inbox.createdAt)); // Default is descending
+    // Default to date sorting
+    if (order === "desc") {
+      query.orderBy(asc(inbox.createdAt)); // Reverse order for desc
+    } else {
+      query.orderBy(desc(inbox.createdAt)); // Default is descending
+    }
   }
 
   // Apply pagination
   const offset = cursor ? Number.parseInt(cursor, 10) : 0;
   query.limit(pageSize).offset(offset);
 
-  // Execute query
-  const data = await query;
+  // Get total count with same filters (but without pagination and search query)
+  const countWhereConditions: SQL[] = [
+    eq(inbox.teamId, teamId),
+    ne(inbox.status, "deleted"),
+  ];
+
+  // Apply only status filter for count (not search query)
+  if (status) {
+    countWhereConditions.push(eq(inbox.status, status));
+  }
+
+  const countQuery = db
+    .select({
+      count: sql<number>`COUNT(*)::int`,
+    })
+    .from(inbox)
+    .where(and(...countWhereConditions));
+
+  // Execute both queries concurrently
+  const [data, [countResult]] = await Promise.all([query, countQuery]);
+
+  const totalCount = countResult?.count ?? 0;
 
   // Calculate next cursor
   const nextCursor =
@@ -169,6 +200,7 @@ export async function getInbox(db: Database, params: GetInboxParams) {
       cursor: nextCursor,
       hasPreviousPage: offset > 0,
       hasNextPage: data && data.length === pageSize,
+      totalCount,
     },
     data: data ?? [],
   };

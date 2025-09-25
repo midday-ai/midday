@@ -53,6 +53,7 @@ export type Template = {
   currency: string;
   paymentDetails: EditorDoc | null;
   fromDetails: EditorDoc | null;
+  noteDetails: EditorDoc | null;
   dateFormat: string;
   includeVat: boolean;
   includeTax: boolean;

@@ -9,42 +9,52 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useAction } from "next-safe-action/hooks";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
 
 type Props = {
   name?: string;
   value?: string | null;
   onSelect: (value: number) => void;
-  onSuggestionReceived?: (taxRate: number) => void;
+  isNewProduct?: boolean;
 };
 
 export function TaxRateAssistant({
   name,
   onSelect,
-  onSuggestionReceived,
   value,
+  isNewProduct = true,
 }: Props) {
   const [result, setResult] = useState<
     { taxRate: number; country?: string } | undefined
   >();
   const [isLoading, setLoading] = useState(false);
-  const lastProcessedName = useRef<string | undefined>(undefined);
+  const requestedNames = useRef(new Set<string>());
 
-  const getVatRate = useAction(getTaxRateAction, {
+  const getTaxRate = useAction(getTaxRateAction, {
     onSuccess: ({ data }) => {
       setLoading(false);
 
       if (data) {
         setResult(data);
-        // Auto-update the input with the AI suggestion
-        onSuggestionReceived?.(data.taxRate);
+        onSelect?.(data.taxRate);
       }
     },
     onError: () => {
       setLoading(false);
     },
   });
+
+  const executeTaxRateRequest = useCallback(
+    (name: string) => {
+      if (!requestedNames.current.has(name)) {
+        requestedNames.current.add(name);
+        setLoading(true);
+        getTaxRate.execute({ name });
+      }
+    },
+    [getTaxRate],
+  );
 
   const handleOnSelect = () => {
     if (result?.taxRate) {
@@ -55,19 +65,12 @@ export function TaxRateAssistant({
   // Use debounced name value with 500ms delay
   const [debouncedName] = useDebounceValue(name, 500);
 
+  // Only trigger tax rate suggestion for new products
   useEffect(() => {
-    // Only trigger API call if debounced name is different from last processed name
-    if (
-      debouncedName &&
-      debouncedName.length > 2 &&
-      debouncedName !== lastProcessedName.current
-    ) {
-      lastProcessedName.current = debouncedName;
-      setResult(undefined);
-      setLoading(true);
-      getVatRate.execute({ name: debouncedName });
+    if (debouncedName && isNewProduct && !value) {
+      executeTaxRateRequest(debouncedName);
     }
-  }, [debouncedName, getVatRate]);
+  }, [debouncedName, isNewProduct, value, executeTaxRateRequest]);
 
   return (
     <TooltipProvider delayDuration={0}>

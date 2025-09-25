@@ -3,7 +3,7 @@
 import { useTRPC } from "@/trpc/client";
 import { Textarea } from "@midday/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
 
 type Props = {
@@ -27,7 +27,7 @@ export function InvoiceNote({ id, defaultValue }: Props) {
     }),
   );
 
-  useEffect(() => {
+  const handleUpdate = useCallback(() => {
     if (debouncedValue !== defaultValue) {
       updateInvoiceMutation.mutate({
         id,
@@ -35,7 +35,11 @@ export function InvoiceNote({ id, defaultValue }: Props) {
           debouncedValue && debouncedValue.length > 0 ? debouncedValue : null,
       });
     }
-  }, [debouncedValue, defaultValue, id, updateInvoiceMutation]);
+  }, [debouncedValue, defaultValue, id, updateInvoiceMutation.mutate]);
+
+  useEffect(() => {
+    handleUpdate();
+  }, [handleUpdate]);
 
   return (
     <Textarea

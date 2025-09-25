@@ -7,6 +7,7 @@ type Props = {
   onChange: (value: string) => void;
   onSelect: (vat: number) => void;
   value?: number | null;
+  isNewProduct?: boolean;
 };
 
 export function TaxRateInput({
@@ -14,6 +15,7 @@ export function TaxRateInput({
   onChange,
   onSelect,
   value: defaultValue,
+  isNewProduct = true,
 }: Props) {
   const [value, setValue] = useState(defaultValue);
 
@@ -48,10 +50,7 @@ export function TaxRateInput({
         name={name}
         value={value?.toString() ?? ""}
         onSelect={handleOnSelect}
-        onSuggestionReceived={(taxRate) => {
-          setValue(taxRate);
-          onChange(taxRate.toString());
-        }}
+        isNewProduct={isNewProduct}
       />
     </div>
   );

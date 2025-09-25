@@ -22,17 +22,26 @@ export function InboxOrdering() {
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuCheckboxItem
-          checked={params.order === "asc"}
-          onCheckedChange={() => setParams({ order: "asc" })}
+          checked={params.sort === "date" && params.order === "asc"}
+          onCheckedChange={() => setParams({ sort: "date", order: "asc" })}
         >
           Most recent
         </DropdownMenuCheckboxItem>
 
         <DropdownMenuCheckboxItem
-          checked={params.order === "desc"}
-          onCheckedChange={() => setParams({ order: "desc" })}
+          checked={params.sort === "date" && params.order === "desc"}
+          onCheckedChange={() => setParams({ sort: "date", order: "desc" })}
         >
           Oldest first
+        </DropdownMenuCheckboxItem>
+
+        <DropdownMenuCheckboxItem
+          checked={params.sort === "alphabetical"}
+          onCheckedChange={() =>
+            setParams({ sort: "alphabetical", order: "asc" })
+          }
+        >
+          Alphabetically
         </DropdownMenuCheckboxItem>
       </DropdownMenuContent>
     </DropdownMenu>

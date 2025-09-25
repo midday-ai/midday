@@ -18,7 +18,19 @@ import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { SubmitButton as BaseSubmitButton } from "@midday/ui/submit-button";
 import { useMutation } from "@tanstack/react-query";
-import { format, setHours, startOfTomorrow } from "date-fns";
+import {
+  addHours,
+  addMilliseconds,
+  addMonths,
+  differenceInMilliseconds,
+  format,
+  getHours,
+  getMinutes,
+  setHours,
+  setMinutes,
+  startOfDay,
+  startOfTomorrow,
+} from "date-fns";
 import * as React from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -34,11 +46,14 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
   // Get next day date/time rounded to nearest hour
   const getDefaultScheduleDateTime = () => {
     const now = new Date();
-    const roundedHour =
-      now.getMinutes() >= 30 ? now.getHours() + 1 : now.getHours();
+    const minutes = getMinutes(now);
+    const shouldRoundUp = minutes >= 30;
 
     // Start with tomorrow at midnight, then set the rounded hour
-    return setHours(startOfTomorrow(), roundedHour);
+    const tomorrow = startOfTomorrow();
+    const baseHour = setHours(tomorrow, getHours(now));
+
+    return shouldRoundUp ? addHours(baseHour, 1) : baseHour;
   };
 
   const [scheduleDate, setScheduleDate] = React.useState<Date | undefined>(
@@ -55,7 +70,8 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
     const initialDateTime = existingScheduledAt
       ? new Date(existingScheduledAt)
       : getDefaultScheduleDateTime();
-    return initialDateTime.toTimeString().slice(0, 5); // Format as HH:MM
+    // Use date-fns format for consistent time formatting
+    return format(initialDateTime, "HH:mm");
   });
 
   // Sync with form scheduledAt changes (for when invoice data is loaded)
@@ -64,7 +80,8 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
     if (currentScheduledAt) {
       const scheduledDateTime = new Date(currentScheduledAt);
       setScheduleDate(scheduledDateTime);
-      setScheduleTime(scheduledDateTime.toTimeString().slice(0, 5));
+      // Use date-fns format for consistent time formatting
+      setScheduleTime(format(scheduledDateTime, "HH:mm"));
     }
   }, [watch("scheduledAt")]);
 
@@ -73,12 +90,44 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
     const timeParts = time.split(":").map(Number);
     const hours = timeParts[0] || 0;
     const minutes = timeParts[1] || 0;
-    const scheduledDateTime = new Date(date);
-    scheduledDateTime.setHours(hours, minutes, 0, 0);
+
+    // Use date-fns for time manipulation
+    const scheduledDateTime = setMinutes(setHours(date, hours), minutes);
 
     setValue("scheduledAt", scheduledDateTime.toISOString(), {
       shouldValidate: true,
     });
+
+    // Auto-adjust issue date and due date when scheduling
+    const currentIssueDate = watch("issueDate");
+    const currentDueDate = watch("dueDate");
+
+    if (currentIssueDate && currentDueDate) {
+      const issueDateTime = new Date(currentIssueDate);
+      const dueDateTime = new Date(currentDueDate);
+
+      // Calculate the payment period
+      const paymentPeriodMs = differenceInMilliseconds(
+        dueDateTime,
+        issueDateTime,
+      );
+
+      // Set issue date to the scheduled date (at start of day for consistency)
+      const newIssueDate = startOfDay(date);
+
+      // Set due date to maintain the same payment period
+      const newDueDate = addMilliseconds(newIssueDate, paymentPeriodMs);
+
+      setValue("issueDate", newIssueDate.toISOString(), {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+
+      setValue("dueDate", newDueDate.toISOString(), {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
   };
 
   // Handler to set date and automatically switch to scheduled
@@ -147,6 +196,22 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
         shouldValidate: true,
         shouldDirty: true,
       });
+
+      // Reset issue date to today and due date to 1 month from today when switching away from scheduled
+      if (currentDeliveryType === "scheduled") {
+        const today = startOfDay(new Date());
+        const nextMonth = addMonths(today, 1);
+
+        setValue("issueDate", today.toISOString(), {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+
+        setValue("dueDate", nextMonth.toISOString(), {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+      }
     }
   };
 

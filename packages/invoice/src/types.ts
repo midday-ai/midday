@@ -3,6 +3,24 @@ export type LineItem = {
   quantity?: number;
   price?: number;
   unit?: string;
+  // Optional product reference for smart autocomplete
+  productId?: string;
+};
+
+export type InvoiceProduct = {
+  id: string;
+  createdAt: string;
+  updatedAt: string | null;
+  teamId: string;
+  createdBy: string | null;
+  name: string;
+  description: string | null;
+  price: number | null;
+  currency: string | null;
+  unit: string | null;
+  isActive: boolean;
+  usageCount: number;
+  lastUsedAt: string | null;
 };
 
 export type Invoice = {
@@ -70,6 +88,7 @@ export type Template = {
   currency: string;
   paymentDetails: EditorDoc | null;
   fromDetails: EditorDoc | null;
+  noteDetails: EditorDoc | null;
   dateFormat: string;
   includeVat: boolean;
   includeTax: boolean;

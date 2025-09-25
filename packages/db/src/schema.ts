@@ -1533,6 +1533,7 @@ export const invoiceTemplates = pgTable(
     currency: text(),
     paymentDetails: jsonb("payment_details"),
     fromDetails: jsonb("from_details"),
+    noteDetails: jsonb("note_details"),
     size: invoiceSizeEnum().default("a4"),
     dateFormat: text("date_format"),
     includeVat: boolean("include_vat"),
@@ -1565,6 +1566,97 @@ export const invoiceTemplates = pgTable(
       for: "all",
       to: ["public"],
       using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+export const invoiceProducts = pgTable(
+  "invoice_products",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+      mode: "string",
+    }).defaultNow(),
+    teamId: uuid("team_id").notNull(),
+    createdBy: uuid("created_by"),
+    name: text().notNull(),
+    description: text(),
+    price: numericCasted({ precision: 10, scale: 2 }),
+    currency: text(),
+    unit: text(),
+    isActive: boolean().default(true).notNull(),
+    usageCount: integer("usage_count").default(0).notNull(),
+    lastUsedAt: timestamp("last_used_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    // Full-text search for product names and descriptions
+    fts: tsvector("fts")
+      .notNull()
+      .generatedAlwaysAs(
+        (): SQL => sql`
+          to_tsvector(
+            'english',
+            (
+              (COALESCE(name, ''::text) || ' '::text) || COALESCE(description, ''::text)
+            )
+          )
+        `,
+      ),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "invoice_products_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.createdBy],
+      foreignColumns: [users.id],
+      name: "invoice_products_created_by_fkey",
+    }).onDelete("set null"),
+    index("invoice_products_team_id_idx").on(table.teamId),
+    index("invoice_products_created_by_idx").on(table.createdBy),
+    index("invoice_products_fts_idx").using("gin", table.fts),
+    index("invoice_products_name_idx").on(table.name),
+    index("invoice_products_usage_count_idx").on(table.usageCount),
+    index("invoice_products_last_used_at_idx").on(table.lastUsedAt),
+    // Composite index for team + active status for fast filtering
+    index("invoice_products_team_active_idx").on(table.teamId, table.isActive),
+    // Unique constraint for upsert operations (team + name + currency + price combination)
+    unique("invoice_products_team_name_currency_price_unique").on(
+      table.teamId,
+      table.name,
+      table.currency,
+      table.price,
+    ),
+    pgPolicy("Enable read access for team members", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`team_id = (select auth.jwt() ->> 'team_id')::uuid`,
+    }),
+    pgPolicy("Enable insert access for team members", {
+      as: "permissive",
+      for: "insert",
+      to: ["public"],
+      withCheck: sql`team_id = (select auth.jwt() ->> 'team_id')::uuid`,
+    }),
+    pgPolicy("Enable update access for team members", {
+      as: "permissive",
+      for: "update",
+      to: ["public"],
+      using: sql`team_id = (select auth.jwt() ->> 'team_id')::uuid`,
+    }),
+    pgPolicy("Enable delete access for team members", {
+      as: "permissive",
+      for: "delete",
+      to: ["public"],
+      using: sql`team_id = (select auth.jwt() ->> 'team_id')::uuid`,
     }),
   ],
 );

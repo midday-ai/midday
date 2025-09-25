@@ -23,6 +23,9 @@ declare module "@tanstack/table-core" {
     // Customers table meta
     deleteCustomer?: (id: string) => void;
 
+    // Products table meta
+    onEdit?: (id: string) => void;
+
     // Members table meta
     currentUser?: RouterOutputs["team"]["members"][number];
     totalOwners?: number;

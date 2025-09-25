@@ -154,7 +154,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
         <Button
           variant="outline"
           aria-expanded={open}
-          className="w-full justify-between relative"
+          className="w-full justify-between relative font-normal"
         >
           <span className="truncate text-ellipsis pr-3">
             {selectedItem ? (

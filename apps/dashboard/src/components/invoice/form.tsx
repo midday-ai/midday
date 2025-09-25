@@ -4,6 +4,7 @@ import { getUrl } from "@/utils/environment";
 import { formatRelativeTime } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
+import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -32,6 +33,7 @@ export function Form() {
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const draftInvoiceMutation = useMutation(
     trpc.invoice.draft.mutationOptions({
@@ -74,6 +76,23 @@ export function Form() {
         });
 
         setParams({ type: "success", invoiceId: data.id });
+      },
+      onError: (error) => {
+        console.log(error);
+        // Check if this is a scheduling error using the specific error code
+        if (error.data?.code === "SERVICE_UNAVAILABLE") {
+          toast({
+            title: "Scheduling Failed",
+            description:
+              "Please try again. If the issue persists, contact support.",
+          });
+        } else {
+          // Generic error handling for other invoice creation errors
+          toast({
+            title: "Invoice Creation Failed",
+            description: "An unexpected error occurred. Please try again.",
+          });
+        }
       },
     }),
   );

@@ -11,6 +11,7 @@ type Props = {
   onFocus?: () => void;
   className?: string;
   step?: number;
+  placeholder?: string;
 };
 
 export function QuantityInput({
@@ -22,6 +23,7 @@ export function QuantityInput({
   onFocus,
   className,
   step = 0.1,
+  placeholder = "0",
 }: Props) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [rawValue, setRawValue] = React.useState(String(value));
@@ -82,7 +84,8 @@ export function QuantityInput({
           max={max}
           autoComplete="off"
           step={step}
-          value={rawValue}
+          value={rawValue === "0" ? "" : rawValue}
+          placeholder={placeholder}
           onInput={handleInput}
           onBlur={onBlur}
           onFocus={onFocus}

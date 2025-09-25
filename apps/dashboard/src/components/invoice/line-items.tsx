@@ -8,11 +8,11 @@ import { Icons } from "@midday/ui/icons";
 import { useMutation } from "@tanstack/react-query";
 import { Reorder, useDragControls } from "framer-motion";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
-import { AmountInput } from "./amount-input";
-import { Description } from "./description";
 import type { InvoiceFormValues } from "./form-context";
-import { Input } from "./input";
 import { LabelInput } from "./label-input";
+import { ProductAutocomplete } from "./product-autocomplete";
+import { ProductAwareAmountInput } from "./product-aware-amount-input";
+import { ProductAwareUnitInput } from "./product-aware-unit-input";
 import { QuantityInput } from "./quantity-input";
 
 export function LineItems() {
@@ -114,6 +114,7 @@ export function LineItems() {
         values={fields}
         onReorder={reorderList}
         className="!m-0"
+        transition={{ duration: 0 }}
       >
         {fields.map((field, index) => (
           <LineItemRow
@@ -166,7 +167,7 @@ function LineItemRow({
   includeUnits?: boolean;
 }) {
   const controls = useDragControls();
-  const { control } = useFormContext();
+  const { control, watch, setValue } = useFormContext();
 
   const locale = useWatch({ control, name: "template.locale" });
 
@@ -180,12 +181,26 @@ function LineItemRow({
     name: `lineItems.${index}.quantity`,
   });
 
+  const lineItemName = watch(`lineItems.${index}.name`);
+
   return (
     <Reorder.Item
       className={`grid ${includeUnits ? "grid-cols-[1.5fr_15%25%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-start relative group mb-2 w-full`}
       value={item}
       dragListener={false}
       dragControls={controls}
+      transition={{ duration: 0 }}
+      onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+        // Don't interfere with arrow keys when they're used for autocomplete navigation
+        if (
+          e.key === "ArrowDown" ||
+          e.key === "ArrowUp" ||
+          e.key === "Enter" ||
+          e.key === "Escape"
+        ) {
+          e.stopPropagation();
+        }
+      }}
     >
       {isReorderable && (
         <Button
@@ -198,14 +213,31 @@ function LineItemRow({
         </Button>
       )}
 
-      <Description name={`lineItems.${index}.name`} />
+      <ProductAutocomplete
+        index={index}
+        value={lineItemName || ""}
+        onChange={(value: string) => {
+          setValue(`lineItems.${index}.name`, value, {
+            shouldValidate: true,
+            shouldDirty: true,
+          });
+        }}
+      />
 
       <QuantityInput name={`lineItems.${index}.quantity`} />
 
       <div className="flex items-center gap-2">
-        <AmountInput name={`lineItems.${index}.price`} />
+        <ProductAwareAmountInput
+          name={`lineItems.${index}.price`}
+          lineItemIndex={index}
+        />
         {includeUnits && <span className="text-xs text-[#878787]">/</span>}
-        {includeUnits && <Input name={`lineItems.${index}.unit`} />}
+        {includeUnits && (
+          <ProductAwareUnitInput
+            name={`lineItems.${index}.unit`}
+            lineItemIndex={index}
+          />
+        )}
       </div>
 
       <div className="text-right">

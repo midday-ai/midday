@@ -34,6 +34,7 @@ export function InboxView() {
   const infiniteQueryOptions = trpc.inbox.get.infiniteQueryOptions(
     {
       order: params.order,
+      sort: params.sort,
       ...filter,
     },
     {
