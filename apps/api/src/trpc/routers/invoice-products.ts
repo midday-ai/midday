@@ -28,12 +28,14 @@ export const invoiceProductsRouter = createTRPCRouter({
         sortBy = "popular",
         limit = 50,
         includeInactive = false,
+        currency,
       } = input || {};
 
       return getInvoiceProducts(db, teamId!, {
         sortBy,
         limit,
         includeInactive,
+        currency,
       });
     }),
 

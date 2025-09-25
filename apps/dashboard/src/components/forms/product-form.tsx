@@ -1,9 +1,12 @@
 "use client";
 
+import { SelectCurrency } from "@/components/select-currency";
 import { useProductParams } from "@/hooks/use-product-params";
+import { useTeamQuery } from "@/hooks/use-team";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { uniqueCurrencies } from "@midday/location/currencies";
 import { CurrencyInput } from "@midday/ui/currency-input";
 import {
   Form,
@@ -35,12 +38,14 @@ type FormData = z.infer<typeof formSchema>;
 
 type Props = {
   data?: RouterOutputs["invoiceProducts"]["getById"];
+  defaultCurrency?: string;
 };
 
-export function ProductForm({ data }: Props) {
+export function ProductForm({ data, defaultCurrency }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { setParams } = useProductParams();
+  const { data: team } = useTeamQuery();
 
   const form = useZodForm(formSchema, {
     defaultValues: {
@@ -49,7 +54,8 @@ export function ProductForm({ data }: Props) {
       description: data?.description || "",
       price: data?.price || undefined,
       unit: data?.unit || "",
-      currency: data?.currency || "USD",
+      currency:
+        data?.currency || defaultCurrency || team?.baseCurrency || "USD",
       isActive: data?.isActive ?? true,
     },
   });
@@ -236,6 +242,27 @@ export function ProductForm({ data }: Props) {
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="currency"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Currency</FormLabel>
+              <FormControl>
+                <SelectCurrency
+                  currencies={uniqueCurrencies}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              </FormControl>
+              <FormDescription>
+                Currency for this product's pricing.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}

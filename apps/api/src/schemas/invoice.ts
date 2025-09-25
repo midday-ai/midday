@@ -428,9 +428,9 @@ export const getInvoiceProductsSchema = z
     sortBy: z.enum(["popular", "recent"]).default("popular"),
     limit: z.number().min(1).max(100).default(50),
     includeInactive: z.boolean().default(false),
+    currency: z.string().optional().nullable(),
   })
-  .optional()
-  .default({});
+  .optional();
 
 export const deleteInvoiceProductSchema = z.object({
   id: z.string().uuid(),

@@ -45,8 +45,8 @@ export function GlobalSheets({ currencyPromise, countryCodePromise }: Props) {
       <CustomerCreateSheet />
       <CustomerEditSheet />
 
-      <ProductCreateSheet />
-      <ProductEditSheet />
+      <ProductCreateSheet defaultCurrency={currency} />
+      <ProductEditSheet defaultCurrency={currency} />
 
       <TransactionSheet />
       <TransactionCreateSheet />

@@ -275,6 +275,7 @@ export type GetInvoiceProductsParams = {
   sortBy?: "popular" | "recent";
   limit?: number;
   includeInactive?: boolean;
+  currency?: string | null;
 };
 
 export async function getInvoiceProducts(
@@ -282,13 +283,22 @@ export async function getInvoiceProducts(
   teamId: string,
   params: GetInvoiceProductsParams = {},
 ): Promise<InvoiceProduct[]> {
-  const { sortBy = "popular", limit = 50, includeInactive = false } = params;
+  const {
+    sortBy = "popular",
+    limit = 50,
+    includeInactive = false,
+    currency,
+  } = params;
 
   const whereConditions = [eq(invoiceProducts.teamId, teamId)];
 
   // Only filter by isActive if includeInactive is false
   if (!includeInactive) {
     whereConditions.push(eq(invoiceProducts.isActive, true));
+  }
+
+  if (currency) {
+    whereConditions.push(eq(invoiceProducts.currency, currency));
   }
 
   const query = db

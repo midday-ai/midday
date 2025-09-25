@@ -132,7 +132,7 @@ export function CategoryEditForm({ data }: Props) {
                     </FormLabel>
                     <FormControl>
                       {hasChildren ? (
-                        <div className="flex items-center space-x-2 p-3 border border-border bg-muted/50">
+                        <div className="flex items-center space-x-2 p-3 py-2 border border-border bg-muted/50">
                           <span className="text-sm text-muted-foreground">
                             Cannot change parent - this category has children
                           </span>

@@ -24,7 +24,9 @@ import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ProductForm } from "../forms/product-form";
 
-export function ProductEditSheet() {
+export function ProductEditSheet({
+  defaultCurrency,
+}: { defaultCurrency: string }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { setParams, productId } = useProductParams();
@@ -110,7 +112,11 @@ export function ProductEditSheet() {
           )}
         </SheetHeader>
 
-        <ProductForm data={product} key={product?.id} />
+        <ProductForm
+          data={product}
+          key={product?.id}
+          defaultCurrency={defaultCurrency}
+        />
       </SheetContent>
     </Sheet>
   );

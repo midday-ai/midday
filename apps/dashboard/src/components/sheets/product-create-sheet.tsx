@@ -7,7 +7,9 @@ import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import React from "react";
 import { ProductForm } from "../forms/product-form";
 
-export function ProductCreateSheet() {
+export function ProductCreateSheet({
+  defaultCurrency,
+}: { defaultCurrency: string }) {
   const { setParams, createProduct } = useProductParams();
 
   const isOpen = Boolean(createProduct);
@@ -27,7 +29,7 @@ export function ProductCreateSheet() {
           </Button>
         </SheetHeader>
 
-        <ProductForm />
+        <ProductForm defaultCurrency={defaultCurrency} />
       </SheetContent>
     </Sheet>
   );

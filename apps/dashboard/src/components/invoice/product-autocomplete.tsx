@@ -93,9 +93,14 @@ export function ProductAutocomplete({
 
   // Get all products for client-side filtering
   const { data: allProducts = [] } = useQuery(
-    trpc.invoiceProducts.get.queryOptions(undefined, {
-      staleTime: 300000, // Cache for 5 minutes
-    }),
+    trpc.invoiceProducts.get.queryOptions(
+      {
+        currency,
+      },
+      {
+        staleTime: 300000, // Cache for 5 minutes
+      },
+    ),
   );
 
   // Filter products instantly on client-side
