@@ -24,7 +24,7 @@ import * as React from "react";
 
 interface CategoriesTableMeta {
   deleteCategory: (id: string) => void;
-  editCategory: (id: string) => void;
+  onEdit: (id: string) => void;
   expandedCategories: Set<string>;
   setExpandedCategories: (categories: Set<string>) => void;
 }
