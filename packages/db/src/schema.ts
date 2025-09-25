@@ -1424,6 +1424,10 @@ export const documents = pgTable(
       "gin",
       table.title.asc().nullsLast().op("gin_trgm_ops"),
     ),
+    index("idx_gin_documents_name").using(
+      "gin",
+      table.name.asc().nullsLast().op("gin_trgm_ops"),
+    ),
     foreignKey({
       columns: [table.ownerId],
       foreignColumns: [users.id],

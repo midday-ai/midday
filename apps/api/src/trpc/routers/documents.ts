@@ -9,6 +9,7 @@ import {
 } from "@api/schemas/documents";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
+  checkDocumentAttachments,
   deleteDocument,
   getDocumentById,
   getDocuments,
@@ -47,6 +48,15 @@ export const documentsRouter = createTRPCRouter({
       return getRelatedDocuments(db, {
         id: input.id,
         pageSize: input.pageSize,
+        teamId: teamId!,
+      });
+    }),
+
+  checkAttachments: protectedProcedure
+    .input(deleteDocumentSchema)
+    .query(async ({ input, ctx: { db, teamId } }) => {
+      return checkDocumentAttachments(db, {
+        id: input.id,
         teamId: teamId!,
       });
     }),

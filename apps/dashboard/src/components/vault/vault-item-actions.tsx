@@ -4,9 +4,10 @@ import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
+import { DeleteVaultFileDialog } from "./delete-vault-file-dialog";
 
 type Props = {
   id: string;
@@ -17,8 +18,8 @@ type Props = {
 export function VaultItemActions({ id, filePath, hideDelete }: Props) {
   const [, copy] = useCopyToClipboard();
   const [isCopied, setIsCopied] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
 
   const downloadUrl = `/api/download/file?path=${filePath.join("/")}`;
   const fileName = filePath.at(-1);
@@ -36,20 +37,6 @@ export function VaultItemActions({ id, filePath, hideDelete }: Props) {
             setIsCopied(false);
           }, 3000);
         }
-      },
-    }),
-  );
-
-  const deleteDocumentMutation = useMutation(
-    trpc.documents.delete.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: trpc.documents.get.infiniteQueryKey(),
-        });
-
-        queryClient.invalidateQueries({
-          queryKey: trpc.search.global.queryKey(),
-        });
       },
     }),
   );
@@ -94,11 +81,18 @@ export function VaultItemActions({ id, filePath, hideDelete }: Props) {
           variant="outline"
           size="icon"
           className="rounded-full size-7 bg-background"
-          onClick={() => deleteDocumentMutation.mutate({ id })}
+          onClick={() => setShowDeleteDialog(true)}
         >
           <Icons.Delete className="size-3.5" />
         </Button>
       )}
+
+      <DeleteVaultFileDialog
+        id={id}
+        filePath={filePath}
+        isOpen={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+      />
     </div>
   );
 }
