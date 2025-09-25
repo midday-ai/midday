@@ -3,6 +3,7 @@
 import { useProductParams } from "@/hooks/use-product-params";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
+import { extractTextFromValue } from "@midday/invoice";
 import type { InvoiceProduct } from "@midday/invoice/types";
 import { cn } from "@midday/ui/cn";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -30,6 +31,9 @@ export function ProductAutocomplete({
   const [hoveredIndex, setHoveredIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const { setValue, watch } = useFormContext();
+
+  // Extract text content from value (handles JSON, TipTap content, etc.)
+  const parsedValue = extractTextFromValue(value);
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -105,9 +109,9 @@ export function ProductAutocomplete({
 
   // Filter products instantly on client-side
   const filteredProducts =
-    value.trim().length >= 2
+    parsedValue.trim().length >= 2
       ? allProducts.filter((product) =>
-          product.name.toLowerCase().includes(value.toLowerCase()),
+          product.name.toLowerCase().includes(parsedValue.toLowerCase()),
         )
       : allProducts.slice(0, 5); // Show top 5 when not searching
 
@@ -185,12 +189,12 @@ export function ProductAutocomplete({
     setTimeout(() => setShowSuggestions(false), 200);
 
     // Only save if there's content OR if we need to clear a productId
-    const hasContent = value && value.trim().length > 0;
+    const hasContent = parsedValue && parsedValue.trim().length > 0;
     const needsToClearProductId = !hasContent && currentProductId;
 
     if (hasContent || needsToClearProductId) {
       saveLineItemAsProductMutation.mutate({
-        name: value || "",
+        name: parsedValue || "",
         price: currentPrice !== undefined ? currentPrice : null,
         unit: currentUnit || null,
         productId: currentProductId || undefined,
@@ -198,7 +202,7 @@ export function ProductAutocomplete({
       });
     }
   }, [
-    value,
+    parsedValue,
     currentPrice,
     currentUnit,
     currentProductId,
@@ -292,20 +296,22 @@ export function ProductAutocomplete({
   );
 
   // Match the exact placeholder logic from the Editor component
-  const showPlaceholder = !value && !isFocused;
+  const showPlaceholder = !parsedValue && !isFocused;
 
   return (
     <div>
       <input
         ref={inputRef}
         type="text"
-        value={value}
+        value={parsedValue}
         onChange={(e) => handleInputChange(e.target.value)}
         onFocus={handleFocus}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         disabled={disabled}
-        placeholder={isFocused && !value ? "Search or create product..." : ""}
+        placeholder={
+          isFocused && !parsedValue ? "Search or create product..." : ""
+        }
         role="combobox"
         aria-expanded={showSuggestions}
         aria-haspopup="listbox"

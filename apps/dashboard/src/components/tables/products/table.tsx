@@ -11,7 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from "@midday/ui/table";
-import { toast } from "@midday/ui/use-toast";
 import {
   useMutation,
   useQueryClient,
@@ -46,16 +45,6 @@ export function DataTable() {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: trpc.invoiceProducts.get.queryKey(),
-        });
-        toast({
-          title: "Product deleted",
-          variant: "success",
-        });
-      },
-      onError: () => {
-        toast({
-          title: "Failed to delete product",
-          variant: "error",
         });
       },
     }),
