@@ -74,7 +74,7 @@ export function DataTable() {
       deleteCategory: (id: string) => {
         deleteCategoryMutation.mutate({ id });
       },
-      editCategory: (id: string) => {
+      onEdit: (id: string) => {
         setParams({ categoryId: id });
       },
       expandedCategories,

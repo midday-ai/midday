@@ -210,9 +210,7 @@ export const columns: ColumnDef<any>[] = [
               align="end"
               onClick={(e) => e.stopPropagation()}
             >
-              <DropdownMenuItem
-                onClick={() => meta?.editCategory?.(row.original.id)}
-              >
+              <DropdownMenuItem onClick={() => meta?.onEdit?.(row.original.id)}>
                 Edit
               </DropdownMenuItem>
 
