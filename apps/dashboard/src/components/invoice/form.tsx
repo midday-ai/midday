@@ -80,7 +80,7 @@ export function Form() {
       onError: (error) => {
         console.log(error);
         // Check if this is a scheduling error using the specific error code
-        if (error.data?.code === "INVOICE_SCHEDULING_FAILED") {
+        if (error.data?.code === "SERVICE_UNAVAILABLE") {
           toast({
             title: "Scheduling Failed",
             description:

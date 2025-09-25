@@ -516,7 +516,7 @@ export const invoiceRouter = createTRPCRouter({
           }
         } catch (error) {
           throw new TRPCError({
-            code: "INVOICE_SCHEDULING_FAILED",
+            code: "SERVICE_UNAVAILABLE",
             cause: error,
           });
         }
@@ -524,7 +524,7 @@ export const invoiceRouter = createTRPCRouter({
         // Only update the invoice status to "scheduled" if we successfully created/rescheduled the job
         if (!scheduledJobId) {
           throw new TRPCError({
-            code: "INVOICE_SCHEDULING_FAILED",
+            code: "SERVICE_UNAVAILABLE",
           });
         }
 
