@@ -57,20 +57,17 @@ export function useNotifications() {
       }),
     );
 
-  // Fallback subscription for team-level activities
+  // Real-time subscription for activities filtered by user_id
   useRealtime({
-    channelName: "team-notifications",
+    channelName: "user-notifications",
     event: "INSERT",
     table: "activities",
-    filter: user?.teamId ? `team_id=eq.${user.teamId}` : undefined,
+    filter: `user_id=eq.${user?.id}`,
     onEvent: (payload) => {
-      const newRecord = payload?.new as any;
-      // Only process if it's for the current user and is a notification
-      if (
-        newRecord?.userId === user?.id &&
-        newRecord?.priority &&
-        newRecord.priority <= 3
-      ) {
+      // Only handle new notifications (priority <= 3), not archived updates
+      const newRecord = payload?.new as any; // Supabase payload type
+      if (newRecord?.priority && newRecord.priority <= 3) {
+        // Invalidate both inbox and archived queries
         queryClient.invalidateQueries({
           queryKey: trpc.notifications.list.queryKey(),
         });
