@@ -75,37 +75,37 @@ export function InvoiceSummary({ data, title }: Props) {
                 sideOffset={10}
               >
                 <h3 className="font-medium text-primary">Currency Breakdown</h3>
-                <div className="space-y-2">
-                  {data.breakdown?.map((item) => (
-                    <div
-                      key={item.currency}
-                      className="flex justify-between items-center"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{item.currency}</span>
-                        <span className="text-[#878787]">({item.count})</span>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-mono">
+                <div className="space-y-1.5">
+                  {data.breakdown?.map((item, index) => (
+                    <div key={item.currency}>
+                      <div className="flex items-center justify-between text-xs py-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{item.currency}</span>
+                          <span className="text-[#878787]">({item.count})</span>
+                        </div>
+                        <div className="font-mono text-right">
                           <FormatAmount
                             amount={item.originalAmount}
                             currency={item.currency}
                             maximumFractionDigits={0}
                             minimumFractionDigits={0}
                           />
+                          {item.currency !== data.currency && (
+                            <div className="text-[#878787] text-xs mt-1">
+                              ≈{" "}
+                              <FormatAmount
+                                amount={item.convertedAmount}
+                                currency={data.currency}
+                                maximumFractionDigits={0}
+                                minimumFractionDigits={0}
+                              />
+                            </div>
+                          )}
                         </div>
-                        {item.currency !== data.currency && (
-                          <div className="text-[#878787] font-mono text-xs">
-                            ≈{" "}
-                            <FormatAmount
-                              amount={item.convertedAmount}
-                              currency={data.currency}
-                              maximumFractionDigits={0}
-                              minimumFractionDigits={0}
-                            />
-                          </div>
-                        )}
                       </div>
+                      {index < (data.breakdown?.length ?? 0) - 1 && (
+                        <div className="border-t border-border mt-2" />
+                      )}
                     </div>
                   ))}
                 </div>
