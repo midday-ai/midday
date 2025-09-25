@@ -7,7 +7,7 @@ import type {
   RealtimePostgresChangesPayload,
   SupabaseClient,
 } from "@supabase/supabase-js";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type PublicSchema = Database[Extract<keyof Database, "public">];
 type Tables = PublicSchema["Tables"];
@@ -30,13 +30,36 @@ export function useRealtime<TN extends TableName>({
 }: UseRealtimeProps<TN>) {
   const supabase: SupabaseClient = createClient();
   const onEventRef = useRef(onEvent);
+  const [isReady, setIsReady] = useState(false);
 
   // Update the ref when onEvent changes
   useEffect(() => {
     onEventRef.current = onEvent;
   }, [onEvent]);
 
+  // Add a small delay to prevent rapid subscription creation/destruction
   useEffect(() => {
+    if (filter === undefined) {
+      setIsReady(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 100); // Small delay to prevent race conditions
+
+    return () => {
+      clearTimeout(timer);
+      setIsReady(false);
+    };
+  }, [filter]);
+
+  useEffect(() => {
+    // Don't set up subscription if not ready or filter is undefined
+    if (!isReady || filter === undefined) {
+      return;
+    }
+
     const filterConfig: RealtimePostgresChangesFilter<"*"> = {
       event: event as RealtimePostgresChangesFilter<"*">["event"],
       schema: "public",
@@ -60,5 +83,5 @@ export function useRealtime<TN extends TableName>({
     };
     // Note: supabase is intentionally not included in dependencies to avoid
     // dependency array size changes between renders
-  }, [channelName, event, table, filter]);
+  }, [channelName, event, table, filter, isReady]);
 }
