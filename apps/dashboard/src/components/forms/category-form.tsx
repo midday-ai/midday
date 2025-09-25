@@ -211,6 +211,7 @@ export function CategoryForm({ data }: Props) {
                       <TaxRateInput
                         value={field.value}
                         name={form.watch("name") ?? ""}
+                        isNewProduct
                         onChange={(value: string) => {
                           field.onChange(value ? Number(value) : undefined);
                         }}

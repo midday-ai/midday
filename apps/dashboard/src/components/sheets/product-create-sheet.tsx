@@ -14,7 +14,7 @@ export function ProductCreateSheet() {
 
   return (
     <Sheet open={isOpen} onOpenChange={() => setParams(null)}>
-      <SheetContent className="max-w-[455px]">
+      <SheetContent>
         <SheetHeader className="mb-6 flex justify-between items-center flex-row">
           <h2 className="text-xl">Create Product</h2>
           <Button

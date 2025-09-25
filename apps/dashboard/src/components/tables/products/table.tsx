@@ -126,8 +126,8 @@ export function DataTable() {
       </Table>
 
       {table.getRowModel().rows.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No products found</p>
+        <div className="text-center py-12 border border-border border-t-0 min-h-[300px] flex items-center justify-center">
+          <p className="text-muted-foreground text-sm">No products found</p>
         </div>
       )}
     </div>
