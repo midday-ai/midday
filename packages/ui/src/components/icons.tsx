@@ -49,6 +49,7 @@ import {
   MdOutlineFactCheck,
   MdOutlineFilterList,
   MdOutlineGridView,
+  MdOutlineInfo,
   MdOutlineInventory2,
   MdOutlineLaunch,
   MdOutlineLink,
@@ -585,4 +586,5 @@ export const Icons = {
   OutgoingMail: MdOutlineSignpost,
   AttachEmail: MdOutlineAttachEmail,
   SyncAlt: MdOutlineSyncAlt,
+  InfoOutline: MdOutlineInfo,
 };

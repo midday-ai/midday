@@ -14,8 +14,6 @@ export function InvoicesOverdue() {
     }),
   );
 
-  const totalInvoiceCount = data?.at(0)?.invoiceCount;
-
   return (
     <button
       type="button"
@@ -26,11 +24,7 @@ export function InvoicesOverdue() {
       }
       className="hidden sm:block text-left"
     >
-      <InvoiceSummary
-        data={data}
-        totalInvoiceCount={totalInvoiceCount ?? 0}
-        title="Overdue"
-      />
+      <InvoiceSummary data={data} title="Overdue" />
     </button>
   );
 }

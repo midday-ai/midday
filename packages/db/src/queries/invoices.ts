@@ -2,6 +2,7 @@ import type { Database } from "@db/client";
 import {
   type activityTypeEnum,
   customers,
+  exchangeRates,
   invoiceStatusEnum,
   invoices,
   teams,
@@ -565,17 +566,103 @@ export async function getInvoiceSummary(
     whereConditions.push(eq(invoices.status, status));
   }
 
-  const result = await db
+  // Get team's base currency
+  const [team] = await db
+    .select({ baseCurrency: teams.baseCurrency })
+    .from(teams)
+    .where(eq(teams.id, teamId))
+    .limit(1);
+
+  const baseCurrency = team?.baseCurrency || "USD";
+
+  // Get all invoices with their amounts and currencies
+  const invoiceData = await db
     .select({
+      amount: invoices.amount,
       currency: invoices.currency,
-      totalAmount: sql<number>`COALESCE(SUM(${invoices.amount}), 0)::float`,
-      invoiceCount: sql<number>`COUNT(*)::int`,
     })
     .from(invoices)
-    .where(and(...whereConditions))
-    .groupBy(invoices.currency);
+    .where(and(...whereConditions));
 
-  return result;
+  if (invoiceData.length === 0) {
+    return {
+      totalAmount: 0,
+      invoiceCount: 0,
+      currency: baseCurrency,
+    };
+  }
+
+  // Convert all amounts to base currency and track currency breakdown
+  let totalAmount = 0;
+  const currencyBreakdown = new Map<
+    string,
+    { amount: number; count: number; convertedAmount: number }
+  >();
+
+  for (const invoice of invoiceData) {
+    const amount = Number(invoice.amount) || 0;
+    const currency = invoice.currency || baseCurrency;
+
+    if (currency === baseCurrency) {
+      totalAmount += amount;
+      const existing = currencyBreakdown.get(currency) || {
+        amount: 0,
+        count: 0,
+        convertedAmount: 0,
+      };
+      currencyBreakdown.set(currency, {
+        amount: existing.amount + amount,
+        count: existing.count + 1,
+        convertedAmount: existing.convertedAmount + amount,
+      });
+    } else {
+      // Get exchange rate for this currency to base currency
+      const [exchangeRate] = await db
+        .select({ rate: exchangeRates.rate })
+        .from(exchangeRates)
+        .where(
+          and(
+            eq(exchangeRates.base, currency),
+            eq(exchangeRates.target, baseCurrency),
+          ),
+        )
+        .limit(1);
+
+      const convertedAmount = exchangeRate?.rate
+        ? amount * Number(exchangeRate.rate)
+        : amount; // Fallback if no exchange rate found
+
+      totalAmount += convertedAmount;
+
+      const existing = currencyBreakdown.get(currency) || {
+        amount: 0,
+        count: 0,
+        convertedAmount: 0,
+      };
+      currencyBreakdown.set(currency, {
+        amount: existing.amount + amount,
+        count: existing.count + 1,
+        convertedAmount: existing.convertedAmount + convertedAmount,
+      });
+    }
+  }
+
+  // Convert breakdown to array and sort by amount (descending)
+  const breakdown = Array.from(currencyBreakdown.entries())
+    .map(([currency, data]) => ({
+      currency,
+      originalAmount: Math.round(data.amount * 100) / 100,
+      convertedAmount: Math.round(data.convertedAmount * 100) / 100,
+      count: data.count,
+    }))
+    .sort((a, b) => b.originalAmount - a.originalAmount);
+
+  return {
+    totalAmount: Math.round(totalAmount * 100) / 100, // Round to 2 decimal places
+    invoiceCount: invoiceData.length,
+    currency: baseCurrency,
+    breakdown: breakdown.length > 1 ? breakdown : undefined, // Only include if multiple currencies
+  };
 }
 
 export type DeleteInvoiceParams = {

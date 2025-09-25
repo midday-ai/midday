@@ -14,8 +14,6 @@ export function InvoicesPaid() {
     }),
   );
 
-  const totalInvoiceCount = data?.at(0)?.invoiceCount;
-
   return (
     <button
       type="button"
@@ -26,11 +24,7 @@ export function InvoicesPaid() {
       }
       className="hidden sm:block text-left"
     >
-      <InvoiceSummary
-        data={data}
-        totalInvoiceCount={totalInvoiceCount ?? 0}
-        title="Paid"
-      />
+      <InvoiceSummary data={data} title="Paid" />
     </button>
   );
 }

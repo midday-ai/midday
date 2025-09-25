@@ -1360,30 +1360,79 @@ export const getPaymentStatusResponseSchema = z.object({
 });
 
 export const invoiceSummaryResponseSchema = z
-  .array(
-    z.object({
-      currency: z.string().openapi({
-        description: "Currency of the invoice",
-        example: "SEK",
-      }),
-      totalAmount: z.number().openapi({
-        description: "Total amount of the invoice",
-        example: 224171.25,
-      }),
-      invoiceCount: z.number().openapi({
-        description: "Number of invoices for this currency",
-        example: 15,
-      }),
+  .object({
+    currency: z.string().openapi({
+      description: "Base currency of the team",
+      example: "USD",
     }),
-  )
+    totalAmount: z.number().openapi({
+      description: "Total amount of all invoices converted to base currency",
+      example: 224171.25,
+    }),
+    invoiceCount: z.number().openapi({
+      description: "Total number of invoices",
+      example: 15,
+    }),
+    breakdown: z
+      .array(
+        z.object({
+          currency: z.string().openapi({
+            description: "Original currency of the invoices",
+            example: "EUR",
+          }),
+          originalAmount: z.number().openapi({
+            description: "Total amount in original currency",
+            example: 15000.5,
+          }),
+          convertedAmount: z.number().openapi({
+            description: "Amount converted to base currency",
+            example: 16250.75,
+          }),
+          count: z.number().openapi({
+            description: "Number of invoices in this currency",
+            example: 5,
+          }),
+        }),
+      )
+      .optional()
+      .openapi({
+        description: "Currency breakdown when multiple currencies are involved",
+        example: [
+          {
+            currency: "EUR",
+            originalAmount: 15000.5,
+            convertedAmount: 16250.75,
+            count: 5,
+          },
+          {
+            currency: "GBP",
+            originalAmount: 8000.25,
+            convertedAmount: 9200.5,
+            count: 3,
+          },
+        ],
+      }),
+  })
   .openapi({
     description:
-      "Array of invoice summary objects, each containing currency, total amount, and invoice count.",
-    example: [
-      {
-        currency: "SEK",
-        totalAmount: 224171.25,
-        invoiceCount: 15,
-      },
-    ],
+      "Invoice summary object containing total amount converted to team's base currency and total invoice count.",
+    example: {
+      currency: "USD",
+      totalAmount: 224171.25,
+      invoiceCount: 15,
+      breakdown: [
+        {
+          currency: "EUR",
+          originalAmount: 15000.5,
+          convertedAmount: 16250.75,
+          count: 5,
+        },
+        {
+          currency: "GBP",
+          originalAmount: 8000.25,
+          convertedAmount: 9200.5,
+          count: 3,
+        },
+      ],
+    },
   });

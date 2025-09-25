@@ -14,11 +14,6 @@ export function InvoicesOpen() {
   );
   const { setFilter } = useInvoiceFilterParams();
 
-  const totalInvoiceCount = data?.reduce(
-    (acc, curr) => acc + (curr.invoiceCount ?? 0),
-    0,
-  );
-
   return (
     <button
       type="button"
@@ -29,11 +24,7 @@ export function InvoicesOpen() {
       }
       className="hidden sm:block text-left"
     >
-      <InvoiceSummary
-        data={data}
-        totalInvoiceCount={totalInvoiceCount ?? 0}
-        title="Open"
-      />
+      <InvoiceSummary data={data} title="Open" />
     </button>
   );
 }

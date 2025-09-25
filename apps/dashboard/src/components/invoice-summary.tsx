@@ -4,14 +4,19 @@ import { useTeamQuery } from "@/hooks/use-team";
 import { useI18n } from "@/locales/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
-import { cn } from "@midday/ui/cn";
+import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
-import { useState } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { AnimatedNumber } from "./animated-number";
+import { FormatAmount } from "./format-amount";
 
 type Props = {
   data: RouterOutputs["invoice"]["invoiceSummary"];
-  totalInvoiceCount: number;
   title: string;
 };
 
@@ -34,49 +39,83 @@ export function InvoiceSummarySkeleton() {
   );
 }
 
-export function InvoiceSummary({ data, totalInvoiceCount, title }: Props) {
+export function InvoiceSummary({ data, title }: Props) {
   const t = useI18n();
-  const [activeIndex, setActiveIndex] = useState(0);
   const { data: team } = useTeamQuery();
 
-  const dataWithDefaultCurrency = data?.length
-    ? data
-    : [{ currency: team?.baseCurrency, totalAmount: 0 }];
-
-  const item = dataWithDefaultCurrency[activeIndex];
-
-  if (!item) {
+  if (!data) {
     return null;
   }
 
+  const hasMultipleCurrencies = data.breakdown && data.breakdown.length > 1;
+
   return (
     <Card>
-      <CardHeader className="pb-2 relative">
+      <CardHeader className="pb-2 flex flex-row items-center">
         <CardTitle className="font-mono font-medium text-2xl">
           <AnimatedNumber
-            key={item.currency}
-            value={item.totalAmount}
-            currency={item.currency ?? team?.baseCurrency ?? "USD"}
+            key={data.currency}
+            value={data.totalAmount}
+            currency={data.currency ?? team?.baseCurrency ?? "USD"}
             maximumFractionDigits={0}
             minimumFractionDigits={0}
           />
-
-          {dataWithDefaultCurrency.length > 1 && (
-            <div className="flex space-x-2 top-[63px] absolute">
-              {dataWithDefaultCurrency.map((item, idx) => (
-                <div
-                  key={item.currency}
-                  onMouseEnter={() => setActiveIndex(idx)}
-                  onClick={() => setActiveIndex(idx)}
-                  className={cn(
-                    "w-[10px] h-[3px] bg-[#1D1D1D] dark:bg-[#D9D9D9] opacity-30 transition-all",
-                    idx === activeIndex && "opacity-100",
-                  )}
-                />
-              ))}
-            </div>
-          )}
         </CardTitle>
+        {hasMultipleCurrencies && (
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="ml-2 text-xs text-muted-foreground">
+                  <Icons.InfoOutline className="size-3.5 mb-1" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent
+                className="text-xs text-[#878787] max-w-[240px] p-4 space-y-2"
+                side="bottom"
+                sideOffset={10}
+              >
+                <h3 className="font-medium text-primary">Currency Breakdown</h3>
+                <div className="space-y-2">
+                  {data.breakdown?.map((item) => (
+                    <div
+                      key={item.currency}
+                      className="flex justify-between items-center"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{item.currency}</span>
+                        <span className="text-[#878787]">({item.count})</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-mono">
+                          <FormatAmount
+                            amount={item.originalAmount}
+                            currency={item.currency}
+                            maximumFractionDigits={0}
+                            minimumFractionDigits={0}
+                          />
+                        </div>
+                        {item.currency !== data.currency && (
+                          <div className="text-[#878787] font-mono text-xs">
+                            ≈{" "}
+                            <FormatAmount
+                              amount={item.convertedAmount}
+                              currency={data.currency}
+                              maximumFractionDigits={0}
+                              minimumFractionDigits={0}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-[#878787]">
+                  All amounts are converted into your base currency.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </CardHeader>
 
       <CardContent>
@@ -84,7 +123,7 @@ export function InvoiceSummary({ data, totalInvoiceCount, title }: Props) {
           <div>{title}</div>
           <div className="text-sm text-muted-foreground">
             {t("invoice_count", {
-              count: totalInvoiceCount ?? 0,
+              count: data.invoiceCount ?? 0,
             })}
           </div>
         </div>
