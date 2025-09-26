@@ -1,14 +1,14 @@
 "use client";
 
-import { ConnectGmail } from "@/components/inbox/connect-gmail";
+// import { ConnectGmail } from "@/components/inbox/connect-gmail";
 import { useUserQuery } from "@/hooks/use-user";
 import { getInboxEmail } from "@midday/inbox";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@midday/ui/accordion";
+// import {
+//   Accordion,
+//   AccordionContent,
+//   AccordionItem,
+//   AccordionTrigger,
+// } from "@midday/ui/accordion";
 import { useRouter } from "next/navigation";
 import { CopyInput } from "../copy-input";
 import { UploadZone } from "./inbox-upload-zone";
@@ -27,18 +27,27 @@ export function InboxGetStarted() {
         <div className="relative z-20 m-auto flex w-full max-w-[380px] flex-col">
           <div className="flex w-full flex-col relative">
             <div className="pb-4 text-center">
-              <h2 className="font-medium text-lg">Connect Your Gmail</h2>
-              <p className="pb-6 text-sm text-[#878787]">
+              {/* <h2 className="font-medium text-lg">Connect Your Gmail</h2> */}
+              <h2 className="font-medium text-lg">Automatic reconciliation</h2>
+              {/* <p className="pb-6 text-sm text-[#878787]">
                 Connect your Gmail to automatically import receipts and
                 invoices. We'll extract the data and match it to your
                 transactions seamlessly.
+              </p> */}
+
+              <p className="pb-6 text-sm text-[#878787]">
+                Forward invoices and receipts to your personalized email for
+                automatic reconciliation and smart transaction matching.
               </p>
             </div>
 
             <div className="pointer-events-auto flex flex-col space-y-4">
-              <ConnectGmail />
-
               {user?.team?.inboxId && (
+                <CopyInput value={getInboxEmail(user.team.inboxId)} />
+              )}
+              {/* <ConnectGmail /> */}
+
+              {/* {user?.team?.inboxId && (
                 <Accordion
                   type="single"
                   collapsible
@@ -55,13 +64,18 @@ export function InboxGetStarted() {
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
-              )}
+              )} */}
             </div>
 
             <div className="text-center mt-8">
-              <p className="text-xs text-[#878787]">
+              {/* <p className="text-xs text-[#878787]">
                 You can also forward receipts to your unique Midday email or
                 drag and drop files here
+              </p> */}
+
+              <p className="text-xs text-[#878787]">
+                You can also just drag and drop files here for automatic
+                reconciliation.
               </p>
             </div>
           </div>
