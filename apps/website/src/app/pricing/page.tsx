@@ -203,7 +203,7 @@ export default function Page() {
                 14 day trial (No credit card required)
               </p>
 
-              <p className="mt-4 text-xs text-muted-foreground font-mono hidden md:block">
+              <p className="mt-4 text-xs text-muted-foreground hidden md:block">
                 Need more? Feel free to{" "}
                 <Link href="/support" className="underline">
                   contact us

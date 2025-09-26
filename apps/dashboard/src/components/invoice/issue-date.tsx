@@ -42,7 +42,7 @@ export function IssueDate() {
       </div>
 
       <Popover open={isOpen} onOpenChange={setIsOpen} modal>
-        <PopoverTrigger className="text-primary text-[11px] font-mono whitespace-nowrap flex">
+        <PopoverTrigger className="text-primary text-[11px] whitespace-nowrap flex">
           {issueDate && format(issueDate, dateFormat)}
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0">

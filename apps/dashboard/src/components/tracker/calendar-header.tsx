@@ -19,7 +19,7 @@ export function CalendarHeader({
   return (
     <div className="flex items-center justify-between mb-6">
       <div className="space-y-1 select-text">
-        <h1 className="text-4xl font-mono flex items-baseline gap-1 space-x-2">
+        <h1 className="text-4xl flex items-baseline gap-1 space-x-2">
           <div>
             <NumberFlow value={hours || 0} />
             <span className="relative">h</span>

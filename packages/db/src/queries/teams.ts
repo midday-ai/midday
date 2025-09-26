@@ -6,6 +6,7 @@ import {
   users,
   usersOnTeam,
 } from "@db/schema";
+import { teamPermissionsCache } from "@midday/cache/team-permissions-cache";
 import {
   CATEGORIES,
   getTaxRateForCategory,
@@ -182,7 +183,7 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
   );
 
   // Use transaction to ensure atomicity and prevent race conditions
-  return await db.transaction(async (tx) => {
+  const teamId = await db.transaction(async (tx) => {
     try {
       // Check if user already has teams to prevent duplicate creation
       const existingTeams = await tx
@@ -276,6 +277,14 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
       throw new Error("Failed to create team due to an unexpected error.");
     }
   });
+
+  // If team switching was enabled, invalidate the team permissions cache
+  if (params.switchTeam) {
+    const cacheKey = `user:${params.userId}:team`;
+    await teamPermissionsCache.delete(cacheKey);
+  }
+
+  return teamId;
 };
 
 export async function getTeamMembers(db: Database, teamId: string) {
@@ -333,6 +342,10 @@ export async function leaveTeam(db: Database, params: LeaveTeamParams) {
       ),
     )
     .returning();
+
+  // Invalidate the team permissions cache since teamId was set to null
+  const cacheKey = `user:${params.userId}:team`;
+  await teamPermissionsCache.delete(cacheKey);
 
   return deleted;
 }

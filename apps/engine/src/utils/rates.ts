@@ -40,7 +40,7 @@ export async function getRates() {
       const date = Object.values(value).at(0);
       const currency = Object.keys(value).at(1);
 
-      if (!currency) {
+      if (!currency || typeof date !== "string") {
         return null;
       }
 

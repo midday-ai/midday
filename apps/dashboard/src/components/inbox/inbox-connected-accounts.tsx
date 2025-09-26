@@ -258,7 +258,7 @@ export function InboxConnectedAccounts() {
             <span>Email Connections</span>
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
-                <div className="rounded-full text-[#878787] text-[9px] font-normal border px-2 py-1 font-mono cursor-help">
+                <div className="rounded-full text-[#878787] text-[9px] font-normal border px-2 py-1 cursor-help">
                   Beta
                 </div>
               </TooltipTrigger>

@@ -51,7 +51,7 @@ export default async function Layout({
       <div className="relative">
         <Sidebar />
 
-        <div className="md:ml-[70px] pb-8">
+        <div className="md:ml-[70px] pb-4">
           <Header />
           <div className="px-6">{children}</div>
         </div>

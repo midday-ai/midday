@@ -1,74 +1,41 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@midday/ui/carousel";
-import { useQuery } from "@tanstack/react-query";
-import * as React from "react";
-import { AccountBalance } from "./account-balance";
-import { Assistant } from "./assistant";
-import { Inbox } from "./inbox";
-import { Invoice } from "./invoice";
-import { WidgetsNavigation } from "./navigation";
-import { Spending } from "./spending";
-import { Tracker } from "./tracker";
-import { Transactions } from "./transactions/transactions";
-import { Vault } from "./vault";
+import { useChatInterface } from "@/hooks/use-chat-interface";
+import { Skeleton } from "@midday/ui/skeleton";
+import { Suspense } from "react";
+import { SuggestedActions } from "../suggested-actions";
+import { WidgetsHeader } from "./header";
+import { WidgetsGrid } from "./widgets-grid";
+
+function SuggestedActionsSkeleton() {
+  return (
+    <div className="w-full px-6 py-4 flex items-center justify-center">
+      <div className="flex gap-3">
+        {Array.from({ length: 6 }, (_, i) => (
+          <Skeleton
+            key={`suggested-skeleton-${Date.now()}-${i}`}
+            className="h-10 w-24"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function Widgets() {
-  const trpc = useTRPC();
+  const { isChatPage } = useChatInterface();
 
-  const { data: accounts } = useQuery(
-    trpc.bankAccounts.get.queryOptions({
-      enabled: true,
-    }),
-  );
-
-  // If the user has not connected any accounts, disable the widgets
-  const disabled = !accounts?.length;
-
-  const items = [
-    <Assistant key="assistant" />,
-    <Spending disabled={disabled} key="spending" />,
-    <Invoice key="invoice" />,
-    <Transactions disabled={disabled} key="transactions" />,
-    <Tracker key="tracker" />,
-    <Inbox key="inbox" disabled={disabled} />,
-    <AccountBalance key="account-balance" />,
-    <Vault key="vault" />,
-  ];
+  if (isChatPage) {
+    return null;
+  }
 
   return (
-    <Carousel
-      className="flex flex-col"
-      opts={{
-        align: "start",
-        watchDrag: false,
-      }}
-    >
-      <WidgetsNavigation />
-      <div className="ml-auto hidden md:flex">
-        <CarouselPrevious className="static p-0 border-none hover:bg-transparent" />
-        <CarouselNext className="static p-0 border-none hover:bg-transparent" />
-      </div>
-
-      <CarouselContent className="-ml-[20px] 2xl:-ml-[40px] flex-col md:flex-row space-y-6 md:space-y-0">
-        {items.map((item, idx) => {
-          return (
-            <CarouselItem
-              className="lg:basis-1/2 xl:basis-1/3 3xl:basis-1/4 pl-[20px] 2xl:pl-[40px]"
-              key={idx.toString()}
-            >
-              {item}
-            </CarouselItem>
-          );
-        })}
-      </CarouselContent>
-    </Carousel>
+    <div className="flex flex-col gap-4 mt-4">
+      <WidgetsHeader />
+      <WidgetsGrid />
+      <Suspense fallback={<SuggestedActionsSkeleton />}>
+        <SuggestedActions />
+      </Suspense>
+    </div>
   );
 }

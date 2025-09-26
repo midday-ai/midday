@@ -1,3 +1,4 @@
+import type { UIChatMessage } from "@api/ai/types";
 import { type SQL, relations, sql } from "drizzle-orm";
 import {
   bigint,
@@ -9,9 +10,7 @@ import {
   integer,
   json,
   jsonb,
-  numeric,
   pgEnum,
-  pgMaterializedView,
   pgPolicy,
   pgTable,
   primaryKey,
@@ -19,7 +18,6 @@ import {
   text,
   timestamp,
   unique,
-  uniqueIndex,
   uuid,
   varchar,
   vector,
@@ -2475,6 +2473,103 @@ export const apiKeys = pgTable(
   ],
 );
 
+export const chats = pgTable(
+  "chats",
+  {
+    id: text("id").primaryKey(), // nanoid
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => teams.id, {
+        onDelete: "cascade",
+      }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, {
+        onDelete: "cascade",
+      }),
+    title: text("title"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    teamIdIdx: index("chats_team_id_idx").on(table.teamId),
+    userIdIdx: index("chats_user_id_idx").on(table.userId),
+    updatedAtIdx: index("chats_updated_at_idx").on(table.updatedAt),
+  }),
+);
+
+export const chatMessages = pgTable(
+  "chat_messages",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    chatId: text("chat_id")
+      .notNull()
+      .references(() => chats.id, {
+        onDelete: "cascade",
+      }),
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => teams.id, {
+        onDelete: "cascade",
+      }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, {
+        onDelete: "cascade",
+      }),
+    content: jsonb("content").$type<UIChatMessage>().notNull(), // Store individual message as JSONB
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    chatIdIdx: index("chat_messages_chat_id_idx").on(table.chatId),
+    teamIdIdx: index("chat_messages_team_id_idx").on(table.teamId),
+    userIdIdx: index("chat_messages_user_id_idx").on(table.userId),
+    createdAtIdx: index("chat_messages_created_at_idx").on(table.createdAt),
+  }),
+);
+
+export const chatFeedback = pgTable(
+  "chat_feedback",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    chatId: text("chat_id")
+      .notNull()
+      .references(() => chats.id, {
+        onDelete: "cascade",
+      }),
+    messageId: text("message_id").notNull(), // Client-side message ID from AI SDK
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => teams.id, {
+        onDelete: "cascade",
+      }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, {
+        onDelete: "cascade",
+      }),
+    type: text("type").notNull(), // "positive", "negative", "other"
+    comment: text("comment"), // Optional comment
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    chatIdIdx: index("chat_feedback_chat_id_idx").on(table.chatId),
+    messageIdIdx: index("chat_feedback_message_id_idx").on(table.messageId),
+    teamIdIdx: index("chat_feedback_team_id_idx").on(table.teamId),
+    userIdIdx: index("chat_feedback_user_id_idx").on(table.userId),
+    typeIdx: index("chat_feedback_type_idx").on(table.type),
+    createdAtIdx: index("chat_feedback_created_at_idx").on(table.createdAt),
+  }),
+);
+
 // Relations
 // OAuth Applications
 export const oauthApplications = pgTable(
@@ -3265,3 +3360,54 @@ export const notificationSettings = pgTable(
     }),
   ],
 );
+
+export const chatsRelations = relations(chats, ({ one, many }) => ({
+  team: one(teams, {
+    fields: [chats.teamId],
+    references: [teams.id],
+  }),
+  user: one(users, {
+    fields: [chats.userId],
+    references: [users.id],
+  }),
+  chatMessages: many(chatMessages),
+  feedback: many(chatFeedback),
+}));
+
+export const chatMessagesRelations = relations(
+  chatMessages,
+  ({ one, many }) => ({
+    chat: one(chats, {
+      fields: [chatMessages.chatId],
+      references: [chats.id],
+    }),
+    team: one(teams, {
+      fields: [chatMessages.teamId],
+      references: [teams.id],
+    }),
+    user: one(users, {
+      fields: [chatMessages.userId],
+      references: [users.id],
+    }),
+    feedback: many(chatFeedback),
+  }),
+);
+
+export const chatFeedbackRelations = relations(chatFeedback, ({ one }) => ({
+  chat: one(chats, {
+    fields: [chatFeedback.chatId],
+    references: [chats.id],
+  }),
+  message: one(chatMessages, {
+    fields: [chatFeedback.messageId],
+    references: [chatMessages.id],
+  }),
+  team: one(teams, {
+    fields: [chatFeedback.teamId],
+    references: [teams.id],
+  }),
+  user: one(users, {
+    fields: [chatFeedback.userId],
+    references: [users.id],
+  }),
+}));

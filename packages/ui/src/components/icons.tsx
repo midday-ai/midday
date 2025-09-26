@@ -1,6 +1,7 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
 import { FaXTwitter } from "react-icons/fa6";
 import { FiGithub } from "react-icons/fi";
+import type { IconType as BaseIconType } from "react-icons/lib";
 import {
   MdArrowBack,
   MdArrowDownward,
@@ -9,6 +10,7 @@ import {
   MdArrowUpward,
   MdAttachMoney,
   MdAutoAwesome,
+  MdBolt,
   MdChangeHistory,
   MdChevronLeft,
   MdChevronRight,
@@ -42,15 +44,18 @@ import {
   MdOutlineConfirmationNumber,
   MdOutlineContentCopy,
   MdOutlineCropFree,
+  MdOutlineDashboardCustomize,
   MdOutlineEditNote,
   MdOutlineEmail,
   MdOutlineEqualizer,
   MdOutlineFace,
   MdOutlineFactCheck,
   MdOutlineFilterList,
+  MdOutlineGraphicEq,
   MdOutlineGridView,
   MdOutlineInfo,
   MdOutlineInventory2,
+  MdOutlineLanguage,
   MdOutlineLaunch,
   MdOutlineLink,
   MdOutlineMoreTime,
@@ -61,15 +66,20 @@ import {
   MdOutlinePictureAsPdf,
   MdOutlinePlayArrow,
   MdOutlineQrCode2,
+  MdOutlineReceiptLong,
+  MdOutlineRefresh,
   MdOutlineReorder,
   MdOutlineRepeat,
   MdOutlineSignpost,
   MdOutlineSquareFoot,
+  MdOutlineStackedBarChart,
   MdOutlineStop,
   MdOutlineStyle,
   MdOutlineSubdirectoryArrowLeft,
   MdOutlineSyncAlt,
   MdOutlineTask,
+  MdOutlineThumbDown,
+  MdOutlineThumbUp,
   MdOutlineTune,
   MdOutlineVisibility,
   MdOutlineVolumeOff,
@@ -95,6 +105,8 @@ type SVGIconProps = {
   children?: React.ReactNode;
   viewBox?: string;
 };
+
+export type IconType = BaseIconType;
 
 const SVGIcon: React.FC<SVGIconProps> = ({
   size = 20,
@@ -587,4 +599,15 @@ export const Icons = {
   AttachEmail: MdOutlineAttachEmail,
   SyncAlt: MdOutlineSyncAlt,
   InfoOutline: MdOutlineInfo,
+  DashboardCustomize: MdOutlineDashboardCustomize,
+  ThumbUp: MdOutlineThumbUp,
+  ThumbDown: MdOutlineThumbDown,
+  ThumbUpOutline: MdOutlineThumbUp,
+  ThumbDownOutline: MdOutlineThumbDown,
+  RefreshOutline: MdOutlineRefresh,
+  Globle: MdOutlineLanguage,
+  Record: MdOutlineGraphicEq,
+  Speed: MdOutlineStackedBarChart,
+  ReceiptLong: MdOutlineReceiptLong,
+  Bolt: MdBolt,
 };
