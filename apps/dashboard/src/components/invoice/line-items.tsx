@@ -190,7 +190,7 @@ function LineItemRow({
       dragListener={false}
       dragControls={controls}
       transition={{ duration: 0 }}
-      onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+      onKeyDown={(e: React.KeyboardEvent<HTMLLIElement>) => {
         // Don't interfere with arrow keys when they're used for autocomplete navigation
         if (
           e.key === "ArrowDown" ||
