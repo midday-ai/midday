@@ -19,6 +19,9 @@ interface TableColumn {
 
 interface TableInterface {
   getAllLeafColumns: () => TableColumn[];
+  getIsAllPageRowsSelected: () => boolean;
+  getIsSomePageRowsSelected: () => boolean;
+  toggleAllPageRowsSelected: (value: boolean) => void;
 }
 
 interface Props {
