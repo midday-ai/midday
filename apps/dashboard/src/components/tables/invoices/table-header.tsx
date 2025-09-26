@@ -3,6 +3,7 @@
 import { HorizontalPagination } from "@/components/horizontal-pagination";
 import { useSortParams } from "@/hooks/use-sort-params";
 import { Button } from "@midday/ui/button";
+import { Checkbox } from "@midday/ui/checkbox";
 import { cn } from "@midday/ui/cn";
 import {
   TableHeader as BaseTableHeader,
@@ -61,8 +62,20 @@ export function TableHeader({ table, tableScroll }: Props) {
   return (
     <BaseTableHeader className="border-l-0 border-r-0">
       <TableRow>
+        <TableHead className="w-[50px] min-w-[50px] px-3 md:px-4 py-2 md:sticky md:left-0 bg-background z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]">
+          <Checkbox
+            checked={
+              table?.getIsAllPageRowsSelected() ||
+              (table?.getIsSomePageRowsSelected() && "indeterminate")
+            }
+            onCheckedChange={(value) =>
+              table?.toggleAllPageRowsSelected(!!value)
+            }
+          />
+        </TableHead>
+
         {isVisible("invoiceNumber") && (
-          <TableHead className="w-[220px] min-w-[220px] md:sticky md:left-0 bg-background z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]">
+          <TableHead className="w-[220px] min-w-[220px] md:sticky md:left-[50px] bg-background z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]">
             <div className="flex items-center justify-between">
               <Button
                 className="p-0 hover:bg-transparent space-x-2"

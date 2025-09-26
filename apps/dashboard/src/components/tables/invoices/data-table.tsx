@@ -17,8 +17,10 @@ import {
   getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { AnimatePresence } from "framer-motion";
 import React, { use, useEffect, useMemo, useState } from "react";
 import { useInView } from "react-intersection-observer";
+import { BottomBar } from "./bottom-bar";
 import { columns } from "./columns";
 import { NoResults } from "./empty-states";
 import { EmptyState } from "./empty-states";
@@ -38,7 +40,7 @@ export function DataTable({
   const { ref, inView } = useInView();
   const { data: user } = useUserQuery();
 
-  const { setColumns } = useInvoiceStore();
+  const { setColumns, setRowSelection, rowSelection } = useInvoiceStore();
   const initialColumnVisibility = use(columnVisibilityPromise);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     initialColumnVisibility ?? {},
@@ -46,7 +48,7 @@ export function DataTable({
 
   const tableScroll = useTableScroll({
     useColumnWidths: true,
-    startFromColumn: 1,
+    startFromColumn: 2,
   });
 
   const infiniteQueryOptions = trpc.invoice.get.infiniteQueryOptions(
@@ -83,11 +85,13 @@ export function DataTable({
     data: tableData,
     getRowId: ({ id }) => id,
     columns,
+    onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     state: {
       columnVisibility,
+      rowSelection,
     },
     meta: {
       dateFormat: user?.dateFormat,
@@ -98,6 +102,8 @@ export function DataTable({
   useEffect(() => {
     setColumns(table.getAllLeafColumns());
   }, [columnVisibility]);
+
+  const showBottomBar = Object.keys(rowSelection).length > 0;
 
   if (hasFilters && !tableData?.length) {
     return <NoResults />;
@@ -123,6 +129,10 @@ export function DataTable({
           </TableBody>
         </Table>
       </div>
+
+      <AnimatePresence>
+        {showBottomBar && <BottomBar data={tableData} />}
+      </AnimatePresence>
 
       <LoadMore ref={ref} hasNextPage={hasNextPage} />
     </div>
