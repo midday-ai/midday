@@ -9,6 +9,7 @@ import { Input } from "@midday/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@midday/ui/input-otp";
 import { Spinner } from "@midday/ui/spinner";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { useToast } from "@midday/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -29,6 +30,7 @@ export function OTPSignIn({ className }: Props) {
   const [isSent, setSent] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [email, setEmail] = useState<string>();
+  const { toast } = useToast();
   const supabase = createClient();
   const searchParams = useSearchParams();
 
@@ -43,9 +45,15 @@ export function OTPSignIn({ className }: Props) {
     setLoading(true);
 
     setEmail(email);
+    const { error } = await supabase.auth.signInWithOtp({ email });
+    if (error) {
+      
+      console.error("Error sending OTP:", error.message);
+      toast({title: error.message, variant: "destructive", duration: 3500});
 
-    await supabase.auth.signInWithOtp({ email });
-
+      setLoading(false);
+      return;
+    }
     setSent(true);
     setLoading(false);
   }
