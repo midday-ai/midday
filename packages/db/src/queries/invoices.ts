@@ -551,19 +551,27 @@ export async function draftInvoice(db: Database, params: DraftInvoiceParams) {
 
 export type GetInvoiceSummaryParams = {
   teamId: string;
-  status?: "paid" | "canceled" | "overdue" | "unpaid" | "draft";
+  statuses?: (
+    | "paid"
+    | "canceled"
+    | "overdue"
+    | "unpaid"
+    | "draft"
+    | "scheduled"
+  )[];
 };
 
 export async function getInvoiceSummary(
   db: Database,
   params: GetInvoiceSummaryParams,
 ) {
-  const { teamId, status } = params;
+  const { teamId, statuses } = params;
 
   const whereConditions: SQL[] = [eq(invoices.teamId, teamId)];
 
-  if (status) {
-    whereConditions.push(eq(invoices.status, status));
+  // Handle multiple statuses
+  if (statuses && statuses.length > 0) {
+    whereConditions.push(inArray(invoices.status, statuses));
   }
 
   // Get team's base currency

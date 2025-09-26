@@ -586,12 +586,14 @@ export const searchInvoiceNumberSchema = z.object({
 
 export const invoiceSummarySchema = z
   .object({
-    status: z
-      .enum(["draft", "overdue", "paid", "unpaid", "canceled"])
+    statuses: z
+      .array(
+        z.enum(["draft", "overdue", "paid", "unpaid", "canceled", "scheduled"]),
+      )
       .optional()
       .openapi({
-        description: "Filter summary by invoice status",
-        example: "paid",
+        description: "Filter summary by invoice statuses",
+        example: ["draft", "unpaid"],
         param: { in: "query" },
       }),
   })

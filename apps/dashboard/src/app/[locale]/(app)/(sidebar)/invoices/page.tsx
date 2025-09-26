@@ -41,13 +41,13 @@ export default async function Page(props: Props) {
       sort,
     }),
     trpc.invoice.invoiceSummary.queryOptions({
-      status: "unpaid",
+      statuses: ["unpaid"],
     }),
     trpc.invoice.invoiceSummary.queryOptions({
-      status: "paid",
+      statuses: ["paid"],
     }),
     trpc.invoice.invoiceSummary.queryOptions({
-      status: "overdue",
+      statuses: ["overdue"],
     }),
     trpc.invoice.paymentStatus.queryOptions(),
   ]);

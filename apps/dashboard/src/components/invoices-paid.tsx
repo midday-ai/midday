@@ -10,7 +10,7 @@ export function InvoicesPaid() {
   const trpc = useTRPC();
   const { data } = useSuspenseQuery(
     trpc.invoice.invoiceSummary.queryOptions({
-      status: "paid",
+      statuses: ["paid"],
     }),
   );
 

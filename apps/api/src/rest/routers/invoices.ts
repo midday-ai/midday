@@ -203,11 +203,11 @@ app.openapi(
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
-    const { status } = c.req.valid("query");
+    const { statuses } = c.req.valid("query");
 
     const result = await getInvoiceSummary(db, {
       teamId,
-      status,
+      statuses,
     });
 
     return c.json(validateResponse(result, invoiceSummaryResponseSchema));

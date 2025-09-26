@@ -9,9 +9,10 @@ export function InvoicesOpen() {
   const trpc = useTRPC();
   const { data } = useSuspenseQuery(
     trpc.invoice.invoiceSummary.queryOptions({
-      status: "unpaid",
+      statuses: ["draft", "scheduled", "unpaid"],
     }),
   );
+
   const { setFilter } = useInvoiceFilterParams();
 
   return (
@@ -19,7 +20,7 @@ export function InvoicesOpen() {
       type="button"
       onClick={() =>
         setFilter({
-          statuses: ["draft", "overdue", "unpaid"],
+          statuses: ["draft", "scheduled", "unpaid"],
         })
       }
       className="hidden sm:block text-left"

@@ -149,7 +149,7 @@ export const invoiceRouter = createTRPCRouter({
     .query(async ({ ctx: { db, teamId }, input }) => {
       return getInvoiceSummary(db, {
         teamId: teamId!,
-        status: input?.status,
+        statuses: input?.statuses,
       });
     }),
 
