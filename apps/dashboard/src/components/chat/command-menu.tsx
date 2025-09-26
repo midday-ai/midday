@@ -6,7 +6,7 @@ import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import { useEffect, useRef } from "react";
+import { type RefObject, useEffect, useRef } from "react";
 import { useOnClickOutside } from "usehooks-ts";
 
 export function CommandMenu() {
@@ -26,7 +26,7 @@ export function CommandMenu() {
   const { setChatId } = useChatInterface();
 
   // Close command menu when clicking outside (but not on the toggle button)
-  useOnClickOutside(commandListRef, (event) => {
+  useOnClickOutside(commandListRef as RefObject<HTMLElement>, (event) => {
     if (showCommands) {
       // Check if the click was on the suggested actions toggle button
       const target = event.target as Element;
