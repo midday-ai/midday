@@ -24,7 +24,7 @@
     "@langchain/core": "0.3.58",
     "@midday/utils": "workspace:*",
     "@mistralai/mistralai": "^1.9.18",
-    "ai": "^5.0.48",
+    "ai": "^5.0.54",
     "canvas": "^3.1.2",
     "mammoth": "^1.9.1",
     "officeparser": "5.1.1",
