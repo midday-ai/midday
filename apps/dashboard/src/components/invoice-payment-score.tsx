@@ -34,7 +34,7 @@ export function InvoicePaymentScore() {
   return (
     <Card>
       <CardHeader className="pb-2 flex flex-col xl:flex-row justify-between">
-        <CardTitle className="font-mono font-medium text-2xl">
+        <CardTitle className="font-medium text-2xl">
           {/* @ts-expect-error */}
           {t(`payment_status.${data?.paymentStatus}`)}
         </CardTitle>

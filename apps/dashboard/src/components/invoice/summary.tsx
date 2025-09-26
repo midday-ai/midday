@@ -130,7 +130,7 @@ export function Summary() {
             updateTemplateMutation.mutate({ subtotalLabel: value });
           }}
         />
-        <span className="text-right font-mono text-[11px] text-[#878787]">
+        <span className="text-right text-[11px] text-[#878787]">
           <FormatAmount
             amount={subTotal}
             maximumFractionDigits={maximumFractionDigits}
@@ -153,7 +153,7 @@ export function Summary() {
             placeholder="0"
             allowNegative={false}
             name="discount"
-            className="text-right font-mono text-[11px] text-[#878787] border-none"
+            className="text-right text-[11px] text-[#878787] border-none"
           />
         </div>
       )}
@@ -172,7 +172,7 @@ export function Summary() {
             <VATInput />
           </div>
 
-          <span className="text-right font-mono text-[11px] text-[#878787]">
+          <span className="text-right text-[11px] text-[#878787]">
             <FormatAmount
               amount={totalVAT}
               maximumFractionDigits={2}
@@ -197,7 +197,7 @@ export function Summary() {
             <TaxInput />
           </div>
 
-          <span className="text-right font-mono text-[11px] text-[#878787]">
+          <span className="text-right text-[11px] text-[#878787]">
             <FormatAmount
               amount={totalTax}
               maximumFractionDigits={2}
@@ -215,7 +215,7 @@ export function Summary() {
             updateTemplateMutation.mutate({ totalSummaryLabel: value });
           }}
         />
-        <span className="text-right font-mono font-medium text-[21px]">
+        <span className="text-right font-medium text-[21px]">
           <AnimatedNumber
             value={total}
             currency={currency}

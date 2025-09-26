@@ -30,7 +30,7 @@ export function UserMessage({ children }: { children: React.ReactNode }) {
         <ChatAvatar role="user" />
       </div>
 
-      <div className="ml-4 flex-1 space-y-2 overflow-hidden pl-2 text-xs font-mono leading-relaxed">
+      <div className="ml-4 flex-1 space-y-2 overflow-hidden pl-2 text-xs leading-relaxed">
         {children}
       </div>
     </div>
@@ -76,7 +76,7 @@ export function BotCard({
 
       <div
         className={cn(
-          "ml-4 flex-1 space-y-2 overflow-hidden pl-2 text-xs font-mono leading-relaxed",
+          "ml-4 flex-1 space-y-2 overflow-hidden pl-2 text-xs leading-relaxed",
           className,
         )}
       >
@@ -113,7 +113,7 @@ export function SignUpCard({
 
         <div
           className={cn(
-            "ml-4 flex-1 space-y-2 overflow-hidden pl-2 text-xs font-mono leading-relaxed",
+            "ml-4 flex-1 space-y-2 overflow-hidden pl-2 text-xs leading-relaxed",
             className,
           )}
         >

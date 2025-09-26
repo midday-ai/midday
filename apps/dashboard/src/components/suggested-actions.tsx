@@ -1,23 +1,27 @@
 "use client";
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
-import { Button } from "@midday/ui/button";
+import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
-import { endOfMonth, subMonths } from "date-fns";
-import {
-  MdBarChart,
-  MdHealthAndSafety,
-  MdReceipt,
-  MdSchedule,
-  MdTask,
-  MdTrendingUp,
-} from "react-icons/md";
+import { Icons } from "@midday/ui/icons";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import type { inferRouterOutputs } from "@trpc/server";
+
+type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export function SuggestedActions() {
   const { sendMessage } = useChatActions();
   const { setChatId } = useChatInterface();
   const chatId = useChatId();
+  const trpc = useTRPC();
+
+  const { data: suggestedActionsData } = useSuspenseQuery(
+    trpc.suggestedActions.list.queryOptions({
+      limit: 6,
+    }),
+  );
 
   const handleToolCall = (params: {
     toolName: string;
@@ -40,113 +44,78 @@ export function SuggestedActions() {
     });
   };
 
-  const SUGGESTED_ACTIONS = [
+  // UI configuration based on action ID
+  const uiConfig: Record<
+    string,
     {
-      id: "revenue",
-      title: "Revenue",
-      icon: MdBarChart,
-      onClick: () => {
-        handleToolCall({
-          toolName: "getRevenue",
-          toolParams: {
-            from: subMonths(new Date(), 12).toISOString(),
-            to: endOfMonth(new Date()).toISOString(),
-            currency: "SEK",
-            showCanvas: true,
-          },
-          text: "Get my revenue data",
-        });
-      },
+      icon: React.ComponentType<any>;
+      title: string;
+      description: string;
+    }
+  > = {
+    "get-burn-rate-analysis": {
+      icon: Icons.Speed,
+      title: "Burn rate analysis",
+      description: "Analyze my burn rate",
     },
-    {
-      id: "burn-rate",
-      title: "Burn rate",
-      icon: MdHealthAndSafety,
-      onClick: () => {
-        handleToolCall({
-          toolName: "getBurnRate",
-          toolParams: {
-            showCanvas: true,
-          },
-          text: "Analyze my burn rate",
-        });
-      },
-    },
-    {
-      id: "expenses",
-      title: "Expenses",
-      icon: MdTrendingUp,
-      onClick: () => {
-        handleToolCall({
-          toolName: "getExpenses",
-          toolParams: {
-            showCanvas: true,
-          },
-          text: "Get my expenses data",
-        });
-      },
-    },
-    {
-      id: "new-task",
-      title: "New task",
-      icon: MdTask,
-      onClick: () => {
-        handleToolCall({
-          toolName: "newTask",
-          toolParams: {},
-          text: "New task",
-        });
-      },
-    },
-    {
-      id: "health-report",
-      title: "Health report",
-      icon: MdHealthAndSafety,
-      onClick: () => {
-        handleToolCall({
-          toolName: "healthReport",
-          toolParams: {},
-          text: "Health report",
-        });
-      },
-    },
-    {
-      id: "latest-transactions",
+    "latest-transactions": {
+      icon: Icons.Transactions,
       title: "Latest transactions",
-      icon: MdReceipt,
-      onClick: () => {
-        handleToolCall({
-          toolName: "getTransactions",
-          toolParams: {
-            pageSize: 10,
-            sort: ["date", "desc"],
-          },
-          text: "Show me my latest transactions",
-        });
-      },
+      description: "Show me my latest transactions",
     },
-  ];
+    "expenses-breakdown": {
+      icon: Icons.Amount,
+      title: "Expense Breakdown",
+      description: "Show me my expense breakdown",
+    },
+    "balance-sheet": {
+      icon: Icons.ReceiptLong,
+      title: "Balance Sheet",
+      description: "Show me my balance sheet",
+    },
+  };
+
+  const suggestedActions = suggestedActionsData.actions;
+
+  type SuggestedAction =
+    RouterOutputs["suggestedActions"]["list"]["actions"][number];
 
   return (
     <div className="w-full px-6 py-4 flex items-center justify-center">
       <div className="flex gap-3 overflow-x-auto scrollbar-hide">
-        {SUGGESTED_ACTIONS.map((action) => {
-          const Icon = action.icon;
+        {suggestedActions.map((action: SuggestedAction) => {
+          const config = uiConfig[action.id];
+          const Icon = config?.icon;
+          const title = config?.title || action.id;
+          const description =
+            config?.description || `Execute ${action.toolName}`;
+
           return (
-            <Button
+            <button
               key={action.id}
               type="button"
-              variant="outline"
               className={cn(
-                "flex items-center gap-3 px-4 py-3 min-w-fit",
-                "text-sm font-regular text-foreground",
-                "whitespace-nowrap",
+                "border border-[#e6e6e6] dark:border-[#1d1d1d]",
+                "hover:bg-[#f7f7f7] hover:border-[#d0d0d0]",
+                "dark:hover:bg-[#131313] dark:hover:border-[#2a2a2a]",
+                "px-3 py-2 flex items-center gap-2 cursor-pointer",
+                "transition-all duration-300 min-w-fit whitespace-nowrap",
               )}
-              onClick={action.onClick}
+              onClick={() => {
+                handleToolCall({
+                  toolName: action.toolName,
+                  toolParams: action.toolParams,
+                  text: description,
+                });
+              }}
             >
-              <Icon className="w-4 h-4 text-muted-foreground" />
-              {action.title}
-            </Button>
+              {Icon && (
+                <Icon className="w-4 h-4 text-[#707070] dark:text-[#666666]" />
+              )}
+              <span className="text-black dark:text-white text-[12px] font-medium">
+                {title}
+              </span>
+            </button>
           );
         })}
       </div>

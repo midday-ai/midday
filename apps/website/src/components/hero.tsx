@@ -13,7 +13,7 @@ export function Hero() {
             variant="outline"
             className="rounded-full border-border flex space-x-2 items-center"
           >
-            <span className="font-mono text-xs">Midday v1.1</span>
+            <span className="text-xs">Midday v1.1</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width={12}

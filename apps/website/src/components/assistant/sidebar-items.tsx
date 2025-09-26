@@ -107,7 +107,7 @@ export function SidebarItems({ onSelect }: SidebarItemsProps) {
           <div key={key}>
             {section?.length > 0 && (
               <div className="sticky top-0 z-20 w-full bg-background dark:bg-[#131313] pb-1">
-                <span className="font-mono text-xs">{formatRange(key)}</span>
+                <span className="text-xs">{formatRange(key)}</span>
               </div>
             )}
 

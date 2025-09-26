@@ -1,6 +1,6 @@
 import { ChatInterface } from "@/components/chat/chat-interface";
 import { Widgets } from "@/components/widgets";
-import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
+import { HydrateClient, getQueryClient, prefetch, trpc } from "@/trpc/server";
 import { Provider as ChatProvider } from "@ai-sdk-tools/store";
 import { geolocation } from "@vercel/functions";
 import type { Metadata } from "next";
@@ -27,6 +27,8 @@ export default async function Overview(props: Props) {
   });
 
   const queryClient = getQueryClient();
+
+  prefetch(trpc.suggestedActions.list.queryOptions({ limit: 6 }));
 
   const chat = currentChatId
     ? await queryClient.fetchQuery(

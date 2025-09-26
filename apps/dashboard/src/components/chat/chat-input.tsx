@@ -3,6 +3,7 @@
 import { CommandMenu } from "@/components/chat/command-menu";
 import { FollowupQuestions } from "@/components/chat/followup-questions";
 import { RecordButton } from "@/components/chat/record-button";
+import { SuggestedActionsButton } from "@/components/suggested-actions-button";
 import { WebSearchButton } from "@/components/web-search-button";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { type CommandSuggestion, useChatStore } from "@/store/chat";
@@ -194,16 +195,13 @@ export function ChatInput() {
                   handleKeyDown(e);
                 }}
                 value={input}
-                placeholder={
-                  isWebSearch
-                    ? "Search the web"
-                    : "Ask anything or press ´/´ for commands..."
-                }
+                placeholder={isWebSearch ? "Search the web" : "Ask anything"}
               />
             </PromptInputBody>
             <PromptInputToolbar>
               <PromptInputTools>
                 <PromptInputActionAddAttachments />
+                <SuggestedActionsButton />
                 <WebSearchButton />
               </PromptInputTools>
 
