@@ -909,15 +909,6 @@ export type GetTaxParams = {
   currency?: string;
 };
 
-interface TaxResultItem {
-  amount: string;
-  tax_rate: string;
-  tax_type: string;
-  date: string;
-  currency: string;
-  category_slug?: string;
-}
-
 export async function getTaxSummary(db: Database, params: GetTaxParams) {
   const {
     teamId,

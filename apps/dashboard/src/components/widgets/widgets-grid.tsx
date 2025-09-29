@@ -1,13 +1,14 @@
 "use client";
 
+import { RunwayWidget } from "./runway";
+import { TopCustomerWidget } from "./top-customer";
+
 export function WidgetsGrid() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {/* Revenue Insights */}
-      <div className="h-44 border p-6 col-span-1" />
+      <RunwayWidget />
 
-      {/* Cash Runway */}
-      <div className="h-44 border p-6 col-span-1" />
+      <TopCustomerWidget />
 
       {/* File Management */}
       <div className="h-44 border p-6 col-span-1" />
