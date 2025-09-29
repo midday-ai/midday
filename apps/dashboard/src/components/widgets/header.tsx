@@ -66,7 +66,7 @@ export function WidgetsHeader() {
         </p>
       </div>
 
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-4" data-no-close>
         <Customize />
         <ChatHistory />
       </div>

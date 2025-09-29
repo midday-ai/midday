@@ -24,7 +24,8 @@ import { CSS } from "@dnd-kit/utilities";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { useMutation } from "@tanstack/react-query";
 import type { inferRouterOutputs } from "@trpc/server";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useOnClickOutside } from "usehooks-ts";
 import { AccountBalancesWidget } from "./account-balances";
 import { CashFlowWidget } from "./cash-flow";
 import { GrowthRateWidget } from "./growth-rate";
@@ -113,10 +114,23 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
 export function WidgetsGrid() {
   const trpc = useTRPC();
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null!);
 
   const isCustomizing = useIsCustomizing();
   const primaryWidgets = usePrimaryWidgets();
   const availableWidgets = useAvailableWidgets();
+  const { setIsCustomizing } = useWidgetActions();
+
+  // Handle click outside to disable customizing
+  useOnClickOutside(gridRef, (event) => {
+    if (isCustomizing) {
+      // Don't close if clicking on element with data-no-close
+      const target = event.target as Element;
+      if (!target.closest("[data-no-close]")) {
+        setIsCustomizing(false);
+      }
+    }
+  });
   const {
     reorderPrimaryWidgets,
     moveToAvailable,
@@ -235,7 +249,7 @@ export function WidgetsGrid() {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="space-y-8">
+      <div ref={gridRef} className="space-y-8">
         {/* Primary Widgets */}
         {isCustomizing ? (
           <SortableContext
