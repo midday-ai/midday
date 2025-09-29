@@ -922,6 +922,60 @@ export async function getRunway(db: Database, params: GetRunwayParams) {
   return Math.round(totalBalance / avgBurnRate);
 }
 
+export type GetSpendingForPeriodParams = {
+  teamId: string;
+  from: string;
+  to: string;
+  currency?: string;
+};
+
+export async function getSpendingForPeriod(
+  db: Database,
+  params: GetSpendingForPeriodParams,
+) {
+  const { teamId, from, to, currency: inputCurrency } = params;
+
+  // Use existing getExpenses function for the specified period
+  const expensesData = await getExpenses(db, {
+    teamId,
+    from,
+    to,
+    currency: inputCurrency,
+  });
+
+  // Calculate total spending across all months in the period
+  const totalSpending = expensesData.result.reduce(
+    (sum, item) => sum + item.total,
+    0,
+  );
+
+  const currency = expensesData.meta.currency || inputCurrency || "USD";
+
+  // Get top spending category for the specified period using existing getSpending function
+  const spendingCategories = await getSpending(db, {
+    teamId,
+    from,
+    to,
+    currency: inputCurrency,
+  });
+
+  const topCategory = spendingCategories[0] || null;
+
+  return {
+    totalSpending: Math.round(totalSpending * 100) / 100,
+    currency,
+    topCategory: topCategory
+      ? {
+          name: topCategory.name,
+          amount:
+            Math.round(((totalSpending * topCategory.percentage) / 100) * 100) /
+            100,
+          percentage: topCategory.percentage,
+        }
+      : null,
+  };
+}
+
 export type GetTaxParams = {
   teamId: string;
   type: "paid" | "collected";

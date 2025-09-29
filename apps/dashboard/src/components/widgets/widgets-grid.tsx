@@ -30,6 +30,7 @@ import { CashFlowWidget } from "./cash-flow";
 import { GrowthRateWidget } from "./growth-rate";
 import { InboxWidget } from "./inbox";
 import { Insights } from "./insights";
+import { MonthlySpendingWidget } from "./monthly-spending";
 import { OutstandingInvoicesWidget } from "./outstanding-invoices";
 import { ProfitMarginWidget } from "./profit-margin";
 import { RevenueSummaryWidget } from "./revenue-summary";
@@ -106,6 +107,7 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
   "time-tracker": TimeTrackerWidget,
   vault: VaultWidget,
   "account-balances": AccountBalancesWidget,
+  "monthly-spending": MonthlySpendingWidget,
 };
 
 export function WidgetsGrid() {
