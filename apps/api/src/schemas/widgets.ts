@@ -60,6 +60,20 @@ export const getInboxStatsSchema = z.object({
   currency: z.string().optional(),
 });
 
+export const getTrackedTimeSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  assignedId: z.string().uuid().optional(),
+});
+
+export const getVaultActivitySchema = z.object({
+  limit: z.number().optional().default(5),
+});
+
+export const getAccountBalancesSchema = z.object({
+  currency: z.string().optional(),
+});
+
 export const widgetTypeSchema = z.enum(WIDGET_TYPES);
 
 export const widgetPreferencesSchema = z.object({

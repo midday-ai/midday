@@ -25,6 +25,7 @@ import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { useMutation } from "@tanstack/react-query";
 import type { inferRouterOutputs } from "@trpc/server";
 import { useState } from "react";
+import { AccountBalancesWidget } from "./account-balances";
 import { CashFlowWidget } from "./cash-flow";
 import { GrowthRateWidget } from "./growth-rate";
 import { InboxWidget } from "./inbox";
@@ -33,7 +34,9 @@ import { OutstandingInvoicesWidget } from "./outstanding-invoices";
 import { ProfitMarginWidget } from "./profit-margin";
 import { RevenueSummaryWidget } from "./revenue-summary";
 import { RunwayWidget } from "./runway";
+import { TimeTrackerWidget } from "./time-tracker";
 import { TopCustomerWidget } from "./top-customer";
+import { VaultWidget } from "./vault";
 import {
   useAvailableWidgets,
   useIsCustomizing,
@@ -100,6 +103,9 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
   "cash-flow": CashFlowWidget,
   "outstanding-invoices": OutstandingInvoicesWidget,
   inbox: InboxWidget,
+  "time-tracker": TimeTrackerWidget,
+  vault: VaultWidget,
+  "account-balances": AccountBalancesWidget,
 };
 
 export function WidgetsGrid() {
