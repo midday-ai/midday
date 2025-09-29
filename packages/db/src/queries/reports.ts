@@ -1464,7 +1464,7 @@ export async function getOutstandingInvoices(
   const {
     teamId,
     currency: inputCurrency,
-    status = ["unpaid", "overdue"],
+    status = ["unpaid", "overdue", "draft", "scheduled"],
   } = params;
 
   // Get target currency

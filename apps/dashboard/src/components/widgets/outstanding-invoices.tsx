@@ -3,11 +3,13 @@ import { useTRPC } from "@/trpc/client";
 import { Icons } from "@midday/ui/icons";
 import { formatAmount } from "@midday/utils/format";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { BaseWidget } from "./base";
 
 export function OutstandingInvoicesWidget() {
   const trpc = useTRPC();
   const { data: team } = useTeamQuery();
+  const router = useRouter();
 
   const { data } = useQuery(
     trpc.widgets.getOutstandingInvoices.queryOptions({
@@ -17,8 +19,7 @@ export function OutstandingInvoicesWidget() {
   );
 
   const handleViewInvoices = () => {
-    // TODO: Navigate to invoices page with unpaid filter
-    console.log("View outstanding invoices clicked");
+    router.push("/invoices?statuses=draft,scheduled,unpaid");
   };
 
   return (
@@ -35,7 +36,7 @@ export function OutstandingInvoicesWidget() {
                 amount: data?.result.totalAmount ?? 0,
                 currency: data?.result.currency ?? team?.baseCurrency ?? "USD",
               })}{" "}
-              outstanding in outstanding invoices
+              in outstanding invoices
             </span>
           </p>
         </div>

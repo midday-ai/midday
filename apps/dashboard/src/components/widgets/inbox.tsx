@@ -1,14 +1,15 @@
-import { formatNumber } from "@/components/charts/chart-utils";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { endOfDay, startOfDay, subDays } from "date-fns";
+import { useRouter } from "next/navigation";
 import { BaseWidget } from "./base";
 
 export function InboxWidget() {
   const trpc = useTRPC();
   const { data: team } = useTeamQuery();
+  const router = useRouter();
 
   const { data } = useQuery(
     trpc.widgets.getInboxStats.queryOptions({
@@ -21,8 +22,7 @@ export function InboxWidget() {
   const stats = data?.result;
 
   const handleViewInbox = () => {
-    // TODO: Navigate to inbox page
-    console.log("View inbox clicked");
+    router.push("/inbox");
   };
 
   // Calculate key metrics for display
