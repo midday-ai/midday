@@ -4,6 +4,7 @@ import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { endOfQuarter, startOfQuarter } from "date-fns";
 import { BaseWidget } from "./base";
+import { WIDGET_POLLING_CONFIG } from "./widget-config";
 
 export function GrowthRateWidget() {
   const trpc = useTRPC();
@@ -14,8 +15,8 @@ export function GrowthRateWidget() {
   const currentQuarterStart = startOfQuarter(currentDate);
   const currentQuarterEnd = endOfQuarter(currentDate);
 
-  const { data } = useQuery(
-    trpc.widgets.getGrowthRate.queryOptions({
+  const { data } = useQuery({
+    ...trpc.widgets.getGrowthRate.queryOptions({
       from: currentQuarterStart.toISOString(),
       to: currentQuarterEnd.toISOString(),
       currency: team?.baseCurrency ?? undefined,
@@ -23,7 +24,8 @@ export function GrowthRateWidget() {
       revenueType: "net",
       period: "quarterly",
     }),
-  );
+    ...WIDGET_POLLING_CONFIG,
+  });
 
   const handleViewAnalysis = () => {
     // TODO: Navigate to growth rate analysis page

@@ -1,3 +1,4 @@
+import { WIDGET_TYPES } from "@midday/cache/widget-preferences-cache";
 import { z } from "zod";
 
 export const getRunwaySchema = z.object({
@@ -59,16 +60,7 @@ export const getInboxStatsSchema = z.object({
   currency: z.string().optional(),
 });
 
-export const widgetTypeSchema = z.enum([
-  "runway",
-  "top-customer",
-  "revenue-summary",
-  "growth-rate",
-  "profit-margin",
-  "cash-flow",
-  "outstanding-invoices",
-  "inbox",
-]);
+export const widgetTypeSchema = z.enum(WIDGET_TYPES);
 
 export const widgetPreferencesSchema = z.object({
   primaryWidgets: z.array(widgetTypeSchema).max(7),

@@ -4,19 +4,21 @@ import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { BaseWidget } from "./base";
+import { WIDGET_POLLING_CONFIG } from "./widget-config";
 
 export function CashFlowWidget() {
   const trpc = useTRPC();
   const { data: team } = useTeamQuery();
 
-  const { data } = useQuery(
-    trpc.widgets.getCashFlow.queryOptions({
+  const { data } = useQuery({
+    ...trpc.widgets.getCashFlow.queryOptions({
       from: startOfMonth(new Date()).toISOString(),
       to: endOfMonth(new Date()).toISOString(),
       currency: team?.baseCurrency ?? undefined,
       period: "monthly",
     }),
-  );
+    ...WIDGET_POLLING_CONFIG,
+  });
 
   const handleViewAnalysis = () => {
     // TODO: Navigate to cash flow analysis page

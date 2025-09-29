@@ -1,21 +1,6 @@
 import { RedisCache } from "./redis-client";
 
-export type WidgetType =
-  | "runway"
-  | "top-customer"
-  | "revenue-summary"
-  | "growth-rate"
-  | "profit-margin"
-  | "cash-flow"
-  | "outstanding-invoices"
-  | "inbox";
-
-export interface WidgetPreferences {
-  primaryWidgets: WidgetType[]; // Up to 7 widgets in order
-  availableWidgets: WidgetType[]; // Remaining widgets not in primary
-}
-
-export const DEFAULT_WIDGET_ORDER: WidgetType[] = [
+export const WIDGET_TYPES = [
   "runway",
   "top-customer",
   "revenue-summary",
@@ -24,7 +9,16 @@ export const DEFAULT_WIDGET_ORDER: WidgetType[] = [
   "cash-flow",
   "outstanding-invoices",
   "inbox",
-];
+] as const;
+
+export type WidgetType = (typeof WIDGET_TYPES)[number];
+
+export interface WidgetPreferences {
+  primaryWidgets: WidgetType[];
+  availableWidgets: WidgetType[];
+}
+
+export const DEFAULT_WIDGET_ORDER: WidgetType[] = [...WIDGET_TYPES];
 
 export const DEFAULT_WIDGET_PREFERENCES: WidgetPreferences = {
   primaryWidgets: DEFAULT_WIDGET_ORDER.slice(0, 7), // First 7 widgets
@@ -33,7 +27,7 @@ export const DEFAULT_WIDGET_PREFERENCES: WidgetPreferences = {
 
 class WidgetPreferencesCache extends RedisCache {
   constructor() {
-    super("widget-preferences", 30 * 24 * 60 * 60); // 30 days TTL
+    super("widget-preferences");
   }
 
   private getWidgetPreferencesKey(teamId: string, userId: string): string {
@@ -142,9 +136,6 @@ class WidgetPreferencesCache extends RedisCache {
     if (newPrimaryWidgets.length > 7) {
       throw new Error("Primary widgets cannot exceed 7");
     }
-
-    // Get current preferences
-    const currentPreferences = await this.getWidgetPreferences(teamId, userId);
 
     // Calculate available widgets (all widgets not in primary)
     const availableWidgets = DEFAULT_WIDGET_ORDER.filter(

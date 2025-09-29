@@ -5,19 +5,21 @@ import { formatAmount } from "@midday/utils/format";
 import { useQuery } from "@tanstack/react-query";
 import { endOfYear, startOfYear } from "date-fns";
 import { BaseWidget } from "./base";
+import { WIDGET_POLLING_CONFIG } from "./widget-config";
 
 export function RevenueSummaryWidget() {
   const trpc = useTRPC();
   const { data: team } = useTeamQuery();
 
-  const { data } = useQuery(
-    trpc.widgets.getRevenueSummary.queryOptions({
+  const { data } = useQuery({
+    ...trpc.widgets.getRevenueSummary.queryOptions({
       from: startOfYear(new Date()).toISOString(),
       to: endOfYear(new Date()).toISOString(),
       currency: team?.baseCurrency ?? undefined,
       revenueType: "net",
     }),
-  );
+    ...WIDGET_POLLING_CONFIG,
+  });
 
   const handleViewTrends = () => {
     // TODO: Navigate to revenue trends page or open revenue analysis

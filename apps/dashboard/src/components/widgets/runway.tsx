@@ -5,6 +5,7 @@ import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { BaseWidget } from "./base";
+import { WIDGET_POLLING_CONFIG } from "./widget-config";
 
 export function RunwayWidget() {
   const trpc = useTRPC();
@@ -12,12 +13,13 @@ export function RunwayWidget() {
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
 
-  const { data } = useQuery(
-    trpc.widgets.getRunway.queryOptions({
+  const { data } = useQuery({
+    ...trpc.widgets.getRunway.queryOptions({
       from: subMonths(startOfMonth(new Date()), 12).toISOString(),
       to: endOfMonth(new Date()).toISOString(),
     }),
-  );
+    ...WIDGET_POLLING_CONFIG,
+  });
 
   const handleToolCall = (params: {
     toolName: string;
