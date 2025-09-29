@@ -14,7 +14,7 @@ export function Customize() {
   }
 
   return (
-    <Button variant="outline" className="space-x-2">
+    <Button variant="outline" className="space-x-2 px-3">
       <span>Customize</span>
       <Icons.DashboardCustomize size={16} className="text-[#666]" />
     </Button>

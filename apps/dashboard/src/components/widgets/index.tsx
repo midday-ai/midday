@@ -30,7 +30,7 @@ export function Widgets() {
   }
 
   return (
-    <div className="flex flex-col gap-4 mt-4">
+    <div className="flex flex-col mt-6">
       <WidgetsHeader />
       <WidgetsGrid />
       <Suspense fallback={<SuggestedActionsSkeleton />}>

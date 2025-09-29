@@ -12,6 +12,7 @@ import {
   and,
   eq,
   gte,
+  inArray,
   isNotNull,
   isNull,
   lt,
@@ -22,6 +23,7 @@ import {
 } from "drizzle-orm";
 import {
   bankAccounts,
+  invoices,
   teams,
   transactionCategories,
   transactions,
@@ -70,6 +72,7 @@ export type GetReportsParams = {
   to: string;
   currency?: string;
   type?: "revenue" | "profit";
+  revenueType?: "gross" | "net";
 };
 
 interface ReportsResultItem {
@@ -161,7 +164,13 @@ ${
 
 // Helper function for revenue calculation
 export async function getRevenue(db: Database, params: GetReportsParams) {
-  const { teamId, from, to, currency: inputCurrency } = params;
+  const {
+    teamId,
+    from,
+    to,
+    currency: inputCurrency,
+    revenueType = "gross",
+  } = params;
 
   const fromDate = startOfMonth(new UTCDate(parseISO(from)));
   const toDate = endOfMonth(new UTCDate(parseISO(to)));
@@ -189,31 +198,36 @@ export async function getRevenue(db: Database, params: GetReportsParams) {
     conditions.push(eq(transactions.baseCurrency, targetCurrency));
   }
 
-  // Step 4: Execute the aggregated query
+  // Step 4: Execute the aggregated query with gross/net calculation
+  const tc = transactionCategories;
   const monthlyData = await db
     .select({
       month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
-      value: inputCurrency
-        ? sql<number>`COALESCE(SUM(${transactions.amount}), 0)`
-        : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
+      value:
+        revenueType === "net"
+          ? inputCurrency
+            ? sql<number>`COALESCE(SUM(
+                ${transactions.amount} - (
+                  ${transactions.amount} * COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0) / 
+                  (100 + COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0))
+                )
+              ), 0)`
+            : sql<number>`COALESCE(SUM(
+                COALESCE(${transactions.baseAmount}, 0) - (
+                  COALESCE(${transactions.baseAmount}, 0) * COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0) / 
+                  (100 + COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0))
+                )
+              ), 0)`
+          : inputCurrency
+            ? sql<number>`COALESCE(SUM(${transactions.amount}), 0)`
+            : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
     })
     .from(transactions)
     .leftJoin(
-      transactionCategories,
-      and(
-        eq(transactionCategories.slug, transactions.categorySlug),
-        eq(transactionCategories.teamId, teamId),
-      ),
+      tc,
+      and(eq(tc.slug, transactions.categorySlug), eq(tc.teamId, teamId)),
     )
-    .where(
-      and(
-        ...conditions,
-        or(
-          isNull(transactionCategories.excluded),
-          eq(transactionCategories.excluded, false),
-        )!,
-      ),
-    )
+    .where(and(...conditions, or(isNull(tc.excluded), eq(tc.excluded, false))!))
     .groupBy(sql`DATE_TRUNC('month', ${transactions.date})`)
     .orderBy(sql`DATE_TRUNC('month', ${transactions.date}) ASC`);
 
@@ -229,7 +243,7 @@ export async function getRevenue(db: Database, params: GetReportsParams) {
     return {
       date: monthKey,
       value: value.toString(),
-      currency: currencyStr, // Avoid repeated string operations
+      currency: currencyStr,
     };
   });
 
@@ -237,7 +251,14 @@ export async function getRevenue(db: Database, params: GetReportsParams) {
 }
 
 export async function getReports(db: Database, params: GetReportsParams) {
-  const { teamId, from, to, type = "profit", currency: inputCurrency } = params;
+  const {
+    teamId,
+    from,
+    to,
+    type = "profit",
+    currency: inputCurrency,
+    revenueType,
+  } = params;
 
   // Calculate previous year date range
   const prevFromDate = subYears(startOfMonth(new UTCDate(parseISO(from))), 1);
@@ -253,12 +274,14 @@ export async function getReports(db: Database, params: GetReportsParams) {
       from: prevFromDate.toISOString(),
       to: prevToDate.toISOString(),
       currency: inputCurrency,
+      revenueType,
     }),
     reportFunction(db, {
       teamId,
       from,
       to,
       currency: inputCurrency,
+      revenueType,
     }),
   ]);
 
@@ -1041,5 +1064,471 @@ export async function getTaxSummary(db: Database, params: GetTaxParams) {
       },
     },
     result: processedData,
+  };
+}
+
+export type GetGrowthRateParams = {
+  teamId: string;
+  from: string;
+  to: string;
+  currency?: string;
+  type?: "revenue" | "profit";
+  revenueType?: "gross" | "net";
+  period?: "quarterly" | "monthly" | "yearly";
+};
+
+export async function getGrowthRate(db: Database, params: GetGrowthRateParams) {
+  const {
+    teamId,
+    from,
+    to,
+    currency: inputCurrency,
+    type = "revenue",
+    revenueType = "net",
+    period = "quarterly",
+  } = params;
+
+  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
+  const toDate = endOfMonth(new UTCDate(parseISO(to)));
+
+  // Calculate comparison period based on period type
+  let prevFromDate: UTCDate;
+  let prevToDate: UTCDate;
+
+  switch (period) {
+    case "quarterly":
+      // Compare with previous quarter (3 months ago)
+      prevFromDate = startOfMonth(new UTCDate(fromDate.getTime()));
+      prevFromDate.setMonth(prevFromDate.getMonth() - 3);
+      prevToDate = endOfMonth(new UTCDate(toDate.getTime()));
+      prevToDate.setMonth(prevToDate.getMonth() - 3);
+      break;
+    case "yearly":
+      // Compare with previous year
+      prevFromDate = subYears(fromDate, 1);
+      prevToDate = subYears(toDate, 1);
+      break;
+    default:
+      // Compare with previous month (default case)
+      prevFromDate = startOfMonth(new UTCDate(fromDate.getTime()));
+      prevFromDate.setMonth(prevFromDate.getMonth() - 1);
+      prevToDate = endOfMonth(new UTCDate(toDate.getTime()));
+      prevToDate.setMonth(prevToDate.getMonth() - 1);
+      break;
+  }
+
+  // Get target currency
+  const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
+
+  // Use appropriate data function based on type
+  const dataFunction = type === "profit" ? getProfit : getRevenue;
+
+  // Get current and previous period data in parallel
+  const [currentData, previousData] = await Promise.all([
+    dataFunction(db, {
+      teamId,
+      from,
+      to,
+      currency: inputCurrency,
+      revenueType,
+    }),
+    dataFunction(db, {
+      teamId,
+      from: prevFromDate.toISOString(),
+      to: prevToDate.toISOString(),
+      currency: inputCurrency,
+      revenueType,
+    }),
+  ]);
+
+  // Calculate totals
+  const currentTotal = currentData.reduce(
+    (sum, item) => sum + Number.parseFloat(item.value),
+    0,
+  );
+  const previousTotal = previousData.reduce(
+    (sum, item) => sum + Number.parseFloat(item.value),
+    0,
+  );
+
+  // Calculate growth rate
+  let growthRate = 0;
+  if (previousTotal > 0) {
+    growthRate = ((currentTotal - previousTotal) / previousTotal) * 100;
+  }
+
+  // For quarterly period, use the full period comparison instead of just recent months
+  let periodGrowthRate = 0;
+  if (period === "quarterly") {
+    // For quarterly, use the full period comparison (current quarter vs previous quarter)
+    periodGrowthRate = growthRate;
+  } else {
+    // For other periods, calculate period-over-period comparison for recent months
+    const recentMonths = Math.min(3, currentData.length);
+    const recentCurrent = currentData
+      .slice(-recentMonths)
+      .reduce((sum, item) => sum + Number.parseFloat(item.value), 0);
+    const recentPrevious = previousData
+      .slice(-recentMonths)
+      .reduce((sum, item) => sum + Number.parseFloat(item.value), 0);
+
+    if (recentPrevious > 0) {
+      periodGrowthRate =
+        ((recentCurrent - recentPrevious) / recentPrevious) * 100;
+    }
+  }
+
+  // Determine trend based on the period growth rate (what we're actually displaying)
+  const trend =
+    periodGrowthRate > 0
+      ? "positive"
+      : periodGrowthRate < 0
+        ? "negative"
+        : "neutral";
+
+  return {
+    summary: {
+      currentTotal: Number(currentTotal.toFixed(2)),
+      previousTotal: Number(previousTotal.toFixed(2)),
+      growthRate: Number(growthRate.toFixed(2)),
+      periodGrowthRate: Number(periodGrowthRate.toFixed(2)),
+      currency: targetCurrency || "USD",
+      trend,
+      period,
+      type,
+      revenueType,
+    },
+    meta: {
+      type: "growth_rate",
+      period,
+      currency: targetCurrency || "USD",
+      dateRange: {
+        current: { from, to },
+        previous: {
+          from: prevFromDate.toISOString(),
+          to: prevToDate.toISOString(),
+        },
+      },
+    },
+    result: {
+      current: {
+        total: Number(currentTotal.toFixed(2)),
+        period: { from, to },
+        data: currentData.map((item) => ({
+          date: item.date,
+          value: Number.parseFloat(item.value),
+          currency: item.currency,
+        })),
+      },
+      previous: {
+        total: Number(previousTotal.toFixed(2)),
+        period: {
+          from: prevFromDate.toISOString(),
+          to: prevToDate.toISOString(),
+        },
+        data: previousData.map((item) => ({
+          date: item.date,
+          value: Number.parseFloat(item.value),
+          currency: item.currency,
+        })),
+      },
+    },
+  };
+}
+
+export type GetProfitMarginParams = {
+  teamId: string;
+  from: string;
+  to: string;
+  currency?: string;
+  revenueType?: "gross" | "net";
+};
+
+export async function getProfitMargin(
+  db: Database,
+  params: GetProfitMarginParams,
+) {
+  const {
+    teamId,
+    from,
+    to,
+    currency: inputCurrency,
+    revenueType = "net",
+  } = params;
+
+  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
+  const toDate = endOfMonth(new UTCDate(parseISO(to)));
+
+  // Get target currency
+  const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
+
+  // Get revenue and profit data in parallel
+  const [revenueData, profitData] = await Promise.all([
+    getRevenue(db, {
+      teamId,
+      from,
+      to,
+      currency: inputCurrency,
+      revenueType,
+    }),
+    getProfit(db, {
+      teamId,
+      from,
+      to,
+      currency: inputCurrency,
+      revenueType,
+    }),
+  ]);
+
+  // Calculate totals
+  const totalRevenue = revenueData.reduce(
+    (sum, item) => sum + Number.parseFloat(item.value),
+    0,
+  );
+  const totalProfit = profitData.reduce(
+    (sum, item) => sum + Number.parseFloat(item.value),
+    0,
+  );
+
+  // Calculate profit margin percentage
+  let profitMargin = 0;
+  if (totalRevenue > 0) {
+    profitMargin = (totalProfit / totalRevenue) * 100;
+  }
+
+  // Calculate monthly profit margins for trend analysis
+  const monthlyMargins = revenueData.map((revenueItem, index) => {
+    const profitItem = profitData[index];
+    const monthRevenue = Number.parseFloat(revenueItem.value);
+    const monthProfit = profitItem ? Number.parseFloat(profitItem.value) : 0;
+
+    let monthMargin = 0;
+    if (monthRevenue > 0) {
+      monthMargin = (monthProfit / monthRevenue) * 100;
+    }
+
+    return {
+      date: revenueItem.date,
+      revenue: monthRevenue,
+      profit: monthProfit,
+      margin: Number(monthMargin.toFixed(2)),
+      currency: revenueItem.currency,
+    };
+  });
+
+  // Calculate average margin
+  const avgMargin =
+    monthlyMargins.length > 0
+      ? monthlyMargins.reduce((sum, item) => sum + item.margin, 0) /
+        monthlyMargins.length
+      : 0;
+
+  // Determine trend based on first vs last month
+  let trend: "positive" | "negative" | "neutral" = "neutral";
+  if (monthlyMargins.length >= 2) {
+    const firstMonth = monthlyMargins[0];
+    const lastMonth = monthlyMargins[monthlyMargins.length - 1];
+    if (firstMonth && lastMonth) {
+      const firstMargin = firstMonth.margin;
+      const lastMargin = lastMonth.margin;
+      trend =
+        lastMargin > firstMargin
+          ? "positive"
+          : lastMargin < firstMargin
+            ? "negative"
+            : "neutral";
+    }
+  }
+
+  return {
+    summary: {
+      totalRevenue: Number(totalRevenue.toFixed(2)),
+      totalProfit: Number(totalProfit.toFixed(2)),
+      profitMargin: Number(profitMargin.toFixed(2)),
+      averageMargin: Number(avgMargin.toFixed(2)),
+      currency: targetCurrency || "USD",
+      revenueType,
+      trend,
+      monthCount: monthlyMargins.length,
+    },
+    meta: {
+      type: "profit_margin",
+      currency: targetCurrency || "USD",
+      revenueType,
+      period: {
+        from,
+        to,
+      },
+    },
+    result: monthlyMargins,
+  };
+}
+
+export type GetCashFlowParams = {
+  teamId: string;
+  from: string;
+  to: string;
+  currency?: string;
+  period?: "monthly" | "quarterly";
+};
+
+export async function getCashFlow(db: Database, params: GetCashFlowParams) {
+  const {
+    teamId,
+    from,
+    to,
+    currency: inputCurrency,
+    period = "monthly",
+  } = params;
+
+  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
+  const toDate = endOfMonth(new UTCDate(parseISO(to)));
+
+  // Get target currency
+  const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
+
+  // Build query conditions
+  const conditions = [
+    eq(transactions.teamId, teamId),
+    eq(transactions.internal, false),
+    ne(transactions.status, "excluded"),
+    gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
+    lte(transactions.date, format(toDate, "yyyy-MM-dd")),
+  ];
+
+  // Add currency conditions
+  if (inputCurrency && targetCurrency) {
+    conditions.push(eq(transactions.currency, targetCurrency));
+  } else if (targetCurrency) {
+    conditions.push(eq(transactions.baseCurrency, targetCurrency));
+  }
+
+  // Get all transactions with category exclusion
+  const result = await db
+    .select({
+      totalAmount: inputCurrency
+        ? sql<number>`COALESCE(SUM(${transactions.amount}), 0)`
+        : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
+    })
+    .from(transactions)
+    .leftJoin(
+      transactionCategories,
+      and(
+        eq(transactionCategories.slug, transactions.categorySlug),
+        eq(transactionCategories.teamId, teamId),
+      ),
+    )
+    .where(
+      and(
+        ...conditions,
+        // Exclude transactions in excluded categories
+        or(
+          isNull(transactions.categorySlug),
+          isNull(transactionCategories.excluded),
+          eq(transactionCategories.excluded, false),
+        )!,
+      ),
+    );
+
+  const netCashFlow = Number(result[0]?.totalAmount || 0);
+
+  return {
+    summary: {
+      netCashFlow: Number(netCashFlow.toFixed(2)),
+      currency: targetCurrency || "USD",
+      period,
+    },
+    meta: {
+      type: "cash_flow",
+      currency: targetCurrency || "USD",
+      period: {
+        from,
+        to,
+      },
+    },
+  };
+}
+
+export type GetOutstandingInvoicesParams = {
+  teamId: string;
+  currency?: string;
+  status?: ("unpaid" | "overdue")[];
+};
+
+export async function getOutstandingInvoices(
+  db: Database,
+  params: GetOutstandingInvoicesParams,
+) {
+  const {
+    teamId,
+    currency: inputCurrency,
+    status = ["unpaid", "overdue"],
+  } = params;
+
+  // Get target currency
+  const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
+
+  // Build query conditions
+  const conditions = [
+    eq(invoices.teamId, teamId),
+    inArray(invoices.status, status),
+  ];
+
+  // Add currency filter if specified
+  if (inputCurrency && targetCurrency) {
+    conditions.push(eq(invoices.currency, targetCurrency));
+  }
+
+  // Get outstanding invoices summary
+  const result = await db
+    .select({
+      count: sql<number>`COUNT(*)`,
+      totalAmount: sql<number>`COALESCE(SUM(${invoices.amount}), 0)`,
+      currency: invoices.currency,
+    })
+    .from(invoices)
+    .where(and(...conditions))
+    .groupBy(invoices.currency);
+
+  // Calculate totals across all currencies (if no currency filter)
+  let totalCount = 0;
+  let totalAmount = 0;
+  let mainCurrency = targetCurrency || "USD";
+
+  if (result.length > 0) {
+    if (inputCurrency && targetCurrency) {
+      // Single currency result
+      const singleResult = result[0];
+      totalCount = Number(singleResult?.count || 0);
+      totalAmount = Number(singleResult?.totalAmount || 0);
+      mainCurrency = singleResult?.currency || targetCurrency;
+    } else {
+      // Multiple currencies - sum counts and use base currency amounts
+      totalCount = result.reduce(
+        (sum, item) => sum + Number(item.count || 0),
+        0,
+      );
+
+      // For multiple currencies, we'd need to convert to base currency
+      // For now, let's use the first currency's total as primary
+      const primaryResult =
+        result.find((r) => r.currency === targetCurrency) || result[0];
+      totalAmount = Number(primaryResult?.totalAmount || 0);
+      mainCurrency = primaryResult?.currency || targetCurrency || "USD";
+    }
+  }
+
+  return {
+    summary: {
+      count: totalCount,
+      totalAmount: Number(totalAmount.toFixed(2)),
+      currency: mainCurrency,
+      status,
+    },
+    meta: {
+      type: "outstanding_invoices",
+      currency: mainCurrency,
+      status,
+    },
   };
 }

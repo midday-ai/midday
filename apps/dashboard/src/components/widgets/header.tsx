@@ -49,7 +49,7 @@ export function WidgetsHeader() {
   }, [user?.timezone]);
 
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex justify-between items-start mb-8">
       <div>
         <h1 className="text-[30px] font-serif leading-normal mb-1">
           <span>{greeting} </span>

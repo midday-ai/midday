@@ -81,7 +81,7 @@ export function SuggestedActions() {
     RouterOutputs["suggestedActions"]["list"]["actions"][number];
 
   return (
-    <div className="w-full px-6 py-4 flex items-center justify-center">
+    <div className="w-full px-6 mt-10 mb-8 flex items-center justify-center">
       <div className="flex gap-3 overflow-x-auto scrollbar-hide">
         {suggestedActions.map((action: SuggestedAction) => {
           const config = uiConfig[action.id];
