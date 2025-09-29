@@ -1,3 +1,7 @@
+import { useLongPress } from "@/hooks/use-long-press";
+import { cn } from "@midday/ui/cn";
+import { useIsCustomizing, useWidgetActions } from "./widget-provider";
+
 interface BaseWidgetProps {
   title: string;
   description: React.ReactNode;
@@ -15,10 +19,23 @@ export function BaseWidget({
   actions,
   icon,
 }: BaseWidgetProps) {
+  const isCustomizing = useIsCustomizing();
+  const { setIsCustomizing } = useWidgetActions();
+
+  const longPressHandlers = useLongPress({
+    onLongPress: () => setIsCustomizing(true),
+    onClick,
+    threshold: 500,
+    disabled: isCustomizing,
+  });
+
   return (
     <div
-      className="dark:bg-[#0c0c0c] border dark:border-[#1d1d1d] p-4 h-[210px] flex flex-col justify-between transition-all duration-300 dark:hover:bg-[#0f0f0f] dark:hover:border-[#222222] group cursor-pointer"
-      onClick={onClick}
+      className={cn(
+        "dark:bg-[#0c0c0c] border dark:border-[#1d1d1d] p-4 h-[210px] flex flex-col justify-between transition-all duration-300 dark:hover:bg-[#0f0f0f] dark:hover:border-[#222222] group",
+        isCustomizing && "cursor-pointer",
+      )}
+      {...longPressHandlers}
     >
       <div>
         <div className="flex items-center justify-between mb-3">

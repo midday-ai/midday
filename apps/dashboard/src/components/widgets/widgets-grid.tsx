@@ -314,7 +314,7 @@ export function WidgetsGrid() {
         {/* Drag Overlay */}
         <DragOverlay>
           {activeId ? (
-            <div className="shadow-[0_4px_12px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)] bg-background cursor-grab active:cursor-grabbing opacity-90 transform-gpu will-change-transform">
+            <div className="shadow-[0_4px_12px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)] bg-background cursor-grabbing opacity-90 transform-gpu will-change-transform">
               <WidgetComponent />
             </div>
           ) : null}
