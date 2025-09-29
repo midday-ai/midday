@@ -3,6 +3,7 @@ import {
   getCashFlowSchema,
   getGrowthRateSchema,
   getInboxStatsSchema,
+  getMonthlySpendingSchema,
   getOutstandingInvoicesSchema,
   getProfitMarginSchema,
   getRevenueSummarySchema,
@@ -23,6 +24,7 @@ import {
   getRecentDocuments,
   getRevenue,
   getRunway,
+  getSpendingForPeriod,
   getTopRevenueClient,
   getTrackedTime,
 } from "@midday/db/queries";
@@ -278,6 +280,29 @@ export const widgetsRouter = createTRPCRouter({
 
       return {
         result: accountBalances,
+      };
+    }),
+
+  getMonthlySpending: protectedProcedure
+    .input(getMonthlySpendingSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      const spending = await getSpendingForPeriod(db, {
+        teamId: teamId!,
+        from: input.from,
+        to: input.to,
+        currency: input.currency,
+      });
+
+      return {
+        result: spending,
+        toolCall: {
+          toolName: "getSpendingAnalysis",
+          toolParams: {
+            from: input.from,
+            to: input.to,
+            currency: input.currency,
+          },
+        },
       };
     }),
 
