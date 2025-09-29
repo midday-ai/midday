@@ -53,7 +53,7 @@ export default async function Layout({
 
         <div className="md:ml-[70px] pb-4">
           <Header />
-          <div className="px-6">{children}</div>
+          <div className="px-8">{children}</div>
         </div>
 
         <ExportStatus />

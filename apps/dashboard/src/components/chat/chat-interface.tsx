@@ -81,7 +81,7 @@ export function ChatInterface({ id, geo }: Props) {
       <div
         className={cn(
           "relative h-full w-full transition-all duration-300 ease-in-out",
-          isHome && "h-[calc(100vh-648px)]",
+          isHome && "h-[calc(100vh-764px)]",
           isChatPage && "h-[calc(100vh-88px)]",
           isCanvasVisible && "pr-[603px]",
         )}
