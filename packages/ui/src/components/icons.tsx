@@ -73,6 +73,7 @@ import {
   MdOutlineSignpost,
   MdOutlineSquareFoot,
   MdOutlineStackedBarChart,
+  MdOutlineStar,
   MdOutlineStop,
   MdOutlineStyle,
   MdOutlineSubdirectoryArrowLeft,
@@ -610,4 +611,5 @@ export const Icons = {
   Speed: MdOutlineStackedBarChart,
   ReceiptLong: MdOutlineReceiptLong,
   Bolt: MdBolt,
+  Star: MdOutlineStar,
 };
