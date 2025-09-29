@@ -9,6 +9,9 @@ export const WIDGET_TYPES = [
   "cash-flow",
   "outstanding-invoices",
   "inbox",
+  "time-tracker",
+  "vault",
+  "account-balances",
 ] as const;
 
 export type WidgetType = (typeof WIDGET_TYPES)[number];
@@ -22,7 +25,7 @@ export const DEFAULT_WIDGET_ORDER: WidgetType[] = [...WIDGET_TYPES];
 
 export const DEFAULT_WIDGET_PREFERENCES: WidgetPreferences = {
   primaryWidgets: DEFAULT_WIDGET_ORDER.slice(0, 7), // First 7 widgets
-  availableWidgets: DEFAULT_WIDGET_ORDER.slice(7), // Remaining widget(s)
+  availableWidgets: DEFAULT_WIDGET_ORDER.slice(7), // Remaining widgets
 };
 
 class WidgetPreferencesCache extends RedisCache {

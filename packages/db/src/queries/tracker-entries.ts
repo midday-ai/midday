@@ -738,3 +738,50 @@ async function stopCurrentRunningTimer(
       .where(eq(trackerEntries.id, runningTimer.id));
   }
 }
+
+export type GetTrackedTimeParams = {
+  teamId: string;
+  from: string;
+  to: string;
+  assignedId?: string;
+};
+
+export async function getTrackedTime(
+  db: Database,
+  params: GetTrackedTimeParams,
+) {
+  const { teamId, from, to, assignedId } = params;
+
+  // Build the where conditions array
+  const whereConditions = [
+    eq(trackerEntries.teamId, teamId),
+    gte(trackerEntries.date, from),
+    lte(trackerEntries.date, to),
+  ];
+
+  if (assignedId) {
+    whereConditions.push(eq(trackerEntries.assignedId, assignedId));
+  }
+
+  const entries = await db.query.trackerEntries.findMany({
+    where: and(...whereConditions),
+    columns: {
+      duration: true,
+    },
+  });
+
+  // Calculate total duration including running timers
+  let totalDuration = 0;
+
+  for (const entry of entries) {
+    if (entry.duration) {
+      totalDuration += entry.duration;
+    }
+  }
+
+  return {
+    totalDuration,
+    from,
+    to,
+  };
+}

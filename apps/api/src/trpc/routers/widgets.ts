@@ -1,4 +1,5 @@
 import {
+  getAccountBalancesSchema,
   getCashFlowSchema,
   getGrowthRateSchema,
   getInboxStatsSchema,
@@ -6,19 +7,24 @@ import {
   getProfitMarginSchema,
   getRevenueSummarySchema,
   getRunwaySchema,
+  getTrackedTimeSchema,
+  getVaultActivitySchema,
   updateWidgetPreferencesSchema,
 } from "@api/schemas/widgets";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { widgetPreferencesCache } from "@midday/cache/widget-preferences-cache";
 import {
   getCashFlow,
+  getCombinedAccountBalance,
   getGrowthRate,
   getInboxStats,
   getOutstandingInvoices,
   getProfitMargin,
+  getRecentDocuments,
   getRevenue,
   getRunway,
   getTopRevenueClient,
+  getTrackedTime,
 } from "@midday/db/queries";
 
 export const widgetsRouter = createTRPCRouter({
@@ -231,6 +237,47 @@ export const widgetsRouter = createTRPCRouter({
         //     currency: input.currency,
         //   },
         // },
+      };
+    }),
+
+  getTrackedTime: protectedProcedure
+    .input(getTrackedTimeSchema)
+    .query(async ({ ctx: { db, teamId, session }, input }) => {
+      const trackedTime = await getTrackedTime(db, {
+        teamId: teamId!,
+        assignedId: input.assignedId ?? session.user.id,
+        from: input.from,
+        to: input.to,
+      });
+
+      return {
+        result: trackedTime,
+      };
+    }),
+
+  getVaultActivity: protectedProcedure
+    .input(getVaultActivitySchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      const vaultActivity = await getRecentDocuments(db, {
+        teamId: teamId!,
+        limit: input.limit,
+      });
+
+      return {
+        result: vaultActivity,
+      };
+    }),
+
+  getAccountBalances: protectedProcedure
+    .input(getAccountBalancesSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      const accountBalances = await getCombinedAccountBalance(db, {
+        teamId: teamId!,
+        currency: input.currency,
+      });
+
+      return {
+        result: accountBalances,
       };
     }),
 
