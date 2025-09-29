@@ -28,6 +28,7 @@ import { useState } from "react";
 import { CashFlowWidget } from "./cash-flow";
 import { GrowthRateWidget } from "./growth-rate";
 import { InboxWidget } from "./inbox";
+import { Insights } from "./insights";
 import { OutstandingInvoicesWidget } from "./outstanding-invoices";
 import { ProfitMarginWidget } from "./profit-margin";
 import { RevenueSummaryWidget } from "./revenue-summary";
@@ -234,6 +235,8 @@ export function WidgetsGrid() {
             strategy={rectSortingStrategy}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-6">
+              <Insights />
+
               {primaryWidgets.map((widgetType, index) => {
                 const WidgetComponent = WIDGET_COMPONENTS[widgetType];
                 const wiggleClass = getWiggleClass(index);
@@ -254,6 +257,8 @@ export function WidgetsGrid() {
           </SortableContext>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-6">
+            <Insights />
+
             {primaryWidgets.map((widgetType) => {
               const WidgetComponent = WIDGET_COMPONENTS[widgetType];
               return <WidgetComponent key={widgetType} />;

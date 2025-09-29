@@ -5,21 +5,23 @@ import { formatAmount } from "@midday/utils/format";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { BaseWidget } from "./base";
+import { WIDGET_POLLING_CONFIG } from "./widget-config";
 
 export function OutstandingInvoicesWidget() {
   const trpc = useTRPC();
   const { data: team } = useTeamQuery();
   const router = useRouter();
 
-  const { data } = useQuery(
-    trpc.widgets.getOutstandingInvoices.queryOptions({
+  const { data } = useQuery({
+    ...trpc.widgets.getOutstandingInvoices.queryOptions({
       currency: team?.baseCurrency ?? undefined,
       status: ["unpaid", "overdue"],
     }),
-  );
+    ...WIDGET_POLLING_CONFIG,
+  });
 
   const handleViewInvoices = () => {
-    router.push("/invoices?statuses=draft,scheduled,unpaid");
+    router.push("/invoices?statuses=unpaid,overdue");
   };
 
   return (

@@ -4,12 +4,16 @@ import { Icons } from "@midday/ui/icons";
 import { formatAmount } from "@midday/utils/format";
 import { useQuery } from "@tanstack/react-query";
 import { BaseWidget } from "./base";
+import { WIDGET_POLLING_CONFIG } from "./widget-config";
 
 export function TopCustomerWidget() {
   const trpc = useTRPC();
   const { data: team } = useTeamQuery();
 
-  const { data } = useQuery(trpc.widgets.getTopCustomer.queryOptions());
+  const { data } = useQuery({
+    ...trpc.widgets.getTopCustomer.queryOptions(),
+    ...WIDGET_POLLING_CONFIG,
+  });
 
   return (
     <BaseWidget
