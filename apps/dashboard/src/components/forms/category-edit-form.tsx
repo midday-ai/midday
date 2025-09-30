@@ -21,6 +21,7 @@ import { SubmitButton } from "@midday/ui/submit-button";
 import { Switch } from "@midday/ui/switch";
 import { taxTypes } from "@midday/utils/tax";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -46,25 +47,37 @@ export function CategoryEditForm({ data }: Props) {
   const queryClient = useQueryClient();
   const { setParams } = useCategoryParams();
 
+  const defaultValues = {
+    id: data?.id,
+    name: data?.name || "",
+    description: data?.description || "",
+    color: data?.color || "",
+    taxRate: data?.taxRate || undefined,
+    taxType: data?.taxType || "",
+    taxReportingCode: data?.taxReportingCode || "",
+    excluded: data?.excluded || false,
+    parentId: data?.parentId || undefined,
+  };
+
   const form = useZodForm(formSchema, {
-    defaultValues: {
-      id: data?.id,
-      name: data?.name || "",
-      description: data?.description || "",
-      color: data?.color || "",
-      taxRate: data?.taxRate || undefined,
-      taxType: data?.taxType || "",
-      taxReportingCode: data?.taxReportingCode || "",
-      excluded: data?.excluded || false,
-      parentId: data?.parentId || undefined,
-    },
+    defaultValues,
   });
+
+  useEffect(() => {
+    form.reset(defaultValues);
+  }, [data, form]);
 
   const updateCategoryMutation = useMutation(
     trpc.transactionCategories.update.mutationOptions({
       onSuccess: () => {
+        // Invalidate the list query
         queryClient.invalidateQueries({
           queryKey: trpc.transactionCategories.get.queryKey(),
+        });
+
+        // Invalidate the specific category query to refetch updated data
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactionCategories.getById.queryKey(),
         });
 
         setParams(null);
@@ -73,7 +86,17 @@ export function CategoryEditForm({ data }: Props) {
   );
 
   function onSubmit(values: UpdateCategoriesFormValues) {
-    updateCategoryMutation.mutate({
+    const payload: {
+      id: string;
+      name: string;
+      description: string | null;
+      color: string | null;
+      taxRate: number | null;
+      taxType: string | null;
+      taxReportingCode: string | null;
+      excluded: boolean | null;
+      parentId?: string | null;
+    } = {
       id: values.id,
       name: values.name,
       description: values.description || null,
@@ -82,8 +105,18 @@ export function CategoryEditForm({ data }: Props) {
       taxType: values.taxType || null,
       taxReportingCode: values.taxReportingCode || null,
       excluded: values.excluded || null,
-      parentId: values.parentId ?? null,
-    });
+    };
+
+    // Only include parentId if it has changed from the original value
+    // Normalize null and undefined to be treated as equivalent
+    const currentParentId = data?.parentId ?? undefined;
+    const newParentId = values.parentId ?? undefined;
+
+    if (newParentId !== currentParentId) {
+      payload.parentId = values.parentId ?? null;
+    }
+
+    updateCategoryMutation.mutate(payload);
   }
 
   return (
