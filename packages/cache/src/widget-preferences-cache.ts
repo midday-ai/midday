@@ -16,6 +16,7 @@ export const WIDGET_TYPES = [
   "invoice-payment-score",
   "recurring-expenses",
   "tax-summary",
+  "category-expenses",
 ] as const;
 
 export type WidgetType = (typeof WIDGET_TYPES)[number];

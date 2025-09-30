@@ -28,6 +28,7 @@ import { useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
 import { AccountBalancesWidget } from "./account-balances";
 import { CashFlowWidget } from "./cash-flow";
+import { CategoryExpensesWidget } from "./category-expenses";
 import { GrowthRateWidget } from "./growth-rate";
 import { InboxWidget } from "./inbox";
 import { Insights } from "./insights";
@@ -115,6 +116,7 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
   "invoice-payment-score": InvoicePaymentScoreWidget,
   "recurring-expenses": RecurringExpensesWidget,
   "tax-summary": TaxSummaryWidget,
+  "category-expenses": CategoryExpensesWidget,
 };
 
 export function WidgetsGrid() {

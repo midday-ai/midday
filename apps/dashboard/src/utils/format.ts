@@ -172,3 +172,12 @@ export function formatRelativeTime(date: Date): string {
 
   return "just now";
 }
+
+export function formatCompactAmount(amount: number): string {
+  const absAmount = Math.abs(amount);
+  if (absAmount >= 1000000) {
+    return `${(absAmount / 1000000).toFixed(1)}m`;
+  }
+  // Always show in thousands notation
+  return `${(absAmount / 1000).toFixed(1)}k`;
+}
