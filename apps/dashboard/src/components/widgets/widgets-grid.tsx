@@ -31,11 +31,14 @@ import { CashFlowWidget } from "./cash-flow";
 import { GrowthRateWidget } from "./growth-rate";
 import { InboxWidget } from "./inbox";
 import { Insights } from "./insights";
+import { InvoicePaymentScoreWidget } from "./invoice-payment-score";
 import { MonthlySpendingWidget } from "./monthly-spending";
 import { OutstandingInvoicesWidget } from "./outstanding-invoices";
 import { ProfitMarginWidget } from "./profit-margin";
+import { RecurringExpensesWidget } from "./recurring-expenses";
 import { RevenueSummaryWidget } from "./revenue-summary";
 import { RunwayWidget } from "./runway";
+import { TaxSummaryWidget } from "./tax-summary";
 import { TimeTrackerWidget } from "./time-tracker";
 import { TopCustomerWidget } from "./top-customer";
 import { VaultWidget } from "./vault";
@@ -109,6 +112,9 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
   vault: VaultWidget,
   "account-balances": AccountBalancesWidget,
   "monthly-spending": MonthlySpendingWidget,
+  "invoice-payment-score": InvoicePaymentScoreWidget,
+  "recurring-expenses": RecurringExpensesWidget,
+  "tax-summary": TaxSummaryWidget,
 };
 
 export function WidgetsGrid() {

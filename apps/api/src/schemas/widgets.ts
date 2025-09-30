@@ -80,6 +80,16 @@ export const getMonthlySpendingSchema = z.object({
   currency: z.string().optional(),
 });
 
+export const getRecurringExpensesSchema = z.object({
+  currency: z.string().optional(),
+});
+
+export const getTaxSummarySchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  currency: z.string().optional(),
+});
+
 export const widgetTypeSchema = z.enum(WIDGET_TYPES);
 
 export const widgetPreferencesSchema = z.object({
