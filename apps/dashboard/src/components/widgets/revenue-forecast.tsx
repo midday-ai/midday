@@ -82,7 +82,7 @@ export function RevenueForecastWidget() {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={chartData}
-                  margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                  margin={{ top: 0, right: 0, left: 0, bottom: 1 }}
                 >
                   <Line
                     type="monotone"
