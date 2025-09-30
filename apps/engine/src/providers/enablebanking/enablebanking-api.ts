@@ -313,6 +313,9 @@ export class EnableBankingApi {
       const startDate = formatISO(subDays(new Date(), 5), {
         representation: "date",
       });
+      const endDate = formatISO(new Date(), {
+        representation: "date",
+      });
 
       do {
         const response = await this.#get<GetTransactionsResponse>(
@@ -321,9 +324,7 @@ export class EnableBankingApi {
             strategy: "default",
             transaction_status: "BOOK",
             date_from: startDate,
-            date_to: formatISO(new Date(), {
-              representation: "date",
-            }),
+            date_to: endDate,
             ...(continuationKey && { continuation_key: continuationKey }),
           },
         );
@@ -375,6 +376,13 @@ export class EnableBankingApi {
 
       // Step 3: If data is stale, fetch recent data and merge with pagination
       if (!mostRecentDate || mostRecentDate < sevenDaysAgo) {
+        const recentStartDate = formatISO(subDays(new Date(), 365), {
+          representation: "date",
+        });
+        const recentEndDate = formatISO(new Date(), {
+          representation: "date",
+        });
+
         let recentContinuationKey: string | undefined;
         do {
           const recentResponse = await this.#get<GetTransactionsResponse>(
@@ -382,12 +390,8 @@ export class EnableBankingApi {
             {
               strategy: "default",
               transaction_status: "BOOK",
-              date_from: formatISO(subDays(new Date(), 365), {
-                representation: "date",
-              }),
-              date_to: formatISO(new Date(), {
-                representation: "date",
-              }),
+              date_from: recentStartDate,
+              date_to: recentEndDate,
               ...(recentContinuationKey && {
                 continuation_key: recentContinuationKey,
               }),
@@ -410,6 +414,13 @@ export class EnableBankingApi {
       allTransactions = [];
       continuationKey = undefined;
 
+      const fallbackStartDate = formatISO(subDays(new Date(), 365), {
+        representation: "date",
+      });
+      const fallbackEndDate = formatISO(new Date(), {
+        representation: "date",
+      });
+
       let fallbackResponse: GetTransactionsResponse;
       do {
         fallbackResponse = await this.#get<GetTransactionsResponse>(
@@ -417,12 +428,8 @@ export class EnableBankingApi {
           {
             strategy: "default",
             transaction_status: "BOOK",
-            date_from: formatISO(subDays(new Date(), 365), {
-              representation: "date",
-            }),
-            date_to: formatISO(new Date(), {
-              representation: "date",
-            }),
+            date_from: fallbackStartDate,
+            date_to: fallbackEndDate,
             ...(continuationKey && { continuation_key: continuationKey }),
           },
         );
