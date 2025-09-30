@@ -1,3 +1,4 @@
+import type { BillableHoursResult } from "@midday/db/queries";
 import NumberFlow from "@number-flow/react";
 import { TotalEarnings } from "../total-earnings";
 import { TrackerCalendarType } from "../tracker-calendar-type";
@@ -7,11 +8,13 @@ import { TrackerSettings } from "../tracker-settings";
 type CalendarHeaderProps = {
   totalDuration?: number;
   selectedView: "week" | "month";
+  billableHoursData?: BillableHoursResult;
 };
 
 export function CalendarHeader({
   totalDuration,
   selectedView,
+  billableHoursData,
 }: CalendarHeaderProps) {
   const hours = Math.floor((totalDuration || 0) / 3600);
   const minutes = Math.floor(((totalDuration || 0) % 3600) / 60);
@@ -29,7 +32,10 @@ export function CalendarHeader({
             <span className="relative">m</span>
           </div>
         </h1>
-        <TotalEarnings selectedView={selectedView} />
+        <TotalEarnings
+          selectedView={selectedView}
+          billableHoursData={billableHoursData}
+        />
       </div>
       <div className="flex space-x-2">
         <TrackerPeriodSelect dateFormat="MMMM" />

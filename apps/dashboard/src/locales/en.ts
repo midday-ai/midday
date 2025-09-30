@@ -504,4 +504,22 @@ export default {
     credit_amount: "{amount} credit",
     open_assistant: "Open taxes assistant",
   },
+  overdue_invoices: {
+    title: "Overdue Invoices",
+    all_paid: "All invoices paid on time",
+    "description#one": "{count} invoice · Oldest {days} {dayText} overdue",
+    "description#other": "{count} invoices · Oldest {days} {dayText} overdue",
+    "day#one": "day",
+    "day#other": "days",
+    view_overdue: "View overdue invoices",
+  },
+  billable_hours: {
+    title: "Billable Hours",
+    no_hours: "No billable hours tracked",
+    "description#one": "{hours} hour tracked",
+    "description#other": "{hours} hours tracked",
+    "hour#one": "hour",
+    "hour#other": "hours",
+    view_tracker: "View time tracker",
+  },
 } as const;

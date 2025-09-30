@@ -173,11 +173,24 @@ export function formatRelativeTime(date: Date): string {
   return "just now";
 }
 
-export function formatCompactAmount(amount: number): string {
+export function formatCompactAmount(
+  amount: number,
+  locale?: string | null,
+): string {
   const absAmount = Math.abs(amount);
+  const safeLocale = locale ?? "en-US";
+
   if (absAmount >= 1000000) {
-    return `${(absAmount / 1000000).toFixed(1)}m`;
+    const formatted = (absAmount / 1000000).toLocaleString(safeLocale, {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    });
+    return `${formatted}m`;
   }
   // Always show in thousands notation
-  return `${(absAmount / 1000).toFixed(1)}k`;
+  const formatted = (absAmount / 1000).toLocaleString(safeLocale, {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+  return `${formatted}k`;
 }

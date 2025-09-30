@@ -1,5 +1,6 @@
 "use client";
 
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { formatCompactAmount } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
@@ -12,6 +13,7 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 export function CategoryExpensesWidget() {
   const trpc = useTRPC();
   const router = useRouter();
+  const { data: user } = useUserQuery();
 
   const now = new Date();
   const from = format(startOfMonth(now), "yyyy-MM-dd");
@@ -69,7 +71,7 @@ export function CategoryExpensesWidget() {
                       <div className={`h-full ${barColor}`} />
                     </div>
                     <span className="text-xs shrink-0 tabular-nums">
-                      {formatCompactAmount(category.amount)}
+                      {formatCompactAmount(category.amount, user?.locale)}
                     </span>
                   </div>
                 </div>

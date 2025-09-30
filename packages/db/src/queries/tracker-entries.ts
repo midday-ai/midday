@@ -1,5 +1,12 @@
 import type { Database } from "@db/client";
-import { trackerEntries } from "@db/schema";
+import { teams, trackerEntries } from "@db/schema";
+import {
+  endOfMonth,
+  endOfWeek,
+  formatISO,
+  startOfMonth,
+  startOfWeek,
+} from "date-fns";
 import { and, eq, gte, inArray, isNull, lte } from "drizzle-orm";
 import { createActivity } from "./activities";
 
@@ -783,5 +790,153 @@ export async function getTrackedTime(
     totalDuration,
     from,
     to,
+  };
+}
+
+export type GetBillableHoursParams = {
+  teamId: string;
+  date: string; // ISO date string (YYYY-MM-DD)
+  view: "week" | "month";
+  weekStartsOnMonday?: boolean;
+};
+
+export type BillableHoursResult = {
+  totalDuration: number;
+  totalAmount: number;
+  earningsByCurrency: Record<string, number>;
+  projectBreakdown: Array<{
+    id: string;
+    name: string;
+    duration: number;
+    amount: number;
+    currency: string;
+  }>;
+  currency: string;
+};
+
+export async function getBillableHours(
+  db: Database,
+  params: GetBillableHoursParams,
+): Promise<BillableHoursResult> {
+  const { teamId, date, view, weekStartsOnMonday = false } = params;
+
+  const currentDate = new Date(date);
+  let from: string;
+  let to: string;
+
+  if (view === "week") {
+    const weekStart = startOfWeek(currentDate, {
+      weekStartsOn: weekStartsOnMonday ? 1 : 0,
+    });
+    const weekEnd = endOfWeek(currentDate, {
+      weekStartsOn: weekStartsOnMonday ? 1 : 0,
+    });
+    from = formatISO(weekStart, { representation: "date" });
+    to = formatISO(weekEnd, { representation: "date" });
+  } else {
+    // Month view: Add 1-day buffer before and after to handle midnight-spanning entries
+    const monthStart = startOfMonth(currentDate);
+    const monthEnd = endOfMonth(currentDate);
+
+    const extendedStart = new Date(monthStart);
+    extendedStart.setDate(extendedStart.getDate() - 1);
+
+    const extendedEnd = new Date(monthEnd);
+    extendedEnd.setDate(extendedEnd.getDate() + 1);
+
+    from = formatISO(extendedStart, { representation: "date" });
+    to = formatISO(extendedEnd, { representation: "date" });
+  }
+
+  const data = await getTrackerRecordsByRange(db, {
+    teamId,
+    from,
+    to,
+  });
+
+  // Get the team's base currency
+  const team = await db.query.teams.findFirst({
+    where: eq(teams.id, teamId),
+    columns: {
+      baseCurrency: true,
+    },
+  });
+
+  const baseCurrency = team?.baseCurrency || "USD";
+
+  if (!data?.result) {
+    return {
+      totalDuration: 0,
+      totalAmount: 0,
+      earningsByCurrency: {},
+      projectBreakdown: [],
+      currency: baseCurrency,
+    };
+  }
+
+  let totalDuration = 0;
+  const earningsByCurrency: Record<string, number> = {};
+  const projects: Record<
+    string,
+    {
+      id: string;
+      name: string;
+      duration: number;
+      amount: number;
+      currency: string;
+    }
+  > = {};
+
+  // Iterate through all days and entries
+  for (const entry of Object.values(data.result).flat()) {
+    // Count ALL durations (matching CalendarHeader)
+    if (entry.duration) {
+      totalDuration += entry.duration;
+    }
+
+    // Only count earnings from billable projects with rates (matching TotalEarnings)
+    if (
+      entry.trackerProject?.billable &&
+      entry.trackerProject?.rate &&
+      entry.duration
+    ) {
+      const projectId = entry.trackerProject.id;
+      const projectName = entry.trackerProject.name;
+      const currency = entry.trackerProject.currency || baseCurrency;
+      const rate = Number(entry.trackerProject.rate);
+      const hours = entry.duration / 3600;
+      const earning = rate * hours;
+
+      // Earnings by currency
+      earningsByCurrency[currency] =
+        (earningsByCurrency[currency] || 0) + earning;
+
+      // Project breakdown
+      if (projects[projectId]) {
+        projects[projectId].duration += entry.duration;
+        projects[projectId].amount += earning;
+      } else {
+        projects[projectId] = {
+          id: projectId,
+          name: projectName,
+          duration: entry.duration,
+          amount: earning,
+          currency,
+        };
+      }
+    }
+  }
+
+  // Calculate total amount in base currency only
+  const totalAmount = earningsByCurrency[baseCurrency] || 0;
+
+  return {
+    totalDuration,
+    totalAmount,
+    earningsByCurrency,
+    projectBreakdown: Object.values(projects).sort(
+      (a, b) => b.amount - a.amount,
+    ),
+    currency: baseCurrency,
   };
 }

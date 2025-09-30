@@ -1,7 +1,7 @@
+import { FormatAmount } from "@/components/format-amount";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
 import { Icons } from "@midday/ui/icons";
-import { formatAmount } from "@midday/utils/format";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { BaseWidget } from "./base";
@@ -34,10 +34,10 @@ export function OutstandingInvoicesWidget() {
             You currently have{" "}
             <span className="text-primary">
               {data?.result.count ?? 0} unpaid and{" "}
-              {formatAmount({
-                amount: data?.result.totalAmount ?? 0,
-                currency: data?.result.currency ?? team?.baseCurrency ?? "USD",
-              })}{" "}
+              <FormatAmount
+                amount={data?.result.totalAmount ?? 0}
+                currency={data?.result.currency!}
+              />{" "}
               in outstanding invoices
             </span>
           </p>
