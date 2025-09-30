@@ -406,8 +406,13 @@ export class EnableBankingApi {
       // Fallback: If longest strategy fails, use default with 1-year range
       console.error("Longest strategy failed, using default fallback:", error);
 
+      // Reset transactions array to avoid mixing data from failed attempt
+      allTransactions = [];
+      continuationKey = undefined;
+
+      let fallbackResponse: GetTransactionsResponse;
       do {
-        const response = await this.#get<GetTransactionsResponse>(
+        fallbackResponse = await this.#get<GetTransactionsResponse>(
           `/accounts/${accountId}/transactions`,
           {
             strategy: "default",
@@ -422,8 +427,8 @@ export class EnableBankingApi {
           },
         );
 
-        allTransactions = allTransactions.concat(response.transactions);
-        continuationKey = response.continuation_key;
+        allTransactions = allTransactions.concat(fallbackResponse.transactions);
+        continuationKey = fallbackResponse.continuation_key;
       } while (continuationKey);
     }
 
