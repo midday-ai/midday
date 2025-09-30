@@ -1,6 +1,8 @@
 "use client";
 
+import { FormatAmount } from "@/components/format-amount";
 import { useTeamQuery } from "@/hooks/use-team";
+import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
@@ -46,6 +48,7 @@ export function TaxSummaryWidget() {
   const router = useRouter();
   const { data: team } = useTeamQuery();
   const t = useI18n();
+  const { data: user } = useUserQuery();
 
   const now = new Date();
   const taxTerms = getTaxTerminology(team?.countryCode ?? undefined, t);
@@ -82,6 +85,7 @@ export function TaxSummaryWidget() {
     const netStr = formatAmount({
       amount: Math.abs(netAmount),
       currency: taxData?.currency || "USD",
+      locale: user?.locale,
     });
 
     if (isOwed) {
@@ -108,10 +112,10 @@ export function TaxSummaryWidget() {
           {/* Main net amount */}
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-medium">
-              {formatAmount({
-                amount: Math.abs(netAmount),
-                currency: taxData.currency,
-              })}
+              <FormatAmount
+                amount={Math.abs(netAmount)}
+                currency={taxData.currency}
+              />
             </span>
           </div>
 
@@ -121,19 +125,16 @@ export function TaxSummaryWidget() {
                 {taxTerms.collected}
               </span>
               <span className="font-medium">
-                {formatAmount({
-                  amount: collectedTax,
-                  currency: taxData.currency,
-                })}
+                <FormatAmount
+                  amount={collectedTax}
+                  currency={taxData.currency}
+                />
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">{taxTerms.paid}</span>
               <span className="font-medium">
-                {formatAmount({
-                  amount: paidTax,
-                  currency: taxData.currency,
-                })}
+                <FormatAmount amount={paidTax} currency={taxData.currency} />
               </span>
             </div>
           </div>

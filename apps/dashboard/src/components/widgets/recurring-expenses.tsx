@@ -1,9 +1,10 @@
 "use client";
 
+import { FormatAmount } from "@/components/format-amount";
 import { useTRPC } from "@/trpc/client";
-import { formatAmount } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
+import { endOfMonth, format, startOfMonth } from "date-fns";
 import { useRouter } from "next/navigation";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
@@ -12,8 +13,16 @@ export function RecurringExpensesWidget() {
   const trpc = useTRPC();
   const router = useRouter();
 
+  // Calculate current month date range
+  const now = new Date();
+  const from = format(startOfMonth(now), "yyyy-MM-dd");
+  const to = format(endOfMonth(now), "yyyy-MM-dd");
+
   const { data } = useQuery({
-    ...trpc.widgets.getRecurringExpenses.queryOptions({}),
+    ...trpc.widgets.getRecurringExpenses.queryOptions({
+      from,
+      to,
+    }),
     ...WIDGET_POLLING_CONFIG,
   });
 
@@ -21,33 +30,23 @@ export function RecurringExpensesWidget() {
 
   const getDescription = () => {
     if (!recurringData || recurringData.summary.totalExpenses === 0) {
-      return "No recurring expenses tracked";
+      return "No recurring expenses this month";
     }
 
-    const { totalExpenses, byFrequency } = recurringData.summary;
+    const { totalExpenses } = recurringData.summary;
 
-    // Find the frequency with the most expenses
-    const frequencies = [
-      { type: "monthly", count: byFrequency.monthly, label: "monthly" },
-      { type: "annually", count: byFrequency.annually, label: "annual" },
-      { type: "weekly", count: byFrequency.weekly, label: "weekly" },
-    ];
+    // Show count for current month
+    const monthName = format(now, "MMMM");
 
-    const topFrequency = frequencies.find((f) => f.count > 0);
-
-    if (topFrequency && totalExpenses === 1) {
-      return `1 ${topFrequency.label} recurring expense`;
+    if (totalExpenses === 1) {
+      return `1 recurring expense in ${monthName}`;
     }
 
-    if (topFrequency) {
-      return `${totalExpenses} recurring expenses tracked`;
-    }
-
-    return "Track your recurring costs";
+    return `${totalExpenses} recurring expenses in ${monthName}`;
   };
 
   const handleViewRecurring = () => {
-    router.push("/transactions?recurring=monthly");
+    router.push(`/transactions?recurring=monthly&start=${from}&end=${to}`);
   };
 
   return (
@@ -61,10 +60,10 @@ export function RecurringExpensesWidget() {
       {recurringData && recurringData.summary.totalExpenses > 0 && (
         <div className="flex items-baseline w-full">
           <span className="text-3xl">
-            {formatAmount({
-              amount: recurringData.summary.totalMonthlyEquivalent,
-              currency: recurringData.summary.currency,
-            })}
+            <FormatAmount
+              amount={recurringData.summary.totalMonthlyEquivalent}
+              currency={recurringData.summary.currency}
+            />
           </span>
           <span className="text-xs text-muted-foreground ml-1">/month</span>
         </div>

@@ -27,6 +27,7 @@ import type { inferRouterOutputs } from "@trpc/server";
 import { useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
 import { AccountBalancesWidget } from "./account-balances";
+import { BillableHoursWidget } from "./billable-hours";
 import { CashFlowWidget } from "./cash-flow";
 import { CategoryExpensesWidget } from "./category-expenses";
 import { GrowthRateWidget } from "./growth-rate";
@@ -35,6 +36,7 @@ import { Insights } from "./insights";
 import { InvoicePaymentScoreWidget } from "./invoice-payment-score";
 import { MonthlySpendingWidget } from "./monthly-spending";
 import { OutstandingInvoicesWidget } from "./outstanding-invoices";
+import { OverdueInvoicesAlertWidget } from "./overdue-invoices-alert";
 import { ProfitMarginWidget } from "./profit-margin";
 import { RecurringExpensesWidget } from "./recurring-expenses";
 import { RevenueSummaryWidget } from "./revenue-summary";
@@ -117,6 +119,8 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
   "recurring-expenses": RecurringExpensesWidget,
   "tax-summary": TaxSummaryWidget,
   "category-expenses": CategoryExpensesWidget,
+  "overdue-invoices-alert": OverdueInvoicesAlertWidget,
+  "billable-hours": BillableHoursWidget,
 };
 
 export function WidgetsGrid() {

@@ -1,11 +1,13 @@
 import {
   getAccountBalancesSchema,
+  getBillableHoursSchema,
   getCashFlowSchema,
   getCategoryExpensesSchema,
   getGrowthRateSchema,
   getInboxStatsSchema,
   getMonthlySpendingSchema,
   getOutstandingInvoicesSchema,
+  getOverdueInvoicesAlertSchema,
   getProfitMarginSchema,
   getRecurringExpensesSchema,
   getRevenueSummarySchema,
@@ -18,11 +20,13 @@ import {
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { widgetPreferencesCache } from "@midday/cache/widget-preferences-cache";
 import {
+  getBillableHours,
   getCashFlow,
   getCombinedAccountBalance,
   getGrowthRate,
   getInboxStats,
   getOutstandingInvoices,
+  getOverdueInvoicesAlert,
   getProfitMargin,
   getRecentDocuments,
   getRecurringExpenses,
@@ -317,6 +321,8 @@ export const widgetsRouter = createTRPCRouter({
     .query(async ({ ctx: { db, teamId }, input }) => {
       const recurringExpenses = await getRecurringExpenses(db, {
         teamId: teamId!,
+        from: input.from,
+        to: input.to,
         currency: input.currency,
       });
 
@@ -383,6 +389,30 @@ export const widgetsRouter = createTRPCRouter({
           totalCategories: categoryExpenses.length,
         },
       };
+    }),
+
+  getOverdueInvoicesAlert: protectedProcedure
+    .input(getOverdueInvoicesAlertSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      const overdueData = await getOverdueInvoicesAlert(db, {
+        teamId: teamId!,
+        currency: input?.currency,
+      });
+
+      return {
+        result: overdueData.summary,
+      };
+    }),
+
+  getBillableHours: protectedProcedure
+    .input(getBillableHoursSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      return getBillableHours(db, {
+        teamId: teamId!,
+        date: input.date,
+        view: input.view,
+        weekStartsOnMonday: input.weekStartsOnMonday,
+      });
     }),
 
   getWidgetPreferences: protectedProcedure.query(

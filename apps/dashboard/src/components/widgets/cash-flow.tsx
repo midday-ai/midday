@@ -1,5 +1,7 @@
 import { useTeamQuery } from "@/hooks/use-team";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import { formatAmount } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { endOfMonth, startOfMonth } from "date-fns";
@@ -9,6 +11,7 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 export function CashFlowWidget() {
   const trpc = useTRPC();
   const { data: team } = useTeamQuery();
+  const { data: user } = useUserQuery();
 
   const { data } = useQuery({
     ...trpc.widgets.getCashFlow.queryOptions({
@@ -27,12 +30,14 @@ export function CashFlowWidget() {
 
   const formatCashFlow = (amount: number, currency: string) => {
     const sign = amount >= 0 ? "+" : "";
-    return `${sign}${new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency,
+    const formatted = formatAmount({
+      amount,
+      currency,
+      locale: user?.locale,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(amount)}`;
+    });
+    return `${sign}${formatted}`;
   };
 
   return (
@@ -49,10 +54,8 @@ export function CashFlowWidget() {
     >
       <div className="flex flex-col gap-2">
         <h2 className="text-2xl font-normal">
-          {formatCashFlow(
-            data?.result.netCashFlow ?? 0,
-            data?.result.currency ?? team?.baseCurrency ?? "USD",
-          )}
+          {data &&
+            formatCashFlow(data.result.netCashFlow ?? 0, data.result.currency!)}
         </h2>
       </div>
     </BaseWidget>

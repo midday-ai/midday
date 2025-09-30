@@ -1,7 +1,7 @@
 "use client";
 
+import { FormatAmount } from "@/components/format-amount";
 import { useTRPC } from "@/trpc/client";
-import { formatAmount } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { endOfMonth, format, startOfMonth } from "date-fns";
@@ -55,10 +55,10 @@ export function MonthlySpendingWidget() {
     >
       {spending && spending.totalSpending > 0 && (
         <p className="text-3xl">
-          {formatAmount({
-            amount: spending.totalSpending,
-            currency: spending.currency,
-          })}
+          <FormatAmount
+            amount={spending.totalSpending}
+            currency={spending.currency}
+          />
         </p>
       )}
     </BaseWidget>

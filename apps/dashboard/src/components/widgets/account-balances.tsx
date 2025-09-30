@@ -1,5 +1,5 @@
+import { FormatAmount } from "@/components/format-amount";
 import { useTRPC } from "@/trpc/client";
-import { formatAmount } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -81,12 +81,12 @@ export function AccountBalancesWidget() {
     >
       <div className="space-y-1">
         <h2 className="text-2xl font-normal text-[24px]">
-          {formatAmount({
-            currency,
-            amount: totalBalance,
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          })}
+          <FormatAmount
+            currency={currency}
+            amount={totalBalance}
+            minimumFractionDigits={0}
+            maximumFractionDigits={0}
+          />
         </h2>
       </div>
     </BaseWidget>

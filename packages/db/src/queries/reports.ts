@@ -25,6 +25,8 @@ import {
   bankAccounts,
   invoices,
   teams,
+  trackerEntries,
+  trackerProjects,
   transactionCategories,
   transactions,
 } from "../schema";
@@ -1509,6 +1511,98 @@ export type GetOutstandingInvoicesParams = {
   status?: ("unpaid" | "overdue")[];
 };
 
+export type GetOverdueInvoicesAlertParams = {
+  teamId: string;
+  currency?: string;
+};
+
+export async function getOverdueInvoicesAlert(
+  db: Database,
+  params: GetOverdueInvoicesAlertParams,
+) {
+  const { teamId, currency: inputCurrency } = params;
+
+  // Get target currency
+  const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
+
+  // Build query conditions for overdue invoices only
+  const conditions = [
+    eq(invoices.teamId, teamId),
+    eq(invoices.status, "overdue"),
+  ];
+
+  // Add currency filter if specified
+  if (inputCurrency && targetCurrency) {
+    conditions.push(eq(invoices.currency, targetCurrency));
+  }
+
+  // Get overdue invoices details
+  const result = await db
+    .select({
+      count: sql<number>`COUNT(*)`,
+      totalAmount: sql<number>`COALESCE(SUM(${invoices.amount}), 0)`,
+      oldestDueDate: sql<string>`MIN(${invoices.dueDate})`,
+      currency: invoices.currency,
+    })
+    .from(invoices)
+    .where(and(...conditions))
+    .groupBy(invoices.currency);
+
+  // Calculate totals
+  let totalCount = 0;
+  let totalAmount = 0;
+  let oldestDueDate: string | null = null;
+  let mainCurrency = targetCurrency || "USD";
+
+  if (result.length > 0) {
+    if (inputCurrency && targetCurrency) {
+      // Single currency result
+      const singleResult = result[0];
+      totalCount = Number(singleResult?.count || 0);
+      totalAmount = Number(singleResult?.totalAmount || 0);
+      oldestDueDate = singleResult?.oldestDueDate || null;
+      mainCurrency = singleResult?.currency || targetCurrency;
+    } else {
+      // Multiple currencies - sum counts
+      totalCount = result.reduce(
+        (sum, item) => sum + Number(item.count || 0),
+        0,
+      );
+
+      // Use the first currency's total as primary
+      const primaryResult =
+        result.find((r) => r.currency === targetCurrency) || result[0];
+      totalAmount = Number(primaryResult?.totalAmount || 0);
+      oldestDueDate = primaryResult?.oldestDueDate || null;
+      mainCurrency = primaryResult?.currency || targetCurrency || "USD";
+    }
+  }
+
+  // Calculate days overdue from oldest invoice
+  let daysOverdue = 0;
+  if (oldestDueDate) {
+    const now = new Date();
+    const dueDate = new Date(oldestDueDate);
+    daysOverdue = Math.floor(
+      (now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24),
+    );
+  }
+
+  return {
+    summary: {
+      count: totalCount,
+      totalAmount: Number(totalAmount.toFixed(2)),
+      currency: mainCurrency,
+      oldestDueDate,
+      daysOverdue,
+    },
+    meta: {
+      type: "overdue_invoices_alert",
+      currency: mainCurrency,
+    },
+  };
+}
+
 export async function getOutstandingInvoices(
   db: Database,
   params: GetOutstandingInvoicesParams,
@@ -1590,6 +1684,8 @@ export async function getOutstandingInvoices(
 export type GetRecurringExpensesParams = {
   teamId: string;
   currency?: string;
+  from?: string; // ISO date string (YYYY-MM-DD)
+  to?: string; // ISO date string (YYYY-MM-DD)
 };
 
 interface RecurringExpenseItem {
@@ -1605,7 +1701,7 @@ export async function getRecurringExpenses(
   db: Database,
   params: GetRecurringExpensesParams,
 ) {
-  const { teamId, currency: inputCurrency } = params;
+  const { teamId, currency: inputCurrency, from, to } = params;
 
   // Get target currency
   const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
@@ -1617,6 +1713,14 @@ export async function getRecurringExpenses(
     eq(transactions.internal, false),
     lt(transactions.baseAmount, 0), // Expenses only
   ];
+
+  // Filter by date range if provided
+  if (from) {
+    conditions.push(gte(transactions.date, from));
+  }
+  if (to) {
+    conditions.push(lte(transactions.date, to));
+  }
 
   if (targetCurrency) {
     conditions.push(

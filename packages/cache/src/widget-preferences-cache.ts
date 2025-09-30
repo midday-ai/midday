@@ -17,6 +17,8 @@ export const WIDGET_TYPES = [
   "recurring-expenses",
   "tax-summary",
   "category-expenses",
+  "overdue-invoices-alert",
+  "billable-hours",
 ] as const;
 
 export type WidgetType = (typeof WIDGET_TYPES)[number];
