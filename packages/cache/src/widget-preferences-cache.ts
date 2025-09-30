@@ -1,26 +1,40 @@
 import { RedisCache } from "./redis-client";
 
 export const WIDGET_TYPES = [
+  // Critical financial health (default primary widgets)
   "runway",
-  "top-customer",
-  "revenue-summary",
-  "revenue-forecast",
-  "growth-rate",
-  "profit-margin",
-  "profit-analysis",
   "cash-flow",
-  "outstanding-invoices",
-  "inbox",
-  "time-tracker",
-  "vault",
   "account-balances",
-  "monthly-spending",
-  "invoice-payment-score",
-  "recurring-expenses",
-  "tax-summary",
-  "category-expenses",
+  "profit-analysis",
+  "revenue-forecast",
+  "revenue-summary",
+  "growth-rate",
+
+  // Customer insights
+  "customer-lifetime-value",
+  "top-customer",
+
+  // Receivables & invoices
+  "outstanding-invoices",
   "overdue-invoices-alert",
+  "invoice-payment-score",
+
+  // Expenses & spending
+  "monthly-spending",
+  "recurring-expenses",
+  "category-expenses",
+
+  // Profitability metrics
+  "profit-margin",
+
+  // Operations
+  "time-tracker",
   "billable-hours",
+
+  // Admin & documents
+  "inbox",
+  "vault",
+  "tax-summary",
 ] as const;
 
 export type WidgetType = (typeof WIDGET_TYPES)[number];

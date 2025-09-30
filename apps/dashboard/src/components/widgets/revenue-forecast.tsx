@@ -5,13 +5,7 @@ import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
-import {
-  addMonths,
-  endOfMonth,
-  format,
-  startOfMonth,
-  subMonths,
-} from "date-fns";
+import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
 import { Line, LineChart, ResponsiveContainer } from "recharts";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
@@ -103,7 +97,7 @@ export function RevenueForecastWidget() {
           ) : (
             <div className="h-12 w-full flex items-center">
               <div className="text-xs text-muted-foreground">
-                {isLoading ? "" : "No data available"}
+                No data available
               </div>
             </div>
           )}

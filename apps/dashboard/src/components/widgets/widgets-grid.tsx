@@ -30,6 +30,7 @@ import { AccountBalancesWidget } from "./account-balances";
 import { BillableHoursWidget } from "./billable-hours";
 import { CashFlowWidget } from "./cash-flow";
 import { CategoryExpensesWidget } from "./category-expenses";
+import { CustomerLifetimeValueWidget } from "./customer-lifetime-value";
 import { GrowthRateWidget } from "./growth-rate";
 import { InboxWidget } from "./inbox";
 import { Insights } from "./insights";
@@ -125,6 +126,7 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
   "category-expenses": CategoryExpensesWidget,
   "overdue-invoices-alert": OverdueInvoicesAlertWidget,
   "billable-hours": BillableHoursWidget,
+  "customer-lifetime-value": CustomerLifetimeValueWidget,
 };
 
 export function WidgetsGrid() {

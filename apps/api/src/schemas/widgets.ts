@@ -111,6 +111,10 @@ export const getBillableHoursSchema = z.object({
   weekStartsOnMonday: z.boolean().optional().default(false),
 });
 
+export const getCustomerLifetimeValueSchema = z.object({
+  currency: z.string().optional(),
+});
+
 export const widgetTypeSchema = z.enum(WIDGET_TYPES);
 
 export const widgetPreferencesSchema = z.object({

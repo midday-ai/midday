@@ -3,6 +3,7 @@ import {
   getBillableHoursSchema,
   getCashFlowSchema,
   getCategoryExpensesSchema,
+  getCustomerLifetimeValueSchema,
   getGrowthRateSchema,
   getInboxStatsSchema,
   getMonthlySpendingSchema,
@@ -23,6 +24,7 @@ import {
   getBillableHours,
   getCashFlow,
   getCombinedAccountBalance,
+  getCustomerLifetimeValue,
   getGrowthRate,
   getInboxStats,
   getOutstandingInvoices,
@@ -413,6 +415,25 @@ export const widgetsRouter = createTRPCRouter({
         view: input.view,
         weekStartsOnMonday: input.weekStartsOnMonday,
       });
+    }),
+
+  getCustomerLifetimeValue: protectedProcedure
+    .input(getCustomerLifetimeValueSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      const result = await getCustomerLifetimeValue(db, {
+        teamId: teamId!,
+        currency: input.currency,
+      });
+
+      return {
+        result,
+        toolCall: {
+          toolName: "getCustomerLifetimeValue",
+          toolParams: {
+            currency: input.currency,
+          },
+        },
+      };
     }),
 
   getWidgetPreferences: protectedProcedure.query(
