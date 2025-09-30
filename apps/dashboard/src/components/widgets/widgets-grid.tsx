@@ -37,8 +37,10 @@ import { InvoicePaymentScoreWidget } from "./invoice-payment-score";
 import { MonthlySpendingWidget } from "./monthly-spending";
 import { OutstandingInvoicesWidget } from "./outstanding-invoices";
 import { OverdueInvoicesAlertWidget } from "./overdue-invoices-alert";
+import { ProfitAnalysisWidget } from "./profit-analysis";
 import { ProfitMarginWidget } from "./profit-margin";
 import { RecurringExpensesWidget } from "./recurring-expenses";
+import { RevenueForecastWidget } from "./revenue-forecast";
 import { RevenueSummaryWidget } from "./revenue-summary";
 import { RunwayWidget } from "./runway";
 import { TaxSummaryWidget } from "./tax-summary";
@@ -106,8 +108,10 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
   runway: RunwayWidget,
   "top-customer": TopCustomerWidget,
   "revenue-summary": RevenueSummaryWidget,
+  "revenue-forecast": RevenueForecastWidget,
   "growth-rate": GrowthRateWidget,
   "profit-margin": ProfitMarginWidget,
+  "profit-analysis": ProfitAnalysisWidget,
   "cash-flow": CashFlowWidget,
   "outstanding-invoices": OutstandingInvoicesWidget,
   inbox: InboxWidget,
