@@ -1,5 +1,6 @@
 import { Buffer } from "node:buffer";
 import { ProviderError } from "@engine/utils/error";
+import { mergeTransactions } from "@engine/utils/transaction-dedup";
 import { formatISO, subDays } from "date-fns";
 import * as jose from "jose";
 import xior, { type XiorInstance, type XiorRequestConfig } from "xior";
@@ -261,22 +262,165 @@ export class EnableBankingApi {
     return highestBalance;
   }
 
+  /**
+   * Get transactions for an account using a hybrid strategy to ensure complete data coverage.
+   *
+   * Enable Banking Strategies (per official documentation):
+   * - "longest": Finds earliest available transaction and fetches up to most recent.
+   *   Ignores date_to. Recommended for initial sync or fetching complete history.
+   * - "default": Respects date_from/date_to range. Returns error if range unavailable.
+   *   Recommended for ongoing syncs of recent transactions.
+   *
+   * Pagination (continuation_key):
+   * - All parameters must remain consistent across paginated requests
+   * - Continue fetching until continuation_key is null
+   * - Empty transaction lists with continuation_key mean more data may be available
+   * - Page size varies by ASPSP and account
+   *
+   * Implementation for latest=false (historical sync):
+   * 1. Use "longest" strategy with date_from constraint (2 years back) + pagination
+   * 2. Check if most recent transaction is older than 7 days (stale data detection)
+   * 3. If stale, fetch last 365 days using "default" strategy + pagination and merge
+   *
+   * Why hybrid approach is necessary:
+   * Testing shows that "longest" strategy may return cached/stale data for some ASPSPs
+   * (e.g., Wise). The "default" strategy with explicit date_to forces fresh data retrieval.
+   *
+   * Transaction IDs:
+   * - entry_reference (transaction_id) may be null for some ASPSPs
+   * - Enable Banking may generate "synthetic" IDs when certain conditions are met
+   * - Cannot rely on transaction_id for deduplication
+   *
+   * Duplicate detection uses Enable Banking's recommended "fundamental values":
+   * booking_date + transaction_amount + credit_debit_indicator
+   * Reference: https://enablebanking.com/blog/2024/10/29/how-to-sync-account-transactions-from-open-banking-apis-without-unique-transaction-ids
+   *
+   * Note: Transaction history availability varies by ASPSP and account type. No universal
+   * guarantees exist for how far back data is available.
+   */
   async getTransactions({
     accountId,
     latest,
   }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
-    return this.#get<GetTransactionsResponse>(
-      `/accounts/${accountId}/transactions`,
-      {
-        strategy: latest ? "default" : "longest",
-        transaction_status: "BOOK",
-        ...(latest && {
-          date_from: formatISO(subDays(new Date(), 5), {
-            representation: "date",
-          }),
+    let allTransactions: GetTransactionsResponse["transactions"] = [];
+    let continuationKey: string | undefined;
+
+    // For latest requests, simple 5-day fetch
+    if (latest) {
+      do {
+        const response = await this.#get<GetTransactionsResponse>(
+          `/accounts/${accountId}/transactions`,
+          {
+            strategy: "default",
+            transaction_status: "BOOK",
+            date_from: formatISO(subDays(new Date(), 5), {
+              representation: "date",
+            }),
+            date_to: formatISO(new Date(), {
+              representation: "date",
+            }),
+            ...(continuationKey && { continuation_key: continuationKey }),
+          },
+        );
+
+        allTransactions = allTransactions.concat(response.transactions);
+        continuationKey = response.continuation_key;
+      } while (continuationKey);
+
+      return { transactions: allTransactions };
+    }
+
+    // For non-latest requests, use hybrid strategy
+    try {
+      // Step 1: Get historical data using "longest" strategy with pagination
+      // Note: Must keep ALL parameters consistent when using continuation_key
+      const longestParams = {
+        strategy: "longest" as const,
+        transaction_status: "BOOK" as const,
+        date_from: formatISO(subDays(new Date(), 730), {
+          representation: "date",
         }),
-      },
-    );
+      };
+
+      let longestContinuationKey: string | undefined;
+      do {
+        const response = await this.#get<GetTransactionsResponse>(
+          `/accounts/${accountId}/transactions`,
+          {
+            ...longestParams,
+            ...(longestContinuationKey && {
+              continuation_key: longestContinuationKey,
+            }),
+          },
+        );
+
+        allTransactions = allTransactions.concat(response.transactions);
+        longestContinuationKey = response.continuation_key;
+      } while (longestContinuationKey);
+
+      // Step 2: Check if we have recent data (within last 7 days)
+      const sevenDaysAgo = formatISO(subDays(new Date(), 7), {
+        representation: "date",
+      });
+      const mostRecentDate = allTransactions
+        .map((t) => t.booking_date || t.value_date)
+        .filter(Boolean)
+        .sort()
+        .pop();
+
+      // Step 3: If data is stale, fetch recent data and merge
+      if (!mostRecentDate || mostRecentDate < sevenDaysAgo) {
+        const recentResponse = await this.#get<GetTransactionsResponse>(
+          `/accounts/${accountId}/transactions`,
+          {
+            strategy: "default",
+            transaction_status: "BOOK",
+            date_from: formatISO(subDays(new Date(), 365), {
+              representation: "date",
+            }),
+            date_to: formatISO(new Date(), {
+              representation: "date",
+            }),
+          },
+        );
+
+        // Merge recent data, removing duplicates using Enable Banking's recommended approach
+        // Reference: https://enablebanking.com/blog/2024/10/29/how-to-sync-account-transactions-from-open-banking-apis-without-unique-transaction-ids
+        if (recentResponse.transactions.length > 0) {
+          allTransactions = mergeTransactions(
+            allTransactions,
+            recentResponse.transactions,
+          ) as typeof allTransactions;
+        }
+      }
+    } catch (error) {
+      // Fallback: If longest strategy fails, use default with 1-year range
+      console.error("Longest strategy failed, using default fallback:", error);
+
+      do {
+        const response = await this.#get<GetTransactionsResponse>(
+          `/accounts/${accountId}/transactions`,
+          {
+            strategy: "default",
+            transaction_status: "BOOK",
+            date_from: formatISO(subDays(new Date(), 365), {
+              representation: "date",
+            }),
+            date_to: formatISO(new Date(), {
+              representation: "date",
+            }),
+            ...(continuationKey && { continuation_key: continuationKey }),
+          },
+        );
+
+        allTransactions = allTransactions.concat(response.transactions);
+        continuationKey = response.continuation_key;
+      } while (continuationKey);
+    }
+
+    return {
+      transactions: allTransactions,
+    };
   }
 
   async deleteSession(sessionId: string): Promise<void> {
