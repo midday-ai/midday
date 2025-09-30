@@ -476,4 +476,32 @@ export default {
     uncategorized: "Transactions that haven't been classified yet",
     other: "Miscellaneous transactions not fitting other categories",
   },
+  tax_summary: {
+    title: {
+      vat: "VAT Summary",
+      gst: "GST Summary",
+      sales_tax: "Sales Tax Summary",
+      default: "Tax Summary",
+    },
+    collected: {
+      vat: "VAT collected",
+      gst: "GST collected",
+      sales_tax: "Sales tax collected",
+      default: "Tax collected",
+    },
+    paid: {
+      vat: "VAT paid",
+      gst: "GST paid",
+      sales_tax: "Tax on purchases",
+      default: "Tax paid",
+    },
+    to_remit: "To Remit",
+    credit: "Credit",
+    no_activity: "No tax activity",
+    balanced: "Balanced",
+    year_to_date: "Year-to-date ({year})",
+    remit_amount: "{amount} to remit",
+    credit_amount: "{amount} credit",
+    open_assistant: "Open taxes assistant",
+  },
 } as const;

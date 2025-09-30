@@ -1,6 +1,7 @@
 import {
   getAccountBalancesSchema,
   getCashFlowSchema,
+  getCategoryExpensesSchema,
   getGrowthRateSchema,
   getInboxStatsSchema,
   getMonthlySpendingSchema,
@@ -27,6 +28,7 @@ import {
   getRecurringExpenses,
   getRevenue,
   getRunway,
+  getSpending,
   getSpendingForPeriod,
   getTaxSummary,
   getTopRevenueClient,
@@ -349,6 +351,36 @@ export const widgetsRouter = createTRPCRouter({
           paid: paidTaxes.summary,
           collected: collectedTaxes.summary,
           currency: paidTaxes.summary.currency || input.currency || "USD",
+        },
+      };
+    }),
+
+  getCategoryExpenses: protectedProcedure
+    .input(getCategoryExpensesSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      const categoryExpenses = await getSpending(db, {
+        teamId: teamId!,
+        from: input.from,
+        to: input.to,
+        currency: input.currency,
+      });
+
+      // Get top N categories by amount
+      const topCategories = categoryExpenses
+        .sort((a, b) => b.amount - a.amount)
+        .slice(0, input.limit || 5);
+
+      const totalAmount = topCategories.reduce(
+        (sum, cat) => sum + cat.amount,
+        0,
+      );
+
+      return {
+        result: {
+          categories: topCategories,
+          totalAmount,
+          currency: topCategories[0]?.currency || input.currency || "USD",
+          totalCategories: categoryExpenses.length,
         },
       };
     }),

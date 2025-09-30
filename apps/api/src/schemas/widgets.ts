@@ -90,6 +90,13 @@ export const getTaxSummarySchema = z.object({
   currency: z.string().optional(),
 });
 
+export const getCategoryExpensesSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  currency: z.string().optional(),
+  limit: z.number().optional().default(5),
+});
+
 export const widgetTypeSchema = z.enum(WIDGET_TYPES);
 
 export const widgetPreferencesSchema = z.object({
