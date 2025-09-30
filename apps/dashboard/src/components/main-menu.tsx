@@ -24,11 +24,6 @@ const items = [
     name: "Overview",
   },
   {
-    path: "/inbox",
-    name: "Inbox",
-    children: [{ path: "/inbox/settings", name: "Settings" }],
-  },
-  {
     path: "/transactions",
     name: "Transactions",
     children: [
@@ -46,6 +41,11 @@ const items = [
       },
       { path: "/transactions?createTransaction=true", name: "Create new" },
     ],
+  },
+  {
+    path: "/inbox",
+    name: "Inbox",
+    children: [{ path: "/inbox/settings", name: "Settings" }],
   },
   {
     path: "/invoices",

@@ -13,6 +13,9 @@ export const WIDGET_TYPES = [
   "vault",
   "account-balances",
   "monthly-spending",
+  "invoice-payment-score",
+  "recurring-expenses",
+  "tax-summary",
 ] as const;
 
 export type WidgetType = (typeof WIDGET_TYPES)[number];

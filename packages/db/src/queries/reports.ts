@@ -1586,3 +1586,163 @@ export async function getOutstandingInvoices(
     },
   };
 }
+
+export type GetRecurringExpensesParams = {
+  teamId: string;
+  currency?: string;
+};
+
+interface RecurringExpenseItem {
+  name: string;
+  amount: number;
+  frequency: "weekly" | "monthly" | "annually" | "irregular";
+  categoryName: string | null;
+  categorySlug: string | null;
+  lastDate: string;
+}
+
+export async function getRecurringExpenses(
+  db: Database,
+  params: GetRecurringExpensesParams,
+) {
+  const { teamId, currency: inputCurrency } = params;
+
+  // Get target currency
+  const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
+
+  // Build conditions
+  const conditions = [
+    eq(transactions.teamId, teamId),
+    eq(transactions.recurring, true),
+    eq(transactions.internal, false),
+    lt(transactions.baseAmount, 0), // Expenses only
+  ];
+
+  if (targetCurrency) {
+    conditions.push(
+      or(
+        eq(transactions.baseCurrency, targetCurrency),
+        eq(transactions.currency, targetCurrency),
+      )!,
+    );
+  }
+
+  // Get all recurring expenses grouped by name and frequency
+  const recurringExpenses = await db
+    .select({
+      name: transactions.name,
+      frequency: transactions.frequency,
+      categoryName: transactionCategories.name,
+      categorySlug: transactionCategories.slug,
+      amount: sql<number>`AVG(ABS(${
+        inputCurrency
+          ? transactions.amount
+          : sql`COALESCE(${transactions.baseAmount}, 0)`
+      }))`,
+      count: sql<number>`COUNT(*)::int`,
+      lastDate: sql<string>`MAX(${transactions.date})`,
+    })
+    .from(transactions)
+    .leftJoin(
+      transactionCategories,
+      and(
+        eq(transactionCategories.slug, transactions.categorySlug),
+        eq(transactionCategories.teamId, teamId),
+      ),
+    )
+    .where(and(...conditions))
+    .groupBy(
+      transactions.name,
+      transactions.frequency,
+      transactionCategories.name,
+      transactionCategories.slug,
+    )
+    .orderBy(
+      sql`AVG(ABS(${
+        inputCurrency
+          ? transactions.amount
+          : sql`COALESCE(${transactions.baseAmount}, 0)`
+      })) DESC`,
+    )
+    .limit(10);
+
+  // Calculate totals by frequency
+  const frequencyTotals = {
+    weekly: 0,
+    monthly: 0,
+    annually: 0,
+    irregular: 0,
+  };
+
+  let totalRecurringAmount = 0;
+
+  for (const expense of recurringExpenses) {
+    const amount = Number(expense.amount);
+    const frequency = (expense.frequency || "irregular") as
+      | "weekly"
+      | "monthly"
+      | "annually"
+      | "irregular";
+
+    // Convert all to monthly equivalent for comparison
+    let monthlyEquivalent = 0;
+    switch (frequency) {
+      case "weekly":
+        monthlyEquivalent = amount * 4.33; // Average weeks per month
+        frequencyTotals.weekly += amount;
+        break;
+      case "monthly":
+        monthlyEquivalent = amount;
+        frequencyTotals.monthly += amount;
+        break;
+      case "annually":
+        monthlyEquivalent = amount / 12;
+        frequencyTotals.annually += amount;
+        break;
+      case "irregular":
+        monthlyEquivalent = amount;
+        frequencyTotals.irregular += amount;
+        break;
+    }
+
+    totalRecurringAmount += monthlyEquivalent;
+  }
+
+  // Get currency from first expense or use target currency
+  const currency = recurringExpenses[0]
+    ? inputCurrency || targetCurrency || "USD"
+    : targetCurrency || "USD";
+
+  // Format expenses for return
+  const expenses: RecurringExpenseItem[] = recurringExpenses.map((exp) => ({
+    name: exp.name,
+    amount: Number(Number(exp.amount).toFixed(2)),
+    frequency: (exp.frequency || "irregular") as
+      | "weekly"
+      | "monthly"
+      | "annually"
+      | "irregular",
+    categoryName: exp.categoryName,
+    categorySlug: exp.categorySlug,
+    lastDate: exp.lastDate,
+  }));
+
+  return {
+    summary: {
+      totalMonthlyEquivalent: Number(totalRecurringAmount.toFixed(2)),
+      totalExpenses: recurringExpenses.length,
+      currency,
+      byFrequency: {
+        weekly: Number((frequencyTotals.weekly || 0).toFixed(2)),
+        monthly: Number((frequencyTotals.monthly || 0).toFixed(2)),
+        annually: Number((frequencyTotals.annually || 0).toFixed(2)),
+        irregular: Number((frequencyTotals.irregular || 0).toFixed(2)),
+      },
+    },
+    expenses,
+    meta: {
+      type: "recurring_expenses",
+      currency,
+    },
+  };
+}
