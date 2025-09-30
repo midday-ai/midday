@@ -1,6 +1,5 @@
 import { Buffer } from "node:buffer";
 import { ProviderError } from "@engine/utils/error";
-import { mergeTransactions } from "@engine/utils/transaction-dedup";
 import { formatISO, subDays } from "date-fns";
 import * as jose from "jose";
 import xior, { type XiorInstance, type XiorRequestConfig } from "xior";
@@ -286,13 +285,16 @@ export class EnableBankingApi {
    * Testing shows that "longest" strategy may return cached/stale data for some ASPSPs
    * (e.g., Wise). The "default" strategy with explicit date_to forces fresh data retrieval.
    *
-   * Transaction IDs:
-   * - entry_reference (transaction_id) may be null for some ASPSPs
-   * - Enable Banking may generate "synthetic" IDs when certain conditions are met
-   * - Cannot rely on transaction_id for deduplication
+   * Duplicate Handling:
+   * - Historical and recent datasets may overlap (e.g., transactions from Oct-Dec 2024)
+   * - API layer returns ALL transactions including potential duplicates
+   * - Database layer MUST implement Enable Banking's full deduplication algorithm
    *
-   * Duplicate detection uses Enable Banking's recommended "fundamental values":
-   * booking_date + transaction_amount + credit_debit_indicator
+   * Enable Banking's recommended approach (to be implemented in database layer):
+   * 1. Try matching by internal_id (entry_reference) first
+   * 2. If no match, search by composite key: booking_date + amount + credit_debit_indicator
+   * 3. If multiple matches, use fuzzy matching with additional fields
+   * 4. Handle edge cases (unexpected internal_id values, property changes)
    * Reference: https://enablebanking.com/blog/2024/10/29/how-to-sync-account-transactions-from-open-banking-apis-without-unique-transaction-ids
    *
    * Note: Transaction history availability varies by ASPSP and account type. No universal
@@ -305,17 +307,20 @@ export class EnableBankingApi {
     let allTransactions: GetTransactionsResponse["transactions"] = [];
     let continuationKey: string | undefined;
 
-    // For latest requests, simple 5-day fetch
+    // For latest requests, use incremental sync
     if (latest) {
+      // last 5 days
+      const startDate = formatISO(subDays(new Date(), 5), {
+        representation: "date",
+      });
+
       do {
         const response = await this.#get<GetTransactionsResponse>(
           `/accounts/${accountId}/transactions`,
           {
             strategy: "default",
             transaction_status: "BOOK",
-            date_from: formatISO(subDays(new Date(), 5), {
-              representation: "date",
-            }),
+            date_from: startDate,
             date_to: formatISO(new Date(), {
               representation: "date",
             }),
@@ -368,30 +373,34 @@ export class EnableBankingApi {
         .sort()
         .pop();
 
-      // Step 3: If data is stale, fetch recent data and merge
+      // Step 3: If data is stale, fetch recent data and merge with pagination
       if (!mostRecentDate || mostRecentDate < sevenDaysAgo) {
-        const recentResponse = await this.#get<GetTransactionsResponse>(
-          `/accounts/${accountId}/transactions`,
-          {
-            strategy: "default",
-            transaction_status: "BOOK",
-            date_from: formatISO(subDays(new Date(), 365), {
-              representation: "date",
-            }),
-            date_to: formatISO(new Date(), {
-              representation: "date",
-            }),
-          },
-        );
+        let recentContinuationKey: string | undefined;
+        do {
+          const recentResponse = await this.#get<GetTransactionsResponse>(
+            `/accounts/${accountId}/transactions`,
+            {
+              strategy: "default",
+              transaction_status: "BOOK",
+              date_from: formatISO(subDays(new Date(), 365), {
+                representation: "date",
+              }),
+              date_to: formatISO(new Date(), {
+                representation: "date",
+              }),
+              ...(recentContinuationKey && {
+                continuation_key: recentContinuationKey,
+              }),
+            },
+          );
 
-        // Merge recent data, removing duplicates using Enable Banking's recommended approach
-        // Reference: https://enablebanking.com/blog/2024/10/29/how-to-sync-account-transactions-from-open-banking-apis-without-unique-transaction-ids
-        if (recentResponse.transactions.length > 0) {
-          allTransactions = mergeTransactions(
-            allTransactions,
-            recentResponse.transactions,
-          ) as typeof allTransactions;
-        }
+          // Merge recent data with historical data
+          // Note: This will include overlapping transactions (duplicates)
+          // Database layer will handle deduplication using Enable Banking's full algorithm
+          // Reference: https://enablebanking.com/blog/2024/10/29/how-to-sync-account-transactions-from-open-banking-apis-without-unique-transaction-ids
+          allTransactions = allTransactions.concat(recentResponse.transactions);
+          recentContinuationKey = recentResponse.continuation_key;
+        } while (recentContinuationKey);
       }
     } catch (error) {
       // Fallback: If longest strategy fails, use default with 1-year range
