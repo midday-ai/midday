@@ -333,6 +333,13 @@ export class EnableBankingApi {
         continuationKey = response.continuation_key;
       } while (continuationKey);
 
+      // Sort transactions by date, latest first
+      allTransactions.sort((a, b) => {
+        const dateA = a.booking_date || a.value_date || "";
+        const dateB = b.booking_date || b.value_date || "";
+        return dateB.localeCompare(dateA); // Descending order (latest first)
+      });
+
       return { transactions: allTransactions };
     }
 
@@ -438,6 +445,13 @@ export class EnableBankingApi {
         continuationKey = fallbackResponse.continuation_key;
       } while (continuationKey);
     }
+
+    // Sort transactions by date, latest first
+    allTransactions.sort((a, b) => {
+      const dateA = a.booking_date || a.value_date || "";
+      const dateB = b.booking_date || b.value_date || "";
+      return dateB.localeCompare(dateA); // Descending order (latest first)
+    });
 
     return {
       transactions: allTransactions,
