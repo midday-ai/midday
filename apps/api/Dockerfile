@@ -20,7 +20,7 @@ WORKDIR /app
 # First install the dependencies (as they change less often)
 COPY --from=builder /app/out/json/ .
 # Don't copy the lockfile, allow Bun to generate a fresh one
-RUN bun install
+RUN bun i --no-cache
 
 # Copy the full source code
 COPY --from=builder /app/out/full/ .
