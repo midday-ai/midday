@@ -59,6 +59,9 @@ export function DataTable({
       ...filter,
       q: deferredSearch,
       sort: params.sort,
+      // When filters are active, load all results for analysis/export
+      // Otherwise use default pagination for browsing
+      pageSize: hasFilters ? 10000 : undefined,
     },
     {
       getNextPageParam: ({ meta }) => meta?.cursor,
@@ -331,7 +334,9 @@ export function DataTable({
 
       <ExportBar />
 
-      <AnimatePresence>{showBottomBar && <BottomBar />}</AnimatePresence>
+      <AnimatePresence>
+        {showBottomBar && <BottomBar transactions={tableData} />}
+      </AnimatePresence>
     </div>
   );
 }

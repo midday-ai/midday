@@ -1,9 +1,7 @@
 "use client";
 
-import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
-import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -12,7 +10,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useMemo } from "react";
 
@@ -21,22 +18,21 @@ type Transaction = {
   currency: string;
 };
 
-export function BottomBar() {
+type Props = {
+  transactions: Array<{
+    amount: number | null;
+    currency: string | null;
+  }>;
+};
+
+export function BottomBar({ transactions }: Props) {
   const { data: user } = useUserQuery();
   const t = useI18n();
-  const trpc = useTRPC();
-  const { filter } = useTransactionFilterParams();
-  const { data: transactions, isLoading } = useQuery({
-    ...trpc.transactions.get.queryOptions({
-      ...filter,
-      pageSize: 10000,
-    }),
-  });
 
   const totalAmount = useMemo(() => {
     const totals: Transaction[] = [];
 
-    for (const transaction of transactions?.data ?? []) {
+    for (const transaction of transactions ?? []) {
       if (!transaction.amount || !transaction.currency) continue;
 
       const existingTotal = totals.find(
@@ -67,8 +63,6 @@ export function BottomBar() {
       }),
     )
     .join(", ");
-
-  if (isLoading) return null;
 
   return (
     <motion.div
@@ -106,7 +100,7 @@ export function BottomBar() {
         <span className="text-sm text-[#878787]">
           (
           {t("bottom_bar.transactions", {
-            count: transactions?.data?.length ?? 0,
+            count: transactions?.length ?? 0,
           })}
           )
         </span>
