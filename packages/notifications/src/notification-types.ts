@@ -17,6 +17,13 @@ export const allNotificationTypes: NotificationType[] = [
     order: 2,
   },
   {
+    type: "transactions_exported",
+    channels: ["in_app", "email"],
+    showInSettings: false,
+    category: "transactions",
+    order: 3,
+  },
+  {
     type: "invoice_paid",
     channels: ["in_app", "email"],
     showInSettings: true,

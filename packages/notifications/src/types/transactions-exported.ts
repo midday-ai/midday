@@ -14,6 +14,28 @@ export const transactionsExported: NotificationHandler = {
       transactionCount: data.transactionCount,
       locale: data.locale,
       dateFormat: data.dateFormat,
+      downloadLink: data.downloadLink,
     },
   }),
+
+  createEmail: (data, user, team) => {
+    // Only send email if accountantEmail is provided
+    if (!data.accountantEmail || !data.downloadLink) {
+      return undefined;
+    }
+
+    return {
+      template: "transactions-exported",
+      emailType: "customer",
+      to: [data.accountantEmail],
+      subject: `Transaction Export from ${team.name}`,
+      from: `${team.name} <middaybot@midday.ai>`,
+      data: {
+        accountantEmail: data.accountantEmail,
+        teamName: team.name,
+        transactionCount: data.transactionCount,
+        downloadLink: data.downloadLink,
+      },
+    };
+  },
 };

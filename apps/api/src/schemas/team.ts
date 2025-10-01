@@ -90,6 +90,18 @@ export const updateTeamByIdSchema = z.object({
     description: "Country code for the team",
     example: "US",
   }),
+  exportSettings: z
+    .object({
+      csvDelimiter: z.string(),
+      includeCSV: z.boolean(),
+      includeXLSX: z.boolean(),
+      sendEmail: z.boolean(),
+      accountantEmail: z.string().optional(),
+    })
+    .optional()
+    .openapi({
+      description: "Export settings for transactions",
+    }),
 });
 
 export const createTeamSchema = z.object({

@@ -39,6 +39,7 @@ export const getTeamById = async (db: Database, id: string) => {
       // subscriptionStatus: teams.subscriptionStatus,
       baseCurrency: teams.baseCurrency,
       countryCode: teams.countryCode,
+      exportSettings: teams.exportSettings,
     })
     .from(teams)
     .where(eq(teams.id, id));
