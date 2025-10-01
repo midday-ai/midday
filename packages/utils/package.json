@@ -10,6 +10,9 @@
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "date-fns": "^4.1.0"
+  },
   "devDependencies": {
     "typescript": "^5.9.2"
   },
@@ -17,6 +20,7 @@
     ".": "./src/index.ts",
     "./envs": "./src/envs.ts",
     "./format": "./src/format.ts",
-    "./tax": "./src/tax.ts"
+    "./tax": "./src/tax.ts",
+    "./check-team-eligibility": "./src/check-team-eligibility.ts"
   }
 }

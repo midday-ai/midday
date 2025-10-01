@@ -518,6 +518,9 @@
     "packages/utils": {
       "name": "@midday/utils",
       "version": "1.0.0",
+      "dependencies": {
+        "date-fns": "^4.1.0",
+      },
       "devDependencies": {
         "typescript": "^5.9.2",
       },

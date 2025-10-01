@@ -3,6 +3,13 @@ import { teamCache } from "@midday/cache/team-cache";
 import type { Database } from "@midday/db/client";
 import { TRPCError } from "@trpc/server";
 
+type TeamData = {
+  id: string;
+  plan: "trial" | "starter" | "pro";
+  createdAt: string;
+  canceledAt: string | null;
+};
+
 export const withTeamPermission = async <TReturn>(opts: {
   ctx: {
     session?: Session | null;
@@ -13,6 +20,7 @@ export const withTeamPermission = async <TReturn>(opts: {
       session?: Session | null;
       db: Database;
       teamId: string | null;
+      team?: TeamData;
     };
   }) => Promise<TReturn>;
 }) => {
@@ -33,6 +41,14 @@ export const withTeamPermission = async <TReturn>(opts: {
         columns: {
           id: true,
           teamId: true,
+        },
+      },
+      team: {
+        columns: {
+          id: true,
+          plan: true,
+          createdAt: true,
+          canceledAt: true,
         },
       },
     },
@@ -73,6 +89,7 @@ export const withTeamPermission = async <TReturn>(opts: {
     ctx: {
       session: ctx.session,
       teamId,
+      team: result.team || undefined,
       db: ctx.db,
     },
   });

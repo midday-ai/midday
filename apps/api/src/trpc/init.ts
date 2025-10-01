@@ -8,6 +8,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { TRPCError, initTRPC } from "@trpc/server";
 import type { Context } from "hono";
 import superjson from "superjson";
+import { withPlanEligibility } from "./middleware/plan-eligibility";
 import { withPrimaryReadAfterWrite } from "./middleware/primary-read-after-write";
 import { withTeamPermission } from "./middleware/team-permission";
 
@@ -60,8 +61,33 @@ const withTeamPermissionMiddleware = t.middleware(async (opts) => {
   });
 });
 
+const withPlanEligibilityMiddleware = t.middleware(async (opts) => {
+  const { session } = opts.ctx as { session: Session };
+  return withPlanEligibility({
+    ctx: {
+      ...opts.ctx,
+      session,
+    },
+    type: opts.type,
+    path: opts.path,
+    next: opts.next,
+  });
+});
+
 export const publicProcedure = t.procedure.use(withPrimaryDbMiddleware);
 
+/**
+ * Protected procedure with automatic plan validation for mutations.
+ *
+ * Behavior:
+ * - Queries (read operations): Always allowed, regardless of plan status
+ * - Mutations (write operations): Blocked if trial expired or subscription canceled
+ *
+ * This ensures users can:
+ * - View their data even with expired trials
+ * - Access billing settings to upgrade
+ * - But cannot modify data without a valid plan
+ */
 export const protectedProcedure = t.procedure
   .use(withTeamPermissionMiddleware) // NOTE: This is needed to ensure that the teamId is set in the context
   .use(withPrimaryDbMiddleware)
@@ -78,4 +104,5 @@ export const protectedProcedure = t.procedure
         session,
       },
     });
-  });
+  })
+  .use(withPlanEligibilityMiddleware); // Automatically validates plan for mutations only (must be after auth check)

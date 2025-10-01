@@ -10,3 +10,6 @@ export {
   getExtensionFromMimeType,
   ensureFileExtension,
 } from "./mime-to-extension";
+
+export { isTeamEligible } from "./check-team-eligibility";
+export type { TeamEligibilityData } from "./check-team-eligibility";

@@ -1,7 +1,7 @@
-import { isTeamEligibleForSync } from "@/utils/check-team-eligibility";
 import { logger } from "@/utils/logger";
 import type { SyncConnectionPayload } from "@midday/jobs/schema";
 import { createClient } from "@midday/supabase/server";
+import { isTeamEligible } from "@midday/utils/check-team-eligibility";
 import { tasks } from "@trigger.dev/sdk";
 import { isAfter, subDays } from "date-fns";
 import { type NextRequest, NextResponse } from "next/server";
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
 
   // Check if team is eligible for sync operations
   if (
-    !isTeamEligibleForSync({
+    !isTeamEligible({
       plan: connectionData.team.plan,
       created_at: connectionData.team.created_at,
     })
