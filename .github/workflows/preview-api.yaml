@@ -15,6 +15,7 @@ jobs:
     name: 🚀 Deploy to Fly Preview
     runs-on: ubuntu-latest
     concurrency: fly-preview
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1

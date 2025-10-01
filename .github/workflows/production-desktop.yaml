@@ -11,6 +11,7 @@ on:
 jobs:
   draft:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     outputs:
       version: ${{ steps.read_version.outputs.value }}
       tag_name: ${{ steps.create_tag.outputs.tag_name }}
