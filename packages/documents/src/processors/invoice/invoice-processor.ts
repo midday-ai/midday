@@ -2,7 +2,7 @@ import { mistral } from "@ai-sdk/mistral";
 import { generateObject } from "ai";
 import { extractText, getDocumentProxy } from "unpdf";
 import type { z } from "zod/v4";
-import { invoicePrompt } from "../../prompt";
+import { createInvoicePrompt, invoicePrompt } from "../../prompt";
 import { invoiceSchema } from "../../schema";
 import type { GetDocumentRequest } from "../../types";
 import { getDomainFromEmail, removeProtocolFromDomain } from "../../utils";
@@ -20,21 +20,26 @@ export class InvoiceProcessor {
     return criticalFieldsMissing;
   }
 
-  async #processDocument({ documentUrl }: GetDocumentRequest) {
+  async #processDocument({ documentUrl, companyName }: GetDocumentRequest) {
     if (!documentUrl) {
       throw new Error("Document URL is required");
     }
 
     try {
+      const prompt = companyName
+        ? createInvoicePrompt(companyName)
+        : invoicePrompt;
+
       const result = await retryCall(() =>
         generateObject({
           model: mistral("mistral-medium-latest"),
           schema: invoiceSchema,
+          temperature: 0.1,
           abortSignal: AbortSignal.timeout(20000), // 20s
           messages: [
             {
               role: "system",
-              content: invoicePrompt,
+              content: prompt,
             },
             {
               role: "user",

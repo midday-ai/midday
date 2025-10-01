@@ -119,12 +119,14 @@ export async function POST(req: Request) {
 
     // Transform and upload files, filtering out attachments smaller than 100kb except PDFs
     // This helps avoid processing small images like logos, favicons and tracking pixels while keeping all PDFs for processing
+    // Note: application/octet-stream is also allowed regardless of size since PDFs are often sent with this generic MIME type
     const uploadedAttachments = allowedAttachments
       ?.filter(
         (attachment) =>
           !(
             attachment.ContentLength < 100000 &&
-            attachment.ContentType !== "application/pdf"
+            attachment.ContentType !== "application/pdf" &&
+            attachment.ContentType !== "application/octet-stream"
           ),
       )
       ?.map(async (attachment) => {

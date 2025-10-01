@@ -1,26 +1,31 @@
 import { mistral } from "@ai-sdk/mistral";
 import { generateObject } from "ai";
-import { receiptPrompt } from "../../prompt";
+import { createReceiptPrompt, receiptPrompt } from "../../prompt";
 import { receiptSchema } from "../../schema";
 import type { GetDocumentRequest } from "../../types";
 import { getDomainFromEmail, removeProtocolFromDomain } from "../../utils";
 import { retryCall } from "../../utils/retry";
 
 export class ReceiptProcessor {
-  async #processDocument({ documentUrl }: GetDocumentRequest) {
+  async #processDocument({ documentUrl, companyName }: GetDocumentRequest) {
     if (!documentUrl) {
       throw new Error("Document URL is required");
     }
+
+    const prompt = companyName
+      ? createReceiptPrompt(companyName)
+      : receiptPrompt;
 
     const result = await retryCall(() =>
       generateObject({
         model: mistral("mistral-medium-latest"),
         schema: receiptSchema,
+        temperature: 0.1,
         abortSignal: AbortSignal.timeout(20000), // 20s
         messages: [
           {
             role: "system",
-            content: receiptPrompt,
+            content: prompt,
           },
           {
             role: "user",
