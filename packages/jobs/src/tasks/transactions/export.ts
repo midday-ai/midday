@@ -1,7 +1,11 @@
 import { writeToString } from "@fast-csv/format";
+import { getDb } from "@jobs/init";
 import { exportTransactionsSchema } from "@jobs/schema";
 import { serializableToBlob } from "@jobs/utils/blob";
+import { createShortLink } from "@midday/db/queries";
 import { createClient } from "@midday/supabase/job";
+import { signedUrl } from "@midday/supabase/storage";
+import { getAppUrl } from "@midday/utils/envs";
 import { metadata, schemaTask, tasks } from "@trigger.dev/sdk";
 import {
   BlobReader,
@@ -50,12 +54,28 @@ export const exportTransactions = schemaTask({
   machine: {
     preset: "large-1x",
   },
-  run: async ({ teamId, locale, transactionIds, dateFormat }) => {
+  run: async ({
+    teamId,
+    userId,
+    locale,
+    transactionIds,
+    dateFormat,
+    exportSettings,
+  }) => {
     const supabase = createClient();
 
     const filePath = `export-${format(new Date(), dateFormat ?? "yyyy-MM-dd")}`;
     const path = `${teamId}/exports`;
     const fileName = `${filePath}.zip`;
+
+    // Use export settings with defaults
+    const settings = {
+      csvDelimiter: exportSettings?.csvDelimiter ?? ",",
+      includeCSV: exportSettings?.includeCSV ?? true,
+      includeXLSX: exportSettings?.includeXLSX ?? true,
+      sendEmail: exportSettings?.sendEmail ?? false,
+      accountantEmail: exportSettings?.accountantEmail,
+    };
 
     metadata.set("progress", 20);
 
@@ -95,28 +115,35 @@ export const exportTransactions = schemaTask({
       r.ok ? r.output.attachments : [],
     );
 
-    const csv = await writeToString(rows, {
-      headers: columns.map((c) => c.label),
-    });
-
-    const data = [
-      columns.map((c) => c.label), // Header row
-      ...rows.map((row) => row.map((cell) => cell ?? "")),
-    ];
-
-    const buffer = xlsx.build([
-      {
-        name: "Transactions",
-        data,
-        options: {},
-      },
-    ]);
-
     const zipFileWriter = new BlobWriter("application/zip");
     const zipWriter = new ZipWriter(zipFileWriter);
 
-    zipWriter.add("transactions.csv", new TextReader(csv));
-    zipWriter.add("transactions.xlsx", new Uint8ArrayReader(buffer));
+    // Add CSV if enabled
+    if (settings.includeCSV) {
+      const csv = await writeToString(rows, {
+        headers: columns.map((c) => c.label),
+        delimiter: settings.csvDelimiter,
+      });
+      zipWriter.add("transactions.csv", new TextReader(csv));
+    }
+
+    // Add XLSX if enabled
+    if (settings.includeXLSX) {
+      const data = [
+        columns.map((c) => c.label), // Header row
+        ...rows.map((row) => row.map((cell) => cell ?? "")),
+      ];
+
+      const buffer = xlsx.build([
+        {
+          name: "Transactions",
+          data,
+          options: {},
+        },
+      ]);
+
+      zipWriter.add("transactions.xlsx", new Uint8ArrayReader(buffer));
+    }
 
     metadata.set("progress", 90);
 
@@ -153,6 +180,40 @@ export const exportTransactions = schemaTask({
       })
       .eq("name", fullPath);
 
+    // If email is enabled, create a short link for the export
+    let downloadLink: string | undefined;
+    if (settings.sendEmail && settings.accountantEmail) {
+      const db = getDb();
+
+      // Create a signed URL valid for 7 days
+      const expireIn = 7 * 24 * 60 * 60; // 7 days in seconds
+      const { data: signedUrlData } = await signedUrl(supabase, {
+        bucket: "vault",
+        path: fullPath,
+        expireIn,
+        options: {
+          download: true,
+        },
+      });
+
+      if (signedUrlData?.signedUrl) {
+        // Create a short link for the signed URL
+        const shortLink = await createShortLink(db, {
+          url: signedUrlData.signedUrl,
+          teamId,
+          userId,
+          type: "download",
+          fileName,
+          mimeType: "application/zip",
+          expiresAt: new Date(Date.now() + expireIn * 1000).toISOString(),
+        });
+
+        if (shortLink) {
+          downloadLink = `${getAppUrl()}/s/${shortLink.shortId}`;
+        }
+      }
+    }
+
     // Create activity for completed export
     await tasks.trigger("notification", {
       type: "transactions_exported",
@@ -160,6 +221,9 @@ export const exportTransactions = schemaTask({
       transactionCount: transactionIds.length,
       locale: locale,
       dateFormat: dateFormat || "yyyy-MM-dd",
+      downloadLink,
+      accountantEmail: settings.accountantEmail,
+      sendEmail: settings.sendEmail,
     });
 
     return {

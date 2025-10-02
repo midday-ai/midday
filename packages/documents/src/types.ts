@@ -2,6 +2,7 @@ export type GetDocumentRequest = {
   content?: string;
   documentUrl?: string;
   mimetype: string;
+  companyName?: string | null;
 };
 
 export type GetInvoiceOrReceiptResponse = {

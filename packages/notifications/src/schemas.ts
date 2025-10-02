@@ -78,6 +78,9 @@ export const transactionsExportedSchema = z.object({
   transactionCount: z.number(),
   locale: z.string(),
   dateFormat: z.string(),
+  downloadLink: z.string().optional(),
+  accountantEmail: z.string().optional(),
+  sendEmail: z.boolean().optional(),
 });
 
 export const documentUploadedSchema = z.object({

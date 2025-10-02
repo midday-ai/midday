@@ -6,6 +6,7 @@ import {
   updateInbox,
   updateInboxWithProcessedData,
 } from "@midday/db/queries";
+import { getTeamById } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask, tasks } from "@trigger.dev/sdk";
@@ -103,17 +104,22 @@ export const processAttachment = schemaTask({
     }
 
     try {
+      // Fetch team data to provide context for OCR extraction
+      const teamData = await getTeamById(getDb(), teamId);
+
       const document = new DocumentClient();
 
       logger.info("Starting document processing", {
         inboxId: inboxData.id,
         mimetype,
         referenceId,
+        teamName: teamData?.name,
       });
 
       const result = await document.getInvoiceOrReceipt({
         documentUrl: data?.signedUrl,
         mimetype,
+        companyName: teamData?.name,
       });
 
       logger.info("Document processing completed", {

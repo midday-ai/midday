@@ -172,34 +172,37 @@ export function PdfViewer({ url, maxWidth }: PdfViewerProps) {
             </div>
           </div>
         ) : (
-          <Document
-            key={`${url}_${isPasswordProtected}`}
-            file={url}
-            onLoadSuccess={onDocumentLoadSuccess}
-            onLoadError={onDocumentLoadError}
-            onPassword={onPassword}
-            loading={
-              <Skeleton className="w-full h-[calc(100vh-theme(spacing.24))]" />
-            }
-            error={
-              <div className="flex flex-col items-center justify-center p-8 text-center">
-                <p className="text-sm text-muted-foreground">
-                  Failed to load PDF. The file may be corrupted or unsupported.
-                </p>
-              </div>
-            }
-          >
-            {numPages &&
-              Array.from(new Array(numPages), (_, index) => (
-                <Page
-                  width={maxWidth}
-                  key={`${url}_${index + 1}`}
-                  pageNumber={index + 1}
-                  renderAnnotationLayer={false}
-                  renderTextLayer={true}
-                />
-              ))}
-          </Document>
+          <div className="pb-24">
+            <Document
+              key={`${url}_${isPasswordProtected}`}
+              file={url}
+              onLoadSuccess={onDocumentLoadSuccess}
+              onLoadError={onDocumentLoadError}
+              onPassword={onPassword}
+              loading={
+                <Skeleton className="w-full h-[calc(100vh-theme(spacing.24))]" />
+              }
+              error={
+                <div className="flex flex-col items-center justify-center p-8 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Failed to load PDF. The file may be corrupted or
+                    unsupported.
+                  </p>
+                </div>
+              }
+            >
+              {numPages &&
+                Array.from(new Array(numPages), (_, index) => (
+                  <Page
+                    width={maxWidth}
+                    key={`${url}_${index + 1}`}
+                    pageNumber={index + 1}
+                    renderAnnotationLayer={false}
+                    renderTextLayer={true}
+                  />
+                ))}
+            </Document>
+          </div>
         )}
       </ScrollArea>
     </div>

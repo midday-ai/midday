@@ -5,6 +5,7 @@ import InvoiceOverdueEmail from "@midday/email/emails/invoice-overdue";
 import InvoicePaidEmail from "@midday/email/emails/invoice-paid";
 import InvoiceReminderEmail from "@midday/email/emails/invoice-reminder";
 import TransactionsEmail from "@midday/email/emails/transactions";
+import TransactionsExportedEmail from "@midday/email/emails/transactions-exported";
 import { render } from "@midday/email/render";
 import { nanoid } from "nanoid";
 import { type CreateEmailOptions, Resend } from "resend";
@@ -164,6 +165,7 @@ export class EmailService {
       invoice: InvoiceEmail,
       "invoice-reminder": InvoiceReminderEmail,
       transactions: TransactionsEmail,
+      "transactions-exported": TransactionsExportedEmail,
     };
 
     const template = templates[templateName as keyof typeof templates];
