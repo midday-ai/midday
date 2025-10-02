@@ -345,20 +345,119 @@ export async function getPaymentStatus(
   db: Database,
   teamId: string,
 ): Promise<PaymentStatusResult> {
-  const results = await db.executeOnReplica(
-    sql`SELECT * FROM get_payment_score(${teamId})`,
+  const invoiceData = await db.executeOnReplica(
+    sql`
+      SELECT 
+        i.id,
+        i.due_date,
+        i.paid_at,
+        i.status,
+        i.amount,
+        i.currency
+      FROM invoices i
+      WHERE i.team_id = ${teamId}
+        AND i.due_date IS NOT NULL
+        AND (
+          (i.status = 'paid' AND i.paid_at IS NOT NULL) OR
+          (i.status = 'unpaid' AND i.paid_at IS NULL AND i.due_date < CURRENT_DATE) OR
+          (i.status = 'overdue' AND i.paid_at IS NULL AND i.due_date < CURRENT_DATE)
+        )
+      ORDER BY i.due_date DESC
+      LIMIT 50
+    `,
   );
-  const result = Array.isArray(results)
-    ? (results[0] as DbPaymentStatusResult)
-    : undefined;
 
-  if (!result) {
-    throw new Error("Failed to fetch payment status");
+  if (!Array.isArray(invoiceData) || invoiceData.length === 0) {
+    return {
+      score: 0,
+      paymentStatus: "none",
+    };
+  }
+
+  // Calculate weighted average days overdue (recent invoices matter more)
+  let totalWeightedDays = 0;
+  let totalWeight = 0;
+  let onTimeCount = 0;
+  let lateCount = 0;
+
+  for (const invoice of invoiceData) {
+    if (!invoice.due_date) continue;
+
+    const dueDate = new Date(invoice.due_date as string);
+    let daysOverdue = 0;
+
+    if (invoice.status === "paid" && invoice.paid_at) {
+      // For paid invoices, calculate days between due_date and paid_at
+      const paidDate = new Date(invoice.paid_at as string);
+      daysOverdue =
+        (paidDate.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24);
+    } else if (
+      (invoice.status === "unpaid" || invoice.status === "overdue") &&
+      invoice.paid_at === null
+    ) {
+      // For unpaid/overdue invoices, calculate days between due_date and current date
+      const currentDate = new Date();
+      daysOverdue =
+        (currentDate.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24);
+    }
+
+    // Weight: recent invoices (last 90 days) get higher weight
+    const daysSinceDue = Math.abs(
+      (new Date().getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    const weight = daysSinceDue <= 90 ? 1.5 : 1.0;
+
+    totalWeightedDays += daysOverdue * weight;
+    totalWeight += weight;
+
+    // Track on-time vs late payments (considering 3-day grace period for banking delays)
+    if (daysOverdue <= 3) {
+      onTimeCount++;
+    } else {
+      lateCount++;
+    }
+  }
+
+  const avgDaysOverdue = totalWeightedDays / totalWeight;
+  const onTimeRate = onTimeCount / (onTimeCount + lateCount);
+
+  // Calculate score based on both average days overdue and on-time rate
+  let baseScore: number;
+
+  if (avgDaysOverdue <= 3) {
+    // Paid on time or within grace period
+    baseScore = 100;
+  } else if (avgDaysOverdue <= 7) {
+    // Paid within 7 days - gradual decrease from 100 to 85
+    baseScore = Math.round(100 - ((avgDaysOverdue - 3) / 4) * 15);
+  } else if (avgDaysOverdue <= 14) {
+    // Paid within 14 days - decrease from 85 to 65
+    baseScore = Math.round(85 - ((avgDaysOverdue - 7) / 7) * 20);
+  } else if (avgDaysOverdue <= 30) {
+    // Paid within 30 days - decrease from 65 to 40
+    baseScore = Math.round(65 - ((avgDaysOverdue - 14) / 16) * 25);
+  } else {
+    // Paid very late - decrease from 40 to 0
+    baseScore = Math.round(Math.max(0, 40 - ((avgDaysOverdue - 30) / 30) * 40));
+  }
+
+  // Adjust score based on on-time payment rate
+  const rateBonus = Math.round((onTimeRate - 0.5) * 20);
+  const score = Math.max(0, Math.min(100, baseScore + rateBonus));
+
+  // Determine payment status based on score
+  let paymentStatus: string;
+  if (score >= 80) {
+    paymentStatus = "good";
+  } else if (score >= 60) {
+    paymentStatus = "average";
+  } else {
+    paymentStatus = "bad";
   }
 
   return {
-    score: Number(result.score),
-    paymentStatus: result.payment_status,
+    score,
+    paymentStatus,
   };
 }
 

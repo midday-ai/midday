@@ -19,7 +19,7 @@ export function AverageInvoiceSize() {
     return (
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="font-mono font-medium text-2xl">$0</CardTitle>
+          <CardTitle className="font-medium text-2xl">$0</CardTitle>
         </CardHeader>
 
         <CardContent className="pb-[34px]">
@@ -40,7 +40,7 @@ export function AverageInvoiceSize() {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="font-mono font-medium text-2xl">
+        <CardTitle className="font-medium text-2xl">
           <FormatAmount
             amount={primaryData?.averageAmount ?? 0}
             currency={primaryData?.currency || team?.baseCurrency || "USD"}

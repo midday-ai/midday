@@ -36,7 +36,7 @@ import { Switch } from "@midday/ui/switch";
 import NumberFlow from "@number-flow/react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 const exportSettingsSchema = z
   .object({

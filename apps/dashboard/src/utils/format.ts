@@ -84,32 +84,6 @@ export function calculateAvgBurnRate(data: BurnRateData[] | null) {
   return data?.reduce((acc, curr) => acc + curr.value, 0) / data?.length;
 }
 
-export function formatDate(
-  date: string,
-  dateFormat?: string | null,
-  checkYear = true,
-) {
-  if (checkYear && isSameYear(new Date(), new Date(date))) {
-    return format(new Date(date), "MMM d");
-  }
-
-  return format(new Date(date), dateFormat ?? "P");
-}
-
-export function getInitials(value: string) {
-  const formatted = value.toUpperCase().replace(/[\s.-]/g, "");
-
-  if (formatted.split(" ").length > 1) {
-    return `${formatted.charAt(0)}${formatted.charAt(1)}`;
-  }
-
-  if (value.length > 1) {
-    return formatted.charAt(0) + formatted.charAt(1);
-  }
-
-  return formatted.charAt(0);
-}
-
 export function formatAccountName({
   name = "",
   currency,
@@ -197,4 +171,26 @@ export function formatRelativeTime(date: Date): string {
   }
 
   return "just now";
+}
+
+export function formatCompactAmount(
+  amount: number,
+  locale?: string | null,
+): string {
+  const absAmount = Math.abs(amount);
+  const safeLocale = locale ?? "en-US";
+
+  if (absAmount >= 1000000) {
+    const formatted = (absAmount / 1000000).toLocaleString(safeLocale, {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    });
+    return `${formatted}m`;
+  }
+  // Always show in thousands notation
+  const formatted = (absAmount / 1000).toLocaleString(safeLocale, {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+  return `${formatted}k`;
 }

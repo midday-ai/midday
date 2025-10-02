@@ -1,21 +1,18 @@
-import { BaseCurrency } from "@/components/base-currency/base-currency";
 import { ConnectedAccounts } from "@/components/connected-accounts";
 import { prefetch, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Accounts | Midday",
+  title: "Bank Connections | Midday",
 };
 
 export default async function Page() {
   prefetch(trpc.bankConnections.get.queryOptions());
   prefetch(trpc.bankAccounts.get.queryOptions({ manual: true }));
-  prefetch(trpc.team.current.queryOptions());
 
   return (
     <div className="space-y-12">
       <ConnectedAccounts />
-      <BaseCurrency />
     </div>
   );
 }

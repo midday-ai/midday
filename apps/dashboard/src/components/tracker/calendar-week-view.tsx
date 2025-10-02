@@ -588,7 +588,7 @@ export const CalendarWeekView = memo(
           {weekDays.map((day) => (
             <div
               key={`header-${day.toString()}`}
-              className="py-4 px-2 bg-background text-xs font-medium text-[#878787] font-mono text-center"
+              className="py-4 px-2 bg-background text-xs font-medium text-[#878787] text-center"
             >
               <div className="flex flex-row items-end justify-center gap-2">
                 <span className="uppercase">{format(day, "EEE")}</span>
@@ -622,7 +622,7 @@ export const CalendarWeekView = memo(
               ) => (
                 <div
                   key={hour}
-                  className="flex items-center justify-center text-[12px] text-[#878787] font-mono border-b border-border"
+                  className="flex items-center justify-center text-[12px] text-[#878787] border-b border-border"
                   style={{ height: `${HOUR_HEIGHT}px` }}
                 >
                   {hour < 24 && formatHour(hour, user?.timeFormat)}
@@ -654,7 +654,7 @@ export const CalendarWeekView = memo(
                       <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 pointer-events-none" />
 
                       {/* Time indicator on hover */}
-                      <div className="absolute left-1 top-0.5 text-xs font-mono text-muted-foreground opacity-0 group-hover:opacity-100 pointer-events-none bg-background/80 px-1 rounded">
+                      <div className="absolute left-1 top-0.5 text-xs text-muted-foreground opacity-0 group-hover:opacity-100 pointer-events-none bg-background/80 px-1 rounded">
                         {formatHour(hour, user?.timeFormat)}
                       </div>
                     </div>

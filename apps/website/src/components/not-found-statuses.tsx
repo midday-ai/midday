@@ -82,7 +82,7 @@ export function NotFoundStatuses() {
 
   return (
     <ul
-      className="overflow-auto p-4 flex flex-col space-y-4 h-[290px] font-mono text-xs"
+      className="overflow-auto p-4 flex flex-col space-y-4 h-[290px] text-xs"
       ref={scrollRef}
     >
       {statuses?.map((status) => {

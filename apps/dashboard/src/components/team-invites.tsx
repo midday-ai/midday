@@ -12,7 +12,7 @@ export function TeamInvites() {
 
   return (
     <div className="mt-4">
-      <span className="text-sm font-mono text-[#878787] mb-4">Invitations</span>
+      <span className="text-sm text-[#878787] mb-4">Invitations</span>
 
       <div className="mt-6 space-y-4">
         {invites.map((invite) => (

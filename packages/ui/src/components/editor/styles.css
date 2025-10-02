@@ -3,7 +3,7 @@
 }
 
 .tiptap {
-  @apply font-mono text-xs leading-loose;
+  @apply text-xs leading-loose;
 }
 
 .tiptap h2 {

@@ -26,7 +26,7 @@ import { Label } from "@midday/ui/label";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { Textarea } from "@midday/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { z } from "zod";
+import { z } from "zod/v3";
 import { CountrySelector } from "../country-selector";
 import {
   type AddressDetails,

@@ -223,6 +223,7 @@ app.openapi(
 
     return c.json(
       validateResponse(result, transactionAttachmentPreSignedUrlResponseSchema),
+      200,
     );
   },
 );
