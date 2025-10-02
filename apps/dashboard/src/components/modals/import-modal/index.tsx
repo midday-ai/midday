@@ -2,10 +2,12 @@
 
 import { importTransactionsAction } from "@/actions/transactions/import-transactions";
 import { useSyncStatus } from "@/hooks/use-sync-status";
+import { useTeamQuery } from "@/hooks/use-team";
 import { useUpload } from "@/hooks/use-upload";
 import { useUserQuery } from "@/hooks/use-user";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
+import { uniqueCurrencies } from "@midday/location/currencies";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import {
   Dialog,
@@ -28,12 +30,9 @@ import { SelectFile } from "./select-file";
 
 const pages = ["select-file", "confirm-import"] as const;
 
-type Props = {
-  currencies: string[];
-  defaultCurrency: string;
-};
-
-export function ImportModal({ currencies, defaultCurrency }: Props) {
+export function ImportModal() {
+  const { data: team } = useTeamQuery();
+  const defaultCurrency = team?.baseCurrency || "USD";
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [runId, setRunId] = useState<string | undefined>();
@@ -248,7 +247,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
                     {page === "select-file" && <SelectFile />}
                     {page === "confirm-import" && (
                       <>
-                        <FieldMapping currencies={currencies} />
+                        <FieldMapping currencies={uniqueCurrencies} />
 
                         <SubmitButton
                           isSubmitting={isImporting}

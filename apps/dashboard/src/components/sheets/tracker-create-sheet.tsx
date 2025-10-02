@@ -1,17 +1,16 @@
 "use client";
 
 import { TrackerProjectForm } from "@/components/forms/tracker-project-form";
+import { useTeamQuery } from "@/hooks/use-team";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import React from "react";
 
-type Props = {
-  defaultCurrency: string;
-};
-
-export function TrackerCreateSheet({ defaultCurrency }: Props) {
+export function TrackerCreateSheet() {
   const { setParams, create } = useTrackerParams();
+  const { data: team } = useTeamQuery();
+  const defaultCurrency = team?.baseCurrency || "USD";
 
   const isOpen = Boolean(create);
 

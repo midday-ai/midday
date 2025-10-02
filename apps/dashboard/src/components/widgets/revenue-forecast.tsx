@@ -85,6 +85,7 @@ export function RevenueForecastWidget() {
                   margin={{ top: 0, right: 0, left: 0, bottom: 1 }}
                 >
                   <Line
+                    isAnimationActive={false}
                     type="monotone"
                     dataKey="value"
                     stroke="hsl(var(--foreground))"

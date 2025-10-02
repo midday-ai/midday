@@ -1,16 +1,17 @@
 "use client";
 
 import { useProductParams } from "@/hooks/use-product-params";
+import { useTeamQuery } from "@/hooks/use-team";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import React from "react";
 import { ProductForm } from "../forms/product-form";
 
-export function ProductCreateSheet({
-  defaultCurrency,
-}: { defaultCurrency: string }) {
+export function ProductCreateSheet() {
   const { setParams, createProduct } = useProductParams();
+  const { data: team } = useTeamQuery();
+  const defaultCurrency = team?.baseCurrency || "USD";
 
   const isOpen = Boolean(createProduct);
 

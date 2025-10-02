@@ -77,13 +77,6 @@ export function ProfitAnalysisWidget() {
     ? chartData.reduce((sum, item) => sum + item.profit, 0) / chartData.length
     : 0;
 
-  // Debug: log chart data
-  console.log("Profit Analysis Chart Data:", {
-    chartData,
-    averageProfit,
-    dataLength: chartData.length,
-  });
-
   return (
     <BaseWidget
       title="Profit Analysis"
@@ -113,7 +106,11 @@ export function ProfitAnalysisWidget() {
                     strokeDasharray="3 3"
                     strokeWidth={1}
                   />
-                  <Bar dataKey="profit" maxBarSize={8}>
+                  <Bar
+                    dataKey="profit"
+                    maxBarSize={8}
+                    isAnimationActive={false}
+                  >
                     {chartData.map((entry) => (
                       <Cell key={entry.month} fill={entry.fill} />
                     ))}
