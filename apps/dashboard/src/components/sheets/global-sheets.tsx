@@ -20,22 +20,12 @@ import { TrackerScheduleSheet } from "@/components/sheets/tracker-schedule-sheet
 import { TrackerUpdateSheet } from "@/components/sheets/tracker-update-sheet";
 import { TransactionCreateSheet } from "@/components/sheets/transaction-create-sheet";
 import { TransactionSheet } from "@/components/sheets/transaction-sheet";
-import { uniqueCurrencies } from "@midday/location/currencies";
-import { use } from "react";
 
-type Props = {
-  currencyPromise: Promise<string>;
-  countryCodePromise: Promise<string>;
-};
-
-export function GlobalSheets({ currencyPromise, countryCodePromise }: Props) {
-  const currency = use(currencyPromise);
-  const countryCode = use(countryCodePromise);
-
+export function GlobalSheets() {
   return (
     <>
-      <TrackerUpdateSheet defaultCurrency={currency} />
-      <TrackerCreateSheet defaultCurrency={currency} />
+      <TrackerUpdateSheet />
+      <TrackerCreateSheet />
       <TrackerScheduleSheet />
 
       <CategoryCreateSheet />
@@ -44,8 +34,8 @@ export function GlobalSheets({ currencyPromise, countryCodePromise }: Props) {
       <CustomerCreateSheet />
       <CustomerEditSheet />
 
-      <ProductCreateSheet defaultCurrency={currency} />
-      <ProductEditSheet defaultCurrency={currency} />
+      <ProductCreateSheet />
+      <ProductEditSheet />
 
       <TransactionSheet />
       <TransactionCreateSheet />
@@ -57,8 +47,8 @@ export function GlobalSheets({ currencyPromise, countryCodePromise }: Props) {
       <DocumentSheet />
       <InboxDetailsSheet />
 
-      <ImportModal currencies={uniqueCurrencies} defaultCurrency={currency} />
-      <ConnectTransactionsModal countryCode={countryCode} />
+      <ImportModal />
+      <ConnectTransactionsModal />
 
       <InvoiceDetailsSheet />
       <InvoiceSheet />

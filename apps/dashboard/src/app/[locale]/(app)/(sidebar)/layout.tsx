@@ -10,9 +10,7 @@ import {
   getQueryClient,
   trpc,
 } from "@/trpc/server";
-import { getCountryCode, getCurrency } from "@midday/location";
 import { redirect } from "next/navigation";
-import { Suspense } from "react";
 
 export default async function Layout({
   children,
@@ -20,8 +18,6 @@ export default async function Layout({
   children: React.ReactNode;
 }) {
   const queryClient = getQueryClient();
-  const currencyPromise = getCurrency();
-  const countryCodePromise = getCountryCode();
 
   // NOTE: These are used in the global sheets
   batchPrefetch([
@@ -57,14 +53,7 @@ export default async function Layout({
         </div>
 
         <ExportStatus />
-
-        <Suspense>
-          <GlobalSheets
-            currencyPromise={currencyPromise}
-            countryCodePromise={countryCodePromise}
-          />
-        </Suspense>
-
+        <GlobalSheets />
         <GlobalTimerProvider />
         <TimezoneDetector />
       </div>

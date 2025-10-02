@@ -3,6 +3,7 @@
 import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
 import { exchangePublicToken } from "@/actions/institutions/exchange-public-token";
 import { useConnectParams } from "@/hooks/use-connect-params";
+import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
 import { track } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
@@ -105,22 +106,19 @@ function SearchResult({
   );
 }
 
-type ConnectTransactionsModalProps = {
-  countryCode: string;
-};
-
-export function ConnectTransactionsModal({
-  countryCode: initialCountryCode,
-}: ConnectTransactionsModalProps) {
+export function ConnectTransactionsModal() {
   const trpc = useTRPC();
   const router = useRouter();
   const [plaidToken, setPlaidToken] = useState<string | undefined>();
+  const { data: team } = useTeamQuery();
+  const teamCountryCode = team?.countryCode || "";
+
   const {
     countryCode,
     search: query,
     step,
     setParams,
-  } = useConnectParams(initialCountryCode);
+  } = useConnectParams(teamCountryCode);
 
   const isOpen = step === "connect";
 
