@@ -16,10 +16,12 @@ import {
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { getDefaultFiscalYearStartMonth } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { use, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { z } from "zod/v3";
 import { CountrySelector } from "../country-selector";
+import { SelectFiscalMonth } from "../select-fiscal-month";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -27,6 +29,7 @@ const formSchema = z.object({
   }),
   countryCode: z.string(),
   baseCurrency: z.string(),
+  fiscalYearStartMonth: z.number().int().min(1).max(12).nullable().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -134,8 +137,19 @@ export function CreateTeamForm({
       name: "",
       baseCurrency: currency,
       countryCode: countryCode ?? "",
+      fiscalYearStartMonth: getDefaultFiscalYearStartMonth(countryCode),
     },
   });
+
+  // Update fiscal year when country changes
+  const selectedCountryCode = form.watch("countryCode");
+  useEffect(() => {
+    const defaultFiscalYear =
+      getDefaultFiscalYearStartMonth(selectedCountryCode);
+    if (defaultFiscalYear !== form.getValues("fiscalYearStartMonth")) {
+      form.setValue("fiscalYearStartMonth", defaultFiscalYear);
+    }
+  }, [selectedCountryCode, form]);
 
   // Computed loading state that can never be reset unexpectedly
   const isFormLocked = isLoading || isSubmittedRef.current;
@@ -169,6 +183,7 @@ export function CreateTeamForm({
       name: values.name,
       baseCurrency: values.baseCurrency,
       countryCode: values.countryCode,
+      fiscalYearStartMonth: values.fiscalYearStartMonth,
       switchTeam: true, // Automatically switch to the new team
     });
   }
@@ -239,6 +254,27 @@ export function CreateTeamForm({
                 If you have multiple accounts in different currencies, this will
                 be the default currency for your company. You can change it
                 later.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="fiscalYearStartMonth"
+          render={({ field }) => (
+            <FormItem className="mt-4 border-b border-border pb-4">
+              <FormLabel className="text-xs text-[#666] font-normal">
+                Fiscal year starts
+              </FormLabel>
+              <FormControl>
+                <SelectFiscalMonth {...field} />
+              </FormControl>
+
+              <FormDescription>
+                When does your company's fiscal year begin? This determines
+                default date ranges for reports. You can change it later.
               </FormDescription>
               <FormMessage />
             </FormItem>

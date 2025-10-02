@@ -2,41 +2,41 @@
 
 import { FormatAmount } from "@/components/format-amount";
 import { useTeamQuery } from "@/hooks/use-team";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { Icons } from "@midday/ui/icons";
+import { getWidgetPeriodDates } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
-import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
+import { format } from "date-fns";
+import { useMemo } from "react";
 import { Line, LineChart, ResponsiveContainer } from "recharts";
 import { BaseWidget } from "./base";
+import { ConfigurableWidget } from "./configurable-widget";
+import { useConfigurableWidget } from "./use-configurable-widget";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSettings } from "./widget-settings";
 
 export function RevenueForecastWidget() {
   const trpc = useTRPC();
   const { data: team } = useTeamQuery();
+  const t = useI18n();
+  const { config, isConfiguring, setIsConfiguring, saveConfig } =
+    useConfigurableWidget("revenue-forecast");
 
-  // Get 12 months of historical data and forecast 6 months ahead
-  // 12 months captures full year cycle and seasonality for better accuracy
-  const historicalMonths = 12;
   const forecastMonths = 6;
 
-  const getDateRange = () => {
-    const to = endOfMonth(new Date());
-    const from = startOfMonth(subMonths(to, historicalMonths - 1));
-    return {
-      from: from.toISOString(),
-      to: to.toISOString(),
-    };
-  };
-
-  const dateRange = getDateRange();
+  const { from, to } = useMemo(() => {
+    const period = config?.period ?? "trailing_12";
+    return getWidgetPeriodDates(period, team?.fiscalYearStartMonth);
+  }, [config?.period, team?.fiscalYearStartMonth]);
 
   const { data, isLoading } = useQuery({
     ...trpc.reports.revenueForecast.queryOptions({
-      from: dateRange.from,
-      to: dateRange.to,
+      from: format(from, "yyyy-MM-dd"),
+      to: format(to, "yyyy-MM-dd"),
       forecastMonths,
       currency: team?.baseCurrency ?? undefined,
-      revenueType: "net",
+      revenueType: config?.revenueType ?? "net",
     }),
     ...WIDGET_POLLING_CONFIG,
   });
@@ -69,60 +69,78 @@ export function RevenueForecastWidget() {
   const currency = data?.summary.currency || team?.baseCurrency || "USD";
 
   return (
-    <BaseWidget
-      title="Forecast"
-      icon={<Icons.TrendingUp className="size-4" />}
-      description={
-        <div className="flex flex-col gap-3">
-          <p className="text-sm text-[#878787]">Revenue projection</p>
-
-          {/* Simple trend line chart */}
-          {!isLoading && chartData.length > 0 ? (
-            <div className="h-12 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={chartData}
-                  margin={{ top: 0, right: 0, left: 0, bottom: 1 }}
-                >
-                  <Line
-                    isAnimationActive={false}
-                    type="monotone"
-                    dataKey="value"
-                    stroke="hsl(var(--foreground))"
-                    strokeWidth={2}
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <div className="h-12 w-full flex items-center">
-              <div className="text-xs text-muted-foreground">
-                No data available
-              </div>
-            </div>
-          )}
-
-          <p className="text-sm text-[#666666]">
-            Next month projection{" "}
-            <span className="font-medium text-foreground">
-              +<FormatAmount amount={nextMonthProjection} currency={currency} />
-            </span>
-          </p>
-
-          <button
-            type="button"
-            onClick={handleViewDetails}
-            className="text-xs text-[#878787] hover:text-foreground text-left transition-colors"
-          >
-            View forecast details
-          </button>
-        </div>
+    <ConfigurableWidget
+      isConfiguring={isConfiguring}
+      settings={
+        <WidgetSettings
+          config={config}
+          onSave={saveConfig}
+          onCancel={() => setIsConfiguring(false)}
+          showPeriod
+          showRevenueType
+        />
       }
-      actions=""
-      onClick={handleViewDetails}
     >
-      <div />
-    </BaseWidget>
+      <BaseWidget
+        title="Forecast"
+        icon={<Icons.TrendingUp className="size-4" />}
+        onConfigure={() => setIsConfiguring(true)}
+        description={
+          <div className="flex flex-col gap-3">
+            <p className="text-sm text-[#878787]">Revenue projection</p>
+
+            {/* Simple trend line chart */}
+            {!isLoading && chartData.length > 0 ? (
+              <div className="h-12 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={chartData}
+                    margin={{ top: 0, right: 0, left: 0, bottom: 1 }}
+                  >
+                    <Line
+                      isAnimationActive={false}
+                      type="monotone"
+                      dataKey="value"
+                      stroke="hsl(var(--foreground))"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-12 w-full flex items-center">
+                <div className="text-xs text-muted-foreground">
+                  No data available
+                </div>
+              </div>
+            )}
+
+            <p className="text-sm text-[#666666]">
+              Next month projection{" "}
+              <span className="font-medium text-foreground">
+                +
+                <FormatAmount
+                  amount={nextMonthProjection}
+                  currency={currency}
+                />
+              </span>
+            </p>
+
+            <button
+              type="button"
+              onClick={handleViewDetails}
+              className="text-xs text-[#878787] hover:text-foreground text-left transition-colors"
+            >
+              View forecast details
+            </button>
+          </div>
+        }
+        actions=""
+        onClick={handleViewDetails}
+      >
+        <div />
+      </BaseWidget>
+    </ConfigurableWidget>
   );
 }

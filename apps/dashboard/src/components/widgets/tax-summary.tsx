@@ -7,12 +7,16 @@ import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
-import { getDefaultTaxType } from "@midday/utils/tax";
+import { getDefaultTaxType, getWidgetPeriodDates } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
-import { endOfYear, format, startOfYear } from "date-fns";
+import { format } from "date-fns";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { BaseWidget } from "./base";
+import { ConfigurableWidget } from "./configurable-widget";
+import { useConfigurableWidget } from "./use-configurable-widget";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSettings } from "./widget-settings";
 
 function getTaxTerminology(
   countryCode: string | undefined,
@@ -49,30 +53,38 @@ export function TaxSummaryWidget() {
   const { data: team } = useTeamQuery();
   const t = useI18n();
   const { data: user } = useUserQuery();
+  const { config, isConfiguring, setIsConfiguring, saveConfig } =
+    useConfigurableWidget("tax-summary");
 
-  const now = new Date();
   const taxTerms = getTaxTerminology(team?.countryCode ?? undefined, t);
+
+  // Get date range based on widget config or default to fiscal_ytd
+  const { from: fromDate, to: toDate } = useMemo(() => {
+    const period = config?.period ?? "fiscal_ytd";
+    return getWidgetPeriodDates(period, team?.fiscalYearStartMonth);
+  }, [config?.period, team?.fiscalYearStartMonth]);
 
   const { data: yearData } = useQuery({
     ...trpc.widgets.getTaxSummary.queryOptions({
-      from: format(startOfYear(now), "yyyy-MM-dd"),
-      to: format(endOfYear(now), "yyyy-MM-dd"),
+      from: format(fromDate, "yyyy-MM-dd"),
+      to: format(toDate, "yyyy-MM-dd"),
     }),
     ...WIDGET_POLLING_CONFIG,
   });
 
   const taxData = yearData?.result;
 
-  // Note: paid tax comes as negative from the query
-  const collectedTax = taxData ? Math.abs(taxData.collected.totalTaxAmount) : 0;
-  const paidTax = taxData ? Math.abs(taxData.paid.totalTaxAmount) : 0;
+  const collectedTax = taxData?.collected.totalTaxAmount ?? 0;
+  const paidTax = taxData?.paid.totalTaxAmount ?? 0;
   const netAmount = collectedTax - paidTax;
   const isOwed = netAmount > 0;
   const hasActivity = collectedTax > 0 || paidTax > 0;
 
   const getDescription = () => {
-    const year = now.getFullYear();
-    const period = t("tax_summary.year_to_date", { year });
+    const periodKey = config?.period ?? "fiscal_ytd";
+    const period = t(
+      `widget_period.${periodKey}` as "widget_period.fiscal_ytd",
+    );
 
     if (!hasActivity) {
       return `${t("tax_summary.no_activity")} · ${period}`;
@@ -100,46 +112,60 @@ export function TaxSummaryWidget() {
   };
 
   return (
-    <BaseWidget
-      title={taxTerms.title}
-      icon={<Icons.ReceiptLong className="size-4" />}
-      description={getDescription()}
-      onClick={handleOpenAssistant}
-      actions={t("tax_summary.open_assistant")}
+    <ConfigurableWidget
+      isConfiguring={isConfiguring}
+      settings={
+        <WidgetSettings
+          config={config}
+          onSave={saveConfig}
+          onCancel={() => setIsConfiguring(false)}
+          showPeriod
+          showRevenueType={false}
+        />
+      }
     >
-      {hasActivity && taxData && (
-        <div className="flex flex-col gap-4">
-          {/* Main net amount */}
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-medium">
-              <FormatAmount
-                amount={Math.abs(netAmount)}
-                currency={taxData.currency}
-              />
-            </span>
-          </div>
-
-          <div className="space-y-2 text-xs">
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">
-                {taxTerms.collected}
-              </span>
-              <span className="font-medium">
+      <BaseWidget
+        title={taxTerms.title}
+        icon={<Icons.ReceiptLong className="size-4" />}
+        description={getDescription()}
+        onClick={handleOpenAssistant}
+        actions={t("tax_summary.open_assistant")}
+        onConfigure={() => setIsConfiguring(true)}
+      >
+        {hasActivity && taxData && (
+          <div className="flex flex-col gap-4">
+            {/* Main net amount */}
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-medium">
                 <FormatAmount
-                  amount={collectedTax}
+                  amount={Math.abs(netAmount)}
                   currency={taxData.currency}
                 />
               </span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">{taxTerms.paid}</span>
-              <span className="font-medium">
-                <FormatAmount amount={paidTax} currency={taxData.currency} />
-              </span>
+
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">
+                  {taxTerms.collected}
+                </span>
+                <span className="font-medium">
+                  <FormatAmount
+                    amount={collectedTax}
+                    currency={taxData.currency}
+                  />
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">{taxTerms.paid}</span>
+                <span className="font-medium">
+                  <FormatAmount amount={paidTax} currency={taxData.currency} />
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </BaseWidget>
+        )}
+      </BaseWidget>
+    </ConfigurableWidget>
   );
 }

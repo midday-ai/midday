@@ -1041,8 +1041,8 @@ export async function getTaxSummary(db: Database, params: GetTaxParams) {
     SELECT 
       COALESCE(tc.slug, 'uncategorized') as category_slug,
       COALESCE(tc.name, 'Uncategorized') as category_name,
-      SUM(COALESCE(t.tax_amount, t.amount * COALESCE(t.tax_rate, tc.tax_rate, 0) / 100))::text as total_tax_amount,
-      SUM(t.amount)::text as total_transaction_amount,
+      ABS(SUM(t.amount * COALESCE(t.tax_rate, tc.tax_rate, 0) / (100 + COALESCE(t.tax_rate, tc.tax_rate, 0))))::text as total_tax_amount,
+      ABS(SUM(t.amount))::text as total_transaction_amount,
       COUNT(t.id) as transaction_count,
       AVG(COALESCE(t.tax_rate, tc.tax_rate))::text as avg_tax_rate,
       COALESCE(t.tax_type, tc.tax_type) as tax_type,
@@ -1057,7 +1057,7 @@ export async function getTaxSummary(db: Database, params: GetTaxParams) {
       COALESCE(tc.name, 'Uncategorized'),
       COALESCE(t.tax_type, tc.tax_type),
       t.currency
-    ORDER BY ABS(SUM(COALESCE(t.tax_amount, t.amount * COALESCE(t.tax_rate, tc.tax_rate, 0) / 100))) DESC
+    ORDER BY ABS(SUM(t.amount * COALESCE(t.tax_rate, tc.tax_rate, 0) / (100 + COALESCE(t.tax_rate, tc.tax_rate, 0)))) DESC
   `;
 
   const rawData = (await db.executeOnReplica(query)) as unknown as Array<{

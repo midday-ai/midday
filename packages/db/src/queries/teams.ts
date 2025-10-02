@@ -40,6 +40,7 @@ export const getTeamById = async (db: Database, id: string) => {
       // subscriptionStatus: teams.subscriptionStatus,
       baseCurrency: teams.baseCurrency,
       countryCode: teams.countryCode,
+      fiscalYearStartMonth: teams.fiscalYearStartMonth,
       exportSettings: teams.exportSettings,
     })
     .from(teams)
@@ -73,6 +74,7 @@ export const updateTeamById = async (
       // subscriptionStatus: teams.subscriptionStatus,
       baseCurrency: teams.baseCurrency,
       countryCode: teams.countryCode,
+      fiscalYearStartMonth: teams.fiscalYearStartMonth,
     });
 
   return result;
@@ -84,6 +86,7 @@ type CreateTeamParams = {
   email: string;
   baseCurrency?: string;
   countryCode?: string;
+  fiscalYearStartMonth?: number | null;
   logoUrl?: string;
   switchTeam?: boolean;
 };
@@ -208,6 +211,7 @@ export const createTeam = async (db: Database, params: CreateTeamParams) => {
           name: params.name,
           baseCurrency: params.baseCurrency,
           countryCode: params.countryCode,
+          fiscalYearStartMonth: params.fiscalYearStartMonth,
           logoUrl: params.logoUrl,
           email: params.email,
         })

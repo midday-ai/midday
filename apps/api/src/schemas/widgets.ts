@@ -125,3 +125,23 @@ export const widgetPreferencesSchema = z.object({
 export const updateWidgetPreferencesSchema = z.object({
   primaryWidgets: z.array(widgetTypeSchema).max(7),
 });
+
+export const widgetPeriodSchema = z.enum([
+  "fiscal_ytd",
+  "fiscal_year",
+  "current_quarter",
+  "trailing_12",
+  "current_month",
+]);
+
+export const revenueTypeSchema = z.enum(["net", "gross"]);
+
+export const widgetConfigSchema = z.object({
+  period: widgetPeriodSchema.optional(),
+  revenueType: revenueTypeSchema.optional(),
+});
+
+export const updateWidgetConfigSchema = z.object({
+  widgetType: widgetTypeSchema,
+  config: widgetConfigSchema,
+});

@@ -41,6 +41,13 @@ export default {
     this_year: "This year",
     last_year: "Last year",
   },
+  widget_period: {
+    fiscal_ytd: "Fiscal YTD",
+    fiscal_year: "Fiscal Year",
+    current_quarter: "Current Quarter",
+    trailing_12: "Last 12 Months",
+    current_month: "Current Month",
+  },
   transactions_period: {
     all: "All",
     income: "Income",

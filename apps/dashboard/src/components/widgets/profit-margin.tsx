@@ -1,19 +1,33 @@
 import { useTeamQuery } from "@/hooks/use-team";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { Icons } from "@midday/ui/icons";
+import { getWidgetPeriodDates } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
-import { endOfYear, startOfYear } from "date-fns";
+import { format } from "date-fns";
+import { useMemo } from "react";
 import { BaseWidget } from "./base";
+import { ConfigurableWidget } from "./configurable-widget";
+import { useConfigurableWidget } from "./use-configurable-widget";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSettings } from "./widget-settings";
 
 export function ProfitMarginWidget() {
   const trpc = useTRPC();
   const { data: team } = useTeamQuery();
+  const t = useI18n();
+  const { config, isConfiguring, setIsConfiguring, saveConfig } =
+    useConfigurableWidget("profit-margin");
+
+  const { from, to } = useMemo(() => {
+    const period = config?.period ?? "fiscal_ytd";
+    return getWidgetPeriodDates(period, team?.fiscalYearStartMonth);
+  }, [config?.period, team?.fiscalYearStartMonth]);
 
   const { data } = useQuery({
     ...trpc.widgets.getProfitMargin.queryOptions({
-      from: startOfYear(new Date()).toISOString(),
-      to: endOfYear(new Date()).toISOString(),
+      from: format(from, "yyyy-MM-dd"),
+      to: format(to, "yyyy-MM-dd"),
       currency: team?.baseCurrency ?? undefined,
       revenueType: "net",
     }),
@@ -29,25 +43,43 @@ export function ProfitMarginWidget() {
     return `${percentage.toFixed(1)}%`;
   };
 
+  const periodLabel = t(
+    `widget_period.${config?.period ?? "fiscal_ytd"}` as "widget_period.fiscal_ytd",
+  );
+
   return (
-    <BaseWidget
-      title="Profit Margin"
-      icon={<Icons.PieChart className="size-4" />}
-      description={
-        <div className="flex flex-col gap-1">
-          <p className="text-sm text-[#666666]">
-            Net profit margin for {new Date().getFullYear()}
-          </p>
-        </div>
+    <ConfigurableWidget
+      isConfiguring={isConfiguring}
+      settings={
+        <WidgetSettings
+          config={config}
+          onSave={saveConfig}
+          onCancel={() => setIsConfiguring(false)}
+          showPeriod
+          showRevenueType={false}
+        />
       }
-      actions="View margin analysis"
-      onClick={handleViewAnalysis}
     >
-      <div className="flex flex-col gap-2">
-        <h2 className="text-2xl font-normal">
-          {formatPercentage(data?.result.profitMargin ?? 0)}
-        </h2>
-      </div>
-    </BaseWidget>
+      <BaseWidget
+        title="Profit Margin"
+        icon={<Icons.PieChart className="size-4" />}
+        description={
+          <div className="flex flex-col gap-1">
+            <p className="text-sm text-[#666666]">
+              Net profit margin · {periodLabel}
+            </p>
+          </div>
+        }
+        actions="View margin analysis"
+        onClick={handleViewAnalysis}
+        onConfigure={() => setIsConfiguring(true)}
+      >
+        <div className="flex flex-col gap-2">
+          <h2 className="text-2xl font-normal">
+            {formatPercentage(data?.result.profitMargin ?? 0)}
+          </h2>
+        </div>
+      </BaseWidget>
+    </ConfigurableWidget>
   );
 }
