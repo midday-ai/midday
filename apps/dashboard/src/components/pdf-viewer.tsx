@@ -172,7 +172,7 @@ export function PdfViewer({ url, maxWidth }: PdfViewerProps) {
             </div>
           </div>
         ) : (
-          <div className="pb-20">
+          <div className="pb-24">
             <Document
               key={`${url}_${isPasswordProtected}`}
               file={url}

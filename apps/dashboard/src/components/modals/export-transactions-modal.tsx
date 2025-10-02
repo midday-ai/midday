@@ -3,6 +3,7 @@
 import { exportTransactionsAction } from "@/actions/export-transactions-action";
 import { useTeamMutation, useTeamQuery } from "@/hooks/use-team";
 import { useUserQuery } from "@/hooks/use-user";
+import { useZodForm } from "@/hooks/use-zod-form";
 import { useExportStore } from "@/store/export";
 import { useTransactionsStore } from "@/store/transactions";
 import {
@@ -19,25 +20,52 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
-import { Icons } from "@midday/ui/icons";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
 import { RadioGroup, RadioGroupItem } from "@midday/ui/radio-group";
 import { Separator } from "@midday/ui/separator";
 import { Spinner } from "@midday/ui/spinner";
 import { Switch } from "@midday/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import NumberFlow from "@number-flow/react";
 import { useAction } from "next-safe-action/hooks";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { z } from "zod";
 
-interface ExportSettings {
-  csvDelimiter: string;
-  includeCSV: boolean;
-  includeXLSX: boolean;
-  sendEmail: boolean;
-  accountantEmail?: string;
-}
+const exportSettingsSchema = z
+  .object({
+    csvDelimiter: z.string(),
+    includeCSV: z.boolean(),
+    includeXLSX: z.boolean(),
+    sendEmail: z.boolean(),
+    accountantEmail: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.sendEmail) {
+        if (!data.accountantEmail || data.accountantEmail.trim() === "") {
+          return false;
+        }
+
+        return z.string().email().safeParse(data.accountantEmail.trim())
+          .success;
+      }
+      return true;
+    },
+    {
+      message: "Please enter a valid email address",
+      path: ["accountantEmail"],
+    },
+  )
+  .refine((data) => data.includeCSV || data.includeXLSX, {
+    message: "Please select at least one export format",
+  });
 
 interface ExportTransactionsModalProps {
   isOpen: boolean;
@@ -58,7 +86,9 @@ export function ExportTransactionsModal({
   const totalSelected = ids.length;
 
   // Load saved settings from team
-  const savedSettings = (team?.exportSettings as ExportSettings) || {
+  const savedSettings = (team?.exportSettings as z.infer<
+    typeof exportSettingsSchema
+  >) || {
     csvDelimiter: ",",
     includeCSV: true,
     includeXLSX: true,
@@ -66,15 +96,17 @@ export function ExportTransactionsModal({
     accountantEmail: "",
   };
 
-  const [settings, setSettings] = useState<ExportSettings>(savedSettings);
-  const [activeTab, setActiveTab] = useState("manual");
+  const form = useZodForm(exportSettingsSchema, {
+    defaultValues: savedSettings,
+    mode: "onChange",
+  });
 
-  // Update settings when team data changes
+  // Update form when team data changes
   useEffect(() => {
     if (team?.exportSettings) {
-      setSettings(team.exportSettings as ExportSettings);
+      form.reset(team.exportSettings as z.infer<typeof exportSettingsSchema>);
     }
-  }, [team?.exportSettings]);
+  }, [team?.exportSettings, form]);
 
   const { execute, status } = useAction(exportTransactionsAction, {
     onSuccess: ({ data }) => {
@@ -95,47 +127,31 @@ export function ExportTransactionsModal({
     },
   });
 
-  const handleExport = async () => {
+  const onSubmit = async (values: z.infer<typeof exportSettingsSchema>) => {
     setIsExporting(true);
 
-    // Save settings to team
-    // @ts-ignore - exportSettings is valid but types haven't regenerated yet
     await teamMutation.mutateAsync({
-      exportSettings: settings,
+      exportSettings: values,
     });
 
     execute({
       transactionIds: ids,
       dateFormat: user?.dateFormat ?? undefined,
       locale: user?.locale ?? undefined,
-      exportSettings: settings,
+      exportSettings: values,
     });
   };
 
-  const handleSettingChange = (
-    key: keyof ExportSettings,
-    value: string | boolean,
-  ) => {
-    setSettings((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-
   const isExporting = status === "executing";
+  const sendEmail = form.watch("sendEmail");
+  const includeCSV = form.watch("includeCSV");
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[600px]">
         <div className="p-4">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            {/* TabsList hidden until Connections feature is ready */}
-            {/* <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="manual">Manual</TabsTrigger>
-              <TabsTrigger value="connections">Connections</TabsTrigger>
-            </TabsList> */}
-
-            <TabsContent value="manual" className="space-y-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <DialogHeader className="mb-8">
                 <DialogTitle>Export Transactions</DialogTitle>
                 <DialogDescription>
@@ -146,124 +162,172 @@ export function ExportTransactionsModal({
               </DialogHeader>
 
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm font-normal">CSV</Label>
-                    <p className="text-xs text-[#878787]">
-                      Export as comma-separated values
-                    </p>
-                  </div>
-                  <Switch
-                    checked={settings.includeCSV}
-                    onCheckedChange={(checked) =>
-                      handleSettingChange("includeCSV", checked)
-                    }
-                  />
-                </div>
-
-                {/* CSV Settings Accordion - Only shown when CSV is enabled */}
-                {settings.includeCSV && (
-                  <Accordion type="single" collapsible className="-mx-4">
-                    <AccordionItem value="csv-settings" className="border-0">
-                      <AccordionTrigger className="py-3 px-4 hover:no-underline hover:bg-accent/50">
-                        <span className="text-sm text-[#878787]">
-                          CSV Settings
-                        </span>
-                      </AccordionTrigger>
-                      <AccordionContent className="px-4">
-                        <div className="space-y-2 pt-2">
-                          <Label htmlFor="delimiter" className="text-sm">
-                            Delimiter
-                          </Label>
-                          <RadioGroup
-                            value={settings.csvDelimiter}
-                            onValueChange={(value) =>
-                              handleSettingChange("csvDelimiter", value)
-                            }
-                            className="flex gap-4"
-                          >
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="," id="comma" />
-                              <Label
-                                htmlFor="comma"
-                                className="text-sm font-normal"
-                              >
-                                Comma (,)
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value=";" id="semicolon" />
-                              <Label
-                                htmlFor="semicolon"
-                                className="text-sm font-normal"
-                              >
-                                Semicolon (;)
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="\t" id="tab" />
-                              <Label
-                                htmlFor="tab"
-                                className="text-sm font-normal"
-                              >
-                                Tab
-                              </Label>
-                            </div>
-                          </RadioGroup>
+                <FormField
+                  control={form.control}
+                  name="includeCSV"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-sm font-normal">
+                            CSV
+                          </FormLabel>
+                          <p className="text-xs text-[#878787]">
+                            Export as comma-separated values
+                          </p>
                         </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                {includeCSV && (
+                  <FormField
+                    control={form.control}
+                    name="csvDelimiter"
+                    render={({ field }) => (
+                      <Accordion type="single" collapsible className="-mx-4">
+                        <AccordionItem
+                          value="csv-settings"
+                          className="border-0"
+                        >
+                          <AccordionTrigger className="py-3 px-4 hover:no-underline hover:bg-accent/50">
+                            <span className="text-sm text-[#878787]">
+                              CSV Settings
+                            </span>
+                          </AccordionTrigger>
+                          <AccordionContent className="px-4">
+                            <FormItem>
+                              <div className="space-y-2 pt-2">
+                                <FormLabel
+                                  htmlFor="delimiter"
+                                  className="text-sm"
+                                >
+                                  Delimiter
+                                </FormLabel>
+                                <FormControl>
+                                  <RadioGroup
+                                    value={field.value}
+                                    onValueChange={field.onChange}
+                                    className="flex gap-4"
+                                  >
+                                    <div className="flex items-center space-x-2">
+                                      <RadioGroupItem value="," id="comma" />
+                                      <Label
+                                        htmlFor="comma"
+                                        className="text-sm font-normal"
+                                      >
+                                        Comma (,)
+                                      </Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <RadioGroupItem
+                                        value=";"
+                                        id="semicolon"
+                                      />
+                                      <Label
+                                        htmlFor="semicolon"
+                                        className="text-sm font-normal"
+                                      >
+                                        Semicolon (;)
+                                      </Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <RadioGroupItem value="\t" id="tab" />
+                                      <Label
+                                        htmlFor="tab"
+                                        className="text-sm font-normal"
+                                      >
+                                        Tab
+                                      </Label>
+                                    </div>
+                                  </RadioGroup>
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          </AccordionContent>
+                        </AccordionItem>
+                      </Accordion>
+                    )}
+                  />
                 )}
 
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm font-normal">Excel (XLSX)</Label>
-                    <p className="text-xs text-[#878787]">
-                      Export as Excel spreadsheet
-                    </p>
-                  </div>
-                  <Switch
-                    checked={settings.includeXLSX}
-                    onCheckedChange={(checked) =>
-                      handleSettingChange("includeXLSX", checked)
-                    }
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="includeXLSX"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-sm font-normal">
+                            Excel (XLSX)
+                          </FormLabel>
+                          <p className="text-xs text-[#878787]">
+                            Export as Excel spreadsheet
+                          </p>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </div>
+                    </FormItem>
+                  )}
+                />
               </div>
 
               <Separator />
 
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm font-normal">
-                      Send via email
-                    </Label>
-                    <p className="text-xs text-[#878787]">
-                      Email the export to your accountant
-                    </p>
-                  </div>
-                  <Switch
-                    checked={settings.sendEmail}
-                    onCheckedChange={(checked) =>
-                      handleSettingChange("sendEmail", checked)
-                    }
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="sendEmail"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-sm font-normal">
+                            Send via email
+                          </FormLabel>
+                          <p className="text-xs text-[#878787]">
+                            Email the export to your accountant
+                          </p>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </div>
+                    </FormItem>
+                  )}
+                />
 
-                {settings.sendEmail && (
-                  <div className="space-y-2">
-                    <Input
-                      id="accountantEmail"
-                      type="email"
-                      placeholder="accountant@example.com"
-                      value={settings.accountantEmail || ""}
-                      onChange={(e) =>
-                        handleSettingChange("accountantEmail", e.target.value)
-                      }
-                    />
-                  </div>
+                {sendEmail && (
+                  <FormField
+                    control={form.control}
+                    name="accountantEmail"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="accountant@example.com"
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                 )}
               </div>
 
@@ -271,18 +335,19 @@ export function ExportTransactionsModal({
 
               <div className="flex justify-end gap-2">
                 <Button
+                  type="button"
                   variant="outline"
                   onClick={() => onOpenChange(false)}
-                  disabled={isExporting}
+                  disabled={isExporting || form.formState.isSubmitting}
                 >
                   Cancel
                 </Button>
                 <Button
-                  onClick={handleExport}
+                  type="submit"
                   disabled={
                     isExporting ||
-                    (!settings.includeCSV && !settings.includeXLSX) ||
-                    (settings.sendEmail && !settings.accountantEmail)
+                    !form.formState.isValid ||
+                    form.formState.isSubmitting
                   }
                 >
                   {isExporting ? (
@@ -295,8 +360,8 @@ export function ExportTransactionsModal({
                   )}
                 </Button>
               </div>
-            </TabsContent>
-          </Tabs>
+            </form>
+          </Form>
         </div>
       </DialogContent>
     </Dialog>

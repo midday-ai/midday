@@ -223,7 +223,7 @@ export const exportTransactions = schemaTask({
       dateFormat: dateFormat || "yyyy-MM-dd",
       downloadLink,
       accountantEmail: settings.accountantEmail,
-      sendEmail: settings.sendEmail && !!downloadLink,
+      sendEmail: settings.sendEmail,
     });
 
     return {
