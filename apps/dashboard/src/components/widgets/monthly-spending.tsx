@@ -1,27 +1,38 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
+import { useTeamQuery } from "@/hooks/use-team";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { Icons } from "@midday/ui/icons";
+import { getWidgetPeriodDates } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
-import { endOfMonth, format, startOfMonth } from "date-fns";
+import { format } from "date-fns";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { BaseWidget } from "./base";
+import { ConfigurableWidget } from "./configurable-widget";
+import { useConfigurableWidget } from "./use-configurable-widget";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSettings } from "./widget-settings";
 
 export function MonthlySpendingWidget() {
   const trpc = useTRPC();
   const router = useRouter();
+  const { data: team } = useTeamQuery();
+  const t = useI18n();
+  const { config, isConfiguring, setIsConfiguring, saveConfig } =
+    useConfigurableWidget("monthly-spending");
 
-  // Calculate current month range
-  const now = new Date();
-  const currentMonthStart = startOfMonth(now);
-  const currentMonthEnd = endOfMonth(now);
+  const { from, to } = useMemo(() => {
+    const period = config?.period ?? "current_month";
+    return getWidgetPeriodDates(period, team?.fiscalYearStartMonth);
+  }, [config?.period, team?.fiscalYearStartMonth]);
 
   const { data } = useQuery({
     ...trpc.widgets.getMonthlySpending.queryOptions({
-      from: format(currentMonthStart, "yyyy-MM-dd"),
-      to: format(currentMonthEnd, "yyyy-MM-dd"),
+      from: format(from, "yyyy-MM-dd"),
+      to: format(to, "yyyy-MM-dd"),
     }),
     ...WIDGET_POLLING_CONFIG,
   });
@@ -46,21 +57,35 @@ export function MonthlySpendingWidget() {
   };
 
   return (
-    <BaseWidget
-      title="Monthly Spending"
-      icon={<Icons.Transactions className="size-4" />}
-      description={getDescription()}
-      onClick={handleSeeExpenses}
-      actions="See biggest cost"
+    <ConfigurableWidget
+      isConfiguring={isConfiguring}
+      settings={
+        <WidgetSettings
+          config={config}
+          onSave={saveConfig}
+          onCancel={() => setIsConfiguring(false)}
+          showPeriod
+          showRevenueType={false}
+        />
+      }
     >
-      {spending && spending.totalSpending > 0 && (
-        <p className="text-3xl">
-          <FormatAmount
-            amount={spending.totalSpending}
-            currency={spending.currency}
-          />
-        </p>
-      )}
-    </BaseWidget>
+      <BaseWidget
+        title="Monthly Spending"
+        icon={<Icons.Transactions className="size-4" />}
+        description={getDescription()}
+        onClick={handleSeeExpenses}
+        actions="See biggest cost"
+        onConfigure={() => setIsConfiguring(true)}
+      >
+        {spending && spending.totalSpending > 0 && (
+          <p className="text-3xl">
+            <FormatAmount
+              amount={spending.totalSpending}
+              currency={spending.currency}
+            />
+          </p>
+        )}
+      </BaseWidget>
+    </ConfigurableWidget>
   );
 }

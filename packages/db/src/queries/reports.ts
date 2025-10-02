@@ -1039,8 +1039,8 @@ export async function getTaxSummary(db: Database, params: GetTaxParams) {
     SELECT 
       COALESCE(tc.slug, 'uncategorized') as category_slug,
       COALESCE(tc.name, 'Uncategorized') as category_name,
-      SUM(t.amount * COALESCE(t.tax_rate, tc.tax_rate, 0) / (100 + COALESCE(t.tax_rate, tc.tax_rate, 0)))::text as total_tax_amount,
-      SUM(t.amount)::text as total_transaction_amount,
+      ABS(SUM(t.amount * COALESCE(t.tax_rate, tc.tax_rate, 0) / (100 + COALESCE(t.tax_rate, tc.tax_rate, 0))))::text as total_tax_amount,
+      ABS(SUM(t.amount))::text as total_transaction_amount,
       COUNT(t.id) as transaction_count,
       AVG(COALESCE(t.tax_rate, tc.tax_rate))::text as avg_tax_rate,
       COALESCE(t.tax_type, tc.tax_type) as tax_type,
