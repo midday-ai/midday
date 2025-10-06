@@ -72,8 +72,6 @@ export function ChatInterface({ id, geo }: Props) {
 
   useChat<UIChatMessage>({
     id: chatId,
-    enableBatching: true,
-    experimental_throttle: 50,
     transport: new DefaultChatTransport({
       api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
       fetch: authenticatedFetch,
