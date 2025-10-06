@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@ai-sdk-tools/artifacts": "beta",
-    "@ai-sdk-tools/cache": "^0.4.0-beta.5",
+    "@ai-sdk-tools/cache": "0.6.0",
     "@ai-sdk/openai": "^2.0.42",
     "@ai-sdk/react": "^2.0.54",
     "@hono/trpc-server": "^0.4.0",
