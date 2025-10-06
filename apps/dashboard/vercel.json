@@ -10,6 +10,10 @@
       "source": "/_next/static/:path*",
       "headers": [
         {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://app.midday.ai"
+        },
+        {
           "key": "X-Content-Type-Options",
           "value": "nosniff"
         }
