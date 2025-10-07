@@ -45,7 +45,11 @@ export function CountrySelector({ defaultValue, onSelect }: Props) {
           <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[225px] p-0" align="start" portal={false}>
+      <PopoverContent
+        className="w-[225px] p-0 z-[60]"
+        align="start"
+        portal={true}
+      >
         <Command loop>
           <CommandInput
             placeholder="Search country..."
