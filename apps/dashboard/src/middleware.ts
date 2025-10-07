@@ -97,10 +97,6 @@ export async function middleware(request: NextRequest) {
     });
   }
 
-  // Add security headers
-  response.headers.set("X-Content-Type-Options", "nosniff");
-  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-
   // If all checks pass, return the original or updated response
   return response;
 }
