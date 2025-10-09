@@ -5,7 +5,7 @@ export const baseUrl = "https://midday.ai";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const blogs = getBlogPosts().map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
+    url: `${baseUrl}/updates/${post.slug}`,
     lastModified: post.metadata.publishedAt,
   }));
 
