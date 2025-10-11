@@ -7,9 +7,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: "var(--font-geist-sans)",
-        mono: "var(--font-geist-mono)",
-        serif: "var(--font-serif)",
+        sans: "var(--font-hedvig-sans)",
+        mono: "var(--font-hedvig-sans)",
+        serif: "var(--font-hedvig-serif)",
       },
       colors: {
         border: "hsl(var(--border))",

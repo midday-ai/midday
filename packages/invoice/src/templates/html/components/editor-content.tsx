@@ -10,7 +10,5 @@ export function EditorContent({ content }: Props) {
     return null;
   }
 
-  return (
-    <div className="font-mono leading-4">{formatEditorContent(content)}</div>
-  );
+  return <div className="leading-4">{formatEditorContent(content)}</div>;
 }

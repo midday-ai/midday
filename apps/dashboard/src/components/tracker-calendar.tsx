@@ -1,5 +1,6 @@
 "use client";
 
+import { useBillableHours } from "@/hooks/use-billable-hours";
 import { useCalendarDates } from "@/hooks/use-calendar-dates";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useUserQuery } from "@/hooks/use-user";
@@ -65,9 +66,11 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
     const weekStart = startOfWeek(currentTZDate, {
       weekStartsOn: weekStartsOnMonday ? 1 : 0,
     });
+
     const weekEnd = endOfWeek(currentTZDate, {
       weekStartsOn: weekStartsOnMonday ? 1 : 0,
     });
+
     return eachDayOfInterval({
       start: weekStart,
       end: weekEnd,
@@ -108,6 +111,13 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
   const { data } = useQuery(
     trpc.trackerEntries.byRange.queryOptions(getDateRange()),
   );
+
+  // Single source of truth for billable hours calculations
+  const { data: billableHoursData } = useBillableHours({
+    date: currentDate,
+    view: selectedView,
+    weekStartsOnMonday,
+  });
 
   function handlePeriodChange(direction: number) {
     if (selectedView === "week") {
@@ -196,8 +206,9 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
     <div ref={ref}>
       <div className="mt-8">
         <CalendarHeader
-          totalDuration={data?.meta?.totalDuration}
+          totalDuration={billableHoursData?.totalDuration}
           selectedView={selectedView as "week" | "month"}
+          billableHoursData={billableHoursData}
         />
         {selectedView === "month" ? (
           <CalendarMonthView

@@ -321,7 +321,7 @@ export function ProductAutocomplete({
           selectedIndex >= 0 ? `product-option-${selectedIndex}` : undefined
         }
         className={cn(
-          "border-0 p-0 min-h-6 border-b border-transparent focus:border-border font-mono text-xs pt-1",
+          "border-0 p-0 min-h-6 border-b border-transparent focus:border-border text-xs pt-1",
           "transition-colors duration-200 bg-transparent outline-none resize-none w-full",
           "text-primary leading-[18px] invoice-editor",
           "placeholder:font-sans placeholder:text-muted-foreground",

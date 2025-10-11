@@ -2,6 +2,7 @@ import {
   getBurnRateSchema,
   getExpensesSchema,
   getProfitSchema,
+  getRevenueForecastSchema,
   getRevenueSchema,
   getRunwaySchema,
   getSpendingSchema,
@@ -12,6 +13,7 @@ import {
   getBurnRate,
   getExpenses,
   getReports,
+  getRevenueForecast,
   getRunway,
   getSpending,
   getTaxSummary,
@@ -97,6 +99,19 @@ export const reportsRouter = createTRPCRouter({
         type: input.type,
         categorySlug: input.categorySlug,
         taxType: input.taxType,
+      });
+    }),
+
+  revenueForecast: protectedProcedure
+    .input(getRevenueForecastSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      return getRevenueForecast(db, {
+        teamId: teamId!,
+        from: input.from,
+        to: input.to,
+        forecastMonths: input.forecastMonths,
+        currency: input.currency,
+        revenueType: input.revenueType,
       });
     }),
 });

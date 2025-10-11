@@ -6,5 +6,6 @@ export type Context = {
     db: Database;
     session: Session;
     teamId: string;
+    userId?: string;
   };
 };

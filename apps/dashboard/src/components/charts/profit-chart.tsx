@@ -1,101 +1,85 @@
-import { useReportsParams } from "@/hooks/use-reports-params";
-import { useTRPC } from "@/trpc/client";
-import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@midday/ui/tooltip";
-import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
-import { AnimatedNumber } from "../animated-number";
-import { FormatAmount } from "../format-amount";
-import { BarChart } from "./bar-chart";
-import { chartExampleData } from "./data";
+"use client";
 
-type Props = {
-  disabled?: boolean;
+import { ReferenceLine, Tooltip } from "recharts";
+import {
+  BaseChart,
+  ChartLegend,
+  StyledBar,
+  StyledLine,
+  StyledTooltip,
+  StyledXAxis,
+  StyledYAxis,
+} from "./base-charts";
+import type { BaseChartProps } from "./chart-utils";
+
+interface ProfitData {
+  month: string;
+  profit: number;
+  expenses: number;
+  revenue?: number;
+}
+
+interface ProfitChartProps extends BaseChartProps {
+  data: ProfitData[];
+  showRevenue?: boolean;
+  showLegend?: boolean;
+}
+
+// Custom formatter for profit tooltip
+const profitTooltipFormatter = (value: any, name: string): [string, string] => {
+  const formattedValue = `$${value.toLocaleString()}`;
+  const displayName =
+    name === "profit" ? "Profit" : name === "expenses" ? "Expenses" : "Revenue";
+  return [formattedValue, displayName];
 };
 
-export function ProfitChart({ disabled }: Props) {
-  const trpc = useTRPC();
-  const { params } = useReportsParams();
-
-  const { data } = useQuery({
-    ...trpc.reports.profit.queryOptions({
-      from: params.from,
-      to: params.to,
-      currency: params.currency ?? undefined,
-    }),
-    placeholderData: (previousData) => previousData ?? chartExampleData,
-  });
-
+export function ProfitChart({
+  data,
+  height = 320,
+  className = "",
+  showRevenue = true,
+  showLegend = true,
+}: ProfitChartProps) {
   return (
-    <div
-      className={cn(
-        disabled && "pointer-events-none select-none blur-[8px] opacity-20",
+    <div className={`w-full ${className}`}>
+      {/* Legend */}
+      {showLegend && (
+        <ChartLegend
+          title="Profit Analysis"
+          items={[
+            { label: "Profit", type: "solid" },
+            { label: "Expenses", type: "solid" },
+            ...(showRevenue
+              ? [{ label: "Revenue", type: "dashed" as const }]
+              : []),
+          ]}
+        />
       )}
-    >
-      <div className="space-y-2 mb-14 inline-block select-text">
-        <h1 className="text-4xl font-mono">
-          <AnimatedNumber
-            value={data?.summary?.currentTotal ?? 0}
-            currency={data?.summary?.currency ?? "USD"}
-          />
-        </h1>
 
-        <div className="text-sm text-[#606060] flex items-center space-x-2">
-          <p className="text-sm text-[#606060]">
-            vs{" "}
-            <FormatAmount
-              maximumFractionDigits={0}
-              minimumFractionDigits={0}
-              amount={data?.summary?.prevTotal ?? 0}
-              currency={data?.meta?.currency ?? "USD"}
-            />{" "}
-            last period
-          </p>
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Icons.Info className="h-4 w-4 mt-1" />
-              </TooltipTrigger>
-              <TooltipContent
-                className="text-xs text-[#878787] max-w-[240px] p-4"
-                side="bottom"
-                sideOffset={10}
-              >
-                <div className="space-y-2">
-                  <h3 className="font-medium text-primary">
-                    Profit is calculated as your income minus expenses.
-                  </h3>
-                  <p>
-                    Explanation: This shows how much you're making after costs.
-                    If the profit seems off, it may be due to internal transfers
-                    labeled as income. You can adjust this by excluding the
-                    transactions from the calculations.
-                  </p>
+      {/* Chart */}
+      <BaseChart data={data} height={height}>
+        <StyledXAxis dataKey="month" />
+        <StyledYAxis
+          tickFormatter={(value: number) => `$${(value / 1000).toFixed(0)}k`}
+        />
 
-                  <p>
-                    All amounts are converted into your{" "}
-                    <Link
-                      href="/settings/accounts"
-                      className="text-primary underline"
-                    >
-                      base currency
-                    </Link>
-                    .
-                  </p>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </div>
+        <Tooltip
+          content={<StyledTooltip formatter={profitTooltipFormatter} />}
+          wrapperStyle={{ zIndex: 9999 }}
+        />
 
-      <BarChart data={data} />
+        <StyledBar dataKey="profit" usePattern={false} />
+        <StyledBar dataKey="expenses" usePattern />
+
+        {showRevenue && <StyledLine dataKey="revenue" strokeDasharray="5 5" />}
+
+        {/* Reference line at zero */}
+        <ReferenceLine
+          y={0}
+          stroke="hsl(var(--border))"
+          strokeDasharray="2 2"
+        />
+      </BaseChart>
     </div>
   );
 }

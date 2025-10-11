@@ -9,9 +9,9 @@ export function BankAccountListSkeleton() {
             <div className="flex items-center">
               <Skeleton className="flex h-9 w-9 items-center justify-center space-y-0 rounded-full" />
               <div className="ml-4 flex flex-col">
-                <p className="text-sm font-medium leading-none mb-1">
+                <span className="text-sm font-medium leading-none mb-1">
                   <Skeleton className="h-3 w-[200px] rounded-none" />
-                </p>
+                </span>
                 <span className="text-xs font-medium text-[#606060]">
                   <Skeleton className="h-2.5 w-[100px] mt-1 rounded-none" />
                 </span>
@@ -22,9 +22,9 @@ export function BankAccountListSkeleton() {
             <div className="flex items-center">
               <Skeleton className="flex h-9 w-9 items-center justify-center space-y-0 rounded-full" />
               <div className="ml-4 flex flex-col">
-                <p className="text-sm font-medium leading-none mb-1">
+                <span className="text-sm font-medium leading-none mb-1">
                   <Skeleton className="h-3 w-[200px] rounded-none" />
-                </p>
+                </span>
                 <span className="text-xs font-medium text-[#606060]">
                   <Skeleton className="h-2.5 w-[100px] mt-1 rounded-none" />
                 </span>

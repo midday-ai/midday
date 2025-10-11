@@ -1154,3 +1154,96 @@ export async function updateInboxWithProcessedData(
 
   return result;
 }
+
+export type GetInboxStatsParams = {
+  teamId: string;
+  from: string;
+  to: string;
+  currency?: string;
+};
+
+export async function getInboxStats(db: Database, params: GetInboxStatsParams) {
+  const { teamId, from, to, currency } = params;
+
+  // Get counts for different statuses
+  const statusCounts = await db
+    .select({
+      status: inbox.status,
+      count: sql<number>`count(*)`,
+    })
+    .from(inbox)
+    .where(and(eq(inbox.teamId, teamId), ne(inbox.status, "deleted")))
+    .groupBy(inbox.status);
+
+  // Get recent matches (done status items within the date range)
+  const recentMatches = await db
+    .select({
+      count: sql<number>`count(*)`,
+    })
+    .from(inbox)
+    .where(
+      and(
+        eq(inbox.teamId, teamId),
+        eq(inbox.status, "done"),
+        sql`${inbox.createdAt}::date >= ${from}::date`,
+        sql`${inbox.createdAt}::date <= ${to}::date`,
+      ),
+    );
+
+  // Get pending suggestions count
+  const pendingSuggestions = await db
+    .select({
+      count: sql<number>`count(*)`,
+    })
+    .from(transactionMatchSuggestions)
+    .innerJoin(inbox, eq(transactionMatchSuggestions.inboxId, inbox.id))
+    .where(
+      and(
+        eq(inbox.teamId, teamId),
+        eq(transactionMatchSuggestions.status, "pending"),
+      ),
+    );
+
+  // Process results
+  const stats = {
+    newItems: 0,
+    pendingItems: 0,
+    analyzingItems: 0,
+    suggestedMatches: 0,
+    recentMatches: Number(recentMatches[0]?.count || 0),
+    totalItems: 0,
+  };
+
+  for (const statusCount of statusCounts) {
+    const count = Number(statusCount.count);
+    stats.totalItems += count;
+
+    switch (statusCount.status) {
+      case "new":
+        stats.newItems = count;
+        break;
+      case "pending":
+        stats.pendingItems = count;
+        break;
+      case "analyzing":
+        stats.analyzingItems = count;
+        break;
+      case "suggested_match":
+        stats.suggestedMatches = count;
+        break;
+    }
+  }
+
+  // Add pending suggestions to suggested matches count
+  stats.suggestedMatches += Number(pendingSuggestions[0]?.count || 0);
+
+  return {
+    result: stats,
+    meta: {
+      from,
+      to,
+      currency,
+      teamId,
+    },
+  };
+}
