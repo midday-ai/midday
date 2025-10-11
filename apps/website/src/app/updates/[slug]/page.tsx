@@ -37,7 +37,7 @@ export async function generateMetadata(props): Promise<Metadata | undefined> {
       description,
       type: "article",
       publishedTime,
-      url: `${baseUrl}/blog/${post.slug}`,
+      url: `${baseUrl}/updates/${post.slug}`,
       images: [
         {
           url: image,
