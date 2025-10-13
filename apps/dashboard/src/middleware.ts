@@ -87,17 +87,6 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  const localeCookie = response.cookies.get("Next-Locale");
-
-  if (localeCookie) {
-    response.cookies.set("Next-Locale", localeCookie.value, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Only enforce Secure in production
-      sameSite: "lax",
-      path: "/",
-    });
-  }
-
   // If all checks pass, return the original or updated response
   return response;
 }
