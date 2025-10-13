@@ -101,7 +101,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v1.2.23
         with:
           bun-version: latest
       - name: Install dependencies
