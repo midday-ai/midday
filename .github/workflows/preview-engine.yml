@@ -13,7 +13,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: v1.2.23
         with:
           bun-version: latest
       - name: Install dependencies
