@@ -54,6 +54,10 @@ export function ActionsMenu({ row }: Props) {
         });
 
         queryClient.invalidateQueries({
+          queryKey: trpc.invoice.paymentStatus.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
           queryKey: trpc.invoice.defaultSettings.queryKey(),
         });
       },
@@ -70,6 +74,18 @@ export function ActionsMenu({ row }: Props) {
         // Widget uses regular query
         queryClient.invalidateQueries({
           queryKey: trpc.invoice.get.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.getById.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.invoiceSummary.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.paymentStatus.queryKey(),
         });
       },
     }),
@@ -114,6 +130,10 @@ export function ActionsMenu({ row }: Props) {
 
         queryClient.invalidateQueries({
           queryKey: trpc.invoice.invoiceSummary.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.paymentStatus.queryKey(),
         });
       },
     }),

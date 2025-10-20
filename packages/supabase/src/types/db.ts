@@ -349,6 +349,176 @@ export type Database = {
           },
         ];
       };
+      chat_feedback: {
+        Row: {
+          chat_id: string;
+          comment: string | null;
+          created_at: string;
+          id: string;
+          message_id: string;
+          team_id: string;
+          type: string;
+          user_id: string;
+        };
+        Insert: {
+          chat_id: string;
+          comment?: string | null;
+          created_at?: string;
+          id?: string;
+          message_id: string;
+          team_id: string;
+          type: string;
+          user_id: string;
+        };
+        Update: {
+          chat_id?: string;
+          comment?: string | null;
+          created_at?: string;
+          id?: string;
+          message_id?: string;
+          team_id?: string;
+          type?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "chat_feedback_chat_id_chats_id_fk";
+            columns: ["chat_id"];
+            isOneToOne: false;
+            referencedRelation: "chats";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "chat_feedback_team_id_teams_id_fk";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "team_limits_metrics";
+            referencedColumns: ["team_id"];
+          },
+          {
+            foreignKeyName: "chat_feedback_team_id_teams_id_fk";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "chat_feedback_user_id_users_id_fk";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      chat_messages: {
+        Row: {
+          chat_id: string;
+          content: Json;
+          created_at: string;
+          id: string;
+          team_id: string;
+          user_id: string;
+        };
+        Insert: {
+          chat_id: string;
+          content: Json;
+          created_at?: string;
+          id?: string;
+          team_id: string;
+          user_id: string;
+        };
+        Update: {
+          chat_id?: string;
+          content?: Json;
+          created_at?: string;
+          id?: string;
+          team_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_chat_id_fkey";
+            columns: ["chat_id"];
+            isOneToOne: false;
+            referencedRelation: "chats";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "chat_messages_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "team_limits_metrics";
+            referencedColumns: ["team_id"];
+          },
+          {
+            foreignKeyName: "chat_messages_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "chat_messages_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      chats: {
+        Row: {
+          created_at: string;
+          id: string;
+          messages: Json | null;
+          team_id: string;
+          title: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id: string;
+          messages?: Json | null;
+          team_id: string;
+          title?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          messages?: Json | null;
+          team_id?: string;
+          title?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "chats_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "team_limits_metrics";
+            referencedColumns: ["team_id"];
+          },
+          {
+            foreignKeyName: "chats_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "chats_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       customer_tags: {
         Row: {
           created_at: string;
@@ -536,16 +706,19 @@ export type Database = {
       document_tag_embeddings: {
         Row: {
           embedding: string | null;
+          model: string;
           name: string;
           slug: string;
         };
         Insert: {
           embedding?: string | null;
+          model?: string;
           name: string;
           slug: string;
         };
         Update: {
           embedding?: string | null;
+          model?: string;
           name?: string;
           slug?: string;
         };
@@ -977,6 +1150,79 @@ export type Database = {
         };
         Relationships: [];
       };
+      invoice_products: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          currency: string | null;
+          description: string | null;
+          fts: unknown | null;
+          id: string;
+          is_active: boolean;
+          last_used_at: string | null;
+          name: string;
+          price: number | null;
+          team_id: string;
+          unit: string | null;
+          updated_at: string | null;
+          usage_count: number;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          currency?: string | null;
+          description?: string | null;
+          fts?: unknown | null;
+          id?: string;
+          is_active?: boolean;
+          last_used_at?: string | null;
+          name: string;
+          price?: number | null;
+          team_id: string;
+          unit?: string | null;
+          updated_at?: string | null;
+          usage_count?: number;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          currency?: string | null;
+          description?: string | null;
+          fts?: unknown | null;
+          id?: string;
+          is_active?: boolean;
+          last_used_at?: string | null;
+          name?: string;
+          price?: number | null;
+          team_id?: string;
+          unit?: string | null;
+          updated_at?: string | null;
+          usage_count?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "invoice_products_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invoice_products_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "team_limits_metrics";
+            referencedColumns: ["team_id"];
+          },
+          {
+            foreignKeyName: "invoice_products_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       invoice_templates: {
         Row: {
           created_at: string;
@@ -1000,6 +1246,7 @@ export type Database = {
           invoice_no_label: string | null;
           issue_date_label: string | null;
           logo_url: string | null;
+          note_details: Json | null;
           note_label: string | null;
           payment_details: Json | null;
           payment_label: string | null;
@@ -1039,6 +1286,7 @@ export type Database = {
           invoice_no_label?: string | null;
           issue_date_label?: string | null;
           logo_url?: string | null;
+          note_details?: Json | null;
           note_label?: string | null;
           payment_details?: Json | null;
           payment_label?: string | null;
@@ -1078,6 +1326,7 @@ export type Database = {
           invoice_no_label?: string | null;
           issue_date_label?: string | null;
           logo_url?: string | null;
+          note_details?: Json | null;
           note_label?: string | null;
           payment_details?: Json | null;
           payment_label?: string | null;
@@ -1742,6 +1991,8 @@ export type Database = {
           created_at: string;
           document_classification: boolean | null;
           email: string | null;
+          export_settings: Json | null;
+          fiscal_year_start_month: number | null;
           flags: string[] | null;
           id: string;
           inbox_email: string | null;
@@ -1758,6 +2009,8 @@ export type Database = {
           created_at?: string;
           document_classification?: boolean | null;
           email?: string | null;
+          export_settings?: Json | null;
+          fiscal_year_start_month?: number | null;
           flags?: string[] | null;
           id?: string;
           inbox_email?: string | null;
@@ -1774,6 +2027,8 @@ export type Database = {
           created_at?: string;
           document_classification?: boolean | null;
           email?: string | null;
+          export_settings?: Json | null;
+          fiscal_year_start_month?: number | null;
           flags?: string[] | null;
           id?: string;
           inbox_email?: string | null;
@@ -1800,7 +2055,11 @@ export type Database = {
           start: string | null;
           stop: string | null;
           team_id: string | null;
-          project_members: Record<string, unknown> | null;
+          project_members: {
+            avatar_url: string;
+            full_name: string;
+            id: string;
+          } | null;
         };
         Insert: {
           assigned_id?: string | null;
@@ -1932,7 +2191,11 @@ export type Database = {
           team_id: string | null;
           get_assigned_users_for_project: Json | null;
           get_project_total_amount: number | null;
-          project_members: Record<string, unknown> | null;
+          project_members: {
+            avatar_url: string;
+            full_name: string;
+            id: string;
+          } | null;
           total_duration: number | null;
         };
         Insert: {
@@ -2106,7 +2369,6 @@ export type Database = {
           color: string | null;
           created_at: string | null;
           description: string | null;
-          embedding: string | null;
           excluded: boolean | null;
           id: string;
           name: string;
@@ -2123,7 +2385,6 @@ export type Database = {
           color?: string | null;
           created_at?: string | null;
           description?: string | null;
-          embedding?: string | null;
           excluded?: boolean | null;
           id?: string;
           name: string;
@@ -2140,7 +2401,6 @@ export type Database = {
           color?: string | null;
           created_at?: string | null;
           description?: string | null;
-          embedding?: string | null;
           excluded?: boolean | null;
           id?: string;
           name?: string;
@@ -2176,6 +2436,33 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      transaction_category_embeddings: {
+        Row: {
+          created_at: string;
+          embedding: string | null;
+          model: string;
+          name: string;
+          system: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          embedding?: string | null;
+          model?: string;
+          name: string;
+          system?: boolean;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          embedding?: string | null;
+          model?: string;
+          name?: string;
+          system?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
       transaction_embeddings: {
         Row: {
@@ -2458,6 +2745,7 @@ export type Database = {
           notified: boolean | null;
           recurring: boolean | null;
           status: Database["public"]["Enums"]["transactionStatus"] | null;
+          tax_amount: number | null;
           tax_rate: number | null;
           tax_type: string | null;
           team_id: string;
@@ -2497,6 +2785,7 @@ export type Database = {
           notified?: boolean | null;
           recurring?: boolean | null;
           status?: Database["public"]["Enums"]["transactionStatus"] | null;
+          tax_amount?: number | null;
           tax_rate?: number | null;
           tax_type?: string | null;
           team_id: string;
@@ -2533,6 +2822,7 @@ export type Database = {
           notified?: boolean | null;
           recurring?: boolean | null;
           status?: Database["public"]["Enums"]["transactionStatus"] | null;
+          tax_amount?: number | null;
           tax_rate?: number | null;
           tax_type?: string | null;
           team_id?: string;
@@ -2932,6 +3222,7 @@ export type Database = {
           notified: boolean | null;
           recurring: boolean | null;
           status: Database["public"]["Enums"]["transactionStatus"] | null;
+          tax_amount: number | null;
           tax_rate: number | null;
           tax_type: string | null;
           team_id: string;
@@ -3587,7 +3878,8 @@ export type Database = {
         | "customer_created"
         | "inbox_auto_matched"
         | "inbox_needs_review"
-        | "inbox_cross_currency_matched";
+        | "inbox_cross_currency_matched"
+        | "inbox_match_confirmed";
       approval_status: "draft" | "pending" | "approved" | "rejected";
       bank_providers:
         | "gocardless"
@@ -3839,6 +4131,7 @@ export const Constants = {
         "inbox_auto_matched",
         "inbox_needs_review",
         "inbox_cross_currency_matched",
+        "inbox_match_confirmed",
       ],
       approval_status: ["draft", "pending", "approved", "rejected"],
       bank_providers: [

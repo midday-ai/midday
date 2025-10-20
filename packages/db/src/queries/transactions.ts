@@ -14,6 +14,7 @@ import {
   users,
 } from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
+import { resolveTaxValues } from "@midday/db/utils/tax";
 import { logger } from "@midday/logger";
 import {
   and,
@@ -261,6 +262,7 @@ export async function getTransactions(
       createdAt: transactions.createdAt,
       taxRate: transactions.taxRate,
       taxType: transactions.taxType,
+      taxAmount: transactions.taxAmount,
       enrichmentCompleted: transactions.enrichmentCompleted,
       isFulfilled:
         sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`.as(
@@ -510,6 +512,7 @@ export async function getTransactionById(
       createdAt: transactions.createdAt,
       taxRate: transactions.taxRate,
       taxType: transactions.taxType,
+      taxAmount: transactions.taxAmount,
       enrichmentCompleted: transactions.enrichmentCompleted,
       isFulfilled:
         sql<boolean>`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, params.teamId)})) OR ${transactions.status} = 'completed'`.as(
@@ -688,16 +691,21 @@ export async function getTransactionById(
       }
     : null;
 
-  const taxRate = rest.taxRate ?? rest.category?.taxRate ?? 0;
+  const { taxAmount, taxRate, taxType } = resolveTaxValues({
+    transactionAmount: rest.amount,
+    transactionTaxAmount: rest.taxAmount,
+    transactionTaxRate: rest.taxRate,
+    transactionTaxType: rest.taxType,
+    categoryTaxRate: rest.category?.taxRate,
+    categoryTaxType: rest.category?.taxType,
+  });
 
   return {
     ...rest,
     account: newAccount,
     taxRate,
-    taxType: rest.taxType ?? rest.category?.taxType ?? null,
-    taxAmount: Math.abs(
-      +((taxRate * rest.amount) / (100 + taxRate)).toFixed(2),
-    ),
+    taxType,
+    taxAmount,
   };
 }
 
@@ -1253,6 +1261,8 @@ type UpdateTransactionData = {
   assignedId?: string | null;
   recurring?: boolean;
   frequency?: "weekly" | "monthly" | "annually" | "irregular" | null;
+  taxRate?: number | null;
+  taxAmount?: number | null;
 };
 
 export async function updateTransaction(
