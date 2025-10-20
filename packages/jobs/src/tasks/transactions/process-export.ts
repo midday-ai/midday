@@ -109,7 +109,7 @@ export const processExport = schemaTask({
         });
 
         const formattedTaxType = getTaxTypeLabel(taxType ?? "");
-        const formattedTaxRate = taxRate && taxRate > 0 ? `${taxRate}%` : "";
+        const formattedTaxRate = taxRate != null ? `${taxRate}%` : "";
 
         return [
           transaction.id,
