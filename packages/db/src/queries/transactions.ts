@@ -14,8 +14,8 @@ import {
   users,
 } from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
-import { resolveTaxValues } from "@midday/db/utils/tax";
 import { logger } from "@midday/logger";
+import { resolveTaxValues } from "@midday/utils/tax";
 import {
   and,
   asc,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTRPC } from "@/trpc/client";
+import { CurrencyInput } from "@midday/ui/currency-input";
 import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
 import {
@@ -17,6 +18,8 @@ import {
   getTaxTypeLabel,
 } from "@midday/utils/tax";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import { useDebounceCallback } from "usehooks-ts";
 import { FormatAmount } from "./format-amount";
 
 type TaxAmountProps = {
@@ -42,7 +45,7 @@ export function TaxAmount({
   const updateTransactionMutation = useMutation(
     trpc.transactions.update.mutationOptions({
       onMutate: async (variables) => {
-        // Cancel outgoing refetches
+        // Cancel any outgoing refetches
         await Promise.all([
           queryClient.cancelQueries({
             queryKey: trpc.transactions.getById.queryKey({ id: transactionId }),
@@ -52,7 +55,7 @@ export function TaxAmount({
           }),
         ]);
 
-        // Snapshot previous value
+        // Snapshot the previous value
         const previousData = {
           details: queryClient.getQueryData(
             trpc.transactions.getById.queryKey({ id: transactionId }),
@@ -62,7 +65,7 @@ export function TaxAmount({
           ),
         };
 
-        // Optimistically update details view
+        // Optimistically update the details view
         queryClient.setQueryData(
           trpc.transactions.getById.queryKey({ id: transactionId }),
           (old: any) => ({
@@ -71,7 +74,7 @@ export function TaxAmount({
           }),
         );
 
-        // Optimistically update list view
+        // Optimistically update the list view
         queryClient.setQueryData(
           trpc.transactions.get.infiniteQueryKey(),
           (old: any) => {
@@ -109,26 +112,46 @@ export function TaxAmount({
           );
         }
       },
-      onSuccess: (data) => {
-        // Update with server response
-        queryClient.setQueryData(
-          trpc.transactions.getById.queryKey({ id: transactionId }),
-          data,
-        );
-        // Only invalidate list view
+      onSettled: () => {
+        // Invalidate to refetch fresh data
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.getById.queryKey({ id: transactionId }),
+        });
         queryClient.invalidateQueries({
           queryKey: trpc.transactions.get.infiniteQueryKey(),
         });
       },
-      onSettled: () => {
-        // Final refetch to ensure consistency (only for details view)
-        queryClient.invalidateQueries({
-          queryKey: trpc.transactions.getById.queryKey({ id: transactionId }),
-        });
-      },
     }),
   );
+
   const isPercentageMode = taxRate !== null && taxRate !== undefined;
+
+  // Local state for controlled inputs
+  const [localTaxRate, setLocalTaxRate] = useState(taxRate?.toString() ?? "");
+  const [localTaxAmount, setLocalTaxAmount] = useState(taxAmount ?? 0);
+
+  // Track the transaction ID to reset state when switching transactions
+  const lastTransactionIdRef = useRef(transactionId);
+
+  // Only sync from props when transaction changes (not from our own mutations)
+  useEffect(() => {
+    if (lastTransactionIdRef.current !== transactionId) {
+      lastTransactionIdRef.current = transactionId;
+      setLocalTaxRate(taxRate?.toString() ?? "");
+      setLocalTaxAmount(taxAmount ?? 0);
+    }
+  }, [transactionId, taxRate, taxAmount]);
+
+  // Debounced mutation call
+  const debouncedUpdate = useDebounceCallback(
+    (params: { taxRate: number | null; taxAmount: number | null }) => {
+      updateTransactionMutation.mutate({
+        id: transactionId,
+        ...params,
+      });
+    },
+    500,
+  );
 
   // Get dynamic label based on tax type
   const getTaxLabel = () => {
@@ -142,63 +165,83 @@ export function TaxAmount({
     <div className="mb-4 border-b pb-4">
       <Label className="mb-2 block font-medium text-md">{getTaxLabel()}</Label>
       <div className="relative">
-        <Input
-          type="number"
-          placeholder="0"
-          step="0.01"
-          className="pr-16"
-          value={isPercentageMode ? taxRate : (taxAmount ?? "")}
-          onChange={(e) => {
-            const value = e.target.value
-              ? Number.parseFloat(e.target.value)
-              : null;
+        {isPercentageMode ? (
+          <Input
+            type="number"
+            placeholder="0"
+            step="0.01"
+            min="0"
+            max="100"
+            className="pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            value={localTaxRate}
+            onWheel={(e) => e.currentTarget.blur()}
+            onChange={(e) => {
+              const inputValue = e.target.value;
+              setLocalTaxRate(inputValue);
 
-            if (isPercentageMode) {
-              // Percentage mode: save taxRate and calculate taxAmount
+              const numValue = inputValue
+                ? Number.parseFloat(inputValue)
+                : null;
+
+              // Validate percentage is between 0 and 100
+              if (numValue !== null && (numValue < 0 || numValue > 100)) {
+                return;
+              }
+
+              // Calculate and debounce the update
+              // Note: 0 is a valid value (explicit override of category default)
               const calculatedTaxAmount =
-                value !== null && amount
-                  ? calculateTaxAmount(amount, value)
+                numValue !== null && amount
+                  ? calculateTaxAmount(amount, numValue)
                   : null;
-              updateTransactionMutation.mutate({
-                id: transactionId,
-                taxRate: value,
+
+              debouncedUpdate({
+                taxRate: numValue,
                 taxAmount: calculatedTaxAmount,
               });
-            } else {
-              // Fixed amount mode: save only taxAmount, set taxRate to null
-              updateTransactionMutation.mutate({
-                id: transactionId,
+            }}
+          />
+        ) : (
+          <CurrencyInput
+            placeholder="0"
+            className="pr-16"
+            value={localTaxAmount ?? undefined}
+            onValueChange={(values) => {
+              const value = values.floatValue ?? 0;
+              setLocalTaxAmount(value);
+
+              // Note: 0 is a valid value (explicit override of category default)
+              debouncedUpdate({
                 taxRate: null,
                 taxAmount: value,
               });
-            }
-          }}
-        />
+            }}
+            decimalScale={2}
+            fixedDecimalScale={false}
+            thousandSeparator={true}
+          />
+        )}
         <Select
           value={isPercentageMode ? "percentage" : "fixed"}
           onValueChange={(value: "percentage" | "fixed") => {
             if (value === "percentage") {
               // Switch to percentage mode
-              // If there's a current taxAmount, try to calculate a rate and round to 2 decimals
+              // Calculate rate from existing taxAmount but keep the taxAmount as-is
               const calculatedRate =
                 taxAmount && amount ? calculateTaxRate(amount, taxAmount) : 0;
 
-              const calculatedTaxAmount =
-                calculatedRate && amount
-                  ? calculateTaxAmount(amount, calculatedRate)
-                  : 0;
-
+              // Keep the existing taxAmount to avoid rounding errors
               updateTransactionMutation.mutate({
                 id: transactionId,
                 taxRate: calculatedRate,
-                taxAmount: calculatedTaxAmount,
+                taxAmount: taxAmount ?? 0,
               });
             } else {
               // Switch to fixed mode: keep taxAmount, clear taxRate
               updateTransactionMutation.mutate({
                 id: transactionId,
                 taxRate: null,
-                taxAmount: taxAmount ?? 0, // Default to 0 for fixed mode
+                taxAmount: taxAmount ?? 0,
               });
             }
           }}
@@ -214,7 +257,7 @@ export function TaxAmount({
           </SelectContent>
         </Select>
       </div>
-      {taxAmount && (
+      {taxAmount !== null && taxAmount !== undefined && taxAmount > 0 && (
         <p className="text-xs text-muted-foreground mt-2">
           {getTaxLabel()}:{" "}
           <FormatAmount
@@ -222,7 +265,10 @@ export function TaxAmount({
             currency={currency}
             maximumFractionDigits={2}
           />
-          {taxRate && ` (${taxRate}%)`}
+          {taxRate !== null &&
+            taxRate !== undefined &&
+            taxRate > 0 &&
+            ` (${taxRate}%)`}
         </p>
       )}
     </div>
