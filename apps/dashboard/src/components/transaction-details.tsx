@@ -31,6 +31,7 @@ import { Note } from "./note";
 import { SelectCategory } from "./select-category";
 import { SelectTags } from "./select-tags";
 import { SuggestedMatch } from "./suggested-match";
+import { TaxAmount } from "./tax-amount";
 import { TransactionAttachments } from "./transaction-attachments";
 import { TransactionBankAccount } from "./transaction-bank-account";
 import { TransactionShortcuts } from "./transaction-shortcuts";
@@ -461,6 +462,15 @@ export function TransactionDetails() {
                 />
               </div>
             </div>
+
+            <TaxAmount
+              transactionId={data?.id}
+              amount={data?.amount}
+              currency={data?.currency}
+              taxRate={data?.taxRate}
+              taxAmount={data?.taxAmount}
+              taxType={data?.taxType}
+            />
 
             <div className="flex flex-row items-center justify-between">
               <div className="space-y-0.5">

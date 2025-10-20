@@ -541,6 +541,14 @@ export const updateTransactionSchema = z.object({
   assignedId: z.string().nullable().optional().openapi({
     description: "Assigned user ID for the transaction.",
   }),
+  taxRate: z.number().nullable().optional().openapi({
+    description:
+      "Tax rate as a percentage (e.g., 25 for 25% VAT). Only set when tax is calculated from a percentage.",
+  }),
+  taxAmount: z.number().nullable().optional().openapi({
+    description:
+      "Tax amount in the transaction currency. Always set when tax is present.",
+  }),
 });
 
 export const updateTransactionsSchema = z.object({

@@ -70,6 +70,10 @@ export function Form() {
           queryKey: trpc.invoice.invoiceSummary.queryKey(),
         });
 
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.paymentStatus.queryKey(),
+        });
+
         // Invalidate global search
         queryClient.invalidateQueries({
           queryKey: trpc.search.global.queryKey(),

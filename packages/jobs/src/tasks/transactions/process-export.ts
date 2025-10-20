@@ -3,7 +3,7 @@ import { processBatch } from "@jobs/utils/process-batch";
 import { createClient } from "@midday/supabase/job";
 import { download } from "@midday/supabase/storage";
 import { ensureFileExtension } from "@midday/utils";
-import { getTaxTypeLabel } from "@midday/utils/tax";
+import { getTaxTypeLabel, resolveTaxValues } from "@midday/utils/tax";
 import { schemaTask } from "@trigger.dev/sdk";
 import { format, parseISO } from "date-fns";
 import { z } from "zod";
@@ -41,6 +41,7 @@ export const processExport = schemaTask({
         counterparty_name,
         tax_type,
         tax_rate,
+        tax_amount,
         attachments:transaction_attachments(*),
         category:transaction_categories(id, name, description, tax_rate, tax_type, tax_reporting_code),
         bank_account:bank_accounts(id, name),
@@ -98,17 +99,17 @@ export const processExport = schemaTask({
     const rows = transactionsData
       ?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .map((transaction) => {
-        const taxRate =
-          transaction?.tax_rate ?? transaction?.category?.tax_rate ?? 0;
-        const taxAmount = Math.abs(
-          +((taxRate * transaction.amount) / (100 + taxRate)).toFixed(2),
-        );
+        const { taxAmount, taxRate, taxType } = resolveTaxValues({
+          transactionAmount: transaction.amount,
+          transactionTaxAmount: transaction.tax_amount,
+          transactionTaxRate: transaction.tax_rate,
+          transactionTaxType: transaction.tax_type,
+          categoryTaxRate: transaction.category?.tax_rate,
+          categoryTaxType: transaction.category?.tax_type,
+        });
 
-        const formattedTaxType = getTaxTypeLabel(
-          transaction?.tax_type ?? transaction?.category?.tax_type ?? "",
-        );
-
-        const formattedTaxRate = taxRate > 0 ? `${taxRate}%` : "";
+        const formattedTaxType = getTaxTypeLabel(taxType ?? "");
+        const formattedTaxRate = taxRate != null ? `${taxRate}%` : "";
 
         return [
           transaction.id,
@@ -126,7 +127,7 @@ export const processExport = schemaTask({
           Intl.NumberFormat(locale, {
             style: "currency",
             currency: transaction.currency,
-          }).format(taxAmount),
+          }).format(taxAmount ?? 0),
           transaction?.counterparty_name ?? "",
           transaction?.category?.name ?? "",
           transaction?.category?.description ?? "",
