@@ -11,7 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
-import { getTaxTypeLabel } from "@midday/utils/tax";
+import {
+  calculateTaxAmount,
+  calculateTaxRate,
+  getTaxTypeLabel,
+} from "@midday/utils/tax";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FormatAmount } from "./format-amount";
 
@@ -153,7 +157,7 @@ export function TaxAmount({
               // Percentage mode: save taxRate and calculate taxAmount
               const calculatedTaxAmount =
                 value !== null && amount
-                  ? Math.abs(amount) * (value / 100)
+                  ? calculateTaxAmount(amount, value)
                   : null;
               updateTransactionMutation.mutate({
                 id: transactionId,
@@ -177,13 +181,11 @@ export function TaxAmount({
               // Switch to percentage mode
               // If there's a current taxAmount, try to calculate a rate and round to 2 decimals
               const calculatedRate =
-                taxAmount && amount
-                  ? Math.round((taxAmount / Math.abs(amount)) * 100 * 100) / 100
-                  : 0;
+                taxAmount && amount ? calculateTaxRate(amount, taxAmount) : 0;
 
               const calculatedTaxAmount =
                 calculatedRate && amount
-                  ? Math.abs(amount) * (calculatedRate / 100)
+                  ? calculateTaxAmount(amount, calculatedRate)
                   : 0;
 
               updateTransactionMutation.mutate({

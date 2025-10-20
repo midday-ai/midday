@@ -148,3 +148,26 @@ export function isVATCountry(countryCode: string): boolean {
 export function isGSTCountry(countryCode: string): boolean {
   return getDefaultTaxType(countryCode) === "gst";
 }
+
+/**
+ * Calculate tax amount from an amount and tax rate percentage
+ * Rounds to 2 decimal places to avoid floating-point precision issues
+ * @param amount - The base amount (can be positive or negative)
+ * @param taxRate - The tax rate as a percentage (e.g., 20 for 20%)
+ * @returns The calculated tax amount rounded to 2 decimal places
+ */
+export function calculateTaxAmount(amount: number, taxRate: number): number {
+  return Math.round(amount * (taxRate / 100) * 100) / 100;
+}
+
+/**
+ * Calculate tax rate percentage from an amount and tax amount
+ * Rounds to 2 decimal places
+ * @param amount - The base amount
+ * @param taxAmount - The tax amount
+ * @returns The calculated tax rate as a percentage rounded to 2 decimal places
+ */
+export function calculateTaxRate(amount: number, taxAmount: number): number {
+  if (amount === 0) return 0;
+  return Math.round((taxAmount / amount) * 100 * 100) / 100;
+}
