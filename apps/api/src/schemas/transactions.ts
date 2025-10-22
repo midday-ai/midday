@@ -192,6 +192,18 @@ export const getTransactionsSchema = z.object({
         in: "query",
       },
     }),
+  manual: z
+    .enum(["include", "exclude"])
+    .nullable()
+    .optional()
+    .openapi({
+      description:
+        "Filter transactions based on whether they were manually imported. 'include' returns only manual transactions, 'exclude' returns only non-manual transactions",
+      example: "include",
+      param: {
+        in: "query",
+      },
+    }),
 });
 
 export const transactionResponseSchema = z

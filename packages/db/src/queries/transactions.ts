@@ -55,6 +55,7 @@ export type GetTransactionsParams = {
   recurring?: string[] | null;
   amount_range?: number[] | null;
   amount?: string[] | null;
+  manual?: "include" | "exclude" | null;
 };
 
 // Helper type from schema if not already exported
@@ -84,6 +85,7 @@ export async function getTransactions(
     recurring: filterRecurring,
     amount: filterAmount,
     amount_range: filterAmountRange,
+    manual: filterManual,
   } = params;
 
   // Always start with teamId filter
@@ -236,6 +238,13 @@ export async function getTransactions(
     } else if (operator === "lte") {
       whereConditions.push(lte(transactions.amount, Number(value)));
     }
+  }
+
+  // Manual filter
+  if (filterManual === "include") {
+    whereConditions.push(eq(transactions.manual, true));
+  } else if (filterManual === "exclude") {
+    whereConditions.push(eq(transactions.manual, false));
   }
 
   const finalWhereConditions = whereConditions.filter(
