@@ -101,8 +101,8 @@ const recurringFilters: FilterItem<RecurringFilter>[] = [
 ];
 
 const manualFilters: FilterItem<ManualFilter>[] = [
-  { id: "include", name: "Manually added" },
-  { id: "exclude", name: "Bank imported" },
+  { id: "include", name: "Manual" },
+  { id: "exclude", name: "Bank connection" },
 ];
 
 // Reusable components
@@ -541,7 +541,7 @@ export function TransactionsSearchFilter() {
           ))}
         </FilterMenuItem>
 
-        <FilterMenuItem icon={Icons.Import} label="Import type">
+        <FilterMenuItem icon={Icons.Import} label="Source">
           {manualFilters.map(({ id, name }) => (
             <FilterCheckboxItem
               key={id}
