@@ -36,7 +36,8 @@ type FilterKey =
   | "customers"
   | "assignees"
   | "owners"
-  | "status";
+  | "status"
+  | "manual";
 
 type FilterValue = {
   start: string;
@@ -52,6 +53,7 @@ type FilterValue = {
   assignees: string[];
   owners: string[];
   status: string;
+  manual: string;
 };
 
 interface FilterValueProps {
@@ -70,6 +72,7 @@ interface Props {
   statusFilters?: { id: string; name: string }[];
   attachmentsFilters?: { id: string; name: string }[];
   recurringFilters?: { id: string; name: string }[];
+  manualFilters?: { id: string; name: string }[];
   tags?: { id: string; name: string; slug?: string }[];
   amountRange?: [number, number];
 }
@@ -86,6 +89,7 @@ export function FilterList({
   statusFilters,
   attachmentsFilters,
   recurringFilters,
+  manualFilters,
   amountRange,
 }: Props) {
   const renderFilter = ({ key, value }: FilterValueProps) => {
@@ -199,6 +203,11 @@ export function FilterList({
             return member?.name;
           })
           .join(", ");
+      }
+
+      case "manual": {
+        const manualValue = value as FilterValue["manual"];
+        return manualFilters?.find((filter) => filter.id === manualValue)?.name;
       }
 
       default:

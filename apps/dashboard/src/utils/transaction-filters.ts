@@ -12,6 +12,7 @@ export type TransactionFilters = {
   amount?: string[] | null;
   recurring?: ("all" | "weekly" | "monthly" | "annually")[] | null;
   statuses?: ("completed" | "uncompleted" | "archived" | "excluded")[] | null;
+  manual?: "include" | "exclude" | null;
 };
 
 // Generic filter state type
@@ -39,6 +40,7 @@ export const EMPTY_FILTER_STATE: TransactionFilters = {
   amount: null,
   recurring: null,
   statuses: null,
+  manual: null,
 };
 
 /**
