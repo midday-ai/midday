@@ -3,6 +3,8 @@
 import { AssignedUser } from "@/components/assigned-user";
 import { Category } from "@/components/category";
 import { FormatAmount } from "@/components/format-amount";
+import { InlineAssignUser } from "@/components/inline-assign-user";
+import { InlineSelectCategory } from "@/components/inline-select-category";
 import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
 import { TransactionStatus } from "@/components/transaction-status";
@@ -303,7 +305,7 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "category",
     header: "Category",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       // Show analyzing state when enrichment is not completed
       if (!row.original.enrichmentCompleted) {
         return (
@@ -325,10 +327,26 @@ export const columns: ColumnDef<Transaction>[] = [
         );
       }
 
+      const meta = table.options.meta;
+
       return (
-        <Category
-          name={row.original?.category?.name ?? ""}
-          color={row.original?.category?.color ?? ""}
+        <InlineSelectCategory
+          selected={
+            row.original.category
+              ? {
+                  id: row.original.category.id,
+                  name: row.original.category.name,
+                  color: row.original.category.color,
+                  slug: row.original.category.slug ?? "",
+                }
+              : undefined
+          }
+          onChange={(category) => {
+            meta?.updateTransaction?.({
+              id: row.original.id,
+              categorySlug: category.slug,
+            });
+          }}
         />
       );
     },
@@ -364,15 +382,18 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "assigned",
     header: "Assigned",
-    cell: ({ row }) => {
-      if (!row.original.assigned) {
-        return null;
-      }
+    cell: ({ row, table }) => {
+      const meta = table.options.meta;
 
       return (
-        <AssignedUser
-          fullName={row.original.assigned?.fullName}
-          avatarUrl={row.original.assigned?.avatarUrl}
+        <InlineAssignUser
+          selectedId={row.original.assigned?.id ?? undefined}
+          onSelect={(user) => {
+            meta?.updateTransaction?.({
+              id: row.original.id,
+              assignedId: user.id,
+            });
+          }}
         />
       );
     },

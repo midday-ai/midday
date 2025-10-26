@@ -254,7 +254,7 @@ export function TransactionsSearchFilter() {
     if (value) {
       setPrompt(value);
     } else {
-      setFilter(defaultSearch);
+      setFilter({ q: null });
       setPrompt("");
     }
   };

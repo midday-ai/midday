@@ -299,7 +299,9 @@ export function DataTable({
                             onClick={() => {
                               if (
                                 cell.column.id !== "select" &&
-                                cell.column.id !== "actions"
+                                cell.column.id !== "actions" &&
+                                cell.column.id !== "category" &&
+                                cell.column.id !== "assigned"
                               ) {
                                 setParams({ transactionId: row.original.id });
                               }
