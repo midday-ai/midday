@@ -264,6 +264,7 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
               return shouldForceStop(step);
             },
             experimental_transform: smoothStream({ chunking: "word" }),
+            experimental_context: { writer },
             tools: createToolRegistry(),
             onError: (error) => {
               console.error(error);
