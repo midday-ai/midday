@@ -7,13 +7,13 @@ import { Messages } from "@/components/chat/messages";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { AIDevtools } from "@ai-sdk-tools/devtools";
-import { useChat } from "@ai-sdk-tools/store";
+import { useChat, useChatActions } from "@ai-sdk-tools/store";
 import type { UIChatMessage } from "@api/ai/types";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
 import type { Geo } from "@vercel/functions";
 import { DefaultChatTransport, generateId } from "ai";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 type Props = {
   id?: string | null;
@@ -24,14 +24,29 @@ export function ChatInterface({ id, geo }: Props) {
   const { current } = useArtifacts({
     exclude: ["chat-title", "followup-questions"],
   });
+
   const isCanvasVisible = !!current;
   const { isHome, isChatPage, chatId: routeChatId } = useChatInterface();
+  const { reset } = useChatActions();
+  const prevChatIdRef = useRef<string | null>(routeChatId);
 
   // Use provided id, or get from route, or generate new one
   const providedId = id ?? routeChatId;
 
   // Generate a consistent chat ID - use provided ID or generate one
   const chatId = useMemo(() => providedId ?? generateId(), [providedId]);
+
+  // Clear messages when navigating back from a chat to home
+  useEffect(() => {
+    const prevChatId = prevChatIdRef.current;
+
+    if (prevChatId && !routeChatId) {
+      // Navigated from chat to home - reset messages
+      reset();
+    }
+
+    prevChatIdRef.current = routeChatId;
+  }, [routeChatId, reset]);
 
   const authenticatedFetch = useMemo(
     () =>
