@@ -165,8 +165,6 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
           msg: "Chat title generated",
           chatId: id,
           title: generatedTitle,
-          userId,
-          teamId,
         });
       } catch (error) {
         logger.error({
