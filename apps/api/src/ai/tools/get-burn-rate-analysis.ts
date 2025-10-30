@@ -1,4 +1,5 @@
 import { openai } from "@ai-sdk/openai";
+import { cached } from "@api/ai/cache";
 import { getBurnRate, getRunway, getSpending } from "@db/queries";
 import { formatAmount } from "@midday/utils/format";
 import { generateText, smoothStream, streamText, tool } from "ai";
@@ -15,7 +16,7 @@ import { generateFollowupQuestions } from "../utils/generate-followup-questions"
 import { safeValue } from "../utils/safe-value";
 import { getBurnRateSchema } from "./schema";
 
-export const getBurnRateAnalysisTool = tool({
+export const getBurnRateAnalysis = tool({
   description:
     "Generate comprehensive burn rate analysis with interactive visualizations, spending trends, runway projections, and actionable insights. Use this tool when users want detailed financial analysis, visual charts, spending breakdowns, or need to understand their business's financial health and future projections.",
   inputSchema: getBurnRateSchema.omit({ showCanvas: true }), // Remove showCanvas since this always shows canvas
@@ -155,7 +156,10 @@ Example format: "I'm analyzing your burn rate data for [period] to show your mon
       // Generate monthly chart data
       const fromDate = startOfMonth(new Date(from));
       const toDate = endOfMonth(new Date(to));
-      const monthSeries = eachMonthOfInterval({ start: fromDate, end: toDate });
+      const monthSeries = eachMonthOfInterval({
+        start: fromDate,
+        end: toDate,
+      });
 
       const monthlyData = monthSeries.map((month, index) => {
         const currentBurn = burnRateData[index]?.value || 0;
@@ -441,4 +445,10 @@ The chart on the right shows your monthly burn rate trends with current vs avera
       throw error;
     }
   },
+});
+
+export const getBurnRateAnalysisTool = cached(getBurnRateAnalysis, {
+  debug: true,
+  onHit: (key) => console.log(`✅ HIT: ${key.slice(0, 50)}...`),
+  onMiss: (key) => console.log(`❌ MISS: ${key.slice(0, 50)}...`),
 });
