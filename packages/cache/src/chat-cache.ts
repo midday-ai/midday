@@ -20,6 +20,7 @@ export interface ChatUserContext {
   city?: string | null;
   region?: string | null;
   timezone?: string | null;
+  fiscalYearStartMonth?: number | null;
 }
 
 export const chatCache = {

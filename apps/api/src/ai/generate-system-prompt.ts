@@ -60,8 +60,9 @@ const generateBasePrompt = (userContext: ChatUserContext) => {
     Answer questions directly without unnecessary structure, but make the user feel heard and valued.
     
     Current date and time: ${tzDate.toISOString()}
-    Team name: ${safeValue(userContext.teamName)}
+    Company name: ${safeValue(userContext.teamName)}
     Company registered in: ${safeValue(userContext.countryCode)}
+    Company fiscal year start month: ${safeValue(userContext.fiscalYearStartMonth?.toString())}
     Base currency: ${safeValue(userContext.baseCurrency)}
     User full name: ${safeValue(userContext.fullName)}
     User current city: ${safeValue(userContext.city)}
