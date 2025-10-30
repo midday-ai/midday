@@ -12,7 +12,7 @@
   "dependencies": {
     "@slack/bolt": "^4.4.0",
     "@slack/web-api": "^7.10.0",
-    "zod": "^4.1.9",
+    "zod": "^4.1.11",
     "@midday/jobs": "workspace:*"
   },
   "devDependencies": {
