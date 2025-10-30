@@ -251,63 +251,32 @@ export function InboxConnectedAccounts() {
   );
 
   return (
-    <TooltipProvider>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <span>Email Connections</span>
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger asChild>
-                <div className="rounded-full text-[#878787] text-[9px] font-normal border px-2 py-1 font-mono cursor-help">
-                  Beta
-                </div>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-[300px] text-xs">
-                <p>
-                  We are currently in Google's verification review process. This
-                  is a standard procedure for all apps requesting Gmail access.
-                  You may see a warning screen - this is normal. Simply click{" "}
-                  <strong>Advanced</strong> →{" "}
-                  <strong>Go to midday.ai (unsafe)</strong> to safely proceed.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </CardTitle>
-          <CardDescription>
-            Manage your connected email accounts or connect a new one.
-          </CardDescription>
-        </CardHeader>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center space-x-2">
+          <span>Email Connections</span>
+        </CardTitle>
+        <CardDescription>
+          Manage your connected email accounts or connect a new one.
+        </CardDescription>
+      </CardHeader>
 
-        <Suspense fallback={<InboxAccountsListSkeleton />}>
-          <InboxAccountsList />
-        </Suspense>
+      <Suspense fallback={<InboxAccountsListSkeleton />}>
+        <InboxAccountsList />
+      </Suspense>
 
-        <CardFooter className="flex justify-between">
-          <div />
+      <CardFooter className="flex justify-between">
+        <div />
 
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <Button
-                onClick={() => connectMutation.mutate({ provider: "gmail" })}
-                disabled={connectMutation.isPending}
-                data-event="Connect email"
-                data-channel="email"
-              >
-                Connect email
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-[300px] text-xs">
-              <p>
-                We are currently in Google's verification review process. This
-                is a standard procedure for all apps requesting Gmail access.
-                You may see a warning screen - this is normal. Simply click{" "}
-                <strong>Advanced</strong> →{" "}
-                <strong>Go to midday.ai (unsafe)</strong> to safely proceed.
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </CardFooter>
-      </Card>
-    </TooltipProvider>
+        <Button
+          onClick={() => connectMutation.mutate({ provider: "gmail" })}
+          disabled={connectMutation.isPending}
+          data-event="Connect email"
+          data-channel="email"
+        >
+          Connect email
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }
