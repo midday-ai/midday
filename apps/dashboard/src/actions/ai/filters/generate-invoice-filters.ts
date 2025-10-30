@@ -3,7 +3,7 @@
 import { openai } from "@ai-sdk/openai";
 import { streamObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 const schema = z.object({
   name: z.string().optional().describe("The name to search for"),

@@ -15,11 +15,8 @@ import { useState } from "react";
 
 export function Chat() {
   const [input, setInput] = useState("");
-  const { messages, append } = useChat({
-    api:
-      process.env.NODE_ENV === "development"
-        ? "http://localhost:3003/chat"
-        : "https://api.midday.ai/chat",
+  const { messages, append, isLoading } = useChat({
+    api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
     headers: {
       "Content-Type": "application/json",
     },
@@ -71,7 +68,7 @@ export function Chat() {
                 )}
               </div>
             ))}
-            {/* {isLoading && <Loader />} */}
+            {isLoading && <Loader />}
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
