@@ -447,8 +447,4 @@ The chart on the right shows your monthly burn rate trends with current vs avera
   },
 });
 
-export const getBurnRateAnalysisTool = cached(getBurnRateAnalysis, {
-  debug: true,
-  onHit: (key) => console.log(`✅ HIT: ${key.slice(0, 50)}...`),
-  onMiss: (key) => console.log(`❌ MISS: ${key.slice(0, 50)}...`),
-});
+export const getBurnRateAnalysisTool = cached(getBurnRateAnalysis);
