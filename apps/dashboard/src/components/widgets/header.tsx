@@ -5,6 +5,7 @@ import { Customize } from "@/components/widgets/customize";
 import { useUserQuery } from "@/hooks/use-user";
 import { TZDate } from "@date-fns/tz";
 import { useEffect, useState } from "react";
+import { useIsCustomizing } from "./widget-provider";
 
 function getTimeBasedGreeting(timezone?: string): string {
   const userTimezone =
@@ -27,6 +28,7 @@ function getTimeBasedGreeting(timezone?: string): string {
 
 export function WidgetsHeader() {
   const { data: user } = useUserQuery();
+  const isCustomizing = useIsCustomizing();
   const [greeting, setGreeting] = useState(() =>
     getTimeBasedGreeting(user?.timezone ?? undefined),
   );
@@ -58,7 +60,9 @@ export function WidgetsHeader() {
           </span>
         </h1>
         <p className="text-[#666666] text-[14px]">
-          here's a quick look at how things are going.
+          {isCustomizing
+            ? "drag and drop to arrange your perfect dashboard."
+            : "here's a quick look at how things are going."}
         </p>
       </div>
 

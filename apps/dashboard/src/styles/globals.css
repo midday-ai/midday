@@ -253,3 +253,159 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   border-bottom: 0px;
   border-top: 1px;
 }
+
+/* Wiggle Animations for Customize Mode - Faster & Smaller Movements */
+@keyframes wiggle1 {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(0.6deg);
+  }
+  40% {
+    transform: rotate(-0.4deg);
+  }
+  60% {
+    transform: rotate(0.7deg);
+  }
+  80% {
+    transform: rotate(-0.5deg);
+  }
+}
+
+@keyframes wiggle2 {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  15% {
+    transform: rotate(-0.6deg);
+  }
+  35% {
+    transform: rotate(0.5deg);
+  }
+  55% {
+    transform: rotate(-0.4deg);
+  }
+  75% {
+    transform: rotate(0.7deg);
+  }
+}
+
+@keyframes wiggle3 {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(0.4deg);
+  }
+  45% {
+    transform: rotate(-0.6deg);
+  }
+  65% {
+    transform: rotate(0.6deg);
+  }
+  85% {
+    transform: rotate(-0.3deg);
+  }
+}
+
+@keyframes wiggle4 {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  18% {
+    transform: rotate(0.7deg);
+  }
+  38% {
+    transform: rotate(-0.5deg);
+  }
+  58% {
+    transform: rotate(0.4deg);
+  }
+  78% {
+    transform: rotate(-0.6deg);
+  }
+}
+
+@keyframes wiggle5 {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  22% {
+    transform: rotate(-0.5deg);
+  }
+  42% {
+    transform: rotate(0.6deg);
+  }
+  62% {
+    transform: rotate(-0.7deg);
+  }
+  82% {
+    transform: rotate(0.5deg);
+  }
+}
+
+@keyframes wiggle6 {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  28% {
+    transform: rotate(0.5deg);
+  }
+  48% {
+    transform: rotate(-0.4deg);
+  }
+  68% {
+    transform: rotate(0.6deg);
+  }
+  88% {
+    transform: rotate(-0.7deg);
+  }
+}
+
+@keyframes wiggle7 {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  16% {
+    transform: rotate(-0.6deg);
+  }
+  36% {
+    transform: rotate(0.7deg);
+  }
+  56% {
+    transform: rotate(-0.4deg);
+  }
+  76% {
+    transform: rotate(0.5deg);
+  }
+}
+
+.wiggle-1 {
+  animation: wiggle1 0.7s ease-in-out infinite;
+}
+.wiggle-2 {
+  animation: wiggle2 0.8s ease-in-out infinite;
+}
+.wiggle-3 {
+  animation: wiggle3 0.6s ease-in-out infinite;
+}
+.wiggle-4 {
+  animation: wiggle4 0.75s ease-in-out infinite;
+}
+.wiggle-5 {
+  animation: wiggle5 0.85s ease-in-out infinite;
+}
+.wiggle-6 {
+  animation: wiggle6 0.65s ease-in-out infinite;
+}
+.wiggle-7 {
+  animation: wiggle7 0.9s ease-in-out infinite;
+}

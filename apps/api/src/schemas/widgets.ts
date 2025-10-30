@@ -58,3 +58,23 @@ export const getInboxStatsSchema = z.object({
   to: z.string(),
   currency: z.string().optional(),
 });
+
+export const widgetTypeSchema = z.enum([
+  "runway",
+  "top-customer",
+  "revenue-summary",
+  "growth-rate",
+  "profit-margin",
+  "cash-flow",
+  "outstanding-invoices",
+  "inbox",
+]);
+
+export const widgetPreferencesSchema = z.object({
+  primaryWidgets: z.array(widgetTypeSchema).max(7),
+  availableWidgets: z.array(widgetTypeSchema),
+});
+
+export const updateWidgetPreferencesSchema = z.object({
+  primaryWidgets: z.array(widgetTypeSchema).max(7),
+});
