@@ -4,7 +4,7 @@ import { ChatHistory } from "@/components/chat/chat-history";
 import { NewChat } from "@/components/chat/new-chat";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
-import { chatTitleArtifact } from "@api/ai/artifacts/chat-title";
+// import { chatTitleArtifact } from "@api/ai/artifacts/chat-title";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 export function ChatHeader() {
   const router = useRouter();
   const { isHome } = useChatInterface();
-  const { data } = useArtifact(chatTitleArtifact);
+  // const { data } = useArtifact(chatTitleArtifact);
 
   if (isHome) {
     return null;
@@ -28,7 +28,7 @@ export function ChatHeader() {
         </Button>
       </div>
 
-      <div
+      {/* <div
         className={cn(
           "flex items-center justify-center transition-all duration-300 ease-in-out",
         )}
@@ -44,7 +44,7 @@ export function ChatHeader() {
             {data.title}
           </TextEffect>
         )}
-      </div>
+      </div> */}
 
       <div className="flex items-center space-x-4 transition-all duration-300 ease-in-out">
         <NewChat />

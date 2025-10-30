@@ -4,19 +4,21 @@ import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useChatStore } from "@/store/chat";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { useChatActions, useChatId, useChatStatus } from "@ai-sdk-tools/store";
-import { followupQuestionsArtifact } from "@api/ai/artifacts/followup-questions";
+// import { followupQuestionsArtifact } from "@api/ai/artifacts/followup-questions";
 import { Button } from "@midday/ui/button";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 export function FollowupQuestions() {
-  const { data } = useArtifact(followupQuestionsArtifact);
+  // const { data } = useArtifact(followupQuestionsArtifact);
   const [isVisible, setIsVisible] = useState(false);
   const { sendMessage } = useChatActions();
   const { setChatId } = useChatInterface();
   const { resetCommandState } = useChatStore();
   const status = useChatStatus();
   const chatId = useChatId();
+
+  return null;
 
   const handleQuestionSelect = (question: string) => {
     if (chatId) {
