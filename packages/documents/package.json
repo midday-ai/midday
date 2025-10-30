@@ -24,12 +24,12 @@
     "@langchain/core": "0.3.58",
     "@midday/utils": "workspace:*",
     "@mistralai/mistralai": "^1.9.18",
-    "ai": "^5.0.47",
+    "ai": "^5.0.48",
     "canvas": "^3.1.2",
     "mammoth": "^1.9.1",
     "officeparser": "5.1.1",
     "unpdf": "^1.1.0",
-    "zod": "^4.1.9"
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@types/bun": "latest"

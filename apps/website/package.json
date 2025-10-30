@@ -19,7 +19,7 @@
     "@team-plain/typescript-sdk": "5.9.0",
     "@uidotdev/usehooks": "^2.4.1",
     "date-fns": "^4.1.0",
-    "framer-motion": "^12.15.0",
+    "framer-motion": "^12.23.16",
     "geist": "^1.5.1",
     "next": "15.5.3",
     "next-mdx-remote": "^5.0.0",
@@ -28,7 +28,7 @@
     "react-dom": "19.1.1",
     "react-hls-player": "^3.0.7",
     "react-use-draggable-scroll": "^0.4.7",
-    "resend": "^4.6.0",
+    "resend": "^6.1.0",
     "server-only": "^0.0.1",
     "sharp": "0.34.4",
     "sugar-high": "^0.9.3"

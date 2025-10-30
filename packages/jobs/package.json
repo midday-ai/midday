@@ -21,13 +21,13 @@
     "@midday/supabase": "workspace:*",
     "@sindresorhus/slugify": "^2.2.1",
     "@zip.js/zip.js": "^2.7.62",
-    "ai": "^5.0.47",
+    "ai": "^5.0.48",
     "camelcase-keys": "^10.0.0",
     "heic-convert": "1.2.4",
     "node-xlsx": "^0.24.0",
     "sharp": "0.34.4",
-    "trigger.dev": "4.0.2",
-    "zod": "^4.1.9"
+    "trigger.dev": "4.0.4",
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@types/heic-convert": "2.1.0",
