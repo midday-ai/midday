@@ -6,8 +6,10 @@ import {
   getProfitMarginSchema,
   getRevenueSummarySchema,
   getRunwaySchema,
+  updateWidgetPreferencesSchema,
 } from "@api/schemas/widgets";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import { widgetPreferencesCache } from "@midday/cache/widget-preferences-cache";
 import {
   getCashFlow,
   getGrowthRate,
@@ -230,5 +232,26 @@ export const widgetsRouter = createTRPCRouter({
         //   },
         // },
       };
+    }),
+
+  getWidgetPreferences: protectedProcedure.query(
+    async ({ ctx: { teamId, session } }) => {
+      const preferences = await widgetPreferencesCache.getWidgetPreferences(
+        teamId!,
+        session.user.id,
+      );
+      return preferences;
+    },
+  ),
+
+  updateWidgetPreferences: protectedProcedure
+    .input(updateWidgetPreferencesSchema)
+    .mutation(async ({ ctx: { teamId, session }, input }) => {
+      const preferences = await widgetPreferencesCache.updatePrimaryWidgets(
+        teamId!,
+        session.user.id,
+        input.primaryWidgets,
+      );
+      return preferences;
     }),
 });
