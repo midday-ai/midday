@@ -7,6 +7,7 @@ import {
   date,
   foreignKey,
   index,
+  integer,
   json,
   jsonb,
   pgEnum,
