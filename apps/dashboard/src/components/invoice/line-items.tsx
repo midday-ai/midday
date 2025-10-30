@@ -190,6 +190,17 @@ function LineItemRow({
       dragListener={false}
       dragControls={controls}
       transition={{ duration: 0 }}
+      onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+        // Don't interfere with arrow keys when they're used for autocomplete navigation
+        if (
+          e.key === "ArrowDown" ||
+          e.key === "ArrowUp" ||
+          e.key === "Enter" ||
+          e.key === "Escape"
+        ) {
+          e.stopPropagation();
+        }
+      }}
     >
       {isReorderable && (
         <Button

@@ -24,8 +24,8 @@
     "zod": "^4.1.11"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250922.0",
-    "wrangler": "^4.38.0"
+    "@cloudflare/workers-types": "^4.20250926.0",
+    "wrangler": "^4.40.1"
   },
   "exports": {
     ".": "./dist/index.js",
