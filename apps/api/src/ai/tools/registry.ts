@@ -21,6 +21,27 @@ export const toolMetadata = {
       "Retrieve and analyze financial transactions with advanced filtering, search, and sorting capabilities",
     relatedTools: ["getBurnRate", "getBurnRateAnalysis", "getExpenses"],
   },
+  getExpensesBreakdown: {
+    name: "getExpensesBreakdown",
+    title: "Expenses Breakdown",
+    description:
+      "Retrieve and analyze financial expenses with advanced filtering, search, and sorting capabilities",
+    relatedTools: ["getBurnRate", "getBurnRateAnalysis", "getTransactions"],
+  },
+  getBalanceSheet: {
+    name: "getBalanceSheet",
+    title: "Balance Sheet",
+    description:
+      "Retrieve and analyze financial balance sheet with advanced filtering, search, and sorting capabilities",
+    relatedTools: ["getBurnRate", "getBurnRateAnalysis", "getTransactions"],
+  },
+  getForecast: {
+    name: "getForecast",
+    title: "Forecast",
+    description:
+      "Retrieve and analyze financial forecast with advanced filtering, search, and sorting capabilities",
+    relatedTools: ["getBurnRate", "getBurnRateAnalysis", "getTransactions"],
+  },
 } as const;
 
 export type ToolName = keyof typeof toolMetadata;

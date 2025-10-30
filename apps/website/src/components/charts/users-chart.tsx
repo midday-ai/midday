@@ -16,7 +16,7 @@ export async function UsersChart() {
           <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
         </span>
 
-        <span className="mt-auto font-mono text-[80px] md:text-[110px]">
+        <span className="mt-auto text-[80px] md:text-[110px]">
           {new Intl.NumberFormat("en-US", {
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,

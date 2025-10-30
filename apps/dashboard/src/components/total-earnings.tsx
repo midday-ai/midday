@@ -164,7 +164,7 @@ export function TotalEarnings({ selectedView }: Props) {
                       <div className="font-medium truncate flex-1 min-w-0 mr-1">
                         {project.name}
                       </div>
-                      <div className="font-mono text-right">
+                      <div className="text-right">
                         <FormatAmount
                           amount={Math.round(project.amount)}
                           currency={project.currency}
