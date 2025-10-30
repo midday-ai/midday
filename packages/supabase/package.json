@@ -13,7 +13,7 @@
     "@supabase/postgrest-js": "^1.21.3",
     "@supabase/ssr": "^0.7.0",
     "date-fns": "^4.1.0",
-    "react": "19.2.0",
+    "react": "19.1.1",
     "server-only": "^0.0.1",
     "supabase": "^2.34.3"
   },

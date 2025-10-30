@@ -24,8 +24,8 @@
     "@tauri-apps/plugin-process": "^2.3.0",
     "@tauri-apps/plugin-updater": "^2.9.0",
     "@tauri-apps/plugin-upload": "~2",
-    "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
   },
   "devDependencies": {
     "@types/react": "^19.1.12",
