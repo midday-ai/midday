@@ -123,7 +123,7 @@
     "cmdk": "1.1.1",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
-    "framer-motion": "^12.23.16",
+    "framer-motion": "^12.23.18",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.542.0",
     "postcss": "^8.5.3",
