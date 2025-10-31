@@ -7,14 +7,20 @@ import { useStickyColumns } from "@/hooks/use-sticky-columns";
 import { useTableScroll } from "@/hooks/use-table-scroll";
 import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
+import { useUpdateTransactionCategory } from "@/hooks/use-update-transaction-category";
 import { useTransactionsStore } from "@/store/transactions";
 import { useTRPC } from "@/trpc/client";
 import { Cookies } from "@/utils/constants";
 import { cn } from "@midday/ui/cn";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
+import { ToastAction } from "@midday/ui/toast";
 import { Tooltip, TooltipProvider } from "@midday/ui/tooltip";
 import { toast } from "@midday/ui/use-toast";
-import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseInfiniteQuery,
+} from "@tanstack/react-query";
 import {
   type VisibilityState,
   flexRender,
@@ -40,6 +46,7 @@ export function DataTable({
   columnVisibility: columnVisibilityPromise,
 }: Props) {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { filter, hasFilters } = useTransactionFilterParamsWithPersistence();
   const { setRowSelection, rowSelection, setColumns, setCanDelete } =
     useTransactionsStore();
@@ -91,6 +98,20 @@ export function DataTable({
       },
     }),
   );
+
+  const updateTransactionsMutation = useMutation(
+    trpc.transactions.updateMany.mutationOptions({
+      onSuccess: () => {
+        refetch();
+      },
+    }),
+  );
+
+  const { updateCategory } = useUpdateTransactionCategory({
+    onSuccess: () => {
+      refetch();
+    },
+  });
 
   useEffect(() => {
     if (inView) {
@@ -167,15 +188,52 @@ export function DataTable({
           });
         }
       },
-      updateTransaction: (data: { id: string; status: string }) => {
+      updateTransaction: (data: {
+        id: string;
+        status?: string;
+        categorySlug?: string | null;
+        categoryName?: string;
+        assignedId?: string | null;
+      }) => {
+        // If updating category, use the hook that checks for similar transactions
+        if (
+          data.categorySlug !== undefined &&
+          data.categorySlug !== null &&
+          data.categoryName
+        ) {
+          const transaction = tableData.find((t) => t.id === data.id);
+          if (transaction) {
+            updateCategory(transaction.id, transaction.name, {
+              name: data.categoryName,
+              slug: data.categorySlug, // TypeScript now knows this is string (not null)
+            });
+          }
+          return;
+        }
+
+        // Handle null category (uncategorizing)
+        if (data.categorySlug === null) {
+          updateTransactionMutation.mutate({
+            id: data.id,
+            categorySlug: null,
+          });
+          return;
+        }
+
+        // For other updates (status, assignedId), use the regular mutation
         updateTransactionMutation.mutate({
           id: data.id,
-          status: data.status as
-            | "pending"
-            | "archived"
-            | "completed"
-            | "posted"
-            | "excluded",
+          ...(data.status && {
+            status: data.status as
+              | "pending"
+              | "archived"
+              | "completed"
+              | "posted"
+              | "excluded",
+          }),
+          ...(data.assignedId !== undefined && {
+            assignedId: data.assignedId,
+          }),
         });
       },
       onDeleteTransaction: (id: string) => {
@@ -301,7 +359,8 @@ export function DataTable({
                                 cell.column.id !== "select" &&
                                 cell.column.id !== "actions" &&
                                 cell.column.id !== "category" &&
-                                cell.column.id !== "assigned"
+                                cell.column.id !== "assigned" &&
+                                cell.column.id !== "tags"
                               ) {
                                 setParams({ transactionId: row.original.id });
                               }

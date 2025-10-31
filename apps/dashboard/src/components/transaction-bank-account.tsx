@@ -24,7 +24,9 @@ export function TransactionBankAccount({
           <BankLogo size={size} src={logoUrl} alt={name ?? ""} />
         </div>
       )}
-      <span className={cn("text-sm line-clamp-1", className)}>{name}</span>
+      <span className={cn("text-sm line-clamp-1", className)}>
+        {name ?? <span className="text-muted-foreground">-</span>}
+      </span>
     </div>
   );
 }

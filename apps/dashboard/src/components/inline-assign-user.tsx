@@ -46,7 +46,7 @@ export function InlineAssignUser({ selectedId, onSelect }: Props) {
               fullName={selectedUser.fullName}
             />
           ) : (
-            "-"
+            <span className="text-muted-foreground">-</span>
           )}
         </button>
       </PopoverTrigger>
