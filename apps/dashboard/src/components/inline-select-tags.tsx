@@ -78,10 +78,12 @@ export function InlineSelectTags({ transactionId, tags = [] }: Props) {
   const selectedTagIds = new Set(tags.map((tag) => tag.id));
 
   const allTagsList =
-    allTags?.map((tag) => ({
-      id: tag.id,
-      name: tag.name!,
-    })) ?? [];
+    allTags
+      ?.filter((tag) => tag.name != null)
+      .map((tag) => ({
+        id: tag.id,
+        name: tag.name!,
+      })) ?? [];
 
   const filteredTags = allTagsList.filter((tag) =>
     tag.name.toLowerCase().includes(inputValue.toLowerCase()),
@@ -126,15 +128,17 @@ export function InlineSelectTags({ transactionId, tags = [] }: Props) {
         >
           {tags.length > 0 ? (
             <div className="flex items-center space-x-2 overflow-x-auto scrollbar-hide">
-              {tags.map((tag) => (
-                <Badge
-                  key={tag.id}
-                  variant="tag-rounded"
-                  className="whitespace-nowrap flex-shrink-0"
-                >
-                  {tag.name}
-                </Badge>
-              ))}
+              {tags
+                .filter((tag) => tag.name != null)
+                .map((tag) => (
+                  <Badge
+                    key={tag.id}
+                    variant="tag-rounded"
+                    className="whitespace-nowrap flex-shrink-0"
+                  >
+                    {tag.name}
+                  </Badge>
+                ))}
             </div>
           ) : (
             <span className="text-muted-foreground">-</span>
