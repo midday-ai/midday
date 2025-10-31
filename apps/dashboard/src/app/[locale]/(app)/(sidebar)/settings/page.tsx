@@ -1,5 +1,7 @@
+import { BaseCurrency } from "@/components/base-currency/base-currency";
 import { CompanyCountry } from "@/components/company-country";
 import { CompanyEmail } from "@/components/company-email";
+import { CompanyFiscalYear } from "@/components/company-fiscal-year";
 import { CompanyLogo } from "@/components/company-logo";
 import { CompanyName } from "@/components/company-name";
 import { DeleteTeam } from "@/components/delete-team";
@@ -19,6 +21,8 @@ export default async function Account() {
       <CompanyName />
       <CompanyEmail />
       <CompanyCountry />
+      <BaseCurrency />
+      <CompanyFiscalYear />
       <DeleteTeam />
     </div>
   );

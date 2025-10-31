@@ -42,7 +42,7 @@ export function DueDate() {
         <span className="text-[11px] text-[#878787] font-mono">:</span>
       </div>
       <Popover open={isOpen} onOpenChange={setIsOpen} modal>
-        <PopoverTrigger className="text-primary text-[11px] font-mono whitespace-nowrap flex">
+        <PopoverTrigger className="text-primary text-[11px] whitespace-nowrap flex">
           {dueDate && format(dueDate, dateFormat)}
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0">

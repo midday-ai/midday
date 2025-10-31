@@ -1,5 +1,5 @@
 import type { Database } from "@db/client";
-import { bankAccounts } from "@db/schema";
+import { bankAccounts, teams } from "@db/schema";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -146,4 +146,102 @@ export async function getBankAccountsCurrencies(db: Database, teamId: string) {
   );
 
   return result;
+}
+
+export type GetCombinedAccountBalanceParams = {
+  teamId: string;
+  currency?: string;
+};
+
+export async function getCombinedAccountBalance(
+  db: Database,
+  params: GetCombinedAccountBalanceParams,
+) {
+  const { teamId, currency: targetCurrency } = params;
+
+  // Get team's base currency if no target currency specified
+  let baseCurrency = targetCurrency;
+  if (!baseCurrency) {
+    const team = await db
+      .select({ baseCurrency: teams.baseCurrency })
+      .from(teams)
+      .where(eq(teams.id, teamId))
+      .limit(1);
+
+    baseCurrency = team[0]?.baseCurrency || "USD";
+  }
+
+  // Get all enabled bank accounts with their balances
+  const accounts = await db.query.bankAccounts.findMany({
+    where: and(eq(bankAccounts.teamId, teamId), eq(bankAccounts.enabled, true)),
+    columns: {
+      id: true,
+      name: true,
+      currency: true,
+      balance: true,
+      baseCurrency: true,
+      baseBalance: true,
+      type: true,
+    },
+    with: {
+      bankConnection: {
+        columns: {
+          name: true,
+          logoUrl: true,
+        },
+      },
+    },
+  });
+
+  let totalBalance = 0;
+  const accountBreakdown: Array<{
+    id: string;
+    name: string;
+    originalBalance: number;
+    originalCurrency: string;
+    convertedBalance: number;
+    convertedCurrency: string;
+    type: string;
+    logoUrl?: string;
+  }> = [];
+
+  for (const account of accounts) {
+    const balance = Number(account.balance) || 0;
+    const accountCurrency: string = account.currency || baseCurrency;
+
+    let convertedBalance = balance;
+
+    // Use baseBalance if available and currencies match, otherwise use original balance
+    if (
+      accountCurrency !== baseCurrency &&
+      account.baseBalance &&
+      account.baseCurrency === baseCurrency
+    ) {
+      convertedBalance = Number(account.baseBalance);
+    } else if (accountCurrency !== baseCurrency) {
+      // If no baseBalance available, use original balance as fallback
+      // In a real scenario, you'd want to fetch exchange rates here
+      convertedBalance = balance;
+    }
+
+    totalBalance += convertedBalance;
+
+    accountBreakdown.push({
+      id: account.id,
+      name: account.name || "Unknown Account",
+      originalBalance: balance,
+      originalCurrency: accountCurrency,
+      convertedBalance,
+      convertedCurrency: baseCurrency,
+      type: account.type || "depository",
+      logoUrl: account.bankConnection?.logoUrl || undefined,
+    });
+  }
+
+  return {
+    totalBalance: Math.round(totalBalance * 100) / 100,
+    currency: baseCurrency,
+    accountCount: accounts.length,
+    accountBreakdown,
+  };
 }

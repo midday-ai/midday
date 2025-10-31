@@ -1,3 +1,4 @@
+import type { UIChatMessage } from "@api/ai/types";
 import { type SQL, relations, sql } from "drizzle-orm";
 import {
   bigint,
@@ -9,9 +10,7 @@ import {
   integer,
   json,
   jsonb,
-  numeric,
   pgEnum,
-  pgMaterializedView,
   pgPolicy,
   pgTable,
   primaryKey,
@@ -19,7 +18,6 @@ import {
   text,
   timestamp,
   unique,
-  uniqueIndex,
   uuid,
   varchar,
   vector,
@@ -1321,6 +1319,7 @@ export const teams = pgTable(
     inboxForwarding: boolean("inbox_forwarding").default(true),
     baseCurrency: text("base_currency"),
     countryCode: text("country_code"),
+    fiscalYearStartMonth: smallint("fiscal_year_start_month"),
     documentClassification: boolean("document_classification").default(false),
     flags: text().array(),
     canceledAt: timestamp("canceled_at", {

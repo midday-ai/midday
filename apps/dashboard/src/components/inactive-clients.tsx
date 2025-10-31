@@ -14,7 +14,7 @@ export function InactiveClients() {
   return (
     <Card className="hidden sm:block">
       <CardHeader className="pb-3">
-        <CardTitle className="font-mono font-medium text-2xl">
+        <CardTitle className="font-medium text-2xl">
           <NumberFlow value={data} willChange />
         </CardTitle>
       </CardHeader>

@@ -1,8 +1,8 @@
 "use server";
 
 import { openai } from "@ai-sdk/openai";
+import { createStreamableValue } from "@ai-sdk/rsc";
 import { streamText } from "ai";
-import { createStreamableValue } from "ai/rsc";
 
 type Params = {
   input: string;
@@ -14,7 +14,7 @@ export async function generateEditorContent({ input, context }: Params) {
 
   (async () => {
     const { textStream } = await streamText({
-      model: openai("gpt-4o-mini"),
+      model: openai("gpt-5-nano"),
       prompt: input,
       temperature: 0.8,
       system: `

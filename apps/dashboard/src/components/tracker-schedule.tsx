@@ -1453,7 +1453,7 @@ export function TrackerSchedule() {
             {hours.map((hour) => (
               <div
                 key={hour}
-                className="pr-4 flex font-mono flex-col"
+                className="pr-4 flex flex-col"
                 style={{ height: `${ROW_HEIGHT}px` }}
               >
                 {formatHour(hour, user?.timeFormat, getUserTimezone(user))}

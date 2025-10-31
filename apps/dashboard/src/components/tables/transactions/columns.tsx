@@ -6,7 +6,6 @@ import { FormatAmount } from "@/components/format-amount";
 import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
 import { TransactionStatus } from "@/components/transaction-status";
-import { formatDate } from "@/utils/format";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
@@ -22,6 +21,7 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Spinner } from "@midday/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
+import { formatDate } from "@midday/utils/format";
 import type { ColumnDef } from "@tanstack/react-table";
 import { memo, useCallback } from "react";
 
