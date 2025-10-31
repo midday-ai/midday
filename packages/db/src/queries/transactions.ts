@@ -1272,6 +1272,7 @@ type UpdateTransactionData = {
   frequency?: "weekly" | "monthly" | "annually" | "irregular" | null;
   taxRate?: number | null;
   taxAmount?: number | null;
+  taxType?: string | null;
 };
 
 export async function updateTransaction(
@@ -1279,6 +1280,13 @@ export async function updateTransaction(
   params: UpdateTransactionData,
 ) {
   const { id, teamId, userId, ...dataToUpdate } = params;
+
+  // If category is being changed, clear tax fields so category's tax rate is used
+  if (dataToUpdate.categorySlug !== undefined) {
+    dataToUpdate.taxRate = null;
+    dataToUpdate.taxAmount = null;
+    dataToUpdate.taxType = null;
+  }
 
   const [result] = await db
     .update(transactions)
@@ -1337,6 +1345,9 @@ type UpdateTransactionsData = {
   tagId?: string | null;
   recurring?: boolean;
   frequency?: "weekly" | "monthly" | "annually" | "irregular" | null;
+  taxRate?: number | null;
+  taxAmount?: number | null;
+  taxType?: string | null;
 };
 
 export async function updateTransactions(
@@ -1344,6 +1355,13 @@ export async function updateTransactions(
   data: UpdateTransactionsData,
 ) {
   const { ids, tagId, teamId, userId, ...input } = data;
+
+  // If category is being changed, clear tax fields so category's tax rate is used
+  if (input.categorySlug !== undefined) {
+    input.taxRate = null;
+    input.taxAmount = null;
+    input.taxType = null;
+  }
 
   if (tagId) {
     await db
