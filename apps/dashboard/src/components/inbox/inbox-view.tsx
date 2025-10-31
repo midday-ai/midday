@@ -31,6 +31,7 @@ export function InboxView() {
 
   const allSeenIdsRef = useRef(new Set<string>());
   const itemRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const scrollAreaViewportRef = useRef<HTMLDivElement | null>(null);
 
   const infiniteQueryOptions = trpc.inbox.get.infiniteQueryOptions(
     {
@@ -210,14 +211,25 @@ export function InboxView() {
     // Use requestAnimationFrame to ensure DOM is ready
     requestAnimationFrame(() => {
       const itemElement = itemRefs.current.get(inboxId);
-      if (!itemElement) return;
+      const viewport = scrollAreaViewportRef.current;
+      if (!itemElement || !viewport) return;
 
-      // Use scrollIntoView with block: 'center' to center the item in the viewport
-      // This works with both window scrolling and container scrolling
-      itemElement.scrollIntoView({
+      // Calculate position relative to viewport
+      const viewportRect = viewport.getBoundingClientRect();
+      const itemRect = itemElement.getBoundingClientRect();
+
+      // Calculate current scroll position
+      const itemTop = itemRect.top - viewportRect.top + viewport.scrollTop;
+      const itemHeight = itemRect.height;
+      const viewportHeight = viewport.clientHeight;
+
+      // Center the item in the viewport
+      const scrollPosition = itemTop - viewportHeight / 2 + itemHeight / 2;
+
+      // Scroll the viewport directly (not the window)
+      viewport.scrollTo({
+        top: Math.max(0, scrollPosition),
         behavior: "smooth",
-        block: "center",
-        inline: "nearest",
       });
     });
   }, [params.inboxId, tableData]);
@@ -235,6 +247,9 @@ export function InboxView() {
     <div className="flex flex-row space-x-8 mt-4">
       <div className="w-full h-full">
         <ScrollArea
+          ref={(node) => {
+            scrollAreaViewportRef.current = node as HTMLDivElement | null;
+          }}
           className="relative w-full h-[calc(100vh-180px)] overflow-hidden"
           hideScrollbar
         >
