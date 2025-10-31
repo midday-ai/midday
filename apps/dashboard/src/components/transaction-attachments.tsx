@@ -77,6 +77,16 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
     }),
   );
 
+  const updateInvoiceMutation = useMutation(
+    trpc.invoice.update.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.queryKey(),
+        });
+      },
+    }),
+  );
+
   // Polling query for tax information
   const { data: pollingTransaction } = useQuery({
     ...trpc.transactions.getById.queryOptions({ id }),
@@ -196,19 +206,84 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
   };
 
   // @ts-expect-error
-  const handleOnSelectFile = (file) => {
-    const filename = stripSpecialCharacters(file.name);
+  const handleOnSelectFile = async (file) => {
+    const isInvoice = file.type === "invoice";
 
-    const item = {
-      name: filename,
-      size: file.data.size,
-      type: file.data.contentType,
-      path: file.data.filePath,
-      transactionId: id,
-    };
+    if (isInvoice) {
+      // Handle invoice selection
+      try {
+        // Fetch transaction to get the date
+        const transactionData = await queryClient.fetchQuery(
+          trpc.transactions.getById.queryOptions({ id }),
+        );
 
-    setFiles((prev) => [item, ...prev]);
-    createAttachmentsMutation.mutate([item]);
+        if (!transactionData?.date) {
+          toast({
+            variant: "error",
+            duration: 2500,
+            title: "Failed to get transaction date",
+          });
+          return;
+        }
+
+        // Convert transaction date (ISO date string) to ISO datetime for paidAt
+        const transactionDate = new Date(transactionData.date).toISOString();
+
+        // Update invoice status to paid
+        await updateInvoiceMutation.mutateAsync({
+          id: file.data.id,
+          status: "paid",
+          paidAt: transactionDate,
+        });
+
+        // Create transaction attachment using invoice filePath
+        if (!file.data.filePath || file.data.filePath.length === 0) {
+          toast({
+            variant: "error",
+            duration: 2500,
+            title: "Invoice PDF not found",
+          });
+          return;
+        }
+
+        const invoiceFilename =
+          file.data.invoiceNumber || `invoice-${file.data.id}.pdf`;
+
+        const attachmentItem = {
+          name: stripSpecialCharacters(invoiceFilename),
+          size: file.data.size ?? 0,
+          type: "application/pdf",
+          path: file.data.filePath,
+          transactionId: id,
+        };
+
+        setFiles((prev) => [attachmentItem, ...prev]);
+        createAttachmentsMutation.mutate([attachmentItem]);
+      } catch (error) {
+        console.error("Error handling invoice selection:", error);
+        toast({
+          variant: "error",
+          duration: 2500,
+          title: "Failed to attach invoice",
+          description:
+            error instanceof Error ? error.message : "Unknown error occurred",
+        });
+      }
+    } else {
+      // Handle inbox item selection (existing logic)
+      const filename = stripSpecialCharacters(file.name);
+
+      const item = {
+        name: filename,
+        size: file.data.size,
+        type: file.data.contentType,
+        path: file.data.filePath,
+        transactionId: id,
+      };
+
+      setFiles((prev) => [item, ...prev]);
+      createAttachmentsMutation.mutate([item]);
+    }
   };
 
   useEffect(() => {

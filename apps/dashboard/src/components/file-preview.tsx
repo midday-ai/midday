@@ -28,7 +28,7 @@ export function FilePreview({ mimeType, filePath }: Props) {
   let src = null;
 
   if (mimeType.startsWith("image/")) {
-    src = `/api/proxy?filePath=${filePath}`;
+    src = `/api/proxy?filePath=${encodeURIComponent(filePath)}`;
   }
 
   if (
@@ -36,7 +36,7 @@ export function FilePreview({ mimeType, filePath }: Props) {
     mimeType.startsWith("application/octet-stream")
   ) {
     // NOTE: Make a image from the pdf
-    src = `/api/preview?filePath=${filePath}`;
+    src = `/api/preview?filePath=${encodeURIComponent(filePath)}`;
   }
 
   useEffect(() => {
