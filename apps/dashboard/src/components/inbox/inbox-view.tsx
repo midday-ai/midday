@@ -30,6 +30,7 @@ export function InboxView() {
   const { params: filter, hasFilter } = useInboxFilterParams();
 
   const allSeenIdsRef = useRef(new Set<string>());
+  const itemRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   const infiniteQueryOptions = trpc.inbox.get.infiniteQueryOptions(
     {
@@ -201,6 +202,26 @@ export function InboxView() {
     [tableData, params, setParams],
   );
 
+  // Scroll selected inbox item to center of viewport
+  useEffect(() => {
+    const inboxId = params.inboxId;
+    if (!inboxId) return;
+
+    // Use requestAnimationFrame to ensure DOM is ready
+    requestAnimationFrame(() => {
+      const itemElement = itemRefs.current.get(inboxId);
+      if (!itemElement) return;
+
+      // Use scrollIntoView with block: 'center' to center the item in the viewport
+      // This works with both window scrolling and container scrolling
+      itemElement.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "nearest",
+      });
+    });
+  }, [params.inboxId, tableData]);
+
   // If user is connected, and we don't have any data, we need to show a skeleton
   if (params.connected && !tableData?.length) {
     return <InboxViewSkeleton />;
@@ -242,7 +263,17 @@ export function InboxView() {
                     }
                     exit="exit"
                   >
-                    <InboxItem item={item} index={index} />
+                    <InboxItem
+                      ref={(el) => {
+                        if (el) {
+                          itemRefs.current.set(item.id, el);
+                        } else {
+                          itemRefs.current.delete(item.id);
+                        }
+                      }}
+                      item={item}
+                      index={index}
+                    />
                   </motion.div>
                 );
               })}
