@@ -1,8 +1,9 @@
 "use client";
 
-import { AssignedUser } from "@/components/assigned-user";
-import { Category } from "@/components/category";
 import { FormatAmount } from "@/components/format-amount";
+import { InlineAssignUser } from "@/components/inline-assign-user";
+import { InlineSelectCategory } from "@/components/inline-select-category";
+import { InlineSelectTags } from "@/components/inline-select-tags";
 import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
 import { TransactionStatus } from "@/components/transaction-status";
@@ -147,7 +148,12 @@ const ActionsCell = memo(
     transaction: Transaction;
     onViewDetails?: (id: string) => void;
     onCopyUrl?: (id: string) => void;
-    onUpdateTransaction?: (data: { id: string; status: string }) => void;
+    onUpdateTransaction?: (data: {
+      id: string;
+      status?: string;
+      categorySlug?: string | null;
+      assignedId?: string | null;
+    }) => void;
     onDeleteTransaction?: (id: string) => void;
   }) => {
     const handleViewDetails = useCallback(() => {
@@ -303,7 +309,7 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "category",
     header: "Category",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       // Show analyzing state when enrichment is not completed
       if (!row.original.enrichmentCompleted) {
         return (
@@ -325,10 +331,27 @@ export const columns: ColumnDef<Transaction>[] = [
         );
       }
 
+      const meta = table.options.meta;
+
       return (
-        <Category
-          name={row.original?.category?.name ?? ""}
-          color={row.original?.category?.color ?? ""}
+        <InlineSelectCategory
+          selected={
+            row.original.category
+              ? {
+                  id: row.original.category.id,
+                  name: row.original.category.name,
+                  color: row.original.category.color,
+                  slug: row.original.category.slug ?? "",
+                }
+              : undefined
+          }
+          onChange={(category) => {
+            meta?.updateTransaction?.({
+              id: row.original.id,
+              categorySlug: category.slug,
+              categoryName: category.name,
+            });
+          }}
         />
       );
     },
@@ -336,15 +359,24 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "counterparty",
     header: "From / To",
-    cell: ({ row }) => row.original.counterpartyName ?? "-",
+    cell: ({ row }) => (
+      <span className="text-muted-foreground">
+        {row.original.counterpartyName ?? "-"}
+      </span>
+    ),
   },
   {
     accessorKey: "tags",
     header: "Tags",
     meta: {
-      className: "w-[280px] max-w-[280px]",
+      className: "w-[280px] min-w-[280px] max-w-[280px]",
     },
-    cell: ({ row }) => <TagsCell tags={row.original.tags} />,
+    cell: ({ row }) => (
+      <InlineSelectTags
+        transactionId={row.original.id}
+        tags={row.original.tags}
+      />
+    ),
   },
   {
     accessorKey: "bank_account",
@@ -364,15 +396,18 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "assigned",
     header: "Assigned",
-    cell: ({ row }) => {
-      if (!row.original.assigned) {
-        return null;
-      }
+    cell: ({ row, table }) => {
+      const meta = table.options.meta;
 
       return (
-        <AssignedUser
-          fullName={row.original.assigned?.fullName}
-          avatarUrl={row.original.assigned?.avatarUrl}
+        <InlineAssignUser
+          selectedId={row.original.assigned?.id ?? undefined}
+          onSelect={(user) => {
+            meta?.updateTransaction?.({
+              id: row.original.id,
+              assignedId: user.id,
+            });
+          }}
         />
       );
     },

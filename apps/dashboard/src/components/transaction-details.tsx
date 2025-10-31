@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransactionParams } from "@/hooks/use-transaction-params";
+import { useUpdateTransactionCategory } from "@/hooks/use-update-transaction-category";
 import { useTRPC } from "@/trpc/client";
 import {
   Accordion,
@@ -39,8 +40,15 @@ import { TransactionShortcuts } from "./transaction-shortcuts";
 export function TransactionDetails() {
   const trpc = useTRPC();
   const { transactionId } = useTransactionParams();
-
   const queryClient = useQueryClient();
+
+  const { updateCategory } = useUpdateTransactionCategory({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: trpc.transactions.getById.queryKey({ id: transactionId! }),
+      });
+    },
+  });
 
   const { data, isLoading, isFetching } = useQuery({
     ...trpc.transactions.getById.queryOptions({ id: transactionId! }),
@@ -307,53 +315,12 @@ export function TransactionDetails() {
             // @ts-expect-error
             selected={data?.category ?? undefined}
             onChange={async (category) => {
-              if (category) {
-                updateTransactionMutation.mutate({
-                  id: data?.id,
-                  categorySlug: category.slug,
+              if (category && data?.id && data?.name) {
+                await updateCategory(data.id, data.name, {
+                  id: category.id,
+                  name: category.name,
+                  slug: category.slug,
                 });
-
-                const similarTransactions = await queryClient.fetchQuery(
-                  trpc.transactions.getSimilarTransactions.queryOptions({
-                    transactionId: data?.id,
-                    name: data.name,
-                    categorySlug: category.slug,
-                  }),
-                );
-
-                if (
-                  similarTransactions?.length &&
-                  similarTransactions.length > 1
-                ) {
-                  toast({
-                    duration: 6000,
-                    variant: "ai",
-                    title: "Midday AI",
-                    description: `We found ${similarTransactions?.length} similar transactions to "${data?.name}". Mark them as ${category.name} too?`,
-                    footer: (
-                      <div className="flex space-x-2 mt-4">
-                        <ToastAction altText="Cancel" className="pl-5 pr-5">
-                          Cancel
-                        </ToastAction>
-                        <ToastAction
-                          altText="Yes"
-                          onClick={() => {
-                            // Use bulk update with the similar transaction IDs
-                            const similarTransactionIds =
-                              similarTransactions.map((t) => t.id);
-                            updateTransactionsMutation.mutate({
-                              ids: similarTransactionIds,
-                              categorySlug: category.slug,
-                            });
-                          }}
-                          className="pl-5 pr-5 bg-primary text-primary-foreground hover:bg-primary/90"
-                        >
-                          Yes
-                        </ToastAction>
-                      </div>
-                    ),
-                  });
-                }
               }
             }}
           />
