@@ -67,13 +67,13 @@ export function SelectAttachment({
         } else if (item.filePath === null || item.filePath === undefined) {
           filePath = null;
         }
-        
+
         // For invoices, ensure filePath is valid before showing preview
         const canShowPreview = filePath && filePath.length > 0;
         const displayName = isInvoice
           ? item.invoiceNumber || "Invoice"
           : item.displayName || item.fileName || "";
-        
+
         // Build secondary text with most important matching info
         let secondaryText: string | undefined;
         if (isInvoice) {
@@ -93,16 +93,16 @@ export function SelectAttachment({
           // Add description if available and not too long (truncate if needed)
           if (item.description && item.description.length > 0) {
             const maxDescLength = 40;
-            const truncatedDesc = item.description.length > maxDescLength 
-              ? `${item.description.substring(0, maxDescLength)}...`
-              : item.description;
+            const truncatedDesc =
+              item.description.length > maxDescLength
+                ? `${item.description.substring(0, maxDescLength)}...`
+                : item.description;
             parts.push(truncatedDesc);
           }
           secondaryText = parts.length > 0 ? parts.join(" • ") : undefined;
         }
 
-        const isSmartSuggestion =
-          debouncedValue.length === 0 && transactionId;
+        const isSmartSuggestion = debouncedValue.length === 0 && transactionId;
         const showBestMatch =
           isSmartSuggestion && index === 0 && items?.length > 1;
 
@@ -155,7 +155,7 @@ export function SelectAttachment({
                   </Badge>
                 )}
                 {item.amount && item.currency && (
-                  <FormatAmount amount={item.amount} currency={item.currency}  />
+                  <FormatAmount amount={item.amount} currency={item.currency} />
                 )}
               </div>
             </div>
