@@ -67,14 +67,14 @@ export const searchRouter = createTRPCRouter({
           teamId: teamId!,
           q: q ?? undefined,
           transactionId: transactionId ?? undefined,
-          limit: Math.floor(limit / 2), // Split limit between inbox and invoices
+          limit: limit,
         }),
         getInvoices(db, {
           teamId: teamId!,
           q: q ?? undefined,
           statuses: ["unpaid", "overdue", "paid"],
-          pageSize: Math.floor(limit / 2),
-          sort: null, // Default sort (most recent first)
+          pageSize: limit,
+          sort: null,
         }),
       ]);
 
