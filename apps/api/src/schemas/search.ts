@@ -93,7 +93,8 @@ export const searchAttachmentsSchema = z
     }),
   })
   .openapi({
-    description: "Parameters for searching attachments (inbox items and invoices).",
+    description:
+      "Parameters for searching attachments (inbox items and invoices).",
   });
 
 export const attachmentSearchResultSchema = z

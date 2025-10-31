@@ -118,7 +118,6 @@ export const searchRouter = createTRPCRouter({
           createdAt: invoice.createdAt,
         })) ?? [];
 
- 
       // Combine and return results
       return [...inboxItems, ...invoices];
     }),
