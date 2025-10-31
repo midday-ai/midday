@@ -421,6 +421,13 @@ export async function getInboxSearch(
           displayName: inbox.displayName,
           size: inbox.size,
           description: inbox.description,
+          status: inbox.status,
+          website: inbox.website,
+          baseAmount: inbox.baseAmount,
+          baseCurrency: inbox.baseCurrency,
+          taxAmount: inbox.taxAmount,
+          taxRate: inbox.taxRate,
+          taxType: inbox.taxType,
         })
         .from(inbox)
         .where(and(...whereConditions))
@@ -490,23 +497,28 @@ export async function getInboxSearch(
         // Use the same successful approach as batch-process-matching
         // Get candidates first, then score them with the same logic that works
         const candidates = await db
-          .select({
-            id: inbox.id,
-            createdAt: inbox.createdAt,
-            fileName: inbox.fileName,
-            amount: inbox.amount,
-            currency: inbox.currency,
-            filePath: inbox.filePath,
-            contentType: inbox.contentType,
-            date: inbox.date,
-            displayName: inbox.displayName,
-            size: inbox.size,
-            description: inbox.description,
-            baseAmount: inbox.baseAmount,
-            baseCurrency: inbox.baseCurrency,
-            embeddingScore:
-              sql<number>`(${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding})`.as(
-                "embedding_score",
+        .select({
+          id: inbox.id,
+          createdAt: inbox.createdAt,
+          fileName: inbox.fileName,
+          amount: inbox.amount,
+          currency: inbox.currency,
+          filePath: inbox.filePath,
+          contentType: inbox.contentType,
+          date: inbox.date,
+          displayName: inbox.displayName,
+          size: inbox.size,
+          description: inbox.description,
+          baseAmount: inbox.baseAmount,
+          baseCurrency: inbox.baseCurrency,
+          status: inbox.status,
+          website: inbox.website,
+          taxAmount: inbox.taxAmount,
+          taxRate: inbox.taxRate,
+          taxType: inbox.taxType,
+          embeddingScore:
+            sql<number>`(${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding})`.as(
+              "embedding_score",
               ),
           })
           .from(inbox)
@@ -626,6 +638,13 @@ export async function getInboxSearch(
         displayName: inbox.displayName,
         size: inbox.size,
         description: inbox.description,
+        status: inbox.status,
+        website: inbox.website,
+        baseAmount: inbox.baseAmount,
+        baseCurrency: inbox.baseCurrency,
+        taxAmount: inbox.taxAmount,
+        taxRate: inbox.taxRate,
+        taxType: inbox.taxType,
       })
       .from(inbox)
       .where(and(...whereConditions))

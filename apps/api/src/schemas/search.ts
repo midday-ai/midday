@@ -75,3 +75,65 @@ export const searchResponseSchema = z
       },
     ],
   });
+
+export const searchAttachmentsSchema = z
+  .object({
+    q: z.string().nullable().optional().openapi({
+      description: "Search query string to filter attachments by text.",
+      example: "invoice",
+    }),
+    transactionId: z.string().uuid().nullable().optional().openapi({
+      description:
+        "Transaction ID for smart suggestions based on transaction details.",
+      example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    }),
+    limit: z.coerce.number().min(1).max(100).default(30).openapi({
+      description: "Maximum number of results to return.",
+      example: 30,
+    }),
+  })
+  .openapi({
+    description:
+      "Parameters for searching attachments (inbox items and invoices).",
+  });
+
+export const attachmentSearchResultSchema = z
+  .union([
+    z.object({
+      type: z.literal("inbox"),
+      id: z.string(),
+      fileName: z.string().nullable(),
+      filePath: z.array(z.string()),
+      displayName: z.string().nullable(),
+      amount: z.number().nullable(),
+      currency: z.string().nullable(),
+      contentType: z.string().nullable(),
+      date: z.string().nullable(),
+      size: z.number().nullable(),
+      description: z.string().nullable(),
+      status: z.string().nullable(),
+      website: z.string().nullable(),
+      baseAmount: z.number().nullable(),
+      baseCurrency: z.string().nullable(),
+      taxAmount: z.number().nullable(),
+      taxRate: z.number().nullable(),
+      taxType: z.string().nullable(),
+      createdAt: z.string(),
+    }),
+    z.object({
+      type: z.literal("invoice"),
+      id: z.string(),
+      invoiceNumber: z.string().nullable(),
+      customerName: z.string().nullable(),
+      amount: z.number().nullable(),
+      currency: z.string().nullable(),
+      filePath: z.array(z.string()).nullable(),
+      dueDate: z.string().nullable(),
+      status: z.string(),
+      size: z.number().nullable(),
+      createdAt: z.string(),
+    }),
+  ])
+  .openapi({
+    description: "Unified attachment search result (inbox item or invoice).",
+  });

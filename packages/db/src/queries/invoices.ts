@@ -131,9 +131,9 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
     } else {
       const query = buildSearchQuery(q);
 
-      // Search using full-text search or customerName
+      // Search using full-text search, invoiceNumber, or customerName
       whereConditions.push(
-        sql`(to_tsquery('english', ${query}) @@ ${invoices.fts} OR ${invoices.customerName} ILIKE '%' || ${q} || '%')`,
+        sql`(to_tsquery('english', ${query}) @@ ${invoices.fts} OR ${invoices.invoiceNumber} ILIKE '%' || ${q} || '%' OR ${invoices.customerName} ILIKE '%' || ${q} || '%')`,
       );
     }
   }
@@ -159,6 +159,7 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
       tax: invoices.tax,
       filePath: invoices.filePath,
       status: invoices.status,
+      fileSize: invoices.fileSize,
       viewedAt: invoices.viewedAt,
       fromDetails: invoices.fromDetails,
       issueDate: invoices.issueDate,
@@ -275,6 +276,7 @@ export async function getInvoiceById(
       tax: invoices.tax,
       filePath: invoices.filePath,
       status: invoices.status,
+      fileSize: invoices.fileSize,
       viewedAt: invoices.viewedAt,
       fromDetails: invoices.fromDetails,
       issueDate: invoices.issueDate,

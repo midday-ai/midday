@@ -1,7 +1,12 @@
-import { globalSearchSchema } from "@api/schemas/search";
+import {
+  globalSearchSchema,
+  searchAttachmentsSchema,
+} from "@api/schemas/search";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { generateLLMFilters } from "@api/utils/search-filters";
 import {
+  getInboxSearch,
+  getInvoices,
   globalSearchQuery,
   globalSemanticSearchQuery,
 } from "@midday/db/queries";
@@ -50,5 +55,70 @@ export const searchRouter = createTRPCRouter({
       }
 
       return results;
+    }),
+
+  attachments: protectedProcedure
+    .input(searchAttachmentsSchema)
+    .query(async ({ input, ctx: { db, teamId } }) => {
+      const { q, transactionId, limit = 30 } = input;
+
+      const [inboxResults, invoiceResults] = await Promise.all([
+        getInboxSearch(db, {
+          teamId: teamId!,
+          q: q ?? undefined,
+          transactionId: transactionId ?? undefined,
+          limit: limit,
+        }),
+        getInvoices(db, {
+          teamId: teamId!,
+          q: q ?? undefined,
+          statuses: ["unpaid", "overdue", "paid"],
+          pageSize: limit,
+          sort: null,
+        }),
+      ]);
+
+      // Transform inbox results
+      const inboxItems =
+        inboxResults.map((item) => ({
+          type: "inbox" as const,
+          id: item.id,
+          fileName: item.fileName ?? null,
+          filePath: item.filePath ?? [],
+          displayName: item.displayName ?? null,
+          amount: item.amount ?? null,
+          currency: item.currency ?? null,
+          contentType: item.contentType ?? null,
+          date: item.date ?? null,
+          size: item.size ?? null,
+          description: item.description ?? null,
+          status: item.status ?? null,
+          website: item.website ?? null,
+          baseAmount: item.baseAmount ?? null,
+          baseCurrency: item.baseCurrency ?? null,
+          taxAmount: item.taxAmount ?? null,
+          taxRate: item.taxRate ?? null,
+          taxType: item.taxType ?? null,
+          createdAt: item.createdAt,
+        })) ?? [];
+
+      // Transform invoice results
+      const invoices =
+        invoiceResults.data.map((invoice) => ({
+          type: "invoice" as const,
+          id: invoice.id,
+          invoiceNumber: invoice.invoiceNumber ?? null,
+          customerName: invoice.customerName ?? null,
+          amount: invoice.amount ?? null,
+          currency: invoice.currency ?? null,
+          filePath: invoice.filePath ?? [],
+          dueDate: invoice.dueDate ?? null,
+          status: invoice.status,
+          size: invoice.fileSize ?? null,
+          createdAt: invoice.createdAt,
+        })) ?? [];
+
+      // Combine and return results
+      return [...inboxItems, ...invoices];
     }),
 });

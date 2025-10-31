@@ -35,11 +35,13 @@ export const documentsRouter = createTRPCRouter({
   getById: protectedProcedure
     .input(getDocumentSchema)
     .query(async ({ input, ctx: { db, teamId } }) => {
-      return getDocumentById(db, {
+      const result = await getDocumentById(db, {
         id: input.id,
         filePath: input.filePath,
         teamId: teamId!,
       });
+
+      return result ?? null;
     }),
 
   getRelatedDocuments: protectedProcedure
