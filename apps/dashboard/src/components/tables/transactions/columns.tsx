@@ -55,17 +55,17 @@ const DescriptionCell = memo(
     name,
     description,
     status,
-    categorySlug,
+    amount,
   }: {
     name: string;
     description?: string;
     status?: string;
-    categorySlug?: string | null;
+    amount: number;
   }) => (
     <div className="flex items-center space-x-2">
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className={cn(categorySlug === "income" && "text-[#00C969]")}>
+          <span className={cn(amount > 0 && "text-[#00C969]")}>
             <div className="flex space-x-2 items-center">
               <span className="line-clamp-1 text-ellipsis max-w-[100px] md:max-w-none">
                 {name}
@@ -100,15 +100,11 @@ const AmountCell = memo(
   ({
     amount,
     currency,
-    categorySlug,
   }: {
     amount: number;
     currency: string;
-    categorySlug?: string | null;
   }) => (
-    <span
-      className={cn("text-sm", categorySlug === "income" && "text-[#00C969]")}
-    >
+    <span className={cn("text-sm", amount > 0 && "text-[#00C969]")}>
       <FormatAmount amount={amount} currency={currency} />
     </span>
   ),
@@ -283,7 +279,7 @@ export const columns: ColumnDef<Transaction>[] = [
         name={row.original.name}
         description={row.original.description ?? undefined}
         status={row.original.status ?? undefined}
-        categorySlug={row.original?.category?.slug}
+        amount={row.original.amount}
       />
     ),
   },
@@ -297,7 +293,6 @@ export const columns: ColumnDef<Transaction>[] = [
       <AmountCell
         amount={row.original.amount}
         currency={row.original.currency}
-        categorySlug={row.original?.category?.slug}
       />
     ),
   },

@@ -65,7 +65,7 @@ export function Transactions({ result }: Props) {
                 <TableCell
                   className={cn(
                     "font-normal",
-                    transaction.category?.slug === "income" && "text-[#00C969]",
+                    transaction.amount > 0 && "text-[#00C969]",
                   )}
                 >
                   <span className="line-clamp-1">{transaction.name}</span>
@@ -76,7 +76,7 @@ export function Transactions({ result }: Props) {
                 <TableCell
                   className={cn(
                     "font-normal",
-                    transaction.category?.slug === "income" && "text-[#00C969]",
+                    transaction.amount > 0 && "text-[#00C969]",
                   )}
                 >
                   <FormatAmount
