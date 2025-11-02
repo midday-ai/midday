@@ -144,6 +144,7 @@ const ActionsCell = memo(
     onCopyUrl,
     onUpdateTransaction,
     onDeleteTransaction,
+    onEditTransaction,
   }: {
     transaction: Transaction;
     onViewDetails?: (id: string) => void;
@@ -155,10 +156,15 @@ const ActionsCell = memo(
       assignedId?: string | null;
     }) => void;
     onDeleteTransaction?: (id: string) => void;
+    onEditTransaction?: (id: string) => void;
   }) => {
     const handleViewDetails = useCallback(() => {
-      onViewDetails?.(transaction.id);
-    }, [transaction.id, onViewDetails]);
+      if (transaction.manual) {
+        onEditTransaction?.(transaction.id);
+      } else {
+        onViewDetails?.(transaction.id);
+      }
+    }, [transaction.id, transaction.manual, onViewDetails, onEditTransaction]);
 
     const handleCopyUrl = useCallback(() => {
       onCopyUrl?.(transaction.id);
@@ -445,6 +451,7 @@ export const columns: ColumnDef<Transaction>[] = [
           onCopyUrl={meta?.copyUrl}
           onUpdateTransaction={meta?.updateTransaction}
           onDeleteTransaction={meta?.onDeleteTransaction}
+          onEditTransaction={meta?.editTransaction}
         />
       );
     },

@@ -239,6 +239,9 @@ export function DataTable({
       onDeleteTransaction: (id: string) => {
         deleteTransactionMutation.mutate([id]);
       },
+      editTransaction: (id: string) => {
+        setParams({ editTransaction: id });
+      },
     },
   });
 
@@ -362,7 +365,13 @@ export function DataTable({
                                 cell.column.id !== "assigned" &&
                                 cell.column.id !== "tags"
                               ) {
-                                setParams({ transactionId: row.original.id });
+                                if (row.original.manual) {
+                                  setParams({
+                                    editTransaction: row.original.id,
+                                  });
+                                } else {
+                                  setParams({ transactionId: row.original.id });
+                                }
                               }
                             }}
                           >
