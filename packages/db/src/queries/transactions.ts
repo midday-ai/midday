@@ -1263,6 +1263,11 @@ type UpdateTransactionData = {
   id: string;
   teamId: string;
   userId?: string;
+  name?: string;
+  amount?: number;
+  currency?: string;
+  date?: string;
+  bankAccountId?: string;
   categorySlug?: string | null;
   status?: "pending" | "archived" | "completed" | "posted" | "excluded" | null;
   internal?: boolean;

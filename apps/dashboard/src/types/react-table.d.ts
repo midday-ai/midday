@@ -16,6 +16,7 @@ declare module "@tanstack/table-core" {
       assignedId?: string | null;
     }) => void;
     onDeleteTransaction?: (id: string) => void;
+    editTransaction?: (id: string) => void;
 
     // Vault table meta
     handleDelete?: (id: string) => void;

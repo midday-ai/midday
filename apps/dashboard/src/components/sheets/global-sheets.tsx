@@ -20,6 +20,7 @@ import { TrackerCreateSheet } from "@/components/sheets/tracker-create-sheet";
 import { TrackerScheduleSheet } from "@/components/sheets/tracker-schedule-sheet";
 import { TrackerUpdateSheet } from "@/components/sheets/tracker-update-sheet";
 import { TransactionCreateSheet } from "@/components/sheets/transaction-create-sheet";
+import { TransactionEditSheet } from "@/components/sheets/transaction-edit-sheet";
 import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import { use } from "react";
@@ -50,6 +51,7 @@ export function GlobalSheets({ currencyPromise, countryCodePromise }: Props) {
 
       <TransactionSheet />
       <TransactionCreateSheet />
+      <TransactionEditSheet />
 
       <AssistantModal />
       <SelectBankAccountsModal />

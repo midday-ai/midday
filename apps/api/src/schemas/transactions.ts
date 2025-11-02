@@ -524,6 +524,21 @@ export const updateTransactionSchema = z.object({
         name: "id",
       },
     }),
+  name: z.string().optional().openapi({
+    description: "Name/description of the transaction.",
+  }),
+  amount: z.number().optional().openapi({
+    description: "Amount of the transaction.",
+  }),
+  currency: z.string().optional().openapi({
+    description: "Currency of the transaction.",
+  }),
+  date: z.string().optional().openapi({
+    description: "Date of the transaction (ISO 8601).",
+  }),
+  bankAccountId: z.string().optional().openapi({
+    description: "Bank account ID associated with the transaction.",
+  }),
   categorySlug: z.string().nullable().optional().openapi({
     description: "Category slug for the transaction.",
   }),

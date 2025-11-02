@@ -264,13 +264,13 @@ export const TransactionsEmail = ({
                     <Link
                       href={`${baseAppUrl}/transactions?id=${transaction.id}`}
                       className={cn(
-                        transaction?.category === "income"
+                        transaction.amount > 0
                           ? "text-[#00C969]"
                           : themeClasses.link,
                       )}
                       style={{
                         color:
-                          transaction?.category === "income"
+                          transaction.amount > 0
                             ? "#00C969 !important"
                             : lightStyles.text.color,
                         textDecoration: "none",
@@ -280,7 +280,7 @@ export const TransactionsEmail = ({
                         className="text-[14px] m-0 p-0 mt-1 pb-1 line-clamp-1"
                         style={{
                           color:
-                            transaction?.category === "income"
+                            transaction.amount > 0
                               ? "#00C969 !important"
                               : "inherit",
                         }}
@@ -293,13 +293,13 @@ export const TransactionsEmail = ({
                     <Text
                       className={cn(
                         "text-[14px] m-0 p-0 mt-1 pb-1",
-                        transaction?.category === "income"
+                        transaction.amount > 0
                           ? "text-[#00C969]"
                           : themeClasses.text,
                       )}
                       style={{
                         color:
-                          transaction?.category === "income"
+                          transaction.amount > 0
                             ? "#00C969 !important"
                             : lightStyles.text.color,
                       }}
