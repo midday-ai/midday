@@ -19,8 +19,9 @@ WORKDIR /app
 
 # Install build dependencies for native modules (canvas, etc.)
 # This layer is cached unless build dependencies change
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y \
     python3 \
+    python3-pip \
     build-essential \
     libcairo2-dev \
     libpango1.0-dev \
