@@ -1,8 +1,10 @@
+import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
+import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { getWidgetPeriodDates } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -19,6 +21,9 @@ export function CashFlowWidget() {
   const { data: team } = useTeamQuery();
   const { data: user } = useUserQuery();
   const t = useI18n();
+  const { sendMessage } = useChatActions();
+  const chatId = useChatId();
+  const { setChatId } = useChatInterface();
   const { config, isConfiguring, setIsConfiguring, saveConfig } =
     useConfigurableWidget("cash-flow");
 
@@ -37,9 +42,38 @@ export function CashFlowWidget() {
     ...WIDGET_POLLING_CONFIG,
   });
 
+  const handleToolCall = (params: {
+    toolName: string;
+    toolParams?: Record<string, any>;
+    text: string;
+  }) => {
+    if (!chatId) return;
+
+    setChatId(chatId);
+
+    sendMessage({
+      role: "user",
+      parts: [{ type: "text", text: params.text }],
+      metadata: {
+        toolCall: {
+          toolName: params.toolName,
+          toolParams: params.toolParams,
+        },
+      },
+    });
+  };
+
   const handleViewAnalysis = () => {
-    // TODO: Navigate to cash flow analysis page
-    console.log("View cash flow analysis clicked");
+    handleToolCall({
+      toolName: "getCashFlow",
+      toolParams: {
+        from: format(from, "yyyy-MM-dd"),
+        to: format(to, "yyyy-MM-dd"),
+        currency: team?.baseCurrency ?? undefined,
+        period: "monthly",
+      },
+      text: "Show cash flow",
+    });
   };
 
   const formatCashFlow = (amount: number, currency: string) => {

@@ -12,6 +12,7 @@ import {
   createAgent,
   formatContextForLLM,
 } from "@api/ai/agents/config/shared";
+import { getAccountBalancesTool } from "@api/ai/tools/get-account-balances";
 
 export const operationsAgent = createAgent({
   name: "operations",
@@ -30,13 +31,14 @@ ${COMMON_AGENT_RULES}
 <guidelines>
 - For direct queries: lead with results, add context
 </guidelines>`,
-  //   tools: {
-  //     listInbox: listInboxItemsTool,
-  //     getBalances: getBalancesTool,
-  //     listDocuments: listDocumentsTool,
-  //     exportData: exportDataTool,
-  //     listTransactions: listTransactionsTool,
-  //     listInvoices: listInvoicesTool,
-  //   },
+  tools: {
+    getAccountBalances: getAccountBalancesTool,
+    // listInbox: listInboxItemsTool,
+    // getBalances: getBalancesTool,
+    // listDocuments: listDocumentsTool,
+    // exportData: exportDataTool,
+    // listTransactions: listTransactionsTool,
+    // listInvoices: listInvoicesTool,
+  },
   maxTurns: 5,
 });

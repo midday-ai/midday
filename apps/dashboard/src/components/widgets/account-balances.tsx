@@ -1,14 +1,17 @@
 import { FormatAmount } from "@/components/format-amount";
+import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useTRPC } from "@/trpc/client";
+import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
 
 export function AccountBalancesWidget() {
   const trpc = useTRPC();
-  const router = useRouter();
+  const { sendMessage } = useChatActions();
+  const chatId = useChatId();
+  const { setChatId } = useChatInterface();
 
   // Fetch combined account balances
   const { data } = useQuery({
@@ -21,8 +24,32 @@ export function AccountBalancesWidget() {
   const currency = balanceData?.currency ?? "USD";
   const accountCount = balanceData?.accountCount ?? 0;
 
+  const handleToolCall = (params: {
+    toolName: string;
+    toolParams?: Record<string, any>;
+    text: string;
+  }) => {
+    if (!chatId) return;
+
+    setChatId(chatId);
+
+    sendMessage({
+      role: "user",
+      parts: [{ type: "text", text: params.text }],
+      metadata: {
+        toolCall: {
+          toolName: params.toolName,
+          toolParams: params.toolParams,
+        },
+      },
+    });
+  };
+
   const handleOpenAccounts = () => {
-    router.push("/accounts");
+    handleToolCall({
+      toolName: "getAccountBalances",
+      text: "Show account balances",
+    });
   };
 
   const getDescription = () => {
@@ -77,7 +104,7 @@ export function AccountBalancesWidget() {
       icon={<Icons.Accounts className="size-4" />}
       description={getDescription()}
       onClick={handleOpenAccounts}
-      actions="View accounts"
+      actions="View account balances"
     >
       <div className="space-y-1">
         <h2 className="text-2xl font-normal text-[24px]">

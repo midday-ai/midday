@@ -49,16 +49,15 @@ export function RunwayWidget() {
       description="Your cash runway in months"
       onClick={() => {
         handleToolCall({
-          toolName: "getBurnRateAnalysis",
+          toolName: "getRunway",
           toolParams: {
             from: subMonths(startOfMonth(new Date()), 12).toISOString(),
             to: endOfMonth(new Date()).toISOString(),
-            currency: "USD",
           },
-          text: "View burn rate",
+          text: "Show cash runway",
         });
       }}
-      actions="View burn rate"
+      actions="View runway"
     >
       <h2 className="text-2xl font-normal text-[24px] mb-2">
         {data?.result} months

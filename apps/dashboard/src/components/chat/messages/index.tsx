@@ -1,7 +1,7 @@
 "use client";
 
 import { MessageActions } from "@/components/chat/messages/message-actions";
-import { ActiveToolCall, ThinkingMessage } from "@/components/message";
+import { ThinkingMessage } from "@/components/message";
 import { WebSearchSources } from "@/components/web-search-sources";
 import { useUserQuery } from "@/hooks/use-user";
 import { useChatMessages, useChatStatus } from "@ai-sdk-tools/store";

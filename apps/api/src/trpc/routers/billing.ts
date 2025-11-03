@@ -37,7 +37,7 @@ export const billingRouter = createTRPCRouter({
             },
             status: order.status,
             product: {
-              name: order.product.name,
+              name: order.product?.name || "Subscription",
             },
             invoiceId: order.isInvoiceGenerated ? order.id : null,
           })),

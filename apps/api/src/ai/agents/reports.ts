@@ -15,6 +15,10 @@ import {
   createAgent,
   formatContextForLLM,
 } from "@api/ai/agents/config/shared";
+import { getCashFlowTool } from "@api/ai/tools/get-cash-flow";
+import { getProfitAnalysisTool } from "@api/ai/tools/get-profit-analysis";
+import { getRevenueSummaryTool } from "@api/ai/tools/get-revenue-summary";
+import { getRunwayTool } from "@api/ai/tools/get-runway";
 
 export const reportsAgent = createAgent({
   name: "reports",
@@ -51,16 +55,20 @@ Provide concise, natural financial reports with:
 - Keep it conversational, not overly structured
 </response_structure>
 </instructions>`,
-  //   tools: {
-  //     revenue: revenueDashboardTool,
-  //     profitLoss: profitLossTool,
-  //     cashFlow: cashFlowTool,
-  //     balanceSheet: balanceSheetTool,
-  //     expenses: expensesTool,
-  //     burnRate: burnRateMetricsTool,
-  //     runway: runwayMetricsTool,
-  //     spending: spendingMetricsTool,
-  //     taxSummary: taxSummaryTool,
-  //   },
+  tools: {
+    getRunway: getRunwayTool,
+    getCashFlow: getCashFlowTool,
+    getProfitAnalysis: getProfitAnalysisTool,
+    getRevenueSummary: getRevenueSummaryTool,
+    // revenue: revenueDashboardTool,
+    // profitLoss: profitLossTool,
+    // cashFlow: cashFlowTool,
+    // balanceSheet: balanceSheetTool,
+    // expenses: expensesTool,
+    // burnRate: burnRateMetricsTool,
+    // runway: runwayMetricsTool,
+    // spending: spendingMetricsTool,
+    // taxSummary: taxSummaryTool,
+  },
   maxTurns: 5,
 });

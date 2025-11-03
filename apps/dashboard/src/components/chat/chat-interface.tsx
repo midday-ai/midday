@@ -1,52 +1,36 @@
 "use client";
 
-import { Canvas } from "@/components/canvas/canvas";
-import { ChatHeader } from "@/components/chat/chat-header";
-import { ChatInput } from "@/components/chat/chat-input";
-import { Messages } from "@/components/chat/messages";
+import { Canvas } from "@/components/canvas";
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useChatStatus } from "@/hooks/use-chat-status";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
-import { AIDevtools } from "@ai-sdk-tools/devtools";
-import { useChat, useChatActions } from "@ai-sdk-tools/store";
-import type { UIChatMessage } from "@api/ai/types";
+import { useChat, useDataPart } from "@ai-sdk-tools/store";
+import type { UIChatMessage } from "@midday/api/ai/types";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
+import {
+  Conversation,
+  ConversationContent,
+  ConversationScrollButton,
+} from "@midday/ui/conversation";
 import type { Geo } from "@vercel/functions";
 import { DefaultChatTransport, generateId } from "ai";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
+import {
+  ChatHeader,
+  ChatInput,
+  type ChatInputMessage,
+  ChatMessages,
+  ChatStatusIndicators,
+} from "./";
 
 type Props = {
-  id?: string | null;
   geo?: Geo;
 };
 
-export function ChatInterface({ id, geo }: Props) {
-  const { current } = useArtifacts({
-    exclude: ["chat-title", "followup-questions"],
-  });
-
-  const isCanvasVisible = !!current;
-  const { isHome, isChatPage, chatId: routeChatId } = useChatInterface();
-  const { reset } = useChatActions();
-  const prevChatIdRef = useRef<string | null>(routeChatId);
-
-  // Use provided id, or get from route, or generate new one
-  const providedId = id ?? routeChatId;
-
-  // Generate a consistent chat ID - use provided ID or generate one
-  const chatId = useMemo(() => providedId ?? generateId(), [providedId]);
-
-  // Clear messages when navigating back from a chat to home
-  useEffect(() => {
-    const prevChatId = prevChatIdRef.current;
-
-    if (prevChatId && !routeChatId) {
-      // Navigated from chat to home - reset messages
-      reset();
-    }
-
-    prevChatIdRef.current = routeChatId;
-  }, [routeChatId, reset]);
+export function ChatInterface({ geo }: Props) {
+  const { chatId: routeChatId, isHome } = useChatInterface();
+  const chatId = useMemo(() => routeChatId ?? generateId(), [routeChatId]);
 
   const authenticatedFetch = useMemo(
     () =>
@@ -70,56 +54,121 @@ export function ChatInterface({ id, geo }: Props) {
     [],
   );
 
-  useChat<UIChatMessage>({
+  const { messages, status } = useChat<UIChatMessage>({
     id: chatId,
     transport: new DefaultChatTransport({
       api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
       fetch: authenticatedFetch,
-      prepareSendMessagesRequest({ messages }) {
+      prepareSendMessagesRequest({ messages, id }) {
+        const lastMessage = messages[messages.length - 1] as ChatInputMessage;
+
+        const agentChoice = lastMessage.metadata?.agentChoice;
+        const toolChoice = lastMessage.metadata?.toolChoice;
+
         return {
           body: {
-            id: chatId,
-            message: messages[messages.length - 1],
+            id,
             country: geo?.country,
             city: geo?.city,
-            timezone: new Intl.DateTimeFormat().resolvedOptions().timeZone,
+            message: lastMessage,
+            agentChoice,
+            toolChoice,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           },
         };
       },
     }),
   });
 
+  const { agentStatus, currentToolCall } = useChatStatus(messages, status);
+
+  const { artifacts } = useArtifacts();
+  const hasArtifacts = artifacts && artifacts.length > 0;
+  const hasMessages = messages.length > 0;
+
+  const [suggestions] = useDataPart<{ prompts: string[] }>("suggestions");
+  const hasSuggestions = suggestions?.prompts && suggestions.prompts.length > 0;
+
   return (
-    <div className="relative h-full overflow-hidden w-full">
+    <div
+      className={cn(
+        "relative flex size-full overflow-hidden",
+        isHome && "h-[calc(100vh-764px)]",
+        !isHome && "h-[calc(100vh-88px)]",
+      )}
+    >
+      {/* Canvas slides in from right when artifacts are present */}
       <div
         className={cn(
-          "relative h-full w-full transition-all duration-300 ease-in-out",
-          isHome && "h-[calc(100vh-764px)]",
-          isChatPage && "h-[calc(100vh-88px)]",
-          isCanvasVisible && "pr-[603px]",
+          "fixed right-0 top-0 bottom-0 z-20",
+          hasArtifacts ? "translate-x-0" : "translate-x-full",
+          hasMessages && "transition-transform duration-300 ease-in-out",
         )}
       >
-        <ChatHeader />
-
-        <div className="relative w-full">
-          <Messages />
-          <ChatInput />
-        </div>
+        {hasArtifacts && <Canvas />}
       </div>
 
-      <Canvas />
+      {/* Main chat area - container that slides left when canvas opens */}
+      <div
+        className={cn(
+          "relative flex-1",
+          hasMessages && "transition-all duration-300 ease-in-out",
+          hasArtifacts && "mr-[600px]",
+          !hasMessages && "flex items-center justify-center",
+        )}
+      >
+        {hasMessages && (
+          <>
+            {/* Conversation view - messages with absolute positioning for proper height */}
+            <div className="absolute inset-0 flex flex-col">
+              <div
+                className={cn(
+                  "sticky top-0 left-0 z-10 shrink-0",
+                  hasMessages && "transition-all duration-300 ease-in-out",
+                  hasArtifacts ? "right-[600px]" : "right-0",
+                )}
+              >
+                <div className="bg-background/80 dark:bg-background/50 backdrop-blur-sm p-2 pt-6">
+                  <ChatHeader />
+                </div>
+              </div>
+              <Conversation>
+                <ConversationContent className="pb-48 pt-14">
+                  <div className="max-w-2xl mx-auto w-full">
+                    <ChatMessages
+                      messages={messages}
+                      isStreaming={
+                        status === "streaming" || status === "submitted"
+                      }
+                    />
+                    <ChatStatusIndicators
+                      agentStatus={agentStatus}
+                      currentToolCall={currentToolCall}
+                      status={status}
+                    />
+                  </div>
+                </ConversationContent>
+                <ConversationScrollButton
+                  className={cn(hasSuggestions ? "bottom-52" : "bottom-42")}
+                />
+              </Conversation>
+            </div>
+          </>
+        )}
 
-      {process.env.NODE_ENV === "development" && (
-        <AIDevtools
-          config={{
-            streamCapture: {
-              enabled: true,
-              endpoint: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
-              autoConnect: true,
-            },
-          }}
-        />
-      )}
+        {/* Fixed input at bottom - respects parent container boundaries */}
+        <div
+          className={cn(
+            "fixed bottom-0 left-0",
+            hasMessages && "transition-all duration-300 ease-in-out",
+            hasArtifacts ? "right-[600px]" : "right-0",
+          )}
+        >
+          <div className="w-full pb-4 max-w-2xl mx-auto">
+            <ChatInput />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

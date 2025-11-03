@@ -6,7 +6,7 @@ import { RecordButton } from "@/components/chat/record-button";
 import { SuggestedActionsButton } from "@/components/suggested-actions-button";
 import { WebSearchButton } from "@/components/web-search-button";
 import { useChatInterface } from "@/hooks/use-chat-interface";
-import { type CommandSuggestion, useChatStore } from "@/store/chat";
+import { useChatStore } from "@/store/chat";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { useChatActions, useChatId, useChatStatus } from "@ai-sdk-tools/store";
 import { cn } from "@midday/ui/cn";
@@ -53,7 +53,13 @@ export function ChatInput() {
     resetCommandState,
   } = useChatStore();
 
-  const handleSubmit = async (message: PromptInputMessage) => {
+  const handleSubmit = (message: PromptInputMessage) => {
+    // If currently streaming or submitted, stop instead of submitting
+    if (status === "streaming" || status === "submitted") {
+      stop();
+      return;
+    }
+
     const hasText = Boolean(message.text);
     const hasAttachments = Boolean(message.files?.length);
 
@@ -61,59 +67,15 @@ export function ChatInput() {
       return;
     }
 
-    let processedFiles = message.files;
-
-    // Convert blob URLs to data URLs for server compatibility
-    if (message.files && message.files.length > 0) {
-      setIsUploading(true);
-      try {
-        processedFiles = await Promise.all(
-          message.files.map(async (file) => {
-            // If it's a blob URL, convert to data URL
-            if (file.url.startsWith("blob:")) {
-              const response = await fetch(file.url);
-              const blob = await response.blob();
-
-              // Convert blob to data URL
-              const dataUrl = await new Promise<string>((resolve) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result as string);
-                reader.readAsDataURL(blob);
-              });
-
-              return {
-                ...file,
-                url: dataUrl,
-              };
-            }
-
-            // Return file as-is if not a blob URL
-            return file;
-          }),
-        );
-      } catch (error) {
-        console.error("Failed to process files:", error);
-        setIsUploading(false);
-        return;
-      }
-      setIsUploading(false);
-    }
-
-    // Set chat ID to ensure proper URL routing
-    if (chatId) {
-      setChatId(chatId);
-    }
-
     sendMessage({
       text: message.text || "Sent with attachments",
-      files: processedFiles,
+      files: message.files,
       metadata: {
-        webSearch: isWebSearch,
+        agentChoice: message.metadata?.agentChoice,
+        toolChoice: message.metadata?.toolChoice,
       },
     });
-
     setInput("");
-    resetCommandState();
   };
 
   return (
