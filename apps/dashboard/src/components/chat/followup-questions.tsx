@@ -18,8 +18,6 @@ export function FollowupQuestions() {
   const status = useChatStatus();
   const chatId = useChatId();
 
-  return null;
-
   const handleQuestionSelect = (question: string) => {
     if (chatId) {
       setChatId(chatId);

@@ -15,7 +15,6 @@ import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { BurnRateChart } from "../charts";
 
 export function BurnRateCanvas() {
-  return null;
   // const { data, status } = useArtifact(burnRateArtifact);
   const { data: user } = useUserQuery();
 

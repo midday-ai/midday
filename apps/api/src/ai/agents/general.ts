@@ -1,18 +1,17 @@
 import { openai } from "@ai-sdk/openai";
-// import { webSearchTool } from "../tools/search";
-// import { analyticsAgent } from "./analytics";
-// import { customersAgent } from "./customers";
-// import { invoicesAgent } from "./invoices";
-// import { operationsAgent } from "./operations";
-// import { reportsAgent } from "./reports";
 import {
   COMMON_AGENT_RULES,
   createAgent,
   formatContextForLLM,
 } from "@api/ai/agents/config/shared";
 import { webSearchTool } from "@api/ai/tools/web-search";
-// import { timeTrackingAgent } from "./time-tracking";
-// import { transactionsAgent } from "./transactions";
+import { analyticsAgent } from "./analytics";
+import { customersAgent } from "./customers";
+import { invoicesAgent } from "./invoices";
+import { operationsAgent } from "./operations";
+import { reportsAgent } from "./reports";
+import { timeTrackingAgent } from "./time-tracking";
+import { transactionsAgent } from "./transactions";
 
 export const generalAgent = createAgent({
   name: "general",
@@ -36,14 +35,14 @@ ${COMMON_AGENT_RULES}
   tools: {
     webSearch: webSearchTool,
   },
-  //   handoffs: [
-  //     operationsAgent,
-  //     reportsAgent,
-  //     analyticsAgent,
-  //     transactionsAgent,
-  //     customersAgent,
-  //     invoicesAgent,
-  //     timeTrackingAgent,
-  //   ],
+  handoffs: [
+    operationsAgent,
+    reportsAgent,
+    analyticsAgent,
+    transactionsAgent,
+    customersAgent,
+    invoicesAgent,
+    timeTrackingAgent,
+  ],
   maxTurns: 5,
 });

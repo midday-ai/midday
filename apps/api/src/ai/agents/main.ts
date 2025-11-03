@@ -1,14 +1,14 @@
 import { openai } from "@ai-sdk/openai";
-// import { analyticsAgent } from "./analytics";
-// import { customersAgent } from "./customers";
-// import { generalAgent } from "./general";
-// import { invoicesAgent } from "./invoices";
-// import { operationsAgent } from "./operations";
-// import { reportsAgent } from "./reports";
-// import { researchAgent } from "./research";
 import { createAgent, formatContextForLLM } from "@api/ai/agents/config/shared";
-// import { timeTrackingAgent } from "./time-tracking";
-// import { transactionsAgent } from "./transactions";
+import { analyticsAgent } from "./analytics";
+import { customersAgent } from "./customers";
+import { generalAgent } from "./general";
+import { invoicesAgent } from "./invoices";
+import { operationsAgent } from "./operations";
+import { reportsAgent } from "./reports";
+import { researchAgent } from "./research";
+import { timeTrackingAgent } from "./time-tracking";
+import { transactionsAgent } from "./transactions";
 
 export const mainAgent = createAgent({
   name: "triage",
@@ -26,8 +26,9 @@ export const mainAgent = createAgent({
 ${formatContextForLLM(ctx)}
 
 <agent-capabilities>
-research: AFFORDABILITY ANALYSIS ("can I afford X?", "should I buy X?"), purchase decisions, market comparisons
 general: General questions, greetings, web search
+
+research: AFFORDABILITY ANALYSIS ("can I afford X?", "should I buy X?"), purchase decisions, market comparisons
 operations: Account balances, documents, inbox
 reports: Financial reports (revenue, expenses, burn rate, runway, P&L)
 analytics: Forecasts, health scores, predictions, stress tests
@@ -37,16 +38,16 @@ customers: Customer management
 timeTracking: Time tracking
 </agent-capabilities>
 </background-data>`,
-  //   handoffs: [
-  //     researchAgent,
-  //     generalAgent,
-  //     operationsAgent,
-  //     reportsAgent,
-  //     analyticsAgent,
-  //     transactionsAgent,
-  //     invoicesAgent,
-  //     timeTrackingAgent,
-  //     customersAgent,
-  //   ],
+  handoffs: [
+    generalAgent,
+    researchAgent,
+    operationsAgent,
+    reportsAgent,
+    analyticsAgent,
+    transactionsAgent,
+    invoicesAgent,
+    customersAgent,
+    timeTrackingAgent,
+  ],
   maxTurns: 1,
 });

@@ -17,9 +17,9 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
     return c.json({ success: false, error: validationResult.error }, 400);
   }
 
-  const db = c.get("db");
-  const { message, id, country, city, timezone, agentChoice, toolChoice } =
+  const { message, id, timezone, agentChoice, toolChoice } =
     validationResult.data;
+
   const teamId = c.get("teamId");
   const session = c.get("session");
   const userId = session.user.id;
