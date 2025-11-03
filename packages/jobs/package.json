@@ -26,7 +26,7 @@
     "heic-convert": "1.2.4",
     "node-xlsx": "^0.24.0",
     "sharp": "0.34.4",
-    "trigger.dev": "4.0.5",
+    "trigger.dev": "4.0.6",
     "zod": "^4.1.12"
   },
   "devDependencies": {
