@@ -32,107 +32,6 @@ function extractDomainFromUrl(url: string): string {
   }
 }
 
-function extractSourcesFromToolOutput(toolOutput: any): WebSearchSource[] {
-  // Try to extract sources from different possible structures
-  const sources: WebSearchSource[] = [];
-
-  // If tool output is just a status, the sources might be elsewhere
-  if (
-    toolOutput &&
-    typeof toolOutput === "object" &&
-    toolOutput.status === "completed"
-  ) {
-    return sources; // Return empty for now, sources might be in text content
-  }
-
-  // Handle OpenAI web search preview tool output structure
-  if (toolOutput?.sources && Array.isArray(toolOutput.sources)) {
-    // Direct sources array
-    return toolOutput.sources.map((source: any) => {
-      const domain = extractDomainFromUrl(source.url || "");
-      return {
-        title: source.title || source.name || domain,
-        url: source.url || "",
-        domain,
-      };
-    });
-  }
-
-  if (toolOutput?.references && Array.isArray(toolOutput.references)) {
-    // References array
-    return toolOutput.references.map((ref: any) => {
-      const domain = extractDomainFromUrl(ref.url || "");
-      return {
-        title: ref.title || ref.name || domain,
-        url: ref.url || "",
-        domain,
-      };
-    });
-  }
-
-  // Handle case where sources might be in the content property
-  if (toolOutput?.content) {
-    if (typeof toolOutput.content === "object" && toolOutput.content.sources) {
-      return extractSourcesFromToolOutput(toolOutput.content);
-    }
-
-    if (typeof toolOutput.content === "string") {
-      // Try to extract URLs from text content
-      const urlRegex = /https?:\/\/[^\s)]+/g;
-      const urls = toolOutput.content.match(urlRegex) || [];
-
-      return urls.map((url: string) => ({
-        title: extractDomainFromUrl(url),
-        url: url,
-        domain: extractDomainFromUrl(url),
-      }));
-    }
-  }
-
-  if (typeof toolOutput === "string") {
-    // Try to extract URLs from text content with better patterns
-    const urlRegex = /https?:\/\/[^\s)]+/g;
-    const urls = toolOutput.match(urlRegex) || [];
-
-    // Also try to extract markdown-style links [title](url)
-    const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
-    const markdownLinks = [...toolOutput.matchAll(markdownLinkRegex)];
-
-    const sources: WebSearchSource[] = [];
-
-    // Add markdown links first (they have titles)
-    for (const match of markdownLinks) {
-      const title = match[1];
-      const url = match[2];
-      if (title && url) {
-        const domain = extractDomainFromUrl(url);
-        sources.push({
-          title: title,
-          url: url,
-          domain,
-        });
-      }
-    }
-
-    // Add plain URLs that weren't already captured
-    for (const url of urls) {
-      const cleanUrl = url.replace(/[.,;!?]*$/, ""); // Remove trailing punctuation
-      if (!sources.some((s) => s.url === cleanUrl)) {
-        const domain = extractDomainFromUrl(cleanUrl);
-        sources.push({
-          title: domain,
-          url: cleanUrl,
-          domain,
-        });
-      }
-    }
-
-    return sources;
-  }
-
-  return sources;
-}
-
 export const WebSearchSources = ({
   sources: providedSources,
   showSourceCount = true,
@@ -227,7 +126,7 @@ const WebSearchSourceAvatar = ({
   const domain = source.domain || extractDomainFromUrl(source.url);
 
   return (
-    <Tooltip>
+    <Tooltip delayDuration={100}>
       <TooltipTrigger asChild>
         <motion.div
           className="inline-flex cursor-pointer"
@@ -255,14 +154,9 @@ const WebSearchSourceAvatar = ({
             <AvatarImage
               src={`https://img.logo.dev/${domain}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=64&retina=true`}
               alt={`${domain} logo`}
-              onError={(e) => {
-                // Fallback to a simple domain favicon if Logo.dev fails
-                (e.target as HTMLImageElement).src =
-                  `https://${domain}/favicon.ico`;
-              }}
             />
             <AvatarFallback className="text-[10px] bg-background text-muted-foreground font-medium">
-              {domain.split(".")[0]?.charAt(0).toUpperCase() || "?"}
+              {domain.split(".")[0]?.charAt(0).toUpperCase() || ""}
             </AvatarFallback>
           </Avatar>
         </motion.div>
@@ -275,9 +169,4 @@ const WebSearchSourceAvatar = ({
       </TooltipContent>
     </Tooltip>
   );
-};
-
-// Helper function to extract sources from web search tool output
-export const extractWebSearchSources = (toolOutput: any): WebSearchSource[] => {
-  return extractSourcesFromToolOutput(toolOutput);
 };

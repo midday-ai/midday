@@ -38,7 +38,8 @@ export const getBurnRateTool = tool({
 
       // Early return if no data
       if (burnRateData.length === 0) {
-        yield "No burn rate data available for the selected period.";
+        yield { text: "No burn rate data available for the selected period." };
+
         return {
           currentMonthlyBurn: 0,
           runway: 0,
@@ -107,9 +108,7 @@ export const getBurnRateTool = tool({
 **Change:** ${formattedData.burnRateChange}% over ${formattedData.burnRateChangePeriod}`;
 
       // Return the data
-      yield {
-        data: response,
-      };
+      yield { text: response };
 
       // Generate follow-up questions based on the data output
       const burnRateFollowupQuestions = await generateFollowupQuestions(

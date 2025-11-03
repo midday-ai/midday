@@ -2,7 +2,7 @@
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
-import { useChatActions, useChatId } from "@ai-sdk-tools/store";
+import { useChatActions, useChatId, useChatStatus } from "@ai-sdk-tools/store";
 import { followupQuestionsArtifact } from "@api/ai/artifacts/followup-questions";
 import { Button } from "@midday/ui/button";
 import { AnimatePresence, motion } from "framer-motion";
@@ -13,6 +13,7 @@ export function FollowupQuestions() {
   const [isVisible, setIsVisible] = useState(false);
   const { sendMessage } = useChatActions();
   const { setChatId } = useChatInterface();
+  const status = useChatStatus();
   const chatId = useChatId();
 
   const handleQuestionSelect = (question: string) => {
@@ -27,7 +28,11 @@ export function FollowupQuestions() {
   };
 
   useEffect(() => {
-    if (data?.questions && data.questions.length > 0) {
+    if (
+      status !== "streaming" &&
+      data?.questions &&
+      data.questions.length > 0
+    ) {
       // Small delay to allow for smooth animation
       setTimeout(() => setIsVisible(true), 100);
     } else {

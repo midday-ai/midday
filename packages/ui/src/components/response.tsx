@@ -1,5 +1,7 @@
 "use client";
 
+import { getAppUrl } from "@midday/utils/envs";
+import Link from "next/link";
 import { type ComponentProps, memo } from "react";
 import { Streamdown } from "streamdown";
 import { cn } from "../utils";
@@ -99,6 +101,18 @@ export const Response = memo(
           </h4>
         ),
         table: (props) => <Table {...props} className="border" />,
+        a: (props) => {
+          // if the href starts with the app url, open in the same window
+          if (props.href?.startsWith(getAppUrl())) {
+            return (
+              <Link href={props.href} className="underline">
+                {props.children}
+              </Link>
+            );
+          }
+
+          return <a {...props} />;
+        },
       }}
       {...props}
     />

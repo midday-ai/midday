@@ -1,11 +1,8 @@
 "use client";
 
-import { MessageActions } from "@/components/chat/messages/message-indicators";
+import { MessageActions } from "@/components/chat/messages/message-actions";
 import { ActiveToolCall, ThinkingMessage } from "@/components/message";
-import {
-  WebSearchSources,
-  extractWebSearchSources,
-} from "@/components/web-search-sources";
+import { WebSearchSources } from "@/components/web-search-sources";
 import { useUserQuery } from "@/hooks/use-user";
 import { useChatMessages, useChatStatus } from "@ai-sdk-tools/store";
 import {
@@ -29,29 +26,9 @@ export function Messages() {
           <ConversationContent className="px-6 mx-auto mb-40 max-w-[770px]">
             {messages.map((message) => (
               <div key={message.id}>
-                {/* {message.role === 'assistant' && message.parts.filter((part) => part.type === 'source-url').length > 0 && (
-                  <Sources>
-                    <SourcesTrigger
-                      count={
-                        message.parts.filter(
-                          (part) => part.type === 'source-url',
-                        ).length
-                      }
-                    />
-                    {message.parts.filter((part) => part.type === 'source-url').map((part, i) => (
-                      <SourcesContent key={`${message.id}-${i}`}>
-                        <Source
-                          key={`${message.id}-${i}`}
-                          href={part.url}
-                          title={part.url}
-                        />
-                      </SourcesContent>
-                    ))}
-                  </Sources>
-                )} */}
                 {message.parts.map((part, i) => {
                   switch (part.type) {
-                    case "data-data-canvas":
+                    case "data-canvas":
                       return null; // Canvas content is rendered in sidebar
 
                     case "text":
@@ -61,58 +38,43 @@ export function Messages() {
                             <MessageContent>
                               <Response>{part.text}</Response>
                             </MessageContent>
+
+                            {message.role === "user" && user && (
+                              <MessageAvatar
+                                src={user.avatarUrl!}
+                                name={user.fullName!}
+                              />
+                            )}
                           </Message>
+
                           {message.role === "assistant" &&
-                            i === messages.length - 1 && (
-                              // <Actions className="mt-2">
-                              //   <Action
-                              //     onClick={() => regenerate()}
-                              //     label="Retry"
-                              //   >
-                              //     <RefreshCcwIcon className="size-3" />
-                              //   </Action>
-                              //   <Action
-                              //     onClick={() =>
-                              //       navigator.clipboard.writeText(part.text)
-                              //     }
-                              //     label="Copy"
-                              //   >
-                              //     <CopyIcon className="size-3" />
-                              //   </Action>
-                              // </Actions>
-                              <MessageActions />
+                            message.parts.filter(
+                              (part) => part.type === "source-url",
+                            ).length > 0 && (
+                              <WebSearchSources
+                                sources={message.parts.filter(
+                                  (part) => part.type === "source-url",
+                                )}
+                              />
+                            )}
+
+                          {message.role === "assistant" &&
+                            status !== "streaming" && (
+                              <MessageActions
+                                messageContent={part.text}
+                                messageId={message.id}
+                              />
                             )}
                         </Fragment>
                       );
-                    // case 'reasoning':
-                    //   return (
-                    //     <Reasoning
-                    //       key={`${message.id}-${i}`}
-                    //       className="w-full"
-                    //       isStreaming={status === 'streaming' && i === message.parts.length - 1 && message.id === messages.at(-1)?.id}
-                    //     >
-                    //       <ReasoningTrigger />
-                    //       <ReasoningContent>{part.text}</ReasoningContent>
-                    //     </Reasoning>
-                    //   );
-                    // case "tool-getTransactions":
-                    //   return (
-                    //     <Fragment key={`${message.id}-${i}`}>
-                    //       <Message from={message.role}>
-                    //         <MessageContent>
-                    //           <Response>{part.output as string}</Response>
-                    //         </MessageContent>
-                    //       </Message>
-                    //     </Fragment>
-                    //   );
+
                     default: {
-                      if (part.type?.startsWith("tool-")) {
-                        console.log(part);
+                      if (part.type.startsWith("tool-")) {
                         return (
                           <Fragment key={`${message.id}-${i}`}>
                             <Message from={message.role}>
                               <MessageContent>
-                                <Response>{part.output as string}</Response>
+                                <Response>{part.output?.text}</Response>
                               </MessageContent>
                             </Message>
                           </Fragment>
