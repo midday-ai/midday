@@ -17,14 +17,14 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
   return (
     <div tw="flex justify-between items-center mt-14 mb-2">
       <div tw="flex items-center">
-        <span tw="text-[22px] text-[#878787] font-mono mr-2">
+        <span tw="text-[22px] text-[#878787] mr-2">
           {template.invoiceNoLabel}:
         </span>
         <span tw="text-[22px] text-white font-mono">{invoiceNumber}</span>
       </div>
 
       <div tw="flex items-center">
-        <span tw="text-[22px] text-[#878787] font-mono mr-2">
+        <span tw="text-[22px] text-[#878787] mr-2">
           {template.issueDateLabel}:
         </span>
         <span tw="text-[22px] text-white font-mono">
@@ -38,7 +38,7 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
       </div>
 
       <div tw="flex items-center">
-        <span tw="text-[22px] text-[#878787] font-mono mr-2">
+        <span tw="text-[22px] text-[#878787] mr-2">
           {template.dueDateLabel}:
         </span>
         <span tw="text-[22px] text-white font-mono">

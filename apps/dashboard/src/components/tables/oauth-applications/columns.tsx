@@ -87,7 +87,7 @@ export const columns: ColumnDef<OAuthApplication>[] = [
               <button
                 type="button"
                 onClick={handleCopyClientId}
-                className="font-mono text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               >
                 {shortId}
               </button>

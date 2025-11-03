@@ -15,6 +15,7 @@ import type { Context } from "@api/rest/types";
 import { chatRequestSchema } from "@api/schemas/chat";
 import { shouldForceStop } from "@api/utils/streaming-utils";
 import { OpenAPIHono } from "@hono/zod-openapi";
+import { suggestedActionsCache } from "@midday/cache/suggested-actions-cache";
 import { getChatById, saveChat, saveChatMessage } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import {
@@ -64,6 +65,38 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
     // Check if this is a forced tool call message
     const messageMetadata = message.metadata as ChatMessageMetadata;
     const isToolCallMessage = messageMetadata?.toolCall;
+
+    // Track suggested action usage if this is a tool call from suggested actions
+    if (isToolCallMessage && messageMetadata?.toolCall) {
+      const { toolName } = messageMetadata.toolCall;
+
+      // Map tool names to suggested action IDs
+      // This is a simple mapping - you might want to make this more sophisticated
+      const toolNameToActionId: Record<string, string> = {
+        getBurnRate: "burn-rate", // Could be multiple actions that use this tool
+        getBurnRateAnalysis: "health-report",
+        getTransactions: "latest-transactions",
+      };
+
+      // Try to find matching action ID for this tool
+      // For now, we'll use a heuristic based on the tool name
+      const possibleActionId = toolNameToActionId[toolName];
+      if (possibleActionId) {
+        // Increment usage asynchronously (don't block the response)
+        suggestedActionsCache
+          .incrementUsage(teamId, userId, possibleActionId)
+          .catch((error) => {
+            logger.error({
+              msg: "Failed to track suggested action usage",
+              userId,
+              teamId,
+              toolName,
+              actionId: possibleActionId,
+              error: error instanceof Error ? error.message : String(error),
+            });
+          });
+      }
+    }
 
     const isWebSearchMessage = messageMetadata?.webSearch;
 

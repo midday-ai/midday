@@ -31,7 +31,7 @@ export function OAuthApplicationStatusBadge({ status, className }: Props) {
   return (
     <div
       className={cn(
-        "text-[10px] px-3 py-1 rounded-full font-mono capitalize",
+        "text-[10px] px-3 py-1 rounded-full capitalize",
         getStatusColor(status),
         className,
       )}

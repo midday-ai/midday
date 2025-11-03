@@ -24,7 +24,7 @@ export function Input({ className, ...props }: InputProps) {
         autoComplete="off"
         value={fieldValue || ""}
         className={cn(
-          "border-0 p-0 h-6 border-b border-transparent focus:border-border font-mono text-xs",
+          "border-0 p-0 h-6 border-b border-transparent focus:border-border text-xs",
           isPlaceholder && "opacity-0",
           className,
         )}

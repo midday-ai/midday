@@ -10,7 +10,8 @@
     "./team-permissions-cache": "./src/team-permissions-cache.ts",
     "./redis-client": "./src/redis-client.ts",
     "./health": "./src/health.ts",
-    "./chat-cache": "./src/chat-cache.ts"
+    "./chat-cache": "./src/chat-cache.ts",
+    "./suggested-actions-cache": "./src/suggested-actions-cache.ts"
   },
   "dependencies": {
     "redis": "^5.8.2",

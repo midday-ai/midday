@@ -54,9 +54,7 @@ export function InvoiceSuccess() {
                 <span className="text-[11px] text-[#878787] font-mono">:</span>
               </div>
 
-              <span className="font-mono text-[11px]">
-                {invoice.invoiceNumber}
-              </span>
+              <span className="text-[11px]">{invoice.invoiceNumber}</span>
             </div>
 
             <div className="flex space-x-1 items-center">
@@ -67,7 +65,7 @@ export function InvoiceSuccess() {
                 <span className="text-[11px] text-[#878787] font-mono">:</span>
               </div>
 
-              <span className="font-mono text-[11px]">
+              <span className="text-[11px]">
                 {format(
                   new Date(invoice.dueDate!),
                   invoice.template.dateFormat,
@@ -84,7 +82,7 @@ export function InvoiceSuccess() {
             <span className="text-[11px] font-mono">
               {invoice.template.customerLabel}
             </span>
-            <div className="font-mono text-[#878787]">
+            <div className="text-[#878787]">
               {/* @ts-expect-error - customerDetails is JSONB */}
               {formatEditorContent(invoice.customerDetails)}
             </div>
@@ -100,7 +98,7 @@ export function InvoiceSuccess() {
               {invoice.template.totalSummaryLabel}
             </span>
 
-            <span className="font-mono text-xl">
+            <span className="text-xl">
               {invoice.amount && invoice.currency && (
                 <FormatAmount
                   amount={invoice.amount}

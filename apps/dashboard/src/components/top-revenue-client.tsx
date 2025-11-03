@@ -19,7 +19,7 @@ export function TopRevenueClient() {
     return (
       <Card className="hidden sm:block">
         <CardHeader className="pb-3">
-          <CardTitle className="font-mono font-medium text-2xl">
+          <CardTitle className="font-medium text-2xl">
             No Revenue Client
           </CardTitle>
         </CardHeader>
@@ -39,7 +39,7 @@ export function TopRevenueClient() {
   return (
     <Card className="hidden sm:block">
       <CardHeader className="pb-3">
-        <CardTitle className="font-mono font-medium text-2xl">
+        <CardTitle className="font-medium text-2xl">
           {data.customerName}
         </CardTitle>
       </CardHeader>

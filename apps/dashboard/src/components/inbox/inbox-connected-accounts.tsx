@@ -14,12 +14,7 @@ import {
   CardTitle,
 } from "@midday/ui/card";
 import { Icons } from "@midday/ui/icons";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@midday/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import {
   useMutation,
