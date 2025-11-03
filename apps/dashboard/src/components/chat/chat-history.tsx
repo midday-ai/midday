@@ -72,13 +72,12 @@ export function ChatHistory() {
         );
 
         // Optimistically update the cache
-        queryClient.setQueryData(
+        queryClient.setQueryData<Chat[]>(
           trpc.chats.list.queryKey({
             limit: 20,
             search: searchQuery || undefined,
           }),
-          (old: Chat[] | undefined) =>
-            old?.filter((chat) => chat.id !== chatId) ?? [],
+          (old) => old?.filter((chat) => chat.id !== chatId) ?? [],
         );
 
         return { previousChats };

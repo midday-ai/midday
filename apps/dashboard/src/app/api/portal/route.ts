@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   }
 
   const result = await api.customerSessions.create({
-    customerExternalId: teamId,
+    externalCustomerId: teamId,
   });
 
   return NextResponse.redirect(result.customerPortalUrl);

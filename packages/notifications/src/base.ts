@@ -21,7 +21,7 @@ export interface NotificationHandler<T = any> {
     data: T,
     user: UserData,
     team: TeamContext,
-  ) => Partial<CreateEmailOptions> & {
+  ) => Partial<Omit<CreateEmailOptions, "template">> & {
     data: Record<string, any>;
     template?: string;
     emailType: "customer" | "team" | "owners"; // Explicit: customer emails go to external recipients, team emails go to all team members, owners emails go to team owners only
@@ -43,7 +43,7 @@ export type EmailInput = {
   template?: string;
   user: UserData;
   data: Record<string, any>;
-} & Partial<CreateEmailOptions>;
+} & Partial<Omit<CreateEmailOptions, "template">>;
 
 // Use intersection type to combine our options with Resend's CreateEmailOptions
 export type NotificationOptions = {

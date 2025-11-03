@@ -16,7 +16,6 @@ import {
   PromptInputAttachment,
   PromptInputAttachments,
   PromptInputBody,
-  PromptInputButton,
   type PromptInputMessage,
   PromptInputSubmit,
   PromptInputTextarea,
@@ -24,6 +23,13 @@ import {
   PromptInputTools,
 } from "@midday/ui/prompt-input";
 import { useRef } from "react";
+
+export interface ChatInputMessage extends PromptInputMessage {
+  metadata?: {
+    agentChoice?: string;
+    toolChoice?: string;
+  };
+}
 
 export function ChatInput() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -53,7 +59,7 @@ export function ChatInput() {
     resetCommandState,
   } = useChatStore();
 
-  const handleSubmit = (message: PromptInputMessage) => {
+  const handleSubmit = (message: ChatInputMessage) => {
     // If currently streaming or submitted, stop instead of submitting
     if (status === "streaming" || status === "submitted") {
       stop();
@@ -71,9 +77,7 @@ export function ChatInput() {
       text: message.text || "Sent with attachments",
       files: message.files,
       metadata: {
-        // @ts-ignore
         agentChoice: message.metadata?.agentChoice,
-        // @ts-ignore
         toolChoice: message.metadata?.toolChoice,
       },
     });

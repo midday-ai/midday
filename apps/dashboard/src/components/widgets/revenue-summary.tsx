@@ -41,8 +41,7 @@ export function RevenueSummaryWidget() {
   });
 
   const handleToolCall = (params: {
-    toolName: string;
-    toolChoice?: Record<string, any>;
+    toolChoice: string;
     text: string;
   }) => {
     if (!chatId) return;
@@ -53,9 +52,7 @@ export function RevenueSummaryWidget() {
       role: "user",
       parts: [{ type: "text", text: params.text }],
       metadata: {
-        toolCall: {
-          toolName: params.toolName,
-        },
+        toolChoice: params.toolChoice,
       },
     });
   };
