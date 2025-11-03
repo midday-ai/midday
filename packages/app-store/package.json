@@ -10,14 +10,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@slack/bolt": "^4.4.0",
-    "@slack/web-api": "^7.10.0",
-    "zod": "^4.1.11",
+    "@slack/bolt": "^4.6.0",
+    "@slack/web-api": "^7.12.0",
+    "zod": "^4.1.12",
     "@midday/jobs": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^24.3.1",
-    "typescript": "^5.9.2"
+    "@types/node": "^24.10.0",
+    "typescript": "^5.9.3"
   },
   "exports": {
     ".": "./src/index.ts",

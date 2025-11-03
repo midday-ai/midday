@@ -22,9 +22,6 @@ const config = {
     "@midday/api",
   ],
   serverExternalPackages: ["@react-pdf/renderer", "pdfjs-dist"],
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },

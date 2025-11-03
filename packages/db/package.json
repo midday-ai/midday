@@ -29,14 +29,14 @@
     "@midday/encryption": "workspace:*",
     "@midday/invoice": "workspace:*",
     "@midday/logger": "workspace:*",
-    "@types/pg": "^8.15.5",
-    "drizzle-orm": "^0.44.6",
-    "camelcase-keys": "^10.0.0",
+    "@types/pg": "^8.15.6",
+    "drizzle-orm": "^0.44.7",
+    "camelcase-keys": "^10.0.1",
     "pg": "^8.16.3",
     "snakecase-keys": "^9.0.2"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.31.4",
+    "drizzle-kit": "^0.31.6",
     "@types/bun": "latest"
   }
 }

@@ -13,19 +13,19 @@
     "build": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
-    "@hono/zod-openapi": "^1.1.3",
-    "@hono/zod-validator": "^0.7.3",
-    "hono": "^4.9.8",
+    "@hono/zod-openapi": "^1.1.4",
+    "@hono/zod-validator": "^0.7.4",
+    "hono": "^4.10.4",
     "jose": "^6.1.0",
-    "plaid": "^38.1.0",
+    "plaid": "^39.1.0",
     "typesense": "^2.1.0",
     "workers-ai-provider": "^2.0.0",
     "xior": "^0.7.8",
-    "zod": "^4.1.11"
+    "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250926.0",
-    "wrangler": "^4.40.1"
+    "@cloudflare/workers-types": "^4.20251014.0",
+    "wrangler": "^4.45.3"
   },
   "exports": {
     ".": "./dist/index.js",

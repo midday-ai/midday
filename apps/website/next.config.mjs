@@ -4,9 +4,6 @@ const config = {
   reactStrictMode: true,
   trailingSlash: true,
   transpilePackages: ["@midday/ui", "@midday/tailwind", "next-mdx-remote"],
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },

@@ -15,7 +15,7 @@
     "./widget-preferences-cache": "./src/widget-preferences-cache.ts"
   },
   "dependencies": {
-    "redis": "^5.8.2",
+    "redis": "^5.9.0",
     "@types/redis": "^4.0.11"
   }
 }

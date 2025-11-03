@@ -22,9 +22,9 @@
     "typecheck": "turbo typecheck"
   },
   "dependencies": {
-    "@biomejs/biome": "2.3.1",
+    "@biomejs/biome": "2.3.3",
     "@manypkg/cli": "^0.25.1",
-    "turbo": "2.5.8",
+    "turbo": "2.6.0",
     "typescript": "^5.9.3"
   },
   "packageManager": "bun@1.2.22"

@@ -11,26 +11,25 @@
     "./schema": "./src/schema.ts"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.11",
-    "@fast-csv/format": "5.0.2",
+    "@ai-sdk/google": "^2.0.26",
+    "@fast-csv/format": "5.0.5",
     "@midday/db": "workspace:*",
     "@midday/email": "workspace:*",
     "@midday/engine": "workspace:*",
     "@midday/engine-client": "workspace:*",
     "@midday/notifications": "workspace:*",
     "@midday/supabase": "workspace:*",
-    "@sindresorhus/slugify": "^2.2.1",
-    "@zip.js/zip.js": "^2.7.62",
-    "ai": "^5.0.81",
-    "camelcase-keys": "^10.0.0",
+    "@sindresorhus/slugify": "^3.0.0",
+    "@zip.js/zip.js": "^2.8.8",
+    "ai": "^5.0.86",
+    "camelcase-keys": "^10.0.1",
     "heic-convert": "1.2.4",
     "node-xlsx": "^0.24.0",
     "sharp": "0.34.4",
-    "trigger.dev": "4.0.4",
-    "zod": "^4.1.11"
+    "trigger.dev": "4.0.5",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@types/heic-convert": "2.1.0",
-    "@types/bun": "latest"
+    "@types/heic-convert": "1.2.3"
   }
 }

@@ -18,11 +18,11 @@
     "@midday/inbox": "workspace:*",
     "@midday/db": "workspace:*",
     "nanoid": "^5.1.6",
-    "resend": "^6.1.0",
-    "zod": "^4.1.11"
+    "resend": "^6.4.0",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   }
 }
