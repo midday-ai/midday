@@ -69,6 +69,7 @@ export function buildAppContext(params: {
   baseCurrency?: string;
   locale?: string;
   timezone?: string;
+  teamId?: string;
 }) {
   return {
     userId: params.userId,
@@ -83,6 +84,7 @@ export function buildAppContext(params: {
     currentDateTime: new Date().toISOString(),
     timezone:
       params.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+    teamId: params.teamId,
   };
 }
 

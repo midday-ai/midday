@@ -1,4 +1,3 @@
-import { safeValue } from "@api/ai/utils/safe-value";
 import { TZDate } from "@date-fns/tz";
 import type { ChatUserContext } from "@midday/cache/chat-cache";
 
@@ -6,7 +5,7 @@ const generateBasePrompt = (userContext: ChatUserContext) => {
   // Format the current date and time in the user's timezone
   const userTimezone = userContext.timezone || "UTC";
   const tzDate = new TZDate(new Date(), userTimezone);
-  const firstName = safeValue(userContext.fullName?.split(" ")[0]);
+  const firstName = userContext.fullName?.split(" ")[0];
 
   return `You are a helpful AI assistant for Midday, a financial management platform. 
     You help users with:
@@ -60,13 +59,13 @@ const generateBasePrompt = (userContext: ChatUserContext) => {
     Answer questions directly without unnecessary structure, but make the user feel heard and valued.
     
     Current date and time: ${tzDate.toISOString()}
-    Company name: ${safeValue(userContext.teamName)}
-    Company registered in: ${safeValue(userContext.countryCode)}
-    Company fiscal year start month: ${safeValue(userContext.fiscalYearStartMonth?.toString())}
-    Base currency: ${safeValue(userContext.baseCurrency)}
-    User full name: ${safeValue(userContext.fullName)}
-    User current city: ${safeValue(userContext.city)}
-    User current country: ${safeValue(userContext.country)}
+    Company name: ${userContext.teamName}
+    Company registered in: ${userContext.countryCode}
+    Company fiscal year start month: ${userContext.fiscalYearStartMonth?.toString()}
+    Base currency: ${userContext.baseCurrency}
+    User full name: ${userContext.fullName}
+    User current city: ${userContext.city}
+    User current country: ${userContext.country}
     User local timezone: ${userTimezone}`;
 };
 

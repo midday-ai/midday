@@ -68,6 +68,14 @@ export const chatRequestSchema = z.object({
     description: "User's timezone",
     example: "America/New_York",
   }),
+  agentChoice: z.string().optional().openapi({
+    description: "Agent choice",
+    example: "general",
+  }),
+  toolChoice: z.string().optional().openapi({
+    description: "Tool choice",
+    example: "getBurnRate",
+  }),
 });
 
 // Use the same structure as messageSchema for consistency with UIMessage

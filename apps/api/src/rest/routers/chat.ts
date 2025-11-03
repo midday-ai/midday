@@ -17,8 +17,16 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
     return c.json({ success: false, error: validationResult.error }, 400);
   }
 
-  const { message, id, timezone, agentChoice, toolChoice } =
-    validationResult.data;
+  const {
+    message,
+    id,
+    timezone,
+    agentChoice,
+    toolChoice,
+    country,
+    city,
+    region,
+  } = validationResult.data;
 
   const teamId = c.get("teamId");
   const session = c.get("session");
@@ -31,10 +39,11 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
     baseCurrency: "SEK",
     locale: "sv-SE",
     timezone: timezone || "Europe/Stockholm",
-    country: "SE",
-    city: "Stockholm",
-    region: "Stockholm",
+    country: country || "SE",
+    city: city || "Stockholm",
+    region: region || "Stockholm",
     chatId: id,
+    teamId,
   });
 
   // Pass user preferences to main agent as context
