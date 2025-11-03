@@ -29,24 +29,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     librsvg2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install npm and node-gyp (required for building native modules like canvas)
-# Bun has compatibility issues with tar-fs used by canvas, so we use npm for canvas
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    npm \
-    && npm install -g node-gyp \
-    && rm -rf /var/lib/apt/lists/*
-
 # Copy only JSON files first (package.json files) for better layer caching
 # This allows Docker to cache dependency installation layer separately
 COPY --from=builder /app/out/json/ .
 
-# Install dependencies - use bun for most packages, npm for canvas
+# Install dependencies with Bun cache mount (BuildKit feature)
 # Cache this layer - only rebuilds when dependencies change
+# Build dependencies (python3, build-essential, node-gyp) are already installed above
 RUN --mount=type=cache,target=/root/.bun/install/cache \
-    --mount=type=cache,target=/root/.npm \
-    bun install --ignore-scripts && \
-    npm install canvas --legacy-peer-deps --no-save || true && \
-    bun install --ignore-scripts=false
+    bun install
 
 # Copy the full source code (this invalidates cache when code changes)
 COPY --from=builder /app/out/full/ .
