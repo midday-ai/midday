@@ -71,7 +71,9 @@ export function ChatInput() {
       text: message.text || "Sent with attachments",
       files: message.files,
       metadata: {
+        // @ts-ignore
         agentChoice: message.metadata?.agentChoice,
+        // @ts-ignore
         toolChoice: message.metadata?.toolChoice,
       },
     });

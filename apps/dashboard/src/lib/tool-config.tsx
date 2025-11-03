@@ -42,15 +42,30 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     icon: TrendingUp,
     description: "Analyzing revenue data",
   },
+  getRevenueSummary: {
+    name: "Revenue Summary",
+    icon: TrendingUp,
+    description: "Analyzing revenue trends",
+  },
   profitLoss: {
     name: "Profit & Loss",
     icon: BarChart3,
     description: "Calculating profit & loss",
   },
+  getProfitAnalysis: {
+    name: "Profit Analysis",
+    icon: PieChart,
+    description: "Analyzing profit performance",
+  },
   cashFlow: {
     name: "Cash Flow",
     icon: DollarSign,
     description: "Analyzing cash flow",
+  },
+  getCashFlow: {
+    name: "Cash Flow",
+    icon: DollarSign,
+    description: "Calculating cash flow",
   },
   balanceSheet: {
     name: "Balance Sheet",
@@ -71,6 +86,11 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     name: "Runway",
     icon: Calendar,
     description: "Calculating runway",
+  },
+  getRunway: {
+    name: "Runway",
+    icon: Calendar,
+    description: "Calculating cash runway",
   },
   spending: {
     name: "Spending",
@@ -203,6 +223,11 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     name: "Get Balances",
     icon: Wallet,
     description: "Fetching account balances",
+  },
+  getAccountBalances: {
+    name: "Account Balances",
+    icon: Wallet,
+    description: "Retrieving account balances",
   },
   listDocuments: {
     name: "List Documents",

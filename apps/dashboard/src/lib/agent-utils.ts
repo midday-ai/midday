@@ -40,12 +40,16 @@ export const getToolMessage = (toolName: string | null) => {
   const toolMessages: Record<string, string> = {
     // Reports tools
     revenue: "Calculating your revenue metrics...",
+    getRevenueSummary: "Analyzing your revenue trends...",
     profitLoss: "Computing your profit & loss statement...",
+    getProfitAnalysis: "Analyzing your profit performance...",
     cashFlow: "Analyzing your cash flow patterns...",
+    getCashFlow: "Calculating your net cash flow...",
     balanceSheet: "Building your balance sheet...",
     expenses: "Categorizing your expenses...",
     burnRate: "Computing your monthly burn rate...",
     runway: "Calculating your cash runway...",
+    getRunway: "Calculating your cash runway...",
     spending: "Analyzing your spending trends...",
     taxSummary: "Preparing your tax summary...",
 
@@ -82,6 +86,7 @@ export const getToolMessage = (toolName: string | null) => {
     // Operations tools
     listInbox: "Checking your inbox...",
     getBalances: "Retrieving your account balances...",
+    getAccountBalances: "Retrieving your account balances...",
     listDocuments: "Loading your documents...",
     exportData: "Preparing your data export...",
 

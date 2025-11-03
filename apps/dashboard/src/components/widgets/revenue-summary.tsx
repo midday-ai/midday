@@ -55,7 +55,6 @@ export function RevenueSummaryWidget() {
       metadata: {
         toolCall: {
           toolName: params.toolName,
-          toolParams: params.toolParams,
         },
       },
     });
@@ -64,13 +63,13 @@ export function RevenueSummaryWidget() {
   const handleViewTrends = () => {
     handleToolCall({
       toolChoice: "getRevenueSummary",
-      toolParams: {
-        from: format(from, "yyyy-MM-dd"),
-        to: format(to, "yyyy-MM-dd"),
-        currency: team?.baseCurrency ?? undefined,
-        revenueType: config?.revenueType ?? "net",
-        showCanvas: true,
-      },
+      // toolParams: {
+      //   from: format(from, "yyyy-MM-dd"),
+      //   to: format(to, "yyyy-MM-dd"),
+      //   currency: team?.baseCurrency ?? undefined,
+      //   revenueType: config?.revenueType ?? "net",
+      //   showCanvas: true,
+      // },
       text: "Show revenue trends",
     });
   };

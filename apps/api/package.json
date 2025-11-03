@@ -10,7 +10,8 @@
     "test:watch": "bun test --watch"
   },
   "exports": {
-    "./trpc/routers/_app": "./src/trpc/routers/_app.ts"
+    "./trpc/routers/_app": "./src/trpc/routers/_app.ts",
+    "./ai/types": "./src/ai/types.ts"
   },
   "dependencies": {
     "@ai-sdk-tools/artifacts": "^1.0.0",

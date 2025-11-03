@@ -13,6 +13,8 @@ export type ChatMessageMetadata = {
   };
 };
 
+export type MessageDataParts = Record<string, any>;
+
 // Define the UI chat message type with proper metadata and tool typing
 export type UIChatMessage = UIMessage<
   ChatMessageMetadata,
