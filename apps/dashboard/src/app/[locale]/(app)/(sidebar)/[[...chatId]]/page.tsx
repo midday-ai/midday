@@ -42,16 +42,13 @@ export default async function Overview(props: Props) {
       )
     : null;
 
-  if (currentChatId && !chat?.messages) {
+  if (currentChatId && !chat) {
     redirect("/");
   }
 
   return (
     <HydrateClient>
-      <ChatProvider
-        initialMessages={chat?.messages}
-        key={currentChatId || "home"}
-      >
+      <ChatProvider initialMessages={chat ?? []} key={currentChatId || "home"}>
         <Widgets initialPreferences={widgetPreferences} />
 
         <ChatInterface geo={geo} />

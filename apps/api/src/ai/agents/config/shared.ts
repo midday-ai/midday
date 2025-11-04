@@ -97,9 +97,6 @@ export const memoryProvider = new UpstashProvider(
 
 export const createAgent = (config: AgentConfig<AppContext>) => {
   return new Agent({
-    modelSettings: {
-      parallel_tool_calls: true,
-    },
     ...config,
     memory: {
       provider: memoryProvider,

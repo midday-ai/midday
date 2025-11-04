@@ -1,7 +1,7 @@
-import { type RedisClientType, createClient } from "redis";
+import type { RedisClientType } from "redis";
+import { getSharedRedisClient } from "./shared-redis";
 
 export class RedisCache {
-  private redis: RedisClientType | null = null;
   private prefix: string;
   private defaultTTL: number;
 
@@ -11,36 +11,7 @@ export class RedisCache {
   }
 
   private async getRedisClient(): Promise<RedisClientType> {
-    if (this.redis?.isOpen) {
-      return this.redis;
-    }
-
-    // Create new connection with your proven solution
-    const redisUrl = process.env.REDIS_URL;
-
-    if (!redisUrl) {
-      throw new Error("REDIS_URL environment variable is required");
-    }
-
-    const isProduction =
-      process.env.NODE_ENV === "production" || process.env.FLY_APP_NAME;
-
-    this.redis = createClient({
-      url: redisUrl,
-      pingInterval: 4 * 60 * 1000, // Your proven 4-minute ping interval
-      socket: {
-        family: isProduction ? 6 : 4, // IPv6 for Fly.io production, IPv4 for local
-        connectTimeout: isProduction ? 15000 : 5000,
-      },
-    });
-
-    // Event listeners from your proven solution
-    this.redis.on("error", (err) => {
-      console.error(`Redis error for ${this.prefix} cache:`, err);
-    });
-
-    await this.redis.connect();
-    return this.redis;
+    return getSharedRedisClient();
   }
 
   private parseValue<T>(value: string | null): T | undefined {
@@ -76,8 +47,6 @@ export class RedisCache {
         `Redis get error for ${this.prefix} cache, key "${key}":`,
         error,
       );
-      // Reset connection on error to force reconnection next time
-      this.redis = null;
       return undefined;
     }
   }
@@ -98,8 +67,6 @@ export class RedisCache {
         `Redis set error for ${this.prefix} cache, key "${key}":`,
         error,
       );
-      // Reset connection on error
-      this.redis = null;
     }
   }
 
@@ -112,8 +79,6 @@ export class RedisCache {
         `Redis delete error for ${this.prefix} cache, key "${key}":`,
         error,
       );
-      // Reset connection on error
-      this.redis = null;
     }
   }
 
@@ -122,11 +87,6 @@ export class RedisCache {
       const redis = await this.getRedisClient();
       await redis.ping();
     } catch (error) {
-      // Reset connection state on health check failure
-      if (this.redis) {
-        await this.redis.quit();
-        this.redis = null;
-      }
       throw new Error(`Redis health check failed: ${error}`);
     }
   }

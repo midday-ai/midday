@@ -12,13 +12,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 
-type Chat = {
-  id: string;
-  title: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
 function ChatHistorySkeleton() {
   return (
     <div className="space-y-4">
@@ -72,12 +65,12 @@ export function ChatHistory() {
         );
 
         // Optimistically update the cache
-        queryClient.setQueryData<Chat[]>(
+        queryClient.setQueryData(
           trpc.chats.list.queryKey({
             limit: 20,
             search: searchQuery || undefined,
           }),
-          (old) => old?.filter((chat) => chat.id !== chatId) ?? [],
+          (old) => old?.filter((chat) => chat.chatId !== chatId) ?? [],
         );
 
         return { previousChats };
@@ -147,14 +140,14 @@ export function ChatHistory() {
               </div>
             ) : (
               <div className="space-y-4">
-                {chats?.map((chat: Chat) => (
+                {chats?.map((chat) => (
                   <div
-                    key={chat.id}
+                    key={chat.chatId}
                     className="group relative flex items-center justify-between hover:bg-muted/50 rounded-md p-2 -m-2"
                   >
                     <button
                       type="button"
-                      onClick={() => handleChatSelect(chat.id)}
+                      onClick={() => handleChatSelect(chat.chatId)}
                       className="flex-1 text-left"
                     >
                       <div className="flex flex-col gap-1">
@@ -170,7 +163,7 @@ export function ChatHistory() {
                     </button>
                     <button
                       type="button"
-                      onClick={(e) => handleDeleteChat(e, chat.id)}
+                      onClick={(e) => handleDeleteChat(e, chat.chatId)}
                       className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-destructive/10 rounded-sm"
                       title="Delete chat"
                     >

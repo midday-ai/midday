@@ -1,3 +1,4 @@
+import { memoryProvider } from "@api/ai/agents/config/shared";
 import {
   deleteChatSchema,
   getChatSchema,
@@ -9,20 +10,19 @@ export const chatsRouter = createTRPCRouter({
   list: protectedProcedure
     .input(listChatsSchema)
     .query(async ({ ctx, input }) => {
-      return [];
+      return memoryProvider.getChats({ userId: ctx.session.user.id });
     }),
 
   get: protectedProcedure.input(getChatSchema).query(async ({ ctx, input }) => {
-    return {
-      messages: [],
-    };
+    return memoryProvider.getMessages({
+      chatId: input.chatId,
+      limit: 50,
+    });
   }),
 
   delete: protectedProcedure
     .input(deleteChatSchema)
-    .mutation(async ({ ctx, input }) => {
-      return {
-        messages: [],
-      };
+    .mutation(async ({ input }) => {
+      return memoryProvider.deleteChat(input.chatId);
     }),
 });

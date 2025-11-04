@@ -44,7 +44,10 @@ export function useChatStatus(
     }
 
     // Check if we have text content streaming
-    const textParts = lastMessage.parts.filter((part) => part.type === "text");
+    const textParts = lastMessage?.parts?.filter(
+      (part) => part.type === "text",
+    );
+
     const hasTextContent = textParts.some((part) => {
       const textPart = part as { text?: string };
       return textPart.text?.trim();
