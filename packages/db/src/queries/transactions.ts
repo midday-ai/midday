@@ -470,16 +470,21 @@ export async function getTransactions(
         : null,
     };
 
-    const taxRate = rest.taxRate ?? rest.category?.taxRate ?? 0;
+    const { taxAmount, taxRate, taxType } = resolveTaxValues({
+      transactionAmount: rest.amount,
+      transactionTaxAmount: rest.taxAmount,
+      transactionTaxRate: rest.taxRate,
+      transactionTaxType: rest.taxType,
+      categoryTaxRate: rest.category?.taxRate,
+      categoryTaxType: rest.category?.taxType,
+    });
 
     return {
       ...rest,
       account: newAccount,
       taxRate,
-      taxType: rest.taxType ?? rest.category?.taxType ?? null,
-      taxAmount: Math.abs(
-        +((taxRate * rest.amount) / (100 + taxRate)).toFixed(2),
-      ),
+      taxType,
+      taxAmount,
     };
   });
 
