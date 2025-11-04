@@ -301,7 +301,7 @@ export const columns: ColumnDef<Transaction>[] = [
     header: "Tax Amount",
     cell: ({ row }) => (
       <FormatAmount
-        amount={row.original.taxAmount}
+        amount={row.original.taxAmount ?? 0}
         currency={row.original.currency}
         maximumFractionDigits={2}
       />
