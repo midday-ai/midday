@@ -14,10 +14,10 @@
     "./ai/types": "./src/ai/types.ts"
   },
   "dependencies": {
-    "@ai-sdk-tools/artifacts": "^1.0.7",
-    "@ai-sdk-tools/cache": "^1.0.7",
-    "@ai-sdk-tools/memory": "^1.0.7",
-    "@ai-sdk-tools/agents": "^1.0.7",
+    "@ai-sdk-tools/artifacts": "^1.0.8",
+    "@ai-sdk-tools/cache": "^1.0.8",
+    "@ai-sdk-tools/memory": "^1.0.8",
+    "@ai-sdk-tools/agents": "^1.0.8",
     "@ai-sdk/openai": "^2.0.62",
     "@ai-sdk/react": "^2.0.87",
     "@hono/trpc-server": "^0.4.0",

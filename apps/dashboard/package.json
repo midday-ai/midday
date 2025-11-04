@@ -15,9 +15,9 @@
     "test:watch": "bun test --watch"
   },
   "dependencies": {
-    "@ai-sdk-tools/artifacts": "^1.0.7",
-    "@ai-sdk-tools/devtools": "^1.0.7",
-    "@ai-sdk-tools/store": "^1.0.7",
+    "@ai-sdk-tools/artifacts": "^1.0.8",
+    "@ai-sdk-tools/devtools": "^1.0.8",
+    "@ai-sdk-tools/store": "^1.0.8",
     "@ai-sdk/openai": "^2.0.62",
     "@ai-sdk/rsc": "^1.0.87",
     "@date-fns/tz": "^1.4.1",

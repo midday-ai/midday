@@ -5,9 +5,10 @@ let sharedRedisClient: RedisClientType | null = null;
 /**
  * Get or create a shared Redis client instance
  * This ensures we reuse the same connection for both cache and memory providers
+ * The client will auto-connect when methods are called, so it's safe to use immediately
  */
-export async function getSharedRedisClient(): Promise<RedisClientType> {
-  if (sharedRedisClient?.isOpen) {
+export function getSharedRedisClient(): RedisClientType {
+  if (sharedRedisClient) {
     return sharedRedisClient;
   }
 
@@ -34,14 +35,11 @@ export async function getSharedRedisClient(): Promise<RedisClientType> {
     console.error("[Shared Redis] Error:", err);
   });
 
-  await sharedRedisClient.connect();
-  return sharedRedisClient;
-}
+  // Start connection in background (don't await)
+  // The client will auto-connect when methods are called
+  sharedRedisClient.connect().catch((err) => {
+    console.error("[Shared Redis] Connection error:", err);
+  });
 
-/**
- * Get the shared Redis client synchronously (may return null if not connected)
- * Use this when you need the client but don't want to await connection
- */
-export function getSharedRedisClientSync(): RedisClientType | null {
-  return sharedRedisClient?.isOpen ? sharedRedisClient : null;
+  return sharedRedisClient;
 }

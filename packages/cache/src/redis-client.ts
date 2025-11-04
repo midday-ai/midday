@@ -10,7 +10,7 @@ export class RedisCache {
     this.defaultTTL = defaultTTL;
   }
 
-  private async getRedisClient(): Promise<RedisClientType> {
+  private getRedisClient(): RedisClientType {
     return getSharedRedisClient();
   }
 
@@ -39,7 +39,7 @@ export class RedisCache {
 
   async get<T>(key: string): Promise<T | undefined> {
     try {
-      const redis = await this.getRedisClient();
+      const redis = this.getRedisClient();
       const value = await redis.get(this.getKey(key));
       return this.parseValue<T>(value);
     } catch (error) {
@@ -53,7 +53,7 @@ export class RedisCache {
 
   async set(key: string, value: any, ttlSeconds?: number): Promise<void> {
     try {
-      const redis = await this.getRedisClient();
+      const redis = this.getRedisClient();
       const serializedValue = this.stringifyValue(value);
       const redisKey = this.getKey(key);
       const ttl = ttlSeconds ?? this.defaultTTL;
@@ -72,7 +72,7 @@ export class RedisCache {
 
   async delete(key: string): Promise<void> {
     try {
-      const redis = await this.getRedisClient();
+      const redis = this.getRedisClient();
       await redis.del(this.getKey(key));
     } catch (error) {
       console.error(
@@ -84,7 +84,7 @@ export class RedisCache {
 
   async healthCheck(): Promise<void> {
     try {
-      const redis = await this.getRedisClient();
+      const redis = this.getRedisClient();
       await redis.ping();
     } catch (error) {
       throw new Error(`Redis health check failed: ${error}`);

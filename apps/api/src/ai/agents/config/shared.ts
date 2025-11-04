@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { Agent, type AgentConfig } from "@ai-sdk-tools/agents";
-import { UpstashProvider } from "@ai-sdk-tools/memory/upstash";
+import { RedisProvider } from "@ai-sdk-tools/memory/redis";
 import { openai } from "@ai-sdk/openai";
-import { Redis } from "@upstash/redis";
+import { getSharedRedisClient } from "@midday/cache/shared-redis";
 
 const memoryTemplate = readFileSync(
   join(process.cwd(), "src/ai/agents/config/memory-template.md"),
@@ -88,12 +88,7 @@ export function buildAppContext(params: {
   };
 }
 
-export const memoryProvider = new UpstashProvider(
-  new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN,
-  }),
-);
+export const memoryProvider = new RedisProvider(getSharedRedisClient());
 
 export const createAgent = (config: AgentConfig<AppContext>) => {
   return new Agent({
