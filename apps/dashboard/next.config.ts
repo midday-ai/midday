@@ -26,6 +26,7 @@ const config = {
     ignoreBuildErrors: true,
   },
   devIndicators: false,
+  reactCompiler: true,
   async headers() {
     return [
       {
