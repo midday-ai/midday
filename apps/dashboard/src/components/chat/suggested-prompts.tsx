@@ -4,6 +4,10 @@ import { useChatActions, useDataPart } from "@ai-sdk-tools/store";
 import { Button } from "@midday/ui/button";
 import { AnimatePresence, motion } from "framer-motion";
 
+type SuggestionsData = {
+  prompts: string[];
+};
+
 const delay = 1;
 
 export function SuggestedPrompts() {
