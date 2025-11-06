@@ -1,5 +1,6 @@
 import { buildAppContext } from "@api/ai/agents/config/shared";
 import { mainAgent } from "@api/ai/agents/main";
+import { getUserContext } from "@api/ai/utils/get-user-context";
 import type { Context } from "@api/rest/types";
 import { chatRequestSchema } from "@api/schemas/chat";
 import { OpenAPIHono } from "@hono/zod-openapi";
@@ -9,7 +10,6 @@ import { withRequiredScope } from "../middleware";
 const app = new OpenAPIHono<Context>();
 
 app.post("/", withRequiredScope("chat.write"), async (c) => {
-  // Parse and validate the request body manually
   const body = await c.req.json();
   const validationResult = chatRequestSchema.safeParse(body);
 
@@ -31,20 +31,18 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
   const teamId = c.get("teamId");
   const session = c.get("session");
   const userId = session.user.id;
+  const db = c.get("db");
 
-  const appContext = buildAppContext({
+  const userContext = await getUserContext({
+    db,
     userId,
-    fullName: "John Doe",
-    companyName: "Acme Inc.",
-    baseCurrency: "SEK",
-    locale: "sv-SE",
-    timezone: timezone || "Europe/Stockholm",
-    country: country || "SE",
-    city: city || "Stockholm",
-    region: region || "Stockholm",
-    chatId: id,
     teamId,
+    country,
+    city,
+    timezone,
   });
+
+  const appContext = buildAppContext(userContext, id);
 
   // Pass user preferences to main agent as context
   // The main agent will use this information to make better routing decisions

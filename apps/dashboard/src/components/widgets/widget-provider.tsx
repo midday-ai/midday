@@ -70,8 +70,8 @@ export const createWidgetStore = (initialPreferences?: WidgetPreferences) => {
           ),
 
         reorderPrimaryWidgets: (newOrder) => {
-          if (newOrder.length > 7) {
-            console.warn("Cannot have more than 7 primary widgets");
+          if (newOrder.length > 8) {
+            console.warn("Cannot have more than 8 primary widgets");
             return;
           }
           set({ primaryWidgets: newOrder }, false, "reorderPrimaryWidgets");
@@ -115,7 +115,7 @@ export const createWidgetStore = (initialPreferences?: WidgetPreferences) => {
 
         swapWithLastPrimary: (widgetId: WidgetType, insertAtIndex: number) => {
           const state = get();
-          if (state.primaryWidgets.length < 7) {
+          if (state.primaryWidgets.length < 8) {
             console.warn("Swap only needed when primary is full");
             return;
           }

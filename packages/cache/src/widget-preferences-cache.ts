@@ -62,8 +62,8 @@ export interface WidgetPreferences {
 export const DEFAULT_WIDGET_ORDER: WidgetType[] = [...WIDGET_TYPES];
 
 export const DEFAULT_WIDGET_PREFERENCES: WidgetPreferences = {
-  primaryWidgets: DEFAULT_WIDGET_ORDER.slice(0, 7), // First 7 widgets
-  availableWidgets: DEFAULT_WIDGET_ORDER.slice(7), // Remaining widgets
+  primaryWidgets: DEFAULT_WIDGET_ORDER.slice(0, 8), // First 8 widgets
+  availableWidgets: DEFAULT_WIDGET_ORDER.slice(8), // Remaining widgets
 };
 
 class WidgetPreferencesCache extends RedisCache {
@@ -172,10 +172,10 @@ class WidgetPreferencesCache extends RedisCache {
       );
     }
 
-    // Check that primary widgets doesn't exceed 7
-    if (preferences.primaryWidgets.length > 7) {
+    // Check that primary widgets doesn't exceed 8
+    if (preferences.primaryWidgets.length > 8) {
       throw new Error(
-        "Invalid widget preferences: primary widgets cannot exceed 7",
+        "Invalid widget preferences: primary widgets cannot exceed 8",
       );
     }
 
@@ -198,8 +198,8 @@ class WidgetPreferencesCache extends RedisCache {
     userId: string,
     newPrimaryWidgets: WidgetType[],
   ): Promise<WidgetPreferences> {
-    if (newPrimaryWidgets.length > 7) {
-      throw new Error("Primary widgets cannot exceed 7");
+    if (newPrimaryWidgets.length > 8) {
+      throw new Error("Primary widgets cannot exceed 8");
     }
 
     const currentPreferences = await this.getWidgetPreferences(teamId, userId);

@@ -2,6 +2,7 @@
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useChatActions } from "@ai-sdk-tools/store";
+import { Button } from "@midday/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -18,15 +19,10 @@ export function ChatNavigation() {
   if (isHome) return null;
 
   return (
-    <div className="absolute left-4">
-      <button
-        type="button"
-        onClick={handleBack}
-        className="p-2 hover:bg-accent transition-colors"
-        aria-label="Back to home"
-      >
+    <div className="absolute left-0">
+      <Button type="button" onClick={handleBack} variant="outline" size="icon">
         <ArrowLeft className="w-4 h-4" />
-      </button>
+      </Button>
     </div>
   );
 }

@@ -118,12 +118,12 @@ export const getCustomerLifetimeValueSchema = z.object({
 export const widgetTypeSchema = z.enum(WIDGET_TYPES);
 
 export const widgetPreferencesSchema = z.object({
-  primaryWidgets: z.array(widgetTypeSchema).max(7),
+  primaryWidgets: z.array(widgetTypeSchema).max(8),
   availableWidgets: z.array(widgetTypeSchema),
 });
 
 export const updateWidgetPreferencesSchema = z.object({
-  primaryWidgets: z.array(widgetTypeSchema).max(7),
+  primaryWidgets: z.array(widgetTypeSchema).max(8),
 });
 
 export const widgetPeriodSchema = z.enum([

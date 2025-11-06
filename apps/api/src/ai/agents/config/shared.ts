@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { Agent, type AgentConfig } from "@ai-sdk-tools/agents";
 import { RedisProvider } from "@ai-sdk-tools/memory/redis";
 import { openai } from "@ai-sdk/openai";
+import type { ChatUserContext } from "@midday/cache/chat-cache";
 import { getSharedRedisClient } from "@midday/cache/shared-redis";
 
 const memoryTemplate = readFileSync(
@@ -58,33 +59,24 @@ export interface AppContext {
   [key: string]: unknown;
 }
 
-export function buildAppContext(params: {
-  userId: string;
-  fullName: string;
-  companyName: string;
-  country?: string;
-  city?: string;
-  region?: string;
-  chatId: string;
-  baseCurrency?: string;
-  locale?: string;
-  timezone?: string;
-  teamId?: string;
-}) {
+export function buildAppContext(
+  context: ChatUserContext,
+  chatId: string,
+): AppContext {
   return {
-    userId: params.userId,
-    fullName: params.fullName,
-    companyName: params.companyName,
-    country: params.country,
-    city: params.city,
-    region: params.region,
-    chatId: params.chatId,
-    baseCurrency: params.baseCurrency || "USD",
-    locale: params.locale || "en-US",
+    userId: context.userId,
+    fullName: context.fullName ?? "",
+    companyName: context.teamName ?? "",
+    country: context.country ?? undefined,
+    city: context.city ?? undefined,
+    region: context.region ?? undefined,
+    chatId,
+    baseCurrency: context.baseCurrency ?? "USD",
+    locale: context.locale ?? "en-US",
     currentDateTime: new Date().toISOString(),
     timezone:
-      params.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-    teamId: params.teamId,
+      context.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+    teamId: context.teamId,
   };
 }
 

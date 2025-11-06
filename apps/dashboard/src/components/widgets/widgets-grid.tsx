@@ -33,7 +33,7 @@ import { CategoryExpensesWidget } from "./category-expenses";
 import { CustomerLifetimeValueWidget } from "./customer-lifetime-value";
 import { GrowthRateWidget } from "./growth-rate";
 import { InboxWidget } from "./inbox";
-import { Insights } from "./insights";
+// import { Insights } from "./insights";
 import { InvoicePaymentScoreWidget } from "./invoice-payment-score";
 import { MonthlySpendingWidget } from "./monthly-spending";
 import { OutstandingInvoicesWidget } from "./outstanding-invoices";
@@ -58,6 +58,8 @@ import {
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 type WidgetPreferences = RouterOutputs["widgets"]["getWidgetPreferences"];
 type WidgetType = WidgetPreferences["primaryWidgets"][number];
+
+const NUMBER_OF_WIDGETS = 8;
 
 // Sortable Card Component
 function SortableCard({
@@ -139,10 +141,8 @@ export function WidgetsGrid() {
   const availableWidgets = useAvailableWidgets();
   const { setIsCustomizing } = useWidgetActions();
 
-  // Handle click outside to disable customizing
   useOnClickOutside(gridRef, (event) => {
     if (isCustomizing) {
-      // Don't close if clicking on element with data-no-close
       const target = event.target as Element;
       if (!target.closest("[data-no-close]")) {
         setIsCustomizing(false);
@@ -157,7 +157,6 @@ export function WidgetsGrid() {
     setSaving,
   } = useWidgetActions();
 
-  // DnD Kit sensors
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -165,7 +164,6 @@ export function WidgetsGrid() {
     }),
   );
 
-  // Auto-save when primary widgets change
   const updatePreferencesMutation = useMutation(
     trpc.widgets.updateWidgetPreferences.mutationOptions({
       onMutate: () => {
@@ -177,7 +175,6 @@ export function WidgetsGrid() {
     }),
   );
 
-  // DnD Kit handlers
   function handleDragStart(event: DragStartEvent) {
     setActiveId(event.active.id);
   }
@@ -217,7 +214,7 @@ export function WidgetsGrid() {
       const overIndex = primaryWidgets.indexOf(overId);
       const insertIndex = overIndex >= 0 ? overIndex : primaryWidgets.length;
 
-      if (primaryWidgets.length >= 7) {
+      if (primaryWidgets.length >= NUMBER_OF_WIDGETS) {
         // Swap with last primary widget
         swapWithLastPrimary(activeId, insertIndex);
         const newPrimary = [...primaryWidgets.slice(0, -1)];
@@ -253,8 +250,7 @@ export function WidgetsGrid() {
   // Get wiggle class for customize mode
   const getWiggleClass = (index: number) => {
     if (!isCustomizing) return "";
-    const WIGGLE_VARIANTS = 7;
-    const wiggleIndex = (index % WIGGLE_VARIANTS) + 1;
+    const wiggleIndex = (index % NUMBER_OF_WIDGETS) + 1;
     return `wiggle-${wiggleIndex}`;
   };
 
@@ -275,7 +271,7 @@ export function WidgetsGrid() {
             strategy={rectSortingStrategy}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-6">
-              <Insights />
+              {/* <Insights /> */}
 
               {primaryWidgets.map((widgetType, index) => {
                 const WidgetComponent = WIDGET_COMPONENTS[widgetType];
@@ -297,7 +293,7 @@ export function WidgetsGrid() {
           </SortableContext>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-6">
-            <Insights />
+            {/* <Insights /> */}
 
             {primaryWidgets.map((widgetType) => {
               const WidgetComponent = WIDGET_COMPONENTS[widgetType];

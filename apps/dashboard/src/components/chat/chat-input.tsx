@@ -1,8 +1,8 @@
 "use client";
 
 import { CommandMenu } from "@/components/chat/command-menu";
-import { FollowupQuestions } from "@/components/chat/followup-questions";
 import { RecordButton } from "@/components/chat/record-button";
+import { SuggestedPrompts } from "@/components/chat/suggested-prompts";
 import { SuggestedActionsButton } from "@/components/suggested-actions-button";
 import { WebSearchButton } from "@/components/web-search-button";
 import { useChatInterface } from "@/hooks/use-chat-interface";
@@ -93,9 +93,8 @@ export function ChatInput() {
         )}
       >
         <div className="mx-auto w-full pt-2 max-w-[770px] relative">
-          <FollowupQuestions />
+          <SuggestedPrompts />
 
-          {/* Command Suggestions Menu */}
           <CommandMenu />
 
           <PromptInput onSubmit={handleSubmit} globalDrop multiple>

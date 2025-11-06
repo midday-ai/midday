@@ -128,7 +128,7 @@ export function ChatInterface({ geo }: Props) {
                   hasArtifacts ? "right-[600px]" : "right-0",
                 )}
               >
-                <div className="bg-background/80 dark:bg-background/50 backdrop-blur-sm p-2 pt-6">
+                <div className="bg-background/80 dark:bg-background/50 backdrop-blur-sm pt-6">
                   <ChatHeader />
                 </div>
               </div>
@@ -156,7 +156,6 @@ export function ChatInterface({ geo }: Props) {
           </>
         )}
 
-        {/* Fixed input at bottom - respects parent container boundaries */}
         <div
           className={cn(
             "fixed bottom-0 left-0",
