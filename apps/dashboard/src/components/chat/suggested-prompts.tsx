@@ -1,5 +1,6 @@
 "use client";
 
+import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useChatActions, useDataPart } from "@ai-sdk-tools/store";
 import { Button } from "@midday/ui/button";
 import { AnimatePresence, motion } from "framer-motion";
@@ -14,13 +15,18 @@ export function SuggestedPrompts() {
   const [suggestions, clearSuggestions] =
     useDataPart<SuggestionsData>("suggestions");
   const { sendMessage } = useChatActions();
+  const { isChatPage } = useChatInterface();
 
   const handlePromptClick = (prompt: string) => {
     clearSuggestions();
     sendMessage({ text: prompt });
   };
 
-  if (!suggestions?.prompts || suggestions.prompts.length === 0) {
+  if (
+    !suggestions?.prompts ||
+    suggestions.prompts.length === 0 ||
+    !isChatPage
+  ) {
     return null;
   }
 

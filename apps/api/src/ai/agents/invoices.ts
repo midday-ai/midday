@@ -1,15 +1,10 @@
 import { openai } from "@ai-sdk/openai";
-// import {
-//   createInvoiceTool,
-//   getInvoiceTool,
-//   listInvoicesTool,
-//   updateInvoiceTool,
-// } from "../tools/invoices";
 import {
   COMMON_AGENT_RULES,
   createAgent,
   formatContextForLLM,
 } from "@api/ai/agents/config/shared";
+import { getInvoicesTool } from "@api/ai/tools/get-invoices";
 
 export const invoicesAgent = createAgent({
   name: "invoices",
@@ -24,11 +19,8 @@ ${formatContextForLLM(ctx)}
 </background-data>
 
 ${COMMON_AGENT_RULES}`,
-  //   tools: {
-  //     listInvoices: listInvoicesTool,
-  //     getInvoice: getInvoiceTool,
-  //     createInvoice: createInvoiceTool,
-  //     updateInvoice: updateInvoiceTool,
-  //   },
+  tools: {
+    getInvoices: getInvoicesTool,
+  },
   maxTurns: 5,
 });

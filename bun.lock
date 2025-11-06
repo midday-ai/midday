@@ -19,6 +19,7 @@
         "@ai-sdk-tools/memory": "^1.0.8",
         "@ai-sdk/openai": "^2.0.62",
         "@ai-sdk/react": "^2.0.87",
+        "@date-fns/tz": "^1.4.1",
         "@hono/trpc-server": "^0.4.0",
         "@hono/zod-openapi": "^1.1.4",
         "@hono/zod-validator": "^0.7.4",
@@ -48,6 +49,7 @@
         "hono-rate-limiter": "^0.4.2",
         "jose": "^6.1.0",
         "nanoid": "^5.1.6",
+        "parse-duration": "^2.1.4",
         "pino": "^10.1.0",
         "resend": "^6.4.1",
         "snakecase-keys": "^9.0.2",
@@ -3672,6 +3674,8 @@
     "papaparse": ["papaparse@5.5.3", "", {}, "sha512-5QvjGxYVjxO59MGU2lHVYpRWBBtKHnlIAcSe1uNFCkkptUh63NFRj0FJQm7nR67puEruUci/ZkjmEFrjCAyP4A=="],
 
     "parent-module": ["parent-module@1.0.1", "", { "dependencies": { "callsites": "^3.0.0" } }, "sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g=="],
+
+    "parse-duration": ["parse-duration@2.1.4", "", {}, "sha512-b98m6MsCh+akxfyoz9w9dt0AlH2dfYLOBss5SdDsr9pkhKNvkWBXU/r8A4ahmIGByBOLV2+4YwfCuFxbDDaGyg=="],
 
     "parse-entities": ["parse-entities@2.0.0", "", { "dependencies": { "character-entities": "^1.0.0", "character-entities-legacy": "^1.0.0", "character-reference-invalid": "^1.0.0", "is-alphanumerical": "^1.0.0", "is-decimal": "^1.0.0", "is-hexadecimal": "^1.0.0" } }, "sha512-kkywGpCcRYhqQIchaWqZ875wzpS/bMKhz5HnN3p7wveJTkTtyAB/AlnS0f8DFSqYW1T82t6yEAkEcB+A1I3MbQ=="],
 

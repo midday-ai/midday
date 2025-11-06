@@ -1,18 +1,16 @@
 import { openai } from "@ai-sdk/openai";
-// import { listInvoicesTool } from "../tools/invoices";
-// import {
-//   exportDataTool,
-//   getBalancesTool,
-//   listDocumentsTool,
-//   listInboxItemsTool,
-// } from "../tools/operations";
-// import { listTransactionsTool } from "../tools/transactions";
 import {
   COMMON_AGENT_RULES,
   createAgent,
   formatContextForLLM,
 } from "@api/ai/agents/config/shared";
 import { getAccountBalancesTool } from "@api/ai/tools/get-account-balances";
+import { getBankAccountsTool } from "@api/ai/tools/get-bank-accounts";
+import { getCustomersTool } from "@api/ai/tools/get-customers";
+import { getDocumentsTool } from "@api/ai/tools/get-documents";
+import { getInboxTool } from "@api/ai/tools/get-inbox";
+import { getInvoicesTool } from "@api/ai/tools/get-invoices";
+import { getTransactionsTool } from "@api/ai/tools/get-transactions";
 
 export const operationsAgent = createAgent({
   name: "operations",
@@ -33,12 +31,12 @@ ${COMMON_AGENT_RULES}
 </guidelines>`,
   tools: {
     getAccountBalances: getAccountBalancesTool,
-    // listInbox: listInboxItemsTool,
-    // getBalances: getBalancesTool,
-    // listDocuments: listDocumentsTool,
-    // exportData: exportDataTool,
-    // listTransactions: listTransactionsTool,
-    // listInvoices: listInvoicesTool,
+    getBankAccounts: getBankAccountsTool,
+    getTransactions: getTransactionsTool,
+    getInvoices: getInvoicesTool,
+    getCustomers: getCustomersTool,
+    getDocuments: getDocumentsTool,
+    getInbox: getInboxTool,
   },
   maxTurns: 5,
 });

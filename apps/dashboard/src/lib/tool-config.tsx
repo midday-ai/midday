@@ -121,6 +121,11 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
   },
 
   // Customer tools
+  getCustomers: {
+    name: "Get Customers",
+    icon: Users,
+    description: "Fetching customers",
+  },
   getCustomer: {
     name: "Get Customer",
     icon: User,
@@ -143,10 +148,15 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
   },
 
   // Invoice tools
+  getInvoices: {
+    name: "Get Invoices",
+    icon: FileText,
+    description: "Fetching invoices",
+  },
   listInvoices: {
     name: "List Invoices",
     icon: FileText,
-    description: "Fetching invoices",
+    description: "Fetching invoices (legacy)",
   },
   getInvoice: {
     name: "Get Invoice",
@@ -165,10 +175,15 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
   },
 
   // Transaction tools
+  getTransactions: {
+    name: "Get Transactions",
+    icon: Receipt,
+    description: "Fetching transactions",
+  },
   listTransactions: {
     name: "List Transactions",
     icon: Receipt,
-    description: "Fetching transactions",
+    description: "Fetching transactions (legacy)",
   },
   getTransaction: {
     name: "Get Transaction",
@@ -212,12 +227,57 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     icon: FolderOpen,
     description: "Fetching projects",
   },
+  getTrackerProjects: {
+    name: "Get Tracker Projects",
+    icon: FolderOpen,
+    description: "Fetching tracker projects",
+  },
+  getTrackerEntries: {
+    name: "Get Tracker Entries",
+    icon: Clock,
+    description: "Fetching tracker entries",
+  },
+  createTrackerEntry: {
+    name: "Create Tracker Entry",
+    icon: Timer,
+    description: "Recording your time",
+  },
+  startTimer: {
+    name: "Start Timer",
+    icon: Play,
+    description: "Starting timer",
+  },
+  stopTimer: {
+    name: "Stop Timer",
+    icon: Square,
+    description: "Stopping timer",
+  },
+  getTimerStatus: {
+    name: "Get Timer Status",
+    icon: Clock,
+    description: "Checking timer status",
+  },
 
   // Operations tools
+  getInbox: {
+    name: "Get Inbox",
+    icon: Inbox,
+    description: "Fetching inbox items",
+  },
   listInbox: {
     name: "List Inbox",
     icon: Inbox,
-    description: "Fetching inbox items",
+    description: "Fetching inbox items (legacy)",
+  },
+  getDocuments: {
+    name: "Get Documents",
+    icon: FileArchive,
+    description: "Fetching documents",
+  },
+  listDocuments: {
+    name: "List Documents",
+    icon: FileArchive,
+    description: "Fetching documents (legacy)",
   },
   getBalances: {
     name: "Get Balances",
@@ -229,10 +289,10 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     icon: Wallet,
     description: "Retrieving account balances",
   },
-  listDocuments: {
-    name: "List Documents",
-    icon: FileArchive,
-    description: "Fetching documents",
+  getBankAccounts: {
+    name: "Get Bank Accounts",
+    icon: Wallet,
+    description: "Fetching bank accounts",
   },
   exportData: {
     name: "Export Data",

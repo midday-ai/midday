@@ -1,13 +1,10 @@
 import { openai } from "@ai-sdk/openai";
-// import {
-//   getTransactionTool,
-//   listTransactionsTool,
-// } from "../tools/transactions";
 import {
   COMMON_AGENT_RULES,
   createAgent,
   formatContextForLLM,
 } from "@api/ai/agents/config/shared";
+import { getTransactionsTool } from "@api/ai/tools/get-transactions";
 
 export const transactionsAgent = createAgent({
   name: "transactions",
@@ -28,9 +25,8 @@ ${COMMON_AGENT_RULES}
 - For "largest transactions", use sort and limit filters
 - Highlight key insights from the data
 </agent-specific-rules>`,
-  //   tools: {
-  //     listTransactions: listTransactionsTool,
-  //     getTransaction: getTransactionTool,
-  //   },
+  tools: {
+    getTransactions: getTransactionsTool,
+  },
   maxTurns: 5,
 });

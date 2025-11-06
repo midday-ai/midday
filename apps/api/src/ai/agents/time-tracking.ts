@@ -1,18 +1,15 @@
 import { openai } from "@ai-sdk/openai";
-// import {
-//   createTimeEntryTool,
-//   deleteTimeEntryTool,
-//   getTimeEntriesTool,
-//   getTrackerProjectsTool,
-//   startTimerTool,
-//   stopTimerTool,
-//   updateTimeEntryTool,
-// } from "../tools/tracker";
 import {
   COMMON_AGENT_RULES,
   createAgent,
   formatContextForLLM,
 } from "@api/ai/agents/config/shared";
+import { createTrackerEntryTool } from "@api/ai/tools/create-tracker-entry";
+import { getTimerStatusTool } from "@api/ai/tools/get-timer-status";
+import { getTrackerEntriesTool } from "@api/ai/tools/get-tracker-entries";
+import { getTrackerProjectsTool } from "@api/ai/tools/get-tracker-projects";
+import { startTimerTool } from "@api/ai/tools/start-timer";
+import { stopTimerTool } from "@api/ai/tools/stop-timer";
 
 export const timeTrackingAgent = createAgent({
   name: "timeTracking",
@@ -33,14 +30,13 @@ ${COMMON_AGENT_RULES}
 - Present time data clearly: duration, project, date
 - Summarize totals when showing multiple entries
 </agent-specific-rules>`,
-  //   tools: {
-  //     startTimer: startTimerTool,
-  //     stopTimer: stopTimerTool,
-  //     getTimeEntries: getTimeEntriesTool,
-  //     createTimeEntry: createTimeEntryTool,
-  //     updateTimeEntry: updateTimeEntryTool,
-  //     deleteTimeEntry: deleteTimeEntryTool,
-  //     getProjects: getTrackerProjectsTool,
-  //   },
+  tools: {
+    getTrackerProjects: getTrackerProjectsTool,
+    getTrackerEntries: getTrackerEntriesTool,
+    createTrackerEntry: createTrackerEntryTool,
+    startTimer: startTimerTool,
+    stopTimer: stopTimerTool,
+    getTimerStatus: getTimerStatusTool,
+  },
   maxTurns: 2,
 });

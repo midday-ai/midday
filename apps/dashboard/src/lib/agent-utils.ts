@@ -59,35 +59,45 @@ export const getToolMessage = (toolName: string | null) => {
     stressTest: "Running financial stress scenarios...",
 
     // Customer tools
+    getCustomers: "Retrieving your customers...",
     getCustomer: "Retrieving customer information...",
     createCustomer: "Setting up new customer profile...",
     updateCustomer: "Updating customer details...",
     profitabilityAnalysis: "Analyzing customer profitability...",
 
     // Invoice tools
+    getInvoices: "Retrieving your invoices...",
     listInvoices: "Retrieving your invoices...",
     getInvoice: "Loading invoice details...",
     createInvoice: "Creating your invoice...",
     updateInvoice: "Updating invoice information...",
 
     // Transaction tools
+    getTransactions: "Retrieving your transactions...",
     listTransactions: "Retrieving your transactions...",
     getTransaction: "Loading transaction details...",
 
     // Time tracking tools
-    startTimer: "Starting your timer...",
-    stopTimer: "Stopping your timer...",
     getTimeEntries: "Retrieving your time entries...",
     createTimeEntry: "Recording your time...",
     updateTimeEntry: "Updating time entry...",
     deleteTimeEntry: "Removing time entry...",
     getProjects: "Loading your projects...",
+    getTrackerProjects: "Loading your projects...",
+    getTrackerEntries: "Retrieving your time entries...",
+    createTrackerEntry: "Recording your time...",
+    startTimer: "Starting your timer...",
+    stopTimer: "Stopping your timer...",
+    getTimerStatus: "Checking timer status...",
 
     // Operations tools
+    getInbox: "Checking your inbox...",
     listInbox: "Checking your inbox...",
+    getDocuments: "Loading your documents...",
+    listDocuments: "Loading your documents...",
     getBalances: "Retrieving your account balances...",
     getAccountBalances: "Retrieving your account balances...",
-    listDocuments: "Loading your documents...",
+    getBankAccounts: "Retrieving your bank accounts...",
     exportData: "Preparing your data export...",
 
     // Research tools

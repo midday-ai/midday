@@ -41,6 +41,7 @@ export function ChatInput() {
   const { current } = useArtifacts({
     exclude: ["chat-title", "followup-questions"],
   });
+
   const isCanvasVisible = !!current;
 
   const {
@@ -94,7 +95,6 @@ export function ChatInput() {
       >
         <div className="mx-auto w-full pt-2 max-w-[770px] relative">
           <SuggestedPrompts />
-
           <CommandMenu />
 
           <PromptInput onSubmit={handleSubmit} globalDrop multiple>

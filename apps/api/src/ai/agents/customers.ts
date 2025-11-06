@@ -1,16 +1,10 @@
 import { openai } from "@ai-sdk/openai";
-// import {
-//   createCustomerTool,
-//   customerProfitabilityTool,
-//   getCustomersTool,
-//   getCustomerTool,
-//   updateCustomerTool,
-// } from "../tools/customers";
 import {
   COMMON_AGENT_RULES,
   createAgent,
   formatContextForLLM,
 } from "@api/ai/agents/config/shared";
+import { getCustomersTool } from "@api/ai/tools/get-customers";
 
 export const customersAgent = createAgent({
   name: "customers",
@@ -29,12 +23,8 @@ ${COMMON_AGENT_RULES}
 <agent-specific-rules>
 - Lead with key information
 </agent-specific-rules>`,
-  //   tools: {
-  //     getCustomer: getCustomerTool,
-  //     getCustomers: getCustomersTool,
-  //     createCustomer: createCustomerTool,
-  //     updateCustomer: updateCustomerTool,
-  //     profitabilityAnalysis: customerProfitabilityTool,
-  //   },
+  tools: {
+    getCustomers: getCustomersTool,
+  },
   maxTurns: 5,
 });
