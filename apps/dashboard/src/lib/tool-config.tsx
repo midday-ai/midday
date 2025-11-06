@@ -242,16 +242,6 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     icon: Timer,
     description: "Recording your time",
   },
-  startTimer: {
-    name: "Start Timer",
-    icon: Play,
-    description: "Starting timer",
-  },
-  stopTimer: {
-    name: "Stop Timer",
-    icon: Square,
-    description: "Stopping timer",
-  },
   getTimerStatus: {
     name: "Get Timer Status",
     icon: Clock,
