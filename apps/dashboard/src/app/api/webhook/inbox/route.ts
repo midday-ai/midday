@@ -3,6 +3,8 @@ import { resend } from "@api/services/resend";
 import { getAllowedAttachments } from "@midday/documents";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
+import { db } from "@midday/db/client";
+import { isSenderExcluded } from "@midday/db/queries";
 import { getInboxIdFromEmail, inboxWebhookPostSchema } from "@midday/inbox";
 import type { ProcessAttachmentPayload } from "@midday/jobs/schema";
 import { createClient } from "@midday/supabase/server";
@@ -91,6 +93,15 @@ export async function POST(req: Request) {
     });
 
     const teamId = teamData?.id;
+
+    // Check if sender is excluded
+    if (teamId && FromFull.Email) {
+      const excluded = await isSenderExcluded(db, teamId, FromFull.Email);
+      if (excluded) {
+        logger(`Skipping email from excluded sender: ${FromFull.Email}`);
+        return NextResponse.json({ success: true });
+      }
+    }
 
     // If the email is forwarded from a Google Workspace account, we need to send a reply to the team email
     if (teamData?.email && ALLOWED_FORWARDING_EMAILS.includes(FromFull.Email)) {
@@ -181,6 +192,7 @@ export async function POST(req: Request) {
           mimetype: item.content_type!,
           size: item.size!,
           teamId: teamId!,
+          senderEmail: FromFull.Email,
         } satisfies ProcessAttachmentPayload,
       })),
     );

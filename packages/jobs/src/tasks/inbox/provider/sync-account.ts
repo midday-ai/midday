@@ -1,6 +1,10 @@
 import { getDb } from "@jobs/init";
 import { processBatch } from "@jobs/utils/process-batch";
-import { getInboxAccountInfo, updateInboxAccount } from "@midday/db/queries";
+import {
+  getInboxAccountInfo,
+  isSenderExcluded,
+  updateInboxAccount,
+} from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
 import { isAuthenticationError } from "@midday/inbox/utils";
 import { createClient } from "@midday/supabase/job";
@@ -86,6 +90,28 @@ export const syncInboxAccount = schemaTask({
         attachments.map((attachment) => attachment.referenceId),
       );
 
+      // Check excluded senders for all attachments with sender emails
+      const excludedSenderChecks = await Promise.all(
+        attachments.map(async (attachment) => {
+          if (!attachment.senderEmail) {
+            return { attachment, isExcluded: false };
+          }
+          const excluded = await isSenderExcluded(
+            getDb(),
+            accountRow.teamId,
+            attachment.senderEmail,
+          );
+          return { attachment, isExcluded: excluded };
+        }),
+      );
+
+      const excludedSenderMap = new Map(
+        excludedSenderChecks.map(({ attachment, isExcluded }) => [
+          attachment.referenceId,
+          isExcluded,
+        ]),
+      );
+
       const filteredAttachments = attachments.filter((attachment) => {
         // Skip if already exists in database
         if (
@@ -107,6 +133,17 @@ export const syncInboxAccount = schemaTask({
             filename: attachment.filename,
             size: attachment.size,
             maxSize: MAX_ATTACHMENT_SIZE,
+            accountId: id,
+          });
+          return false;
+        }
+
+        // Skip if sender is excluded
+        if (excludedSenderMap.get(attachment.referenceId)) {
+          logger.info("Skipping attachment - sender excluded", {
+            filename: attachment.filename,
+            senderEmail: attachment.senderEmail,
+            referenceId: attachment.referenceId,
             accountId: id,
           });
           return false;
@@ -151,6 +188,7 @@ export const syncInboxAccount = schemaTask({
                   referenceId: item.referenceId,
                   teamId: accountRow.teamId,
                   inboxAccountId: id,
+                  senderEmail: item.senderEmail,
                 },
               });
             }

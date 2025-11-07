@@ -3,6 +3,7 @@ import {
   inbox,
   inboxAccounts,
   inboxEmbeddings,
+  inboxSettings,
   transactionAttachments,
   transactionEmbeddings,
   transactionMatchSuggestions,
@@ -213,6 +214,7 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
       website: inbox.website,
       description: inbox.description,
       inboxAccountId: inbox.inboxAccountId,
+      meta: inbox.meta,
       inboxAccount: {
         id: inboxAccounts.id,
         email: inboxAccounts.email,
@@ -497,28 +499,28 @@ export async function getInboxSearch(
         // Use the same successful approach as batch-process-matching
         // Get candidates first, then score them with the same logic that works
         const candidates = await db
-        .select({
-          id: inbox.id,
-          createdAt: inbox.createdAt,
-          fileName: inbox.fileName,
-          amount: inbox.amount,
-          currency: inbox.currency,
-          filePath: inbox.filePath,
-          contentType: inbox.contentType,
-          date: inbox.date,
-          displayName: inbox.displayName,
-          size: inbox.size,
-          description: inbox.description,
-          baseAmount: inbox.baseAmount,
-          baseCurrency: inbox.baseCurrency,
-          status: inbox.status,
-          website: inbox.website,
-          taxAmount: inbox.taxAmount,
-          taxRate: inbox.taxRate,
-          taxType: inbox.taxType,
-          embeddingScore:
-            sql<number>`(${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding})`.as(
-              "embedding_score",
+          .select({
+            id: inbox.id,
+            createdAt: inbox.createdAt,
+            fileName: inbox.fileName,
+            amount: inbox.amount,
+            currency: inbox.currency,
+            filePath: inbox.filePath,
+            contentType: inbox.contentType,
+            date: inbox.date,
+            displayName: inbox.displayName,
+            size: inbox.size,
+            description: inbox.description,
+            baseAmount: inbox.baseAmount,
+            baseCurrency: inbox.baseCurrency,
+            status: inbox.status,
+            website: inbox.website,
+            taxAmount: inbox.taxAmount,
+            taxRate: inbox.taxRate,
+            taxType: inbox.taxType,
+            embeddingScore:
+              sql<number>`(${transactionEmbeddings.embedding} <-> ${inboxEmbeddings.embedding})`.as(
+                "embedding_score",
               ),
           })
           .from(inbox)
@@ -1074,6 +1076,7 @@ export type CreateInboxParams = {
     | "processing"
     | "archived"
     | "deleted";
+  meta?: Record<string, unknown> | null;
 };
 
 export async function createInbox(db: Database, params: CreateInboxParams) {
@@ -1088,6 +1091,7 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
     website,
     inboxAccountId,
     status = "new",
+    meta,
   } = params;
 
   const [result] = await db
@@ -1103,6 +1107,7 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
       website,
       inboxAccountId,
       status,
+      meta: meta ?? null,
     })
     .returning({
       id: inbox.id,
@@ -1172,4 +1177,101 @@ export async function updateInboxWithProcessedData(
     });
 
   return result;
+}
+
+export type GetInboxSettingsParams = {
+  teamId: string;
+  settingType?: "excluded_sender";
+};
+
+export async function getInboxSettings(
+  db: Database,
+  params: GetInboxSettingsParams,
+) {
+  const { teamId, settingType } = params;
+
+  const whereConditions: SQL[] = [eq(inboxSettings.teamId, teamId)];
+
+  if (settingType) {
+    whereConditions.push(eq(inboxSettings.settingType, settingType));
+  }
+
+  const result = await db
+    .select()
+    .from(inboxSettings)
+    .where(and(...whereConditions))
+    .orderBy(desc(inboxSettings.createdAt));
+
+  return result;
+}
+
+export async function getExcludedSenders(db: Database, teamId: string) {
+  return getInboxSettings(db, { teamId, settingType: "excluded_sender" });
+}
+
+export type CreateInboxSettingParams = {
+  teamId: string;
+  settingType: "excluded_sender";
+  settingValue: string;
+  settingConfig?: Record<string, unknown> | null;
+  userId?: string | null;
+};
+
+export async function createInboxSetting(
+  db: Database,
+  params: CreateInboxSettingParams,
+) {
+  const { teamId, settingType, settingValue, settingConfig, userId } = params;
+
+  const [result] = await db
+    .insert(inboxSettings)
+    .values({
+      teamId,
+      settingType,
+      settingValue,
+      settingConfig: settingConfig ?? null,
+      createdBy: userId ?? null,
+    })
+    .returning();
+
+  return result;
+}
+
+export type DeleteInboxSettingParams = {
+  id: string;
+  teamId: string;
+};
+
+export async function deleteInboxSetting(
+  db: Database,
+  params: DeleteInboxSettingParams,
+) {
+  const { id, teamId } = params;
+
+  const [result] = await db
+    .delete(inboxSettings)
+    .where(and(eq(inboxSettings.id, id), eq(inboxSettings.teamId, teamId)))
+    .returning();
+
+  return result;
+}
+
+export async function isSenderExcluded(
+  db: Database,
+  teamId: string,
+  senderEmail: string,
+): Promise<boolean> {
+  const result = await db
+    .select()
+    .from(inboxSettings)
+    .where(
+      and(
+        eq(inboxSettings.teamId, teamId),
+        eq(inboxSettings.settingType, "excluded_sender"),
+        eq(inboxSettings.settingValue, senderEmail),
+      ),
+    )
+    .limit(1);
+
+  return result.length > 0;
 }

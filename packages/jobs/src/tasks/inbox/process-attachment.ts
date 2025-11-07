@@ -36,6 +36,7 @@ export const processAttachment = schemaTask({
     referenceId,
     website,
     inboxAccountId,
+    senderEmail,
   }) => {
     const supabase = createClient();
 
@@ -77,6 +78,7 @@ export const processAttachment = schemaTask({
         website,
         inboxAccountId,
         status: "processing", // Set as processing when created by job
+        meta: senderEmail ? { senderEmail } : null,
       });
     } else if (inboxData.status === "processing") {
       logger.info("Found existing inbox item already in processing status", {

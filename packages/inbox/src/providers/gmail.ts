@@ -328,10 +328,13 @@ export class GmailProvider implements OAuthProviderInterface {
       (h) => h.name === "From",
     )?.value;
     let senderDomain: string | undefined;
+    let senderEmail: string | undefined;
 
     if (fromHeader) {
       const emailMatch = fromHeader.match(/<([^>]+)>/);
       const email = emailMatch ? emailMatch[1] : fromHeader;
+      senderEmail = email.trim();
+
       const domain = email?.split("@")[1];
 
       // Extract root domain (remove subdomains)
@@ -367,6 +370,7 @@ export class GmailProvider implements OAuthProviderInterface {
           data: decodeBase64Url(att.data),
           website: senderDomain,
           referenceId: referenceId,
+          senderEmail: senderEmail,
         };
       });
 

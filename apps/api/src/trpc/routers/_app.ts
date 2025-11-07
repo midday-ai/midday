@@ -11,6 +11,7 @@ import { documentTagsRouter } from "./document-tags";
 import { documentsRouter } from "./documents";
 import { inboxRouter } from "./inbox";
 import { inboxAccountsRouter } from "./inbox-accounts";
+import { inboxSettingsRouter } from "./inbox-settings";
 import { institutionsRouter } from "./institutions";
 import { invoiceRouter } from "./invoice";
 import { invoiceProductsRouter } from "./invoice-products";
@@ -43,6 +44,7 @@ export const appRouter = createTRPCRouter({
   documentTags: documentTagsRouter,
   inbox: inboxRouter,
   inboxAccounts: inboxAccountsRouter,
+  inboxSettings: inboxSettingsRouter,
   institutions: institutionsRouter,
   invoice: invoiceRouter,
   invoiceProducts: invoiceProductsRouter,

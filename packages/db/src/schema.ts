@@ -102,6 +102,9 @@ export const inboxStatusEnum = pgEnum("inbox_status", [
 ]);
 
 export const inboxTypeEnum = pgEnum("inbox_type", ["invoice", "expense"]);
+export const inboxSettingTypeEnum = pgEnum("inbox_setting_type", [
+  "excluded_sender",
+]);
 export const invoiceDeliveryTypeEnum = pgEnum("invoice_delivery_type", [
   "create",
   "create_and_send",
@@ -1940,6 +1943,63 @@ export const inbox = pgTable(
       as: "permissive",
       for: "update",
       to: ["public"],
+    }),
+  ],
+);
+
+export const inboxSettings = pgTable(
+  "inbox_settings",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    settingType: inboxSettingTypeEnum("setting_type").notNull(),
+    settingValue: text("setting_value").notNull(),
+    settingConfig: json("setting_config"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    createdBy: uuid("created_by"),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "inbox_settings_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.createdBy],
+      foreignColumns: [users.id],
+      name: "inbox_settings_created_by_fkey",
+    }).onDelete("set null"),
+    unique("inbox_settings_team_id_setting_type_setting_value_key").on(
+      table.teamId,
+      table.settingType,
+      table.settingValue,
+    ),
+    index("inbox_settings_team_id_idx").using(
+      "btree",
+      table.teamId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("inbox_settings_setting_type_idx").using(
+      "btree",
+      table.settingType.asc().nullsLast(),
+    ),
+    pgPolicy("Inbox settings can be deleted by a member of the team", {
+      as: "permissive",
+      for: "delete",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Inbox settings can be selected by a member of the team", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+    }),
+    pgPolicy("Inbox settings can be inserted by a member of the team", {
+      as: "permissive",
+      for: "insert",
+      to: ["public"],
+      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
     }),
   ],
 );

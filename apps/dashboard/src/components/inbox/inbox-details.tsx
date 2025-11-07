@@ -9,6 +9,17 @@ import { getUrl } from "@/utils/environment";
 import { formatDate } from "@/utils/format";
 import { getInitials } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@midday/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
@@ -30,7 +41,7 @@ import {
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { MoreVertical, Trash2 } from "lucide-react";
+import { Ban, MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useCopyToClipboard } from "usehooks-ts";
@@ -157,6 +168,36 @@ export function InboxDetails() {
       },
     }),
   );
+
+  const excludeSenderMutation = useMutation(
+    trpc.inboxSettings.createExcludedSender.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.inboxSettings.listExcludedSenders.queryKey(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: trpc.inbox.get.infiniteQueryKey(),
+        });
+        toast({
+          title: "Sender excluded",
+          description: "Future emails from this sender will be filtered.",
+          variant: "success",
+        });
+      },
+      onError: () => {
+        toast({
+          title: "Failed to exclude sender",
+          description: "Please try again.",
+          variant: "error",
+        });
+      },
+    }),
+  );
+
+  const senderEmail =
+    data?.meta && typeof data.meta === "object" && "senderEmail" in data.meta
+      ? (data.meta.senderEmail as string)
+      : undefined;
 
   const handleOnDelete = () => {
     if (data?.id) {
@@ -305,6 +346,49 @@ export function InboxDetails() {
                   <Icons.Copy className="mr-2 size-4" />
                   <span className="text-xs">Copy Link</span>
                 </DropdownMenuItem>
+
+                {senderEmail && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <DropdownMenuItem
+                        onSelect={(e) => {
+                          e.preventDefault();
+                        }}
+                      >
+                        <Ban className="mr-2 size-4" />
+                        <span className="text-xs">Exclude sender</span>
+                      </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Exclude Sender</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to exclude{" "}
+                          <span className="font-medium">{senderEmail}</span>?
+                          Future emails from this sender will be filtered and
+                          won't appear in your inbox.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          disabled={excludeSenderMutation.isPending}
+                          onClick={() =>
+                            excludeSenderMutation.mutate({
+                              senderEmail,
+                            })
+                          }
+                        >
+                          {excludeSenderMutation.isPending ? (
+                            <Icons.Refresh className="mr-2 size-4 animate-spin" />
+                          ) : (
+                            "Exclude"
+                          )}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
 
                 {/* Destructive Actions - At Bottom */}
                 <DropdownMenuItem

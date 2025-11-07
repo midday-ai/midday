@@ -63,6 +63,7 @@ export const processAttachmentSchema = z.object({
   referenceId: z.string().optional(),
   website: z.string().optional(),
   inboxAccountId: z.string().uuid().optional(),
+  senderEmail: z.string().email().optional(),
 });
 
 export type ProcessAttachmentPayload = z.infer<typeof processAttachmentSchema>;

@@ -291,3 +291,25 @@ export const inboxPreSignedUrlResponseSchema = z.object({
     example: "invoice.pdf",
   }),
 });
+
+export const inboxSettingTypeSchema = z.enum(["excluded_sender"]);
+
+export const listInboxSettingsSchema = z
+  .object({
+    settingType: inboxSettingTypeSchema.optional(),
+  })
+  .optional();
+
+export const createInboxSettingSchema = z.object({
+  settingType: inboxSettingTypeSchema,
+  settingValue: z.string().email(),
+  settingConfig: z.record(z.unknown()).optional().nullable(),
+});
+
+export const createExcludedSenderSchema = z.object({
+  senderEmail: z.string().email(),
+});
+
+export const deleteInboxSettingSchema = z.object({
+  id: z.string().uuid(),
+});
