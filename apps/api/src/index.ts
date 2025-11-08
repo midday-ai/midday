@@ -6,6 +6,7 @@ import { Scalar } from "@scalar/hono-api-reference";
 import { sql } from "drizzle-orm";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
+import { httpLogger } from "@midday/logger";
 import { routers } from "./rest/routers";
 import type { Context } from "./rest/types";
 import { createTRPCContext } from "./trpc/init";
@@ -14,6 +15,7 @@ import { checkHealth } from "./utils/health";
 
 const app = new OpenAPIHono<Context>();
 
+app.use(httpLogger());
 app.use(secureHeaders());
 
 app.use(
