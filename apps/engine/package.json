@@ -15,17 +15,17 @@
   "dependencies": {
     "@hono/zod-openapi": "^1.1.4",
     "@hono/zod-validator": "^0.7.4",
-    "hono": "^4.10.4",
-    "jose": "^6.1.0",
+    "hono": "^4.10.5",
+    "jose": "^6.1.1",
     "plaid": "^39.1.0",
     "typesense": "^2.1.0",
     "workers-ai-provider": "^2.0.0",
-    "xior": "^0.7.8",
+    "xior": "^0.8.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20251014.0",
-    "wrangler": "^4.45.3"
+    "@cloudflare/workers-types": "^4.20251111.0",
+    "wrangler": "^4.47.0"
   },
   "exports": {
     ".": "./dist/index.js",

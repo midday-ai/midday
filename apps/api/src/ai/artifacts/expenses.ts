@@ -1,8 +1,8 @@
 import { artifact } from "@ai-sdk-tools/artifacts";
 import { z } from "zod";
 
-export const burnRateArtifact = artifact(
-  "burn-rate-canvas",
+export const expensesArtifact = artifact(
+  "category-expenses-canvas",
   z.object({
     // Processing stage
     stage: z.enum([
@@ -18,30 +18,34 @@ export const burnRateArtifact = artifact(
     // Chart data (available at chart_ready stage)
     chart: z
       .object({
-        monthlyData: z.array(
+        categoryData: z.array(
           z.object({
-            month: z.string(),
+            category: z.string(),
             amount: z.number(),
-            average: z.number(),
-            currentBurn: z.number(),
-            averageBurn: z.number(),
+            percentage: z.number(),
           }),
         ),
+        monthlyData: z
+          .array(
+            z.object({
+              month: z.string(),
+              amount: z.number(),
+            }),
+          )
+          .optional(),
       })
       .optional(),
 
     // Core metrics (available at metrics_ready stage)
     metrics: z
       .object({
-        currentMonthlyBurn: z.number(),
-        averageBurnRate: z.number(),
-        runway: z.number(),
-        runwayStatus: z.string(),
+        totalExpenses: z.number(),
+        averageMonthlyExpenses: z.number(),
         topCategory: z
           .object({
             name: z.string(),
-            percentage: z.number(),
             amount: z.number(),
+            percentage: z.number(),
           })
           .optional(),
       })
@@ -50,17 +54,10 @@ export const burnRateArtifact = artifact(
     // Analysis data (available at analysis_ready stage)
     analysis: z
       .object({
-        burnRateChange: z
-          .object({
-            percentage: z.number(),
-            period: z.string(),
-            startValue: z.number(),
-            endValue: z.number(),
-          })
-          .optional(),
         summary: z.string(),
         recommendations: z.array(z.string()),
       })
       .optional(),
   }),
 );
+

@@ -19,12 +19,12 @@
   },
   "dependencies": {
     "zod": "^4.1.12",
-    "ai": "^5.0.86",
-    "@ai-sdk/google": "^2.0.26",
+    "ai": "^5.0.92",
+    "@ai-sdk/google": "^2.0.31",
     "@midday/logger": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^24.10.0",
+    "@types/node": "^24.10.1",
     "typescript": "^5.9.3"
   }
 }

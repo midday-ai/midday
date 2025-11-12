@@ -18,7 +18,7 @@
   "dependencies": {
     "@midday/encryption": "workspace:*",
     "@midday/supabase": "workspace:*",
-    "googleapis": "^164.1.0",
+    "googleapis": "^166.0.0",
     "zod": "^4.1.12"
   }
 }

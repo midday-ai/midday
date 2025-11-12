@@ -1,11 +1,11 @@
 import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
-import { balanceSheetArtifact } from "@api/ai/artifacts/balance-sheet";
+import { spendingArtifact } from "@api/ai/artifacts/spending";
 import { tool } from "ai";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { z } from "zod";
 
-const getBalanceSheetSchema = z.object({
+const getSpendingSchema = z.object({
   from: z
     .string()
     .default(() => startOfMonth(subMonths(new Date(), 12)).toISOString())
@@ -29,10 +29,10 @@ const getBalanceSheetSchema = z.object({
     ),
 });
 
-export const getBalanceSheetTool = tool({
+export const getSpendingTool = tool({
   description:
-    "Generate a balance sheet showing assets, liabilities, and equity for a given period. Use this tool when users ask about balance sheet, assets, liabilities, equity, or financial position.",
-  inputSchema: getBalanceSheetSchema,
+    "Analyze spending patterns for a given period. Provides spending totals, monthly trends, category breakdowns, and insights. Use this tool when users ask about spending, spending analysis, spending patterns, or expenses.",
+  inputSchema: getSpendingSchema,
   execute: async function* (
     { from, to, currency, showCanvas },
     executionOptions,
@@ -42,22 +42,21 @@ export const getBalanceSheetTool = tool({
 
     if (!teamId) {
       yield {
-        text: "Unable to retrieve balance sheet: Team ID not found in context.",
+        text: "Unable to retrieve spending data: Team ID not found in context.",
       };
       return {
-        totalAssets: 0,
-        totalLiabilities: 0,
-        totalEquity: 0,
+        totalSpending: 0,
         currency: currency || appContext.baseCurrency || "USD",
+        monthlyData: [],
       };
     }
 
     try {
       // Initialize artifact only if showCanvas is true
-      let analysis: ReturnType<typeof balanceSheetArtifact.stream> | undefined;
+      let analysis: ReturnType<typeof spendingArtifact.stream> | undefined;
       if (showCanvas) {
         const writer = getWriter(executionOptions);
-        analysis = balanceSheetArtifact.stream(
+        analysis = spendingArtifact.stream(
           {
             stage: "loading",
             currency: currency || appContext.baseCurrency || "USD",
@@ -79,37 +78,36 @@ export const getBalanceSheetTool = tool({
             monthlyData: [],
           },
           metrics: {
-            totalAssets: 0,
-            totalLiabilities: 0,
-            totalEquity: 0,
+            totalSpending: 0,
+            averageMonthlySpending: 0,
+            currentMonthSpending: 0,
           },
           analysis: {
-            summary: "Balance sheet will be available soon.",
+            summary: "Spending analysis will be available soon.",
             recommendations: [],
           },
         });
       }
 
       yield {
-        text: "Balance sheet is not yet implemented. This feature will be available soon.",
+        text: "Spending analysis is not yet implemented. This feature will be available soon.",
       };
 
       return {
-        totalAssets: 0,
-        totalLiabilities: 0,
-        totalEquity: 0,
+        totalSpending: 0,
         currency: targetCurrency,
+        monthlyData: [],
       };
     } catch (error) {
       yield {
-        text: `Failed to retrieve balance sheet: ${error instanceof Error ? error.message : "Unknown error"}`,
+        text: `Failed to retrieve spending data: ${error instanceof Error ? error.message : "Unknown error"}`,
       };
       return {
-        totalAssets: 0,
-        totalLiabilities: 0,
-        totalEquity: 0,
+        totalSpending: 0,
         currency: currency || appContext.baseCurrency || "USD",
+        monthlyData: [],
       };
     }
   },
 });
+

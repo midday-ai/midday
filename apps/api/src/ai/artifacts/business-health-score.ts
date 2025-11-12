@@ -1,8 +1,8 @@
 import { artifact } from "@ai-sdk-tools/artifacts";
 import { z } from "zod";
 
-export const burnRateArtifact = artifact(
-  "burn-rate-canvas",
+export const businessHealthScoreArtifact = artifact(
+  "health-report-canvas",
   z.object({
     // Processing stage
     stage: z.enum([
@@ -21,10 +21,9 @@ export const burnRateArtifact = artifact(
         monthlyData: z.array(
           z.object({
             month: z.string(),
-            amount: z.number(),
-            average: z.number(),
-            currentBurn: z.number(),
-            averageBurn: z.number(),
+            healthScore: z.number(),
+            revenue: z.number(),
+            expenses: z.number(),
           }),
         ),
       })
@@ -33,34 +32,23 @@ export const burnRateArtifact = artifact(
     // Core metrics (available at metrics_ready stage)
     metrics: z
       .object({
-        currentMonthlyBurn: z.number(),
-        averageBurnRate: z.number(),
-        runway: z.number(),
-        runwayStatus: z.string(),
-        topCategory: z
-          .object({
-            name: z.string(),
-            percentage: z.number(),
-            amount: z.number(),
-          })
-          .optional(),
+        overallScore: z.number(),
+        revenueScore: z.number(),
+        expenseScore: z.number(),
+        cashFlowScore: z.number(),
+        profitabilityScore: z.number(),
       })
       .optional(),
 
     // Analysis data (available at analysis_ready stage)
     analysis: z
       .object({
-        burnRateChange: z
-          .object({
-            percentage: z.number(),
-            period: z.string(),
-            startValue: z.number(),
-            endValue: z.number(),
-          })
-          .optional(),
         summary: z.string(),
         recommendations: z.array(z.string()),
+        strengths: z.array(z.string()).optional(),
+        weaknesses: z.array(z.string()).optional(),
       })
       .optional(),
   }),
 );
+

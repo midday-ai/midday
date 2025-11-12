@@ -1,4 +1,6 @@
+import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
+import { runwayArtifact } from "@api/ai/artifacts/runway";
 import { db } from "@midday/db/client";
 import { getRunway } from "@midday/db/queries";
 import { tool } from "ai";
@@ -23,13 +25,22 @@ const getRunwaySchema = z.object({
     .describe("Optional currency code (e.g., 'USD', 'SEK').")
     .nullable()
     .optional(),
+  showCanvas: z
+    .boolean()
+    .default(false)
+    .describe(
+      "Whether to show detailed visual analytics. Use true for in-depth analysis requests, trends, breakdowns, or when user asks for charts/visuals. Use false for simple questions or quick answers.",
+    ),
 });
 
 export const getRunwayTool = tool({
   description:
     "Calculate cash runway in months based on current account balance and average burn rate. Runway represents how many months the business can operate with current cash reserves at the current spending rate. Use this tool when users ask about cash runway, months of runway, financial runway, or how long they can operate with current cash.",
   inputSchema: getRunwaySchema,
-  execute: async function* ({ from, to, currency }, executionOptions) {
+  execute: async function* (
+    { from, to, currency, showCanvas },
+    executionOptions,
+  ) {
     const appContext = executionOptions.experimental_context as AppContext;
     const teamId = appContext.teamId as string;
 
@@ -44,6 +55,19 @@ export const getRunwayTool = tool({
     }
 
     try {
+      // Initialize artifact only if showCanvas is true
+      let analysis: ReturnType<typeof runwayArtifact.stream> | undefined;
+      if (showCanvas) {
+        const writer = getWriter(executionOptions);
+        analysis = runwayArtifact.stream(
+          {
+            stage: "loading",
+            currency: currency || appContext.baseCurrency || "USD",
+          },
+          writer,
+        );
+      }
+
       const runway = await getRunway(db, {
         teamId,
         from,
@@ -86,6 +110,33 @@ export const getRunwayTool = tool({
           responseText +=
             "Your runway is critical. Immediate action may be needed to extend your runway through cost reduction, revenue increase, or securing additional funding.";
         }
+      }
+
+      // Update artifact with dummy data if showCanvas is true
+      if (showCanvas && analysis) {
+        await analysis.update({
+          stage: "analysis_ready",
+          currency: currency || appContext.baseCurrency || "USD",
+          chart: {
+            monthlyData: [],
+          },
+          metrics: {
+            currentRunway: runway,
+            cashBalance: 0,
+            averageBurnRate: 0,
+            status,
+          },
+          analysis: {
+            summary: responseText,
+            recommendations: [],
+          },
+        });
+      }
+
+      // Mention canvas if requested
+      if (showCanvas) {
+        responseText +=
+          "\n\nA detailed visual runway analysis with charts and trends is available.";
       }
 
       yield { text: responseText };

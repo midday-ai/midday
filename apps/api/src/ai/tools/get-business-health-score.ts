@@ -1,11 +1,11 @@
 import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
-import { balanceSheetArtifact } from "@api/ai/artifacts/balance-sheet";
+import { businessHealthScoreArtifact } from "@api/ai/artifacts/business-health-score";
 import { tool } from "ai";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { z } from "zod";
 
-const getBalanceSheetSchema = z.object({
+const getBusinessHealthScoreSchema = z.object({
   from: z
     .string()
     .default(() => startOfMonth(subMonths(new Date(), 12)).toISOString())
@@ -29,10 +29,10 @@ const getBalanceSheetSchema = z.object({
     ),
 });
 
-export const getBalanceSheetTool = tool({
+export const getBusinessHealthScoreTool = tool({
   description:
-    "Generate a balance sheet showing assets, liabilities, and equity for a given period. Use this tool when users ask about balance sheet, assets, liabilities, equity, or financial position.",
-  inputSchema: getBalanceSheetSchema,
+    "Calculate business health score based on multiple financial metrics including revenue, expenses, cash flow, and profitability. Provides an overall health score and breakdown by category. Use this tool when users ask about business health, financial health, business score, or overall financial performance.",
+  inputSchema: getBusinessHealthScoreSchema,
   execute: async function* (
     { from, to, currency, showCanvas },
     executionOptions,
@@ -42,22 +42,22 @@ export const getBalanceSheetTool = tool({
 
     if (!teamId) {
       yield {
-        text: "Unable to retrieve balance sheet: Team ID not found in context.",
+        text: "Unable to retrieve business health score: Team ID not found in context.",
       };
       return {
-        totalAssets: 0,
-        totalLiabilities: 0,
-        totalEquity: 0,
+        overallScore: 0,
         currency: currency || appContext.baseCurrency || "USD",
       };
     }
 
     try {
       // Initialize artifact only if showCanvas is true
-      let analysis: ReturnType<typeof balanceSheetArtifact.stream> | undefined;
+      let analysis:
+        | ReturnType<typeof businessHealthScoreArtifact.stream>
+        | undefined;
       if (showCanvas) {
         const writer = getWriter(executionOptions);
-        analysis = balanceSheetArtifact.stream(
+        analysis = businessHealthScoreArtifact.stream(
           {
             stage: "loading",
             currency: currency || appContext.baseCurrency || "USD",
@@ -79,35 +79,33 @@ export const getBalanceSheetTool = tool({
             monthlyData: [],
           },
           metrics: {
-            totalAssets: 0,
-            totalLiabilities: 0,
-            totalEquity: 0,
+            overallScore: 0,
+            revenueScore: 0,
+            expenseScore: 0,
+            cashFlowScore: 0,
+            profitabilityScore: 0,
           },
           analysis: {
-            summary: "Balance sheet will be available soon.",
+            summary: "Business health score analysis will be available soon.",
             recommendations: [],
           },
         });
       }
 
       yield {
-        text: "Balance sheet is not yet implemented. This feature will be available soon.",
+        text: "Business health score analysis is not yet implemented. This feature will be available soon.",
       };
 
       return {
-        totalAssets: 0,
-        totalLiabilities: 0,
-        totalEquity: 0,
+        overallScore: 0,
         currency: targetCurrency,
       };
     } catch (error) {
       yield {
-        text: `Failed to retrieve balance sheet: ${error instanceof Error ? error.message : "Unknown error"}`,
+        text: `Failed to retrieve business health score: ${error instanceof Error ? error.message : "Unknown error"}`,
       };
       return {
-        totalAssets: 0,
-        totalLiabilities: 0,
-        totalEquity: 0,
+        overallScore: 0,
         currency: currency || appContext.baseCurrency || "USD",
       };
     }

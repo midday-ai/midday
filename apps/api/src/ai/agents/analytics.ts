@@ -9,6 +9,8 @@ import {
   createAgent,
   formatContextForLLM,
 } from "@api/ai/agents/config/shared";
+import { getBusinessHealthScoreTool } from "@api/ai/tools/get-business-health-score";
+import { getCashFlowStressTestTool } from "@api/ai/tools/get-cash-flow-stress-test";
 
 export const analyticsAgent = createAgent({
   name: "analytics",
@@ -29,10 +31,9 @@ ${COMMON_AGENT_RULES}
 - Provide 2-3 actionable focus areas
 - Never mention reports or downloads
 </agent-specific-rules>`,
-  //   tools: {
-  //     businessHealth: businessHealthScoreTool,
-  //     cashFlowForecast: cashFlowForecastTool,
-  //     stressTest: cashFlowStressTestTool,
-  //   },
+  tools: {
+    getBusinessHealthScore: getBusinessHealthScoreTool,
+    getCashFlowStressTest: getCashFlowStressTestTool,
+  },
   maxTurns: 5,
 });

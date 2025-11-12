@@ -97,15 +97,45 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     icon: CreditCard,
     description: "Analyzing spending patterns",
   },
+  getSpending: {
+    name: "Spending",
+    icon: CreditCard,
+    description: "Analyzing spending patterns",
+  },
   taxSummary: {
     name: "Tax Summary",
     icon: FileText,
     description: "Generating tax summary",
   },
+  getTaxSummary: {
+    name: "Tax Summary",
+    icon: FileText,
+    description: "Generating tax summary",
+  },
+  getBalanceSheet: {
+    name: "Balance Sheet",
+    icon: FileSpreadsheet,
+    description: "Generating balance sheet",
+  },
+  getExpenses: {
+    name: "Expenses",
+    icon: Receipt,
+    description: "Analyzing expenses",
+  },
+  getBurnRate: {
+    name: "Burn Rate",
+    icon: Flame,
+    description: "Calculating burn rate",
+  },
 
   // Analytics tools
   businessHealth: {
     name: "Business Health",
+    icon: PieChart,
+    description: "Analyzing business health",
+  },
+  getBusinessHealthScore: {
+    name: "Business Health Score",
     icon: PieChart,
     description: "Analyzing business health",
   },
@@ -116,6 +146,11 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
   },
   stressTest: {
     name: "Stress Test",
+    icon: Calculator,
+    description: "Running stress test scenarios",
+  },
+  getCashFlowStressTest: {
+    name: "Cash Flow Stress Test",
     icon: Calculator,
     description: "Running stress test scenarios",
   },

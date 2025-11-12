@@ -11,8 +11,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@openpanel/nextjs": "^1.0.8",
-    "@vercel/functions": "^3.1.4"
+    "@openpanel/nextjs": "^1.0.9",
+    "@vercel/functions": "^3.3.0"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

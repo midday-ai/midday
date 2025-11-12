@@ -1,8 +1,8 @@
 import { artifact } from "@ai-sdk-tools/artifacts";
 import { z } from "zod";
 
-export const burnRateArtifact = artifact(
-  "burn-rate-canvas",
+export const taxSummaryArtifact = artifact(
+  "tax-summary-canvas",
   z.object({
     // Processing stage
     stage: z.enum([
@@ -21,10 +21,8 @@ export const burnRateArtifact = artifact(
         monthlyData: z.array(
           z.object({
             month: z.string(),
-            amount: z.number(),
-            average: z.number(),
-            currentBurn: z.number(),
-            averageBurn: z.number(),
+            taxAmount: z.number(),
+            taxableIncome: z.number(),
           }),
         ),
       })
@@ -33,34 +31,20 @@ export const burnRateArtifact = artifact(
     // Core metrics (available at metrics_ready stage)
     metrics: z
       .object({
-        currentMonthlyBurn: z.number(),
-        averageBurnRate: z.number(),
-        runway: z.number(),
-        runwayStatus: z.string(),
-        topCategory: z
-          .object({
-            name: z.string(),
-            percentage: z.number(),
-            amount: z.number(),
-          })
-          .optional(),
+        totalTaxLiability: z.number(),
+        totalTaxableIncome: z.number(),
+        effectiveTaxRate: z.number(),
+        estimatedQuarterlyPayments: z.number().optional(),
       })
       .optional(),
 
     // Analysis data (available at analysis_ready stage)
     analysis: z
       .object({
-        burnRateChange: z
-          .object({
-            percentage: z.number(),
-            period: z.string(),
-            startValue: z.number(),
-            endValue: z.number(),
-          })
-          .optional(),
         summary: z.string(),
         recommendations: z.array(z.string()),
       })
       .optional(),
   }),
 );
+

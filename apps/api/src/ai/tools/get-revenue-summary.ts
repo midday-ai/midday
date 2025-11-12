@@ -1,4 +1,6 @@
+import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
+import { revenueArtifact } from "@api/ai/artifacts/revenue";
 import { db } from "@midday/db/client";
 import { getReports } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
@@ -60,6 +62,19 @@ export const getRevenueSummaryTool = tool({
     }
 
     try {
+      // Initialize artifact only if showCanvas is true
+      let analysis: ReturnType<typeof revenueArtifact.stream> | undefined;
+      if (showCanvas) {
+        const writer = getWriter(executionOptions);
+        analysis = revenueArtifact.stream(
+          {
+            stage: "loading",
+            currency: currency || appContext.baseCurrency || "USD",
+          },
+          writer,
+        );
+      }
+
       const result = await getReports(db, {
         teamId,
         from,
@@ -186,6 +201,34 @@ export const getRevenueSummaryTool = tool({
       } else {
         responseText +=
           "No revenue data found for the selected period. Ensure transactions are properly categorized as income.";
+      }
+
+      // Update artifact with dummy data if showCanvas is true
+      if (showCanvas && analysis) {
+        const chartData = last12Months.map((item) => ({
+          month: format(new Date(item.date), "MMM"),
+          revenue: item.current.value,
+          lastYearRevenue: item.previous.value,
+          average: averageMonthlyRevenue,
+        }));
+
+        await analysis.update({
+          stage: "analysis_ready",
+          currency: targetCurrency,
+          chart: {
+            monthlyData: chartData,
+          },
+          metrics: {
+            totalRevenue: currentTotal,
+            averageMonthlyRevenue,
+            currentMonthRevenue: currentMonthlyRevenue,
+            revenueGrowth: changePercentage,
+          },
+          analysis: {
+            summary: responseText,
+            recommendations: [],
+          },
+        });
       }
 
       // Mention canvas if requested

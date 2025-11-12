@@ -1,4 +1,6 @@
+import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
+import { cashFlowArtifact } from "@api/ai/artifacts/cash-flow";
 import { db } from "@midday/db/client";
 import { getCashFlow } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
@@ -27,13 +29,22 @@ const getCashFlowSchema = z.object({
     .default("monthly")
     .describe("Period aggregation: 'monthly' or 'quarterly'")
     .optional(),
+  showCanvas: z
+    .boolean()
+    .default(false)
+    .describe(
+      "Whether to show detailed visual analytics. Use true for in-depth analysis requests, trends, breakdowns, or when user asks for charts/visuals. Use false for simple questions or quick answers.",
+    ),
 });
 
 export const getCashFlowTool = tool({
   description:
     "Calculate net cash flow (income minus expenses) for a given period. Net cash flow represents the total money coming in minus money going out. Use this tool when users ask about cash flow, net cash position, cash movement, or income vs expenses.",
   inputSchema: getCashFlowSchema,
-  execute: async function* ({ from, to, currency, period }, executionOptions) {
+  execute: async function* (
+    { from, to, currency, period, showCanvas },
+    executionOptions,
+  ) {
     const appContext = executionOptions.experimental_context as AppContext;
     const teamId = appContext.teamId as string;
 
@@ -49,6 +60,19 @@ export const getCashFlowTool = tool({
     }
 
     try {
+      // Initialize artifact only if showCanvas is true
+      let analysis: ReturnType<typeof cashFlowArtifact.stream> | undefined;
+      if (showCanvas) {
+        const writer = getWriter(executionOptions);
+        analysis = cashFlowArtifact.stream(
+          {
+            stage: "loading",
+            currency: currency || appContext.baseCurrency || "USD",
+          },
+          writer,
+        );
+      }
+
       const result = await getCashFlow(db, {
         teamId,
         from,
@@ -92,6 +116,33 @@ export const getCashFlowTool = tool({
           "A negative cash flow means you're spending more than you're earning. ";
         responseText +=
           "This could be normal for growth-stage businesses investing heavily, but monitor your cash reserves and runway to ensure sustainability.";
+      }
+
+      // Update artifact with dummy data if showCanvas is true
+      if (showCanvas && analysis) {
+        await analysis.update({
+          stage: "analysis_ready",
+          currency: targetCurrency,
+          chart: {
+            monthlyData: [],
+          },
+          metrics: {
+            netCashFlow,
+            totalIncome: 0,
+            totalExpenses: 0,
+            averageMonthlyCashFlow: 0,
+          },
+          analysis: {
+            summary: responseText,
+            recommendations: [],
+          },
+        });
+      }
+
+      // Mention canvas if requested
+      if (showCanvas) {
+        responseText +=
+          "\n\nA detailed visual cash flow analysis with charts and trends is available.";
       }
 
       yield { text: responseText };

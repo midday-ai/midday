@@ -18,13 +18,13 @@
     "test": "bun test src"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.26",
-    "@ai-sdk/mistral": "^2.0.22",
-    "@langchain/community": "1.0.0",
-    "@langchain/core": "1.0.2",
+    "@ai-sdk/google": "^2.0.31",
+    "@ai-sdk/mistral": "^2.0.24",
+    "@langchain/community": "1.0.2",
+    "@langchain/core": "1.0.4",
     "@midday/utils": "workspace:*",
     "@mistralai/mistralai": "^1.10.0",
-    "ai": "^5.0.86",
+    "ai": "^5.0.92",
     "canvas": "^3.2.0",
     "mammoth": "^1.11.0",
     "officeparser": "5.2.1",

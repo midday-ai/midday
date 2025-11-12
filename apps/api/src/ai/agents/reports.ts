@@ -15,10 +15,15 @@ import {
   createAgent,
   formatContextForLLM,
 } from "@api/ai/agents/config/shared";
+import { getBalanceSheetTool } from "@api/ai/tools/get-balance-sheet";
+import { getBurnRateTool } from "@api/ai/tools/get-burn-rate";
 import { getCashFlowTool } from "@api/ai/tools/get-cash-flow";
+import { getExpensesTool } from "@api/ai/tools/get-expenses";
 import { getProfitAnalysisTool } from "@api/ai/tools/get-profit-analysis";
 import { getRevenueSummaryTool } from "@api/ai/tools/get-revenue-summary";
 import { getRunwayTool } from "@api/ai/tools/get-runway";
+import { getSpendingTool } from "@api/ai/tools/get-spending";
+import { getTaxSummaryTool } from "@api/ai/tools/get-tax-summary";
 
 export const reportsAgent = createAgent({
   name: "reports",
@@ -60,15 +65,11 @@ Provide concise, natural financial reports with:
     getCashFlow: getCashFlowTool,
     getProfitAnalysis: getProfitAnalysisTool,
     getRevenueSummary: getRevenueSummaryTool,
-    // revenue: revenueDashboardTool,
-    // profitLoss: profitLossTool,
-    // cashFlow: cashFlowTool,
-    // balanceSheet: balanceSheetTool,
-    // expenses: expensesTool,
-    // burnRate: burnRateMetricsTool,
-    // runway: runwayMetricsTool,
-    // spending: spendingMetricsTool,
-    // taxSummary: taxSummaryTool,
+    getSpending: getSpendingTool,
+    getBalanceSheet: getBalanceSheetTool,
+    getExpenses: getExpensesTool,
+    getTaxSummary: getTaxSummaryTool,
+    getBurnRate: getBurnRateTool,
   },
   maxTurns: 5,
 });

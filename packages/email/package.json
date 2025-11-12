@@ -20,11 +20,11 @@
   "dependencies": {
     "@midday/ui": "workspace:*",
     "@midday/utils": "workspace:*",
-    "@react-email/components": "0.5.7",
-    "@react-email/render": "1.4.0",
-    "@react-email/tailwind": "1.2.2",
+    "@react-email/components": "1.0.0",
+    "@react-email/render": "2.0.0",
+    "@react-email/tailwind": "2.0.0",
     "date-fns": "^4.1.0",
-    "react-email": "4.3.2",
+    "react-email": "5.0.1",
     "responsive-react-email": "^0.0.5"
   },
   "devDependencies": {
