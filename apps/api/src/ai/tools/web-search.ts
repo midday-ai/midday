@@ -13,9 +13,7 @@ export const webSearchTool = tool({
   description:
     "Search the web for current information, prices, news, and external data. Returns concise factual data for analysis.",
   inputSchema: z.object({
-    query: z
-      .string()
-      .describe("Search query (2-4 words max for faster results)"),
+    query: z.string().describe("Search query"),
   }),
   execute: async ({ query }, executionOptions) => {
     const appContext = executionOptions.experimental_context as AppContext;

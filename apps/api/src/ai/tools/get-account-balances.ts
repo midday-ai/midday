@@ -8,7 +8,7 @@ import { z } from "zod";
 const getAccountBalancesSchema = z.object({
   currency: z
     .string()
-    .describe("Optional currency code (e.g., 'USD', 'SEK').")
+    .describe("Currency code (ISO 4217, e.g. 'USD')")
     .nullable()
     .optional(),
 });

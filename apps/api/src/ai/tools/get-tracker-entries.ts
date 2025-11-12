@@ -8,30 +8,10 @@ import { formatDistance } from "date-fns";
 import { z } from "zod";
 
 const getTrackerEntriesSchema = z.object({
-  from: z
-    .string()
-    .describe(
-      "Start date for date range filter (inclusive). Use ISO 8601 format: 'YYYY-MM-DD' or 'YYYY-MM-DDTHH:mm:ss.sssZ'. Example: '2024-01-01' or '2024-01-01T00:00:00.000Z'",
-    ),
-  to: z
-    .string()
-    .describe(
-      "End date for date range filter (inclusive). Use ISO 8601 format: 'YYYY-MM-DD' or 'YYYY-MM-DDTHH:mm:ss.sssZ'. Example: '2024-12-31' or '2024-12-31T23:59:59.999Z'",
-    ),
-  projectId: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Filter by project ID. Provide project UUID. Example: 'project-uuid-1'",
-    ),
-  userId: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Filter by assigned user ID. Provide user UUID. Example: 'user-uuid-1'",
-    ),
+  from: z.string().describe("Start date (ISO 8601)"),
+  to: z.string().describe("End date (ISO 8601)"),
+  projectId: z.string().nullable().optional().describe("Project ID"),
+  userId: z.string().nullable().optional().describe("User ID"),
 });
 
 export const getTrackerEntriesTool = tool({

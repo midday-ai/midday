@@ -8,20 +8,8 @@ import { formatDistance } from "date-fns";
 import { z } from "zod";
 
 const stopTimerSchema = z.object({
-  entryId: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Specific timer entry ID to stop. If not provided, will stop the current running timer for the user.",
-    ),
-  assignedId: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "User ID to find the running timer for. If not provided, will use the current user from context.",
-    ),
+  entryId: z.string().nullable().optional().describe("Timer entry ID"),
+  assignedId: z.string().nullable().optional().describe("User ID"),
 });
 
 export const stopTimerTool = tool({

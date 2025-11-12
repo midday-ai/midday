@@ -7,20 +7,8 @@ import { tool } from "ai";
 import { z } from "zod";
 
 const getBankAccountsSchema = z.object({
-  enabled: z
-    .boolean()
-    .nullable()
-    .optional()
-    .describe(
-      "Filter by enabled status. Use true to show only enabled accounts, false to show only disabled accounts. Leave empty to show all.",
-    ),
-  manual: z
-    .boolean()
-    .nullable()
-    .optional()
-    .describe(
-      "Filter by manual accounts. Use true to show only manually created accounts, false to show only bank-connected accounts. Leave empty to show all.",
-    ),
+  enabled: z.boolean().nullable().optional().describe("Enabled status"),
+  manual: z.boolean().nullable().optional().describe("Manual account flag"),
 });
 
 export const getBankAccountsTool = tool({

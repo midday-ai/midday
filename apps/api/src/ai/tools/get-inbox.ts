@@ -7,28 +7,9 @@ import { tool } from "ai";
 import { z } from "zod";
 
 const getInboxSchema = z.object({
-  cursor: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Pagination cursor from the previous page. Use the cursor value returned from a previous request to get the next page. Leave empty for first page.",
-    ),
-  pageSize: z
-    .number()
-    .min(1)
-    .max(100)
-    .default(10)
-    .describe(
-      "Number of inbox items to return per page. Minimum 1, maximum 100. Default is 10. Use smaller values (10-25) for quick overviews, larger (50-100) for comprehensive lists.",
-    ),
-  q: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Search query string. Searches across inbox item names, descriptions, and amounts. Can search by amount if numeric. Example: 'receipt' or '150.50'",
-    ),
+  cursor: z.string().nullable().optional().describe("Pagination cursor"),
+  pageSize: z.number().min(1).max(100).default(10).describe("Page size"),
+  q: z.string().nullable().optional().describe("Search query"),
   status: z
     .enum([
       "new",
@@ -42,23 +23,17 @@ const getInboxSchema = z.object({
     ])
     .nullable()
     .optional()
-    .describe(
-      "Filter inbox items by status. Use 'new' for unprocessed, 'done' for processed, 'pending' for pending, 'archived' for archived, etc. Example: 'new'",
-    ),
+    .describe("Status filter"),
   sort: z
     .enum(["date", "alphabetical"])
     .nullable()
     .optional()
-    .describe(
-      "Sort order. Use 'date' to sort by date (default), 'alphabetical' to sort by name.",
-    ),
+    .describe("Sort field"),
   order: z
     .enum(["asc", "desc"])
     .nullable()
     .optional()
-    .describe(
-      "Sort direction. Use 'asc' for ascending, 'desc' for descending. Default is 'desc' for date sorting.",
-    ),
+    .describe("Sort direction"),
 });
 
 export const getInboxTool = tool({

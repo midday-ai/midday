@@ -8,71 +8,24 @@ import { formatDistance } from "date-fns";
 import { z } from "zod";
 
 const getTrackerProjectsSchema = z.object({
-  cursor: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Pagination cursor from the previous page. Use the cursor value returned from a previous request to get the next page. Leave empty for first page.",
-    ),
+  cursor: z.string().nullable().optional().describe("Pagination cursor"),
   sort: z
     .array(z.string())
     .length(2)
     .nullable()
     .optional()
-    .describe(
-      "Sort order as [field, direction]. Field can be 'name', 'created_at', 'customer', 'time', 'amount', 'assigned', or 'tags'. Direction is 'asc' or 'desc'. Examples: ['name', 'asc'], ['created_at', 'desc']",
-    ),
-  pageSize: z
-    .number()
-    .min(1)
-    .max(100)
-    .default(10)
-    .describe(
-      "Number of projects to return per page. Minimum 1, maximum 100. Default is 10. Use smaller values (10-25) for quick overviews, larger (50-100) for comprehensive lists.",
-    ),
-  q: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Search query string. Searches across project names and descriptions. Example: 'Website Redesign'",
-    ),
-  start: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Start date for date range filter (inclusive) on creation date. Use ISO 8601 format: 'YYYY-MM-DD' or 'YYYY-MM-DDTHH:mm:ss.sssZ'. Example: '2024-01-01' or '2024-01-01T00:00:00.000Z'",
-    ),
-  end: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "End date for date range filter (inclusive) on creation date. Use ISO 8601 format: 'YYYY-MM-DD' or 'YYYY-MM-DDTHH:mm:ss.sssZ'. Example: '2024-12-31' or '2024-12-31T23:59:59.999Z'",
-    ),
+    .describe("Sort order"),
+  pageSize: z.number().min(1).max(100).default(10).describe("Page size"),
+  q: z.string().nullable().optional().describe("Search query"),
+  start: z.string().nullable().optional().describe("Start date (ISO 8601)"),
+  end: z.string().nullable().optional().describe("End date (ISO 8601)"),
   status: z
     .enum(["in_progress", "completed"])
     .nullable()
     .optional()
-    .describe(
-      "Filter projects by status. Use 'in_progress' for active projects, 'completed' for finished projects.",
-    ),
-  customers: z
-    .array(z.string())
-    .nullable()
-    .optional()
-    .describe(
-      "Filter by customer IDs. Provide array of customer UUIDs. Example: ['customer-uuid-1', 'customer-uuid-2']",
-    ),
-  tags: z
-    .array(z.string())
-    .nullable()
-    .optional()
-    .describe(
-      "Filter by tag IDs. Provide array of tag UUIDs. Example: ['tag-uuid-1', 'tag-uuid-2']",
-    ),
+    .describe("Project status"),
+  customers: z.array(z.string()).nullable().optional().describe("Customer IDs"),
+  tags: z.array(z.string()).nullable().optional().describe("Tag IDs"),
 });
 
 export const getTrackerProjectsTool = tool({

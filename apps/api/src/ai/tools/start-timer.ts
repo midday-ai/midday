@@ -7,32 +7,10 @@ import { tool } from "ai";
 import { z } from "zod";
 
 const startTimerSchema = z.object({
-  projectName: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Project name to search for. If multiple projects match, the first one will be used.",
-    ),
-  projectId: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Direct project ID (UUID). Use this if you know the exact project ID. Alternative to projectName.",
-    ),
-  description: z
-    .string()
-    .nullable()
-    .optional()
-    .describe("Optional description for the timer."),
-  assignedId: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "User ID to assign the timer to. If not provided, will use the current user from context.",
-    ),
+  projectName: z.string().nullable().optional().describe("Project name"),
+  projectId: z.string().nullable().optional().describe("Project ID"),
+  description: z.string().nullable().optional().describe("Timer description"),
+  assignedId: z.string().nullable().optional().describe("User ID"),
 });
 
 export const startTimerTool = tool({

@@ -9,24 +9,17 @@ const getBurnRateSchema = z.object({
   from: z
     .string()
     .default(() => startOfMonth(subMonths(new Date(), 12)).toISOString())
-    .describe("The start date when to retrieve data from. In ISO-8601 format."),
+    .describe("Start date (ISO 8601)"),
   to: z
     .string()
     .default(() => endOfMonth(new Date()).toISOString())
-    .describe(
-      "The end date when to retrieve data from. Defaults to end of current month. Return ISO-8601 format",
-    ),
+    .describe("End date (ISO 8601)"),
   currency: z
     .string()
-    .describe("Optional currency code (e.g., 'USD', 'SEK')")
+    .describe("Currency code (ISO 4217, e.g. 'USD')")
     .nullable()
     .optional(),
-  showCanvas: z
-    .boolean()
-    .default(false)
-    .describe(
-      "Whether to show detailed visual analytics. Use true for in-depth analysis requests, trends, breakdowns, or when user asks for charts/visuals. Use false for simple questions or quick answers.",
-    ),
+  showCanvas: z.boolean().default(false).describe("Show visual analytics"),
 });
 
 export const getBurnRateTool = tool({

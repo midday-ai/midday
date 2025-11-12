@@ -7,66 +7,25 @@ import { tool } from "ai";
 import { z } from "zod";
 
 const getInvoicesSchema = z.object({
-  cursor: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Pagination cursor from the previous page. Use the cursor value returned from a previous request to get the next page. Leave empty for first page.",
-    ),
+  cursor: z.string().nullable().optional().describe("Pagination cursor"),
   sort: z
     .array(z.string())
     .length(2)
     .nullable()
     .optional()
-    .describe(
-      "Sort order as [field, direction]. Field can be 'customer', 'created_at', 'due_date', 'amount', or 'status'. Direction is 'asc' or 'desc'. Examples: ['created_at', 'desc'], ['amount', 'asc']",
-    ),
-  pageSize: z
-    .number()
-    .min(1)
-    .max(100)
-    .default(10)
-    .describe(
-      "Number of invoices to return per page. Minimum 1, maximum 100. Default is 10. Use smaller values (10-25) for quick overviews, larger (50-100) for comprehensive lists.",
-    ),
-  q: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Search query string. Searches across invoice numbers, customer names, and amounts. Can search by amount if numeric. Example: 'INV-001' or '1500'",
-    ),
-  start: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Start date for date range filter (inclusive) on due date. Use ISO 8601 format: 'YYYY-MM-DD' or 'YYYY-MM-DDTHH:mm:ss.sssZ'. Example: '2024-01-01' or '2024-01-01T00:00:00.000Z'",
-    ),
-  end: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "End date for date range filter (inclusive) on due date. Use ISO 8601 format: 'YYYY-MM-DD' or 'YYYY-MM-DDTHH:mm:ss.sssZ'. Example: '2024-12-31' or '2024-12-31T23:59:59.999Z'",
-    ),
+    .describe("Sort order"),
+  pageSize: z.number().min(1).max(100).default(10).describe("Page size"),
+  q: z.string().nullable().optional().describe("Search query"),
+  start: z.string().nullable().optional().describe("Start date (ISO 8601)"),
+  end: z.string().nullable().optional().describe("End date (ISO 8601)"),
   statuses: z
     .array(
       z.enum(["draft", "overdue", "paid", "unpaid", "canceled", "scheduled"]),
     )
     .nullable()
     .optional()
-    .describe(
-      "Filter invoices by status. Use 'draft' for unsent, 'paid' for paid, 'unpaid' for outstanding, 'overdue' for past due, 'canceled' for canceled, 'scheduled' for scheduled. Example: ['unpaid', 'overdue']",
-    ),
-  customers: z
-    .array(z.string())
-    .nullable()
-    .optional()
-    .describe(
-      "Filter by customer IDs. Provide array of customer UUIDs. Example: ['customer-uuid-1', 'customer-uuid-2']",
-    ),
+    .describe("Status filter"),
+  customers: z.array(z.string()).nullable().optional().describe("Customer IDs"),
 });
 
 export const getInvoicesTool = tool({

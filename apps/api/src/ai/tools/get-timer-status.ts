@@ -8,13 +8,7 @@ import { formatDistance } from "date-fns";
 import { z } from "zod";
 
 const getTimerStatusSchema = z.object({
-  assignedId: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "User ID to check timer status for. If not provided, will use the current user from context.",
-    ),
+  assignedId: z.string().nullable().optional().describe("User ID"),
 });
 
 export const getTimerStatusTool = tool({

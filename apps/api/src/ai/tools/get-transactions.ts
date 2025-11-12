@@ -7,135 +7,70 @@ import { tool } from "ai";
 import { z } from "zod";
 
 const getTransactionsSchema = z.object({
-  cursor: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Pagination cursor from the previous page. Use the cursor value returned from a previous request to get the next page. Leave empty for first page.",
-    ),
+  cursor: z.string().nullable().optional().describe("Pagination cursor"),
   sort: z
     .array(z.string())
     .length(2)
     .nullable()
     .optional()
-    .describe(
-      "Sort order as [field, direction]. Field can be 'date', 'amount', 'name', 'category', 'status', 'counterparty', 'assigned', 'bank_account', 'tags', or 'attachment'. Direction is 'asc' or 'desc'. Examples: ['date', 'desc'], ['amount', 'asc']",
-    ),
-  pageSize: z
-    .number()
-    .min(1)
-    .max(100)
-    .default(10)
-    .describe(
-      "Number of transactions to return per page. Minimum 1, maximum 100. Default is 10. Use smaller values (10-25) for quick overviews, larger (50-100) for comprehensive lists.",
-    ),
-  q: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Search query string. Searches across transaction names, descriptions, and amounts. Can search by amount if numeric. Example: 'office supplies' or '150.50'",
-    ),
-  start: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Start date for date range filter (inclusive). Use ISO 8601 format: 'YYYY-MM-DD' or 'YYYY-MM-DDTHH:mm:ss.sssZ'. Example: '2024-01-01' or '2024-01-01T00:00:00.000Z'",
-    ),
-  end: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "End date for date range filter (inclusive). Use ISO 8601 format: 'YYYY-MM-DD' or 'YYYY-MM-DDTHH:mm:ss.sssZ'. Example: '2024-12-31' or '2024-12-31T23:59:59.999Z'",
-    ),
+    .describe("Sort order ([field, direction], e.g. ['date', 'desc'])"),
+  pageSize: z.number().min(1).max(100).default(10).describe("Page size"),
+  q: z.string().nullable().optional().describe("Search query"),
+  start: z.string().nullable().optional().describe("Start date (ISO 8601)"),
+  end: z.string().nullable().optional().describe("End date (ISO 8601)"),
   statuses: z
     .array(z.enum(["pending", "completed", "archived", "posted", "excluded"]))
     .nullable()
     .optional()
-    .describe(
-      "Filter transactions by status. Use 'pending' for unprocessed, 'completed' for fulfilled, 'archived' for archived, 'posted' for confirmed, 'excluded' for excluded. Example: ['pending', 'posted']",
-    ),
+    .describe("Status filter"),
   categories: z
     .array(z.string())
     .nullable()
     .optional()
-    .describe(
-      "Filter by category slugs. Use category slugs like 'office-supplies', 'travel', 'income'. Example: ['office-supplies', 'travel']",
-    ),
-  tags: z
-    .array(z.string())
-    .nullable()
-    .optional()
-    .describe(
-      "Filter by tag IDs. Provide array of tag UUIDs. Example: ['tag-uuid-1', 'tag-uuid-2']",
-    ),
+    .describe("Category slugs"),
+  tags: z.array(z.string()).nullable().optional().describe("Tag IDs"),
   accounts: z
     .array(z.string())
     .nullable()
     .optional()
-    .describe(
-      "Filter by bank account IDs. Provide array of account UUIDs. Example: ['account-uuid-1']",
-    ),
-  assignees: z
-    .array(z.string())
-    .nullable()
-    .optional()
-    .describe(
-      "Filter by assigned user IDs. Provide array of user UUIDs. Example: ['user-uuid-1']",
-    ),
+    .describe("Bank account IDs"),
+  assignees: z.array(z.string()).nullable().optional().describe("User IDs"),
   type: z
     .enum(["income", "expense"])
     .nullable()
     .optional()
-    .describe(
-      "Filter by transaction type. Use 'income' for money received, 'expense' for money spent.",
-    ),
+    .describe("Transaction type"),
   recurring: z
     .array(z.enum(["weekly", "monthly", "annually", "irregular", "all"]))
     .nullable()
     .optional()
-    .describe(
-      "Filter by recurring frequency. Use 'weekly', 'monthly', 'annually', 'irregular', or 'all' for any recurring. Example: ['monthly']",
-    ),
+    .describe("Recurring frequency"),
   amountRange: z
     .array(z.number())
     .length(2)
     .nullable()
     .optional()
-    .describe(
-      "Filter by amount range as [min, max]. Both values are numbers. Example: [100, 1000] filters transactions between $100 and $1000.",
-    ),
+    .describe("Amount range ([min, max] as numbers)"),
   amount: z
     .array(z.string())
     .nullable()
     .optional()
-    .describe(
-      "Filter by specific amounts. Provide array of amount strings. Example: ['150.75', '299.99']",
-    ),
+    .describe("Specific amounts"),
   currency: z
     .string()
     .nullable()
     .optional()
-    .describe(
-      "Filter by currency code. Use ISO 4217 currency codes like 'USD', 'EUR', 'SEK'. Example: 'USD'",
-    ),
+    .describe("Currency code (ISO 4217, e.g. 'USD')"),
   attachments: z
     .enum(["include", "exclude"])
     .nullable()
     .optional()
-    .describe(
-      "Filter by attachment presence. Use 'include' to show only transactions with attachments/receipts, 'exclude' to show only transactions without attachments.",
-    ),
+    .describe("Attachment filter"),
   manual: z
     .enum(["include", "exclude"])
     .nullable()
     .optional()
-    .describe(
-      "Filter by manual transactions. Use 'include' to show only manually created transactions, 'exclude' to show only bank-imported transactions.",
-    ),
+    .describe("Manual transaction filter"),
 });
 
 export const getTransactionsTool = tool({

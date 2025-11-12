@@ -10,44 +10,11 @@ import parseDuration from "parse-duration";
 import { z } from "zod";
 
 const createTrackerEntrySchema = z.object({
-  projectName: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Project name to search for (e.g., 'acme inc'). If multiple projects match, the first one will be used.",
-    ),
-  projectId: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Direct project ID (UUID). Use this if you know the exact project ID. Alternative to projectName.",
-    ),
-  duration: z
-    .string()
-    .describe(
-      "Duration in a flexible format. Examples: '8h', '2h 30m', '480m', '8.5' (hours), '2.5h'. Supports hours (h) and minutes (m).",
-    ),
-  date: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "Date for the time entry in YYYY-MM-DD format. Defaults to today if not provided.",
-    ),
-  description: z
-    .string()
-    .nullable()
-    .optional()
-    .describe("Optional description for the time entry."),
-  assignedId: z
-    .string()
-    .nullable()
-    .optional()
-    .describe(
-      "User ID to assign the entry to. If not provided, will use the current user from context.",
-    ),
+  projectName: z.string().nullable().optional().describe("Project name"),
+  projectId: z.string().nullable().optional().describe("Project ID"),
+  duration: z.string().describe("Duration (e.g. '8h', '2h 30m', '480m')"),
+  date: z.string().nullable().optional().describe("Date (YYYY-MM-DD)"),
+  description: z.string().nullable().optional().describe("Description"),
 });
 
 /**
@@ -81,12 +48,12 @@ export const createTrackerEntryTool = tool({
     "Create a time entry for a tracker project. Supports finding projects by name and flexible duration formats. Use this when users want to add time entries like 'add 8h to acme inc'.",
   inputSchema: createTrackerEntrySchema,
   execute: async function* (
-    { projectName, projectId, duration, date, description, assignedId },
+    { projectName, projectId, duration, date, description },
     executionOptions,
   ) {
     const appContext = executionOptions.experimental_context as AppContext;
     const teamId = appContext.teamId as string;
-    const userId = assignedId || appContext.userId || null;
+    const userId = appContext.userId || null;
     const searchProjectName = projectName;
 
     if (!teamId) {
