@@ -30,7 +30,7 @@
     "react-use-draggable-scroll": "^0.4.7",
     "resend": "^6.4.2",
     "server-only": "^0.0.1",
-    "sharp": "0.34.5",
+    "sharp": "0.34.4",
     "sugar-high": "^0.9.5"
   },
   "devDependencies": {

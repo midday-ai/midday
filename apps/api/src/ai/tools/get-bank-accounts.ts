@@ -2,7 +2,7 @@ import type { AppContext } from "@api/ai/agents/config/shared";
 import { db } from "@midday/db/client";
 import { getBankAccounts } from "@midday/db/queries";
 import { getAppUrl } from "@midday/utils/envs";
-import { formatAmount, formatDate } from "@midday/utils/format";
+import { formatAmount } from "@midday/utils/format";
 import { tool } from "ai";
 import { z } from "zod";
 

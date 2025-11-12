@@ -9,7 +9,6 @@ interface SourceItem {
   publishedDate?: string;
 }
 
-// Static tool that uses context at execution time via experimental_context
 export const webSearchTool = tool({
   description:
     "Search the web for current information, prices, news, and external data. Returns concise factual data for analysis.",

@@ -81,7 +81,7 @@
     "recharts": "2.15.3",
     "resend": "^6.4.2",
     "server-only": "^0.0.1",
-    "sharp": "0.34.5",
+    "sharp": "0.34.4",
     "tus-js-client": "4.3.1",
     "use-places-autocomplete": "^4.0.1",
     "usehooks-ts": "^3.1.1",
