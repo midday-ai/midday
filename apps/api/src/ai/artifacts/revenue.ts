@@ -48,4 +48,3 @@ export const revenueArtifact = artifact(
       .optional(),
   }),
 );
-

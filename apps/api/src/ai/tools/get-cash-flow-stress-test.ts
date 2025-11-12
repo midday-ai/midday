@@ -54,9 +54,9 @@ export const getCashFlowStressTestTool = tool({
 
     try {
       // Initialize artifact only if showCanvas is true
-      let analysis: ReturnType<
-        typeof cashFlowStressTestArtifact.stream
-      > | undefined;
+      let analysis:
+        | ReturnType<typeof cashFlowStressTestArtifact.stream>
+        | undefined;
       if (showCanvas) {
         const writer = getWriter(executionOptions);
         analysis = cashFlowStressTestArtifact.stream(
@@ -116,4 +116,3 @@ export const getCashFlowStressTestTool = tool({
     }
   },
 });
-

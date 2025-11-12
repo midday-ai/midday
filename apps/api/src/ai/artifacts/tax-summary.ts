@@ -47,4 +47,3 @@ export const taxSummaryArtifact = artifact(
       .optional(),
   }),
 );
-

@@ -53,4 +53,3 @@ export const spendingArtifact = artifact(
       .optional(),
   }),
 );
-

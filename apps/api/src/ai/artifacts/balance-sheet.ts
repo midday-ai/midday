@@ -48,4 +48,3 @@ export const balanceSheetArtifact = artifact(
       .optional(),
   }),
 );
-

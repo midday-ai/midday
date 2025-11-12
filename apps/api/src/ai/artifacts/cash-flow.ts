@@ -48,4 +48,3 @@ export const cashFlowArtifact = artifact(
       .optional(),
   }),
 );
-

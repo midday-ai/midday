@@ -48,4 +48,3 @@ export const runwayArtifact = artifact(
       .optional(),
   }),
 );
-
