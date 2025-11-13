@@ -56,7 +56,7 @@ export function SuggestedActions() {
     "get-burn-rate-analysis": {
       icon: Icons.Speed,
       title: "Burn rate analysis",
-      description: "Analyze my burn rate",
+      description: "Show me my burn rate visual analytics",
     },
     "latest-transactions": {
       icon: Icons.Transactions,

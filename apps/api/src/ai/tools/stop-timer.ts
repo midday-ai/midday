@@ -25,6 +25,7 @@ export const stopTimerTool = tool({
       yield {
         text: "Unable to stop timer: Team ID not found in context.",
       };
+
       return;
     }
 

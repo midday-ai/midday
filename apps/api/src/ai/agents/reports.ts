@@ -1,15 +1,4 @@
 import { openai } from "@ai-sdk/openai";
-// import {
-//   balanceSheetTool,
-//   burnRateMetricsTool,
-//   cashFlowTool,
-//   expensesTool,
-//   profitLossTool,
-//   revenueDashboardTool,
-//   runwayMetricsTool,
-//   spendingMetricsTool,
-//   taxSummaryTool,
-// } from "../tools/reports";
 import {
   COMMON_AGENT_RULES,
   createAgent,
@@ -48,6 +37,10 @@ ${COMMON_AGENT_RULES}
 - Default to text responses, use artifacts only when requested
 - For "balance sheet report" requests, use the balanceSheet tool with useArtifact: true to show the canvas
 - For "balance sheet", "show me balance sheet" requests, use the balanceSheet tool to show the canvas
+- For "spending", "spending patterns", "spending analysis", "show spending" requests, use the getSpending tool
+- For "show spending this month" or similar requests with "show", use getSpending with showCanvas: true
+- For "burn rate", "burn rate analysis" requests, use the getBurnRate tool
+- For "show burn rate", "burn rate visual analytics", "visual burn rate" or similar requests with "show"/"visual", use getBurnRate with showCanvas: true
 - When providing text responses for financial data, mention that visual reports are available (e.g., "You can also ask for a visual balance sheet report")
 - Use only ONE tool per query - don't call multiple similar tools
 </guidelines>

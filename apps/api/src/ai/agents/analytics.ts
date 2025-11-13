@@ -1,9 +1,5 @@
 import { openai } from "@ai-sdk/openai";
-// import {
-//   businessHealthScoreTool,
-//   cashFlowForecastTool,
-//   cashFlowStressTestTool,
-// } from "../tools/analytics";
+
 import {
   COMMON_AGENT_RULES,
   createAgent,
@@ -11,6 +7,7 @@ import {
 } from "@api/ai/agents/config/shared";
 import { getBusinessHealthScoreTool } from "@api/ai/tools/get-business-health-score";
 import { getCashFlowStressTestTool } from "@api/ai/tools/get-cash-flow-stress-test";
+import { reportsAgent } from "./reports";
 
 export const analyticsAgent = createAgent({
   name: "analytics",
@@ -35,5 +32,6 @@ ${COMMON_AGENT_RULES}
     getBusinessHealthScore: getBusinessHealthScoreTool,
     getCashFlowStressTest: getCashFlowStressTestTool,
   },
+  handoffs: [reportsAgent],
   maxTurns: 5,
 });

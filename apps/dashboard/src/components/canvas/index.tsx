@@ -16,7 +16,7 @@ export function Canvas() {
   });
 
   switch (current?.type) {
-    case "burn-rate":
+    case "burn-rate-canvas":
       return <BurnRateCanvas />;
     case "revenue-canvas":
       return <RevenueCanvas />;

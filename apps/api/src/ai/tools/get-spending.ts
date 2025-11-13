@@ -1,6 +1,12 @@
 import { getWriter } from "@ai-sdk-tools/artifacts";
+import { openai } from "@ai-sdk/openai";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { spendingArtifact } from "@api/ai/artifacts/spending";
+import { db } from "@midday/db/client";
+import { getSpending, getSpendingForPeriod } from "@midday/db/queries";
+import { getTransactions } from "@midday/db/queries";
+import { formatAmount, formatDate } from "@midday/utils/format";
+import { generateText } from "ai";
 import { tool } from "ai";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { z } from "zod";
@@ -40,7 +46,10 @@ export const getSpendingTool = tool({
       return {
         totalSpending: 0,
         currency: currency || appContext.baseCurrency || "USD",
-        monthlyData: [],
+        currentMonthSpending: 0,
+        averageMonthlySpending: 0,
+        topCategory: null,
+        transactions: [],
       };
     }
 
@@ -58,38 +67,273 @@ export const getSpendingTool = tool({
         );
       }
 
-      // TODO: Implement actual data fetching
-      // For now, return empty data
       const targetCurrency = currency || appContext.baseCurrency || "USD";
+      const locale = appContext.locale || "en-US";
 
-      // Update artifact with dummy data if showCanvas is true
+      // Fetch spending data
+      const spendingCategories = await getSpending(db, {
+        teamId,
+        from,
+        to,
+        currency: currency ?? undefined,
+      });
+
+      const periodSummary = await getSpendingForPeriod(db, {
+        teamId,
+        from,
+        to,
+        currency: currency ?? undefined,
+      });
+
+      // Fetch transactions (we'll sort by absolute amount after fetching)
+      const transactionsResult = await getTransactions(db, {
+        teamId,
+        type: "expense",
+        start: from,
+        end: to,
+        sort: ["amount", "asc"], // Ascending because expenses are negative, so smallest (most negative) = largest expense
+        pageSize: 50, // Fetch more to ensure we get top 10 after processing
+        statuses: ["pending", "posted", "completed"],
+      });
+
+      const totalSpending = periodSummary.totalSpending;
+      const topCategory = periodSummary.topCategory;
+
+      // Format transactions, calculate share percentages, and sort by absolute amount descending
+      const formattedTransactions = transactionsResult.data
+        .map((transaction) => {
+          const amount = Math.abs(transaction.amount);
+          const share = totalSpending > 0 ? (amount / totalSpending) * 100 : 0;
+
+          return {
+            date: formatDate(transaction.date),
+            vendor: transaction.name,
+            category: transaction.category?.name || "Uncategorized",
+            amount,
+            share: Math.round(share * 10) / 10, // Round to 1 decimal place
+          };
+        })
+        .sort((a, b) => b.amount - a.amount) // Sort descending by absolute amount
+        .slice(0, 10); // Take top 10
+
+      // Calculate average monthly spending
+      const fromDate = new Date(from);
+      const toDate = new Date(to);
+      const monthsDiff =
+        (toDate.getFullYear() - fromDate.getFullYear()) * 12 +
+        (toDate.getMonth() - fromDate.getMonth()) +
+        1;
+      const averageMonthlySpending =
+        monthsDiff > 0 ? totalSpending / monthsDiff : totalSpending;
+
+      // Get current month spending
+      const currentMonthStart = startOfMonth(new Date());
+      const currentMonthEnd = endOfMonth(new Date());
+      const currentMonthSummary = await getSpendingForPeriod(db, {
+        teamId,
+        from: currentMonthStart.toISOString(),
+        to: currentMonthEnd.toISOString(),
+        currency: currency ?? undefined,
+      });
+      const currentMonthSpending = currentMonthSummary.totalSpending;
+
+      // Update artifact with metrics
+      if (showCanvas && analysis) {
+        await analysis.update({
+          stage: "metrics_ready",
+          currency: targetCurrency,
+          metrics: {
+            totalSpending,
+            averageMonthlySpending,
+            currentMonthSpending,
+            topCategory: topCategory
+              ? {
+                  name: topCategory.name,
+                  amount: topCategory.amount,
+                  percentage: topCategory.percentage,
+                }
+              : undefined,
+          },
+          transactions: formattedTransactions,
+        });
+      }
+
+      // Generate AI summary and recommendations
+      const categoryBreakdown = spendingCategories
+        .slice(0, 5)
+        .map(
+          (cat) =>
+            `${cat.name}: ${formatAmount({
+              amount: cat.amount,
+              currency: targetCurrency,
+              locale,
+            })} (${cat.percentage.toFixed(1)}%)`,
+        )
+        .join(", ");
+
+      const topTransactionsText = formattedTransactions
+        .slice(0, 5)
+        .map(
+          (t) =>
+            `${t.vendor} (${t.category}): ${formatAmount({
+              amount: t.amount,
+              currency: targetCurrency,
+              locale,
+            })} - ${t.share.toFixed(1)}%`,
+        )
+        .join("\n");
+
+      const analysisResult = await generateText({
+        model: openai("gpt-4o-mini"),
+        messages: [
+          {
+            role: "user",
+            content: `Analyze this spending data for ${appContext.companyName || "the business"}:
+
+Total Spending: ${formatAmount({
+              amount: totalSpending,
+              currency: targetCurrency,
+              locale,
+            })}
+Current Month Spending: ${formatAmount({
+              amount: currentMonthSpending,
+              currency: targetCurrency,
+              locale,
+            })}
+Average Monthly Spending: ${formatAmount({
+              amount: averageMonthlySpending,
+              currency: targetCurrency,
+              locale,
+            })}
+Top Category: ${topCategory?.name || "N/A"} - ${topCategory?.percentage.toFixed(1) || 0}% of total
+
+Top Spending Categories:
+${categoryBreakdown}
+
+Top 5 Largest Transactions:
+${topTransactionsText}
+
+Provide a concise 2-3 sentence summary analyzing the spending patterns and 2-3 actionable recommendations for cost optimization.`,
+          },
+        ],
+      });
+
+      // Parse AI response
+      const aiResponseText = analysisResult.text;
+      const lines = aiResponseText
+        .split("\n")
+        .filter((line) => line.trim().length > 0);
+
+      // Extract summary (first 2-3 sentences)
+      const summaryText =
+        lines
+          .slice(0, 3)
+          .join(" ")
+          .replace(/^[-•*]\s*/, "")
+          .trim() ||
+        `Total spending of ${formatAmount({
+          amount: totalSpending,
+          currency: targetCurrency,
+          locale,
+        })} with ${topCategory?.name || "various categories"} representing the largest share.`;
+
+      // Extract recommendations (remaining lines starting with bullets or dashes)
+      const recommendations = lines
+        .slice(3)
+        .map((line) => line.replace(/^[-•*]\s*/, "").trim())
+        .filter((line) => line.length > 0)
+        .slice(0, 3);
+
+      // Update artifact with analysis
       if (showCanvas && analysis) {
         await analysis.update({
           stage: "analysis_ready",
           currency: targetCurrency,
-          chart: {
-            monthlyData: [],
-          },
           metrics: {
-            totalSpending: 0,
-            averageMonthlySpending: 0,
-            currentMonthSpending: 0,
+            totalSpending,
+            averageMonthlySpending,
+            currentMonthSpending,
+            topCategory: topCategory
+              ? {
+                  name: topCategory.name,
+                  amount: topCategory.amount,
+                  percentage: topCategory.percentage,
+                }
+              : undefined,
           },
+          transactions: formattedTransactions,
           analysis: {
-            summary: "Spending analysis will be available soon.",
-            recommendations: [],
+            summary: summaryText,
+            recommendations: recommendations.length > 0 ? recommendations : [],
           },
         });
       }
 
-      yield {
-        text: "Spending analysis is not yet implemented. This feature will be available soon.",
-      };
+      // Format text response
+      const formattedTotalSpending = formatAmount({
+        amount: totalSpending,
+        currency: targetCurrency,
+        locale,
+      });
+
+      let responseText_output = `**Total Spending:** ${formattedTotalSpending}\n\n`;
+
+      if (topCategory) {
+        responseText_output += `**Top Category:** ${topCategory.name} - ${formatAmount(
+          {
+            amount: topCategory.amount,
+            currency: targetCurrency,
+            locale,
+          },
+        )} (${topCategory.percentage.toFixed(1)}% of total)\n\n`;
+      }
+
+      if (formattedTransactions.length > 0) {
+        responseText_output += `**Top ${formattedTransactions.length} Largest Transactions:**\n\n`;
+        responseText_output +=
+          "| Date | Vendor | Category | Amount | Share |\n";
+        responseText_output += "|------|--------|----------|--------|------|\n";
+
+        for (const transaction of formattedTransactions) {
+          const formattedAmount = formatAmount({
+            amount: transaction.amount,
+            currency: targetCurrency,
+            locale,
+          });
+          responseText_output += `| ${transaction.date} | ${transaction.vendor} | ${transaction.category} | ${formattedAmount} | ${transaction.share.toFixed(1)}% |\n`;
+        }
+        responseText_output += "\n";
+      }
+
+      responseText_output += `**Summary & Recommendations:**\n\n${summaryText}\n\n`;
+
+      if (recommendations.length > 0) {
+        responseText_output += "**Recommendations:**\n";
+        for (const rec of recommendations) {
+          responseText_output += `- ${rec}\n`;
+        }
+      }
+
+      if (showCanvas) {
+        responseText_output +=
+          "\n\nA detailed visual spending analysis with charts and insights is available.";
+      }
+
+      yield { text: responseText_output };
 
       return {
-        totalSpending: 0,
+        totalSpending,
         currency: targetCurrency,
-        monthlyData: [],
+        currentMonthSpending,
+        averageMonthlySpending,
+        topCategory: topCategory
+          ? {
+              name: topCategory.name,
+              amount: topCategory.amount,
+              percentage: topCategory.percentage,
+            }
+          : null,
+        transactions: formattedTransactions,
       };
     } catch (error) {
       yield {
@@ -98,7 +342,10 @@ export const getSpendingTool = tool({
       return {
         totalSpending: 0,
         currency: currency || appContext.baseCurrency || "USD",
-        monthlyData: [],
+        currentMonthSpending: 0,
+        averageMonthlySpending: 0,
+        topCategory: null,
+        transactions: [],
       };
     }
   },

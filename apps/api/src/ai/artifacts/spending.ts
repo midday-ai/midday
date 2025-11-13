@@ -44,6 +44,19 @@ export const spendingArtifact = artifact(
       })
       .optional(),
 
+    // Transactions data (available at metrics_ready stage)
+    transactions: z
+      .array(
+        z.object({
+          date: z.string(),
+          vendor: z.string(),
+          category: z.string(),
+          amount: z.number(),
+          share: z.number(),
+        }),
+      )
+      .optional(),
+
     // Analysis data (available at analysis_ready stage)
     analysis: z
       .object({
