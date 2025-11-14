@@ -1,0 +1,1272 @@
+{
+  "metadata": {
+    "extractedFrom": "midday-fork",
+    "repositoryUrl": "https://github.com/midday-ai/midday",
+    "framework": "Next.js 15.5.2 + React 19.1.1",
+    "architecture": "Monorepo (Turbo + Bun workspaces)",
+    "stylingMethod": "Tailwind CSS + CVA (Class Variance Authority)",
+    "designSystemPackage": "@midday/ui",
+    "extractedAt": "2025-11-14",
+    "version": "1.0.0"
+  },
+  "tokens": {
+    "colors": {
+      "description": "All color tokens are defined as HSL values in CSS Variables",
+      "format": "hsl(var(--token-name))",
+      "light": {
+        "background": {
+          "value": "0, 0%, 100%",
+          "hsl": "hsl(0, 0%, 100%)",
+          "usage": "Main background color"
+        },
+        "foreground": {
+          "value": "0, 0%, 7%",
+          "hsl": "hsl(0, 0%, 7%)",
+          "usage": "Main text color"
+        },
+        "card": {
+          "DEFAULT": {
+            "value": "45 18% 96%",
+            "hsl": "hsl(45, 18%, 96%)",
+            "usage": "Card background"
+          },
+          "foreground": {
+            "value": "240 10% 3.9%",
+            "hsl": "hsl(240, 10%, 3.9%)",
+            "usage": "Card text"
+          }
+        },
+        "popover": {
+          "DEFAULT": {
+            "value": "45 18% 96%",
+            "hsl": "hsl(45, 18%, 96%)",
+            "usage": "Popover background"
+          },
+          "foreground": {
+            "value": "240 10% 3.9%",
+            "hsl": "hsl(240, 10%, 3.9%)",
+            "usage": "Popover text"
+          }
+        },
+        "primary": {
+          "DEFAULT": {
+            "value": "240 5.9% 10%",
+            "hsl": "hsl(240, 5.9%, 10%)",
+            "usage": "Primary actions, buttons"
+          },
+          "foreground": {
+            "value": "0 0% 98%",
+            "hsl": "hsl(0, 0%, 98%)",
+            "usage": "Text on primary"
+          }
+        },
+        "secondary": {
+          "DEFAULT": {
+            "value": "40, 11%, 89%",
+            "hsl": "hsl(40, 11%, 89%)",
+            "usage": "Secondary actions"
+          },
+          "foreground": {
+            "value": "240 5.9% 10%",
+            "hsl": "hsl(240, 5.9%, 10%)",
+            "usage": "Text on secondary"
+          }
+        },
+        "muted": {
+          "DEFAULT": {
+            "value": "40, 11%, 89%",
+            "hsl": "hsl(40, 11%, 89%)",
+            "usage": "Muted backgrounds"
+          },
+          "foreground": {
+            "value": "0, 0%, 38%",
+            "hsl": "hsl(0, 0%, 38%)",
+            "usage": "Muted text (duplicate definition in globals.css)"
+          },
+          "foreground2": {
+            "value": "240 3.8% 46.1%",
+            "hsl": "hsl(240, 3.8%, 46.1%)",
+            "usage": "Alternative muted text definition"
+          }
+        },
+        "accent": {
+          "DEFAULT": {
+            "value": "40, 10%, 94%",
+            "hsl": "hsl(40, 10%, 94%)",
+            "usage": "Accent backgrounds (hover states)"
+          },
+          "foreground": {
+            "value": "240 5.9% 10%",
+            "hsl": "hsl(240, 5.9%, 10%)",
+            "usage": "Text on accent"
+          }
+        },
+        "destructive": {
+          "DEFAULT": {
+            "value": "0 84.2% 60.2%",
+            "hsl": "hsl(0, 84.2%, 60.2%)",
+            "usage": "Destructive actions, errors"
+          },
+          "foreground": {
+            "value": "0 0% 98%",
+            "hsl": "hsl(0, 0%, 98%)",
+            "usage": "Text on destructive"
+          }
+        },
+        "border": {
+          "value": "45, 5%, 85%",
+          "hsl": "hsl(45, 5%, 85%)",
+          "usage": "Default borders"
+        },
+        "input": {
+          "value": "240 5.9% 90%",
+          "hsl": "hsl(240, 5.9%, 90%)",
+          "usage": "Input backgrounds"
+        },
+        "ring": {
+          "value": "240 5.9% 10%",
+          "hsl": "hsl(240, 5.9%, 10%)",
+          "usage": "Focus ring color"
+        }
+      },
+      "dark": {
+        "background": {
+          "value": "0, 0%, 7%",
+          "hsl": "hsl(0, 0%, 7%)",
+          "usage": "Main background color"
+        },
+        "foreground": {
+          "value": "0 0% 98%",
+          "hsl": "hsl(0, 0%, 98%)",
+          "usage": "Main text color"
+        },
+        "card": {
+          "DEFAULT": {
+            "value": "0, 0%, 7%",
+            "hsl": "hsl(0, 0%, 7%)",
+            "usage": "Card background"
+          },
+          "foreground": {
+            "value": "0 0% 98%",
+            "hsl": "hsl(0, 0%, 98%)",
+            "usage": "Card text"
+          }
+        },
+        "popover": {
+          "DEFAULT": {
+            "value": "0, 0%, 7%",
+            "hsl": "hsl(0, 0%, 7%)",
+            "usage": "Popover background"
+          },
+          "foreground": {
+            "value": "0 0% 98%",
+            "hsl": "hsl(0, 0%, 98%)",
+            "usage": "Popover text"
+          }
+        },
+        "primary": {
+          "DEFAULT": {
+            "value": "0 0% 98%",
+            "hsl": "hsl(0, 0%, 98%)",
+            "usage": "Primary actions, buttons"
+          },
+          "foreground": {
+            "value": "240 5.9% 10%",
+            "hsl": "hsl(240, 5.9%, 10%)",
+            "usage": "Text on primary"
+          }
+        },
+        "secondary": {
+          "DEFAULT": {
+            "value": "0, 0%, 11%",
+            "hsl": "hsl(0, 0%, 11%)",
+            "usage": "Secondary actions"
+          },
+          "foreground": {
+            "value": "0 0% 98%",
+            "hsl": "hsl(0, 0%, 98%)",
+            "usage": "Text on secondary"
+          }
+        },
+        "muted": {
+          "DEFAULT": {
+            "value": "0, 0%, 11%",
+            "hsl": "hsl(0, 0%, 11%)",
+            "usage": "Muted backgrounds"
+          },
+          "foreground": {
+            "value": "0, 0%, 38%",
+            "hsl": "hsl(0, 0%, 38%)",
+            "usage": "Muted text (duplicate definition)"
+          },
+          "foreground2": {
+            "value": "240 5% 64.9%",
+            "hsl": "hsl(240, 5%, 64.9%)",
+            "usage": "Alternative muted text definition"
+          }
+        },
+        "accent": {
+          "DEFAULT": {
+            "value": "0, 0%, 11%",
+            "hsl": "hsl(0, 0%, 11%)",
+            "usage": "Accent backgrounds (hover states)"
+          },
+          "foreground": {
+            "value": "0 0% 98%",
+            "hsl": "hsl(0, 0%, 98%)",
+            "usage": "Text on accent"
+          }
+        },
+        "destructive": {
+          "DEFAULT": {
+            "value": "359, 100%, 61%",
+            "hsl": "hsl(359, 100%, 61%)",
+            "usage": "Destructive actions, errors"
+          },
+          "foreground": {
+            "value": "0, 0%, 100%",
+            "hsl": "hsl(0, 0%, 100%)",
+            "usage": "Text on destructive"
+          }
+        },
+        "border": {
+          "value": "0, 0%, 17%",
+          "hsl": "hsl(0, 0%, 17%)",
+          "usage": "Default borders"
+        },
+        "input": {
+          "value": "0, 0%, 11%",
+          "hsl": "hsl(0, 0%, 11%)",
+          "usage": "Input backgrounds"
+        },
+        "ring": {
+          "value": "240 4.9% 83.9%",
+          "hsl": "hsl(240, 4.9%, 83.9%)",
+          "usage": "Focus ring color"
+        }
+      },
+      "custom": {
+        "description": "Hardcoded colors used in specific components",
+        "cardDescription": "#606060",
+        "cardFooter": "#606060",
+        "dialogDescription": "#878787",
+        "spinner": "#878787",
+        "badgeTag": {
+          "text": "#878787",
+          "background": {
+            "light": "#F2F1EF",
+            "dark": "#1D1D1D"
+          }
+        },
+        "badgeTagOutline": {
+          "background": "zinc-700",
+          "text": "zinc-200"
+        }
+      }
+    },
+    "typography": {
+      "fontFamilies": {
+        "sans": {
+          "value": "var(--font-geist-sans)",
+          "source": "Geist Sans (geist package)",
+          "weights": ["variable"],
+          "usage": "Primary font for UI"
+        },
+        "mono": {
+          "value": "var(--font-geist-mono)",
+          "source": "Geist Mono (geist package)",
+          "weights": ["variable"],
+          "usage": "Monospace font for code, badges"
+        },
+        "serif": {
+          "value": "var(--font-serif)",
+          "source": "Lora (Google Fonts)",
+          "weights": ["400"],
+          "usage": "Serif font for editorial content"
+        }
+      },
+      "fontSizes": {
+        "xs": "0.75rem",
+        "sm": "0.875rem",
+        "base": "1rem",
+        "lg": "1.125rem",
+        "xl": "1.25rem",
+        "2xl": "1.5rem",
+        "tiptap": {
+          "value": "11px",
+          "usage": "TipTap editor override"
+        }
+      },
+      "lineHeights": {
+        "tiptap": {
+          "value": "18px",
+          "usage": "TipTap editor override"
+        },
+        "relaxed": "1.625",
+        "none": "1",
+        "tight": "1.25"
+      },
+      "fontWeights": {
+        "normal": "400",
+        "medium": "500",
+        "semibold": "600"
+      },
+      "letterSpacing": {
+        "tight": "-0.025em"
+      }
+    },
+    "spacing": {
+      "description": "Tailwind default spacing scale is used (0.25rem increments)",
+      "custom": {
+        "0": "0px",
+        "0.5": "0.125rem",
+        "1": "0.25rem",
+        "1.5": "0.375rem",
+        "2": "0.5rem",
+        "2.5": "0.625rem",
+        "3": "0.75rem",
+        "3.5": "0.875rem",
+        "4": "1rem",
+        "5": "1.25rem",
+        "6": "1.5rem",
+        "7": "1.75rem",
+        "8": "2rem",
+        "9": "2.25rem",
+        "10": "2.5rem",
+        "12": "3rem",
+        "16": "4rem",
+        "20": "5rem",
+        "24": "6rem"
+      }
+    },
+    "borderRadius": {
+      "sm": "calc(var(--radius) - 4px)",
+      "md": "calc(var(--radius) - 2px)",
+      "lg": "var(--radius)",
+      "base": {
+        "value": "0.5rem",
+        "variable": "--radius"
+      },
+      "full": "9999px",
+      "desktop": {
+        "value": "10px",
+        "usage": "Desktop app window border radius"
+      }
+    },
+    "shadows": {
+      "md": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+      "sm": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+      "none": "none"
+    },
+    "transitions": {
+      "default": {
+        "duration": "150ms",
+        "timing": "cubic-bezier(0.4, 0, 0.2, 1)"
+      },
+      "colors": {
+        "property": "transition-colors",
+        "duration": "150ms"
+      },
+      "pinField": {
+        "duration": "250ms",
+        "properties": "color, border, box-shadow, transform"
+      }
+    },
+    "animations": {
+      "accordionDown": {
+        "keyframes": "accordion-down",
+        "duration": "0.2s",
+        "timing": "ease-out"
+      },
+      "accordionUp": {
+        "keyframes": "accordion-up",
+        "duration": "0.2s",
+        "timing": "ease-out"
+      },
+      "caretBlink": {
+        "keyframes": "caret-blink",
+        "duration": "1.25s",
+        "timing": "ease-out",
+        "iteration": "infinite"
+      },
+      "first": "moveVertical 30s ease infinite",
+      "second": "moveInCircle 20s reverse infinite",
+      "third": "moveInCircle 40s linear infinite",
+      "fourth": "moveHorizontal 40s ease infinite",
+      "fifth": "moveInCircle 20s ease infinite",
+      "shimmer": "shimmer 2.5s linear infinite",
+      "slideEffect": "slide-effect 1.3s ease-in-out infinite",
+      "scroll": "scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite",
+      "shake": {
+        "keyframes": "shake",
+        "duration": "0.2s",
+        "timing": "ease-in-out",
+        "iteration": "2"
+      },
+      "pulse": {
+        "duration": "2s",
+        "timing": "cubic-bezier(0.4, 0, 0.6, 1)",
+        "iteration": "infinite"
+      }
+    },
+    "keyframes": {
+      "shimmer": {
+        "0%": { "backgroundPosition": "200% 0" },
+        "100%": { "backgroundPosition": "-200% 0" }
+      },
+      "accordionDown": {
+        "from": { "height": "0" },
+        "to": { "height": "var(--radix-accordion-content-height)" }
+      },
+      "accordionUp": {
+        "from": { "height": "var(--radix-accordion-content-height)" },
+        "to": { "height": "0" }
+      },
+      "jiggle": {
+        "0%": { "transform": "rotate(-4deg)" },
+        "50%": { "transform": "rotate(4deg)" }
+      },
+      "caretBlink": {
+        "0%,70%,100%": { "opacity": "1" },
+        "20%,50%": { "opacity": "0" }
+      },
+      "scroll": {
+        "to": { "transform": "translate(calc(-50% - 0.5rem))" }
+      },
+      "moveHorizontal": {
+        "0%": { "transform": "translateX(-50%) translateY(-10%)" },
+        "50%": { "transform": "translateX(50%) translateY(10%)" },
+        "100%": { "transform": "translateX(-50%) translateY(-10%)" }
+      },
+      "moveInCircle": {
+        "0%": { "transform": "rotate(0deg)" },
+        "50%": { "transform": "rotate(180deg)" },
+        "100%": { "transform": "rotate(360deg)" }
+      },
+      "moveVertical": {
+        "0%": { "transform": "translateY(-50%)" },
+        "50%": { "transform": "translateY(50%)" },
+        "100%": { "transform": "translateY(-50%)" }
+      },
+      "webglScaleInFade": {
+        "0%": { "opacity": "0", "transform": "scale(.7)" },
+        "100%": { "opacity": "1", "transform": "scale(1)" }
+      },
+      "slideEffect": {
+        "0%": { "left": "0%" },
+        "50%": { "left": "calc(100% - 80px)" },
+        "100%": { "left": "0%" }
+      },
+      "dialogOverlayShow": {
+        "from": { "opacity": "0" },
+        "to": { "opacity": "1" }
+      },
+      "dialogOverlayHide": {
+        "from": { "opacity": "1" },
+        "to": { "opacity": "0" }
+      },
+      "dialogContentShow": {
+        "from": { "opacity": "0", "transform": "translate(-50%, -50%) scale(0.97)" },
+        "to": { "opacity": "1", "transform": "translate(-50%, -50%) scale(1)" }
+      },
+      "dialogContentHide": {
+        "from": { "opacity": "1", "transform": "translate(-50%, -50%) scale(1)" },
+        "to": { "opacity": "0", "transform": "translate(-50%, -50%) scale(0.97)" }
+      },
+      "ellipsis": {
+        "to": { "width": "1.25em" }
+      },
+      "shake": {
+        "0%": { "transform": "translateX(0rem)" },
+        "25%": { "transform": "translateX(0.5rem)" },
+        "75%": { "transform": "translateX(-0.5rem)" },
+        "100%": { "transform": "translateX(0rem)" }
+      }
+    },
+    "breakpoints": {
+      "sm": "640px",
+      "md": "768px",
+      "lg": "1024px",
+      "xl": "1280px",
+      "2xl": "1536px",
+      "3xl": "1800px"
+    },
+    "zIndex": {
+      "0": "0",
+      "10": "10",
+      "50": "50",
+      "100": "100"
+    }
+  },
+  "components": [
+    {
+      "name": "Button",
+      "path": "packages/ui/src/components/button.tsx",
+      "category": "Actions",
+      "description": "Versatile button component with multiple variants and sizes",
+      "usesCVA": true,
+      "primitives": ["@radix-ui/react-slot"],
+      "props": {
+        "variant": {
+          "type": "enum",
+          "values": ["default", "destructive", "outline", "secondary", "ghost", "link"],
+          "default": "default"
+        },
+        "size": {
+          "type": "enum",
+          "values": ["default", "sm", "lg", "icon"],
+          "default": "default"
+        },
+        "asChild": {
+          "type": "boolean",
+          "default": false,
+          "description": "Renders as Slot component for composition"
+        }
+      },
+      "variants": {
+        "default": "bg-primary text-primary-foreground hover:bg-primary/90",
+        "destructive": "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        "outline": "border border bg-transparent hover:bg-accent hover:text-accent-foreground",
+        "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        "ghost": "hover:bg-accent hover:text-accent-foreground",
+        "link": "text-primary underline-offset-4 hover:underline"
+      },
+      "sizes": {
+        "default": "h-9 px-4 py-2",
+        "sm": "h-8 px-3 text-xs",
+        "lg": "h-10 px-8",
+        "icon": "h-9 w-9"
+      },
+      "states": ["hover", "focus-visible", "disabled"]
+    },
+    {
+      "name": "Badge",
+      "path": "packages/ui/src/components/badge.tsx",
+      "category": "Display",
+      "description": "Badge component for labels, tags, and status indicators",
+      "usesCVA": true,
+      "props": {
+        "variant": {
+          "type": "enum",
+          "values": ["default", "secondary", "destructive", "outline", "tag", "tag-rounded", "tag-outline"],
+          "default": "default"
+        }
+      },
+      "variants": {
+        "default": "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+        "secondary": "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        "destructive": "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+        "outline": "font-mono rounded-none bg-transparent text-[10px] font-normal border-border border text-primary",
+        "tag": "font-mono text-[#878787] bg-[#F2F1EF] text-[10px] dark:bg-[#1D1D1D] border-none font-normal rounded-none",
+        "tag-rounded": "font-mono text-[#878787] bg-[#F2F1EF] text-[12px] dark:bg-[#1D1D1D] font-normal px-3 py-1 border-none",
+        "tag-outline": "border-transparent bg-zinc-700 text-zinc-200 hover:bg-zinc-700/80"
+      }
+    },
+    {
+      "name": "Card",
+      "path": "packages/ui/src/components/card.tsx",
+      "category": "Layout",
+      "description": "Container component for grouping related content",
+      "usesCVA": false,
+      "composition": ["CardHeader", "CardTitle", "CardDescription", "CardContent", "CardFooter"],
+      "subComponents": {
+        "Card": "border bg-background text-card-foreground",
+        "CardHeader": "flex flex-col space-y-1.5 p-6",
+        "CardTitle": "text-lg font-medium leading-none tracking-tight mb-2",
+        "CardDescription": "text-sm text-[#606060]",
+        "CardContent": "p-6 pt-0",
+        "CardFooter": "flex items-center p-6 border-t text-xs text-[#606060]"
+      }
+    },
+    {
+      "name": "Input",
+      "path": "packages/ui/src/components/input.tsx",
+      "category": "Forms",
+      "description": "Text input component with consistent styling",
+      "usesCVA": false,
+      "props": {
+        "type": {
+          "type": "string",
+          "description": "HTML input type"
+        }
+      },
+      "className": "flex h-9 w-full border bg-transparent px-3 py-1 text-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+    },
+    {
+      "name": "Alert",
+      "path": "packages/ui/src/components/alert.tsx",
+      "category": "Feedback",
+      "description": "Alert component for important messages",
+      "usesCVA": true,
+      "composition": ["AlertTitle", "AlertDescription"],
+      "props": {
+        "variant": {
+          "type": "enum",
+          "values": ["default", "destructive", "warning"],
+          "default": "default"
+        }
+      },
+      "variants": {
+        "default": "bg-background text-foreground",
+        "destructive": "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+        "warning": "dark:border-[#4a2800] dark:bg-[#1f1400]"
+      }
+    },
+    {
+      "name": "Dialog",
+      "path": "packages/ui/src/components/dialog.tsx",
+      "category": "Overlay",
+      "description": "Modal dialog component",
+      "usesCVA": false,
+      "primitives": ["@radix-ui/react-dialog"],
+      "composition": ["DialogTrigger", "DialogPortal", "DialogOverlay", "DialogContent", "DialogContentFrameless", "DialogHeader", "DialogFooter", "DialogTitle", "DialogDescription"],
+      "props": {
+        "hideClose": {
+          "type": "boolean",
+          "default": false,
+          "component": "DialogContent"
+        }
+      },
+      "animations": ["dialog-overlay-show", "dialog-overlay-hide", "dialog-content-show", "dialog-content-hide"]
+    },
+    {
+      "name": "Select",
+      "path": "packages/ui/src/components/select.tsx",
+      "category": "Forms",
+      "description": "Select dropdown component",
+      "usesCVA": false,
+      "primitives": ["@radix-ui/react-select"],
+      "composition": ["SelectGroup", "SelectValue", "SelectTrigger", "SelectContent", "SelectLabel", "SelectItem", "SelectSeparator", "SelectScrollUpButton", "SelectScrollDownButton"],
+      "props": {
+        "hideIcon": {
+          "type": "boolean",
+          "default": false,
+          "component": "SelectTrigger"
+        }
+      }
+    },
+    {
+      "name": "Spinner",
+      "path": "packages/ui/src/components/spinner.tsx",
+      "category": "Feedback",
+      "description": "Loading spinner indicator",
+      "usesCVA": false,
+      "props": {
+        "size": {
+          "type": "number",
+          "default": 20,
+          "description": "Size in pixels"
+        }
+      },
+      "className": "animate-spin stroke-[#878787]"
+    },
+    {
+      "name": "Accordion",
+      "path": "packages/ui/src/components/accordion.tsx",
+      "category": "Disclosure",
+      "primitives": ["@radix-ui/react-accordion"],
+      "composition": ["AccordionItem", "AccordionTrigger", "AccordionContent"],
+      "animations": ["accordion-down", "accordion-up"]
+    },
+    {
+      "name": "AlertDialog",
+      "path": "packages/ui/src/components/alert-dialog.tsx",
+      "category": "Overlay",
+      "primitives": ["@radix-ui/react-alert-dialog"],
+      "composition": ["AlertDialogTrigger", "AlertDialogPortal", "AlertDialogOverlay", "AlertDialogContent", "AlertDialogHeader", "AlertDialogFooter", "AlertDialogTitle", "AlertDialogDescription", "AlertDialogAction", "AlertDialogCancel"]
+    },
+    {
+      "name": "Avatar",
+      "path": "packages/ui/src/components/avatar.tsx",
+      "category": "Display",
+      "primitives": ["@radix-ui/react-avatar", "next/image"],
+      "composition": ["AvatarImage", "AvatarImageNext", "AvatarFallback"],
+      "description": "Avatar with Next.js Image support and fallback"
+    },
+    {
+      "name": "Calendar",
+      "path": "packages/ui/src/components/calendar.tsx",
+      "category": "Forms",
+      "primitives": ["react-day-picker"],
+      "props": {
+        "buttonVariant": "Button variant type",
+        "showOutsideDays": "boolean",
+        "captionLayout": "enum: label | buttons"
+      },
+      "composition": ["CalendarDayButton"]
+    },
+    {
+      "name": "Carousel",
+      "path": "packages/ui/src/components/carousel.tsx",
+      "category": "Display",
+      "primitives": ["embla-carousel-react"],
+      "composition": ["CarouselContent", "CarouselItem", "CarouselPrevious", "CarouselNext"],
+      "props": {
+        "orientation": "enum: horizontal | vertical",
+        "opts": "EmblaCarousel options",
+        "plugins": "EmblaCarousel plugins"
+      }
+    },
+    {
+      "name": "Checkbox",
+      "path": "packages/ui/src/components/checkbox.tsx",
+      "category": "Forms",
+      "primitives": ["@radix-ui/react-checkbox"],
+      "description": "Checkbox with check icon indicator"
+    },
+    {
+      "name": "Collapsible",
+      "path": "packages/ui/src/components/collapsible.tsx",
+      "category": "Disclosure",
+      "primitives": ["@radix-ui/react-collapsible"],
+      "composition": ["CollapsibleTrigger", "CollapsibleContent"]
+    },
+    {
+      "name": "Combobox",
+      "path": "packages/ui/src/components/combobox.tsx",
+      "category": "Forms",
+      "primitives": ["cmdk"],
+      "props": {
+        "options": "Array of Option objects",
+        "value": "Selected Option",
+        "isLoading": "boolean",
+        "onCreate": "Callback for creating new items",
+        "showIcon": "boolean - show search icon"
+      }
+    },
+    {
+      "name": "ComboboxDropdown",
+      "path": "packages/ui/src/components/combobox-dropdown.tsx",
+      "category": "Forms",
+      "primitives": ["cmdk"],
+      "description": "Generic combobox with custom rendering",
+      "props": {
+        "items": "Generic array T[]",
+        "headless": "boolean - no button UI",
+        "creatable": "boolean - allow creating items",
+        "maxSelected": "number limit"
+      }
+    },
+    {
+      "name": "Command",
+      "path": "packages/ui/src/components/command.tsx",
+      "category": "Navigation",
+      "primitives": ["cmdk"],
+      "composition": ["CommandDialog", "CommandInput", "CommandList", "CommandEmpty", "CommandGroup", "CommandItem", "CommandSeparator", "CommandShortcut"],
+      "description": "Command palette with search and filtering"
+    },
+    {
+      "name": "ContextMenu",
+      "path": "packages/ui/src/components/context-menu.tsx",
+      "category": "Overlay",
+      "primitives": ["@radix-ui/react-context-menu"],
+      "composition": ["ContextMenuTrigger", "ContextMenuContent", "ContextMenuItem", "ContextMenuCheckboxItem", "ContextMenuRadioItem", "ContextMenuLabel", "ContextMenuSeparator", "ContextMenuShortcut", "ContextMenuGroup", "ContextMenuSub", "ContextMenuSubContent", "ContextMenuSubTrigger", "ContextMenuRadioGroup"]
+    },
+    {
+      "name": "DateRangePicker",
+      "path": "packages/ui/src/components/date-range-picker.tsx",
+      "category": "Forms",
+      "primitives": ["react-day-picker"],
+      "description": "Date range picker with two month view",
+      "props": {
+        "range": "DateRange { from?, to? }",
+        "onSelect": "Callback with selected range"
+      }
+    },
+    {
+      "name": "CurrencyInput",
+      "path": "packages/ui/src/components/currency-input.tsx",
+      "category": "Forms",
+      "primitives": ["react-number-format"],
+      "description": "Numeric input with thousand separators",
+      "props": {
+        "thousandSeparator": "boolean - default true"
+      }
+    },
+    {
+      "name": "Drawer",
+      "path": "packages/ui/src/components/drawer.tsx",
+      "category": "Overlay",
+      "primitives": ["vaul"],
+      "composition": ["DrawerTrigger", "DrawerPortal", "DrawerClose", "DrawerOverlay", "DrawerContent", "DrawerHeader", "DrawerFooter", "DrawerTitle", "DrawerDescription"],
+      "props": {
+        "shouldScaleBackground": "boolean - default true"
+      }
+    },
+    {
+      "name": "DropdownMenu",
+      "path": "packages/ui/src/components/dropdown-menu.tsx",
+      "category": "Overlay",
+      "primitives": ["@radix-ui/react-dropdown-menu"],
+      "composition": ["DropdownMenuTrigger", "DropdownMenuContent", "DropdownMenuItem", "DropdownMenuCheckboxItem", "DropdownMenuRadioItem", "DropdownMenuLabel", "DropdownMenuSeparator", "DropdownMenuShortcut", "DropdownMenuGroup", "DropdownMenuSub", "DropdownMenuSubContent", "DropdownMenuSubTrigger", "DropdownMenuRadioGroup"]
+    },
+    {
+      "name": "Form",
+      "path": "packages/ui/src/components/form.tsx",
+      "category": "Forms",
+      "primitives": ["react-hook-form"],
+      "composition": ["FormField", "FormItem", "FormLabel", "FormControl", "FormDescription", "FormMessage"],
+      "description": "Form components integrated with react-hook-form"
+    },
+    {
+      "name": "HoverCard",
+      "path": "packages/ui/src/components/hover-card.tsx",
+      "category": "Overlay",
+      "primitives": ["@radix-ui/react-hover-card"],
+      "composition": ["HoverCardTrigger", "HoverCardContent"],
+      "props": {
+        "align": "enum - default center",
+        "sideOffset": "number - default 4"
+      }
+    },
+    {
+      "name": "Icons",
+      "path": "packages/ui/src/components/icons.tsx",
+      "category": "Display",
+      "primitives": ["react-icons", "@radix-ui/react-icons"],
+      "description": "Centralized icon exports from multiple libraries"
+    },
+    {
+      "name": "InputOTP",
+      "path": "packages/ui/src/components/input-otp.tsx",
+      "category": "Forms",
+      "primitives": ["input-otp"],
+      "composition": ["InputOTPGroup", "InputOTPSlot", "InputOTPSeparator"],
+      "description": "OTP input with animated cursor"
+    },
+    {
+      "name": "Label",
+      "path": "packages/ui/src/components/label.tsx",
+      "category": "Forms",
+      "primitives": ["@radix-ui/react-label"],
+      "usesCVA": true,
+      "description": "Form label with peer-disabled support"
+    },
+    {
+      "name": "MultipleSelector",
+      "path": "packages/ui/src/components/multiple-selector.tsx",
+      "category": "Forms",
+      "primitives": ["cmdk"],
+      "description": "Multi-select with async search and creation",
+      "props": {
+        "maxSelected": "number limit",
+        "creatable": "boolean",
+        "onSearch": "async search function",
+        "groupBy": "string - group options by key"
+      }
+    },
+    {
+      "name": "NavigationMenu",
+      "path": "packages/ui/src/components/navigation-menu.tsx",
+      "category": "Navigation",
+      "primitives": ["@radix-ui/react-navigation-menu"],
+      "usesCVA": true,
+      "composition": ["NavigationMenuList", "NavigationMenuItem", "NavigationMenuTrigger", "NavigationMenuContent", "NavigationMenuLink", "NavigationMenuViewport", "NavigationMenuIndicator"]
+    },
+    {
+      "name": "Popover",
+      "path": "packages/ui/src/components/popover.tsx",
+      "category": "Overlay",
+      "primitives": ["@radix-ui/react-popover"],
+      "composition": ["PopoverTrigger", "PopoverContent"],
+      "props": {
+        "portal": "boolean - default true",
+        "align": "enum - default center",
+        "sideOffset": "number - default 4"
+      }
+    },
+    {
+      "name": "Progress",
+      "path": "packages/ui/src/components/progress.tsx",
+      "category": "Feedback",
+      "primitives": ["@radix-ui/react-progress"],
+      "props": {
+        "value": "number (0-100)"
+      }
+    },
+    {
+      "name": "QuantityInput",
+      "path": "packages/ui/src/components/quantity-input.tsx",
+      "category": "Forms",
+      "description": "Numeric input with +/- buttons",
+      "props": {
+        "min": "number",
+        "max": "number",
+        "step": "number - default 0.1"
+      }
+    },
+    {
+      "name": "RadioGroup",
+      "path": "packages/ui/src/components/radio-group.tsx",
+      "category": "Forms",
+      "primitives": ["@radix-ui/react-radio-group"],
+      "composition": ["RadioGroupItem"]
+    },
+    {
+      "name": "ScrollArea",
+      "path": "packages/ui/src/components/scroll-area.tsx",
+      "category": "Layout",
+      "primitives": ["@radix-ui/react-scroll-area"],
+      "composition": ["ScrollBar"],
+      "props": {
+        "hideScrollbar": "boolean"
+      }
+    },
+    {
+      "name": "Separator",
+      "path": "packages/ui/src/components/separator.tsx",
+      "category": "Layout",
+      "primitives": ["@radix-ui/react-separator"],
+      "props": {
+        "orientation": "enum: horizontal | vertical - default horizontal",
+        "decorative": "boolean - default true"
+      }
+    },
+    {
+      "name": "Sheet",
+      "path": "packages/ui/src/components/sheet.tsx",
+      "category": "Overlay",
+      "primitives": ["@radix-ui/react-dialog"],
+      "usesCVA": true,
+      "composition": ["SheetTrigger", "SheetClose", "SheetPortal", "SheetOverlay", "SheetContent", "SheetHeader", "SheetFooter", "SheetTitle", "SheetDescription"],
+      "props": {
+        "side": {
+          "type": "enum",
+          "values": ["top", "bottom", "left", "right"],
+          "default": "right"
+        },
+        "stack": "boolean - default false"
+      },
+      "variants": {
+        "top": "slide from top",
+        "bottom": "slide from bottom",
+        "left": "slide from left, w-3/4 sm:max-w-sm",
+        "right": "slide from right, w-3/4 sm:max-w-[520px]"
+      }
+    },
+    {
+      "name": "Skeleton",
+      "path": "packages/ui/src/components/skeleton.tsx",
+      "category": "Feedback",
+      "description": "Loading skeleton with shimmer animation",
+      "props": {
+        "animate": "boolean - default true"
+      }
+    },
+    {
+      "name": "Slider",
+      "path": "packages/ui/src/components/slider.tsx",
+      "category": "Forms",
+      "primitives": ["@radix-ui/react-slider"],
+      "description": "Range slider with dual thumbs"
+    },
+    {
+      "name": "SubmitButton",
+      "path": "packages/ui/src/components/submit-button.tsx",
+      "category": "Actions",
+      "description": "Button with integrated loading spinner",
+      "props": {
+        "isSubmitting": "boolean"
+      }
+    },
+    {
+      "name": "Switch",
+      "path": "packages/ui/src/components/switch.tsx",
+      "category": "Forms",
+      "primitives": ["@radix-ui/react-switch"],
+      "description": "Toggle switch with theme-aware colors"
+    },
+    {
+      "name": "Table",
+      "path": "packages/ui/src/components/table.tsx",
+      "category": "Display",
+      "composition": ["TableHeader", "TableBody", "TableFooter", "TableRow", "TableHead", "TableCell", "TableCaption"],
+      "description": "Semantic table components"
+    },
+    {
+      "name": "Tabs",
+      "path": "packages/ui/src/components/tabs.tsx",
+      "category": "Navigation",
+      "primitives": ["@radix-ui/react-tabs"],
+      "composition": ["TabsList", "TabsTrigger", "TabsContent"]
+    },
+    {
+      "name": "Textarea",
+      "path": "packages/ui/src/components/textarea.tsx",
+      "category": "Forms",
+      "description": "Multi-line text input"
+    },
+    {
+      "name": "TimeRangeInput",
+      "path": "packages/ui/src/components/time-range-input.tsx",
+      "category": "Forms",
+      "primitives": ["date-fns"],
+      "description": "Time range input with automatic duration calculation",
+      "props": {
+        "value": "{ start: string; stop: string }",
+        "onChange": "Callback with same format"
+      }
+    },
+    {
+      "name": "Toast",
+      "path": "packages/ui/src/components/toast.tsx",
+      "category": "Feedback",
+      "primitives": ["@radix-ui/react-toast"],
+      "usesCVA": true,
+      "composition": ["ToastProvider", "ToastViewport", "ToastAction", "ToastClose", "ToastTitle", "ToastDescription"],
+      "props": {
+        "variant": {
+          "type": "enum",
+          "values": ["default", "error", "success", "progress", "spinner", "ai", "destructive"],
+          "default": "default"
+        }
+      }
+    },
+    {
+      "name": "Toaster",
+      "path": "packages/ui/src/components/toaster.tsx",
+      "category": "Feedback",
+      "description": "Toast renderer with multiple variant support"
+    },
+    {
+      "name": "Tooltip",
+      "path": "packages/ui/src/components/tooltip.tsx",
+      "category": "Overlay",
+      "primitives": ["@radix-ui/react-tooltip"],
+      "composition": ["TooltipProvider", "TooltipTrigger", "TooltipContent"],
+      "props": {
+        "sideOffset": "number - default 4"
+      }
+    },
+    {
+      "name": "AnimatedSizeContainer",
+      "path": "packages/ui/src/components/animated-size-container.tsx",
+      "category": "Layout",
+      "primitives": ["framer-motion"],
+      "description": "Container with animated height/width based on content",
+      "props": {
+        "width": "boolean",
+        "height": "boolean",
+        "transition": "transition config"
+      }
+    },
+    {
+      "name": "Chart",
+      "path": "packages/ui/src/components/chart.tsx",
+      "category": "Display",
+      "primitives": ["recharts"],
+      "composition": ["ChartContainer", "ChartTooltip", "ChartTooltipContent", "ChartLegend", "ChartLegendContent", "ChartStyle"],
+      "description": "Type-safe Recharts wrapper with theming",
+      "props": {
+        "config": "ChartConfig - color and label definitions",
+        "indicator": "enum: line | dot | dashed"
+      }
+    }
+  ],
+  "patterns": {
+    "namingConventions": {
+      "components": "PascalCase (e.g., Button, AlertDialog)",
+      "files": "kebab-case.tsx (e.g., button.tsx, alert-dialog.tsx)",
+      "cssVariables": "kebab-case with -- prefix (e.g., --background, --primary)",
+      "utilities": "camelCase (e.g., cn, truncate)",
+      "hooks": "camelCase with use prefix (e.g., useMediaQuery)"
+    },
+    "fileStructure": {
+      "designSystem": "packages/ui/src/",
+      "components": "packages/ui/src/components/",
+      "hooks": "packages/ui/src/hooks/",
+      "utils": "packages/ui/src/utils/",
+      "styles": "packages/ui/src/globals.css"
+    },
+    "exportPatterns": {
+      "granular": "Each component exported separately in package.json",
+      "example": "import { Button } from '@midday/ui/button'",
+      "treeshaking": "sideEffects: false for optimal tree-shaking"
+    },
+    "compositionPatterns": {
+      "radixWrapper": "Most components wrap Radix UI primitives",
+      "forwardRef": "All components use React.forwardRef for ref forwarding",
+      "asChild": "Common pattern using @radix-ui/react-slot for composition",
+      "cvaVariants": "CVA used for complex variant management"
+    },
+    "stateManagement": {
+      "radixStates": "data-state=open/closed for animations",
+      "ariaStates": "ARIA attributes for accessibility",
+      "focusStates": "focus-visible for keyboard navigation",
+      "disabledStates": "disabled:opacity-50 disabled:pointer-events-none"
+    },
+    "theming": {
+      "method": "CSS Variables + Tailwind CSS",
+      "darkMode": "class-based (.dark class)",
+      "variables": "HSL format for color manipulation",
+      "tokens": "Centralized in globals.css"
+    },
+    "accessibility": {
+      "foundation": "Radix UI primitives provide WAI-ARIA compliance",
+      "keyboard": "Full keyboard navigation support",
+      "screenReaders": "Semantic HTML and ARIA labels",
+      "focusManagement": "Focus trapping in modals, focus-visible states"
+    },
+    "responsive": {
+      "breakpoints": "Tailwind breakpoints (sm, md, lg, xl, 2xl, 3xl)",
+      "mobile": "Mobile-first approach",
+      "desktop": "Special desktop app styles with .desktop class"
+    }
+  },
+  "utilities": {
+    "cn": {
+      "path": "packages/ui/src/utils/cn.ts",
+      "description": "Merges Tailwind classes safely using clsx + tailwind-merge",
+      "usage": "cn('base-class', conditionalClass && 'conditional', className)",
+      "dependencies": ["clsx", "tailwind-merge"]
+    },
+    "truncate": {
+      "path": "packages/ui/src/utils/truncate.ts",
+      "description": "Truncates strings with ellipsis",
+      "signature": "(str: string | null | undefined, length: number): string | null"
+    }
+  },
+  "hooks": {
+    "useMediaQuery": {
+      "path": "packages/ui/src/hooks/use-media-query.ts",
+      "description": "React hook for responsive media queries",
+      "signature": "(query: string): boolean",
+      "example": "useMediaQuery('(min-width: 768px)')"
+    },
+    "useResizeObserver": {
+      "path": "packages/ui/src/hooks/use-resize-observer.ts",
+      "description": "Observes element size changes",
+      "signature": "(elementRef: RefObject<Element>): ResizeObserverEntry | undefined"
+    },
+    "useEnterSubmit": {
+      "path": "packages/ui/src/hooks/use-enter-submit.ts",
+      "description": "Submits form on Enter key in textarea",
+      "returns": "{ formRef, onKeyDown }",
+      "usage": "For chat/messaging UIs"
+    },
+    "useToast": {
+      "path": "packages/ui/src/components/use-toast.tsx",
+      "description": "Toast notification management hook",
+      "returns": "{ toast, toasts, dismiss }"
+    }
+  },
+  "dependencies": {
+    "core": {
+      "react": "19.1.1",
+      "next": "15.5.2",
+      "typescript": "5.9.2"
+    },
+    "styling": {
+      "tailwindcss": "^3.4.13",
+      "tailwindcss-animate": "^1.0.7",
+      "class-variance-authority": "^0.7.1",
+      "clsx": "^2.1.1",
+      "tailwind-merge": "2.5.3",
+      "postcss": "^8.5.3",
+      "autoprefixer": "^10.4.21"
+    },
+    "primitives": {
+      "@radix-ui/react-accordion": "^1.2.11",
+      "@radix-ui/react-alert-dialog": "^1.1.14",
+      "@radix-ui/react-avatar": "^1.1.10",
+      "@radix-ui/react-checkbox": "^1.3.2",
+      "@radix-ui/react-collapsible": "^1.1.11",
+      "@radix-ui/react-context-menu": "^2.2.15",
+      "@radix-ui/react-dialog": "^1.1.14",
+      "@radix-ui/react-dropdown-menu": "^2.1.15",
+      "@radix-ui/react-hover-card": "^1.1.14",
+      "@radix-ui/react-icons": "^1.3.2",
+      "@radix-ui/react-label": "^2.1.7",
+      "@radix-ui/react-navigation-menu": "^1.2.13",
+      "@radix-ui/react-popover": "^1.1.14",
+      "@radix-ui/react-progress": "^1.1.7",
+      "@radix-ui/react-radio-group": "^1.3.7",
+      "@radix-ui/react-scroll-area": "^1.2.9",
+      "@radix-ui/react-select": "^2.2.5",
+      "@radix-ui/react-separator": "^1.1.7",
+      "@radix-ui/react-slider": "^1.3.5",
+      "@radix-ui/react-slot": "^1.2.3",
+      "@radix-ui/react-switch": "^1.2.5",
+      "@radix-ui/react-tabs": "^1.1.12",
+      "@radix-ui/react-toast": "^1.2.14",
+      "@radix-ui/react-tooltip": "^1.2.7"
+    },
+    "specialized": {
+      "cmdk": "1.1.1",
+      "date-fns": "^4.1.0",
+      "embla-carousel-react": "^8.6.0",
+      "framer-motion": "^12.18.1",
+      "input-otp": "^1.4.2",
+      "lucide-react": "^0.511.0",
+      "react-day-picker": "9.8.0",
+      "react-hook-form": "^7.57.0",
+      "react-icons": "^5.5.0",
+      "react-number-format": "^5.4.4",
+      "recharts": "^2.15.3",
+      "vaul": "^1.1.2"
+    },
+    "editor": {
+      "@tiptap/extension-bold": "^2.12.0",
+      "@tiptap/extension-link": "^2.12.0",
+      "@tiptap/extension-placeholder": "^2.12.0",
+      "@tiptap/extension-underline": "^2.12.0",
+      "@tiptap/pm": "^2.12.0",
+      "@tiptap/react": "^2.12.0",
+      "@tiptap/starter-kit": "^2.12.0"
+    },
+    "fonts": {
+      "geist": "^1.4.2",
+      "next/font/google": "built-in (Lora)"
+    }
+  },
+  "configuration": {
+    "tailwind": {
+      "path": "packages/ui/tailwind.config.ts",
+      "extends": "Used by apps via presets",
+      "darkMode": "class",
+      "plugins": ["tailwindcss-animate"]
+    },
+    "postcss": {
+      "path": "packages/ui/postcss.config.js",
+      "plugins": ["tailwindcss", "autoprefixer"]
+    },
+    "typescript": {
+      "strict": true,
+      "noEmit": true
+    }
+  },
+  "customStyles": {
+    "scrollbar": {
+      "hide": ".scrollbar-hide class hides scrollbars",
+      "custom": "ScrollArea component provides styled scrollbars"
+    },
+    "skeleton": {
+      "box": ".skeleton-box - pulsing box placeholder",
+      "circle": ".skeleton-circle - circular avatar placeholder",
+      "line": ".skeleton-line - text line placeholder"
+    },
+    "pinField": {
+      "container": ".pin-field-container - grid layout for OTP",
+      "field": ".pin-field - individual input styling"
+    },
+    "desktop": {
+      "class": ".desktop - special styles for desktop app",
+      "borderRadius": "10px with border overlay",
+      "cursor": "cursor: default for native feel"
+    },
+    "colorPicker": {
+      "class": ".color-picker - react-colorful customization",
+      "height": "240px"
+    },
+    "tiptap": {
+      "fontSize": "11px",
+      "lineHeight": "18px",
+      "placeholder": "Custom placeholder via ::before"
+    },
+    "dottedBackground": {
+      "light": ".light .dotted-bg - #e0e0e0 dots",
+      "dark": ".dark .dotted-bg - #232323 dots",
+      "size": "6px × 6px grid"
+    }
+  }
+}
