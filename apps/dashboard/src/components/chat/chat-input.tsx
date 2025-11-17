@@ -54,7 +54,6 @@ export function ChatInput() {
     selectedCommandIndex,
     filteredCommands,
     setInput,
-    setIsUploading,
     handleInputChange,
     handleKeyDown,
     resetCommandState,
@@ -74,6 +73,11 @@ export function ChatInput() {
       return;
     }
 
+    // Set chat ID to ensure proper URL routing
+    if (chatId) {
+      setChatId(chatId);
+    }
+
     sendMessage({
       text: message.text || "Sent with attachments",
       files: message.files,
@@ -83,6 +87,7 @@ export function ChatInput() {
       },
     });
     setInput("");
+    resetCommandState();
   };
 
   return (
