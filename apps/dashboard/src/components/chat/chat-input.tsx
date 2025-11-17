@@ -8,7 +8,12 @@ import { WebSearchButton } from "@/components/web-search-button";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useChatStore } from "@/store/chat";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
-import { useChatActions, useChatId, useChatStatus } from "@ai-sdk-tools/store";
+import {
+  useChatActions,
+  useChatId,
+  useChatStatus,
+  useDataPart,
+} from "@ai-sdk-tools/store";
 import { cn } from "@midday/ui/cn";
 import {
   PromptInput,
@@ -41,6 +46,9 @@ export function ChatInput() {
   const { current } = useArtifacts({
     exclude: ["chat-title", "followup-questions"],
   });
+  const [, clearSuggestions] = useDataPart<{ prompts: string[] }>(
+    "suggestions",
+  );
 
   const isCanvasVisible = !!current;
 
@@ -72,6 +80,9 @@ export function ChatInput() {
     if (!(hasText || hasAttachments)) {
       return;
     }
+
+    // Clear old suggestions before sending new message
+    clearSuggestions();
 
     // Set chat ID to ensure proper URL routing
     if (chatId) {
@@ -121,6 +132,9 @@ export function ChatInput() {
                       // Execute command through the store
                       if (!chatId) return;
 
+                      // Clear old suggestions before sending new message
+                      clearSuggestions();
+
                       setChatId(chatId);
 
                       sendMessage({
@@ -144,6 +158,9 @@ export function ChatInput() {
                   if (e.key === "Enter" && !showCommands) {
                     e.preventDefault();
                     if (input.trim()) {
+                      // Clear old suggestions before sending new message
+                      clearSuggestions();
+
                       // Set chat ID to ensure proper URL routing
                       if (chatId) {
                         setChatId(chatId);

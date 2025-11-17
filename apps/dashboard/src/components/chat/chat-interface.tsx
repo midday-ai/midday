@@ -33,6 +33,9 @@ export function ChatInterface({ geo }: Props) {
   const chatId = useMemo(() => routeChatId ?? generateId(), [routeChatId]);
   const { reset } = useChatActions();
   const prevChatIdRef = useRef<string | null>(routeChatId);
+  const [, clearSuggestions] = useDataPart<{ prompts: string[] }>(
+    "suggestions",
+  );
 
   // Reset chat state when navigating away from a chat (sidebar, browser back, etc.)
   useEffect(() => {
@@ -43,11 +46,12 @@ export function ChatInterface({ geo }: Props) {
     // Or if we're switching to a different chatId, reset
     if (prevChatId && prevChatId !== currentChatId) {
       reset();
+      clearSuggestions();
     }
 
     // Update the ref for next comparison
     prevChatIdRef.current = currentChatId;
-  }, [routeChatId, reset]);
+  }, [routeChatId, reset, clearSuggestions]);
 
   const authenticatedFetch = useMemo(
     () =>
