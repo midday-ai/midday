@@ -175,7 +175,7 @@ export function ChatInterface({ geo }: Props) {
                   </div>
                 </ConversationContent>
                 <ConversationScrollButton
-                  className={cn(hasSuggestions ? "bottom-52" : "bottom-42")}
+                  className={cn(hasSuggestions ? "bottom-40" : "bottom-32")}
                 />
               </Conversation>
             </div>

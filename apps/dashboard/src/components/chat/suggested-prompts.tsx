@@ -57,7 +57,7 @@ export function SuggestedPrompts() {
               variant="ghost"
               size="sm"
               onClick={() => handlePromptClick(prompt)}
-              className="px-2 py-1 h-auto rounded-full text-xs font-normal border text-[#666] flex-shrink-0 whitespace-nowrap"
+              className="px-2 py-1 h-auto rounded-full text-xs font-normal border text-[#666] flex-shrink-0 whitespace-nowrap bg-background"
             >
               {prompt}
             </Button>
