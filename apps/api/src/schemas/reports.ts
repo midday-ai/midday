@@ -14,6 +14,10 @@ export const getRevenueSchema = z
       description: "Currency code (ISO 4217)",
       example: "USD",
     }),
+    revenueType: z.enum(["gross", "net"]).optional().default("net").openapi({
+      description: "Type of revenue calculation",
+      example: "net",
+    }),
   })
   .openapi("GetRevenueSchema");
 
@@ -30,6 +34,10 @@ export const getProfitSchema = z
     currency: z.string().optional().openapi({
       description: "Currency code (ISO 4217)",
       example: "USD",
+    }),
+    revenueType: z.enum(["gross", "net"]).optional().default("net").openapi({
+      description: "Type of revenue calculation",
+      example: "net",
     }),
   })
   .openapi("GetProfitSchema");

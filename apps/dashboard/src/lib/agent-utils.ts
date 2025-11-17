@@ -1,4 +1,9 @@
 import type { AgentStatus } from "@/types/agents";
+import type { ArtifactStage, ArtifactType } from "./artifact-config";
+import {
+  getArtifactSectionMessage,
+  getArtifactStageMessage,
+} from "./artifact-config";
 
 // Generate user-friendly status messages
 export const getStatusMessage = (status?: AgentStatus | null) => {
@@ -48,6 +53,7 @@ export const getToolMessage = (toolName: string | null) => {
     balanceSheet: "Building your balance sheet...",
     expenses: "Categorizing your expenses...",
     burnRate: "Computing your monthly burn rate...",
+    getBurnRate: "Computing your monthly burn rate...",
     runway: "Calculating your cash runway...",
     getRunway: "Calculating your cash runway...",
     spending: "Analyzing your spending trends...",
@@ -111,4 +117,20 @@ export const getToolMessage = (toolName: string | null) => {
   };
 
   return toolMessages[toolName];
+};
+
+// Generate user-friendly artifact stage messages (generic)
+export const getArtifactStageMessageForStatus = (
+  artifactType: ArtifactType | null,
+  stage: ArtifactStage | null,
+): string | null => {
+  return getArtifactStageMessage(artifactType, stage);
+};
+
+// Generate section-specific status messages (generic)
+export const getArtifactSectionMessageForStatus = (
+  artifactType: ArtifactType | null,
+  section: string | null,
+): string | null => {
+  return getArtifactSectionMessage(artifactType, section);
 };

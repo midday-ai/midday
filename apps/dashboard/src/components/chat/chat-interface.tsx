@@ -4,7 +4,7 @@ import { Canvas } from "@/components/canvas";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useChatStatus } from "@/hooks/use-chat-status";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
-import { useChat, useDataPart } from "@ai-sdk-tools/store";
+import { useChat, useChatActions, useDataPart } from "@ai-sdk-tools/store";
 import type { UIChatMessage } from "@midday/api/ai/types";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
@@ -15,7 +15,7 @@ import {
 } from "@midday/ui/conversation";
 import type { Geo } from "@vercel/functions";
 import { DefaultChatTransport, generateId } from "ai";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   ChatHeader,
   ChatInput,
@@ -31,6 +31,23 @@ type Props = {
 export function ChatInterface({ geo }: Props) {
   const { chatId: routeChatId, isHome } = useChatInterface();
   const chatId = useMemo(() => routeChatId ?? generateId(), [routeChatId]);
+  const { reset } = useChatActions();
+  const prevChatIdRef = useRef<string | null>(routeChatId);
+
+  // Reset chat state when navigating away from a chat (sidebar, browser back, etc.)
+  useEffect(() => {
+    const prevChatId = prevChatIdRef.current;
+    const currentChatId = routeChatId;
+
+    // If we had a chatId before and now we don't (navigated away), reset
+    // Or if we're switching to a different chatId, reset
+    if (prevChatId && prevChatId !== currentChatId) {
+      reset();
+    }
+
+    // Update the ref for next comparison
+    prevChatIdRef.current = currentChatId;
+  }, [routeChatId, reset]);
 
   const authenticatedFetch = useMemo(
     () =>
@@ -80,7 +97,13 @@ export function ChatInterface({ geo }: Props) {
     }),
   });
 
-  const { agentStatus, currentToolCall } = useChatStatus(messages, status);
+  const {
+    agentStatus,
+    currentToolCall,
+    artifactStage,
+    artifactType,
+    currentSection,
+  } = useChatStatus(messages, status);
 
   const { artifacts } = useArtifacts();
   const hasArtifacts = artifacts && artifacts.length > 0;
@@ -145,6 +168,9 @@ export function ChatInterface({ geo }: Props) {
                       agentStatus={agentStatus}
                       currentToolCall={currentToolCall}
                       status={status}
+                      artifactStage={artifactStage}
+                      artifactType={artifactType}
+                      currentSection={currentSection}
                     />
                   </div>
                 </ConversationContent>

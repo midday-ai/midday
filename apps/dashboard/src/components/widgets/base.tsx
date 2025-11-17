@@ -49,8 +49,21 @@ export function BaseWidget({
           {onConfigure && !isCustomizing && (
             <button
               type="button"
+              onMouseDown={(e) => {
+                e.stopPropagation();
+              }}
+              onMouseUp={(e) => {
+                e.stopPropagation();
+              }}
+              onTouchStart={(e) => {
+                e.stopPropagation();
+              }}
+              onTouchEnd={(e) => {
+                e.stopPropagation();
+              }}
               onClick={(e) => {
                 e.stopPropagation();
+                e.preventDefault();
                 onConfigure();
               }}
               className="opacity-0 group-hover:opacity-100 transition-opacity text-[#666666] hover:text-primary"

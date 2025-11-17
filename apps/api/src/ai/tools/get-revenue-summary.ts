@@ -1,22 +1,17 @@
 import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { revenueArtifact } from "@api/ai/artifacts/revenue";
+import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
 import { db } from "@midday/db/client";
 import { getReports } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
 import { tool } from "ai";
-import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
+import { endOfMonth, format, startOfMonth } from "date-fns";
 import { z } from "zod";
 
 const getRevenueSummarySchema = z.object({
-  from: z
-    .string()
-    .default(() => startOfMonth(subMonths(new Date(), 12)).toISOString())
-    .describe("Start date (ISO 8601)"),
-  to: z
-    .string()
-    .default(() => endOfMonth(new Date()).toISOString())
-    .describe("End date (ISO 8601)"),
+  from: z.string().optional().describe("Start date (ISO 8601)"),
+  to: z.string().optional().describe("End date (ISO 8601)"),
   currency: z
     .string()
     .describe("Currency code (ISO 4217, e.g. 'USD')")
@@ -50,6 +45,11 @@ export const getRevenueSummaryTool = tool({
     }
 
     try {
+      // Use fiscal year-aware defaults if dates not provided
+      const defaultDates = getToolDateDefaults(appContext.fiscalYearStartMonth);
+      const finalFrom = from ?? defaultDates.from;
+      const finalTo = to ?? defaultDates.to;
+
       // Initialize artifact only if showCanvas is true
       let analysis: ReturnType<typeof revenueArtifact.stream> | undefined;
       if (showCanvas) {
@@ -65,8 +65,8 @@ export const getRevenueSummaryTool = tool({
 
       const result = await getReports(db, {
         teamId,
-        from,
-        to,
+        from: finalFrom,
+        to: finalTo,
         currency: currency ?? undefined,
         type: "revenue",
         revenueType,

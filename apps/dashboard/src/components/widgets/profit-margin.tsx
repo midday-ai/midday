@@ -29,7 +29,7 @@ export function ProfitMarginWidget() {
       from: format(from, "yyyy-MM-dd"),
       to: format(to, "yyyy-MM-dd"),
       currency: team?.baseCurrency ?? undefined,
-      revenueType: "net",
+      revenueType: config?.revenueType ?? "net",
     }),
     ...WIDGET_POLLING_CONFIG,
   });
@@ -47,6 +47,8 @@ export function ProfitMarginWidget() {
     `widget_period.${config?.period ?? "fiscal_ytd"}` as "widget_period.fiscal_ytd",
   );
 
+  const revenueTypeLabel = config?.revenueType === "gross" ? "Gross" : "Net";
+
   return (
     <ConfigurableWidget
       isConfiguring={isConfiguring}
@@ -56,7 +58,7 @@ export function ProfitMarginWidget() {
           onSave={saveConfig}
           onCancel={() => setIsConfiguring(false)}
           showPeriod
-          showRevenueType={false}
+          showRevenueType
         />
       }
     >
@@ -66,7 +68,7 @@ export function ProfitMarginWidget() {
         description={
           <div className="flex flex-col gap-1">
             <p className="text-sm text-[#666666]">
-              Net profit margin · {periodLabel}
+              {revenueTypeLabel} profit margin · {periodLabel}
             </p>
           </div>
         }

@@ -1,19 +1,14 @@
 import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { taxSummaryArtifact } from "@api/ai/artifacts/tax-summary";
+import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
 import { tool } from "ai";
-import { endOfMonth, startOfMonth, subMonths } from "date-fns";
+import { endOfMonth, startOfMonth } from "date-fns";
 import { z } from "zod";
 
 const getTaxSummarySchema = z.object({
-  from: z
-    .string()
-    .default(() => startOfMonth(subMonths(new Date(), 12)).toISOString())
-    .describe("Start date (ISO 8601)"),
-  to: z
-    .string()
-    .default(() => endOfMonth(new Date()).toISOString())
-    .describe("End date (ISO 8601)"),
+  from: z.string().optional().describe("Start date (ISO 8601)"),
+  to: z.string().optional().describe("End date (ISO 8601)"),
   currency: z
     .string()
     .describe("Currency code (ISO 4217, e.g. 'USD')")
@@ -45,6 +40,9 @@ export const getTaxSummaryTool = tool({
     }
 
     try {
+      // Use fiscal year-aware defaults if dates not provided
+      const defaultDates = getToolDateDefaults(appContext.fiscalYearStartMonth);
+
       // Initialize artifact only if showCanvas is true
       let analysis: ReturnType<typeof taxSummaryArtifact.stream> | undefined;
       if (showCanvas) {

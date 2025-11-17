@@ -48,6 +48,7 @@ export function ProfitAnalysisWidget() {
       from: format(from, "yyyy-MM-dd"),
       to: format(to, "yyyy-MM-dd"),
       currency: team?.baseCurrency ?? undefined,
+      revenueType: config?.revenueType ?? "net",
     }),
     ...WIDGET_POLLING_CONFIG,
   });
@@ -80,6 +81,7 @@ export function ProfitAnalysisWidget() {
         from: format(from, "yyyy-MM-dd"),
         to: format(to, "yyyy-MM-dd"),
         currency: team?.baseCurrency ?? undefined,
+        revenueType: config?.revenueType ?? "net",
         showCanvas: true,
       },
       text: "Show profit analysis",
@@ -115,6 +117,8 @@ export function ProfitAnalysisWidget() {
     `widget_period.${config?.period ?? "trailing_12"}` as "widget_period.fiscal_ytd",
   );
 
+  const revenueTypeLabel = config?.revenueType === "gross" ? "Gross" : "Net";
+
   return (
     <ConfigurableWidget
       isConfiguring={isConfiguring}
@@ -124,7 +128,7 @@ export function ProfitAnalysisWidget() {
           onSave={saveConfig}
           onCancel={() => setIsConfiguring(false)}
           showPeriod
-          showRevenueType={false}
+          showRevenueType
         />
       }
     >
@@ -135,7 +139,8 @@ export function ProfitAnalysisWidget() {
         description={
           <div className="flex flex-col gap-2">
             <p className="text-sm text-[#666666]">
-              Your average profit · {periodLabel}{" "}
+              Your average {revenueTypeLabel.toLowerCase()} profit ·{" "}
+              {periodLabel}{" "}
               <span className="font-medium text-foreground">
                 {formatCurrency(averageProfit)}
               </span>

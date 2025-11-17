@@ -55,6 +55,7 @@ export interface AppContext {
   region?: string;
   timezone: string;
   chatId: string;
+  fiscalYearStartMonth?: number | null;
   // Allow additional properties to satisfy Record<string, unknown> constraint
   [key: string]: unknown;
 }
@@ -77,6 +78,7 @@ export function buildAppContext(
     timezone:
       context.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
     teamId: context.teamId,
+    fiscalYearStartMonth: context.fiscalYearStartMonth ?? undefined,
   };
 }
 

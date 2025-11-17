@@ -53,7 +53,7 @@ app.openapi(
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
-    const { from, to, currency } = c.req.valid("query");
+    const { from, to, currency, revenueType } = c.req.valid("query");
 
     const results = await getReports(db, {
       teamId,
@@ -61,6 +61,7 @@ app.openapi(
       to,
       currency,
       type: "revenue",
+      revenueType,
     });
 
     return c.json(validateResponse(results, getRevenueResponseSchema));
@@ -94,7 +95,7 @@ app.openapi(
   async (c) => {
     const db = c.get("db");
     const teamId = c.get("teamId");
-    const { from, to, currency } = c.req.valid("query");
+    const { from, to, currency, revenueType } = c.req.valid("query");
 
     const results = await getReports(db, {
       teamId,
@@ -102,6 +103,7 @@ app.openapi(
       to,
       currency,
       type: "profit",
+      revenueType,
     });
 
     return c.json(validateResponse(results, getProfitResponseSchema));

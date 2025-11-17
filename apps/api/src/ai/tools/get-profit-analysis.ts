@@ -1,36 +1,36 @@
 import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { profitArtifact } from "@api/ai/artifacts/profit";
+import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
 import { db } from "@midday/db/client";
 import { getReports } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
 import { tool } from "ai";
-import { endOfMonth, format, startOfMonth, subMonths } from "date-fns";
+import { format } from "date-fns";
 import { z } from "zod";
 
 const getProfitAnalysisSchema = z.object({
-  from: z
-    .string()
-    .default(() => startOfMonth(subMonths(new Date(), 12)).toISOString())
-    .describe("Start date (ISO 8601)"),
-  to: z
-    .string()
-    .default(() => endOfMonth(new Date()).toISOString())
-    .describe("End date (ISO 8601)"),
+  from: z.string().optional().describe("Start date (ISO 8601)"),
+  to: z.string().optional().describe("End date (ISO 8601)"),
   currency: z
     .string()
     .describe("Currency code (ISO 4217, e.g. 'USD')")
     .nullable()
     .optional(),
+  revenueType: z
+    .enum(["gross", "net"])
+    .optional()
+    .default("net")
+    .describe("Revenue type: 'net' (after taxes) or 'gross' (before taxes)"),
   showCanvas: z.boolean().default(false).describe("Show visual analytics"),
 });
 
 export const getProfitAnalysisTool = tool({
   description:
-    "Calculate and analyze profit (revenue minus expenses) - shows profit totals, monthly trends, year-over-year comparisons, and margins.",
+    "Calculate and analyze profit (revenue minus expenses) - shows profit totals, monthly trends, year-over-year comparisons, and margins. Supports both net and gross revenue types.",
   inputSchema: getProfitAnalysisSchema,
   execute: async function* (
-    { from, to, currency, showCanvas },
+    { from, to, currency, revenueType, showCanvas },
     executionOptions,
   ) {
     const appContext = executionOptions.experimental_context as AppContext;
@@ -49,6 +49,11 @@ export const getProfitAnalysisTool = tool({
     }
 
     try {
+      // Use fiscal year-aware defaults if dates not provided
+      const defaultDates = getToolDateDefaults(appContext.fiscalYearStartMonth);
+      const finalFrom = from ?? defaultDates.from;
+      const finalTo = to ?? defaultDates.to;
+
       // Initialize artifact only if showCanvas is true
       let analysis: ReturnType<typeof profitArtifact.stream> | undefined;
       if (showCanvas) {
@@ -66,17 +71,19 @@ export const getProfitAnalysisTool = tool({
       const [profitResult, revenueResult] = await Promise.all([
         getReports(db, {
           teamId,
-          from,
-          to,
+          from: finalFrom,
+          to: finalTo,
           currency: currency ?? undefined,
           type: "profit",
+          revenueType: revenueType ?? "net",
         }),
         getReports(db, {
           teamId,
-          from,
-          to,
+          from: finalFrom,
+          to: finalTo,
           currency: currency ?? undefined,
           type: "revenue",
+          revenueType: revenueType ?? "net",
         }),
       ]);
 
@@ -212,7 +219,8 @@ export const getProfitAnalysisTool = tool({
       }
 
       // Build response text
-      let responseText = `**Total Profit:** ${formattedCurrentTotal}\n\n`;
+      const revenueTypeLabel = revenueType === "gross" ? "Gross" : "Net";
+      let responseText = `**Total ${revenueTypeLabel} Profit:** ${formattedCurrentTotal}\n\n`;
 
       if (prevTotal !== 0) {
         responseText += "**Year-over-Year Comparison:**\n";

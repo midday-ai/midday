@@ -29,6 +29,7 @@ export const reportsRouter = createTRPCRouter({
         to: input.to,
         currency: input.currency,
         type: "revenue",
+        revenueType: input.revenueType,
       });
     }),
 
@@ -41,6 +42,7 @@ export const reportsRouter = createTRPCRouter({
         to: input.to,
         currency: input.currency,
         type: "profit",
+        revenueType: input.revenueType,
       });
     }),
 

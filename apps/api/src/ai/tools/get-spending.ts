@@ -2,24 +2,19 @@ import { getWriter } from "@ai-sdk-tools/artifacts";
 import { openai } from "@ai-sdk/openai";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { spendingArtifact } from "@api/ai/artifacts/spending";
+import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
 import { db } from "@midday/db/client";
 import { getSpending, getSpendingForPeriod } from "@midday/db/queries";
 import { getTransactions } from "@midday/db/queries";
 import { formatAmount, formatDate } from "@midday/utils/format";
 import { generateText } from "ai";
 import { tool } from "ai";
-import { endOfMonth, startOfMonth, subMonths } from "date-fns";
+import { endOfMonth, startOfMonth } from "date-fns";
 import { z } from "zod";
 
 const getSpendingSchema = z.object({
-  from: z
-    .string()
-    .default(() => startOfMonth(subMonths(new Date(), 12)).toISOString())
-    .describe("Start date (ISO 8601)"),
-  to: z
-    .string()
-    .default(() => endOfMonth(new Date()).toISOString())
-    .describe("End date (ISO 8601)"),
+  from: z.string().optional().describe("Start date (ISO 8601)"),
+  to: z.string().optional().describe("End date (ISO 8601)"),
   currency: z
     .string()
     .describe("Currency code (ISO 4217, e.g. 'USD')")
@@ -54,6 +49,11 @@ export const getSpendingTool = tool({
     }
 
     try {
+      // Use fiscal year-aware defaults if dates not provided
+      const defaultDates = getToolDateDefaults(appContext.fiscalYearStartMonth);
+      const finalFrom = from ?? defaultDates.from;
+      const finalTo = to ?? defaultDates.to;
+
       // Initialize artifact only if showCanvas is true
       let analysis: ReturnType<typeof spendingArtifact.stream> | undefined;
       if (showCanvas) {
@@ -73,15 +73,15 @@ export const getSpendingTool = tool({
       // Fetch spending data
       const spendingCategories = await getSpending(db, {
         teamId,
-        from,
-        to,
+        from: finalFrom,
+        to: finalTo,
         currency: currency ?? undefined,
       });
 
       const periodSummary = await getSpendingForPeriod(db, {
         teamId,
-        from,
-        to,
+        from: finalFrom,
+        to: finalTo,
         currency: currency ?? undefined,
       });
 
@@ -89,8 +89,8 @@ export const getSpendingTool = tool({
       const transactionsResult = await getTransactions(db, {
         teamId,
         type: "expense",
-        start: from,
-        end: to,
+        start: finalFrom,
+        end: finalTo,
         sort: ["amount", "asc"], // Ascending because expenses are negative, so smallest (most negative) = largest expense
         pageSize: 50, // Fetch more to ensure we get top 10 after processing
         statuses: ["pending", "posted", "completed"],
@@ -117,8 +117,8 @@ export const getSpendingTool = tool({
         .slice(0, 10); // Take top 10
 
       // Calculate average monthly spending
-      const fromDate = new Date(from);
-      const toDate = new Date(to);
+      const fromDate = new Date(finalFrom);
+      const toDate = new Date(finalTo);
       const monthsDiff =
         (toDate.getFullYear() - fromDate.getFullYear()) * 12 +
         (toDate.getMonth() - fromDate.getMonth()) +

@@ -1,6 +1,9 @@
 "use client";
 
+import type { ArtifactStage, ArtifactType } from "@/lib/artifact-config";
+import { getSectionFromStage } from "@/lib/artifact-config";
 import type { AgentStatus } from "@/types/agents";
+import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { useDataPart } from "@ai-sdk-tools/store";
 import type { ChatStatus, ToolUIPart, UIMessage } from "ai";
 import { useMemo } from "react";
@@ -9,6 +12,9 @@ interface ChatStatusResult {
   agentStatus: AgentStatus | null;
   currentToolCall: string | null;
   hasTextContent: boolean;
+  artifactStage: ArtifactStage | null;
+  artifactType: ArtifactType | null;
+  currentSection: string | null;
 }
 
 /**
@@ -24,13 +30,35 @@ export function useChatStatus(
   status: ChatStatus,
 ): ChatStatusResult {
   const [agentStatusData] = useDataPart<AgentStatus>("agent-status");
+  const { current } = useArtifacts({
+    exclude: ["chat-title", "followup-questions"],
+  });
 
   const result = useMemo(() => {
+    // Extract artifact stage generically for any artifact type
+    let artifactStage: ArtifactStage | null = null;
+    let artifactType: ArtifactType | null = null;
+    let currentSection: string | null = null;
+
+    // Check if current artifact has a stage property
+    if (current?.type) {
+      artifactType = current.type as ArtifactType;
+      const stage = (current.payload as { stage?: ArtifactStage })?.stage;
+      if (stage) {
+        artifactStage = stage;
+        // Map stage to current section using generic mapping
+        currentSection = getSectionFromStage(stage);
+      }
+    }
+
     if (messages.length === 0) {
       return {
         agentStatus: agentStatusData,
         currentToolCall: null,
         hasTextContent: false,
+        artifactStage,
+        artifactType,
+        currentSection,
       };
     }
 
@@ -40,6 +68,9 @@ export function useChatStatus(
         agentStatus: agentStatusData,
         currentToolCall: null,
         hasTextContent: false,
+        artifactStage,
+        artifactType,
+        currentSection,
       };
     }
 
@@ -116,8 +147,11 @@ export function useChatStatus(
       agentStatus,
       currentToolCall,
       hasTextContent,
+      artifactStage,
+      artifactType,
+      currentSection,
     };
-  }, [messages, status, agentStatusData]);
+  }, [messages, status, agentStatusData, current]);
 
   return result;
 }
