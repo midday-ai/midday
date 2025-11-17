@@ -1,5 +1,6 @@
 "use client";
 
+import { ChatMessageActions } from "@/components/chat/chat-message-actions";
 import { FaviconStack } from "@/components/favicon-stack";
 import { Message, MessageContent } from "@midday/ui/message";
 import { Response } from "@midday/ui/response";
@@ -100,11 +101,14 @@ export function ChatMessages({
         // Check if this is the last (currently streaming) message
         const isLastMessage = index === messages.length - 1;
 
+        // Message is finished if it's not the last message, or if it's the last message and not streaming
+        const isMessageFinished = !isLastMessage || !isStreaming;
+
         // Show sources only after response is finished (not on the currently streaming message)
         const shouldShowSources =
           uniqueSources.length > 0 &&
           message.role === "assistant" &&
-          (!isLastMessage || !isStreaming);
+          isMessageFinished;
 
         return (
           <div key={message.id}>
@@ -177,6 +181,16 @@ export function ChatMessages({
                 <FaviconStack sources={uniqueSources} />
               </div>
             )}
+
+            {/* Render message actions for assistant messages when finished */}
+            {message.role === "assistant" &&
+              isMessageFinished &&
+              textContent && (
+                <ChatMessageActions
+                  messageContent={textContent}
+                  messageId={message.id}
+                />
+              )}
           </div>
         );
       })}

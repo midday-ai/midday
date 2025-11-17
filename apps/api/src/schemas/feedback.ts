@@ -18,3 +18,14 @@ export const createChatFeedbackSchema = z.object({
     example: "This response was very helpful!",
   }),
 });
+
+export const deleteChatFeedbackSchema = z.object({
+  chatId: z.string().openapi({
+    description: "Chat ID",
+    example: "chat_abc123",
+  }),
+  messageId: z.string().openapi({
+    description: "Message ID from AI SDK",
+    example: "msg_abc123",
+  }),
+});

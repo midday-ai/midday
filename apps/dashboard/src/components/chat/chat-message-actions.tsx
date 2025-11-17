@@ -14,15 +14,15 @@ import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-interface MessageActionsProps {
+interface ChatMessageActionsProps {
   messageId: string;
   messageContent: string;
 }
 
-export function MessageActions({
+export function ChatMessageActions({
   messageId,
   messageContent,
-}: MessageActionsProps) {
+}: ChatMessageActionsProps) {
   const chatId = useChatId();
   const { regenerate } = useChatActions();
   const [feedbackGiven, setFeedbackGiven] = useState<
@@ -36,6 +36,10 @@ export function MessageActions({
     trpc.chatFeedback.create.mutationOptions(),
   );
 
+  const deleteFeedbackMutation = useMutation(
+    trpc.chatFeedback.delete.mutationOptions(),
+  );
+
   const handleRegenerate = () => {
     regenerate?.();
   };
@@ -44,6 +48,13 @@ export function MessageActions({
     if (feedbackGiven === "positive") {
       // Already gave positive feedback, remove feedback
       setFeedbackGiven(null);
+
+      if (!chatId) return;
+
+      deleteFeedbackMutation.mutate({
+        chatId,
+        messageId,
+      });
       return;
     }
 
@@ -62,6 +73,13 @@ export function MessageActions({
     if (feedbackGiven === "negative") {
       // Already gave negative feedback, remove feedback
       setFeedbackGiven(null);
+
+      if (!chatId) return;
+
+      deleteFeedbackMutation.mutate({
+        chatId,
+        messageId,
+      });
       return;
     }
 
@@ -162,10 +180,14 @@ export function MessageActions({
               <button
                 type="button"
                 onClick={handlePositive}
-                disabled={createFeedbackMutation.isPending}
+                disabled={
+                  createFeedbackMutation.isPending ||
+                  deleteFeedbackMutation.isPending
+                }
                 className={cn(
                   "flex items-center justify-center w-6 h-6 transition-colors duration-200 hover:bg-muted",
-                  createFeedbackMutation.isPending &&
+                  (createFeedbackMutation.isPending ||
+                    deleteFeedbackMutation.isPending) &&
                     "opacity-50 cursor-not-allowed",
                 )}
               >
@@ -173,7 +195,7 @@ export function MessageActions({
                   className={cn(
                     "w-3 h-3",
                     feedbackGiven === "positive"
-                      ? "text-green-600"
+                      ? "fill-foreground text-foreground"
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 />
@@ -202,10 +224,14 @@ export function MessageActions({
               <button
                 type="button"
                 onClick={handleNegative}
-                disabled={createFeedbackMutation.isPending}
+                disabled={
+                  createFeedbackMutation.isPending ||
+                  deleteFeedbackMutation.isPending
+                }
                 className={cn(
                   "flex items-center justify-center w-6 h-6 transition-colors duration-200 hover:bg-muted",
-                  createFeedbackMutation.isPending &&
+                  (createFeedbackMutation.isPending ||
+                    deleteFeedbackMutation.isPending) &&
                     "opacity-50 cursor-not-allowed",
                 )}
               >
@@ -213,7 +239,7 @@ export function MessageActions({
                   className={cn(
                     "w-3 h-3",
                     feedbackGiven === "negative"
-                      ? "text-red-600"
+                      ? "fill-foreground text-foreground"
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 />

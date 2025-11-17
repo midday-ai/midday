@@ -5,5 +5,3 @@ export { ChatMessages } from "./chat-messages";
 export { ChatNavigation } from "./chat-navigation";
 export { ChatStatusIndicators } from "./chat-status-indicators";
 export { ChatTitle } from "./chat-title";
-// export { SuggestedPrompts } from "./suggested-prompts";
-// export { SuggestionPills } from "./suggestion-pills";
