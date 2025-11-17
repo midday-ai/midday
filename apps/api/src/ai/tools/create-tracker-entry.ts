@@ -45,7 +45,7 @@ function parseDurationToSeconds(durationStr: string): number {
 
 export const createTrackerEntryTool = tool({
   description:
-    "Create a time entry for a tracker project. Supports finding projects by name and flexible duration formats. Use this when users want to add time entries like 'add 8h to acme inc'.",
+    "Create a time entry for a tracker project - supports finding projects by name and flexible duration formats.",
   inputSchema: createTrackerEntrySchema,
   execute: async function* (
     { projectName, projectId, duration, date, description },

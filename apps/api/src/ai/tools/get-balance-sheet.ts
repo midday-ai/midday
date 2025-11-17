@@ -24,7 +24,7 @@ const getBalanceSheetSchema = z.object({
 
 export const getBalanceSheetTool = tool({
   description:
-    "Generate a balance sheet showing assets, liabilities, and equity for a given period. Use this tool when users ask about balance sheet, assets, liabilities, equity, or financial position.",
+    "Generate balance sheet - shows assets, liabilities, and equity for a given period.",
   inputSchema: getBalanceSheetSchema,
   execute: async function* (
     { from, to, currency, showCanvas },

@@ -14,7 +14,7 @@ const stopTimerSchema = z.object({
 
 export const stopTimerTool = tool({
   description:
-    "Stop the current running timer. Calculates and saves the duration. Use this when users want to stop tracking time.",
+    "Stop the current running timer - calculates and saves the duration.",
   inputSchema: stopTimerSchema,
   execute: async function* ({ entryId, assignedId }, executionOptions) {
     const appContext = executionOptions.experimental_context as AppContext;

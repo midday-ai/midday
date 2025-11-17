@@ -1,3 +1,4 @@
+import { UTCDate } from "@date-fns/utc";
 import type { Database } from "@db/client";
 import {
   type activityTypeEnum,
@@ -13,7 +14,15 @@ import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { generateToken } from "@midday/invoice/token";
 import type { EditorDoc, LineItem } from "@midday/invoice/types";
 import camelcaseKeys from "camelcase-keys";
-import { addMonths } from "date-fns";
+import {
+  addMonths,
+  eachMonthOfInterval,
+  endOfMonth,
+  format,
+  parseISO,
+  startOfMonth,
+  subMonths,
+} from "date-fns";
 import {
   and,
   asc,
@@ -1111,4 +1120,258 @@ export async function getAverageInvoiceSize(
     .groupBy(invoices.currency);
 
   return result;
+}
+
+export type GetInvoicePaymentAnalysisParams = {
+  teamId: string;
+  from: string;
+  to: string;
+  currency?: string;
+};
+
+export type InvoicePaymentAnalysisResult = {
+  metrics: {
+    averageDaysToPay: number;
+    paymentRate: number;
+    overdueRate: number;
+    paymentScore: number;
+    totalInvoices: number;
+    paidInvoices: number;
+    unpaidInvoices: number;
+    overdueInvoices: number;
+    overdueAmount: number;
+  };
+  paymentTrends: Array<{
+    month: string;
+    averageDaysToPay: number;
+    paymentRate: number;
+    invoiceCount: number;
+  }>;
+  overdueSummary: {
+    count: number;
+    totalAmount: number;
+    oldestDays: number;
+  };
+};
+
+export async function getInvoicePaymentAnalysis(
+  db: Database,
+  params: GetInvoicePaymentAnalysisParams,
+): Promise<InvoicePaymentAnalysisResult> {
+  const { teamId, from, to, currency: inputCurrency } = params;
+
+  const fromDate = startOfMonth(new UTCDate(parseISO(from)));
+  const toDate = endOfMonth(new UTCDate(parseISO(to)));
+
+  // Get team's base currency
+  const [team] = await db
+    .select({ baseCurrency: teams.baseCurrency })
+    .from(teams)
+    .where(eq(teams.id, teamId))
+    .limit(1);
+
+  const targetCurrency = inputCurrency || team?.baseCurrency || "USD";
+
+  // Build base conditions
+  const baseConditions = [
+    eq(invoices.teamId, teamId),
+    gte(invoices.createdAt, format(fromDate, "yyyy-MM-dd")),
+    lte(invoices.createdAt, format(toDate, "yyyy-MM-dd")),
+  ];
+
+  if (inputCurrency) {
+    baseConditions.push(eq(invoices.currency, inputCurrency));
+  }
+
+  // Get all invoices in date range
+  const allInvoices = await db
+    .select({
+      id: invoices.id,
+      amount: invoices.amount,
+      currency: invoices.currency,
+      status: invoices.status,
+      dueDate: invoices.dueDate,
+      paidAt: invoices.paidAt,
+      createdAt: invoices.createdAt,
+      issueDate: invoices.issueDate,
+    })
+    .from(invoices)
+    .where(and(...baseConditions));
+
+  if (allInvoices.length === 0) {
+    return {
+      metrics: {
+        averageDaysToPay: 0,
+        paymentRate: 0,
+        overdueRate: 0,
+        paymentScore: 0,
+        totalInvoices: 0,
+        paidInvoices: 0,
+        unpaidInvoices: 0,
+        overdueInvoices: 0,
+        overdueAmount: 0,
+      },
+      paymentTrends: [],
+      overdueSummary: {
+        count: 0,
+        totalAmount: 0,
+        oldestDays: 0,
+      },
+    };
+  }
+
+  // Calculate metrics
+  const paidInvoices = allInvoices.filter((inv) => inv.status === "paid");
+  const unpaidInvoices = allInvoices.filter(
+    (inv) => inv.status === "unpaid" || inv.status === "overdue",
+  );
+  const overdueInvoices = allInvoices.filter(
+    (inv) =>
+      (inv.status === "overdue" ||
+        (inv.status === "unpaid" &&
+          inv.dueDate &&
+          new Date(inv.dueDate) < new Date())) &&
+      !inv.paidAt,
+  );
+
+  // Calculate average days to pay (from issue date or created date to paid date)
+  let totalDaysToPay = 0;
+  let paidCount = 0;
+
+  for (const invoice of paidInvoices) {
+    if (invoice.paidAt) {
+      const issueDate =
+        invoice.issueDate || invoice.createdAt || invoice.dueDate;
+      if (issueDate) {
+        const daysToPay =
+          (new Date(invoice.paidAt).getTime() - new Date(issueDate).getTime()) /
+          (1000 * 60 * 60 * 24);
+        if (daysToPay >= 0) {
+          totalDaysToPay += daysToPay;
+          paidCount++;
+        }
+      }
+    }
+  }
+
+  const averageDaysToPay =
+    paidCount > 0 ? Math.round(totalDaysToPay / paidCount) : 0;
+
+  // Calculate payment rate
+  const paymentRate =
+    allInvoices.length > 0
+      ? Math.round((paidInvoices.length / allInvoices.length) * 100)
+      : 0;
+
+  // Calculate overdue rate
+  const overdueRate =
+    allInvoices.length > 0
+      ? Math.round((overdueInvoices.length / allInvoices.length) * 100)
+      : 0;
+
+  // Calculate overdue amount (convert to target currency)
+  let overdueAmount = 0;
+  for (const invoice of overdueInvoices) {
+    const amount = Number(invoice.amount) || 0;
+    if (invoice.currency === targetCurrency) {
+      overdueAmount += amount;
+    } else {
+      // For simplicity, use amount as-is (could add currency conversion)
+      overdueAmount += amount;
+    }
+  }
+
+  // Calculate payment score (similar to getPaymentStatus logic)
+  let paymentScore = 100;
+  if (averageDaysToPay > 30) {
+    paymentScore = Math.max(0, 100 - (averageDaysToPay - 30) * 2);
+  } else if (averageDaysToPay > 14) {
+    paymentScore = 85 - ((averageDaysToPay - 14) / 16) * 25;
+  } else if (averageDaysToPay > 7) {
+    paymentScore = 100 - ((averageDaysToPay - 7) / 7) * 15;
+  }
+
+  // Adjust score based on overdue rate
+  paymentScore = Math.max(0, Math.min(100, paymentScore - overdueRate * 0.5));
+
+  // Calculate payment trends by month
+  const monthSeries = eachMonthOfInterval({ start: fromDate, end: toDate });
+  const paymentTrends = monthSeries.map((monthStart) => {
+    const monthEnd = endOfMonth(monthStart);
+    const monthStr = format(monthStart, "yyyy-MM");
+
+    const monthInvoices = allInvoices.filter((inv) => {
+      const invDate = inv.createdAt || inv.issueDate;
+      if (!invDate) return false;
+      const invDateObj = new Date(invDate);
+      return invDateObj >= monthStart && invDateObj <= monthEnd;
+    });
+
+    const monthPaid = monthInvoices.filter((inv) => inv.status === "paid");
+    let monthTotalDays = 0;
+    let monthPaidCount = 0;
+
+    for (const invoice of monthPaid) {
+      if (invoice.paidAt) {
+        const issueDate =
+          invoice.issueDate || invoice.createdAt || invoice.dueDate;
+        if (issueDate) {
+          const daysToPay =
+            (new Date(invoice.paidAt).getTime() -
+              new Date(issueDate).getTime()) /
+            (1000 * 60 * 60 * 24);
+          if (daysToPay >= 0) {
+            monthTotalDays += daysToPay;
+            monthPaidCount++;
+          }
+        }
+      }
+    }
+
+    const monthAvgDays =
+      monthPaidCount > 0 ? Math.round(monthTotalDays / monthPaidCount) : 0;
+    const monthPaymentRate =
+      monthInvoices.length > 0
+        ? Math.round((monthPaid.length / monthInvoices.length) * 100)
+        : 0;
+
+    return {
+      month: monthStr,
+      averageDaysToPay: monthAvgDays,
+      paymentRate: monthPaymentRate,
+      invoiceCount: monthInvoices.length,
+    };
+  });
+
+  // Calculate overdue summary
+  let oldestDays = 0;
+  const now = new Date();
+  for (const invoice of overdueInvoices) {
+    if (invoice.dueDate) {
+      const daysOverdue =
+        (now.getTime() - new Date(invoice.dueDate).getTime()) /
+        (1000 * 60 * 60 * 24);
+      oldestDays = Math.max(oldestDays, Math.round(daysOverdue));
+    }
+  }
+
+  return {
+    metrics: {
+      averageDaysToPay,
+      paymentRate,
+      overdueRate,
+      paymentScore: Math.round(paymentScore),
+      totalInvoices: allInvoices.length,
+      paidInvoices: paidInvoices.length,
+      unpaidInvoices: unpaidInvoices.length,
+      overdueInvoices: overdueInvoices.length,
+      overdueAmount: Math.round(overdueAmount * 100) / 100,
+    },
+    paymentTrends,
+    overdueSummary: {
+      count: overdueInvoices.length,
+      totalAmount: Math.round(overdueAmount * 100) / 100,
+      oldestDays,
+    },
+  };
 }

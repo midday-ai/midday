@@ -11,7 +11,7 @@ interface SourceItem {
 
 export const webSearchTool = tool({
   description:
-    "Search the web for current information, prices, news, and external data. Returns concise factual data for analysis.",
+    "Search the web for current information, prices, news, and external data.",
   inputSchema: z.object({
     query: z.string().describe("Search query"),
   }),

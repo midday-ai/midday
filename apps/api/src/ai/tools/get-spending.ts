@@ -30,7 +30,7 @@ const getSpendingSchema = z.object({
 
 export const getSpendingTool = tool({
   description:
-    "Analyze spending patterns for a given period. Provides spending totals, monthly trends, category breakdowns, and insights. Use this tool when users ask about spending, spending analysis, spending patterns, or expenses.",
+    "Analyze spending patterns with transaction details - shows spending totals, top transactions by amount, spending by category, and trends.",
   inputSchema: getSpendingSchema,
   execute: async function* (
     { from, to, currency, showCanvas },

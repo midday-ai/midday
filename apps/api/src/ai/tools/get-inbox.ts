@@ -38,7 +38,7 @@ const getInboxSchema = z.object({
 
 export const getInboxTool = tool({
   description:
-    "Retrieve and filter inbox items with pagination, sorting, and search capabilities. Use this tool when users ask about inbox items, want to see inbox lists, search for specific receipts or documents, or need inbox data for analysis.",
+    "Retrieve and filter inbox items with pagination, sorting, and search.",
   inputSchema: getInboxSchema,
   execute: async function* (
     { cursor, pageSize = 10, q, status, sort, order },

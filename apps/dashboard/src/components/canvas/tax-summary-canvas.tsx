@@ -2,7 +2,7 @@
 
 import { BaseCanvas } from "@/components/canvas/base";
 
-export function BalanceSheetCanvas() {
+export function TaxSummaryCanvas() {
   return (
     <BaseCanvas>
       <div className="space-y-4">
@@ -10,10 +10,10 @@ export function BalanceSheetCanvas() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Balance Sheet
+                Tax Summary
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Assets, liabilities, and equity overview
+                Tax liability, taxable income, and tax rates
               </p>
             </div>
           </div>
@@ -31,12 +31,12 @@ export function BalanceSheetCanvas() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={1.5}
-                  d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Balance sheet data will appear here
+              Tax summary data will appear here
             </p>
           </div>
         </div>

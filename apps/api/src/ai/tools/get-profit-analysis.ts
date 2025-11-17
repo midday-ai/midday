@@ -27,7 +27,7 @@ const getProfitAnalysisSchema = z.object({
 
 export const getProfitAnalysisTool = tool({
   description:
-    "Calculate and analyze profit (revenue minus expenses) for a given period. Provides profit totals, monthly trends, year-over-year comparisons, and insights. Use this tool when users ask about profit, profit analysis, P&L, profit trends, or profitability.",
+    "Calculate and analyze profit (revenue minus expenses) - shows profit totals, monthly trends, year-over-year comparisons, and margins.",
   inputSchema: getProfitAnalysisSchema,
   execute: async function* (
     { from, to, currency, showCanvas },

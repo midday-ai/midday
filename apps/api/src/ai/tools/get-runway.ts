@@ -26,7 +26,7 @@ const getRunwaySchema = z.object({
 
 export const getRunwayTool = tool({
   description:
-    "Calculate cash runway in months based on current account balance and average burn rate. Runway represents how many months the business can operate with current cash reserves at the current spending rate. Use this tool when users ask about cash runway, months of runway, financial runway, or how long they can operate with current cash.",
+    "Calculate cash runway in months - shows how many months the business can operate with current cash at current spending rate.",
   inputSchema: getRunwaySchema,
   execute: async function* (
     { from, to, currency, showCanvas },

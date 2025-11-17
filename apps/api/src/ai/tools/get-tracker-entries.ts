@@ -16,7 +16,7 @@ const getTrackerEntriesSchema = z.object({
 
 export const getTrackerEntriesTool = tool({
   description:
-    "Retrieve tracker entries (time entries) within a date range with optional filtering by project or user. Use this tool when users ask about time entries, want to see time tracking data, need to review logged hours, or analyze time spent on projects.",
+    "Retrieve tracker entries (time entries) within a date range with filtering by project or user.",
   inputSchema: getTrackerEntriesSchema,
   execute: async function* ({ from, to, projectId, userId }, executionOptions) {
     const appContext = executionOptions.experimental_context as AppContext;

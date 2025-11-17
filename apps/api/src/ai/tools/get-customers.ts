@@ -21,7 +21,7 @@ const getCustomersSchema = z.object({
 
 export const getCustomersTool = tool({
   description:
-    "Retrieve and filter customers with pagination, sorting, and search capabilities. Use this tool when users ask about customers, want to see customer lists, search for specific customers, or need customer data for analysis.",
+    "Retrieve and filter customers with pagination, sorting, and search.",
   inputSchema: getCustomersSchema,
   execute: async function* (
     { cursor, sort, pageSize = 10, q, tags },

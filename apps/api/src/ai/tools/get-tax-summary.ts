@@ -24,7 +24,7 @@ const getTaxSummarySchema = z.object({
 
 export const getTaxSummaryTool = tool({
   description:
-    "Generate a tax summary showing tax liability, taxable income, and tax rates for a given period. Use this tool when users ask about taxes, tax summary, tax liability, taxable income, or tax planning.",
+    "Generate tax summary - shows tax liability, taxable income, and tax rates for a given period.",
   inputSchema: getTaxSummarySchema,
   execute: async function* (
     { from, to, currency, showCanvas },

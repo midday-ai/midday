@@ -24,7 +24,7 @@ const getExpensesSchema = z.object({
 
 export const getExpensesTool = tool({
   description:
-    "Analyze expenses by category for a given period. Provides expense totals, category breakdowns, monthly trends, and insights. Use this tool when users ask about expenses, expense analysis, expense breakdown, or cost analysis.",
+    "Analyze expenses by category - shows expense totals grouped by category with percentages and monthly trends.",
   inputSchema: getExpensesSchema,
   execute: async function* (
     { from, to, currency, showCanvas },

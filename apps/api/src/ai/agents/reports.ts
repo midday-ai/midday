@@ -8,6 +8,7 @@ import { getBalanceSheetTool } from "@api/ai/tools/get-balance-sheet";
 import { getBurnRateTool } from "@api/ai/tools/get-burn-rate";
 import { getCashFlowTool } from "@api/ai/tools/get-cash-flow";
 import { getExpensesTool } from "@api/ai/tools/get-expenses";
+import { getInvoicePaymentAnalysisTool } from "@api/ai/tools/get-invoice-payment-analysis";
 import { getProfitAnalysisTool } from "@api/ai/tools/get-profit-analysis";
 import { getRevenueSummaryTool } from "@api/ai/tools/get-revenue-summary";
 import { getRunwayTool } from "@api/ai/tools/get-runway";
@@ -41,6 +42,8 @@ ${COMMON_AGENT_RULES}
 - For "show spending this month" or similar requests with "show", use getSpending with showCanvas: true
 - For "burn rate", "burn rate analysis" requests, use the getBurnRate tool
 - For "show burn rate", "burn rate visual analytics", "visual burn rate" or similar requests with "show"/"visual", use getBurnRate with showCanvas: true
+- For "invoice payment", "payment analysis", "how quickly do customers pay", "average days to pay", "overdue invoices" requests, use the getInvoicePaymentAnalysis tool
+- For "show invoice payment analysis" or similar requests with "show"/"visual", use getInvoicePaymentAnalysis with showCanvas: true
 - When providing text responses for financial data, mention that visual reports are available (e.g., "You can also ask for a visual balance sheet report")
 - Use only ONE tool per query - don't call multiple similar tools
 </guidelines>
@@ -63,6 +66,7 @@ Provide concise, natural financial reports with:
     getExpenses: getExpensesTool,
     getTaxSummary: getTaxSummaryTool,
     getBurnRate: getBurnRateTool,
+    getInvoicePaymentAnalysis: getInvoicePaymentAnalysisTool,
   },
   maxTurns: 5,
 });

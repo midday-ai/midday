@@ -32,7 +32,7 @@ const getCashFlowSchema = z.object({
 
 export const getCashFlowTool = tool({
   description:
-    "Calculate net cash flow (income minus expenses) for a given period. Net cash flow represents the total money coming in minus money going out. Use this tool when users ask about cash flow, net cash position, cash movement, or income vs expenses.",
+    "Calculate net cash flow (income minus expenses) - shows net money flowing in/out with monthly trends.",
   inputSchema: getCashFlowSchema,
   execute: async function* (
     { from, to, currency, period, showCanvas },

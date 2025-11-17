@@ -17,7 +17,7 @@ const getDocumentsSchema = z.object({
 
 export const getDocumentsTool = tool({
   description:
-    "Retrieve and filter documents with pagination, sorting, and search capabilities. Use this tool when users ask about documents, want to see document lists, search for specific documents, or need document data for analysis.",
+    "Retrieve and filter documents with pagination, sorting, and search.",
   inputSchema: getDocumentsSchema,
   execute: async function* (
     { cursor, pageSize = 10, q, tags, start, end },

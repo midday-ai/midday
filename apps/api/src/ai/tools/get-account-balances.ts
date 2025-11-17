@@ -15,7 +15,7 @@ const getAccountBalancesSchema = z.object({
 
 export const getAccountBalancesTool = tool({
   description:
-    "Get account balances for all bank accounts. Returns combined total balance in base currency and individual account balances in their native currencies. Use this tool when users ask about account balances, total cash, available funds, or account details.",
+    "Get account balances for all bank accounts - returns combined total balance and individual account balances.",
   inputSchema: getAccountBalancesSchema,
   execute: async function* ({ currency }, executionOptions) {
     const appContext = executionOptions.experimental_context as AppContext;

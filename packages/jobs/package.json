@@ -11,7 +11,7 @@
     "./schema": "./src/schema.ts"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.31",
+    "@ai-sdk/google": "^2.0.33",
     "@fast-csv/format": "5.0.5",
     "@midday/db": "workspace:*",
     "@midday/email": "workspace:*",
@@ -21,12 +21,12 @@
     "@midday/supabase": "workspace:*",
     "@sindresorhus/slugify": "^3.0.0",
     "@zip.js/zip.js": "^2.8.10",
-    "ai": "5.0.87",
+    "ai": "5.0.93",
     "camelcase-keys": "^10.0.1",
     "heic-convert": "1.2.4",
     "node-xlsx": "^0.24.0",
-    "sharp": "0.34.4",
-    "trigger.dev": "4.0.7",
+    "sharp": "0.34.5",
+    "trigger.dev": "4.1.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {

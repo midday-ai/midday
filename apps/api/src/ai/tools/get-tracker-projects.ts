@@ -30,7 +30,7 @@ const getTrackerProjectsSchema = z.object({
 
 export const getTrackerProjectsTool = tool({
   description:
-    "Retrieve and filter tracker projects with pagination, sorting, and search capabilities. Use this tool when users ask about projects, want to see project lists, search for specific projects, or need project data for analysis.",
+    "Retrieve and filter tracker projects with pagination, sorting, and search.",
   inputSchema: getTrackerProjectsSchema,
   execute: async function* (
     { cursor, sort, pageSize = 10, q, start, end, status, customers, tags },

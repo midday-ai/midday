@@ -15,7 +15,7 @@ const startTimerSchema = z.object({
 
 export const startTimerTool = tool({
   description:
-    "Start a timer for a tracker project. This will stop any currently running timer for the user and start a new one. Use this when users want to start tracking time on a project.",
+    "Start timer for a tracker project - stops any running timer and starts a new one.",
   inputSchema: startTimerSchema,
   execute: async function* (
     { projectName, projectId, description, assignedId },

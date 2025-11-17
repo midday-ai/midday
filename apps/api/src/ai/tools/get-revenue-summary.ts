@@ -28,7 +28,7 @@ const getRevenueSummarySchema = z.object({
 
 export const getRevenueSummaryTool = tool({
   description:
-    "Calculate and analyze revenue for a given period. Provides revenue totals, monthly trends, year-over-year comparisons, and insights. Use this tool when users ask about revenue, revenue analysis, revenue trends, sales, or income.",
+    "Calculate and analyze revenue (income/sales) - shows revenue totals, monthly trends, year-over-year comparisons, and growth rates.",
   inputSchema: getRevenueSummarySchema,
   execute: async function* (
     { from, to, currency, revenueType, showCanvas },

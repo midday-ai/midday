@@ -3,12 +3,16 @@ import { BalanceSheetCanvas } from "./balance-sheet-canvas";
 import { BurnRateCanvas } from "./burn-rate-canvas";
 import { CashFlowCanvas } from "./cash-flow-canvas";
 import { CategoryExpensesCanvas } from "./category-expenses-canvas";
+import { ForecastCanvas } from "./forecast-canvas";
 import { HealthReportCanvas } from "./health-report-canvas";
+import { InvoicePaymentCanvas } from "./invoice-payment-canvas";
 import { ProfitAnalysisCanvas } from "./profit-analysis-canvas";
 import { ProfitCanvas } from "./profit-canvas";
 import { RevenueCanvas } from "./revenue-canvas";
 import { RunwayCanvas } from "./runway-canvas";
 import { SpendingCanvas } from "./spending-canvas";
+import { StressTestCanvas } from "./stress-test-canvas";
+import { TaxSummaryCanvas } from "./tax-summary-canvas";
 
 export function Canvas() {
   const { current } = useArtifacts({
@@ -36,6 +40,14 @@ export function Canvas() {
       return <ProfitAnalysisCanvas />;
     case "spending-canvas":
       return <SpendingCanvas />;
+    case "forecast-canvas":
+      return <ForecastCanvas />;
+    case "tax-summary-canvas":
+      return <TaxSummaryCanvas />;
+    case "stress-test-canvas":
+      return <StressTestCanvas />;
+    case "invoice-payment-canvas":
+      return <InvoicePaymentCanvas />;
     default:
       return null;
   }

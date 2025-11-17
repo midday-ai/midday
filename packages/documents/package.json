@@ -18,16 +18,16 @@
     "test": "bun test src"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.31",
+    "@ai-sdk/google": "^2.0.33",
     "@ai-sdk/mistral": "^2.0.24",
-    "@langchain/community": "1.0.2",
-    "@langchain/core": "1.0.4",
+    "@langchain/community": "1.0.3",
+    "@langchain/core": "1.0.5",
     "@midday/utils": "workspace:*",
     "@mistralai/mistralai": "^1.10.0",
-    "ai": "5.0.87",
+    "ai": "5.0.93",
     "canvas": "^3.2.0",
     "mammoth": "^1.11.0",
-    "officeparser": "5.2.1",
+    "officeparser": "5.2.2",
     "unpdf": "^1.4.0",
     "zod": "^4.1.12"
   },

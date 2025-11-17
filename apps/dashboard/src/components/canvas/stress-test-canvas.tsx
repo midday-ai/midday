@@ -2,7 +2,7 @@
 
 import { BaseCanvas } from "@/components/canvas/base";
 
-export function BalanceSheetCanvas() {
+export function StressTestCanvas() {
   return (
     <BaseCanvas>
       <div className="space-y-4">
@@ -10,10 +10,10 @@ export function BalanceSheetCanvas() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Balance Sheet
+                Cash Flow Stress Test
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Assets, liabilities, and equity overview
+                Scenario analysis and financial resilience
               </p>
             </div>
           </div>
@@ -31,12 +31,12 @@ export function BalanceSheetCanvas() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={1.5}
-                  d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
                 />
               </svg>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Balance sheet data will appear here
+              Stress test data will appear here
             </p>
           </div>
         </div>

@@ -75,7 +75,7 @@ const getTransactionsSchema = z.object({
 
 export const getTransactionsTool = tool({
   description:
-    "Retrieve and analyze financial transactions with advanced filtering, search, and sorting capabilities. Use this tool when users ask about specific transactions, want to see recent activity, search for particular payments, or need transaction data for analysis.",
+    "Retrieve financial transactions with filtering, search, and sorting.",
   inputSchema: getTransactionsSchema,
   execute: async function* (
     {

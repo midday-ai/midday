@@ -13,7 +13,7 @@ const getBankAccountsSchema = z.object({
 
 export const getBankAccountsTool = tool({
   description:
-    "Retrieve bank accounts with optional filtering by enabled status and manual flag. Use this tool when users ask about bank accounts, want to see account lists, check account status, or need account information.",
+    "Retrieve bank accounts with filtering by enabled status and manual flag.",
   inputSchema: getBankAccountsSchema,
   execute: async function* ({ enabled, manual }, executionOptions) {
     const appContext = executionOptions.experimental_context as AppContext;

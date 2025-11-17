@@ -24,7 +24,7 @@ const getBusinessHealthScoreSchema = z.object({
 
 export const getBusinessHealthScoreTool = tool({
   description:
-    "Calculate business health score based on multiple financial metrics including revenue, expenses, cash flow, and profitability. Provides an overall health score and breakdown by category. Use this tool when users ask about business health, financial health, business score, or overall financial performance.",
+    "Calculate business health score (0-100) - composite score based on revenue, expenses, cash flow, and profitability metrics.",
   inputSchema: getBusinessHealthScoreSchema,
   execute: async function* (
     { from, to, currency, showCanvas },

@@ -24,7 +24,7 @@ const getCashFlowStressTestSchema = z.object({
 
 export const getCashFlowStressTestTool = tool({
   description:
-    "Perform cash flow stress testing by analyzing different scenarios (base case, worst case, best case) to determine financial resilience. Use this tool when users ask about stress testing, financial resilience, worst case scenarios, or cash flow scenarios.",
+    "Perform cash flow stress testing - analyzes base case, worst case, and best case scenarios to assess financial resilience.",
   inputSchema: getCashFlowStressTestSchema,
   execute: async function* (
     { from, to, currency, showCanvas },

@@ -30,7 +30,7 @@ const getInvoicesSchema = z.object({
 
 export const getInvoicesTool = tool({
   description:
-    "Retrieve and filter invoices with pagination, sorting, and search capabilities. Use this tool when users ask about invoices, want to see invoice lists, search for specific invoices, track payments, or monitor overdue accounts.",
+    "Retrieve and filter invoices with pagination, sorting, and search.",
   inputSchema: getInvoicesSchema,
   execute: async function* (
     { cursor, sort, pageSize = 10, q, start, end, statuses, customers },
