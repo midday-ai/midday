@@ -50,7 +50,7 @@
     "@trigger.dev/sdk": "4.1.0",
     "@trpc/client": "^11.7.1",
     "@trpc/tanstack-react-query": "^11.7.1",
-    "ai": "5.0.93",
+    "ai": "5.0.87",
     "change-case": "^5.4.4",
     "date-fns": "^4.1.0",
     "file-saver": "^2.0.5",

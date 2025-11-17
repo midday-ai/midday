@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "zod": "^4.1.12",
-    "ai": "5.0.93",
+    "ai": "5.0.87",
     "@ai-sdk/google": "^2.0.33",
     "@midday/logger": "workspace:*"
   },
