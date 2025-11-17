@@ -4,7 +4,7 @@
   "github": {
     "enabled": false
   },
-  "regions": ["fra1", "iad1", "sfo1"],
+  "regions": ["fra1"],
   "headers": [
     {
       "source": "/_next/static/:path*",
