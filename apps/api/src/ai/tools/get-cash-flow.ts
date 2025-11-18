@@ -1,14 +1,13 @@
 import { getWriter } from "@ai-sdk-tools/artifacts";
+import { openai } from "@ai-sdk/openai";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { cashFlowArtifact } from "@api/ai/artifacts/cash-flow";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
 import { db } from "@midday/db/client";
 import { getCashFlow } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
-import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import { tool } from "ai";
-import { format } from "date-fns";
 import { z } from "zod";
 
 const getCashFlowSchema = z.object({
