@@ -3,7 +3,9 @@ import { triggerMatchingNotification } from "@jobs/utils/inbox-matching-notifica
 import {
   calculateInboxSuggestions,
   getPendingInboxForMatching,
-  updateInbox,
+  getTransactionById,
+  hasSuggestion,
+  matchTransaction,
 } from "@midday/db/queries";
 import { findInboxMatches } from "@midday/db/queries";
 import { logger, schemaTask } from "@trigger.dev/sdk";
@@ -45,11 +47,10 @@ export const matchTransactionsBidirectional = schemaTask({
 
           if (shouldAutoMatch) {
             // Auto-match the transaction to inbox
-            await updateInbox(db, {
+            await matchTransaction(db, {
               id: inboxMatch.inboxId,
               teamId,
-              status: "done",
-              transactionId: transactionId,
+              transactionId,
             });
 
             forwardMatchCount++;
@@ -62,23 +63,36 @@ export const matchTransactionsBidirectional = schemaTask({
             });
 
             // Send notification for auto-match
-            await triggerMatchingNotification({
-              db,
+            // Get transaction data to create complete MatchResult
+            const transaction = await getTransactionById(db, {
+              id: transactionId,
               teamId,
-              inboxId: inboxMatch.inboxId,
-              result: {
-                action: "auto_matched",
-                suggestion: {
-                  transactionId,
-                  confidenceScore: inboxMatch.confidenceScore,
-                  matchType: "auto_matched",
-                  amountScore: inboxMatch.amountScore,
-                  currencyScore: inboxMatch.currencyScore,
-                  dateScore: inboxMatch.dateScore,
-                  embeddingScore: inboxMatch.embeddingScore,
-                },
-              },
             });
+
+            if (transaction) {
+              await triggerMatchingNotification({
+                db,
+                teamId,
+                inboxId: inboxMatch.inboxId,
+                result: {
+                  action: "auto_matched",
+                  suggestion: {
+                    transactionId,
+                    name: transaction.name,
+                    amount: transaction.amount,
+                    currency: transaction.currency,
+                    date: transaction.date,
+                    confidenceScore: inboxMatch.confidenceScore,
+                    matchType: "auto_matched",
+                    amountScore: inboxMatch.amountScore,
+                    currencyScore: inboxMatch.currencyScore,
+                    dateScore: inboxMatch.dateScore,
+                    embeddingScore: inboxMatch.embeddingScore,
+                    isAlreadyMatched: false,
+                  },
+                },
+              });
+            }
           } else {
             // Create suggestion for manual review
             forwardSuggestionCount++;
@@ -138,12 +152,14 @@ export const matchTransactionsBidirectional = schemaTask({
             });
 
             // Send notifications based on matching result
-            if (result.action !== "no_match_yet" && result.suggestion) {
+            if (hasSuggestion(result)) {
+              // Type guard narrows the type here
+              const resultWithSuggestion = result;
               await triggerMatchingNotification({
                 db,
                 teamId,
                 inboxId: inboxItem.id,
-                result,
+                result: resultWithSuggestion,
               });
             }
 

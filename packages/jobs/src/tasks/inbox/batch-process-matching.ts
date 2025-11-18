@@ -1,6 +1,6 @@
 import { getDb } from "@jobs/init";
 import { triggerMatchingNotification } from "@jobs/utils/inbox-matching-notifications";
-import { calculateInboxSuggestions } from "@midday/db/queries";
+import { calculateInboxSuggestions, hasSuggestion } from "@midday/db/queries";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 
@@ -40,7 +40,7 @@ export const batchProcessMatching = schemaTask({
             });
 
             // Send notifications based on matching result
-            if (result.action !== "no_match_yet" && result.suggestion) {
+            if (hasSuggestion(result)) {
               await triggerMatchingNotification({
                 db,
                 teamId,
@@ -52,21 +52,23 @@ export const batchProcessMatching = schemaTask({
             switch (result.action) {
               case "auto_matched":
                 autoMatchCount++;
+                // suggestion is guaranteed to exist when action is "auto_matched"
                 logger.info("Auto-matched inbox item", {
                   teamId,
                   inboxId,
-                  transactionId: result.suggestion?.transactionId,
-                  confidence: result.suggestion?.confidenceScore,
+                  transactionId: result.suggestion!.transactionId,
+                  confidence: result.suggestion!.confidenceScore,
                 });
                 break;
 
               case "suggestion_created":
                 suggestionCount++;
+                // suggestion is guaranteed to exist when action is "suggestion_created"
                 logger.info("Created match suggestion", {
                   teamId,
                   inboxId,
-                  transactionId: result.suggestion?.transactionId,
-                  confidence: result.suggestion?.confidenceScore,
+                  transactionId: result.suggestion!.transactionId,
+                  confidence: result.suggestion!.confidenceScore,
                 });
                 break;
 
