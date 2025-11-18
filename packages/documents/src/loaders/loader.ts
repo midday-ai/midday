@@ -1,7 +1,7 @@
+import { TextLoader } from "@langchain/classic/document_loaders/fs/text";
 import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
 import { PPTXLoader } from "@langchain/community/document_loaders/fs/pptx";
 import { Mistral } from "@mistralai/mistralai";
-import { TextLoader } from "langchain/document_loaders/fs/text";
 import { parseOfficeAsync } from "officeparser";
 import { extractText, getDocumentProxy } from "unpdf";
 import { cleanText, extractTextFromRtf } from "../utils";
