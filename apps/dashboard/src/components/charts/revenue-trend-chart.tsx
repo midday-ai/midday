@@ -13,19 +13,15 @@ import {
 } from "recharts";
 import { createCompactTickFormatter, useChartMargin } from "./chart-utils";
 
-interface ProfitData {
+interface RevenueTrendData {
   month: string;
-  profit: number;
-  lastYearProfit: number;
+  revenue: number;
+  lastYearRevenue: number;
   average: number;
-  revenue?: number;
-  expenses?: number;
-  lastYearRevenue?: number;
-  lastYearExpenses?: number;
 }
 
-interface ProfitChartProps {
-  data: ProfitData[];
+interface RevenueTrendChartProps {
+  data: RevenueTrendData[];
   height?: number;
   showLegend?: boolean;
   currency?: string;
@@ -41,8 +37,9 @@ const CustomTooltip = ({
   locale,
 }: any) => {
   if (active && Array.isArray(payload) && payload.length > 0) {
-    const thisYear = payload.find((p) => p.dataKey === "profit")?.value;
-    const lastYear = payload.find((p) => p.dataKey === "lastYearProfit")?.value;
+    const thisYear = payload.find((p) => p.dataKey === "revenue")?.value;
+    const lastYear = payload.find((p) => p.dataKey === "lastYearRevenue")
+      ?.value;
     const average = payload.find((p) => p.dataKey === "average")?.value;
 
     // Format amounts using proper currency formatting
@@ -78,17 +75,17 @@ const CustomTooltip = ({
   return null;
 };
 
-export function ProfitChart({
+export function RevenueTrendChart({
   data,
   height = 320,
   currency = "USD",
   locale,
-}: ProfitChartProps) {
+}: RevenueTrendChartProps) {
   // Use the compact tick formatter
   const tickFormatter = createCompactTickFormatter();
 
   // Calculate margin using the utility hook
-  const { marginLeft } = useChartMargin(data, "profit", tickFormatter);
+  const { marginLeft } = useChartMargin(data, "revenue", tickFormatter);
 
   return (
     <div className="w-full">
@@ -125,17 +122,17 @@ export function ProfitChart({
                 className: "dark:fill-[#666666]",
               }}
               tickFormatter={tickFormatter}
-              dataKey="profit"
+              dataKey="revenue"
             />
             <Tooltip
               content={<CustomTooltip currency={currency} locale={locale} />}
               wrapperStyle={{ zIndex: 9999 }}
             />
             {/* This Year bars (white in dark mode) */}
-            <Bar dataKey="profit" fill="white" isAnimationActive={false} />
+            <Bar dataKey="revenue" fill="white" isAnimationActive={false} />
             {/* Last Year bars (dark gray in dark mode with 0.3 opacity) */}
             <Bar
-              dataKey="lastYearProfit"
+              dataKey="lastYearRevenue"
               fill="#6666664D"
               isAnimationActive={false}
             />
@@ -155,3 +152,4 @@ export function ProfitChart({
     </div>
   );
 }
+

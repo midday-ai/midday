@@ -1,36 +1,111 @@
 "use client";
 
-import { BaseCanvas } from "@/components/canvas/base";
-import { RunwayChart } from "../charts";
+import {
+  BaseCanvas,
+  CanvasGrid,
+  CanvasHeader,
+  CanvasSection,
+} from "@/components/canvas/base";
+import { CanvasContent } from "@/components/canvas/base/canvas-content";
+import { useUserQuery } from "@/hooks/use-user";
+import { formatAmount } from "@/utils/format";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { runwayArtifact } from "@api/ai/artifacts/runway";
 
 export function RunwayCanvas() {
-  // Generate sample runway data
-  const runwayData = Array.from({ length: 12 }, (_, i) => ({
-    month: new Date(2024, i).toLocaleDateString("en-US", { month: "short" }),
-    cashRemaining: Math.max(0, 200000 - i * 15000 + Math.random() * 10000),
-    burnRate: Math.floor(Math.random() * 5000) + 12000,
-    projectedCash: Math.max(0, 180000 - i * 18000),
-  }));
+  const { data, status } = useArtifact(runwayArtifact);
+  const { data: user } = useUserQuery();
+
+  const isLoading = status === "loading";
+  const stage = data?.stage;
+
+  const metrics = data?.metrics;
+  const statusValue = metrics?.status;
+
+  // Build metrics array with status indicator
+  const runwayMetrics = metrics
+    ? [
+        {
+          id: "current-runway",
+          title: "Cash Runway",
+          value: `${metrics.currentRunway || 0} months`,
+          subtitle:
+            statusValue === "healthy"
+              ? "Healthy (12+ months)"
+              : statusValue === "concerning"
+                ? "Concerning (6-11 months)"
+                : statusValue === "critical"
+                  ? "Critical (<6 months)"
+                  : stage === "loading"
+                    ? "Loading..."
+                    : "No data",
+        },
+        {
+          id: "cash-balance",
+          title: "Cash Balance",
+          value:
+            formatAmount({
+              currency: data.currency,
+              amount: metrics.cashBalance || 0,
+              locale: user?.locale,
+            }) || "$0",
+          subtitle: "Current available cash",
+        },
+        {
+          id: "average-burn-rate",
+          title: "Average Burn Rate",
+          value:
+            formatAmount({
+              currency: data.currency,
+              amount: metrics.averageBurnRate || 0,
+              locale: user?.locale,
+            }) || "$0",
+          subtitle: "Monthly spending average",
+        },
+        {
+          id: "status",
+          title: "Status",
+          value:
+            statusValue === "healthy"
+              ? "Healthy"
+              : statusValue === "concerning"
+                ? "Concerning"
+                : statusValue === "critical"
+                  ? "Critical"
+                  : "Unknown",
+          subtitle:
+            statusValue === "healthy"
+              ? "Sufficient cash reserves"
+              : statusValue === "concerning"
+                ? "Monitor closely"
+                : statusValue === "critical"
+                  ? "Take immediate action"
+                  : "No status available",
+        },
+      ]
+    : [];
+
+  const showSummarySkeleton = !stage || stage !== "analysis_ready";
 
   return (
     <BaseCanvas>
-      <div className="space-y-4">
-        <div className="border-b border-gray-200 dark:border-gray-800 pb-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Cash Runway Analysis
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Cash remaining over time with projections and critical thresholds
-          </p>
-        </div>
-        <div className="h-96">
-          <RunwayChart
-            data={runwayData}
-            showAnimation={true}
-            showProjection={true}
+      <CanvasHeader title="Cash Runway" isLoading={isLoading} />
+
+      <CanvasContent>
+        <div className="space-y-8">
+          {/* Always show metrics section */}
+          <CanvasGrid
+            items={runwayMetrics}
+            layout="2/2"
+            isLoading={stage === "loading" || stage === "chart_ready"}
           />
+
+          {/* Always show summary section */}
+          <CanvasSection title="Summary" isLoading={showSummarySkeleton}>
+            {data?.analysis?.summary}
+          </CanvasSection>
         </div>
-      </div>
+      </CanvasContent>
     </BaseCanvas>
   );
 }

@@ -1,6 +1,13 @@
 import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { cashFlowStressTestArtifact } from "@api/ai/artifacts/cash-flow-stress-test";
+import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { db } from "@midday/db/client";
+import {
+  getBurnRate,
+  getCashFlow,
+  getCombinedAccountBalance,
+} from "@midday/db/queries";
 import { tool } from "ai";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { z } from "zod";
@@ -46,6 +53,11 @@ export const getCashFlowStressTestTool = tool({
     }
 
     try {
+      // Use fiscal year-aware defaults if dates not provided
+      const defaultDates = getToolDateDefaults(appContext.fiscalYearStartMonth);
+      const finalFrom = from ?? defaultDates.from;
+      const finalTo = to ?? defaultDates.to;
+
       // Initialize artifact only if showCanvas is true
       let analysis:
         | ReturnType<typeof cashFlowStressTestArtifact.stream>
@@ -61,40 +73,308 @@ export const getCashFlowStressTestTool = tool({
         );
       }
 
-      // TODO: Implement actual data fetching
-      // For now, return empty data
       const targetCurrency = currency || appContext.baseCurrency || "USD";
+      const locale = appContext.locale || "en-US";
 
-      // Update artifact with dummy data if showCanvas is true
+      // Fetch required data in parallel
+      const [cashFlowData, balanceResult, burnRateData] = await Promise.all([
+        getCashFlow(db, {
+          teamId,
+          from: finalFrom,
+          to: finalTo,
+          currency: currency ?? undefined,
+          period: "monthly",
+        }),
+        getCombinedAccountBalance(db, {
+          teamId,
+          currency: currency ?? undefined,
+        }),
+        getBurnRate(db, {
+          teamId,
+          from: finalFrom,
+          to: finalTo,
+          currency: currency ?? undefined,
+        }),
+      ]);
+
+      // Get current cash balance
+      const currentCashBalance = balanceResult.totalBalance || 0;
+
+      // Calculate average monthly income and expenses from cash flow data
+      const monthlyData = cashFlowData.monthlyData || [];
+      const averageMonthlyIncome =
+        monthlyData.length > 0
+          ? monthlyData.reduce((sum, item) => sum + item.income, 0) /
+            monthlyData.length
+          : 0;
+      const averageMonthlyExpenses =
+        monthlyData.length > 0
+          ? monthlyData.reduce((sum, item) => sum + item.expenses, 0) /
+            monthlyData.length
+          : 0;
+      const averageMonthlyCashFlow =
+        averageMonthlyIncome - averageMonthlyExpenses;
+
+      // Calculate average monthly burn rate (expenses)
+      const averageBurnRate =
+        burnRateData.length > 0
+          ? burnRateData.reduce((sum, item) => sum + Number(item.value), 0) /
+            burnRateData.length
+          : averageMonthlyExpenses;
+
+      // Scenario definitions
+      const scenarios = [
+        {
+          name: "Base Case",
+          revenueMultiplier: 1.0,
+          expenseMultiplier: 1.0,
+          revenueAdjustment: 0,
+          expenseAdjustment: 0,
+        },
+        {
+          name: "Worst Case",
+          revenueMultiplier: 0.7, // -30% revenue
+          expenseMultiplier: 1.2, // +20% expenses
+          revenueAdjustment: -30,
+          expenseAdjustment: 20,
+        },
+        {
+          name: "Best Case",
+          revenueMultiplier: 1.2, // +20% revenue
+          expenseMultiplier: 0.9, // -10% expenses
+          revenueAdjustment: 20,
+          expenseAdjustment: -10,
+        },
+      ];
+
+      // Calculate scenarios
+      const scenarioResults = scenarios.map((scenario) => {
+        const adjustedMonthlyIncome =
+          averageMonthlyIncome * scenario.revenueMultiplier;
+        const adjustedMonthlyExpenses =
+          averageMonthlyExpenses * scenario.expenseMultiplier;
+        const adjustedMonthlyCashFlow =
+          adjustedMonthlyIncome - adjustedMonthlyExpenses;
+        const adjustedMonthlyBurnRate = adjustedMonthlyExpenses;
+
+        // Calculate runway (months until cash runs out)
+        // If cash flow is positive, runway is effectively infinite (set to large number)
+        let runway: number;
+        if (adjustedMonthlyCashFlow >= 0) {
+          // Positive cash flow - runway is effectively infinite
+          runway = 999; // Use large number to represent infinite
+        } else if (adjustedMonthlyBurnRate === 0) {
+          runway = 0;
+        } else {
+          // Negative cash flow - calculate months until cash runs out
+          runway = Math.max(0, currentCashBalance / adjustedMonthlyBurnRate);
+        }
+
+        // Determine status
+        let status: "healthy" | "concerning" | "critical";
+        if (runway >= 12 || runway >= 999) {
+          status = "healthy";
+        } else if (runway >= 6) {
+          status = "concerning";
+        } else {
+          status = "critical";
+        }
+
+        return {
+          scenario: scenario.name,
+          months: Math.round(runway * 10) / 10, // Round to 1 decimal
+          cashFlow: adjustedMonthlyCashFlow,
+          status,
+          revenueAdjustment: scenario.revenueAdjustment,
+          expenseAdjustment: scenario.expenseAdjustment,
+          adjustedMonthlyIncome,
+          adjustedMonthlyExpenses,
+          adjustedMonthlyBurnRate,
+        };
+      });
+
+      // Project cash balance over time (up to 24 months or until zero)
+      const projectionMonths: Array<{
+        month: number;
+        baseCase: number;
+        worstCase: number;
+        bestCase: number;
+      }> = [];
+
+      if (scenarioResults.length < 3) {
+        throw new Error("Failed to calculate scenario results");
+      }
+
+      const baseCaseResult = scenarioResults[0]!;
+      const worstCaseResult = scenarioResults[1]!;
+      const bestCaseResult = scenarioResults[2]!;
+
+      const maxMonths = 24;
+      for (let month = 0; month <= maxMonths; month++) {
+        // Base case projection
+        let baseCaseBalance = currentCashBalance;
+        if (baseCaseResult.cashFlow < 0) {
+          baseCaseBalance = Math.max(
+            0,
+            currentCashBalance + baseCaseResult.cashFlow * month,
+          );
+        } else {
+          baseCaseBalance =
+            currentCashBalance + baseCaseResult.cashFlow * month;
+        }
+
+        // Worst case projection
+        let worstCaseBalance = currentCashBalance;
+        if (worstCaseResult.cashFlow < 0) {
+          worstCaseBalance = Math.max(
+            0,
+            currentCashBalance + worstCaseResult.cashFlow * month,
+          );
+        } else {
+          worstCaseBalance =
+            currentCashBalance + worstCaseResult.cashFlow * month;
+        }
+
+        // Best case projection
+        let bestCaseBalance = currentCashBalance;
+        if (bestCaseResult.cashFlow < 0) {
+          bestCaseBalance = Math.max(
+            0,
+            currentCashBalance + bestCaseResult.cashFlow * month,
+          );
+        } else {
+          bestCaseBalance =
+            currentCashBalance + bestCaseResult.cashFlow * month;
+        }
+
+        projectionMonths.push({
+          month,
+          baseCase: Math.round(baseCaseBalance * 100) / 100,
+          worstCase: Math.round(worstCaseBalance * 100) / 100,
+          bestCase: Math.round(bestCaseBalance * 100) / 100,
+        });
+
+        // Stop if all scenarios reach zero (optimization)
+        if (
+          baseCaseBalance <= 0 &&
+          worstCaseBalance <= 0 &&
+          bestCaseBalance <= 0
+        ) {
+          break;
+        }
+      }
+
+      // Extract runway values
+      const baseCaseRunway = baseCaseResult.months;
+      const worstCaseRunway = worstCaseResult.months;
+      const bestCaseRunway = bestCaseResult.months;
+
+      // Calculate stress test score based on worst-case runway
+      // 0-3 months = 0-30 (critical)
+      // 3-6 months = 31-60 (concerning)
+      // 6-12 months = 61-80 (healthy)
+      // 12+ months = 81-100 (excellent)
+      let stressTestScore: number;
+      if (worstCaseRunway >= 999) {
+        stressTestScore = 100; // Infinite runway
+      } else if (worstCaseRunway >= 12) {
+        stressTestScore = Math.min(100, 80 + (worstCaseRunway - 12) * 1.67); // 80-100 for 12+ months
+      } else if (worstCaseRunway >= 6) {
+        stressTestScore = 60 + ((worstCaseRunway - 6) / 6) * 20; // 60-80 for 6-12 months
+      } else if (worstCaseRunway >= 3) {
+        stressTestScore = 30 + ((worstCaseRunway - 3) / 3) * 30; // 30-60 for 3-6 months
+      } else {
+        stressTestScore = (worstCaseRunway / 3) * 30; // 0-30 for 0-3 months
+      }
+      stressTestScore = Math.round(stressTestScore);
+
+      // Update artifact with chart data if showCanvas is true
+      if (showCanvas && analysis) {
+        await analysis.update({
+          stage: "chart_ready",
+          currency: targetCurrency,
+          chart: {
+            projectedCashBalance: projectionMonths,
+          },
+        });
+      }
+
+      // Update artifact with metrics if showCanvas is true
+      if (showCanvas && analysis) {
+        await analysis.update({
+          stage: "metrics_ready",
+          currency: targetCurrency,
+          chart: {
+            projectedCashBalance: projectionMonths,
+          },
+          metrics: {
+            baseCaseRunway,
+            worstCaseRunway,
+            bestCaseRunway,
+            stressTestScore,
+          },
+        });
+      }
+
+      // Generate summary text (plain text, no markdown or emojis)
+      const formattedBaseRunway =
+        baseCaseRunway >= 999 ? "infinite" : `${baseCaseRunway.toFixed(1)}`;
+      const formattedWorstRunway =
+        worstCaseRunway >= 999 ? "infinite" : `${worstCaseRunway.toFixed(1)}`;
+      const formattedBestRunway =
+        bestCaseRunway >= 999 ? "infinite" : `${bestCaseRunway.toFixed(1)}`;
+
+      let summaryText = `Your cash flow stress test shows a base case runway of ${formattedBaseRunway} months, a worst case runway of ${formattedWorstRunway} months (assuming revenue drops 30% and expenses increase 20%), and a best case runway of ${formattedBestRunway} months (assuming revenue increases 20% and expenses decrease 10%). `;
+      summaryText += `Your stress test score is ${stressTestScore} out of 100. `;
+
+      if (worstCaseRunway < 6) {
+        summaryText +=
+          "Your worst-case scenario shows less than 6 months of runway, indicating high financial risk. ";
+      } else if (worstCaseRunway < 12) {
+        summaryText +=
+          "Your worst-case scenario shows 6 to 11 months of runway, which is manageable but requires close monitoring. ";
+      } else {
+        summaryText +=
+          "Your worst-case scenario shows 12 or more months of runway, indicating good financial resilience. ";
+      }
+
+      summaryText +=
+        "Continue monitoring your cash flow trends and adjust your financial strategy as needed.";
+
+      // Update artifact with analysis if showCanvas is true
       if (showCanvas && analysis) {
         await analysis.update({
           stage: "analysis_ready",
           currency: targetCurrency,
           chart: {
-            scenarios: [],
+            projectedCashBalance: projectionMonths,
           },
           metrics: {
-            baseCaseRunway: 0,
-            worstCaseRunway: 0,
-            bestCaseRunway: 0,
-            stressTestScore: 0,
+            baseCaseRunway,
+            worstCaseRunway,
+            bestCaseRunway,
+            stressTestScore,
           },
           analysis: {
-            summary: "Cash flow stress test analysis will be available soon.",
-            recommendations: [],
+            summary: summaryText,
           },
         });
       }
 
-      yield {
-        text: "Cash flow stress test analysis is not yet implemented. This feature will be available soon.",
-      };
+      // Mention canvas if requested
+      if (showCanvas) {
+        summaryText +=
+          "\n\nA detailed visual stress test analysis with cash balance projections is available.";
+      }
+
+      yield { text: summaryText };
 
       return {
-        baseCaseRunway: 0,
-        worstCaseRunway: 0,
-        bestCaseRunway: 0,
+        baseCaseRunway,
+        worstCaseRunway,
+        bestCaseRunway,
         currency: targetCurrency,
+        stressTestScore,
       };
     } catch (error) {
       yield {

@@ -5,7 +5,6 @@ import {
   Bar,
   CartesianGrid,
   ComposedChart,
-  Line,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -13,19 +12,14 @@ import {
 } from "recharts";
 import { createCompactTickFormatter, useChartMargin } from "./chart-utils";
 
-interface ProfitData {
+interface TaxTrendData {
   month: string;
-  profit: number;
-  lastYearProfit: number;
-  average: number;
-  revenue?: number;
-  expenses?: number;
-  lastYearRevenue?: number;
-  lastYearExpenses?: number;
+  taxAmount: number;
+  taxableIncome: number;
 }
 
-interface ProfitChartProps {
-  data: ProfitData[];
+interface TaxTrendChartProps {
+  data: TaxTrendData[];
   height?: number;
   showLegend?: boolean;
   currency?: string;
@@ -41,9 +35,10 @@ const CustomTooltip = ({
   locale,
 }: any) => {
   if (active && Array.isArray(payload) && payload.length > 0) {
-    const thisYear = payload.find((p) => p.dataKey === "profit")?.value;
-    const lastYear = payload.find((p) => p.dataKey === "lastYearProfit")?.value;
-    const average = payload.find((p) => p.dataKey === "average")?.value;
+    const taxAmount = payload.find((p) => p.dataKey === "taxAmount")?.value;
+    const taxableIncome = payload.find(
+      (p) => p.dataKey === "taxableIncome",
+    )?.value;
 
     // Format amounts using proper currency formatting
     const formatCurrency = (amount: number) =>
@@ -57,19 +52,14 @@ const CustomTooltip = ({
     return (
       <div className="border p-2 text-[10px] font-hedvig-sans bg-white dark:bg-[#0c0c0c] border-[#e6e6e6] dark:border-[#1d1d1d] text-black dark:text-white shadow-sm">
         <p className="mb-1 text-[#707070] dark:text-[#666666]">{label}</p>
-        {typeof thisYear === "number" && (
+        {typeof taxAmount === "number" && (
           <p className="text-black dark:text-white">
-            This Year: {formatCurrency(thisYear)}
+            Tax: {formatCurrency(taxAmount)}
           </p>
         )}
-        {typeof lastYear === "number" && (
+        {typeof taxableIncome === "number" && (
           <p className="text-black dark:text-white">
-            Last Year: {formatCurrency(lastYear)}
-          </p>
-        )}
-        {typeof average === "number" && (
-          <p className="text-black dark:text-white">
-            Average: {formatCurrency(average)}
+            Taxable Income: {formatCurrency(taxableIncome)}
           </p>
         )}
       </div>
@@ -78,17 +68,17 @@ const CustomTooltip = ({
   return null;
 };
 
-export function ProfitChart({
+export function TaxTrendChart({
   data,
   height = 320,
   currency = "USD",
   locale,
-}: ProfitChartProps) {
+}: TaxTrendChartProps) {
   // Use the compact tick formatter
   const tickFormatter = createCompactTickFormatter();
 
   // Calculate margin using the utility hook
-  const { marginLeft } = useChartMargin(data, "profit", tickFormatter);
+  const { marginLeft } = useChartMargin(data, "taxAmount", tickFormatter);
 
   return (
     <div className="w-full">
@@ -125,28 +115,16 @@ export function ProfitChart({
                 className: "dark:fill-[#666666]",
               }}
               tickFormatter={tickFormatter}
-              dataKey="profit"
+              dataKey="taxAmount"
             />
             <Tooltip
               content={<CustomTooltip currency={currency} locale={locale} />}
               wrapperStyle={{ zIndex: 9999 }}
             />
-            {/* This Year bars (white in dark mode) */}
-            <Bar dataKey="profit" fill="white" isAnimationActive={false} />
-            {/* Last Year bars (dark gray in dark mode with 0.3 opacity) */}
+            {/* Tax amount bars (white in dark mode) */}
             <Bar
-              dataKey="lastYearProfit"
-              fill="#6666664D"
-              isAnimationActive={false}
-            />
-            {/* Average line */}
-            <Line
-              type="monotone"
-              dataKey="average"
-              stroke="#666"
-              strokeWidth={1}
-              strokeDasharray="5 5"
-              dot={false}
+              dataKey="taxAmount"
+              fill="white"
               isAnimationActive={false}
             />
           </ComposedChart>
@@ -155,3 +133,4 @@ export function ProfitChart({
     </div>
   );
 }
+

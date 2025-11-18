@@ -191,15 +191,60 @@ export const getRevenueSummaryTool = tool({
           "No revenue data found for the selected period. Ensure transactions are properly categorized as income.";
       }
 
-      // Update artifact with dummy data if showCanvas is true
-      if (showCanvas && analysis) {
-        const chartData = last12Months.map((item) => ({
-          month: format(new Date(item.date), "MMM"),
-          revenue: item.current.value,
-          lastYearRevenue: item.previous.value,
-          average: averageMonthlyRevenue,
-        }));
+      // Prepare chart data for artifact
+      const chartData = last12Months.map((item) => ({
+        month: format(new Date(item.date), "MMM"),
+        revenue: item.current.value,
+        lastYearRevenue: item.previous.value,
+        average: averageMonthlyRevenue,
+      }));
 
+      // Update artifact with chart data if showCanvas is true
+      if (showCanvas && analysis) {
+        await analysis.update({
+          stage: "chart_ready",
+          currency: targetCurrency,
+          chart: {
+            monthlyData: chartData,
+          },
+        });
+      }
+
+      // Update artifact with metrics if showCanvas is true
+      if (showCanvas && analysis) {
+        await analysis.update({
+          stage: "metrics_ready",
+          currency: targetCurrency,
+          chart: {
+            monthlyData: chartData,
+          },
+          metrics: {
+            totalRevenue: currentTotal,
+            averageMonthlyRevenue,
+            currentMonthRevenue: currentMonthlyRevenue,
+            revenueGrowth: changePercentage,
+          },
+        });
+      }
+
+      // Generate summary for artifact
+      let summaryText = "";
+      if (currentTotal > 0) {
+        summaryText = `Revenue ${isPositiveChange ? "increased" : "decreased"} ${Math.abs(changePercentage)}% over ${last12Months.length} months (${formattedPrevTotal} to ${formattedCurrentTotal}). `;
+        if (isPositiveChange && prevTotal !== 0) {
+          summaryText +=
+            "This indicates positive business growth and strong sales performance.";
+        } else if (!isPositiveChange && prevTotal !== 0) {
+          summaryText +=
+            "Consider reviewing sales strategies, marketing efforts, or pricing models to reverse the trend.";
+        }
+      } else {
+        summaryText =
+          "No revenue data found for the selected period. Ensure transactions are properly categorized as income.";
+      }
+
+      // Update artifact with analysis if showCanvas is true
+      if (showCanvas && analysis) {
         await analysis.update({
           stage: "analysis_ready",
           currency: targetCurrency,
@@ -213,8 +258,17 @@ export const getRevenueSummaryTool = tool({
             revenueGrowth: changePercentage,
           },
           analysis: {
-            summary: responseText,
-            recommendations: [],
+            summary: summaryText,
+            recommendations: [
+              currentTotal === 0
+                ? "Ensure transactions are properly categorized as income"
+                : !isPositiveChange && prevTotal !== 0
+                  ? "Review sales strategies and marketing efforts to increase revenue"
+                  : "Continue focusing on revenue growth initiatives",
+              monthlyRevenueChange < 0 && last12Months.length > 1
+                ? "Address declining monthly revenue trends"
+                : "Maintain current revenue performance",
+            ],
           },
         });
       }

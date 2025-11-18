@@ -118,8 +118,8 @@ export function SuggestedActions() {
     },
     "get-profit-analysis": {
       icon: Icons.PieChart,
-      title: "Profit Analysis",
-      description: "Show me my profit analysis",
+      title: "Profit & Loss",
+      description: "Show me my profit & loss statement",
     },
     "get-invoice-payment-analysis": {
       icon: Icons.Invoice,
@@ -140,6 +140,11 @@ export function SuggestedActions() {
       icon: Icons.TrendingUp,
       title: "Revenue Forecast",
       description: "Show me my revenue forecast",
+    },
+    "get-cash-flow-stress-test": {
+      icon: Icons.Speed,
+      title: "Stress Test",
+      description: "Show me my cash flow stress test",
     },
   };
 

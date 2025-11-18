@@ -47,7 +47,7 @@ export const getToolMessage = (toolName: string | null) => {
     revenue: "Calculating your revenue metrics...",
     getRevenueSummary: "Analyzing your revenue trends...",
     profitLoss: "Computing your profit & loss statement...",
-    getProfitAnalysis: "Analyzing your profit performance...",
+    getProfitAnalysis: "Computing your profit & loss statement...",
     cashFlow: "Analyzing your cash flow patterns...",
     getCashFlow: "Calculating your net cash flow...",
     balanceSheet: "Building your balance sheet...",

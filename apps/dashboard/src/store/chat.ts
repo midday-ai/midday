@@ -78,6 +78,13 @@ const COMMAND_SUGGESTIONS = [
     keywords: ["show", "runway", "cash", "left"],
   },
   {
+    command: "/show",
+    title: "Show cash flow stress test",
+    toolName: "getCashFlowStressTest",
+    toolParams: { showCanvas: true },
+    keywords: ["show", "stress", "test", "scenario", "resilience", "financial"],
+  },
+  {
     command: "/find",
     title: "Find untagged transactions from last month",
     toolName: "getTransactions",
@@ -108,6 +115,13 @@ const COMMAND_SUGGESTIONS = [
     toolName: "getSpending",
     toolParams: { showCanvas: true },
     keywords: ["analyze", "spending", "patterns"],
+  },
+  {
+    command: "/analyze",
+    title: "Analyze financial resilience",
+    toolName: "getCashFlowStressTest",
+    toolParams: { showCanvas: true },
+    keywords: ["analyze", "stress", "test", "resilience", "scenarios", "financial"],
   },
 ];
 

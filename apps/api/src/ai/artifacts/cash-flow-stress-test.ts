@@ -18,14 +18,16 @@ export const cashFlowStressTestArtifact = artifact(
     // Chart data (available at chart_ready stage)
     chart: z
       .object({
-        scenarios: z.array(
-          z.object({
-            scenario: z.string(),
-            months: z.number(),
-            cashFlow: z.number(),
-            status: z.enum(["healthy", "concerning", "critical"]),
-          }),
-        ),
+        projectedCashBalance: z
+          .array(
+            z.object({
+              month: z.number(),
+              baseCase: z.number(),
+              worstCase: z.number(),
+              bestCase: z.number(),
+            }),
+          )
+          .optional(),
       })
       .optional(),
 
@@ -43,8 +45,6 @@ export const cashFlowStressTestArtifact = artifact(
     analysis: z
       .object({
         summary: z.string(),
-        recommendations: z.array(z.string()),
-        riskFactors: z.array(z.string()).optional(),
       })
       .optional(),
   }),

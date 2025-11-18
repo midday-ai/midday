@@ -3,9 +3,12 @@ import type { AppContext } from "@api/ai/agents/config/shared";
 import { runwayArtifact } from "@api/ai/artifacts/runway";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
 import { db } from "@midday/db/client";
-import { getRunway } from "@midday/db/queries";
+import {
+  getBurnRate,
+  getCombinedAccountBalance,
+  getRunway,
+} from "@midday/db/queries";
 import { tool } from "ai";
-import { endOfMonth, startOfMonth } from "date-fns";
 import { z } from "zod";
 
 const getRunwaySchema = z.object({
@@ -59,12 +62,38 @@ export const getRunwayTool = tool({
         );
       }
 
-      const runway = await getRunway(db, {
-        teamId,
-        from: finalFrom,
-        to: finalTo,
-        currency: currency ?? undefined,
-      });
+      const targetCurrency =
+        currency || appContext.baseCurrency || "USD";
+
+      // Fetch runway, cash balance, and burn rate data in parallel
+      const [runway, balanceResult, burnRateData] = await Promise.all([
+        getRunway(db, {
+          teamId,
+          from: finalFrom,
+          to: finalTo,
+          currency: currency ?? undefined,
+        }),
+        getCombinedAccountBalance(db, {
+          teamId,
+          currency: currency ?? undefined,
+        }),
+        getBurnRate(db, {
+          teamId,
+          from: finalFrom,
+          to: finalTo,
+          currency: currency ?? undefined,
+        }),
+      ]);
+
+      // Calculate average burn rate from burn rate data
+      const averageBurnRate =
+        burnRateData.length > 0
+          ? burnRateData.reduce((sum, item) => sum + Number(item.value), 0) /
+            burnRateData.length
+          : 0;
+
+      // Get cash balance (use converted balance if available, otherwise total balance)
+      const cashBalance = balanceResult.totalBalance;
 
       // Determine status based on runway months
       let status: "healthy" | "concerning" | "critical";
@@ -79,6 +108,23 @@ export const getRunwayTool = tool({
       } else {
         status = "critical";
         statusMessage = "critical";
+      }
+
+      // Update artifact with metrics if showCanvas is true
+      if (showCanvas && analysis) {
+        await analysis.update({
+          stage: "metrics_ready",
+          currency: targetCurrency,
+          chart: {
+            monthlyData: [],
+          },
+          metrics: {
+            currentRunway: runway,
+            cashBalance,
+            averageBurnRate,
+            status,
+          },
+        });
       }
 
       // Build response text
@@ -103,23 +149,74 @@ export const getRunwayTool = tool({
         }
       }
 
-      // Update artifact with dummy data if showCanvas is true
+      // Generate recommendations based on status
+      const recommendations: string[] = [];
+      if (runway === 0) {
+        recommendations.push(
+          "Ensure transactions are properly categorized to calculate runway",
+        );
+        recommendations.push("Check that bank accounts are connected and synced");
+      } else if (status === "critical") {
+        recommendations.push(
+          "Immediately reduce expenses or increase revenue to extend runway",
+        );
+        recommendations.push(
+          "Consider securing additional funding or investment",
+        );
+        recommendations.push("Review and optimize all recurring expenses");
+      } else if (status === "concerning") {
+        recommendations.push(
+          "Monitor burn rate and cash flow closely each month",
+        );
+        recommendations.push(
+          "Focus on increasing revenue or reducing expenses",
+        );
+        recommendations.push("Build a plan to extend runway to 12+ months");
+      } else {
+        recommendations.push(
+          "Maintain current cash management practices",
+        );
+        recommendations.push(
+          "Continue monitoring runway monthly to ensure healthy position",
+        );
+      }
+
+      // Generate summary for artifact
+      let summaryText = "";
+      if (runway === 0) {
+        summaryText =
+          "Unable to calculate runway. This may be due to insufficient data or no burn rate detected.";
+      } else {
+        summaryText = `Your business has ${runway} months of cash runway remaining. `;
+        if (status === "healthy") {
+          summaryText +=
+            "This is a healthy position with sufficient cash reserves for 12+ months of operations.";
+        } else if (status === "concerning") {
+          summaryText +=
+            "Your runway is below the recommended 12 months. Monitor cash flow closely and consider strategies to extend runway.";
+        } else {
+          summaryText +=
+            "Your runway is critical. Immediate action is needed to extend runway through cost reduction, revenue increase, or securing additional funding.";
+        }
+      }
+
+      // Update artifact with analysis if showCanvas is true
       if (showCanvas && analysis) {
         await analysis.update({
           stage: "analysis_ready",
-          currency: currency || appContext.baseCurrency || "USD",
+          currency: targetCurrency,
           chart: {
             monthlyData: [],
           },
           metrics: {
             currentRunway: runway,
-            cashBalance: 0,
-            averageBurnRate: 0,
+            cashBalance,
+            averageBurnRate,
             status,
           },
           analysis: {
-            summary: responseText,
-            recommendations: [],
+            summary: summaryText,
+            recommendations,
           },
         });
       }

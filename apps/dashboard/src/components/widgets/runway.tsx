@@ -53,6 +53,7 @@ export function RunwayWidget() {
           toolParams: {
             from: subMonths(startOfMonth(new Date()), 12).toISOString(),
             to: endOfMonth(new Date()).toISOString(),
+            showCanvas: true,
           },
           text: "Show cash runway",
         });

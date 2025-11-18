@@ -84,7 +84,7 @@ export function ProfitAnalysisWidget() {
         revenueType: config?.revenueType ?? "net",
         showCanvas: true,
       },
-      text: "Show profit analysis",
+      text: "Show profit & loss statement",
     });
   };
 
@@ -133,7 +133,7 @@ export function ProfitAnalysisWidget() {
       }
     >
       <BaseWidget
-        title="Profit Analysis"
+        title="Profit & Loss"
         icon={<Icons.PieChart className="size-4" />}
         onConfigure={() => setIsConfiguring(true)}
         description={

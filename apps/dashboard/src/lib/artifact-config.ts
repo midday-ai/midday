@@ -36,7 +36,7 @@ export const TOOL_TO_ARTIFACT_MAP: Record<string, ArtifactType> = {
   runway: "runway-canvas",
   getRevenueSummary: "revenue-canvas",
   revenue: "revenue-canvas",
-  getProfitAnalysis: "profit-analysis-canvas",
+  getProfitAnalysis: "profit-canvas",
   profitLoss: "profit-canvas",
   getCashFlow: "cash-flow-canvas",
   cashFlow: "cash-flow-canvas",
@@ -116,6 +116,18 @@ const CUSTOM_STAGE_MESSAGES: Partial<
     loading: "Preparing cash flow analysis...",
     chart_ready: "Chart data ready, calculating metrics...",
     metrics_ready: "Metrics calculated, generating insights...",
+    analysis_ready: "Analysis complete",
+  },
+  "tax-summary-canvas": {
+    loading: "Preparing tax summary...",
+    chart_ready: "Chart data ready, calculating metrics...",
+    metrics_ready: "Metrics calculated, generating insights...",
+    analysis_ready: "Analysis complete",
+  },
+  "stress-test-canvas": {
+    loading: "Preparing stress test scenarios...",
+    chart_ready: "Scenarios calculated, computing metrics...",
+    metrics_ready: "Metrics ready, generating insights...",
     analysis_ready: "Analysis complete",
   },
 };

@@ -1,16 +1,17 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
+import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
+import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { getDefaultTaxType, getWidgetPeriodDates } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { BaseWidget } from "./base";
 import { ConfigurableWidget } from "./configurable-widget";
@@ -49,10 +50,12 @@ function getTaxTerminology(
 
 export function TaxSummaryWidget() {
   const trpc = useTRPC();
-  const router = useRouter();
   const { data: team } = useTeamQuery();
   const t = useI18n();
   const { data: user } = useUserQuery();
+  const { sendMessage } = useChatActions();
+  const chatId = useChatId();
+  const { setChatId } = useChatInterface();
   const { config, isConfiguring, setIsConfiguring, saveConfig } =
     useConfigurableWidget("tax-summary");
 
@@ -107,8 +110,40 @@ export function TaxSummaryWidget() {
     return `${t("tax_summary.credit_amount", { amount: netStr })} · ${period}`;
   };
 
-  const handleOpenAssistant = () => {
-    router.push("/");
+  const handleToolCall = (params: {
+    toolName: string;
+    toolParams?: Record<string, any>;
+    text: string;
+  }) => {
+    if (!chatId) return;
+
+    setChatId(chatId);
+
+    sendMessage({
+      role: "user",
+      parts: [{ type: "text", text: params.text }],
+      metadata: {
+        toolCall: {
+          toolName: params.toolName,
+          toolParams: params.toolParams,
+        },
+      },
+    });
+  };
+
+  const handleViewTaxSummary = () => {
+    // Use dynamic terminology based on tax type (VAT/GST/Sales Tax/Tax)
+    const summaryText = taxTerms.title.toLowerCase();
+    handleToolCall({
+      toolName: "getTaxSummary",
+      toolParams: {
+        from: format(fromDate, "yyyy-MM-dd"),
+        to: format(toDate, "yyyy-MM-dd"),
+        currency: team?.baseCurrency ?? undefined,
+        showCanvas: true,
+      },
+      text: `Show ${summaryText}`,
+    });
   };
 
   return (
@@ -128,8 +163,8 @@ export function TaxSummaryWidget() {
         title={taxTerms.title}
         icon={<Icons.ReceiptLong className="size-4" />}
         description={getDescription()}
-        onClick={handleOpenAssistant}
-        actions={t("tax_summary.open_assistant")}
+        onClick={handleViewTaxSummary}
+        actions="See detailed analysis"
         onConfigure={() => setIsConfiguring(true)}
       >
         {hasActivity && taxData && (

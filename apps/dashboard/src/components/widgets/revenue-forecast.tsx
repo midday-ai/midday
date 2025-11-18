@@ -1,9 +1,11 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
+import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
+import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { getWidgetPeriodDates } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -20,6 +22,9 @@ export function RevenueForecastWidget() {
   const trpc = useTRPC();
   const { data: team } = useTeamQuery();
   const t = useI18n();
+  const { sendMessage } = useChatActions();
+  const chatId = useChatId();
+  const { setChatId } = useChatInterface();
   const { config, isConfiguring, setIsConfiguring, saveConfig } =
     useConfigurableWidget("revenue-forecast");
 
@@ -41,9 +46,40 @@ export function RevenueForecastWidget() {
     ...WIDGET_POLLING_CONFIG,
   });
 
+  const handleToolCall = (params: {
+    toolName: string;
+    toolParams?: Record<string, any>;
+    text: string;
+  }) => {
+    if (!chatId) return;
+
+    setChatId(chatId);
+
+    sendMessage({
+      role: "user",
+      parts: [{ type: "text", text: params.text }],
+      metadata: {
+        toolCall: {
+          toolName: params.toolName,
+          toolParams: params.toolParams,
+        },
+      },
+    });
+  };
+
   const handleViewDetails = () => {
-    // TODO: Navigate to detailed forecast page
-    console.log("View forecast details clicked");
+    handleToolCall({
+      toolName: "getForecast",
+      toolParams: {
+        from: format(from, "yyyy-MM-dd"),
+        to: format(to, "yyyy-MM-dd"),
+        currency: team?.baseCurrency ?? undefined,
+        revenueType: config?.revenueType ?? "net",
+        forecastMonths,
+        showCanvas: true,
+      },
+      text: "Show revenue forecast",
+    });
   };
 
   // Prepare data for simple trend line chart

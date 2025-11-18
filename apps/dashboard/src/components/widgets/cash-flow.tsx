@@ -71,6 +71,7 @@ export function CashFlowWidget() {
         to: format(to, "yyyy-MM-dd"),
         currency: team?.baseCurrency ?? undefined,
         period: "monthly",
+        showCanvas: true,
       },
       text: "Show cash flow",
     });

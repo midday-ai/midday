@@ -18,13 +18,24 @@ export const taxSummaryArtifact = artifact(
     // Chart data (available at chart_ready stage)
     chart: z
       .object({
-        monthlyData: z.array(
-          z.object({
-            month: z.string(),
-            taxAmount: z.number(),
-            taxableIncome: z.number(),
-          }),
-        ),
+        categoryData: z
+          .array(
+            z.object({
+              category: z.string(),
+              taxAmount: z.number(),
+              percentage: z.number(),
+            }),
+          )
+          .optional(),
+        taxTypeData: z
+          .array(
+            z.object({
+              taxType: z.string(),
+              taxAmount: z.number(),
+              percentage: z.number(),
+            }),
+          )
+          .optional(),
       })
       .optional(),
 
@@ -35,6 +46,22 @@ export const taxSummaryArtifact = artifact(
         totalTaxableIncome: z.number(),
         effectiveTaxRate: z.number(),
         estimatedQuarterlyPayments: z.number().optional(),
+        topCategories: z
+          .array(
+            z.object({
+              category: z.string(),
+              taxAmount: z.number(),
+              percentage: z.number(),
+            }),
+          )
+          .optional(),
+        previousPeriod: z
+          .object({
+            totalTaxLiability: z.number(),
+            totalTaxableIncome: z.number(),
+            effectiveTaxRate: z.number(),
+          })
+          .optional(),
       })
       .optional(),
 
@@ -42,7 +69,6 @@ export const taxSummaryArtifact = artifact(
     analysis: z
       .object({
         summary: z.string(),
-        recommendations: z.array(z.string()),
       })
       .optional(),
   }),

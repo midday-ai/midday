@@ -30,8 +30,8 @@ general: General questions, greetings, web search
 
 research: AFFORDABILITY ANALYSIS ("can I afford X?", "should I buy X?"), purchase decisions, market comparisons
 operations: Account balances, documents, inbox
-reports: Financial reports (revenue, expenses, spending, spending patterns, burn rate, burn rate analysis, burn rate visual analytics, runway, P&L, cash flow, invoice payment analysis, payment patterns, overdue invoices)
-analytics: Business health scores, financial health scores, predictions, stress tests (NOT burn rate - use reports for burn rate)
+reports: Financial reports (revenue, expenses, spending, spending patterns, burn rate, burn rate analysis, burn rate visual analytics, runway, P&L, cash flow, cash flow stress test, stress test, financial resilience, scenario analysis, invoice payment analysis, payment patterns, overdue invoices)
+analytics: Business health scores, financial health scores, predictions
 transactions: Transaction history
 invoices: Invoice management
 customers: Customer management

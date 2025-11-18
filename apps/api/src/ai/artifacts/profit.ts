@@ -24,6 +24,10 @@ export const profitArtifact = artifact(
             profit: z.number(),
             lastYearProfit: z.number(),
             average: z.number(),
+            revenue: z.number().optional(),
+            expenses: z.number().optional(),
+            lastYearRevenue: z.number().optional(),
+            lastYearExpenses: z.number().optional(),
           }),
         ),
       })
@@ -42,6 +46,24 @@ export const profitArtifact = artifact(
             period: z.string(),
           })
           .optional(),
+        // Period comparison
+        currentPeriod: z
+          .object({
+            revenue: z.number(),
+            expenses: z.number(),
+            profit: z.number(),
+          })
+          .optional(),
+        previousPeriod: z
+          .object({
+            revenue: z.number(),
+            expenses: z.number(),
+            profit: z.number(),
+          })
+          .optional(),
+        // Totals
+        totalRevenue: z.number().optional(),
+        totalExpenses: z.number().optional(),
       })
       .optional(),
 

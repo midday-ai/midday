@@ -1,46 +1,207 @@
 "use client";
 
-import { BaseCanvas } from "@/components/canvas/base";
+import {
+  BaseCanvas,
+  CanvasChart,
+  CanvasGrid,
+  CanvasHeader,
+  CanvasSection,
+} from "@/components/canvas/base";
+import { CanvasContent } from "@/components/canvas/base/canvas-content";
+import { CategoryExpenseDonutChart } from "@/components/charts/category-expense-donut-chart";
+import { useTeamQuery } from "@/hooks/use-team";
+import { useUserQuery } from "@/hooks/use-user";
+import { useI18n } from "@/locales/client";
+import { formatAmount } from "@/utils/format";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { taxSummaryArtifact } from "@api/ai/artifacts/tax-summary";
+import { getDefaultTaxType } from "@midday/utils";
+
+function getTaxTerminology(
+  countryCode: string | undefined,
+  t: ReturnType<typeof useI18n>,
+): {
+  title: string;
+  typeName: string;
+  liability: string;
+  paid: string;
+  rate: string;
+  rateSubtitle: string;
+  category: string;
+  previousPeriod: string;
+} {
+  if (!countryCode) {
+    return {
+      title: t("tax_summary.title.default"),
+      typeName: "Tax",
+      liability: "Total Tax Liability",
+      paid: "Total tax paid",
+      rate: "Effective Tax Rate",
+      rateSubtitle: "Tax as % of taxable income",
+      category: "Top Tax Category",
+      previousPeriod: "Previous Period Tax",
+    };
+  }
+
+  const taxType = getDefaultTaxType(countryCode);
+
+  // Map tax type to i18n key
+  const typeKey =
+    taxType === "vat" || taxType === "gst" || taxType === "sales_tax"
+      ? taxType
+      : "default";
+
+  const title = t(`tax_summary.title.${typeKey}` as "tax_summary.title.vat");
+
+  // Extract tax type name from title (e.g., "VAT Summary" -> "VAT")
+  const typeName =
+    typeKey === "default" ? "Tax" : title.replace(" Summary", "");
+
+  // Get paid label from i18n
+  const paidLabel = t(`tax_summary.paid.${typeKey}` as "tax_summary.paid.vat");
+
+  return {
+    title,
+    typeName,
+    liability: `Total ${typeName} Liability`,
+    paid: `Total ${paidLabel}`,
+    rate: `Effective ${typeName} Rate`,
+    rateSubtitle: `${typeName} as % of taxable income`,
+    category: `Top ${typeName} Category`,
+    previousPeriod: `Previous Period ${typeName}`,
+  };
+}
 
 export function TaxSummaryCanvas() {
+  const { data, status } = useArtifact(taxSummaryArtifact);
+  const { data: user } = useUserQuery();
+  const { data: team } = useTeamQuery();
+  const t = useI18n();
+
+  const isLoading = status === "loading";
+  const stage = data?.stage;
+
+  const currency = data?.currency || "USD";
+  const locale = user?.locale || undefined;
+  const taxTerms = getTaxTerminology(team?.countryCode ?? undefined, t);
+
+  const categoryData = data?.chart?.categoryData || [];
+  const metrics = data?.metrics;
+
+  // Prepare category data for donut chart (convert to expected format)
+  const donutChartData = categoryData.map((item) => ({
+    category: item.category,
+    amount: item.taxAmount,
+    percentage: item.percentage,
+  }));
+
+  // Prepare metrics cards
+  const taxMetrics: Array<{
+    id: string;
+    title: string;
+    value: string;
+    subtitle: string;
+  }> = [
+    {
+      id: "total-tax-liability",
+      title: taxTerms.liability,
+      value:
+        formatAmount({
+          currency,
+          amount: metrics?.totalTaxLiability || 0,
+          locale,
+        }) || "$0",
+      subtitle: taxTerms.paid,
+    },
+    {
+      id: "total-taxable-income",
+      title: "Total Taxable Income",
+      value:
+        formatAmount({
+          currency,
+          amount: metrics?.totalTaxableIncome || 0,
+          locale,
+        }) || "$0",
+      subtitle: "Income subject to tax",
+    },
+    {
+      id: "effective-tax-rate",
+      title: taxTerms.rate,
+      value: `${(metrics?.effectiveTaxRate || 0).toFixed(2)}%`,
+      subtitle: taxTerms.rateSubtitle,
+    },
+    {
+      id: "top-tax-category",
+      title: taxTerms.category,
+      value: metrics?.topCategories?.[0]?.category || "N/A",
+      subtitle: metrics?.topCategories?.[0]
+        ? `${formatAmount({
+            currency,
+            amount: metrics.topCategories[0].taxAmount,
+            locale,
+          })} (${metrics.topCategories[0].percentage.toFixed(1)}%)`
+        : "No data",
+    },
+  ];
+
+  // Add previous period comparison if available
+  if (metrics?.previousPeriod) {
+    taxMetrics.push({
+      id: "previous-period-tax",
+      title: taxTerms.previousPeriod,
+      value:
+        formatAmount({
+          currency,
+          amount: metrics.previousPeriod.totalTaxLiability,
+          locale,
+        }) || "$0",
+      subtitle: "For comparison",
+    });
+  }
+
+  const showChart =
+    stage &&
+    ["loading", "chart_ready", "metrics_ready", "analysis_ready"].includes(
+      stage,
+    );
+
+  const showSummarySkeleton = !stage || stage !== "analysis_ready";
+
   return (
     <BaseCanvas>
-      <div className="space-y-4">
-        <div className="border-b border-gray-200 dark:border-gray-800 pb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Tax Summary
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Tax liability, taxable income, and tax rates
-              </p>
-            </div>
-          </div>
+      <CanvasHeader title={taxTerms.title} isLoading={isLoading} />
+
+      <CanvasContent>
+        <div className="space-y-8">
+          {/* Tax by Category Donut Chart */}
+          {showChart && donutChartData.length > 0 && (
+            <CanvasChart
+              title={`${taxTerms.typeName} by Category`}
+              isLoading={stage === "loading"}
+              height="20rem"
+            >
+              <CategoryExpenseDonutChart
+                data={donutChartData}
+                currency={currency}
+                locale={locale}
+                height={320}
+              />
+            </CanvasChart>
+          )}
+
+          {/* Metrics Grid */}
+          <CanvasGrid
+            items={taxMetrics}
+            layout="2/2"
+            isLoading={stage === "loading" || stage === "chart_ready"}
+          />
+
+          {/* Summary Section */}
+          <CanvasSection title="Summary" isLoading={showSummarySkeleton}>
+            {data?.analysis?.summary}
+          </CanvasSection>
         </div>
-        <div className="h-96 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-gray-400 dark:text-gray-600 mb-2">
-              <svg
-                className="w-12 h-12 mx-auto"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Tax summary data will appear here
-            </p>
-          </div>
-        </div>
-      </div>
+      </CanvasContent>
     </BaseCanvas>
   );
 }

@@ -122,18 +122,45 @@ export const getProfitAnalysisTool = tool({
 
       // Prepare chart data for artifact
       const last12Months = monthlyData.slice(-12);
+      const last12MonthsRevenue = revenueMonthlyData.slice(-12);
       const averageProfit =
         last12Months.length > 0
           ? last12Months.reduce((sum, item) => sum + item.current.value, 0) /
             last12Months.length
           : 0;
 
-      const chartData = last12Months.map((item) => ({
-        month: format(new Date(item.date), "MMM"),
-        profit: item.current.value,
-        lastYearProfit: item.previous.value,
-        average: averageProfit,
-      }));
+      // Create a map of revenue data by date for quick lookup
+      const revenueMap = new Map(
+        last12MonthsRevenue.map((item) => [
+          item.date,
+          {
+            current: item.current.value,
+            previous: item.previous.value,
+          },
+        ]),
+      );
+
+      const chartData = last12Months.map((item) => {
+        const revenueData = revenueMap.get(item.date);
+        const revenue = revenueData?.current || 0;
+        const lastYearRevenue = revenueData?.previous || 0;
+        const profit = item.current.value;
+        const lastYearProfit = item.previous.value;
+        // Calculate expenses: revenue - profit
+        const expenses = revenue - profit;
+        const lastYearExpenses = lastYearRevenue - lastYearProfit;
+
+        return {
+          month: format(new Date(item.date), "MMM"),
+          profit,
+          lastYearProfit,
+          average: averageProfit,
+          revenue,
+          expenses,
+          lastYearRevenue,
+          lastYearExpenses,
+        };
+      });
 
       // Update artifact with chart data if showCanvas is true
       if (showCanvas && analysis) {
@@ -198,6 +225,29 @@ export const getProfitAnalysisTool = tool({
             )
           : 0;
 
+      // Calculate expenses for current period
+      const currentMonthlyExpenses = currentMonthRevenue - currentMonthlyProfit;
+      const previousMonthRevenue =
+        revenueMonthlyData.length > 0
+          ? revenueMonthlyData[revenueMonthlyData.length - 1]?.previous.value ||
+            0
+          : 0;
+      const previousMonthlyExpenses =
+        previousMonthRevenue - previousMonthlyProfit;
+
+      // Calculate period totals (current vs previous)
+      const currentPeriodTotal = {
+        revenue: currentRevenueTotal,
+        expenses: currentRevenueTotal - currentTotal, // Total expenses = revenue - profit
+        profit: currentTotal,
+      };
+
+      const previousPeriodTotal = {
+        revenue: prevRevenueTotal,
+        expenses: prevRevenueTotal - prevTotal,
+        profit: prevTotal,
+      };
+
       // Update artifact with metrics if showCanvas is true
       if (showCanvas && analysis) {
         await analysis.update({
@@ -214,6 +264,10 @@ export const getProfitAnalysisTool = tool({
               percentage: monthlyProfitChange,
               period: "last month",
             },
+            currentPeriod: currentPeriodTotal,
+            previousPeriod: previousPeriodTotal,
+            totalRevenue: currentRevenueTotal,
+            totalExpenses: currentPeriodTotal.expenses,
           },
         });
       }
@@ -317,6 +371,10 @@ export const getProfitAnalysisTool = tool({
               percentage: monthlyProfitChange,
               period: "last month",
             },
+            currentPeriod: currentPeriodTotal,
+            previousPeriod: previousPeriodTotal,
+            totalRevenue: currentRevenueTotal,
+            totalExpenses: currentPeriodTotal.expenses,
           },
           analysis: {
             summary: summaryText,

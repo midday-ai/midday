@@ -53,9 +53,9 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     description: "Calculating profit & loss",
   },
   getProfitAnalysis: {
-    name: "Profit Analysis",
+    name: "Profit & Loss",
     icon: PieChart,
-    description: "Analyzing profit performance",
+    description: "Analyzing profit & loss",
   },
   cashFlow: {
     name: "Cash Flow",

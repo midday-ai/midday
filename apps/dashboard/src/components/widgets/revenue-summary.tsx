@@ -41,7 +41,8 @@ export function RevenueSummaryWidget() {
   });
 
   const handleToolCall = (params: {
-    toolChoice: string;
+    toolName: string;
+    toolParams?: Record<string, any>;
     text: string;
   }) => {
     if (!chatId) return;
@@ -52,21 +53,24 @@ export function RevenueSummaryWidget() {
       role: "user",
       parts: [{ type: "text", text: params.text }],
       metadata: {
-        toolChoice: params.toolChoice,
+        toolCall: {
+          toolName: params.toolName,
+          toolParams: params.toolParams,
+        },
       },
     });
   };
 
   const handleViewTrends = () => {
     handleToolCall({
-      toolChoice: "getRevenueSummary",
-      // toolParams: {
-      //   from: format(from, "yyyy-MM-dd"),
-      //   to: format(to, "yyyy-MM-dd"),
-      //   currency: team?.baseCurrency ?? undefined,
-      //   revenueType: config?.revenueType ?? "net",
-      //   showCanvas: true,
-      // },
+      toolName: "getRevenueSummary",
+      toolParams: {
+        from: format(from, "yyyy-MM-dd"),
+        to: format(to, "yyyy-MM-dd"),
+        currency: team?.baseCurrency ?? undefined,
+        revenueType: config?.revenueType ?? "net",
+        showCanvas: true,
+      },
       text: "Show revenue trends",
     });
   };
