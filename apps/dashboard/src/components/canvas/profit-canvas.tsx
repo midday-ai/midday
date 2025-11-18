@@ -4,7 +4,7 @@ import { BaseCanvas } from "@/components/canvas/base";
 import { ProfitChart, generateSampleData } from "../charts";
 
 export function ProfitCanvas() {
-  const profitData = generateSampleData.profit();
+  // const profitData = generateSampleData.profit();
 
   return (
     <BaseCanvas>
