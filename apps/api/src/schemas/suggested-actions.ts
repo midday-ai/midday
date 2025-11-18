@@ -9,6 +9,10 @@ export const getSuggestedActionsSchema = z.object({
     .describe("Maximum number of suggested actions to return"),
 });
 
+export const trackSuggestedActionUsageSchema = z.object({
+  actionId: z.string().describe("Unique identifier for the action to track"),
+});
+
 export const suggestedActionSchema = z.object({
   id: z.string().describe("Unique identifier for the action"),
   toolName: z.string().describe("Name of the tool to call"),

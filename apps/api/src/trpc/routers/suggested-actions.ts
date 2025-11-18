@@ -1,7 +1,9 @@
-import { getSuggestedActionsSchema } from "@api/schemas/suggested-actions";
+import {
+  getSuggestedActionsSchema,
+  trackSuggestedActionUsageSchema,
+} from "@api/schemas/suggested-actions";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { suggestedActionsCache } from "@midday/cache/suggested-actions-cache";
-import { endOfMonth, subMonths } from "date-fns";
 
 // Define the static suggested actions configuration
 const SUGGESTED_ACTIONS_CONFIG = [
@@ -32,6 +34,54 @@ const SUGGESTED_ACTIONS_CONFIG = [
     toolName: "getBalanceSheet",
     toolParams: {
       showCanvas: true,
+    },
+  },
+  {
+    id: "get-spending",
+    toolName: "getSpending",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
+  {
+    id: "get-runway",
+    toolName: "getRunway",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
+  {
+    id: "get-cash-flow",
+    toolName: "getCashFlow",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
+  {
+    id: "get-revenue-summary",
+    toolName: "getRevenueSummary",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
+  {
+    id: "get-account-balances",
+    toolName: "getAccountBalances",
+    toolParams: {},
+  },
+  {
+    id: "get-invoices",
+    toolName: "getInvoices",
+    toolParams: {
+      pageSize: 10,
+      sort: ["createdAt", "desc"],
+    },
+  },
+  {
+    id: "get-customers",
+    toolName: "getCustomers",
+    toolParams: {
+      pageSize: 10,
     },
   },
 ] as const;
@@ -82,5 +132,19 @@ export const suggestedActionsRouter = createTRPCRouter({
         actions: actionsWithUsage,
         total: SUGGESTED_ACTIONS_CONFIG.length,
       };
+    }),
+
+  trackUsage: protectedProcedure
+    .input(trackSuggestedActionUsageSchema)
+    .mutation(async ({ ctx: { teamId, session }, input }) => {
+      const userId = session.user.id;
+
+      await suggestedActionsCache.incrementUsage(
+        teamId!,
+        userId,
+        input.actionId,
+      );
+
+      return { success: true };
     }),
 });

@@ -6,7 +6,7 @@ import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import type { inferRouterOutputs } from "@trpc/server";
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
@@ -19,16 +19,24 @@ export function SuggestedActions() {
 
   const { data: suggestedActionsData } = useSuspenseQuery(
     trpc.suggestedActions.list.queryOptions({
-      limit: 6,
+      limit: 4,
     }),
+  );
+
+  // Mutation for tracking action usage
+  const trackUsageMutation = useMutation(
+    trpc.suggestedActions.trackUsage.mutationOptions(),
   );
 
   const handleToolCall = (params: {
     toolName: string;
     toolParams: Record<string, any>;
     text: string;
+    actionId: string;
   }) => {
     if (!chatId) return;
+
+    trackUsageMutation.mutate({ actionId: params.actionId });
 
     setChatId(chatId);
 
@@ -73,6 +81,41 @@ export function SuggestedActions() {
       title: "Balance Sheet",
       description: "Show me my balance sheet",
     },
+    "get-spending": {
+      icon: Icons.ShowChart,
+      title: "Spending Analysis",
+      description: "Show me my spending analysis",
+    },
+    "get-runway": {
+      icon: Icons.Speed,
+      title: "Runway",
+      description: "Show me my runway",
+    },
+    "get-cash-flow": {
+      icon: Icons.TrendingUp,
+      title: "Cash Flow",
+      description: "Show me my cash flow",
+    },
+    "get-revenue-summary": {
+      icon: Icons.Currency,
+      title: "Revenue Summary",
+      description: "Show me my revenue summary",
+    },
+    "get-account-balances": {
+      icon: Icons.Accounts,
+      title: "Account Balances",
+      description: "Show me my account balances",
+    },
+    "get-invoices": {
+      icon: Icons.Invoice,
+      title: "Invoices",
+      description: "Show me my invoices",
+    },
+    "get-customers": {
+      icon: Icons.Customers,
+      title: "Customers",
+      description: "Show me my customers",
+    },
   };
 
   const suggestedActions = suggestedActionsData.actions;
@@ -106,6 +149,7 @@ export function SuggestedActions() {
                   toolName: action.toolName,
                   toolParams: action.toolParams,
                   text: description,
+                  actionId: action.id,
                 });
               }}
             >

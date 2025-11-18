@@ -1,7 +1,7 @@
 import { RedisCache } from "./redis-client";
 
 // Redis-based cache for tracking suggested action usage per team + user
-const cache = new RedisCache("suggested-actions", 24 * 60 * 60); // 24 hours TTL
+const cache = new RedisCache("suggested-actions", 7 * 24 * 60 * 60); // 7 days TTL
 
 export interface SuggestedActionUsage {
   actionId: string;
