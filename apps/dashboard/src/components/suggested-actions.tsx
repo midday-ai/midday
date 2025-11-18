@@ -19,7 +19,7 @@ export function SuggestedActions() {
 
   const { data: suggestedActionsData } = useSuspenseQuery(
     trpc.suggestedActions.list.queryOptions({
-      limit: 4,
+      limit: 6,
     }),
   );
 
@@ -115,6 +115,31 @@ export function SuggestedActions() {
       icon: Icons.Customers,
       title: "Customers",
       description: "Show me my customers",
+    },
+    "get-profit-analysis": {
+      icon: Icons.PieChart,
+      title: "Profit Analysis",
+      description: "Show me my profit analysis",
+    },
+    "get-invoice-payment-analysis": {
+      icon: Icons.Invoice,
+      title: "Payment Analysis",
+      description: "Show me my invoice payment analysis",
+    },
+    "get-tax-summary": {
+      icon: Icons.Tax,
+      title: "Tax Summary",
+      description: "Show me my tax summary",
+    },
+    "get-business-health-score": {
+      icon: Icons.Info,
+      title: "Business Health",
+      description: "Show me my business health score",
+    },
+    "get-forecast": {
+      icon: Icons.TrendingUp,
+      title: "Revenue Forecast",
+      description: "Show me my revenue forecast",
     },
   };
 

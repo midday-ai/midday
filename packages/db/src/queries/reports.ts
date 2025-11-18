@@ -1446,8 +1446,8 @@ export async function getCashFlow(db: Database, params: GetCashFlowParams) {
   // Get target currency
   const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
 
-  // Build query conditions
-  const conditions = [
+  // Build base query conditions
+  const baseConditions = [
     eq(transactions.teamId, teamId),
     eq(transactions.internal, false),
     ne(transactions.status, "excluded"),
@@ -1457,17 +1457,36 @@ export async function getCashFlow(db: Database, params: GetCashFlowParams) {
 
   // Add currency conditions
   if (inputCurrency && targetCurrency) {
-    conditions.push(eq(transactions.currency, targetCurrency));
+    baseConditions.push(eq(transactions.currency, targetCurrency));
   } else if (targetCurrency) {
-    conditions.push(eq(transactions.baseCurrency, targetCurrency));
+    baseConditions.push(eq(transactions.baseCurrency, targetCurrency));
   }
 
-  // Get all transactions with category exclusion
-  const result = await db
+  // Category exclusion condition
+  const categoryExclusion = or(
+    isNull(transactions.categorySlug),
+    isNull(transactionCategories.excluded),
+    eq(transactionCategories.excluded, false),
+  )!;
+
+  // Get monthly income (positive amounts) and expenses (negative amounts)
+  const monthlyData = await db
     .select({
-      totalAmount: inputCurrency
-        ? sql<number>`COALESCE(SUM(${transactions.amount}), 0)`
-        : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
+      month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
+      income: inputCurrency
+        ? sql<number>`COALESCE(SUM(
+            CASE WHEN ${transactions.amount} > 0 THEN ${transactions.amount} ELSE 0 END
+          ), 0)`
+        : sql<number>`COALESCE(SUM(
+            CASE WHEN COALESCE(${transactions.baseAmount}, 0) > 0 THEN COALESCE(${transactions.baseAmount}, 0) ELSE 0 END
+          ), 0)`,
+      expenses: inputCurrency
+        ? sql<number>`COALESCE(SUM(
+            CASE WHEN ${transactions.amount} < 0 THEN ABS(${transactions.amount}) ELSE 0 END
+          ), 0)`
+        : sql<number>`COALESCE(SUM(
+            CASE WHEN COALESCE(${transactions.baseAmount}, 0) < 0 THEN ABS(COALESCE(${transactions.baseAmount}, 0)) ELSE 0 END
+          ), 0)`,
     })
     .from(transactions)
     .leftJoin(
@@ -1477,26 +1496,59 @@ export async function getCashFlow(db: Database, params: GetCashFlowParams) {
         eq(transactionCategories.teamId, teamId),
       ),
     )
-    .where(
-      and(
-        ...conditions,
-        // Exclude transactions in excluded categories
-        or(
-          isNull(transactions.categorySlug),
-          isNull(transactionCategories.excluded),
-          eq(transactionCategories.excluded, false),
-        )!,
-      ),
-    );
+    .where(and(...baseConditions, categoryExclusion))
+    .groupBy(sql`DATE_TRUNC('month', ${transactions.date})`)
+    .orderBy(sql`DATE_TRUNC('month', ${transactions.date}) ASC`);
 
-  const netCashFlow = Number(result[0]?.totalAmount || 0);
+  // Generate complete month series
+  const monthSeries = eachMonthOfInterval({ start: fromDate, end: toDate });
+  const dataMap = new Map(
+    monthlyData.map((item) => [
+      item.month,
+      { income: Number(item.income), expenses: Number(item.expenses) },
+    ]),
+  );
+
+  // Build complete monthly data array
+  const completeMonthlyData = monthSeries.map((monthStart) => {
+    const monthKey = format(monthStart, "yyyy-MM-dd");
+    const monthData = dataMap.get(monthKey) || { income: 0, expenses: 0 };
+    const netCashFlow = monthData.income - monthData.expenses;
+
+    return {
+      month: format(monthStart, "MMM"),
+      date: monthKey,
+      income: Number(monthData.income.toFixed(2)),
+      expenses: Number(monthData.expenses.toFixed(2)),
+      netCashFlow: Number(netCashFlow.toFixed(2)),
+    };
+  });
+
+  // Calculate totals
+  const totalIncome = completeMonthlyData.reduce(
+    (sum, item) => sum + item.income,
+    0,
+  );
+  const totalExpenses = completeMonthlyData.reduce(
+    (sum, item) => sum + item.expenses,
+    0,
+  );
+  const netCashFlow = totalIncome - totalExpenses;
+  const averageMonthlyCashFlow =
+    completeMonthlyData.length > 0
+      ? netCashFlow / completeMonthlyData.length
+      : 0;
 
   return {
     summary: {
       netCashFlow: Number(netCashFlow.toFixed(2)),
+      totalIncome: Number(totalIncome.toFixed(2)),
+      totalExpenses: Number(totalExpenses.toFixed(2)),
+      averageMonthlyCashFlow: Number(averageMonthlyCashFlow.toFixed(2)),
       currency: targetCurrency || "USD",
       period,
     },
+    monthlyData: completeMonthlyData,
     meta: {
       type: "cash_flow",
       currency: targetCurrency || "USD",

@@ -23,19 +23,21 @@ export const forecastArtifact = artifact(
             month: z.string(),
             forecasted: z.number(),
             actual: z.number().optional(),
-            confidence: z.number().optional(),
+            date: z.string().optional(),
           }),
         ),
+        forecastStartIndex: z.number().optional(),
       })
       .optional(),
 
     // Core metrics (available at metrics_ready stage)
     metrics: z
       .object({
-        nextMonthForecast: z.number(),
-        nextQuarterForecast: z.number(),
-        nextYearForecast: z.number(),
-        forecastAccuracy: z.number().optional(),
+        peakMonth: z.string(),
+        peakMonthValue: z.number(),
+        growthRate: z.number(),
+        unpaidInvoices: z.number(),
+        billableHours: z.number(),
       })
       .optional(),
 
@@ -43,8 +45,7 @@ export const forecastArtifact = artifact(
     analysis: z
       .object({
         summary: z.string(),
-        recommendations: z.array(z.string()),
-        riskFactors: z.array(z.string()).optional(),
+        recommendations: z.array(z.string()).optional(),
       })
       .optional(),
   }),

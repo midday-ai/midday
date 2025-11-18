@@ -1,85 +1,153 @@
 "use client";
 
-import { ReferenceLine, Tooltip } from "recharts";
+import { formatAmount } from "@/utils/format";
 import {
-  BaseChart,
-  ChartLegend,
-  StyledBar,
-  StyledLine,
-  StyledTooltip,
-  StyledXAxis,
-  StyledYAxis,
-} from "./base-charts";
-import type { BaseChartProps } from "./chart-utils";
+  Bar,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { createCompactTickFormatter, useChartMargin } from "./chart-utils";
 
 interface ProfitData {
   month: string;
   profit: number;
-  expenses: number;
-  revenue?: number;
+  lastYearProfit: number;
+  average: number;
 }
 
-interface ProfitChartProps extends BaseChartProps {
+interface ProfitChartProps {
   data: ProfitData[];
-  showRevenue?: boolean;
+  height?: number;
   showLegend?: boolean;
+  currency?: string;
+  locale?: string;
 }
 
-// Custom formatter for profit tooltip
-const profitTooltipFormatter = (value: any, name: string): [string, string] => {
-  const formattedValue = `$${value.toLocaleString()}`;
-  const displayName =
-    name === "profit" ? "Profit" : name === "expenses" ? "Expenses" : "Revenue";
-  return [formattedValue, displayName];
+// Custom tooltip component
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+  currency = "USD",
+  locale,
+}: any) => {
+  if (active && Array.isArray(payload) && payload.length > 0) {
+    const thisYear = payload.find((p) => p.dataKey === "profit")?.value;
+    const lastYear = payload.find((p) => p.dataKey === "lastYearProfit")?.value;
+    const average = payload.find((p) => p.dataKey === "average")?.value;
+
+    // Format amounts using proper currency formatting
+    const formatCurrency = (amount: number) =>
+      formatAmount({
+        amount,
+        currency,
+        locale: locale ?? undefined,
+        maximumFractionDigits: 0,
+      }) ?? `${currency}${amount.toLocaleString()}`;
+
+    return (
+      <div className="border p-2 text-[10px] font-hedvig-sans bg-white dark:bg-[#0c0c0c] border-[#e6e6e6] dark:border-[#1d1d1d] text-black dark:text-white shadow-sm">
+        <p className="mb-1 text-[#707070] dark:text-[#666666]">{label}</p>
+        {typeof thisYear === "number" && (
+          <p className="text-black dark:text-white">
+            This Year: {formatCurrency(thisYear)}
+          </p>
+        )}
+        {typeof lastYear === "number" && (
+          <p className="text-black dark:text-white">
+            Last Year: {formatCurrency(lastYear)}
+          </p>
+        )}
+        {typeof average === "number" && (
+          <p className="text-black dark:text-white">
+            Average: {formatCurrency(average)}
+          </p>
+        )}
+      </div>
+    );
+  }
+  return null;
 };
 
 export function ProfitChart({
   data,
   height = 320,
-  className = "",
-  showRevenue = true,
-  showLegend = true,
+  currency = "USD",
+  locale,
 }: ProfitChartProps) {
+  // Use the compact tick formatter
+  const tickFormatter = createCompactTickFormatter();
+
+  // Calculate margin using the utility hook
+  const { marginLeft } = useChartMargin(data, "profit", tickFormatter);
+
   return (
-    <div className={`w-full ${className}`}>
-      {/* Legend */}
-      {showLegend && (
-        <ChartLegend
-          title="Profit Analysis"
-          items={[
-            { label: "Profit", type: "solid" },
-            { label: "Expenses", type: "solid" },
-            ...(showRevenue
-              ? [{ label: "Revenue", type: "dashed" as const }]
-              : []),
-          ]}
-        />
-      )}
-
+    <div className="w-full">
       {/* Chart */}
-      <BaseChart data={data} height={height}>
-        <StyledXAxis dataKey="month" />
-        <StyledYAxis
-          tickFormatter={(value: number) => `$${(value / 1000).toFixed(0)}k`}
-        />
-
-        <Tooltip
-          content={<StyledTooltip formatter={profitTooltipFormatter} />}
-          wrapperStyle={{ zIndex: 9999 }}
-        />
-
-        <StyledBar dataKey="profit" usePattern={false} />
-        <StyledBar dataKey="expenses" usePattern />
-
-        {showRevenue && <StyledLine dataKey="revenue" strokeDasharray="5 5" />}
-
-        {/* Reference line at zero */}
-        <ReferenceLine
-          y={0}
-          stroke="hsl(var(--border))"
-          strokeDasharray="2 2"
-        />
-      </BaseChart>
+      <div style={{ height }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <ComposedChart
+            data={data}
+            margin={{ top: 0, right: 6, left: -marginLeft, bottom: 0 }}
+          >
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="#e6e6e6"
+              className="dark:stroke-[#1d1d1d]"
+            />
+            <XAxis
+              dataKey="month"
+              axisLine={false}
+              tickLine={false}
+              tick={{
+                fill: "#707070",
+                fontSize: 10,
+                fontFamily: "Hedvig Letters Sans",
+                className: "dark:fill-[#666666]",
+              }}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{
+                fill: "#707070",
+                fontSize: 10,
+                fontFamily: "Hedvig Letters Sans",
+                className: "dark:fill-[#666666]",
+              }}
+              tickFormatter={tickFormatter}
+              dataKey="profit"
+            />
+            <Tooltip
+              content={<CustomTooltip currency={currency} locale={locale} />}
+              wrapperStyle={{ zIndex: 9999 }}
+            />
+            {/* This Year bars (white in dark mode) */}
+            <Bar dataKey="profit" fill="white" isAnimationActive={false} />
+            {/* Last Year bars (dark gray in dark mode with 0.3 opacity) */}
+            <Bar
+              dataKey="lastYearProfit"
+              fill="#6666664D"
+              isAnimationActive={false}
+            />
+            {/* Average line */}
+            <Line
+              type="monotone"
+              dataKey="average"
+              stroke="#666"
+              strokeWidth={1}
+              strokeDasharray="5 5"
+              dot={false}
+              isAnimationActive={false}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }

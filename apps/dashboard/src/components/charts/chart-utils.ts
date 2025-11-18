@@ -2,6 +2,8 @@
  * Shared utilities for chart styling and data formatting
  */
 
+import { formatAmount } from "@/utils/format";
+
 // Tailwind classes for chart styling
 export const chartClasses = {
   container: "w-full h-full",
@@ -52,6 +54,75 @@ export const createCompactTickFormatter = () => {
       return `${(value / 1000).toFixed(0)}k`;
     }
     return value.toString();
+  };
+};
+
+// Currency-aware Y-axis tick formatter (e.g., "$14k", "€16k")
+export const createYAxisTickFormatter = (currency: string, locale?: string) => {
+  return (value: number): string => {
+    if (value >= 1000) {
+      // Format as compact currency (e.g., "$14k", "€16k")
+      const formatted = formatAmount({
+        amount: value / 1000,
+        currency,
+        locale: locale ?? undefined,
+        maximumFractionDigits: 0,
+        minimumFractionDigits: 0,
+      });
+      if (formatted) {
+        // Extract currency symbol and number, then add 'k'
+        // Handle different currency formats (e.g., "$14" -> "$14k", "14 €" -> "14k €")
+        const match = formatted.match(/([^\d\s]*)(\d+)([^\d\s]*)/);
+        if (match) {
+          const [, prefix, num, suffix] = match;
+          return `${prefix}${num}k${suffix}`;
+        }
+        return `${formatted}k`;
+      }
+      // Fallback if formatAmount fails
+      return `${currency}${(value / 1000).toFixed(0)}k`;
+    }
+    // For values < 1000, format normally
+    const formatted = formatAmount({
+      amount: value,
+      currency,
+      locale: locale ?? undefined,
+      maximumFractionDigits: 0,
+      minimumFractionDigits: 0,
+    });
+    return formatted || `${currency}${value}`;
+  };
+};
+
+// Calculate Y-axis domain and ticks for forecast charts
+export const calculateYAxisDomain = <
+  T extends { actual?: number; forecasted?: number },
+>(
+  data: T[],
+) => {
+  const allValues = data
+    .flatMap((d) => [d.actual ?? 0, d.forecasted ?? 0])
+    .filter((v) => v > 0);
+
+  if (allValues.length === 0) return { min: 0, max: 10000, ticks: [] };
+
+  const min = Math.min(...allValues);
+  const max = Math.max(...allValues);
+
+  // Round to nearest 2k for nice increments
+  const minRounded = Math.floor(min / 2000) * 2000;
+  const maxRounded = Math.ceil(max / 2000) * 2000;
+
+  // Generate ticks in 2k increments
+  const ticks: number[] = [];
+  for (let i = minRounded; i <= maxRounded; i += 2000) {
+    ticks.push(i);
+  }
+
+  return {
+    min: minRounded,
+    max: maxRounded,
+    ticks,
   };
 };
 

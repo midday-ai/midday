@@ -1,44 +1,147 @@
 "use client";
 
-import { BaseCanvas } from "@/components/canvas/base";
+import {
+  BaseCanvas,
+  CanvasChart,
+  CanvasGrid,
+  CanvasHeader,
+  CanvasSection,
+} from "@/components/canvas/base";
+import { CanvasContent } from "@/components/canvas/base/canvas-content";
+import { useUserQuery } from "@/hooks/use-user";
+import { formatAmount } from "@/utils/format";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { cashFlowArtifact } from "@api/ai/artifacts/cash-flow";
 import { CashFlowChart } from "../charts";
 
 export function CashFlowCanvas() {
-  // Generate sample cash flow data
-  const cashFlowData = Array.from({ length: 12 }, (_, i) => {
-    const inflow = Math.floor(Math.random() * 20000) + 15000;
-    const outflow = Math.floor(Math.random() * 15000) + 10000;
-    const netFlow = inflow - outflow;
-    const cumulativeFlow = i === 0 ? netFlow : netFlow + i * 2000;
+  const { data, status } = useArtifact(cashFlowArtifact);
+  const { data: user } = useUserQuery();
 
-    return {
-      month: new Date(2024, i).toLocaleDateString("en-US", { month: "short" }),
-      inflow,
-      outflow,
-      netFlow,
-      cumulativeFlow,
-    };
-  });
+  const isLoading = status === "loading";
+  const stage = data?.stage;
+
+  // Calculate cumulative flow and map artifact data to chart format
+  let cumulativeFlow = 0;
+  const cashFlowData =
+    data?.chart?.monthlyData?.map((item) => {
+      cumulativeFlow += item.netCashFlow;
+      return {
+        month: item.month,
+        inflow: item.income,
+        outflow: item.expenses,
+        netFlow: item.netCashFlow,
+        cumulativeFlow,
+      };
+    }) || [];
+
+  const lastMonthData =
+    cashFlowData.length > 0 ? cashFlowData[cashFlowData.length - 1] : null;
+
+  const cashFlowMetrics = data?.metrics
+    ? [
+        {
+          id: "current-cash-flow",
+          title: "Current Monthly Cash Flow",
+          value:
+            formatAmount({
+              currency: data.currency,
+              amount: Math.abs(lastMonthData?.netFlow ?? 0) || 0,
+              locale: user?.locale,
+            }) || "$0",
+          subtitle: lastMonthData
+            ? lastMonthData.netFlow >= 0
+              ? "Positive this month"
+              : "Negative this month"
+            : "No data",
+        },
+        {
+          id: "average-cash-flow",
+          title: "Average Monthly Cash Flow",
+          value:
+            formatAmount({
+              currency: data.currency,
+              amount: Math.abs(data.metrics.averageMonthlyCashFlow || 0) || 0,
+              locale: user?.locale,
+            }) || "$0",
+          subtitle: `Over ${cashFlowData.length} months`,
+        },
+        {
+          id: "total-income",
+          title: "Total Income",
+          value:
+            formatAmount({
+              currency: data.currency,
+              amount: data.metrics.totalIncome || 0,
+              locale: user?.locale,
+            }) || "$0",
+          subtitle: "All periods combined",
+        },
+        {
+          id: "total-expenses",
+          title: "Total Expenses",
+          value:
+            formatAmount({
+              currency: data.currency,
+              amount: data.metrics.totalExpenses || 0,
+              locale: user?.locale,
+            }) || "$0",
+          subtitle: "All periods combined",
+        },
+      ]
+    : [];
+
+  const showChart =
+    stage &&
+    ["loading", "chart_ready", "metrics_ready", "analysis_ready"].includes(
+      stage,
+    );
+
+  const showSummarySkeleton = !stage || stage !== "analysis_ready";
 
   return (
     <BaseCanvas>
-      <div className="space-y-4">
-        <div className="border-b border-gray-200 dark:border-gray-800 pb-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Cash Flow Analysis
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Monthly cash inflow vs outflow with cumulative trends
-          </p>
-        </div>
-        <div className="h-96">
-          <CashFlowChart
-            data={cashFlowData}
-            showAnimation={true}
-            showCumulative={true}
+      <CanvasHeader title="Analysis" isLoading={isLoading} />
+
+      <CanvasContent>
+        <div className="space-y-8">
+          {/* Show chart as soon as we have cash flow data */}
+          {showChart && (
+            <CanvasChart
+              title="Cash Flow Trend"
+              legend={{
+                items: [
+                  { label: "Income", type: "solid" },
+                  { label: "Expenses", type: "pattern" },
+                  { label: "Net Flow", type: "solid" },
+                  { label: "Cumulative", type: "dashed" },
+                ],
+              }}
+              isLoading={stage === "loading"}
+              height="20rem"
+            >
+              <CashFlowChart
+                data={cashFlowData}
+                height={320}
+                showLegend={false}
+                showCumulative={true}
+              />
+            </CanvasChart>
+          )}
+
+          {/* Always show metrics section */}
+          <CanvasGrid
+            items={cashFlowMetrics}
+            layout="2/2"
+            isLoading={stage === "loading" || stage === "chart_ready"}
           />
+
+          {/* Always show summary section */}
+          <CanvasSection title="Summary" isLoading={showSummarySkeleton}>
+            {data?.analysis?.summary}
+          </CanvasSection>
         </div>
-      </div>
+      </CanvasContent>
     </BaseCanvas>
   );
 }

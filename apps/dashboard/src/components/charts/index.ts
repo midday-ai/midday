@@ -1,8 +1,10 @@
 // Chart Components
 export { BurnRateChart } from "./burn-rate-chart";
 export { RevenueChart } from "./revenue-chart";
+export { RevenueForecastChart } from "./revenue-forecast-chart";
 export { ProfitChart } from "./profit-chart";
 export { ExpensesChart } from "./expenses-chart";
+export { CategoryExpenseDonutChart } from "./category-expense-donut-chart";
 export { RunwayChart } from "./runway-chart";
 export { CashFlowChart } from "./cash-flow-chart";
 

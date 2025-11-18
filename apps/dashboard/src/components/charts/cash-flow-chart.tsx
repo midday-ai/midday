@@ -1,15 +1,18 @@
 "use client";
 
-import { ReferenceLine, Tooltip } from "recharts";
 import {
-  BaseChart,
-  ChartLegend,
-  StyledBar,
-  StyledLine,
-  StyledTooltip,
-  StyledXAxis,
-  StyledYAxis,
-} from "./base-charts";
+  Bar,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { ChartLegend } from "./base-charts";
+import { createCompactTickFormatter } from "./chart-utils";
 import type { BaseChartProps } from "./chart-utils";
 
 interface CashFlowData {
@@ -50,6 +53,8 @@ export function CashFlowChart({
   showCumulative = true,
   showLegend = true,
 }: CashFlowChartProps) {
+  const tickFormatter = createCompactTickFormatter();
+
   return (
     <div className={`w-full ${className}`}>
       {/* Legend */}
@@ -68,32 +73,134 @@ export function CashFlowChart({
       )}
 
       {/* Chart */}
-      <BaseChart data={data} height={height}>
-        <StyledXAxis dataKey="month" />
-        <StyledYAxis
-          tickFormatter={(value: number) => `$${(value / 1000).toFixed(0)}k`}
-        />
+      <div style={{ height }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <ComposedChart
+            data={data}
+            margin={{ top: 0, right: 6, left: -20, bottom: 0 }}
+          >
+            <defs>
+              <pattern
+                id="outflowPattern"
+                x="0"
+                y="0"
+                width="8"
+                height="8"
+                patternUnits="userSpaceOnUse"
+              >
+                <rect
+                  width="8"
+                  height="8"
+                  fill="white"
+                  className="dark:fill-[#0c0c0c]"
+                />
+                <path
+                  d="M0,0 L8,8 M-2,6 L6,16 M-4,4 L4,12"
+                  stroke="#707070"
+                  className="dark:stroke-[#666666]"
+                  strokeWidth="0.8"
+                  opacity="0.6"
+                />
+              </pattern>
+            </defs>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="#e6e6e6"
+              className="dark:stroke-[#1d1d1d]"
+            />
+            <XAxis
+              dataKey="month"
+              axisLine={false}
+              tickLine={false}
+              tick={{
+                fill: "#707070",
+                fontSize: 10,
+                fontFamily: "Hedvig Letters Sans",
+                className: "dark:fill-[#666666]",
+              }}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{
+                fill: "#707070",
+                fontSize: 10,
+                fontFamily: "Hedvig Letters Sans",
+                className: "dark:fill-[#666666]",
+              }}
+              tickFormatter={tickFormatter}
+            />
 
-        <Tooltip
-          content={<StyledTooltip formatter={cashFlowTooltipFormatter} />}
-          wrapperStyle={{ zIndex: 9999 }}
-        />
+            <Tooltip
+              content={({ active, payload, label }) => {
+                if (active && payload && payload.length) {
+                  return (
+                    <div className="p-2 text-[10px] font-sans border bg-white dark:bg-[#0c0c0c] border-gray-200 dark:border-[#1d1d1d] text-black dark:text-white">
+                      <p className="mb-1 text-gray-500 dark:text-[#666666]">
+                        {label}
+                      </p>
+                      {payload.map((entry, index) => {
+                        const value =
+                          typeof entry.value === "number" ? entry.value : 0;
+                        const [formattedValue, name] = cashFlowTooltipFormatter(
+                          value,
+                          entry.dataKey as string,
+                        );
+                        return (
+                          <p
+                            key={`${entry.dataKey}-${index}`}
+                            className="text-black dark:text-white"
+                          >
+                            {name}: {formattedValue}
+                          </p>
+                        );
+                      })}
+                    </div>
+                  );
+                }
+                return null;
+              }}
+              wrapperStyle={{ zIndex: 9999 }}
+            />
 
-        <StyledBar dataKey="inflow" usePattern={false} />
-        <StyledBar dataKey="outflow" usePattern />
-        <StyledBar dataKey="netFlow" usePattern={false} />
+            {/* Income bars */}
+            <Bar dataKey="inflow" fill="white" isAnimationActive={false} />
+            {/* Expenses bars with pattern */}
+            <Bar
+              dataKey="outflow"
+              fill="url(#outflowPattern)"
+              isAnimationActive={false}
+            />
+            {/* Net flow bars */}
+            <Bar
+              dataKey="netFlow"
+              fill="#000000"
+              className="dark:fill-white"
+              isAnimationActive={false}
+            />
 
-        {showCumulative && (
-          <StyledLine dataKey="cumulativeFlow" strokeDasharray="5 5" />
-        )}
+            {showCumulative && (
+              <Line
+                type="monotone"
+                dataKey="cumulativeFlow"
+                stroke="#666666"
+                className="dark:stroke-[#999999]"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={false}
+                isAnimationActive={false}
+              />
+            )}
 
-        {/* Reference line at zero */}
-        <ReferenceLine
-          y={0}
-          stroke="hsl(var(--border))"
-          strokeDasharray="2 2"
-        />
-      </BaseChart>
+            {/* Reference line at zero */}
+            <ReferenceLine
+              y={0}
+              stroke="hsl(var(--border))"
+              strokeDasharray="2 2"
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }

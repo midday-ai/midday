@@ -92,9 +92,10 @@ export const getSpendingTool = tool({
         start: finalFrom,
         end: finalTo,
         sort: ["amount", "asc"], // Ascending because expenses are negative, so smallest (most negative) = largest expense
-        pageSize: 50, // Fetch more to ensure we get top 10 after processing
-        statuses: ["pending", "posted", "completed"],
+        pageSize: 10,
       });
+
+      console.log(transactionsResult.data);
 
       const totalSpending = periodSummary.totalSpending;
       const topCategory = periodSummary.topCategory;
@@ -213,36 +214,19 @@ ${categoryBreakdown}
 Top 5 Largest Transactions:
 ${topTransactionsText}
 
-Provide a concise 2-3 sentence summary analyzing the spending patterns and 2-3 actionable recommendations for cost optimization.`,
+Provide a concise analysis (2-3 sentences) of the key spending patterns and trends, followed by 2-3 actionable recommendations for cost optimization. Write it as natural, flowing text.`,
           },
         ],
       });
 
-      // Parse AI response
-      const aiResponseText = analysisResult.text;
-      const lines = aiResponseText
-        .split("\n")
-        .filter((line) => line.trim().length > 0);
-
-      // Extract summary (first 2-3 sentences)
+      // Use the AI response as the summary text
       const summaryText =
-        lines
-          .slice(0, 3)
-          .join(" ")
-          .replace(/^[-•*]\s*/, "")
-          .trim() ||
+        analysisResult.text.trim() ||
         `Total spending of ${formatAmount({
           amount: totalSpending,
           currency: targetCurrency,
           locale,
         })} with ${topCategory?.name || "various categories"} representing the largest share.`;
-
-      // Extract recommendations (remaining lines starting with bullets or dashes)
-      const recommendations = lines
-        .slice(3)
-        .map((line) => line.replace(/^[-•*]\s*/, "").trim())
-        .filter((line) => line.length > 0)
-        .slice(0, 3);
 
       // Update artifact with analysis
       if (showCanvas && analysis) {
@@ -264,7 +248,7 @@ Provide a concise 2-3 sentence summary analyzing the spending patterns and 2-3 a
           transactions: formattedTransactions,
           analysis: {
             summary: summaryText,
-            recommendations: recommendations.length > 0 ? recommendations : [],
+            recommendations: [],
           },
         });
       }
@@ -288,35 +272,31 @@ Provide a concise 2-3 sentence summary analyzing the spending patterns and 2-3 a
         )} (${topCategory.percentage.toFixed(1)}% of total)\n\n`;
       }
 
-      if (formattedTransactions.length > 0) {
-        responseText_output += `**Top ${formattedTransactions.length} Largest Transactions:**\n\n`;
-        responseText_output +=
-          "| Date | Vendor | Category | Amount | Share |\n";
-        responseText_output += "|------|--------|----------|--------|------|\n";
+      // Only show detailed transaction table, summary, and recommendations if canvas is not shown
+      if (!showCanvas) {
+        if (formattedTransactions.length > 0) {
+          responseText_output += `**Top ${formattedTransactions.length} Largest Transactions:**\n\n`;
+          responseText_output +=
+            "| Date | Vendor | Category | Amount | Share |\n";
+          responseText_output +=
+            "|------|--------|----------|--------|------|\n";
 
-        for (const transaction of formattedTransactions) {
-          const formattedAmount = formatAmount({
-            amount: transaction.amount,
-            currency: targetCurrency,
-            locale,
-          });
-          responseText_output += `| ${transaction.date} | ${transaction.vendor} | ${transaction.category} | ${formattedAmount} | ${transaction.share.toFixed(1)}% |\n`;
+          for (const transaction of formattedTransactions) {
+            const formattedAmount = formatAmount({
+              amount: transaction.amount,
+              currency: targetCurrency,
+              locale,
+            });
+            responseText_output += `| ${transaction.date} | ${transaction.vendor} | ${transaction.category} | ${formattedAmount} | ${transaction.share.toFixed(1)}% |\n`;
+          }
+          responseText_output += "\n";
         }
-        responseText_output += "\n";
-      }
 
-      responseText_output += `**Summary & Recommendations:**\n\n${summaryText}\n\n`;
-
-      if (recommendations.length > 0) {
-        responseText_output += "**Recommendations:**\n";
-        for (const rec of recommendations) {
-          responseText_output += `- ${rec}\n`;
-        }
-      }
-
-      if (showCanvas) {
+        responseText_output += `**Summary & Recommendations:**\n\n${summaryText}\n\n`;
+      } else {
+        // When canvas is shown, just mention that detailed analysis is available
         responseText_output +=
-          "\n\nA detailed visual spending analysis with charts and insights is available.";
+          "\n\nA detailed visual spending analysis with transaction details, charts, and insights is available.";
       }
 
       yield { text: responseText_output };

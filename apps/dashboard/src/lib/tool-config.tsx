@@ -127,6 +127,11 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     icon: Flame,
     description: "Calculating burn rate",
   },
+  getForecast: {
+    name: "Revenue Forecast",
+    icon: TrendingUp,
+    description: "Generating revenue forecast",
+  },
 
   // Analytics tools
   businessHealth: {

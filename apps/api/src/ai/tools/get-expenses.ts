@@ -1,9 +1,13 @@
 import { getWriter } from "@ai-sdk-tools/artifacts";
+import { openai } from "@ai-sdk/openai";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { expensesArtifact } from "@api/ai/artifacts/expenses";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { db } from "@midday/db/client";
+import { getSpending, getSpendingForPeriod } from "@midday/db/queries";
+import { formatAmount } from "@midday/utils/format";
+import { generateText } from "ai";
 import { tool } from "ai";
-import { endOfMonth, startOfMonth } from "date-fns";
 import { z } from "zod";
 
 const getExpensesSchema = z.object({
@@ -58,37 +62,201 @@ export const getExpensesTool = tool({
         );
       }
 
-      // TODO: Implement actual data fetching (use finalFrom and finalTo when implemented)
-      // For now, return empty data
       const targetCurrency = currency || appContext.baseCurrency || "USD";
+      const locale = appContext.locale || "en-US";
 
-      // Update artifact with dummy data if showCanvas is true
+      // Fetch category spending data
+      const spendingCategories = await getSpending(db, {
+        teamId,
+        from: finalFrom,
+        to: finalTo,
+        currency: currency ?? undefined,
+      });
+
+      const periodSummary = await getSpendingForPeriod(db, {
+        teamId,
+        from: finalFrom,
+        to: finalTo,
+        currency: currency ?? undefined,
+      });
+
+      const totalExpenses = periodSummary.totalSpending;
+      const topCategory = periodSummary.topCategory;
+
+      // Transform category data to match artifact schema
+      const categoryData = spendingCategories.map((cat) => ({
+        category: cat.name,
+        amount: cat.amount,
+        percentage: cat.percentage,
+        color: cat.color || undefined,
+      }));
+
+      // Calculate average monthly expenses
+      const fromDate = new Date(finalFrom);
+      const toDate = new Date(finalTo);
+      const monthsDiff =
+        (toDate.getFullYear() - fromDate.getFullYear()) * 12 +
+        (toDate.getMonth() - fromDate.getMonth()) +
+        1;
+      const averageMonthlyExpenses =
+        monthsDiff > 0 ? totalExpenses / monthsDiff : totalExpenses;
+
+      // Update artifact with chart data
+      if (showCanvas && analysis) {
+        await analysis.update({
+          stage: "chart_ready",
+          currency: targetCurrency,
+          chart: {
+            categoryData,
+          },
+        });
+
+        // Update artifact with metrics
+        await analysis.update({
+          stage: "metrics_ready",
+          currency: targetCurrency,
+          chart: {
+            categoryData,
+          },
+          metrics: {
+            totalExpenses,
+            averageMonthlyExpenses,
+            topCategory: topCategory
+              ? {
+                  name: topCategory.name,
+                  amount: topCategory.amount,
+                  percentage: topCategory.percentage,
+                }
+              : undefined,
+          },
+        });
+      }
+
+      // Generate AI summary focused on category breakdown
+      const categoryBreakdown = spendingCategories
+        .slice(0, 10)
+        .map(
+          (cat) =>
+            `${cat.name}: ${formatAmount({
+              amount: cat.amount,
+              currency: targetCurrency,
+              locale,
+            })} (${cat.percentage.toFixed(1)}%)`,
+        )
+        .join("\n");
+
+      const analysisResult = await generateText({
+        model: openai("gpt-4o-mini"),
+        messages: [
+          {
+            role: "user",
+            content: `Analyze this expense breakdown by category for ${appContext.companyName || "the business"}:
+
+Total Expenses: ${formatAmount({
+              amount: totalExpenses,
+              currency: targetCurrency,
+              locale,
+            })}
+Average Monthly Expenses: ${formatAmount({
+              amount: averageMonthlyExpenses,
+              currency: targetCurrency,
+              locale,
+            })}
+Top Category: ${topCategory?.name || "N/A"} - ${topCategory?.percentage.toFixed(1) || 0}% of total
+
+Expense Categories (sorted by amount):
+${categoryBreakdown}
+
+Provide a concise analysis (2-3 sentences) of the key expense patterns by category, highlighting which categories dominate spending and any notable trends. Write it as natural, flowing text.`,
+          },
+        ],
+      });
+
+      // Use the AI response as the summary text
+      const summaryText =
+        analysisResult.text.trim() ||
+        `Total expenses of ${formatAmount({
+          amount: totalExpenses,
+          currency: targetCurrency,
+          locale,
+        })} with ${topCategory?.name || "various categories"} representing the largest share.`;
+
+      // Update artifact with analysis
       if (showCanvas && analysis) {
         await analysis.update({
           stage: "analysis_ready",
           currency: targetCurrency,
           chart: {
-            categoryData: [],
+            categoryData,
           },
           metrics: {
-            totalExpenses: 0,
-            averageMonthlyExpenses: 0,
+            totalExpenses,
+            averageMonthlyExpenses,
+            topCategory: topCategory
+              ? {
+                  name: topCategory.name,
+                  amount: topCategory.amount,
+                  percentage: topCategory.percentage,
+                }
+              : undefined,
           },
           analysis: {
-            summary: "Expense analysis will be available soon.",
+            summary: summaryText,
             recommendations: [],
           },
         });
       }
 
-      yield {
-        text: "Expense analysis is not yet implemented. This feature will be available soon.",
-      };
+      // Format text response
+      const formattedTotalExpenses = formatAmount({
+        amount: totalExpenses,
+        currency: targetCurrency,
+        locale,
+      });
+
+      let responseText_output = `**Total Expenses:** ${formattedTotalExpenses}\n\n`;
+
+      if (topCategory) {
+        responseText_output += `**Top Category:** ${topCategory.name} - ${formatAmount(
+          {
+            amount: topCategory.amount,
+            currency: targetCurrency,
+            locale,
+          },
+        )} (${topCategory.percentage.toFixed(1)}% of total)\n\n`;
+      }
+
+      if (categoryData.length > 0) {
+        responseText_output += "**Top Expense Categories:**\n\n";
+        for (const cat of categoryData.slice(0, 5)) {
+          responseText_output += `- ${cat.category}: ${formatAmount({
+            amount: cat.amount,
+            currency: targetCurrency,
+            locale,
+          })} (${cat.percentage.toFixed(1)}%)\n`;
+        }
+        responseText_output += "\n";
+      }
+
+      // Only show summary if canvas is not shown
+      if (!showCanvas) {
+        responseText_output += `**Summary:**\n\n${summaryText}\n\n`;
+      } else {
+        // When canvas is shown, just mention that detailed analysis is available
+        responseText_output +=
+          "\n\nA detailed visual expense breakdown by category with charts and insights is available.";
+      }
+
+      yield { text: responseText_output };
 
       return {
-        totalExpenses: 0,
+        totalExpenses,
         currency: targetCurrency,
-        categoryData: [],
+        categoryData: categoryData.map((cat) => ({
+          category: cat.category,
+          amount: cat.amount,
+          percentage: cat.percentage,
+        })),
       };
     } catch (error) {
       yield {

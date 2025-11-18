@@ -48,6 +48,8 @@ export const TOOL_TO_ARTIFACT_MAP: Record<string, ArtifactType> = {
   spending: "spending-canvas",
   getTaxSummary: "tax-summary-canvas",
   taxSummary: "tax-summary-canvas",
+  getForecast: "forecast-canvas",
+  forecast: "forecast-canvas",
   cashFlowForecast: "forecast-canvas",
   stressTest: "stress-test-canvas",
   getCashFlowStressTest: "stress-test-canvas",
@@ -104,6 +106,18 @@ const CUSTOM_STAGE_MESSAGES: Partial<
     metrics_ready: "Metrics calculated, generating insights...",
     analysis_ready: "Analysis complete",
   },
+  "forecast-canvas": {
+    loading: "Preparing revenue forecast...",
+    chart_ready: "Chart data ready, calculating metrics...",
+    metrics_ready: "Metrics calculated, generating insights...",
+    analysis_ready: "Analysis complete",
+  },
+  "cash-flow-canvas": {
+    loading: "Preparing cash flow analysis...",
+    chart_ready: "Chart data ready, calculating metrics...",
+    metrics_ready: "Metrics calculated, generating insights...",
+    analysis_ready: "Analysis complete",
+  },
 };
 
 /**
@@ -125,6 +139,11 @@ const CUSTOM_SECTION_MESSAGES: Partial<
     Chart: "Loading chart data...",
     Metrics: "Calculating metrics...",
     Summary: "Generating analysis...",
+  },
+  "forecast-canvas": {
+    Chart: "Loading forecast data...",
+    Metrics: "Calculating forecast metrics...",
+    Summary: "Generating forecast insights...",
   },
 };
 

@@ -1,46 +1,140 @@
 "use client";
 
-import { BaseCanvas } from "@/components/canvas/base";
+import {
+  BaseCanvas,
+  CanvasChart,
+  CanvasGrid,
+  CanvasHeader,
+  CanvasSection,
+} from "@/components/canvas/base";
+import { CanvasContent } from "@/components/canvas/base/canvas-content";
+import { useUserQuery } from "@/hooks/use-user";
+import { formatAmount } from "@/utils/format";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { forecastArtifact } from "@api/ai/artifacts/forecast";
+import { RevenueForecastChart } from "../charts";
 
 export function ForecastCanvas() {
+  const { data, status } = useArtifact(forecastArtifact);
+  const { data: user } = useUserQuery();
+
+  const isLoading = status === "loading";
+  const stage = data?.stage;
+
+  // Use artifact data or fallback to empty/default values
+  const forecastData =
+    data?.chart?.monthlyData?.map((item) => ({
+      month: item.month,
+      actual: item.actual,
+      forecasted: item.forecasted > 0 ? item.forecasted : undefined,
+      date: item.date,
+    })) || [];
+
+  const forecastStartIndex = data?.chart?.forecastStartIndex;
+
+  const metrics = data?.metrics
+    ? [
+        {
+          id: "peak-month",
+          title: "Peak Month",
+          value: data.metrics.peakMonth,
+          subtitle: `${formatAmount({
+            currency: data.currency,
+            amount: data.metrics.peakMonthValue,
+            locale: user?.locale,
+          })} projected`,
+        },
+        {
+          id: "growth-rate",
+          title: "Growth Rate",
+          value: `${data.metrics.growthRate}%`,
+          subtitle: "Average monthly",
+        },
+        {
+          id: "unpaid-invoices",
+          title: "Unpaid Invoices",
+          value:
+            formatAmount({
+              currency: data.currency,
+              amount: data.metrics.unpaidInvoices,
+              locale: user?.locale,
+            }) || "$0",
+          subtitle: "Pending collection",
+        },
+        {
+          id: "billable-hours",
+          title: "Billable Hours",
+          value: `${data.metrics.billableHours}h`,
+          subtitle: "This month tracked",
+        },
+      ]
+    : [];
+
+  const showChart =
+    stage &&
+    ["loading", "chart_ready", "metrics_ready", "analysis_ready"].includes(
+      stage,
+    );
+
+  const showSummarySkeleton = !stage || stage !== "analysis_ready";
+
   return (
     <BaseCanvas>
-      <div className="space-y-4">
-        <div className="border-b border-gray-200 dark:border-gray-800 pb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Forecast
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Financial forecasts and projections
-              </p>
-            </div>
-          </div>
+      <CanvasHeader title="Analysis" isLoading={isLoading} />
+
+      <CanvasContent>
+        <div className="space-y-8">
+          {/* Show chart as soon as we have forecast data */}
+          {showChart && (
+            <CanvasChart
+              title="Revenue Forecast"
+              legend={{
+                items: [
+                  {
+                    label: "Actual",
+                    type: "line",
+                    lineStyle: "solid",
+                    color: "white",
+                  },
+                  {
+                    label: "Forecast",
+                    type: "line",
+                    lineStyle: "dashed",
+                    color: "#666666",
+                  },
+                  {
+                    label: "Forecast Start",
+                    type: "line",
+                    lineStyle: "reference",
+                  },
+                ],
+              }}
+              isLoading={stage === "loading"}
+              height="20rem"
+            >
+              <RevenueForecastChart
+                data={forecastData}
+                height={320}
+                currency={data?.currency || "USD"}
+                locale={user?.locale ?? undefined}
+                forecastStartIndex={forecastStartIndex}
+              />
+            </CanvasChart>
+          )}
+
+          {/* Always show metrics section */}
+          <CanvasGrid
+            items={metrics}
+            layout="2/2"
+            isLoading={stage === "loading" || stage === "chart_ready"}
+          />
+
+          {/* Always show summary section */}
+          <CanvasSection title="Summary" isLoading={showSummarySkeleton}>
+            {data?.analysis?.summary}
+          </CanvasSection>
         </div>
-        <div className="h-96 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-gray-400 dark:text-gray-600 mb-2">
-              <svg
-                className="w-12 h-12 mx-auto"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                />
-              </svg>
-            </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Forecast data will appear here
-            </p>
-          </div>
-        </div>
-      </div>
+      </CanvasContent>
     </BaseCanvas>
   );
 }

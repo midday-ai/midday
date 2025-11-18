@@ -2,6 +2,7 @@
 
 import { Skeleton } from "@/components/canvas/base/skeleton";
 import { generateCanvasPdf } from "@/utils/canvas-to-pdf";
+import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
@@ -56,7 +57,7 @@ export function CanvasHeader({
   }
 
   return (
-    <div className={cn("flex items-center justify-between mb-4", className)}>
+    <div className={cn("flex justify-between items-center mb-4", className)}>
       <div>
         <h2 className="text-[12px] leading-[23px] text-[#707070] dark:text-[#666666]">
           {title}
@@ -70,12 +71,9 @@ export function CanvasHeader({
       <div className="flex justify-end mb-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-            >
-              <Icons.MoreVertical size={16} />
-            </button>
+            <Button variant="ghost" size="icon" className="p-0 h-6 w-6">
+              <Icons.MoreVertical size={15} className="text-muted-foreground" />
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={handleDownloadReport}>

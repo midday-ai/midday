@@ -1,46 +1,224 @@
 "use client";
 
-import { BaseCanvas } from "@/components/canvas/base";
+import {
+  BaseCanvas,
+  CanvasHeader,
+  CanvasSection,
+} from "@/components/canvas/base";
+import { CanvasContent } from "@/components/canvas/base/canvas-content";
+import {
+  Skeleton,
+  SkeletonCard,
+  SkeletonLine,
+} from "@/components/canvas/base/skeleton";
+import { useUserQuery } from "@/hooks/use-user";
+import { formatAmount } from "@/utils/format";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { spendingArtifact } from "@api/ai/artifacts/spending";
+import { cn } from "@midday/ui/cn";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@midday/ui/table";
+import Link from "next/link";
 
 export function SpendingCanvas() {
+  const { data, status } = useArtifact(spendingArtifact);
+  const { data: user } = useUserQuery();
+
+  const isLoading = status === "loading";
+  const stage = data?.stage;
+
+  const transactions = data?.transactions || [];
+  const metrics = data?.metrics;
+  const currency = data?.currency || "USD";
+  const locale = user?.locale;
+
+  const showTransactions =
+    stage && ["metrics_ready", "analysis_ready"].includes(stage);
+  const showCards =
+    stage && ["metrics_ready", "analysis_ready"].includes(stage);
+  const showSummary = stage === "analysis_ready";
+
   return (
     <BaseCanvas>
-      <div className="space-y-4">
-        <div className="border-b border-gray-200 dark:border-gray-800 pb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Spending Overview
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Comprehensive spending patterns and trends
-              </p>
+      <CanvasHeader title="Spending" isLoading={isLoading} />
+
+      <CanvasContent>
+        <div className="space-y-8">
+          {/* Largest transactions section */}
+          {showTransactions ? (
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-[18px] font-normal font-serif text-black dark:text-white">
+                  Largest transactions
+                </h4>
+                <Link
+                  href="/transactions"
+                  className="text-[12px] text-[#707070] dark:text-[#666666] hover:underline"
+                >
+                  View all transactions
+                </Link>
+              </div>
+
+              {transactions.length > 0 ? (
+                <div className="border border-[#e6e6e6] dark:border-[#1d1d1d]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-b-0">
+                        <TableHead className="text-[12px] text-[#707070] dark:text-[#666666] font-normal">
+                          Date
+                        </TableHead>
+                        <TableHead className="text-[12px] text-[#707070] dark:text-[#666666] font-normal">
+                          Vendor
+                        </TableHead>
+                        <TableHead className="text-[12px] text-[#707070] dark:text-[#666666] font-normal">
+                          Category
+                        </TableHead>
+                        <TableHead className="text-right text-[12px] text-[#707070] dark:text-[#666666] font-normal">
+                          Amount
+                        </TableHead>
+                        <TableHead className="text-right text-[12px] text-[#707070] dark:text-[#666666] font-normal">
+                          Share
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {transactions.slice(0, 10).map((transaction, index) => (
+                        <TableRow
+                          key={`${transaction.date}-${transaction.vendor}-${transaction.amount}-${index}`}
+                          className={cn(
+                            index === transactions.slice(0, 10).length - 1 &&
+                              "border-b-0",
+                          )}
+                        >
+                          <TableCell className="text-[12px] text-black dark:text-white">
+                            {transaction.date}
+                          </TableCell>
+                          <TableCell className="text-[12px] text-black dark:text-white">
+                            {transaction.vendor}
+                          </TableCell>
+                          <TableCell className="text-[12px] text-black dark:text-white">
+                            {transaction.category}
+                          </TableCell>
+                          <TableCell className="text-right text-[12px] text-black dark:text-white font-hedvig-sans-slashed-zero">
+                            {formatAmount({
+                              currency,
+                              amount: transaction.amount,
+                              locale,
+                            })}
+                          </TableCell>
+                          <TableCell className="text-right text-[12px] text-[#707070] dark:text-[#666666]">
+                            {transaction.share.toFixed(1)}%
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-[12px] text-[#707070] dark:text-[#666666] py-8 text-center">
+                  No transactions found
+                </div>
+              )}
             </div>
-          </div>
-        </div>
-        <div className="h-96 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-gray-400 dark:text-gray-600 mb-2">
-              <svg
-                className="w-12 h-12 mx-auto"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-                />
-              </svg>
+          ) : (
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <Skeleton width="8rem" height="1.125rem" />
+                <Skeleton width="6rem" height="0.875rem" />
+              </div>
+              <div className="border border-[#e6e6e6] dark:border-[#1d1d1d]">
+                <div className="p-3 space-y-3">
+                  {Array.from(
+                    { length: 5 },
+                    (_, i) => `skeleton-transaction-row-${i}`,
+                  ).map((key) => (
+                    <SkeletonLine key={key} width="100%" />
+                  ))}
+                </div>
+              </div>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Spending data will appear here
-            </p>
-          </div>
+          )}
+
+          {/* Two summary cards */}
+          {showCards ? (
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              <div className="border p-3 bg-white dark:bg-[#0c0c0c] border-[#e6e6e6] dark:border-[#1d1d1d]">
+                <div className="text-[12px] text-[#707070] dark:text-[#666666] mb-1">
+                  Spending this month
+                </div>
+                <div className="text-[18px] font-normal font-hedvig-sans-slashed-zero text-black dark:text-white mb-1">
+                  {metrics?.currentMonthSpending
+                    ? formatAmount({
+                        currency,
+                        amount: metrics.currentMonthSpending,
+                        locale,
+                      })
+                    : formatAmount({
+                        currency,
+                        amount: 0,
+                        locale,
+                      })}
+                </div>
+                <div className="text-[10px] text-[#707070] dark:text-[#666666]">
+                  Across {transactions.length} high-value transaction
+                  {transactions.length !== 1 ? "s" : ""}
+                </div>
+              </div>
+
+              <div className="border p-3 bg-white dark:bg-[#0c0c0c] border-[#e6e6e6] dark:border-[#1d1d1d]">
+                <div className="text-[12px] text-[#707070] dark:text-[#666666] mb-1">
+                  Top category
+                </div>
+                <div className="text-[18px] font-normal font-hedvig-sans-slashed-zero text-black dark:text-white mb-1">
+                  {metrics?.topCategory
+                    ? `${metrics.topCategory.name} — ${formatAmount({
+                        currency,
+                        amount: metrics.topCategory.amount,
+                        locale,
+                      })}`
+                    : "—"}
+                </div>
+                <div className="text-[10px] text-[#707070] dark:text-[#666666]">
+                  Largest share of monthly spend
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              {Array.from(
+                { length: 2 },
+                (_, i) => `skeleton-summary-card-${i}`,
+              ).map((key) => (
+                <SkeletonCard key={key}>
+                  <SkeletonLine width="5rem" />
+                  <Skeleton width="8rem" height="1.125rem" className="mb-1" />
+                  <SkeletonLine width="6rem" />
+                </SkeletonCard>
+              ))}
+            </div>
+          )}
+
+          {/* Summary & Recommendations section */}
+          <CanvasSection
+            title="Summary & Recommendations"
+            isLoading={!showSummary}
+          >
+            {data?.analysis?.summary && (
+              <div className="space-y-3">
+                <div className="whitespace-pre-wrap">
+                  {data.analysis.summary}
+                </div>
+              </div>
+            )}
+          </CanvasSection>
         </div>
-      </div>
+      </CanvasContent>
     </BaseCanvas>
   );
 }

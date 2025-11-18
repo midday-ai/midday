@@ -23,6 +23,7 @@ export const expensesArtifact = artifact(
             category: z.string(),
             amount: z.number(),
             percentage: z.number(),
+            color: z.string().optional(),
           }),
         ),
         monthlyData: z
@@ -48,6 +49,16 @@ export const expensesArtifact = artifact(
             percentage: z.number(),
           })
           .optional(),
+        saasSubscriptions: z
+          .object({
+            name: z.string(),
+            amount: z.number(),
+            percentage: z.number(),
+            changeVsAverage: z.number().optional(),
+          })
+          .optional(),
+        categoryCoverage: z.number().optional(),
+        optimizationPotential: z.number().optional(),
       })
       .optional(),
 

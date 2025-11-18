@@ -84,6 +84,41 @@ const SUGGESTED_ACTIONS_CONFIG = [
       pageSize: 10,
     },
   },
+  {
+    id: "get-profit-analysis",
+    toolName: "getProfitAnalysis",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
+  {
+    id: "get-invoice-payment-analysis",
+    toolName: "getInvoicePaymentAnalysis",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
+  {
+    id: "get-tax-summary",
+    toolName: "getTaxSummary",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
+  {
+    id: "get-business-health-score",
+    toolName: "getBusinessHealthScore",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
+  {
+    id: "get-forecast",
+    toolName: "getForecast",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
 ] as const;
 
 export const suggestedActionsRouter = createTRPCRouter({

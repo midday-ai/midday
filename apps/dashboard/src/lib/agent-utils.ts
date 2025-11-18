@@ -57,7 +57,9 @@ export const getToolMessage = (toolName: string | null) => {
     runway: "Calculating your cash runway...",
     getRunway: "Calculating your cash runway...",
     spending: "Analyzing your spending trends...",
+    getSpending: "Analyzing your spending patterns...",
     taxSummary: "Preparing your tax summary...",
+    getForecast: "Generating your revenue forecast...",
 
     // Analytics tools
     businessHealth: "Computing your business health score...",

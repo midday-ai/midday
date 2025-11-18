@@ -34,7 +34,7 @@ export default async function Overview(props: Props) {
     trpc.widgets.getWidgetPreferences.queryOptions(),
   );
 
-  prefetch(trpc.suggestedActions.list.queryOptions({ limit: 4 }));
+  prefetch(trpc.suggestedActions.list.queryOptions({ limit: 6 }));
 
   const chat = currentChatId
     ? await queryClient.fetchQuery(

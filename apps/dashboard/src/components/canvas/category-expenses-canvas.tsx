@@ -1,46 +1,163 @@
 "use client";
 
-import { BaseCanvas } from "@/components/canvas/base";
+import {
+  BaseCanvas,
+  CanvasChart,
+  CanvasGrid,
+  CanvasHeader,
+  CanvasSection,
+} from "@/components/canvas/base";
+import { CanvasContent } from "@/components/canvas/base/canvas-content";
+import { CategoryExpenseDonutChart } from "@/components/charts/category-expense-donut-chart";
+import { useUserQuery } from "@/hooks/use-user";
+import { formatAmount } from "@/utils/format";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { expensesArtifact } from "@api/ai/artifacts/expenses";
 
 export function CategoryExpensesCanvas() {
+  const { data, status } = useArtifact(expensesArtifact);
+  const { data: user } = useUserQuery();
+
+  const isLoading = status === "loading";
+  const stage = data?.stage;
+
+  const currency = data?.currency || "USD";
+  const locale = user?.locale || undefined;
+  const categoryData = data?.chart?.categoryData || [];
+  const metrics = data?.metrics;
+
+  // Categories are already sorted by amount (largest first) from the database
+  // Get the largest expense categories for the chart
+  const largestCategories = categoryData.slice(0, 10); // Top 10 categories
+
+  // Gray shades for legend (matching the chart)
+  const grayShades = [
+    "#ffffff", // White for first
+    "#707070", // Gray for second
+    "#A0A0A0", // Light gray for third
+    "#606060", // Dark gray for fourth
+  ];
+
+  // Prepare chart data (colors will be handled by the chart component)
+  const chartDataWithColors = largestCategories;
+
+  // Prepare legend items - show top 3 largest categories with gray shades
+  const legendItems = chartDataWithColors.slice(0, 3).map((item, index) => ({
+    label: item.category,
+    type: "solid" as const,
+    color: grayShades[index % grayShades.length],
+  }));
+
+  // Get top 4 categories for metrics cards
+  const topCategories = largestCategories.slice(0, 4);
+  const totalExpenses = metrics?.totalExpenses || 0;
+  const categoryCoverage = metrics?.categoryCoverage;
+  const optimizationPotential = metrics?.optimizationPotential;
+
+  // Prepare metrics cards dynamically from largest categories
+  const expenseMetrics: Array<{
+    id: string;
+    title: string;
+    value: string;
+    subtitle: string;
+  }> = topCategories.map((category, index) => ({
+    id: `category-${index}`,
+    title: index === 0 ? "Top Category" : category.category,
+    value:
+      index === 0
+        ? category.category
+        : formatAmount({
+            currency,
+            amount: category.amount,
+            locale,
+          }) || "$0",
+    subtitle:
+      index === 0
+        ? `${
+            formatAmount({
+              currency,
+              amount: category.amount,
+              locale,
+            }) || "$0"
+          } this month`
+        : `${category.percentage.toFixed(1)}% of total`,
+  }));
+
+  // If we have fewer than 4 categories, add general metrics
+  if (topCategories.length < 4) {
+    if (categoryCoverage !== undefined) {
+      expenseMetrics.push({
+        id: "category-coverage",
+        title: "Category Coverage",
+        value: `${Math.round(categoryCoverage)}%`,
+        subtitle: "Tagged transactions",
+      });
+    }
+    if (
+      optimizationPotential !== undefined &&
+      optimizationPotential > 0 &&
+      expenseMetrics.length < 4
+    ) {
+      expenseMetrics.push({
+        id: "optimization-potential",
+        title: "Optimization Potential",
+        value:
+          formatAmount({
+            currency,
+            amount: optimizationPotential,
+            locale,
+          }) || "$0",
+        subtitle: "Quick wins this month",
+      });
+    }
+  }
+
+  const showChart =
+    stage &&
+    ["loading", "chart_ready", "metrics_ready", "analysis_ready"].includes(
+      stage,
+    );
+
+  const showSummarySkeleton = !stage || stage !== "analysis_ready";
+
   return (
     <BaseCanvas>
-      <div className="space-y-4">
-        <div className="border-b border-gray-200 dark:border-gray-800 pb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Category Expenses
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Detailed breakdown by expense categories
-              </p>
-            </div>
-          </div>
+      <CanvasHeader title="Analysis" isLoading={isLoading} />
+
+      <CanvasContent>
+        <div className="space-y-8">
+          {/* Chart Section */}
+          {showChart && (
+            <CanvasChart
+              title="Category Expense Breakdown"
+              legend={{
+                items: legendItems,
+              }}
+              isLoading={stage === "loading"}
+              height="20rem"
+            >
+              <CategoryExpenseDonutChart
+                data={chartDataWithColors}
+                currency={currency}
+                locale={locale}
+                height={320}
+              />
+            </CanvasChart>
+          )}
+
+          {/* Metrics Grid */}
+          <CanvasGrid
+            items={expenseMetrics}
+            layout="2/2"
+            isLoading={stage === "loading" || stage === "chart_ready"}
+          />
+
+          {/* Summary Section */}
+          <CanvasSection title="Summary" isLoading={showSummarySkeleton}>
+            {data?.analysis?.summary}
+          </CanvasSection>
         </div>
-        <div className="h-96 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-gray-400 dark:text-gray-600 mb-2">
-              <svg
-                className="w-12 h-12 mx-auto"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"
-                />
-              </svg>
-            </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Category expenses data will appear here
-            </p>
-          </div>
-        </div>
-      </div>
+      </CanvasContent>
     </BaseCanvas>
   );
 }
