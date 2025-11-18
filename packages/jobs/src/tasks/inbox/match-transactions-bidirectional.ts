@@ -35,7 +35,6 @@ export const matchTransactionsBidirectional = schemaTask({
         const inboxMatch = await findInboxMatches(db, {
           teamId,
           transactionId,
-          includeAlreadyMatched: false,
         });
 
         if (inboxMatch) {

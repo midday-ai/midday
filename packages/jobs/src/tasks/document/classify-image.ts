@@ -32,11 +32,11 @@ export const classifyImage = schemaTask({
     const data = await updateDocumentByFileName(getDb(), {
       fileName,
       teamId,
-      title: result.title,
-      summary: result.summary,
+      title: result.title ?? undefined,
+      summary: result.summary ?? undefined,
       content: result.content ? limitWords(result.content, 10000) : undefined,
-      date: result.date,
-      language: result.language,
+      date: result.date ?? undefined,
+      language: result.language ?? undefined,
       // If the document has no tags, we consider it as processed
       processingStatus:
         !result.tags || result.tags.length === 0 ? "completed" : undefined,

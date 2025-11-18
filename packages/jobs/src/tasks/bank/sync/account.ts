@@ -136,10 +136,16 @@ export const syncAccount = schemaTask({
         return;
       }
 
+      // Map transactions to ensure merchant_name is included (default to null if missing)
+      const mappedTransactions = transactionsData.map((tx: any) => ({
+        ...tx,
+        merchant_name: tx.merchant_name ?? null,
+      }));
+
       // Upsert transactions in batches of 500
       // This is to avoid memory issues with the DB
-      for (let i = 0; i < transactionsData.length; i += BATCH_SIZE) {
-        const transactionBatch = transactionsData.slice(i, i + BATCH_SIZE);
+      for (let i = 0; i < mappedTransactions.length; i += BATCH_SIZE) {
+        const transactionBatch = mappedTransactions.slice(i, i + BATCH_SIZE);
         await upsertTransactions.triggerAndWait({
           transactions: transactionBatch,
           teamId,

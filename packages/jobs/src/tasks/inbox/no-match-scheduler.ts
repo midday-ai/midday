@@ -38,7 +38,6 @@ export const noMatchScheduler = schedules.task({
         .update(inbox)
         .set({
           status: "no_match",
-          updatedAt: sql`NOW()`,
         })
         .where(
           and(
@@ -70,7 +69,9 @@ export const noMatchScheduler = schedules.task({
       if (result.length > 0) {
         const teamCounts = result.reduce(
           (acc, item) => {
-            acc[item.teamId] = (acc[item.teamId] || 0) + 1;
+            if (item.teamId) {
+              acc[item.teamId] = (acc[item.teamId] || 0) + 1;
+            }
             return acc;
           },
           {} as Record<string, number>,

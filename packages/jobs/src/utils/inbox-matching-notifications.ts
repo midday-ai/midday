@@ -1,6 +1,6 @@
 import type { Database } from "@midday/db/client";
 import { getInboxById, getTransactionById } from "@midday/db/queries";
-import type { MatchResult } from "@midday/db/queries/transaction-matching";
+import type { MatchResult } from "@midday/db/queries";
 import { logger, tasks } from "@trigger.dev/sdk";
 
 // Helper function to trigger appropriate notifications based on matching results

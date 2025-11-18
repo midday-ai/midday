@@ -5,7 +5,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@jobs/*": ["src/*"]
+      "@jobs/*": ["src/*"],
+      "@db/*": ["../../packages/db/src/*"],
+      "@api/*": ["../../apps/api/src/*"]
     },
     "jsx": "react-jsx"
   }
