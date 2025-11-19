@@ -2,7 +2,8 @@
 
 import { ChatMessageActions } from "@/components/chat/chat-message-actions";
 import { FaviconStack } from "@/components/favicon-stack";
-import { Message, MessageContent } from "@midday/ui/message";
+import { useUserQuery } from "@/hooks/use-user";
+import { Message, MessageAvatar, MessageContent } from "@midday/ui/message";
 import { Response } from "@midday/ui/response";
 import type { UIMessage } from "ai";
 import { PaperclipIcon } from "lucide-react";
@@ -73,6 +74,8 @@ export function ChatMessages({
   messages,
   isStreaming = false,
 }: ChatMessagesProps) {
+  const { data: user } = useUserQuery();
+
   return (
     <>
       {messages.map(({ parts, ...message }, index) => {
@@ -163,6 +166,12 @@ export function ChatMessages({
                     })}
                   </div>
                 </MessageContent>
+                {message.role === "user" && user && (
+                  <MessageAvatar
+                    src={user.avatarUrl || ""}
+                    name={user.fullName || user.email || ""}
+                  />
+                )}
               </Message>
             )}
 
@@ -172,6 +181,12 @@ export function ChatMessages({
                 <MessageContent className="max-w-[80%]">
                   <Response>{textContent}</Response>
                 </MessageContent>
+                {message.role === "user" && user && (
+                  <MessageAvatar
+                    src={user.avatarUrl || ""}
+                    name={user.fullName || user.email || ""}
+                  />
+                )}
               </Message>
             )}
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { formatAmount } from "@/utils/format";
 import { ReferenceLine, Tooltip } from "recharts";
 import {
   BaseChart,
@@ -10,7 +11,7 @@ import {
   StyledXAxis,
   StyledYAxis,
 } from "./base-charts";
-import { useChartMargin } from "./chart-utils";
+import { createYAxisTickFormatter, useChartMargin } from "./chart-utils";
 import type { BaseChartProps } from "./chart-utils";
 
 interface RevenueData {
@@ -23,14 +24,24 @@ interface RevenueChartProps extends BaseChartProps {
   data: RevenueData[];
   showTarget?: boolean;
   showLegend?: boolean;
+  currency?: string;
+  locale?: string;
 }
 
 // Custom formatter for revenue tooltip
 const revenueTooltipFormatter = (
   value: any,
   name: string,
+  currency = "USD",
+  locale?: string,
 ): [string, string] => {
-  const formattedValue = `$${value.toLocaleString()}`;
+  const formattedValue =
+    formatAmount({
+      amount: value,
+      currency,
+      locale: locale ?? undefined,
+      maximumFractionDigits: 0,
+    }) || `${currency}${value.toLocaleString()}`;
   const displayName = name === "revenue" ? "Revenue" : "Target";
   return [formattedValue, displayName];
 };
@@ -41,8 +52,10 @@ export function RevenueChart({
   className = "",
   showTarget = true,
   showLegend = true,
+  currency = "USD",
+  locale,
 }: RevenueChartProps) {
-  const tickFormatter = (value: number) => `$${(value / 1000).toFixed(0)}k`;
+  const tickFormatter = createYAxisTickFormatter(currency, locale);
   const maxValues = data.map((d) => ({
     maxValue: Math.max(d.revenue, d.target ?? 0),
   }));
@@ -73,7 +86,13 @@ export function RevenueChart({
         <StyledYAxis tickFormatter={tickFormatter} />
 
         <Tooltip
-          content={<StyledTooltip formatter={revenueTooltipFormatter} />}
+          content={
+            <StyledTooltip
+              formatter={(value: any, name: string) =>
+                revenueTooltipFormatter(value, name, currency, locale)
+              }
+            />
+          }
           wrapperStyle={{ zIndex: 9999 }}
         />
 

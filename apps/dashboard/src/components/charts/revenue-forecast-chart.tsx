@@ -82,7 +82,7 @@ const CustomTooltip = ({
         locale: locale ?? undefined,
         maximumFractionDigits: 0,
       });
-      return formatted || `$${amount.toLocaleString()}`;
+      return formatted || `${amount.toLocaleString()}`;
     };
 
     // Determine label text based on reference logic

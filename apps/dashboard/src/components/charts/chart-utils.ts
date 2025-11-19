@@ -26,10 +26,6 @@ export const commonChartConfig = {
 } as const;
 
 // Utility functions
-export const formatCurrency = (value: number): string => {
-  return `$${(value / 1000).toFixed(0)}k`;
-};
-
 export const formatPercentage = (value: number): string => {
   return `${value.toFixed(1)}%`;
 };
@@ -57,40 +53,16 @@ export const createCompactTickFormatter = () => {
   };
 };
 
-// Currency-aware Y-axis tick formatter (e.g., "$14k", "€16k")
+// Currency-aware Y-axis tick formatter (e.g., "14k", "16k") - no currency symbol
 export const createYAxisTickFormatter = (currency: string, locale?: string) => {
   return (value: number): string => {
-    if (value >= 1000) {
-      // Format as compact currency (e.g., "$14k", "€16k")
-      const formatted = formatAmount({
-        amount: value / 1000,
-        currency,
-        locale: locale ?? undefined,
-        maximumFractionDigits: 0,
-        minimumFractionDigits: 0,
-      });
-      if (formatted) {
-        // Extract currency symbol and number, then add 'k'
-        // Handle different currency formats (e.g., "$14" -> "$14k", "14 €" -> "14k €")
-        const match = formatted.match(/([^\d\s]*)(\d+)([^\d\s]*)/);
-        if (match) {
-          const [, prefix, num, suffix] = match;
-          return `${prefix}${num}k${suffix}`;
-        }
-        return `${formatted}k`;
-      }
-      // Fallback if formatAmount fails
-      return `${currency}${(value / 1000).toFixed(0)}k`;
+    if (value >= 1000000) {
+      return `${(value / 1000000).toFixed(1)}M`;
     }
-    // For values < 1000, format normally
-    const formatted = formatAmount({
-      amount: value,
-      currency,
-      locale: locale ?? undefined,
-      maximumFractionDigits: 0,
-      minimumFractionDigits: 0,
-    });
-    return formatted || `${currency}${value}`;
+    if (value >= 1000) {
+      return `${(value / 1000).toFixed(0)}k`;
+    }
+    return value.toString();
   };
 };
 

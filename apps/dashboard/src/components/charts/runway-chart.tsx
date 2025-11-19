@@ -1,5 +1,6 @@
 "use client";
 
+import { formatAmount } from "@/utils/format";
 import { ReferenceLine, Tooltip } from "recharts";
 import {
   BaseChart,
@@ -10,7 +11,7 @@ import {
   StyledXAxis,
   StyledYAxis,
 } from "./base-charts";
-import { useChartMargin } from "./chart-utils";
+import { createYAxisTickFormatter, useChartMargin } from "./chart-utils";
 import type { BaseChartProps } from "./chart-utils";
 
 interface RunwayData {
@@ -24,11 +25,24 @@ interface RunwayChartProps extends BaseChartProps {
   data: RunwayData[];
   showProjection?: boolean;
   showLegend?: boolean;
+  currency?: string;
+  locale?: string;
 }
 
 // Custom formatter for runway tooltip
-const runwayTooltipFormatter = (value: any, name: string): [string, string] => {
-  const formattedValue = `$${value.toLocaleString()}`;
+const runwayTooltipFormatter = (
+  value: any,
+  name: string,
+  currency = "USD",
+  locale?: string,
+): [string, string] => {
+  const formattedValue =
+    formatAmount({
+      amount: value,
+      currency,
+      locale: locale ?? undefined,
+      maximumFractionDigits: 0,
+    }) || `${currency}${value.toLocaleString()}`;
   const displayName =
     name === "cashRemaining"
       ? "Cash Remaining"
@@ -44,8 +58,10 @@ export function RunwayChart({
   className = "",
   showProjection = true,
   showLegend = true,
+  currency = "USD",
+  locale,
 }: RunwayChartProps) {
-  const tickFormatter = (value: number) => `$${(value / 1000).toFixed(0)}k`;
+  const tickFormatter = createYAxisTickFormatter(currency, locale);
   const maxValues = data.map((d) => ({
     maxValue: Math.max(d.cashRemaining, d.burnRate, d.projectedCash ?? 0),
   }));
@@ -77,7 +93,13 @@ export function RunwayChart({
         <StyledYAxis tickFormatter={tickFormatter} />
 
         <Tooltip
-          content={<StyledTooltip formatter={runwayTooltipFormatter} />}
+          content={
+            <StyledTooltip
+              formatter={(value: any, name: string) =>
+                runwayTooltipFormatter(value, name, currency, locale)
+              }
+            />
+          }
           wrapperStyle={{ zIndex: 9999 }}
         />
 

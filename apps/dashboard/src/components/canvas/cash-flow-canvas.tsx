@@ -8,18 +8,19 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { useUserQuery } from "@/hooks/use-user";
-import { formatAmount } from "@/utils/format";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { useCanvasData } from "@/components/canvas/hooks";
+import {
+  formatCurrencyAmount,
+  shouldShowChart,
+  shouldShowMetricsSkeleton,
+  shouldShowSummarySkeleton,
+} from "@/components/canvas/utils";
 import { cashFlowArtifact } from "@api/ai/artifacts/cash-flow";
 import { CashFlowChart } from "../charts";
 
 export function CashFlowCanvas() {
-  const { data, status } = useArtifact(cashFlowArtifact);
-  const { data: user } = useUserQuery();
-
-  const isLoading = status === "loading";
-  const stage = data?.stage;
+  const { data, isLoading, stage, currency, locale } =
+    useCanvasData(cashFlowArtifact);
 
   // Calculate cumulative flow and map artifact data to chart format
   let cumulativeFlow = 0;
@@ -43,12 +44,11 @@ export function CashFlowCanvas() {
         {
           id: "current-cash-flow",
           title: "Current Monthly Cash Flow",
-          value:
-            formatAmount({
-              currency: data.currency,
-              amount: Math.abs(lastMonthData?.netFlow ?? 0) || 0,
-              locale: user?.locale,
-            }) || "$0",
+          value: formatCurrencyAmount(
+            Math.abs(lastMonthData?.netFlow ?? 0) || 0,
+            currency,
+            locale,
+          ),
           subtitle: lastMonthData
             ? lastMonthData.netFlow >= 0
               ? "Positive this month"
@@ -58,46 +58,38 @@ export function CashFlowCanvas() {
         {
           id: "average-cash-flow",
           title: "Average Monthly Cash Flow",
-          value:
-            formatAmount({
-              currency: data.currency,
-              amount: Math.abs(data.metrics.averageMonthlyCashFlow || 0) || 0,
-              locale: user?.locale,
-            }) || "$0",
+          value: formatCurrencyAmount(
+            Math.abs(data.metrics.averageMonthlyCashFlow || 0) || 0,
+            currency,
+            locale,
+          ),
           subtitle: `Over ${cashFlowData.length} months`,
         },
         {
           id: "total-income",
           title: "Total Income",
-          value:
-            formatAmount({
-              currency: data.currency,
-              amount: data.metrics.totalIncome || 0,
-              locale: user?.locale,
-            }) || "$0",
+          value: formatCurrencyAmount(
+            data.metrics.totalIncome || 0,
+            currency,
+            locale,
+          ),
           subtitle: "All periods combined",
         },
         {
           id: "total-expenses",
           title: "Total Expenses",
-          value:
-            formatAmount({
-              currency: data.currency,
-              amount: data.metrics.totalExpenses || 0,
-              locale: user?.locale,
-            }) || "$0",
+          value: formatCurrencyAmount(
+            data.metrics.totalExpenses || 0,
+            currency,
+            locale,
+          ),
           subtitle: "All periods combined",
         },
       ]
     : [];
 
-  const showChart =
-    stage &&
-    ["loading", "chart_ready", "metrics_ready", "analysis_ready"].includes(
-      stage,
-    );
-
-  const showSummarySkeleton = !stage || stage !== "analysis_ready";
+  const showChart = shouldShowChart(stage);
+  const showSummarySkeleton = shouldShowSummarySkeleton(stage);
 
   return (
     <BaseCanvas>
@@ -125,6 +117,8 @@ export function CashFlowCanvas() {
                 height={320}
                 showLegend={false}
                 showCumulative={true}
+                currency={currency}
+                locale={locale}
               />
             </CanvasChart>
           )}
@@ -133,7 +127,7 @@ export function CashFlowCanvas() {
           <CanvasGrid
             items={cashFlowMetrics}
             layout="2/2"
-            isLoading={stage === "loading" || stage === "chart_ready"}
+            isLoading={shouldShowMetricsSkeleton(stage)}
           />
 
           {/* Always show summary section */}

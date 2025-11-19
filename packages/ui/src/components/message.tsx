@@ -50,7 +50,7 @@ export const MessageAvatar = ({
   className,
   ...props
 }: MessageAvatarProps) => (
-  <Avatar className={cn("size-5", className)} {...props}>
+  <Avatar className={cn("size-4", className)} {...props}>
     <AvatarImage alt="" className="mt-0 mb-0" src={src} />
     <AvatarFallback>{name?.slice(0, 2) || "ME"}</AvatarFallback>
   </Avatar>

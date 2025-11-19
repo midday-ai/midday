@@ -1,5 +1,6 @@
 "use client";
 
+import { formatAmount } from "@/utils/format";
 import {
   Bar,
   CartesianGrid,
@@ -12,7 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import { ChartLegend } from "./base-charts";
-import { createCompactTickFormatter, useChartMargin } from "./chart-utils";
+import { createYAxisTickFormatter, useChartMargin } from "./chart-utils";
 import type { BaseChartProps } from "./chart-utils";
 
 interface CashFlowData {
@@ -27,14 +28,24 @@ interface CashFlowChartProps extends BaseChartProps {
   data: CashFlowData[];
   showCumulative?: boolean;
   showLegend?: boolean;
+  currency?: string;
+  locale?: string;
 }
 
 // Custom formatter for cash flow tooltip
 const cashFlowTooltipFormatter = (
   value: any,
   name: string,
+  currency = "USD",
+  locale?: string,
 ): [string, string] => {
-  const formattedValue = `$${value.toLocaleString()}`;
+  const formattedValue =
+    formatAmount({
+      amount: value,
+      currency,
+      locale: locale ?? undefined,
+      maximumFractionDigits: 0,
+    }) || `${currency}${value.toLocaleString()}`;
   const displayName =
     name === "inflow"
       ? "Cash Inflow"
@@ -52,8 +63,10 @@ export function CashFlowChart({
   className = "",
   showCumulative = true,
   showLegend = true,
+  currency = "USD",
+  locale,
 }: CashFlowChartProps) {
-  const tickFormatter = createCompactTickFormatter();
+  const tickFormatter = createYAxisTickFormatter(currency, locale);
   // Calculate margin based on the maximum value across all data points
   const maxValues = data.map((d) => ({
     maxValue: Math.max(
@@ -155,6 +168,8 @@ export function CashFlowChart({
                         const [formattedValue, name] = cashFlowTooltipFormatter(
                           value,
                           entry.dataKey as string,
+                          currency,
+                          locale,
                         );
                         return (
                           <p

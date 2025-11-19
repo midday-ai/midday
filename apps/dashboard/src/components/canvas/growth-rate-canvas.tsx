@@ -8,18 +8,19 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { useUserQuery } from "@/hooks/use-user";
-import { formatAmount } from "@/utils/format";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { useCanvasData } from "@/components/canvas/hooks";
+import {
+  formatCurrencyAmount,
+  shouldShowChart,
+  shouldShowMetricsSkeleton,
+  shouldShowSummarySkeleton,
+} from "@/components/canvas/utils";
 import { growthRateArtifact } from "@api/ai/artifacts/growth-rate";
 import { GrowthRateChart } from "../charts/growth-rate-chart";
 
 export function GrowthRateCanvas() {
-  const { data, status } = useArtifact(growthRateArtifact);
-  const { data: user } = useUserQuery();
-
-  const isLoading = status === "loading";
-  const stage = data?.stage;
+  const { data, isLoading, stage, currency, locale } =
+    useCanvasData(growthRateArtifact);
 
   // Use artifact data or fallback to empty/default values
   const chartData =
@@ -50,34 +51,31 @@ export function GrowthRateCanvas() {
         {
           id: "current-total",
           title: `Current ${periodLabel}`,
-          value:
-            formatAmount({
-              currency: data.currency,
-              amount: data.metrics.currentTotal || 0,
-              locale: user?.locale,
-            }) || "$0",
+          value: formatCurrencyAmount(
+            data.metrics.currentTotal || 0,
+            currency,
+            locale,
+          ),
           subtitle: `${revenueTypeLabel} ${typeLabel.toLowerCase()}`,
         },
         {
           id: "previous-total",
           title: `Previous ${periodLabel}`,
-          value:
-            formatAmount({
-              currency: data.currency,
-              amount: data.metrics.previousTotal || 0,
-              locale: user?.locale,
-            }) || "$0",
+          value: formatCurrencyAmount(
+            data.metrics.previousTotal || 0,
+            currency,
+            locale,
+          ),
           subtitle: "Comparison period",
         },
         {
           id: "change-amount",
           title: "Change Amount",
-          value:
-            formatAmount({
-              currency: data.currency,
-              amount: Math.abs(data.metrics.changeAmount || 0),
-              locale: user?.locale,
-            }) || "$0",
+          value: formatCurrencyAmount(
+            Math.abs(data.metrics.changeAmount || 0),
+            currency,
+            locale,
+          ),
           subtitle:
             data.metrics.trend === "positive"
               ? "Increase"
@@ -88,13 +86,8 @@ export function GrowthRateCanvas() {
       ]
     : [];
 
-  const showChart =
-    stage &&
-    ["loading", "chart_ready", "metrics_ready", "analysis_ready"].includes(
-      stage,
-    );
-
-  const showSummarySkeleton = !stage || stage !== "analysis_ready";
+  const showChart = shouldShowChart(stage);
+  const showSummarySkeleton = shouldShowSummarySkeleton(stage);
 
   return (
     <BaseCanvas>
@@ -122,8 +115,8 @@ export function GrowthRateCanvas() {
               <GrowthRateChart
                 data={chartData}
                 height={320}
-                currency={data?.currency || "USD"}
-                locale={user?.locale ?? undefined}
+                currency={currency}
+                locale={locale}
               />
             </CanvasChart>
           )}
@@ -132,7 +125,7 @@ export function GrowthRateCanvas() {
           <CanvasGrid
             items={growthMetrics}
             layout="2/2"
-            isLoading={stage === "loading" || stage === "chart_ready"}
+            isLoading={shouldShowMetricsSkeleton(stage)}
           />
 
           {/* Always show summary section */}

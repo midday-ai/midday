@@ -8,18 +8,19 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { useUserQuery } from "@/hooks/use-user";
-import { formatAmount } from "@/utils/format";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { useCanvasData } from "@/components/canvas/hooks";
+import {
+  formatCurrencyAmount,
+  shouldShowChart,
+  shouldShowMetricsSkeleton,
+  shouldShowSummarySkeleton,
+} from "@/components/canvas/utils";
 import { profitArtifact } from "@api/ai/artifacts/profit";
 import { ProfitChart } from "../charts";
 
 export function ProfitCanvas() {
-  const { data, status } = useArtifact(profitArtifact);
-  const { data: user } = useUserQuery();
-
-  const isLoading = status === "loading";
-  const stage = data?.stage;
+  const { data, isLoading, stage, currency, locale } =
+    useCanvasData(profitArtifact);
 
   // Use artifact data or fallback to empty/default values
   const profitData =
@@ -45,35 +46,31 @@ export function ProfitCanvas() {
         {
           id: "current-revenue",
           title: "Current Period Revenue",
-          value:
-            formatAmount({
-              currency: data.currency,
-              amount: currentPeriod?.revenue || metrics.totalRevenue || 0,
-              locale: user?.locale,
-            }) || "$0",
+          value: formatCurrencyAmount(
+            currentPeriod?.revenue || metrics.totalRevenue || 0,
+            currency,
+            locale,
+          ),
           subtitle: "Total revenue",
         },
         {
           id: "current-expenses",
           title: "Current Period Expenses",
-          value:
-            formatAmount({
-              currency: data.currency,
-              amount: currentPeriod?.expenses || metrics.totalExpenses || 0,
-              locale: user?.locale,
-            }) || "$0",
+          value: formatCurrencyAmount(
+            currentPeriod?.expenses || metrics.totalExpenses || 0,
+            currency,
+            locale,
+          ),
           subtitle: "Total expenses",
         },
         {
           id: "current-profit",
           title: "Current Period Profit",
-          value:
-            formatAmount({
-              currency: data.currency,
-              amount:
-                currentPeriod?.profit || metrics.currentMonthlyProfit || 0,
-              locale: user?.locale,
-            }) || "$0",
+          value: formatCurrencyAmount(
+            currentPeriod?.profit || metrics.currentMonthlyProfit || 0,
+            currency,
+            locale,
+          ),
           subtitle: metrics.currentMonthlyProfitChange
             ? `${metrics.currentMonthlyProfitChange.percentage > 0 ? "+" : ""}${metrics.currentMonthlyProfitChange.percentage}% vs ${metrics.currentMonthlyProfitChange.period}`
             : "Net profit",
@@ -97,34 +94,31 @@ export function ProfitCanvas() {
               {
                 id: "previous-revenue",
                 title: "Previous Period Revenue",
-                value:
-                  formatAmount({
-                    currency: data.currency,
-                    amount: previousPeriod.revenue,
-                    locale: user?.locale,
-                  }) || "$0",
+                value: formatCurrencyAmount(
+                  previousPeriod.revenue,
+                  currency,
+                  locale,
+                ),
                 subtitle: "For comparison",
               },
               {
                 id: "previous-expenses",
                 title: "Previous Period Expenses",
-                value:
-                  formatAmount({
-                    currency: data.currency,
-                    amount: previousPeriod.expenses,
-                    locale: user?.locale,
-                  }) || "$0",
+                value: formatCurrencyAmount(
+                  previousPeriod.expenses,
+                  currency,
+                  locale,
+                ),
                 subtitle: "For comparison",
               },
               {
                 id: "previous-profit",
                 title: "Previous Period Profit",
-                value:
-                  formatAmount({
-                    currency: data.currency,
-                    amount: previousPeriod.profit,
-                    locale: user?.locale,
-                  }) || "$0",
+                value: formatCurrencyAmount(
+                  previousPeriod.profit,
+                  currency,
+                  locale,
+                ),
                 subtitle: "For comparison",
               },
             ]
@@ -139,13 +133,8 @@ export function ProfitCanvas() {
       ]
     : [];
 
-  const showChart =
-    stage &&
-    ["loading", "chart_ready", "metrics_ready", "analysis_ready"].includes(
-      stage,
-    );
-
-  const showSummarySkeleton = !stage || stage !== "analysis_ready";
+  const showChart = shouldShowChart(stage);
+  const showSummarySkeleton = shouldShowSummarySkeleton(stage);
 
   return (
     <BaseCanvas>
@@ -171,8 +160,8 @@ export function ProfitCanvas() {
                 data={profitData}
                 height={320}
                 showLegend={false}
-                currency={data?.currency || "USD"}
-                locale={user?.locale ?? undefined}
+                currency={currency}
+                locale={locale}
               />
             </CanvasChart>
           )}
@@ -181,7 +170,7 @@ export function ProfitCanvas() {
           <CanvasGrid
             items={profitMetrics}
             layout="2/2"
-            isLoading={stage === "loading" || stage === "chart_ready"}
+            isLoading={shouldShowMetricsSkeleton(stage)}
           />
 
           {/* Always show summary section */}

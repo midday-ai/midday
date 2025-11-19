@@ -10,10 +10,14 @@ import {
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
 import { CategoryExpenseDonutChart } from "@/components/charts/category-expense-donut-chart";
 import { useTeamQuery } from "@/hooks/use-team";
-import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
-import { formatAmount } from "@/utils/format";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { useCanvasData } from "@/components/canvas/hooks";
+import {
+  formatCurrencyAmount,
+  shouldShowChart,
+  shouldShowMetricsSkeleton,
+  shouldShowSummarySkeleton,
+} from "@/components/canvas/utils";
 import { taxSummaryArtifact } from "@api/ai/artifacts/tax-summary";
 import { getDefaultTaxType } from "@midday/utils";
 
@@ -73,16 +77,10 @@ function getTaxTerminology(
 }
 
 export function TaxSummaryCanvas() {
-  const { data, status } = useArtifact(taxSummaryArtifact);
-  const { data: user } = useUserQuery();
+  const { data, isLoading, stage, currency, locale } =
+    useCanvasData(taxSummaryArtifact);
   const { data: team } = useTeamQuery();
   const t = useI18n();
-
-  const isLoading = status === "loading";
-  const stage = data?.stage;
-
-  const currency = data?.currency || "USD";
-  const locale = user?.locale || undefined;
   const taxTerms = getTaxTerminology(team?.countryCode ?? undefined, t);
 
   const categoryData = data?.chart?.categoryData || [];
@@ -105,23 +103,21 @@ export function TaxSummaryCanvas() {
     {
       id: "total-tax-liability",
       title: taxTerms.liability,
-      value:
-        formatAmount({
-          currency,
-          amount: metrics?.totalTaxLiability || 0,
-          locale,
-        }) || "$0",
+      value: formatCurrencyAmount(
+        metrics?.totalTaxLiability || 0,
+        currency,
+        locale,
+      ),
       subtitle: taxTerms.paid,
     },
     {
       id: "total-taxable-income",
       title: "Total Taxable Income",
-      value:
-        formatAmount({
-          currency,
-          amount: metrics?.totalTaxableIncome || 0,
-          locale,
-        }) || "$0",
+      value: formatCurrencyAmount(
+        metrics?.totalTaxableIncome || 0,
+        currency,
+        locale,
+      ),
       subtitle: "Income subject to tax",
     },
     {
@@ -135,11 +131,11 @@ export function TaxSummaryCanvas() {
       title: taxTerms.category,
       value: metrics?.topCategories?.[0]?.category || "N/A",
       subtitle: metrics?.topCategories?.[0]
-        ? `${formatAmount({
+        ? `${formatCurrencyAmount(
+            metrics.topCategories[0].taxAmount,
             currency,
-            amount: metrics.topCategories[0].taxAmount,
             locale,
-          })} (${metrics.topCategories[0].percentage.toFixed(1)}%)`
+          )} (${metrics.topCategories[0].percentage.toFixed(1)}%)`
         : "No data",
     },
   ];
@@ -149,23 +145,17 @@ export function TaxSummaryCanvas() {
     taxMetrics.push({
       id: "previous-period-tax",
       title: taxTerms.previousPeriod,
-      value:
-        formatAmount({
-          currency,
-          amount: metrics.previousPeriod.totalTaxLiability,
-          locale,
-        }) || "$0",
+      value: formatCurrencyAmount(
+        metrics.previousPeriod.totalTaxLiability,
+        currency,
+        locale,
+      ),
       subtitle: "For comparison",
     });
   }
 
-  const showChart =
-    stage &&
-    ["loading", "chart_ready", "metrics_ready", "analysis_ready"].includes(
-      stage,
-    );
-
-  const showSummarySkeleton = !stage || stage !== "analysis_ready";
+  const showChart = shouldShowChart(stage);
+  const showSummarySkeleton = shouldShowSummarySkeleton(stage);
 
   return (
     <BaseCanvas>
@@ -193,7 +183,7 @@ export function TaxSummaryCanvas() {
           <CanvasGrid
             items={taxMetrics}
             layout="2/2"
-            isLoading={stage === "loading" || stage === "chart_ready"}
+            isLoading={shouldShowMetricsSkeleton(stage)}
           />
 
           {/* Summary Section */}

@@ -29,7 +29,6 @@ export {
 export {
   chartClasses,
   commonChartConfig,
-  formatCurrency,
   formatPercentage,
   formatNumber,
   generateSampleData,

@@ -40,7 +40,7 @@ export function ChatInput() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const status = useChatStatus();
-  const { sendMessage } = useChatActions();
+  const { sendMessage, stop } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
   const { current } = useArtifacts({
@@ -68,17 +68,17 @@ export function ChatInput() {
   } = useChatStore();
 
   const handleSubmit = (message: ChatInputMessage) => {
-    // If currently streaming or submitted, stop instead of submitting
-    if (status === "streaming" || status === "submitted") {
-      stop();
-      return;
-    }
-
     const hasText = Boolean(message.text);
     const hasAttachments = Boolean(message.files?.length);
 
     if (!(hasText || hasAttachments)) {
       return;
+    }
+
+    // If currently streaming, stop the current stream first
+    if (status === "streaming" || status === "submitted") {
+      stop?.();
+      // Continue to send the new message after stopping
     }
 
     // Clear old suggestions before sending new message
@@ -158,6 +158,12 @@ export function ChatInput() {
                   if (e.key === "Enter" && !showCommands) {
                     e.preventDefault();
                     if (input.trim()) {
+                      // If currently streaming, stop the current stream first
+                      if (status === "streaming" || status === "submitted") {
+                        stop?.();
+                        // Continue to send the new message after stopping
+                      }
+
                       // Clear old suggestions before sending new message
                       clearSuggestions();
 

@@ -9,17 +9,17 @@ import {
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
 import { InvoicePaymentChart } from "@/components/charts/invoice-payment-chart";
-import { useUserQuery } from "@/hooks/use-user";
-import { formatAmount } from "@/utils/format";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { useCanvasData } from "@/components/canvas/hooks";
+import {
+  shouldShowChart,
+  shouldShowMetricsSkeleton,
+  shouldShowSummarySkeleton,
+} from "@/components/canvas/utils";
 import { invoicePaymentAnalysisArtifact } from "@api/ai/artifacts/invoice-payment-analysis";
 
 export function InvoicePaymentCanvas() {
-  const { data, status } = useArtifact(invoicePaymentAnalysisArtifact);
-  const { data: user } = useUserQuery();
-
-  const isLoading = status === "loading";
-  const stage = data?.stage;
+  const { data, isLoading, stage, locale } =
+    useCanvasData(invoicePaymentAnalysisArtifact);
 
   // Use artifact data or fallback to empty/default values
   const chartData =
@@ -58,13 +58,8 @@ export function InvoicePaymentCanvas() {
       ]
     : [];
 
-  const showChart =
-    stage &&
-    ["loading", "chart_ready", "metrics_ready", "analysis_ready"].includes(
-      stage,
-    );
-
-  const showSummarySkeleton = !stage || stage !== "analysis_ready";
+  const showChart = shouldShowChart(stage);
+  const showSummarySkeleton = shouldShowSummarySkeleton(stage);
 
   return (
     <BaseCanvas>
@@ -88,7 +83,7 @@ export function InvoicePaymentCanvas() {
               <InvoicePaymentChart
                 data={chartData}
                 height={320}
-                locale={user?.locale ?? undefined}
+                locale={locale}
               />
             </CanvasChart>
           )}
@@ -97,7 +92,7 @@ export function InvoicePaymentCanvas() {
           <CanvasGrid
             items={paymentMetrics}
             layout="2/2"
-            isLoading={stage === "loading" || stage === "chart_ready"}
+            isLoading={shouldShowMetricsSkeleton(stage)}
           />
 
           {/* Always show summary section */}

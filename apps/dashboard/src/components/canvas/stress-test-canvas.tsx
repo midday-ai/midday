@@ -9,19 +9,17 @@ import {
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
 import { StressTestChart } from "@/components/charts/stress-test-chart";
-import { useUserQuery } from "@/hooks/use-user";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { useCanvasData } from "@/components/canvas/hooks";
+import {
+  shouldShowChart,
+  shouldShowMetricsSkeleton,
+  shouldShowSummarySkeleton,
+} from "@/components/canvas/utils";
 import { cashFlowStressTestArtifact } from "@api/ai/artifacts/cash-flow-stress-test";
 
 export function StressTestCanvas() {
-  const { data, status } = useArtifact(cashFlowStressTestArtifact);
-  const { data: user } = useUserQuery();
-
-  const isLoading = status === "loading";
-  const stage = data?.stage;
-
-  const currency = data?.currency || "USD";
-  const locale = user?.locale || undefined;
+  const { data, isLoading, stage, currency, locale } =
+    useCanvasData(cashFlowStressTestArtifact);
 
   const projectedCashBalance = data?.chart?.projectedCashBalance || [];
   const metrics = data?.metrics;
@@ -84,13 +82,8 @@ export function StressTestCanvas() {
     );
   }
 
-  const showChart =
-    stage &&
-    ["loading", "chart_ready", "metrics_ready", "analysis_ready"].includes(
-      stage,
-    );
-
-  const showSummarySkeleton = !stage || stage !== "analysis_ready";
+  const showChart = shouldShowChart(stage);
+  const showSummarySkeleton = shouldShowSummarySkeleton(stage);
 
   return (
     <BaseCanvas>
@@ -140,7 +133,7 @@ export function StressTestCanvas() {
           <CanvasGrid
             items={stressTestMetrics}
             layout="2/2"
-            isLoading={stage === "loading" || stage === "chart_ready"}
+            isLoading={shouldShowMetricsSkeleton(stage)}
           />
 
           {/* Summary Section */}

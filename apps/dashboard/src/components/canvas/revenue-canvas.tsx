@@ -8,18 +8,19 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { useUserQuery } from "@/hooks/use-user";
-import { formatAmount } from "@/utils/format";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { useCanvasData } from "@/components/canvas/hooks";
+import {
+  formatCurrencyAmount,
+  shouldShowChart,
+  shouldShowMetricsSkeleton,
+  shouldShowSummarySkeleton,
+} from "@/components/canvas/utils";
 import { revenueArtifact } from "@api/ai/artifacts/revenue";
 import { RevenueTrendChart } from "../charts/revenue-trend-chart";
 
 export function RevenueCanvas() {
-  const { data, status } = useArtifact(revenueArtifact);
-  const { data: user } = useUserQuery();
-
-  const isLoading = status === "loading";
-  const stage = data?.stage;
+  const { data, isLoading, stage, currency, locale } =
+    useCanvasData(revenueArtifact);
 
   // Use artifact data or fallback to empty/default values
   const revenueData =
@@ -35,34 +36,31 @@ export function RevenueCanvas() {
         {
           id: "total-revenue",
           title: "Total Revenue",
-          value:
-            formatAmount({
-              currency: data.currency,
-              amount: data.metrics.totalRevenue || 0,
-              locale: user?.locale,
-            }) || "$0",
+          value: formatCurrencyAmount(
+            data.metrics.totalRevenue || 0,
+            currency,
+            locale,
+          ),
           subtitle: "All periods combined",
         },
         {
           id: "average-monthly-revenue",
           title: "Average Monthly Revenue",
-          value:
-            formatAmount({
-              currency: data.currency,
-              amount: data.metrics.averageMonthlyRevenue || 0,
-              locale: user?.locale,
-            }) || "$0",
+          value: formatCurrencyAmount(
+            data.metrics.averageMonthlyRevenue || 0,
+            currency,
+            locale,
+          ),
           subtitle: "Over last 12 months",
         },
         {
           id: "current-month-revenue",
           title: "Current Month Revenue",
-          value:
-            formatAmount({
-              currency: data.currency,
-              amount: data.metrics.currentMonthRevenue || 0,
-              locale: user?.locale,
-            }) || "$0",
+          value: formatCurrencyAmount(
+            data.metrics.currentMonthRevenue || 0,
+            currency,
+            locale,
+          ),
           subtitle: "Latest month",
         },
         {
@@ -74,13 +72,8 @@ export function RevenueCanvas() {
       ]
     : [];
 
-  const showChart =
-    stage &&
-    ["loading", "chart_ready", "metrics_ready", "analysis_ready"].includes(
-      stage,
-    );
-
-  const showSummarySkeleton = !stage || stage !== "analysis_ready";
+  const showChart = shouldShowChart(stage);
+  const showSummarySkeleton = shouldShowSummarySkeleton(stage);
 
   return (
     <BaseCanvas>
@@ -106,8 +99,8 @@ export function RevenueCanvas() {
                 data={revenueData}
                 height={320}
                 showLegend={false}
-                currency={data?.currency || "USD"}
-                locale={user?.locale ?? undefined}
+                currency={currency}
+                locale={locale}
               />
             </CanvasChart>
           )}
@@ -116,7 +109,7 @@ export function RevenueCanvas() {
           <CanvasGrid
             items={revenueMetrics}
             layout="2/2"
-            isLoading={stage === "loading" || stage === "chart_ready"}
+            isLoading={shouldShowMetricsSkeleton(stage)}
           />
 
           {/* Always show summary section */}

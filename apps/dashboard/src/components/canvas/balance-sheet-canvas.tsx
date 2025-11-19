@@ -104,8 +104,17 @@ export function BalanceSheetCanvas() {
                   currency,
                   amount: metrics.workingCapital,
                   locale: user?.locale,
-                }) || "$0"
-              : "$0",
+                }) ||
+                formatAmount({
+                  currency: data?.currency || "USD",
+                  amount: 0,
+                  locale: user?.locale,
+                })
+              : formatAmount({
+                  currency: data?.currency || "USD",
+                  amount: 0,
+                  locale: user?.locale,
+                }),
           subtitle: "Current assets - current liabilities",
         },
         {

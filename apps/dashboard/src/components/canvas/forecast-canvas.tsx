@@ -8,18 +8,19 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { useUserQuery } from "@/hooks/use-user";
-import { formatAmount } from "@/utils/format";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { useCanvasData } from "@/components/canvas/hooks";
+import {
+  formatCurrencyAmount,
+  shouldShowChart,
+  shouldShowMetricsSkeleton,
+  shouldShowSummarySkeleton,
+} from "@/components/canvas/utils";
 import { forecastArtifact } from "@api/ai/artifacts/forecast";
 import { RevenueForecastChart } from "../charts";
 
 export function ForecastCanvas() {
-  const { data, status } = useArtifact(forecastArtifact);
-  const { data: user } = useUserQuery();
-
-  const isLoading = status === "loading";
-  const stage = data?.stage;
+  const { data, isLoading, stage, currency, locale } =
+    useCanvasData(forecastArtifact);
 
   // Use artifact data or fallback to empty/default values
   const forecastData =
@@ -38,11 +39,11 @@ export function ForecastCanvas() {
           id: "peak-month",
           title: "Peak Month",
           value: data.metrics.peakMonth,
-          subtitle: `${formatAmount({
-            currency: data.currency,
-            amount: data.metrics.peakMonthValue,
-            locale: user?.locale,
-          })} projected`,
+          subtitle: `${formatCurrencyAmount(
+            data.metrics.peakMonthValue,
+            currency,
+            locale,
+          )} projected`,
         },
         {
           id: "growth-rate",
@@ -53,12 +54,11 @@ export function ForecastCanvas() {
         {
           id: "unpaid-invoices",
           title: "Unpaid Invoices",
-          value:
-            formatAmount({
-              currency: data.currency,
-              amount: data.metrics.unpaidInvoices,
-              locale: user?.locale,
-            }) || "$0",
+          value: formatCurrencyAmount(
+            data.metrics.unpaidInvoices,
+            currency,
+            locale,
+          ),
           subtitle: "Pending collection",
         },
         {
@@ -70,13 +70,8 @@ export function ForecastCanvas() {
       ]
     : [];
 
-  const showChart =
-    stage &&
-    ["loading", "chart_ready", "metrics_ready", "analysis_ready"].includes(
-      stage,
-    );
-
-  const showSummarySkeleton = !stage || stage !== "analysis_ready";
+  const showChart = shouldShowChart(stage);
+  const showSummarySkeleton = shouldShowSummarySkeleton(stage);
 
   return (
     <BaseCanvas>
@@ -115,8 +110,8 @@ export function ForecastCanvas() {
               <RevenueForecastChart
                 data={forecastData}
                 height={320}
-                currency={data?.currency || "USD"}
-                locale={user?.locale ?? undefined}
+                currency={currency}
+                locale={locale}
                 forecastStartIndex={forecastStartIndex}
               />
             </CanvasChart>
@@ -126,7 +121,7 @@ export function ForecastCanvas() {
           <CanvasGrid
             items={metrics}
             layout="2/2"
-            isLoading={stage === "loading" || stage === "chart_ready"}
+            isLoading={shouldShowMetricsSkeleton(stage)}
           />
 
           {/* Always show summary section */}

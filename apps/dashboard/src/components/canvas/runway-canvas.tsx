@@ -7,17 +7,17 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { useUserQuery } from "@/hooks/use-user";
-import { formatAmount } from "@/utils/format";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { useCanvasData } from "@/components/canvas/hooks";
+import {
+  formatCurrencyAmount,
+  shouldShowMetricsSkeleton,
+  shouldShowSummarySkeleton,
+} from "@/components/canvas/utils";
 import { runwayArtifact } from "@api/ai/artifacts/runway";
 
 export function RunwayCanvas() {
-  const { data, status } = useArtifact(runwayArtifact);
-  const { data: user } = useUserQuery();
-
-  const isLoading = status === "loading";
-  const stage = data?.stage;
+  const { data, isLoading, stage, currency, locale } =
+    useCanvasData(runwayArtifact);
 
   const metrics = data?.metrics;
   const statusValue = metrics?.status;
@@ -43,23 +43,21 @@ export function RunwayCanvas() {
         {
           id: "cash-balance",
           title: "Cash Balance",
-          value:
-            formatAmount({
-              currency: data.currency,
-              amount: metrics.cashBalance || 0,
-              locale: user?.locale,
-            }) || "$0",
+          value: formatCurrencyAmount(
+            metrics.cashBalance || 0,
+            currency,
+            locale,
+          ),
           subtitle: "Current available cash",
         },
         {
           id: "average-burn-rate",
           title: "Average Burn Rate",
-          value:
-            formatAmount({
-              currency: data.currency,
-              amount: metrics.averageBurnRate || 0,
-              locale: user?.locale,
-            }) || "$0",
+          value: formatCurrencyAmount(
+            metrics.averageBurnRate || 0,
+            currency,
+            locale,
+          ),
           subtitle: "Monthly spending average",
         },
         {
@@ -85,7 +83,7 @@ export function RunwayCanvas() {
       ]
     : [];
 
-  const showSummarySkeleton = !stage || stage !== "analysis_ready";
+  const showSummarySkeleton = shouldShowSummarySkeleton(stage);
 
   return (
     <BaseCanvas>
@@ -97,7 +95,7 @@ export function RunwayCanvas() {
           <CanvasGrid
             items={runwayMetrics}
             layout="2/2"
-            isLoading={stage === "loading" || stage === "chart_ready"}
+            isLoading={shouldShowMetricsSkeleton(stage)}
           />
 
           {/* Always show summary section */}

@@ -8,18 +8,19 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { useUserQuery } from "@/hooks/use-user";
-import { formatAmount } from "@/utils/format";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { useCanvasData } from "@/components/canvas/hooks";
+import {
+  formatCurrencyAmount,
+  shouldShowChart,
+  shouldShowMetricsSkeleton,
+  shouldShowSummarySkeleton,
+} from "@/components/canvas/utils";
 import { burnRateArtifact } from "@api/ai/artifacts/burn-rate";
 import { BurnRateChart } from "../charts";
 
 export function BurnRateCanvas() {
-  const { data, status } = useArtifact(burnRateArtifact);
-  const { data: user } = useUserQuery();
-
-  const isLoading = status === "loading";
-  const stage = data?.stage;
+  const { data, isLoading, stage, currency, locale } =
+    useCanvasData(burnRateArtifact);
 
   // Use artifact data or fallback to empty/default values
   const burnRateData =
@@ -36,12 +37,11 @@ export function BurnRateCanvas() {
         {
           id: "current-burn",
           title: "Current Monthly Burn",
-          value:
-            formatAmount({
-              currency: data.currency,
-              amount: data.metrics.currentMonthlyBurn || 0,
-              locale: user?.locale,
-            }) || (data.metrics.currentMonthlyBurn || 0).toLocaleString(),
+          value: formatCurrencyAmount(
+            data.metrics.currentMonthlyBurn || 0,
+            currency,
+            locale,
+          ),
           subtitle: data.analysis?.burnRateChange
             ? `${data.analysis.burnRateChange.percentage}% vs ${data.analysis.burnRateChange.period}`
             : stage === "loading"
@@ -59,36 +59,28 @@ export function BurnRateCanvas() {
         {
           id: "average-burn",
           title: "Average Burn Rate",
-          value:
-            formatAmount({
-              currency: data.currency,
-              amount: data.metrics.averageBurnRate || 0,
-              locale: user?.locale,
-            }) || (data.metrics.averageBurnRate || 0).toLocaleString(),
+          value: formatCurrencyAmount(
+            data.metrics.averageBurnRate || 0,
+            currency,
+            locale,
+          ),
           subtitle: `Over last ${data.chart?.monthlyData?.length || 0} months`,
         },
         {
           id: "highest-category",
           title: data.metrics.topCategory?.name || "Top Category",
           value: `${data.metrics.topCategory?.percentage || 0}%`,
-          subtitle: `${
-            formatAmount({
-              currency: data.currency,
-              amount: data.metrics.topCategory?.amount || 0,
-              locale: user?.locale,
-            }) || (data.metrics.topCategory?.amount || 0).toLocaleString()
-          } of monthly burn`,
+          subtitle: `${formatCurrencyAmount(
+            data.metrics.topCategory?.amount || 0,
+            currency,
+            locale,
+          )} of monthly burn`,
         },
       ]
     : [];
 
-  const showChart =
-    stage &&
-    ["loading", "chart_ready", "metrics_ready", "analysis_ready"].includes(
-      stage,
-    );
-
-  const showSummarySkeleton = !stage || stage !== "analysis_ready";
+  const showChart = shouldShowChart(stage);
+  const showSummarySkeleton = shouldShowSummarySkeleton(stage);
 
   return (
     <BaseCanvas>
@@ -113,8 +105,8 @@ export function BurnRateCanvas() {
                 data={burnRateData}
                 height={320}
                 showLegend={false}
-                currency={data?.currency || "USD"}
-                locale={user?.locale ?? undefined}
+                currency={currency}
+                locale={locale}
               />
             </CanvasChart>
           )}
@@ -123,7 +115,7 @@ export function BurnRateCanvas() {
           <CanvasGrid
             items={burnRateMetrics}
             layout="2/2"
-            isLoading={stage === "loading" || stage === "chart_ready"}
+            isLoading={shouldShowMetricsSkeleton(stage)}
           />
 
           {/* Always show summary section */}

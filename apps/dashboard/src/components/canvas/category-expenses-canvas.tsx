@@ -9,20 +9,18 @@ import {
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
 import { CategoryExpenseDonutChart } from "@/components/charts/category-expense-donut-chart";
-import { useUserQuery } from "@/hooks/use-user";
-import { formatAmount } from "@/utils/format";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { useCanvasData } from "@/components/canvas/hooks";
+import {
+  formatCurrencyAmount,
+  shouldShowChart,
+  shouldShowMetricsSkeleton,
+  shouldShowSummarySkeleton,
+} from "@/components/canvas/utils";
 import { expensesArtifact } from "@api/ai/artifacts/expenses";
 
 export function CategoryExpensesCanvas() {
-  const { data, status } = useArtifact(expensesArtifact);
-  const { data: user } = useUserQuery();
-
-  const isLoading = status === "loading";
-  const stage = data?.stage;
-
-  const currency = data?.currency || "USD";
-  const locale = user?.locale || undefined;
+  const { data, isLoading, stage, currency, locale } =
+    useCanvasData(expensesArtifact);
   const categoryData = data?.chart?.categoryData || [];
   const metrics = data?.metrics;
 
@@ -66,20 +64,10 @@ export function CategoryExpensesCanvas() {
     value:
       index === 0
         ? category.category
-        : formatAmount({
-            currency,
-            amount: category.amount,
-            locale,
-          }) || "$0",
+        : formatCurrencyAmount(category.amount, currency, locale),
     subtitle:
       index === 0
-        ? `${
-            formatAmount({
-              currency,
-              amount: category.amount,
-              locale,
-            }) || "$0"
-          } this month`
+        ? `${formatCurrencyAmount(category.amount, currency, locale)} this month`
         : `${category.percentage.toFixed(1)}% of total`,
   }));
 
@@ -101,24 +89,18 @@ export function CategoryExpensesCanvas() {
       expenseMetrics.push({
         id: "optimization-potential",
         title: "Optimization Potential",
-        value:
-          formatAmount({
-            currency,
-            amount: optimizationPotential,
-            locale,
-          }) || "$0",
+        value: formatCurrencyAmount(
+          optimizationPotential,
+          currency,
+          locale,
+        ),
         subtitle: "Quick wins this month",
       });
     }
   }
 
-  const showChart =
-    stage &&
-    ["loading", "chart_ready", "metrics_ready", "analysis_ready"].includes(
-      stage,
-    );
-
-  const showSummarySkeleton = !stage || stage !== "analysis_ready";
+  const showChart = shouldShowChart(stage);
+  const showSummarySkeleton = shouldShowSummarySkeleton(stage);
 
   return (
     <BaseCanvas>
@@ -149,7 +131,7 @@ export function CategoryExpensesCanvas() {
           <CanvasGrid
             items={expenseMetrics}
             layout="2/2"
-            isLoading={stage === "loading" || stage === "chart_ready"}
+            isLoading={shouldShowMetricsSkeleton(stage)}
           />
 
           {/* Summary Section */}
