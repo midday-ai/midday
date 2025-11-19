@@ -36,7 +36,7 @@ export function CanvasSection({
           {title}
         </h3>
       )}
-      <div className="text-[12px] leading-[17px] font-hedvig-sans-slashed-zero text-black dark:text-white">
+      <div className="text-[12px] leading-[17px] font-sans text-black dark:text-white">
         {children}
       </div>
     </div>

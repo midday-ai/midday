@@ -32,7 +32,7 @@ const donutTooltipFormatter = ({
         <p className="mb-1 text-gray-500 dark:text-[#666666] font-medium">
           {data.category}
         </p>
-        <p className="mb-1 text-black dark:text-white font-hedvig-sans-slashed-zero">
+        <p className="mb-1 text-black dark:text-white font-sans">
           Amount:{" "}
           {formatAmount({
             amount: data.amount,

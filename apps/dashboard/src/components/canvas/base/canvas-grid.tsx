@@ -64,7 +64,7 @@ export function CanvasGrid({
             <div className="text-[12px] text-[#707070] dark:text-[#666666] mb-1">
               {item.title}
             </div>
-            <div className="text-[18px] font-normal font-hedvig-sans-slashed-zero text-black dark:text-white mb-1">
+            <div className="text-[18px] font-normal font-sans text-black dark:text-white mb-1">
               {item.value}
             </div>
             {item.subtitle && (

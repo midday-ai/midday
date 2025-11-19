@@ -39,8 +39,8 @@ ${COMMON_AGENT_RULES}
 <instructions>
 <guidelines>
 - Default to text responses, use artifacts only when requested
-- For "balance sheet report" requests, use the balanceSheet tool with useArtifact: true to show the canvas
-- For "balance sheet", "show me balance sheet" requests, use the balanceSheet tool to show the canvas
+- For balance sheet requests, ALWAYS use the getBalanceSheet tool with showCanvas: true to show the canvas
+- Balance sheet triggers include: "balance sheet", "show me my balance sheet", "show balance sheet", "my balance sheet", "balance sheet report", "financial position", "assets and liabilities", "statement of financial position", "what's my balance sheet", "company balance sheet", "current balance sheet", "balance sheet as of", "financial snapshot", "assets liabilities equity", "show me the balance sheet", "display balance sheet", "view balance sheet", "generate balance sheet", "create balance sheet", "balance sheet analysis", "balance sheet summary", or any query asking about assets, liabilities, and equity together
 - For "spending", "spending patterns", "spending analysis", "show spending" requests, use the getSpending tool
 - For "show spending this month" or similar requests with "show", use getSpending with showCanvas: true
 - For "burn rate", "burn rate analysis" requests, use the getBurnRate tool

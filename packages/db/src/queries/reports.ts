@@ -11,6 +11,7 @@ import {
 import {
   and,
   eq,
+  gt,
   gte,
   inArray,
   isNotNull,
@@ -18,18 +19,20 @@ import {
   lt,
   lte,
   ne,
+  not,
   or,
   sql,
 } from "drizzle-orm";
 import {
   bankAccounts,
+  inbox,
   invoices,
   teams,
-  trackerEntries,
-  trackerProjects,
   transactionCategories,
   transactions,
 } from "../schema";
+import { getCombinedAccountBalance } from "./bank-accounts";
+import { getExchangeRatesBatch } from "./exhange-rates";
 import { getBillableHours } from "./tracker-entries";
 
 function getPercentageIncrease(a: number, b: number) {
@@ -2371,5 +2374,943 @@ export async function getRevenueForecast(
       revenueStability: Number(((1 - coefficientOfVariation) * 100).toFixed(2)), // 0-100%
       expectedInvoiceCollection: Number(expectedInvoiceCollection.toFixed(2)),
     },
+  };
+}
+
+export type GetBalanceSheetParams = {
+  teamId: string;
+  currency?: string;
+  asOf?: string; // ISO date string (YYYY-MM-DD), defaults to today
+};
+
+export type BalanceSheetResult = {
+  assets: {
+    current: {
+      cash: number;
+      accountsReceivable: number;
+      inventory: number;
+      inventoryName?: string;
+      prepaidExpenses: number;
+      prepaidExpensesName?: string;
+      total: number;
+    };
+    nonCurrent: {
+      fixedAssets: number;
+      fixedAssetsName?: string;
+      accumulatedDepreciation: number;
+      softwareTechnology: number;
+      softwareTechnologyName?: string;
+      longTermInvestments: number;
+      longTermInvestmentsName?: string;
+      otherAssets: number;
+      total: number;
+    };
+    total: number;
+  };
+  liabilities: {
+    current: {
+      accountsPayable: number;
+      accruedExpenses: number;
+      accruedExpensesName?: string;
+      shortTermDebt: number;
+      creditCardDebt: number;
+      creditCardDebtName?: string;
+      total: number;
+    };
+    nonCurrent: {
+      longTermDebt: number;
+      deferredRevenue: number;
+      deferredRevenueName?: string;
+      leases: number;
+      leasesName?: string;
+      otherLiabilities: number;
+      total: number;
+    };
+    total: number;
+  };
+  equity: {
+    capitalInvestment: number;
+    capitalInvestmentName?: string;
+    ownerDraws: number;
+    ownerDrawsName?: string;
+    retainedEarnings: number;
+    total: number;
+  };
+  currency: string;
+};
+
+export async function getBalanceSheet(
+  db: Database,
+  params: GetBalanceSheetParams,
+): Promise<BalanceSheetResult> {
+  const { teamId, currency: inputCurrency, asOf } = params;
+
+  // Get target currency
+  const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
+  const currency = targetCurrency || "USD";
+
+  // Get asOf date (default to today)
+  const asOfDate = asOf ? parseISO(asOf) : new UTCDate();
+  const asOfDateStr = format(asOfDate, "yyyy-MM-dd");
+
+  // Fetch all data in parallel
+  const [
+    accountBalanceData,
+    outstandingInvoicesData,
+    assetTransactions,
+    fixedAssetTransactionsForDepreciation,
+    liabilityTransactions,
+    loanProceedsTransactions,
+    equityTransactions,
+    allRevenueTransactions,
+    allExpenseTransactions,
+    bankAccountsData,
+    unmatchedBillsData,
+  ] = await Promise.all([
+    // 1. Bank account balances (Cash) - only depository accounts
+    getCombinedAccountBalance(db, {
+      teamId,
+      currency: inputCurrency,
+    }),
+
+    // 2. Unpaid invoices (Accounts Receivable) - fetch directly for currency conversion
+    db
+      .select({
+        amount: invoices.amount,
+        currency: invoices.currency,
+      })
+      .from(invoices)
+      .where(
+        and(
+          eq(invoices.teamId, teamId),
+          // Include unpaid and overdue invoices, plus scheduled invoices with issueDate on or before balance sheet date
+          or(
+            inArray(invoices.status, ["unpaid", "overdue"]),
+            and(
+              eq(invoices.status, "scheduled"),
+              isNotNull(invoices.issueDate),
+              lte(invoices.issueDate, asOfDateStr),
+            ),
+          )!,
+        ),
+      ),
+
+    // 3. Asset transactions (prepaid expenses, fixed assets)
+    db
+      .select({
+        categorySlug: transactions.categorySlug,
+        categoryName: transactionCategories.name,
+        amount: inputCurrency
+          ? sql<number>`COALESCE(SUM(${transactions.amount}), 0)`
+          : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
+      })
+      .from(transactions)
+      .leftJoin(
+        transactionCategories,
+        and(
+          eq(transactionCategories.slug, transactions.categorySlug),
+          eq(transactionCategories.teamId, teamId),
+        ),
+      )
+      .where(
+        and(
+          eq(transactions.teamId, teamId),
+          eq(transactions.internal, false),
+          ne(transactions.status, "excluded"),
+          lte(transactions.date, asOfDateStr),
+          inArray(transactions.categorySlug, [
+            "prepaid-expenses",
+            "fixed-assets",
+            "software",
+            "inventory",
+            "equipment",
+          ]),
+          or(
+            isNull(transactionCategories.excluded),
+            eq(transactionCategories.excluded, false),
+          )!,
+          inputCurrency && targetCurrency
+            ? eq(transactions.currency, targetCurrency)
+            : targetCurrency
+              ? eq(transactions.baseCurrency, targetCurrency)
+              : sql`true`,
+        ),
+      )
+      .groupBy(transactions.categorySlug, transactionCategories.name),
+
+    // 4. Liability transactions (loans, deferred revenue)
+    db
+      .select({
+        categorySlug: transactions.categorySlug,
+        categoryName: transactionCategories.name,
+        amount: inputCurrency
+          ? sql<number>`COALESCE(SUM(${transactions.amount}), 0)`
+          : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
+      })
+      .from(transactions)
+      .leftJoin(
+        transactionCategories,
+        and(
+          eq(transactionCategories.slug, transactions.categorySlug),
+          eq(transactionCategories.teamId, teamId),
+        ),
+      )
+      .where(
+        and(
+          eq(transactions.teamId, teamId),
+          eq(transactions.internal, false),
+          ne(transactions.status, "excluded"),
+          lte(transactions.date, asOfDateStr),
+          inArray(transactions.categorySlug, [
+            "loan-proceeds",
+            "loan-principal-repayment",
+            "deferred-revenue",
+            "leases",
+          ]),
+          or(
+            isNull(transactionCategories.excluded),
+            eq(transactionCategories.excluded, false),
+          )!,
+          inputCurrency && targetCurrency
+            ? eq(transactions.currency, targetCurrency)
+            : targetCurrency
+              ? eq(transactions.baseCurrency, targetCurrency)
+              : sql`true`,
+        ),
+      )
+      .groupBy(transactions.categorySlug, transactionCategories.name),
+
+    // 4b. Loan proceeds transactions with dates for short-term vs long-term classification
+    db
+      .select({
+        amount: inputCurrency
+          ? sql<number>`ABS(${transactions.amount})`
+          : sql<number>`ABS(COALESCE(${transactions.baseAmount}, ${transactions.amount}))`,
+        date: sql<string>`${transactions.date}::text`,
+      })
+      .from(transactions)
+      .leftJoin(
+        transactionCategories,
+        and(
+          eq(transactionCategories.slug, transactions.categorySlug),
+          eq(transactionCategories.teamId, teamId),
+        ),
+      )
+      .where(
+        and(
+          eq(transactions.teamId, teamId),
+          eq(transactions.internal, false),
+          ne(transactions.status, "excluded"),
+          lte(transactions.date, asOfDateStr),
+          eq(transactions.categorySlug, "loan-proceeds"),
+          or(
+            isNull(transactionCategories.excluded),
+            eq(transactionCategories.excluded, false),
+          )!,
+          inputCurrency && targetCurrency
+            ? eq(transactions.currency, targetCurrency)
+            : targetCurrency
+              ? eq(transactions.baseCurrency, targetCurrency)
+              : sql`true`,
+        ),
+      ),
+
+    // 3b. Fixed asset transactions with dates for depreciation calculation
+    db
+      .select({
+        categorySlug: transactions.categorySlug,
+        amount: inputCurrency
+          ? sql<number>`ABS(${transactions.amount})`
+          : sql<number>`ABS(COALESCE(${transactions.baseAmount}, ${transactions.amount}))`,
+        date: sql<string>`${transactions.date}::text`,
+      })
+      .from(transactions)
+      .leftJoin(
+        transactionCategories,
+        and(
+          eq(transactionCategories.slug, transactions.categorySlug),
+          eq(transactionCategories.teamId, teamId),
+        ),
+      )
+      .where(
+        and(
+          eq(transactions.teamId, teamId),
+          eq(transactions.internal, false),
+          ne(transactions.status, "excluded"),
+          lte(transactions.date, asOfDateStr),
+          inArray(transactions.categorySlug, [
+            "fixed-assets",
+            "equipment",
+            "software",
+          ]),
+          or(
+            isNull(transactionCategories.excluded),
+            eq(transactionCategories.excluded, false),
+          )!,
+          inputCurrency && targetCurrency
+            ? eq(transactions.currency, targetCurrency)
+            : targetCurrency
+              ? eq(transactions.baseCurrency, targetCurrency)
+              : sql`true`,
+        ),
+      ),
+
+    // 5. Equity transactions (capital investment, owner draws)
+    db
+      .select({
+        categorySlug: transactions.categorySlug,
+        categoryName: transactionCategories.name,
+        amount: inputCurrency
+          ? sql<number>`COALESCE(SUM(${transactions.amount}), 0)`
+          : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
+      })
+      .from(transactions)
+      .leftJoin(
+        transactionCategories,
+        and(
+          eq(transactionCategories.slug, transactions.categorySlug),
+          eq(transactionCategories.teamId, teamId),
+        ),
+      )
+      .where(
+        and(
+          eq(transactions.teamId, teamId),
+          eq(transactions.internal, false),
+          ne(transactions.status, "excluded"),
+          lte(transactions.date, asOfDateStr),
+          inArray(transactions.categorySlug, [
+            "capital-investment",
+            "owner-draws",
+          ]),
+          or(
+            isNull(transactionCategories.excluded),
+            eq(transactionCategories.excluded, false),
+          )!,
+          inputCurrency && targetCurrency
+            ? eq(transactions.currency, targetCurrency)
+            : targetCurrency
+              ? eq(transactions.baseCurrency, targetCurrency)
+              : sql`true`,
+        ),
+      )
+      .groupBy(transactions.categorySlug, transactionCategories.name),
+
+    // 6. All revenue transactions (for retained earnings)
+    db
+      .select({
+        amount: inputCurrency
+          ? sql<number>`COALESCE(SUM(${transactions.amount}), 0)`
+          : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
+      })
+      .from(transactions)
+      .leftJoin(
+        transactionCategories,
+        and(
+          eq(transactionCategories.slug, transactions.categorySlug),
+          eq(transactionCategories.teamId, teamId),
+        ),
+      )
+      .where(
+        and(
+          eq(transactions.teamId, teamId),
+          eq(transactions.internal, false),
+          ne(transactions.status, "excluded"),
+          lte(transactions.date, asOfDateStr),
+          eq(transactions.categorySlug, "income"),
+          gt(transactions.baseAmount, 0),
+          or(
+            isNull(transactionCategories.excluded),
+            eq(transactionCategories.excluded, false),
+          )!,
+          inputCurrency && targetCurrency
+            ? eq(transactions.currency, targetCurrency)
+            : targetCurrency
+              ? eq(transactions.baseCurrency, targetCurrency)
+              : sql`true`,
+        ),
+      ),
+
+    // 7. All expense transactions (for retained earnings)
+    // Exclude asset purchases (capital expenditures) - they don't reduce retained earnings
+    db
+      .select({
+        amount: inputCurrency
+          ? sql<number>`COALESCE(SUM(ABS(${transactions.amount})), 0)`
+          : sql<number>`COALESCE(SUM(ABS(COALESCE(${transactions.baseAmount}, 0))), 0)`,
+      })
+      .from(transactions)
+      .leftJoin(
+        transactionCategories,
+        and(
+          eq(transactionCategories.slug, transactions.categorySlug),
+          eq(transactionCategories.teamId, teamId),
+        ),
+      )
+      .where(
+        and(
+          eq(transactions.teamId, teamId),
+          eq(transactions.internal, false),
+          ne(transactions.status, "excluded"),
+          lte(transactions.date, asOfDateStr),
+          lt(transactions.baseAmount, 0),
+          // Exclude asset categories - these are capital expenditures, not operating expenses
+          or(
+            isNull(transactions.categorySlug),
+            sql`${transactions.categorySlug} NOT IN ('prepaid-expenses', 'fixed-assets', 'software', 'inventory', 'equipment')`,
+          )!,
+          or(
+            isNull(transactionCategories.excluded),
+            eq(transactionCategories.excluded, false),
+          )!,
+          inputCurrency && targetCurrency
+            ? eq(transactions.currency, targetCurrency)
+            : targetCurrency
+              ? eq(transactions.baseCurrency, targetCurrency)
+              : sql`true`,
+        ),
+      ),
+
+    // 8. Bank accounts data (for credit cards and loans)
+    db.query.bankAccounts.findMany({
+      where: and(
+        eq(bankAccounts.teamId, teamId),
+        eq(bankAccounts.enabled, true),
+        or(eq(bankAccounts.type, "credit"), eq(bankAccounts.type, "loan")),
+      ),
+      columns: {
+        id: true,
+        name: true,
+        currency: true,
+        balance: true,
+        baseCurrency: true,
+        baseBalance: true,
+        type: true,
+      },
+    }),
+
+    // 9. Unmatched inbox items (bills/vendor invoices) for Accounts Payable
+    // These are inbox items (both "invoice" and "expense" types) that haven't been matched to transactions yet
+    // Note: Customer invoices are tracked separately in the invoices table, so unmatched inbox items
+    // represent bills/vendor invoices we need to pay
+    db
+      .select({
+        amount: inbox.amount,
+        currency: inbox.currency,
+        baseAmount: inbox.baseAmount,
+        baseCurrency: inbox.baseCurrency,
+      })
+      .from(inbox)
+      .where(
+        and(
+          eq(inbox.teamId, teamId),
+          isNull(inbox.transactionId), // Not matched to a transaction yet
+          isNotNull(inbox.amount), // Has an amount
+          // Only include items that are not done/deleted (still pending payment)
+          ne(inbox.status, "done"),
+          ne(inbox.status, "deleted"),
+          // Only include items dated on or before the balance sheet date
+          lte(inbox.date, asOfDateStr),
+        ),
+      ),
+  ]);
+
+  // Process asset transactions and build category name maps
+  // Note: Asset transactions are stored as negative (expenses), but on balance sheet they should be positive (assets owned)
+  const assetMap = new Map<string, number>();
+  const assetNameMap = new Map<string, string>();
+  for (const item of assetTransactions) {
+    const slug = item.categorySlug || "";
+    // Take absolute value because assets should be positive on balance sheet
+    assetMap.set(slug, Math.abs(Number(item.amount) || 0));
+    if (item.categoryName) {
+      assetNameMap.set(slug, item.categoryName);
+    }
+  }
+  const prepaidExpenses: number = assetMap.get("prepaid-expenses") || 0;
+  const fixedAssetsRaw: number = assetMap.get("fixed-assets") || 0;
+  const equipment: number = assetMap.get("equipment") || 0;
+  const fixedAssets: number = fixedAssetsRaw + equipment; // Combine fixed assets and equipment
+  const softwareTechnology: number = assetMap.get("software") || 0;
+  const inventory: number = assetMap.get("inventory") || 0;
+
+  // Calculate accumulated depreciation based on asset age
+  // Use straight-line depreciation with reasonable useful lives
+  let accumulatedDepreciation = 0;
+  // TypeScript inference issue - cast through unknown first
+  const fixedAssetTransactionsList =
+    fixedAssetTransactionsForDepreciation as unknown as Array<{
+      categorySlug: string | null;
+      amount: number;
+      date: string;
+    }>;
+
+  for (const asset of fixedAssetTransactionsList) {
+    const purchaseDate = parseISO(asset.date);
+    const purchaseYear = purchaseDate.getFullYear();
+    const purchaseMonth = purchaseDate.getMonth();
+    const asOfYear = asOfDate.getFullYear();
+    const asOfMonth = asOfDate.getMonth();
+
+    // Calculate months since purchase
+    const monthsSincePurchase =
+      (asOfYear - purchaseYear) * 12 + (asOfMonth - purchaseMonth);
+
+    if (monthsSincePurchase <= 0) continue; // Asset purchased after balance sheet date
+
+    const assetAmount = Number(asset.amount) || 0;
+    const category = asset.categorySlug || "";
+
+    // Determine useful life based on asset type
+    // Equipment/Fixed Assets: 5 years (60 months)
+    // Software: 3 years (36 months)
+    let usefulLifeMonths = 60; // Default for equipment/fixed assets
+    if (category === "software") {
+      usefulLifeMonths = 36; // 3 years for software
+    }
+
+    // Calculate depreciation: (months since purchase / useful life) * asset cost
+    // Cap at 100% (fully depreciated)
+    const depreciationPercentage = Math.min(
+      monthsSincePurchase / usefulLifeMonths,
+      1,
+    );
+    const depreciationAmount = assetAmount * depreciationPercentage;
+    accumulatedDepreciation += depreciationAmount;
+  }
+
+  // Process liability transactions and build category name maps
+  const liabilityMap = new Map<string, number>();
+  const liabilityNameMap = new Map<string, string>();
+  const liabilityTransactionsList = liabilityTransactions as unknown as Array<{
+    categorySlug: string | null;
+    categoryName: string | null;
+    amount: number;
+  }>;
+  for (const item of liabilityTransactionsList) {
+    const slug = item.categorySlug || "";
+    liabilityMap.set(slug, Number(item.amount) || 0);
+    if (item.categoryName) {
+      liabilityNameMap.set(slug, item.categoryName);
+    }
+  }
+  const loanProceeds: number = liabilityMap.get("loan-proceeds") || 0;
+  const loanRepayments: number =
+    liabilityMap.get("loan-principal-repayment") || 0;
+  const deferredRevenue: number = liabilityMap.get("deferred-revenue") || 0;
+  const leases: number = liabilityMap.get("leases") || 0;
+  const leasesName: string = liabilityNameMap.get("leases") || "Leases";
+
+  // Accrued expenses: Set to 0 since we cannot accurately determine unpaid expenses
+  // from transaction data (all transactions come from banks and are already paid)
+  const accruedExpenses: number = 0;
+  const accruedExpensesName: string | undefined = undefined;
+
+  // Calculate Accounts Payable from unmatched inbox items (bills/vendor invoices)
+  let accountsPayable = 0;
+  const billsData = unmatchedBillsData as Array<{
+    amount: number | null;
+    currency: string | null;
+    baseAmount: number | null;
+    baseCurrency: string | null;
+  }>;
+
+  // Collect unique currency pairs that need conversion
+  const billsCurrencyPairs: Array<{ base: string; target: string }> = [];
+  const billsNeedingConversion: Array<{
+    amount: number;
+    currency: string;
+  }> = [];
+
+  for (const bill of billsData) {
+    // Bills are typically stored as positive amounts (money owed)
+    // Accounts Payable should be positive (liability)
+    // Prioritize using baseAmount/baseCurrency if available
+    if (bill.baseAmount !== null && bill.baseCurrency !== null) {
+      const baseAmountValue = Number(bill.baseAmount) || 0;
+      if (bill.baseCurrency === currency) {
+        // baseCurrency matches target currency - use baseAmount directly
+        // Use Math.abs to ensure positive (defensive, bills should already be positive)
+        accountsPayable += Math.abs(baseAmountValue);
+      } else {
+        // baseCurrency exists but doesn't match target - convert from baseCurrency
+        billsNeedingConversion.push({
+          amount: Math.abs(baseAmountValue),
+          currency: bill.baseCurrency,
+        });
+        billsCurrencyPairs.push({ base: bill.baseCurrency, target: currency });
+      }
+    } else {
+      // No baseAmount/baseCurrency - use amount/currency
+      const amount = Number(bill.amount) || 0;
+      const billCurrency = bill.currency || currency;
+
+      if (billCurrency === currency) {
+        // Already in target currency
+        // Use Math.abs to ensure positive (defensive, bills should already be positive)
+        accountsPayable += Math.abs(amount);
+      } else {
+        // Need currency conversion from original currency
+        billsNeedingConversion.push({
+          amount: Math.abs(amount),
+          currency: billCurrency,
+        });
+        billsCurrencyPairs.push({ base: billCurrency, target: currency });
+      }
+    }
+  }
+
+  // Process equity transactions and build category name maps
+  const equityMap = new Map<string, number>();
+  const equityNameMap = new Map<string, string>();
+  for (const item of equityTransactions) {
+    const slug = item.categorySlug || "";
+    equityMap.set(slug, Number(item.amount) || 0);
+    if (item.categoryName) {
+      equityNameMap.set(slug, item.categoryName);
+    }
+  }
+  const capitalInvestment: number = equityMap.get("capital-investment") || 0;
+  const ownerDrawsRaw: number = equityMap.get("owner-draws") || 0;
+  const ownerDraws: number = Math.abs(ownerDrawsRaw); // Owner draws are negative, so we take absolute value
+
+  // Calculate retained earnings (cumulative profit)
+  const totalRevenue: number = Number(allRevenueTransactions[0]?.amount) || 0;
+  const totalExpenses: number = Number(allExpenseTransactions[0]?.amount) || 0;
+  const retainedEarnings: number = totalRevenue - totalExpenses;
+
+  // Get cash from bank accounts (already converted to target currency)
+  const cash: number = accountBalanceData.totalBalance;
+
+  // Get accounts receivable from unpaid invoices with proper currency conversion
+  let accountsReceivable = 0;
+  const invoiceData = outstandingInvoicesData as Array<{
+    amount: number;
+    currency: string;
+  }>;
+
+  // Collect unique currency pairs that need conversion
+  const invoiceCurrencyPairs: Array<{ base: string; target: string }> = [];
+  const invoicesNeedingConversion: Array<{
+    amount: number;
+    currency: string;
+  }> = [];
+
+  for (const invoice of invoiceData) {
+    const amount = Number(invoice.amount) || 0;
+    const invoiceCurrency = invoice.currency || currency;
+
+    if (invoiceCurrency === currency) {
+      accountsReceivable += amount;
+    } else {
+      invoicesNeedingConversion.push({ amount, currency: invoiceCurrency });
+      invoiceCurrencyPairs.push({ base: invoiceCurrency, target: currency });
+    }
+  }
+
+  // Process bank accounts: credit cards, loans, other assets, and other liabilities
+  let creditCardDebt = 0;
+  let loanAccountDebt = 0;
+  let otherAssets = 0;
+  let otherLiabilities = 0;
+  const bankAccountsList = bankAccountsData as Array<{
+    id: string;
+    name: string;
+    currency: string;
+    balance: number;
+    baseCurrency: string | null;
+    baseBalance: number | null;
+    type: string;
+  }>;
+
+  // Collect currency pairs for accounts that need conversion (don't have baseBalance/baseCurrency)
+  const accountCurrencyPairs: Array<{ base: string; target: string }> = [];
+  const accountsNeedingConversion: Array<{
+    balance: number;
+    currency: string;
+    type: string;
+  }> = [];
+
+  for (const account of bankAccountsList) {
+    const balance = Number(account.balance) || 0;
+    const accountCurrency = account.currency || currency;
+
+    // Prioritize using baseBalance if available and matches target currency
+    if (
+      account.baseBalance !== null &&
+      account.baseCurrency === currency &&
+      accountCurrency !== currency
+    ) {
+      const convertedBalance = Number(account.baseBalance);
+      if (account.type === "credit") {
+        creditCardDebt += Math.abs(convertedBalance);
+      } else if (account.type === "loan") {
+        loanAccountDebt += Math.abs(convertedBalance);
+      } else if (account.type === "other_asset") {
+        otherAssets += Math.abs(convertedBalance);
+      } else if (account.type === "other_liability") {
+        otherLiabilities += Math.abs(convertedBalance);
+      }
+    } else if (accountCurrency === currency) {
+      // Already in target currency
+      if (account.type === "credit") {
+        creditCardDebt += Math.abs(balance);
+      } else if (account.type === "loan") {
+        loanAccountDebt += Math.abs(balance);
+      } else if (account.type === "other_asset") {
+        otherAssets += Math.abs(balance);
+      } else if (account.type === "other_liability") {
+        otherLiabilities += Math.abs(balance);
+      }
+    } else {
+      // Need conversion - collect for batch query
+      accountsNeedingConversion.push({
+        balance,
+        currency: accountCurrency,
+        type: account.type,
+      });
+      accountCurrencyPairs.push({ base: accountCurrency, target: currency });
+    }
+  }
+
+  // Combine all currency pairs and fetch exchange rates in one batch query
+  const allCurrencyPairs = [
+    ...invoiceCurrencyPairs,
+    ...accountCurrencyPairs,
+    ...billsCurrencyPairs,
+  ];
+  const exchangeRateMap =
+    allCurrencyPairs.length > 0
+      ? await getExchangeRatesBatch(db, { pairs: allCurrencyPairs })
+      : new Map<string, number>();
+
+  // Convert invoices using batch-fetched rates
+  for (const invoice of invoicesNeedingConversion) {
+    const key = `${invoice.currency}-${currency}`;
+    const rate = exchangeRateMap.get(key);
+    const convertedAmount = rate ? invoice.amount * rate : invoice.amount; // Fallback if no exchange rate found
+    accountsReceivable += convertedAmount;
+  }
+
+  // Convert bills using batch-fetched rates
+  for (const bill of billsNeedingConversion) {
+    const key = `${bill.currency}-${currency}`;
+    const rate = exchangeRateMap.get(key);
+    const convertedAmount = rate ? bill.amount * rate : bill.amount; // Fallback if no exchange rate found
+    accountsPayable += convertedAmount;
+  }
+
+  // Convert accounts using batch-fetched rates
+  for (const account of accountsNeedingConversion) {
+    const key = `${account.currency}-${currency}`;
+    const rate = exchangeRateMap.get(key);
+    const convertedBalance = rate ? account.balance * rate : account.balance; // Fallback if no exchange rate found
+
+    if (account.type === "credit") {
+      // Credit card balances are negative (debt owed), so we take absolute value
+      creditCardDebt += Math.abs(convertedBalance);
+    } else if (account.type === "loan") {
+      // Loan account balances are typically positive (amount owed)
+      loanAccountDebt += Math.abs(convertedBalance);
+    } else if (account.type === "other_asset") {
+      otherAssets += Math.abs(convertedBalance);
+    } else if (account.type === "other_liability") {
+      otherLiabilities += Math.abs(convertedBalance);
+    }
+  }
+
+  // Classify debt as short-term vs long-term based on loan age
+  // Loans taken within last 12 months are considered short-term
+  // Older loans and loan account balances without transaction history are long-term
+  let shortTermLoanAmount = 0;
+  let longTermLoanAmount = 0;
+
+  const loanProceedsList = loanProceedsTransactions as unknown as Array<{
+    amount: number;
+    date: string;
+  }>;
+
+  // Calculate date 12 months ago for threshold
+  const twelveMonthsAgo = new UTCDate(asOfDate);
+  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+
+  for (const loan of loanProceedsList) {
+    const loanDate = parseISO(loan.date);
+    const loanAmount = Number(loan.amount) || 0;
+
+    if (loanDate >= twelveMonthsAgo) {
+      // Loan taken within last 12 months = short-term
+      shortTermLoanAmount += loanAmount;
+    } else {
+      // Older loan = long-term
+      longTermLoanAmount += loanAmount;
+    }
+  }
+
+  // Apply repayments proportionally to short-term and long-term debt
+  // If we have both types, repayments reduce proportionally
+  const totalLoanProceeds = loanProceeds || 1; // Avoid division by zero
+  const shortTermProportion =
+    totalLoanProceeds > 0 ? shortTermLoanAmount / totalLoanProceeds : 0;
+  const longTermProportion =
+    totalLoanProceeds > 0 ? longTermLoanAmount / totalLoanProceeds : 0;
+
+  // Apply repayments proportionally
+  const shortTermAfterRepayments = Math.max(
+    0,
+    shortTermLoanAmount - loanRepayments * shortTermProportion,
+  );
+  const longTermAfterRepayments = Math.max(
+    0,
+    longTermLoanAmount - loanRepayments * longTermProportion,
+  );
+
+  // Add loan account balances to long-term (conservative - account balances without transaction history)
+  const longTermDebt: number = Math.max(
+    0,
+    longTermAfterRepayments + loanAccountDebt,
+  );
+  const shortTermDebt: number = Math.max(0, shortTermAfterRepayments);
+
+  // Calculate totals
+  const currentAssetsTotal =
+    cash + accountsReceivable + inventory + prepaidExpenses;
+  const nonCurrentAssetsTotal =
+    fixedAssets - accumulatedDepreciation + softwareTechnology + otherAssets;
+  const totalAssets = currentAssetsTotal + nonCurrentAssetsTotal;
+
+  const currentLiabilitiesTotal =
+    accountsPayable + accruedExpenses + shortTermDebt + creditCardDebt;
+  const nonCurrentLiabilitiesTotal =
+    longTermDebt + deferredRevenue + leases + otherLiabilities;
+  const totalLiabilities = currentLiabilitiesTotal + nonCurrentLiabilitiesTotal;
+
+  const equityTotal = capitalInvestment - ownerDraws + retainedEarnings;
+  const totalLiabilitiesAndEquity = totalLiabilities + equityTotal;
+
+  // Balance sheet equation validation: Assets must equal Liabilities + Equity
+  const balanceDifference = totalAssets - totalLiabilitiesAndEquity;
+  if (Math.abs(balanceDifference) > 0.01) {
+    // Adjust retained earnings to balance (common practice for rounding differences)
+    // If assets > liabilities+equity, we need to INCREASE retained earnings (add the difference)
+    // If assets < liabilities+equity, we need to DECREASE retained earnings (subtract the difference)
+    const adjustedRetainedEarnings = retainedEarnings + balanceDifference;
+    // Update equity total with adjusted retained earnings
+    const adjustedEquityTotal =
+      capitalInvestment - ownerDraws + adjustedRetainedEarnings;
+    const adjustedTotalLiabilitiesAndEquity =
+      totalLiabilities + adjustedEquityTotal;
+
+    return {
+      assets: {
+        current: {
+          cash: Math.round(cash * 100) / 100,
+          accountsReceivable: Math.round(accountsReceivable * 100) / 100,
+          inventory: Math.round(inventory * 100) / 100,
+          inventoryName: assetNameMap.get("inventory"),
+          prepaidExpenses: Math.round(prepaidExpenses * 100) / 100,
+          prepaidExpensesName: assetNameMap.get("prepaid-expenses"),
+          total: Math.round(currentAssetsTotal * 100) / 100,
+        },
+        nonCurrent: {
+          fixedAssets: Math.round(fixedAssets * 100) / 100,
+          fixedAssetsName: assetNameMap.get("fixed-assets"),
+          accumulatedDepreciation:
+            Math.round(accumulatedDepreciation * 100) / 100,
+          softwareTechnology: Math.round(softwareTechnology * 100) / 100,
+          softwareTechnologyName: assetNameMap.get("software"),
+          longTermInvestments: 0,
+          longTermInvestmentsName: assetNameMap.get("long-term-investments"),
+          otherAssets: Math.round(otherAssets * 100) / 100,
+          total: Math.round(nonCurrentAssetsTotal * 100) / 100,
+        },
+        total: Math.round(totalAssets * 100) / 100,
+      },
+      liabilities: {
+        current: {
+          accountsPayable: Math.round(accountsPayable * 100) / 100,
+          accruedExpenses: Math.round(accruedExpenses * 100) / 100,
+          accruedExpensesName,
+          shortTermDebt: Math.round(shortTermDebt * 100) / 100,
+          creditCardDebt: Math.round(creditCardDebt * 100) / 100,
+          creditCardDebtName: "Credit Card Debt",
+          total: Math.round(currentLiabilitiesTotal * 100) / 100,
+        },
+        nonCurrent: {
+          longTermDebt: Math.round(longTermDebt * 100) / 100,
+          deferredRevenue: Math.round(deferredRevenue * 100) / 100,
+          deferredRevenueName: liabilityNameMap.get("deferred-revenue"),
+          leases: Math.round(leases * 100) / 100,
+          leasesName,
+          otherLiabilities: Math.round(otherLiabilities * 100) / 100,
+          total: Math.round(nonCurrentLiabilitiesTotal * 100) / 100,
+        },
+        total: Math.round(totalLiabilities * 100) / 100,
+      },
+      equity: {
+        capitalInvestment: Math.round(capitalInvestment * 100) / 100,
+        capitalInvestmentName: equityNameMap.get("capital-investment"),
+        ownerDraws: Math.round(ownerDraws * 100) / 100,
+        ownerDrawsName: equityNameMap.get("owner-draws"),
+        retainedEarnings: Math.round(adjustedRetainedEarnings * 100) / 100,
+        total: Math.round(adjustedEquityTotal * 100) / 100,
+      },
+      currency,
+    };
+  }
+
+  return {
+    assets: {
+      current: {
+        cash: Math.round(cash * 100) / 100,
+        accountsReceivable: Math.round(accountsReceivable * 100) / 100,
+        inventory: Math.round(inventory * 100) / 100,
+        inventoryName: assetNameMap.get("inventory"),
+        prepaidExpenses: Math.round(prepaidExpenses * 100) / 100,
+        prepaidExpensesName: assetNameMap.get("prepaid-expenses"),
+        total: Math.round(currentAssetsTotal * 100) / 100,
+      },
+      nonCurrent: {
+        fixedAssets: Math.round(fixedAssets * 100) / 100,
+        fixedAssetsName: assetNameMap.get("fixed-assets"),
+        accumulatedDepreciation: 0,
+        softwareTechnology: Math.round(softwareTechnology * 100) / 100,
+        softwareTechnologyName: assetNameMap.get("software"),
+        longTermInvestments: 0,
+        longTermInvestmentsName: assetNameMap.get("long-term-investments"),
+        otherAssets: Math.round(otherAssets * 100) / 100,
+        total: Math.round(nonCurrentAssetsTotal * 100) / 100,
+      },
+      total: Math.round(totalAssets * 100) / 100,
+    },
+    liabilities: {
+      current: {
+        accountsPayable: Math.round(accountsPayable * 100) / 100,
+        accruedExpenses: Math.round(accruedExpenses * 100) / 100,
+        accruedExpensesName,
+        shortTermDebt: Math.round(shortTermDebt * 100) / 100,
+        creditCardDebt: Math.round(creditCardDebt * 100) / 100,
+        creditCardDebtName: "Credit Card Debt",
+        total: Math.round(currentLiabilitiesTotal * 100) / 100,
+      },
+      nonCurrent: {
+        longTermDebt: Math.round(longTermDebt * 100) / 100,
+        deferredRevenue: Math.round(deferredRevenue * 100) / 100,
+        deferredRevenueName: liabilityNameMap.get("deferred-revenue"),
+        leases: Math.round(leases * 100) / 100,
+        leasesName,
+        otherLiabilities: Math.round(otherLiabilities * 100) / 100,
+        total: Math.round(nonCurrentLiabilitiesTotal * 100) / 100,
+      },
+      total: Math.round(totalLiabilities * 100) / 100,
+    },
+    equity: {
+      capitalInvestment: Math.round(capitalInvestment * 100) / 100,
+      capitalInvestmentName: equityNameMap.get("capital-investment"),
+      ownerDraws: Math.round(ownerDraws * 100) / 100,
+      ownerDrawsName: equityNameMap.get("owner-draws"),
+      retainedEarnings: Math.round(retainedEarnings * 100) / 100,
+      total: Math.round(equityTotal * 100) / 100,
+    },
+    currency,
   };
 }

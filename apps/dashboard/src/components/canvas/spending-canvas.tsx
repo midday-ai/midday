@@ -105,7 +105,7 @@ export function SpendingCanvas() {
                           <TableCell className="text-[12px] text-black dark:text-white">
                             {transaction.category}
                           </TableCell>
-                          <TableCell className="text-right text-[12px] text-black dark:text-white font-hedvig-sans-slashed-zero">
+                          <TableCell className="text-right text-[12px] text-black dark:text-white font-sans">
                             {formatAmount({
                               currency,
                               amount: transaction.amount,
@@ -152,7 +152,7 @@ export function SpendingCanvas() {
                 <div className="text-[12px] text-[#707070] dark:text-[#666666] mb-1">
                   Spending this month
                 </div>
-                <div className="text-[18px] font-normal font-hedvig-sans-slashed-zero text-black dark:text-white mb-1">
+                <div className="text-[18px] font-normal font-sans text-black dark:text-white mb-1">
                   {metrics?.currentMonthSpending
                     ? formatAmount({
                         currency,
@@ -175,7 +175,7 @@ export function SpendingCanvas() {
                 <div className="text-[12px] text-[#707070] dark:text-[#666666] mb-1">
                   Top category
                 </div>
-                <div className="text-[18px] font-normal font-hedvig-sans-slashed-zero text-black dark:text-white mb-1">
+                <div className="text-[18px] font-normal font-sans text-black dark:text-white mb-1">
                   {metrics?.topCategory
                     ? `${metrics.topCategory.name} — ${formatAmount({
                         currency,
