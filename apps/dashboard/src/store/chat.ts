@@ -19,7 +19,7 @@ const COMMAND_SUGGESTIONS = [
   {
     command: "/show",
     title: "Show cash burn and top 3 vendor increases",
-    toolName: "getBurnRateAnalysis",
+    toolName: "getBurnRate",
     toolParams: { showCanvas: true },
     keywords: ["show", "burn", "cash", "vendor", "increases", "analysis"],
   },
@@ -37,7 +37,7 @@ const COMMAND_SUGGESTIONS = [
   {
     command: "/show",
     title: "Show weekly trends and insights",
-    toolName: "getBurnRateAnalysis",
+    toolName: "getBurnRate",
     toolParams: {
       from: subDays(new Date(), 7).toISOString(),
       to: new Date().toISOString(),
@@ -48,7 +48,7 @@ const COMMAND_SUGGESTIONS = [
   {
     command: "/show",
     title: "Show revenue performance",
-    toolName: "getRevenue",
+    toolName: "getRevenueSummary",
     toolParams: {
       from: startOfYear(new Date()).toISOString(),
       to: endOfMonth(new Date()).toISOString(),
@@ -66,7 +66,7 @@ const COMMAND_SUGGESTIONS = [
   {
     command: "/show",
     title: "Show profit margins",
-    toolName: "getProfit",
+    toolName: "getProfitAnalysis",
     toolParams: { showCanvas: true },
     keywords: ["show", "profit", "margins"],
   },
@@ -105,7 +105,7 @@ const COMMAND_SUGGESTIONS = [
   {
     command: "/analyze",
     title: "Analyze burn rate trends",
-    toolName: "getBurnRateAnalysis",
+    toolName: "getBurnRate",
     toolParams: { showCanvas: true },
     keywords: ["analyze", "burn", "rate", "trends"],
   },
@@ -129,6 +129,235 @@ const COMMAND_SUGGESTIONS = [
       "scenarios",
       "financial",
     ],
+  },
+  // Balance Sheet
+  {
+    command: "/show",
+    title: "Show balance sheet",
+    toolName: "getBalanceSheet",
+    toolParams: { showCanvas: true },
+    keywords: ["show", "balance", "sheet", "assets", "liabilities", "equity"],
+  },
+  // Growth Rate
+  {
+    command: "/show",
+    title: "Show growth rate analysis",
+    toolName: "getGrowthRate",
+    toolParams: { showCanvas: true },
+    keywords: ["show", "growth", "rate", "revenue", "profit", "trends"],
+  },
+  {
+    command: "/analyze",
+    title: "Analyze revenue growth trends",
+    toolName: "getGrowthRate",
+    toolParams: { showCanvas: true, type: "revenue" },
+    keywords: ["analyze", "revenue", "growth", "trends", "period"],
+  },
+  // Invoice Payment Analysis
+  {
+    command: "/show",
+    title: "Show invoice payment analysis",
+    toolName: "getInvoicePaymentAnalysis",
+    toolParams: { showCanvas: true },
+    keywords: ["show", "invoice", "payment", "analysis", "days", "overdue"],
+  },
+  {
+    command: "/analyze",
+    title: "Analyze customer payment patterns",
+    toolName: "getInvoicePaymentAnalysis",
+    toolParams: { showCanvas: true },
+    keywords: ["analyze", "customer", "payment", "patterns", "invoices"],
+  },
+  // Tax Summary
+  {
+    command: "/show",
+    title: "Show tax summary",
+    toolName: "getTaxSummary",
+    toolParams: { showCanvas: true },
+    keywords: ["show", "tax", "summary", "deductions", "year"],
+  },
+  {
+    command: "/show",
+    title: "Show tax breakdown by category",
+    toolName: "getTaxSummary",
+    toolParams: { showCanvas: true },
+    keywords: ["show", "tax", "breakdown", "category", "deductions"],
+  },
+  // Business Health Score
+  {
+    command: "/show",
+    title: "Show business health score",
+    toolName: "getBusinessHealthScore",
+    toolParams: { showCanvas: true },
+    keywords: ["show", "business", "health", "score", "metrics"],
+  },
+  {
+    command: "/analyze",
+    title: "Analyze business health metrics",
+    toolName: "getBusinessHealthScore",
+    toolParams: { showCanvas: true },
+    keywords: ["analyze", "business", "health", "metrics", "performance"],
+  },
+  // Forecast
+  {
+    command: "/show",
+    title: "Show revenue forecast",
+    toolName: "getForecast",
+    toolParams: { showCanvas: true },
+    keywords: ["show", "revenue", "forecast", "projection", "future"],
+  },
+  {
+    command: "/analyze",
+    title: "Analyze revenue projections",
+    toolName: "getForecast",
+    toolParams: { showCanvas: true },
+    keywords: ["analyze", "revenue", "projections", "forecast", "trends"],
+  },
+  // Expenses Breakdown
+  {
+    command: "/show",
+    title: "Show expenses breakdown",
+    toolName: "getExpensesBreakdown",
+    toolParams: { showCanvas: true },
+    keywords: ["show", "expenses", "breakdown", "category", "analysis"],
+  },
+  {
+    command: "/analyze",
+    title: "Analyze expense categories",
+    toolName: "getExpensesBreakdown",
+    toolParams: { showCanvas: true },
+    keywords: ["analyze", "expense", "categories", "breakdown"],
+  },
+  // Revenue Summary
+  {
+    command: "/show",
+    title: "Show revenue summary",
+    toolName: "getRevenueSummary",
+    toolParams: { showCanvas: true },
+    keywords: ["show", "revenue", "summary", "income", "earnings"],
+  },
+  {
+    command: "/show",
+    title: "Show revenue trends this year",
+    toolName: "getRevenueSummary",
+    toolParams: {
+      from: startOfYear(new Date()).toISOString(),
+      to: endOfMonth(new Date()).toISOString(),
+      showCanvas: true,
+    },
+    keywords: ["show", "revenue", "trends", "year", "this year"],
+  },
+  // Profit Analysis
+  {
+    command: "/show",
+    title: "Show profit and loss statement",
+    toolName: "getProfitAnalysis",
+    toolParams: { showCanvas: true },
+    keywords: ["show", "profit", "loss", "statement", "p&l"],
+  },
+  {
+    command: "/analyze",
+    title: "Analyze profit margins",
+    toolName: "getProfitAnalysis",
+    toolParams: { showCanvas: true },
+    keywords: ["analyze", "profit", "margins", "profitability"],
+  },
+  // Account Balances
+  {
+    command: "/show",
+    title: "Show account balances",
+    toolName: "getAccountBalances",
+    toolParams: {},
+    keywords: ["show", "account", "balances", "bank", "accounts"],
+  },
+  // Invoices
+  {
+    command: "/show",
+    title: "Show latest invoices",
+    toolName: "getInvoices",
+    toolParams: { pageSize: 10, sort: ["createdAt", "desc"] },
+    keywords: ["show", "latest", "invoices", "recent"],
+  },
+  {
+    command: "/find",
+    title: "Find unpaid invoices",
+    toolName: "getInvoices",
+    toolParams: { statuses: ["unpaid"], pageSize: 20 },
+    keywords: ["find", "unpaid", "invoices", "outstanding"],
+  },
+  {
+    command: "/find",
+    title: "Find overdue invoices",
+    toolName: "getInvoices",
+    toolParams: { statuses: ["overdue"], pageSize: 20 },
+    keywords: ["find", "overdue", "invoices", "late"],
+  },
+  // Customers
+  {
+    command: "/show",
+    title: "Show customers",
+    toolName: "getCustomers",
+    toolParams: { pageSize: 10 },
+    keywords: ["show", "customers", "clients", "list"],
+  },
+  {
+    command: "/find",
+    title: "Find top customers",
+    toolName: "getCustomers",
+    toolParams: { pageSize: 10 },
+    keywords: ["find", "top", "customers", "clients"],
+  },
+  // Cash Flow
+  {
+    command: "/show",
+    title: "Show cash flow",
+    toolName: "getCashFlow",
+    toolParams: { showCanvas: true },
+    keywords: ["show", "cash", "flow", "income", "expenses"],
+  },
+  {
+    command: "/show",
+    title: "Show cash flow this month",
+    toolName: "getCashFlow",
+    toolParams: {
+      from: startOfMonth(new Date()).toISOString(),
+      to: endOfMonth(new Date()).toISOString(),
+      showCanvas: true,
+    },
+    keywords: ["show", "cash", "flow", "month", "this month"],
+  },
+  {
+    command: "/analyze",
+    title: "Analyze cash flow trends",
+    toolName: "getCashFlow",
+    toolParams: { showCanvas: true },
+    keywords: ["analyze", "cash", "flow", "trends", "patterns"],
+  },
+  // Expenses
+  {
+    command: "/show",
+    title: "Show expenses",
+    toolName: "getExpenses",
+    toolParams: { showCanvas: true },
+    keywords: ["show", "expenses", "costs", "spending"],
+  },
+  {
+    command: "/show",
+    title: "Show expenses this month",
+    toolName: "getExpenses",
+    toolParams: {
+      from: startOfMonth(new Date()).toISOString(),
+      to: endOfMonth(new Date()).toISOString(),
+      showCanvas: true,
+    },
+    keywords: ["show", "expenses", "month", "this month"],
+  },
+  {
+    command: "/analyze",
+    title: "Analyze expense trends",
+    toolName: "getExpenses",
+    toolParams: { showCanvas: true },
+    keywords: ["analyze", "expense", "trends", "patterns"],
   },
 ];
 

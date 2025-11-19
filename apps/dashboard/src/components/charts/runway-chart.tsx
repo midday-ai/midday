@@ -47,11 +47,7 @@ export function RunwayChart({
 }: RunwayChartProps) {
   const tickFormatter = (value: number) => `$${(value / 1000).toFixed(0)}k`;
   const maxValues = data.map((d) => ({
-    maxValue: Math.max(
-      d.cashRemaining,
-      d.burnRate,
-      d.projectedCash ?? 0,
-    ),
+    maxValue: Math.max(d.cashRemaining, d.burnRate, d.projectedCash ?? 0),
   }));
   const { marginLeft } = useChartMargin(maxValues, "maxValue", tickFormatter);
 

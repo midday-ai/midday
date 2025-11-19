@@ -133,6 +133,13 @@ const SUGGESTED_ACTIONS_CONFIG = [
       showCanvas: true,
     },
   },
+  {
+    id: "get-growth-rate",
+    toolName: "getGrowthRate",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
 ] as const;
 
 export const suggestedActionsRouter = createTRPCRouter({

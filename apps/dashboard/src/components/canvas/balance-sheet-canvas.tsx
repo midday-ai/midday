@@ -2,6 +2,7 @@
 
 import { BaseCanvas, CanvasHeader } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
+import { Skeleton } from "@/components/canvas/base/skeleton";
 import { useUserQuery } from "@/hooks/use-user";
 import { formatAmount } from "@/utils/format";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
@@ -826,15 +827,164 @@ export function BalanceSheetCanvas() {
 
           {/* Show skeleton while loading */}
           {showDataSkeleton && !balanceSheet && (
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <div className="h-4 w-24 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                <div className="space-y-2">
-                  <div className="h-3 w-32 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                  <div className="space-y-1 pl-4">
-                    <div className="h-4 w-full bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-                    <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+            <div className="mb-6">
+              {/* Title */}
+              <div className="flex items-center justify-between mb-4">
+                <Skeleton width="8rem" height="1.125rem" />
+                <Skeleton width="6rem" height="0.75rem" />
+              </div>
+
+              {/* Balance Sheet Table */}
+              <div className="border bg-white dark:bg-[#0c0c0c] border-[#e6e6e6] dark:border-[#1d1d1d] rounded-none">
+                {/* Header */}
+                <div className="flex border-b border-[#e6e6e6] dark:border-[#1d1d1d]">
+                  <div className="w-1/2 px-4 py-3">
+                    <Skeleton width="3rem" height="0.75rem" />
                   </div>
+                  <div className="w-1/2 px-4 py-3 text-right">
+                    <Skeleton
+                      width="3rem"
+                      height="0.75rem"
+                      className="ml-auto"
+                    />
+                  </div>
+                </div>
+
+                {/* Current Assets */}
+                <div className="border-b border-[#e6e6e6] dark:border-[#1d1d1d]">
+                  <div className="px-4 py-2 bg-[#f7f7f7] dark:bg-[#131313]">
+                    <Skeleton width="5rem" height="0.75rem" />
+                  </div>
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="px-4 py-2 flex justify-between">
+                      <Skeleton
+                        width="8rem"
+                        height="0.75rem"
+                        className="pl-4"
+                      />
+                      <Skeleton width="4rem" height="0.75rem" />
+                    </div>
+                  ))}
+                  <div className="px-4 py-2 flex justify-between border-t border-[#e6e6e6] dark:border-[#1d1d1d] bg-[#f7f7f7] dark:bg-[#131313]">
+                    <Skeleton width="6rem" height="0.75rem" />
+                    <Skeleton width="4rem" height="0.75rem" />
+                  </div>
+                </div>
+
+                {/* Non-Current Assets */}
+                <div className="border-b border-[#e6e6e6] dark:border-[#1d1d1d]">
+                  <div className="px-4 py-2 bg-[#f7f7f7] dark:bg-[#131313]">
+                    <Skeleton width="7rem" height="0.75rem" />
+                  </div>
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="px-4 py-2 flex justify-between">
+                      <Skeleton
+                        width="9rem"
+                        height="0.75rem"
+                        className="pl-4"
+                      />
+                      <Skeleton width="4rem" height="0.75rem" />
+                    </div>
+                  ))}
+                  <div className="px-4 py-2 flex justify-between border-t border-[#e6e6e6] dark:border-[#1d1d1d] bg-[#f7f7f7] dark:bg-[#131313]">
+                    <Skeleton width="8rem" height="0.75rem" />
+                    <Skeleton width="4rem" height="0.75rem" />
+                  </div>
+                </div>
+
+                {/* Total Assets */}
+                <div className="px-4 py-3 flex justify-between border-b border-[#e6e6e6] dark:border-[#1d1d1d] bg-[#f7f7f7] dark:bg-[#0f0f0f]">
+                  <Skeleton width="5rem" height="0.875rem" />
+                  <Skeleton width="4rem" height="0.875rem" />
+                </div>
+
+                {/* Liabilities and Equity Header */}
+                <div className="flex border-b border-[#e6e6e6] dark:border-[#1d1d1d]">
+                  <div className="w-1/2 px-4 py-3">
+                    <Skeleton width="8rem" height="0.75rem" />
+                  </div>
+                  <div className="w-1/2 px-4 py-3 text-right">
+                    <Skeleton
+                      width="3rem"
+                      height="0.75rem"
+                      className="ml-auto"
+                    />
+                  </div>
+                </div>
+
+                {/* Current Liabilities */}
+                <div className="border-b border-[#e6e6e6] dark:border-[#1d1d1d]">
+                  <div className="px-4 py-2 bg-[#f7f7f7] dark:bg-[#131313]">
+                    <Skeleton width="7rem" height="0.75rem" />
+                  </div>
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="px-4 py-2 flex justify-between">
+                      <Skeleton
+                        width="7rem"
+                        height="0.75rem"
+                        className="pl-4"
+                      />
+                      <Skeleton width="4rem" height="0.75rem" />
+                    </div>
+                  ))}
+                  <div className="px-4 py-2 flex justify-between border-t border-[#e6e6e6] dark:border-[#1d1d1d] bg-[#f7f7f7] dark:bg-[#131313]">
+                    <Skeleton width="8rem" height="0.75rem" />
+                    <Skeleton width="4rem" height="0.75rem" />
+                  </div>
+                </div>
+
+                {/* Non-Current Liabilities */}
+                <div className="border-b border-[#e6e6e6] dark:border-[#1d1d1d]">
+                  <div className="px-4 py-2 bg-[#f7f7f7] dark:bg-[#131313]">
+                    <Skeleton width="10rem" height="0.75rem" />
+                  </div>
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="px-4 py-2 flex justify-between">
+                      <Skeleton
+                        width="9rem"
+                        height="0.75rem"
+                        className="pl-4"
+                      />
+                      <Skeleton width="4rem" height="0.75rem" />
+                    </div>
+                  ))}
+                  <div className="px-4 py-2 flex justify-between border-t border-[#e6e6e6] dark:border-[#1d1d1d] bg-[#f7f7f7] dark:bg-[#131313]">
+                    <Skeleton width="11rem" height="0.75rem" />
+                    <Skeleton width="4rem" height="0.75rem" />
+                  </div>
+                </div>
+
+                {/* Total Liabilities */}
+                <div className="px-4 py-3 flex justify-between border-b border-[#e6e6e6] dark:border-[#1d1d1d] bg-[#f7f7f7] dark:bg-[#0f0f0f]">
+                  <Skeleton width="6rem" height="0.875rem" />
+                  <Skeleton width="4rem" height="0.875rem" />
+                </div>
+
+                {/* Equity */}
+                <div className="border-b border-[#e6e6e6] dark:border-[#1d1d1d]">
+                  <div className="px-4 py-2 bg-[#f7f7f7] dark:bg-[#131313]">
+                    <Skeleton width="3rem" height="0.75rem" />
+                  </div>
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="px-4 py-2 flex justify-between">
+                      <Skeleton
+                        width="7rem"
+                        height="0.75rem"
+                        className="pl-4"
+                      />
+                      <Skeleton width="4rem" height="0.75rem" />
+                    </div>
+                  ))}
+                  <div className="px-4 py-2 flex justify-between border-t border-[#e6e6e6] dark:border-[#1d1d1d] bg-[#f7f7f7] dark:bg-[#131313]">
+                    <Skeleton width="5rem" height="0.75rem" />
+                    <Skeleton width="4rem" height="0.75rem" />
+                  </div>
+                </div>
+
+                {/* Total Liabilities and Equity */}
+                <div className="px-4 py-3 flex justify-between bg-[#f7f7f7] dark:bg-[#0f0f0f]">
+                  <Skeleton width="11rem" height="0.875rem" />
+                  <Skeleton width="4rem" height="0.875rem" />
                 </div>
               </div>
             </div>

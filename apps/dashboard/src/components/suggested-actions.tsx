@@ -151,6 +151,11 @@ export function SuggestedActions() {
       title: "Expenses",
       description: "Show me my expenses",
     },
+    "get-growth-rate": {
+      icon: Icons.TrendingUp,
+      title: "Growth Rate",
+      description: "Show me my growth rate analysis",
+    },
   };
 
   const suggestedActions = suggestedActionsData.actions;

@@ -66,60 +66,58 @@ export function SpendingCanvas() {
               </div>
 
               {transactions.length > 0 ? (
-                <div className="border border-[#e6e6e6] dark:border-[#1d1d1d]">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-b-0">
-                        <TableHead className="text-[12px] text-[#707070] dark:text-[#666666] font-normal">
-                          Date
-                        </TableHead>
-                        <TableHead className="text-[12px] text-[#707070] dark:text-[#666666] font-normal">
-                          Vendor
-                        </TableHead>
-                        <TableHead className="text-[12px] text-[#707070] dark:text-[#666666] font-normal">
-                          Category
-                        </TableHead>
-                        <TableHead className="text-right text-[12px] text-[#707070] dark:text-[#666666] font-normal">
-                          Amount
-                        </TableHead>
-                        <TableHead className="text-right text-[12px] text-[#707070] dark:text-[#666666] font-normal">
-                          Share
-                        </TableHead>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b-0">
+                      <TableHead className="text-[12px] text-[#707070] dark:text-[#666666] font-normal">
+                        Date
+                      </TableHead>
+                      <TableHead className="text-[12px] text-[#707070] dark:text-[#666666] font-normal">
+                        Vendor
+                      </TableHead>
+                      <TableHead className="text-[12px] text-[#707070] dark:text-[#666666] font-normal">
+                        Category
+                      </TableHead>
+                      <TableHead className="text-right text-[12px] text-[#707070] dark:text-[#666666] font-normal">
+                        Amount
+                      </TableHead>
+                      <TableHead className="text-right text-[12px] text-[#707070] dark:text-[#666666] font-normal">
+                        Share
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {transactions.slice(0, 10).map((transaction, index) => (
+                      <TableRow
+                        key={`${transaction.date}-${transaction.vendor}-${transaction.amount}-${index}`}
+                        className={cn(
+                          index === transactions.slice(0, 10).length - 1 &&
+                            "border-b-0",
+                        )}
+                      >
+                        <TableCell className="text-[12px] text-black dark:text-white">
+                          {transaction.date}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-black dark:text-white">
+                          {transaction.vendor}
+                        </TableCell>
+                        <TableCell className="text-[12px] text-black dark:text-white">
+                          {transaction.category}
+                        </TableCell>
+                        <TableCell className="text-right text-[12px] text-black dark:text-white font-sans">
+                          {formatAmount({
+                            currency,
+                            amount: transaction.amount,
+                            locale,
+                          })}
+                        </TableCell>
+                        <TableCell className="text-right text-[12px] text-[#707070] dark:text-[#666666]">
+                          {transaction.share.toFixed(1)}%
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {transactions.slice(0, 10).map((transaction, index) => (
-                        <TableRow
-                          key={`${transaction.date}-${transaction.vendor}-${transaction.amount}-${index}`}
-                          className={cn(
-                            index === transactions.slice(0, 10).length - 1 &&
-                              "border-b-0",
-                          )}
-                        >
-                          <TableCell className="text-[12px] text-black dark:text-white">
-                            {transaction.date}
-                          </TableCell>
-                          <TableCell className="text-[12px] text-black dark:text-white">
-                            {transaction.vendor}
-                          </TableCell>
-                          <TableCell className="text-[12px] text-black dark:text-white">
-                            {transaction.category}
-                          </TableCell>
-                          <TableCell className="text-right text-[12px] text-black dark:text-white font-sans">
-                            {formatAmount({
-                              currency,
-                              amount: transaction.amount,
-                              locale,
-                            })}
-                          </TableCell>
-                          <TableCell className="text-right text-[12px] text-[#707070] dark:text-[#666666]">
-                            {transaction.share.toFixed(1)}%
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                    ))}
+                  </TableBody>
+                </Table>
               ) : (
                 <div className="text-[12px] text-[#707070] dark:text-[#666666] py-8 text-center">
                   No transactions found
