@@ -2,6 +2,7 @@
 
 import type { ArtifactStage, ArtifactType } from "@/lib/artifact-config";
 import { getSectionFromStage } from "@/lib/artifact-config";
+import { extractBankAccountRequired } from "@/lib/chat-utils";
 import type { AgentStatus } from "@/types/agents";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { useDataPart } from "@ai-sdk-tools/store";
@@ -91,14 +92,7 @@ export function useChatStatus(
     const allParts = lastMessage.parts;
 
     // Check if bank account is required
-    const bankAccountRequired = allParts.some((part) => {
-      if ((part.type as string).startsWith("tool-")) {
-        const toolPart = part as Record<string, unknown>;
-        const errorText = toolPart.errorText as string | undefined;
-        return errorText === "BANK_ACCOUNT_REQUIRED";
-      }
-      return false;
-    });
+    const bankAccountRequired = extractBankAccountRequired(allParts);
 
     const toolParts = allParts.filter((part) => {
       const type = part.type;
@@ -152,7 +146,10 @@ export function useChatStatus(
 
     // Hide agent status when streaming text, when complete, when tool is showing, or when bank account is required
     const agentStatus =
-      status === "ready" || hasTextContent || currentToolCall || bankAccountRequired
+      status === "ready" ||
+      hasTextContent ||
+      currentToolCall ||
+      bankAccountRequired
         ? null
         : agentStatusData;
 

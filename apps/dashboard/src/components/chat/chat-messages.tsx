@@ -4,6 +4,7 @@ import { ChatMessageActions } from "@/components/chat/chat-message-actions";
 import { ConnectBankMessage } from "@/components/chat/connect-bank-message";
 import { FaviconStack } from "@/components/favicon-stack";
 import { useUserQuery } from "@/hooks/use-user";
+import { extractBankAccountRequired } from "@/lib/chat-utils";
 import { Message, MessageAvatar, MessageContent } from "@midday/ui/message";
 import { Response } from "@midday/ui/response";
 import type { UIMessage } from "ai";
@@ -69,23 +70,6 @@ function extractAiSdkSources(parts: UIMessage["parts"]): SourceItem[] {
  */
 function extractFileParts(parts: UIMessage["parts"]) {
   return parts.filter((part) => part.type === "file");
-}
-
-/**
- * Check if message parts indicate bank account is required
- */
-function extractBankAccountRequired(parts: UIMessage["parts"]): boolean {
-  for (const part of parts) {
-    if ((part.type as string).startsWith("tool-")) {
-      const toolPart = part as Record<string, unknown>;
-      const errorText = toolPart.errorText as string | undefined;
-
-      if (errorText === "BANK_ACCOUNT_REQUIRED") {
-        return true;
-      }
-    }
-  }
-  return false;
 }
 
 export function ChatMessages({
