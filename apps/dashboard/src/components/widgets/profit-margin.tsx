@@ -1,6 +1,8 @@
+import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
+import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { getWidgetPeriodDates } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -16,6 +18,9 @@ export function ProfitMarginWidget() {
   const trpc = useTRPC();
   const { data: team } = useTeamQuery();
   const t = useI18n();
+  const { sendMessage } = useChatActions();
+  const chatId = useChatId();
+  const { setChatId } = useChatInterface();
   const { config, isConfiguring, setIsConfiguring, saveConfig } =
     useConfigurableWidget("profit-margin");
 
@@ -34,9 +39,39 @@ export function ProfitMarginWidget() {
     ...WIDGET_POLLING_CONFIG,
   });
 
+  const handleToolCall = (params: {
+    toolName: string;
+    toolParams?: Record<string, any>;
+    text: string;
+  }) => {
+    if (!chatId) return;
+
+    setChatId(chatId);
+
+    sendMessage({
+      role: "user",
+      parts: [{ type: "text", text: params.text }],
+      metadata: {
+        toolCall: {
+          toolName: params.toolName,
+          toolParams: params.toolParams,
+        },
+      },
+    });
+  };
+
   const handleViewAnalysis = () => {
-    // TODO: Navigate to profit margin analysis page
-    console.log("View profit margin analysis clicked");
+    handleToolCall({
+      toolName: "getProfitAnalysis",
+      toolParams: {
+        from: format(from, "yyyy-MM-dd"),
+        to: format(to, "yyyy-MM-dd"),
+        currency: team?.baseCurrency ?? undefined,
+        revenueType: config?.revenueType ?? "net",
+        showCanvas: true,
+      },
+      text: "Show profit & loss statement",
+    });
   };
 
   const formatPercentage = (percentage: number) => {

@@ -10,6 +10,8 @@ export { CategoryExpenseDonutChart } from "./category-expense-donut-chart";
 export { RunwayChart } from "./runway-chart";
 export { CashFlowChart } from "./cash-flow-chart";
 export { StressTestChart } from "./stress-test-chart";
+export { GrowthRateChart } from "./growth-rate-chart";
+export { InvoicePaymentChart } from "./invoice-payment-chart";
 
 // Base Chart Components
 export {

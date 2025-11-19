@@ -105,7 +105,11 @@ export const Response = memo(
             {children}
           </p>
         ),
-        table: (props) => <Table {...props} className="border" />,
+        table: (props) => (
+          <div className="relative overflow-x-auto">
+            <Table {...props} className="border" />
+          </div>
+        ),
         a: (props) => {
           // if the href starts with the app url, open in the same window
           if (props.href?.startsWith(getAppUrl())) {

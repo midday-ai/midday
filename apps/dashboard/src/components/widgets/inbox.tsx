@@ -1,5 +1,7 @@
+import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
+import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { endOfDay, startOfDay, subDays } from "date-fns";
@@ -10,6 +12,9 @@ export function InboxWidget() {
   const trpc = useTRPC();
   const { data: team } = useTeamQuery();
   const router = useRouter();
+  const { sendMessage } = useChatActions();
+  const chatId = useChatId();
+  const { setChatId } = useChatInterface();
 
   const { data } = useQuery(
     trpc.widgets.getInboxStats.queryOptions({
@@ -21,8 +26,35 @@ export function InboxWidget() {
 
   const stats = data?.result;
 
+  const handleToolCall = (params: {
+    toolName: string;
+    toolParams?: Record<string, any>;
+    text: string;
+  }) => {
+    if (!chatId) return;
+
+    setChatId(chatId);
+
+    sendMessage({
+      role: "user",
+      parts: [{ type: "text", text: params.text }],
+      metadata: {
+        toolCall: {
+          toolName: params.toolName,
+          toolParams: params.toolParams,
+        },
+      },
+    });
+  };
+
   const handleViewInbox = () => {
-    router.push("/inbox");
+    handleToolCall({
+      toolName: "getInbox",
+      toolParams: {
+        pageSize: 20,
+      },
+      text: "Show inbox items",
+    });
   };
 
   // Calculate key metrics for display

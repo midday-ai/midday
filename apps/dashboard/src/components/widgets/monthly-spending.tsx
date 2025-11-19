@@ -1,14 +1,15 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
+import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
+import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { getWidgetPeriodDates } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { BaseWidget } from "./base";
 import { ConfigurableWidget } from "./configurable-widget";
@@ -18,9 +19,11 @@ import { WidgetSettings } from "./widget-settings";
 
 export function MonthlySpendingWidget() {
   const trpc = useTRPC();
-  const router = useRouter();
   const { data: team } = useTeamQuery();
   const t = useI18n();
+  const { sendMessage } = useChatActions();
+  const chatId = useChatId();
+  const { setChatId } = useChatInterface();
   const { config, isConfiguring, setIsConfiguring, saveConfig } =
     useConfigurableWidget("monthly-spending");
 
@@ -52,8 +55,38 @@ export function MonthlySpendingWidget() {
     return "Track your monthly expenses";
   };
 
+  const handleToolCall = (params: {
+    toolName: string;
+    toolParams?: Record<string, any>;
+    text: string;
+  }) => {
+    if (!chatId) return;
+
+    setChatId(chatId);
+
+    sendMessage({
+      role: "user",
+      parts: [{ type: "text", text: params.text }],
+      metadata: {
+        toolCall: {
+          toolName: params.toolName,
+          toolParams: params.toolParams,
+        },
+      },
+    });
+  };
+
   const handleSeeExpenses = () => {
-    router.push("/transactions?type=expense");
+    handleToolCall({
+      toolName: "getSpending",
+      toolParams: {
+        from: format(from, "yyyy-MM-dd"),
+        to: format(to, "yyyy-MM-dd"),
+        currency: team?.baseCurrency ?? undefined,
+        showCanvas: true,
+      },
+      text: "Show spending analysis",
+    });
   };
 
   return (

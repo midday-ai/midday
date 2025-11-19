@@ -1,9 +1,11 @@
 "use client";
 
+import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { formatCompactAmount } from "@/utils/format";
+import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { getWidgetPeriodDates } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -21,6 +23,9 @@ export function CategoryExpensesWidget() {
   const router = useRouter();
   const { data: user } = useUserQuery();
   const { data: team } = useTeamQuery();
+  const { sendMessage } = useChatActions();
+  const chatId = useChatId();
+  const { setChatId } = useChatInterface();
   const { config, isConfiguring, setIsConfiguring, saveConfig } =
     useConfigurableWidget("category-expenses");
 
@@ -47,11 +52,40 @@ export function CategoryExpensesWidget() {
 
   const hasCategories = categoryData && categories.length > 0;
 
+  const handleToolCall = (params: {
+    toolName: string;
+    toolParams?: Record<string, any>;
+    text: string;
+  }) => {
+    if (!chatId) return;
+
+    setChatId(chatId);
+
+    sendMessage({
+      role: "user",
+      parts: [{ type: "text", text: params.text }],
+      metadata: {
+        toolCall: {
+          toolName: params.toolName,
+          toolParams: params.toolParams,
+        },
+      },
+    });
+  };
+
   const handleViewCategories = () => {
     if (!hasCategories) return;
-    router.push(
-      `/transactions?categories=${categories.map((category) => category.slug).join(",")}&start=${fromStr}&end=${toStr}`,
-    );
+
+    handleToolCall({
+      toolName: "getExpenses",
+      toolParams: {
+        from: fromStr,
+        to: toStr,
+        currency: team?.baseCurrency ?? undefined,
+        showCanvas: true,
+      },
+      text: "Show expense breakdown by category",
+    });
   };
 
   return (

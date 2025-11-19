@@ -10,6 +10,7 @@ import { getCashFlowTool } from "@api/ai/tools/get-cash-flow";
 import { getCashFlowStressTestTool } from "@api/ai/tools/get-cash-flow-stress-test";
 import { getExpensesTool } from "@api/ai/tools/get-expenses";
 import { getForecastTool } from "@api/ai/tools/get-forecast";
+import { getGrowthRateTool } from "@api/ai/tools/get-growth-rate";
 import { getInvoicePaymentAnalysisTool } from "@api/ai/tools/get-invoice-payment-analysis";
 import { getProfitAnalysisTool } from "@api/ai/tools/get-profit-analysis";
 import { getRevenueSummaryTool } from "@api/ai/tools/get-revenue-summary";
@@ -52,6 +53,8 @@ ${COMMON_AGENT_RULES}
 - For "cash flow stress test", "stress test", "financial resilience", "scenario analysis", "worst case scenario", "best case scenario" requests, use getCashFlowStressTest with showCanvas: true
 - For "show cash flow stress test", "show stress test", "show financial resilience" or similar requests with "show", use getCashFlowStressTest with showCanvas: true
 - For regular "cash flow" requests (without "stress test"), use getCashFlow tool
+- For "growth rate", "revenue growth", "profit growth", "growth analysis", "period-over-period growth" requests, use the getGrowthRate tool
+- For "show growth rate", "show growth analysis", "show revenue growth" or similar requests with "show"/"visual", use getGrowthRate with showCanvas: true
 - When providing text responses for financial data, mention that visual reports are available (e.g., "You can also ask for a visual balance sheet report")
 - Use only ONE tool per query - don't call multiple similar tools
 </guidelines>
@@ -70,6 +73,7 @@ Provide concise, natural financial reports with:
     getCashFlowStressTest: getCashFlowStressTestTool,
     getProfitAnalysis: getProfitAnalysisTool,
     getRevenueSummary: getRevenueSummaryTool,
+    getGrowthRate: getGrowthRateTool,
     getSpending: getSpendingTool,
     getBalanceSheet: getBalanceSheetTool,
     getExpenses: getExpensesTool,

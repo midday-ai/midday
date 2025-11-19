@@ -13,6 +13,7 @@ export type ArtifactType =
   | "burn-rate-canvas"
   | "revenue-canvas"
   | "profit-canvas"
+  | "growth-rate-canvas"
   | "runway-canvas"
   | "cash-flow-canvas"
   | "balance-sheet-canvas"
@@ -36,6 +37,7 @@ export const TOOL_TO_ARTIFACT_MAP: Record<string, ArtifactType> = {
   runway: "runway-canvas",
   getRevenueSummary: "revenue-canvas",
   revenue: "revenue-canvas",
+  getGrowthRate: "growth-rate-canvas",
   getProfitAnalysis: "profit-canvas",
   profitLoss: "profit-canvas",
   getCashFlow: "cash-flow-canvas",
@@ -96,6 +98,12 @@ const CUSTOM_STAGE_MESSAGES: Partial<
   },
   "profit-canvas": {
     loading: "Preparing profit analysis...",
+    chart_ready: "Chart data ready, calculating metrics...",
+    metrics_ready: "Metrics calculated, generating insights...",
+    analysis_ready: "Analysis complete",
+  },
+  "growth-rate-canvas": {
+    loading: "Preparing growth rate analysis...",
     chart_ready: "Chart data ready, calculating metrics...",
     metrics_ready: "Metrics calculated, generating insights...",
     analysis_ready: "Analysis complete",

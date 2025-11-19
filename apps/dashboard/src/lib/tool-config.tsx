@@ -47,6 +47,11 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     icon: TrendingUp,
     description: "Analyzing revenue trends",
   },
+  getGrowthRate: {
+    name: "Growth Rate",
+    icon: TrendingUp,
+    description: "Analyzing growth rate",
+  },
   profitLoss: {
     name: "Profit & Loss",
     icon: BarChart3,

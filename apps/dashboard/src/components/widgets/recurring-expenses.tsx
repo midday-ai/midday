@@ -1,8 +1,10 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
+import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
+import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { getWidgetPeriodDates } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -19,6 +21,9 @@ export function RecurringExpensesWidget() {
   const trpc = useTRPC();
   const router = useRouter();
   const { data: team } = useTeamQuery();
+  const { sendMessage } = useChatActions();
+  const chatId = useChatId();
+  const { setChatId } = useChatInterface();
   const { config, isConfiguring, setIsConfiguring, saveConfig } =
     useConfigurableWidget("recurring-expenses");
 
@@ -54,10 +59,38 @@ export function RecurringExpensesWidget() {
     return `${totalExpenses} recurring expenses`;
   };
 
+  const handleToolCall = (params: {
+    toolName: string;
+    toolParams?: Record<string, any>;
+    text: string;
+  }) => {
+    if (!chatId) return;
+
+    setChatId(chatId);
+
+    sendMessage({
+      role: "user",
+      parts: [{ type: "text", text: params.text }],
+      metadata: {
+        toolCall: {
+          toolName: params.toolName,
+          toolParams: params.toolParams,
+        },
+      },
+    });
+  };
+
   const handleViewRecurring = () => {
-    router.push(
-      `/transactions?recurring=monthly&start=${fromStr}&end=${toStr}`,
-    );
+    handleToolCall({
+      toolName: "getExpenses",
+      toolParams: {
+        from: fromStr,
+        to: toStr,
+        currency: team?.baseCurrency ?? undefined,
+        showCanvas: true,
+      },
+      text: "Show recurring expenses",
+    });
   };
 
   return (

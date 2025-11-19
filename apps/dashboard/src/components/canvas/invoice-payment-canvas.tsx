@@ -1,46 +1,111 @@
 "use client";
 
-import { BaseCanvas } from "@/components/canvas/base";
+import {
+  BaseCanvas,
+  CanvasChart,
+  CanvasGrid,
+  CanvasHeader,
+  CanvasSection,
+} from "@/components/canvas/base";
+import { CanvasContent } from "@/components/canvas/base/canvas-content";
+import { InvoicePaymentChart } from "@/components/charts/invoice-payment-chart";
+import { useUserQuery } from "@/hooks/use-user";
+import { formatAmount } from "@/utils/format";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { invoicePaymentAnalysisArtifact } from "@api/ai/artifacts/invoice-payment-analysis";
 
 export function InvoicePaymentCanvas() {
+  const { data, status } = useArtifact(invoicePaymentAnalysisArtifact);
+  const { data: user } = useUserQuery();
+
+  const isLoading = status === "loading";
+  const stage = data?.stage;
+
+  // Use artifact data or fallback to empty/default values
+  const chartData =
+    data?.chart?.monthlyData?.map((item) => ({
+      month: item.month,
+      averageDaysToPay: item.averageDaysToPay,
+      paymentRate: item.paymentRate,
+    })) || [];
+
+  const paymentMetrics = data?.metrics
+    ? [
+        {
+          id: "payment-score",
+          title: "Payment Score",
+          value: `${data.metrics.paymentScore.toFixed(0)}/100`,
+          subtitle: "Overall payment performance",
+        },
+        {
+          id: "average-days-to-pay",
+          title: "Average Days to Pay",
+          value: `${data.metrics.averageDaysToPay.toFixed(1)} days`,
+          subtitle: "Time to receive payment",
+        },
+        {
+          id: "payment-rate",
+          title: "Payment Rate",
+          value: `${data.metrics.paymentRate.toFixed(1)}%`,
+          subtitle: "Percentage of invoices paid",
+        },
+        {
+          id: "overdue-rate",
+          title: "Overdue Rate",
+          value: `${data.metrics.overdueRate.toFixed(1)}%`,
+          subtitle: "Percentage of overdue invoices",
+        },
+      ]
+    : [];
+
+  const showChart =
+    stage &&
+    ["loading", "chart_ready", "metrics_ready", "analysis_ready"].includes(
+      stage,
+    );
+
+  const showSummarySkeleton = !stage || stage !== "analysis_ready";
+
   return (
     <BaseCanvas>
-      <div className="space-y-4">
-        <div className="border-b border-gray-200 dark:border-gray-800 pb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Invoice Payment Analysis
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Payment patterns, trends, and overdue summary
-              </p>
-            </div>
-          </div>
+      <CanvasHeader title="Invoice Payment Analysis" isLoading={isLoading} />
+
+      <CanvasContent>
+        <div className="space-y-8">
+          {/* Show chart as soon as we have data */}
+          {showChart && (
+            <CanvasChart
+              title="Payment Trends"
+              legend={{
+                items: [
+                  { label: "Avg Days to Pay", type: "solid" },
+                  { label: "Payment Rate %", type: "line" },
+                ],
+              }}
+              isLoading={stage === "loading"}
+              height="20rem"
+            >
+              <InvoicePaymentChart
+                data={chartData}
+                height={320}
+                locale={user?.locale ?? undefined}
+              />
+            </CanvasChart>
+          )}
+
+          {/* Always show metrics section */}
+          <CanvasGrid
+            items={paymentMetrics}
+            layout="2/2"
+            isLoading={stage === "loading" || stage === "chart_ready"}
+          />
+
+          {/* Always show summary section */}
+          <CanvasSection title="Summary" isLoading={showSummarySkeleton}>
+            {data?.analysis?.summary}
+          </CanvasSection>
         </div>
-        <div className="h-96 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-gray-400 dark:text-gray-600 mb-2">
-              <svg
-                className="w-12 h-12 mx-auto"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Invoice payment analysis data will appear here
-            </p>
-          </div>
-        </div>
-      </div>
+      </CanvasContent>
     </BaseCanvas>
   );
 }

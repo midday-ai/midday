@@ -1,6 +1,8 @@
 import { FormatAmount } from "@/components/format-amount";
+import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
+import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -11,6 +13,9 @@ export function OutstandingInvoicesWidget() {
   const trpc = useTRPC();
   const { data: team } = useTeamQuery();
   const router = useRouter();
+  const { sendMessage } = useChatActions();
+  const chatId = useChatId();
+  const { setChatId } = useChatInterface();
 
   const { data } = useQuery({
     ...trpc.widgets.getOutstandingInvoices.queryOptions({
@@ -20,8 +25,36 @@ export function OutstandingInvoicesWidget() {
     ...WIDGET_POLLING_CONFIG,
   });
 
+  const handleToolCall = (params: {
+    toolName: string;
+    toolParams?: Record<string, any>;
+    text: string;
+  }) => {
+    if (!chatId) return;
+
+    setChatId(chatId);
+
+    sendMessage({
+      role: "user",
+      parts: [{ type: "text", text: params.text }],
+      metadata: {
+        toolCall: {
+          toolName: params.toolName,
+          toolParams: params.toolParams,
+        },
+      },
+    });
+  };
+
   const handleViewInvoices = () => {
-    router.push("/invoices?statuses=unpaid,overdue");
+    handleToolCall({
+      toolName: "getInvoices",
+      toolParams: {
+        statuses: ["unpaid", "overdue"],
+        pageSize: 20,
+      },
+      text: "Show outstanding invoices",
+    });
   };
 
   return (
