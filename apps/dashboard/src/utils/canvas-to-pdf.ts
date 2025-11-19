@@ -36,6 +36,11 @@ export async function generateCanvasPdf(
       throw new Error("Canvas content not found");
     }
 
+    // Get the element's scrollHeight and add extra buffer to ensure we capture everything
+    const elementHeight =
+      canvasContent.scrollHeight || canvasContent.offsetHeight;
+    const extraHeight = 100; // Add extra pixels to ensure nothing is cut off
+
     // Capture the content as is, without any modifications
     const canvas = await html2canvas(canvasContent, {
       scale,
@@ -45,7 +50,36 @@ export async function generateCanvasPdf(
       logging: false,
       removeContainer: true,
       imageTimeout: 0,
+      // Set height with extra buffer to ensure full content capture
+      height: elementHeight + extraHeight,
+      // Ensure we capture full scrollable content
+      scrollX: 0,
+      scrollY: 0,
+      foreignObjectRendering: false,
       onclone: (clonedDoc) => {
+        // Safari fix: Ensure background is set on the main container
+        const mainContainer = clonedDoc.querySelector("[data-canvas-content]");
+        if (mainContainer) {
+          const containerEl = mainContainer as HTMLElement;
+          containerEl.style.backgroundColor = backgroundColor;
+          // Ensure overflow is visible and height is auto to capture full content
+          containerEl.style.overflow = "visible";
+          containerEl.style.height = "auto";
+          containerEl.style.maxHeight = "none";
+        }
+
+        // Set background on body and html for Safari
+        if (clonedDoc.body) {
+          clonedDoc.body.style.backgroundColor = backgroundColor;
+          clonedDoc.body.style.overflow = "visible";
+          clonedDoc.body.style.height = "auto";
+        }
+        if (clonedDoc.documentElement) {
+          clonedDoc.documentElement.style.backgroundColor = backgroundColor;
+          clonedDoc.documentElement.style.overflow = "visible";
+          clonedDoc.documentElement.style.height = "auto";
+        }
+
         // Inject fonts and fix chart text rendering
 
         // Apply font directly to all SVG text elements
