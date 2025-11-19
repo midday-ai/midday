@@ -7,133 +7,116 @@ import {
   CanvasHeader,
   CanvasSection,
 } from "@/components/canvas/base";
-import { useEffect, useState } from "react";
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { CanvasContent } from "@/components/canvas/base/canvas-content";
+import { BusinessHealthScoreChart } from "@/components/charts/business-health-score-chart";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
+import { businessHealthScoreArtifact } from "@api/ai/artifacts/business-health-score";
 
 export function HealthReportCanvas() {
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, status } = useArtifact(businessHealthScoreArtifact);
 
-  useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
+  const isLoading = status === "loading";
+  const stage = data?.stage;
 
-    return () => clearTimeout(timer);
-  }, []);
+  // Use artifact data or fallback to empty/default values
+  const healthScoreData =
+    data?.chart?.monthlyData?.map((item) => ({
+      month: item.month,
+      healthScore: item.healthScore,
+    })) || [];
 
-  const healthMetrics = [
-    {
-      id: "cash-flow-score",
-      title: "Cash Flow Score",
-      value: "8.5/10",
-      subtitle: "Excellent",
-      trend: { value: "+0.3 vs last month", isPositive: true },
-    },
-    {
-      id: "profitability-score",
-      title: "Profitability Score",
-      value: "7.2/10",
-      subtitle: "Good",
-      trend: { value: "+0.8 vs last month", isPositive: true },
-    },
-    {
-      id: "efficiency-score",
-      title: "Efficiency Score",
-      value: "6.8/10",
-      subtitle: "Fair",
-      trend: { value: "-0.2 vs last month", isPositive: false },
-    },
-    {
-      id: "growth-score",
-      title: "Growth Score",
-      value: "9.1/10",
-      subtitle: "Outstanding",
-      trend: { value: "+1.2 vs last month", isPositive: true },
-    },
-  ];
+  const healthMetrics = data?.metrics
+    ? [
+        {
+          id: "overall-score",
+          title: "Overall Score",
+          value: `${Math.round(data.metrics.overallScore)}/100`,
+          subtitle: "Composite health score",
+        },
+        {
+          id: "revenue-score",
+          title: "Revenue Score",
+          value: `${Math.round(data.metrics.revenueScore)}/100`,
+          subtitle: "Revenue performance",
+        },
+        {
+          id: "expense-score",
+          title: "Expense Score",
+          value: `${Math.round(data.metrics.expenseScore)}/100`,
+          subtitle: "Expense management",
+        },
+        {
+          id: "cash-flow-score",
+          title: "Cash Flow Score",
+          value: `${Math.round(data.metrics.cashFlowScore)}/100`,
+          subtitle: "Cash flow health",
+        },
+        {
+          id: "profitability-score",
+          title: "Profitability Score",
+          value: `${Math.round(data.metrics.profitabilityScore)}/100`,
+          subtitle: "Profitability metrics",
+        },
+      ]
+    : [];
 
-  const healthTrendData = [
-    { month: "Jan", score: 7.2 },
-    { month: "Feb", score: 7.5 },
-    { month: "Mar", score: 7.8 },
-    { month: "Apr", score: 8.1 },
-    { month: "May", score: 8.3 },
-    { month: "Jun", score: 8.5 },
-  ];
+  const showChart =
+    stage &&
+    ["loading", "chart_ready", "metrics_ready", "analysis_ready"].includes(
+      stage,
+    );
+
+  const showSummarySkeleton = !stage || stage !== "analysis_ready";
 
   return (
     <BaseCanvas>
-      <div className="space-y-4">
-        <CanvasHeader
-          title="Health Report"
-          description="Financial health metrics and KPIs"
-          isLoading={isLoading}
-        />
+      <CanvasHeader title="Analysis" isLoading={isLoading} />
 
-        <CanvasGrid items={healthMetrics} layout="2/2" isLoading={isLoading} />
+      <CanvasContent>
+        <div className="space-y-8">
+          {/* Show chart as soon as we have health score data */}
+          {showChart && (
+            <CanvasChart
+              title="Business Health Score Trend"
+              legend={{
+                items: [{ label: "Health Score", type: "solid" }],
+              }}
+              isLoading={stage === "loading"}
+              height="20rem"
+            >
+              <BusinessHealthScoreChart
+                data={healthScoreData}
+                height={320}
+                showLegend={false}
+              />
+            </CanvasChart>
+          )}
 
-        <CanvasChart
-          title="Health Score Trend"
-          legend={{
-            items: [
-              { label: "Overall Score", type: "solid", color: "#3b82f6" },
-            ],
-          }}
-          isLoading={isLoading}
-          height="16rem"
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={healthTrendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis
-                dataKey="month"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: "#6b7280", fontSize: 10 }}
-              />
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: "#6b7280", fontSize: 10 }}
-                domain={[6, 9]}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "0px",
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="score"
-                stroke="#3b82f6"
-                strokeWidth={2}
-                dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: "#3b82f6", strokeWidth: 2 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </CanvasChart>
+          {/* Always show metrics section */}
+          <CanvasGrid
+            items={healthMetrics}
+            layout="2/2"
+            isLoading={stage === "loading" || stage === "chart_ready"}
+          />
 
-        <CanvasSection title="Analysis" isLoading={isLoading}>
-          <p>
-            Overall financial health is strong with a composite score of 8.5/10.
-            Growth metrics are particularly impressive at 9.1/10, while
-            efficiency could be improved. Cash flow management is excellent,
-            indicating good liquidity management.
-          </p>
-        </CanvasSection>
-      </div>
+          {/* Always show summary section */}
+          <CanvasSection title="Summary" isLoading={showSummarySkeleton}>
+            {data?.analysis?.summary}
+          </CanvasSection>
+
+          {/* Show recommendations if available */}
+          {data?.analysis?.recommendations &&
+            data.analysis.recommendations.length > 0 && (
+              <CanvasSection title="Recommendations" isLoading={false}>
+                <ul className="list-disc list-inside space-y-2 text-[12px] leading-[17px] font-sans text-black dark:text-white">
+                  {data.analysis.recommendations.map((rec, index) => (
+                    <li key={rec}>{rec}</li>
+                  ))}
+                </ul>
+              </CanvasSection>
+            )}
+        </div>
+      </CanvasContent>
     </BaseCanvas>
   );
 }

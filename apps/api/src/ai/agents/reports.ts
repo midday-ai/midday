@@ -6,6 +6,7 @@ import {
 } from "@api/ai/agents/config/shared";
 import { getBalanceSheetTool } from "@api/ai/tools/get-balance-sheet";
 import { getBurnRateTool } from "@api/ai/tools/get-burn-rate";
+import { getBusinessHealthScoreTool } from "@api/ai/tools/get-business-health-score";
 import { getCashFlowTool } from "@api/ai/tools/get-cash-flow";
 import { getCashFlowStressTestTool } from "@api/ai/tools/get-cash-flow-stress-test";
 import { getExpensesTool } from "@api/ai/tools/get-expenses";
@@ -55,6 +56,8 @@ ${COMMON_AGENT_RULES}
 - For regular "cash flow" requests (without "stress test"), use getCashFlow tool
 - For "growth rate", "revenue growth", "profit growth", "growth analysis", "period-over-period growth" requests, use the getGrowthRate tool
 - For "show growth rate", "show growth analysis", "show revenue growth" or similar requests with "show"/"visual", use getGrowthRate with showCanvas: true
+- For "business health", "business health score", "health score", "financial health", "business metrics" requests, use the getBusinessHealthScore tool
+- For "show business health score", "show business health", "show health metrics" or similar requests with "show"/"visual", use getBusinessHealthScore with showCanvas: true
 - When providing text responses for financial data, mention that visual reports are available (e.g., "You can also ask for a visual balance sheet report")
 - Use only ONE tool per query - don't call multiple similar tools
 </guidelines>
@@ -81,6 +84,7 @@ Provide concise, natural financial reports with:
     getBurnRate: getBurnRateTool,
     getInvoicePaymentAnalysis: getInvoicePaymentAnalysisTool,
     getForecast: getForecastTool,
+    getBusinessHealthScore: getBusinessHealthScoreTool,
   },
   maxTurns: 5,
 });
