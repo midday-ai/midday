@@ -16,6 +16,7 @@ import {
   StyledXAxis,
   StyledYAxis,
 } from "./base-charts";
+import { useChartMargin } from "./chart-utils";
 import type { BaseChartProps } from "./chart-utils";
 
 interface ExpenseData {
@@ -111,6 +112,10 @@ export function ExpensesChart({
     );
   }
 
+  const tickFormatter = (value: number) => `$${(value / 1000).toFixed(0)}k`;
+  const maxValues = data.map((d) => ({ maxValue: d.amount }));
+  const { marginLeft } = useChartMargin(maxValues, "maxValue", tickFormatter);
+
   return (
     <div className={`w-full ${className}`}>
       {/* Legend */}
@@ -122,11 +127,13 @@ export function ExpensesChart({
       )}
 
       {/* Bar Chart */}
-      <BaseChart data={data} height={height}>
+      <BaseChart
+        data={data}
+        height={height}
+        margin={{ top: 5, right: 5, left: -marginLeft, bottom: 5 }}
+      >
         <StyledXAxis dataKey="month" />
-        <StyledYAxis
-          tickFormatter={(value: number) => `$${(value / 1000).toFixed(0)}k`}
-        />
+        <StyledYAxis tickFormatter={tickFormatter} />
 
         <Tooltip
           content={<StyledTooltip formatter={expensesTooltipFormatter} />}

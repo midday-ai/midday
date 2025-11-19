@@ -38,8 +38,9 @@ const CustomTooltip = ({
 }: any) => {
   if (active && Array.isArray(payload) && payload.length > 0) {
     const thisYear = payload.find((p) => p.dataKey === "revenue")?.value;
-    const lastYear = payload.find((p) => p.dataKey === "lastYearRevenue")
-      ?.value;
+    const lastYear = payload.find(
+      (p) => p.dataKey === "lastYearRevenue",
+    )?.value;
     const average = payload.find((p) => p.dataKey === "average")?.value;
 
     // Format amounts using proper currency formatting
@@ -152,4 +153,3 @@ export function RevenueTrendChart({
     </div>
   );
 }
-

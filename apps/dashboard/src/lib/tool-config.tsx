@@ -213,6 +213,11 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     icon: FileText,
     description: "Updating invoice",
   },
+  getInvoicePaymentAnalysis: {
+    name: "Invoice Payment Analysis",
+    icon: FileText,
+    description: "Analyzing invoice payment patterns",
+  },
 
   // Transaction tools
   getTransactions: {

@@ -146,6 +146,11 @@ export function SuggestedActions() {
       title: "Stress Test",
       description: "Show me my cash flow stress test",
     },
+    "get-expenses": {
+      icon: Icons.Amount,
+      title: "Expenses",
+      description: "Show me my expenses",
+    },
   };
 
   const suggestedActions = suggestedActionsData.actions;

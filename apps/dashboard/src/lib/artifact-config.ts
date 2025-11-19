@@ -130,6 +130,30 @@ const CUSTOM_STAGE_MESSAGES: Partial<
     metrics_ready: "Metrics ready, generating insights...",
     analysis_ready: "Analysis complete",
   },
+  "spending-canvas": {
+    loading: "Preparing spending analysis...",
+    chart_ready: "Chart data ready, calculating metrics...",
+    metrics_ready: "Metrics calculated, generating insights...",
+    analysis_ready: "Analysis complete",
+  },
+  "balance-sheet-canvas": {
+    loading: "Preparing balance sheet...",
+    chart_ready: "Chart data ready, calculating metrics...",
+    metrics_ready: "Metrics calculated, generating insights...",
+    analysis_ready: "Analysis complete",
+  },
+  "health-report-canvas": {
+    loading: "Preparing business health score...",
+    chart_ready: "Chart data ready, calculating metrics...",
+    metrics_ready: "Metrics calculated, generating insights...",
+    analysis_ready: "Analysis complete",
+  },
+  "invoice-payment-canvas": {
+    loading: "Preparing invoice payment analysis...",
+    chart_ready: "Chart data ready, calculating metrics...",
+    metrics_ready: "Metrics calculated, generating insights...",
+    analysis_ready: "Analysis complete",
+  },
 };
 
 /**

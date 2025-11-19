@@ -4,23 +4,16 @@ import { cashFlowStressTestArtifact } from "@api/ai/artifacts/cash-flow-stress-t
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
 import { db } from "@midday/db/client";
 import {
-  getBurnRate,
   getCashFlow,
   getCombinedAccountBalance,
+  getRunway,
 } from "@midday/db/queries";
 import { tool } from "ai";
-import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { z } from "zod";
 
 const getCashFlowStressTestSchema = z.object({
-  from: z
-    .string()
-    .default(() => startOfMonth(subMonths(new Date(), 12)).toISOString())
-    .describe("Start date (ISO 8601)"),
-  to: z
-    .string()
-    .default(() => endOfMonth(new Date()).toISOString())
-    .describe("End date (ISO 8601)"),
+  from: z.string().optional().describe("Start date (ISO 8601)"),
+  to: z.string().optional().describe("End date (ISO 8601)"),
   currency: z
     .string()
     .describe("Currency code (ISO 4217, e.g. 'USD')")
@@ -77,25 +70,26 @@ export const getCashFlowStressTestTool = tool({
       const locale = appContext.locale || "en-US";
 
       // Fetch required data in parallel
-      const [cashFlowData, balanceResult, burnRateData] = await Promise.all([
-        getCashFlow(db, {
-          teamId,
-          from: finalFrom,
-          to: finalTo,
-          currency: currency ?? undefined,
-          period: "monthly",
-        }),
-        getCombinedAccountBalance(db, {
-          teamId,
-          currency: currency ?? undefined,
-        }),
-        getBurnRate(db, {
-          teamId,
-          from: finalFrom,
-          to: finalTo,
-          currency: currency ?? undefined,
-        }),
-      ]);
+      const [cashFlowData, balanceResult, baseCaseRunwayFromQuery] =
+        await Promise.all([
+          getCashFlow(db, {
+            teamId,
+            from: finalFrom,
+            to: finalTo,
+            currency: currency ?? undefined,
+            period: "monthly",
+          }),
+          getCombinedAccountBalance(db, {
+            teamId,
+            currency: currency ?? undefined,
+          }),
+          getRunway(db, {
+            teamId,
+            from: finalFrom,
+            to: finalTo,
+            currency: currency ?? undefined,
+          }),
+        ]);
 
       // Get current cash balance
       const currentCashBalance = balanceResult.totalBalance || 0;
@@ -104,23 +98,18 @@ export const getCashFlowStressTestTool = tool({
       const monthlyData = cashFlowData.monthlyData || [];
       const averageMonthlyIncome =
         monthlyData.length > 0
-          ? monthlyData.reduce((sum, item) => sum + item.income, 0) /
-            monthlyData.length
+          ? monthlyData.reduce(
+              (sum: number, item: { income: number }) => sum + item.income,
+              0,
+            ) / monthlyData.length
           : 0;
       const averageMonthlyExpenses =
         monthlyData.length > 0
-          ? monthlyData.reduce((sum, item) => sum + item.expenses, 0) /
-            monthlyData.length
+          ? monthlyData.reduce(
+              (sum: number, item: { expenses: number }) => sum + item.expenses,
+              0,
+            ) / monthlyData.length
           : 0;
-      const averageMonthlyCashFlow =
-        averageMonthlyIncome - averageMonthlyExpenses;
-
-      // Calculate average monthly burn rate (expenses)
-      const averageBurnRate =
-        burnRateData.length > 0
-          ? burnRateData.reduce((sum, item) => sum + Number(item.value), 0) /
-            burnRateData.length
-          : averageMonthlyExpenses;
 
       // Scenario definitions
       const scenarios = [
@@ -148,31 +137,31 @@ export const getCashFlowStressTestTool = tool({
       ];
 
       // Calculate scenarios
-      const scenarioResults = scenarios.map((scenario) => {
+      const scenarioResults = scenarios.map((scenario, index) => {
         const adjustedMonthlyIncome =
           averageMonthlyIncome * scenario.revenueMultiplier;
         const adjustedMonthlyExpenses =
           averageMonthlyExpenses * scenario.expenseMultiplier;
         const adjustedMonthlyCashFlow =
           adjustedMonthlyIncome - adjustedMonthlyExpenses;
-        const adjustedMonthlyBurnRate = adjustedMonthlyExpenses;
 
         // Calculate runway (months until cash runs out)
-        // If cash flow is positive, runway is effectively infinite (set to large number)
+        // Base case uses the same calculation as getRunway tool
+        // Other scenarios use adjusted expenses
         let runway: number;
-        if (adjustedMonthlyCashFlow >= 0) {
-          // Positive cash flow - runway is effectively infinite
-          runway = 999; // Use large number to represent infinite
-        } else if (adjustedMonthlyBurnRate === 0) {
+        if (index === 0) {
+          // Base case: use the same calculation as regular runway tool
+          runway = baseCaseRunwayFromQuery;
+        } else if (adjustedMonthlyExpenses === 0) {
           runway = 0;
         } else {
-          // Negative cash flow - calculate months until cash runs out
-          runway = Math.max(0, currentCashBalance / adjustedMonthlyBurnRate);
+          // Other scenarios: calculate based on adjusted expenses
+          runway = Math.max(0, currentCashBalance / adjustedMonthlyExpenses);
         }
 
         // Determine status
         let status: "healthy" | "concerning" | "critical";
-        if (runway >= 12 || runway >= 999) {
+        if (runway >= 12) {
           status = "healthy";
         } else if (runway >= 6) {
           status = "concerning";
@@ -180,16 +169,18 @@ export const getCashFlowStressTestTool = tool({
           status = "critical";
         }
 
+        // Round runway to whole months
+        const roundedRunway = Math.round(runway);
+
         return {
           scenario: scenario.name,
-          months: Math.round(runway * 10) / 10, // Round to 1 decimal
+          months: roundedRunway,
           cashFlow: adjustedMonthlyCashFlow,
           status,
           revenueAdjustment: scenario.revenueAdjustment,
           expenseAdjustment: scenario.expenseAdjustment,
           adjustedMonthlyIncome,
           adjustedMonthlyExpenses,
-          adjustedMonthlyBurnRate,
         };
       });
 
@@ -275,9 +266,7 @@ export const getCashFlowStressTestTool = tool({
       // 6-12 months = 61-80 (healthy)
       // 12+ months = 81-100 (excellent)
       let stressTestScore: number;
-      if (worstCaseRunway >= 999) {
-        stressTestScore = 100; // Infinite runway
-      } else if (worstCaseRunway >= 12) {
+      if (worstCaseRunway >= 12) {
         stressTestScore = Math.min(100, 80 + (worstCaseRunway - 12) * 1.67); // 80-100 for 12+ months
       } else if (worstCaseRunway >= 6) {
         stressTestScore = 60 + ((worstCaseRunway - 6) / 6) * 20; // 60-80 for 6-12 months
@@ -316,13 +305,15 @@ export const getCashFlowStressTestTool = tool({
         });
       }
 
+      // Format runway as whole months
+      const formatRunway = (runway: number): string => {
+        return Math.round(runway).toString();
+      };
+
       // Generate summary text (plain text, no markdown or emojis)
-      const formattedBaseRunway =
-        baseCaseRunway >= 999 ? "infinite" : `${baseCaseRunway.toFixed(1)}`;
-      const formattedWorstRunway =
-        worstCaseRunway >= 999 ? "infinite" : `${worstCaseRunway.toFixed(1)}`;
-      const formattedBestRunway =
-        bestCaseRunway >= 999 ? "infinite" : `${bestCaseRunway.toFixed(1)}`;
+      const formattedBaseRunway = formatRunway(baseCaseRunway);
+      const formattedWorstRunway = formatRunway(worstCaseRunway);
+      const formattedBestRunway = formatRunway(bestCaseRunway);
 
       let summaryText = `Your cash flow stress test shows a base case runway of ${formattedBaseRunway} months, a worst case runway of ${formattedWorstRunway} months (assuming revenue drops 30% and expenses increase 20%), and a best case runway of ${formattedBestRunway} months (assuming revenue increases 20% and expenses decrease 10%). `;
       summaryText += `Your stress test score is ${stressTestScore} out of 100. `;

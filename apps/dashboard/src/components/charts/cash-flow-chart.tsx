@@ -12,7 +12,7 @@ import {
   YAxis,
 } from "recharts";
 import { ChartLegend } from "./base-charts";
-import { createCompactTickFormatter } from "./chart-utils";
+import { createCompactTickFormatter, useChartMargin } from "./chart-utils";
 import type { BaseChartProps } from "./chart-utils";
 
 interface CashFlowData {
@@ -54,6 +54,16 @@ export function CashFlowChart({
   showLegend = true,
 }: CashFlowChartProps) {
   const tickFormatter = createCompactTickFormatter();
+  // Calculate margin based on the maximum value across all data points
+  const maxValues = data.map((d) => ({
+    maxValue: Math.max(
+      Math.abs(d.inflow),
+      Math.abs(d.outflow),
+      Math.abs(d.netFlow),
+      Math.abs(d.cumulativeFlow),
+    ),
+  }));
+  const { marginLeft } = useChartMargin(maxValues, "maxValue", tickFormatter);
 
   return (
     <div className={`w-full ${className}`}>
@@ -77,7 +87,7 @@ export function CashFlowChart({
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={data}
-            margin={{ top: 0, right: 6, left: -20, bottom: 0 }}
+            margin={{ top: 0, right: 6, left: -marginLeft, bottom: 0 }}
           >
             <defs>
               <pattern

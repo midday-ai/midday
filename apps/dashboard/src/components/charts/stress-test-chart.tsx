@@ -4,7 +4,6 @@ import { formatAmount } from "@/utils/format";
 import {
   CartesianGrid,
   ComposedChart,
-  Legend,
   Line,
   ReferenceLine,
   ResponsiveContainer,
@@ -37,25 +36,36 @@ const ProjectionTooltip = ({
   locale,
 }: any) => {
   if (active && Array.isArray(payload) && payload.length > 0) {
-    return (
-      <div className="bg-background border border-border rounded-lg p-3 shadow-lg">
-        <p className="text-sm font-medium mb-2">Month {label}</p>
-        {payload.map((entry: any) => {
-          const value = entry.value as number;
-          const name = entry.name as string;
-          const color = entry.color as string;
+    const formatCurrency = (amount: number) =>
+      formatAmount({
+        amount,
+        currency,
+        locale: locale ?? undefined,
+        maximumFractionDigits: 0,
+      }) ?? `${currency}${amount.toLocaleString()}`;
 
-          return (
-            <p key={name} className="text-sm" style={{ color }}>
-              <span className="font-medium capitalize">{name}:</span>{" "}
-              {formatAmount({
-                amount: value,
-                currency,
-                locale,
-              })}
-            </p>
-          );
-        })}
+    const baseCase = payload.find((p) => p.dataKey === "baseCase")?.value;
+    const worstCase = payload.find((p) => p.dataKey === "worstCase")?.value;
+    const bestCase = payload.find((p) => p.dataKey === "bestCase")?.value;
+
+    return (
+      <div className="border p-2 text-[10px] font-hedvig-sans bg-white dark:bg-[#0c0c0c] border-[#e6e6e6] dark:border-[#1d1d1d] text-black dark:text-white shadow-sm">
+        <p className="mb-1 text-[#707070] dark:text-[#666666]">Month {label}</p>
+        {typeof baseCase === "number" && (
+          <p className="text-black dark:text-white">
+            Base Case: {formatCurrency(baseCase)}
+          </p>
+        )}
+        {typeof worstCase === "number" && (
+          <p className="text-black dark:text-white">
+            Worst Case: {formatCurrency(worstCase)}
+          </p>
+        )}
+        {typeof bestCase === "number" && (
+          <p className="text-black dark:text-white">
+            Best Case: {formatCurrency(bestCase)}
+          </p>
+        )}
       </div>
     );
   }
@@ -75,18 +85,19 @@ export function CashBalanceProjectionChart({
   locale?: string;
 }) {
   const tickFormatter = createCompactTickFormatter();
-  const { marginLeft } = useChartMargin(
-    data.map((d) => Math.max(d.baseCase, d.worstCase, d.bestCase)),
-    "baseCase",
-    tickFormatter,
-  );
+  // Calculate margin based on the maximum value across all scenarios
+  // Create a temporary data structure with max values for margin calculation
+  const maxValues = data.map((d) => ({
+    maxValue: Math.max(d.baseCase, d.worstCase, d.bestCase),
+  }));
+  const { marginLeft } = useChartMargin(maxValues, "maxValue", tickFormatter);
 
   return (
     <div className="w-full" style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart
           data={data}
-          margin={{ top: 0, right: 6, left: -marginLeft, bottom: 0 }}
+          margin={{ top: 0, right: 0, left: -marginLeft, bottom: 20 }}
         >
           <CartesianGrid
             strokeDasharray="3 3"
@@ -106,7 +117,7 @@ export function CashBalanceProjectionChart({
             label={{
               value: "Months from now",
               position: "insideBottom",
-              offset: -5,
+              offset: -10,
               style: {
                 textAnchor: "middle",
                 fill: "#707070",
@@ -131,43 +142,34 @@ export function CashBalanceProjectionChart({
             content={<ProjectionTooltip currency={currency} locale={locale} />}
             wrapperStyle={{ zIndex: 9999 }}
           />
-          <Legend
-            wrapperStyle={{
-              paddingTop: "20px",
-              fontSize: "12px",
-              fontFamily: "Hedvig Letters Sans",
-            }}
-            iconType="line"
-          />
           {/* Base Case Line (white in dark mode, black in light mode) */}
           <Line
             type="monotone"
             dataKey="baseCase"
-            stroke="#000000"
-            className="dark:stroke-white"
-            strokeWidth={2}
+            stroke="hsl(var(--primary))"
+            strokeWidth={1}
             dot={false}
             name="Base Case"
             isAnimationActive={false}
           />
-          {/* Worst Case Line (gray with opacity) */}
+          {/* Worst Case Line (gray, lighter in dark mode) */}
           <Line
             type="monotone"
             dataKey="worstCase"
             stroke="#666666"
-            className="dark:stroke-[#6666664D]"
+            className="dark:stroke-[#999999]"
             strokeWidth={2}
             strokeDasharray="5 5"
             dot={false}
             name="Worst Case"
             isAnimationActive={false}
           />
-          {/* Best Case Line (gray with opacity) */}
+          {/* Best Case Line (gray, lighter in dark mode) */}
           <Line
             type="monotone"
             dataKey="bestCase"
             stroke="#666666"
-            className="dark:stroke-[#6666664D]"
+            className="dark:stroke-[#999999]"
             strokeWidth={2}
             strokeDasharray="3 3"
             dot={false}

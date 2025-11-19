@@ -62,8 +62,7 @@ export const getRunwayTool = tool({
         );
       }
 
-      const targetCurrency =
-        currency || appContext.baseCurrency || "USD";
+      const targetCurrency = currency || appContext.baseCurrency || "USD";
 
       // Fetch runway, cash balance, and burn rate data in parallel
       const [runway, balanceResult, burnRateData] = await Promise.all([
@@ -88,8 +87,11 @@ export const getRunwayTool = tool({
       // Calculate average burn rate from burn rate data
       const averageBurnRate =
         burnRateData.length > 0
-          ? burnRateData.reduce((sum, item) => sum + Number(item.value), 0) /
-            burnRateData.length
+          ? burnRateData.reduce(
+              (sum: number, item: { value: number | string }) =>
+                sum + Number(item.value),
+              0,
+            ) / burnRateData.length
           : 0;
 
       // Get cash balance (use converted balance if available, otherwise total balance)
@@ -155,7 +157,9 @@ export const getRunwayTool = tool({
         recommendations.push(
           "Ensure transactions are properly categorized to calculate runway",
         );
-        recommendations.push("Check that bank accounts are connected and synced");
+        recommendations.push(
+          "Check that bank accounts are connected and synced",
+        );
       } else if (status === "critical") {
         recommendations.push(
           "Immediately reduce expenses or increase revenue to extend runway",
@@ -173,9 +177,7 @@ export const getRunwayTool = tool({
         );
         recommendations.push("Build a plan to extend runway to 12+ months");
       } else {
-        recommendations.push(
-          "Maintain current cash management practices",
-        );
+        recommendations.push("Maintain current cash management practices");
         recommendations.push(
           "Continue monitoring runway monthly to ensure healthy position",
         );

@@ -10,6 +10,7 @@ import {
   StyledXAxis,
   StyledYAxis,
 } from "./base-charts";
+import { useChartMargin } from "./chart-utils";
 import type { BaseChartProps } from "./chart-utils";
 
 interface RunwayData {
@@ -44,6 +45,16 @@ export function RunwayChart({
   showProjection = true,
   showLegend = true,
 }: RunwayChartProps) {
+  const tickFormatter = (value: number) => `$${(value / 1000).toFixed(0)}k`;
+  const maxValues = data.map((d) => ({
+    maxValue: Math.max(
+      d.cashRemaining,
+      d.burnRate,
+      d.projectedCash ?? 0,
+    ),
+  }));
+  const { marginLeft } = useChartMargin(maxValues, "maxValue", tickFormatter);
+
   return (
     <div className={`w-full ${className}`}>
       {/* Legend */}
@@ -61,11 +72,13 @@ export function RunwayChart({
       )}
 
       {/* Chart */}
-      <BaseChart data={data} height={height}>
+      <BaseChart
+        data={data}
+        height={height}
+        margin={{ top: 5, right: 5, left: -marginLeft, bottom: 5 }}
+      >
         <StyledXAxis dataKey="month" />
-        <StyledYAxis
-          tickFormatter={(value: number) => `$${(value / 1000).toFixed(0)}k`}
-        />
+        <StyledYAxis tickFormatter={tickFormatter} />
 
         <Tooltip
           content={<StyledTooltip formatter={runwayTooltipFormatter} />}

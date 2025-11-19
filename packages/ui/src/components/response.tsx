@@ -20,7 +20,7 @@ const CustomUnorderedList = ({
   children?: React.ReactNode;
   className?: string;
 }) => (
-  <ul className={cn("list-none m-0 p-0", className)} {...props}>
+  <ul className={cn("list-none m-0 p-0 leading-relaxed", className)} {...props}>
     {children}
   </ul>
 );
@@ -37,7 +37,7 @@ const CustomOrderedList = ({
   className?: string;
 }) => (
   <ol
-    className={cn("list-none m-0 p-0", className)}
+    className={cn("list-none m-0 p-0 leading-relaxed", className)}
     {...props}
     data-streamdown="unordered-list"
   >
@@ -57,7 +57,7 @@ const CustomListItem = ({
   className?: string;
 }) => (
   <li
-    className={cn("py-0 my-0 leading-none", className)}
+    className={cn("py-0 my-0 leading-relaxed", className)}
     {...props}
     data-streamdown="list-item"
   >
@@ -69,7 +69,7 @@ export const Response = memo(
   ({ className, ...props }: ResponseProps) => (
     <Streamdown
       className={cn(
-        "size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 space-y-4",
+        "size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 space-y-4 [&>h3+ul]:!mt-2 [&>h3+ol]:!mt-2 [&>h4+ul]:!mt-2 [&>h4+ol]:!mt-2 [&>ul]:!my-0 [&>ul]:!-mt-4 [&>*+ul]:!mt-2 [&>ol]:!my-0 [&>ol]:!-mt-4 [&>*+ol]:!mt-2",
         className,
       )}
       components={{
@@ -99,6 +99,11 @@ export const Response = memo(
           >
             {children}
           </h4>
+        ),
+        p: ({ children, ...props }) => (
+          <p className="leading-relaxed" {...props}>
+            {children}
+          </p>
         ),
         table: (props) => <Table {...props} className="border" />,
         a: (props) => {

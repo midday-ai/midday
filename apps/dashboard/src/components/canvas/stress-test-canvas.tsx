@@ -34,6 +34,11 @@ export function StressTestCanvas() {
     subtitle: string;
   }> = [];
 
+  // Format runway as whole months
+  const formatRunway = (runway: number): string => {
+    return `${Math.round(runway)} months`;
+  };
+
   if (metrics) {
     stressTestMetrics.push(
       {
@@ -42,7 +47,7 @@ export function StressTestCanvas() {
         value:
           metrics.baseCaseRunway >= 999
             ? "∞"
-            : `${metrics.baseCaseRunway.toFixed(1)} months`,
+            : formatRunway(metrics.baseCaseRunway),
         subtitle: "Current trends continue",
       },
       {
@@ -51,7 +56,7 @@ export function StressTestCanvas() {
         value:
           metrics.worstCaseRunway >= 999
             ? "∞"
-            : `${metrics.worstCaseRunway.toFixed(1)} months`,
+            : formatRunway(metrics.worstCaseRunway),
         subtitle: "Revenue -30%, Expenses +20%",
       },
       {
@@ -60,7 +65,7 @@ export function StressTestCanvas() {
         value:
           metrics.bestCaseRunway >= 999
             ? "∞"
-            : `${metrics.bestCaseRunway.toFixed(1)} months`,
+            : formatRunway(metrics.bestCaseRunway),
         subtitle: "Revenue +20%, Expenses -10%",
       },
       {
@@ -99,6 +104,28 @@ export function StressTestCanvas() {
               title="Cash Balance Projection"
               isLoading={stage === "loading" || stage === "chart_ready"}
               height="20rem"
+              legend={{
+                items: [
+                  {
+                    label: "Base Case",
+                    type: "line",
+                    lineStyle: "solid",
+                    color: "#000000",
+                  },
+                  {
+                    label: "Worst Case",
+                    type: "line",
+                    lineStyle: "dashed",
+                    color: "#666666",
+                  },
+                  {
+                    label: "Best Case",
+                    type: "line",
+                    lineStyle: "dashed",
+                    color: "#666666",
+                  },
+                ],
+              }}
             >
               <StressTestChart
                 projectedCashBalance={projectedCashBalance}

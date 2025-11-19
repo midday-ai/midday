@@ -9,7 +9,7 @@ import { suggestedActionsCache } from "@midday/cache/suggested-actions-cache";
 const SUGGESTED_ACTIONS_CONFIG = [
   {
     id: "get-burn-rate-analysis",
-    toolName: "getBurnRateAnalysis",
+    toolName: "getBurnRate",
     toolParams: {
       showCanvas: true,
     },
@@ -115,6 +115,20 @@ const SUGGESTED_ACTIONS_CONFIG = [
   {
     id: "get-forecast",
     toolName: "getForecast",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
+  {
+    id: "get-cash-flow-stress-test",
+    toolName: "getCashFlowStressTest",
+    toolParams: {
+      showCanvas: true,
+    },
+  },
+  {
+    id: "get-expenses",
+    toolName: "getExpenses",
     toolParams: {
       showCanvas: true,
     },

@@ -51,7 +51,9 @@ export const getToolMessage = (toolName: string | null) => {
     cashFlow: "Analyzing your cash flow patterns...",
     getCashFlow: "Calculating your net cash flow...",
     balanceSheet: "Building your balance sheet...",
+    getBalanceSheet: "Building your balance sheet...",
     expenses: "Categorizing your expenses...",
+    getExpenses: "Categorizing your expenses...",
     burnRate: "Computing your monthly burn rate...",
     getBurnRate: "Computing your monthly burn rate...",
     runway: "Calculating your cash runway...",
@@ -59,12 +61,15 @@ export const getToolMessage = (toolName: string | null) => {
     spending: "Analyzing your spending trends...",
     getSpending: "Analyzing your spending patterns...",
     taxSummary: "Preparing your tax summary...",
+    getTaxSummary: "Preparing your tax summary...",
     getForecast: "Generating your revenue forecast...",
 
     // Analytics tools
     businessHealth: "Computing your business health score...",
+    getBusinessHealthScore: "Computing your business health score...",
     cashFlowForecast: "Projecting your future cash flow...",
     stressTest: "Running financial stress scenarios...",
+    getCashFlowStressTest: "Running financial stress scenarios...",
 
     // Customer tools
     getCustomers: "Retrieving your customers...",
@@ -79,6 +84,7 @@ export const getToolMessage = (toolName: string | null) => {
     getInvoice: "Loading invoice details...",
     createInvoice: "Creating your invoice...",
     updateInvoice: "Updating invoice information...",
+    getInvoicePaymentAnalysis: "Analyzing invoice payment patterns...",
 
     // Transaction tools
     getTransactions: "Retrieving your transactions...",

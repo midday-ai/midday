@@ -122,15 +122,10 @@ export function TaxTrendChart({
               wrapperStyle={{ zIndex: 9999 }}
             />
             {/* Tax amount bars (white in dark mode) */}
-            <Bar
-              dataKey="taxAmount"
-              fill="white"
-              isAnimationActive={false}
-            />
+            <Bar dataKey="taxAmount" fill="white" isAnimationActive={false} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
     </div>
   );
 }
-

@@ -11,7 +11,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { calculateYAxisDomain, createYAxisTickFormatter } from "./chart-utils";
+import {
+  calculateYAxisDomain,
+  createYAxisTickFormatter,
+  useChartMargin,
+} from "./chart-utils";
 
 interface ForecastData {
   month: string;
@@ -115,6 +119,12 @@ export function RevenueForecastChart({
   // Create currency-aware tick formatter
   const formatYAxisTick = createYAxisTickFormatter(currency, locale);
 
+  // Calculate margin based on the maximum value
+  const maxValues = data.map((d) => ({
+    maxValue: Math.max(d.actual ?? 0, d.forecasted ?? 0),
+  }));
+  const { marginLeft } = useChartMargin(maxValues, "maxValue", formatYAxisTick);
+
   // Get forecast start month for ReferenceLine
   const forecastStartMonth =
     forecastStartIndex !== undefined &&
@@ -130,7 +140,7 @@ export function RevenueForecastChart({
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={data}
-            margin={{ top: 20, right: 20, left: 0, bottom: 10 }}
+            margin={{ top: 20, right: 20, left: -marginLeft, bottom: 10 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"

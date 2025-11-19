@@ -121,7 +121,14 @@ const COMMAND_SUGGESTIONS = [
     title: "Analyze financial resilience",
     toolName: "getCashFlowStressTest",
     toolParams: { showCanvas: true },
-    keywords: ["analyze", "stress", "test", "resilience", "scenarios", "financial"],
+    keywords: [
+      "analyze",
+      "stress",
+      "test",
+      "resilience",
+      "scenarios",
+      "financial",
+    ],
   },
 ];
 
