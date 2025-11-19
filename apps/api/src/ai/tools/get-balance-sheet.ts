@@ -2,6 +2,7 @@ import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { balanceSheetArtifact } from "@api/ai/artifacts/balance-sheet";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getBalanceSheet } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
@@ -44,6 +45,11 @@ export const getBalanceSheetTool = tool({
         totalEquity: 0,
         currency: currency || appContext.baseCurrency || "USD",
       };
+    }
+
+    const { shouldYield } = checkBankAccountsRequired(appContext);
+    if (shouldYield) {
+      throw new Error("BANK_ACCOUNT_REQUIRED");
     }
 
     try {

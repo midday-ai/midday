@@ -3,6 +3,7 @@ import { openai } from "@ai-sdk/openai";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { spendingArtifact } from "@api/ai/artifacts/spending";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getSpending, getSpendingForPeriod } from "@midday/db/queries";
 import { getTransactions } from "@midday/db/queries";
@@ -46,6 +47,11 @@ export const getSpendingTool = tool({
         topCategory: null,
         transactions: [],
       };
+    }
+
+    const { shouldYield } = checkBankAccountsRequired(appContext);
+    if (shouldYield) {
+      throw new Error("BANK_ACCOUNT_REQUIRED");
     }
 
     try {

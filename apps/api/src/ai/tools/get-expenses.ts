@@ -1,6 +1,7 @@
 import { getWriter } from "@ai-sdk-tools/artifacts";
 import { openai } from "@ai-sdk/openai";
 import type { AppContext } from "@api/ai/agents/config/shared";
+import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { expensesArtifact } from "@api/ai/artifacts/expenses";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
 import { db } from "@midday/db/client";
@@ -41,6 +42,11 @@ export const getExpensesTool = tool({
         currency: currency || appContext.baseCurrency || "USD",
         categoryData: [],
       };
+    }
+
+    const { shouldYield } = checkBankAccountsRequired(appContext);
+    if (shouldYield) {
+      throw new Error("BANK_ACCOUNT_REQUIRED");
     }
 
     try {

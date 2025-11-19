@@ -1,4 +1,5 @@
 import type { AppContext } from "@api/ai/agents/config/shared";
+import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getTransactions } from "@midday/db/queries";
 import { getAppUrl } from "@midday/utils/envs";
@@ -108,6 +109,11 @@ export const getTransactionsTool = tool({
         text: "Unable to retrieve transactions: Team ID not found in context.",
       };
       return;
+    }
+
+    const { shouldYield } = checkBankAccountsRequired(appContext);
+    if (shouldYield) {
+      throw new Error("BANK_ACCOUNT_REQUIRED");
     }
 
     try {

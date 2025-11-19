@@ -107,6 +107,7 @@ export function ChatInterface({ geo }: Props) {
     artifactStage,
     artifactType,
     currentSection,
+    bankAccountRequired,
   } = useChatStatus(messages, status);
 
   const { artifacts } = useArtifacts();
@@ -175,6 +176,7 @@ export function ChatInterface({ geo }: Props) {
                       artifactStage={artifactStage}
                       artifactType={artifactType}
                       currentSection={currentSection}
+                      bankAccountRequired={bankAccountRequired}
                     />
                   </div>
                 </ConversationContent>

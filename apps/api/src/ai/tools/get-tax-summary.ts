@@ -1,5 +1,6 @@
 import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
+import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { taxSummaryArtifact } from "@api/ai/artifacts/tax-summary";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
 import { UTCDate } from "@date-fns/utc";
@@ -42,6 +43,11 @@ export const getTaxSummaryTool = tool({
         totalTaxableIncome: 0,
         currency: currency || appContext.baseCurrency || "USD",
       };
+    }
+
+    const { shouldYield } = checkBankAccountsRequired(appContext);
+    if (shouldYield) {
+      throw new Error("BANK_ACCOUNT_REQUIRED");
     }
 
     try {

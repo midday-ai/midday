@@ -56,6 +56,7 @@ export interface AppContext {
   timezone: string;
   chatId: string;
   fiscalYearStartMonth?: number | null;
+  hasBankAccounts?: boolean;
   // Allow additional properties to satisfy Record<string, unknown> constraint
   [key: string]: unknown;
 }
@@ -79,6 +80,7 @@ export function buildAppContext(
       context.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
     teamId: context.teamId,
     fiscalYearStartMonth: context.fiscalYearStartMonth ?? undefined,
+    hasBankAccounts: context.hasBankAccounts ?? false,
   };
 }
 

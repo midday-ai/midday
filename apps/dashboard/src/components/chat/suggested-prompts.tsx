@@ -1,8 +1,9 @@
 "use client";
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useChatActions, useDataPart } from "@ai-sdk-tools/store";
+import { useChat, useChatActions, useDataPart } from "@ai-sdk-tools/store";
 import { Button } from "@midday/ui/button";
+import type { UIMessage } from "ai";
 import { AnimatePresence, motion } from "framer-motion";
 
 type SuggestionsData = {
@@ -11,11 +12,34 @@ type SuggestionsData = {
 
 const delay = 1;
 
+/**
+ * Check if message parts indicate bank account is required
+ */
+function extractBankAccountRequired(parts: UIMessage["parts"]): boolean {
+  for (const part of parts) {
+    if ((part.type as string).startsWith("tool-")) {
+      const toolPart = part as Record<string, unknown>;
+      const errorText = toolPart.errorText as string | undefined;
+      if (errorText === "BANK_ACCOUNT_REQUIRED") {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 export function SuggestedPrompts() {
   const [suggestions, clearSuggestions] =
     useDataPart<SuggestionsData>("suggestions");
   const { sendMessage } = useChatActions();
   const { isChatPage } = useChatInterface();
+  const { messages } = useChat();
+
+  // Check if last message requires bank account
+  const bankAccountRequired =
+    messages.length > 0 && messages[messages.length - 1]?.role === "assistant"
+      ? extractBankAccountRequired(messages[messages.length - 1].parts)
+      : false;
 
   const handlePromptClick = (prompt: string) => {
     clearSuggestions();
@@ -25,7 +49,8 @@ export function SuggestedPrompts() {
   if (
     !suggestions?.prompts ||
     suggestions.prompts.length === 0 ||
-    !isChatPage
+    !isChatPage ||
+    bankAccountRequired
   ) {
     return null;
   }

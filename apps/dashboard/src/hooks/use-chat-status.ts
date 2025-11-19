@@ -15,6 +15,7 @@ interface ChatStatusResult {
   artifactStage: ArtifactStage | null;
   artifactType: ArtifactType | null;
   currentSection: string | null;
+  bankAccountRequired: boolean;
 }
 
 /**
@@ -59,6 +60,7 @@ export function useChatStatus(
         artifactStage,
         artifactType,
         currentSection,
+        bankAccountRequired: false,
       };
     }
 
@@ -71,6 +73,7 @@ export function useChatStatus(
         artifactStage,
         artifactType,
         currentSection,
+        bankAccountRequired: false,
       };
     }
 
@@ -86,6 +89,16 @@ export function useChatStatus(
 
     // Find active tool calls - check ALL tool-related parts
     const allParts = lastMessage.parts;
+
+    // Check if bank account is required
+    const bankAccountRequired = allParts.some((part) => {
+      if ((part.type as string).startsWith("tool-")) {
+        const toolPart = part as Record<string, unknown>;
+        const errorText = toolPart.errorText as string | undefined;
+        return errorText === "BANK_ACCOUNT_REQUIRED";
+      }
+      return false;
+    });
 
     const toolParts = allParts.filter((part) => {
       const type = part.type;
@@ -137,19 +150,23 @@ export function useChatStatus(
       _toolMetadata = null;
     }
 
-    // Hide agent status when streaming text, when complete, or when tool is showing
+    // Hide agent status when streaming text, when complete, when tool is showing, or when bank account is required
     const agentStatus =
-      status === "ready" || hasTextContent || currentToolCall
+      status === "ready" || hasTextContent || currentToolCall || bankAccountRequired
         ? null
         : agentStatusData;
 
+    // Hide tool call when bank account is required
+    const finalToolCall = bankAccountRequired ? null : currentToolCall;
+
     return {
       agentStatus,
-      currentToolCall,
+      currentToolCall: finalToolCall,
       hasTextContent,
       artifactStage,
       artifactType,
       currentSection,
+      bankAccountRequired,
     };
   }, [messages, status, agentStatusData, current]);
 

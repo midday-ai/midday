@@ -3,6 +3,7 @@ import { openai } from "@ai-sdk/openai";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { forecastArtifact } from "@api/ai/artifacts/forecast";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getRevenueForecast } from "@midday/db/queries";
 import { formatAmount, formatDate } from "@midday/utils/format";
@@ -48,6 +49,11 @@ export const getForecastTool = tool({
         currency: currency || appContext.baseCurrency || "USD",
         monthlyData: [],
       };
+    }
+
+    const { shouldYield } = checkBankAccountsRequired(appContext);
+    if (shouldYield) {
+      throw new Error("BANK_ACCOUNT_REQUIRED");
     }
 
     try {

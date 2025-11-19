@@ -1,7 +1,10 @@
 import type { Database } from "@db/client";
-import { chatCache } from "@midday/cache/chat-cache";
-import type { ChatUserContext } from "@midday/cache/chat-cache";
-import { getTeamById, getUserById } from "@midday/db/queries";
+import {
+  type ChatTeamContext,
+  type ChatUserContext,
+  chatCache,
+} from "@midday/cache/chat-cache";
+import { getBankAccounts, getTeamById, getUserById } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import { HTTPException } from "hono/http-exception";
 
@@ -28,8 +31,39 @@ export async function getUserContext({
 }: GetUserContextParams): Promise<ChatUserContext> {
   // Try to get cached context first
   const cached = await chatCache.getUserContext(userId, teamId);
+
+  // Get team context (cached separately)
+  let teamContext = await chatCache.getTeamContext(teamId);
+
+  // If team context not cached, fetch bank account status
+  if (!teamContext) {
+    const bankAccounts = await getBankAccounts(db, {
+      teamId,
+      enabled: true,
+    });
+    const hasBankAccounts = bankAccounts.length > 0;
+
+    teamContext = {
+      teamId,
+      hasBankAccounts,
+    };
+
+    // Cache team context (non-blocking)
+    chatCache.setTeamContext(teamId, teamContext).catch((err) => {
+      logger.warn({
+        msg: "Failed to cache team context",
+        teamId,
+        error: err.message,
+      });
+    });
+  }
+
+  // If user context is cached, merge team context and return
   if (cached) {
-    return cached;
+    return {
+      ...cached,
+      hasBankAccounts: teamContext.hasBankAccounts,
+    };
   }
 
   // If not cached, fetch team and user data in parallel
@@ -56,6 +90,7 @@ export async function getUserContext({
     country,
     city,
     timezone,
+    hasBankAccounts: teamContext.hasBankAccounts,
   };
 
   // Cache for future requests (non-blocking)

@@ -2,6 +2,7 @@ import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { businessHealthScoreArtifact } from "@api/ai/artifacts/business-health-score";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getCashFlow, getExpenses, getReports } from "@midday/db/queries";
 import { tool } from "ai";
@@ -50,6 +51,11 @@ export const getBusinessHealthScoreTool = tool({
         overallScore: 0,
         currency: currency || appContext.baseCurrency || "USD",
       };
+    }
+
+    const { shouldYield } = checkBankAccountsRequired(appContext);
+    if (shouldYield) {
+      throw new Error("BANK_ACCOUNT_REQUIRED");
     }
 
     try {

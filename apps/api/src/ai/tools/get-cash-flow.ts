@@ -3,6 +3,7 @@ import { openai } from "@ai-sdk/openai";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { cashFlowArtifact } from "@api/ai/artifacts/cash-flow";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getCashFlow } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
@@ -46,6 +47,11 @@ export const getCashFlowTool = tool({
         currency: currency || appContext.baseCurrency || "USD",
         period: period || "monthly",
       };
+    }
+
+    const { shouldYield } = checkBankAccountsRequired(appContext);
+    if (shouldYield) {
+      throw new Error("BANK_ACCOUNT_REQUIRED");
     }
 
     try {

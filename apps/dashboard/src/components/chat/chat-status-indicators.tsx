@@ -24,6 +24,7 @@ interface ChatStatusIndicatorsProps {
   artifactStage?: ArtifactStage | null;
   artifactType?: ArtifactType | null;
   currentSection?: string | null;
+  bankAccountRequired?: boolean;
 }
 
 export function ChatStatusIndicators({
@@ -33,7 +34,12 @@ export function ChatStatusIndicators({
   artifactStage,
   artifactType,
   currentSection,
+  bankAccountRequired = false,
 }: ChatStatusIndicatorsProps) {
+  // Don't show status indicators when bank account is required
+  if (bankAccountRequired) {
+    return null;
+  }
   const statusMessage = getStatusMessage(agentStatus);
   const toolMessage = getToolMessage(currentToolCall);
 

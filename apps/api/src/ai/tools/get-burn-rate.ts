@@ -3,6 +3,7 @@ import { openai } from "@ai-sdk/openai";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { burnRateArtifact } from "@api/ai/artifacts/burn-rate";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getBurnRate, getRunway, getSpending } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
@@ -48,6 +49,11 @@ export const getBurnRateTool = tool({
         runway: 0,
         currency: currency || appContext.baseCurrency || "USD",
       };
+    }
+
+    const { shouldYield } = checkBankAccountsRequired(appContext);
+    if (shouldYield) {
+      throw new Error("BANK_ACCOUNT_REQUIRED");
     }
 
     try {

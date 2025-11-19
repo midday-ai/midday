@@ -1,5 +1,6 @@
 import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
+import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { revenueArtifact } from "@api/ai/artifacts/revenue";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
 import { db } from "@midday/db/client";
@@ -42,6 +43,11 @@ export const getRevenueSummaryTool = tool({
         currency: currency || appContext.baseCurrency || "USD",
         monthlyData: [],
       };
+    }
+
+    const { shouldYield } = checkBankAccountsRequired(appContext);
+    if (shouldYield) {
+      throw new Error("BANK_ACCOUNT_REQUIRED");
     }
 
     try {

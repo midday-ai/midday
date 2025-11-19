@@ -2,6 +2,7 @@ import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { growthRateArtifact } from "@api/ai/artifacts/growth-rate";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getGrowthRate } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
@@ -51,6 +52,11 @@ export const getGrowthRateTool = tool({
         period,
         trend: "neutral",
       };
+    }
+
+    const { shouldYield } = checkBankAccountsRequired(appContext);
+    if (shouldYield) {
+      throw new Error("BANK_ACCOUNT_REQUIRED");
     }
 
     try {

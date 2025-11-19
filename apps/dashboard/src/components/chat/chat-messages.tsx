@@ -1,6 +1,7 @@
 "use client";
 
 import { ChatMessageActions } from "@/components/chat/chat-message-actions";
+import { ConnectBankMessage } from "@/components/chat/connect-bank-message";
 import { FaviconStack } from "@/components/favicon-stack";
 import { useUserQuery } from "@/hooks/use-user";
 import { Message, MessageAvatar, MessageContent } from "@midday/ui/message";
@@ -70,6 +71,23 @@ function extractFileParts(parts: UIMessage["parts"]) {
   return parts.filter((part) => part.type === "file");
 }
 
+/**
+ * Check if message parts indicate bank account is required
+ */
+function extractBankAccountRequired(parts: UIMessage["parts"]): boolean {
+  for (const part of parts) {
+    if ((part.type as string).startsWith("tool-")) {
+      const toolPart = part as Record<string, unknown>;
+      const errorText = toolPart.errorText as string | undefined;
+
+      if (errorText === "BANK_ACCOUNT_REQUIRED") {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 export function ChatMessages({
   messages,
   isStreaming = false,
@@ -100,6 +118,9 @@ export function ChatMessages({
           (source, index, self) =>
             index === self.findIndex((s) => s.url === source.url),
         );
+
+        // Check if bank account is required
+        const bankAccountRequired = extractBankAccountRequired(parts);
 
         // Check if this is the last (currently streaming) message
         const isLastMessage = index === messages.length - 1;
@@ -175,8 +196,17 @@ export function ChatMessages({
               </Message>
             )}
 
+            {/* Render bank account required message */}
+            {bankAccountRequired && message.role === "assistant" && (
+              <Message from={message.role}>
+                <MessageContent className="max-w-[80%]">
+                  <ConnectBankMessage />
+                </MessageContent>
+              </Message>
+            )}
+
             {/* Render text content in message */}
-            {textParts.length > 0 && (
+            {textParts.length > 0 && !bankAccountRequired && (
               <Message from={message.role}>
                 <MessageContent className="max-w-[80%]">
                   <Response>{textContent}</Response>
@@ -191,7 +221,7 @@ export function ChatMessages({
             )}
 
             {/* Render sources as stacked favicons - show immediately when available */}
-            {shouldShowSources && (
+            {shouldShowSources && !bankAccountRequired && (
               <div className="max-w-[80%]">
                 <FaviconStack sources={uniqueSources} />
               </div>
@@ -200,7 +230,8 @@ export function ChatMessages({
             {/* Render message actions for assistant messages when finished */}
             {message.role === "assistant" &&
               isMessageFinished &&
-              textContent && (
+              textContent &&
+              !bankAccountRequired && (
                 <ChatMessageActions
                   messageContent={textContent}
                   messageId={message.id}

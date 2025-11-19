@@ -1,4 +1,5 @@
 import type { AppContext } from "@api/ai/agents/config/shared";
+import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getCombinedAccountBalance } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
@@ -31,6 +32,11 @@ export const getAccountBalancesTool = tool({
         accountCount: 0,
         accounts: [],
       };
+    }
+
+    const { shouldYield } = checkBankAccountsRequired(appContext);
+    if (shouldYield) {
+      throw new Error("BANK_ACCOUNT_REQUIRED");
     }
 
     try {
