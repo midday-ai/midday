@@ -8,19 +8,24 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { useCanvasData } from "@/components/canvas/hooks";
 import {
   formatCurrencyAmount,
   shouldShowChart,
   shouldShowMetricsSkeleton,
   shouldShowSummarySkeleton,
 } from "@/components/canvas/utils";
+import { useUserQuery } from "@/hooks/use-user";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { cashFlowArtifact } from "@api/ai/artifacts/cash-flow";
 import { CashFlowChart } from "../charts";
 
 export function CashFlowCanvas() {
-  const { data, isLoading, stage, currency, locale } =
-    useCanvasData(cashFlowArtifact);
+  const { data, status } = useArtifact(cashFlowArtifact);
+  const { data: user } = useUserQuery();
+  const isLoading = status === "loading";
+  const stage = data?.stage;
+  const currency = data?.currency || "USD";
+  const locale = user?.locale ?? undefined;
 
   // Calculate cumulative flow and map artifact data to chart format
   let cumulativeFlow = 0;

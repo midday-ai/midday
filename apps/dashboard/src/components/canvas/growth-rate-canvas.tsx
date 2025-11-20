@@ -8,19 +8,24 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { useCanvasData } from "@/components/canvas/hooks";
 import {
   formatCurrencyAmount,
   shouldShowChart,
   shouldShowMetricsSkeleton,
   shouldShowSummarySkeleton,
 } from "@/components/canvas/utils";
+import { useUserQuery } from "@/hooks/use-user";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { growthRateArtifact } from "@api/ai/artifacts/growth-rate";
 import { GrowthRateChart } from "../charts/growth-rate-chart";
 
 export function GrowthRateCanvas() {
-  const { data, isLoading, stage, currency, locale } =
-    useCanvasData(growthRateArtifact);
+  const { data, status } = useArtifact(growthRateArtifact);
+  const { data: user } = useUserQuery();
+  const isLoading = status === "loading";
+  const stage = data?.stage;
+  const currency = data?.currency || "USD";
+  const locale = user?.locale ?? undefined;
 
   // Use artifact data or fallback to empty/default values
   const chartData =

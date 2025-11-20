@@ -36,7 +36,7 @@ export function SpendingCanvas() {
   const transactions = data?.transactions || [];
   const metrics = data?.metrics;
   const currency = data?.currency || "USD";
-  const locale = user?.locale;
+  const locale = user?.locale ?? undefined;
 
   const showTransactions =
     stage && ["metrics_ready", "analysis_ready"].includes(stage);

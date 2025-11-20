@@ -8,7 +8,6 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { useCanvasData } from "@/components/canvas/hooks";
 import {
   formatCurrencyAmount,
   shouldShowChart,
@@ -17,7 +16,9 @@ import {
 } from "@/components/canvas/utils";
 import { CategoryExpenseDonutChart } from "@/components/charts/category-expense-donut-chart";
 import { useTeamQuery } from "@/hooks/use-team";
+import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { taxSummaryArtifact } from "@api/ai/artifacts/tax-summary";
 import { getDefaultTaxType } from "@midday/utils";
 
@@ -77,8 +78,12 @@ function getTaxTerminology(
 }
 
 export function TaxSummaryCanvas() {
-  const { data, isLoading, stage, currency, locale } =
-    useCanvasData(taxSummaryArtifact);
+  const { data, status } = useArtifact(taxSummaryArtifact);
+  const { data: user } = useUserQuery();
+  const isLoading = status === "loading";
+  const stage = data?.stage;
+  const currency = data?.currency || "USD";
+  const locale = user?.locale;
   const { data: team } = useTeamQuery();
   const t = useI18n();
   const taxTerms = getTaxTerminology(team?.countryCode ?? undefined, t);

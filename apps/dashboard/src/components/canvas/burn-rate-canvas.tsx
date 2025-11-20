@@ -8,19 +8,24 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { useCanvasData } from "@/components/canvas/hooks";
 import {
   formatCurrencyAmount,
   shouldShowChart,
   shouldShowMetricsSkeleton,
   shouldShowSummarySkeleton,
 } from "@/components/canvas/utils";
+import { useUserQuery } from "@/hooks/use-user";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { burnRateArtifact } from "@api/ai/artifacts/burn-rate";
 import { BurnRateChart } from "../charts";
 
 export function BurnRateCanvas() {
-  const { data, isLoading, stage, currency, locale } =
-    useCanvasData(burnRateArtifact);
+  const { data, status } = useArtifact(burnRateArtifact);
+  const { data: user } = useUserQuery();
+  const isLoading = status === "loading";
+  const stage = data?.stage;
+  const currency = data?.currency || "USD";
+  const locale = user?.locale ?? undefined;
 
   // Use artifact data or fallback to empty/default values
   const burnRateData =

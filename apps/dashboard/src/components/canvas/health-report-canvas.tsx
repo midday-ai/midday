@@ -8,17 +8,19 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { useCanvasData } from "@/components/canvas/hooks";
 import {
   shouldShowChart,
   shouldShowMetricsSkeleton,
   shouldShowSummarySkeleton,
 } from "@/components/canvas/utils";
 import { BusinessHealthScoreChart } from "@/components/charts/business-health-score-chart";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { businessHealthScoreArtifact } from "@api/ai/artifacts/business-health-score";
 
 export function HealthReportCanvas() {
-  const { data, isLoading, stage } = useCanvasData(businessHealthScoreArtifact);
+  const { data, status } = useArtifact(businessHealthScoreArtifact);
+  const isLoading = status === "loading";
+  const stage = data?.stage;
 
   // Use artifact data or fallback to empty/default values
   const healthScoreData =

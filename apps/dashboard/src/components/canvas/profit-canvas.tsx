@@ -8,19 +8,24 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { useCanvasData } from "@/components/canvas/hooks";
 import {
   formatCurrencyAmount,
   shouldShowChart,
   shouldShowMetricsSkeleton,
   shouldShowSummarySkeleton,
 } from "@/components/canvas/utils";
+import { useUserQuery } from "@/hooks/use-user";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { profitArtifact } from "@api/ai/artifacts/profit";
 import { ProfitChart } from "../charts";
 
 export function ProfitCanvas() {
-  const { data, isLoading, stage, currency, locale } =
-    useCanvasData(profitArtifact);
+  const { data, status } = useArtifact(profitArtifact);
+  const { data: user } = useUserQuery();
+  const isLoading = status === "loading";
+  const stage = data?.stage;
+  const currency = data?.currency || "USD";
+  const locale = user?.locale;
 
   // Use artifact data or fallback to empty/default values
   const profitData =

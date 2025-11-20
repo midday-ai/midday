@@ -8,7 +8,6 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { useCanvasData } from "@/components/canvas/hooks";
 import {
   formatCurrencyAmount,
   shouldShowChart,
@@ -16,11 +15,17 @@ import {
   shouldShowSummarySkeleton,
 } from "@/components/canvas/utils";
 import { CategoryExpenseDonutChart } from "@/components/charts/category-expense-donut-chart";
+import { useUserQuery } from "@/hooks/use-user";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { expensesArtifact } from "@api/ai/artifacts/expenses";
 
 export function CategoryExpensesCanvas() {
-  const { data, isLoading, stage, currency, locale } =
-    useCanvasData(expensesArtifact);
+  const { data, status } = useArtifact(expensesArtifact);
+  const { data: user } = useUserQuery();
+  const isLoading = status === "loading";
+  const stage = data?.stage;
+  const currency = data?.currency || "USD";
+  const locale = user?.locale;
   const categoryData = data?.chart?.categoryData || [];
   const metrics = data?.metrics;
 

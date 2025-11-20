@@ -8,19 +8,23 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { useCanvasData } from "@/components/canvas/hooks";
 import {
   shouldShowChart,
   shouldShowMetricsSkeleton,
   shouldShowSummarySkeleton,
 } from "@/components/canvas/utils";
 import { StressTestChart } from "@/components/charts/stress-test-chart";
+import { useUserQuery } from "@/hooks/use-user";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { cashFlowStressTestArtifact } from "@api/ai/artifacts/cash-flow-stress-test";
 
 export function StressTestCanvas() {
-  const { data, isLoading, stage, currency, locale } = useCanvasData(
-    cashFlowStressTestArtifact,
-  );
+  const { data, status } = useArtifact(cashFlowStressTestArtifact);
+  const { data: user } = useUserQuery();
+  const isLoading = status === "loading";
+  const stage = data?.stage;
+  const currency = data?.currency || "USD";
+  const locale = user?.locale;
 
   const projectedCashBalance = data?.chart?.projectedCashBalance || [];
   const metrics = data?.metrics;

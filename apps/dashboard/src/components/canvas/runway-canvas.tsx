@@ -7,17 +7,22 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { useCanvasData } from "@/components/canvas/hooks";
 import {
   formatCurrencyAmount,
   shouldShowMetricsSkeleton,
   shouldShowSummarySkeleton,
 } from "@/components/canvas/utils";
+import { useUserQuery } from "@/hooks/use-user";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { runwayArtifact } from "@api/ai/artifacts/runway";
 
 export function RunwayCanvas() {
-  const { data, isLoading, stage, currency, locale } =
-    useCanvasData(runwayArtifact);
+  const { data, status } = useArtifact(runwayArtifact);
+  const { data: user } = useUserQuery();
+  const isLoading = status === "loading";
+  const stage = data?.stage;
+  const currency = data?.currency || "USD";
+  const locale = user?.locale ?? undefined;
 
   const metrics = data?.metrics;
   const statusValue = metrics?.status;
