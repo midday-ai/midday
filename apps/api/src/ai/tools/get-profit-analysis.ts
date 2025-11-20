@@ -1,8 +1,8 @@
 import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
-import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { profitArtifact } from "@api/ai/artifacts/profit";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getReports } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";

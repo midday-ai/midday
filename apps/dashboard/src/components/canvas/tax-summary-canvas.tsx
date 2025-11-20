@@ -8,9 +8,6 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { CategoryExpenseDonutChart } from "@/components/charts/category-expense-donut-chart";
-import { useTeamQuery } from "@/hooks/use-team";
-import { useI18n } from "@/locales/client";
 import { useCanvasData } from "@/components/canvas/hooks";
 import {
   formatCurrencyAmount,
@@ -18,6 +15,9 @@ import {
   shouldShowMetricsSkeleton,
   shouldShowSummarySkeleton,
 } from "@/components/canvas/utils";
+import { CategoryExpenseDonutChart } from "@/components/charts/category-expense-donut-chart";
+import { useTeamQuery } from "@/hooks/use-team";
+import { useI18n } from "@/locales/client";
 import { taxSummaryArtifact } from "@api/ai/artifacts/tax-summary";
 import { getDefaultTaxType } from "@midday/utils";
 

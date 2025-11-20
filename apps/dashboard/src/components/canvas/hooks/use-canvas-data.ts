@@ -1,6 +1,6 @@
 import { useUserQuery } from "@/hooks/use-user";
-import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import type { Artifact } from "@ai-sdk-tools/artifacts";
+import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 
 /**
  * Custom hook that combines useArtifact + useUserQuery
@@ -25,4 +25,3 @@ export function useCanvasData<T extends Artifact>(artifact: T) {
     locale,
   };
 }
-

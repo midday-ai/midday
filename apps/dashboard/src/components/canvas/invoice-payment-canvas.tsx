@@ -8,18 +8,19 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { InvoicePaymentChart } from "@/components/charts/invoice-payment-chart";
 import { useCanvasData } from "@/components/canvas/hooks";
 import {
   shouldShowChart,
   shouldShowMetricsSkeleton,
   shouldShowSummarySkeleton,
 } from "@/components/canvas/utils";
+import { InvoicePaymentChart } from "@/components/charts/invoice-payment-chart";
 import { invoicePaymentAnalysisArtifact } from "@api/ai/artifacts/invoice-payment-analysis";
 
 export function InvoicePaymentCanvas() {
-  const { data, isLoading, stage, locale } =
-    useCanvasData(invoicePaymentAnalysisArtifact);
+  const { data, isLoading, stage, locale } = useCanvasData(
+    invoicePaymentAnalysisArtifact,
+  );
 
   // Use artifact data or fallback to empty/default values
   const chartData =

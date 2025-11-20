@@ -8,7 +8,6 @@ import {
   CanvasSection,
 } from "@/components/canvas/base";
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
-import { CategoryExpenseDonutChart } from "@/components/charts/category-expense-donut-chart";
 import { useCanvasData } from "@/components/canvas/hooks";
 import {
   formatCurrencyAmount,
@@ -16,6 +15,7 @@ import {
   shouldShowMetricsSkeleton,
   shouldShowSummarySkeleton,
 } from "@/components/canvas/utils";
+import { CategoryExpenseDonutChart } from "@/components/charts/category-expense-donut-chart";
 import { expensesArtifact } from "@api/ai/artifacts/expenses";
 
 export function CategoryExpensesCanvas() {
@@ -89,11 +89,7 @@ export function CategoryExpensesCanvas() {
       expenseMetrics.push({
         id: "optimization-potential",
         title: "Optimization Potential",
-        value: formatCurrencyAmount(
-          optimizationPotential,
-          currency,
-          locale,
-        ),
+        value: formatCurrencyAmount(optimizationPotential, currency, locale),
         subtitle: "Quick wins this month",
       });
     }

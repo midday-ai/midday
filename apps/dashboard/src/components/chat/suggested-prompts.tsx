@@ -4,7 +4,6 @@ import { useChatInterface } from "@/hooks/use-chat-interface";
 import { extractBankAccountRequired } from "@/lib/chat-utils";
 import { useChat, useChatActions, useDataPart } from "@ai-sdk-tools/store";
 import { Button } from "@midday/ui/button";
-import type { UIMessage } from "ai";
 import { AnimatePresence, motion } from "framer-motion";
 
 type SuggestionsData = {
