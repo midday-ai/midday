@@ -5,6 +5,7 @@ import type { IconType as BaseIconType } from "react-icons/lib";
 import {
   MdArrowBack,
   MdArrowDownward,
+  MdArrowDropDown,
   MdArrowForward,
   MdArrowRightAlt,
   MdArrowUpward,
@@ -613,4 +614,5 @@ export const Icons = {
   Star: MdOutlineStar,
   ShowChart: MdOutlineShowChart,
   PieChart: MdOutlinePieChart,
+  ArrowDropDown: MdArrowDropDown,
 };

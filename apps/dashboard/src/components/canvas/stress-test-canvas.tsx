@@ -17,14 +17,19 @@ import { StressTestChart } from "@/components/charts/stress-test-chart";
 import { useUserQuery } from "@/hooks/use-user";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { cashFlowStressTestArtifact } from "@api/ai/artifacts/cash-flow-stress-test";
+import { parseAsInteger, useQueryState } from "nuqs";
 
 export function StressTestCanvas() {
-  const { data, status } = useArtifact(cashFlowStressTestArtifact);
+  const [version] = useQueryState("version", parseAsInteger.withDefault(0));
+  const [artifact] = useArtifact(cashFlowStressTestArtifact, {
+    version,
+  });
+  const { data, status } = artifact;
   const { data: user } = useUserQuery();
   const isLoading = status === "loading";
   const stage = data?.stage;
   const currency = data?.currency || "USD";
-  const locale = user?.locale;
+  const locale = user?.locale ?? undefined;
 
   const projectedCashBalance = data?.chart?.projectedCashBalance || [];
   const metrics = data?.metrics;
@@ -92,7 +97,7 @@ export function StressTestCanvas() {
 
   return (
     <BaseCanvas>
-      <CanvasHeader title="Cash Flow Stress Test" isLoading={isLoading} />
+      <CanvasHeader title="Cash Flow Stress Test" />
 
       <CanvasContent>
         <div className="space-y-8">

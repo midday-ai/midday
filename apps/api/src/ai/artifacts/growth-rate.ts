@@ -17,6 +17,12 @@ export const growthRateArtifact = artifact(
     type: z.enum(["revenue", "profit"]),
     revenueType: z.enum(["gross", "net"]),
     period: z.enum(["monthly", "quarterly", "yearly"]),
+    from: z.string().optional().describe("Start date (ISO 8601)"),
+    to: z.string().optional().describe("End date (ISO 8601)"),
+    description: z
+      .string()
+      .optional()
+      .describe("Generated description based on date range"),
 
     // Chart data (available at chart_ready stage)
     chart: z

@@ -3,6 +3,7 @@ import { openai } from "@ai-sdk/openai";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { spendingArtifact } from "@api/ai/artifacts/spending";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getSpending, getSpendingForPeriod } from "@midday/db/queries";
@@ -60,6 +61,9 @@ export const getSpendingTool = tool({
       const finalFrom = from ?? defaultDates.from;
       const finalTo = to ?? defaultDates.to;
 
+      // Generate description based on date range
+      const description = generateArtifactDescription(finalFrom, finalTo);
+
       // Initialize artifact only if showCanvas is true
       let analysis: ReturnType<typeof spendingArtifact.stream> | undefined;
       if (showCanvas) {
@@ -68,6 +72,9 @@ export const getSpendingTool = tool({
           {
             stage: "loading",
             currency: currency || appContext.baseCurrency || "USD",
+            from: finalFrom,
+            to: finalTo,
+            description,
           },
           writer,
         );
@@ -149,6 +156,9 @@ export const getSpendingTool = tool({
         await analysis.update({
           stage: "metrics_ready",
           currency: targetCurrency,
+          from: finalFrom,
+          to: finalTo,
+          description,
           metrics: {
             totalSpending,
             averageMonthlySpending,
@@ -239,6 +249,9 @@ Provide a concise analysis (2-3 sentences) of the key spending patterns and tren
         await analysis.update({
           stage: "analysis_ready",
           currency: targetCurrency,
+          from: finalFrom,
+          to: finalTo,
+          description,
           metrics: {
             totalSpending,
             averageMonthlySpending,

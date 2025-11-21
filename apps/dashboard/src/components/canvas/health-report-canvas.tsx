@@ -16,9 +16,14 @@ import {
 import { BusinessHealthScoreChart } from "@/components/charts/business-health-score-chart";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { businessHealthScoreArtifact } from "@api/ai/artifacts/business-health-score";
+import { parseAsInteger, useQueryState } from "nuqs";
 
 export function HealthReportCanvas() {
-  const { data, status } = useArtifact(businessHealthScoreArtifact);
+  const [version] = useQueryState("version", parseAsInteger.withDefault(0));
+  const [artifact] = useArtifact(businessHealthScoreArtifact, {
+    version,
+  });
+  const { data, status } = artifact;
   const isLoading = status === "loading";
   const stage = data?.stage;
 
@@ -69,7 +74,7 @@ export function HealthReportCanvas() {
 
   return (
     <BaseCanvas>
-      <CanvasHeader title="Analysis" isLoading={isLoading} />
+      <CanvasHeader title="Analysis" />
 
       <CanvasContent>
         <div className="space-y-8">

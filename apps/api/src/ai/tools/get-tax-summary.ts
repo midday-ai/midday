@@ -2,6 +2,7 @@ import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { taxSummaryArtifact } from "@api/ai/artifacts/tax-summary";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { UTCDate } from "@date-fns/utc";
 import { db } from "@midday/db/client";
@@ -56,6 +57,9 @@ export const getTaxSummaryTool = tool({
       const finalFrom = from ?? defaultDates.from;
       const finalTo = to ?? defaultDates.to;
 
+      // Generate description based on date range
+      const description = generateArtifactDescription(finalFrom, finalTo);
+
       // Initialize artifact only if showCanvas is true
       let analysis: ReturnType<typeof taxSummaryArtifact.stream> | undefined;
       if (showCanvas) {
@@ -64,6 +68,9 @@ export const getTaxSummaryTool = tool({
           {
             stage: "loading",
             currency: currency || appContext.baseCurrency || "USD",
+            from: finalFrom,
+            to: finalTo,
+            description,
           },
           writer,
         );
@@ -171,6 +178,9 @@ export const getTaxSummaryTool = tool({
         await analysis.update({
           stage: "chart_ready",
           currency: targetCurrency,
+          from: finalFrom,
+          to: finalTo,
+          description,
           chart: {
             categoryData: categoryData.length > 0 ? categoryData : undefined,
             taxTypeData: taxTypeData.length > 0 ? taxTypeData : undefined,

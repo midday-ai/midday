@@ -21,6 +21,7 @@ import { useI18n } from "@/locales/client";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { taxSummaryArtifact } from "@api/ai/artifacts/tax-summary";
 import { getDefaultTaxType } from "@midday/utils";
+import { parseAsInteger, useQueryState } from "nuqs";
 
 function getTaxTerminology(
   countryCode: string | undefined,
@@ -78,12 +79,14 @@ function getTaxTerminology(
 }
 
 export function TaxSummaryCanvas() {
-  const { data, status } = useArtifact(taxSummaryArtifact);
+  const [version] = useQueryState("version", parseAsInteger.withDefault(0));
+  const [artifact] = useArtifact(taxSummaryArtifact, { version });
+  const { data, status } = artifact;
   const { data: user } = useUserQuery();
   const isLoading = status === "loading";
   const stage = data?.stage;
   const currency = data?.currency || "USD";
-  const locale = user?.locale;
+  const locale = user?.locale ?? undefined;
   const { data: team } = useTeamQuery();
   const t = useI18n();
   const taxTerms = getTaxTerminology(team?.countryCode ?? undefined, t);
@@ -164,7 +167,7 @@ export function TaxSummaryCanvas() {
 
   return (
     <BaseCanvas>
-      <CanvasHeader title={taxTerms.title} isLoading={isLoading} />
+      <CanvasHeader title={taxTerms.title} />
 
       <CanvasContent>
         <div className="space-y-8">

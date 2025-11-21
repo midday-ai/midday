@@ -11,7 +11,6 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useMutation } from "@tanstack/react-query";
-import { motion } from "framer-motion";
 import { useState } from "react";
 
 interface ChatMessageActionsProps {
@@ -106,22 +105,9 @@ export function ChatMessageActions({
   };
 
   return (
-    <motion.div
-      className="flex items-center gap-1 mt-3"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.3,
-        ease: "easeOut",
-        staggerChildren: 0.05,
-      }}
-    >
+    <div className="flex items-center gap-1">
       {/* Copy Button */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.2 }}
-      >
+      <div>
         <TooltipProvider delayDuration={200}>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -142,14 +128,10 @@ export function ChatMessageActions({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-      </motion.div>
+      </div>
 
       {/* Retry Button */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.2 }}
-      >
+      <div>
         <TooltipProvider delayDuration={200}>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -166,14 +148,10 @@ export function ChatMessageActions({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-      </motion.div>
+      </div>
 
       {/* Positive Feedback Button */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.2 }}
-      >
+      <div>
         <TooltipProvider delayDuration={200}>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -210,14 +188,10 @@ export function ChatMessageActions({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-      </motion.div>
+      </div>
 
       {/* Negative Feedback Button */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.2 }}
-      >
+      <div>
         <TooltipProvider delayDuration={200}>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -254,7 +228,7 @@ export function ChatMessageActions({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

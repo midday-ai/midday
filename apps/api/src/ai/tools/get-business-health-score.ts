@@ -2,6 +2,7 @@ import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { businessHealthScoreArtifact } from "@api/ai/artifacts/business-health-score";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getCashFlow, getExpenses, getReports } from "@midday/db/queries";
@@ -59,6 +60,14 @@ export const getBusinessHealthScoreTool = tool({
     }
 
     try {
+      // Use fiscal year-aware defaults if dates not provided
+      const defaultDates = getToolDateDefaults(appContext.fiscalYearStartMonth);
+      const finalFrom = from ?? defaultDates.from;
+      const finalTo = to ?? defaultDates.to;
+
+      // Generate description based on date range
+      const description = generateArtifactDescription(finalFrom, finalTo);
+
       // Initialize artifact only if showCanvas is true
       let analysis:
         | ReturnType<typeof businessHealthScoreArtifact.stream>
@@ -69,15 +78,13 @@ export const getBusinessHealthScoreTool = tool({
           {
             stage: "loading",
             currency: currency || appContext.baseCurrency || "USD",
+            from: finalFrom,
+            to: finalTo,
+            description,
           },
           writer,
         );
       }
-
-      // Use fiscal year-aware defaults if dates not provided
-      const defaultDates = getToolDateDefaults(appContext.fiscalYearStartMonth);
-      const finalFrom = from ?? defaultDates.from;
-      const finalTo = to ?? defaultDates.to;
 
       const targetCurrency = currency || appContext.baseCurrency || "USD";
       const locale = appContext.locale || "en-US";
@@ -287,6 +294,9 @@ export const getBusinessHealthScoreTool = tool({
         await analysis.update({
           stage: "chart_ready",
           currency: targetCurrency,
+          from: finalFrom,
+          to: finalTo,
+          description,
           chart: {
             monthlyData: monthlyHealthScores,
           },

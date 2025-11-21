@@ -17,13 +17,18 @@ import { InvoicePaymentChart } from "@/components/charts/invoice-payment-chart";
 import { useUserQuery } from "@/hooks/use-user";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { invoicePaymentAnalysisArtifact } from "@api/ai/artifacts/invoice-payment-analysis";
+import { parseAsInteger, useQueryState } from "nuqs";
 
 export function InvoicePaymentCanvas() {
-  const { data, status } = useArtifact(invoicePaymentAnalysisArtifact);
+  const [version] = useQueryState("version", parseAsInteger.withDefault(0));
+  const [artifact] = useArtifact(invoicePaymentAnalysisArtifact, {
+    version,
+  });
+  const { data, status } = artifact;
   const { data: user } = useUserQuery();
   const isLoading = status === "loading";
   const stage = data?.stage;
-  const locale = user?.locale;
+  const locale = user?.locale ?? undefined;
 
   // Use artifact data or fallback to empty/default values
   const chartData =
@@ -67,7 +72,7 @@ export function InvoicePaymentCanvas() {
 
   return (
     <BaseCanvas>
-      <CanvasHeader title="Invoice Payment Analysis" isLoading={isLoading} />
+      <CanvasHeader title="Invoice Payment Analysis" />
 
       <CanvasContent>
         <div className="space-y-8">

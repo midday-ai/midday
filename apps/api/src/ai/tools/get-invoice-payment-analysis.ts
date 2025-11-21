@@ -2,6 +2,7 @@ import { getWriter } from "@ai-sdk-tools/artifacts";
 import { openai } from "@ai-sdk/openai";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { invoicePaymentAnalysisArtifact } from "@api/ai/artifacts/invoice-payment-analysis";
+import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
 import { db } from "@midday/db/client";
 import { getInvoicePaymentAnalysis } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
@@ -57,6 +58,9 @@ export const getInvoicePaymentAnalysisTool = tool({
     }
 
     try {
+      // Generate description based on date range
+      const description = generateArtifactDescription(from, to);
+
       // Initialize artifact only if showCanvas is true
       let analysis:
         | ReturnType<typeof invoicePaymentAnalysisArtifact.stream>
@@ -67,6 +71,9 @@ export const getInvoicePaymentAnalysisTool = tool({
           {
             stage: "loading",
             currency: currency || appContext.baseCurrency || "USD",
+            from,
+            to,
+            description,
           },
           writer,
         );
@@ -105,6 +112,9 @@ export const getInvoicePaymentAnalysisTool = tool({
         await analysis.update({
           stage: "chart_ready",
           currency: targetCurrency,
+          from,
+          to,
+          description,
           chart: {
             monthlyData: paymentData.paymentTrends.map((trend) => ({
               month: trend.month,

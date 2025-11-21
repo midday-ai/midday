@@ -2,6 +2,7 @@ import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { growthRateArtifact } from "@api/ai/artifacts/growth-rate";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getGrowthRate } from "@midday/db/queries";
@@ -65,6 +66,9 @@ export const getGrowthRateTool = tool({
       const finalFrom = from ?? defaultDates.from;
       const finalTo = to ?? defaultDates.to;
 
+      // Generate description based on date range
+      const description = generateArtifactDescription(finalFrom, finalTo);
+
       // Initialize artifact only if showCanvas is true
       let analysis: ReturnType<typeof growthRateArtifact.stream> | undefined;
       if (showCanvas) {
@@ -73,6 +77,9 @@ export const getGrowthRateTool = tool({
           {
             stage: "loading",
             currency: currency || appContext.baseCurrency || "USD",
+            from: finalFrom,
+            to: finalTo,
+            description,
             type,
             revenueType,
             period,
@@ -182,6 +189,9 @@ export const getGrowthRateTool = tool({
         await analysis.update({
           stage: "chart_ready",
           currency: targetCurrency,
+          from: finalFrom,
+          to: finalTo,
+          description,
           type,
           revenueType,
           period,
@@ -241,6 +251,9 @@ export const getGrowthRateTool = tool({
         await analysis.update({
           stage: "analysis_ready",
           currency: targetCurrency,
+          from: finalFrom,
+          to: finalTo,
+          description,
           type,
           revenueType,
           period,

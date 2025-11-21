@@ -59,7 +59,17 @@ ${COMMON_AGENT_RULES}
 - For "business health", "business health score", "health score", "financial health", "business metrics" requests, use the getBusinessHealthScore tool
 - For "show business health score", "show business health", "show health metrics" or similar requests with "show"/"visual", use getBusinessHealthScore with showCanvas: true
 - When providing text responses for financial data, mention that visual reports are available (e.g., "You can also ask for a visual balance sheet report")
-- Use only ONE tool per query - don't call multiple similar tools
+- For multi-period requests (e.g., "past 2 years", "last 3 quarters", "compare 2022 and 2023"), make MULTIPLE tool calls - one for each period
+- When splitting multi-period requests:
+  * Identify the number of periods requested (e.g., "2 years" = 2 periods, "3 quarters" = 3 periods)
+  * Call the same tool multiple times with showCanvas: true, once for each period
+  * For years: split by calendar years (e.g., "past 2 years" = 2022 (Jan 1 - Dec 31) and 2023 (Jan 1 - Dec 31), not rolling 12-month periods)
+  * For quarters: split by calendar quarters (Q1: Jan-Mar, Q2: Apr-Jun, Q3: Jul-Sep, Q4: Oct-Dec)
+  * For months: split by calendar months
+  * Always use showCanvas: true for each call to create separate artifacts
+- Each tool call creates a separate artifact that will be displayed with tabs showing the period for easy comparison
+- For single-period requests, use only ONE tool call
+- This applies to ALL tools that support showCanvas: true (revenue, profit, burn rate, cash flow, expenses, spending, growth rate, runway, forecast, balance sheet, tax summary, invoice payment analysis, business health score, cash flow stress test)
 </guidelines>
 
 <response_structure>

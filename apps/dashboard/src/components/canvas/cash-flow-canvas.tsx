@@ -17,10 +17,13 @@ import {
 import { useUserQuery } from "@/hooks/use-user";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { cashFlowArtifact } from "@api/ai/artifacts/cash-flow";
+import { parseAsInteger, useQueryState } from "nuqs";
 import { CashFlowChart } from "../charts";
 
 export function CashFlowCanvas() {
-  const { data, status } = useArtifact(cashFlowArtifact);
+  const [version] = useQueryState("version", parseAsInteger.withDefault(0));
+  const [artifact] = useArtifact(cashFlowArtifact, { version });
+  const { data, status } = artifact;
   const { data: user } = useUserQuery();
   const isLoading = status === "loading";
   const stage = data?.stage;
@@ -98,7 +101,7 @@ export function CashFlowCanvas() {
 
   return (
     <BaseCanvas>
-      <CanvasHeader title="Analysis" isLoading={isLoading} />
+      <CanvasHeader title="Analysis" />
 
       <CanvasContent>
         <div className="space-y-8">

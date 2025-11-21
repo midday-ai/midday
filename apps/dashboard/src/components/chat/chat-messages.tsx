@@ -1,10 +1,14 @@
 "use client";
 
+import { ArtifactToggleIcon } from "@/components/chat/artifact-toggle-icon";
 import { ChatMessageActions } from "@/components/chat/chat-message-actions";
 import { ConnectBankMessage } from "@/components/chat/connect-bank-message";
 import { FaviconStack } from "@/components/favicon-stack";
 import { useUserQuery } from "@/hooks/use-user";
-import { extractBankAccountRequired } from "@/lib/chat-utils";
+import {
+  extractArtifactTypeFromMessage,
+  extractBankAccountRequired,
+} from "@/lib/chat-utils";
 import { Message, MessageAvatar, MessageContent } from "@midday/ui/message";
 import { Response } from "@midday/ui/response";
 import type { UIMessage } from "ai";
@@ -106,6 +110,12 @@ export function ChatMessages({
         // Check if bank account is required
         const bankAccountRequired = extractBankAccountRequired(parts);
 
+        // Extract artifact type from message parts
+        const artifactType =
+          message.role === "assistant"
+            ? extractArtifactTypeFromMessage(parts)
+            : null;
+
         // Check if this is the last (currently streaming) message
         const isLastMessage = index === messages.length - 1;
 
@@ -119,7 +129,7 @@ export function ChatMessages({
           isMessageFinished;
 
         return (
-          <div key={message.id}>
+          <div key={message.id} className="group">
             {/* Render file attachments */}
             {fileParts.length > 0 && (
               <Message from={message.role}>
@@ -211,15 +221,27 @@ export function ChatMessages({
               </div>
             )}
 
-            {/* Render message actions for assistant messages when finished */}
+            {/* Render message actions and artifact toggle for assistant messages when finished */}
             {message.role === "assistant" &&
               isMessageFinished &&
               textContent &&
               !bankAccountRequired && (
-                <ChatMessageActions
-                  messageContent={textContent}
-                  messageId={message.id}
-                />
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div className="flex items-center gap-1 mt-3">
+                    {/* Message actions */}
+                    <ChatMessageActions
+                      messageContent={textContent}
+                      messageId={message.id}
+                    />
+                    {/* Artifact toggle icon */}
+                    {artifactType && (
+                      <ArtifactToggleIcon
+                        artifactType={artifactType}
+                        messageId={message.id}
+                      />
+                    )}
+                  </div>
+                </div>
               )}
           </div>
         );

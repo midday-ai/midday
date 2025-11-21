@@ -2,6 +2,7 @@ import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { profitArtifact } from "@api/ai/artifacts/profit";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getReports } from "@midday/db/queries";
@@ -60,6 +61,9 @@ export const getProfitAnalysisTool = tool({
       const finalFrom = from ?? defaultDates.from;
       const finalTo = to ?? defaultDates.to;
 
+      // Generate description based on date range
+      const description = generateArtifactDescription(finalFrom, finalTo);
+
       // Initialize artifact only if showCanvas is true
       let analysis: ReturnType<typeof profitArtifact.stream> | undefined;
       if (showCanvas) {
@@ -68,6 +72,9 @@ export const getProfitAnalysisTool = tool({
           {
             stage: "loading",
             currency: currency || appContext.baseCurrency || "USD",
+            from: finalFrom,
+            to: finalTo,
+            description,
           },
           writer,
         );
@@ -172,6 +179,9 @@ export const getProfitAnalysisTool = tool({
       if (showCanvas && analysis) {
         await analysis.update({
           stage: "chart_ready",
+          from: finalFrom,
+          to: finalTo,
+          description,
           chart: {
             monthlyData: chartData,
           },
@@ -258,6 +268,9 @@ export const getProfitAnalysisTool = tool({
       if (showCanvas && analysis) {
         await analysis.update({
           stage: "metrics_ready",
+          from: finalFrom,
+          to: finalTo,
+          description,
           chart: {
             monthlyData: chartData,
           },
@@ -365,6 +378,9 @@ export const getProfitAnalysisTool = tool({
       if (showCanvas && analysis) {
         await analysis.update({
           stage: "analysis_ready",
+          from: finalFrom,
+          to: finalTo,
+          description,
           chart: {
             monthlyData: chartData,
           },

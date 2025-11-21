@@ -1,6 +1,7 @@
 import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { balanceSheetArtifact } from "@api/ai/artifacts/balance-sheet";
+import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
@@ -55,7 +56,11 @@ export const getBalanceSheetTool = tool({
     try {
       // Use fiscal year-aware defaults if dates not provided
       const defaultDates = getToolDateDefaults(appContext.fiscalYearStartMonth);
+      const finalFrom = from ?? defaultDates.from;
       const finalTo = to ?? defaultDates.to;
+
+      // Generate description based on date range
+      const description = generateArtifactDescription(finalFrom, finalTo);
 
       const targetCurrency = currency || appContext.baseCurrency || "USD";
       const locale = appContext.locale || "en-US";
@@ -72,6 +77,9 @@ export const getBalanceSheetTool = tool({
             stage: "loading",
             currency: targetCurrency,
             asOf: asOfDate,
+            from: finalFrom,
+            to: finalTo,
+            description,
           },
           writer,
         );
@@ -365,6 +373,9 @@ export const getBalanceSheetTool = tool({
           stage: "metrics_ready",
           currency: balanceSheetData.currency,
           asOf: asOfDate,
+          from: finalFrom,
+          to: finalTo,
+          description,
           balanceSheet: balanceSheetData,
           metrics: {
             totalAssets: balanceSheetData.assets.total,
@@ -381,6 +392,9 @@ export const getBalanceSheetTool = tool({
           stage: "analysis_ready",
           currency: balanceSheetData.currency,
           asOf: asOfDate,
+          from: finalFrom,
+          to: finalTo,
+          description,
           balanceSheet: balanceSheetData,
           metrics: {
             totalAssets: balanceSheetData.assets.total,

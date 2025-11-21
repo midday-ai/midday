@@ -25,9 +25,12 @@ import {
   TableRow,
 } from "@midday/ui/table";
 import Link from "next/link";
+import { parseAsInteger, useQueryState } from "nuqs";
 
 export function SpendingCanvas() {
-  const { data, status } = useArtifact(spendingArtifact);
+  const [version] = useQueryState("version", parseAsInteger.withDefault(0));
+  const [artifact] = useArtifact(spendingArtifact, { version });
+  const { data, status } = artifact;
   const { data: user } = useUserQuery();
 
   const isLoading = status === "loading";
@@ -46,7 +49,7 @@ export function SpendingCanvas() {
 
   return (
     <BaseCanvas>
-      <CanvasHeader title="Spending" isLoading={isLoading} />
+      <CanvasHeader title="Spending" />
 
       <CanvasContent>
         <div className="space-y-8">

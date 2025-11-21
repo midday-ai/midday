@@ -44,10 +44,14 @@ export function useChatInterface() {
   const isChatPage = Boolean(chatId);
 
   const setChatId = (id: string) => {
-    // Preserve the locale in the URL
+    // Always replace with just the chat ID - no nesting
+    // Preserve query parameters when updating the URL
+    const currentSearch = window.location.search;
     const segments = pathname.split("/").filter(Boolean);
     const locale = segments[0];
-    const newPath = locale ? `/${locale}/${id}` : `/${id}`;
+    const newPath = locale
+      ? `/${locale}/${id}${currentSearch}`
+      : `/${id}${currentSearch}`;
 
     window.history.pushState({}, "", newPath);
     setChatIdState(id);

@@ -1,6 +1,7 @@
 import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { revenueArtifact } from "@api/ai/artifacts/revenue";
+import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
@@ -56,6 +57,9 @@ export const getRevenueSummaryTool = tool({
       const finalFrom = from ?? defaultDates.from;
       const finalTo = to ?? defaultDates.to;
 
+      // Generate description based on date range
+      const description = generateArtifactDescription(finalFrom, finalTo);
+
       // Initialize artifact only if showCanvas is true
       let analysis: ReturnType<typeof revenueArtifact.stream> | undefined;
       if (showCanvas) {
@@ -64,6 +68,9 @@ export const getRevenueSummaryTool = tool({
           {
             stage: "loading",
             currency: currency || appContext.baseCurrency || "USD",
+            from: finalFrom,
+            to: finalTo,
+            description,
           },
           writer,
         );
@@ -210,6 +217,9 @@ export const getRevenueSummaryTool = tool({
         await analysis.update({
           stage: "chart_ready",
           currency: targetCurrency,
+          from: finalFrom,
+          to: finalTo,
+          description,
           chart: {
             monthlyData: chartData,
           },
@@ -221,6 +231,9 @@ export const getRevenueSummaryTool = tool({
         await analysis.update({
           stage: "metrics_ready",
           currency: targetCurrency,
+          from: finalFrom,
+          to: finalTo,
+          description,
           chart: {
             monthlyData: chartData,
           },
@@ -254,6 +267,9 @@ export const getRevenueSummaryTool = tool({
         await analysis.update({
           stage: "analysis_ready",
           currency: targetCurrency,
+          from: finalFrom,
+          to: finalTo,
+          description,
           chart: {
             monthlyData: chartData,
           },

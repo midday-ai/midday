@@ -14,6 +14,7 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { format } from "date-fns";
+import { parseAsInteger, useQueryState } from "nuqs";
 
 function getBalanceSheetTooltip(item: string): string {
   const tooltips: Record<string, string> = {
@@ -48,7 +49,9 @@ function getBalanceSheetTooltip(item: string): string {
 }
 
 export function BalanceSheetCanvas() {
-  const { data, status } = useArtifact(balanceSheetArtifact);
+  const [version] = useQueryState("version", parseAsInteger.withDefault(0));
+  const [artifact] = useArtifact(balanceSheetArtifact, { version });
+  const { data, status } = artifact;
   const { data: user } = useUserQuery();
 
   const isLoading = status === "loading";
@@ -137,7 +140,7 @@ export function BalanceSheetCanvas() {
 
   return (
     <BaseCanvas>
-      <CanvasHeader title="Financial Position" isLoading={isLoading} />
+      <CanvasHeader title="Financial Position" />
 
       <CanvasContent>
         <div className="space-y-8">
@@ -149,6 +152,7 @@ export function BalanceSheetCanvas() {
                 <h4 className="text-[18px] font-normal font-serif text-black dark:text-white">
                   Balance Sheet
                 </h4>
+
                 {asOf && (
                   <div className="text-[12px] text-[#707070] dark:text-[#666666]">
                     As of {asOf}

@@ -18,14 +18,17 @@ import { CategoryExpenseDonutChart } from "@/components/charts/category-expense-
 import { useUserQuery } from "@/hooks/use-user";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { expensesArtifact } from "@api/ai/artifacts/expenses";
+import { parseAsInteger, useQueryState } from "nuqs";
 
 export function CategoryExpensesCanvas() {
-  const { data, status } = useArtifact(expensesArtifact);
+  const [version] = useQueryState("version", parseAsInteger.withDefault(0));
+  const [artifact] = useArtifact(expensesArtifact, { version });
+  const { data, status } = artifact;
   const { data: user } = useUserQuery();
   const isLoading = status === "loading";
   const stage = data?.stage;
   const currency = data?.currency || "USD";
-  const locale = user?.locale;
+  const locale = user?.locale ?? undefined;
   const categoryData = data?.chart?.categoryData || [];
   const metrics = data?.metrics;
 
@@ -105,7 +108,7 @@ export function CategoryExpensesCanvas() {
 
   return (
     <BaseCanvas>
-      <CanvasHeader title="Analysis" isLoading={isLoading} />
+      <CanvasHeader title="Analysis" />
 
       <CanvasContent>
         <div className="space-y-8">

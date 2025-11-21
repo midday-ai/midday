@@ -1,4 +1,5 @@
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
+import { parseAsString, useQueryState } from "nuqs";
 import { BalanceSheetCanvas } from "./balance-sheet-canvas";
 import { BurnRateCanvas } from "./burn-rate-canvas";
 import { CashFlowCanvas } from "./cash-flow-canvas";
@@ -15,11 +16,18 @@ import { StressTestCanvas } from "./stress-test-canvas";
 import { TaxSummaryCanvas } from "./tax-summary-canvas";
 
 export function Canvas() {
-  const { current } = useArtifacts({
+  const [selectedType, setSelectedType] = useQueryState(
+    "artifact-type",
+    parseAsString,
+  );
+
+  const [data] = useArtifacts({
+    value: selectedType,
+    onChange: (v) => setSelectedType(v ?? null),
     exclude: ["chat-title", "followup-questions"],
   });
 
-  switch (current?.type) {
+  switch (data.activeType) {
     case "burn-rate-canvas":
       return <BurnRateCanvas />;
     case "revenue-canvas":

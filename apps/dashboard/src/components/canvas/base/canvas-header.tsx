@@ -12,22 +12,13 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { useTheme } from "next-themes";
+import { ArtifactTabs } from "../artifact-tabs";
 
 interface CanvasHeaderProps {
   title: string;
-  description?: string;
-  isLoading?: boolean;
-  actions?: React.ReactNode;
-  className?: string;
 }
 
-export function CanvasHeader({
-  title,
-  description,
-  isLoading = false,
-  actions,
-  className,
-}: CanvasHeaderProps) {
+export function CanvasHeader({ title }: CanvasHeaderProps) {
   const { theme } = useTheme();
 
   const handleDownloadReport = async () => {
@@ -39,36 +30,11 @@ export function CanvasHeader({
     } catch {}
   };
 
-  if (isLoading) {
-    return (
-      <div className={cn("flex items-center justify-between", className)}>
-        <div className="space-y-2">
-          <Skeleton width="8rem" height="1.125rem" />
-          {description && <Skeleton width="12rem" height="0.875rem" />}
-        </div>
-        {actions && (
-          <div className="flex gap-2">
-            <Skeleton width="3rem" height="2rem" />
-            <Skeleton width="3rem" height="2rem" />
-          </div>
-        )}
-      </div>
-    );
-  }
-
   return (
-    <div className={cn("flex justify-between items-center mb-4", className)}>
-      <div>
-        <h2 className="text-[12px] leading-[23px] text-[#707070] dark:text-[#666666]">
-          {title}
-        </h2>
-        {description && (
-          <p className="text-[12px] text-[#707070] dark:text-[#666666] mt-1">
-            {description}
-          </p>
-        )}
-      </div>
-      <div className="flex justify-end mb-4">
+    <div className="flex items-center justify-between dark:bg-[#131313]">
+      <ArtifactTabs />
+
+      <div className="flex justify-end mr-1.5">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="p-0 h-6 w-6">

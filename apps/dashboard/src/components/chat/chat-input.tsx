@@ -27,6 +27,7 @@ import {
   PromptInputToolbar,
   PromptInputTools,
 } from "@midday/ui/prompt-input";
+import { parseAsString, useQueryState } from "nuqs";
 import { useRef } from "react";
 
 export interface ChatInputMessage extends PromptInputMessage {
@@ -43,14 +44,17 @@ export function ChatInput() {
   const { sendMessage, stop } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { current } = useArtifacts({
-    exclude: ["chat-title", "followup-questions"],
-  });
+
   const [, clearSuggestions] = useDataPart<{ prompts: string[] }>(
     "suggestions",
   );
 
-  const isCanvasVisible = !!current;
+  const [selectedType, setSelectedType] = useQueryState(
+    "artifact-type",
+    parseAsString,
+  );
+
+  const isCanvasVisible = !!selectedType;
 
   const {
     input,

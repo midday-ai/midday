@@ -3,7 +3,6 @@
 import { Canvas } from "@/components/canvas";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useChatStatus } from "@/hooks/use-chat-status";
-import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { useChat, useChatActions, useDataPart } from "@ai-sdk-tools/store";
 import type { UIChatMessage } from "@midday/api/ai/types";
 import { createClient } from "@midday/supabase/client";
@@ -15,6 +14,7 @@ import {
 } from "@midday/ui/conversation";
 import type { Geo } from "@vercel/functions";
 import { DefaultChatTransport, generateId } from "ai";
+import { parseAsString, useQueryState } from "nuqs";
 import { useEffect, useMemo, useRef } from "react";
 import {
   ChatHeader,
@@ -110,12 +110,16 @@ export function ChatInterface({ geo }: Props) {
     bankAccountRequired,
   } = useChatStatus(messages, status);
 
-  const { artifacts } = useArtifacts();
-  const hasArtifacts = artifacts && artifacts.length > 0;
+  const [selectedType, setSelectedType] = useQueryState(
+    "artifact-type",
+    parseAsString,
+  );
+
   const hasMessages = messages.length > 0;
 
   const [suggestions] = useDataPart<{ prompts: string[] }>("suggestions");
   const hasSuggestions = suggestions?.prompts && suggestions.prompts.length > 0;
+  const showCanvas = Boolean(selectedType);
 
   return (
     <div
@@ -129,11 +133,11 @@ export function ChatInterface({ geo }: Props) {
       <div
         className={cn(
           "fixed right-0 top-0 bottom-0 z-20",
-          hasArtifacts ? "translate-x-0" : "translate-x-full",
+          showCanvas ? "translate-x-0" : "translate-x-full",
           hasMessages && "transition-transform duration-300 ease-in-out",
         )}
       >
-        {hasArtifacts && <Canvas />}
+        <Canvas />
       </div>
 
       {/* Main chat area - container that slides left when canvas opens */}
@@ -141,7 +145,7 @@ export function ChatInterface({ geo }: Props) {
         className={cn(
           "relative flex-1",
           hasMessages && "transition-all duration-300 ease-in-out",
-          hasArtifacts && "mr-[600px]",
+          showCanvas && "mr-[600px]",
           !hasMessages && "flex items-center justify-center",
         )}
       >
@@ -153,7 +157,7 @@ export function ChatInterface({ geo }: Props) {
                 className={cn(
                   "sticky top-0 left-0 z-10 shrink-0",
                   hasMessages && "transition-all duration-300 ease-in-out",
-                  hasArtifacts ? "right-[600px]" : "right-0",
+                  showCanvas ? "right-[600px]" : "right-0",
                 )}
               >
                 <div className="bg-background/80 dark:bg-background/50 backdrop-blur-sm pt-6">
@@ -192,7 +196,7 @@ export function ChatInterface({ geo }: Props) {
           className={cn(
             "fixed bottom-0 left-0",
             hasMessages && "transition-all duration-300 ease-in-out",
-            hasArtifacts ? "right-[600px]" : "right-0",
+            showCanvas ? "right-[600px]" : "right-0",
           )}
         >
           <div className="w-full pb-4 max-w-2xl mx-auto">

@@ -15,9 +15,12 @@ import {
 import { useUserQuery } from "@/hooks/use-user";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { runwayArtifact } from "@api/ai/artifacts/runway";
+import { parseAsInteger, useQueryState } from "nuqs";
 
 export function RunwayCanvas() {
-  const { data, status } = useArtifact(runwayArtifact);
+  const [version] = useQueryState("version", parseAsInteger.withDefault(0));
+  const [artifact] = useArtifact(runwayArtifact, { version });
+  const { data, status } = artifact;
   const { data: user } = useUserQuery();
   const isLoading = status === "loading";
   const stage = data?.stage;
@@ -92,7 +95,7 @@ export function RunwayCanvas() {
 
   return (
     <BaseCanvas>
-      <CanvasHeader title="Cash Runway" isLoading={isLoading} />
+      <CanvasHeader title="Cash Runway" />
 
       <CanvasContent>
         <div className="space-y-8">

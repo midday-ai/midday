@@ -17,10 +17,13 @@ import {
 import { useUserQuery } from "@/hooks/use-user";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { growthRateArtifact } from "@api/ai/artifacts/growth-rate";
+import { parseAsInteger, useQueryState } from "nuqs";
 import { GrowthRateChart } from "../charts/growth-rate-chart";
 
 export function GrowthRateCanvas() {
-  const { data, status } = useArtifact(growthRateArtifact);
+  const [version] = useQueryState("version", parseAsInteger.withDefault(0));
+  const [artifact] = useArtifact(growthRateArtifact, { version });
+  const { data, status } = artifact;
   const { data: user } = useUserQuery();
   const isLoading = status === "loading";
   const stage = data?.stage;
@@ -96,10 +99,7 @@ export function GrowthRateCanvas() {
 
   return (
     <BaseCanvas>
-      <CanvasHeader
-        title={`${revenueTypeLabel} ${typeLabel} Growth Rate`}
-        isLoading={isLoading}
-      />
+      <CanvasHeader title={`${revenueTypeLabel} ${typeLabel} Growth Rate`} />
 
       <CanvasContent>
         <div className="space-y-8">

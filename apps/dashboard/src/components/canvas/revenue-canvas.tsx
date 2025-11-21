@@ -17,15 +17,18 @@ import {
 import { useUserQuery } from "@/hooks/use-user";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { revenueArtifact } from "@api/ai/artifacts/revenue";
+import { parseAsInteger, useQueryState } from "nuqs";
 import { RevenueTrendChart } from "../charts/revenue-trend-chart";
 
 export function RevenueCanvas() {
-  const { data, status } = useArtifact(revenueArtifact);
+  const [version] = useQueryState("version", parseAsInteger.withDefault(0));
+  const [artifact] = useArtifact(revenueArtifact, { version });
+  const { data, status } = artifact;
   const { data: user } = useUserQuery();
   const isLoading = status === "loading";
   const stage = data?.stage;
   const currency = data?.currency || "USD";
-  const locale = user?.locale;
+  const locale = user?.locale ?? undefined;
 
   // Use artifact data or fallback to empty/default values
   const revenueData =
@@ -82,7 +85,7 @@ export function RevenueCanvas() {
 
   return (
     <BaseCanvas>
-      <CanvasHeader title="Revenue Analysis" isLoading={isLoading} />
+      <CanvasHeader title="Revenue Analysis" />
 
       <CanvasContent>
         <div className="space-y-8">

@@ -17,15 +17,18 @@ import {
 import { useUserQuery } from "@/hooks/use-user";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { profitArtifact } from "@api/ai/artifacts/profit";
+import { parseAsInteger, useQueryState } from "nuqs";
 import { ProfitChart } from "../charts";
 
 export function ProfitCanvas() {
-  const { data, status } = useArtifact(profitArtifact);
+  const [version] = useQueryState("version", parseAsInteger.withDefault(0));
+  const [artifact] = useArtifact(profitArtifact, { version });
+  const { data, status } = artifact;
   const { data: user } = useUserQuery();
   const isLoading = status === "loading";
   const stage = data?.stage;
   const currency = data?.currency || "USD";
-  const locale = user?.locale;
+  const locale = user?.locale ?? undefined;
 
   // Use artifact data or fallback to empty/default values
   const profitData =
@@ -143,7 +146,7 @@ export function ProfitCanvas() {
 
   return (
     <BaseCanvas>
-      <CanvasHeader title="Profit & Loss" isLoading={isLoading} />
+      <CanvasHeader title="Profit & Loss" />
 
       <CanvasContent>
         <div className="space-y-8">

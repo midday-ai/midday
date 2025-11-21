@@ -3,6 +3,7 @@ import { openai } from "@ai-sdk/openai";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { forecastArtifact } from "@api/ai/artifacts/forecast";
 import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
+import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
 import { getRevenueForecast } from "@midday/db/queries";
@@ -62,6 +63,9 @@ export const getForecastTool = tool({
       const finalFrom = from ?? defaultDates.from;
       const finalTo = to ?? defaultDates.to;
 
+      // Generate description based on date range
+      const description = generateArtifactDescription(finalFrom, finalTo);
+
       // Initialize artifact only if showCanvas is true
       let analysis: ReturnType<typeof forecastArtifact.stream> | undefined;
       if (showCanvas) {
@@ -70,6 +74,9 @@ export const getForecastTool = tool({
           {
             stage: "loading",
             currency: currency || appContext.baseCurrency || "USD",
+            from: finalFrom,
+            to: finalTo,
+            description,
           },
           writer,
         );
@@ -104,6 +111,9 @@ export const getForecastTool = tool({
         await analysis.update({
           stage: "chart_ready",
           currency: targetCurrency,
+          from: finalFrom,
+          to: finalTo,
+          description,
           chart: {
             monthlyData: monthlyData.map((item) => ({
               month: item.month,

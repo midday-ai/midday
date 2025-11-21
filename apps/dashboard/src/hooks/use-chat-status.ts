@@ -32,7 +32,7 @@ export function useChatStatus(
   status: ChatStatus,
 ): ChatStatusResult {
   const [agentStatusData] = useDataPart<AgentStatus>("agent-status");
-  const { current } = useArtifacts({
+  const [{ current }] = useArtifacts({
     exclude: ["chat-title", "followup-questions"],
   });
 
