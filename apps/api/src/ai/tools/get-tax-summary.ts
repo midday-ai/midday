@@ -1,8 +1,8 @@
 import { getWriter } from "@ai-sdk-tools/artifacts";
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { taxSummaryArtifact } from "@api/ai/artifacts/tax-summary";
-import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
 import { generateArtifactDescription } from "@api/ai/utils/artifact-title";
+import { getToolDateDefaults } from "@api/ai/utils/tool-date-defaults";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { UTCDate } from "@date-fns/utc";
 import { db } from "@midday/db/client";

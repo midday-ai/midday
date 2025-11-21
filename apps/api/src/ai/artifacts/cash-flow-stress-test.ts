@@ -16,7 +16,10 @@ export const cashFlowStressTestArtifact = artifact(
     currency: z.string(),
     from: z.string().optional().describe("Start date (ISO 8601)"),
     to: z.string().optional().describe("End date (ISO 8601)"),
-    description: z.string().optional().describe("Generated description based on date range"),
+    description: z
+      .string()
+      .optional()
+      .describe("Generated description based on date range"),
 
     // Chart data (available at chart_ready stage)
     chart: z
