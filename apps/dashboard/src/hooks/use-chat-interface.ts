@@ -1,8 +1,10 @@
 import { usePathname } from "next/navigation";
+import { parseAsString, useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 
 export function useChatInterface() {
   const pathname = usePathname();
+  const [, setSelectedType] = useQueryState("artifact-type", parseAsString);
 
   // Initialize state immediately from pathname to avoid blink on refresh
   const getInitialChatId = () => {
@@ -25,7 +27,12 @@ export function useChatInterface() {
     const potentialChatId =
       segments.length === 1 ? segments[0] : segments[1] || null;
     setChatIdState(potentialChatId || null);
-  }, [pathname]);
+
+    // Clear artifact-type when navigating away from chat pages
+    if (!potentialChatId) {
+      setSelectedType(null);
+    }
+  }, [pathname, setSelectedType]);
 
   // Listen to popstate events for browser back/forward
   useEffect(() => {
@@ -34,11 +41,16 @@ export function useChatInterface() {
       const potentialChatId =
         segments.length === 1 ? segments[0] : segments[1] || null;
       setChatIdState(potentialChatId || null);
+
+      // Clear artifact-type when navigating away from chat pages
+      if (!potentialChatId) {
+        setSelectedType(null);
+      }
     };
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
+  }, [setSelectedType]);
 
   const isHome = !chatId;
   const isChatPage = Boolean(chatId);

@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorBoundary } from "@/components/error-boundary";
 import { useTRPC } from "@/trpc/client";
 import {
   DndContext,
@@ -48,6 +49,7 @@ import { TaxSummaryWidget } from "./tax-summary";
 import { TimeTrackerWidget } from "./time-tracker";
 import { TopCustomerWidget } from "./top-customer";
 import { VaultWidget } from "./vault";
+import { WidgetErrorFallback } from "./widget-error-fallback";
 import {
   useAvailableWidgets,
   useIsCustomizing,
@@ -285,7 +287,9 @@ export function WidgetsGrid() {
                     customizeMode={isCustomizing}
                     wiggleClass={wiggleClass}
                   >
-                    <WidgetComponent />
+                    <ErrorBoundary fallback={<WidgetErrorFallback />}>
+                      <WidgetComponent />
+                    </ErrorBoundary>
                   </SortableCard>
                 );
               })}
@@ -297,7 +301,14 @@ export function WidgetsGrid() {
 
             {primaryWidgets.map((widgetType) => {
               const WidgetComponent = WIDGET_COMPONENTS[widgetType];
-              return <WidgetComponent key={widgetType} />;
+              return (
+                <ErrorBoundary
+                  key={widgetType}
+                  fallback={<WidgetErrorFallback />}
+                >
+                  <WidgetComponent />
+                </ErrorBoundary>
+              );
             })}
           </div>
         )}
@@ -330,7 +341,9 @@ export function WidgetsGrid() {
                       customizeMode={isCustomizing}
                       wiggleClass={wiggleClass}
                     >
-                      <WidgetComponent />
+                      <ErrorBoundary fallback={<WidgetErrorFallback />}>
+                        <WidgetComponent />
+                      </ErrorBoundary>
                     </SortableCard>
                   );
                 })}
@@ -343,7 +356,9 @@ export function WidgetsGrid() {
         <DragOverlay>
           {activeId ? (
             <div className="shadow-[0_4px_12px_rgba(0,0,0,0.15)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)] bg-background cursor-grabbing opacity-90 transform-gpu will-change-transform">
-              <WidgetComponent />
+              <ErrorBoundary fallback={<WidgetErrorFallback />}>
+                <WidgetComponent />
+              </ErrorBoundary>
             </div>
           ) : null}
         </DragOverlay>

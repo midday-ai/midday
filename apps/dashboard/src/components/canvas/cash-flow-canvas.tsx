@@ -25,7 +25,6 @@ export function CashFlowCanvas() {
   const [artifact] = useArtifact(cashFlowArtifact, { version });
   const { data, status } = artifact;
   const { data: user } = useUserQuery();
-  const isLoading = status === "loading";
   const stage = data?.stage;
   const currency = data?.currency || "USD";
   const locale = user?.locale ?? undefined;

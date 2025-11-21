@@ -1,5 +1,7 @@
 "use client";
 
+import { ErrorBoundary } from "@/components/error-boundary";
+
 export function CanvasContent({ children }: { children: React.ReactNode }) {
   return (
     <div
