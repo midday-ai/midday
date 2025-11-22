@@ -60,10 +60,6 @@ export const chatRequestSchema = z.object({
     description: "User's city",
     example: "San Francisco",
   }),
-  region: z.string().optional().openapi({
-    description: "User's region/state",
-    example: "California",
-  }),
   timezone: z.string().optional().openapi({
     description: "User's timezone",
     example: "America/New_York",
@@ -76,6 +72,25 @@ export const chatRequestSchema = z.object({
     description: "Tool choice",
     example: "getBurnRate",
   }),
+  files: z
+    .array(
+      z.object({
+        name: z.string(),
+        type: z.string(),
+        data: z.string(),
+      }),
+    )
+    .optional()
+    .openapi({
+      description: "Files to send to the chat",
+      example: [
+        {
+          name: "example.pdf",
+          type: "application/pdf",
+          data: "base64encodeddata",
+        },
+      ],
+    }),
 });
 
 // Use the same structure as messageSchema for consistency with UIMessage

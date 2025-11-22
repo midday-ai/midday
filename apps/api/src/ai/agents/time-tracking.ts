@@ -8,7 +8,6 @@ import { createTrackerEntryTool } from "@api/ai/tools/create-tracker-entry";
 import { getTimerStatusTool } from "@api/ai/tools/get-timer-status";
 import { getTrackerEntriesTool } from "@api/ai/tools/get-tracker-entries";
 import { getTrackerProjectsTool } from "@api/ai/tools/get-tracker-projects";
-import { startTimerTool } from "@api/ai/tools/start-timer";
 import { stopTimerTool } from "@api/ai/tools/stop-timer";
 
 export const timeTrackingAgent = createAgent({
@@ -34,7 +33,6 @@ ${COMMON_AGENT_RULES}
     getTrackerProjects: getTrackerProjectsTool,
     getTrackerEntries: getTrackerEntriesTool,
     createTrackerEntry: createTrackerEntryTool,
-    startTimer: startTimerTool,
     stopTimer: stopTimerTool,
     getTimerStatus: getTimerStatusTool,
   },

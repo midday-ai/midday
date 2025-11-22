@@ -156,34 +156,17 @@ export function ChatInput() {
                     return;
                   }
 
-                  // Handle Enter key for normal messages
-                  if (e.key === "Enter" && !showCommands) {
+                  // Handle Enter key for normal messages - trigger form submission
+                  if (e.key === "Enter" && !showCommands && !e.shiftKey) {
+                    // Don't submit if IME composition is in progress
+                    if (e.nativeEvent.isComposing) {
+                      return;
+                    }
+
                     e.preventDefault();
-                    if (input.trim()) {
-                      // If currently streaming, stop the current stream first
-                      if (status === "streaming" || status === "submitted") {
-                        stop?.();
-                        // Continue to send the new message after stopping
-                      }
-
-                      // Clear old suggestions before sending new message
-                      clearSuggestions();
-
-                      // Set chat ID to ensure proper URL routing
-                      if (chatId) {
-                        setChatId(chatId);
-                      }
-
-                      sendMessage({
-                        text: input,
-                        files: [],
-                        metadata: {
-                          webSearch: isWebSearch,
-                        },
-                      });
-
-                      setInput("");
-                      resetCommandState();
+                    const form = e.currentTarget.form;
+                    if (form) {
+                      form.requestSubmit();
                     }
                     return;
                   }

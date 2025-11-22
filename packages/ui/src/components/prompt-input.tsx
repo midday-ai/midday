@@ -18,7 +18,6 @@ import {
 import { Textarea } from "@midday/ui/textarea";
 import type { ChatStatus, FileUIPart } from "ai";
 import { PaperclipIcon, PlusIcon, XIcon } from "lucide-react";
-import { nanoid } from "nanoid";
 import {
   type ChangeEventHandler,
   Children,
@@ -253,6 +252,39 @@ export const PromptInput = ({
     [accept],
   );
 
+  const convertFilesToDataURLs = useCallback(
+    (
+      files: FileList | File[],
+    ): Promise<
+      { type: "file"; filename: string; mediaType: string; url: string }[]
+    > => {
+      return Promise.all(
+        Array.from(files).map(
+          (file) =>
+            new Promise<{
+              type: "file";
+              filename: string;
+              mediaType: string;
+              url: string;
+            }>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => {
+                resolve({
+                  type: "file",
+                  filename: file.name,
+                  mediaType: file.type,
+                  url: reader.result as string, // Data URL
+                });
+              };
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+            }),
+        ),
+      );
+    },
+    [],
+  );
+
   const add = useCallback(
     (files: File[] | FileList) => {
       const incoming = Array.from(files);
@@ -287,26 +319,73 @@ export const PromptInput = ({
             message: "Too many files. Some were not added.",
           });
         }
-        const next: (FileUIPart & { id: string })[] = [];
-        for (const file of capped) {
-          next.push({
-            id: nanoid(),
-            type: "file",
-            url: URL.createObjectURL(file),
+
+        // Create temporary items with blob URLs for immediate UI display
+        // Use filename + index as ID
+        const tempItems = capped.map((file, index) => {
+          const blobUrl = URL.createObjectURL(file);
+          return {
+            id: `${file.name}-${index}-${Date.now()}`,
+            type: "file" as const,
+            url: blobUrl,
             mediaType: file.type,
             filename: file.name,
+          };
+        });
+
+        // Convert files to data URLs using FileReader and replace temp items
+        convertFilesToDataURLs(capped).then((convertedFiles) => {
+          setItems((current) => {
+            // Match temp items to converted items by index (since arrays are parallel)
+            return current.map((item) => {
+              // If this is a temp item (blob URL), find its corresponding converted file
+              const itemUrl = item.url;
+              if (
+                itemUrl &&
+                typeof itemUrl === "string" &&
+                itemUrl.startsWith("blob:")
+              ) {
+                // Find the temp item by matching ID
+                const tempItem = tempItems.find((temp) => temp.id === item.id);
+                if (tempItem) {
+                  const tempIndex = tempItems.indexOf(tempItem);
+                  if (
+                    tempIndex >= 0 &&
+                    tempIndex < convertedFiles.length &&
+                    itemUrl
+                  ) {
+                    const converted = convertedFiles[tempIndex];
+                    if (converted) {
+                      // Revoke the blob URL
+                      URL.revokeObjectURL(itemUrl);
+                      // Return converted item with same id and filename
+                      return {
+                        ...item,
+                        url: converted.url, // Data URL
+                        data: converted.url, // Also store in data field
+                        filename: converted.filename, // Keep original filename
+                      };
+                    }
+                  }
+                }
+              }
+              return item;
+            });
           });
-        }
-        return prev.concat(next);
+        });
+
+        // Return immediately with temporary blob URLs for UI responsiveness
+        return prev.concat(tempItems);
       });
     },
-    [matchesAccept, maxFiles, maxFileSize, onError],
+    [matchesAccept, maxFiles, maxFileSize, onError, convertFilesToDataURLs],
   );
 
   const remove = useCallback((id: string) => {
     setItems((prev) => {
       const found = prev.find((file) => file.id === id);
-      if (found?.url) {
+      // Only revoke blob URLs, not data URLs
+      if (found?.url?.startsWith("blob:")) {
         URL.revokeObjectURL(found.url);
       }
       return prev.filter((file) => file.id !== id);
@@ -316,7 +395,8 @@ export const PromptInput = ({
   const clear = useCallback(() => {
     setItems((prev) => {
       for (const file of prev) {
-        if (file.url) {
+        // Only revoke blob URLs, not data URLs
+        if (file.url?.startsWith("blob:")) {
           URL.revokeObjectURL(file.url);
         }
       }

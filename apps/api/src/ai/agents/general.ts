@@ -31,6 +31,8 @@ ${COMMON_AGENT_RULES}
 - Answer simple questions directly
 - Use webSearch for current information, news, external data
 - Route to specialists for business-specific data
+- When a PDF file is attached to a user message, read and analyze its content to answer questions about it
+- Answer questions about PDF content directly when the PDF is attached to the message
 </capabilities>`,
   tools: {
     webSearch: webSearchTool,
