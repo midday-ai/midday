@@ -58,7 +58,7 @@ type RowProps = {
 
 export function Row({ children }: RowProps) {
   return (
-    <TableRow className="group h-[45px] hover:bg-[#F2F1EF] hover:dark:bg-secondary">
+    <TableRow className="group h-[45px] hover:bg-[#F2F1EF] hover:dark:bg-[#0f0f0f]">
       {children}
     </TableRow>
   );
@@ -84,7 +84,7 @@ export function DataTableRow({ row, onDelete }: DataTableRowProps) {
     <AlertDialog>
       <DropdownMenu>
         <Row>
-          <DataTableCell className="w-[420px] min-w-[420px] md:sticky md:left-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-secondary z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:to-muted after:z-[-1]">
+          <DataTableCell className="w-[420px] min-w-[420px] md:sticky md:left-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:opacity-0 after:z-[-1]">
             <TrackerTimer
               projectId={row.id}
               projectName={row.name}
@@ -182,7 +182,7 @@ export function DataTableRow({ row, onDelete }: DataTableRowProps) {
           <DataTableCell onClick={onClick} className="cursor-pointer">
             <TrackerStatus status={row.status} />
           </DataTableCell>
-          <DataTableCell className="md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-secondary z-30 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background group-hover:after:to-muted after:z-[-1]">
+          <DataTableCell className="md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-30 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background group-hover:after:opacity-0 after:z-[-1]">
             <div className="flex justify-center">
               <DropdownMenuTrigger>
                 <Icons.MoreHoriz />

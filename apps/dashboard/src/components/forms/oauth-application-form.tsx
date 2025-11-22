@@ -842,7 +842,7 @@ export function OAuthApplicationForm({ data }: Props) {
           </Accordion>
         </div>
 
-        <div className="sticky bottom-0 bg-[#FAFAF9] dark:bg-[#121212] border-t pt-3 mt-4">
+        <div className="sticky bottom-0 bg-[#FAFAF9] dark:bg-[#0C0C0C] border-t pt-3 mt-4">
           <SubmitButton
             type="submit"
             className="w-full"
