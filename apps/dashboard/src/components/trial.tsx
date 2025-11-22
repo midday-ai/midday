@@ -1,6 +1,7 @@
 "use client";
 
 import { useUserQuery } from "@/hooks/use-user";
+import { isTrialExpired } from "@/utils/trial";
 import { UTCDate } from "@date-fns/utc";
 import { addDays, differenceInDays, isSameDay, parseISO } from "date-fns";
 import { ChoosePlanButton } from "./choose-plan-button";
@@ -19,34 +20,20 @@ export function Trial() {
     return <FeedbackForm />;
   }
 
-  // Parse dates using UTCDate for consistent timezone handling
+  // Check if trial has expired
+  if (isTrialExpired(team.createdAt)) {
+    // If trial expired, show feedback form (upgrade content is shown in layout)
+    return <FeedbackForm />;
+  }
+
+  // Calculate days left for display
   const rawCreatedAt = parseISO(team.createdAt);
   const today = new UTCDate();
-
-  // Convert to UTCDate for consistent calculation
   const createdAt = new UTCDate(rawCreatedAt);
-
-  // Set trial end date 14 days from creation
   const trialEndDate = addDays(createdAt, 14);
-
   const daysLeft = isSameDay(createdAt, today)
     ? 14
     : Math.max(0, differenceInDays(trialEndDate, today));
-
-  const isTrialEnded = daysLeft <= 0;
-
-  if (isTrialEnded) {
-    return (
-      <ChoosePlanButton
-        initialIsOpen={false}
-        daysLeft={daysLeft}
-        hasDiscount
-        discountPrice={49}
-      >
-        Upgrade plan
-      </ChoosePlanButton>
-    );
-  }
 
   return (
     <ChoosePlanButton hasDiscount discountPrice={49} daysLeft={daysLeft}>

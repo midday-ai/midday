@@ -3,7 +3,6 @@
 import { ConnectTransactionsModal } from "@/components/modals/connect-transactions-modal";
 import { ImportModal } from "@/components/modals/import-modal";
 import { SelectBankAccountsModal } from "@/components/modals/select-bank-accounts";
-import { TrialEndedModal } from "@/components/modals/trial-ended-modal";
 import { SearchModal } from "@/components/search/search-modal";
 import { CategoryCreateSheet } from "@/components/sheets/category-create-sheet";
 import { CategoryEditSheet } from "@/components/sheets/category-edit-sheet";
@@ -43,7 +42,7 @@ export function GlobalSheets() {
       <TransactionEditSheet />
 
       <SelectBankAccountsModal />
-      <TrialEndedModal />
+
       <SearchModal />
 
       <DocumentSheet />

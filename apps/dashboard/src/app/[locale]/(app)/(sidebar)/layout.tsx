@@ -4,12 +4,15 @@ import { Header } from "@/components/header";
 import { GlobalSheets } from "@/components/sheets/global-sheets";
 import { Sidebar } from "@/components/sidebar";
 import { TimezoneDetector } from "@/components/timezone-detector";
+import { UpgradeContent } from "@/components/upgrade-content";
 import {
   HydrateClient,
   batchPrefetch,
   getQueryClient,
   trpc,
 } from "@/trpc/server";
+import { shouldShowUpgradeContent } from "@/utils/trial";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export default async function Layout({
@@ -42,6 +45,15 @@ export default async function Layout({
     redirect("/teams");
   }
 
+  // Check if trial has expired - render upgrade content directly instead of redirecting
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || "";
+  const showUpgradeContent = shouldShowUpgradeContent(
+    user.team?.plan,
+    user.team?.createdAt,
+    pathname,
+  );
+
   return (
     <HydrateClient>
       <div className="relative">
@@ -49,7 +61,11 @@ export default async function Layout({
 
         <div className="md:ml-[70px] pb-4">
           <Header />
-          <div className="px-4 md:px-8">{children}</div>
+          {showUpgradeContent ? (
+            <UpgradeContent user={user} />
+          ) : (
+            <div className="px-4 md:px-8">{children}</div>
+          )}
         </div>
 
         <ExportStatus />

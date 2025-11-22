@@ -45,6 +45,8 @@ export const GET = async (req: NextRequest) => {
     successUrl.searchParams.set("isDesktop", "true");
   }
 
+  const isEmbedded = req.nextUrl.searchParams.get("embedOrigin") === "true";
+
   const checkout = await api.checkouts.create({
     products: [selectedPlan.id],
     successUrl: successUrl.toString(),
@@ -56,7 +58,14 @@ export const GET = async (req: NextRequest) => {
       teamId: team.id,
       companyName: team.name ?? "",
     },
+    // Set embed_origin for embedded checkout
+    ...(isEmbedded ? { embedOrigin: new URL(req.nextUrl.origin).origin } : {}),
   });
+
+  // Return JSON for embedded checkout, redirect for regular checkout
+  if (isEmbedded) {
+    return NextResponse.json({ url: checkout.url });
+  }
 
   return NextResponse.redirect(checkout.url);
 };
