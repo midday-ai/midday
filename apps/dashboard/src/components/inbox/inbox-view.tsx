@@ -32,6 +32,7 @@ export function InboxView() {
   const allSeenIdsRef = useRef(new Set<string>());
   const itemRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const scrollAreaViewportRef = useRef<HTMLDivElement | null>(null);
+  const shouldScrollRef = useRef(false);
 
   const infiniteQueryOptions = trpc.inbox.get.infiniteQueryOptions(
     {
@@ -175,6 +176,7 @@ export function InboxView() {
 
       if (currentIndex > 0) {
         const prevItem = tableData[currentIndex - 1];
+        shouldScrollRef.current = true;
         setParams({
           ...params,
           inboxId: prevItem?.id,
@@ -194,6 +196,7 @@ export function InboxView() {
 
       if (currentIndex < tableData.length - 1) {
         const nextItem = tableData[currentIndex + 1];
+        shouldScrollRef.current = true;
         setParams({
           ...params,
           inboxId: nextItem?.id,
@@ -203,16 +206,22 @@ export function InboxView() {
     [tableData, params, setParams],
   );
 
-  // Scroll selected inbox item to center of viewport
+  // Scroll selected inbox item to center of viewport (only on keyboard navigation)
   useEffect(() => {
     const inboxId = params.inboxId;
     if (!inboxId) return;
+
+    // Only scroll if navigation was triggered by keyboard
+    if (!shouldScrollRef.current) return;
 
     // Use requestAnimationFrame to ensure DOM is ready
     requestAnimationFrame(() => {
       const itemElement = itemRefs.current.get(inboxId);
       const viewport = scrollAreaViewportRef.current;
-      if (!itemElement || !viewport) return;
+      if (!itemElement || !viewport) {
+        shouldScrollRef.current = false;
+        return;
+      }
 
       // Calculate position relative to viewport
       const viewportRect = viewport.getBoundingClientRect();
@@ -231,6 +240,9 @@ export function InboxView() {
         top: Math.max(0, scrollPosition),
         behavior: "smooth",
       });
+
+      // Reset the flag after scrolling
+      shouldScrollRef.current = false;
     });
   }, [params.inboxId, tableData]);
 
