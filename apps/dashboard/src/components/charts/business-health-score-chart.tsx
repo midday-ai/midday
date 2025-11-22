@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { commonChartConfig } from "./chart-utils";
 
 interface BusinessHealthScoreData {
   month: string;
@@ -67,42 +68,31 @@ export function BusinessHealthScoreChart({
                 x2="1"
                 y2="0"
               >
-                <stop
-                  offset="0%"
-                  stopColor="#707070"
-                  className="dark:[stop-color:#666666]"
-                />
-                <stop
-                  offset="100%"
-                  stopColor="#000000"
-                  className="dark:[stop-color:#ffffff]"
-                />
+                <stop offset="0%" stopColor="var(--chart-gradient-start)" />
+                <stop offset="100%" stopColor="var(--chart-gradient-end)" />
               </linearGradient>
             </defs>
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="#e6e6e6"
-              className="dark:stroke-[#1d1d1d]"
+              stroke="var(--chart-grid-stroke)"
             />
             <XAxis
               dataKey="month"
               axisLine={false}
               tickLine={false}
               tick={{
-                fill: "#707070",
+                fill: "var(--chart-axis-text)",
                 fontSize: 10,
-                fontFamily: "Hedvig Letters Sans",
-                className: "dark:fill-[#666666]",
+                fontFamily: commonChartConfig.fontFamily,
               }}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
               tick={{
-                fill: "#707070",
+                fill: "var(--chart-axis-text)",
                 fontSize: 10,
-                fontFamily: "Hedvig Letters Sans",
-                className: "dark:fill-[#666666]",
+                fontFamily: commonChartConfig.fontFamily,
               }}
               tickFormatter={tickFormatter}
               domain={[0, 100]}
@@ -117,17 +107,15 @@ export function BusinessHealthScoreChart({
               stroke="url(#healthScoreGradient)"
               strokeWidth={2}
               dot={{
-                fill: "#000000",
+                fill: "var(--chart-actual-line)",
                 strokeWidth: 0,
                 r: 3,
-                className: "dark:fill-white",
               }}
               activeDot={{
                 r: 5,
-                fill: "#000000",
-                stroke: "#000000",
+                fill: "var(--chart-actual-line)",
+                stroke: "var(--chart-actual-line)",
                 strokeWidth: 2,
-                className: "dark:fill-white dark:stroke-white",
               }}
               isAnimationActive={false}
             />

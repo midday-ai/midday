@@ -21,8 +21,7 @@ export function BaseChart({
     <RechartsPrimitive.ComposedChart data={data} margin={margin}>
       <RechartsPrimitive.CartesianGrid
         strokeDasharray="3 3"
-        stroke="#e6e6e6"
-        className="dark:stroke-[#1d1d1d]"
+        stroke="var(--chart-grid-stroke)"
       />
       {children}
     </RechartsPrimitive.ComposedChart>
@@ -35,7 +34,7 @@ export function StyledXAxis(props: any) {
     <RechartsPrimitive.XAxis
       axisLine={false}
       tickLine={false}
-      tick={{ fill: "#666", fontSize: 10 }}
+      tick={{ fill: "var(--chart-axis-text)", fontSize: 10 }}
       {...props}
     />
   );
@@ -47,7 +46,7 @@ export function StyledYAxis(props: any) {
     <RechartsPrimitive.YAxis
       axisLine={false}
       tickLine={false}
-      tick={{ fill: "#666", fontSize: 10 }}
+      tick={{ fill: "var(--chart-axis-text)", fontSize: 10 }}
       {...props}
     />
   );

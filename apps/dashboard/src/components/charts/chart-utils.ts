@@ -152,37 +152,3 @@ export interface BaseChartProps {
   className?: string;
   showAnimation?: boolean;
 }
-
-// Sample data generators for development
-export const generateSampleData = {
-  burnRate: () => [
-    { month: "Oct", amount: 4500, average: 6000 },
-    { month: "Nov", amount: 5200, average: 6000 },
-    { month: "Dec", amount: 5800, average: 6000 },
-    { month: "Jan", amount: 6200, average: 6000 },
-    { month: "Feb", amount: 6800, average: 6000 },
-    { month: "Mar", amount: 7100, average: 6000 },
-    { month: "Apr", amount: 7500, average: 6000 },
-  ],
-
-  revenue: () =>
-    Array.from({ length: 12 }, (_, i) => ({
-      month: new Date(2024, i).toLocaleDateString("en-US", { month: "short" }),
-      revenue: Math.floor(Math.random() * 15000) + 5000,
-      target: 12000,
-    })),
-
-  profit: () =>
-    Array.from({ length: 12 }, (_, i) => ({
-      month: new Date(2024, i).toLocaleDateString("en-US", { month: "short" }),
-      profit: Math.floor(Math.random() * 8000) - 2000,
-      expenses: Math.floor(Math.random() * 5000) + 3000,
-    })),
-
-  expenses: () =>
-    Array.from({ length: 12 }, (_, i) => ({
-      month: new Date(2024, i).toLocaleDateString("en-US", { month: "short" }),
-      amount: Math.floor(Math.random() * 7000) + 2000,
-      category: ["Marketing", "Operations", "Salaries", "Office"][i % 4],
-    })),
-};

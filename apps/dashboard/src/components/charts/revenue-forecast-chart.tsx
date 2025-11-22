@@ -1,5 +1,8 @@
 "use client";
 
+import { formatAmount } from "@/utils/format";
+import { format } from "date-fns";
+import { useMemo } from "react";
 import {
   CartesianGrid,
   Line,
@@ -10,54 +13,78 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import {
+  commonChartConfig,
+  createCompactTickFormatter,
+  useChartMargin,
+} from "./chart-utils";
+import type { BaseChartProps } from "./chart-utils";
 
 interface ForecastData {
   month: string;
   actual?: number | null;
   forecasted?: number | null;
-  forecast?: number | null; // Alias for forecasted
   date?: string; // Full date for tooltip
 }
 
-interface RevenueForecastChartProps {
-  data: ForecastData[];
-  height?: number;
+interface RevenueForecastChartProps extends Omit<BaseChartProps, "data"> {
+  data?: ForecastData[];
   currency?: string;
   locale?: string;
   forecastStartIndex?: number;
 }
 
-// Custom tooltip component using Tailwind dark mode classes
+// Custom tooltip component
 const CustomTooltip = ({
   active,
   payload,
+  currency = "USD",
+  locale,
+  forecastStartMonth,
 }: {
   active?: boolean;
   payload?: any[];
+  currency?: string;
+  locale?: string;
+  forecastStartMonth?: string | null;
 }) => {
   if (active && Array.isArray(payload) && payload.length > 0) {
     const data = payload[0]?.payload;
     const value = payload[0]?.value;
     const isActual = payload[0]?.dataKey === "actual";
-    const isAugust = data?.month === "Aug";
+    const isForecastStart = data?.month === forecastStartMonth;
+
+    // Extract year from date if available, otherwise use current year
+    const year = data?.date
+      ? format(new Date(data.date), "yyyy")
+      : new Date().getFullYear();
+
+    // Format currency using formatAmount utility
+    const formatCurrency = (amount: number) =>
+      formatAmount({
+        amount,
+        currency,
+        locale: locale ?? undefined,
+        maximumFractionDigits: 0,
+      }) ?? `${currency}${amount.toLocaleString()}`;
 
     return (
       <div
-        className="bg-white dark:bg-[#0c0c0c] border border-[#e6e6e6] dark:border-[#1d1d1d] p-2 text-[10px] font-stack-sans-slashed-zero text-black dark:text-white shadow-sm"
+        className="bg-white dark:bg-[#0c0c0c] border border-[#e6e6e6] dark:border-[#1d1d1d] p-2 text-[10px] font-stack-sans-slashed-zero"
         style={{
           opacity: 1,
-          borderRadius: "0px",
           boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
+          borderRadius: "0px",
         }}
       >
-        <p className="text-[#707070] dark:text-[#666666] mb-1">
-          {data?.month} 2025
+        <p className="mb-1 text-[#707070] dark:text-[#666666]">
+          {data?.month} {year}
         </p>
         <p className="text-black dark:text-white">
-          Revenue: ${value?.toLocaleString()}
+          Revenue: {formatCurrency(value)}
         </p>
         <p className="text-[#707070] dark:text-[#666666]">
-          {isAugust
+          {isForecastStart
             ? isActual
               ? "Actual (Baseline)"
               : "Forecast Start"
@@ -74,32 +101,105 @@ const CustomTooltip = ({
 export function RevenueForecastChart({
   data,
   height = 320,
+  className = "",
   currency = "USD",
   locale,
   forecastStartIndex,
 }: RevenueForecastChartProps) {
-  // Normalize data: use forecast if available, otherwise forecasted
-  // Keep null values as null (don't convert to undefined)
-  const normalizedData = data.map((d) => ({
-    month: d.month,
-    actual: d.actual ?? null,
-    forecast: d.forecast ?? d.forecasted ?? null,
-    date: d.date,
+  // Normalize data - use data prop directly, fallback to empty array
+  const normalizedData = useMemo(() => {
+    if (!data || data.length === 0) return [];
+    return data;
+  }, [data]);
+
+  // Detect forecast start index dynamically
+  const forecastStartIndexFinal = useMemo(() => {
+    if (forecastStartIndex !== undefined && forecastStartIndex >= 0) {
+      return forecastStartIndex;
+    }
+
+    // Find the last month that has both actual and forecasted (forecast start month)
+    // or the first month that has forecasted but no actual
+    let lastActualIndex = -1;
+    for (let i = normalizedData.length - 1; i >= 0; i--) {
+      if (
+        normalizedData[i]?.actual !== null &&
+        normalizedData[i]?.actual !== undefined
+      ) {
+        lastActualIndex = i;
+        break;
+      }
+    }
+
+    // If the last actual month also has forecasted, that's the forecast start
+    if (
+      lastActualIndex >= 0 &&
+      normalizedData[lastActualIndex]?.forecasted !== null &&
+      normalizedData[lastActualIndex]?.forecasted !== undefined
+    ) {
+      return lastActualIndex;
+    }
+
+    // Otherwise, find the first month with forecasted but no actual
+    const startIndex = normalizedData.findIndex(
+      (d) =>
+        (d.actual === null || d.actual === undefined) &&
+        d.forecasted !== null &&
+        d.forecasted !== undefined,
+    );
+
+    return startIndex >= 0 ? startIndex : null;
+  }, [normalizedData, forecastStartIndex]);
+
+  // Get forecast start month for tooltip and ReferenceLine
+  const forecastStartMonth =
+    forecastStartIndexFinal !== null &&
+    forecastStartIndexFinal !== undefined &&
+    normalizedData[forecastStartIndexFinal]
+      ? normalizedData[forecastStartIndexFinal].month
+      : null;
+
+  // Use compact tick formatter (same as other charts)
+  const tickFormatter = createCompactTickFormatter();
+
+  // Calculate margin using the utility hook
+  // Get max value from both actual and forecasted data
+  const maxValues = normalizedData.map((d) => ({
+    maxValue: Math.max(d.actual ?? 0, d.forecasted ?? 0),
   }));
+  const { marginLeft } = useChartMargin(maxValues, "maxValue", tickFormatter);
+
+  // Calculate dynamic domain based on data
+  const yAxisDomain = useMemo(() => {
+    const allValues = normalizedData
+      .flatMap((d) => [d.actual ?? 0, d.forecasted ?? 0])
+      .filter((v) => v > 0);
+
+    if (allValues.length === 0) return { min: 0, max: 10000 };
+
+    const min = Math.min(...allValues);
+    const max = Math.max(...allValues);
+
+    // Add 10% padding
+    const padding = (max - min) * 0.1;
+    const minWithPadding = Math.max(0, min - padding);
+    const maxWithPadding = max + padding;
+
+    return { min: minWithPadding, max: maxWithPadding };
+  }, [normalizedData]);
 
   return (
-    <div className="w-full">
+    <div className={`w-full ${className}`}>
       {/* Chart */}
       <div style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={normalizedData}
-            margin={{ top: 20, right: 20, left: 0, bottom: 10 }}
+            margin={{ top: 20, right: 6, left: -marginLeft, bottom: 10 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="#e6e6e6"
-              className="dark:stroke-[#1d1d1d]"
+              stroke="var(--chart-grid-stroke)"
             />
             <XAxis
               dataKey="month"
@@ -107,8 +207,7 @@ export function RevenueForecastChart({
               tickLine={false}
               tick={{
                 fontSize: 12,
-                fill: "#707070",
-                className: "dark:fill-[#666666]",
+                fill: "var(--chart-axis-text)",
               }}
             />
             <YAxis
@@ -116,32 +215,37 @@ export function RevenueForecastChart({
               tickLine={false}
               tick={{
                 fontSize: 11,
-                fill: "#707070",
-                className: "dark:fill-[#666666]",
+                fill: "var(--chart-axis-text)",
+                fontFamily: commonChartConfig.fontFamily,
               }}
-              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-              domain={[14000, 26000]}
-              tickCount={7}
-              width={50}
-              ticks={[14000, 16000, 18000, 20000, 22000, 24000, 26000]}
+              tickFormatter={tickFormatter}
+              domain={[yAxisDomain.min, yAxisDomain.max]}
             />
-            <ReferenceLine
-              x="Aug"
-              stroke="#e6e6e6"
-              className="dark:stroke-[#333333]"
-              strokeWidth={1}
-              label={{
-                value: "Forecast Start",
-                position: "top",
-                style: {
-                  fontSize: "10px",
-                  fill: "#707070",
-                  textAnchor: "start",
-                },
-              }}
-            />
+            {forecastStartMonth && (
+              <ReferenceLine
+                x={forecastStartMonth}
+                stroke="var(--chart-reference-line-stroke)"
+                strokeWidth={1}
+                label={{
+                  value: "Forecast Start",
+                  position: "top",
+                  fill: "var(--chart-reference-label)",
+                  style: {
+                    fontSize: "10px",
+                    fill: "var(--chart-reference-label)",
+                    textAnchor: "start",
+                  },
+                }}
+              />
+            )}
             <Tooltip
-              content={<CustomTooltip />}
+              content={
+                <CustomTooltip
+                  currency={currency}
+                  locale={locale}
+                  forecastStartMonth={forecastStartMonth}
+                />
+              }
               wrapperStyle={{ zIndex: 9999 }}
               contentStyle={{
                 backgroundColor: "transparent",
@@ -150,56 +254,49 @@ export function RevenueForecastChart({
                 zIndex: 9999,
               }}
               cursor={{
-                stroke: "#666666",
+                stroke: "var(--chart-tooltip-cursor)",
                 strokeWidth: 1,
-                className: "dark:stroke-[#999999]",
               }}
               isAnimationActive={false}
             />
             <Line
               type="linear"
               dataKey="actual"
-              stroke="#000000"
-              className="dark:stroke-white"
+              stroke="var(--chart-actual-line)"
               strokeWidth={2}
               dot={{
-                fill: "#000000",
+                fill: "var(--chart-actual-line)",
                 strokeWidth: 0,
                 r: 4,
-                className: "dark:fill-white",
               }}
               activeDot={{
                 r: 5,
-                stroke: "#000000",
+                stroke: "var(--chart-actual-line)",
                 strokeWidth: 2,
-                fill: "#000000",
-                className: "dark:stroke-white dark:fill-white",
+                fill: "var(--chart-actual-line)",
               }}
               isAnimationActive={false}
               connectNulls={false}
             />
             <Line
               type="linear"
-              dataKey="forecast"
-              stroke="#666666"
-              className="dark:stroke-[#999999]"
+              dataKey="forecasted"
+              stroke="var(--chart-forecast-line)"
               strokeWidth={2}
               strokeDasharray="8 4"
               dot={{
-                fill: "#666666",
+                fill: "var(--chart-forecast-line)",
                 strokeWidth: 0,
                 r: 4,
-                className: "dark:fill-[#999999]",
               }}
               activeDot={{
                 r: 5,
-                stroke: "#666666",
+                stroke: "var(--chart-forecast-line)",
                 strokeWidth: 2,
-                fill: "#666666",
-                className: "dark:stroke-[#999999] dark:fill-[#999999]",
+                fill: "var(--chart-forecast-line)",
               }}
               isAnimationActive={false}
-              connectNulls={false}
+              connectNulls={true}
             />
           </LineChart>
         </ResponsiveContainer>

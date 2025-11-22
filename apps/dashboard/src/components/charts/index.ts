@@ -31,7 +31,6 @@ export {
   commonChartConfig,
   formatPercentage,
   formatNumber,
-  generateSampleData,
   type BaseChartProps,
 } from "./chart-utils";
 

@@ -11,7 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { createCompactTickFormatter, useChartMargin } from "./chart-utils";
+import { commonChartConfig, createCompactTickFormatter, useChartMargin } from "./chart-utils";
 
 interface ProfitData {
   month: string;
@@ -101,28 +101,25 @@ export function ProfitChart({
           >
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="#e6e6e6"
-              className="dark:stroke-[#1d1d1d]"
+              stroke="var(--chart-grid-stroke)"
             />
             <XAxis
               dataKey="month"
               axisLine={false}
               tickLine={false}
               tick={{
-                fill: "#707070",
+                fill: "var(--chart-axis-text)",
                 fontSize: 10,
-                fontFamily: "Hedvig Letters Sans",
-                className: "dark:fill-[#666666]",
+                fontFamily: commonChartConfig.fontFamily,
               }}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
               tick={{
-                fill: "#707070",
+                fill: "var(--chart-axis-text)",
                 fontSize: 10,
-                fontFamily: "Hedvig Letters Sans",
-                className: "dark:fill-[#666666]",
+                fontFamily: commonChartConfig.fontFamily,
               }}
               tickFormatter={tickFormatter}
               dataKey="profit"
@@ -132,18 +129,18 @@ export function ProfitChart({
               wrapperStyle={{ zIndex: 9999 }}
             />
             {/* This Year bars (white in dark mode) */}
-            <Bar dataKey="profit" fill="white" isAnimationActive={false} />
+            <Bar dataKey="profit" fill="var(--chart-bar-fill)" isAnimationActive={false} />
             {/* Last Year bars (dark gray in dark mode with 0.3 opacity) */}
             <Bar
               dataKey="lastYearProfit"
-              fill="#6666664D"
+              fill="var(--chart-bar-fill-secondary)"
               isAnimationActive={false}
             />
             {/* Average line */}
             <Line
               type="monotone"
               dataKey="average"
-              stroke="#666"
+              stroke="var(--chart-line-secondary)"
               strokeWidth={1}
               strokeDasharray="5 5"
               dot={false}

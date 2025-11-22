@@ -34,8 +34,8 @@ export function ForecastCanvas() {
   const forecastData =
     data?.chart?.monthlyData?.map((item) => ({
       month: item.month,
-      actual: item.actual,
-      forecasted: item.forecasted > 0 ? item.forecasted : undefined,
+      actual: item.actual ?? undefined,
+      forecasted: item.forecasted ?? undefined,
       date: item.date,
     })) || [];
 

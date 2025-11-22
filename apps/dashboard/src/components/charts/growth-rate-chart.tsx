@@ -11,7 +11,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { createCompactTickFormatter, useChartMargin } from "./chart-utils";
+import {
+  commonChartConfig,
+  createCompactTickFormatter,
+  useChartMargin,
+} from "./chart-utils";
 
 interface GrowthRateData {
   period: string;
@@ -103,18 +107,16 @@ export function GrowthRateChart({
           >
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="#e6e6e6"
-              className="dark:stroke-[#1d1d1d]"
+              stroke="var(--chart-grid-stroke)"
             />
             <XAxis
               dataKey="period"
               axisLine={false}
               tickLine={false}
               tick={{
-                fill: "#707070",
+                fill: "var(--chart-axis-text)",
                 fontSize: 10,
-                fontFamily: "Hedvig Letters Sans",
-                className: "dark:fill-[#666666]",
+                fontFamily: commonChartConfig.fontFamily,
               }}
             />
             <YAxis
@@ -122,10 +124,9 @@ export function GrowthRateChart({
               axisLine={false}
               tickLine={false}
               tick={{
-                fill: "#707070",
+                fill: "var(--chart-axis-text)",
                 fontSize: 10,
-                fontFamily: "Hedvig Letters Sans",
-                className: "dark:fill-[#666666]",
+                fontFamily: commonChartConfig.fontFamily,
               }}
               tickFormatter={tickFormatter}
               dataKey="currentTotal"
@@ -136,10 +137,9 @@ export function GrowthRateChart({
               axisLine={false}
               tickLine={false}
               tick={{
-                fill: "#707070",
+                fill: "var(--chart-axis-text)",
                 fontSize: 10,
-                fontFamily: "Hedvig Letters Sans",
-                className: "dark:fill-[#666666]",
+                fontFamily: commonChartConfig.fontFamily,
               }}
               tickFormatter={(value) =>
                 `${value > 0 ? "+" : ""}${value.toFixed(0)}%`
@@ -154,14 +154,14 @@ export function GrowthRateChart({
             <Bar
               yAxisId="left"
               dataKey="currentTotal"
-              fill="white"
+              fill="var(--chart-bar-fill)"
               isAnimationActive={false}
             />
             {/* Previous period bars (with opacity) */}
             <Bar
               yAxisId="left"
               dataKey="previousTotal"
-              fill="#6666664D"
+              fill="var(--chart-bar-fill-secondary)"
               isAnimationActive={false}
             />
             {/* Growth rate line */}
@@ -169,9 +169,9 @@ export function GrowthRateChart({
               yAxisId="right"
               type="monotone"
               dataKey="growthRate"
-              stroke="#666"
+              stroke="var(--chart-line-secondary)"
               strokeWidth={2}
-              dot={{ fill: "#666", r: 3 }}
+              dot={{ fill: "var(--chart-line-secondary)", r: 3 }}
               isAnimationActive={false}
             />
           </ComposedChart>

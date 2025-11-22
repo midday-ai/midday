@@ -96,15 +96,57 @@ export const getForecastTool = tool({
       });
 
       // Prepare monthly data for chart
-      const monthlyData = forecastResult.combined.map((item) => ({
-        month: format(new Date(item.date), "MMM"),
-        date: item.date,
-        actual: item.type === "actual" ? item.value : undefined,
-        forecasted: item.type === "forecast" ? item.value : undefined,
-      }));
+      // Structure: one item per month with both actual and forecasted fields
+      const monthlyData: Array<{
+        month: string;
+        date: string;
+        actual?: number;
+        forecasted?: number;
+      }> = [];
 
-      // Find forecast start date index
-      const forecastStartIndex = forecastResult.historical.length;
+      // Check if data spans multiple years
+      const allDates = [
+        ...forecastResult.historical.map((item) => item.date),
+        ...forecastResult.forecast.map((item) => item.date),
+      ];
+      const years = new Set(
+        allDates.map((date) => new Date(date).getFullYear()),
+      );
+      const spansMultipleYears = years.size > 1;
+
+      // Add historical months with actual values only
+      for (const [index, item] of forecastResult.historical.entries()) {
+        const date = new Date(item.date);
+        const month = spansMultipleYears
+          ? format(date, "MMM ''yy")
+          : format(date, "MMM");
+        const isLastHistorical = index === forecastResult.historical.length - 1;
+
+        monthlyData.push({
+          month,
+          date: item.date,
+          actual: item.value,
+          // On the last historical month (forecast start), set forecasted to same value as actual
+          forecasted: isLastHistorical ? item.value : undefined,
+        });
+      }
+
+      // Add forecast months with forecasted values only
+      for (const item of forecastResult.forecast) {
+        const date = new Date(item.date);
+        const month = spansMultipleYears
+          ? format(date, "MMM ''yy")
+          : format(date, "MMM");
+        monthlyData.push({
+          month,
+          date: item.date,
+          actual: undefined,
+          forecasted: item.value,
+        });
+      }
+
+      // Find forecast start date index (last historical month index)
+      const forecastStartIndex = forecastResult.historical.length - 1;
 
       // Update artifact with chart data
       if (showCanvas && analysis) {
@@ -117,7 +159,7 @@ export const getForecastTool = tool({
           chart: {
             monthlyData: monthlyData.map((item) => ({
               month: item.month,
-              forecasted: item.forecasted ?? 0,
+              forecasted: item.forecasted,
               actual: item.actual,
               date: item.date,
             })),
@@ -146,7 +188,7 @@ export const getForecastTool = tool({
           chart: {
             monthlyData: monthlyData.map((item) => ({
               month: item.month,
-              forecasted: item.forecasted ?? 0,
+              forecasted: item.forecasted,
               actual: item.actual,
               date: item.date,
             })),
@@ -217,7 +259,7 @@ Provide a concise analysis (2-3 sentences) highlighting key insights about the r
           chart: {
             monthlyData: monthlyData.map((item) => ({
               month: item.month,
-              forecasted: item.forecasted ?? 0,
+              forecasted: item.forecasted,
               actual: item.actual,
               date: item.date,
             })),

@@ -10,7 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { createCompactTickFormatter, useChartMargin } from "./chart-utils";
+import { commonChartConfig, createCompactTickFormatter, useChartMargin } from "./chart-utils";
 
 interface TaxTrendData {
   month: string;
@@ -91,28 +91,25 @@ export function TaxTrendChart({
           >
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="#e6e6e6"
-              className="dark:stroke-[#1d1d1d]"
+              stroke="var(--chart-grid-stroke)"
             />
             <XAxis
               dataKey="month"
               axisLine={false}
               tickLine={false}
               tick={{
-                fill: "#707070",
+                fill: "var(--chart-axis-text)",
                 fontSize: 10,
-                fontFamily: "Hedvig Letters Sans",
-                className: "dark:fill-[#666666]",
+                fontFamily: commonChartConfig.fontFamily,
               }}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
               tick={{
-                fill: "#707070",
+                fill: "var(--chart-axis-text)",
                 fontSize: 10,
-                fontFamily: "Hedvig Letters Sans",
-                className: "dark:fill-[#666666]",
+                fontFamily: commonChartConfig.fontFamily,
               }}
               tickFormatter={tickFormatter}
               dataKey="taxAmount"
@@ -122,7 +119,7 @@ export function TaxTrendChart({
               wrapperStyle={{ zIndex: 9999 }}
             />
             {/* Tax amount bars (white in dark mode) */}
-            <Bar dataKey="taxAmount" fill="white" isAnimationActive={false} />
+            <Bar dataKey="taxAmount" fill="var(--chart-bar-fill)" isAnimationActive={false} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>

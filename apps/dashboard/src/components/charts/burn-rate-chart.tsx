@@ -11,7 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { createCompactTickFormatter, useChartMargin } from "./chart-utils";
+import { commonChartConfig, createCompactTickFormatter, useChartMargin } from "./chart-utils";
 
 interface BurnRateData {
   month: string;
@@ -102,13 +102,11 @@ export function BurnRateChart({
                 <rect
                   width="8"
                   height="8"
-                  fill="white"
-                  className="dark:fill-[#0c0c0c]"
+                  fill="var(--chart-pattern-bg)"
                 />
                 <path
                   d="M0,0 L8,8 M-2,6 L6,16 M-4,4 L4,12"
-                  stroke="#707070"
-                  className="dark:stroke-[#666666]"
+                  stroke="var(--chart-pattern-stroke)"
                   strokeWidth="0.8"
                   opacity="0.6"
                 />
@@ -116,40 +114,35 @@ export function BurnRateChart({
               <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
                 <stop
                   offset="0%"
-                  stopColor="#707070"
-                  className="dark:[stop-color:#666666]"
+                  stopColor="var(--chart-gradient-start)"
                 />
                 <stop
                   offset="100%"
-                  stopColor="#000000"
-                  className="dark:[stop-color:#ffffff]"
+                  stopColor="var(--chart-gradient-end)"
                 />
               </linearGradient>
             </defs>
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="#e6e6e6"
-              className="dark:stroke-[#1d1d1d]"
+              stroke="var(--chart-grid-stroke)"
             />
             <XAxis
               dataKey="month"
               axisLine={false}
               tickLine={false}
               tick={{
-                fill: "#707070",
+                fill: "var(--chart-axis-text)",
                 fontSize: 10,
-                fontFamily: "Hedvig Letters Sans",
-                className: "dark:fill-[#666666]",
+                fontFamily: commonChartConfig.fontFamily,
               }}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
               tick={{
-                fill: "#707070",
+                fill: "var(--chart-axis-text)",
                 fontSize: 10,
-                fontFamily: "Hedvig Letters Sans",
-                className: "dark:fill-[#666666]",
+                fontFamily: commonChartConfig.fontFamily,
               }}
               tickFormatter={tickFormatter}
               dataKey="amount"
@@ -165,25 +158,22 @@ export function BurnRateChart({
               strokeWidth={2}
               fill="url(#burnRatePattern)"
               dot={{
-                fill: "#000000",
+                fill: "var(--chart-actual-line)",
                 strokeWidth: 0,
                 r: 3,
-                className: "dark:fill-white",
               }}
               activeDot={{
                 r: 5,
-                fill: "#000000",
-                stroke: "#000000",
+                fill: "var(--chart-actual-line)",
+                stroke: "var(--chart-actual-line)",
                 strokeWidth: 2,
-                className: "dark:fill-white dark:stroke-white",
               }}
               isAnimationActive={false}
             />
             <Line
               type="monotone"
               dataKey="average"
-              stroke="#707070"
-              className="dark:stroke-[#666666]"
+              stroke="var(--chart-axis-text)"
               strokeWidth={1}
               strokeDasharray="5 5"
               dot={false}

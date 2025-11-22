@@ -11,7 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { createCompactTickFormatter, useChartMargin } from "./chart-utils";
+import { commonChartConfig, createCompactTickFormatter, useChartMargin } from "./chart-utils";
 
 interface ProjectedCashBalanceData {
   month: number;
@@ -101,18 +101,16 @@ export function CashBalanceProjectionChart({
         >
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="#e6e6e6"
-            className="dark:stroke-[#1d1d1d]"
+            stroke="var(--chart-grid-stroke)"
           />
           <XAxis
             dataKey="month"
             axisLine={false}
             tickLine={false}
             tick={{
-              fill: "#707070",
+              fill: "var(--chart-axis-text)",
               fontSize: 10,
-              fontFamily: "Hedvig Letters Sans",
-              className: "dark:fill-[#666666]",
+              fontFamily: commonChartConfig.fontFamily,
             }}
             label={{
               value: "Months from now",
@@ -120,21 +118,19 @@ export function CashBalanceProjectionChart({
               offset: -10,
               style: {
                 textAnchor: "middle",
-                fill: "#707070",
+                fill: "var(--chart-axis-text)",
                 fontSize: 10,
-                fontFamily: "Hedvig Letters Sans",
+                fontFamily: commonChartConfig.fontFamily,
               },
-              className: "dark:fill-[#666666]",
             }}
           />
           <YAxis
             axisLine={false}
             tickLine={false}
             tick={{
-              fill: "#707070",
+              fill: "var(--chart-axis-text)",
               fontSize: 10,
-              fontFamily: "Hedvig Letters Sans",
-              className: "dark:fill-[#666666]",
+              fontFamily: commonChartConfig.fontFamily,
             }}
             tickFormatter={tickFormatter}
           />
@@ -156,8 +152,7 @@ export function CashBalanceProjectionChart({
           <Line
             type="monotone"
             dataKey="worstCase"
-            stroke="#666666"
-            className="dark:stroke-[#999999]"
+            stroke="var(--chart-line-secondary)"
             strokeWidth={2}
             strokeDasharray="5 5"
             dot={false}
@@ -168,8 +163,7 @@ export function CashBalanceProjectionChart({
           <Line
             type="monotone"
             dataKey="bestCase"
-            stroke="#666666"
-            className="dark:stroke-[#999999]"
+            stroke="var(--chart-line-secondary)"
             strokeWidth={2}
             strokeDasharray="3 3"
             dot={false}

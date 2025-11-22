@@ -27,7 +27,7 @@ export const forecastArtifact = artifact(
         monthlyData: z.array(
           z.object({
             month: z.string(),
-            forecasted: z.number(),
+            forecasted: z.number().optional(),
             actual: z.number().optional(),
             date: z.string().optional(),
           }),

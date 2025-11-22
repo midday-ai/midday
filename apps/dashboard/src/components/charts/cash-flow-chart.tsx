@@ -13,7 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import { ChartLegend } from "./base-charts";
-import { createYAxisTickFormatter, useChartMargin } from "./chart-utils";
+import { commonChartConfig, createYAxisTickFormatter, useChartMargin } from "./chart-utils";
 import type { BaseChartProps } from "./chart-utils";
 
 interface CashFlowData {
@@ -114,13 +114,11 @@ export function CashFlowChart({
                 <rect
                   width="8"
                   height="8"
-                  fill="white"
-                  className="dark:fill-[#0c0c0c]"
+                  fill="var(--chart-pattern-bg)"
                 />
                 <path
                   d="M0,0 L8,8 M-2,6 L6,16 M-4,4 L4,12"
-                  stroke="#707070"
-                  className="dark:stroke-[#666666]"
+                  stroke="var(--chart-pattern-stroke)"
                   strokeWidth="0.8"
                   opacity="0.6"
                 />
@@ -128,28 +126,25 @@ export function CashFlowChart({
             </defs>
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="#e6e6e6"
-              className="dark:stroke-[#1d1d1d]"
+              stroke="var(--chart-grid-stroke)"
             />
             <XAxis
               dataKey="month"
               axisLine={false}
               tickLine={false}
               tick={{
-                fill: "#707070",
+                fill: "var(--chart-axis-text)",
                 fontSize: 10,
-                fontFamily: "Hedvig Letters Sans",
-                className: "dark:fill-[#666666]",
+                fontFamily: commonChartConfig.fontFamily,
               }}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
               tick={{
-                fill: "#707070",
+                fill: "var(--chart-axis-text)",
                 fontSize: 10,
-                fontFamily: "Hedvig Letters Sans",
-                className: "dark:fill-[#666666]",
+                fontFamily: commonChartConfig.fontFamily,
               }}
               tickFormatter={tickFormatter}
             />
@@ -189,7 +184,7 @@ export function CashFlowChart({
             />
 
             {/* Income bars */}
-            <Bar dataKey="inflow" fill="white" isAnimationActive={false} />
+            <Bar dataKey="inflow" fill="var(--chart-bar-fill)" isAnimationActive={false} />
             {/* Expenses bars with pattern */}
             <Bar
               dataKey="outflow"
@@ -199,8 +194,7 @@ export function CashFlowChart({
             {/* Net flow bars */}
             <Bar
               dataKey="netFlow"
-              fill="#000000"
-              className="dark:fill-white"
+              fill="var(--chart-actual-line)"
               isAnimationActive={false}
             />
 
@@ -208,8 +202,7 @@ export function CashFlowChart({
               <Line
                 type="monotone"
                 dataKey="cumulativeFlow"
-                stroke="#666666"
-                className="dark:stroke-[#999999]"
+                stroke="var(--chart-line-secondary)"
                 strokeWidth={2}
                 strokeDasharray="5 5"
                 dot={false}

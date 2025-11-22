@@ -10,7 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { createCompactTickFormatter, useChartMargin } from "./chart-utils";
+import { commonChartConfig, createCompactTickFormatter, useChartMargin } from "./chart-utils";
 
 interface InvoicePaymentData {
   month: string;
@@ -77,18 +77,16 @@ export function InvoicePaymentChart({
           >
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="#e6e6e6"
-              className="dark:stroke-[#1d1d1d]"
+              stroke="var(--chart-grid-stroke)"
             />
             <XAxis
               dataKey="month"
               axisLine={false}
               tickLine={false}
               tick={{
-                fill: "#707070",
+                fill: "var(--chart-axis-text)",
                 fontSize: 10,
-                fontFamily: "Hedvig Letters Sans",
-                className: "dark:fill-[#666666]",
+                fontFamily: commonChartConfig.fontFamily,
               }}
             />
             <YAxis
@@ -96,10 +94,9 @@ export function InvoicePaymentChart({
               axisLine={false}
               tickLine={false}
               tick={{
-                fill: "#707070",
+                fill: "var(--chart-axis-text)",
                 fontSize: 10,
-                fontFamily: "Hedvig Letters Sans",
-                className: "dark:fill-[#666666]",
+                fontFamily: commonChartConfig.fontFamily,
               }}
               tickFormatter={(value) => `${value.toFixed(0)}`}
               dataKey="averageDaysToPay"
@@ -110,10 +107,9 @@ export function InvoicePaymentChart({
               axisLine={false}
               tickLine={false}
               tick={{
-                fill: "#707070",
+                fill: "var(--chart-axis-text)",
                 fontSize: 10,
-                fontFamily: "Hedvig Letters Sans",
-                className: "dark:fill-[#666666]",
+                fontFamily: commonChartConfig.fontFamily,
               }}
               tickFormatter={(value) => `${value.toFixed(0)}%`}
               dataKey="paymentRate"
@@ -126,7 +122,7 @@ export function InvoicePaymentChart({
             <Bar
               yAxisId="left"
               dataKey="averageDaysToPay"
-              fill="white"
+              fill="var(--chart-bar-fill)"
               isAnimationActive={false}
             />
             {/* Payment Rate line */}
@@ -134,9 +130,9 @@ export function InvoicePaymentChart({
               yAxisId="right"
               type="monotone"
               dataKey="paymentRate"
-              stroke="#666"
+              stroke="var(--chart-line-secondary)"
               strokeWidth={2}
-              dot={{ fill: "#666", r: 3 }}
+              dot={{ fill: "var(--chart-line-secondary)", r: 3 }}
               isAnimationActive={false}
             />
           </ComposedChart>
