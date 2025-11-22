@@ -3,25 +3,7 @@ import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { format } from "date-fns";
-import { motion } from "framer-motion";
 import { formatDateRange } from "little-date";
-
-const listVariant = {
-  hidden: { y: 10, opacity: 0 },
-  show: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.05,
-      staggerChildren: 0.06,
-    },
-  },
-};
-
-const itemVariant = {
-  hidden: { y: 10, opacity: 0 },
-  show: { y: 0, opacity: 1 },
-};
 
 type FilterKey =
   | "start"
@@ -225,20 +207,15 @@ export function FilterList({
   };
 
   return (
-    <motion.ul
-      variants={listVariant}
-      initial="hidden"
-      animate="show"
-      className="flex space-x-2"
-    >
+    <ul className="flex space-x-2">
       {loading && (
         <div className="flex space-x-2">
-          <motion.li key="1" variants={itemVariant}>
+          <li>
             <Skeleton className="h-8 w-[100px]" />
-          </motion.li>
-          <motion.li key="2" variants={itemVariant}>
+          </li>
+          <li key="2">
             <Skeleton className="h-8 w-[100px]" />
-          </motion.li>
+          </li>
         </div>
       )}
 
@@ -248,7 +225,7 @@ export function FilterList({
           .map(([key, value]) => {
             const filterKey = key as FilterKey;
             return (
-              <motion.li key={key} variants={itemVariant}>
+              <li key={key}>
                 <Button
                   className="h-9 px-2 bg-secondary hover:bg-secondary font-normal text-[#878787] flex space-x-1 items-center group rounded-none"
                   onClick={() => handleOnRemove(filterKey)}
@@ -261,9 +238,9 @@ export function FilterList({
                     })}
                   </span>
                 </Button>
-              </motion.li>
+              </li>
             );
           })}
-    </motion.ul>
+    </ul>
   );
 }

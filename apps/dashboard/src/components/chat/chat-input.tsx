@@ -49,10 +49,7 @@ export function ChatInput() {
     "suggestions",
   );
 
-  const [selectedType, setSelectedType] = useQueryState(
-    "artifact-type",
-    parseAsString,
-  );
+  const [selectedType] = useQueryState("artifact-type", parseAsString);
 
   const isCanvasVisible = !!selectedType;
 
@@ -109,11 +106,12 @@ export function ChatInput() {
     <>
       <div
         className={cn(
-          "fixed bottom-6 left-[70px] z-20 px-6 transition-all duration-300 ease-in-out",
-          isCanvasVisible ? "right-[603px]" : "right-0",
+          "fixed bottom-6 z-20 transition-all duration-300 ease-in-out",
+          "left-0 md:left-[70px] px-4 md:px-6",
+          isCanvasVisible ? "right-0 md:right-[603px]" : "right-0",
         )}
       >
-        <div className="mx-auto w-full pt-2 max-w-[770px] relative">
+        <div className="mx-auto w-full pt-2 max-w-full md:max-w-[770px] relative">
           <SuggestedPrompts />
           <CommandMenu />
 

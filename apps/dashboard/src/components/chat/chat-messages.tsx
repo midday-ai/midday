@@ -235,10 +235,7 @@ export function ChatMessages({
                     />
                     {/* Artifact toggle icon */}
                     {artifactType && (
-                      <ArtifactToggleIcon
-                        artifactType={artifactType}
-                        messageId={message.id}
-                      />
+                      <ArtifactToggleIcon artifactType={artifactType} />
                     )}
                   </div>
                 </div>

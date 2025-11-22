@@ -1,6 +1,7 @@
 import { ErrorBoundary } from "@/components/error-boundary";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { parseAsString, useQueryState } from "nuqs";
+import { useCallback } from "react";
 import { BalanceSheetCanvas } from "./balance-sheet-canvas";
 import { CanvasErrorFallback } from "./base/canvas-error-fallback";
 import { BurnRateCanvas } from "./burn-rate-canvas";
@@ -26,7 +27,7 @@ export function Canvas() {
   const [data] = useArtifacts({
     value: selectedType,
     onChange: (v) => setSelectedType(v ?? null),
-    exclude: ["chat-title", "followup-questions"],
+    exclude: ["chat-title", "suggestions"],
   });
 
   const renderCanvas = useCallback(() => {

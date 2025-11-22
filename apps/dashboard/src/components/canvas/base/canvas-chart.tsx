@@ -40,7 +40,7 @@ export function CanvasChart({
     <div className={cn("mb-6", className)}>
       {/* Chart Header */}
       <div className="flex items-center justify-between mb-4">
-        <h4 className="text-[18px] font-normal font-serif text-black dark:text-white">
+        <h4 className="text-[18px] font-normal font-serif text-primary">
           {title}
         </h4>
         {legend && (

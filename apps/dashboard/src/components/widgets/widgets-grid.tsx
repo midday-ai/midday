@@ -265,16 +265,43 @@ export function WidgetsGrid() {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div ref={gridRef} className="space-y-8">
+      <div ref={gridRef}>
         {/* Primary Widgets */}
         {isCustomizing ? (
           <SortableContext
             items={primaryWidgets}
             strategy={rectSortingStrategy}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-6">
-              {/* <Insights /> */}
+            {/* Mobile: Horizontal scrollable row with snap */}
+            <div className="lg:hidden overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4">
+              <div className="flex gap-4">
+                {primaryWidgets.map((widgetType, index) => {
+                  const WidgetComponent = WIDGET_COMPONENTS[widgetType];
+                  const wiggleClass = getWiggleClass(index);
 
+                  return (
+                    <div
+                      key={widgetType}
+                      className="flex-shrink-0 w-[calc(100vw-2rem)] snap-center first:ml-4 last:mr-4"
+                    >
+                      <SortableCard
+                        id={widgetType}
+                        className="relative cursor-grab active:cursor-grabbing"
+                        customizeMode={isCustomizing}
+                        wiggleClass={wiggleClass}
+                      >
+                        <ErrorBoundary fallback={<WidgetErrorFallback />}>
+                          <WidgetComponent />
+                        </ErrorBoundary>
+                      </SortableCard>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Desktop: Grid layout */}
+            <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-6">
               {primaryWidgets.map((widgetType, index) => {
                 const WidgetComponent = WIDGET_COMPONENTS[widgetType];
                 const wiggleClass = getWiggleClass(index);
@@ -296,21 +323,41 @@ export function WidgetsGrid() {
             </div>
           </SortableContext>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-6">
-            {/* <Insights /> */}
+          <>
+            {/* Mobile: Horizontal scrollable row with snap */}
+            <div className="lg:hidden overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4">
+              <div className="flex gap-4">
+                {primaryWidgets.map((widgetType, index) => {
+                  const WidgetComponent = WIDGET_COMPONENTS[widgetType];
+                  return (
+                    <div
+                      key={widgetType}
+                      className="flex-shrink-0 w-[calc(100vw-2rem)] snap-center first:ml-4 last:mr-4"
+                    >
+                      <ErrorBoundary fallback={<WidgetErrorFallback />}>
+                        <WidgetComponent />
+                      </ErrorBoundary>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
 
-            {primaryWidgets.map((widgetType) => {
-              const WidgetComponent = WIDGET_COMPONENTS[widgetType];
-              return (
-                <ErrorBoundary
-                  key={widgetType}
-                  fallback={<WidgetErrorFallback />}
-                >
-                  <WidgetComponent />
-                </ErrorBoundary>
-              );
-            })}
-          </div>
+            {/* Desktop: Grid layout */}
+            <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-6">
+              {primaryWidgets.map((widgetType) => {
+                const WidgetComponent = WIDGET_COMPONENTS[widgetType];
+                return (
+                  <ErrorBoundary
+                    key={widgetType}
+                    fallback={<WidgetErrorFallback />}
+                  >
+                    <WidgetComponent />
+                  </ErrorBoundary>
+                );
+              })}
+            </div>
+          </>
         )}
 
         {/* Separator and Available Widgets (shown when customizing) */}
@@ -326,7 +373,38 @@ export function WidgetsGrid() {
               items={availableWidgets}
               strategy={rectSortingStrategy}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-6">
+              {/* Mobile: Horizontal scrollable row with snap */}
+              <div className="lg:hidden overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4">
+                <div className="flex gap-4">
+                  {availableWidgets.map((widgetType, index) => {
+                    const WidgetComponent = WIDGET_COMPONENTS[widgetType];
+                    const wiggleClass = getWiggleClass(
+                      primaryWidgets.length + index,
+                    );
+
+                    return (
+                      <div
+                        key={widgetType}
+                        className="flex-shrink-0 w-[calc(100vw-2rem)] snap-center first:ml-4 last:mr-4"
+                      >
+                        <SortableCard
+                          id={widgetType}
+                          className="opacity-60 hover:opacity-70 cursor-grab active:cursor-grabbing"
+                          customizeMode={isCustomizing}
+                          wiggleClass={wiggleClass}
+                        >
+                          <ErrorBoundary fallback={<WidgetErrorFallback />}>
+                            <WidgetComponent />
+                          </ErrorBoundary>
+                        </SortableCard>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Desktop: Grid layout */}
+              <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-6">
                 {availableWidgets.map((widgetType, index) => {
                   const WidgetComponent = WIDGET_COMPONENTS[widgetType];
                   const wiggleClass = getWiggleClass(

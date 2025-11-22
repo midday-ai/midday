@@ -135,6 +135,7 @@ export function ChatInterface({ geo }: Props) {
           "fixed right-0 top-0 bottom-0 z-20",
           showCanvas ? "translate-x-0" : "translate-x-full",
           hasMessages && "transition-transform duration-300 ease-in-out",
+          "md:z-20 z-40",
         )}
       >
         <Canvas />
@@ -145,7 +146,7 @@ export function ChatInterface({ geo }: Props) {
         className={cn(
           "relative flex-1",
           hasMessages && "transition-all duration-300 ease-in-out",
-          showCanvas && "mr-[600px]",
+          showCanvas && "mr-0 md:mr-[600px]",
           !hasMessages && "flex items-center justify-center",
         )}
       >
@@ -157,7 +158,7 @@ export function ChatInterface({ geo }: Props) {
                 className={cn(
                   "sticky top-0 left-0 z-10 shrink-0",
                   hasMessages && "transition-all duration-300 ease-in-out",
-                  showCanvas ? "right-[600px]" : "right-0",
+                  showCanvas ? "right-0 md:right-[600px]" : "right-0",
                 )}
               >
                 <div className="bg-background/80 dark:bg-background/50 backdrop-blur-sm pt-6">
@@ -196,12 +197,10 @@ export function ChatInterface({ geo }: Props) {
           className={cn(
             "fixed bottom-0 left-0",
             hasMessages && "transition-all duration-300 ease-in-out",
-            showCanvas ? "right-[600px]" : "right-0",
+            showCanvas ? "right-0 md:right-[600px]" : "right-0",
           )}
         >
-          <div className="w-full pb-4 max-w-2xl mx-auto">
-            <ChatInput />
-          </div>
+          <ChatInput />
         </div>
       </div>
     </div>

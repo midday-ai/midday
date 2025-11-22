@@ -15,37 +15,36 @@ import { useCallback } from "react";
 
 interface ArtifactToggleIconProps {
   artifactType: ArtifactType;
-  messageId: string;
 }
 
-export function ArtifactToggleIcon({
-  artifactType,
-  messageId,
-}: ArtifactToggleIconProps) {
+export function ArtifactToggleIcon({ artifactType }: ArtifactToggleIconProps) {
   const [selectedType, setSelectedType] = useQueryState(
     "artifact-type",
     parseAsString,
   );
 
-  const [data] = useArtifacts({
+  const [data, actions] = useArtifacts({
     value: selectedType ?? undefined,
     onChange: (v: string | null) => setSelectedType(v ?? null),
-    exclude: ["chat-title", "followup-questions"],
+    exclude: ["chat-title", "suggestions"],
   });
 
-  const { available } = data;
+  const { available, activeType } = data;
   const isArtifactAvailable = available.includes(artifactType);
-  const isCurrentlyOpen = selectedType === artifactType;
+  const isCurrentlyOpen =
+    activeType === artifactType || selectedType === artifactType;
 
   const handleToggle = useCallback(() => {
     if (isCurrentlyOpen) {
       // If this artifact is currently open, close it
+      actions.setValue(null);
       setSelectedType(null);
     } else {
       // Otherwise, open this artifact
+      actions.setValue(artifactType);
       setSelectedType(artifactType);
     }
-  }, [isCurrentlyOpen, artifactType, setSelectedType]);
+  }, [isCurrentlyOpen, artifactType, setSelectedType, actions]);
 
   // Don't render if artifact is not available
   if (!isArtifactAvailable) {

@@ -33,7 +33,7 @@ export function useChatStatus(
 ): ChatStatusResult {
   const [agentStatusData] = useDataPart<AgentStatus>("agent-status");
   const [{ current }] = useArtifacts({
-    exclude: ["chat-title", "followup-questions"],
+    exclude: ["chat-title", "suggestions"],
   });
 
   const result = useMemo(() => {

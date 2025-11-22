@@ -101,6 +101,15 @@ export async function generateCanvasPdf(
         for (const element of hideElements) {
           (element as HTMLElement).style.display = "none";
         }
+
+        // Disable all animations and transitions for PDF generation
+        const allElements = clonedDoc.querySelectorAll("*");
+        for (const element of allElements) {
+          const htmlElement = element as HTMLElement;
+          htmlElement.style.animation = "none";
+          htmlElement.style.transition = "none";
+          htmlElement.style.opacity = "1";
+        }
       },
     });
 

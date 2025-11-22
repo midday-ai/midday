@@ -1,11 +1,22 @@
 "use client";
 
-import { generateTransactionsFilters } from "@/actions/ai/filters/generate-transactions-filters";
+import {
+  transactionFilterOutputSchema,
+  transactionsFilterSchema,
+} from "@/app/api/ai/filters/transactions/schema";
+import type { TransactionsFilterSchema } from "@/app/api/ai/filters/transactions/schema";
+import {
+  mapStringArrayToIds,
+  normalizeEnum,
+  normalizeString,
+  useAIFilter,
+  validateEnumArray,
+  validateNumberRange,
+} from "@/hooks/use-ai-filter";
 import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
 import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
 import { useTRPC } from "@/trpc/client";
 import { formatAccountName } from "@/utils/format";
-import { readStreamableValue } from "@ai-sdk/rsc";
 import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
 import {
@@ -23,7 +34,7 @@ import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { formatISO } from "date-fns";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { AmountRange } from "./amount-range";
 import { FilterList } from "./filter-list";
@@ -215,13 +226,70 @@ function updateArrayFilter(
 export function TransactionsSearchFilter() {
   const [placeholder, setPlaceholder] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const { filter = defaultSearch, setFilter } =
     useTransactionFilterParamsWithPersistence();
   const { tags, accounts, categories } = useFilterData(isOpen, isFocused);
-  const [prompt, setPrompt] = useState(filter.q ?? "");
+  const [input, setInput] = useState(filter.q ?? "");
+
+  const mapTransactionFilters = useCallback(
+    (
+      object: TransactionsFilterSchema,
+      data?: {
+        categories?: Array<{ name: string; slug: string | null }>;
+        tags?: Array<{ id: string; name: string }>;
+      },
+    ) => {
+      const categorySlugs = mapStringArrayToIds(
+        object.categories,
+        (name) =>
+          data?.categories?.find((category) => category.name === name)?.slug ??
+          null,
+      );
+
+      const tagIds = mapStringArrayToIds(
+        object.tags,
+        (name) => data?.tags?.find((tag) => tag.name === name)?.id ?? null,
+      );
+
+      const recurring = validateEnumArray(object.recurring, [
+        "all",
+        "weekly",
+        "monthly",
+        "annually",
+      ] as const);
+
+      return {
+        q: normalizeString(object.name),
+        attachments: normalizeEnum(object.attachments, [
+          "exclude",
+          "include",
+        ] as const),
+        start: normalizeString(object.start),
+        end: normalizeString(object.end),
+        categories: categorySlugs,
+        tags: tagIds,
+        accounts: null,
+        assignees: null,
+        amount_range: validateNumberRange(object.amount_range),
+        amount: null,
+        recurring,
+        statuses: null,
+        manual: null,
+      };
+    },
+    [],
+  );
+
+  const { submit, isLoading } = useAIFilter({
+    api: "/api/ai/filters/transactions",
+    inputSchema: transactionsFilterSchema,
+    outputSchema: transactionFilterOutputSchema,
+    mapper: mapTransactionFilters,
+    onFilterApplied: setFilter,
+    data: { categories, tags },
+  });
 
   useEffect(() => {
     const randomPlaceholder =
@@ -234,13 +302,13 @@ export function TransactionsSearchFilter() {
   useHotkeys(
     "esc",
     () => {
-      setPrompt("");
+      setInput("");
       setFilter(defaultSearch);
       setIsOpen(false);
     },
     {
       enableOnFormTags: true,
-      enabled: Boolean(prompt) && isFocused,
+      enabled: Boolean(input) && isFocused,
     },
   );
 
@@ -252,56 +320,30 @@ export function TransactionsSearchFilter() {
   const handleSearch = (evt: React.ChangeEvent<HTMLInputElement>) => {
     const value = evt.target.value;
     if (value) {
-      setPrompt(value);
+      setInput(value);
     } else {
       setFilter({ q: null });
-      setPrompt("");
+      setInput("");
     }
   };
 
-  const handleSubmit = async () => {
-    if (prompt.split(" ").length > 1) {
-      setStreaming(true);
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
 
-      const { object } = await generateTransactionsFilters(
-        prompt,
-        `
-          Categories: ${categories?.map((category) => category.name).join(", ")}
-          Tags: ${tags?.map((tag) => tag.name).join(", ")}
-        `,
-      );
+    if (input.split(" ").length > 1) {
+      const context = `
+        Categories: ${categories?.map((category) => category.name).join(", ")}
+        Tags: ${tags?.map((tag) => tag.name).join(", ")}
+      `;
 
-      let finalObject = {};
-
-      for await (const partialObject of readStreamableValue(object)) {
-        if (partialObject) {
-          finalObject = {
-            ...finalObject,
-            ...partialObject,
-            categories:
-              partialObject?.categories?.map(
-                (name: string) =>
-                  categories?.find((category) => category.name === name)?.slug,
-              ) ?? null,
-            tags:
-              partialObject?.tags?.map(
-                (name: string) => tags?.find((tag) => tag.name === name)?.id,
-              ) ?? null,
-            recurring: partialObject?.recurring ?? null,
-            q: partialObject?.name ?? null,
-            amount_range: partialObject?.amount_range ?? null,
-          };
-        }
-      }
-
-      setFilter({
-        q: null,
-        ...finalObject,
+      submit({
+        input,
+        context,
+        currentDate: formatISO(new Date(), { representation: "date" }),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
-
-      setStreaming(false);
     } else {
-      setFilter({ q: prompt.length > 0 ? prompt : null });
+      setFilter({ q: input.length > 0 ? input : null });
     }
   };
 
@@ -314,23 +356,27 @@ export function TransactionsSearchFilter() {
   );
 
   const processFiltersForList = () => {
+    const processed = {
+      start: filter.start ?? undefined,
+      end: filter.end ?? undefined,
+      amount_range: filter.amount_range
+        ? `${filter.amount_range[0]}-${filter.amount_range[1]}`
+        : undefined,
+      attachments: filter.attachments ?? undefined,
+      categories: filter.categories ?? undefined,
+      tags: filter.tags ?? undefined,
+      accounts: filter.accounts ?? undefined,
+      assignees: filter.assignees ?? undefined,
+      statuses: filter.statuses ?? undefined,
+      recurring: filter.recurring ?? undefined,
+      manual: filter.manual ?? undefined,
+    };
+
+    // Filter out undefined and null values
     return Object.fromEntries(
-      Object.entries({
-        ...validFilters,
-        start: filter.start ?? undefined,
-        end: filter.end ?? undefined,
-        amount_range: filter.amount_range
-          ? `${filter.amount_range[0]}-${filter.amount_range[1]}`
-          : undefined,
-        attachments: filter.attachments ?? undefined,
-        categories: filter.categories ?? undefined,
-        tags: filter.tags ?? undefined,
-        accounts: filter.accounts ?? undefined,
-        assignees: filter.assignees ?? undefined,
-        statuses: filter.statuses ?? undefined,
-        recurring: filter.recurring ?? undefined,
-        manual: filter.manual ?? undefined,
-      }).filter(([_, value]) => value !== undefined && value !== null),
+      Object.entries(processed).filter(
+        ([_, value]) => value !== undefined && value !== null,
+      ),
     );
   };
 
@@ -360,7 +406,7 @@ export function TransactionsSearchFilter() {
             ref={inputRef}
             placeholder={placeholder}
             className="pl-9 w-full sm:w-[350px] pr-8"
-            value={prompt}
+            value={input}
             onChange={handleSearch}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
@@ -387,7 +433,7 @@ export function TransactionsSearchFilter() {
 
         <FilterList
           filters={processFiltersForList()}
-          loading={streaming}
+          loading={isLoading}
           onRemove={setFilter}
           categories={categories}
           accounts={accounts}

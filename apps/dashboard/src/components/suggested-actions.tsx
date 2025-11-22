@@ -164,14 +164,15 @@ export function SuggestedActions() {
     RouterOutputs["suggestedActions"]["list"]["actions"][number];
 
   return (
-    <div className="w-full px-6 mt-10 mb-8 flex items-center justify-center">
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide">
-        {suggestedActions.map((action: SuggestedAction) => {
+    <div className="w-[calc(100%+16px)] md:w-full -mx-4 md:mx-0 md:px-6 mt-10 mb-8 flex items-center justify-center">
+      <div className="flex gap-3 overflow-x-auto scrollbar-hide w-full md:w-auto pl-4 md:pl-0">
+        {suggestedActions.map((action: SuggestedAction, index) => {
           const config = uiConfig[action.id];
           const Icon = config?.icon;
           const title = config?.title || action.id;
           const description =
             config?.description || `Execute ${action.toolName}`;
+          const isLast = index === suggestedActions.length - 1;
 
           return (
             <button
@@ -183,6 +184,8 @@ export function SuggestedActions() {
                 "dark:hover:bg-[#131313] dark:hover:border-[#2a2a2a]",
                 "px-3 py-2 flex items-center gap-2 cursor-pointer",
                 "transition-all duration-300 min-w-fit whitespace-nowrap",
+                "flex-shrink-0",
+                isLast && "mr-4 md:mr-0",
               )}
               onClick={() => {
                 handleToolCall({

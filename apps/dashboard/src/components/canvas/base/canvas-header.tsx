@@ -31,7 +31,7 @@ export function CanvasHeader({ title }: CanvasHeaderProps) {
   };
 
   return (
-    <div className="flex items-center justify-between dark:bg-[#131313]">
+    <div className="flex items-center justify-between bg-gray-50 dark:bg-[#131313]">
       <ArtifactTabs />
 
       <div className="flex justify-end mr-1.5">

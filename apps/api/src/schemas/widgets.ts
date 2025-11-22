@@ -81,8 +81,8 @@ export const getMonthlySpendingSchema = z.object({
 });
 
 export const getRecurringExpensesSchema = z.object({
-  from: z.string(), // ISO date string (YYYY-MM-DD)
-  to: z.string(), // ISO date string (YYYY-MM-DD)
+  from: z.string(),
+  to: z.string(),
   currency: z.string().optional(),
 });
 
@@ -106,7 +106,7 @@ export const getOverdueInvoicesAlertSchema = z
   .optional();
 
 export const getBillableHoursSchema = z.object({
-  date: z.string(), // ISO date string (YYYY-MM-DD)
+  date: z.string(),
   view: z.enum(["week", "month"]),
   weekStartsOnMonday: z.boolean().optional().default(false),
 });
