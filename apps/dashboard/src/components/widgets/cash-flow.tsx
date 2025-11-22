@@ -64,6 +64,10 @@ export function CashFlowWidget() {
   };
 
   const handleViewAnalysis = () => {
+    const periodLabel = t(
+      `widget_period.${config?.period ?? "current_month"}` as "widget_period.fiscal_ytd",
+    );
+
     handleToolCall({
       toolName: "getCashFlow",
       toolParams: {
@@ -73,7 +77,7 @@ export function CashFlowWidget() {
         period: "monthly",
         showCanvas: true,
       },
-      text: "Show cash flow",
+      text: `Show cash flow for ${periodLabel}`,
     });
   };
 

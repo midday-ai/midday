@@ -75,6 +75,11 @@ export function ProfitAnalysisWidget() {
   };
 
   const handleViewAnalysis = () => {
+    const periodLabel = t(
+      `widget_period.${config?.period ?? "trailing_12"}` as "widget_period.fiscal_ytd",
+    );
+    const revenueTypeLabel = config?.revenueType === "gross" ? "Gross" : "Net";
+
     handleToolCall({
       toolName: "getProfitAnalysis",
       toolParams: {
@@ -84,7 +89,7 @@ export function ProfitAnalysisWidget() {
         revenueType: config?.revenueType ?? "net",
         showCanvas: true,
       },
-      text: "Show profit & loss statement",
+      text: `Show ${revenueTypeLabel.toLowerCase()} profit & loss statement for ${periodLabel}`,
     });
   };
 

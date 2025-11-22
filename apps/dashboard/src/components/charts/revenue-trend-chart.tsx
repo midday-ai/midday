@@ -11,7 +11,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { commonChartConfig, createCompactTickFormatter, useChartMargin } from "./chart-utils";
+import {
+  commonChartConfig,
+  createCompactTickFormatter,
+  useChartMargin,
+} from "./chart-utils";
 
 interface RevenueTrendData {
   month: string;
@@ -127,7 +131,11 @@ export function RevenueTrendChart({
               wrapperStyle={{ zIndex: 9999 }}
             />
             {/* This Year bars (white in dark mode) */}
-            <Bar dataKey="revenue" fill="var(--chart-bar-fill)" isAnimationActive={false} />
+            <Bar
+              dataKey="revenue"
+              fill="var(--chart-bar-fill)"
+              isAnimationActive={false}
+            />
             {/* Last Year bars (dark gray in dark mode with 0.3 opacity) */}
             <Bar
               dataKey="lastYearRevenue"

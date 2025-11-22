@@ -77,6 +77,10 @@ export function MonthlySpendingWidget() {
   };
 
   const handleSeeExpenses = () => {
+    const periodLabel = t(
+      `widget_period.${config?.period ?? "current_month"}` as "widget_period.fiscal_ytd",
+    );
+
     handleToolCall({
       toolName: "getSpending",
       toolParams: {
@@ -85,7 +89,7 @@ export function MonthlySpendingWidget() {
         currency: team?.baseCurrency ?? undefined,
         showCanvas: true,
       },
-      text: "Show spending analysis",
+      text: `Show spending analysis for ${periodLabel}`,
     });
   };
 

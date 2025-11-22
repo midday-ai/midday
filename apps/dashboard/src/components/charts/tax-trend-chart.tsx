@@ -10,7 +10,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { commonChartConfig, createCompactTickFormatter, useChartMargin } from "./chart-utils";
+import {
+  commonChartConfig,
+  createCompactTickFormatter,
+  useChartMargin,
+} from "./chart-utils";
 
 interface TaxTrendData {
   month: string;
@@ -119,7 +123,11 @@ export function TaxTrendChart({
               wrapperStyle={{ zIndex: 9999 }}
             />
             {/* Tax amount bars (white in dark mode) */}
-            <Bar dataKey="taxAmount" fill="var(--chart-bar-fill)" isAnimationActive={false} />
+            <Bar
+              dataKey="taxAmount"
+              fill="var(--chart-bar-fill)"
+              isAnimationActive={false}
+            />
           </ComposedChart>
         </ResponsiveContainer>
       </div>

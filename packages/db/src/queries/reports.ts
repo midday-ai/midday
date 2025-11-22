@@ -1938,30 +1938,88 @@ export async function getRevenueForecast(
     revenueType = "net",
   } = params;
 
+  // Calculate forecast date range
+  const currentDate = new UTCDate(parseISO(to));
+  const forecastStartDate = format(
+    endOfMonth(
+      new UTCDate(currentDate.getFullYear(), currentDate.getMonth() + 1, 1),
+    ),
+    "yyyy-MM-dd",
+  );
+  const forecastEndDate = format(
+    endOfMonth(
+      new UTCDate(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + forecastMonths,
+        1,
+      ),
+    ),
+    "yyyy-MM-dd",
+  );
+
   // Fetch all required data in parallel for better performance
-  const [historicalData, outstandingInvoicesData, billableHoursData] =
-    await Promise.all([
-      // Historical revenue data
-      getRevenue(db, {
-        teamId,
-        from,
-        to,
-        currency: inputCurrency,
-        revenueType,
-      }),
-      // Outstanding invoices (unpaid revenue)
-      getOutstandingInvoices(db, {
-        teamId,
-        currency: inputCurrency,
-        status: ["unpaid", "overdue"],
-      }),
-      // Billable hours this month
-      getBillableHours(db, {
-        teamId,
-        date: new Date().toISOString(),
-        view: "month",
-      }),
-    ]);
+  const [
+    historicalData,
+    outstandingInvoicesData,
+    billableHoursData,
+    scheduledInvoicesData,
+    paidInvoicesData,
+  ] = await Promise.all([
+    // Historical revenue data
+    getRevenue(db, {
+      teamId,
+      from,
+      to,
+      currency: inputCurrency,
+      revenueType,
+    }),
+    // Outstanding invoices (unpaid revenue)
+    getOutstandingInvoices(db, {
+      teamId,
+      currency: inputCurrency,
+      status: ["unpaid", "overdue"],
+    }),
+    // Billable hours this month
+    getBillableHours(db, {
+      teamId,
+      date: new Date().toISOString(),
+      view: "month",
+    }),
+    // Scheduled invoices with issueDate in forecast period
+    db
+      .select({
+        amount: invoices.amount,
+        issueDate: invoices.issueDate,
+        currency: invoices.currency,
+      })
+      .from(invoices)
+      .where(
+        and(
+          eq(invoices.teamId, teamId),
+          eq(invoices.status, "scheduled"),
+          isNotNull(invoices.issueDate),
+          gte(invoices.issueDate, forecastStartDate),
+          lte(invoices.issueDate, forecastEndDate),
+        ),
+      ),
+    // Paid invoices for collection rate calculation
+    db
+      .select({
+        issueDate: invoices.issueDate,
+        paidAt: invoices.paidAt,
+        amount: invoices.amount,
+        dueDate: invoices.dueDate,
+      })
+      .from(invoices)
+      .where(
+        and(
+          eq(invoices.teamId, teamId),
+          eq(invoices.status, "paid"),
+          isNotNull(invoices.paidAt),
+          isNotNull(invoices.issueDate),
+        ),
+      ),
+  ]);
 
   // Convert to numbers - keep ALL months including zero revenue
   const historical = historicalData.map((item: ReportsResultItem) => ({
@@ -1983,7 +2041,6 @@ export async function getRevenueForecast(
       historical[historical.length - 1]?.value ?? avgValue;
 
     const forecast: ForecastDataPoint[] = [];
-    const currentDate = new UTCDate(parseISO(to));
 
     for (let i = 1; i <= forecastMonths; i++) {
       const forecastDate = endOfMonth(
@@ -2159,14 +2216,147 @@ export async function getRevenueForecast(
   // Apply seasonality adjustment to smoothed baseline
   const lastActualValue = smoothedValue * seasonalityFactor;
 
+  // Calculate dynamic collection rate from historical paid invoices
+  const calculateCollectionRate = (
+    paidInvoices: Array<{
+      issueDate: string | null;
+      paidAt: string | null;
+      amount: number | null;
+      dueDate: string | null;
+    }>,
+    outstandingInvoices: Array<{
+      issueDate?: string | null;
+      dueDate?: string | null;
+    }>,
+  ): number => {
+    if (paidInvoices.length === 0) {
+      // No historical data, use conservative default
+      return 0.7;
+    }
+
+    // Calculate average days to payment from historical data
+    const paymentDelays: number[] = [];
+    for (const invoice of paidInvoices) {
+      if (invoice.issueDate && invoice.paidAt) {
+        const issueDate = parseISO(invoice.issueDate);
+        const paidDate = parseISO(invoice.paidAt);
+        const daysToPayment = Math.floor(
+          (paidDate.getTime() - issueDate.getTime()) / (1000 * 60 * 60 * 24),
+        );
+        if (daysToPayment >= 0 && daysToPayment <= 365) {
+          // Only include reasonable payment delays (0-365 days)
+          paymentDelays.push(daysToPayment);
+        }
+      }
+    }
+
+    if (paymentDelays.length === 0) {
+      return 0.7; // Default if no valid payment delays
+    }
+
+    const avgDaysToPayment =
+      paymentDelays.reduce((sum, days) => sum + days, 0) / paymentDelays.length;
+
+    // Calculate collection rate by invoice age
+    const now = new UTCDate();
+    let totalOutstanding = 0;
+    let weightedCollection = 0;
+
+    for (const invoice of outstandingInvoices) {
+      if (!invoice.issueDate) continue;
+
+      const issueDate = parseISO(invoice.issueDate);
+      const daysSinceIssue = Math.floor(
+        (now.getTime() - issueDate.getTime()) / (1000 * 60 * 60 * 24),
+      );
+
+      // Determine collection probability based on invoice age
+      let collectionRate = 0.7; // Default
+      if (daysSinceIssue < 30) {
+        // Recent invoices (< 30 days): Higher probability
+        collectionRate = 0.85;
+      } else if (invoice.dueDate) {
+        const dueDate = parseISO(invoice.dueDate);
+        const daysSinceDue = Math.floor(
+          (now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24),
+        );
+        if (daysSinceDue > 0) {
+          // Overdue: Lower probability
+          collectionRate = 0.5;
+        } else {
+          // Not yet due: Normal probability
+          collectionRate = 0.7;
+        }
+      } else if (daysSinceIssue > 90) {
+        // Very old invoices (> 90 days): Lower probability
+        collectionRate = 0.5;
+      }
+
+      // Weight by expected payment timing (invoices closer to avg payment time have higher weight)
+      const daysUntilExpectedPayment = Math.max(
+        0,
+        avgDaysToPayment - daysSinceIssue,
+      );
+      const weight = Math.max(
+        0.1,
+        Math.min(1.0, daysUntilExpectedPayment / 30),
+      );
+      weightedCollection += collectionRate * weight;
+      totalOutstanding += weight;
+    }
+
+    // Return weighted average collection rate, or default if no outstanding invoices
+    return totalOutstanding > 0
+      ? Math.max(0.5, Math.min(0.9, weightedCollection / totalOutstanding))
+      : 0.7;
+  };
+
+  // Get outstanding invoices with dates for collection rate calculation
+  const outstandingInvoicesWithDates = await db
+    .select({
+      issueDate: invoices.issueDate,
+      dueDate: invoices.dueDate,
+    })
+    .from(invoices)
+    .where(
+      and(
+        eq(invoices.teamId, teamId),
+        inArray(invoices.status, ["unpaid", "overdue"]),
+      ),
+    );
+
+  const collectionRate = calculateCollectionRate(
+    paidInvoicesData as Array<{
+      issueDate: string | null;
+      paidAt: string | null;
+      amount: number | null;
+      dueDate: string | null;
+    }>,
+    outstandingInvoicesWithDates as Array<{
+      issueDate: string | null;
+      dueDate: string | null;
+    }>,
+  );
+
+  // Group scheduled invoices by month
+  const scheduledByMonth = new Map<string, number>();
+  for (const invoice of scheduledInvoicesData) {
+    if (!invoice.issueDate) continue;
+    const issueDate = parseISO(invoice.issueDate);
+    const monthKey = format(issueDate, "yyyy-MM");
+    const amount = Number(invoice.amount) || 0;
+    scheduledByMonth.set(
+      monthKey,
+      (scheduledByMonth.get(monthKey) || 0) + amount,
+    );
+  }
+
   // Step 6: Generate forecast with conservative dampening
   const forecast: ForecastDataPoint[] = [];
-  const currentDate = new UTCDate(parseISO(to));
 
-  // Calculate expected collection rate from unpaid invoices
-  // Assume 70% of unpaid invoices will be collected next month
+  // Calculate expected collection from unpaid invoices using dynamic rate
   const expectedInvoiceCollection =
-    outstandingInvoicesData.summary.totalAmount * 0.7;
+    outstandingInvoicesData.summary.totalAmount * collectionRate;
 
   for (let i = 1; i <= forecastMonths; i++) {
     const forecastDate = endOfMonth(
@@ -2201,6 +2391,13 @@ export async function getRevenueForecast(
     // Add expected invoice collection to first month only (one-time boost)
     if (i === 1 && expectedInvoiceCollection > 0) {
       finalValue += expectedInvoiceCollection;
+    }
+
+    // Add scheduled invoices for this month
+    const monthKey = format(forecastDate, "yyyy-MM");
+    const scheduledAmount = scheduledByMonth.get(monthKey) || 0;
+    if (scheduledAmount > 0) {
+      finalValue += scheduledAmount;
     }
 
     forecast.push({
@@ -2373,6 +2570,13 @@ export async function getRevenueForecast(
       seasonalityFactor: Number(seasonalityFactor.toFixed(2)),
       revenueStability: Number(((1 - coefficientOfVariation) * 100).toFixed(2)), // 0-100%
       expectedInvoiceCollection: Number(expectedInvoiceCollection.toFixed(2)),
+      collectionRate: Number((collectionRate * 100).toFixed(1)), // as percentage
+      scheduledInvoicesTotal: Number(
+        Array.from(scheduledByMonth.values())
+          .reduce((sum, amount) => sum + amount, 0)
+          .toFixed(2),
+      ),
+      scheduledInvoicesCount: scheduledByMonth.size,
     },
   };
 }

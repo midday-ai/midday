@@ -63,6 +63,11 @@ export function GrowthRateWidget() {
   };
 
   const handleViewAnalysis = () => {
+    const periodLabel = t(
+      `widget_period.${config?.period ?? "current_quarter"}` as "widget_period.fiscal_ytd",
+    );
+    const revenueTypeLabel = config?.revenueType === "gross" ? "Gross" : "Net";
+
     handleToolCall({
       toolName: "getGrowthRate",
       toolParams: {
@@ -74,7 +79,7 @@ export function GrowthRateWidget() {
         period: "quarterly",
         showCanvas: true,
       },
-      text: "Show period-over-period growth rate analysis",
+      text: `Show ${revenueTypeLabel.toLowerCase()} revenue growth rate analysis for ${periodLabel}`,
     });
   };
 

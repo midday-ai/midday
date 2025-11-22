@@ -62,6 +62,11 @@ export function RevenueSummaryWidget() {
   };
 
   const handleViewTrends = () => {
+    const periodLabel = t(
+      `widget_period.${config?.period ?? "fiscal_year"}` as "widget_period.fiscal_ytd",
+    );
+    const revenueTypeLabel = config?.revenueType === "gross" ? "Gross" : "Net";
+
     handleToolCall({
       toolName: "getRevenueSummary",
       toolParams: {
@@ -71,7 +76,7 @@ export function RevenueSummaryWidget() {
         revenueType: config?.revenueType ?? "net",
         showCanvas: true,
       },
-      text: "Show revenue trends",
+      text: `Show ${revenueTypeLabel.toLowerCase()} revenue trends for ${periodLabel}`,
     });
   };
 

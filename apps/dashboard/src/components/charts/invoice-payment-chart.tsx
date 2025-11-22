@@ -10,7 +10,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { commonChartConfig, createCompactTickFormatter, useChartMargin } from "./chart-utils";
+import {
+  commonChartConfig,
+  createCompactTickFormatter,
+  useChartMargin,
+} from "./chart-utils";
 
 interface InvoicePaymentData {
   month: string;

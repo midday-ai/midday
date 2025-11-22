@@ -3,6 +3,7 @@
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useUserQuery } from "@/hooks/use-user";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { formatCompactAmount } from "@/utils/format";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
@@ -23,6 +24,7 @@ export function CategoryExpensesWidget() {
   const router = useRouter();
   const { data: user } = useUserQuery();
   const { data: team } = useTeamQuery();
+  const t = useI18n();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
@@ -76,6 +78,10 @@ export function CategoryExpensesWidget() {
   const handleViewCategories = () => {
     if (!hasCategories) return;
 
+    const periodLabel = t(
+      `widget_period.${config?.period ?? "current_month"}` as "widget_period.fiscal_ytd",
+    );
+
     handleToolCall({
       toolName: "getExpenses",
       toolParams: {
@@ -84,7 +90,7 @@ export function CategoryExpensesWidget() {
         currency: team?.baseCurrency ?? undefined,
         showCanvas: true,
       },
-      text: "Show expense breakdown by category",
+      text: `Show expense breakdown by category for ${periodLabel}`,
     });
   };
 

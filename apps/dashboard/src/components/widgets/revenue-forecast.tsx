@@ -35,10 +35,14 @@ export function RevenueForecastWidget() {
     return getWidgetPeriodDates(period, team?.fiscalYearStartMonth);
   }, [config?.period, team?.fiscalYearStartMonth]);
 
+  // Ensure widget and tool use identical parameters
+  const fromStr = format(from, "yyyy-MM-dd");
+  const toStr = format(to, "yyyy-MM-dd");
+
   const { data, isLoading } = useQuery({
     ...trpc.reports.revenueForecast.queryOptions({
-      from: format(from, "yyyy-MM-dd"),
-      to: format(to, "yyyy-MM-dd"),
+      from: fromStr,
+      to: toStr,
       forecastMonths,
       currency: team?.baseCurrency ?? undefined,
       revenueType: config?.revenueType ?? "net",
@@ -68,17 +72,22 @@ export function RevenueForecastWidget() {
   };
 
   const handleViewDetails = () => {
+    const periodLabel = t(
+      `widget_period.${config?.period ?? "trailing_12"}` as "widget_period.fiscal_ytd",
+    );
+    const revenueTypeLabel = config?.revenueType === "gross" ? "Gross" : "Net";
+
     handleToolCall({
       toolName: "getForecast",
       toolParams: {
-        from: format(from, "yyyy-MM-dd"),
-        to: format(to, "yyyy-MM-dd"),
+        from: fromStr,
+        to: toStr,
         currency: team?.baseCurrency ?? undefined,
         revenueType: config?.revenueType ?? "net",
         forecastMonths,
         showCanvas: true,
       },
-      text: "Show revenue forecast",
+      text: `Show ${revenueTypeLabel.toLowerCase()} revenue forecast for ${periodLabel} with ${forecastMonths} months forecast`,
     });
   };
 
@@ -101,8 +110,8 @@ export function RevenueForecastWidget() {
       ]
     : [];
 
-  const nextMonthProjection = data?.summary.nextMonthProjection ?? 0;
-  const currency = data?.summary.currency || team?.baseCurrency || "USD";
+  const nextMonthProjection = data?.summary?.nextMonthProjection ?? 0;
+  const currency = data?.summary?.currency || team?.baseCurrency || "USD";
 
   return (
     <ConfigurableWidget
@@ -162,17 +171,9 @@ export function RevenueForecastWidget() {
                 />
               </span>
             </p>
-
-            <button
-              type="button"
-              onClick={handleViewDetails}
-              className="text-xs text-[#878787] hover:text-foreground text-left transition-colors"
-            >
-              View forecast details
-            </button>
           </div>
         }
-        actions=""
+        actions="View forecast details"
         onClick={handleViewDetails}
       >
         <div />

@@ -134,6 +134,10 @@ export function TaxSummaryWidget() {
   const handleViewTaxSummary = () => {
     // Use dynamic terminology based on tax type (VAT/GST/Sales Tax/Tax)
     const summaryText = taxTerms.title.toLowerCase();
+    const periodLabel = t(
+      `widget_period.${config?.period ?? "fiscal_ytd"}` as "widget_period.fiscal_ytd",
+    );
+
     handleToolCall({
       toolName: "getTaxSummary",
       toolParams: {
@@ -142,7 +146,7 @@ export function TaxSummaryWidget() {
         currency: team?.baseCurrency ?? undefined,
         showCanvas: true,
       },
-      text: `Show ${summaryText}`,
+      text: `Show ${summaryText} for ${periodLabel}`,
     });
   };
 

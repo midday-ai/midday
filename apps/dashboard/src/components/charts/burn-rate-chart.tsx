@@ -11,7 +11,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { commonChartConfig, createCompactTickFormatter, useChartMargin } from "./chart-utils";
+import {
+  commonChartConfig,
+  createCompactTickFormatter,
+  useChartMargin,
+} from "./chart-utils";
 
 interface BurnRateData {
   month: string;
@@ -99,11 +103,7 @@ export function BurnRateChart({
                 height="8"
                 patternUnits="userSpaceOnUse"
               >
-                <rect
-                  width="8"
-                  height="8"
-                  fill="var(--chart-pattern-bg)"
-                />
+                <rect width="8" height="8" fill="var(--chart-pattern-bg)" />
                 <path
                   d="M0,0 L8,8 M-2,6 L6,16 M-4,4 L4,12"
                   stroke="var(--chart-pattern-stroke)"
@@ -112,14 +112,8 @@ export function BurnRateChart({
                 />
               </pattern>
               <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-                <stop
-                  offset="0%"
-                  stopColor="var(--chart-gradient-start)"
-                />
-                <stop
-                  offset="100%"
-                  stopColor="var(--chart-gradient-end)"
-                />
+                <stop offset="0%" stopColor="var(--chart-gradient-start)" />
+                <stop offset="100%" stopColor="var(--chart-gradient-end)" />
               </linearGradient>
             </defs>
             <CartesianGrid

@@ -13,7 +13,11 @@ import {
   YAxis,
 } from "recharts";
 import { ChartLegend } from "./base-charts";
-import { commonChartConfig, createYAxisTickFormatter, useChartMargin } from "./chart-utils";
+import {
+  commonChartConfig,
+  createYAxisTickFormatter,
+  useChartMargin,
+} from "./chart-utils";
 import type { BaseChartProps } from "./chart-utils";
 
 interface CashFlowData {
@@ -111,11 +115,7 @@ export function CashFlowChart({
                 height="8"
                 patternUnits="userSpaceOnUse"
               >
-                <rect
-                  width="8"
-                  height="8"
-                  fill="var(--chart-pattern-bg)"
-                />
+                <rect width="8" height="8" fill="var(--chart-pattern-bg)" />
                 <path
                   d="M0,0 L8,8 M-2,6 L6,16 M-4,4 L4,12"
                   stroke="var(--chart-pattern-stroke)"
@@ -184,7 +184,11 @@ export function CashFlowChart({
             />
 
             {/* Income bars */}
-            <Bar dataKey="inflow" fill="var(--chart-bar-fill)" isAnimationActive={false} />
+            <Bar
+              dataKey="inflow"
+              fill="var(--chart-bar-fill)"
+              isAnimationActive={false}
+            />
             {/* Expenses bars with pattern */}
             <Bar
               dataKey="outflow"

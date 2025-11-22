@@ -3,6 +3,7 @@
 import { FormatAmount } from "@/components/format-amount";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useTeamQuery } from "@/hooks/use-team";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
@@ -21,6 +22,7 @@ export function RecurringExpensesWidget() {
   const trpc = useTRPC();
   const router = useRouter();
   const { data: team } = useTeamQuery();
+  const t = useI18n();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
@@ -81,6 +83,10 @@ export function RecurringExpensesWidget() {
   };
 
   const handleViewRecurring = () => {
+    const periodLabel = t(
+      `widget_period.${config?.period ?? "current_month"}` as "widget_period.fiscal_ytd",
+    );
+
     handleToolCall({
       toolName: "getExpenses",
       toolParams: {
@@ -89,7 +95,7 @@ export function RecurringExpensesWidget() {
         currency: team?.baseCurrency ?? undefined,
         showCanvas: true,
       },
-      text: "Show recurring expenses",
+      text: `Show recurring expenses for ${periodLabel}`,
     });
   };
 
