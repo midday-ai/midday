@@ -1,6 +1,7 @@
 import { updateUserSchema } from "@api/schemas/users";
 import { resend } from "@api/services/resend";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import { withRetryOnPrimary } from "@api/utils/db-retry";
 import {
   deleteUser,
   getUserById,
@@ -10,7 +11,12 @@ import {
 
 export const userRouter = createTRPCRouter({
   me: protectedProcedure.query(async ({ ctx: { db, session } }) => {
-    return getUserById(db, session.user.id);
+    // Use retryOnNull to handle replication lag when user record hasn't replicated yet
+    return withRetryOnPrimary(
+      db,
+      async (dbInstance) => getUserById(dbInstance, session.user.id),
+      { retryOnNull: true },
+    );
   }),
 
   update: protectedProcedure
