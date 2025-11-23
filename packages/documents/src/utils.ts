@@ -37,6 +37,46 @@ export function removeProtocolFromDomain(domain: string | null): string | null {
   return domain.replace(/^(https?:\/\/)/, "");
 }
 
+/**
+ * Extracts only the root domain from a website URL, removing protocol, www, paths, query params, etc.
+ * Examples:
+ * - "https://www.example.com/path/to/page?query=1" -> "example.com"
+ * - "http://subdomain.example.com/page" -> "example.com"
+ * - "example.com/path" -> "example.com"
+ * - "www.example.com" -> "example.com"
+ */
+export function extractRootDomain(website: string | null): string | null {
+  if (!website) return null;
+
+  try {
+    // Remove protocol if present
+    let domain = website.replace(/^(https?:\/\/)?(www\.)?/i, "");
+
+    // Remove path, query params, fragments, and port
+    // Match everything up to the first /, ?, #, or : (for port)
+    const parts = domain.split(/[/?#:]/);
+    domain = parts[0] || domain;
+
+    // Remove trailing dot if present
+    domain = domain.replace(/\.$/, "");
+
+    // Extract root domain (last two parts for most domains)
+    const domainParts = domain.split(".");
+
+    if (domainParts.length <= 2) {
+      return domain.toLowerCase();
+    }
+
+    // For domains with more than 2 parts, take last 2 parts
+    // e.g., subdomain.example.com -> example.com
+    const rootDomain = domainParts.slice(-2).join(".");
+    return rootDomain ? rootDomain.toLowerCase() : null;
+  } catch {
+    // If parsing fails, return null
+    return null;
+  }
+}
+
 export function getDocumentTypeFromMimeType(mimetype: string): string {
   switch (mimetype) {
     case "application/pdf":

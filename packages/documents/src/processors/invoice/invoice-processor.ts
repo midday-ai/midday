@@ -1,12 +1,16 @@
-import { mistral } from "@ai-sdk/mistral";
-import { generateObject } from "ai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { generateObject, generateText } from "ai";
 import { extractText, getDocumentProxy } from "unpdf";
 import type { z } from "zod/v4";
 import { createInvoicePrompt, invoicePrompt } from "../../prompt";
 import { invoiceSchema } from "../../schema";
 import type { GetDocumentRequest } from "../../types";
-import { getDomainFromEmail, removeProtocolFromDomain } from "../../utils";
+import { extractRootDomain, getDomainFromEmail } from "../../utils";
 import { retryCall } from "../../utils/retry";
+
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+});
 
 export class InvoiceProcessor {
   // Check if the extracted data meets minimum quality standards
@@ -30,12 +34,21 @@ export class InvoiceProcessor {
         ? createInvoicePrompt(companyName)
         : invoicePrompt;
 
+      // Convert HTTP URL to base64 data URL (Gemini requires base64 inlineData)
+      let fileData = documentUrl;
+      if (documentUrl.startsWith("http")) {
+        const response = await fetch(documentUrl);
+        const arrayBuffer = await response.arrayBuffer();
+        const base64Content = Buffer.from(arrayBuffer).toString("base64");
+        fileData = `data:application/pdf;base64,${base64Content}`;
+      }
+
       const result = await retryCall(() =>
         generateObject({
-          model: mistral("mistral-medium-latest"),
+          model: google("gemini-3-pro-preview"),
           schema: invoiceSchema,
-          temperature: 0.1,
-          abortSignal: AbortSignal.timeout(20000), // 20s
+          temperature: 1,
+          abortSignal: AbortSignal.timeout(60000), // 60s - Gemini 3 needs more time for PDF processing
           messages: [
             {
               role: "system",
@@ -46,20 +59,28 @@ export class InvoiceProcessor {
               content: [
                 {
                   type: "file",
-
-                  data: documentUrl,
+                  data: fileData,
                   mediaType: "application/pdf",
                 },
               ],
             },
           ],
           providerOptions: {
-            mistral: {
-              documentPageLimit: 10,
+            google: {
+              // Set media resolution to medium for PDFs (recommended by Gemini 3 docs)
+              // medium (560 tokens) is optimal for document understanding
+              // See: https://ai.google.dev/gemini-api/docs/gemini-3?thinking=high#media-resolution
+              mediaResolution: "MEDIA_RESOLUTION_MEDIUM",
+              // Set thinking level to low to minimize latency and cost
+              // Best for simple instruction following like document extraction
+              // See: https://ai.google.dev/gemini-api/docs/gemini-3?thinking=high#thinking-level
+              thinkingLevel: "low",
             },
           },
         }),
       );
+
+      console.log("result:", result.object);
 
       // Check data quality and merge with fallback if poor
       if (this.#isDataQualityPoor(result.object)) {
@@ -141,9 +162,9 @@ export class InvoiceProcessor {
 
     const result = await retryCall(() =>
       generateObject({
-        model: mistral("mistral-medium-latest"),
+        model: google("gemini-3-pro-preview"),
         schema: invoiceSchema,
-        abortSignal: AbortSignal.timeout(20000), // 20s
+        abortSignal: AbortSignal.timeout(60000), // 60s - Gemini 3 needs more time
         messages: [
           {
             role: "system",
@@ -159,6 +180,12 @@ export class InvoiceProcessor {
             ],
           },
         ],
+        providerOptions: {
+          google: {
+            // Set thinking level to low to minimize latency and cost
+            thinkingLevel: "low",
+          },
+        },
       }),
     );
 
@@ -170,10 +197,12 @@ export class InvoiceProcessor {
     email,
   }: { website: string | null; email: string | null }) {
     if (website) {
-      return website;
+      // Extract only root domain, removing protocol, paths, query params, etc.
+      return extractRootDomain(website);
     }
 
-    return removeProtocolFromDomain(getDomainFromEmail(email));
+    // Fallback to email domain if no website provided
+    return getDomainFromEmail(email);
   }
 
   public async getInvoice(params: GetDocumentRequest) {

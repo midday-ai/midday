@@ -1,10 +1,14 @@
-import { mistral } from "@ai-sdk/mistral";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { createReceiptPrompt, receiptPrompt } from "../../prompt";
 import { receiptSchema } from "../../schema";
 import type { GetDocumentRequest } from "../../types";
-import { getDomainFromEmail, removeProtocolFromDomain } from "../../utils";
+import { extractRootDomain, getDomainFromEmail } from "../../utils";
 import { retryCall } from "../../utils/retry";
+
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+});
 
 export class ReceiptProcessor {
   async #processDocument({ documentUrl, companyName }: GetDocumentRequest) {
@@ -18,10 +22,10 @@ export class ReceiptProcessor {
 
     const result = await retryCall(() =>
       generateObject({
-        model: mistral("mistral-medium-latest"),
+        model: google("gemini-3-pro-preview"),
         schema: receiptSchema,
         temperature: 0.1,
-        abortSignal: AbortSignal.timeout(20000), // 20s
+        abortSignal: AbortSignal.timeout(60000), // 60s - Gemini 3 needs more time for image processing
         messages: [
           {
             role: "system",
@@ -38,8 +42,10 @@ export class ReceiptProcessor {
           },
         ],
         providerOptions: {
-          mistral: {
-            documentImageLimit: 4,
+          google: {
+            // Set thinking level to low to minimize latency and cost
+            // Best for simple instruction following like document extraction
+            thinkingLevel: "low",
           },
         },
       }),
@@ -53,10 +59,12 @@ export class ReceiptProcessor {
     email,
   }: { website: string | null; email: string | null }) {
     if (website) {
-      return website;
+      // Extract only root domain, removing protocol, paths, query params, etc.
+      return extractRootDomain(website);
     }
 
-    return removeProtocolFromDomain(getDomainFromEmail(email));
+    // Fallback to email domain if no website provided
+    return getDomainFromEmail(email);
   }
 
   public async getReceipt(params: GetDocumentRequest) {
