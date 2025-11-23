@@ -56,7 +56,7 @@ export function TopCustomerWidget() {
       icon={<Icons.Star className="size-4" />}
       description={
         <p className="text-sm text-[#666666]">
-          {data?.result?.customerName ? (
+          {data?.result?.customerName && data?.result?.currency ? (
             <>
               Your top customer is{" "}
               <span className="text-primary">
