@@ -5,10 +5,10 @@ import {
   createAgent,
   formatContextForLLM,
 } from "@api/ai/agents/config/shared";
-// import {
-//   businessHealthScoreTool,
-//   cashFlowForecastTool,
-// } from "../tools/analytics";
+import { getAccountBalancesTool } from "@api/ai/tools/get-account-balances";
+import { getBusinessHealthScoreTool } from "@api/ai/tools/get-business-health-score";
+import { getCashFlowTool } from "@api/ai/tools/get-cash-flow";
+import { getRunwayTool } from "@api/ai/tools/get-runway";
 import { webSearchTool } from "@api/ai/tools/web-search";
 import { operationsAgent } from "./operations";
 import { reportsAgent } from "./reports";
@@ -19,7 +19,7 @@ export const researchAgent = createAgent({
   temperature: 0.7,
   instructions: (
     ctx: AppContext,
-  ) => `You are a research specialist for ${ctx.companyName}. Analyze affordability from a business owner's perspective with specific calculations and actionable advice.
+  ) => `You are a research specialist for ${ctx.companyName}. Analyze affordability and purchase decisions from a business owner's perspective with specific calculations and actionable advice.
 
 <context>
 ${formatContextForLLM(ctx)}
@@ -87,8 +87,10 @@ Prioritized list (most important first):
 </instructions>`,
   tools: {
     webSearch: webSearchTool,
-    // businessHealth: businessHealthScoreTool,
-    // cashFlowForecast: cashFlowForecastTool,
+    getAccountBalances: getAccountBalancesTool,
+    getCashFlow: getCashFlowTool,
+    getRunway: getRunwayTool,
+    getBusinessHealthScore: getBusinessHealthScoreTool,
   },
   handoffs: [operationsAgent, reportsAgent],
   maxTurns: 5,
