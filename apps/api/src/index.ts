@@ -24,6 +24,7 @@ app.use(
     allowHeaders: [
       "Authorization",
       "Content-Type",
+      "User-Agent",
       "accept-language",
       "x-trpc-source",
       "x-user-locale",
