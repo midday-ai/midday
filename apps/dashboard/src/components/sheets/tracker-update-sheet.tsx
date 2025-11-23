@@ -2,6 +2,7 @@
 
 import { TrackerProjectForm } from "@/components/forms/tracker-project-form";
 import { useLatestProjectId } from "@/hooks/use-latest-project-id";
+import { useTeamQuery } from "@/hooks/use-team";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useTRPC } from "@/trpc/client";
 import {
@@ -28,11 +29,9 @@ import { useMutation } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 
-type Props = {
-  defaultCurrency: string;
-};
-
-export function TrackerUpdateSheet({ defaultCurrency }: Props) {
+export function TrackerUpdateSheet() {
+  const { data: team } = useTeamQuery();
+  const defaultCurrency = team?.baseCurrency || "USD";
   const { setParams, update, projectId } = useTrackerParams();
   const { latestProjectId, setLatestProjectId } = useLatestProjectId();
   const trpc = useTRPC();

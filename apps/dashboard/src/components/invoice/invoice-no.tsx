@@ -65,9 +65,7 @@ export function InvoiceNo() {
           }}
           className="truncate"
         />
-        <span className="text-[11px] text-[#878787] font-mono flex-shrink-0">
-          :
-        </span>
+        <span className="text-[11px] text-[#878787] flex-shrink-0">:</span>
       </div>
 
       <TooltipProvider delayDuration={100}>

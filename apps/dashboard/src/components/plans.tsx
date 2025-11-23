@@ -11,18 +11,82 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
 import { useQuery } from "@tanstack/react-query";
 import { Check } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 export function Plans() {
   const isDesktop = isDesktopApp();
   const [isSubmitting, setIsSubmitting] = useState(0);
   const trpc = useTRPC();
+  const router = useRouter();
+  const checkoutInstanceRef = useRef<Awaited<
+    ReturnType<typeof PolarEmbedCheckout.create>
+  > | null>(null);
 
   const { data: user } = useUserQuery();
   const { data, isLoading } = useQuery(trpc.team.availablePlans.queryOptions());
+
+  // Initialize PolarEmbedCheckout on mount
+  useEffect(() => {
+    PolarEmbedCheckout.init();
+  }, []);
+
+  // Clean up checkout instance on unmount
+  useEffect(() => {
+    return () => {
+      if (checkoutInstanceRef.current) {
+        checkoutInstanceRef.current.close();
+      }
+    };
+  }, []);
+
+  const handleCheckout = async (plan: "starter" | "pro", planType: string) => {
+    try {
+      setIsSubmitting(plan === "starter" ? 1 : 2);
+
+      // Fetch checkout URL from API
+      const checkoutUrl = new URL("/api/checkout", window.location.origin);
+      checkoutUrl.searchParams.set("plan", plan);
+      checkoutUrl.searchParams.set("teamId", user?.team?.id || "");
+      checkoutUrl.searchParams.set("isDesktop", String(isDesktop));
+      checkoutUrl.searchParams.set("planType", planType);
+      checkoutUrl.searchParams.set("embedOrigin", "true");
+
+      const response = await fetch(checkoutUrl.toString());
+      if (!response.ok) {
+        throw new Error("Failed to create checkout");
+      }
+
+      const { url } = await response.json();
+
+      // Use dark theme
+      const checkout = await PolarEmbedCheckout.create(url, "dark");
+      checkoutInstanceRef.current = checkout;
+
+      // Handle checkout events
+      checkout.addEventListener("success", (event: any) => {
+        // Prevent Polar's automatic redirect
+        event.preventDefault();
+        // Refresh the page to show updated plan status
+        router.refresh();
+      });
+
+      checkout.addEventListener("close", () => {
+        checkoutInstanceRef.current = null;
+        setIsSubmitting(0);
+      });
+
+      checkout.addEventListener("confirmed", () => {
+        // Payment is being processed
+      });
+    } catch (error) {
+      console.error("Failed to open checkout", error);
+      setIsSubmitting(0);
+    }
+  };
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -95,30 +159,27 @@ export function Plans() {
           <div className="mt-8 border-t-[1px] border-border pt-4">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link
-                  prefetch={false}
-                  href={`/api/checkout?plan=starter&teamId=${user?.team?.id}&isDesktop=${isDesktop}&planType=starter`}
-                  className={cn(!data?.starter && "opacity-50 cursor-default")}
-                  onClick={(evt) => {
-                    if (!data?.starter) {
-                      evt.preventDefault();
-                      return;
-                    }
-
-                    setIsSubmitting(1);
-                  }}
-                >
+                <div>
                   <SubmitButton
                     variant="secondary"
                     className={cn(
-                      "h-9 hover:bg-primary hover:text-secondary",
-                      !isLoading && !data?.starter && "pointer-events-none",
+                      "h-9 hover:bg-primary hover:text-secondary w-full",
+                      !isLoading &&
+                        !data?.starter &&
+                        "pointer-events-none opacity-50",
                     )}
                     isSubmitting={isSubmitting === 1}
+                    onClick={() => {
+                      if (!data?.starter || isLoading) {
+                        return;
+                      }
+                      handleCheckout("starter", "starter");
+                    }}
+                    disabled={!isLoading && !data?.starter}
                   >
                     Choose starter plan
                   </SubmitButton>
-                </Link>
+                </div>
               </TooltipTrigger>
               {!isLoading && !data?.starter && (
                 <TooltipContent className="text-xs max-w-[300px]">
@@ -212,18 +273,13 @@ export function Plans() {
           </div>
 
           <div className="mt-8 border-t border-border pt-4">
-            <Link
-              prefetch={false}
-              href={`/api/checkout?plan=pro&teamId=${user?.team?.id}&isDesktop=${isDesktop}&planType=pro`}
+            <SubmitButton
+              className="h-9 w-full"
+              onClick={() => handleCheckout("pro", "pro")}
+              isSubmitting={isSubmitting === 2}
             >
-              <SubmitButton
-                className="h-9"
-                onClick={() => setIsSubmitting(2)}
-                isSubmitting={isSubmitting === 2}
-              >
-                Choose pro plan
-              </SubmitButton>
-            </Link>
+              Choose pro plan
+            </SubmitButton>
           </div>
         </div>
       </div>

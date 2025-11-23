@@ -1,6 +1,8 @@
 export const SCOPES = [
   "bank-accounts.read",
   "bank-accounts.write",
+  "chat.read",
+  "chat.write",
   "customers.read",
   "customers.write",
   "documents.read",

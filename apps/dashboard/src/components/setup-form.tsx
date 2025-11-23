@@ -17,7 +17,7 @@ import { SubmitButton } from "@midday/ui/submit-button";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import { z } from "zod";
+import { z } from "zod/v3";
 import { AvatarUpload } from "./avatar-upload";
 
 const formSchema = z.object({

@@ -57,7 +57,18 @@ export const embedInbox = schemaTask({
     }
 
     const inboxItem = inboxData[0];
-    const text = prepareInboxText(inboxItem);
+    if (!inboxItem) {
+      await db
+        .update(inbox)
+        .set({ status: "pending" })
+        .where(eq(inbox.id, inboxId));
+      throw new Error(`Inbox item not found: ${inboxId}`);
+    }
+
+    const text = prepareInboxText({
+      displayName: inboxItem.displayName ?? null,
+      website: inboxItem.website ?? null,
+    });
 
     if (!text.trim()) {
       logger.warn("No text to embed for inbox item", {

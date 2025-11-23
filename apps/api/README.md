@@ -25,11 +25,6 @@ REDIS_URL=redis://localhost:6379
    export REDIS_URL=redis://localhost:6379
    ```
 
-3. **Test Redis connection:**
-   ```bash
-   bun run packages/cache/src/test-redis.ts
-   ```
-
 #### Database Configuration
 ```bash
 DATABASE_URL=postgresql://...

@@ -39,7 +39,7 @@ export function InvoiceSuccess() {
       <InvoiceSheetHeader invoiceId={invoiceId!} />
 
       <div className="flex flex-col justify-center h-[calc(100vh-260px)]">
-        <div className="bg-[#F2F2F2] dark:bg-background p-6 relative">
+        <div className="bg-[#F2F2F2] dark:bg-[#121212] p-6 relative">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -54,9 +54,7 @@ export function InvoiceSuccess() {
                 <span className="text-[11px] text-[#878787] font-mono">:</span>
               </div>
 
-              <span className="font-mono text-[11px]">
-                {invoice.invoiceNumber}
-              </span>
+              <span className="text-[11px]">{invoice.invoiceNumber}</span>
             </div>
 
             <div className="flex space-x-1 items-center">
@@ -67,7 +65,7 @@ export function InvoiceSuccess() {
                 <span className="text-[11px] text-[#878787] font-mono">:</span>
               </div>
 
-              <span className="font-mono text-[11px]">
+              <span className="text-[11px]">
                 {format(
                   new Date(invoice.dueDate!),
                   invoice.template.dateFormat,
@@ -84,7 +82,7 @@ export function InvoiceSuccess() {
             <span className="text-[11px] font-mono">
               {invoice.template.customerLabel}
             </span>
-            <div className="font-mono text-[#878787]">
+            <div className="text-[#878787]">
               {/* @ts-expect-error - customerDetails is JSONB */}
               {formatEditorContent(invoice.customerDetails)}
             </div>
@@ -100,7 +98,7 @@ export function InvoiceSuccess() {
               {invoice.template.totalSummaryLabel}
             </span>
 
-            <span className="font-mono text-xl">
+            <span className="text-xl">
               {invoice.amount && invoice.currency && (
                 <FormatAmount
                   amount={invoice.amount}
@@ -163,7 +161,7 @@ export function InvoiceSuccess() {
             {Array.from({ length: 10 }).map((_, index) => (
               <div
                 key={index.toString()}
-                className="size-[30px] rounded-full bg-background dark:bg-[#0C0C0C]"
+                className="size-[30px] rounded-full bg-[#fcfcfc] dark:bg-[#121212]"
               />
             ))}
           </motion.div>

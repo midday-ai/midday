@@ -1,5 +1,6 @@
 import type { Database } from "@db/client";
 import { bankAccounts, bankConnections } from "@db/schema";
+import { chatCache } from "@midday/cache/chat-cache";
 import { and, eq } from "drizzle-orm";
 
 export type GetBankConnectionsParams = {
@@ -162,6 +163,9 @@ export const createBankConnection = async (
       manual: false,
     })),
   );
+
+  // Invalidate team context cache to refresh hasBankAccounts flag
+  await chatCache.invalidateTeamContext(teamId);
 
   return bankConnection;
 };

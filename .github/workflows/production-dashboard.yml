@@ -4,6 +4,7 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DASHBOARD }}
   TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
+  NODE_OPTIONS: "--max-old-space-size=8192"
 on:
   push:
     branches:
@@ -28,7 +29,7 @@ jobs:
         run: bun run lint
         working-directory: ./apps/dashboard
       - name: 🪐 Check TypeScript
-        run: NODE_OPTIONS="--max-old-space-size=8192" bun run typecheck
+        run: bun run typecheck
         working-directory: ./apps/dashboard
       # - name: 🧪 Run unit tests
       #   run: bun run test
@@ -41,12 +42,6 @@ jobs:
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
         run: bunx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-      # - name: 🔄 Deploy Background Jobs
-      #   env:
-      #     TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
-      #   run: |
-      #     TRIGGER_PROJECT_ID=${{ secrets.TRIGGER_PROJECT_ID }} bunx trigger.dev@4.0.1 deploy
-      #   working-directory: packages/jobs
       - name: 🚀 Deploy to Vercel
         run: |
           bunx vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt

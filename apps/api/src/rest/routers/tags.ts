@@ -115,7 +115,7 @@ app.openapi(
         description: "Tag created",
         content: {
           "application/json": {
-            schema: tagsResponseSchema,
+            schema: tagResponseSchema,
           },
         },
       },
@@ -129,7 +129,7 @@ app.openapi(
 
     const result = await createTag(db, { teamId, ...body });
 
-    return c.json(validateResponse(result, tagResponseSchema));
+    return c.json(validateResponse(result, tagResponseSchema), 201);
   },
 );
 

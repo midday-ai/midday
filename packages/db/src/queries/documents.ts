@@ -167,6 +167,60 @@ export type GetRelatedDocumentsParams = {
   teamId: string;
 };
 
+export type GetRecentDocumentsParams = {
+  teamId: string;
+  limit?: number;
+};
+
+export async function getRecentDocuments(
+  db: Database,
+  params: GetRecentDocumentsParams,
+) {
+  const { teamId, limit = 5 } = params;
+
+  const data = await db.query.documents.findMany({
+    where: and(
+      eq(documents.teamId, teamId),
+      not(like(documents.name, "%.folderPlaceholder")),
+    ),
+    columns: {
+      id: true,
+      name: true,
+      title: true,
+      createdAt: true,
+      processingStatus: true,
+      tag: true,
+    },
+    with: {
+      documentTagAssignments: {
+        with: {
+          documentTag: {
+            columns: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+        },
+      },
+      user: {
+        columns: {
+          id: true,
+          fullName: true,
+          avatarUrl: true,
+        },
+      },
+    },
+    limit,
+    orderBy: desc(documents.createdAt),
+  });
+
+  return {
+    data,
+    total: data.length,
+  };
+}
+
 export type GetRelatedDocumentsResponse = {
   id: string;
   name: string;

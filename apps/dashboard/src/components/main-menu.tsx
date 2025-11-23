@@ -1,5 +1,6 @@
 "use client";
 
+import { useChatInterface } from "@/hooks/use-chat-interface";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import Link from "next/link";
@@ -24,11 +25,6 @@ const items = [
     name: "Overview",
   },
   {
-    path: "/inbox",
-    name: "Inbox",
-    children: [{ path: "/inbox/settings", name: "Settings" }],
-  },
-  {
     path: "/transactions",
     name: "Transactions",
     children: [
@@ -46,6 +42,11 @@ const items = [
       },
       { path: "/transactions?createTransaction=true", name: "Create new" },
     ],
+  },
+  {
+    path: "/inbox",
+    name: "Inbox",
+    children: [{ path: "/inbox/settings", name: "Settings" }],
   },
   {
     path: "/invoices",
@@ -89,6 +90,18 @@ const items = [
       { path: "/settings/developer", name: "Developer" },
     ],
   },
+];
+
+// Known menu base paths that should not be treated as chat IDs
+const KNOWN_MENU_PATHS = [
+  "/transactions",
+  "/inbox",
+  "/invoices",
+  "/tracker",
+  "/customers",
+  "/vault",
+  "/apps",
+  "/settings",
 ];
 
 interface ItemProps {
@@ -274,8 +287,18 @@ type Props = {
 
 export function MainMenu({ onSelect, isExpanded = false }: Props) {
   const pathname = usePathname();
+  const { isChatPage } = useChatInterface();
   const part = pathname?.split("/")[1];
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+
+  // Check if current pathname is a known menu path (including sub-paths)
+  const pathnameWithoutQuery = pathname?.split("?")[0] || "";
+  const isKnownMenuPath = KNOWN_MENU_PATHS.some((knownPath) =>
+    pathnameWithoutQuery.startsWith(knownPath),
+  );
+
+  // Only treat as chat page if isChatPage is true AND it's not a known menu path
+  const isValidChatPage = isChatPage && !isKnownMenuPath;
 
   // Reset expanded item when sidebar expands/collapses
   useEffect(() => {
@@ -289,6 +312,7 @@ export function MainMenu({ onSelect, isExpanded = false }: Props) {
           {items.map((item) => {
             const isActive =
               (pathname === "/" && item.path === "/") ||
+              (item.path === "/" && isValidChatPage) ||
               (pathname !== "/" && item.path.startsWith(`/${part}`));
 
             return (

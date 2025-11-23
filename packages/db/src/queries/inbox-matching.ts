@@ -9,6 +9,17 @@ import {
   findMatches,
 } from "./transaction-matching";
 
+// Type guard to check if result has a suggestion
+export function hasSuggestion(result: {
+  action: "auto_matched" | "suggestion_created" | "no_match_yet";
+  suggestion?: MatchResult;
+}): result is {
+  action: "auto_matched" | "suggestion_created";
+  suggestion: MatchResult;
+} {
+  return result.action !== "no_match_yet" && result.suggestion !== undefined;
+}
+
 // Calculate and store suggestions for an inbox item
 export async function calculateInboxSuggestions(
   db: Database,

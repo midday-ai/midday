@@ -10,7 +10,7 @@ export function Description({ content }: Props) {
 
   // If the content is not valid JSON, return the content as a string
   if (!value) {
-    return <div className="font-mono leading-4 text-[11px]">{content}</div>;
+    return <div className="leading-4 text-[11px]">{content}</div>;
   }
 
   return <EditorContent content={value} />;

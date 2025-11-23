@@ -51,7 +51,7 @@ export function SelectCustomer() {
         type="button"
         variant="ghost"
         onClick={() => setCustomerParams({ createCustomer: true })}
-        className="font-mono text-[#434343] p-0 text-[11px] h-auto hover:bg-transparent"
+        className="text-[#434343] p-0 text-[11px] h-auto hover:bg-transparent"
       >
         Select customer
       </Button>
@@ -65,7 +65,7 @@ export function SelectCustomer() {
           type="button"
           variant="ghost"
           aria-expanded={open}
-          className="font-mono text-[#434343] p-0 text-[11px] h-auto hover:bg-transparent"
+          className="text-[#434343] p-0 text-[11px] h-auto hover:bg-transparent"
         >
           Select customer
         </Button>

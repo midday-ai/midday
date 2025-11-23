@@ -18,7 +18,7 @@ import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 type Props = {
   children: React.ReactNode;

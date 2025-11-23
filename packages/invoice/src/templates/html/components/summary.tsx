@@ -58,7 +58,7 @@ export function Summary({
         <span className="text-[11px] text-[#878787] font-mono">
           {subtotalLabel}
         </span>
-        <span className="text-right font-mono text-[11px] text-[#878787]">
+        <span className="text-right text-[11px] text-[#878787]">
           {currency &&
             new Intl.NumberFormat(locale, {
               style: "currency",
@@ -73,7 +73,7 @@ export function Summary({
           <span className="text-[11px] text-[#878787] font-mono">
             {discountLabel}
           </span>
-          <span className="text-right font-mono text-[11px] text-[#878787]">
+          <span className="text-right text-[11px] text-[#878787]">
             {currency &&
               new Intl.NumberFormat(locale, {
                 style: "currency",
@@ -89,7 +89,7 @@ export function Summary({
           <span className="text-[11px] text-[#878787] font-mono">
             {vatLabel} ({vatRate}%)
           </span>
-          <span className="text-right font-mono text-[11px] text-[#878787]">
+          <span className="text-right text-[11px] text-[#878787]">
             {currency &&
               new Intl.NumberFormat(locale, {
                 style: "currency",
@@ -105,7 +105,7 @@ export function Summary({
           <span className="text-[11px] text-[#878787] font-mono">
             {taxLabel} ({taxRate}%)
           </span>
-          <span className="text-right font-mono text-[11px] text-[#878787]">
+          <span className="text-right text-[11px] text-[#878787]">
             {currency &&
               new Intl.NumberFormat(locale, {
                 style: "currency",
@@ -120,7 +120,7 @@ export function Summary({
         <span className="text-[11px] text-[#878787] font-mono">
           {totalLabel}
         </span>
-        <span className="text-right font-mono text-[21px]">
+        <span className="text-right text-[21px]">
           {currency &&
             new Intl.NumberFormat(locale, {
               style: "currency",

@@ -29,6 +29,7 @@ test("transformTransaction should correctly transform transaction data", () => {
     assigned_id: null,
     bank_account_id: null,
     counterparty_name: "Spotify AB",
+    merchant_name: null,
     base_amount: null,
     base_currency: null,
     category_slug: null,
@@ -43,6 +44,10 @@ test("transformTransaction should correctly transform transaction data", () => {
     is_fulfilled: null,
     amount_text: null,
     calculated_vat: null,
+    enrichment_completed: false,
+    tax_amount: null,
+    tax_rate: null,
+    tax_type: null,
   };
 
   const teamId = "team123";
@@ -62,6 +67,7 @@ test("transformTransaction should correctly transform transaction data", () => {
     currency: "USD",
     method: "card_purchase",
     counterparty_name: "Spotify AB",
+    merchant_name: null,
     internal_id: "team123_123456",
     category_slug: "meals",
     bank_account_id: "account456",
@@ -101,6 +107,7 @@ test("transformTransaction should handle null values correctly", () => {
     base_amount: null,
     base_currency: null,
     counterparty_name: null,
+    merchant_name: null,
     category_slug: null,
     created_at: "2023-05-16",
     frequency: null,
@@ -113,6 +120,10 @@ test("transformTransaction should handle null values correctly", () => {
     is_fulfilled: null,
     amount_text: null,
     calculated_vat: null,
+    enrichment_completed: false,
+    tax_amount: null,
+    tax_rate: null,
+    tax_type: null,
   };
 
   const teamId = "team456";
@@ -134,6 +145,7 @@ test("transformTransaction should handle null values correctly", () => {
     internal_id: "team456_789012",
     category_slug: null,
     counterparty_name: null,
+    merchant_name: null,
     bank_account_id: "account789",
     balance: null,
     team_id: "team456",

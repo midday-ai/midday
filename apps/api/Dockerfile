@@ -1,5 +1,5 @@
 # Base image with Bun
-FROM oven/bun:1.2.21 AS base
+FROM oven/bun:1.2.22 AS base
 
 # Install turbo CLI globally using Bun
 FROM base AS turbo-cli
@@ -16,6 +16,18 @@ RUN turbo prune @midday/api --docker
 # Installer stage
 FROM base AS installer
 WORKDIR /app
+
+# Install build dependencies for native modules (canvas, etc.)
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    build-essential \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libjpeg-dev \
+    libgif-dev \
+    librsvg2-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # First install the dependencies (as they change less often)
 COPY --from=builder /app/out/json/ .

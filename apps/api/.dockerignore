@@ -28,3 +28,38 @@ apps/website
 
 # Cache
 .turbo
+.cache
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github
+
+# Documentation
+*.md
+README*
+LICENSE*
+CHANGELOG*
+
+# Tests
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+**/__tests__/**
+**/test/**
+
+# Development files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Other build artifacts
+*.log
+*.tgz
+*.tar.gz

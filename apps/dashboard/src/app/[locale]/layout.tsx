@@ -5,21 +5,19 @@ import { DesktopHeader } from "@/components/desktop-header";
 import { isDesktopApp } from "@/utils/desktop";
 import { Provider as Analytics } from "@midday/events/client";
 import { Toaster } from "@midday/ui/toaster";
-import { GeistMono } from "geist/font/mono";
-import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
-import { Lora } from "next/font/google";
+import { Hedvig_Letters_Sans, Hedvig_Letters_Serif } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { ReactElement } from "react";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://app.midday.ai"),
-  title: "Midday | Run your business smarter",
+  title: "Midday | Your AI-Powered Business Assistant",
   description:
     "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
   twitter: {
-    title: "Midday | Run your business smarter",
+    title: "Midday | Your AI-Powered Business Assistant",
     description:
       "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
     images: [
@@ -36,7 +34,7 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "Midday | Run your business smarter",
+    title: "Midday | Your AI-Powered Business Assistant",
     description:
       "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
     url: "https://app.midday.ai",
@@ -58,11 +56,18 @@ export const metadata: Metadata = {
   },
 };
 
-const lora = Lora({
+const hedvigSans = Hedvig_Letters_Sans({
   weight: "400",
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-serif",
+  variable: "--font-hedvig-sans",
+});
+
+const hedvigSerif = Hedvig_Letters_Serif({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-hedvig-serif",
 });
 
 export const viewport = {
@@ -94,7 +99,7 @@ export default async function Layout({
     >
       <body
         className={cn(
-          `${GeistSans.variable} ${GeistMono.variable} ${lora.variable} font-sans`,
+          `${hedvigSans.variable} ${hedvigSerif.variable} font-sans`,
           "whitespace-pre-line overscroll-none antialiased",
         )}
       >

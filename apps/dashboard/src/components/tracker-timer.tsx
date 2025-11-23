@@ -155,7 +155,7 @@ export function TrackerTimer({
 
         toast({
           title: "Timer stopped",
-          description: `${secondsToHoursAndMinutes(context?.currentElapsedTime)} added to ${context?.currentProjectName}`,
+          description: `${secondsToHoursAndMinutes(context?.currentElapsedTime ?? 0)} added to ${context?.currentProjectName}`,
           variant: "success",
         });
       },
@@ -353,7 +353,7 @@ export function TrackerTimer({
         <div className="flex items-center gap-2">
           <span>{projectName}</span>
           <div
-            className={`flex items-center gap-px font-mono text-xs text-[#666] ml-auto transition-all duration-300 ease-in-out ${
+            className={`flex items-center gap-px text-xs text-[#666] ml-auto transition-all duration-300 ease-in-out ${
               isThisProjectRunning
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-2"

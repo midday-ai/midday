@@ -20,7 +20,7 @@ mtls_certificates = [
 ]
 
 r2_buckets = [
-  { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "", jurisdiction = "eu" }
+  { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "engine-assets", jurisdiction = "eu" }
 ]
 
 [env.production.ai]
@@ -42,7 +42,7 @@ mtls_certificates = [
 ]
 
 r2_buckets = [
-  { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "", jurisdiction = "eu" }
+  { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "engine-assets", jurisdiction = "eu" }
 ]
 
 [env.staging.ai]

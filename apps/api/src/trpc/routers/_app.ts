@@ -5,10 +5,12 @@ import { appsRouter } from "./apps";
 import { bankAccountsRouter } from "./bank-accounts";
 import { bankConnectionsRouter } from "./bank-connections";
 import { billingRouter } from "./billing";
+import { chatsRouter } from "./chats";
 import { customersRouter } from "./customers";
 import { documentTagAssignmentsRouter } from "./document-tag-assignments";
 import { documentTagsRouter } from "./document-tags";
 import { documentsRouter } from "./documents";
+import { chatFeedbackRouter } from "./feedback";
 import { inboxRouter } from "./inbox";
 import { inboxAccountsRouter } from "./inbox-accounts";
 import { institutionsRouter } from "./institutions";
@@ -21,6 +23,7 @@ import { oauthApplicationsRouter } from "./oauth-applications";
 import { reportsRouter } from "./reports";
 import { searchRouter } from "./search";
 import { shortLinksRouter } from "./short-links";
+import { suggestedActionsRouter } from "./suggested-actions";
 import { tagsRouter } from "./tags";
 import { teamRouter } from "./team";
 import { trackerEntriesRouter } from "./tracker-entries";
@@ -30,6 +33,7 @@ import { transactionCategoriesRouter } from "./transaction-categories";
 import { transactionTagsRouter } from "./transaction-tags";
 import { transactionsRouter } from "./transactions";
 import { userRouter } from "./user";
+import { widgetsRouter } from "./widgets";
 
 export const appRouter = createTRPCRouter({
   notifications: notificationsRouter,
@@ -37,10 +41,12 @@ export const appRouter = createTRPCRouter({
   apps: appsRouter,
   bankAccounts: bankAccountsRouter,
   bankConnections: bankConnectionsRouter,
+  chats: chatsRouter,
   customers: customersRouter,
   documents: documentsRouter,
   documentTagAssignments: documentTagAssignmentsRouter,
   documentTags: documentTagsRouter,
+  chatFeedback: chatFeedbackRouter,
   inbox: inboxRouter,
   inboxAccounts: inboxAccountsRouter,
   institutions: institutionsRouter,
@@ -50,6 +56,7 @@ export const appRouter = createTRPCRouter({
   reports: reportsRouter,
   oauthApplications: oauthApplicationsRouter,
   billing: billingRouter,
+  suggestedActions: suggestedActionsRouter,
   tags: tagsRouter,
   team: teamRouter,
   trackerEntries: trackerEntriesRouter,
@@ -62,6 +69,7 @@ export const appRouter = createTRPCRouter({
   search: searchRouter,
   shortLinks: shortLinksRouter,
   apiKeys: apiKeysRouter,
+  widgets: widgetsRouter,
 });
 
 // export type definition of API

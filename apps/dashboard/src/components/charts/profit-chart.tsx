@@ -1,101 +1,162 @@
-import { useReportsParams } from "@/hooks/use-reports-params";
-import { useTRPC } from "@/trpc/client";
-import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@midday/ui/tooltip";
-import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
-import { AnimatedNumber } from "../animated-number";
-import { FormatAmount } from "../format-amount";
-import { BarChart } from "./bar-chart";
-import { chartExampleData } from "./data";
+"use client";
 
-type Props = {
-  disabled?: boolean;
+import { formatAmount } from "@/utils/format";
+import {
+  Bar,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  commonChartConfig,
+  createCompactTickFormatter,
+  useChartMargin,
+} from "./chart-utils";
+
+interface ProfitData {
+  month: string;
+  profit: number;
+  lastYearProfit: number;
+  average: number;
+  revenue?: number;
+  expenses?: number;
+  lastYearRevenue?: number;
+  lastYearExpenses?: number;
+}
+
+interface ProfitChartProps {
+  data: ProfitData[];
+  height?: number;
+  showLegend?: boolean;
+  currency?: string;
+  locale?: string;
+}
+
+// Custom tooltip component
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+  currency = "USD",
+  locale,
+}: any) => {
+  if (active && Array.isArray(payload) && payload.length > 0) {
+    const thisYear = payload.find((p) => p.dataKey === "profit")?.value;
+    const lastYear = payload.find((p) => p.dataKey === "lastYearProfit")?.value;
+    const average = payload.find((p) => p.dataKey === "average")?.value;
+
+    // Format amounts using proper currency formatting
+    const formatCurrency = (amount: number) =>
+      formatAmount({
+        amount,
+        currency,
+        locale: locale ?? undefined,
+        maximumFractionDigits: 0,
+      }) ?? `${currency}${amount.toLocaleString()}`;
+
+    return (
+      <div className="border p-2 text-[10px] font-hedvig-sans bg-white dark:bg-[#0c0c0c] border-[#e6e6e6] dark:border-[#1d1d1d] text-black dark:text-white shadow-sm">
+        <p className="mb-1 text-[#707070] dark:text-[#666666]">{label}</p>
+        {typeof thisYear === "number" && (
+          <p className="text-black dark:text-white">
+            This Year: {formatCurrency(thisYear)}
+          </p>
+        )}
+        {typeof lastYear === "number" && (
+          <p className="text-black dark:text-white">
+            Last Year: {formatCurrency(lastYear)}
+          </p>
+        )}
+        {typeof average === "number" && (
+          <p className="text-black dark:text-white">
+            Average: {formatCurrency(average)}
+          </p>
+        )}
+      </div>
+    );
+  }
+  return null;
 };
 
-export function ProfitChart({ disabled }: Props) {
-  const trpc = useTRPC();
-  const { params } = useReportsParams();
+export function ProfitChart({
+  data,
+  height = 320,
+  currency = "USD",
+  locale,
+}: ProfitChartProps) {
+  // Use the compact tick formatter
+  const tickFormatter = createCompactTickFormatter();
 
-  const { data } = useQuery({
-    ...trpc.reports.profit.queryOptions({
-      from: params.from,
-      to: params.to,
-      currency: params.currency ?? undefined,
-    }),
-    placeholderData: (previousData) => previousData ?? chartExampleData,
-  });
+  // Calculate margin using the utility hook
+  const { marginLeft } = useChartMargin(data, "profit", tickFormatter);
 
   return (
-    <div
-      className={cn(
-        disabled && "pointer-events-none select-none blur-[8px] opacity-20",
-      )}
-    >
-      <div className="space-y-2 mb-14 inline-block select-text">
-        <h1 className="text-4xl font-mono">
-          <AnimatedNumber
-            value={data?.summary?.currentTotal ?? 0}
-            currency={data?.summary?.currency ?? "USD"}
-          />
-        </h1>
-
-        <div className="text-sm text-[#606060] flex items-center space-x-2">
-          <p className="text-sm text-[#606060]">
-            vs{" "}
-            <FormatAmount
-              maximumFractionDigits={0}
-              minimumFractionDigits={0}
-              amount={data?.summary?.prevTotal ?? 0}
-              currency={data?.meta?.currency ?? "USD"}
-            />{" "}
-            last period
-          </p>
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Icons.Info className="h-4 w-4 mt-1" />
-              </TooltipTrigger>
-              <TooltipContent
-                className="text-xs text-[#878787] max-w-[240px] p-4"
-                side="bottom"
-                sideOffset={10}
-              >
-                <div className="space-y-2">
-                  <h3 className="font-medium text-primary">
-                    Profit is calculated as your income minus expenses.
-                  </h3>
-                  <p>
-                    Explanation: This shows how much you're making after costs.
-                    If the profit seems off, it may be due to internal transfers
-                    labeled as income. You can adjust this by excluding the
-                    transactions from the calculations.
-                  </p>
-
-                  <p>
-                    All amounts are converted into your{" "}
-                    <Link
-                      href="/settings/accounts"
-                      className="text-primary underline"
-                    >
-                      base currency
-                    </Link>
-                    .
-                  </p>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+    <div className="w-full">
+      {/* Chart */}
+      <div style={{ height }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <ComposedChart
+            data={data}
+            margin={{ top: 0, right: 6, left: -marginLeft, bottom: 0 }}
+          >
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="var(--chart-grid-stroke)"
+            />
+            <XAxis
+              dataKey="month"
+              axisLine={false}
+              tickLine={false}
+              tick={{
+                fill: "var(--chart-axis-text)",
+                fontSize: 10,
+                fontFamily: commonChartConfig.fontFamily,
+              }}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{
+                fill: "var(--chart-axis-text)",
+                fontSize: 10,
+                fontFamily: commonChartConfig.fontFamily,
+              }}
+              tickFormatter={tickFormatter}
+              dataKey="profit"
+            />
+            <Tooltip
+              content={<CustomTooltip currency={currency} locale={locale} />}
+              wrapperStyle={{ zIndex: 9999 }}
+            />
+            {/* This Year bars (white in dark mode) */}
+            <Bar
+              dataKey="profit"
+              fill="var(--chart-bar-fill)"
+              isAnimationActive={false}
+            />
+            {/* Last Year bars (dark gray in dark mode with 0.3 opacity) */}
+            <Bar
+              dataKey="lastYearProfit"
+              fill="var(--chart-bar-fill-secondary)"
+              isAnimationActive={false}
+            />
+            {/* Average line */}
+            <Line
+              type="monotone"
+              dataKey="average"
+              stroke="var(--chart-line-secondary)"
+              strokeWidth={1}
+              strokeDasharray="5 5"
+              dot={false}
+              isAnimationActive={false}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
       </div>
-
-      <BarChart data={data} />
     </div>
   );
 }

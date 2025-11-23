@@ -72,7 +72,7 @@ const SheetContent = React.forwardRef<
       >
         <div
           className={cn(
-            "border w-full h-full bg-[#FAFAF9] dark:bg-[#121212] p-6 relative overflow-hidden",
+            "border w-full h-full bg-[#FAFAF9] dark:bg-[#0C0C0C] p-6 relative overflow-hidden",
             className,
           )}
         >

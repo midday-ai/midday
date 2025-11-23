@@ -16,13 +16,13 @@ import { baseUrl } from "./sitemap";
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "Midday | Run your business smarter",
+    default: "Midday | Your AI-Powered Business Assistant",
     template: "%s | Midday",
   },
   description:
     "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
   openGraph: {
-    title: "Midday | Run your business smarter",
+    title: "Midday | Your AI-Powered Business Assistant",
     description:
       "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
     url: baseUrl,
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    title: "Midday | Run your business smarter",
+    title: "Midday | Your AI-Powered Business Assistant",
     description:
       "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
     images: [

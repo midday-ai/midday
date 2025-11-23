@@ -62,9 +62,7 @@ export default async function Teams() {
           {/* If there are teams, show them */}
           {teams?.length && (
             <>
-              <span className="text-sm font-mono text-[#878787] mb-4">
-                Teams
-              </span>
+              <span className="text-sm text-[#878787] mb-4">Teams</span>
               <div className="max-h-[260px] overflow-y-auto">
                 <SelectTeamTable data={teams} />
               </div>

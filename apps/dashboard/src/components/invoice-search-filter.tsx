@@ -1,6 +1,16 @@
 "use client";
 
-import { generateInvoiceFilters } from "@/actions/ai/filters/generate-invoice-filters";
+import {
+  invoiceFilterOutputSchema,
+  invoiceFilterSchema,
+} from "@/app/api/ai/filters/invoices/schema";
+import type { InvoiceFilterSchema } from "@/app/api/ai/filters/invoices/schema";
+import {
+  mapStringArrayToIds,
+  normalizeString,
+  useAIFilter,
+  validateEnumArray,
+} from "@/hooks/use-ai-filter";
 import { useInvoiceFilterParams } from "@/hooks/use-invoice-filter-params";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
@@ -21,9 +31,8 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useQuery } from "@tanstack/react-query";
-import { readStreamableValue } from "ai/rsc";
 import { formatISO } from "date-fns";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FilterList } from "./filter-list";
 
@@ -37,10 +46,9 @@ const allowedStatuses = [
 ];
 
 export function InvoiceSearchFilter() {
-  const [prompt, setPrompt] = useState("");
+  const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const t = useI18n();
-  const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const trpc = useTRPC();
 
@@ -54,16 +62,66 @@ export function InvoiceSearchFilter() {
     name: t(`invoice_status.${status}`),
   }));
 
+  const mapInvoiceFilters = useCallback(
+    (
+      object: InvoiceFilterSchema,
+      data?: { customersData?: { data?: Array<{ id: string; name: string }> } },
+    ) => {
+      const statuses = Array.isArray(object.statuses)
+        ? validateEnumArray(object.statuses, [
+            "draft",
+            "overdue",
+            "paid",
+            "unpaid",
+            "canceled",
+          ] as const)
+        : normalizeString(object.statuses)
+          ? validateEnumArray([object.statuses], [
+              "draft",
+              "overdue",
+              "paid",
+              "unpaid",
+              "canceled",
+            ] as const)
+          : null;
+
+      const customerIds = mapStringArrayToIds(
+        object.customers,
+        (name) =>
+          data?.customersData?.data?.find((customer) => customer.name === name)
+            ?.id ?? null,
+      );
+
+      return {
+        q: normalizeString(object.name),
+        statuses,
+        customers: customerIds,
+        start: normalizeString(object.start),
+        end: normalizeString(object.end),
+      };
+    },
+    [],
+  );
+
+  const { submit, isLoading } = useAIFilter({
+    api: "/api/ai/filters/invoices",
+    inputSchema: invoiceFilterSchema,
+    outputSchema: invoiceFilterOutputSchema,
+    mapper: mapInvoiceFilters,
+    onFilterApplied: setFilter,
+    data: { customersData },
+  });
+
   useHotkeys(
     "esc",
     () => {
-      setPrompt("");
+      setInput("");
       setFilter(null);
       setIsOpen(false);
     },
     {
       enableOnFormTags: true,
-      enabled: Boolean(prompt),
+      enabled: Boolean(input),
     },
   );
 
@@ -76,60 +134,29 @@ export function InvoiceSearchFilter() {
     const value = evt.target.value;
 
     if (value) {
-      setPrompt(value);
+      setInput(value);
     } else {
       setFilter(null);
-      setPrompt("");
+      setInput("");
     }
   };
 
-  const handleSubmit = async () => {
-    // If the user is typing a query with multiple words, we want to stream the results
-    if (prompt.split(" ").length > 1) {
-      setStreaming(true);
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
 
-      setStreaming(true);
-
-      const { object } = await generateInvoiceFilters(
-        prompt,
-        `Invoice payment statuses: ${statusFilters.map((filter) => filter.name).join(", ")}
+    if (input.split(" ").length > 1) {
+      const context = `Invoice payment statuses: ${statusFilters.map((filter) => filter.name).join(", ")}
          Customers: ${customersData?.data?.map((customer) => customer.name).join(", ")}
-      `,
-      );
+      `;
 
-      let finalObject = {};
-
-      for await (const partialObject of readStreamableValue(object)) {
-        if (partialObject) {
-          finalObject = {
-            ...finalObject,
-            statuses: Array.isArray(partialObject?.statuses)
-              ? partialObject?.statuses
-              : partialObject?.statuses
-                ? [partialObject.statuses]
-                : null,
-            customers:
-              partialObject?.customers?.map(
-                (name: string) =>
-                  customersData?.data?.find(
-                    (customer) => customer.name === name,
-                  )?.id,
-              ) ?? null,
-            q: partialObject?.name ?? null,
-            start: partialObject?.start ?? null,
-            end: partialObject?.end ?? null,
-          };
-        }
-      }
-
-      setFilter({
-        q: null,
-        ...finalObject,
+      submit({
+        input,
+        context,
+        currentDate: formatISO(new Date(), { representation: "date" }),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
-
-      setStreaming(false);
     } else {
-      setFilter({ q: prompt.length > 0 ? prompt : null });
+      setFilter({ q: input.length > 0 ? input : null });
     }
   };
 
@@ -156,7 +183,7 @@ export function InvoiceSearchFilter() {
             ref={inputRef}
             placeholder="Search or filter"
             className="pl-9 w-full sm:w-[350px] pr-8"
-            value={prompt}
+            value={input}
             onChange={handleSearch}
             autoComplete="off"
             autoCapitalize="none"
@@ -181,7 +208,7 @@ export function InvoiceSearchFilter() {
 
         <FilterList
           filters={validFilters}
-          loading={streaming}
+          loading={isLoading}
           onRemove={setFilter}
           statusFilters={statusFilters}
           customers={customersData?.data}

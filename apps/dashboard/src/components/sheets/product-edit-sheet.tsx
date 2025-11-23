@@ -1,6 +1,7 @@
 "use client";
 
 import { useProductParams } from "@/hooks/use-product-params";
+import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
@@ -24,12 +25,12 @@ import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ProductForm } from "../forms/product-form";
 
-export function ProductEditSheet({
-  defaultCurrency,
-}: { defaultCurrency: string }) {
+export function ProductEditSheet() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { setParams, productId } = useProductParams();
+  const { data: team } = useTeamQuery();
+  const defaultCurrency = team?.baseCurrency || "USD";
 
   const isOpen = Boolean(productId);
 

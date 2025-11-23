@@ -25,10 +25,25 @@
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
     --radius: 0.5rem;
+    /* Chart colors */
+    --chart-grid-stroke: #e6e6e6;
+    --chart-axis-text: #707070;
+    --chart-reference-line-stroke: #e6e6e6;
+    --chart-reference-label: #707070;
+    --chart-actual-line: #000000;
+    --chart-forecast-line: #666666;
+    --chart-tooltip-cursor: #666666;
+    --chart-pattern-bg: white;
+    --chart-pattern-stroke: #707070;
+    --chart-bar-fill: #000000;
+    --chart-bar-fill-secondary: #6666664d;
+    --chart-gradient-start: #707070;
+    --chart-gradient-end: #000000;
+    --chart-line-secondary: #666666;
   }
 
   .dark {
-    --background: 0, 0%, 7%;
+    --background: 0, 0%, 5%;
     --foreground: 0 0% 98%;
     --card: 0, 0%, 7%;
     --card-foreground: 0 0% 98%;
@@ -45,9 +60,24 @@
     --destructive: 359, 100%, 61%;
     --destructive-foreground: 0, 0%, 100%;
     --muted-foreground: 0, 0%, 38%;
-    --border: 0, 0%, 17%;
+    --border: 0, 0%, 11%;
     --input: 0, 0%, 11%;
     --ring: 240 4.9% 83.9%;
+    /* Chart colors */
+    --chart-grid-stroke: #1d1d1d;
+    --chart-axis-text: #666666;
+    --chart-reference-line-stroke: #333333;
+    --chart-reference-label: #666666;
+    --chart-actual-line: #ffffff;
+    --chart-forecast-line: #999999;
+    --chart-tooltip-cursor: #999999;
+    --chart-pattern-bg: #0c0c0c;
+    --chart-pattern-stroke: #666666;
+    --chart-bar-fill: white;
+    --chart-bar-fill-secondary: #6666664d;
+    --chart-gradient-start: #666666;
+    --chart-gradient-end: #ffffff;
+    --chart-line-secondary: #999999;
   }
 }
 

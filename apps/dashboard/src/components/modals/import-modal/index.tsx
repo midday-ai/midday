@@ -2,10 +2,12 @@
 
 import { importTransactionsAction } from "@/actions/transactions/import-transactions";
 import { useSyncStatus } from "@/hooks/use-sync-status";
+import { useTeamQuery } from "@/hooks/use-team";
 import { useUpload } from "@/hooks/use-upload";
 import { useUserQuery } from "@/hooks/use-user";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
+import { uniqueCurrencies } from "@midday/location/currencies";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import {
   Dialog,
@@ -28,12 +30,9 @@ import { SelectFile } from "./select-file";
 
 const pages = ["select-file", "confirm-import"] as const;
 
-type Props = {
-  currencies: string[];
-  defaultCurrency: string;
-};
-
-export function ImportModal({ currencies, defaultCurrency }: Props) {
+export function ImportModal() {
+  const { data: team } = useTeamQuery();
+  const defaultCurrency = team?.baseCurrency || "USD";
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [runId, setRunId] = useState<string | undefined>();
@@ -69,11 +68,20 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
       if (data) {
         setRunId(data.id);
         setAccessToken(data.publicAccessToken);
+      } else {
+        // If no data returned, something went wrong
+        setIsImporting(false);
+        toast({
+          duration: 3500,
+          variant: "error",
+          title: "Something went wrong please try again.",
+        });
       }
     },
     onError: () => {
       setIsImporting(false);
       setRunId(undefined);
+      setAccessToken(undefined);
       setStatus("FAILED");
 
       toast({
@@ -102,9 +110,12 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
   const file = watch("file");
 
   const onclose = () => {
+    setIsImporting(false);
     setFileColumns(null);
     setFirstRows(null);
     setPageNumber(0);
+    setRunId(undefined);
+    setAccessToken(undefined);
     reset();
 
     setParams({
@@ -142,9 +153,9 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
 
   useEffect(() => {
     if (status === "COMPLETED") {
-      setRunId(undefined);
       setIsImporting(false);
-      onclose();
+      setRunId(undefined);
+      setAccessToken(undefined);
 
       queryClient.invalidateQueries({
         queryKey: trpc.transactions.get.queryKey(),
@@ -167,15 +178,17 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
         variant: "success",
         title: "Transactions imported successfully.",
       });
+
+      onclose();
     }
   }, [status]);
 
   // Go to second page if file looks good
   useEffect(() => {
-    if (file && fileColumns && pageNumber === 0) {
+    if (file && fileColumns && firstRows && pageNumber === 0) {
       setPageNumber(1);
     }
-  }, [file, fileColumns, pageNumber]);
+  }, [file, fileColumns, firstRows, pageNumber]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onclose}>
@@ -248,7 +261,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
                     {page === "select-file" && <SelectFile />}
                     {page === "confirm-import" && (
                       <>
-                        <FieldMapping currencies={currencies} />
+                        <FieldMapping currencies={uniqueCurrencies} />
 
                         <SubmitButton
                           isSubmitting={isImporting}

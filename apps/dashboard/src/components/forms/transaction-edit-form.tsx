@@ -257,9 +257,6 @@ export function TransactionEditForm({ transaction }: Props) {
   return (
     <div className="space-y-8">
       <div>
-        <Label htmlFor="transactionType" className="mb-2 block">
-          Transaction Type
-        </Label>
         <div className="flex w-full border border-border bg-muted">
           <Button
             type="button"

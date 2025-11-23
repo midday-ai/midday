@@ -89,7 +89,7 @@ export function AmountRange() {
             </Label>
 
             <CurrencyInput
-              className="w-full font-mono text-xs"
+              className="w-full text-xs"
               type="text"
               inputMode="decimal"
               value={inputValues[0] || ""}
@@ -113,7 +113,7 @@ export function AmountRange() {
             </Label>
 
             <CurrencyInput
-              className="w-full font-mono text-xs"
+              className="w-full text-xs"
               type="text"
               inputMode="decimal"
               value={inputValues[1] || ""}

@@ -4,15 +4,16 @@ import { Header } from "@/components/header";
 import { GlobalSheets } from "@/components/sheets/global-sheets";
 import { Sidebar } from "@/components/sidebar";
 import { TimezoneDetector } from "@/components/timezone-detector";
+import { UpgradeContent } from "@/components/upgrade-content";
 import {
   HydrateClient,
   batchPrefetch,
   getQueryClient,
   trpc,
 } from "@/trpc/server";
-import { getCountryCode, getCurrency } from "@midday/location";
+import { shouldShowUpgradeContent } from "@/utils/trial";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { Suspense } from "react";
 
 export default async function Layout({
   children,
@@ -20,8 +21,6 @@ export default async function Layout({
   children: React.ReactNode;
 }) {
   const queryClient = getQueryClient();
-  const currencyPromise = getCurrency();
-  const countryCodePromise = getCountryCode();
 
   // NOTE: These are used in the global sheets
   batchPrefetch([
@@ -46,25 +45,31 @@ export default async function Layout({
     redirect("/teams");
   }
 
+  // Check if trial has expired - render upgrade content directly instead of redirecting
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || "";
+  const showUpgradeContent = shouldShowUpgradeContent(
+    user.team?.plan,
+    user.team?.createdAt,
+    pathname,
+  );
+
   return (
     <HydrateClient>
       <div className="relative">
         <Sidebar />
 
-        <div className="md:ml-[70px] pb-8">
+        <div className="md:ml-[70px] pb-4">
           <Header />
-          <div className="px-6">{children}</div>
+          {showUpgradeContent ? (
+            <UpgradeContent user={user} />
+          ) : (
+            <div className="px-4 md:px-8">{children}</div>
+          )}
         </div>
 
         <ExportStatus />
-
-        <Suspense>
-          <GlobalSheets
-            currencyPromise={currencyPromise}
-            countryCodePromise={countryCodePromise}
-          />
-        </Suspense>
-
+        <GlobalSheets />
         <GlobalTimerProvider />
         <TimezoneDetector />
       </div>

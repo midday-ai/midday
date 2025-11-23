@@ -34,23 +34,21 @@ export function InvoicePaymentScore() {
   return (
     <Card>
       <CardHeader className="pb-2 flex flex-col xl:flex-row justify-between">
-        <CardTitle className="font-mono font-medium text-2xl">
+        <CardTitle className="font-medium text-2xl">
           {/* @ts-expect-error */}
           {t(`payment_status.${data?.paymentStatus}`)}
         </CardTitle>
 
-        <PaymentScoreVisualizer
-          score={data?.score}
-          paymentStatus={data?.paymentStatus}
-        />
+        <PaymentScoreVisualizer score={data?.score ?? 0} count={15} />
       </CardHeader>
 
       <CardContent className="sm:hidden xl:flex">
         <div className="flex flex-col gap-2">
           <div>Payment score</div>
           <div className="text-sm text-muted-foreground">
-            {/* @ts-expect-error */}
-            {t(`payment_status_description.${data?.paymentStatus}`)}
+            {data?.paymentStatus &&
+              // @ts-expect-error
+              t(`payment_status_description.${data?.paymentStatus}`)}
           </div>
         </div>
       </CardContent>

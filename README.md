@@ -3,7 +3,7 @@
 <p align="center">
 	<h1 align="center"><b>Midday</b></h1>
 <p align="center">
-    Run your business smarter
+    Your AI-Powered Business Assistant
     <br />
     <br />
     <a href="https://go.midday.ai/anPiuRx">Discord</a>

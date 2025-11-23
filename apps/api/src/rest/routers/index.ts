@@ -1,6 +1,7 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { protectedMiddleware } from "../middleware";
 import { bankAccountsRouter } from "./bank-accounts";
+import { chatRouter } from "./chat";
 import { customersRouter } from "./customers";
 import { documentsRouter } from "./documents";
 import { inboxRouter } from "./inbox";
@@ -14,6 +15,7 @@ import { teamsRouter } from "./teams";
 import { trackerEntriesRouter } from "./tracker-entries";
 import { trackerProjectsRouter } from "./tracker-projects";
 import { transactionsRouter } from "./transactions";
+import { transcriptionRouter } from "./transcription";
 import { usersRouter } from "./users";
 
 const routers = new OpenAPIHono();
@@ -39,5 +41,7 @@ routers.route("/search", searchRouter);
 routers.route("/reports", reportsRouter);
 routers.route("/tracker-projects", trackerProjectsRouter);
 routers.route("/tracker-entries", trackerEntriesRouter);
+routers.route("/chat", chatRouter);
+routers.route("/transcription", transcriptionRouter);
 
 export { routers };

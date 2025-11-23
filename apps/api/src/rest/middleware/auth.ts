@@ -1,3 +1,4 @@
+import { verifyAccessToken } from "@api/utils/auth";
 import { expandScopes } from "@api/utils/scopes";
 import { isValidApiKeyFormat } from "@db/utils/api-keys";
 import { apiKeyCache } from "@midday/cache/api-key-cache";
@@ -30,6 +31,34 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
   }
 
   const db = c.get("db");
+
+  // Handle Supabase JWT tokens (try to verify as JWT first)
+  const supabaseSession = await verifyAccessToken(token);
+  if (supabaseSession) {
+    // Get user from database to get team info
+    const user = await getUserById(db, supabaseSession.user.id);
+
+    if (!user) {
+      throw new HTTPException(401, { message: "User not found" });
+    }
+
+    const session = {
+      teamId: user.teamId,
+      user: {
+        id: user.id,
+        email: user.email,
+        full_name: user.fullName,
+      },
+    };
+
+    c.set("session", session);
+    c.set("teamId", session.teamId);
+    // Grant all scopes for authenticated users via Supabase
+    c.set("scopes", expandScopes(["apis.all"]));
+
+    await next();
+    return;
+  }
 
   // Handle OAuth access tokens (start with mid_access_token_)
   if (token.startsWith("mid_access_token_")) {

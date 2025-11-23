@@ -23,7 +23,7 @@ import { Textarea } from "@midday/ui/textarea";
 import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 const formSchema = z.object({
   subject: z.string(),

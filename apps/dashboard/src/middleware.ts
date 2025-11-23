@@ -87,6 +87,9 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Set pathname header for server components to access
+  response.headers.set("x-pathname", newUrl.pathname);
+
   // If all checks pass, return the original or updated response
   return response;
 }

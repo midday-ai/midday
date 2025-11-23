@@ -14,6 +14,10 @@ export const getRevenueSchema = z
       description: "Currency code (ISO 4217)",
       example: "USD",
     }),
+    revenueType: z.enum(["gross", "net"]).optional().default("net").openapi({
+      description: "Type of revenue calculation",
+      example: "net",
+    }),
   })
   .openapi("GetRevenueSchema");
 
@@ -30,6 +34,10 @@ export const getProfitSchema = z
     currency: z.string().optional().openapi({
       description: "Currency code (ISO 4217)",
       example: "USD",
+    }),
+    revenueType: z.enum(["gross", "net"]).optional().default("net").openapi({
+      description: "Type of revenue calculation",
+      example: "net",
     }),
   })
   .openapi("GetProfitSchema");
@@ -416,3 +424,28 @@ export const getTaxSummarySchema = z
     }),
   })
   .openapi("GetTaxSummarySchema");
+
+export const getRevenueForecastSchema = z
+  .object({
+    from: z.string().openapi({
+      description: "Start date for historical data (ISO 8601 format)",
+      example: "2023-01-01",
+    }),
+    to: z.string().openapi({
+      description: "End date for historical data (ISO 8601 format)",
+      example: "2023-12-31",
+    }),
+    forecastMonths: z.number().min(1).max(24).default(6).openapi({
+      description: "Number of months to forecast into the future",
+      example: 6,
+    }),
+    currency: z.string().optional().openapi({
+      description: "Currency code (ISO 4217)",
+      example: "USD",
+    }),
+    revenueType: z.enum(["gross", "net"]).default("net").openapi({
+      description: "Type of revenue calculation",
+      example: "net",
+    }),
+  })
+  .openapi("GetRevenueForecastSchema");

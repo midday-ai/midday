@@ -1,7 +1,12 @@
 "use client";
 
-import { generateVaultFilters } from "@/actions/ai/filters/generate-vault-filters";
+import {
+  vaultFilterOutputSchema,
+  vaultFilterSchema,
+} from "@/app/api/ai/filters/vault/schema";
+import type { VaultFilterSchema } from "@/app/api/ai/filters/vault/schema";
 import { FilterList } from "@/components/filter-list";
+import { normalizeString, useAIFilter } from "@/hooks/use-ai-filter";
 import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { useTRPC } from "@/trpc/client";
 import { Calendar } from "@midday/ui/calendar";
@@ -21,20 +26,18 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useQuery } from "@tanstack/react-query";
-import { readStreamableValue } from "ai/rsc";
 import { formatISO } from "date-fns";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 export function VaultSearchFilter() {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const trpc = useTRPC();
 
   const { filter, setFilter } = useDocumentFilterParams();
-  const [prompt, setPrompt] = useState(filter.q ?? "");
+  const [input, setInput] = useState(filter.q ?? "");
 
   const shouldFetch = isOpen;
 
@@ -43,16 +46,33 @@ export function VaultSearchFilter() {
     enabled: shouldFetch || Boolean(filter.tags?.length),
   });
 
+  const mapVaultFilters = useCallback((object: VaultFilterSchema) => {
+    return {
+      q: normalizeString(object.name),
+      tags: null,
+      start: normalizeString(object.start),
+      end: normalizeString(object.end),
+    };
+  }, []);
+
+  const { submit, isLoading } = useAIFilter({
+    api: "/api/ai/filters/vault",
+    inputSchema: vaultFilterSchema,
+    outputSchema: vaultFilterOutputSchema,
+    mapper: mapVaultFilters,
+    onFilterApplied: setFilter,
+  });
+
   useHotkeys(
     "esc",
     () => {
-      setPrompt("");
+      setInput("");
       setFilter(null);
       setIsOpen(false);
     },
     {
       enableOnFormTags: true,
-      enabled: Boolean(prompt) && isFocused,
+      enabled: Boolean(input) && isFocused,
     },
   );
 
@@ -65,42 +85,24 @@ export function VaultSearchFilter() {
     const value = evt.target.value;
 
     if (value) {
-      setPrompt(value);
+      setInput(value);
     } else {
       setFilter(null);
-      setPrompt("");
+      setInput("");
     }
   };
 
-  const handleSubmit = async () => {
-    // If the user is typing a query with multiple words, we want to stream the results
-    if (prompt.split(" ").length > 1) {
-      setStreaming(true);
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
 
-      const { object } = await generateVaultFilters(prompt);
-
-      let finalObject = {};
-
-      for await (const partialObject of readStreamableValue(object)) {
-        if (partialObject) {
-          finalObject = {
-            ...finalObject,
-            ...partialObject,
-            start: partialObject?.start ?? null,
-            end: partialObject?.end ?? null,
-            q: partialObject?.name ?? null,
-          };
-        }
-      }
-
-      setFilter({
-        q: null,
-        ...finalObject,
+    if (input.split(" ").length > 1) {
+      submit({
+        input,
+        currentDate: formatISO(new Date(), { representation: "date" }),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
-
-      setStreaming(false);
     } else {
-      setFilter({ q: prompt.length > 0 ? prompt : null });
+      setFilter({ q: input.length > 0 ? input : null });
     }
   };
 
@@ -127,7 +129,7 @@ export function VaultSearchFilter() {
             ref={inputRef}
             placeholder="Search or type filter"
             className="pl-9 w-full md:w-[350px] pr-8"
-            value={prompt}
+            value={input}
             onChange={handleSearch}
             autoComplete="off"
             autoCapitalize="none"
@@ -154,7 +156,7 @@ export function VaultSearchFilter() {
 
         <FilterList
           filters={validFilters}
-          loading={streaming}
+          loading={isLoading}
           onRemove={setFilter}
           tags={tagsData}
         />

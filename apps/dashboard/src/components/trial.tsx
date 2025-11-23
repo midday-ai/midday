@@ -1,9 +1,9 @@
 "use client";
 
 import { useUserQuery } from "@/hooks/use-user";
-import { UTCDate } from "@date-fns/utc";
-import { addDays, differenceInDays, isSameDay, parseISO } from "date-fns";
-import { ChoosePlanButton } from "./choose-plan-button";
+import { getTrialDaysLeft, isTrialExpired } from "@/utils/trial";
+import { Button } from "@midday/ui/button";
+import Link from "next/link";
 import { FeedbackForm } from "./feedback-form";
 
 export function Trial() {
@@ -19,38 +19,24 @@ export function Trial() {
     return <FeedbackForm />;
   }
 
-  // Parse dates using UTCDate for consistent timezone handling
-  const rawCreatedAt = parseISO(team.createdAt);
-  const today = new UTCDate();
-
-  // Convert to UTCDate for consistent calculation
-  const createdAt = new UTCDate(rawCreatedAt);
-
-  // Set trial end date 14 days from creation
-  const trialEndDate = addDays(createdAt, 14);
-
-  const daysLeft = isSameDay(createdAt, today)
-    ? 14
-    : Math.max(0, differenceInDays(trialEndDate, today));
-
-  const isTrialEnded = daysLeft <= 0;
-
-  if (isTrialEnded) {
-    return (
-      <ChoosePlanButton
-        initialIsOpen={false}
-        daysLeft={daysLeft}
-        hasDiscount
-        discountPrice={49}
-      >
-        Upgrade plan
-      </ChoosePlanButton>
-    );
+  // Check if trial has expired
+  if (isTrialExpired(team.createdAt)) {
+    // If trial expired, show feedback form (upgrade content is shown in layout)
+    return <FeedbackForm />;
   }
 
+  // Calculate days left for display
+  const daysLeft = getTrialDaysLeft(team.createdAt);
+
   return (
-    <ChoosePlanButton hasDiscount discountPrice={49} daysLeft={daysLeft}>
-      Pro trial - {daysLeft} {daysLeft === 1 ? "day" : "days"} left
-    </ChoosePlanButton>
+    <Button
+      asChild
+      variant="outline"
+      className="rounded-full font-normal h-[32px] p-0 px-3 text-xs text-[#878787]"
+    >
+      <Link href="/upgrade">
+        Pro trial - {daysLeft} {daysLeft === 1 ? "day" : "days"} left
+      </Link>
+    </Button>
   );
 }

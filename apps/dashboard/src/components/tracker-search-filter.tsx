@@ -1,6 +1,16 @@
 "use client";
 
-import { generateTrackerFilters } from "@/actions/ai/filters/generate-tracker-filters";
+import {
+  trackerFilterOutputSchema,
+  trackerFilterSchema,
+} from "@/app/api/ai/filters/tracker/schema";
+import type { TrackerFilterSchema } from "@/app/api/ai/filters/tracker/schema";
+import {
+  mapStringArrayToIds,
+  normalizeString,
+  useAIFilter,
+  validateEnumArray,
+} from "@/hooks/use-ai-filter";
 import { useTrackerFilterParams } from "@/hooks/use-tracker-filter-params";
 import { useTRPC } from "@/trpc/client";
 import { Calendar } from "@midday/ui/calendar";
@@ -20,9 +30,8 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useQuery } from "@tanstack/react-query";
-import { readStreamableValue } from "ai/rsc";
 import { formatISO } from "date-fns";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FilterList } from "./filter-list";
 
@@ -32,9 +41,8 @@ const statusFilters = [
 ];
 
 export function TrackerSearchFilter() {
-  const [prompt, setPrompt] = useState("");
+  const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const trpc = useTRPC();
@@ -58,16 +66,63 @@ export function TrackerSearchFilter() {
     enabled: shouldFetch || Boolean(filter.tags?.length),
   });
 
+  const mapTrackerFilters = useCallback(
+    (
+      object: TrackerFilterSchema,
+      data?: {
+        customersData?: { data?: Array<{ id: string; name: string }> };
+        tagsData?: Array<{ id: string; name: string }>;
+      },
+    ) => {
+      const tagIds = mapStringArrayToIds(
+        object.tags,
+        (name) => data?.tagsData?.find((tag) => tag.name === name)?.id ?? null,
+      );
+
+      const customerIds = mapStringArrayToIds(
+        object.customers,
+        (name) =>
+          data?.customersData?.data?.find((customer) => customer.name === name)
+            ?.id ?? null,
+      );
+
+      const status =
+        typeof object.status === "string" &&
+        (object.status === "in_progress" || object.status === "completed")
+          ? object.status
+          : null;
+
+      return {
+        q: normalizeString(object.name),
+        status,
+        tags: tagIds,
+        customers: customerIds,
+        start: normalizeString(object.start),
+        end: normalizeString(object.end),
+      };
+    },
+    [],
+  );
+
+  const { submit, isLoading } = useAIFilter({
+    api: "/api/ai/filters/tracker",
+    inputSchema: trackerFilterSchema,
+    outputSchema: trackerFilterOutputSchema,
+    mapper: mapTrackerFilters,
+    onFilterApplied: setFilter,
+    data: { customersData, tagsData },
+  });
+
   useHotkeys(
     "esc",
     () => {
-      setPrompt("");
+      setInput("");
       setFilter(null);
       setIsOpen(false);
     },
     {
       enableOnFormTags: true,
-      enabled: Boolean(prompt) && isFocused,
+      enabled: Boolean(input) && isFocused,
     },
   );
 
@@ -80,57 +135,30 @@ export function TrackerSearchFilter() {
     const value = evt.target.value;
 
     if (value) {
-      setPrompt(value);
+      setInput(value);
     } else {
       setFilter(null);
-      setPrompt("");
+      setInput("");
     }
   };
 
-  const handleSubmit = async () => {
-    // If the user is typing a query with multiple words, we want to stream the results
-    if (prompt.split(" ").length > 1) {
-      setStreaming(true);
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
 
-      const { object } = await generateTrackerFilters(
-        prompt,
-        `
+    if (input.split(" ").length > 1) {
+      const context = `
         Customers: ${customersData?.data?.map((customer) => customer.name).join(", ")}
         Tags: ${tagsData?.map((tag) => tag.name).join(", ")}
-        `,
-      );
+      `;
 
-      let finalObject = {};
-
-      for await (const partialObject of readStreamableValue(object)) {
-        if (partialObject) {
-          finalObject = {
-            ...finalObject,
-            ...partialObject,
-            status: partialObject?.status ?? null,
-            start: partialObject?.start ?? null,
-            end: partialObject?.end ?? null,
-            q: partialObject?.name ?? null,
-            tags: partialObject?.tags ?? null,
-            customers:
-              partialObject?.customers?.map(
-                (name: string) =>
-                  customersData?.data?.find(
-                    (customer) => customer.name === name,
-                  )?.id,
-              ) ?? null,
-          };
-        }
-      }
-
-      setFilter({
-        q: null,
-        ...finalObject,
+      submit({
+        input,
+        context,
+        currentDate: formatISO(new Date(), { representation: "date" }),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
-
-      setStreaming(false);
     } else {
-      setFilter({ q: prompt.length > 0 ? prompt : null });
+      setFilter({ q: input.length > 0 ? input : null });
     }
   };
 
@@ -152,7 +180,7 @@ export function TrackerSearchFilter() {
       <div className="flex space-x-4 items-center">
         <FilterList
           filters={validFilters}
-          loading={streaming}
+          loading={isLoading}
           onRemove={setFilter}
           members={members}
           customers={customersData?.data}
@@ -172,7 +200,7 @@ export function TrackerSearchFilter() {
             ref={inputRef}
             placeholder="Search or type filter"
             className="pl-9 w-full md:w-[350px] pr-8"
-            value={prompt}
+            value={input}
             onChange={handleSearch}
             autoComplete="off"
             autoCapitalize="none"

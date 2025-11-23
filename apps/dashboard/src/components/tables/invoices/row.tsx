@@ -16,7 +16,7 @@ export function InvoiceRow({ row }: Props) {
   return (
     <>
       <TableRow
-        className="group h-[57px] cursor-pointer hover:bg-[#F2F1EF] hover:dark:bg-secondary"
+        className="group h-[57px] cursor-pointer hover:bg-[#F2F1EF] hover:dark:bg-[#0f0f0f]"
         key={row.id}
         data-state={row.getIsSelected() && "selected"}
       >

@@ -42,7 +42,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, formatISO } from "date-fns";
 import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 const formSchema = z.object({
   name: z.string().min(1),
@@ -150,7 +150,6 @@ export function TransactionCreateForm() {
           name="transactionType"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Transaction Type</FormLabel>
               <FormControl>
                 <div className="flex w-full border border-border bg-muted">
                   <Button

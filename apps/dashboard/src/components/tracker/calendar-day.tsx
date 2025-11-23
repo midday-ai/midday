@@ -97,7 +97,7 @@ export function CalendarDay({
       onMouseEnter={() => handleMouseEnter(date)}
       onMouseUp={handleMouseUp}
       className={cn(
-        "aspect-square md:aspect-[4/2] pt-2 pb-10 px-3 font-mono text-lg relative transition-all duration-100 text-left flex space-x-2 select-none",
+        "aspect-square md:aspect-[4/2] pt-2 pb-10 px-3 text-lg relative transition-all duration-100 text-left flex space-x-2 select-none",
         isCurrentMonth && isToday(date)
           ? "bg-[#f0f0f0] dark:bg-[#202020]"
           : "bg-background",

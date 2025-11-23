@@ -1,7 +1,7 @@
 import { logger } from "@midday/logger";
 import type { ZodSchema } from "zod";
 
-export const validateResponse = (data: any, schema: ZodSchema) => {
+export const validateResponse = <T>(data: any, schema: ZodSchema<T>): T => {
   const result = schema.safeParse(data);
 
   if (!result.success) {
@@ -9,12 +9,7 @@ export const validateResponse = (data: any, schema: ZodSchema) => {
 
     logger.error(cause);
 
-    return {
-      success: false,
-      error: "Response validation failed",
-      details: cause,
-      data: null,
-    };
+    throw new Error(`Response validation failed: ${JSON.stringify(cause)}`);
   }
 
   return result.data;

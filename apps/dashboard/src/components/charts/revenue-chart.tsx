@@ -1,101 +1,112 @@
-import { useReportsParams } from "@/hooks/use-reports-params";
-import { useTRPC } from "@/trpc/client";
-import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@midday/ui/tooltip";
-import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
-import { AnimatedNumber } from "../animated-number";
-import { FormatAmount } from "../format-amount";
-import { BarChart } from "./bar-chart";
-import { chartExampleData } from "./data";
+"use client";
 
-type Props = {
-  disabled?: boolean;
+import { formatAmount } from "@/utils/format";
+import { ReferenceLine, Tooltip } from "recharts";
+import {
+  BaseChart,
+  ChartLegend,
+  StyledArea,
+  StyledLine,
+  StyledTooltip,
+  StyledXAxis,
+  StyledYAxis,
+} from "./base-charts";
+import { createYAxisTickFormatter, useChartMargin } from "./chart-utils";
+import type { BaseChartProps } from "./chart-utils";
+
+interface RevenueData {
+  month: string;
+  revenue: number;
+  target?: number;
+}
+
+interface RevenueChartProps extends BaseChartProps {
+  data: RevenueData[];
+  showTarget?: boolean;
+  showLegend?: boolean;
+  currency?: string;
+  locale?: string;
+}
+
+// Custom formatter for revenue tooltip
+const revenueTooltipFormatter = (
+  value: any,
+  name: string,
+  currency = "USD",
+  locale?: string,
+): [string, string] => {
+  const formattedValue =
+    formatAmount({
+      amount: value,
+      currency,
+      locale: locale ?? undefined,
+      maximumFractionDigits: 0,
+    }) || `${currency}${value.toLocaleString()}`;
+  const displayName = name === "revenue" ? "Revenue" : "Target";
+  return [formattedValue, displayName];
 };
 
-export function RevenueChart({ disabled }: Props) {
-  const trpc = useTRPC();
-  const { params } = useReportsParams();
-
-  const { data } = useQuery({
-    ...trpc.reports.revenue.queryOptions({
-      from: params.from,
-      to: params.to,
-      currency: params.currency ?? undefined,
-    }),
-    placeholderData: (previousData) => previousData ?? chartExampleData,
-  });
+export function RevenueChart({
+  data,
+  height = 320,
+  className = "",
+  showTarget = true,
+  showLegend = true,
+  currency = "USD",
+  locale,
+}: RevenueChartProps) {
+  const tickFormatter = createYAxisTickFormatter(currency, locale);
+  const maxValues = data.map((d) => ({
+    maxValue: Math.max(d.revenue, d.target ?? 0),
+  }));
+  const { marginLeft } = useChartMargin(maxValues, "maxValue", tickFormatter);
 
   return (
-    <div
-      className={cn(
-        disabled && "pointer-events-none select-none blur-[8px] opacity-20",
+    <div className={`w-full ${className}`}>
+      {/* Legend */}
+      {showLegend && (
+        <ChartLegend
+          title="Monthly Revenue"
+          items={[
+            { label: "Revenue", type: "solid" },
+            ...(showTarget
+              ? [{ label: "Target", type: "dashed" as const }]
+              : []),
+          ]}
+        />
       )}
-    >
-      <div className="space-y-2 mb-14 inline-block select-text">
-        <h1 className="text-4xl font-mono">
-          <AnimatedNumber
-            value={data?.summary?.currentTotal ?? 0}
-            currency={data?.summary?.currency ?? "USD"}
-          />
-        </h1>
 
-        <div className="text-sm text-[#606060] flex items-center space-x-2">
-          <p className="text-sm text-[#606060]">
-            vs{" "}
-            <FormatAmount
-              maximumFractionDigits={0}
-              minimumFractionDigits={0}
-              amount={data?.summary?.prevTotal ?? 0}
-              currency={data?.meta?.currency ?? "USD"}
-            />{" "}
-            last period
-          </p>
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Icons.Info className="h-4 w-4 mt-1" />
-              </TooltipTrigger>
-              <TooltipContent
-                className="text-xs text-[#878787] max-w-[240px] p-4"
-                side="bottom"
-                sideOffset={10}
-              >
-                <div className="space-y-2">
-                  <h3 className="font-medium text-primary">
-                    Revenue represents your total income from all sources.
-                  </h3>
-                  <p>
-                    Explanation: This is your gross income before expenses. If
-                    the revenue appears too high, internal transfers may have
-                    been marked as income. You can fix this by excluding the
-                    transactions from the calculations.
-                  </p>
+      {/* Chart */}
+      <BaseChart
+        data={data}
+        height={height}
+        margin={{ top: 5, right: 5, left: -marginLeft, bottom: 5 }}
+      >
+        <StyledXAxis dataKey="month" />
+        <StyledYAxis tickFormatter={tickFormatter} />
 
-                  <p>
-                    All amounts are converted into your{" "}
-                    <Link
-                      href="/settings/accounts"
-                      className="text-primary underline"
-                    >
-                      base currency
-                    </Link>
-                    .
-                  </p>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </div>
+        <Tooltip
+          content={
+            <StyledTooltip
+              formatter={(value: any, name: string) =>
+                revenueTooltipFormatter(value, name, currency, locale)
+              }
+            />
+          }
+          wrapperStyle={{ zIndex: 9999 }}
+        />
 
-      <BarChart data={data} />
+        <StyledArea dataKey="revenue" usePattern={false} useGradient />
+
+        {showTarget && <StyledLine dataKey="target" strokeDasharray="5 5" />}
+
+        {/* Reference line at zero */}
+        <ReferenceLine
+          y={0}
+          stroke="hsl(var(--border))"
+          strokeDasharray="2 2"
+        />
+      </BaseChart>
     </div>
   );
 }
