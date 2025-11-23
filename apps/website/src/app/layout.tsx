@@ -7,11 +7,24 @@ import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Provider as Analytics } from "@midday/events/client";
-import { GeistMono } from "geist/font/mono";
-import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
+import { Hedvig_Letters_Sans, Hedvig_Letters_Serif } from "next/font/google";
 import type { ReactElement } from "react";
 import { baseUrl } from "./sitemap";
+
+const hedvigSans = Hedvig_Letters_Sans({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-hedvig-sans",
+});
+
+const hedvigSerif = Hedvig_Letters_Serif({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-hedvig-serif",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -85,7 +98,7 @@ export default function Layout({ children }: { children: ReactElement }) {
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          `${GeistSans.variable} ${GeistMono.variable}`,
+          `${hedvigSans.variable} ${hedvigSerif.variable} font-sans`,
           "bg-[#fbfbfb] dark:bg-[#0C0C0C] overflow-x-hidden font-sans antialiased",
         )}
       >

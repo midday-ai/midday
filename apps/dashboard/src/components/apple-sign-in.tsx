@@ -7,7 +7,11 @@ import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useState } from "react";
 
-export function AppleSignIn() {
+type Props = {
+  showLastUsed?: boolean;
+};
+
+export function AppleSignIn({ showLastUsed = false }: Props) {
   const [isLoading, setLoading] = useState(false);
   const supabase = createClient();
 
@@ -44,15 +48,24 @@ export function AppleSignIn() {
   };
 
   return (
-    <SubmitButton
+    <button
+      type="button"
       onClick={handleSignIn}
-      className="bg-primary px-6 py-4 text-secondary font-medium h-[40px] w-full"
-      isSubmitting={isLoading}
+      disabled={isLoading}
+      className="w-full bg-transparent border border-[#0e0e0e] dark:border-border text-[#0e0e0e] dark:text-foreground font-sans text-sm h-[40px] px-6 py-4 hover:bg-[#0e0e0e]/5 dark:hover:bg-border/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed relative flex items-center justify-center"
     >
-      <div className="flex items-center space-x-2">
-        <Icons.Apple />
+      <div className="flex items-center justify-center gap-2">
+        <Icons.Apple size={16} />
         <span>Continue with Apple</span>
       </div>
-    </SubmitButton>
+      {/* Last used pill */}
+      {showLastUsed && (
+        <div className="absolute top-1/2 right-3 transform -translate-y-1/2">
+          <span className="font-sans text-sm text-muted-foreground/50">
+            Last used
+          </span>
+        </div>
+      )}
+    </button>
   );
 }

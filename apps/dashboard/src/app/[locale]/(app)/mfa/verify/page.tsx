@@ -7,9 +7,9 @@ import Link from "next/link";
 export default function Verify() {
   return (
     <div>
-      <div className="absolute left-5 top-4 md:left-10 md:top-10">
+      <div className="absolute left-4 top-4">
         <Link href="https://midday.ai">
-          <Icons.LogoSmall />
+          <Icons.LogoSmall className="h-6 w-auto" />
         </Link>
       </div>
 

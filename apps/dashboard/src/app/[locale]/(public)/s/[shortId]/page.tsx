@@ -48,8 +48,8 @@ export default async function Page({ params }: Props) {
   return (
     <div className="h-screen p-2">
       <header className="absolute top-0 left-0 z-30 w-full">
-        <div className="p-6 md:p-8">
-          <Icons.LogoSmall className="h-8 w-auto" />
+        <div className="p-6">
+          <Icons.LogoSmall className="h-6 w-auto" />
         </div>
       </header>
 

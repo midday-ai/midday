@@ -8,7 +8,11 @@ import { SubmitButton } from "@midday/ui/submit-button";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-export function GoogleSignIn() {
+type Props = {
+  showLastUsed?: boolean;
+};
+
+export function GoogleSignIn({ showLastUsed = false }: Props) {
   const [isLoading, setLoading] = useState(false);
   const supabase = createClient();
   const searchParams = useSearchParams();
@@ -59,15 +63,24 @@ export function GoogleSignIn() {
   };
 
   return (
-    <SubmitButton
+    <button
+      type="button"
       onClick={handleSignIn}
-      className="bg-primary px-6 py-4 text-secondary font-medium h-[40px] w-full"
-      isSubmitting={isLoading}
+      disabled={isLoading}
+      className="w-full bg-[#0e0e0e] dark:bg-white/90 border border-[#0e0e0e] dark:border-white text-white dark:text-[#0e0e0e] font-sans font-medium text-sm h-[40px] px-6 py-4 hover:bg-[#1a1a1a] dark:hover:bg-white transition-colors relative disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
     >
-      <div className="flex items-center space-x-2">
-        <Icons.Google />
+      <div className="flex items-center justify-center gap-2">
+        <Icons.Google size={16} />
         <span>Continue with Google</span>
       </div>
-    </SubmitButton>
+      {/* Last used pill */}
+      {showLastUsed && (
+        <div className="absolute top-1/2 right-3 transform -translate-y-1/2">
+          <span className="font-sans text-sm text-white/60 dark:text-[#70707080]">
+            Last used
+          </span>
+        </div>
+      )}
+    </button>
   );
 }

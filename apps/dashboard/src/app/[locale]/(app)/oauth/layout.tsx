@@ -9,9 +9,9 @@ export default function Layout({
   return (
     <div className="h-screen p-2">
       <header className="absolute top-0 left-0 z-30 w-full">
-        <div className="p-6 md:p-8">
+        <div className="p-6">
           <Link href="/">
-            <Icons.LogoSmall className="h-8 w-auto" />
+            <Icons.LogoSmall className="h-6 w-auto" />
           </Link>
         </div>
       </header>
