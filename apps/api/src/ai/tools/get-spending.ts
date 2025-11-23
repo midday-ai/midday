@@ -108,8 +108,6 @@ export const getSpendingTool = tool({
         pageSize: 10,
       });
 
-      console.log(transactionsResult.data);
-
       const totalSpending = periodSummary.totalSpending;
       const topCategory = periodSummary.topCategory;
 
