@@ -1,7 +1,10 @@
 "use client";
 
 import { Skeleton } from "@/components/canvas/base/skeleton";
-import { generateCanvasPdf } from "@/utils/canvas-to-pdf";
+import {
+  generateCanvasPdf,
+  generateCanvasPdfBlob,
+} from "@/utils/canvas-to-pdf";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import {
@@ -11,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
+import { useToast } from "@midday/ui/use-toast";
 import { useTheme } from "next-themes";
 import { ArtifactTabs } from "../artifact-tabs";
 
@@ -20,14 +24,54 @@ interface CanvasHeaderProps {
 
 export function CanvasHeader({ title }: CanvasHeaderProps) {
   const { theme } = useTheme();
+  const { toast } = useToast();
+
+  const filename = `${title.toLowerCase().replace(/\s+/g, "-")}-report.pdf`;
 
   const handleDownloadReport = async () => {
     try {
       await generateCanvasPdf({
-        filename: `${title.toLowerCase().replace(/\s+/g, "-")}-report.pdf`,
+        filename,
         theme,
       });
     } catch {}
+  };
+
+  const handleShareReport = async () => {
+    try {
+      // Check if Web Share API is available
+      if (!navigator.share) {
+        // Fallback to download if Web Share API is not supported
+        await handleDownloadReport();
+        return;
+      }
+
+      // Generate PDF blob silently
+      const blob = await generateCanvasPdfBlob({
+        filename,
+        theme,
+      });
+
+      // Create File object from blob
+      const file = new File([blob], filename, {
+        type: "application/pdf",
+      });
+
+      // Share using Web Share API
+      await navigator.share({
+        title: title,
+        files: [file],
+      });
+    } catch (error) {
+      // User cancelled or error occurred
+      if (error instanceof Error && error.name !== "AbortError") {
+        toast({
+          duration: 2500,
+          title: "Failed to share report",
+          description: "Please try downloading the report instead.",
+        });
+      }
+    }
   };
 
   return (
@@ -42,8 +86,14 @@ export function CanvasHeader({ title }: CanvasHeaderProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleDownloadReport}>
-              Download Report
+            <DropdownMenuItem onClick={handleShareReport} className="text-xs">
+              Share
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={handleDownloadReport}
+              className="text-xs"
+            >
+              Download
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
