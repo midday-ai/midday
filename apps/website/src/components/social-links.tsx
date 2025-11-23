@@ -19,12 +19,6 @@ export function SocialLinks() {
         </a>
       </li>
       <li>
-        <a target="_blank" rel="noreferrer" href="https://go.midday.ai/anPiuRx">
-          <span className="sr-only">Discord</span>
-          <FaDiscord size={24} className="fill-[#878787]" />
-        </a>
-      </li>
-      <li>
         <a target="_blank" rel="noreferrer" href="https://git.new/midday">
           <span className="sr-only">Github</span>
           <FaGithub size={22} className="fill-[#878787]" />

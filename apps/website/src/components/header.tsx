@@ -170,11 +170,6 @@ export function Header() {
           icon: <MdOutlineMemory size={20} />,
         },
         {
-          title: "Join the community",
-          path: "https://go.midday.ai/anPiuRx",
-          icon: <FaDiscord size={19} />,
-        },
-        {
           title: "Apps & Integrations",
           path: "https://docs.midday.ai/integrations",
           icon: <MdOutlineIntegrationInstructions size={20} />,

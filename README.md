@@ -6,8 +6,6 @@
     Your AI-Powered Business Assistant
     <br />
     <br />
-    <a href="https://go.midday.ai/anPiuRx">Discord</a>
-    ·
     <a href="https://midday.ai">Website</a>
     ·
     <a href="https://github.com/midday-ai/midday/issues">Issues</a>
