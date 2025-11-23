@@ -1,10 +1,9 @@
 "use client";
 
 import { useUserQuery } from "@/hooks/use-user";
-import { isTrialExpired } from "@/utils/trial";
-import { UTCDate } from "@date-fns/utc";
-import { addDays, differenceInDays, isSameDay, parseISO } from "date-fns";
-import { ChoosePlanButton } from "./choose-plan-button";
+import { getTrialDaysLeft, isTrialExpired } from "@/utils/trial";
+import { Button } from "@midday/ui/button";
+import Link from "next/link";
 import { FeedbackForm } from "./feedback-form";
 
 export function Trial() {
@@ -27,17 +26,17 @@ export function Trial() {
   }
 
   // Calculate days left for display
-  const rawCreatedAt = parseISO(team.createdAt);
-  const today = new UTCDate();
-  const createdAt = new UTCDate(rawCreatedAt);
-  const trialEndDate = addDays(createdAt, 14);
-  const daysLeft = isSameDay(createdAt, today)
-    ? 14
-    : Math.max(0, differenceInDays(trialEndDate, today));
+  const daysLeft = getTrialDaysLeft(team.createdAt);
 
   return (
-    <ChoosePlanButton hasDiscount discountPrice={49} daysLeft={daysLeft}>
-      Pro trial - {daysLeft} {daysLeft === 1 ? "day" : "days"} left
-    </ChoosePlanButton>
+    <Button
+      asChild
+      variant="outline"
+      className="rounded-full font-normal h-[32px] p-0 px-3 text-xs text-[#878787]"
+    >
+      <Link href="/upgrade">
+        Pro trial - {daysLeft} {daysLeft === 1 ? "day" : "days"} left
+      </Link>
+    </Button>
   );
 }

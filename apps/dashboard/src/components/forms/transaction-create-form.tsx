@@ -150,7 +150,6 @@ export function TransactionCreateForm() {
           name="transactionType"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Transaction Type</FormLabel>
               <FormControl>
                 <div className="flex w-full border border-border bg-muted">
                   <Button

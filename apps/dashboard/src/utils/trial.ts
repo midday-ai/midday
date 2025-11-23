@@ -1,7 +1,7 @@
 import { UTCDate } from "@date-fns/utc";
 import { addDays, differenceInDays, isSameDay, parseISO } from "date-fns";
 
-export function isTrialExpired(createdAt: string): boolean {
+export function getTrialDaysLeft(createdAt: string): number {
   // Parse dates using UTCDate for consistent timezone handling
   const rawCreatedAt = parseISO(createdAt);
   const today = new UTCDate();
@@ -12,11 +12,13 @@ export function isTrialExpired(createdAt: string): boolean {
   // Set trial end date 14 days from creation
   const trialEndDate = addDays(createdAtDate, 14);
 
-  const daysLeft = isSameDay(createdAtDate, today)
+  return isSameDay(createdAtDate, today)
     ? 14
     : Math.max(0, differenceInDays(trialEndDate, today));
+}
 
-  return daysLeft <= 0;
+export function isTrialExpired(createdAt: string): boolean {
+  return getTrialDaysLeft(createdAt) <= 0;
 }
 
 const EXCLUDED_PATHS = ["/upgrade", "/settings", "/support"];
