@@ -14,6 +14,12 @@ import type { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 
 export const withAuth: MiddlewareHandler = async (c, next) => {
+  // Skip auth for OPTIONS preflight requests - let CORS handle them
+  // if (c.req.method === "OPTIONS") {
+  //   await next();
+  //   return;
+  // }
+
   const authHeader = c.req.header("Authorization");
 
   if (!authHeader) {
