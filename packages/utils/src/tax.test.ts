@@ -1,5 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { calculateTaxAmount, resolveTaxValues } from "./tax";
+import {
+  calculateTaxAmount,
+  calculateTaxAmountFromGross,
+  resolveTaxValues,
+} from "./tax";
 
 describe("Tax Utilities", () => {
   describe("calculateTaxAmount", () => {
@@ -40,6 +44,46 @@ describe("Tax Utilities", () => {
     test("should handle very small amounts", () => {
       expect(calculateTaxAmount(0.01, 25)).toBe(0);
       expect(calculateTaxAmount(1, 25)).toBe(0.25);
+    });
+  });
+
+  describe("calculateTaxAmountFromGross", () => {
+    test("should calculate VAT from gross amount correctly", () => {
+      // Example from the bug report: €33.84 gross with 23% VAT = €6.33
+      expect(calculateTaxAmountFromGross(33.84, 23)).toBe(6.33);
+      // Net would be: 33.84 - 6.33 = 27.51
+      // Verification: 27.51 × 1.23 = 33.84 ✓
+    });
+
+    test("should calculate tax for common VAT rates", () => {
+      // 100 gross with 25% VAT = 20 VAT (not 25)
+      expect(calculateTaxAmountFromGross(100, 25)).toBe(20);
+      // 100 gross with 20% VAT = 16.67 VAT (not 20)
+      expect(calculateTaxAmountFromGross(100, 20)).toBe(16.67);
+      // 100 gross with 19% VAT = 15.97 VAT (not 19)
+      expect(calculateTaxAmountFromGross(100, 19)).toBe(15.97);
+    });
+
+    test("should calculate tax for negative amounts (expenses)", () => {
+      expect(calculateTaxAmountFromGross(-100, 25)).toBe(20);
+      expect(calculateTaxAmountFromGross(-33.84, 23)).toBe(6.33);
+    });
+
+    test("should handle decimal tax rates", () => {
+      expect(calculateTaxAmountFromGross(100, 8.5)).toBe(7.83);
+      expect(calculateTaxAmountFromGross(200, 12.5)).toBe(22.22);
+    });
+
+    test("should round to 2 decimal places", () => {
+      expect(calculateTaxAmountFromGross(99.99, 19)).toBe(15.96);
+    });
+
+    test("should handle zero rate", () => {
+      expect(calculateTaxAmountFromGross(100, 0)).toBe(0);
+    });
+
+    test("should handle zero amount", () => {
+      expect(calculateTaxAmountFromGross(0, 25)).toBe(0);
     });
   });
 
@@ -101,7 +145,8 @@ describe("Tax Utilities", () => {
         categoryTaxType: "gst",
       });
 
-      expect(result.taxAmount).toBe(25);
+      // Bank transactions are gross, so 100 × (25/125) = 20
+      expect(result.taxAmount).toBe(20);
       expect(result.taxRate).toBe(25);
       expect(result.taxType).toBe("vat");
     });
@@ -131,7 +176,8 @@ describe("Tax Utilities", () => {
         categoryTaxType: null,
       });
 
-      expect(result.taxAmount).toBe(25);
+      // Bank transactions are gross, so -100 × (25/125) = 20 (always positive)
+      expect(result.taxAmount).toBe(20);
       expect(result.taxRate).toBe(25);
       expect(result.taxType).toBe("sales_tax");
     });
@@ -148,7 +194,8 @@ describe("Tax Utilities", () => {
         categoryTaxType: "gst",
       });
 
-      expect(result.taxAmount).toBe(20);
+      // Bank transactions are gross, so 100 × (20/120) = 16.67
+      expect(result.taxAmount).toBe(16.67);
       expect(result.taxRate).toBe(20);
       expect(result.taxType).toBe("gst");
     });
@@ -188,7 +235,7 @@ describe("Tax Utilities", () => {
 
   describe("resolveTaxValues - Real-world Scenarios", () => {
     test("should handle user switching from percentage to fixed", () => {
-      // User had 25% tax on $100 = $25
+      // User had 25% tax on $100 gross = $20 VAT
       const beforeSwitch = resolveTaxValues({
         transactionAmount: 100,
         transactionTaxAmount: null,
@@ -197,7 +244,8 @@ describe("Tax Utilities", () => {
         categoryTaxRate: null,
         categoryTaxType: null,
       });
-      expect(beforeSwitch.taxAmount).toBe(25);
+      // Bank transactions are gross, so 100 × (25/125) = 20
+      expect(beforeSwitch.taxAmount).toBe(20);
       expect(beforeSwitch.taxRate).toBe(25);
 
       // User switches to fixed $30
@@ -235,7 +283,8 @@ describe("Tax Utilities", () => {
         categoryTaxRate: null,
         categoryTaxType: null,
       });
-      expect(afterSwitch.taxAmount).toBe(20);
+      // Bank transactions are gross, so 100 × (20/120) = 16.67
+      expect(afterSwitch.taxAmount).toBe(16.67);
       expect(afterSwitch.taxRate).toBe(20);
     });
 
@@ -250,7 +299,8 @@ describe("Tax Utilities", () => {
         categoryTaxType: "vat",
       });
 
-      expect(result.taxAmount).toBe(30);
+      // Bank transactions are gross, so 200 × (15/115) = 26.09
+      expect(result.taxAmount).toBe(26.09);
       expect(result.taxRate).toBe(15);
       expect(result.taxType).toBe("sales_tax");
     });
@@ -265,7 +315,8 @@ describe("Tax Utilities", () => {
         categoryTaxType: null,
       });
 
-      expect(result.taxAmount).toBe(190);
+      // Bank transactions are gross, so 1000 × (19/119) = 159.66
+      expect(result.taxAmount).toBe(159.66);
       expect(result.taxRate).toBe(19);
       expect(result.taxType).toBe("vat");
     });
@@ -280,7 +331,8 @@ describe("Tax Utilities", () => {
         categoryTaxType: null,
       });
 
-      expect(result.taxAmount).toBe(44.38);
+      // Bank transactions are gross, so 500 × (8.875/108.875) = 40.76
+      expect(result.taxAmount).toBe(40.76);
       expect(result.taxRate).toBe(8.875);
       expect(result.taxType).toBe("sales_tax");
     });
@@ -295,7 +347,8 @@ describe("Tax Utilities", () => {
         categoryTaxType: null,
       });
 
-      expect(result.taxAmount).toBe(500);
+      // Bank transactions are gross, so 5000 × (10/110) = 454.55
+      expect(result.taxAmount).toBe(454.55);
       expect(result.taxRate).toBe(10);
       expect(result.taxType).toBe("withholding_tax");
     });
@@ -328,7 +381,8 @@ describe("Tax Utilities", () => {
         categoryTaxType: "vat",
       });
 
-      expect(resultWithUndefined.taxAmount).toBe(25);
+      // Bank transactions are gross, so 100 × (25/125) = 20
+      expect(resultWithUndefined.taxAmount).toBe(20);
       expect(resultWithUndefined.taxRate).toBe(25);
       expect(resultWithUndefined.taxType).toBe("vat");
     });
@@ -343,7 +397,8 @@ describe("Tax Utilities", () => {
         categoryTaxType: null,
       });
 
-      expect(result.taxAmount).toBe(25);
+      // Bank transactions are gross, so 10000 × (0.25/100.25) = 24.94
+      expect(result.taxAmount).toBe(24.94);
       expect(result.taxRate).toBe(0.25);
     });
 
@@ -357,7 +412,8 @@ describe("Tax Utilities", () => {
         categoryTaxType: null,
       });
 
-      expect(result.taxAmount).toBe(150);
+      // Bank transactions are gross, so 100 × (150/250) = 60
+      expect(result.taxAmount).toBe(60);
       expect(result.taxRate).toBe(150);
     });
 
@@ -371,7 +427,8 @@ describe("Tax Utilities", () => {
         categoryTaxType: null,
       });
 
-      expect(result.taxAmount).toBe(25);
+      // Bank transactions are gross, so 99.99 × (25/125) = 20
+      expect(result.taxAmount).toBe(20);
       expect(result.taxRate).toBe(25);
     });
   });

@@ -162,6 +162,28 @@ export function calculateTaxAmount(amount: number, taxRate: number): number {
 }
 
 /**
+ * Calculate tax amount from a gross amount (amount including tax) and tax rate
+ * Uses reverse VAT calculation: VAT = Gross × (Rate / (100 + Rate))
+ * This is used when the transaction amount is gross (inc-VAT), which is always
+ * the case for bank transactions.
+ * Rounds to 2 decimal places to avoid floating-point precision issues
+ * Always returns a positive value, even for negative amounts (expenses)
+ * @param grossAmount - The gross amount including tax (can be positive or negative)
+ * @param taxRate - The tax rate as a percentage (e.g., 23 for 23%)
+ * @returns The calculated tax amount rounded to 2 decimal places (always positive)
+ * @example
+ * calculateTaxAmountFromGross(33.84, 23) // Returns 6.33 (not 7.78)
+ */
+export function calculateTaxAmountFromGross(
+  grossAmount: number,
+  taxRate: number,
+): number {
+  return Math.abs(
+    Math.round(grossAmount * (taxRate / (100 + taxRate)) * 100) / 100,
+  );
+}
+
+/**
  * Calculate tax rate percentage from an amount and tax amount
  * Rounds to 2 decimal places
  * Uses absolute value of amount to ensure positive tax rates for both income and expenses
@@ -210,16 +232,22 @@ export function resolveTaxValues(params: {
 
   if (transactionTaxAmount !== null && transactionTaxAmount !== undefined) {
     // Fixed amount mode - use stored amount (even if it's 0)
+    // This takes priority and uses the OCR-extracted value when available
     taxAmount = transactionTaxAmount;
     taxRate = transactionTaxRate ?? null;
   } else if (transactionTaxRate !== null && transactionTaxRate !== undefined) {
     // Percentage mode - calculate from transaction's rate
+    // Bank transactions are always gross (inc-VAT), so use reverse calculation
     taxRate = transactionTaxRate;
-    taxAmount = calculateTaxAmount(transactionAmount, transactionTaxRate);
+    taxAmount = calculateTaxAmountFromGross(
+      transactionAmount,
+      transactionTaxRate,
+    );
   } else if (categoryTaxRate !== null && categoryTaxRate !== undefined) {
     // Inherited from category - calculate from category's rate
+    // Bank transactions are always gross (inc-VAT), so use reverse calculation
     taxRate = categoryTaxRate;
-    taxAmount = calculateTaxAmount(transactionAmount, categoryTaxRate);
+    taxAmount = calculateTaxAmountFromGross(transactionAmount, categoryTaxRate);
   }
 
   const taxType = transactionTaxType ?? categoryTaxType ?? null;

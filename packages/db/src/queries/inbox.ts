@@ -781,6 +781,7 @@ export async function matchTransaction(
       filePath: inbox.filePath,
       size: inbox.size,
       fileName: inbox.fileName,
+      taxAmount: inbox.taxAmount,
       taxRate: inbox.taxRate,
       taxType: inbox.taxType,
       transactionId: inbox.transactionId, // Check if already matched
@@ -827,14 +828,28 @@ export async function matchTransaction(
     })
     .returning({ id: transactionAttachments.id });
 
-  // Update transaction with tax rate and type
+  // Update transaction with tax data from OCR
+  // Transfer taxAmount if available (from OCR extraction)
+  // Transfer taxRate and taxType if available
+  const taxUpdates: {
+    taxAmount?: number | null;
+    taxRate?: number | null;
+    taxType?: string | null;
+  } = {};
+
+  if (result.taxAmount !== null && result.taxAmount !== undefined) {
+    taxUpdates.taxAmount = result.taxAmount;
+  }
+
   if (result.taxRate && result.taxType) {
+    taxUpdates.taxRate = result.taxRate;
+    taxUpdates.taxType = result.taxType;
+  }
+
+  if (Object.keys(taxUpdates).length > 0) {
     await db
       .update(transactions)
-      .set({
-        taxRate: result.taxRate,
-        taxType: result.taxType,
-      })
+      .set(taxUpdates)
       .where(eq(transactions.id, transactionId));
   }
 
