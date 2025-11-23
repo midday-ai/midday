@@ -28,34 +28,22 @@ export function Hero() {
           </Button>
         </Link>
 
-        <h2 className="mt-6 md:mt-10 max-w-[580px] text-[#878787] leading-tight text-[24px] md:text-[36px] font-medium">
-          Invoicing, Time tracking, File reconciliation, Storage, Financial
-          Overview & your own Assistant made for <WordAnimation />
+        <h2 className="mt-6 md:mt-10 max-w-[580px] text-[#878787] leading-tight text-[24px] md:text-[36px] font-medium font-serif">
+          Your AI-powered business assistant for finances, reconciliation &
+          invoicing{" "}
+          <span className="text-primary">that saves you hours every week</span>.
         </h2>
 
         <div className="mt-8 md:mt-10">
           <div className="flex items-center space-x-4">
-            <Link
-              href="https://cal.com/pontus-midday/15min"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button
-                variant="outline"
-                className="border-transparent h-11 px-6 dark:bg-[#1D1D1D] bg-[#F2F1EF]"
-              >
-                Talk to founders
-              </Button>
-            </Link>
-
             <a href="https://app.midday.ai">
-              <Button className="h-11 px-5">Start free trial</Button>
+              <Button className="h-11 px-5">Meet your assistant</Button>
             </a>
           </div>
         </div>
 
         <p className="text-xs text-[#707070] mt-4 font-mono">
-          Start free trial, no credit card required.
+          14 day trial (No credit card required)
         </p>
       </div>
 
