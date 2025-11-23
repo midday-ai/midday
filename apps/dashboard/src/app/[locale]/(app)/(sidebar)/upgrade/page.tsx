@@ -19,6 +19,9 @@ export default async function UpgradePage() {
     return null;
   }
 
+  // Extract first name for personalization
+  const firstName = user?.fullName ? user.fullName.split(" ").at(0) : "";
+
   // Calculate days left
   const daysLeft = getTrialDaysLeft(team.createdAt);
 
@@ -26,30 +29,41 @@ export default async function UpgradePage() {
   const discountPrice = 49;
 
   const getTitle = () => {
+    // Benefit-focused titles with urgency and value proposition
     if (daysLeft && daysLeft > 0) {
-      return `Pro trial - ${daysLeft} ${daysLeft === 1 ? "day" : "days"} left`;
+      if (hasDiscount) {
+        return "Secure your 50% discount before trial ends";
+      }
+      return "Unlock full access to Midday";
     }
 
-    return hasDiscount ? "Special Discount Offer" : "Choose plan";
+    // Expired trial - emphasize value and opportunity
+    if (hasDiscount) {
+      return "Limited-time offer: Save 50% on Pro";
+    }
+
+    return "Unlock full access to Midday";
   };
 
   const getDescription = () => {
+    const greeting = firstName ? `Hi ${firstName}, ` : "";
+
     if (daysLeft !== undefined) {
       if (daysLeft > 0) {
-        return `Your trial will end in ${daysLeft} ${daysLeft === 1 ? "day" : "days"}, after the trial period you will have read access only.`;
+        return `${greeting}Your trial ends in ${daysLeft} ${daysLeft === 1 ? "day" : "days"}. Choose a plan now to continue using all of Midday's features and secure our limited-time discount—save 50% on the Pro plan.`;
       }
 
-      return "Your trial period has ended. Please choose a plan to continue using Midday.";
+      return `${greeting}Your trial has ended. Choose a plan to continue using all of Midday's features and unlock your full potential.`;
     }
 
     if (hasDiscount && discountPrice) {
       const saveAmount = 99 - discountPrice;
       const savePercentage = Math.round((saveAmount / 99) * 100);
 
-      return `As a valued early customer, you qualify for our special discount pricing. Get the Pro plan for $${discountPrice}/month instead of the regular $99/month and save ${savePercentage}%.`;
+      return `${greeting}As a valued early customer, you qualify for our special discount pricing. Get the Pro plan for $${discountPrice}/month instead of the regular $99/month and save ${savePercentage}%.`;
     }
 
-    return "Choose a plan to continue using Midday.";
+    return `${greeting}Choose a plan to continue using all of Midday's features.`;
   };
 
   return (
@@ -65,11 +79,18 @@ export default async function UpgradePage() {
         <Plans />
 
         <p className="text-xs text-muted-foreground mt-6 text-center">
-          After the trial period ends, you'll have read-only access,{" "}
+          Questions?{" "}
           <Link href="/account/support" className="hover:underline">
-            contact us
+            Contact support
           </Link>{" "}
-          if you have any questions.
+          or{" "}
+          <OpenURL
+            href="https://cal.com/pontus-midday/15min"
+            className="hover:underline"
+          >
+            book a call with the founders
+          </OpenURL>
+          .
         </p>
       </div>
     </div>
