@@ -1,5 +1,5 @@
 import { Plans } from "@/components/plans";
-import Link from "next/link";
+import { OpenURL } from "./open-url";
 
 type UpgradeContentProps = {
   user: {
@@ -28,18 +28,16 @@ export function UpgradeContent({ user }: UpgradeContentProps) {
 
         <p className="text-xs text-muted-foreground mt-6 text-center">
           Questions?{" "}
-          <Link href="/support" className="hover:underline">
+          <a href="/account/support" className="hover:underline">
             Contact support
-          </Link>
+          </a>
           {" or "}
-          <Link
+          <OpenURL
             href="https://cal.com/pontus-midday/15min"
-            target="_blank"
-            rel="noopener noreferrer"
             className="hover:underline"
           >
             book a call with the founders
-          </Link>
+          </OpenURL>
           .
         </p>
       </div>

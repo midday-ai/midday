@@ -33,40 +33,76 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { capitalCase } from "change-case";
-import { useEffect, useState } from "react";
-import { Controller } from "react-hook-form";
+import { useEffect, useRef, useState } from "react";
+import { Controller, useWatch } from "react-hook-form";
 import { mappableFields, useCsvContext } from "./context";
 
 export function FieldMapping({ currencies }: { currencies: string[] }) {
   const { fileColumns, firstRows, setValue, control, watch } = useCsvContext();
-  const [isStreaming, setIsStreaming] = useState(true);
+  const [isStreaming, setIsStreaming] = useState(false);
   const [showCurrency, setShowCurrency] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    if (!fileColumns || !firstRows) return;
+    if (!fileColumns || !firstRows) {
+      setIsStreaming(false);
+      return;
+    }
+
+    if (fileColumns.length === 0 || firstRows.length === 0) {
+      setIsStreaming(false);
+      return;
+    }
+
+    // Abort previous request if it exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    setIsStreaming(true);
+
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
 
     generateCsvMapping(fileColumns, firstRows)
       .then(async ({ object }) => {
-        setIsStreaming(true);
+        try {
+          for await (const partialObject of readStreamableValue(object)) {
+            if (abortController.signal.aborted) {
+              break;
+            }
 
-        for await (const partialObject of readStreamableValue(object)) {
-          if (partialObject) {
-            for (const [field, value] of Object.entries(partialObject)) {
-              if (
-                Object.keys(mappableFields).includes(field) &&
-                fileColumns.includes(value as string)
-              ) {
-                // @ts-expect-error
-                setValue(field as keyof typeof mappableFields, value, {
-                  shouldValidate: true,
-                });
+            if (partialObject) {
+              for (const [field, value] of Object.entries(partialObject)) {
+                if (
+                  Object.keys(mappableFields).includes(field) &&
+                  value &&
+                  typeof value === "string" &&
+                  fileColumns.includes(value)
+                ) {
+                  setValue(field as keyof typeof mappableFields, value, {
+                    shouldValidate: true,
+                  });
+                }
               }
             }
           }
+        } catch (streamError) {
+          console.error("Error reading stream:", streamError);
         }
       })
-      .finally(() => setIsStreaming(false));
-  }, [fileColumns, firstRows]);
+      .catch((error) => {
+        console.error("Error generating CSV mapping:", error);
+      })
+      .finally(() => {
+        setIsStreaming(false);
+        abortControllerRef.current = null;
+      });
+
+    return () => {
+      abortController.abort();
+    };
+  }, [fileColumns, firstRows, setValue]);
 
   return (
     <div className="mt-6">
@@ -130,6 +166,9 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
               className="w-full"
               placeholder="Select account"
               value={value}
+              popoverProps={{
+                className: "z-[100]",
+              }}
               onChange={(account) => {
                 onChange(account.id);
 
@@ -188,17 +227,18 @@ function FieldRow({
   currency?: string;
 }) {
   const { label, required } = mappableFields[field];
-  const { control, watch, fileColumns, firstRows } = useCsvContext();
+  const { control, fileColumns, firstRows } = useCsvContext();
   const { data: user } = useUserQuery();
 
-  const value = watch(field);
-  const inverted = watch("inverted");
+  // Use useWatch for better reactivity when values change
+  const value = useWatch({ control, name: field });
+  const inverted = useWatch({ control, name: "inverted" });
 
   const isLoading = isStreaming && !value;
 
   const firstRow = firstRows?.at(0);
 
-  const description = firstRow?.[value as keyof typeof firstRow];
+  const description = value && firstRow ? firstRow[value as string] : undefined;
 
   const formatDescription = (description?: string) => {
     if (!description) return;
@@ -259,7 +299,7 @@ function FieldRow({
 
                   {isLoading && (
                     <div className="absolute top-2 right-2">
-                      <Spinner />
+                      <Spinner size={16} />
                     </div>
                   )}
                 </SelectTrigger>
@@ -293,11 +333,13 @@ function FieldRow({
         <div className="grow whitespace-nowrap text-sm font-normal text-muted-foreground justify-between flex">
           <span>{label}</span>
 
-          {description && (
+          {description?.trim() && (
             <TooltipProvider delayDuration={50}>
               <Tooltip>
-                <TooltipTrigger>
-                  <Icons.Info />
+                <TooltipTrigger asChild>
+                  <button type="button" className="cursor-help">
+                    <Icons.Info />
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent className="p-2 text-xs">
                   {formatDescription(description)}

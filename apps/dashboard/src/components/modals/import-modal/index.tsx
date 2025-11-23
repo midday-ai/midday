@@ -68,11 +68,20 @@ export function ImportModal() {
       if (data) {
         setRunId(data.id);
         setAccessToken(data.publicAccessToken);
+      } else {
+        // If no data returned, something went wrong
+        setIsImporting(false);
+        toast({
+          duration: 3500,
+          variant: "error",
+          title: "Something went wrong please try again.",
+        });
       }
     },
     onError: () => {
       setIsImporting(false);
       setRunId(undefined);
+      setAccessToken(undefined);
       setStatus("FAILED");
 
       toast({
@@ -101,9 +110,12 @@ export function ImportModal() {
   const file = watch("file");
 
   const onclose = () => {
+    setIsImporting(false);
     setFileColumns(null);
     setFirstRows(null);
     setPageNumber(0);
+    setRunId(undefined);
+    setAccessToken(undefined);
     reset();
 
     setParams({
@@ -141,9 +153,9 @@ export function ImportModal() {
 
   useEffect(() => {
     if (status === "COMPLETED") {
-      setRunId(undefined);
       setIsImporting(false);
-      onclose();
+      setRunId(undefined);
+      setAccessToken(undefined);
 
       queryClient.invalidateQueries({
         queryKey: trpc.transactions.get.queryKey(),
@@ -166,15 +178,17 @@ export function ImportModal() {
         variant: "success",
         title: "Transactions imported successfully.",
       });
+
+      onclose();
     }
   }, [status]);
 
   // Go to second page if file looks good
   useEffect(() => {
-    if (file && fileColumns && pageNumber === 0) {
+    if (file && fileColumns && firstRows && pageNumber === 0) {
       setPageNumber(1);
     }
-  }, [file, fileColumns, pageNumber]);
+  }, [file, fileColumns, firstRows, pageNumber]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onclose}>
