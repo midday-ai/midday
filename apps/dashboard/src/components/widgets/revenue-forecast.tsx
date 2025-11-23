@@ -39,7 +39,7 @@ export function RevenueForecastWidget() {
   const fromStr = format(from, "yyyy-MM-dd");
   const toStr = format(to, "yyyy-MM-dd");
 
-  const { data, isLoading } = useQuery({
+  const { data } = useQuery({
     ...trpc.reports.revenueForecast.queryOptions({
       from: fromStr,
       to: toStr,
@@ -135,7 +135,7 @@ export function RevenueForecastWidget() {
             <p className="text-sm text-[#878787]">Revenue projection</p>
 
             {/* Simple trend line chart */}
-            {!isLoading && chartData.length > 0 ? (
+            {chartData.length > 0 ? (
               <div className="h-12 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
@@ -161,16 +161,18 @@ export function RevenueForecastWidget() {
               </div>
             )}
 
-            <p className="text-sm text-[#666666]">
-              Next month projection{" "}
-              <span className="font-medium text-foreground">
-                +
-                <FormatAmount
-                  amount={nextMonthProjection}
-                  currency={currency}
-                />
-              </span>
-            </p>
+            {data?.summary && (
+              <p className="text-sm text-[#666666]">
+                Next month projection{" "}
+                <span className="font-medium text-foreground">
+                  +
+                  <FormatAmount
+                    amount={nextMonthProjection}
+                    currency={currency}
+                  />
+                </span>
+              </p>
+            )}
           </div>
         }
         actions="View forecast details"

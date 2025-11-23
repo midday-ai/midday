@@ -687,11 +687,16 @@ export const PromptInputSubmit = ({
     Icon = <XIcon className="size-4" />;
   }
 
+  // Change button type to "button" when streaming to prevent form submission
+  // The onClick handler will handle stopping the stream
+  const buttonType =
+    status === "streaming" || status === "submitted" ? "button" : "submit";
+
   return (
     <Button
       className={cn("gap-1.5 size-8", className)}
       size={size}
-      type="submit"
+      type={buttonType}
       variant={variant}
       {...props}
     >

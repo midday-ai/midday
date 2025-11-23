@@ -114,12 +114,14 @@ export function RevenueSummaryWidget() {
         onConfigure={() => setIsConfiguring(true)}
       >
         <div className="flex flex-col gap-2">
-          <h2 className="text-2xl font-normal">
-            <FormatAmount
-              amount={data?.result.totalRevenue ?? 0}
-              currency={data?.result.currency!}
-            />
-          </h2>
+          {data?.result && (
+            <h2 className="text-2xl font-normal">
+              <FormatAmount
+                amount={data.result.totalRevenue}
+                currency={data.result.currency}
+              />
+            </h2>
+          )}
         </div>
       </BaseWidget>
     </ConfigurableWidget>

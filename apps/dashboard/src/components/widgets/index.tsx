@@ -14,13 +14,15 @@ type RouterOutputs = inferRouterOutputs<AppRouter>;
 type WidgetPreferences = RouterOutputs["widgets"]["getWidgetPreferences"];
 
 function SuggestedActionsSkeleton() {
+  const skeletonWidths = ["w-28", "w-32", "w-36", "w-28", "w-32", "w-28"];
+
   return (
-    <div className="w-full px-6 py-4 flex items-center justify-center">
-      <div className="flex gap-3">
-        {Array.from({ length: 6 }, (_, i) => (
+    <div className="w-[calc(100%+16px)] md:w-full -mx-4 md:mx-0 md:px-6 mt-10 mb-8 flex items-center justify-center">
+      <div className="flex gap-3 overflow-x-auto scrollbar-hide w-full md:w-auto pl-4 md:pl-0">
+        {skeletonWidths.map((width) => (
           <Skeleton
-            key={`suggested-skeleton-${Date.now()}-${i}`}
-            className="h-10 w-24"
+            key={`suggested-actions-skeleton-${width}`}
+            className={`${width} h-[34px] border border-[#e6e6e6] dark:border-[#1d1d1d] flex-shrink-0`}
           />
         ))}
       </div>

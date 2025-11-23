@@ -143,13 +143,20 @@ export function ProfitAnalysisWidget() {
         onConfigure={() => setIsConfiguring(true)}
         description={
           <div className="flex flex-col gap-2">
-            <p className="text-sm text-[#666666]">
-              Your average {revenueTypeLabel.toLowerCase()} profit ·{" "}
-              {periodLabel}{" "}
-              <span className="font-medium text-foreground">
-                {formatCurrency(averageProfit)}
-              </span>
-            </p>
+            {chartData.length > 0 && data?.summary ? (
+              <p className="text-sm text-[#666666]">
+                Your average {revenueTypeLabel.toLowerCase()} profit ·{" "}
+                {periodLabel}{" "}
+                <span className="font-medium text-foreground">
+                  {formatCurrency(averageProfit)}
+                </span>
+              </p>
+            ) : (
+              <p className="text-sm text-[#666666]">
+                Your average {revenueTypeLabel.toLowerCase()} profit ·{" "}
+                {periodLabel}
+              </p>
+            )}
 
             {/* Chart */}
             {chartData.length > 0 ? (

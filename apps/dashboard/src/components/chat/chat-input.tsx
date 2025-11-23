@@ -102,6 +102,16 @@ export function ChatInput() {
     resetCommandState();
   };
 
+  const handleStopClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // Prevent form submission when stopping
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (status === "streaming" || status === "submitted") {
+      stop?.();
+    }
+  };
+
   return (
     <>
       <div
@@ -189,12 +199,20 @@ export function ChatInput() {
                 <RecordButton size={16} />
                 <PromptInputSubmit
                   disabled={
-                    (!input && !status) ||
-                    isUploading ||
-                    isRecording ||
-                    isProcessing
+                    // Enable button when streaming so user can stop
+                    status === "streaming" || status === "submitted"
+                      ? false
+                      : (!input && !status) ||
+                        isUploading ||
+                        isRecording ||
+                        isProcessing
                   }
                   status={status}
+                  onClick={
+                    status === "streaming" || status === "submitted"
+                      ? handleStopClick
+                      : undefined
+                  }
                 />
               </PromptInputTools>
             </PromptInputToolbar>
