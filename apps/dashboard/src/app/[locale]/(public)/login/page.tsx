@@ -112,6 +112,7 @@ export default async function Page() {
           muted
           playsInline
           preload="auto"
+          poster="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/video-poster.jpg"
         >
           <source
             src="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/videos/login-video.webm"
