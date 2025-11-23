@@ -203,10 +203,11 @@ export const getProfitAnalysisTool = tool({
             0
           : 0;
 
-      // Calculate profit margin (profit / revenue * 100)
+      // Calculate profit margin using period totals (not monthly data)
+      // This matches the "Current Period" metrics displayed in the canvas
       const profitMargin =
-        currentMonthRevenue > 0
-          ? (currentMonthlyProfit / currentMonthRevenue) * 100
+        currentRevenueTotal > 0
+          ? (currentTotal / currentRevenueTotal) * 100
           : 0;
 
       // Calculate average monthly profit (last 6 months)
