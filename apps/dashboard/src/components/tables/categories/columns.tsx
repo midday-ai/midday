@@ -27,6 +27,8 @@ interface CategoriesTableMeta {
   onEdit: (id: string) => void;
   expandedCategories: Set<string>;
   setExpandedCategories: (categories: Set<string>) => void;
+  searchValue?: string;
+  setSearchValue?: (value: string) => void;
 }
 
 export type Category = RouterOutputs["transactionCategories"]["get"][number];

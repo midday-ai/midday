@@ -19,7 +19,6 @@ import {
 import {
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import React from "react";
@@ -49,27 +48,80 @@ export function DataTable() {
     }),
   );
 
-  // Flatten categories and filter based on expanded state
+  // Flatten categories - include all parents and all children
   const flattenedData = React.useMemo(() => {
-    const flattened = flattenCategories(data ?? []);
+    return flattenCategories(data ?? []);
+  }, [data]);
 
-    // Filter to only show parent categories and children of expanded parents
-    return flattened.filter((category) => {
-      // Always show parent categories
+  // Get search filter value
+  const [searchValue, setSearchValue] = React.useState<string>("");
+
+  // Create a map of parent IDs to their children for efficient lookup
+  const childrenByParentId = React.useMemo(() => {
+    const map = new Map<string, typeof flattenedData>();
+    for (const category of flattenedData) {
+      if (category.isChild && category.parentId) {
+        if (!map.has(category.parentId)) {
+          map.set(category.parentId, []);
+        }
+        map.get(category.parentId)!.push(category);
+      }
+    }
+    return map;
+  }, [flattenedData]);
+
+  // Custom filter function that handles expanded state and search
+  const filteredData = React.useMemo(() => {
+    if (!searchValue) {
+      // No search: only show parents and children of expanded parents
+      return flattenedData.filter((category) => {
+        if (!category.isChild) {
+          return true; // Always show parents
+        }
+        // Only show children if their parent is expanded
+        return category.parentId && expandedCategories.has(category.parentId);
+      });
+    }
+
+    // With search: show parents and children that match, or children whose parent matches
+    const searchLower = searchValue.toLowerCase();
+    const matchingParentIds = new Set<string>();
+
+    return flattenedData.filter((category) => {
+      const matchesSearch = category.name?.toLowerCase().includes(searchLower);
+
       if (!category.isChild) {
+        // Check if any children match
+        const children = childrenByParentId.get(category.id) || [];
+        const hasMatchingChild = children.some((child) =>
+          child.name?.toLowerCase().includes(searchLower),
+        );
+
+        if (matchesSearch || hasMatchingChild) {
+          matchingParentIds.add(category.id);
+          return true;
+        }
+        return false;
+      }
+
+      // For children: show if they match search OR if their parent matches
+      if (matchesSearch) {
         return true;
       }
-      // Only show children if their parent is expanded
+      if (category.parentId && matchingParentIds.has(category.parentId)) {
+        return true;
+      }
+      // Also show if parent is expanded (even without search match)
       return category.parentId && expandedCategories.has(category.parentId);
     });
-  }, [data, expandedCategories]);
+  }, [flattenedData, expandedCategories, searchValue, childrenByParentId]);
 
   const table = useReactTable({
-    data: flattenedData,
+    data: filteredData,
     getRowId: ({ id }) => id,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
+    manualFiltering: true, // We handle filtering manually
     meta: {
       deleteCategory: (id: string) => {
         deleteCategoryMutation.mutate({ id });
@@ -79,6 +131,8 @@ export function DataTable() {
       },
       expandedCategories,
       setExpandedCategories,
+      searchValue,
+      setSearchValue,
     },
   });
 
