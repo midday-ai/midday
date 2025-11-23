@@ -10,8 +10,10 @@ export const chatsRouter = createTRPCRouter({
   list: protectedProcedure
     .input(listChatsSchema)
     .query(async ({ ctx, input }) => {
+      const scopedUserId = `${ctx.session.user.id}:${ctx.teamId}`;
+
       return memoryProvider.getChats({
-        userId: ctx.session.user.id,
+        userId: scopedUserId,
         search: input.search,
         limit: input.limit ?? 50,
       });

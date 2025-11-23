@@ -112,7 +112,7 @@ export function ChatHistory() {
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button variant="outline" size="icon">
-          <Icons.Menu size={16} />
+          <Icons.History size={16} />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[380px] p-0" align="end">

@@ -65,8 +65,11 @@ export function buildAppContext(
   context: ChatUserContext,
   chatId: string,
 ): AppContext {
+  // Combine userId and teamId to scope chats by both user and team
+  const scopedUserId = `${context.userId}:${context.teamId}`;
+
   return {
-    userId: context.userId,
+    userId: scopedUserId,
     fullName: context.fullName ?? "",
     companyName: context.teamName ?? "",
     country: context.country ?? undefined,

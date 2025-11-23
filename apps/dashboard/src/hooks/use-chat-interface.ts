@@ -31,6 +31,8 @@ export function useChatInterface() {
     // Clear artifact-type when navigating away from chat pages
     if (!potentialChatId) {
       setSelectedType(null);
+      // Reset document title when navigating away from chat
+      document.title = "Overview | Midday";
     }
   }, [pathname, setSelectedType]);
 
@@ -45,6 +47,8 @@ export function useChatInterface() {
       // Clear artifact-type when navigating away from chat pages
       if (!potentialChatId) {
         setSelectedType(null);
+        // Reset document title when navigating away from chat
+        document.title = "Overview | Midday";
       }
     };
 
