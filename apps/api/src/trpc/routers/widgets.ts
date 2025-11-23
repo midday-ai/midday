@@ -103,15 +103,6 @@ export const widgetsRouter = createTRPCRouter({
           revenueType: input.revenueType,
           monthCount: revenue.length,
         },
-        // toolCall: {
-        //   toolName: "getRevenueAnalysis",
-        //   toolParams: {
-        //     from: input.from,
-        //     to: input.to,
-        //     currency: input.currency,
-        //     revenueType: input.revenueType,
-        //   },
-        // },
       };
     }),
 
@@ -244,14 +235,6 @@ export const widgetsRouter = createTRPCRouter({
 
       return {
         result: inboxStats.result,
-        // toolCall: {
-        //   toolName: "getInboxAnalysis",
-        //   toolParams: {
-        //     from: input.from,
-        //     to: input.to,
-        //     currency: input.currency,
-        //   },
-        // },
       };
     }),
 

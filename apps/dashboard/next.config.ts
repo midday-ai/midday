@@ -26,7 +26,8 @@ const config = {
     ignoreBuildErrors: true,
   },
   devIndicators: false,
-  reactCompiler: true,
+  // Verify invoice editor etc
+  // reactCompiler: true,
   async headers() {
     return [
       {

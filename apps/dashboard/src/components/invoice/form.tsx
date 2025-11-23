@@ -179,7 +179,10 @@ export function Form() {
       className="relative h-full"
       onKeyDown={handleKeyDown}
     >
-      <ScrollArea className="h-[calc(100vh-200px)] bg-background" hideScrollbar>
+      <ScrollArea
+        className="h-[calc(100vh-200px)] bg-[#fcfcfc] dark:bg-[#121212]"
+        hideScrollbar
+      >
         <div className="p-8 pb-4 h-full flex flex-col">
           <div className="flex justify-between">
             <Meta />
