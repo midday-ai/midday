@@ -2,25 +2,46 @@
 
 import { ArrowDownIcon } from "lucide-react";
 import type { ComponentProps } from "react";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 import { cn } from "../utils/cn";
 import { Button } from "./button";
 
-export type ConversationProps = ComponentProps<typeof StickToBottom>;
+export type ConversationProps = ComponentProps<typeof StickToBottom> & {
+  onScrollContainerRef?: (ref: HTMLElement | null) => void;
+};
 
-export const Conversation = ({ className, ...props }: ConversationProps) => (
-  <StickToBottom
-    className={cn(
-      "relative flex-1 overflow-y-auto [&_div::-webkit-scrollbar]:hidden [&_div]:[scrollbar-width:none] [&_div]:[-ms-overflow-style:none]",
-      className,
-    )}
-    initial="smooth"
-    resize="smooth"
-    role="log"
-    {...props}
-  />
-);
+export const Conversation = ({
+  className,
+  onScrollContainerRef,
+  ...props
+}: ConversationProps) => {
+  useEffect(() => {
+    const findElement = () => {
+      const element = document.querySelector(".conversation-scroll-container");
+      if (element && element instanceof HTMLElement && onScrollContainerRef) {
+        onScrollContainerRef(element);
+      }
+    };
+
+    findElement();
+    const timeoutId = setTimeout(findElement, 100);
+    return () => clearTimeout(timeoutId);
+  }, [onScrollContainerRef]);
+
+  return (
+    <StickToBottom
+      className={cn(
+        "conversation-scroll-container relative flex-1 overflow-y-auto [&_div::-webkit-scrollbar]:hidden [&_div]:[scrollbar-width:none] [&_div]:[-ms-overflow-style:none]",
+        className,
+      )}
+      initial="smooth"
+      resize="smooth"
+      role="log"
+      {...props}
+    />
+  );
+};
 
 export type ConversationContentProps = ComponentProps<
   typeof StickToBottom.Content

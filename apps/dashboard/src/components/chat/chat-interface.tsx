@@ -7,15 +7,12 @@ import { useChat, useChatActions, useDataPart } from "@ai-sdk-tools/store";
 import type { UIChatMessage } from "@midday/api/ai/types";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
-import {
-  Conversation,
-  ConversationContent,
-  ConversationScrollButton,
-} from "@midday/ui/conversation";
+import { Conversation, ConversationContent } from "@midday/ui/conversation";
 import type { Geo } from "@vercel/functions";
 import { DefaultChatTransport, generateId } from "ai";
 import { parseAsString, useQueryState } from "nuqs";
-import { useEffect, useMemo, useRef } from "react";
+import type { RefObject } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef } from "react";
 import {
   ChatHeader,
   ChatInput,
@@ -26,6 +23,15 @@ import {
 
 type Props = {
   geo?: Geo;
+};
+
+// Context to share conversation scroll ref
+const ConversationScrollContext = createContext<RefObject<HTMLElement | null>>({
+  current: null,
+});
+
+export const useConversationScroll = () => {
+  return useContext(ConversationScrollContext);
 };
 
 export function ChatInterface({ geo }: Props) {
@@ -118,91 +124,94 @@ export function ChatInterface({ geo }: Props) {
   const hasMessages = messages.length > 0;
 
   const [suggestions] = useDataPart<{ prompts: string[] }>("suggestions");
-  const hasSuggestions = suggestions?.prompts && suggestions.prompts.length > 0;
   const showCanvas = Boolean(selectedType);
+  const conversationScrollRef = useRef<HTMLElement | null>(null);
 
   return (
-    <div
-      className={cn(
-        "relative flex size-full overflow-hidden",
-        isHome && "h-[calc(100vh-764px)]",
-        !isHome && "h-[calc(100vh-88px)]",
-      )}
-    >
-      {/* Canvas slides in from right when artifacts are present */}
+    <ConversationScrollContext.Provider value={conversationScrollRef}>
       <div
         className={cn(
-          "fixed right-0 top-0 bottom-0 z-20",
-          showCanvas ? "translate-x-0" : "translate-x-full",
-          hasMessages && "transition-transform duration-300 ease-in-out",
-          "md:z-20 z-40",
+          "relative flex size-full overflow-hidden",
+          isHome && "h-[calc(100vh-764px)]",
+          !isHome && "h-[calc(100vh-88px)]",
         )}
       >
-        <Canvas />
-      </div>
-
-      {/* Main chat area - container that slides left when canvas opens */}
-      <div
-        className={cn(
-          "relative flex-1",
-          hasMessages && "transition-all duration-300 ease-in-out",
-          showCanvas && "mr-0 md:mr-[600px]",
-          !hasMessages && "flex items-center justify-center",
-        )}
-      >
-        {hasMessages && (
-          <>
-            {/* Conversation view - messages with absolute positioning for proper height */}
-            <div className="absolute inset-0 flex flex-col">
-              <div
-                className={cn(
-                  "sticky top-0 left-0 z-10 shrink-0",
-                  hasMessages && "transition-all duration-300 ease-in-out",
-                  showCanvas ? "right-0 md:right-[600px]" : "right-0",
-                )}
-              >
-                <div className="bg-background/80 dark:bg-background/50 backdrop-blur-sm pt-6">
-                  <ChatHeader />
-                </div>
-              </div>
-              <Conversation>
-                <ConversationContent className="pb-48 pt-14">
-                  <div className="max-w-2xl mx-auto w-full">
-                    <ChatMessages
-                      messages={messages}
-                      isStreaming={
-                        status === "streaming" || status === "submitted"
-                      }
-                    />
-                    <ChatStatusIndicators
-                      agentStatus={agentStatus}
-                      currentToolCall={currentToolCall}
-                      status={status}
-                      artifactStage={artifactStage}
-                      artifactType={artifactType}
-                      currentSection={currentSection}
-                      bankAccountRequired={bankAccountRequired}
-                    />
-                  </div>
-                </ConversationContent>
-                <ConversationScrollButton
-                  className={cn(hasSuggestions ? "bottom-40" : "bottom-32")}
-                />
-              </Conversation>
-            </div>
-          </>
-        )}
-
+        {/* Canvas slides in from right when artifacts are present */}
         <div
           className={cn(
-            "fixed bottom-0 left-0",
-            hasMessages && "transition-all duration-300 ease-in-out",
-            showCanvas ? "right-0 md:right-[600px]" : "right-0",
+            "fixed right-0 top-0 bottom-0 z-20",
+            showCanvas ? "translate-x-0" : "translate-x-full",
+            hasMessages && "transition-transform duration-300 ease-in-out",
+            "md:z-20 z-40",
           )}
         >
-          <ChatInput />
+          <Canvas />
+        </div>
+
+        {/* Main chat area - container that slides left when canvas opens */}
+        <div
+          className={cn(
+            "relative flex-1",
+            hasMessages && "transition-all duration-300 ease-in-out",
+            showCanvas && "mr-0 md:mr-[600px]",
+            !hasMessages && "flex items-center justify-center",
+          )}
+        >
+          {hasMessages && (
+            <>
+              {/* Conversation view - messages with absolute positioning for proper height */}
+              <div className="absolute inset-0 flex flex-col">
+                <div
+                  className={cn(
+                    "sticky top-0 left-0 z-10 shrink-0",
+                    hasMessages && "transition-all duration-300 ease-in-out",
+                    showCanvas ? "right-0 md:right-[600px]" : "right-0",
+                  )}
+                >
+                  <div className="bg-background/80 dark:bg-background/50 backdrop-blur-sm pt-6">
+                    <ChatHeader />
+                  </div>
+                </div>
+                <Conversation
+                  onScrollContainerRef={(ref) => {
+                    conversationScrollRef.current = ref;
+                  }}
+                >
+                  <ConversationContent className="pb-48 pt-14">
+                    <div className="max-w-2xl mx-auto w-full">
+                      <ChatMessages
+                        messages={messages}
+                        isStreaming={
+                          status === "streaming" || status === "submitted"
+                        }
+                      />
+                      <ChatStatusIndicators
+                        agentStatus={agentStatus}
+                        currentToolCall={currentToolCall}
+                        status={status}
+                        artifactStage={artifactStage}
+                        artifactType={artifactType}
+                        currentSection={currentSection}
+                        bankAccountRequired={bankAccountRequired}
+                      />
+                    </div>
+                  </ConversationContent>
+                </Conversation>
+              </div>
+            </>
+          )}
+
+          <div
+            className={cn(
+              "fixed bottom-0 left-0",
+              hasMessages && "transition-all duration-300 ease-in-out",
+              showCanvas ? "right-0 md:right-[600px]" : "right-0",
+            )}
+          >
+            <ChatInput />
+          </div>
         </div>
       </div>
-    </div>
+    </ConversationScrollContext.Provider>
   );
 }

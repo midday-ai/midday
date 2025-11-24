@@ -1,10 +1,12 @@
 "use client";
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useScrollDirection } from "@/hooks/use-scroll-direction";
 import { extractBankAccountRequired } from "@/lib/chat-utils";
 import { useChat, useChatActions, useDataPart } from "@ai-sdk-tools/store";
 import { Button } from "@midday/ui/button";
 import { AnimatePresence, motion } from "framer-motion";
+import { useConversationScroll } from "./chat-interface";
 
 type SuggestionsData = {
   prompts: string[];
@@ -18,6 +20,17 @@ export function SuggestedPrompts() {
   const { sendMessage } = useChatActions();
   const { isChatPage } = useChatInterface();
   const { messages } = useChat();
+  const scrollContainerRef = useConversationScroll();
+
+  const { shouldShow, direction } = useScrollDirection(
+    scrollContainerRef,
+    {
+      threshold: 1,
+      throttle: 16,
+      showAtBottom: true,
+    },
+    messages.length, // Re-run when messages change
+  );
 
   // Check if last message requires bank account
   const lastMessage = messages[messages.length - 1];
@@ -43,14 +56,20 @@ export function SuggestedPrompts() {
   const prompts = suggestions.prompts;
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 10 }}
-        transition={{ duration: 0.3, delay, ease: "easeOut" }}
-        className="absolute bottom-full left-0 right-0 w-full z-30 flex gap-2 mb-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={
+        shouldShow
+          ? { opacity: 1, y: 0 }
+          : { opacity: 0, y: -10, pointerEvents: "none" }
+      }
+      transition={{
+        duration: direction === "up" ? 0.15 : 0.3,
+        ease: "easeOut",
+      }}
+      className="absolute bottom-full left-0 right-0 w-full z-30 flex gap-2 mb-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
+      <AnimatePresence mode="wait">
         {prompts.map((prompt, index) => (
           <motion.div
             key={prompt}
@@ -73,7 +92,7 @@ export function SuggestedPrompts() {
             </Button>
           </motion.div>
         ))}
-      </motion.div>
-    </AnimatePresence>
+      </AnimatePresence>
+    </motion.div>
   );
 }
