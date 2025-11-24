@@ -140,9 +140,7 @@ export function RunwayCard({
         <p className="text-3xl font-normal">
           {currentRunway.toFixed(1)} months
         </p>
-        <p className="text-xs mt-1 text-muted-foreground">
-          {dateRangeDisplay}
-        </p>
+        <p className="text-xs mt-1 text-muted-foreground">{dateRangeDisplay}</p>
       </div>
       <div className="h-80">
         <RunwayChart
@@ -156,4 +154,3 @@ export function RunwayCard({
     </div>
   );
 }
-

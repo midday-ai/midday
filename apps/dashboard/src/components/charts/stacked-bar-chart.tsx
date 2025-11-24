@@ -224,4 +224,3 @@ export function StackedBarChart({ data, height = 290 }) {
     </div>
   );
 }
-

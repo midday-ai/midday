@@ -53,4 +53,3 @@ export function MetricsHeader({
     </div>
   );
 }
-

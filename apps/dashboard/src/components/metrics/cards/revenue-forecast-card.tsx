@@ -126,9 +126,7 @@ export function RevenueForecastCard({
             maximumFractionDigits: 0,
           })}
         </p>
-        <p className="text-xs mt-1 text-muted-foreground">
-          {dateRangeDisplay}
-        </p>
+        <p className="text-xs mt-1 text-muted-foreground">{dateRangeDisplay}</p>
         <div className="flex gap-4 items-center mt-2">
           <div className="flex gap-2 items-center">
             <div className="w-4 h-0.5 bg-foreground" />
@@ -158,4 +156,3 @@ export function RevenueForecastCard({
     </div>
   );
 }
-

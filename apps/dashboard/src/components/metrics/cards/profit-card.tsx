@@ -110,9 +110,7 @@ export function ProfitCard({
             maximumFractionDigits: 0,
           })}
         </p>
-        <p className="text-xs mt-1 text-muted-foreground">
-          {dateRangeDisplay}
-        </p>
+        <p className="text-xs mt-1 text-muted-foreground">{dateRangeDisplay}</p>
       </div>
       <div className="h-80">
         <ProfitChart
@@ -125,4 +123,3 @@ export function ProfitCard({
     </div>
   );
 }
-

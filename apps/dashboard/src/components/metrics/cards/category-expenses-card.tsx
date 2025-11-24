@@ -79,9 +79,7 @@ export function CategoryExpensesCard({
             maximumFractionDigits: 0,
           })}
         </p>
-        <p className="text-xs mt-1 text-muted-foreground">
-          {dateRangeDisplay}
-        </p>
+        <p className="text-xs mt-1 text-muted-foreground">{dateRangeDisplay}</p>
         {categoryDonutChartData.length > 0 && (
           <div className="flex gap-4 items-center mt-2 flex-wrap">
             {categoryDonutChartData.slice(0, 3).map((item, idx) => (
@@ -90,11 +88,7 @@ export function CategoryExpensesCard({
                   className="w-2 h-2 rounded-full"
                   style={{
                     backgroundColor:
-                      idx === 0
-                        ? "#ffffff"
-                        : idx === 1
-                          ? "#707070"
-                          : "#666666",
+                      idx === 0 ? "#ffffff" : idx === 1 ? "#707070" : "#666666",
                   }}
                 />
                 <span className="text-xs text-muted-foreground">
@@ -122,4 +116,3 @@ export function CategoryExpensesCard({
     </div>
   );
 }
-
