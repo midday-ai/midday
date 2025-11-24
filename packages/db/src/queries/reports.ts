@@ -314,6 +314,7 @@ export async function getRevenue(db: Database, params: GetReportsParams) {
     eq(transactions.teamId, teamId),
     eq(transactions.internal, false),
     eq(transactions.categorySlug, "income"),
+    gt(transactions.baseAmount, 0), // Only include positive amounts
     ne(transactions.status, "excluded"),
     gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
