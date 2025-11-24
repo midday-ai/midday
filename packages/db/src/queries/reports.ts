@@ -1,6 +1,10 @@
 import { UTCDate } from "@date-fns/utc";
 import type { Database } from "@db/client";
 import {
+  CONTRA_REVENUE_CATEGORIES,
+  REVENUE_CATEGORIES,
+} from "@midday/categories";
+import {
   eachMonthOfInterval,
   endOfMonth,
   format,
@@ -313,12 +317,17 @@ export async function getRevenue(db: Database, params: GetReportsParams) {
   const conditions = [
     eq(transactions.teamId, teamId),
     eq(transactions.internal, false),
-    eq(transactions.categorySlug, "income"),
+    inArray(transactions.categorySlug, REVENUE_CATEGORIES), // Include all revenue categories
     gt(transactions.baseAmount, 0), // Only include positive amounts
     ne(transactions.status, "excluded"),
     gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
   ];
+
+  // Explicitly exclude contra-revenue categories
+  conditions.push(
+    not(inArray(transactions.categorySlug, CONTRA_REVENUE_CATEGORIES)),
+  );
 
   // Add currency conditions
   if (inputCurrency && targetCurrency) {
@@ -3045,7 +3054,8 @@ export async function getBalanceSheet(
           eq(transactions.internal, false),
           ne(transactions.status, "excluded"),
           lte(transactions.date, asOfDateStr),
-          eq(transactions.categorySlug, "income"),
+          inArray(transactions.categorySlug, REVENUE_CATEGORIES),
+          not(inArray(transactions.categorySlug, CONTRA_REVENUE_CATEGORIES)),
           gt(transactions.baseAmount, 0),
           or(
             isNull(transactionCategories.excluded),

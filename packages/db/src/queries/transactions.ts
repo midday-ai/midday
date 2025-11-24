@@ -13,6 +13,10 @@ import {
   transactions,
   users,
 } from "@db/schema";
+import {
+  CONTRA_REVENUE_CATEGORIES,
+  REVENUE_CATEGORIES,
+} from "@midday/categories";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { logger } from "@midday/logger";
 import { resolveTaxValues } from "@midday/utils/tax";
@@ -29,6 +33,7 @@ import {
   lt,
   lte,
   ne,
+  not,
   or,
   sql,
 } from "drizzle-orm";
@@ -192,7 +197,12 @@ export async function getTransactions(
     whereConditions.push(lt(transactions.amount, 0));
     whereConditions.push(ne(transactions.categorySlug, "transfer"));
   } else if (type === "income") {
-    whereConditions.push(eq(transactions.categorySlug, "income"));
+    whereConditions.push(
+      inArray(transactions.categorySlug, REVENUE_CATEGORIES),
+    );
+    whereConditions.push(
+      not(inArray(transactions.categorySlug, CONTRA_REVENUE_CATEGORIES)),
+    );
   }
 
   // Accounts filter
