@@ -113,11 +113,6 @@ export function ProfitAnalysisWidget() {
         : "hsl(var(--foreground))",
   }));
 
-  // Calculate average profit
-  const averageProfit = chartData.length
-    ? chartData.reduce((sum, item) => sum + item.profit, 0) / chartData.length
-    : 0;
-
   const periodLabel = t(
     `widget_period.${config?.period ?? "trailing_12"}` as "widget_period.fiscal_ytd",
   );
@@ -143,60 +138,43 @@ export function ProfitAnalysisWidget() {
         onConfigure={() => setIsConfiguring(true)}
         description={
           <div className="flex flex-col gap-2">
-            {chartData.length > 0 && data?.summary ? (
-              <p className="text-sm text-[#666666]">
-                Your average {revenueTypeLabel.toLowerCase()} profit ·{" "}
-                {periodLabel}{" "}
-                <span className="font-medium text-foreground">
-                  {formatCurrency(averageProfit)}
-                </span>
-              </p>
-            ) : (
-              <p className="text-sm text-[#666666]">
-                Your average {revenueTypeLabel.toLowerCase()} profit ·{" "}
-                {periodLabel}
-              </p>
-            )}
-
-            {/* Chart */}
-            {chartData.length > 0 ? (
-              <div className="h-16 w-full mt-3">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart
-                    data={chartData}
-                    margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
-                  >
-                    <XAxis dataKey="month" hide />
-                    <YAxis hide />
-                    <ReferenceLine
-                      y={0}
-                      stroke="hsl(var(--border))"
-                      strokeDasharray="3 3"
-                      strokeWidth={1}
-                    />
-                    <Bar
-                      dataKey="profit"
-                      maxBarSize={8}
-                      isAnimationActive={false}
-                    >
-                      {chartData.map((entry) => (
-                        <Cell key={entry.month} fill={entry.fill} />
-                      ))}
-                    </Bar>
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="text-xs text-muted-foreground mt-2">
-                No data available
-              </div>
-            )}
+            <h2 className="text-3xl font-normal">
+              {formatCurrency(data?.summary?.currentTotal ?? 0)}
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              {periodLabel} · {revenueTypeLabel}
+            </p>
           </div>
         }
         actions="See detailed analysis"
         onClick={handleViewAnalysis}
       >
-        <div />
+        {chartData.length > 0 ? (
+          <div className="h-16 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart
+                data={chartData}
+                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+              >
+                <XAxis dataKey="month" hide />
+                <YAxis hide />
+                <ReferenceLine
+                  y={0}
+                  stroke="hsl(var(--border))"
+                  strokeDasharray="3 3"
+                  strokeWidth={1}
+                />
+                <Bar dataKey="profit" maxBarSize={8} isAnimationActive={false}>
+                  {chartData.map((entry) => (
+                    <Cell key={entry.month} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="text-xs text-muted-foreground">No data available</div>
+        )}
       </BaseWidget>
     </ConfigurableWidget>
   );

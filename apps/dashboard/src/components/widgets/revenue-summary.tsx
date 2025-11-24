@@ -118,7 +118,7 @@ export function RevenueSummaryWidget() {
             <h2 className="text-2xl font-normal">
               <FormatAmount
                 amount={data.result.totalRevenue}
-                currency={data.result.currency}
+                currency={data.result.currency || "USD"}
               />
             </h2>
           )}
