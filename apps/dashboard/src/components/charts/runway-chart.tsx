@@ -112,11 +112,11 @@ export function RunwayChart({
       {/* Legend */}
       {showLegend && (
         <ChartLegend
-          title="Cash Runway"
           items={[
             {
               label: isMonthsMode ? "Runway (months)" : "Cash Remaining",
               type: "solid" as const,
+              color: "hsl(var(--foreground))",
             },
             ...(isMonthsMode
               ? []

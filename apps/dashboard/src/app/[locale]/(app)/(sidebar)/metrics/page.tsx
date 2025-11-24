@@ -103,6 +103,12 @@ export default async function MetricsPage(props: Props) {
       to,
       currency,
     }),
+    trpc.reports.revenue.queryOptions({
+      from,
+      to,
+      currency,
+      revenueType,
+    }),
     trpc.reports.profit.queryOptions({
       from,
       to,

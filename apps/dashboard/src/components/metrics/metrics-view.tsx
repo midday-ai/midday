@@ -2,6 +2,7 @@
 
 import { BurnRateChart } from "@/components/charts/burn-rate-chart";
 import { CategoryExpenseDonutChart } from "@/components/charts/category-expense-donut-chart";
+import { MonthlyRevenueChart } from "@/components/charts/monthly-revenue-chart";
 import { ProfitChart } from "@/components/charts/profit-chart";
 import { RevenueForecastChart } from "@/components/charts/revenue-forecast-chart";
 import { RunwayChart } from "@/components/charts/runway-chart";
@@ -117,6 +118,15 @@ export function MetricsView() {
     }),
   );
 
+  const { data: revenueData } = useQuery(
+    trpc.reports.revenue.queryOptions({
+      from,
+      to,
+      currency,
+      revenueType,
+    }),
+  );
+
   const { data: revenueForecastData } = useQuery(
     trpc.reports.revenueForecast.queryOptions({
       from,
@@ -129,14 +139,6 @@ export function MetricsView() {
 
   const { data: runwayData } = useQuery(
     trpc.reports.runway.queryOptions({
-      from,
-      to,
-      currency,
-    }),
-  );
-
-  const { data: expenseData } = useQuery(
-    trpc.reports.expense.queryOptions({
       from,
       to,
       currency,
@@ -166,12 +168,29 @@ export function MetricsView() {
     }));
   }, [burnRateData]);
 
+  // Transform revenue data
+  const monthlyRevenueChartData = useMemo(() => {
+    if (!revenueData?.result || revenueData.result.length === 0) return [];
+
+    const values = revenueData.result.map((item) => item.current.value);
+    const average = values.reduce((sum, val) => sum + val, 0) / values.length;
+
+    return revenueData.result.map((item) => ({
+      month: format(new Date(item.date), "MMM"),
+      amount: item.current.value,
+      lastYearAmount: item.previous.value,
+      average,
+      currentRevenue: item.current.value,
+      lastYearRevenue: item.previous.value,
+      averageRevenue: average,
+    }));
+  }, [revenueData]);
+
   // Transform profit data - need to get previous year data
   const profitChartData = useMemo(() => {
     if (!profitData?.result || profitData.result.length === 0) return [];
 
     const currentValues = profitData.result.map((item) => item.current.value);
-    const previousValues = profitData.result.map((item) => item.previous.value);
     const average =
       currentValues.reduce((sum, val) => sum + val, 0) / currentValues.length;
 
@@ -191,10 +210,11 @@ export function MetricsView() {
     const forecast = revenueForecastData.forecast || [];
 
     return [
-      ...historical.map((item) => ({
+      ...historical.map((item, index) => ({
         month: format(new Date(item.date), "MMM"),
         actual: item.value,
-        forecasted: null,
+        // Set forecasted value on the last historical point to same as actual to connect the lines
+        forecasted: index === historical.length - 1 ? item.value : null,
         date: item.date,
       })),
       ...forecast.map((item) => ({
@@ -330,6 +350,11 @@ export function MetricsView() {
     return burnRateData[burnRateData.length - 1]!.value;
   }, [burnRateData]);
 
+  const currentRevenue = useMemo(() => {
+    if (!revenueData?.result || revenueData.result.length === 0) return 0;
+    return revenueData.result[revenueData.result.length - 1]!.current.value;
+  }, [revenueData]);
+
   const totalProfit = profitData?.summary?.currentTotal ?? 0;
 
   const forecastedRevenue =
@@ -347,10 +372,10 @@ export function MetricsView() {
       {/* Header */}
       <div className="flex items-center justify-between py-6">
         <div>
-          <h1 className="text-2xl font-normal mb-1">Metrics</h1>
+          <h1 className="text-2xl font-normal mb-1 font-serif">Metrics</h1>
           <p className="text-sm text-muted-foreground">{dateRangeDisplay}</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           {/* Filter Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -433,6 +458,55 @@ export function MetricsView() {
 
       {/* Charts Grid */}
       <div className="space-y-8 pb-8">
+        {/* Monthly Revenue - Full Width */}
+        <div className="border bg-background border-border p-6">
+          <div className="mb-4">
+            <h3 className="text-sm font-normal mb-1 text-muted-foreground">
+              Monthly Revenue
+            </h3>
+            <p className="text-3xl font-normal mb-3">
+              {formatAmount({
+                amount: currentRevenue,
+                currency: currency || "USD",
+                locale,
+                maximumFractionDigits: 0,
+              })}
+            </p>
+            <div className="flex items-center gap-4 mt-2">
+              <div className="flex gap-2 items-center">
+                <div className="w-2 h-2 bg-foreground" />
+                <span className="text-xs text-muted-foreground">This Year</span>
+              </div>
+              <div className="flex gap-2 items-center">
+                <div
+                  className="w-2 h-2"
+                  style={{
+                    backgroundColor: "var(--chart-bar-fill-secondary)",
+                  }}
+                />
+                <span className="text-xs text-muted-foreground">Last Year</span>
+              </div>
+              <div className="flex gap-2 items-center">
+                <div
+                  className="w-4 h-0.5"
+                  style={{
+                    borderTop: "2px dashed hsl(var(--muted-foreground))",
+                  }}
+                />
+                <span className="text-xs text-muted-foreground">Average</span>
+              </div>
+            </div>
+          </div>
+          <div className="h-80">
+            <MonthlyRevenueChart
+              data={monthlyRevenueChartData}
+              height={320}
+              currency={currency}
+              locale={locale}
+            />
+          </div>
+        </div>
+
         {/* Burn Rate - Full Width */}
         <div className="border bg-background border-border p-6">
           <div className="mb-4">
@@ -454,10 +528,9 @@ export function MetricsView() {
               </div>
               <div className="flex gap-2 items-center">
                 <div
-                  className="w-2 h-2"
+                  className="w-4 h-0.5"
                   style={{
-                    background:
-                      "repeating-linear-gradient(45deg, hsl(var(--muted-foreground)), hsl(var(--muted-foreground)) 1px, transparent 1px, transparent 2px)",
+                    borderTop: "2px dashed hsl(var(--muted-foreground))",
                   }}
                 />
                 <span className="text-xs text-muted-foreground">Average</span>
@@ -480,7 +553,7 @@ export function MetricsView() {
           <div className="border bg-background border-border p-6">
             <div className="mb-4">
               <h3 className="text-sm font-normal mb-1 text-muted-foreground">
-                Profit Analysis
+                Profit & Loss
               </h3>
               <p className="text-3xl font-normal">
                 {formatAmount({
