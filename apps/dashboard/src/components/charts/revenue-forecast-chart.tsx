@@ -221,23 +221,25 @@ export function RevenueForecastChart({
               tickFormatter={tickFormatter}
               domain={[yAxisDomain.min, yAxisDomain.max]}
             />
-            {forecastStartMonth && (
-              <ReferenceLine
-                x={forecastStartMonth}
-                stroke="var(--chart-reference-line-stroke)"
-                strokeWidth={1}
-                label={{
-                  value: "Forecast Start",
-                  position: "top",
-                  fill: "var(--chart-reference-label)",
-                  style: {
-                    fontSize: "10px",
+            {forecastStartIndexFinal !== null &&
+              forecastStartIndexFinal !== undefined &&
+              forecastStartIndexFinal >= 0 && (
+                <ReferenceLine
+                  x={forecastStartIndexFinal}
+                  stroke="var(--chart-reference-line-stroke)"
+                  strokeWidth={1}
+                  label={{
+                    value: "Forecast Start",
+                    position: "top",
                     fill: "var(--chart-reference-label)",
-                    textAnchor: "start",
-                  },
-                }}
-              />
-            )}
+                    style: {
+                      fontSize: "10px",
+                      fill: "var(--chart-reference-label)",
+                      textAnchor: "start",
+                    },
+                  }}
+                />
+              )}
             <Tooltip
               content={
                 <CustomTooltip
@@ -260,7 +262,7 @@ export function RevenueForecastChart({
               isAnimationActive={false}
             />
             <Line
-              type="linear"
+              type="monotone"
               dataKey="actual"
               stroke="var(--chart-actual-line)"
               strokeWidth={2}
@@ -279,7 +281,7 @@ export function RevenueForecastChart({
               connectNulls={false}
             />
             <Line
-              type="linear"
+              type="monotone"
               dataKey="forecasted"
               stroke="var(--chart-forecast-line)"
               strokeWidth={2}
