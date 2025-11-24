@@ -3,18 +3,9 @@
 import { RevenueForecastChart } from "@/components/charts/revenue-forecast-chart";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
-import { Button } from "@midday/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 interface RevenueForecastCardProps {
   from: string;
@@ -34,7 +25,6 @@ export function RevenueForecastCard({
   wiggleClass,
 }: RevenueForecastCardProps) {
   const trpc = useTRPC();
-  const [revenueType, setRevenueType] = useState<"net" | "gross">("net");
 
   const { data: revenueForecastData } = useQuery(
     trpc.reports.revenueForecast.queryOptions({
@@ -42,7 +32,7 @@ export function RevenueForecastCard({
       to,
       forecastMonths: 6,
       currency,
-      revenueType,
+      revenueType: "net",
     }),
   );
 
@@ -90,33 +80,12 @@ export function RevenueForecastCard({
   }, [from, to]);
 
   return (
-    <div className="border bg-background border-border p-6">
-      <div className="mb-4">
+    <div className="border bg-background border-border p-6 flex flex-col h-full">
+      <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between mb-1">
           <h3 className="text-sm font-normal text-muted-foreground">
             Revenue Forecast
           </h3>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
-                {revenueType === "net" ? "Net" : "Gross"}
-                <Icons.ChevronDown size={12} className="ml-1" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-32">
-              <DropdownMenuRadioGroup
-                value={revenueType}
-                onValueChange={(value) =>
-                  setRevenueType(value as "net" | "gross")
-                }
-              >
-                <DropdownMenuRadioItem value="net">Net</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="gross">
-                  Gross
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
         <p className="text-3xl font-normal">
           {formatAmount({

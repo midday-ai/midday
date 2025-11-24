@@ -89,11 +89,10 @@ export function RunwayChart({
   // Guard against empty data
   if (!data || data.length === 0) {
     return (
-      <div className={`w-full ${className}`}>
-        <div
-          style={{ height }}
-          className="flex items-center justify-center text-muted-foreground"
-        >
+      <div
+        className={`w-full h-full flex items-center justify-center ${className}`}
+      >
+        <div className="text-xs text-muted-foreground -mt-8">
           No runway data available
         </div>
       </div>

@@ -45,7 +45,7 @@ export function RevenueForecastWidget() {
       to: toStr,
       forecastMonths,
       currency: team?.baseCurrency ?? undefined,
-      revenueType: config?.revenueType ?? "net",
+      revenueType: "net",
     }),
     ...WIDGET_POLLING_CONFIG,
   });
@@ -75,7 +75,6 @@ export function RevenueForecastWidget() {
     const periodLabel = t(
       `widget_period.${config?.period ?? "trailing_12"}` as "widget_period.fiscal_ytd",
     );
-    const revenueTypeLabel = config?.revenueType === "gross" ? "Gross" : "Net";
 
     handleToolCall({
       toolName: "getForecast",
@@ -83,11 +82,11 @@ export function RevenueForecastWidget() {
         from: fromStr,
         to: toStr,
         currency: team?.baseCurrency ?? undefined,
-        revenueType: config?.revenueType ?? "net",
+        revenueType: "net",
         forecastMonths,
         showCanvas: true,
       },
-      text: `Show ${revenueTypeLabel.toLowerCase()} revenue forecast for ${periodLabel} with ${forecastMonths} months forecast`,
+      text: `Show revenue forecast for ${periodLabel} with ${forecastMonths} months forecast`,
     });
   };
 
@@ -122,7 +121,6 @@ export function RevenueForecastWidget() {
           onSave={saveConfig}
           onCancel={() => setIsConfiguring(false)}
           showPeriod
-          showRevenueType
         />
       }
     >

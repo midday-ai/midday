@@ -89,7 +89,13 @@ interface ReportsResultItem {
 
 // Helper function for profit calculation
 export async function getProfit(db: Database, params: GetReportsParams) {
-  const { teamId, from, to, currency: inputCurrency } = params;
+  const {
+    teamId,
+    from,
+    to,
+    currency: inputCurrency,
+    revenueType = "net",
+  } = params;
 
   const fromDate = startOfMonth(new UTCDate(parseISO(from)));
   const toDate = endOfMonth(new UTCDate(parseISO(to)));
@@ -100,33 +106,89 @@ export async function getProfit(db: Database, params: GetReportsParams) {
   // Step 2: Generate month series for complete results
   const monthSeries = eachMonthOfInterval({ start: fromDate, end: toDate });
 
-  // Step 3: Build the main query conditions
-  const conditions = [
+  // Step 3: Get Net Revenue for each month (always use net revenue for profit calculation)
+  const netRevenueData = await getRevenue(db, {
+    teamId,
+    from,
+    to,
+    currency: inputCurrency,
+    revenueType: "net", // Always use net revenue for profit calculations
+  });
+
+  // Step 4: Build the main query conditions for expenses
+  const expenseConditions = [
     eq(transactions.teamId, teamId),
     eq(transactions.internal, false),
     ne(transactions.status, "excluded"),
+    lt(transactions.baseAmount, 0), // Only expenses (negative amounts)
     gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
   ];
 
   // Add currency conditions
   if (inputCurrency && targetCurrency) {
-    conditions.push(eq(transactions.currency, targetCurrency));
+    expenseConditions.push(eq(transactions.currency, targetCurrency));
   } else if (targetCurrency) {
-    conditions.push(eq(transactions.baseCurrency, targetCurrency));
+    expenseConditions.push(eq(transactions.baseCurrency, targetCurrency));
   }
 
-  // Step 4: Execute the aggregated query
-  const monthlyData = await db
+  // Step 5: First, get the COGS parent category ID
+  const cogsParentCategory = await db
+    .select({ id: transactionCategories.id })
+    .from(transactionCategories)
+    .where(
+      and(
+        eq(transactionCategories.teamId, teamId),
+        eq(transactionCategories.slug, "cost-of-goods-sold"),
+        isNull(transactionCategories.parentId), // Parent category has no parent
+      ),
+    )
+    .limit(1);
+
+  const cogsParentId = cogsParentCategory[0]?.id;
+
+  // Step 6: Get all COGS category slugs (child categories under "cost-of-goods-sold")
+  let cogsCategorySlugs: string[] = [];
+  if (cogsParentId) {
+    const cogsCategories = await db
+      .select({ slug: transactionCategories.slug })
+      .from(transactionCategories)
+      .where(
+        and(
+          eq(transactionCategories.teamId, teamId),
+          eq(transactionCategories.parentId, cogsParentId),
+          or(
+            isNull(transactionCategories.excluded),
+            eq(transactionCategories.excluded, false),
+          )!,
+        ),
+      );
+
+    cogsCategorySlugs = cogsCategories
+      .map((cat) => cat.slug)
+      .filter((slug): slug is string => slug !== null);
+  }
+
+  // Step 7: Get COGS expenses (categories under "cost-of-goods-sold" parent)
+  const cogsConditions = [...expenseConditions];
+  if (cogsCategorySlugs.length > 0) {
+    cogsConditions.push(
+      isNotNull(transactions.categorySlug),
+      inArray(transactions.categorySlug, cogsCategorySlugs),
+    );
+  } else {
+    // No COGS categories found, so no COGS expenses
+    cogsConditions.push(sql`1 = 0`); // Always false
+  }
+
+  const cogsData = await db
     .select({
       month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
-      value: sql<number>`COALESCE(SUM(
-${
-  inputCurrency
-    ? transactions.amount
-    : sql`COALESCE(${transactions.baseAmount}, 0)`
-}
-      ), 0)`,
+      value: sql<number>`COALESCE(SUM(ABS(${
+        inputCurrency
+          ? transactions.amount
+          : sql`COALESCE(${transactions.baseAmount}, 0)`
+      })), 0)`,
     })
     .from(transactions)
     .leftJoin(
@@ -138,9 +200,8 @@ ${
     )
     .where(
       and(
-        ...conditions,
+        ...cogsConditions,
         or(
-          isNull(transactions.categorySlug),
           isNull(transactionCategories.excluded),
           eq(transactionCategories.excluded, false),
         )!,
@@ -149,19 +210,80 @@ ${
     .groupBy(sql`DATE_TRUNC('month', ${transactions.date})`)
     .orderBy(sql`DATE_TRUNC('month', ${transactions.date}) ASC`);
 
-  // Step 5: Create a map of month data for quick lookup
-  const dataMap = new Map(monthlyData.map((item) => [item.month, item.value]));
+  // Step 8: Get Operating Expenses (all expenses EXCEPT COGS)
+  // This includes expenses from non-COGS categories and uncategorized expenses
+  const operatingExpensesConditions = [...expenseConditions];
+  if (cogsCategorySlugs.length > 0) {
+    // Exclude COGS categories
+    operatingExpensesConditions.push(
+      or(
+        isNull(transactions.categorySlug), // Uncategorized expenses are operating expenses
+        not(inArray(transactions.categorySlug, cogsCategorySlugs)), // Not a COGS category
+      )!,
+    );
+  }
 
-  // Step 6: Generate complete results (optimized)
+  const operatingExpensesData = await db
+    .select({
+      month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
+      value: sql<number>`COALESCE(SUM(ABS(${
+        inputCurrency
+          ? transactions.amount
+          : sql`COALESCE(${transactions.baseAmount}, 0)`
+      })), 0)`,
+    })
+    .from(transactions)
+    .leftJoin(
+      transactionCategories,
+      and(
+        eq(transactionCategories.slug, transactions.categorySlug),
+        eq(transactionCategories.teamId, teamId),
+      ),
+    )
+    .where(
+      and(
+        ...operatingExpensesConditions,
+        or(
+          isNull(transactionCategories.excluded),
+          eq(transactionCategories.excluded, false),
+        )!,
+      ),
+    )
+    .groupBy(sql`DATE_TRUNC('month', ${transactions.date})`)
+    .orderBy(sql`DATE_TRUNC('month', ${transactions.date}) ASC`);
+
+  // Step 9: Create maps for quick lookup
+  const netRevenueMap = new Map(
+    netRevenueData.map((item) => [item.date, Number.parseFloat(item.value)]),
+  );
+  const cogsMap = new Map(cogsData.map((item) => [item.month, item.value]));
+  const operatingExpensesMap = new Map(
+    operatingExpensesData.map((item) => [item.month, item.value]),
+  );
+
+  // Step 10: Calculate profit for each month
   const currencyStr = targetCurrency || "USD";
   const results: ReportsResultItem[] = monthSeries.map((monthStart) => {
     const monthKey = format(monthStart, "yyyy-MM-dd");
-    const value = dataMap.get(monthKey) || 0;
+    const netRevenue = netRevenueMap.get(monthKey) || 0;
+    const cogs = cogsMap.get(monthKey) || 0;
+    const operatingExpenses = operatingExpensesMap.get(monthKey) || 0;
+
+    // Calculate profit based on revenueType
+    let profit: number;
+    if (revenueType === "gross") {
+      // Gross Profit = Net Revenue - COGS
+      profit = netRevenue - cogs;
+    } else {
+      // Net Profit = Net Revenue - COGS - Operating Expenses
+      // OR: Net Profit = Gross Profit - Operating Expenses
+      profit = netRevenue - cogs - operatingExpenses;
+    }
 
     return {
       date: monthKey,
-      value: value.toString(),
-      currency: currencyStr, // Avoid repeated string operations
+      value: profit.toString(),
+      currency: currencyStr,
     };
   });
 
@@ -1325,20 +1447,22 @@ export async function getProfitMargin(
   const targetCurrency = await getTargetCurrency(db, teamId, inputCurrency);
 
   // Get revenue and profit data in parallel
+  // Note: For profit margin calculation, we always use Net Revenue as the denominator
+  // because Gross Profit = Net Revenue - COGS, and Net Profit = Gross Profit - Operating Expenses
   const [revenueData, profitData] = await Promise.all([
     getRevenue(db, {
       teamId,
       from,
       to,
       currency: inputCurrency,
-      revenueType,
+      revenueType: "net", // Always use net revenue for profit margin denominator
     }),
     getProfit(db, {
       teamId,
       from,
       to,
       currency: inputCurrency,
-      revenueType,
+      revenueType, // Use the provided revenueType to determine gross vs net profit
     }),
   ]);
 

@@ -34,7 +34,6 @@ import {
   getRecentDocuments,
   getRecurringExpenses,
   getReports,
-  getRevenue,
   getRunway,
   getSpending,
   getSpendingForPeriod,
