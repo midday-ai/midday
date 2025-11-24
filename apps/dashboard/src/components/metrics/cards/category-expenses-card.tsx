@@ -1,6 +1,9 @@
 "use client";
 
-import { CategoryExpenseDonutChart } from "@/components/charts/category-expense-donut-chart";
+import {
+  CategoryExpenseDonutChart,
+  grayShades,
+} from "@/components/charts/category-expense-donut-chart";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
 import { useQuery } from "@tanstack/react-query";
@@ -87,8 +90,7 @@ export function CategoryExpensesCard({
                 <div
                   className="w-2 h-2 rounded-full"
                   style={{
-                    backgroundColor:
-                      idx === 0 ? "#ffffff" : idx === 1 ? "#707070" : "#666666",
+                    backgroundColor: grayShades[idx % grayShades.length],
                   }}
                 />
                 <span className="text-xs text-muted-foreground">

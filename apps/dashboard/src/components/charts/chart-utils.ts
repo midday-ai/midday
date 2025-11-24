@@ -66,13 +66,13 @@ export const createYAxisTickFormatter = (currency: string, locale?: string) => {
   };
 };
 
-// Formatter for runway months (e.g., "10.5M", "8.2M", "0.0M")
+// Formatter for runway months (e.g., "10.5mo", "8.2mo", "0.0mo")
 export const createMonthsTickFormatter = () => {
   return (value: number): string => {
     // Handle edge cases
-    if (!Number.isFinite(value)) return "0.0M";
-    if (value === 0) return "0.0M";
-    return `${value.toFixed(1)}M`;
+    if (!Number.isFinite(value)) return "0.0mo";
+    if (value === 0) return "0.0mo";
+    return `${value.toFixed(1)}mo`;
   };
 };
 
