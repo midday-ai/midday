@@ -63,18 +63,15 @@ export function MonthlyRevenueCard({
     }));
   }, [revenueData]);
 
-  const currentRevenue = useMemo(() => {
-    if (!revenueData?.result || revenueData.result.length === 0) return 0;
-    return revenueData.result[revenueData.result.length - 1]!.current.value;
+  const totalRevenue = useMemo(() => {
+    return revenueData?.summary?.currentTotal ?? 0;
   }, [revenueData]);
 
   return (
     <div className="border bg-background border-border p-6">
       <div className="mb-4">
         <div className="flex items-start justify-between mb-1">
-          <h3 className="text-sm font-normal text-muted-foreground">
-            Monthly Revenue
-          </h3>
+          <h3 className="text-sm font-normal text-muted-foreground">Revenue</h3>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
@@ -99,7 +96,7 @@ export function MonthlyRevenueCard({
         </div>
         <p className="text-3xl font-normal mb-3">
           {formatAmount({
-            amount: currentRevenue,
+            amount: totalRevenue,
             currency,
             locale,
             maximumFractionDigits: 0,
