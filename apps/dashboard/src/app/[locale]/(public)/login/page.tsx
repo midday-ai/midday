@@ -174,11 +174,11 @@ export default async function Page() {
               <div className="text-center absolute bottom-4 left-0 right-0">
                 <p className="text-xs text-[#878787] leading-relaxed font-mono">
                   By signing in you agree to our{" "}
-                  <Link href="https://midday.ai/terms" className="underline">
+                  <Link href="https://er0s.co/terms" className="underline">
                     Terms of service
                   </Link>{" "}
                   &{" "}
-                  <Link href="https://midday.ai/policy" className="underline">
+                  <Link href="https://er0s.co/policy" className="underline">
                     Privacy policy
                   </Link>
                 </p>

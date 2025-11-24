@@ -5,7 +5,7 @@ import { ImageResponse } from "next/og";
 
 export const contentType = "image/png";
 
-const CDN_URL = "https://cdn.midday.ai";
+const CDN_URL = "https://cdn.er0s.co";
 
 type Props = {
   params: { token: string };

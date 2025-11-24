@@ -166,8 +166,8 @@ app.doc("/openapi", {
       "Midday is a platform for Invoicing, Time tracking, File reconciliation, Storage, Financial Overview & your own Assistant.",
     contact: {
       name: "Midday Support",
-      email: "engineer@midday.ai",
-      url: "https://midday.ai",
+      email: "engineer@er0s.co",
+      url: "https://er0s.co",
     },
     license: {
       name: "AGPL-3.0 license",
@@ -176,7 +176,7 @@ app.doc("/openapi", {
   },
   servers: [
     {
-      url: "https://api.midday.ai",
+      url: "https://api.er0s.co",
       description: "Production API",
     },
   ],

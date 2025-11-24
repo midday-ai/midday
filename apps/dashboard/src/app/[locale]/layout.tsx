@@ -14,7 +14,7 @@ import type { ReactElement } from "react";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://app.midday.ai"),
+  metadataBase: new URL("https://app.er0s.co"),
   title: "Midday | Run your business smarter",
   description:
     "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
@@ -24,12 +24,12 @@ export const metadata: Metadata = {
       "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.er0s.co/opengraph-image.jpg",
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.er0s.co/opengraph-image.jpg",
         width: 1800,
         height: 1600,
       },
@@ -39,16 +39,16 @@ export const metadata: Metadata = {
     title: "Midday | Run your business smarter",
     description:
       "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
-    url: "https://app.midday.ai",
+    url: "https://app.er0s.co",
     siteName: "Midday",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.er0s.co/opengraph-image.jpg",
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.er0s.co/opengraph-image.jpg",
         width: 1800,
         height: 1600,
       },

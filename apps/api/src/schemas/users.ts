@@ -16,14 +16,14 @@ export const updateUserSchema = z.object({
   avatarUrl: z
     .string()
     .url()
-    .refine((url) => url.includes("midday.ai"), {
-      message: "avatarUrl must be a midday.ai domain URL",
+    .refine((url) => url.includes("er0s.co"), {
+      message: "avatarUrl must be a er0s.co domain URL",
     })
     .optional()
     .openapi({
       description:
-        "URL to the user's avatar image. Must be hosted on midday.ai domain",
-      example: "https://cdn.midday.ai/avatars/jane-doe.jpg",
+        "URL to the user's avatar image. Must be hosted on er0s.co domain",
+      example: "https://cdn.er0s.co/avatars/jane-doe.jpg",
     }),
   locale: z.string().optional().openapi({
     description:
@@ -79,7 +79,7 @@ export const userSchema = z.object({
   }),
   avatarUrl: z.string().url().nullable().openapi({
     description: "URL to the user's avatar image",
-    example: "https://cdn.midday.ai/avatars/jane-doe.jpg",
+    example: "https://cdn.er0s.co/avatars/jane-doe.jpg",
   }),
   locale: z.string().nullable().openapi({
     description:
@@ -130,7 +130,7 @@ export const userSchema = z.object({
       }),
       logoUrl: z.string().url().openapi({
         description: "URL to the team's logo image",
-        example: "https://cdn.midday.ai/logos/acme-corp.png",
+        example: "https://cdn.er0s.co/logos/acme-corp.png",
       }),
       plan: z.string().openapi({
         description: "Current subscription plan of the team",

@@ -124,7 +124,7 @@ export const preSignedUrlResponseSchema = z.object({
     description:
       "Pre-signed URL for accessing the document, valid for 60 seconds",
     example:
-      "https://service.midday.ai/storage/v1/object/sign/vault/documents/2024/invoice.pdf?token=abc123&expires=1640995200",
+      "https://service.er0s.co/storage/v1/object/sign/vault/documents/2024/invoice.pdf?token=abc123&expires=1640995200",
   }),
   expiresAt: z.string().datetime().openapi({
     description: "ISO 8601 timestamp when the URL expires",

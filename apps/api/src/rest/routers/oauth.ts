@@ -289,7 +289,7 @@ app.openapi(
           );
 
           await resend.emails.send({
-            from: "Midday <middaybot@midday.ai>",
+            from: "Midday <middaybot@er0s.co>",
             to: session.user.email,
             subject: "An app has been added to your team",
             html,

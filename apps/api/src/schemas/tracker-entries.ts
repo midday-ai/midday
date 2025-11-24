@@ -180,7 +180,7 @@ export const trackerEntryResponseSchema = z.object({
       }),
       avatarUrl: z.string().openapi({
         description: "URL to the user's avatar image",
-        example: "https://cdn.midday.ai/avatar.jpg",
+        example: "https://cdn.er0s.co/avatar.jpg",
       }),
     })
     .openapi({

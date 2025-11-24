@@ -61,10 +61,10 @@ export class PlaidApi {
 
   #generateWebhookUrl(environment: "sandbox" | "production") {
     if (environment === "sandbox") {
-      return "https://staging.app.midday.ai/api/webhook/plaid";
+      return "https://staging.app.er0s.co/api/webhook/plaid";
     }
 
-    return "https://app.midday.ai/api/webhook/plaid";
+    return "https://app.er0s.co/api/webhook/plaid";
   }
 
   async getHealthCheck() {

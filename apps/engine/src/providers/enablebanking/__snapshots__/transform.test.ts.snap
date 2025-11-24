@@ -50,7 +50,7 @@ exports[`Transform account 1`] = `
   "id": "83435345-d61cb425f293",
   "institution": {
     "id": "7df7c347a9cf",
-    "logo": "https://cdn-engine.midday.ai/SEB.png",
+    "logo": "https://cdn-engine.er0s.co/SEB.png",
     "name": "SEB",
     "provider": "enablebanking",
   },

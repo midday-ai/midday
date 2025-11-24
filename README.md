@@ -6,16 +6,16 @@
     Run your business smarter
     <br />
     <br />
-    <a href="https://go.midday.ai/anPiuRx">Discord</a>
+    <a href="https://go.er0s.co/anPiuRx">Discord</a>
     ·
-    <a href="https://midday.ai">Website</a>
+    <a href="https://er0s.co">Website</a>
     ·
     <a href="https://github.com/midday-ai/midday/issues">Issues</a>
   </p>
 </p>
 
 <p align="center">
-  <a href="https://go.midday.ai/K7GwMoQ">
+  <a href="https://go.er0s.co/K7GwMoQ">
     <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
   </a>
 </p>
@@ -39,7 +39,7 @@ Midday is an all-in-one tool designed to help freelancers, contractors, consulta
 
 ## Get started
 
-We are working on the documentation to get started with Midday for local development: https://docs.midday.ai
+We are working on the documentation to get started with Midday for local development: https://docs.er0s.co
 
 ## App Architecture
 
@@ -86,6 +86,6 @@ This project is licensed under the **[AGPL-3.0](https://opensource.org/licenses/
 ### Commercial Use
 
 For commercial use or deployments requiring a setup fee, please contact us
-for a commercial license at [engineer@midday.ai](mailto:engineer@midday.ai).
+for a commercial license at [engineer@er0s.co](mailto:engineer@er0s.co).
 
 By using this software, you agree to the terms of the license.

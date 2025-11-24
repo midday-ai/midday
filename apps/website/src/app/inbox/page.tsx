@@ -56,7 +56,7 @@ export default function Page() {
         </div>
 
         <CopyInput
-          value="inbox.f3f1s@midday.ai"
+          value="inbox.f3f1s@er0s.co"
           className="max-w-[240px] mt-8"
         />
 

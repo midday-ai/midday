@@ -1,7 +1,7 @@
 import { getBlogPosts } from "@/lib/blog";
 import type { MetadataRoute } from "next";
 
-export const baseUrl = "https://midday.ai";
+export const baseUrl = "https://er0s.co";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const blogs = getBlogPosts().map((post) => ({

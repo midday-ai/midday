@@ -44,7 +44,7 @@ export const oauthAuthorizationResponseSchema = z.object({
   authorize_url: z.string().url().openapi({
     description: "URL to redirect user for authorization",
     example:
-      "https://app.midday.ai/oauth/authorize?client_id=mid_abcdef123456789&...",
+      "https://app.er0s.co/oauth/authorize?client_id=mid_abcdef123456789&...",
   }),
 });
 
@@ -167,7 +167,7 @@ export const oauthErrorResponseSchema = z.object({
   }),
   error_uri: z.string().url().optional().openapi({
     description: "URI to a human-readable error page",
-    example: "https://docs.midday.ai/errors/invalid_request",
+    example: "https://docs.er0s.co/errors/invalid_request",
   }),
   // SECURITY: Enhanced state parameter validation (optional for error responses)
   state: z

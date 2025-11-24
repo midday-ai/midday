@@ -14,7 +14,7 @@ export const InstitutionSchema = z
       .string()
       .openapi({
         example:
-          "https://cdn.midday.ai/institution/9293961c-df93-4d6d-a2cc-fc3e353b2d10.jpg",
+          "https://cdn.er0s.co/institution/9293961c-df93-4d6d-a2cc-fc3e353b2d10.jpg",
       })
       .nullable(),
     available_history: z

@@ -127,7 +127,7 @@ export function SignUpCard({
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 2.2 }}
       >
-        <a href="https://app.midday.ai">
+        <a href="https://app.er0s.co">
           <Button>Sign up</Button>
         </a>
       </motion.div>

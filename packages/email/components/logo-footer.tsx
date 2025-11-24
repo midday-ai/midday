@@ -32,7 +32,7 @@ export function LogoFooter() {
           }
         `}</style>
 
-      <Link href="https://go.midday.ai/FZwOHud">
+      <Link href="https://go.er0s.co/FZwOHud">
         <Img
           src={`${baseUrl}/email/logo-footer.png`}
           width="80"

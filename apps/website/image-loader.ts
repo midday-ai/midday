@@ -9,5 +9,5 @@ export default function imageLoader({
   width,
   quality = 80,
 }: ImageLoaderParams): string {
-  return `https://midday.ai/cdn-cgi/image/width=${width},quality=${quality}/${src}`;
+  return `https://er0s.co/cdn-cgi/image/width=${width},quality=${quality}/${src}`;
 }

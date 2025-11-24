@@ -1,10 +1,10 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "Midday.ai Docs",
+  "name": "er0s.co Docs",
   "logo": {
     "dark": "/logos/logotype-dark.svg",
     "light": "/logos/logotype.svg",
-    "href": "https://midday.ai"
+    "href": "https://er0s.co"
   },
   "favicon": "/logos/favicon.png",
   "colors": {
@@ -23,14 +23,14 @@
   "topbarLinks": [
     {
       "name": "Support",
-      "url": "mailto:support@midday.ai"
+      "url": "mailto:support@er0s.co"
     }
   ],
   "topbarCtaButton": {
     "name": "Dashboard",
-    "url": "https://app.midday.ai"
+    "url": "https://app.er0s.co"
   },
-  "openapi": "https://engine.midday.ai/openapi",
+  "openapi": "https://engine.er0s.co/openapi",
   "tabs": [
     {
       "name": "Engine API Reference",
@@ -41,7 +41,7 @@
     {
       "name": "Help Center",
       "icon": "question",
-      "url": "https://midday.ai/support"
+      "url": "https://er0s.co/support"
     },
     {
       "name": "GitHub",
@@ -91,7 +91,7 @@
   "footerSocials": {
     "twitter": "https://twitter.com/middayai",
     "github": "https://git.new/midday",
-    "website": "https://midday.ai",
+    "website": "https://er0s.co",
     "linkedin": "https://www.linkedin.com/company/midday-ai"
   }
 }

@@ -137,7 +137,7 @@ export class EmailService {
     const recipients = email.to || [email.user.email];
 
     const payload: CreateEmailOptions = {
-      from: email.from || "Midday <middaybot@midday.ai>",
+      from: email.from || "Midday <middaybot@er0s.co>",
       to: recipients,
       subject: email.subject,
       html,

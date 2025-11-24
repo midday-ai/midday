@@ -32,12 +32,12 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.er0s.co/opengraph-image.jpg",
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.er0s.co/opengraph-image.jpg",
         width: 1800,
         height: 1600,
       },
@@ -49,12 +49,12 @@ export const metadata: Metadata = {
       "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.er0s.co/opengraph-image.jpg",
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.er0s.co/opengraph-image.jpg",
         width: 1800,
         height: 1600,
       },

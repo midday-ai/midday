@@ -25,7 +25,7 @@ app.use(securityMiddleware);
 app.use(loggingMiddleware);
 
 app.get("/", (c) => {
-  return c.redirect("https://midday.ai", 302);
+  return c.redirect("https://er0s.co", 302);
 });
 
 export const appRoutes = app

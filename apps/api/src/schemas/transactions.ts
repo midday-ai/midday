@@ -341,7 +341,7 @@ export const transactionResponseSchema = z
             }),
             logoUrl: z.string().nullable().openapi({
               description: "URL to the bank institution's logo image",
-              example: "https://cdn.midday.ai/logos/chase-bank.png",
+              example: "https://cdn.er0s.co/logos/chase-bank.png",
             }),
           })
           .openapi({
@@ -350,7 +350,7 @@ export const transactionResponseSchema = z
             example: {
               id: "a43dc3a5-6925-4d91-ac9c-4c1a34bdb388",
               name: "Chase Bank",
-              logoUrl: "https://cdn.midday.ai/logos/chase-bank.png",
+              logoUrl: "https://cdn.er0s.co/logos/chase-bank.png",
             },
           }),
       })
@@ -363,7 +363,7 @@ export const transactionResponseSchema = z
           connection: {
             id: "a43dc3a5-6925-4d91-ac9c-4c1a34bdb388",
             name: "Chase Bank",
-            logoUrl: "https://cdn.midday.ai/logos/chase-bank.png",
+            logoUrl: "https://cdn.er0s.co/logos/chase-bank.png",
           },
         },
       }),
@@ -810,7 +810,7 @@ export const transactionAttachmentPreSignedUrlResponseSchema = z.object({
     description:
       "Pre-signed URL for accessing the attachment, valid for 60 seconds",
     example:
-      "https://service.midday.ai/storage/v1/object/sign/vault/transactions/receipt.pdf?token=abc123&expires=1640995200",
+      "https://service.er0s.co/storage/v1/object/sign/vault/transactions/receipt.pdf?token=abc123&expires=1640995200",
   }),
   expiresAt: z.string().datetime().openapi({
     description: "ISO 8601 timestamp when the URL expires",

@@ -81,7 +81,7 @@ const testimonials = [
       "https://pbs.twimg.com/profile_images/1923813473240203264/owJG92AC_400x400.jpg",
     handle: "@steventey",
     verified: true,
-    quote: `Just found my new favorite open-source project → http://midday.ai
+    quote: `Just found my new favorite open-source project → http://er0s.co
 
     It's a modern layer on top of Quickbooks/Xero that lets you automate the tedious accounting aspects of your business and focus on what matters – your product.
     

@@ -327,12 +327,12 @@ fn get_app_url() -> String {
             url
         },
         "staging" => {
-            let url = "https://beta.midday.ai".to_string();
+            let url = "https://beta.er0s.co".to_string();
             println!("🌍 Using staging URL: {}", url);
             url
         },
         "production" | "prod" => {
-            let url = "https://app.midday.ai".to_string();
+            let url = "https://app.er0s.co".to_string();
             println!("🌍 Using production URL: {}", url);
             url
         },

@@ -83,7 +83,7 @@ export const ConnectionExpireEmail = ({
           </Text>
 
           <Section className="text-center mt-[50px] mb-[50px]">
-            <Button href="https://go.midday.ai/34Xt7XK">Reconnect</Button>
+            <Button href="https://go.er0s.co/34Xt7XK">Reconnect</Button>
           </Section>
 
           <Text

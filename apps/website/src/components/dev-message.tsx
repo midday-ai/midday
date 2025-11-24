@@ -17,7 +17,7 @@ export function DevMessage() {
       ╚═╝     ╚═╝╚═╝╚═════╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   
       -------------------------------------------------
     We are open source: https://git.new/midday
-    Join the community: https://go.midday.ai/anPiuRx
+    Join the community: https://go.er0s.co/anPiuRx
     
     `);
       ref.current = true;

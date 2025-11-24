@@ -26,14 +26,14 @@ export function BankLogo({ src, alt, size = 34 }: Props) {
         />
       ) : (
         <AvatarImage
-          src="https://cdn-engine.midday.ai/default.jpg"
+          src="https://cdn-engine.er0s.co/default.jpg"
           alt={alt}
           className="object-contain"
         />
       )}
       <AvatarFallback>
         <AvatarImage
-          src="https://cdn-engine.midday.ai/default.jpg"
+          src="https://cdn-engine.er0s.co/default.jpg"
           alt={alt}
           className="object-contain"
         />

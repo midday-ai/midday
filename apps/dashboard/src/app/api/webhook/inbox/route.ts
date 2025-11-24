@@ -20,7 +20,7 @@ const ipRange = [
   "18.217.206.57",
 ];
 
-const FORWARD_FROM_EMAIL = "inbox@midday.ai";
+const FORWARD_FROM_EMAIL = "inbox@er0s.co";
 
 // These are used by Google Workspace to forward emails to our inbox
 const ALLOWED_FORWARDING_EMAILS = ["forwarding-noreply@google.com"];

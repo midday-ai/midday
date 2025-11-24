@@ -226,7 +226,7 @@ function Video({ src }: { src: string }) {
         src={src}
         onClick={togglePlay}
         autoPlay={false}
-        poster="https://cdn.midday.ai/guy-cover.png"
+        poster="https://cdn.er0s.co/guy-cover.png"
         playerRef={playerRef}
         className="w-full"
       />

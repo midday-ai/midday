@@ -31,7 +31,7 @@ exports[`Transform accounts 1`] = `
   "id": "b11e5627-cac8-41c9-a74a-2b88438fe07d",
   "institution": {
     "id": "PLEO_PLEODK00",
-    "logo": "https://cdn-engine.midday.ai/PLEO_PLEODK00.png",
+    "logo": "https://cdn-engine.er0s.co/PLEO_PLEODK00.png",
     "name": "Pleo",
     "provider": "gocardless",
   },

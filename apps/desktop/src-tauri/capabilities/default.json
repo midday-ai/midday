@@ -32,8 +32,8 @@
   "remote": {
     "urls": [
       "http://localhost:3001/**",
-      "https://beta.midday.ai/**",
-      "https://app.midday.ai/**"
+      "https://beta.er0s.co/**",
+      "https://app.er0s.co/**"
     ]
   },
   "platforms": ["macOS"]

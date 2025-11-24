@@ -48,7 +48,7 @@ export function Hero() {
               </Button>
             </Link>
 
-            <a href="https://app.midday.ai">
+            <a href="https://app.er0s.co">
               <Button className="h-11 px-5">Start free trial</Button>
             </a>
           </div>

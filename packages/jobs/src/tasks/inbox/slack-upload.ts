@@ -140,7 +140,7 @@ export const inboxSlackUpload = schemaTask({
                       text: "Show receipt",
                       emoji: true,
                     },
-                    url: `https://app.midday.ai/inbox?id=${encodeURIComponent(updatedInbox.id)}`,
+                    url: `https://app.er0s.co/inbox?id=${encodeURIComponent(updatedInbox.id)}`,
                     action_id: "view_receipt",
                   },
                 ],

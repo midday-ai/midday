@@ -3,7 +3,7 @@ export function getAppUrl() {
     process.env.VERCEL_ENV === "production" ||
     process.env.NODE_ENV === "production"
   ) {
-    return "https://app.midday.ai";
+    return "https://app.er0s.co";
   }
 
   if (process.env.VERCEL_ENV === "preview") {
@@ -18,7 +18,7 @@ export function getEmailUrl() {
     return "http://localhost:3000";
   }
 
-  return "https://midday.ai";
+  return "https://er0s.co";
 }
 
 export function getWebsiteUrl() {
@@ -26,7 +26,7 @@ export function getWebsiteUrl() {
     process.env.VERCEL_ENV === "production" ||
     process.env.NODE_ENV === "production"
   ) {
-    return "https://midday.ai";
+    return "https://er0s.co";
   }
 
   if (process.env.VERCEL_ENV === "preview") {
@@ -37,5 +37,5 @@ export function getWebsiteUrl() {
 }
 
 export function getCdnUrl() {
-  return "https://cdn.midday.ai";
+  return "https://cdn.er0s.co";
 }

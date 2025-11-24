@@ -13,8 +13,8 @@ A Tauri-based desktop application for Midday that supports multiple environments
 The desktop app supports three environments, each loading a different URL:
 
 - **Development**: `http://localhost:3001`
-- **Staging**: `https://beta.midday.ai`
-- **Production**: `https://app.midday.ai`
+- **Staging**: `https://beta.er0s.co`
+- **Production**: `https://app.er0s.co`
 
 ## Running the App
 
@@ -26,13 +26,13 @@ bun run tauri:dev
 
 ### Staging Mode
 ```bash
-# Run in staging environment (loads beta.midday.ai)
+# Run in staging environment (loads beta.er0s.co)
 bun run tauri:staging
 ```
 
 ### Production Mode
 ```bash
-# Run in production environment (loads app.midday.ai)
+# Run in production environment (loads app.er0s.co)
 bun run tauri:prod
 ```
 
@@ -58,8 +58,8 @@ bun run tauri:build:prod
 The environment is controlled by the `MIDDAY_ENV` environment variable:
 
 - `development` or `dev` → `http://localhost:3001`
-- `staging` → `https://beta.midday.ai`
-- `production` or `prod` → `https://app.midday.ai`
+- `staging` → `https://beta.er0s.co`
+- `production` or `prod` → `https://app.er0s.co`
 
 If no environment is specified, it defaults to development mode.
 

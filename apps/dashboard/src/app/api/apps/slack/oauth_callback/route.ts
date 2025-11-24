@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
               elements: [
                 {
                   type: "mrkdwn",
-                  text: "<https://app.midday.ai/apps?app=slack&settings=true|Notification settings>",
+                  text: "<https://app.er0s.co/apps?app=slack&settings=true|Notification settings>",
                 },
               ],
             },

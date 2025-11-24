@@ -1,4 +1,4 @@
-Contact: security@midday.ai
+Contact: security@er0s.co
 Preferred-Languages: en
-Canonical: https://midday.ai/.well-known/security.txt
+Canonical: https://er0s.co/.well-known/security.txt
 Policy: https://github.com/midday-ai/midday/blob/main/SECURITY.md

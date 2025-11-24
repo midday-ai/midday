@@ -69,7 +69,7 @@ exports[`Transform accounts 1`] = `
   "id": "kKZWQnoZVqcBeN71qdyoh8mVoErgb7tL7gmBL",
   "institution": {
     "id": "ins_100546",
-    "logo": "https://cdn-engine.midday.ai/ins_100546.jpg",
+    "logo": "https://cdn-engine.er0s.co/ins_100546.jpg",
     "name": "American Funds Retirement Solutions",
     "provider": "plaid",
   },

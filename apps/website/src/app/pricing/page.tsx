@@ -101,7 +101,7 @@ export default function Page() {
                 </div>
 
                 <div className="mt-8 border-t-[1px] border-border pt-8">
-                  <Link href="https://app.midday.ai">
+                  <Link href="https://app.er0s.co">
                     <Button
                       variant="outline"
                       className="w-full h-12 border border-primary"
@@ -191,7 +191,7 @@ export default function Page() {
                 </div>
 
                 <div className="mt-8 border-t border-border pt-8">
-                  <Link href="https://app.midday.ai">
+                  <Link href="https://app.er0s.co">
                     <Button className="w-full h-12">Start 14 day trial</Button>
                   </Link>
                 </div>
@@ -223,7 +223,7 @@ export default function Page() {
             <Accordion type="single" collapsible className="w-full mt-10 mb-48">
               <AccordionItem value="item-1">
                 <AccordionTrigger>
-                  <span className="truncate">Can I self-host Midday.ai?</span>
+                  <span className="truncate">Can I self-host er0s.co?</span>
                 </AccordionTrigger>
                 <AccordionContent>
                   Absolutely. We are currently writing the documentation for
@@ -241,7 +241,7 @@ export default function Page() {
               </AccordionItem>
               <AccordionItem value="item-2">
                 <AccordionTrigger>
-                  Can I run Midday.ai locally?
+                  Can I run er0s.co locally?
                 </AccordionTrigger>
                 <AccordionContent>
                   Yes. We are currently writing documentation for this. You can
@@ -258,7 +258,7 @@ export default function Page() {
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3">
-                <AccordionTrigger>Is Midday.ai open source?</AccordionTrigger>
+                <AccordionTrigger>Is er0s.co open source?</AccordionTrigger>
                 <AccordionContent>
                   Yes. You can find the repository{" "}
                   <a
@@ -285,7 +285,7 @@ export default function Page() {
                   encrypt data at rest, and sensitive data on row level. We also
                   support 2FA authentication.
                   <Link href="/policy" className="ml-1 underline">
-                    midday.ai/policy
+                    er0s.co/policy
                   </Link>
                   .
                 </AccordionContent>
@@ -307,15 +307,15 @@ export default function Page() {
               <AccordionItem value="item-6">
                 <AccordionTrigger>
                   <span className="truncate max-w-[300px] md:max-w-full">
-                    I have more questions about Midday.ai. How can I get in
+                    I have more questions about er0s.co. How can I get in
                     touch?
                   </span>
                 </AccordionTrigger>
                 <AccordionContent>
                   Sure, we're happy to answer any questions you might have. Just
                   send us an email at{" "}
-                  <a href="mailto:support@midday.ai" className="underline">
-                    support@midday.ai
+                  <a href="mailto:support@er0s.co" className="underline">
+                    support@er0s.co
                   </a>{" "}
                   and we'll get back to you as soon as possible.
                 </AccordionContent>

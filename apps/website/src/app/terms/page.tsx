@@ -203,7 +203,7 @@ export default function Page() {
 
           <p className="leading-7 mt-8">
             If you believe your work has been used in a way that constitutes
-            infringement, please email dmca@midday.ai with:
+            infringement, please email dmca@er0s.co with:
           </p>
           <ul className="list-disc pl-6 mt-4">
             <li className="leading-7">
@@ -351,7 +351,7 @@ export default function Page() {
             For questions regarding these Terms, contact:
           </p>
 
-          <p className="leading-7 mt-8">support@midday.ai</p>
+          <p className="leading-7 mt-8">support@er0s.co</p>
         </div>
       </div>
     </>

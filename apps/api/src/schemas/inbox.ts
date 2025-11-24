@@ -280,7 +280,7 @@ export const inboxPreSignedUrlResponseSchema = z.object({
     description:
       "Pre-signed URL for accessing the inbox attachment, valid for 60 seconds",
     example:
-      "https://service.midday.ai/storage/v1/object/sign/vault/inbox/document.pdf?token=abc123&expires=1640995200",
+      "https://service.er0s.co/storage/v1/object/sign/vault/inbox/document.pdf?token=abc123&expires=1640995200",
   }),
   expiresAt: z.string().datetime().openapi({
     description: "ISO 8601 timestamp when the URL expires",

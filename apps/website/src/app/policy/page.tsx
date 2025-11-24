@@ -607,7 +607,7 @@ export default function Page() {
             us:
           </p>
           <ul>
-            <li>By email: support@midday.ai</li>
+            <li>By email: support@er0s.co</li>
           </ul>
         </div>
       </div>

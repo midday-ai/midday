@@ -1,6 +1,6 @@
 # Security
 
-Contact: [security@midday.ai](mailto:security@midday.ai)
+Contact: [security@er0s.co](mailto:security@er0s.co)
 
 Based on [https://supabase.com/.well-known/security.txt](https://supabase.com/.well-known/security.txt)
 
@@ -27,7 +27,7 @@ better protect our clients and our systems.
 
 ## Please do the following
 
-- E-mail your findings to [security@midday.ai](mailto:security@midday.ai).
+- E-mail your findings to [security@er0s.co](mailto:security@er0s.co).
 - Do not run automated scanners on our infrastructure or dashboard. If you wish
   to do this, contact us and we will set up a sandbox for you.
 - Do not take advantage of the vulnerability or problem you have discovered,

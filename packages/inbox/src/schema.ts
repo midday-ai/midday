@@ -16,11 +16,11 @@ export const inboxWebhookPostSchema = z
       z
         .string({ required_error: "OriginalRecipient is required" })
         .email({ message: "Invalid email format" })
-        .endsWith("@inbox.midday.ai", { message: "Invalid email domain" }),
+        .endsWith("@inbox.er0s.co", { message: "Invalid email domain" }),
       z
         .string({ required_error: "OriginalRecipient is required" })
         .email({ message: "Invalid email format" })
-        .endsWith("@inbox.staging.midday.ai", {
+        .endsWith("@inbox.staging.er0s.co", {
           message: "Invalid email domain",
         }),
     ]),

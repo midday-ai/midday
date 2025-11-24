@@ -90,7 +90,7 @@ export function UpdatesToolbar({ posts }) {
 
   const handleOnShare = () => {
     const popup = popupCenter({
-      url: `https://twitter.com/intent/tweet?text=${currentPost.title} https://midday.ai/updates/${currentPost.slug}`,
+      url: `https://twitter.com/intent/tweet?text=${currentPost.title} https://er0s.co/updates/${currentPost.slug}`,
       title: currentPost.title,
       w: 800,
       h: 400,
@@ -170,7 +170,7 @@ export function UpdatesToolbar({ posts }) {
           </DialogHeader>
 
           <div className="grid gap-6 py-4">
-            <CopyInput value={`https://midday.ai${pathname}`} />
+            <CopyInput value={`https://er0s.co${pathname}`} />
             <Button
               className="w-full flex items-center space-x-2 h-10"
               onClick={handleOnShare}

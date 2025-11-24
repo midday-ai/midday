@@ -160,7 +160,7 @@ export function Header() {
           icon: <FaGithub size={19} />,
         },
         {
-          path: "https://docs.midday.ai",
+          path: "https://docs.er0s.co",
           title: "Documentation",
           icon: <MdOutlineDescription size={20} />,
         },
@@ -171,12 +171,12 @@ export function Header() {
         },
         {
           title: "Join the community",
-          path: "https://go.midday.ai/anPiuRx",
+          path: "https://go.er0s.co/anPiuRx",
           icon: <FaDiscord size={19} />,
         },
         {
           title: "Apps & Integrations",
-          path: "https://docs.midday.ai/integrations",
+          path: "https://docs.er0s.co/integrations",
           icon: <MdOutlineIntegrationInstructions size={20} />,
         },
         {
@@ -232,7 +232,7 @@ export function Header() {
               </ContextMenuItem>
               <ContextMenuItem>
                 <a
-                  href="https://ui.midday.ai"
+                  href="https://ui.er0s.co"
                   className="flex items-center space-x-2"
                 >
                   <Icons.Palette />
@@ -325,7 +325,7 @@ export function Header() {
 
         <a
           className="text-sm font-medium pr-2 border-l-[1px] border-border pl-4 hidden md:block"
-          href="https://app.midday.ai"
+          href="https://app.er0s.co"
         >
           Sign in
         </a>
@@ -426,7 +426,7 @@ export function Header() {
               >
                 <Link
                   className="text-xl text-primary"
-                  href="https://app.midday.ai"
+                  href="https://app.er0s.co"
                 >
                   Sign in
                 </Link>
