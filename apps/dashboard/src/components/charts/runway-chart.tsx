@@ -1,9 +1,9 @@
 "use client";
 
 import { formatAmount } from "@/utils/format";
-import { ReferenceLine, Tooltip } from "recharts";
+import { Area, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, ComposedChart } from "recharts";
 import {
-  BaseChart,
   ChartLegend,
   StyledArea,
   StyledLine,
@@ -11,7 +11,12 @@ import {
   StyledXAxis,
   StyledYAxis,
 } from "./base-charts";
-import { createYAxisTickFormatter, useChartMargin } from "./chart-utils";
+import { commonChartConfig } from "./chart-utils";
+import {
+  createMonthsTickFormatter,
+  createYAxisTickFormatter,
+  useChartMargin,
+} from "./chart-utils";
 import type { BaseChartProps } from "./chart-utils";
 
 interface RunwayData {
@@ -19,6 +24,7 @@ interface RunwayData {
   cashRemaining: number;
   burnRate: number;
   projectedCash?: number;
+  runwayMonths?: number;
 }
 
 interface RunwayChartProps extends BaseChartProps {
@@ -27,6 +33,7 @@ interface RunwayChartProps extends BaseChartProps {
   showLegend?: boolean;
   currency?: string;
   locale?: string;
+  displayMode?: "currency" | "months";
 }
 
 // Custom formatter for runway tooltip
@@ -35,7 +42,19 @@ const runwayTooltipFormatter = (
   name: string,
   currency = "USD",
   locale?: string,
+  displayMode: "currency" | "months" = "currency",
 ): [string, string] => {
+  if (displayMode === "months") {
+    const formattedValue = `${value.toFixed(1)} months`;
+    const displayName =
+      name === "runwayMonths"
+        ? "Runway"
+        : name === "burnRate"
+          ? "Burn Rate"
+          : name;
+    return [formattedValue, displayName];
+  }
+
   const formattedValue =
     formatAmount({
       amount: value,
@@ -60,12 +79,33 @@ export function RunwayChart({
   showLegend = true,
   currency = "USD",
   locale,
+  displayMode = "months",
 }: RunwayChartProps) {
-  const tickFormatter = createYAxisTickFormatter(currency, locale);
-  const maxValues = data.map((d) => ({
-    maxValue: Math.max(d.cashRemaining, d.burnRate, d.projectedCash ?? 0),
-  }));
-  const { marginLeft } = useChartMargin(maxValues, "maxValue", tickFormatter);
+  const isMonthsMode = displayMode === "months";
+  const tickFormatter = isMonthsMode
+    ? createMonthsTickFormatter()
+    : createYAxisTickFormatter(currency, locale);
+
+  // Guard against empty data
+  if (!data || data.length === 0) {
+    return (
+      <div className={`w-full ${className}`}>
+        <div
+          style={{ height }}
+          className="flex items-center justify-center text-muted-foreground"
+        >
+          No runway data available
+        </div>
+      </div>
+    );
+  }
+
+  // Calculate margin using the actual data field
+  const { marginLeft } = useChartMargin(
+    data,
+    isMonthsMode ? "runwayMonths" : "cashRemaining",
+    tickFormatter,
+  );
 
   return (
     <div className={`w-full ${className}`}>
@@ -74,49 +114,135 @@ export function RunwayChart({
         <ChartLegend
           title="Cash Runway"
           items={[
-            { label: "Cash Remaining", type: "solid" },
-            { label: "Burn Rate", type: "pattern" },
-            ...(showProjection
-              ? [{ label: "Projected", type: "dashed" as const }]
-              : []),
+            {
+              label: isMonthsMode ? "Runway (months)" : "Cash Remaining",
+              type: "solid" as const,
+            },
+            ...(isMonthsMode
+              ? []
+              : [
+                  { label: "Burn Rate", type: "pattern" as const },
+                  ...(showProjection
+                    ? [{ label: "Projected", type: "dashed" as const }]
+                    : []),
+                ]),
           ]}
         />
       )}
 
       {/* Chart */}
-      <BaseChart
-        data={data}
-        height={height}
-        margin={{ top: 5, right: 5, left: -marginLeft, bottom: 5 }}
-      >
-        <StyledXAxis dataKey="month" />
-        <StyledYAxis tickFormatter={tickFormatter} />
-
-        <Tooltip
-          content={
-            <StyledTooltip
-              formatter={(value: any, name: string) =>
-                runwayTooltipFormatter(value, name, currency, locale)
-              }
+      <div style={{ height }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <ComposedChart
+            data={data}
+            margin={{
+              top: 5,
+              right: 5,
+              left: -marginLeft,
+              bottom: 25, // Extra space for X-axis labels
+            }}
+          >
+            {isMonthsMode && (
+              <defs>
+                <linearGradient
+                  id="runwayMonthsGradient"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop
+                    offset="0%"
+                    stopColor="hsl(var(--foreground))"
+                    stopOpacity={0.3}
+                  />
+                  <stop
+                    offset="100%"
+                    stopColor="hsl(var(--foreground))"
+                    stopOpacity={0.05}
+                  />
+                </linearGradient>
+              </defs>
+            )}
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="var(--chart-grid-stroke)"
             />
-          }
-          wrapperStyle={{ zIndex: 9999 }}
-        />
+            <XAxis
+              dataKey="month"
+              axisLine={false}
+              tickLine={false}
+              tick={{
+                fill: "var(--chart-axis-text)",
+                fontSize: 10,
+                fontFamily: commonChartConfig.fontFamily,
+              }}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{
+                fill: "var(--chart-axis-text)",
+                fontSize: 10,
+                fontFamily: commonChartConfig.fontFamily,
+              }}
+              tickFormatter={tickFormatter}
+              domain={isMonthsMode ? [0, "dataMax"] : undefined}
+            />
 
-        <StyledArea dataKey="cashRemaining" usePattern={false} useGradient />
-        <StyledArea dataKey="burnRate" usePattern useGradient={false} />
+            <Tooltip
+              content={
+                <StyledTooltip
+                  formatter={(value: any, name: string) =>
+                    runwayTooltipFormatter(
+                      value,
+                      name,
+                      currency,
+                      locale,
+                      displayMode,
+                    )
+                  }
+                />
+              }
+              wrapperStyle={{ zIndex: 9999 }}
+            />
 
-        {showProjection && (
-          <StyledLine dataKey="projectedCash" strokeDasharray="5 5" />
-        )}
-
-        {/* Reference line at zero */}
-        <ReferenceLine
-          y={0}
-          stroke="hsl(var(--border))"
-          strokeDasharray="2 2"
-        />
-      </BaseChart>
+            {isMonthsMode ? (
+              <Area
+                type="monotone"
+                dataKey="runwayMonths"
+                fill="url(#runwayMonthsGradient)"
+                stroke="hsl(var(--foreground))"
+                strokeWidth={2}
+                dot={{
+                  fill: "hsl(var(--foreground))",
+                  strokeWidth: 0,
+                  r: 3,
+                }}
+                activeDot={{
+                  r: 5,
+                  fill: "hsl(var(--foreground))",
+                  stroke: "hsl(var(--foreground))",
+                  strokeWidth: 2,
+                }}
+                isAnimationActive={false}
+              />
+            ) : (
+              <>
+                <StyledArea
+                  dataKey="cashRemaining"
+                  usePattern={false}
+                  useGradient
+                />
+                <StyledArea dataKey="burnRate" usePattern useGradient={false} />
+                {showProjection && (
+                  <StyledLine dataKey="projectedCash" strokeDasharray="5 5" />
+                )}
+              </>
+            )}
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }

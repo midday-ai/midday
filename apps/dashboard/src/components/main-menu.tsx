@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 
 const icons = {
   "/": () => <Icons.Overview size={20} />,
+  "/metrics": () => <Icons.ShowChart size={20} />,
   "/transactions": () => <Icons.Transactions size={20} />,
   "/invoices": () => <Icons.Invoice size={20} />,
   "/tracker": () => <Icons.Tracker size={20} />,
@@ -23,6 +24,12 @@ const items = [
   {
     path: "/",
     name: "Overview",
+    children: [
+      {
+        path: "/metrics",
+        name: "Metrics",
+      },
+    ],
   },
   {
     path: "/transactions",
@@ -310,10 +317,14 @@ export function MainMenu({ onSelect, isExpanded = false }: Props) {
       <nav className="w-full">
         <div className="flex flex-col gap-2">
           {items.map((item) => {
+            // Check if current path matches item path or is a child of it
             const isActive =
               (pathname === "/" && item.path === "/") ||
               (item.path === "/" && isValidChatPage) ||
-              (pathname !== "/" && item.path.startsWith(`/${part}`));
+              (pathname !== "/" &&
+                (pathname.startsWith(item.path) ||
+                  (item.path === "/" &&
+                    pathname.startsWith("/overview/metrics"))));
 
             return (
               <Item

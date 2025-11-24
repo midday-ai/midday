@@ -66,6 +66,16 @@ export const createYAxisTickFormatter = (currency: string, locale?: string) => {
   };
 };
 
+// Formatter for runway months (e.g., "10.5M", "8.2M", "0.0M")
+export const createMonthsTickFormatter = () => {
+  return (value: number): string => {
+    // Handle edge cases
+    if (!Number.isFinite(value)) return "0.0M";
+    if (value === 0) return "0.0M";
+    return `${value.toFixed(1)}M`;
+  };
+};
+
 // Calculate Y-axis domain and ticks for forecast charts
 export const calculateYAxisDomain = <
   T extends { actual?: number; forecasted?: number },
