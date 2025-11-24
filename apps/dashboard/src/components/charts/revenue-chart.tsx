@@ -61,6 +61,7 @@ export function RevenueChart({
   }));
   const { marginLeft } = useChartMargin(maxValues, "maxValue", tickFormatter);
 
+  console.log(data);
   return (
     <div className={`w-full ${className}`}>
       {/* Legend */}

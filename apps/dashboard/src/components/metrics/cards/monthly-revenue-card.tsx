@@ -12,6 +12,12 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
@@ -64,34 +70,64 @@ export function MonthlyRevenueCard({
   }, [revenueData]);
 
   const currentRevenue = useMemo(() => {
-    if (!revenueData?.result || revenueData.result.length === 0) return 0;
-    return revenueData.result[revenueData.result.length - 1]!.current.value;
+    if (!revenueData?.summary) return 0;
+    return revenueData.summary.currentTotal;
   }, [revenueData]);
 
   return (
     <div className="border bg-background border-border p-6">
       <div className="mb-4">
         <div className="flex items-start justify-between mb-1">
-          <h3 className="text-sm font-normal text-muted-foreground">
-            Monthly Revenue
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-normal text-muted-foreground">
+              Revenue
+            </h3>
+            <TooltipProvider delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <Icons.Info size={14} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="w-[280px] text-xs" side="right">
+                  <div className="space-y-2">
+                    <div>
+                      <strong>Gross Revenue:</strong> Total income including
+                      tax/VAT
+                    </div>
+                    <div>
+                      <strong>Net Revenue:</strong> Total income excluding
+                      tax/VAT portion
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
-                {revenueType === "net" ? "Net" : "Gross"}
+                {revenueType === "net"
+                  ? "Net (excludes tax)"
+                  : "Gross (includes tax)"}
                 <Icons.ChevronDown size={12} className="ml-1" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-32">
+            <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuRadioGroup
                 value={revenueType}
                 onValueChange={(value) =>
                   setRevenueType(value as "net" | "gross")
                 }
               >
-                <DropdownMenuRadioItem value="net">Net</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="net">
+                  Net (excludes tax)
+                </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="gross">
-                  Gross
+                  Gross (includes tax)
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>

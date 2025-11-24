@@ -150,7 +150,12 @@ ${
     .orderBy(sql`DATE_TRUNC('month', ${transactions.date}) ASC`);
 
   // Step 5: Create a map of month data for quick lookup
-  const dataMap = new Map(monthlyData.map((item) => [item.month, item.value]));
+  const dataMap = new Map(
+    monthlyData.map((item) => [
+      format(new UTCDate(parseISO(item.month)), "yyyy-MM-dd"),
+      item.value,
+    ]),
+  );
 
   // Step 6: Generate complete results (optimized)
   const currencyStr = targetCurrency || "USD";
@@ -204,29 +209,15 @@ export async function getRevenue(db: Database, params: GetReportsParams) {
     conditions.push(eq(transactions.baseCurrency, targetCurrency));
   }
 
-  // Step 4: Execute the aggregated query with gross/net calculation
+  // Step 4: Execute the aggregated query for revenue (income transactions)
+  // Gross revenue = sum of all income transaction amounts (includes tax)
   const tc = transactionCategories;
-  const monthlyData = await db
+  const monthlyRevenueData = await db
     .select({
       month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
-      value:
-        revenueType === "net"
-          ? inputCurrency
-            ? sql<number>`COALESCE(SUM(
-                ${transactions.amount} - (
-                  ${transactions.amount} * COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0) / 
-                  (100 + COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0))
-                )
-              ), 0)`
-            : sql<number>`COALESCE(SUM(
-                COALESCE(${transactions.baseAmount}, 0) - (
-                  COALESCE(${transactions.baseAmount}, 0) * COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0) / 
-                  (100 + COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0))
-                )
-              ), 0)`
-          : inputCurrency
-            ? sql<number>`COALESCE(SUM(${transactions.amount}), 0)`
-            : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
+      value: inputCurrency
+        ? sql<number>`COALESCE(SUM(${transactions.amount}), 0)`
+        : sql<number>`COALESCE(SUM(COALESCE(${transactions.baseAmount}, 0)), 0)`,
     })
     .from(transactions)
     .leftJoin(
@@ -237,14 +228,73 @@ export async function getRevenue(db: Database, params: GetReportsParams) {
     .groupBy(sql`DATE_TRUNC('month', ${transactions.date})`)
     .orderBy(sql`DATE_TRUNC('month', ${transactions.date}) ASC`);
 
-  // Step 5: Create a map of month data for quick lookup
-  const dataMap = new Map(monthlyData.map((item) => [item.month, item.value]));
+  // Step 4b: If net revenue, also query tax amounts
+  // Net revenue = gross revenue minus tax portion
+  let monthlyTaxData: Array<{ month: string; value: number }> = [];
+  if (revenueType === "net") {
+    // Calculate tax using: taxAmount if available, otherwise calculate from taxRate
+    // Uses reverse VAT formula: tax = amount * rate / (100 + rate)
+    // For baseAmount: calculate tax proportionally
+    const taxQuery = inputCurrency
+      ? sql<number>`COALESCE(
+          SUM(
+            COALESCE(
+              ${transactions.taxAmount},
+              ${transactions.amount} * COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0) / NULLIF(100 + COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0), 0)
+            )
+          ),
+          0
+        )`
+      : sql<number>`COALESCE(
+          SUM(
+            COALESCE(
+              ${transactions.taxAmount},
+              COALESCE(${transactions.baseAmount}, 0) * COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0) / NULLIF(100 + COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0), 0)
+            )
+          ),
+          0
+        )`;
+
+    monthlyTaxData = await db
+      .select({
+        month: sql<string>`DATE_TRUNC('month', ${transactions.date})::date`,
+        value: taxQuery,
+      })
+      .from(transactions)
+      .leftJoin(
+        tc,
+        and(eq(tc.slug, transactions.categorySlug), eq(tc.teamId, teamId)),
+      )
+      .where(
+        and(...conditions, or(isNull(tc.excluded), eq(tc.excluded, false))!),
+      )
+      .groupBy(sql`DATE_TRUNC('month', ${transactions.date})`)
+      .orderBy(sql`DATE_TRUNC('month', ${transactions.date}) ASC`);
+  }
+
+  // Step 5: Create maps of month data for quick lookup
+  const revenueMap = new Map(
+    monthlyRevenueData.map((item) => [
+      format(new UTCDate(parseISO(item.month)), "yyyy-MM-dd"),
+      item.value,
+    ]),
+  );
+  const taxMap = new Map(
+    monthlyTaxData.map((item) => [
+      format(new UTCDate(parseISO(item.month)), "yyyy-MM-dd"),
+      item.value,
+    ]),
+  );
 
   // Step 6: Generate complete results (optimized)
+  // Gross revenue = revenue (includes tax)
+  // Net revenue = revenue - tax portion (excludes tax)
   const currencyStr = targetCurrency || "USD";
   const results: ReportsResultItem[] = monthSeries.map((monthStart) => {
     const monthKey = format(monthStart, "yyyy-MM-dd");
-    const value = dataMap.get(monthKey) || 0;
+    const revenue = revenueMap.get(monthKey) || 0;
+    const taxAmount = taxMap.get(monthKey) || 0;
+    const value = revenueType === "net" ? revenue - taxAmount : revenue;
 
     return {
       date: monthKey,

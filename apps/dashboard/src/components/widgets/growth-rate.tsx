@@ -66,7 +66,10 @@ export function GrowthRateWidget() {
     const periodLabel = t(
       `widget_period.${config?.period ?? "current_quarter"}` as "widget_period.fiscal_ytd",
     );
-    const revenueTypeLabel = config?.revenueType === "gross" ? "Gross" : "Net";
+    const revenueTypeLabel =
+      config?.revenueType === "gross"
+        ? "Gross revenue (includes tax)"
+        : "Net revenue (excludes tax)";
 
     handleToolCall({
       toolName: "getGrowthRate",
@@ -92,7 +95,10 @@ export function GrowthRateWidget() {
     `widget_period.${config?.period ?? "current_quarter"}` as "widget_period.fiscal_ytd",
   );
 
-  const revenueTypeLabel = config?.revenueType === "gross" ? "Gross" : "Net";
+  const revenueTypeLabel =
+    config?.revenueType === "gross"
+      ? "Gross revenue (includes tax)"
+      : "Net revenue (excludes tax)";
 
   return (
     <ConfigurableWidget

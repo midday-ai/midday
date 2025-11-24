@@ -5,6 +5,12 @@ import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { getWidgetPeriodDates } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -84,7 +90,10 @@ export function RevenueSummaryWidget() {
     `widget_period.${config?.period ?? "fiscal_year"}` as "widget_period.fiscal_ytd",
   );
 
-  const revenueTypeLabel = config?.revenueType === "gross" ? "Gross" : "Net";
+  const revenueTypeLabel =
+    config?.revenueType === "gross"
+      ? "Gross revenue (includes tax)"
+      : "Net revenue (excludes tax)";
 
   return (
     <ConfigurableWidget
@@ -103,10 +112,34 @@ export function RevenueSummaryWidget() {
         title="Revenue Summary"
         icon={<Icons.TrendingUp className="size-4" />}
         description={
-          <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
             <p className="text-sm text-[#666666]">
-              {revenueTypeLabel} revenue · {periodLabel}
+              {revenueTypeLabel} · {periodLabel}
             </p>
+            <TooltipProvider delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="text-[#666666] hover:text-foreground"
+                  >
+                    <Icons.Info size={14} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="w-[280px] text-xs" side="right">
+                  <div className="space-y-2">
+                    <div>
+                      <strong>Gross Revenue:</strong> Total income including
+                      tax/VAT
+                    </div>
+                    <div>
+                      <strong>Net Revenue:</strong> Total income excluding
+                      tax/VAT portion
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         }
         actions="View revenue trends"

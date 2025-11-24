@@ -40,7 +40,10 @@ export function GrowthRateCanvas() {
     })) || [];
 
   const typeLabel = data?.type === "profit" ? "Profit" : "Revenue";
-  const revenueTypeLabel = data?.revenueType === "gross" ? "Gross" : "Net";
+  const revenueTypeLabel =
+    data?.revenueType === "gross"
+      ? "Gross (includes tax)"
+      : "Net (excludes tax)";
   const periodLabel =
     data?.period === "monthly"
       ? "Month"

@@ -78,7 +78,10 @@ export function ProfitAnalysisWidget() {
     const periodLabel = t(
       `widget_period.${config?.period ?? "trailing_12"}` as "widget_period.fiscal_ytd",
     );
-    const revenueTypeLabel = config?.revenueType === "gross" ? "Gross" : "Net";
+    const revenueTypeLabel =
+      config?.revenueType === "gross"
+        ? "Gross revenue (includes tax)"
+        : "Net revenue (excludes tax)";
 
     handleToolCall({
       toolName: "getProfitAnalysis",
@@ -122,7 +125,10 @@ export function ProfitAnalysisWidget() {
     `widget_period.${config?.period ?? "trailing_12"}` as "widget_period.fiscal_ytd",
   );
 
-  const revenueTypeLabel = config?.revenueType === "gross" ? "Gross" : "Net";
+  const revenueTypeLabel =
+    config?.revenueType === "gross"
+      ? "Gross revenue (includes tax)"
+      : "Net revenue (excludes tax)";
 
   return (
     <ConfigurableWidget

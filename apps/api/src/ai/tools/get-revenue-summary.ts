@@ -19,13 +19,18 @@ const getRevenueSummarySchema = z.object({
     .describe("Currency code (ISO 4217, e.g. 'USD')")
     .nullable()
     .optional(),
-  revenueType: z.enum(["gross", "net"]).default("net").describe("Revenue type"),
+  revenueType: z
+    .enum(["gross", "net"])
+    .default("net")
+    .describe(
+      "Revenue type: 'gross' includes tax/VAT, 'net' excludes tax/VAT portion",
+    ),
   showCanvas: z.boolean().default(false).describe("Show visual analytics"),
 });
 
 export const getRevenueSummaryTool = tool({
   description:
-    "Calculate and analyze revenue (income/sales) - shows revenue totals, monthly trends, year-over-year comparisons, and growth rates.",
+    "Calculate and analyze revenue (income/sales). Gross revenue includes tax/VAT, net revenue excludes tax/VAT portion. Shows revenue totals, monthly trends, year-over-year comparisons, and growth rates.",
   inputSchema: getRevenueSummarySchema,
   execute: async function* (
     { from, to, currency, revenueType, showCanvas },
@@ -140,8 +145,11 @@ export const getRevenueSummaryTool = tool({
           : 0;
 
       // Build response text
-      const revenueTypeLabel = revenueType === "gross" ? "Gross" : "Net";
-      let responseText = `**Total ${revenueTypeLabel} Revenue:** ${formattedCurrentTotal}\n\n`;
+      const revenueTypeLabel =
+        revenueType === "gross"
+          ? "Gross Revenue (includes tax)"
+          : "Net Revenue (excludes tax)";
+      let responseText = `**Total ${revenueTypeLabel}:** ${formattedCurrentTotal}\n\n`;
 
       if (prevTotal !== 0) {
         responseText += "**Year-over-Year Comparison:**\n";

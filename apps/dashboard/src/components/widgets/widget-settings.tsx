@@ -98,7 +98,7 @@ export function WidgetSettings({
               htmlFor="revenueType"
               className="text-[11px] text-muted-foreground"
             >
-              Type
+              Revenue Type
             </Label>
             <Select
               value={revenueType}
@@ -108,8 +108,8 @@ export function WidgetSettings({
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="net">Net</SelectItem>
-                <SelectItem value="gross">Gross</SelectItem>
+                <SelectItem value="net">Net (excludes tax)</SelectItem>
+                <SelectItem value="gross">Gross (includes tax)</SelectItem>
               </SelectContent>
             </Select>
           </div>
