@@ -137,7 +137,7 @@ export const restUpsertInvoiceTemplateSchema = baseInvoiceTemplateSchema.extend(
 const baseDraftLineItemSchema = z.object({
   quantity: z.number().min(0, "Quantity must be at least 0").optional(),
   unit: z.string().optional().nullable(),
-  price: z.number().safe().optional(),
+  price: z.number().optional(),
   vat: z.number().min(0, "VAT must be at least 0").nullable().optional(),
   tax: z.number().min(0, "Tax must be at least 0").nullable().optional(),
 });
@@ -398,7 +398,7 @@ export const lineItemSchema = z.object({
 export const createInvoiceProductSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   description: z.string().optional().nullable(),
-  price: z.number().safe().optional().nullable(),
+  price: z.number().optional().nullable(),
   currency: z.string().optional().nullable(),
   unit: z.string().optional().nullable(),
   isActive: z.boolean().optional(),
@@ -408,7 +408,7 @@ export const updateInvoiceProductSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1, "Product name is required").optional(),
   description: z.string().optional().nullable(),
-  price: z.number().safe().optional().nullable(),
+  price: z.number().optional().nullable(),
   currency: z.string().optional().nullable(),
   unit: z.string().optional().nullable(),
   isActive: z.boolean().optional(),
@@ -438,7 +438,7 @@ export const deleteInvoiceProductSchema = z.object({
 
 export const saveLineItemAsProductSchema = z.object({
   name: z.string().min(1, "Product name is required"),
-  price: z.number().safe().optional().nullable(),
+  price: z.number().optional().nullable(),
   unit: z.string().optional().nullable(),
   productId: z.string().uuid().optional(),
   currency: z.string().optional().nullable(),
@@ -447,7 +447,7 @@ export const saveLineItemAsProductSchema = z.object({
 export const upsertInvoiceProductSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   description: z.string().optional().nullable(),
-  price: z.number().safe().optional().nullable(),
+  price: z.number().optional().nullable(),
   currency: z.string().optional().nullable(),
   unit: z.string().optional().nullable(),
 });

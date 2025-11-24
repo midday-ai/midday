@@ -28,7 +28,14 @@ export function AmountInput({
         autoComplete="off"
         value={value}
         onValueChange={(values) => {
-          onChange(values.floatValue || 0, { shouldValidate: true });
+          // Preserve the exact floatValue, including 0 and decimals like 1.20
+          // Only use 0 as fallback if floatValue is explicitly undefined/null
+          onChange(
+            values.floatValue !== undefined && values.floatValue !== null
+              ? values.floatValue
+              : 0,
+            { shouldValidate: true },
+          );
         }}
         onFocus={() => setIsFocused(true)}
         onBlur={() => {
@@ -42,6 +49,7 @@ export function AmountInput({
           "p-0 border-0 h-6 text-xs !bg-transparent border-b border-transparent focus:border-border",
         )}
         thousandSeparator={true}
+        decimalScale={props.decimalScale ?? 2}
       />
 
       {isPlaceholder && (
