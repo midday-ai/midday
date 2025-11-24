@@ -138,11 +138,9 @@ export function ProfitAnalysisWidget() {
         onConfigure={() => setIsConfiguring(true)}
         description={
           <div className="flex flex-col gap-2">
-            <h2 className="text-3xl font-normal">
-              {formatCurrency(data?.summary?.currentTotal ?? 0)}
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              {periodLabel} · {revenueTypeLabel}
+            <p className="text-sm text-[#666666]">
+              {formatCurrency(data?.summary?.currentTotal ?? 0)} · {periodLabel}{" "}
+              · {revenueTypeLabel}
             </p>
           </div>
         }
