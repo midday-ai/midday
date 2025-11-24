@@ -20,13 +20,15 @@ import { getTaxTypeLabel } from "@midday/utils/tax";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import * as React from "react";
+import type { Dispatch, SetStateAction } from "react";
 
-interface CategoriesTableMeta {
+export interface CategoriesTableMeta {
   deleteCategory: (id: string) => void;
   onEdit: (id: string) => void;
   expandedCategories: Set<string>;
-  setExpandedCategories: (categories: Set<string>) => void;
+  setExpandedCategories: Dispatch<SetStateAction<Set<string>>>;
+  searchValue?: string;
+  setSearchValue?: Dispatch<SetStateAction<string>>;
 }
 
 export type Category = RouterOutputs["transactionCategories"]["get"][number];

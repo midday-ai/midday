@@ -1,4 +1,5 @@
 import type { RouterOutputs } from "@/trpc/client";
+import type { Dispatch, SetStateAction } from "react";
 
 declare module "@tanstack/table-core" {
   interface TableMeta<TData extends RowData> {
@@ -24,8 +25,11 @@ declare module "@tanstack/table-core" {
 
     // Categories table meta
     deleteCategory?: (id: string) => void;
+    onEdit?: (id: string) => void;
     expandedCategories?: Set<string>;
-    setExpandedCategories?: React.Dispatch<React.SetStateAction<Set<string>>>;
+    setExpandedCategories?: Dispatch<SetStateAction<Set<string>>>;
+    searchValue?: string;
+    setSearchValue?: Dispatch<SetStateAction<string>>;
 
     // Customers table meta
     deleteCustomer?: (id: string) => void;
