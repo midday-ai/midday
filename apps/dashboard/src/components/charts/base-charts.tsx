@@ -140,7 +140,9 @@ export function ChartLegend({
   }[];
 }) {
   return (
-    <div className={`flex items-center ${title ? "justify-between" : "justify-end"} mb-4`}>
+    <div
+      className={`flex items-center ${title ? "justify-between" : "justify-end"} mb-4`}
+    >
       {title && (
         <h4 className="text-[18px] font-normal font-serif text-black dark:text-white">
           {title}

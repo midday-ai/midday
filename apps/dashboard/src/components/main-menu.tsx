@@ -323,8 +323,7 @@ export function MainMenu({ onSelect, isExpanded = false }: Props) {
               (item.path === "/" && isValidChatPage) ||
               (pathname !== "/" &&
                 (pathname.startsWith(item.path) ||
-                  (item.path === "/" &&
-                    pathname.startsWith("/overview/metrics"))));
+                  (item.path === "/" && pathname.startsWith("/metrics"))));
 
             return (
               <Item

@@ -1,5 +1,5 @@
 import { useQueryStates } from "nuqs";
-import { createLoader, parseAsStringLiteral } from "nuqs/server";
+import { parseAsStringLiteral } from "nuqs/server";
 
 export const metricsParamsSchema = {
   "revenue-type": parseAsStringLiteral(["net", "gross"] as const).withDefault(
@@ -46,5 +46,3 @@ export function useMetricsParams() {
     },
   };
 }
-
-export const loadMetricsParams = createLoader(metricsParamsSchema);
