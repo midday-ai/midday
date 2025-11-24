@@ -33,6 +33,7 @@ import {
   getProfitMargin,
   getRecentDocuments,
   getRecurringExpenses,
+  getReports,
   getRevenue,
   getRunway,
   getSpending,
@@ -73,35 +74,27 @@ export const widgetsRouter = createTRPCRouter({
 
     return {
       result: topCustomer,
-      // toolCall: {
-      //   toolName: "getCustomers",
-      // },
     };
   }),
 
   getRevenueSummary: protectedProcedure
     .input(getRevenueSummarySchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
-      const revenue = await getRevenue(db, {
+      const result = await getReports(db, {
         teamId: teamId!,
         from: input.from,
         to: input.to,
         currency: input.currency,
+        type: "revenue",
         revenueType: input.revenueType,
       });
 
-      // Calculate total revenue for the period
-      const totalRevenue = revenue.reduce(
-        (sum, item) => sum + Number.parseFloat(item.value),
-        0,
-      );
-
       return {
         result: {
-          totalRevenue,
-          currency: revenue[0]?.currency ?? input.currency ?? "USD",
+          totalRevenue: result.summary.currentTotal,
+          currency: result.summary.currency,
           revenueType: input.revenueType,
-          monthCount: revenue.length,
+          monthCount: result.result.length,
         },
       };
     }),
@@ -132,17 +125,6 @@ export const widgetsRouter = createTRPCRouter({
           trend: growthData.summary.trend,
           meta: growthData.meta,
         },
-        // toolCall: {
-        //   toolName: "getGrowthRateAnalysis",
-        //   toolParams: {
-        //     from: input.from,
-        //     to: input.to,
-        //     currency: input.currency,
-        //     type: input.type,
-        //     revenueType: input.revenueType,
-        //     period: input.period,
-        //   },
-        // },
       };
     }),
 
@@ -170,15 +152,6 @@ export const widgetsRouter = createTRPCRouter({
           monthlyData: profitMarginData.result,
           meta: profitMarginData.meta,
         },
-        // toolCall: {
-        //   toolName: "getProfitMarginAnalysis",
-        //   toolParams: {
-        //     from: input.from,
-        //     to: input.to,
-        //     currency: input.currency,
-        //     revenueType: input.revenueType,
-        //   },
-        // },
       };
     }),
 
