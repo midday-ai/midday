@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   calculateTaxAmount,
   calculateTaxAmountFromGross,
+  calculateTaxRateFromGross,
   resolveTaxValues,
 } from "./tax";
 
@@ -430,6 +431,115 @@ describe("Tax Utilities", () => {
       // Bank transactions are gross, so 99.99 × (25/125) = 20
       expect(result.taxAmount).toBe(20);
       expect(result.taxRate).toBe(25);
+    });
+  });
+
+  describe("resolveTaxValues - Gross Amount Handling", () => {
+    test("should always use gross calculation (all transactions are gross)", () => {
+      // All transactions are gross (tax-inclusive) amounts
+      const result = resolveTaxValues({
+        transactionAmount: 100,
+        transactionTaxAmount: null,
+        transactionTaxRate: 25,
+        transactionTaxType: "vat",
+        categoryTaxRate: null,
+        categoryTaxType: null,
+      });
+
+      // Gross calculation: 100 × (25/125) = 20
+      expect(result.taxAmount).toBe(20);
+    });
+  });
+
+  describe("calculateTaxRateFromGross", () => {
+    test("should calculate rate from gross amount correctly", () => {
+      // Example: Gross 100, Tax 20 → Rate should be 25% (not 20%)
+      expect(calculateTaxRateFromGross(100, 20)).toBe(25);
+      // Verification: 100 × (25/125) = 20 ✓
+    });
+
+    test("should calculate rate for common VAT scenarios", () => {
+      // Gross 100, Tax 16.67 → Rate should be 20%
+      expect(calculateTaxRateFromGross(100, 16.67)).toBeCloseTo(20, 1);
+      // Gross 100, Tax 15.97 → Rate should be 19% (may have rounding differences)
+      expect(calculateTaxRateFromGross(100, 15.97)).toBeCloseTo(19, 1);
+      // Gross 100, Tax 20 → Rate should be 25%
+      expect(calculateTaxRateFromGross(100, 20)).toBe(25);
+    });
+
+    test("should handle the bug report example", () => {
+      // €33.84 gross, €6.33 tax → Rate should be 23% (may have rounding differences)
+      expect(calculateTaxRateFromGross(33.84, 6.33)).toBeCloseTo(23, 1);
+      // Verification: 33.84 × (23/123) = 6.33 ✓
+    });
+
+    test("should work with negative amounts (expenses)", () => {
+      // Negative gross amounts should still calculate correctly
+      expect(calculateTaxRateFromGross(-100, 20)).toBe(25);
+      expect(calculateTaxRateFromGross(-33.84, 6.33)).toBeCloseTo(23, 1);
+    });
+
+    test("should handle decimal tax amounts", () => {
+      // Gross 100, Tax 7.83 → Rate should be 8.5%
+      expect(calculateTaxRateFromGross(100, 7.83)).toBe(8.5);
+      // Gross 200, Tax 22.22 → Rate should be 12.5%
+      expect(calculateTaxRateFromGross(200, 22.22)).toBe(12.5);
+    });
+
+    test("should round to 2 decimal places", () => {
+      // Gross 100, Tax 15.96 → Rate should round to approximately 19%
+      // Note: Due to rounding in tax calculation, may vary slightly
+      expect(calculateTaxRateFromGross(100, 15.96)).toBeCloseTo(19, 1);
+    });
+
+    test("should handle zero tax amount", () => {
+      expect(calculateTaxRateFromGross(100, 0)).toBe(0);
+      expect(calculateTaxRateFromGross(-100, 0)).toBe(0);
+    });
+
+    test("should handle zero gross amount", () => {
+      expect(calculateTaxRateFromGross(0, 20)).toBe(0);
+    });
+
+    test("should handle edge case where tax equals gross", () => {
+      // If tax equals gross, net would be 0, so return 0
+      expect(calculateTaxRateFromGross(100, 100)).toBe(0);
+    });
+
+    test("should verify round-trip calculation", () => {
+      // Calculate tax from rate, then rate from tax - should match original rate
+      const originalRate = 25;
+      const grossAmount = 100;
+      const taxAmount = calculateTaxAmountFromGross(grossAmount, originalRate);
+      const calculatedRate = calculateTaxRateFromGross(grossAmount, taxAmount);
+      expect(calculatedRate).toBe(originalRate);
+    });
+
+    test("should verify round-trip with different rates", () => {
+      const rates = [19, 20, 23, 25, 8.5, 12.5];
+      const grossAmount = 100;
+
+      for (const rate of rates) {
+        const taxAmount = calculateTaxAmountFromGross(grossAmount, rate);
+        const calculatedRate = calculateTaxRateFromGross(
+          grossAmount,
+          taxAmount,
+        );
+        // Allow small rounding differences (within 0.1%)
+        expect(calculatedRate).toBeCloseTo(rate, 1);
+      }
+    });
+
+    test("should verify round-trip with different amounts", () => {
+      const amounts = [33.84, 50, 100, 200, 500, 1000];
+      const rate = 23;
+
+      for (const amount of amounts) {
+        const taxAmount = calculateTaxAmountFromGross(amount, rate);
+        const calculatedRate = calculateTaxRateFromGross(amount, taxAmount);
+        // Allow small rounding differences (within 0.1%)
+        expect(calculatedRate).toBeCloseTo(rate, 1);
+      }
     });
   });
 });

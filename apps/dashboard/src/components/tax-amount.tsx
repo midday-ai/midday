@@ -13,8 +13,8 @@ import {
   SelectValue,
 } from "@midday/ui/select";
 import {
-  calculateTaxAmount,
-  calculateTaxRate,
+  calculateTaxAmountFromGross,
+  calculateTaxRateFromGross,
   getTaxTypeLabel,
 } from "@midday/utils/tax";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -190,9 +190,10 @@ export function TaxAmount({
 
               // Calculate and debounce the update
               // Note: 0 is a valid value (explicit override of category default)
+              // Transaction amounts are gross (tax-inclusive), so use reverse calculation
               const calculatedTaxAmount =
                 numValue !== null && amount
-                  ? calculateTaxAmount(amount, numValue)
+                  ? calculateTaxAmountFromGross(amount, numValue)
                   : null;
 
               debouncedUpdate({
@@ -227,8 +228,11 @@ export function TaxAmount({
             if (value === "percentage") {
               // Switch to percentage mode
               // Calculate rate from existing taxAmount but keep the taxAmount as-is
+              // Transaction amounts are gross (tax-inclusive), so use reverse calculation
               const calculatedRate =
-                taxAmount && amount ? calculateTaxRate(amount, taxAmount) : 0;
+                taxAmount && amount
+                  ? calculateTaxRateFromGross(amount, taxAmount)
+                  : 0;
 
               // Keep the existing taxAmount to avoid rounding errors
               updateTransactionMutation.mutate({

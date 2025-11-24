@@ -150,10 +150,12 @@ export function isGSTCountry(countryCode: string): boolean {
 }
 
 /**
- * Calculate tax amount from an amount and tax rate percentage
+ * Calculate tax amount from a net amount (amount excluding tax) and tax rate
+ * Use this only if you have net amounts. For transactions (which are gross),
+ * use calculateTaxAmountFromGross instead.
  * Rounds to 2 decimal places to avoid floating-point precision issues
  * Always returns a positive value, even for negative amounts (expenses)
- * @param amount - The base amount (can be positive or negative)
+ * @param amount - The net amount excluding tax (can be positive or negative)
  * @param taxRate - The tax rate as a percentage (e.g., 20 for 20%)
  * @returns The calculated tax amount rounded to 2 decimal places (always positive)
  */
@@ -164,8 +166,7 @@ export function calculateTaxAmount(amount: number, taxRate: number): number {
 /**
  * Calculate tax amount from a gross amount (amount including tax) and tax rate
  * Uses reverse VAT calculation: VAT = Gross × (Rate / (100 + Rate))
- * This is used when the transaction amount is gross (inc-VAT), which is always
- * the case for bank transactions.
+ * All transactions are gross amounts, so this is the standard calculation.
  * Rounds to 2 decimal places to avoid floating-point precision issues
  * Always returns a positive value, even for negative amounts (expenses)
  * @param grossAmount - The gross amount including tax (can be positive or negative)
@@ -184,10 +185,35 @@ export function calculateTaxAmountFromGross(
 }
 
 /**
- * Calculate tax rate percentage from an amount and tax amount
+ * Calculate tax rate percentage from a gross amount (amount including tax) and tax amount
+ * Uses reverse calculation: Rate = (Tax × 100) / (Gross - Tax)
+ * All transactions are gross amounts, so this is the standard calculation.
+ * Rounds to 2 decimal places to avoid floating-point precision issues
+ * Always returns a positive value, even for negative amounts (expenses)
+ * @param grossAmount - The gross amount including tax (can be positive or negative)
+ * @param taxAmount - The tax amount
+ * @returns The calculated tax rate as a percentage rounded to 2 decimal places (always positive)
+ * @example
+ * calculateTaxRateFromGross(100, 20) // Returns 25 (not 20)
+ * // Verification: 100 × (25/125) = 20 ✓
+ */
+export function calculateTaxRateFromGross(
+  grossAmount: number,
+  taxAmount: number,
+): number {
+  if (grossAmount === 0 || taxAmount === 0) return 0;
+  const netAmount = Math.abs(grossAmount) - taxAmount;
+  if (netAmount <= 0) return 0; // Prevent division by zero or negative
+  return Math.round((taxAmount / netAmount) * 100 * 100) / 100;
+}
+
+/**
+ * Calculate tax rate percentage from a net amount (amount excluding tax) and tax amount
+ * Use this only if you have net amounts. For transactions (which are gross),
+ * use calculateTaxRateFromGross instead.
  * Rounds to 2 decimal places
  * Uses absolute value of amount to ensure positive tax rates for both income and expenses
- * @param amount - The base amount (can be positive or negative)
+ * @param amount - The net amount excluding tax (can be positive or negative)
  * @param taxAmount - The tax amount
  * @returns The calculated tax rate as a percentage rounded to 2 decimal places (always positive)
  */
@@ -201,6 +227,8 @@ export function calculateTaxRate(amount: number, taxAmount: number): number {
  * 1. Use stored taxAmount if available (fixed amount mode)
  * 2. Calculate from transaction taxRate if available (percentage mode)
  * 3. Calculate from category taxRate if available (inherited percentage)
+ *
+ * All transactions are gross (tax-inclusive) amounts, so uses reverse VAT calculation.
  *
  * @param params - Transaction and category tax values
  * @returns Resolved tax values
@@ -232,12 +260,10 @@ export function resolveTaxValues(params: {
 
   if (transactionTaxAmount !== null && transactionTaxAmount !== undefined) {
     // Fixed amount mode - use stored amount (even if it's 0)
-    // This takes priority and uses the OCR-extracted value when available
     taxAmount = transactionTaxAmount;
     taxRate = transactionTaxRate ?? null;
   } else if (transactionTaxRate !== null && transactionTaxRate !== undefined) {
     // Percentage mode - calculate from transaction's rate
-    // Bank transactions are always gross (inc-VAT), so use reverse calculation
     taxRate = transactionTaxRate;
     taxAmount = calculateTaxAmountFromGross(
       transactionAmount,
@@ -245,7 +271,6 @@ export function resolveTaxValues(params: {
     );
   } else if (categoryTaxRate !== null && categoryTaxRate !== undefined) {
     // Inherited from category - calculate from category's rate
-    // Bank transactions are always gross (inc-VAT), so use reverse calculation
     taxRate = categoryTaxRate;
     taxAmount = calculateTaxAmountFromGross(transactionAmount, categoryTaxRate);
   }

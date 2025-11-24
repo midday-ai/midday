@@ -22,7 +22,11 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import React from "react";
-import { columns, flattenCategories } from "./columns";
+import {
+  type CategoriesTableMeta,
+  columns,
+  flattenCategories,
+} from "./columns";
 import { Header } from "./header";
 
 export function DataTable() {
@@ -111,10 +115,23 @@ export function DataTable() {
       if (category.parentId && matchingParentIds.has(category.parentId)) {
         return true;
       }
-      // Also show if parent is expanded (even without search match)
-      return category.parentId && expandedCategories.has(category.parentId);
+      // Don't show children that don't match search, even if parent is expanded
+      return false;
     });
   }, [flattenedData, expandedCategories, searchValue, childrenByParentId]);
+
+  const tableMeta: CategoriesTableMeta = {
+    deleteCategory: (id: string) => {
+      deleteCategoryMutation.mutate({ id });
+    },
+    onEdit: (id: string) => {
+      setParams({ categoryId: id });
+    },
+    expandedCategories,
+    setExpandedCategories,
+    searchValue,
+    setSearchValue,
+  };
 
   const table = useReactTable({
     data: filteredData,
@@ -122,18 +139,7 @@ export function DataTable() {
     columns,
     getCoreRowModel: getCoreRowModel(),
     manualFiltering: true, // We handle filtering manually
-    meta: {
-      deleteCategory: (id: string) => {
-        deleteCategoryMutation.mutate({ id });
-      },
-      onEdit: (id: string) => {
-        setParams({ categoryId: id });
-      },
-      expandedCategories,
-      setExpandedCategories,
-      searchValue,
-      setSearchValue,
-    },
+    meta: tableMeta,
   });
 
   return (
