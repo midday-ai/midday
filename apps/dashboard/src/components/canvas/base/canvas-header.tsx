@@ -23,7 +23,7 @@ interface CanvasHeaderProps {
 }
 
 export function CanvasHeader({ title }: CanvasHeaderProps) {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const { toast } = useToast();
 
   const filename = `${title.toLowerCase().replace(/\s+/g, "-")}-report.pdf`;
@@ -32,7 +32,7 @@ export function CanvasHeader({ title }: CanvasHeaderProps) {
     try {
       await generateCanvasPdf({
         filename,
-        theme,
+        theme: resolvedTheme,
       });
     } catch {}
   };
@@ -49,7 +49,7 @@ export function CanvasHeader({ title }: CanvasHeaderProps) {
       // Generate PDF blob silently
       const blob = await generateCanvasPdfBlob({
         filename,
-        theme,
+        theme: resolvedTheme,
       });
 
       // Create File object from blob

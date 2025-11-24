@@ -25,9 +25,19 @@ export async function generateCanvasPdf(
     theme,
   } = options;
 
-  const backgroundColor = theme === "dark" ? "#0c0c0c" : "#ffffff";
+  // Resolve theme: if "system" or undefined, check system preference
+  const resolvedTheme =
+    theme === "system" || !theme
+      ? window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light"
+      : theme;
+
+  const backgroundColor = resolvedTheme === "dark" ? "#0c0c0c" : "#ffffff";
   const backgroundRgb =
-    theme === "dark" ? { r: 12, g: 12, b: 12 } : { r: 255, g: 255, b: 255 };
+    resolvedTheme === "dark"
+      ? { r: 12, g: 12, b: 12 }
+      : { r: 255, g: 255, b: 255 };
 
   try {
     // Find the canvas content
@@ -140,9 +150,19 @@ export async function generateCanvasPdfBlob(
     theme,
   } = options;
 
-  const backgroundColor = theme === "dark" ? "#0c0c0c" : "#ffffff";
+  // Resolve theme: if "system" or undefined, check system preference
+  const resolvedTheme =
+    theme === "system" || !theme
+      ? window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light"
+      : theme;
+
+  const backgroundColor = resolvedTheme === "dark" ? "#0c0c0c" : "#ffffff";
   const backgroundRgb =
-    theme === "dark" ? { r: 12, g: 12, b: 12 } : { r: 255, g: 255, b: 255 };
+    resolvedTheme === "dark"
+      ? { r: 12, g: 12, b: 12 }
+      : { r: 255, g: 255, b: 255 };
 
   try {
     // Find the canvas content
