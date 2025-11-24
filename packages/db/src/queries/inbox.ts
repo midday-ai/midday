@@ -841,7 +841,11 @@ export async function matchTransaction(
     taxUpdates.taxAmount = result.taxAmount;
   }
 
-  if (result.taxRate && result.taxType) {
+  if (
+    result.taxRate !== null &&
+    result.taxRate !== undefined &&
+    result.taxType
+  ) {
     taxUpdates.taxRate = result.taxRate;
     taxUpdates.taxType = result.taxType;
   }
