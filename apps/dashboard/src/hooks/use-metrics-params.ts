@@ -1,20 +1,19 @@
+import { formatISO, subMonths, subYears } from "date-fns";
 import { useQueryStates } from "nuqs";
-import { parseAsStringLiteral } from "nuqs/server";
+import { parseAsString } from "nuqs/server";
+
+const getDefaultDateRange = () => {
+  const now = new Date();
+  const from = subYears(now, 1);
+  return {
+    from: formatISO(from, { representation: "date" }),
+    to: formatISO(now, { representation: "date" }),
+  };
+};
 
 export const metricsParamsSchema = {
-  "revenue-type": parseAsStringLiteral(["net", "gross"] as const).withDefault(
-    "net",
-  ),
-  "year-type": parseAsStringLiteral(["fiscal", "real"] as const).withDefault(
-    "real",
-  ),
-  "time-period": parseAsStringLiteral([
-    "3 months",
-    "6 months",
-    "1 year",
-    "2 years",
-    "5 years",
-  ] as const).withDefault("1 year"),
+  from: parseAsString.withDefault(getDefaultDateRange().from),
+  to: parseAsString.withDefault(getDefaultDateRange().to),
 };
 
 export function useMetricsParams() {
@@ -24,23 +23,18 @@ export function useMetricsParams() {
 
   // Map kebab-case URL params to camelCase for easier usage
   return {
-    revenueType: params["revenue-type"],
-    yearType: params["year-type"],
-    timePeriod: params["time-period"],
+    from: params.from,
+    to: params.to,
     setParams: (updates: {
-      revenueType?: "net" | "gross";
-      yearType?: "fiscal" | "real";
-      timePeriod?: "3 months" | "6 months" | "1 year" | "2 years" | "5 years";
+      from?: string;
+      to?: string;
     }) => {
       const mappedUpdates: Record<string, string | null> = {};
-      if (updates.revenueType !== undefined) {
-        mappedUpdates["revenue-type"] = updates.revenueType;
+      if (updates.from !== undefined) {
+        mappedUpdates.from = updates.from;
       }
-      if (updates.yearType !== undefined) {
-        mappedUpdates["year-type"] = updates.yearType;
-      }
-      if (updates.timePeriod !== undefined) {
-        mappedUpdates["time-period"] = updates.timePeriod;
+      if (updates.to !== undefined) {
+        mappedUpdates.to = updates.to;
       }
       setParams(mappedUpdates);
     },
