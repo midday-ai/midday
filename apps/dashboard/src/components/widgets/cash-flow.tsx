@@ -28,7 +28,7 @@ export function CashFlowWidget() {
     useConfigurableWidget("cash-flow");
 
   const { from, to } = useMemo(() => {
-    const period = config?.period ?? "current_month";
+    const period = config?.period ?? "trailing_12";
     return getWidgetPeriodDates(period, team?.fiscalYearStartMonth);
   }, [config?.period, team?.fiscalYearStartMonth]);
 
@@ -65,7 +65,7 @@ export function CashFlowWidget() {
 
   const handleViewAnalysis = () => {
     const periodLabel = t(
-      `widget_period.${config?.period ?? "current_month"}` as "widget_period.fiscal_ytd",
+      `widget_period.${config?.period ?? "trailing_12"}` as "widget_period.fiscal_ytd",
     );
 
     handleToolCall({
@@ -94,7 +94,7 @@ export function CashFlowWidget() {
   };
 
   const periodLabel = t(
-    `widget_period.${config?.period ?? "current_month"}` as "widget_period.fiscal_ytd",
+    `widget_period.${config?.period ?? "trailing_12"}` as "widget_period.fiscal_ytd",
   );
 
   return (

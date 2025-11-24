@@ -69,8 +69,8 @@ export function CategoryExpensesCard({
   }, [from, to]);
 
   return (
-    <div className="border bg-background border-border p-6">
-      <div className="mb-4">
+    <div className="border bg-background border-border p-6 flex flex-col h-full">
+      <div className="mb-4 min-h-[140px]">
         <h3 className="text-sm font-normal mb-1 text-muted-foreground">
           Category Expense Breakdown
         </h3>

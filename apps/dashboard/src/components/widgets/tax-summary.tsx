@@ -61,9 +61,9 @@ export function TaxSummaryWidget() {
 
   const taxTerms = getTaxTerminology(team?.countryCode ?? undefined, t);
 
-  // Get date range based on widget config or default to fiscal_ytd
+  // Get date range based on widget config or default to trailing_12
   const { from: fromDate, to: toDate } = useMemo(() => {
-    const period = config?.period ?? "fiscal_ytd";
+    const period = config?.period ?? "trailing_12";
     return getWidgetPeriodDates(period, team?.fiscalYearStartMonth);
   }, [config?.period, team?.fiscalYearStartMonth]);
 
@@ -84,7 +84,7 @@ export function TaxSummaryWidget() {
   const hasActivity = collectedTax > 0 || paidTax > 0;
 
   const getDescription = () => {
-    const periodKey = config?.period ?? "fiscal_ytd";
+    const periodKey = config?.period ?? "trailing_12";
     const period = t(
       `widget_period.${periodKey}` as "widget_period.fiscal_ytd",
     );
@@ -135,7 +135,7 @@ export function TaxSummaryWidget() {
     // Use dynamic terminology based on tax type (VAT/GST/Sales Tax/Tax)
     const summaryText = taxTerms.title.toLowerCase();
     const periodLabel = t(
-      `widget_period.${config?.period ?? "fiscal_ytd"}` as "widget_period.fiscal_ytd",
+      `widget_period.${config?.period ?? "trailing_12"}` as "widget_period.fiscal_ytd",
     );
 
     handleToolCall({

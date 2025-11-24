@@ -42,7 +42,7 @@ export function WidgetSettings({
 }: WidgetSettingsProps) {
   const t = useI18n();
   const [period, setPeriod] = useState<WidgetPeriod | undefined>(
-    config?.period ?? "fiscal_ytd",
+    config?.period ?? "trailing_12",
   );
   const [revenueType, setRevenueType] = useState<RevenueType | undefined>(
     config?.revenueType ?? "net",

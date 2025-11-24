@@ -26,7 +26,7 @@ export function RevenueSummaryWidget() {
     useConfigurableWidget("revenue-summary");
 
   const { from, to } = useMemo(() => {
-    const period = config?.period ?? "fiscal_year";
+    const period = config?.period ?? "trailing_12";
     return getWidgetPeriodDates(period, team?.fiscalYearStartMonth);
   }, [config?.period, team?.fiscalYearStartMonth]);
 
@@ -63,7 +63,7 @@ export function RevenueSummaryWidget() {
 
   const handleViewTrends = () => {
     const periodLabel = t(
-      `widget_period.${config?.period ?? "fiscal_year"}` as "widget_period.fiscal_ytd",
+      `widget_period.${config?.period ?? "trailing_12"}` as "widget_period.fiscal_ytd",
     );
     const revenueTypeLabel = config?.revenueType === "gross" ? "Gross" : "Net";
 
@@ -81,7 +81,7 @@ export function RevenueSummaryWidget() {
   };
 
   const periodLabel = t(
-    `widget_period.${config?.period ?? "fiscal_year"}` as "widget_period.fiscal_ytd",
+    `widget_period.${config?.period ?? "trailing_12"}` as "widget_period.fiscal_ytd",
   );
 
   const revenueTypeLabel = config?.revenueType === "gross" ? "Gross" : "Net";
@@ -118,7 +118,7 @@ export function RevenueSummaryWidget() {
             <h2 className="text-2xl font-normal">
               <FormatAmount
                 amount={data.result.totalRevenue}
-                currency={data.result.currency}
+                currency={data.result.currency || "USD"}
               />
             </h2>
           )}

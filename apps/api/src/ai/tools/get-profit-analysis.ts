@@ -81,6 +81,8 @@ export const getProfitAnalysisTool = tool({
       }
 
       // Get profit and revenue data in parallel
+      // Note: For profit margin calculation, we always use Net Revenue as the denominator
+      // because Gross Profit = Net Revenue - COGS, and Net Profit = Gross Profit - Operating Expenses
       const [profitResult, revenueResult] = await Promise.all([
         getReports(db, {
           teamId,
@@ -88,7 +90,7 @@ export const getProfitAnalysisTool = tool({
           to: finalTo,
           currency: currency ?? undefined,
           type: "profit",
-          revenueType: revenueType ?? "net",
+          revenueType: revenueType ?? "net", // Use revenueType to determine gross vs net profit
         }),
         getReports(db, {
           teamId,
@@ -96,7 +98,7 @@ export const getProfitAnalysisTool = tool({
           to: finalTo,
           currency: currency ?? undefined,
           type: "revenue",
-          revenueType: revenueType ?? "net",
+          revenueType: "net", // Always use net revenue for profit margin denominator
         }),
       ]);
 

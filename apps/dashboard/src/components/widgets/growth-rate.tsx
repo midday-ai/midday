@@ -25,7 +25,7 @@ export function GrowthRateWidget() {
     useConfigurableWidget("growth-rate");
 
   const { from, to } = useMemo(() => {
-    const period = config?.period ?? "current_quarter";
+    const period = config?.period ?? "trailing_12";
     return getWidgetPeriodDates(period, team?.fiscalYearStartMonth);
   }, [config?.period, team?.fiscalYearStartMonth]);
 
@@ -64,7 +64,7 @@ export function GrowthRateWidget() {
 
   const handleViewAnalysis = () => {
     const periodLabel = t(
-      `widget_period.${config?.period ?? "current_quarter"}` as "widget_period.fiscal_ytd",
+      `widget_period.${config?.period ?? "trailing_12"}` as "widget_period.fiscal_ytd",
     );
     const revenueTypeLabel = config?.revenueType === "gross" ? "Gross" : "Net";
 
@@ -89,7 +89,7 @@ export function GrowthRateWidget() {
   };
 
   const periodLabel = t(
-    `widget_period.${config?.period ?? "current_quarter"}` as "widget_period.fiscal_ytd",
+    `widget_period.${config?.period ?? "trailing_12"}` as "widget_period.fiscal_ytd",
   );
 
   const revenueTypeLabel = config?.revenueType === "gross" ? "Gross" : "Net";
