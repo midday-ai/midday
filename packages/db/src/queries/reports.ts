@@ -388,24 +388,26 @@ export async function getRevenue(db: Database, params: GetReportsParams) {
           ? inputCurrency && targetCurrency
             ? sql<number>`COALESCE(SUM(
                 -- Use baseAmount when baseCurrency matches target AND baseAmount is not NULL, otherwise use amount
+                -- ROUND to 2 decimal places for financial precision
                 CASE 
                   WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN
-                    ${transactions.baseAmount} - (
+                    ROUND(${transactions.baseAmount} - (
                       ${transactions.baseAmount} * COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0) / 
                       (100 + COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0))
-                    )
+                    ), 2)
                   ELSE
-                    ${transactions.amount} - (
+                    ROUND(${transactions.amount} - (
                       ${transactions.amount} * COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0) / 
                       (100 + COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0))
-                    )
+                    ), 2)
                 END
               ), 0)`
             : sql<number>`COALESCE(SUM(
-                COALESCE(${transactions.baseAmount}, 0) - (
+                -- ROUND to 2 decimal places for financial precision
+                ROUND(COALESCE(${transactions.baseAmount}, 0) - (
                   COALESCE(${transactions.baseAmount}, 0) * COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0) / 
                   (100 + COALESCE(${transactions.taxRate}, ${tc.taxRate}, 0))
-                )
+                ), 2)
               ), 0)`
           : inputCurrency && targetCurrency
             ? sql<number>`COALESCE(SUM(
@@ -1347,10 +1349,10 @@ export async function getTaxSummary(db: Database, params: GetTaxParams) {
     SELECT 
       COALESCE(tc.slug, 'uncategorized') as category_slug,
       COALESCE(tc.name, 'Uncategorized') as category_name,
-      ABS(SUM(${amountExpr} * COALESCE(t.tax_rate, tc.tax_rate, 0) / (100 + COALESCE(t.tax_rate, tc.tax_rate, 0))))::text as total_tax_amount,
-      ABS(SUM(${amountExpr}))::text as total_transaction_amount,
+      ROUND(ABS(SUM(${amountExpr} * COALESCE(t.tax_rate, tc.tax_rate, 0) / (100 + COALESCE(t.tax_rate, tc.tax_rate, 0)))), 2)::text as total_tax_amount,
+      ROUND(ABS(SUM(${amountExpr})), 2)::text as total_transaction_amount,
       COUNT(t.id) as transaction_count,
-      AVG(COALESCE(t.tax_rate, tc.tax_rate))::text as avg_tax_rate,
+      ROUND(AVG(COALESCE(t.tax_rate, tc.tax_rate)), 2)::text as avg_tax_rate,
       COALESCE(t.tax_type, tc.tax_type) as tax_type,
       t.currency,
       MIN(t.date) as earliest_date,
@@ -1363,7 +1365,7 @@ export async function getTaxSummary(db: Database, params: GetTaxParams) {
       COALESCE(tc.name, 'Uncategorized'),
       COALESCE(t.tax_type, tc.tax_type),
       t.currency
-    ORDER BY ABS(SUM(${amountExpr} * COALESCE(t.tax_rate, tc.tax_rate, 0) / (100 + COALESCE(t.tax_rate, tc.tax_rate, 0)))) DESC
+    ORDER BY ROUND(ABS(SUM(${amountExpr} * COALESCE(t.tax_rate, tc.tax_rate, 0) / (100 + COALESCE(t.tax_rate, tc.tax_rate, 0)))), 2) DESC
   `;
 
   const rawData = (await db.executeOnReplica(query)) as unknown as Array<{

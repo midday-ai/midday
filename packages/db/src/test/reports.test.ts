@@ -359,7 +359,9 @@ function createMockDatabase(mockData: {
                             if (!tx.category) continue;
 
                             const key = tx.category.slug || "uncategorized";
-                            const amount = Math.abs(getAmount(tx, targetCurrency));
+                            const amount = Math.abs(
+                              getAmount(tx, targetCurrency),
+                            );
 
                             if (!grouped.has(key)) {
                               grouped.set(key, {
@@ -380,7 +382,8 @@ function createMockDatabase(mockData: {
                             then: (
                               onFulfill: (value: any) => any,
                               onReject?: (error: any) => any,
-                            ) => Promise.resolve(result).then(onFulfill, onReject),
+                            ) =>
+                              Promise.resolve(result).then(onFulfill, onReject),
                             catch: (onReject: (error: any) => any) =>
                               Promise.resolve(result).catch(onReject),
                           };
@@ -450,14 +453,14 @@ function createMockDatabase(mockData: {
                               // The filter should already handle this, but double-check
                               if (
                                 !REVENUE_CATEGORIES.includes(
-                                  tx.categorySlug || "",
+                                  tx.categorySlug as (typeof REVENUE_CATEGORIES)[number],
                                 ) ||
                                 tx.amount <= 0
                               ) {
                                 continue; // Skip non-revenue transactions
                               }
 
-                              const month = tx.date.substring(0, 7) + "-01";
+                              const month = `${tx.date.substring(0, 7)}-01`;
                               let value = 0;
 
                               // Check if net revenue (simplified check)
@@ -508,7 +511,7 @@ function createMockDatabase(mockData: {
                             for (const tx of filteredByCategory) {
                               if (tx.amount >= 0) continue; // Only expenses
 
-                              const month = tx.date.substring(0, 7) + "-01";
+                              const month = `${tx.date.substring(0, 7)}-01`;
                               const amount = Math.abs(
                                 getAmount(tx, targetCurrency),
                               );
@@ -547,7 +550,7 @@ function createMockDatabase(mockData: {
                             const targetCurrency = "GBP";
 
                             for (const tx of filteredByCategory) {
-                              const month = tx.date.substring(0, 7) + "-01";
+                              const month = `${tx.date.substring(0, 7)}-01`;
                               const amount = getAmount(tx, targetCurrency);
 
                               if (!grouped.has(month)) {
@@ -696,7 +699,7 @@ function createMockDatabase(mockData: {
                         const targetCurrency = "GBP";
 
                         for (const tx of joined) {
-                          const month = tx.date.substring(0, 7) + "-01";
+                          const month = `${tx.date.substring(0, 7)}-01`;
                           const amount = getAmount(tx, targetCurrency);
                           const current = grouped.get(month) || 0;
                           grouped.set(month, current + Math.abs(amount));
@@ -742,7 +745,7 @@ function createMockDatabase(mockData: {
           const team = data.teams.find((t) => {
             if (options?.where) {
               const where = options.where;
-              if (where.id && where.id.value) {
+              if (where.id?.value) {
                 return t.id === where.id.value;
               }
             }
@@ -919,6 +922,8 @@ const createTestCategories = (): MockCategory[] => [
     taxRate: null,
     taxType: null,
     excluded: false,
+    parentId: null,
+    color: "#22c55e",
   },
   {
     id: "cat-2",
@@ -928,6 +933,8 @@ const createTestCategories = (): MockCategory[] => [
     taxRate: 20,
     taxType: "vat",
     excluded: false,
+    parentId: null,
+    color: "#3b82f6",
   },
   {
     id: "cat-3",
@@ -937,6 +944,8 @@ const createTestCategories = (): MockCategory[] => [
     taxRate: null,
     taxType: null,
     excluded: false,
+    parentId: null,
+    color: "#ef4444",
   },
   {
     id: "cat-4",
@@ -946,6 +955,8 @@ const createTestCategories = (): MockCategory[] => [
     taxRate: null,
     taxType: null,
     excluded: false,
+    parentId: null,
+    color: "#f59e0b",
   },
   {
     id: "cat-5",
@@ -955,6 +966,8 @@ const createTestCategories = (): MockCategory[] => [
     taxRate: null,
     taxType: null,
     excluded: false,
+    parentId: null,
+    color: "#8b5cf6",
   },
 ];
 
