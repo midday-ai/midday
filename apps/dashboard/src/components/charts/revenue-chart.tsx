@@ -66,7 +66,7 @@ export function RevenueChart({
       {/* Legend */}
       {showLegend && (
         <ChartLegend
-          title="Monthly Revenue"
+          title="Revenue"
           items={[
             { label: "Revenue", type: "solid" },
             ...(showTarget

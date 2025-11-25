@@ -123,15 +123,30 @@ export async function getProfit(db: Database, params: GetReportsParams) {
   // Note: When no inputCurrency is provided, we use baseAmount directly in WHERE clause.
   // This is intentional - transactions without baseAmount set are excluded as they haven't
   // been converted to the team's base currency yet. When inputCurrency is provided,
-  // we handle NULL baseAmount gracefully in the amount calculation CASE expressions.
+  // we handle NULL baseAmount gracefully by using the original amount field.
   const expenseConditions = [
     eq(transactions.teamId, teamId),
     eq(transactions.internal, false),
     ne(transactions.status, "excluded"),
-    lt(transactions.baseAmount, 0), // Only expenses (negative amounts)
     gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
   ];
+
+  // Amount condition: handle NULL baseAmount gracefully when inputCurrency is provided
+  if (inputCurrency && targetCurrency) {
+    // When inputCurrency is provided, use CASE to handle NULL baseAmount
+    // If baseCurrency matches targetCurrency and baseAmount is not NULL, use baseAmount
+    // Otherwise, use the original amount field
+    expenseConditions.push(
+      sql`(CASE 
+        WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
+        ELSE ${transactions.amount}
+      END < 0)`,
+    );
+  } else {
+    // When no inputCurrency, exclude transactions without baseAmount
+    expenseConditions.push(lt(transactions.baseAmount, 0));
+  }
 
   // Add currency conditions
   // When inputCurrency is provided, we want to show transactions in that currency
@@ -336,16 +351,31 @@ export async function getRevenue(db: Database, params: GetReportsParams) {
   // Note: When no inputCurrency is provided, we use baseAmount directly in WHERE clause.
   // This is intentional - transactions without baseAmount set are excluded as they haven't
   // been converted to the team's base currency yet. When inputCurrency is provided,
-  // we handle NULL baseAmount gracefully in the amount calculation CASE expressions.
+  // we handle NULL baseAmount gracefully by using the original amount field.
   const conditions = [
     eq(transactions.teamId, teamId),
     eq(transactions.internal, false),
     inArray(transactions.categorySlug, REVENUE_CATEGORIES), // Include all revenue categories (includes "revenue" parent)
-    gt(transactions.baseAmount, 0), // Only include positive amounts
     ne(transactions.status, "excluded"),
     gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
   ];
+
+  // Amount condition: handle NULL baseAmount gracefully when inputCurrency is provided
+  if (inputCurrency && targetCurrency) {
+    // When inputCurrency is provided, use CASE to handle NULL baseAmount
+    // If baseCurrency matches targetCurrency and baseAmount is not NULL, use baseAmount
+    // Otherwise, use the original amount field
+    conditions.push(
+      sql`(CASE 
+        WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
+        ELSE ${transactions.amount}
+      END > 0)`,
+    );
+  } else {
+    // When no inputCurrency, exclude transactions without baseAmount
+    conditions.push(gt(transactions.baseAmount, 0));
+  }
 
   // Explicitly exclude contra-revenue categories
   conditions.push(
@@ -717,10 +747,10 @@ export async function getExpenses(db: Database, params: GetExpensesParams) {
       END < 0)`,
     );
   } else if (targetCurrency) {
-    // When no inputCurrency, use baseAmount directly but handle NULL
-    conditions.push(
-      sql`(COALESCE(${transactions.baseAmount}, ${transactions.amount}) < 0)`,
-    );
+    // When no inputCurrency, exclude transactions without baseAmount
+    // This ensures we only show transactions that have been converted to the team's base currency
+    conditions.push(eq(transactions.baseCurrency, targetCurrency));
+    conditions.push(lt(transactions.baseAmount, 0));
   }
 
   // Step 4: Execute the aggregated query
@@ -898,19 +928,10 @@ export async function getSpending(
         ELSE ${transactions.amount}
       END < 0)`,
     );
-  } else {
-    totalAmountConditions.push(
-      sql`(COALESCE(${transactions.baseAmount}, ${transactions.amount}) < 0)`,
-    );
-  }
-
-  if (targetCurrency) {
-    totalAmountConditions.push(
-      or(
-        eq(transactions.baseCurrency, targetCurrency),
-        eq(transactions.currency, targetCurrency),
-      )!,
-    );
+  } else if (targetCurrency) {
+    // When no inputCurrency, exclude transactions without baseAmount
+    totalAmountConditions.push(eq(transactions.baseCurrency, targetCurrency));
+    totalAmountConditions.push(lt(transactions.baseAmount, 0));
   }
 
   const totalAmountResult = await db
@@ -921,7 +942,7 @@ export async function getSpending(
               WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
               ELSE ${transactions.amount}
             END`
-          : sql`COALESCE(${transactions.baseAmount}, ${transactions.amount})`
+          : sql`COALESCE(${transactions.baseAmount}, 0)`
       })`,
     })
     .from(transactions)
@@ -962,19 +983,10 @@ export async function getSpending(
         ELSE ${transactions.amount}
       END < 0)`,
     );
-  } else {
-    spendingConditions.push(
-      sql`(COALESCE(${transactions.baseAmount}, ${transactions.amount}) < 0)`,
-    );
-  }
-
-  if (targetCurrency) {
-    spendingConditions.push(
-      or(
-        eq(transactions.baseCurrency, targetCurrency),
-        eq(transactions.currency, targetCurrency),
-      )!,
-    );
+  } else if (targetCurrency) {
+    // When no inputCurrency, exclude transactions without baseAmount
+    spendingConditions.push(eq(transactions.baseCurrency, targetCurrency));
+    spendingConditions.push(lt(transactions.baseAmount, 0));
   }
 
   // Single query replaces N queries (where N = number of categories)
@@ -989,7 +1001,7 @@ export async function getSpending(
               WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
               ELSE ${transactions.amount}
             END`
-          : sql`COALESCE(${transactions.baseAmount}, ${transactions.amount})`
+          : sql`COALESCE(${transactions.baseAmount}, 0)`
       }))`,
     })
     .from(transactions)
@@ -1021,7 +1033,7 @@ export async function getSpending(
               WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
               ELSE ${transactions.amount}
             END`
-          : sql`COALESCE(${transactions.baseAmount}, ${transactions.amount})`
+          : sql`COALESCE(${transactions.baseAmount}, 0)`
       }) < 0`,
     )
     .then((results) =>
@@ -1058,10 +1070,10 @@ export async function getSpending(
         ELSE ${transactions.amount}
       END < 0)`,
     );
-  } else {
-    uncategorizedConditions.push(
-      sql`(COALESCE(${transactions.baseAmount}, ${transactions.amount}) < 0)`,
-    );
+  } else if (targetCurrency) {
+    // When no inputCurrency, exclude transactions without baseAmount
+    uncategorizedConditions.push(eq(transactions.baseCurrency, targetCurrency));
+    uncategorizedConditions.push(lt(transactions.baseAmount, 0));
   }
 
   uncategorizedConditions.push(
@@ -1075,15 +1087,6 @@ export async function getSpending(
     )!,
   );
 
-  if (targetCurrency) {
-    uncategorizedConditions.push(
-      or(
-        eq(transactions.baseCurrency, targetCurrency),
-        eq(transactions.currency, targetCurrency),
-      )!,
-    );
-  }
-
   const uncategorizedResult = await db
     .select({
       amount: sql<number>`SUM(${
@@ -1092,7 +1095,7 @@ export async function getSpending(
               WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
               ELSE ${transactions.amount}
             END`
-          : sql`COALESCE(${transactions.baseAmount}, ${transactions.amount})`
+          : sql`COALESCE(${transactions.baseAmount}, 0)`
       })`,
     })
     .from(transactions)
@@ -2118,10 +2121,10 @@ export async function getRecurringExpenses(
         ELSE ${transactions.amount}
       END < 0)`,
     );
-  } else {
-    conditions.push(
-      sql`(COALESCE(${transactions.baseAmount}, ${transactions.amount}) < 0)`,
-    );
+  } else if (targetCurrency) {
+    // When no inputCurrency, exclude transactions without baseAmount
+    conditions.push(eq(transactions.baseCurrency, targetCurrency));
+    conditions.push(lt(transactions.baseAmount, 0));
   }
 
   // Filter by date range if provided
@@ -2130,15 +2133,6 @@ export async function getRecurringExpenses(
   }
   if (to) {
     conditions.push(lte(transactions.date, to));
-  }
-
-  if (targetCurrency) {
-    conditions.push(
-      or(
-        eq(transactions.baseCurrency, targetCurrency),
-        eq(transactions.currency, targetCurrency),
-      )!,
-    );
   }
 
   // Get all recurring expenses grouped by name and frequency
@@ -2154,7 +2148,7 @@ export async function getRecurringExpenses(
               WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
               ELSE ${transactions.amount}
             END`
-          : sql`COALESCE(${transactions.baseAmount}, ${transactions.amount})`
+          : sql`COALESCE(${transactions.baseAmount}, 0)`
       }))`,
       count: sql<number>`COUNT(*)::int`,
       lastDate: sql<string>`MAX(${transactions.date})`,
@@ -2181,7 +2175,7 @@ export async function getRecurringExpenses(
               WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
               ELSE ${transactions.amount}
             END`
-          : sql`COALESCE(${transactions.baseAmount}, ${transactions.amount})`
+          : sql`COALESCE(${transactions.baseAmount}, 0)`
       })) DESC`,
     )
     .limit(10);
@@ -3103,7 +3097,10 @@ export async function getBalanceSheet(
                 eq(transactions.baseCurrency, targetCurrency),
               )!
             : targetCurrency
-              ? eq(transactions.baseCurrency, targetCurrency)
+              ? and(
+                  eq(transactions.baseCurrency, targetCurrency),
+                  isNotNull(transactions.baseAmount),
+                )
               : sql`true`,
         ),
       )
@@ -3154,7 +3151,10 @@ export async function getBalanceSheet(
                 eq(transactions.baseCurrency, targetCurrency),
               )!
             : targetCurrency
-              ? eq(transactions.baseCurrency, targetCurrency)
+              ? and(
+                  eq(transactions.baseCurrency, targetCurrency),
+                  isNotNull(transactions.baseAmount),
+                )
               : sql`true`,
         ),
       )
@@ -3296,7 +3296,10 @@ export async function getBalanceSheet(
                 eq(transactions.baseCurrency, targetCurrency),
               )!
             : targetCurrency
-              ? eq(transactions.baseCurrency, targetCurrency)
+              ? and(
+                  eq(transactions.baseCurrency, targetCurrency),
+                  isNotNull(transactions.baseAmount),
+                )
               : sql`true`,
         ),
       )
@@ -3331,7 +3334,13 @@ export async function getBalanceSheet(
           lte(transactions.date, asOfDateStr),
           inArray(transactions.categorySlug, REVENUE_CATEGORIES),
           not(inArray(transactions.categorySlug, CONTRA_REVENUE_CATEGORIES)),
-          gt(transactions.baseAmount, 0),
+          // Amount condition: handle NULL baseAmount gracefully when inputCurrency is provided
+          inputCurrency && targetCurrency
+            ? sql`(CASE 
+                WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
+                ELSE ${transactions.amount}
+              END > 0)`
+            : gt(transactions.baseAmount, 0),
           // Category exclusion check: allow if category doesn't exist (NULL) or is not excluded
           or(
             isNull(transactionCategories.excluded),
@@ -3376,7 +3385,13 @@ export async function getBalanceSheet(
           eq(transactions.internal, false),
           ne(transactions.status, "excluded"),
           lte(transactions.date, asOfDateStr),
-          lt(transactions.baseAmount, 0),
+          // Amount condition: handle NULL baseAmount gracefully when inputCurrency is provided
+          inputCurrency && targetCurrency
+            ? sql`(CASE 
+                WHEN ${transactions.baseCurrency} = ${sql`${targetCurrency}`} AND ${transactions.baseAmount} IS NOT NULL THEN ${transactions.baseAmount}
+                ELSE ${transactions.amount}
+              END < 0)`
+            : lt(transactions.baseAmount, 0),
           // Exclude asset categories - these are capital expenditures, not operating expenses
           or(
             isNull(transactions.categorySlug),
