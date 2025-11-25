@@ -5,6 +5,7 @@ import { SelectParentCategory } from "@/components/select-parent-category";
 import { SelectTaxType } from "@/components/select-tax-type";
 import { TaxRateInput } from "@/components/tax-rate-input";
 import { useCategoryParams } from "@/hooks/use-category-params";
+import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
@@ -46,6 +47,7 @@ export function CategoryEditForm({ data }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { setParams } = useCategoryParams();
+  const invalidateTransactionQueries = useInvalidateTransactionQueries();
 
   const defaultValues = {
     id: data?.id,
@@ -69,16 +71,23 @@ export function CategoryEditForm({ data }: Props) {
 
   const updateCategoryMutation = useMutation(
     trpc.transactionCategories.update.mutationOptions({
-      onSuccess: () => {
-        // Invalidate the list query
+      onSuccess: (_, variables) => {
+        // Always invalidate category queries
         queryClient.invalidateQueries({
           queryKey: trpc.transactionCategories.get.queryKey(),
         });
 
-        // Invalidate the specific category query to refetch updated data
         queryClient.invalidateQueries({
           queryKey: trpc.transactionCategories.getById.queryKey(),
         });
+
+        // Check if excluded or taxRate changed (affects calculations)
+        const excludedChanged = data?.excluded !== variables.excluded;
+        const taxRateChanged = data?.taxRate !== variables.taxRate;
+
+        if (excludedChanged || taxRateChanged) {
+          invalidateTransactionQueries();
+        }
 
         setParams(null);
       },

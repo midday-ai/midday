@@ -317,7 +317,7 @@ export async function getRevenue(db: Database, params: GetReportsParams) {
   const conditions = [
     eq(transactions.teamId, teamId),
     eq(transactions.internal, false),
-    inArray(transactions.categorySlug, REVENUE_CATEGORIES), // Include all revenue categories
+    inArray(transactions.categorySlug, REVENUE_CATEGORIES), // Include all revenue categories (includes "revenue" parent)
     gt(transactions.baseAmount, 0), // Only include positive amounts
     ne(transactions.status, "excluded"),
     gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
@@ -337,6 +337,8 @@ export async function getRevenue(db: Database, params: GetReportsParams) {
   }
 
   // Step 4: Execute the aggregated query with gross/net calculation
+  // Note: We use LEFT JOIN to get taxRate from categories, but we don't filter by excluded
+  // since revenue categories should always be included
   const tc = transactionCategories;
   const monthlyData = await db
     .select({
@@ -365,7 +367,13 @@ export async function getRevenue(db: Database, params: GetReportsParams) {
       tc,
       and(eq(tc.slug, transactions.categorySlug), eq(tc.teamId, teamId)),
     )
-    .where(and(...conditions, or(isNull(tc.excluded), eq(tc.excluded, false))!))
+    .where(
+      and(
+        ...conditions,
+        // Category exclusion check: allow if category doesn't exist (NULL) or is not excluded
+        or(isNull(tc.excluded), eq(tc.excluded, false))!,
+      ),
+    )
     .groupBy(sql`DATE_TRUNC('month', ${transactions.date})`)
     .orderBy(sql`DATE_TRUNC('month', ${transactions.date}) ASC`);
 
@@ -3057,6 +3065,7 @@ export async function getBalanceSheet(
           inArray(transactions.categorySlug, REVENUE_CATEGORIES),
           not(inArray(transactions.categorySlug, CONTRA_REVENUE_CATEGORIES)),
           gt(transactions.baseAmount, 0),
+          // Category exclusion check: allow if category doesn't exist (NULL) or is not excluded
           or(
             isNull(transactionCategories.excluded),
             eq(transactionCategories.excluded, false),
