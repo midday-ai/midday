@@ -73,8 +73,8 @@ export function AccountBalancesWidget() {
       actions="View account balances"
     >
       {balanceData && (
-        <div className="space-y-1">
-          <h2 className="text-2xl font-normal text-[24px]">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-2xl font-normal">
             <FormatAmount
               currency={currency}
               amount={totalBalance}

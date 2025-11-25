@@ -64,8 +64,8 @@ export function BillableHoursWidget() {
       onClick={handleViewTracker}
       actions={t("billable_hours.view_tracker")}
     >
-      <div className="space-y-1 select-text">
-        <div className="text-4xl flex items-baseline gap-1 space-x-2">
+      <div className="flex flex-col gap-2 select-text">
+        <div className="text-2xl flex items-baseline gap-1 space-x-2">
           <div>
             <span>{hours || 0}</span>
             <span className="relative">h</span>

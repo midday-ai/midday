@@ -60,9 +60,11 @@ export function RunwayWidget() {
       }}
       actions="View runway"
     >
-      <h2 className="text-2xl font-normal text-[24px] mb-2">
-        {data?.result} months
-      </h2>
+      <div className="flex flex-col gap-2">
+        <h2 className="text-2xl font-normal">
+          {data?.result} months
+        </h2>
+      </div>
     </BaseWidget>
   );
 }
