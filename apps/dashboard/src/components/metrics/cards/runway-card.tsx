@@ -127,7 +127,8 @@ export function RunwayCard({
 
   const currentRunway = typeof runwayData === "number" ? runwayData : 0;
 
-  // Prevent animating to 0 during loading
+  // Update display value when runway data changes
+  // Note: 0 is a legitimate value (zero runway means no months of cash remaining)
   useEffect(() => {
     if (
       currentRunway !== undefined &&
@@ -141,14 +142,11 @@ export function RunwayCard({
         return;
       }
 
-      // If we had a previous non-zero value and new value is 0, it's likely a loading state
-      if (displayRunwayRef.current !== 0 && currentRunway === 0) {
-        return;
-      }
-
+      // Always update to the current value, including 0 (which is legitimate)
       displayRunwayRef.current = currentRunway;
       setDisplayRunway(currentRunway);
     }
+    // If currentRunway is undefined/null/NaN, preserve the previous value (this indicates loading)
   }, [currentRunway]);
 
   const dateRangeDisplay = useMemo(() => {

@@ -40,7 +40,12 @@ function WidgetsContent() {
   }
 
   return (
-    <div className={cn("flex flex-col mt-6", isHome && "widgets-container-spacing")}>
+    <div
+      className={cn(
+        "flex flex-col mt-6",
+        isHome && "widgets-container-spacing",
+      )}
+    >
       <WidgetsHeader />
       <WidgetsGrid />
       {!isCustomizing && (
