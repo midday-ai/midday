@@ -43,7 +43,7 @@ export function ChatInput() {
   const status = useChatStatus();
   const { sendMessage, stop } = useChatActions();
   const chatId = useChatId();
-  const { setChatId } = useChatInterface();
+  const { setChatId, isHome } = useChatInterface();
 
   const [, clearSuggestions] = useDataPart<{ prompts: string[] }>(
     "suggestions",
@@ -119,6 +119,7 @@ export function ChatInput() {
           "fixed bottom-6 z-20 transition-all duration-300 ease-in-out",
           "left-0 md:left-[70px] px-4 md:px-6",
           isCanvasVisible ? "right-0 md:right-[603px]" : "right-0",
+          isHome && "chat-input-static",
         )}
       >
         <div className="mx-auto w-full pt-2 max-w-full md:max-w-[770px] relative">
