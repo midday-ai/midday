@@ -791,7 +791,7 @@ export function Search() {
   return (
     <Command
       shouldFilter={false}
-      className="search-container overflow-hidden p-0 relative w-full bg-background backdrop-filter dark:border-[#2C2C2C] backdrop-blur-lg dark:bg-[#151515]/[99] h-auto border border-border"
+      className="search-container overflow-hidden p-0 relative w-full bg-background backdrop-filter backdrop-blur-lg dark:bg-[#0C0C0C]/[99] h-auto border border-border"
     >
       <div className="border-b border-border relative">
         <CommandInput

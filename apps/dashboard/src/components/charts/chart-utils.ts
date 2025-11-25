@@ -19,7 +19,7 @@ export const chartClasses = {
 
 // Common chart configurations
 export const commonChartConfig = {
-  margin: { top: 5, right: 20, left: 0, bottom: 5 },
+  margin: { top: 6, right: 20, left: 0, bottom: 6 },
   fontFamily: "var(--font-hedvig-sans)",
   fontSize: 10,
   animationDuration: 300,
@@ -43,11 +43,14 @@ export const formatNumber = (value: number): string => {
 // Compact tick formatter for charts (600k, 1.2M, etc.)
 export const createCompactTickFormatter = () => {
   return (value: number): string => {
-    if (value >= 1000000) {
-      return `${(value / 1000000).toFixed(1)}M`;
+    const absValue = Math.abs(value);
+    const sign = value < 0 ? "-" : "";
+
+    if (absValue >= 1000000) {
+      return `${sign}${(absValue / 1000000).toFixed(1)}M`;
     }
-    if (value >= 1000) {
-      return `${(value / 1000).toFixed(0)}k`;
+    if (absValue >= 1000) {
+      return `${sign}${(absValue / 1000).toFixed(0)}k`;
     }
     return value.toString();
   };
@@ -56,11 +59,14 @@ export const createCompactTickFormatter = () => {
 // Currency-aware Y-axis tick formatter (e.g., "14k", "16k") - no currency symbol
 export const createYAxisTickFormatter = (currency: string, locale?: string) => {
   return (value: number): string => {
-    if (value >= 1000000) {
-      return `${(value / 1000000).toFixed(1)}M`;
+    const absValue = Math.abs(value);
+    const sign = value < 0 ? "-" : "";
+
+    if (absValue >= 1000000) {
+      return `${sign}${(absValue / 1000000).toFixed(1)}M`;
     }
-    if (value >= 1000) {
-      return `${(value / 1000).toFixed(0)}k`;
+    if (absValue >= 1000) {
+      return `${sign}${(absValue / 1000).toFixed(0)}k`;
     }
     return value.toString();
   };
@@ -131,13 +137,20 @@ export const useChartMargin = (
   dataKey: string,
   tickFormatter: (value: number) => string,
 ) => {
-  // Calculate the maximum value from the data
-  const maxValue = Math.max(...data.map((d) => d[dataKey]));
+  // Calculate both min and max values from the data
+  const values = data.map((d) => d[dataKey]);
+  const minValue = Math.min(...values);
+  const maxValue = Math.max(...values);
+
+  // For margin calculation, use the maximum absolute value to determine tick range
+  // This prevents excessive margin when range spans both negative and positive values
+  const maxAbsValue = Math.max(Math.abs(minValue), Math.abs(maxValue));
 
   // Generate realistic tick values that Recharts would actually use
-  const tickValues = [];
-  for (let i = 0; i <= 4; i++) {
-    tickValues.push((maxValue / 4) * i);
+  // Use the max absolute value to determine the longest tick (which will be at the extremes)
+  const tickValues = [maxAbsValue];
+  if (minValue < 0) {
+    tickValues.push(-maxAbsValue);
   }
 
   // Format all ticks and find the longest one
@@ -148,6 +161,7 @@ export const useChartMargin = (
 
   // Calculate dynamic margin based on actual longest tick
   // Adjusted to match target values: 100k=28, 10k=35
+  // The negative sign is already included in longestTick.length, so no extra margin needed
   const marginLeft = 48 - longestTick.length * 5;
 
   return {
