@@ -17,6 +17,7 @@ type TRPCContext = {
   db: Database;
   geo: ReturnType<typeof getGeoContext>;
   teamId?: string;
+  forcePrimary?: boolean;
 };
 
 export const createTRPCContext = async (
@@ -30,11 +31,15 @@ export const createTRPCContext = async (
   // Use the singleton database instance - no need for caching
   const geo = getGeoContext(c.req);
 
+  // Check if client wants to force primary database reads (for replication lag handling)
+  const forcePrimary = c.req.header("x-force-primary") === "true";
+
   return {
     session,
     supabase,
     db,
     geo,
+    forcePrimary,
   };
 };
 

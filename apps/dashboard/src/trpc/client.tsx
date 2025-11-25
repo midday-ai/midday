@@ -1,5 +1,6 @@
 "use client";
 
+import { Cookies } from "@/utils/constants";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { createClient } from "@midday/supabase/client";
 import type { QueryClient } from "@tanstack/react-query";
@@ -9,6 +10,15 @@ import { createTRPCContext } from "@trpc/tanstack-react-query";
 import { useState } from "react";
 import superjson from "superjson";
 import { makeQueryClient } from "./query-client";
+
+// Helper to get cookie value by name
+function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
+  return null;
+}
 
 export const { TRPCProvider, useTRPC } = createTRPCContext<AppRouter>();
 
@@ -48,9 +58,17 @@ export function TRPCReactProvider(
               data: { session },
             } = await supabase.auth.getSession();
 
-            return {
+            const headers: Record<string, string> = {
               Authorization: `Bearer ${session?.access_token}`,
             };
+
+            // Pass force-primary cookie as header to API for replication lag handling
+            const forcePrimary = getCookie(Cookies.ForcePrimary);
+            if (forcePrimary === "true") {
+              headers["x-force-primary"] = "true";
+            }
+
+            return headers;
           },
         }),
         loggerLink({

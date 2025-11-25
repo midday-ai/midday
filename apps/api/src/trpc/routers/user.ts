@@ -11,11 +11,10 @@ import {
 
 export const userRouter = createTRPCRouter({
   me: protectedProcedure.query(async ({ ctx: { db, session } }) => {
-    // Use retryOnNull to handle replication lag when user record hasn't replicated yet
-    return withRetryOnPrimary(
-      db,
-      async (dbInstance) => getUserById(dbInstance, session.user.id),
-      { retryOnNull: true },
+    // Cookie-based approach handles replication lag for new users via x-force-primary header
+    // Retry logic still handles connection errors/timeouts
+    return withRetryOnPrimary(db, async (dbInstance) =>
+      getUserById(dbInstance, session.user.id),
     );
   }),
 
