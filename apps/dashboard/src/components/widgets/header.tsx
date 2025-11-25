@@ -19,11 +19,8 @@ function getTimeBasedGreeting(timezone?: string): string {
   if (hour >= 12 && hour < 17) {
     return "Afternoon";
   }
-  if (hour >= 17 && hour < 21) {
-    return "Evening";
-  }
 
-  return "Night";
+  return "Evening";
 }
 
 export function WidgetsHeader() {

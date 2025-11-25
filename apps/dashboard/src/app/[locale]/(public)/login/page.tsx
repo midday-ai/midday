@@ -3,11 +3,10 @@ import { ConsentBanner } from "@/components/consent-banner";
 import { GithubSignIn } from "@/components/github-sign-in";
 import { GoogleSignIn } from "@/components/google-sign-in";
 import { LoginAccordion } from "@/components/login-accordion";
-import LoginTestimonials from "@/components/login-testimonials";
+import { LoginVideoBackground } from "@/components/login-video-background";
 import { OTPSignIn } from "@/components/otp-sign-in";
 import { Cookies } from "@/utils/constants";
 import { isEU } from "@midday/location";
-import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import Link from "next/link";
@@ -104,39 +103,7 @@ export default async function Page() {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Left Side - Video Background */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden m-2">
-        <video
-          className="absolute inset-0 w-full h-full object-cover"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          poster="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/video-poster.jpg"
-        >
-          <source
-            src="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/videos/login-video.webm"
-            type="video/webm"
-          />
-        </video>
-
-        {/* Overlay for better text readability */}
-        <div className="absolute inset-0 bg-black/20" />
-
-        {/* Logo */}
-        <div className="absolute top-0 left-0 right-0 z-20">
-          <div className="p-4">
-            <Icons.LogoSmall className="h-6 w-auto text-white" />
-          </div>
-        </div>
-
-        {/* Content overlay */}
-        <div className="relative z-10 flex flex-col justify-center items-center p-2 text-center h-full w-full">
-          <div className="max-w-lg">
-            <LoginTestimonials />
-          </div>
-        </div>
-      </div>
+      <LoginVideoBackground />
 
       {/* Right Side - Login Form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 lg:p-12 pb-2">

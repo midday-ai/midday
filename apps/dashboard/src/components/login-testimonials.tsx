@@ -98,22 +98,34 @@ export default function LoginTestimonials() {
               </svg>
             </div>
             <p className="font-serif text-xl text-white/40 leading-relaxed pl-4">
-              {currentTestimonial === 0 ? (
-                <>
-                  <span className="text-white">
-                    {testimonials[currentTestimonial]?.firstPart}
-                  </span>
-                  .{testimonials[currentTestimonial]?.secondPart}"
-                </>
-              ) : (
-                <>
-                  {testimonials[currentTestimonial]?.firstPart}.
-                  <span className="text-white">
-                    {testimonials[currentTestimonial]?.secondPart}
-                  </span>
-                  "
-                </>
-              )}
+              {(() => {
+                const testimonial = testimonials[currentTestimonial];
+                const secondPart = testimonial?.secondPart || "";
+                const startsWithPunctuation =
+                  secondPart.startsWith(".") || secondPart.startsWith(",");
+                const punctuation = startsWithPunctuation ? secondPart[0] : ".";
+                const secondPartWithoutPunctuation = startsWithPunctuation
+                  ? secondPart.slice(1)
+                  : secondPart;
+
+                return currentTestimonial === 0 ? (
+                  <>
+                    {testimonial?.firstPart}
+                    {punctuation}
+                    <span className="text-white">
+                      {secondPartWithoutPunctuation}"
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-white">
+                      {testimonial?.firstPart}
+                      {punctuation}
+                    </span>
+                    {secondPartWithoutPunctuation}"
+                  </>
+                );
+              })()}
             </p>
           </motion.div>
 
