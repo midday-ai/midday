@@ -105,7 +105,7 @@ export function RunwayCard({
       if (!Number.isFinite(projectedRunwayMonths)) continue;
 
       projections.push({
-        month: i === 0 ? "Now" : `+${i}M`,
+        month: i === 0 ? "Now" : `+${i}mo`,
         cashRemaining: remainingCash,
         burnRate: burnRateAvg,
         projectedCash: i > 0 ? remainingCash : undefined,

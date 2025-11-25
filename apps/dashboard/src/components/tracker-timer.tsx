@@ -152,6 +152,9 @@ export function TrackerTimer({
         queryClient.invalidateQueries({
           queryKey: trpc.trackerEntries.byRange.queryKey(),
         });
+        queryClient.invalidateQueries({
+          queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
+        });
 
         toast({
           title: "Timer stopped",

@@ -158,7 +158,7 @@ export function ExpensesChart({
       <BaseChart
         data={data}
         height={height}
-        margin={{ top: 5, right: 5, left: -marginLeft, bottom: 5 }}
+        margin={{ top: 6, right: 5, left: -marginLeft, bottom: 6 }}
       >
         <StyledXAxis dataKey="month" />
         <StyledYAxis tickFormatter={tickFormatter} />

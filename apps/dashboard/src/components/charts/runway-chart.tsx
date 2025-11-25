@@ -135,10 +135,10 @@ export function RunwayChart({
           <ComposedChart
             data={data}
             margin={{
-              top: 5,
+              top: 6,
               right: 5,
               left: -marginLeft,
-              bottom: 25, // Extra space for X-axis labels
+              bottom: 6,
             }}
           >
             {isMonthsMode && (

@@ -92,7 +92,7 @@ export function BurnRateChart({
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={data}
-            margin={{ top: 0, right: 6, left: -marginLeft, bottom: 0 }}
+            margin={{ top: 6, right: 6, left: -marginLeft, bottom: 6 }}
           >
             <defs>
               <pattern

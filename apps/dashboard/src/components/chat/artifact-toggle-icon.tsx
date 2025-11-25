@@ -2,7 +2,6 @@
 
 import type { ArtifactType } from "@/lib/artifact-config";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
-import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import {
   Tooltip,
@@ -62,14 +61,7 @@ export function ArtifactToggleIcon({ artifactType }: ArtifactToggleIconProps) {
               className="flex items-center justify-center w-6 h-6 transition-colors duration-200 hover:bg-muted"
               aria-label={isCurrentlyOpen ? "Close artifact" : "Open artifact"}
             >
-              <Icons.Sidebar
-                className={cn(
-                  "size-3.5",
-                  isCurrentlyOpen
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              />
+              <Icons.Sidebar className="size-3.5 text-muted-foreground hover:text-foreground" />
             </button>
           </TooltipTrigger>
           <TooltipContent className="px-2 py-1 text-xs">
