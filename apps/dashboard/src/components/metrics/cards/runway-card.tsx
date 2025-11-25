@@ -2,6 +2,8 @@
 
 import { RunwayChart } from "@/components/charts/runway-chart";
 import { useTRPC } from "@/trpc/client";
+import { useUserQuery } from "@/hooks/use-user";
+import NumberFlow from "@number-flow/react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useMemo } from "react";
@@ -24,6 +26,7 @@ export function RunwayCard({
   wiggleClass,
 }: RunwayCardProps) {
   const trpc = useTRPC();
+  const { data: user } = useUserQuery();
 
   const { data: runwayData } = useQuery(
     trpc.reports.runway.queryOptions({
@@ -138,7 +141,16 @@ export function RunwayCard({
           Runway
         </h3>
         <p className="text-3xl font-normal">
-          {currentRunway.toFixed(1)} months
+          <NumberFlow
+            value={currentRunway}
+            format={{
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            }}
+            willChange
+            locales={locale || user?.locale || "en"}
+          />{" "}
+          months
         </p>
         <p className="text-xs mt-1 text-muted-foreground">{dateRangeDisplay}</p>
       </div>
