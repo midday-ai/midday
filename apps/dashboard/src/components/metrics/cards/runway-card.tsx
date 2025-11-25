@@ -22,8 +22,6 @@ export function RunwayCard({
   to,
   currency = "USD",
   locale,
-  isCustomizing,
-  wiggleClass,
 }: RunwayCardProps) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();

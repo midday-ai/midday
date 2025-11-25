@@ -21,8 +21,6 @@ export function RevenueForecastCard({
   to,
   currency = "USD",
   locale,
-  isCustomizing,
-  wiggleClass,
 }: RevenueForecastCardProps) {
   const trpc = useTRPC();
 
