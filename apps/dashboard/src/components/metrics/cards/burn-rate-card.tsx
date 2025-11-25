@@ -1,8 +1,8 @@
 "use client";
 
+import { AnimatedNumber } from "@/components/animated-number";
 import { BurnRateChart } from "@/components/charts/burn-rate-chart";
 import { useTRPC } from "@/trpc/client";
-import { formatAmount } from "@/utils/format";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useMemo } from "react";
@@ -62,12 +62,12 @@ export function BurnRateCard({
           Monthly Burn Rate
         </h3>
         <p className="text-3xl font-normal mb-3">
-          {formatAmount({
-            amount: currentBurnRate,
-            currency,
-            locale,
-            maximumFractionDigits: 0,
-          })}
+          <AnimatedNumber
+            value={currentBurnRate}
+            currency={currency}
+            locale={locale}
+            maximumFractionDigits={0}
+          />
         </p>
         <div className="flex items-center gap-4 mt-2">
           <div className="flex gap-2 items-center">

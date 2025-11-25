@@ -1,8 +1,8 @@
 "use client";
 
+import { AnimatedNumber } from "@/components/animated-number";
 import { StackedBarChart } from "@/components/charts/stacked-bar-chart";
 import { useTRPC } from "@/trpc/client";
-import { formatAmount } from "@/utils/format";
 import { useQuery } from "@tanstack/react-query";
 
 interface ExpensesCardProps {
@@ -41,12 +41,12 @@ export function ExpensesCard({
           Monthly Expenses
         </h3>
         <p className="text-3xl font-normal mb-3">
-          {formatAmount({
-            amount: averageExpense,
-            currency,
-            locale,
-            maximumFractionDigits: 0,
-          })}
+          <AnimatedNumber
+            value={averageExpense}
+            currency={currency}
+            locale={locale}
+            maximumFractionDigits={0}
+          />
         </p>
         <p className="text-xs text-muted-foreground">Average expenses</p>
       </div>

@@ -1,8 +1,8 @@
 "use client";
 
+import { AnimatedNumber } from "@/components/animated-number";
 import { RevenueForecastChart } from "@/components/charts/revenue-forecast-chart";
 import { useTRPC } from "@/trpc/client";
-import { formatAmount } from "@/utils/format";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useMemo } from "react";
@@ -21,8 +21,6 @@ export function RevenueForecastCard({
   to,
   currency = "USD",
   locale,
-  isCustomizing,
-  wiggleClass,
 }: RevenueForecastCardProps) {
   const trpc = useTRPC();
 
@@ -88,12 +86,12 @@ export function RevenueForecastCard({
           </h3>
         </div>
         <p className="text-3xl font-normal">
-          {formatAmount({
-            amount: forecastedRevenue,
-            currency,
-            locale,
-            maximumFractionDigits: 0,
-          })}
+          <AnimatedNumber
+            value={forecastedRevenue}
+            currency={currency}
+            locale={locale}
+            maximumFractionDigits={0}
+          />
         </p>
         <p className="text-xs mt-1 text-muted-foreground">{dateRangeDisplay}</p>
         <div className="flex gap-4 items-center mt-2">

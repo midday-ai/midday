@@ -409,3 +409,38 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .wiggle-7 {
   animation: wiggle7 1.4s linear infinite;
 }
+
+/* Chat input positioning for small viewport heights on homepage */
+@media (max-height: 860px) {
+  .chat-input-wrapper-static {
+    position: relative !important;
+    bottom: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    margin-top: auto;
+    margin-bottom: 0;
+  }
+
+  .chat-input-static {
+    position: relative !important;
+    bottom: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .widgets-container-spacing {
+    padding-bottom: 0px;
+  }
+
+  /* Allow scrolling when chat input is not fixed */
+  .chat-interface-container-scrollable {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+    min-height: calc(100vh - 764px);
+  }
+}

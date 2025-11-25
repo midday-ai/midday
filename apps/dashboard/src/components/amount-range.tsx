@@ -45,11 +45,19 @@ export function AmountRange() {
     initialValue: amountRange || [minValue, maxValue],
   });
 
+  // Initialize with defaults only if amountRange is not set from URL
   useEffect(() => {
-    if (minValue !== undefined && maxValue !== undefined) {
+    if (minValue !== undefined && maxValue !== undefined && !amountRange) {
       setValues([minValue, maxValue]);
     }
-  }, [minValue, maxValue, setValues]);
+  }, [minValue, maxValue, setValues, amountRange]);
+
+  // Sync sliderValue when amountRange changes from URL
+  useEffect(() => {
+    if (amountRange && amountRange.length === 2) {
+      setValues(amountRange);
+    }
+  }, [amountRange, setValues]);
 
   if (isLoading) return null;
 
@@ -59,17 +67,22 @@ export function AmountRange() {
 
   const countItemsInRange = (min: number, max: number) => {
     if (!items) return 0;
+    const actualMin = Math.min(min, max);
+    const actualMax = Math.max(min, max);
+
     return items.filter((item) => {
       const amount =
         typeof item.amount === "number" ? item.amount : Number(item.amount);
-      return !Number.isNaN(amount) && amount >= min && amount <= max;
+      return (
+        !Number.isNaN(amount) && amount >= actualMin && amount <= actualMax
+      );
     }).length;
   };
 
-  const totalCount = countItemsInRange(
-    sliderValue[0] ?? minValue,
-    sliderValue[1] ?? maxValue,
-  );
+  // Use sliderValue for live count as user interacts with slider
+  const countMin = sliderValue[0] ?? minValue;
+  const countMax = sliderValue[1] ?? maxValue;
+  const totalCount = countItemsInRange(countMin, countMax);
 
   return (
     <div className="space-y-4">

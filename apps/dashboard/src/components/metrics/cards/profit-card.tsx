@@ -1,8 +1,8 @@
 "use client";
 
+import { AnimatedNumber } from "@/components/animated-number";
 import { ProfitChart } from "@/components/charts/profit-chart";
 import { useTRPC } from "@/trpc/client";
-import { formatAmount } from "@/utils/format";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -109,12 +109,12 @@ export function ProfitCard({
           </DropdownMenu>
         </div>
         <p className="text-3xl font-normal">
-          {formatAmount({
-            amount: totalProfit,
-            currency,
-            locale,
-            maximumFractionDigits: 0,
-          })}
+          <AnimatedNumber
+            value={totalProfit}
+            currency={currency}
+            locale={locale}
+            maximumFractionDigits={0}
+          />
         </p>
         <p className="text-xs mt-1 text-muted-foreground">{dateRangeDisplay}</p>
       </div>

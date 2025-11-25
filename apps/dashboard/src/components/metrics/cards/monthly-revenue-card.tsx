@@ -1,8 +1,8 @@
 "use client";
 
+import { AnimatedNumber } from "@/components/animated-number";
 import { MonthlyRevenueChart } from "@/components/charts/monthly-revenue-chart";
 import { useTRPC } from "@/trpc/client";
-import { formatAmount } from "@/utils/format";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -103,12 +103,12 @@ export function MonthlyRevenueCard({
           </DropdownMenu>
         </div>
         <p className="text-3xl font-normal mb-3">
-          {formatAmount({
-            amount: totalRevenue,
-            currency,
-            locale,
-            maximumFractionDigits: 0,
-          })}
+          <AnimatedNumber
+            value={totalRevenue}
+            currency={currency}
+            locale={locale}
+            maximumFractionDigits={0}
+          />
         </p>
         <div className="flex items-center gap-4 mt-2">
           <div className="flex gap-2 items-center">

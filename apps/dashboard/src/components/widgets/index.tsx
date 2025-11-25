@@ -2,6 +2,7 @@
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
+import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
 import type { inferRouterOutputs } from "@trpc/server";
 import { Suspense } from "react";
@@ -31,7 +32,7 @@ function SuggestedActionsSkeleton() {
 }
 
 function WidgetsContent() {
-  const { isChatPage } = useChatInterface();
+  const { isChatPage, isHome } = useChatInterface();
   const isCustomizing = useIsCustomizing();
 
   if (isChatPage) {
@@ -39,7 +40,12 @@ function WidgetsContent() {
   }
 
   return (
-    <div className="flex flex-col mt-6">
+    <div
+      className={cn(
+        "flex flex-col mt-6",
+        isHome && "widgets-container-spacing",
+      )}
+    >
       <WidgetsHeader />
       <WidgetsGrid />
       {!isCustomizing && (

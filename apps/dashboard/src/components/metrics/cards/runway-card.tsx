@@ -1,10 +1,12 @@
 "use client";
 
 import { RunwayChart } from "@/components/charts/runway-chart";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import NumberFlow from "@number-flow/react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 interface RunwayCardProps {
   from: string;
@@ -20,10 +22,12 @@ export function RunwayCard({
   to,
   currency = "USD",
   locale,
-  isCustomizing,
-  wiggleClass,
 }: RunwayCardProps) {
   const trpc = useTRPC();
+  const { data: user } = useUserQuery();
+  const [displayRunway, setDisplayRunway] = useState<number>(0);
+  const displayRunwayRef = useRef<number>(0);
+  const hasInitializedRef = useRef<boolean>(false);
 
   const { data: runwayData } = useQuery(
     trpc.reports.runway.queryOptions({
@@ -121,6 +125,28 @@ export function RunwayCard({
 
   const currentRunway = typeof runwayData === "number" ? runwayData : 0;
 
+  // Update display value when runway data changes
+  // Note: 0 is a legitimate value (zero runway means no months of cash remaining)
+  useEffect(() => {
+    if (
+      currentRunway !== undefined &&
+      currentRunway !== null &&
+      !Number.isNaN(currentRunway)
+    ) {
+      if (!hasInitializedRef.current) {
+        displayRunwayRef.current = currentRunway;
+        setDisplayRunway(currentRunway);
+        hasInitializedRef.current = true;
+        return;
+      }
+
+      // Always update to the current value, including 0 (which is legitimate)
+      displayRunwayRef.current = currentRunway;
+      setDisplayRunway(currentRunway);
+    }
+    // If currentRunway is undefined/null/NaN, preserve the previous value (this indicates loading)
+  }, [currentRunway]);
+
   const dateRangeDisplay = useMemo(() => {
     try {
       const fromDate = new Date(from);
@@ -138,7 +164,16 @@ export function RunwayCard({
           Runway
         </h3>
         <p className="text-3xl font-normal">
-          {currentRunway.toFixed(1)} months
+          <NumberFlow
+            value={displayRunway}
+            format={{
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            }}
+            willChange
+            locales={locale || user?.locale || "en"}
+          />{" "}
+          months
         </p>
         <p className="text-xs mt-1 text-muted-foreground">{dateRangeDisplay}</p>
       </div>
