@@ -132,16 +132,16 @@ export function ProfitChart({
               content={<CustomTooltip currency={currency} locale={locale} />}
               wrapperStyle={{ zIndex: 9999 }}
             />
-            {/* This Year bars (white in dark mode) */}
-            <Bar
-              dataKey="profit"
-              fill="var(--chart-bar-fill)"
-              isAnimationActive={false}
-            />
             {/* Last Year bars (dark gray in dark mode with 0.3 opacity) */}
             <Bar
               dataKey="lastYearProfit"
               fill="var(--chart-bar-fill-secondary)"
+              isAnimationActive={false}
+            />
+            {/* This Year bars (white in dark mode) */}
+            <Bar
+              dataKey="profit"
+              fill="var(--chart-bar-fill)"
               isAnimationActive={false}
             />
             {/* Average line */}

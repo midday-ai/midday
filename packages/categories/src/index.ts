@@ -64,6 +64,7 @@ export const TAX_TYPES = [
 
 // Revenue category constants
 export const REVENUE_CATEGORIES = [
+  "revenue",
   "income",
   "product-sales",
   "service-revenue",

@@ -77,26 +77,32 @@ export function ProfitCard({
     <div className="border bg-background border-border p-6 flex flex-col h-full">
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between mb-1">
-          <h3 className="text-sm font-normal text-muted-foreground">
+          <h3 className="text-sm font-normal text-muted-foreground font-serif">
             Profit & Loss
           </h3>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-xs border border-border"
+              >
                 {revenueType === "net" ? "Net" : "Gross"}
                 <Icons.ChevronDown size={12} className="ml-1" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-32">
+            <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuRadioGroup
                 value={revenueType}
                 onValueChange={(value) =>
                   setRevenueType(value as "net" | "gross")
                 }
               >
-                <DropdownMenuRadioItem value="net">Net</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="net">
+                  Net Profit (ex tax)
+                </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="gross">
-                  Gross
+                  Gross Profit (inc tax)
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>

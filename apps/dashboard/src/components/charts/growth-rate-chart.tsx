@@ -150,18 +150,18 @@ export function GrowthRateChart({
               content={<CustomTooltip currency={currency} locale={locale} />}
               wrapperStyle={{ zIndex: 9999 }}
             />
-            {/* Current period bars */}
-            <Bar
-              yAxisId="left"
-              dataKey="currentTotal"
-              fill="var(--chart-bar-fill)"
-              isAnimationActive={false}
-            />
             {/* Previous period bars (with opacity) */}
             <Bar
               yAxisId="left"
               dataKey="previousTotal"
               fill="var(--chart-bar-fill-secondary)"
+              isAnimationActive={false}
+            />
+            {/* Current period bars */}
+            <Bar
+              yAxisId="left"
+              dataKey="currentTotal"
+              fill="var(--chart-bar-fill)"
               isAnimationActive={false}
             />
             {/* Growth rate line */}

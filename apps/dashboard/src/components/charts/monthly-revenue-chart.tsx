@@ -131,16 +131,16 @@ export function MonthlyRevenueChart({
               content={<CustomTooltip currency={currency} locale={locale} />}
               wrapperStyle={{ zIndex: 9999 }}
             />
-            {/* This Year bars */}
-            <Bar
-              dataKey="amount"
-              fill="var(--chart-bar-fill)"
-              isAnimationActive={false}
-            />
             {/* Last Year bars */}
             <Bar
               dataKey="lastYearAmount"
               fill="var(--chart-bar-fill-secondary)"
+              isAnimationActive={false}
+            />
+            {/* This Year bars */}
+            <Bar
+              dataKey="amount"
+              fill="var(--chart-bar-fill)"
               isAnimationActive={false}
             />
             {/* Average line */}

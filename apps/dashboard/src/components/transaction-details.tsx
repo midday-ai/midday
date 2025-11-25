@@ -1,5 +1,6 @@
 "use client";
 
+import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useUpdateTransactionCategory } from "@/hooks/use-update-transaction-category";
 import { useTRPC } from "@/trpc/client";
@@ -41,6 +42,7 @@ export function TransactionDetails() {
   const trpc = useTRPC();
   const { transactionId } = useTransactionParams();
   const queryClient = useQueryClient();
+  const invalidateTransactionQueries = useInvalidateTransactionQueries();
 
   const { updateCategory } = useUpdateTransactionCategory({
     onSuccess: () => {
@@ -67,10 +69,15 @@ export function TransactionDetails() {
 
   const updateTransactionMutation = useMutation(
     trpc.transactions.update.mutationOptions({
-      onSuccess: () => {
+      onSuccess: (_, variables) => {
         queryClient.invalidateQueries({
           queryKey: trpc.transactions.get.infiniteQueryKey(),
         });
+
+        // If category changed, invalidate reports and widgets
+        if ("categorySlug" in variables) {
+          invalidateTransactionQueries();
+        }
       },
       onMutate: async (variables) => {
         // Cancel any outgoing refetches

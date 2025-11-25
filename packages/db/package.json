@@ -8,6 +8,7 @@
     "test:integration": "bun test src/test/transaction-matching.integration.test.ts",
     "test:golden": "bun test src/test/transaction-matching.golden.test.ts",
     "test:all-matching": "bun test src/test/transaction-matching*.test.ts",
+    "test:reports": "bun test src/test/reports.test.ts",
     "test:watch": "bun test --watch",
     "validate-golden": "bun run src/test/validate-golden-dataset.ts"
   },

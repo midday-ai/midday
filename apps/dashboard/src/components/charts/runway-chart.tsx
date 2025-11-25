@@ -92,7 +92,7 @@ export function RunwayChart({
       <div
         className={`w-full h-full flex items-center justify-center ${className}`}
       >
-        <div className="text-xs text-muted-foreground -mt-8">
+        <div className="text-xs text-muted-foreground -mt-12">
           No runway data available
         </div>
       </div>
