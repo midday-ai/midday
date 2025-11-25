@@ -229,15 +229,24 @@ export async function getTransactions(
   if (
     filterAmountRange &&
     filterAmountRange.length === 2 &&
-    typeof filterAmountRange[0] === "number" &&
-    typeof filterAmountRange[1] === "number"
+    filterAmountRange[0] != null &&
+    filterAmountRange[1] != null
   ) {
-    whereConditions.push(
-      gte(transactions.amount, Number(filterAmountRange[0])),
-    );
-    whereConditions.push(
-      lte(transactions.amount, Number(filterAmountRange[1])),
-    );
+    let minAmount = Number(filterAmountRange[0]);
+    let maxAmount = Number(filterAmountRange[1]);
+    if (!Number.isNaN(minAmount) && !Number.isNaN(maxAmount)) {
+      // Ensure min <= max
+      if (minAmount > maxAmount) {
+        [minAmount, maxAmount] = [maxAmount, minAmount];
+      }
+
+      whereConditions.push(
+        sql`COALESCE(${transactions.baseAmount}, ${transactions.amount}) >= ${minAmount}`,
+      );
+      whereConditions.push(
+        sql`COALESCE(${transactions.baseAmount}, ${transactions.amount}) <= ${maxAmount}`,
+      );
+    }
   }
 
   // Specific amount filter (gte/lte)
@@ -769,9 +778,21 @@ export async function getTransactionsAmountFullRangeData(
   db: Database,
   teamId: string,
 ) {
-  return db.executeOnReplica(
-    sql`select * from get_transactions_amount_full_range_data(${teamId})`,
-  );
+  // Use COALESCE(baseAmount, amount) to match the backend filter logic
+  // This ensures the frontend count matches the actual filtered results
+  return db
+    .select({
+      amount: sql<number>`COALESCE(${transactions.baseAmount}, ${transactions.amount})`,
+      currency: sql<string>`COALESCE(${transactions.baseCurrency}, ${transactions.currency})`,
+    })
+    .from(transactions)
+    .where(
+      and(
+        eq(transactions.teamId, teamId),
+        eq(transactions.internal, false),
+        ne(transactions.status, "excluded"),
+      ),
+    );
 }
 
 type GetSimilarTransactionsParams = {

@@ -158,7 +158,7 @@ export const getTransactionsSchema = z.object({
         in: "query",
       },
     }),
-  amountRange: z
+  amount_range: z
     .array(z.coerce.number())
     .nullable()
     .optional()

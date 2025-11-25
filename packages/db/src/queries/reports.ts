@@ -130,6 +130,8 @@ export async function getProfit(db: Database, params: GetReportsParams) {
     ne(transactions.status, "excluded"),
     gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
+    // Explicitly exclude contra-revenue categories (refunds, chargebacks)
+    not(inArray(transactions.categorySlug, CONTRA_REVENUE_CATEGORIES)),
   ];
 
   // Amount condition: handle NULL baseAmount gracefully when inputCurrency is provided
