@@ -136,7 +136,7 @@ export function RunwayChart({
             data={data}
             margin={{
               top: 6,
-              right: 5,
+              right: 6,
               left: -marginLeft,
               bottom: 6,
             }}

@@ -7,7 +7,7 @@ import { commonChartConfig } from "./chart-utils";
 // Base Chart Wrapper with common styling
 export function BaseChart({
   data,
-  margin = { top: 6, right: 5, left: -20, bottom: 6 },
+  margin = { top: 6, right: 6, left: -20, bottom: 6 },
   children,
 }: {
   data: any[];
