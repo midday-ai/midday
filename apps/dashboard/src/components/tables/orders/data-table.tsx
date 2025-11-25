@@ -53,10 +53,16 @@ export function OrdersDataTable() {
                   )}
                 </TableCell>
                 <TableCell className="w-[100px] font-medium">
-                  <FormatAmount
-                    amount={order.amount.amount / 100}
-                    currency={order.amount.currency}
-                  />
+                  <span
+                    className={
+                      order.status === "refunded" ? "line-through" : ""
+                    }
+                  >
+                    <FormatAmount
+                      amount={order.amount.amount / 100}
+                      currency={order.amount.currency}
+                    />
+                  </span>
                 </TableCell>
                 <TableCell className="w-[120px]">
                   <OrderStatus status={order.status} />
