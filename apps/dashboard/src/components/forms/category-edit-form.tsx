@@ -54,7 +54,7 @@ export function CategoryEditForm({ data }: Props) {
     name: data?.name || "",
     description: data?.description || "",
     color: data?.color || "",
-    taxRate: data?.taxRate || undefined,
+    taxRate: data?.taxRate ?? undefined,
     taxType: data?.taxType || "",
     taxReportingCode: data?.taxReportingCode || "",
     excluded: data?.excluded || false,
@@ -110,10 +110,10 @@ export function CategoryEditForm({ data }: Props) {
       name: values.name,
       description: values.description || null,
       color: values.color || null,
-      taxRate: values.taxRate || null,
+      taxRate: values.taxRate ?? null,
       taxType: values.taxType || null,
       taxReportingCode: values.taxReportingCode || null,
-      excluded: values.excluded || null,
+      excluded: values.excluded ?? null,
     };
 
     // Only include parentId if it has changed from the original value

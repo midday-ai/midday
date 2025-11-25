@@ -35,7 +35,7 @@ export function useUpdateTransactionCategory(
         });
 
         // If category changed, invalidate reports and widgets
-        if (variables.categorySlug) {
+        if ("categorySlug" in variables) {
           invalidateTransactionQueries();
         }
 
@@ -56,7 +56,7 @@ export function useUpdateTransactionCategory(
         });
 
         // If category changed, invalidate reports and widgets
-        if (variables.categorySlug) {
+        if ("categorySlug" in variables) {
           invalidateTransactionQueries();
         }
       },

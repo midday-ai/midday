@@ -48,10 +48,6 @@ export function useInvalidateTransactionQueries() {
     });
 
     queryClient.invalidateQueries({
-      queryKey: trpc.widgets.getProfitAnalysis.queryKey(),
-    });
-
-    queryClient.invalidateQueries({
       queryKey: trpc.widgets.getProfitMargin.queryKey(),
     });
 
@@ -61,10 +57,6 @@ export function useInvalidateTransactionQueries() {
 
     queryClient.invalidateQueries({
       queryKey: trpc.widgets.getTaxSummary.queryKey(),
-    });
-
-    queryClient.invalidateQueries({
-      queryKey: trpc.widgets.getRevenueForecast.queryKey(),
     });
 
     queryClient.invalidateQueries({
