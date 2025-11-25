@@ -28,7 +28,8 @@ export const withPrimaryReadAfterWrite = async <TReturn>(opts: {
   const forcePrimary = ctx.forcePrimary;
 
   // If x-force-primary header is set, force primary DB reads (for new users)
-  if (forcePrimary) {
+  // For queries, we can return early. For mutations, we still need to update the cache.
+  if (forcePrimary && type !== "mutation") {
     const dbWithPrimary = ctx.db as DatabaseWithPrimary;
     if (dbWithPrimary.usePrimaryOnly) {
       ctx.db = dbWithPrimary.usePrimaryOnly();
