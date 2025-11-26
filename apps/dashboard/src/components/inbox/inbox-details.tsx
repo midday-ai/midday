@@ -482,15 +482,18 @@ export function InboxDetails() {
 
             {data?.relatedItems &&
               data.relatedItems.length > 0 &&
-              data.relatedItems.map((relatedItem) => (
-                <div key={relatedItem.id} className="mt-4">
-                  <FileViewer
-                    mimeType={relatedItem.contentType}
-                    url={`/api/proxy?filePath=vault/${relatedItem.filePath?.join("/")}`}
-                    key={`${relatedItem.id}-${params.order}-${JSON.stringify(filterParams)}`}
-                  />
-                </div>
-              ))}
+              data.relatedItems.map(
+                (relatedItem) =>
+                  relatedItem.filePath && (
+                    <div key={relatedItem.id} className="mt-4">
+                      <FileViewer
+                        mimeType={relatedItem.contentType}
+                        url={`/api/proxy?filePath=vault/${relatedItem.filePath.join("/")}`}
+                        key={`${relatedItem.id}-${params.order}-${JSON.stringify(filterParams)}`}
+                      />
+                    </div>
+                  ),
+              )}
           </div>
         </div>
       ) : (
