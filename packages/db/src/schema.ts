@@ -1889,6 +1889,8 @@ export const inbox = pgTable(
     taxRate: numericCasted("tax_rate", { precision: 10, scale: 2 }),
     taxType: text("tax_type"),
     inboxAccountId: uuid("inbox_account_id"),
+    invoiceNumber: text("invoice_number"),
+    groupedInboxId: uuid("grouped_inbox_id"),
   },
   (table) => [
     index("inbox_attachment_id_idx").using(
@@ -1911,6 +1913,14 @@ export const inbox = pgTable(
       "btree",
       table.inboxAccountId.asc().nullsLast().op("uuid_ops"),
     ),
+    index("inbox_invoice_number_idx").using(
+      "btree",
+      table.invoiceNumber.asc().nullsLast().op("text_ops"),
+    ),
+    index("inbox_grouped_inbox_id_idx").using(
+      "btree",
+      table.groupedInboxId.asc().nullsLast().op("uuid_ops"),
+    ),
     foreignKey({
       columns: [table.attachmentId],
       foreignColumns: [transactionAttachments.id],
@@ -1930,6 +1940,11 @@ export const inbox = pgTable(
       columns: [table.inboxAccountId],
       foreignColumns: [inboxAccounts.id],
       name: "inbox_inbox_account_id_fkey",
+    }).onDelete("set null"),
+    foreignKey({
+      columns: [table.groupedInboxId],
+      foreignColumns: [inbox.id],
+      name: "inbox_grouped_inbox_id_fkey",
     }).onDelete("set null"),
     unique("inbox_reference_id_key").on(table.referenceId),
     pgPolicy("Inbox can be deleted by a member of the team", {

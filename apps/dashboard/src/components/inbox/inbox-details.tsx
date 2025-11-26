@@ -470,14 +470,28 @@ export function InboxDetails() {
             <InboxActions data={data} key={data.id} />
           </div>
 
-          {data?.filePath && (
-            <FileViewer
-              mimeType={data.contentType}
-              url={`/api/proxy?filePath=vault/${data?.filePath.join("/")}`}
-              // If the order changes, the file viewer will remount otherwise the PDF worker will crash
-              key={`${params.order}-${JSON.stringify(filterParams)}`}
-            />
-          )}
+          <div className="flex flex-col gap-4 overflow-y-auto">
+            {data?.filePath && (
+              <FileViewer
+                mimeType={data.contentType}
+                url={`/api/proxy?filePath=vault/${data?.filePath.join("/")}`}
+                // If the order changes, the file viewer will remount otherwise the PDF worker will crash
+                key={`${params.order}-${JSON.stringify(filterParams)}-primary`}
+              />
+            )}
+
+            {data?.relatedItems &&
+              data.relatedItems.length > 0 &&
+              data.relatedItems.map((relatedItem) => (
+                <div key={relatedItem.id} className="mt-4">
+                  <FileViewer
+                    mimeType={relatedItem.contentType}
+                    url={`/api/proxy?filePath=vault/${relatedItem.filePath?.join("/")}`}
+                    key={`${relatedItem.id}-${params.order}-${JSON.stringify(filterParams)}`}
+                  />
+                </div>
+              ))}
+          </div>
         </div>
       ) : (
         <div className="p-8 text-center text-muted-foreground">

@@ -3,6 +3,7 @@ import { InboxStatus } from "@/components/inbox/inbox-status";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useUserQuery } from "@/hooks/use-user";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { Badge } from "@midday/ui/badge";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
 import { formatDate } from "@midday/utils/format";
@@ -46,6 +47,16 @@ export const InboxItem = forwardRef<HTMLButtonElement, Props>(
                     item.displayName
                   )}
                 </div>
+                {!isProcessing &&
+                  item.relatedCount !== undefined &&
+                  item.relatedCount > 0 && (
+                    <Badge
+                      variant="outline"
+                      className="h-4 px-1.5 text-[10px] font-normal"
+                    >
+                      +{item.relatedCount}
+                    </Badge>
+                  )}
               </div>
             </div>
             <div
