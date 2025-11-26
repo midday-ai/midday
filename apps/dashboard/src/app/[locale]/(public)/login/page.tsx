@@ -1,12 +1,10 @@
 import { AppleSignIn } from "@/components/apple-sign-in";
-import { ConsentBanner } from "@/components/consent-banner";
 import { GithubSignIn } from "@/components/github-sign-in";
 import { GoogleSignIn } from "@/components/google-sign-in";
 import { LoginAccordion } from "@/components/login-accordion";
 import { LoginVideoBackground } from "@/components/login-video-background";
 import { OTPSignIn } from "@/components/otp-sign-in";
 import { Cookies } from "@/utils/constants";
-import { isEU } from "@midday/location";
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import Link from "next/link";
@@ -19,14 +17,12 @@ export const metadata: Metadata = {
 export default async function Page() {
   const cookieStore = await cookies();
   const preferred = cookieStore.get(Cookies.PreferredSignInProvider);
-  const showTrackingConsent =
-    (await isEU()) && !cookieStore.has(Cookies.TrackingConsent);
   const { device } = userAgent({ headers: await headers() });
 
   let moreSignInOptions = null;
   let preferredSignInOption =
     device?.vendor === "Apple" ? (
-      <div className="flex flex-col space-y-3">
+      <div className="flex flex-col space-y-3 w-full">
         <GoogleSignIn showLastUsed={preferred?.value === "google"} />
         <AppleSignIn showLastUsed={preferred?.value === "apple"} />
       </div>
@@ -118,7 +114,7 @@ export default async function Page() {
             </div>
 
             {/* Sign In Options */}
-            <div className="space-y-3 flex items-center justify-center">
+            <div className="space-y-3 flex items-center justify-center w-full">
               {preferredSignInOption}
             </div>
 
@@ -136,19 +132,6 @@ export default async function Page() {
 
             {/* More Options Accordion */}
             <LoginAccordion>{moreSignInOptions}</LoginAccordion>
-
-            {/* Sign Up Link */}
-            <div className="text-center">
-              <p className="font-sans text-sm text-[#878787]">
-                Don't have an account?{" "}
-                <Link
-                  href="#"
-                  className="text-foreground hover:text-[#878787] transition-colors"
-                >
-                  Sign up
-                </Link>
-              </p>
-            </div>
           </div>
 
           {/* Terms and Privacy Policy - Bottom aligned */}
@@ -172,9 +155,6 @@ export default async function Page() {
           </div>
         </div>
       </div>
-
-      {/* Consent Banner */}
-      {showTrackingConsent && <ConsentBanner />}
     </div>
   );
 }

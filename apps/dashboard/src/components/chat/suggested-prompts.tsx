@@ -5,12 +5,14 @@ import { extractBankAccountRequired } from "@/lib/chat-utils";
 import { useChat, useChatActions, useDataPart } from "@ai-sdk-tools/store";
 import { Button } from "@midday/ui/button";
 import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { useStickToBottomContext } from "use-stick-to-bottom";
 
 type SuggestionsData = {
   prompts: string[];
 };
 
-const delay = 1;
+const delay = 0.05;
 
 export function SuggestedPrompts() {
   const [suggestions, clearSuggestions] =
@@ -18,6 +20,10 @@ export function SuggestedPrompts() {
   const { sendMessage } = useChatActions();
   const { isChatPage } = useChatInterface();
   const { messages } = useChat();
+  const { isAtBottom, scrollRef } = useStickToBottomContext();
+  const [shouldShow, setShouldShow] = useState(true);
+  const prevScrollTopRef = useRef<number>(0);
+  const isAtBottomRef = useRef<boolean>(isAtBottom);
 
   // Check if last message requires bank account
   const lastMessage = messages[messages.length - 1];
@@ -31,11 +37,54 @@ export function SuggestedPrompts() {
     sendMessage({ text: prompt });
   };
 
+  // Keep isAtBottom ref updated
+  useEffect(() => {
+    isAtBottomRef.current = isAtBottom;
+  }, [isAtBottom]);
+
+  // Track scroll direction - hide when scrolling up, show only when at bottom
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    // Initialize previous scroll position
+    prevScrollTopRef.current = container.scrollTop;
+
+    const handleScroll = () => {
+      const currentScrollTop = container.scrollTop;
+      const prevScrollTop = prevScrollTopRef.current;
+
+      // Hide immediately when scrolling up (if not at bottom)
+      if (currentScrollTop < prevScrollTop && !isAtBottomRef.current) {
+        setShouldShow(false);
+      }
+
+      prevScrollTopRef.current = currentScrollTop;
+    };
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
+
+    // Initial state
+    setShouldShow(isAtBottom);
+
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+    };
+  }, [scrollRef, isAtBottom]);
+
+  // Show only when at bottom
+  useEffect(() => {
+    if (isAtBottom) {
+      setShouldShow(true);
+    }
+  }, [isAtBottom]);
+
   if (
     !suggestions?.prompts ||
     suggestions.prompts.length === 0 ||
     !isChatPage ||
-    bankAccountRequired
+    bankAccountRequired ||
+    !shouldShow
   ) {
     return null;
   }

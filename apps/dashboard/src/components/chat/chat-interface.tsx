@@ -142,7 +142,7 @@ export function ChatInterface({ geo }: Props) {
       </div>
 
       {/* Main chat area - container that slides left when canvas opens */}
-      <div
+      <Conversation
         className={cn(
           "relative flex-1",
           hasMessages && "transition-all duration-300 ease-in-out",
@@ -165,30 +165,25 @@ export function ChatInterface({ geo }: Props) {
                   <ChatHeader />
                 </div>
               </div>
-              <Conversation>
-                <ConversationContent className="pb-48 pt-14">
-                  <div className="max-w-2xl mx-auto w-full">
-                    <ChatMessages
-                      messages={messages}
-                      isStreaming={
-                        status === "streaming" || status === "submitted"
-                      }
-                    />
-                    <ChatStatusIndicators
-                      agentStatus={agentStatus}
-                      currentToolCall={currentToolCall}
-                      status={status}
-                      artifactStage={artifactStage}
-                      artifactType={artifactType}
-                      currentSection={currentSection}
-                      bankAccountRequired={bankAccountRequired}
-                    />
-                  </div>
-                </ConversationContent>
-                <ConversationScrollButton
-                  className={cn(hasSuggestions ? "bottom-40" : "bottom-32")}
-                />
-              </Conversation>
+              <ConversationContent className="pb-[150px] pt-14 relative">
+                <div className="max-w-2xl mx-auto w-full">
+                  <ChatMessages
+                    messages={messages}
+                    isStreaming={
+                      status === "streaming" || status === "submitted"
+                    }
+                  />
+                  <ChatStatusIndicators
+                    agentStatus={agentStatus}
+                    currentToolCall={currentToolCall}
+                    status={status}
+                    artifactStage={artifactStage}
+                    artifactType={artifactType}
+                    currentSection={currentSection}
+                    bankAccountRequired={bankAccountRequired}
+                  />
+                </div>
+              </ConversationContent>
             </div>
           </>
         )}
@@ -203,7 +198,7 @@ export function ChatInterface({ geo }: Props) {
         >
           <ChatInput />
         </div>
-      </div>
+      </Conversation>
     </div>
   );
 }
