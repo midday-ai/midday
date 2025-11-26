@@ -22,7 +22,7 @@ export function OgTemplate({ data, isValidLogo }: Props) {
   } = data;
 
   return (
-    <div tw="h-full w-full flex flex-col bg-[#0C0C0C] font-[GeistMono] p-16 py-8">
+    <div tw="h-full w-full flex flex-col bg-[#0C0C0C] font-sans p-16 py-8">
       <Header
         customerName={customerName || ""}
         status={status}
@@ -43,7 +43,7 @@ export function OgTemplate({ data, isValidLogo }: Props) {
 
       <div tw="flex justify-between mt-10">
         <div tw="flex flex-col flex-1 max-w-[50%]">
-          <span tw="text-[#858585] text-[22px] font-[GeistMono] mb-1">
+          <span tw="text-[#858585] text-[22px] font-sans mb-1">
             {template.fromLabel}
           </span>
           <EditorContent content={fromDetails} />
@@ -52,7 +52,7 @@ export function OgTemplate({ data, isValidLogo }: Props) {
         <div tw="w-12" />
 
         <div tw="flex flex-col flex-1 max-w-[50%]">
-          <span tw="text-[#858585] text-[22px] font-[GeistMono] mb-1">
+          <span tw="text-[#858585] text-[22px] font-sans mb-1">
             {template.customerLabel}
           </span>
           <EditorContent content={customerDetails} />

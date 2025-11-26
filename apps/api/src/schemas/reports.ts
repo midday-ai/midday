@@ -449,3 +449,57 @@ export const getRevenueForecastSchema = z
     }),
   })
   .openapi("GetRevenueForecastSchema");
+
+export const reportTypeSchema = z.enum([
+  "profit",
+  "revenue",
+  "burn_rate",
+  "expense",
+  "monthly_revenue",
+  "revenue_forecast",
+  "runway",
+  "category_expenses",
+]);
+
+export const createReportSchema = z
+  .object({
+    type: reportTypeSchema.openapi({
+      description: "Type of report/chart to share",
+      example: "burn_rate",
+    }),
+    from: z.string().openapi({
+      description: "Start date (ISO 8601 format)",
+      example: "2023-01-01",
+    }),
+    to: z.string().openapi({
+      description: "End date (ISO 8601 format)",
+      example: "2023-12-31",
+    }),
+    currency: z.string().optional().openapi({
+      description: "Currency code (ISO 4217)",
+      example: "USD",
+    }),
+    expireAt: z.string().optional().openapi({
+      description: "Expiration date for the shared link (ISO 8601 format)",
+      example: "2024-12-31",
+    }),
+  })
+  .openapi("CreateReportSchema");
+
+export const getReportByLinkIdSchema = z
+  .object({
+    linkId: z.string().openapi({
+      description: "Unique link identifier for the shared report",
+      example: "abc12345",
+    }),
+  })
+  .openapi("GetReportByLinkIdSchema");
+
+export const getChartDataByLinkIdSchema = z
+  .object({
+    linkId: z.string().openapi({
+      description: "Unique link identifier for the shared report",
+      example: "abc12345",
+    }),
+  })
+  .openapi("GetChartDataByLinkIdSchema");

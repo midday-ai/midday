@@ -6,6 +6,7 @@ import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useMemo } from "react";
+import { ShareMetricButton } from "../components/share-metric-button";
 
 interface RevenueForecastCardProps {
   from: string;
@@ -78,12 +79,20 @@ export function RevenueForecastCard({
   }, [from, to]);
 
   return (
-    <div className="border bg-background border-border p-6 flex flex-col h-full">
+    <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">
             Revenue Forecast
           </h3>
+          <div className="opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity">
+            <ShareMetricButton
+              type="revenue_forecast"
+              from={from}
+              to={to}
+              currency={currency}
+            />
+          </div>
         </div>
         <p className="text-3xl font-normal">
           <AnimatedNumber

@@ -134,6 +134,10 @@ export const reportTypesEnum = pgEnum("reportTypes", [
   "revenue",
   "burn_rate",
   "expense",
+  "monthly_revenue",
+  "revenue_forecast",
+  "runway",
+  "category_expenses",
 ]);
 
 export const teamRolesEnum = pgEnum("teamRoles", ["owner", "member"]);
