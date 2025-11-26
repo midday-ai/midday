@@ -115,7 +115,7 @@ export function OTPSignIn({ className }: Props) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
         <div className={cn("flex flex-col space-y-4", className)}>
           <FormField
             control={form.control}
