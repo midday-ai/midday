@@ -37,6 +37,7 @@ import {
   MdOutlineAttachFile,
   MdOutlineAttachMoney,
   MdOutlineAutoAwesome,
+  MdOutlineBlock,
   MdOutlineBrokenImage,
   MdOutlineCalculate,
   MdOutlineCalendarMonth,
@@ -599,4 +600,5 @@ export const Icons = {
   ShowChart: MdOutlineShowChart,
   PieChart: MdOutlinePieChart,
   ArrowDropDown: MdArrowDropDown,
+  Block: MdOutlineBlock,
 };

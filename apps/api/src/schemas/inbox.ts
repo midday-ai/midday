@@ -291,3 +291,67 @@ export const inboxPreSignedUrlResponseSchema = z.object({
     example: "invoice.pdf",
   }),
 });
+
+export const createInboxBlocklistSchema = z.object({
+  type: z.enum(["email", "domain"]).openapi({
+    description: "Type of blocklist entry - either 'email' or 'domain'",
+    example: "domain",
+  }),
+  value: z.string().openapi({
+    description: "The email address or domain to block",
+    example: "netflix.com",
+  }),
+});
+
+export const deleteInboxBlocklistSchema = z.object({
+  id: z
+    .string()
+    .uuid()
+    .openapi({
+      description: "The unique identifier of the blocklist entry to delete",
+      example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
+      param: {
+        in: "path",
+        name: "id",
+      },
+    }),
+});
+
+export const getInboxBlocklistSchema = z.object({}).optional();
+
+export const inboxBlocklistItemResponseSchema = z
+  .object({
+    id: z.string().uuid().openapi({
+      description: "Blocklist entry ID (UUID)",
+      example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
+    }),
+    teamId: z.string().uuid().openapi({
+      description: "Team ID this blocklist entry belongs to",
+      example: "a1b2c3d4-5678-4e7a-9c1a-2b7c1e24c2a4",
+    }),
+    type: z.enum(["email", "domain"]).openapi({
+      description: "Type of blocklist entry",
+      example: "domain",
+    }),
+    value: z.string().openapi({
+      description: "The blocked email address or domain",
+      example: "netflix.com",
+    }),
+    createdAt: z.string().openapi({
+      description:
+        "Date and time when the blocklist entry was created (ISO 8601)",
+      example: "2024-05-01T12:34:56.789Z",
+    }),
+  })
+  .openapi({
+    description: "Inbox blocklist entry object",
+  });
+
+export const inboxBlocklistResponseSchema = z.object({
+  entries: z.array(inboxBlocklistItemResponseSchema),
+  count: z.number().int().min(0).openapi({
+    description:
+      "Total number of inbox items currently blocked by the blocklist",
+    example: 42,
+  }),
+});

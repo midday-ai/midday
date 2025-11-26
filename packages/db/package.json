@@ -22,7 +22,8 @@
     "./utils/search-query": "./src/utils/search-query.ts",
     "./utils/health": "./src/utils/health.ts",
     "./utils/currency": "./src/utils/currency.ts",
-    "./utils/tax": "./src/utils/tax.ts"
+    "./utils/tax": "./src/utils/tax.ts",
+    "./utils/blocklist": "./src/utils/blocklist.ts"
   },
   "dependencies": {
     "@date-fns/utc": "^2.1.1",

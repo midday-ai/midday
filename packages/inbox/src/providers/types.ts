@@ -13,6 +13,7 @@ export interface Attachment {
   referenceId: string;
   data: Buffer;
   website?: string;
+  senderEmail?: string;
 }
 
 export interface Account {

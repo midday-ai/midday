@@ -62,6 +62,7 @@ export const processAttachmentSchema = z.object({
   filePath: z.array(z.string()),
   referenceId: z.string().optional(),
   website: z.string().optional(),
+  senderEmail: z.email().optional(),
   inboxAccountId: z.string().uuid().optional(),
 });
 

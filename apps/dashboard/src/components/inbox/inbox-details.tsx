@@ -14,6 +14,9 @@ import { DialogTrigger } from "@midday/ui/dialog";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from "@midday/ui/dropdown-menu";
 import { DropdownMenu, DropdownMenuTrigger } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
@@ -28,12 +31,12 @@ import {
 import { useToast } from "@midday/ui/use-toast";
 import { formatDate, getInitials } from "@midday/utils/format";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
 import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useCopyToClipboard } from "usehooks-ts";
 import { EditInboxModal } from "../modals/edit-inbox-modal";
+import { DeleteInboxDialog } from "./delete-inbox-dialog";
 import { InboxActions } from "./inbox-actions";
 import { InboxDetailsSkeleton } from "./inbox-details-skeleton";
 
@@ -45,6 +48,7 @@ export function InboxDetails() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [showFallback, setShowFallback] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { data: user } = useUserQuery();
   const [, copy] = useCopyToClipboard();
 
@@ -57,76 +61,6 @@ export function InboxDetails() {
         enabled: !!id,
       },
     ),
-  );
-
-  const deleteInboxMutation = useMutation(
-    trpc.inbox.delete.mutationOptions({
-      onMutate: async ({ id }) => {
-        // Cancel outgoing refetches
-        await queryClient.cancelQueries({
-          queryKey: trpc.inbox.get.infiniteQueryKey(),
-        });
-
-        // Get current data
-        const previousData = queryClient.getQueriesData({
-          queryKey: trpc.inbox.get.infiniteQueryKey(),
-        });
-
-        // Flatten the data from all pages to find the current index and the next item
-        const allInboxes = previousData
-          // @ts-expect-error
-          .flatMap(([, data]) => data?.pages ?? [])
-          .flatMap((page) => page.data ?? []);
-
-        const currentIndex = allInboxes.findIndex((item) => item.id === id);
-        let nextInboxId: string | null = null;
-
-        if (allInboxes.length > 1) {
-          if (currentIndex === allInboxes.length - 1) {
-            // If it was the last item, select the previous one
-            nextInboxId = allInboxes[currentIndex - 1]?.id ?? null;
-          } else if (currentIndex !== -1) {
-            // Otherwise, select the next one
-            nextInboxId = allInboxes[currentIndex + 1]?.id ?? null;
-          }
-        }
-        // If list had 0 or 1 item, or index not found, nextInboxId remains null
-
-        // Optimistically update infinite query data
-        queryClient.setQueriesData(
-          { queryKey: trpc.inbox.get.infiniteQueryKey() },
-          (old: any) => ({
-            pages: old.pages.map((page: any) => ({
-              ...page,
-              data: page.data.filter((item: any) => item.id !== id),
-            })),
-            pageParams: old.pageParams,
-          }),
-        );
-
-        setParams({
-          ...params,
-          inboxId: nextInboxId,
-        });
-
-        return { previousData };
-      },
-      onError: (_, __, context) => {
-        // Restore previous data on error
-        if (context?.previousData) {
-          queryClient.setQueriesData(
-            { queryKey: trpc.inbox.get.infiniteQueryKey() },
-            context.previousData,
-          );
-        }
-      },
-      onSettled: () => {
-        // Refetch after error or success
-        queryClient.invalidateQueries({
-          queryKey: trpc.inbox.get.infiniteQueryKey(),
-        });
-      },
-    }),
   );
 
   const updateInboxMutation = useMutation(
@@ -157,10 +91,113 @@ export function InboxDetails() {
     }),
   );
 
-  const handleOnDelete = () => {
-    if (data?.id) {
-      deleteInboxMutation.mutate({ id: data.id });
+  const blockSenderMutation = useMutation(
+    trpc.inbox.blocklist.create.mutationOptions({
+      onMutate: async (variables) => {
+        // Check if the currently selected inbox item matches what was blocked
+        if (data) {
+          const shouldDeselect =
+            (variables.type === "email" &&
+              data.senderEmail &&
+              data.senderEmail.toLowerCase() ===
+                variables.value.toLowerCase()) ||
+            (variables.type === "domain" &&
+              data.website &&
+              data.website.toLowerCase() === variables.value.toLowerCase());
+
+          if (shouldDeselect) {
+            // Cancel outgoing refetches
+            await queryClient.cancelQueries({
+              queryKey: trpc.inbox.get.infiniteQueryKey(),
+            });
+
+            // Get current data before invalidation
+            const previousData = queryClient.getQueriesData({
+              queryKey: trpc.inbox.get.infiniteQueryKey(),
+            });
+
+            // Flatten the data from all pages to find the current index and the next item
+            const allInboxes = previousData
+              // @ts-expect-error
+              .flatMap(([, data]) => data?.pages ?? [])
+              .flatMap((page) => page.data ?? []);
+
+            const currentIndex = allInboxes.findIndex(
+              (item) => item.id === data.id,
+            );
+            let nextInboxId: string | null = null;
+
+            if (allInboxes.length > 1) {
+              if (currentIndex === allInboxes.length - 1) {
+                // If it was the last item, select the previous one
+                nextInboxId = allInboxes[currentIndex - 1]?.id ?? null;
+              } else if (currentIndex !== -1) {
+                // Otherwise, select the next one
+                nextInboxId = allInboxes[currentIndex + 1]?.id ?? null;
+              }
+            }
+
+            // Select the next item
+            setParams({
+              ...params,
+              inboxId: nextInboxId,
+            });
+
+            return { previousData };
+          }
+        }
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.inbox.blocklist.get.queryKey(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: trpc.inbox.get.infiniteQueryKey(),
+        });
+      },
+    }),
+  );
+
+  const handleBlockSender = () => {
+    // Prefer blocking by email if available, otherwise use domain
+    if (data?.senderEmail) {
+      blockSenderMutation.mutate({
+        type: "email",
+        value: data.senderEmail,
+      });
+    } else if (data?.website) {
+      blockSenderMutation.mutate({
+        type: "domain",
+        value: data.website,
+      });
+    } else {
+      toast({
+        title: "Cannot block sender",
+        description: "No sender information available for this item.",
+      });
     }
+  };
+
+  const handleBlockEmail = () => {
+    if (data?.senderEmail) {
+      blockSenderMutation.mutate({
+        type: "email",
+        value: data.senderEmail,
+      });
+    }
+  };
+
+  const handleBlockDomain = () => {
+    if (data?.website) {
+      blockSenderMutation.mutate({
+        type: "domain",
+        value: data.website,
+      });
+    }
+  };
+
+  const handleOnDelete = () => {
+    setShowDeleteDialog(true);
   };
 
   const handleRetryMatching = () => {
@@ -305,6 +342,47 @@ export function InboxDetails() {
                   <span className="text-xs">Copy Link</span>
                 </DropdownMenuItem>
 
+                {(data?.website || data?.senderEmail) && (
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      <Icons.Block className="mr-2 size-4" />
+                      <span className="text-xs">Blocklist</span>
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      {data?.senderEmail && (
+                        <DropdownMenuItem
+                          onClick={handleBlockEmail}
+                          disabled={blockSenderMutation.isPending}
+                        >
+                          {blockSenderMutation.isPending ? (
+                            <>
+                              <Icons.Refresh className="mr-2 size-4 animate-spin" />
+                              <span className="text-xs">Blocking...</span>
+                            </>
+                          ) : (
+                            <span className="text-xs">Block email</span>
+                          )}
+                        </DropdownMenuItem>
+                      )}
+                      {data?.website && (
+                        <DropdownMenuItem
+                          onClick={handleBlockDomain}
+                          disabled={blockSenderMutation.isPending}
+                        >
+                          {blockSenderMutation.isPending ? (
+                            <>
+                              <Icons.Refresh className="mr-2 size-4 animate-spin" />
+                              <span className="text-xs">Blocking...</span>
+                            </>
+                          ) : (
+                            <span className="text-xs">Block domain</span>
+                          )}
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                )}
+
                 {/* Destructive Actions - At Bottom */}
                 <DropdownMenuItem
                   onClick={handleOnDelete}
@@ -406,6 +484,13 @@ export function InboxDetails() {
           No attachment selected
         </div>
       )}
+
+      <DeleteInboxDialog
+        id={data?.id!}
+        filePath={data?.filePath ?? null}
+        isOpen={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+      />
     </div>
   );
 }

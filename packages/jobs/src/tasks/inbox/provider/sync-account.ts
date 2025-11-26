@@ -1,6 +1,11 @@
 import { getDb } from "@jobs/init";
 import { processBatch } from "@jobs/utils/process-batch";
-import { getInboxAccountInfo, updateInboxAccount } from "@midday/db/queries";
+import {
+  getInboxAccountInfo,
+  getInboxBlocklist,
+  updateInboxAccount,
+} from "@midday/db/queries";
+import { separateBlocklistEntries } from "@midday/db/utils/blocklist";
 import { InboxConnector } from "@midday/inbox/connector";
 import { isAuthenticationError } from "@midday/inbox/utils";
 import { createClient } from "@midday/supabase/job";
@@ -34,215 +39,284 @@ export const syncInboxAccount = schemaTask({
     preset: "medium-1x",
   },
   run: async (payload) => {
-    const { id, manualSync = false } = payload;
-
-    const supabase = createClient();
-
-    if (!id) {
-      throw new Error("id is required");
-    }
-
-    // Get the account info to access provider and teamId
-    const accountRow = await getInboxAccountInfo(getDb(), { id });
-
-    if (!accountRow) {
-      // TODO: Unregister inbox account scheduler by deduplication key?
-      throw new Error("Account not found");
-    }
-
-    const connector = new InboxConnector(accountRow.provider, getDb());
-
-    logger.info("Starting inbox sync", {
-      accountId: id,
-      teamId: accountRow.teamId,
-      provider: accountRow.provider,
-      lastAccessed: accountRow.lastAccessed,
-      manualSync,
-      fullSync: manualSync,
-      maxResults: 50,
-    });
-
     try {
-      // Use same limit for both initial and ongoing sync to ensure consistent behavior
-      const maxResults = 50; // Same limit for both initial and ongoing sync
+      const { id, manualSync = false } = payload;
 
-      const attachments = await connector.getAttachments({
-        id,
+      const supabase = createClient();
+
+      if (!id) {
+        throw new Error("id is required");
+      }
+
+      // Get the account info to access provider and teamId
+      const accountRow = await getInboxAccountInfo(getDb(), { id });
+
+      if (!accountRow) {
+        // TODO: Unregister inbox account scheduler by deduplication key?
+        throw new Error("Account not found");
+      }
+
+      const connector = new InboxConnector(accountRow.provider, getDb());
+
+      logger.info("Starting inbox sync", {
+        accountId: id,
         teamId: accountRow.teamId,
-        maxResults,
-        lastAccessed: accountRow.lastAccessed,
-        fullSync: manualSync,
-      });
-
-      logger.info("Fetched attachments from provider", {
-        accountId: id,
-        totalFound: attachments.length,
         provider: accountRow.provider,
+        lastAccessed: accountRow.lastAccessed,
+        manualSync,
+        fullSync: manualSync,
+        maxResults: 50,
       });
 
-      // Filter out attachments that are already processed
-      const existingAttachments = await getExistingInboxAttachmentsQuery(
-        supabase,
-        attachments.map((attachment) => attachment.referenceId),
-      );
+      try {
+        // Use same limit for both initial and ongoing sync to ensure consistent behavior
+        const maxResults = 50; // Same limit for both initial and ongoing sync
 
-      const filteredAttachments = attachments.filter((attachment) => {
-        // Skip if already exists in database
-        if (
-          existingAttachments.data?.some(
-            (existing) => existing.reference_id === attachment.referenceId,
-          )
-        ) {
-          logger.info("Skipping attachment - already processed", {
-            filename: attachment.filename,
-            referenceId: attachment.referenceId,
-            accountId: id,
-          });
-          return false;
-        }
+        const attachments = await connector.getAttachments({
+          id,
+          teamId: accountRow.teamId,
+          maxResults,
+          lastAccessed: accountRow.lastAccessed,
+          fullSync: manualSync,
+        });
 
-        // Skip if attachment is too large
-        if (attachment.size > MAX_ATTACHMENT_SIZE) {
-          logger.warn("Attachment exceeds size limit", {
-            filename: attachment.filename,
-            size: attachment.size,
-            maxSize: MAX_ATTACHMENT_SIZE,
-            accountId: id,
-          });
-          return false;
-        }
+        logger.info("Fetched attachments from provider", {
+          accountId: id,
+          totalFound: attachments.length,
+          provider: accountRow.provider,
+        });
 
-        return true;
-      });
+        // Filter out attachments that are already processed
+        const existingAttachments = await getExistingInboxAttachmentsQuery(
+          supabase,
+          attachments.map((attachment) => attachment.referenceId),
+        );
 
-      logger.info("Attachment filtering summary", {
-        accountId: id,
-        totalFound: attachments.length,
-        afterFiltering: filteredAttachments.length,
-        skipped: attachments.length - filteredAttachments.length,
-      });
+        // Get blocklist entries for the team
+        const blocklistEntries = await getInboxBlocklist(getDb(), {
+          teamId: accountRow.teamId,
+        });
 
-      const uploadedAttachments = await processBatch(
-        filteredAttachments,
-        BATCH_SIZE,
-        async (batch) => {
-          const results = [];
-          for (const item of batch) {
-            // Ensure filename has proper extension as final safety check
-            const safeFilename = ensureFileExtension(
-              item.filename,
-              item.mimeType,
-            );
+        const { blockedDomains, blockedEmails } =
+          separateBlocklistEntries(blocklistEntries);
 
-            const { data: uploadData } = await supabase.storage
-              .from("vault")
-              .upload(`${accountRow.teamId}/inbox/${safeFilename}`, item.data, {
-                contentType: item.mimeType,
-                upsert: true,
+        // Track filtering statistics
+        let skippedAlreadyProcessed = 0;
+        let skippedTooLarge = 0;
+        let skippedBlockedDomain = 0;
+        let skippedBlockedEmail = 0;
+
+        const filteredAttachments = attachments.filter((attachment) => {
+          // Skip if already exists in database
+          if (
+            existingAttachments.data?.some(
+              (existing) => existing.reference_id === attachment.referenceId,
+            )
+          ) {
+            skippedAlreadyProcessed++;
+            logger.info("Skipping attachment - already processed", {
+              filename: attachment.filename,
+              referenceId: attachment.referenceId,
+              accountId: id,
+            });
+            return false;
+          }
+
+          // Skip if attachment is too large
+          if (attachment.size > MAX_ATTACHMENT_SIZE) {
+            skippedTooLarge++;
+            logger.warn("Attachment exceeds size limit", {
+              filename: attachment.filename,
+              size: attachment.size,
+              maxSize: MAX_ATTACHMENT_SIZE,
+              accountId: id,
+            });
+            return false;
+          }
+
+          // Skip if domain is blocked
+          if (attachment.website) {
+            const domain = attachment.website.toLowerCase();
+            if (blockedDomains.includes(domain)) {
+              skippedBlockedDomain++;
+              logger.info("Skipping attachment - domain blocked", {
+                filename: attachment.filename,
+                website: attachment.website,
+                blockedDomain: domain,
+                accountId: id,
               });
 
-            if (uploadData) {
-              results.push({
-                payload: {
-                  filePath: uploadData.path.split("/"),
-                  size: item.size,
-                  mimetype: item.mimeType,
-                  website: item.website,
-                  referenceId: item.referenceId,
-                  teamId: accountRow.teamId,
-                  inboxAccountId: id,
-                },
-              });
+              return false;
             }
           }
 
-          return results;
-        },
-      );
+          // Skip if sender email is blocked
+          if (attachment.senderEmail) {
+            const email = attachment.senderEmail.toLowerCase();
+            if (blockedEmails.includes(email)) {
+              skippedBlockedEmail++;
+              logger.info("Skipping attachment - sender email blocked", {
+                filename: attachment.filename,
+                senderEmail: attachment.senderEmail,
+                blockedEmail: email,
+                accountId: id,
+              });
 
-      logger.info("Attachment processing summary", {
-        accountId: id,
-        totalFetched: attachments.length,
-        afterFiltering: filteredAttachments.length,
-        uploaded: uploadedAttachments.length,
-        skipped: attachments.length - filteredAttachments.length,
-      });
+              return false;
+            }
+          }
 
-      if (uploadedAttachments.length > 0) {
-        logger.info("Triggering document processing", {
+          return true;
+        });
+
+        logger.info("Attachment filtering summary", {
           accountId: id,
-          attachmentCount: uploadedAttachments.length,
+          totalFound: attachments.length,
+          afterFiltering: filteredAttachments.length,
+          skipped: attachments.length - filteredAttachments.length,
+          skippedByReason: {
+            alreadyProcessed: skippedAlreadyProcessed,
+            tooLarge: skippedTooLarge,
+            blockedDomain: skippedBlockedDomain,
+            blockedEmail: skippedBlockedEmail,
+          },
+          blocklistStats: {
+            blockedDomainsCount: blockedDomains.length,
+            blockedEmailsCount: blockedEmails.length,
+            totalBlocklistEntries: blocklistEntries.length,
+          },
         });
 
-        await processAttachment.batchTriggerAndWait(uploadedAttachments);
+        const uploadedAttachments = await processBatch(
+          filteredAttachments,
+          BATCH_SIZE,
+          async (batch) => {
+            const results = [];
+            for (const item of batch) {
+              // Ensure filename has proper extension as final safety check
+              const safeFilename = ensureFileExtension(
+                item.filename,
+                item.mimeType,
+              );
 
-        // Send notification for new inbox items
-        await tasks.trigger("notification", {
-          type: "inbox_new",
-          teamId: accountRow.teamId,
-          totalCount: uploadedAttachments.length,
-          inboxType: "sync",
-          provider: accountRow.provider,
+              const { data: uploadData } = await supabase.storage
+                .from("vault")
+                .upload(
+                  `${accountRow.teamId}/inbox/${safeFilename}`,
+                  item.data,
+                  {
+                    contentType: item.mimeType,
+                    upsert: true,
+                  },
+                );
+
+              if (uploadData) {
+                results.push({
+                  payload: {
+                    filePath: uploadData.path.split("/"),
+                    size: item.size,
+                    mimetype: item.mimeType,
+                    website: item.website,
+                    senderEmail: item.senderEmail,
+                    referenceId: item.referenceId,
+                    teamId: accountRow.teamId,
+                    inboxAccountId: id,
+                  },
+                });
+              }
+            }
+
+            return results;
+          },
+        );
+
+        logger.info("Attachment processing summary", {
+          accountId: id,
+          totalFetched: attachments.length,
+          afterFiltering: filteredAttachments.length,
+          uploaded: uploadedAttachments.length,
+          skipped: attachments.length - filteredAttachments.length,
         });
-      }
 
-      // Update account with successful sync - mark as connected and clear errors
-      await updateInboxAccount(getDb(), {
-        id,
-        lastAccessed: new Date().toISOString(),
-        status: "connected",
-        errorMessage: null,
-      });
+        if (uploadedAttachments.length > 0) {
+          logger.info("Triggering document processing", {
+            accountId: id,
+            attachmentCount: uploadedAttachments.length,
+          });
 
-      logger.info("Inbox sync completed", {
-        accountId: id,
-        processedAttachments: uploadedAttachments.length,
-      });
+          await processAttachment.batchTriggerAndWait(uploadedAttachments);
 
-      // Return the attachment count for the frontend
-      return {
-        accountId: id,
-        attachmentsProcessed: uploadedAttachments.length,
-        syncedAt: new Date().toISOString(),
-      };
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown sync error";
+          // Send notification for new inbox items
+          await tasks.trigger("notification", {
+            type: "inbox_new",
+            teamId: accountRow.teamId,
+            totalCount: uploadedAttachments.length,
+            inboxType: "sync",
+            provider: accountRow.provider,
+          });
+        }
 
-      logger.error("Inbox sync failed", {
-        accountId: id,
-        error: errorMessage,
-        provider: accountRow.provider,
-      });
-
-      // Check if this is an authentication/authorization error
-      const isAuthError = isAuthenticationError(errorMessage);
-
-      if (isAuthError) {
-        // Only mark as disconnected for authentication errors
+        // Update account with successful sync - mark as connected and clear errors
         await updateInboxAccount(getDb(), {
           id,
-          status: "disconnected",
-          errorMessage: `Authentication failed: ${errorMessage}`,
+          lastAccessed: new Date().toISOString(),
+          status: "connected",
+          errorMessage: null,
         });
 
-        logger.error("Account marked as disconnected due to auth error", {
+        logger.info("Inbox sync completed", {
+          accountId: id,
+          processedAttachments: uploadedAttachments.length,
+        });
+
+        // Return the attachment count for the frontend
+        return {
+          accountId: id,
+          attachmentsProcessed: uploadedAttachments.length,
+          syncedAt: new Date().toISOString(),
+        };
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown sync error";
+
+        logger.error("Inbox sync failed", {
           accountId: id,
           error: errorMessage,
           provider: accountRow.provider,
         });
-      } else {
-        // For temporary errors (network, API downtime, etc.), don't change connection status
-        // Just log the error for monitoring
-        logger.warn("Temporary sync error - connection status unchanged", {
-          accountId: id,
-          error: errorMessage,
-          provider: accountRow.provider,
-          errorType: "temporary",
-        });
+
+        // Check if this is an authentication/authorization error
+        const isAuthError = isAuthenticationError(errorMessage);
+
+        if (isAuthError) {
+          // Only mark as disconnected for authentication errors
+          await updateInboxAccount(getDb(), {
+            id,
+            status: "disconnected",
+            errorMessage: `Authentication failed: ${errorMessage}`,
+          });
+
+          logger.error("Account marked as disconnected due to auth error", {
+            accountId: id,
+            error: errorMessage,
+            provider: accountRow.provider,
+          });
+        } else {
+          // For temporary errors (network, API downtime, etc.), don't change connection status
+          // Just log the error for monitoring
+          logger.warn("Temporary sync error - connection status unchanged", {
+            accountId: id,
+            error: errorMessage,
+            provider: accountRow.provider,
+            errorType: "temporary",
+          });
+        }
+
+        // Re-throw the error so the job is marked as failed
+        throw error;
       }
-
-      // Re-throw the error so the job is marked as failed
+    } catch (error) {
+      console.log(error);
       throw error;
     }
   },

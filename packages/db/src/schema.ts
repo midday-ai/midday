@@ -99,6 +99,10 @@ export const inboxStatusEnum = pgEnum("inbox_status", [
 ]);
 
 export const inboxTypeEnum = pgEnum("inbox_type", ["invoice", "expense"]);
+export const inboxBlocklistTypeEnum = pgEnum("inbox_blocklist_type", [
+  "email",
+  "domain",
+]);
 export const invoiceDeliveryTypeEnum = pgEnum("invoice_delivery_type", [
   "create",
   "create_and_send",
@@ -1865,6 +1869,7 @@ export const inbox = pgTable(
     meta: json(),
     status: inboxStatusEnum().default("new"),
     website: text(),
+    senderEmail: text("sender_email"),
     displayName: text("display_name"),
     fts: tsvector("fts")
       .notNull()
@@ -1938,6 +1943,49 @@ export const inbox = pgTable(
       as: "permissive",
       for: "update",
       to: ["public"],
+    }),
+  ],
+);
+
+export const inboxBlocklist = pgTable(
+  "inbox_blocklist",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    teamId: uuid("team_id").notNull(),
+    type: inboxBlocklistTypeEnum().notNull(),
+    value: text().notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "inbox_blocklist_team_id_fkey",
+    }).onDelete("cascade"),
+    unique("inbox_blocklist_team_id_type_value_key").on(
+      table.teamId,
+      table.type,
+      table.value,
+    ),
+    pgPolicy("Inbox blocklist can be deleted by a member of the team", {
+      as: "permissive",
+      for: "delete",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Inbox blocklist can be inserted by a member of the team", {
+      as: "permissive",
+      for: "insert",
+      to: ["public"],
+      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Inbox blocklist can be selected by a member of the team", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
     }),
   ],
 );
@@ -2756,6 +2804,7 @@ export const teamsRelations = relations(teams, ({ many }) => ({
   users: many(users),
   trackerProjects: many(trackerProjects),
   inboxes: many(inbox),
+  inboxBlocklist: many(inboxBlocklist),
   documentTagAssignments: many(documentTagAssignments),
   usersOnTeams: many(usersOnTeam),
   transactionCategories: many(transactionCategories),
@@ -2870,6 +2919,13 @@ export const tagsRelations = relations(tags, ({ one, many }) => ({
 export const inboxAccountsRelations = relations(inboxAccounts, ({ one }) => ({
   team: one(teams, {
     fields: [inboxAccounts.teamId],
+    references: [teams.id],
+  }),
+}));
+
+export const inboxBlocklistRelations = relations(inboxBlocklist, ({ one }) => ({
+  team: one(teams, {
+    fields: [inboxBlocklist.teamId],
     references: [teams.id],
   }),
 }));
