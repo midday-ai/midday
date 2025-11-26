@@ -1,7 +1,6 @@
 import { headers } from "next/headers";
 import flags from "./country-flags";
 import { currencies } from "./currencies";
-import { EU_COUNTRY_CODES } from "./eu-countries";
 import timezones from "./timezones.json";
 
 export async function getCountryCode() {
@@ -50,16 +49,6 @@ export async function getDateFormat() {
 
   // Default to yyyy-MM-dd for other countries
   return "yyyy-MM-dd";
-}
-
-export async function isEU() {
-  const countryCode = await getCountryCode();
-
-  if (countryCode && EU_COUNTRY_CODES.includes(countryCode)) {
-    return true;
-  }
-
-  return false;
 }
 
 export async function getCountry() {

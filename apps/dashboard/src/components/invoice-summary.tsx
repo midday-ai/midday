@@ -52,7 +52,7 @@ export function InvoiceSummary({ data, title }: Props) {
   return (
     <Card>
       <CardHeader className="pb-2 flex flex-row items-center">
-        <CardTitle className="font-medium text-2xl">
+        <CardTitle className="font-medium text-2xl font-serif">
           <AnimatedNumber
             key={data.currency}
             value={data.totalAmount}

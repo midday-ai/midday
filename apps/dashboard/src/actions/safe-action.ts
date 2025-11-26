@@ -63,10 +63,7 @@ export const authActionClient = actionClientWithMeta
       throw new Error("Unauthorized");
     }
 
-    const analytics = await setupAnalytics({
-      userId: user.id,
-      fullName: user.fullName,
-    });
+    const analytics = await setupAnalytics();
 
     if (metadata?.track) {
       analytics.track(metadata.track);

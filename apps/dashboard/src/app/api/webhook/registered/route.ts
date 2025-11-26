@@ -36,12 +36,8 @@ export async function POST(req: Request) {
   const body = await req.json();
 
   const userId = body.record.id;
-  const fullName = body.record.full_name;
 
-  const analytics = await setupAnalytics({
-    userId,
-    fullName,
-  });
+  const analytics = await setupAnalytics();
 
   analytics.track({
     event: LogEvents.Registered.name,

@@ -19,7 +19,7 @@ export function AverageInvoiceSize() {
     return (
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="font-medium text-2xl">$0</CardTitle>
+          <CardTitle className="font-medium text-2xl font-serif">$0</CardTitle>
         </CardHeader>
 
         <CardContent className="pb-[34px]">

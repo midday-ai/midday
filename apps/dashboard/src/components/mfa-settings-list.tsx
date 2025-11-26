@@ -1,3 +1,4 @@
+import { createClient } from "@midday/supabase/server";
 import { Button } from "@midday/ui/button";
 import {
   Card,
@@ -10,7 +11,11 @@ import {
 import Link from "next/link";
 import { UnenrollMFA } from "./unenroll-mfa";
 
-export function MfaSettingsList() {
+export async function MfaSettingsList() {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.mfa.listFactors();
+  const hasMfaFactors = data?.all && data.all.length > 0;
+
   return (
     <Card>
       <CardHeader>
@@ -22,13 +27,19 @@ export function MfaSettingsList() {
       </CardHeader>
 
       <CardContent>
-        <UnenrollMFA />
+        {hasMfaFactors && <UnenrollMFA />}
+        {!hasMfaFactors && (
+          <p className="text-sm text-[#606060]">
+            Multi-factor authentication is not enabled. Enable it to add an
+            additional layer of security to your account.
+          </p>
+        )}
       </CardContent>
 
       <CardFooter className="flex justify-between">
         <div />
         <Link href="?add=device">
-          <Button>Add new device</Button>
+          <Button>{hasMfaFactors ? "Add new device" : "Enable MFA"}</Button>
         </Link>
       </CardFooter>
     </Card>
