@@ -86,7 +86,6 @@ export function InboxBlocklistSettings() {
   );
 
   const existingEntries = blocklistData?.entries ?? [];
-  const blockedItemsCount = blocklistData?.count ?? 0;
 
   const form = useZodForm(formSchema, {
     defaultValues: {
@@ -339,7 +338,7 @@ export function InboxBlocklistSettings() {
                         }
                         disabled={
                           deleteMutation.isPending ||
-                          (form.watch(`entries.${index}.id`) &&
+                          (!!form.watch(`entries.${index}.id`) &&
                             deleteMutation.variables?.id ===
                               form.watch(`entries.${index}.id`))
                         }
@@ -374,23 +373,15 @@ export function InboxBlocklistSettings() {
           </form>
         </Form>
       </div>
-      <CardFooter className="flex items-center justify-between">
-        {blockedItemsCount > 0 && (
-          <div className="text-sm text-muted-foreground">
-            {blockedItemsCount} {blockedItemsCount === 1 ? "item" : "items"}{" "}
-            blocked
-          </div>
-        )}
-        <div className={blockedItemsCount > 0 ? "" : "ml-auto"}>
-          <SubmitButton
-            type="submit"
-            form="blocklist-form"
-            isSubmitting={createMutation.isPending || deleteMutation.isPending}
-            disabled={createMutation.isPending || deleteMutation.isPending}
-          >
-            Save changes
-          </SubmitButton>
-        </div>
+      <CardFooter className="flex items-center justify-end">
+        <SubmitButton
+          type="submit"
+          form="blocklist-form"
+          isSubmitting={createMutation.isPending || deleteMutation.isPending}
+          disabled={createMutation.isPending || deleteMutation.isPending}
+        >
+          Save changes
+        </SubmitButton>
       </CardFooter>
     </Card>
   );

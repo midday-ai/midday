@@ -349,9 +349,4 @@ export const inboxBlocklistItemResponseSchema = z
 
 export const inboxBlocklistResponseSchema = z.object({
   entries: z.array(inboxBlocklistItemResponseSchema),
-  count: z.number().int().min(0).openapi({
-    description:
-      "Total number of inbox items currently blocked by the blocklist",
-    example: 42,
-  }),
 });
