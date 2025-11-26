@@ -151,6 +151,9 @@ export async function POST(req: Request) {
             },
           );
 
+        // Extract sender email from FromFull
+        const senderEmail = FromFull?.Email || null;
+
         return {
           // NOTE: If we can't parse the name using OCR this will be the fallback name
           display_name: Subject || attachment.Name,
@@ -158,6 +161,7 @@ export async function POST(req: Request) {
           file_path: data?.path.split("/"),
           file_name: uniqueFileName,
           content_type: attachment.ContentType,
+          sender_email: senderEmail,
           reference_id: `${MessageID}_${attachment.Name}`,
           size: attachment.ContentLength,
         };
@@ -180,6 +184,7 @@ export async function POST(req: Request) {
           filePath: item.file_path!,
           mimetype: item.content_type!,
           size: item.size!,
+          senderEmail: item.sender_email || undefined,
           teamId: teamId!,
         } satisfies ProcessAttachmentPayload,
       })),

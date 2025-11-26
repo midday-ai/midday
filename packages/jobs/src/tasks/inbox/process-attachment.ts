@@ -35,6 +35,7 @@ export const processAttachment = schemaTask({
     filePath,
     referenceId,
     website,
+    senderEmail,
     inboxAccountId,
   }) => {
     const supabase = createClient();
@@ -75,6 +76,7 @@ export const processAttachment = schemaTask({
         size,
         referenceId,
         website,
+        senderEmail,
         inboxAccountId,
         status: "processing", // Set as processing when created by job
       });

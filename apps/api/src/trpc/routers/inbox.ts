@@ -1,8 +1,11 @@
 import {
   confirmMatchSchema,
+  createInboxBlocklistSchema,
   createInboxItemSchema,
   declineMatchSchema,
+  deleteInboxBlocklistSchema,
   deleteInboxSchema,
+  getInboxBlocklistSchema,
   getInboxByIdSchema,
   getInboxByStatusSchema,
   getInboxSchema,
@@ -15,12 +18,16 @@ import {
 } from "@api/schemas/inbox";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
+  checkInboxAttachments,
   confirmSuggestedMatch,
   createInbox,
+  createInboxBlocklist,
   declineSuggestedMatch,
   deleteInbox,
+  deleteInboxBlocklist,
   deleteInboxEmbedding,
   getInbox,
+  getInboxBlocklist,
   getInboxById,
   getInboxByStatus,
   getInboxSearch,
@@ -29,6 +36,7 @@ import {
   updateInbox,
 } from "@midday/db/queries";
 import type { ProcessAttachmentPayload } from "@midday/jobs/schema";
+import { remove } from "@midday/supabase/storage";
 import { tasks } from "@trigger.dev/sdk";
 
 export const inboxRouter = createTRPCRouter({
@@ -50,19 +58,42 @@ export const inboxRouter = createTRPCRouter({
       });
     }),
 
+  checkAttachments: protectedProcedure
+    .input(deleteInboxSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      return checkInboxAttachments(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
+    }),
+
   delete: protectedProcedure
     .input(deleteInboxSchema)
-    .mutation(async ({ ctx: { db, teamId }, input }) => {
-      await Promise.all([
-        deleteInboxEmbedding(db, {
-          inboxId: input.id,
-          teamId: teamId!,
-        }),
-        deleteInbox(db, {
-          id: input.id,
-          teamId: teamId!,
-        }),
-      ]);
+    .mutation(async ({ ctx: { db, supabase, teamId }, input }) => {
+      // Delete inbox item and get filePath for storage cleanup
+      const result = await deleteInbox(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
+
+      // Delete file from storage if filePath exists
+      if (result?.filePath && result.filePath.length > 0) {
+        try {
+          await remove(supabase, {
+            bucket: "vault",
+            path: result.filePath,
+          });
+        } catch (error) {
+          // Log error but don't fail the deletion if file doesn't exist in storage
+          console.error("Failed to delete file from storage:", error);
+        }
+      }
+
+      // Delete embedding
+      await deleteInboxEmbedding(db, {
+        inboxId: input.id,
+        teamId: teamId!,
+      });
     }),
 
   create: protectedProcedure
@@ -186,4 +217,34 @@ export const inboxRouter = createTRPCRouter({
 
       return { jobId: result.id };
     }),
+
+  // Blocklist management
+  blocklist: createTRPCRouter({
+    get: protectedProcedure
+      .input(getInboxBlocklistSchema)
+      .query(async ({ ctx: { db, teamId } }) => {
+        return getInboxBlocklist(db, {
+          teamId: teamId!,
+        });
+      }),
+
+    create: protectedProcedure
+      .input(createInboxBlocklistSchema)
+      .mutation(async ({ ctx: { db, teamId }, input }) => {
+        return createInboxBlocklist(db, {
+          teamId: teamId!,
+          type: input.type,
+          value: input.value,
+        });
+      }),
+
+    delete: protectedProcedure
+      .input(deleteInboxBlocklistSchema)
+      .mutation(async ({ ctx: { db, teamId }, input }) => {
+        return deleteInboxBlocklist(db, {
+          id: input.id,
+          teamId: teamId!,
+        });
+      }),
+  }),
 });

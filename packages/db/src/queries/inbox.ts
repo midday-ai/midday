@@ -2,16 +2,18 @@ import type { Database } from "@db/client";
 import {
   inbox,
   inboxAccounts,
+  inboxBlocklist,
   inboxEmbeddings,
   transactionAttachments,
   transactionEmbeddings,
   transactionMatchSuggestions,
   transactions,
 } from "@db/schema";
-import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { logger } from "@midday/logger";
-import { and, asc, desc, eq, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, ne, notInArray, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
+import { separateBlocklistEntries } from "../utils/blocklist";
+import { buildSearchQuery } from "../utils/search-query";
 
 // Scoring functions for suggestion ranking
 function calculateAmountScore(
@@ -92,6 +94,47 @@ export async function getInbox(db: Database, params: GetInboxParams) {
     ne(inbox.status, "deleted"),
   ];
 
+  // Apply blocklist filter
+  const blocklistEntries = await db
+    .select({
+      type: inboxBlocklist.type,
+      value: inboxBlocklist.value,
+    })
+    .from(inboxBlocklist)
+    .where(eq(inboxBlocklist.teamId, teamId));
+
+  if (blocklistEntries.length > 0) {
+    const { blockedDomains, blockedEmails } =
+      separateBlocklistEntries(blocklistEntries);
+
+    // Filter out blocked domains (website field contains domain)
+    if (blockedDomains.length > 0) {
+      // Build NOT IN condition for blocked domains
+      const domainConditions = blockedDomains.map(
+        (domain: string) => sql`LOWER(${inbox.website}) = LOWER(${domain})`,
+      );
+      whereConditions.push(
+        sql`(${inbox.website} IS NULL OR NOT (${sql.join(
+          domainConditions,
+          sql` OR `,
+        )}))`,
+      );
+    }
+
+    // Filter out blocked email addresses (senderEmail field)
+    if (blockedEmails.length > 0) {
+      const emailConditions = blockedEmails.map(
+        (email: string) => sql`LOWER(${inbox.senderEmail}) = LOWER(${email})`,
+      );
+      whereConditions.push(
+        sql`(${inbox.senderEmail} IS NULL OR NOT (${sql.join(
+          emailConditions,
+          sql` OR `,
+        )}))`,
+      );
+    }
+  }
+
   // Apply status filter
   if (status) {
     whereConditions.push(eq(inbox.status, status));
@@ -131,6 +174,7 @@ export async function getInbox(db: Database, params: GetInboxParams) {
       status: inbox.status,
       createdAt: inbox.createdAt,
       website: inbox.website,
+      senderEmail: inbox.senderEmail,
       description: inbox.description,
       inboxAccountId: inbox.inboxAccountId,
       inboxAccount: {
@@ -211,6 +255,7 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
       status: inbox.status,
       createdAt: inbox.createdAt,
       website: inbox.website,
+      senderEmail: inbox.senderEmail,
       description: inbox.description,
       inboxAccountId: inbox.inboxAccountId,
       inboxAccount: {
@@ -272,6 +317,61 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
   return result;
 }
 
+export type CheckInboxAttachmentsParams = {
+  id: string;
+  teamId: string;
+};
+
+export async function checkInboxAttachments(
+  db: Database,
+  params: CheckInboxAttachmentsParams,
+) {
+  const inboxItem = await db
+    .select({
+      id: inbox.id,
+      filePath: inbox.filePath,
+      fileName: inbox.fileName,
+      transactionId: inbox.transactionId,
+      attachmentId: inbox.attachmentId,
+    })
+    .from(inbox)
+    .where(and(eq(inbox.id, params.id), eq(inbox.teamId, params.teamId)))
+    .limit(1);
+
+  if (!inboxItem[0]) {
+    return { hasAttachments: false, attachments: [] };
+  }
+
+  // Check if inbox item has transaction attachment
+  if (inboxItem[0].attachmentId && inboxItem[0].transactionId) {
+    const attachments = await db
+      .select({
+        id: transactionAttachments.id,
+        transactionId: transactionAttachments.transactionId,
+        name: transactionAttachments.name,
+      })
+      .from(transactionAttachments)
+      .where(
+        and(
+          eq(transactionAttachments.id, inboxItem[0].attachmentId),
+          eq(transactionAttachments.teamId, params.teamId),
+        ),
+      );
+
+    return {
+      hasAttachments: attachments.length > 0,
+      attachments,
+      fileName: inboxItem[0].fileName,
+    };
+  }
+
+  return {
+    hasAttachments: false,
+    attachments: [],
+    fileName: inboxItem[0].fileName,
+  };
+}
+
 export type DeleteInboxParams = {
   id: string;
   teamId: string;
@@ -330,8 +430,18 @@ export async function deleteInbox(db: Database, params: DeleteInboxParams) {
     }
   }
 
+  // Get filePath before deletion for storage cleanup
+  const [inboxItem] = await db
+    .select({
+      id: inbox.id,
+      filePath: inbox.filePath,
+    })
+    .from(inbox)
+    .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
+    .limit(1);
+
   // Mark inbox item as deleted and clear attachment/transaction references
-  return db
+  const [deleted] = await db
     .update(inbox)
     .set({
       status: "deleted",
@@ -339,7 +449,15 @@ export async function deleteInbox(db: Database, params: DeleteInboxParams) {
       attachmentId: null,
     })
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
-    .returning();
+    .returning({
+      id: inbox.id,
+      filePath: inbox.filePath,
+    });
+
+  return {
+    ...deleted,
+    filePath: inboxItem?.filePath,
+  };
 }
 
 export type GetInboxSearchParams = {
@@ -1084,6 +1202,7 @@ export type CreateInboxParams = {
   size: number;
   referenceId?: string;
   website?: string;
+  senderEmail?: string;
   inboxAccountId?: string;
   status?:
     | "new"
@@ -1105,6 +1224,7 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
     size,
     referenceId,
     website,
+    senderEmail,
     inboxAccountId,
     status = "new",
   } = params;
@@ -1120,6 +1240,7 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
       size,
       referenceId,
       website,
+      senderEmail,
       inboxAccountId,
       status,
     })
@@ -1136,9 +1257,11 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
       status: inbox.status,
       createdAt: inbox.createdAt,
       website: inbox.website,
+      senderEmail: inbox.senderEmail,
       description: inbox.description,
       referenceId: inbox.referenceId,
       size: inbox.size,
+      inboxAccountId: inbox.inboxAccountId,
     });
 
   return result;

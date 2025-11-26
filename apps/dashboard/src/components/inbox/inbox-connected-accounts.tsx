@@ -25,6 +25,7 @@ import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Suspense } from "react";
+import { ConnectGmail } from "./connect-gmail";
 import { DeleteInboxAccount } from "./delete-inbox-account";
 import { InboxAccountsListSkeleton } from "./inbox-connected-accounts-skeleton";
 import { SyncInboxAccount } from "./sync-inbox-account";
@@ -214,10 +215,10 @@ function InboxAccountsList() {
 
   if (!data?.length) {
     return (
-      <div className="px-6 py-8 text-center">
-        <p className="text-muted-foreground text-sm">
-          No inbox connections found.
-        </p>
+      <div className="px-6 py-8 pb-12 text-center flex flex-col items-center">
+        <div className="w-full max-w-[300px]">
+          <ConnectGmail />
+        </div>
       </div>
     );
   }
@@ -234,6 +235,7 @@ function InboxAccountsList() {
 export function InboxConnectedAccounts() {
   const trpc = useTRPC();
   const router = useRouter();
+  const { data } = useSuspenseQuery(trpc.inboxAccounts.get.queryOptions());
 
   const connectMutation = useMutation(
     trpc.inboxAccounts.connect.mutationOptions({
@@ -260,18 +262,20 @@ export function InboxConnectedAccounts() {
         <InboxAccountsList />
       </Suspense>
 
-      <CardFooter className="flex justify-between">
-        <div />
+      {data?.length > 0 && (
+        <CardFooter className="flex justify-between">
+          <div />
 
-        <Button
-          onClick={() => connectMutation.mutate({ provider: "gmail" })}
-          disabled={connectMutation.isPending}
-          data-event="Connect email"
-          data-channel="email"
-        >
-          Connect email
-        </Button>
-      </CardFooter>
+          <Button
+            onClick={() => connectMutation.mutate({ provider: "gmail" })}
+            disabled={connectMutation.isPending}
+            data-event="Connect email"
+            data-channel="email"
+          >
+            Connect email
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 }
