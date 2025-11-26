@@ -63,7 +63,7 @@ export function WidgetsHeader() {
         </p>
       </div>
 
-      <div className="flex items-center space-x-4" data-no-close>
+      <div className="flex items-center space-x-2" data-no-close>
         <div className="hidden md:block">
           <Customize />
         </div>

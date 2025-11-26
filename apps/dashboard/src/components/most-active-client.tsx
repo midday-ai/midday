@@ -14,7 +14,7 @@ export function MostActiveClient() {
     return (
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="font-medium text-2xl">
+          <CardTitle className="font-medium text-2xl font-serif">
             No Active Client
           </CardTitle>
         </CardHeader>
@@ -42,7 +42,7 @@ export function MostActiveClient() {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="font-medium text-2xl">
+        <CardTitle className="font-medium text-2xl font-serif">
           {data.customerName}
         </CardTitle>
       </CardHeader>
