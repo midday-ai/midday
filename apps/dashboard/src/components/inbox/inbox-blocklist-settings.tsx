@@ -85,7 +85,7 @@ export function InboxBlocklistSettings() {
     trpc.inbox.blocklist.get.queryOptions(),
   );
 
-  const existingEntries = blocklistData?.entries ?? [];
+  const existingEntries = blocklistData ?? [];
 
   const form = useZodForm(formSchema, {
     defaultValues: {
