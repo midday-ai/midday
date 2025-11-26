@@ -1257,9 +1257,11 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
       status: inbox.status,
       createdAt: inbox.createdAt,
       website: inbox.website,
+      senderEmail: inbox.senderEmail,
       description: inbox.description,
       referenceId: inbox.referenceId,
       size: inbox.size,
+      inboxAccountId: inbox.inboxAccountId,
     });
 
   return result;
