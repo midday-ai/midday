@@ -4,6 +4,7 @@ import { useChatInterface } from "@/hooks/use-chat-interface";
 import { extractBankAccountRequired } from "@/lib/chat-utils";
 import { useChat, useChatActions, useDataPart } from "@ai-sdk-tools/store";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useStickToBottomContext } from "use-stick-to-bottom";
@@ -24,6 +25,10 @@ export function SuggestedPrompts() {
   const [shouldShow, setShouldShow] = useState(true);
   const prevScrollTopRef = useRef<number>(0);
   const isAtBottomRef = useRef<boolean>(isAtBottom);
+  const scrollableRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const [isScrollable, setIsScrollable] = useState(false);
 
   // Check if last message requires bank account
   const lastMessage = messages[messages.length - 1];
@@ -79,6 +84,43 @@ export function SuggestedPrompts() {
     }
   }, [isAtBottom]);
 
+  const prompts = suggestions?.prompts || [];
+
+  // Track horizontal scroll state for shadows
+  useEffect(() => {
+    if (!shouldShow) return;
+
+    const container = scrollableRef.current;
+    if (!container) return;
+
+    const checkScrollability = () => {
+      const { scrollLeft, scrollWidth, clientWidth } = container;
+      const scrollable = scrollWidth > clientWidth;
+      const maxScrollLeft = scrollWidth - clientWidth;
+
+      setIsScrollable(scrollable);
+      setCanScrollLeft(scrollLeft > 1);
+      setCanScrollRight(scrollLeft < maxScrollLeft - 1);
+    };
+
+    // Initial check with a small delay to ensure layout is complete
+    requestAnimationFrame(checkScrollability);
+
+    // Check on scroll
+    container.addEventListener("scroll", checkScrollability, { passive: true });
+
+    // Check on resize (handles layout changes)
+    const resizeObserver = new ResizeObserver(() => {
+      requestAnimationFrame(checkScrollability);
+    });
+    resizeObserver.observe(container);
+
+    return () => {
+      container.removeEventListener("scroll", checkScrollability);
+      resizeObserver.disconnect();
+    };
+  }, [prompts, shouldShow]);
+
   if (
     !suggestions?.prompts ||
     suggestions.prompts.length === 0 ||
@@ -89,8 +131,6 @@ export function SuggestedPrompts() {
     return null;
   }
 
-  const prompts = suggestions.prompts;
-
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -98,30 +138,41 @@ export function SuggestedPrompts() {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 10 }}
         transition={{ duration: 0.3, delay, ease: "easeOut" }}
-        className="absolute bottom-full left-0 right-0 w-full z-30 flex gap-2 mb-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="relative mb-2"
       >
-        {prompts.map((prompt, index) => (
-          <motion.div
-            key={prompt}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{
-              duration: 0.2,
-              delay: delay + index * 0.05,
-              ease: "easeOut",
-            }}
-          >
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handlePromptClick(prompt)}
-              className="px-2 py-1 h-auto rounded-full text-xs font-normal border text-[#666] flex-shrink-0 whitespace-nowrap bg-background"
+        {isScrollable && canScrollLeft && (
+          <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-background to-transparent pointer-events-none z-20" />
+        )}
+        {isScrollable && canScrollRight && (
+          <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-background to-transparent pointer-events-none z-20" />
+        )}
+        <div
+          ref={scrollableRef}
+          className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {prompts.map((prompt, index) => (
+            <motion.div
+              key={prompt}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{
+                duration: 0.2,
+                delay: delay + index * 0.05,
+                ease: "easeOut",
+              }}
             >
-              {prompt}
-            </Button>
-          </motion.div>
-        ))}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handlePromptClick(prompt)}
+                className="px-2 py-1 h-auto rounded-full text-xs font-normal border text-[#666] flex-shrink-0 whitespace-nowrap bg-background"
+              >
+                {prompt}
+              </Button>
+            </motion.div>
+          ))}
+        </div>
       </motion.div>
     </AnimatePresence>
   );

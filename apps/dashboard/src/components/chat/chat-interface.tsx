@@ -7,11 +7,7 @@ import { useChat, useChatActions, useDataPart } from "@ai-sdk-tools/store";
 import type { UIChatMessage } from "@midday/api/ai/types";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
-import {
-  Conversation,
-  ConversationContent,
-  ConversationScrollButton,
-} from "@midday/ui/conversation";
+import { Conversation, ConversationContent } from "@midday/ui/conversation";
 import type { Geo } from "@vercel/functions";
 import { DefaultChatTransport, generateId } from "ai";
 import { parseAsString, useQueryState } from "nuqs";
@@ -23,6 +19,7 @@ import {
   ChatMessages,
   ChatStatusIndicators,
 } from "./";
+import { SuggestedPrompts } from "./suggested-prompts";
 
 type Props = {
   geo?: Geo;
@@ -142,7 +139,7 @@ export function ChatInterface({ geo }: Props) {
       </div>
 
       {/* Main chat area - container that slides left when canvas opens */}
-      <Conversation
+      <div
         className={cn(
           "relative flex-1",
           hasMessages && "transition-all duration-300 ease-in-out",
@@ -165,25 +162,39 @@ export function ChatInterface({ geo }: Props) {
                   <ChatHeader />
                 </div>
               </div>
-              <ConversationContent className="pb-[150px] pt-14 relative">
-                <div className="max-w-2xl mx-auto w-full">
-                  <ChatMessages
-                    messages={messages}
-                    isStreaming={
-                      status === "streaming" || status === "submitted"
-                    }
-                  />
-                  <ChatStatusIndicators
-                    agentStatus={agentStatus}
-                    currentToolCall={currentToolCall}
-                    status={status}
-                    artifactStage={artifactStage}
-                    artifactType={artifactType}
-                    currentSection={currentSection}
-                    bankAccountRequired={bankAccountRequired}
-                  />
+              <Conversation>
+                <ConversationContent className="pb-[150px] pt-14">
+                  <div className="max-w-2xl mx-auto w-full">
+                    <ChatMessages
+                      messages={messages}
+                      isStreaming={
+                        status === "streaming" || status === "submitted"
+                      }
+                    />
+                    <ChatStatusIndicators
+                      agentStatus={agentStatus}
+                      currentToolCall={currentToolCall}
+                      status={status}
+                      artifactStage={artifactStage}
+                      artifactType={artifactType}
+                      currentSection={currentSection}
+                      bankAccountRequired={bankAccountRequired}
+                    />
+                  </div>
+                </ConversationContent>
+
+                <div
+                  className={cn(
+                    "fixed bottom-32 z-10 transition-all duration-300 ease-in-out",
+                    "left-0 md:left-[70px] px-4 md:px-6",
+                    showCanvas ? "right-0 md:right-[603px]" : "right-0",
+                  )}
+                >
+                  <div className="mx-auto w-full max-w-full md:max-w-[770px]">
+                    <SuggestedPrompts />
+                  </div>
                 </div>
-              </ConversationContent>
+              </Conversation>
             </div>
           </>
         )}
@@ -198,7 +209,7 @@ export function ChatInterface({ geo }: Props) {
         >
           <ChatInput />
         </div>
-      </Conversation>
+      </div>
     </div>
   );
 }

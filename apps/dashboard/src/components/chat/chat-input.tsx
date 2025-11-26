@@ -2,7 +2,6 @@
 
 import { CommandMenu } from "@/components/chat/command-menu";
 import { RecordButton } from "@/components/chat/record-button";
-import { SuggestedPrompts } from "@/components/chat/suggested-prompts";
 import { SuggestedActionsButton } from "@/components/suggested-actions-button";
 import { WebSearchButton } from "@/components/web-search-button";
 import { useChatInterface } from "@/hooks/use-chat-interface";
@@ -113,113 +112,110 @@ export function ChatInput() {
   };
 
   return (
-    <>
-      <div
-        className={cn(
-          "fixed bottom-6 z-20 transition-all duration-300 ease-in-out",
-          "left-0 md:left-[70px] px-4 md:px-6",
-          isCanvasVisible ? "right-0 md:right-[603px]" : "right-0",
-          isHome && "chat-input-static",
-        )}
-      >
-        <div className="mx-auto w-full pt-2 max-w-full md:max-w-[770px] relative">
-          <SuggestedPrompts />
-          <CommandMenu />
+    <div
+      className={cn(
+        "fixed bottom-6 z-20 transition-all duration-300 ease-in-out",
+        "left-0 md:left-[70px] px-4 md:px-6",
+        isCanvasVisible ? "right-0 md:right-[603px]" : "right-0",
+        isHome && "chat-input-static",
+      )}
+    >
+      <div className="mx-auto w-full pt-2 max-w-full md:max-w-[770px] relative">
+        <CommandMenu />
 
-          <PromptInput onSubmit={handleSubmit} globalDrop multiple>
-            <PromptInputBody>
-              <PromptInputAttachments>
-                {(attachment) => <PromptInputAttachment data={attachment} />}
-              </PromptInputAttachments>
-              <PromptInputTextarea
-                ref={textareaRef}
-                autoFocus
-                onChange={handleInputChange}
-                onKeyDown={(e) => {
-                  // Handle Enter key for commands
-                  if (e.key === "Enter" && showCommands) {
-                    e.preventDefault();
-                    const selectedCommand =
-                      filteredCommands[selectedCommandIndex];
-                    if (selectedCommand) {
-                      // Execute command through the store
-                      if (!chatId) return;
+        <PromptInput onSubmit={handleSubmit} globalDrop multiple>
+          <PromptInputBody>
+            <PromptInputAttachments>
+              {(attachment) => <PromptInputAttachment data={attachment} />}
+            </PromptInputAttachments>
+            <PromptInputTextarea
+              ref={textareaRef}
+              autoFocus
+              onChange={handleInputChange}
+              onKeyDown={(e) => {
+                // Handle Enter key for commands
+                if (e.key === "Enter" && showCommands) {
+                  e.preventDefault();
+                  const selectedCommand =
+                    filteredCommands[selectedCommandIndex];
+                  if (selectedCommand) {
+                    // Execute command through the store
+                    if (!chatId) return;
 
-                      // Clear old suggestions before sending new message
-                      clearSuggestions();
+                    // Clear old suggestions before sending new message
+                    clearSuggestions();
 
-                      setChatId(chatId);
+                    setChatId(chatId);
 
-                      sendMessage({
-                        role: "user",
-                        parts: [{ type: "text", text: selectedCommand.title }],
-                        metadata: {
-                          toolCall: {
-                            toolName: selectedCommand.toolName,
-                            toolParams: selectedCommand.toolParams,
-                          },
+                    sendMessage({
+                      role: "user",
+                      parts: [{ type: "text", text: selectedCommand.title }],
+                      metadata: {
+                        toolCall: {
+                          toolName: selectedCommand.toolName,
+                          toolParams: selectedCommand.toolParams,
                         },
-                      });
+                      },
+                    });
 
-                      setInput("");
-                      resetCommandState();
-                    }
+                    setInput("");
+                    resetCommandState();
+                  }
+                  return;
+                }
+
+                // Handle Enter key for normal messages - trigger form submission
+                if (e.key === "Enter" && !showCommands && !e.shiftKey) {
+                  // Don't submit if IME composition is in progress
+                  if (e.nativeEvent.isComposing) {
                     return;
                   }
 
-                  // Handle Enter key for normal messages - trigger form submission
-                  if (e.key === "Enter" && !showCommands && !e.shiftKey) {
-                    // Don't submit if IME composition is in progress
-                    if (e.nativeEvent.isComposing) {
-                      return;
-                    }
-
-                    e.preventDefault();
-                    const form = e.currentTarget.form;
-                    if (form) {
-                      form.requestSubmit();
-                    }
-                    return;
+                  e.preventDefault();
+                  const form = e.currentTarget.form;
+                  if (form) {
+                    form.requestSubmit();
                   }
+                  return;
+                }
 
-                  // Handle other keys normally
-                  handleKeyDown(e);
-                }}
-                value={input}
-                placeholder={isWebSearch ? "Search the web" : "Ask anything"}
+                // Handle other keys normally
+                handleKeyDown(e);
+              }}
+              value={input}
+              placeholder={isWebSearch ? "Search the web" : "Ask anything"}
+            />
+          </PromptInputBody>
+          <PromptInputToolbar>
+            <PromptInputTools>
+              <PromptInputActionAddAttachments />
+              <SuggestedActionsButton />
+              <WebSearchButton />
+            </PromptInputTools>
+
+            <PromptInputTools>
+              <RecordButton size={16} />
+              <PromptInputSubmit
+                disabled={
+                  // Enable button when streaming so user can stop
+                  status === "streaming" || status === "submitted"
+                    ? false
+                    : (!input && !status) ||
+                      isUploading ||
+                      isRecording ||
+                      isProcessing
+                }
+                status={status}
+                onClick={
+                  status === "streaming" || status === "submitted"
+                    ? handleStopClick
+                    : undefined
+                }
               />
-            </PromptInputBody>
-            <PromptInputToolbar>
-              <PromptInputTools>
-                <PromptInputActionAddAttachments />
-                <SuggestedActionsButton />
-                <WebSearchButton />
-              </PromptInputTools>
-
-              <PromptInputTools>
-                <RecordButton size={16} />
-                <PromptInputSubmit
-                  disabled={
-                    // Enable button when streaming so user can stop
-                    status === "streaming" || status === "submitted"
-                      ? false
-                      : (!input && !status) ||
-                        isUploading ||
-                        isRecording ||
-                        isProcessing
-                  }
-                  status={status}
-                  onClick={
-                    status === "streaming" || status === "submitted"
-                      ? handleStopClick
-                      : undefined
-                  }
-                />
-              </PromptInputTools>
-            </PromptInputToolbar>
-          </PromptInput>
-        </div>
+            </PromptInputTools>
+          </PromptInputToolbar>
+        </PromptInput>
       </div>
-    </>
+    </div>
   );
 }
