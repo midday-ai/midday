@@ -56,6 +56,9 @@ export default function LoginTestimonials() {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
   useEffect(() => {
+    // Set random starting index only on client to avoid hydration mismatch
+    setCurrentTestimonial(Math.floor(Math.random() * testimonials.length));
+
     const interval = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
     }, 6000);
