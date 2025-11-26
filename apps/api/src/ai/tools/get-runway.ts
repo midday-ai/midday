@@ -110,6 +110,45 @@ export const getRunwayTool = tool({
       // Get cash balance (use converted balance if available, otherwise total balance)
       const cashBalance = balanceResult.totalBalance;
 
+      // Generate monthly projection data for chart
+      const monthlyData: Array<{
+        month: string;
+        runway: number;
+        cashBalance: number;
+        burnRate: number;
+      }> = [];
+
+      // Only generate projections if we have valid data
+      if (
+        averageBurnRate > 0 &&
+        Number.isFinite(cashBalance) &&
+        Number.isFinite(averageBurnRate)
+      ) {
+        // Generate projections for up to 8 months or until runway reaches 0
+        for (let i = 0; i <= 8; i++) {
+          const monthsFromNow = i;
+          const remainingCash = Math.max(
+            0,
+            cashBalance - averageBurnRate * monthsFromNow,
+          );
+          const projectedRunwayMonths =
+            averageBurnRate > 0 ? remainingCash / averageBurnRate : 0;
+
+          // Skip if runwayMonths is invalid
+          if (!Number.isFinite(projectedRunwayMonths)) continue;
+
+          monthlyData.push({
+            month: i === 0 ? "Now" : `+${i}mo`,
+            runway: projectedRunwayMonths,
+            cashBalance: remainingCash,
+            burnRate: averageBurnRate,
+          });
+
+          // Stop adding projections once runway reaches 0
+          if (projectedRunwayMonths <= 0) break;
+        }
+      }
+
       // Determine status based on runway months
       let status: "healthy" | "concerning" | "critical";
       let statusMessage: string;
@@ -125,6 +164,20 @@ export const getRunwayTool = tool({
         statusMessage = "critical";
       }
 
+      // Update artifact with chart data first if showCanvas is true
+      if (showCanvas && analysis && monthlyData.length > 0) {
+        await analysis.update({
+          stage: "chart_ready",
+          currency: targetCurrency,
+          from: finalFrom,
+          to: finalTo,
+          description,
+          chart: {
+            monthlyData,
+          },
+        });
+      }
+
       // Update artifact with metrics if showCanvas is true
       if (showCanvas && analysis) {
         await analysis.update({
@@ -134,7 +187,7 @@ export const getRunwayTool = tool({
           to: finalTo,
           description,
           chart: {
-            monthlyData: [],
+            monthlyData,
           },
           metrics: {
             currentRunway: runway,
@@ -227,7 +280,7 @@ export const getRunwayTool = tool({
           to: finalTo,
           description,
           chart: {
-            monthlyData: [],
+            monthlyData,
           },
           metrics: {
             currentRunway: runway,

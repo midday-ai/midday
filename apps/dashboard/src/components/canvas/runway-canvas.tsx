@@ -2,6 +2,7 @@
 
 import {
   BaseCanvas,
+  CanvasChart,
   CanvasGrid,
   CanvasHeader,
   CanvasSection,
@@ -9,9 +10,11 @@ import {
 import { CanvasContent } from "@/components/canvas/base/canvas-content";
 import {
   formatCurrencyAmount,
+  shouldShowChart,
   shouldShowMetricsSkeleton,
   shouldShowSummarySkeleton,
 } from "@/components/canvas/utils";
+import { RunwayChart } from "@/components/charts/runway-chart";
 import { useUserQuery } from "@/hooks/use-user";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
 import { runwayArtifact } from "@api/ai/artifacts/runway";
@@ -29,6 +32,17 @@ export function RunwayCanvas() {
 
   const metrics = data?.metrics;
   const statusValue = metrics?.status;
+
+  // Transform chart data for RunwayChart component
+  const monthlyData = data?.chart?.monthlyData || [];
+  const runwayChartData = monthlyData.map((item) => ({
+    month: item.month,
+    cashRemaining: item.cashBalance,
+    burnRate: item.burnRate,
+    runwayMonths: item.runway,
+  }));
+
+  const showChart = shouldShowChart(stage);
 
   // Build metrics array with status indicator
   const runwayMetrics = metrics
@@ -99,6 +113,32 @@ export function RunwayCanvas() {
 
       <CanvasContent>
         <div className="space-y-8">
+          {/* Show chart as soon as we have runway data */}
+          {showChart && runwayChartData.length > 0 && (
+            <CanvasChart
+              title="Cash Runway Projection"
+              isLoading={stage === "loading" || stage === "chart_ready"}
+              height="20rem"
+              legend={{
+                items: [
+                  {
+                    label: "Runway (months)",
+                    type: "solid",
+                  },
+                ],
+              }}
+            >
+              <RunwayChart
+                data={runwayChartData}
+                height={320}
+                showLegend={false}
+                displayMode="months"
+                currency={currency}
+                locale={locale}
+              />
+            </CanvasChart>
+          )}
+
           {/* Always show metrics section */}
           <CanvasGrid
             items={runwayMetrics}

@@ -58,9 +58,11 @@ export function BurnRateCard({
   return (
     <div className="border bg-background border-border p-6 flex flex-col h-full">
       <div className="mb-4 min-h-[140px]">
-        <h3 className="text-sm font-normal mb-1 text-muted-foreground">
-          Monthly Burn Rate
-        </h3>
+        <div className="h-7">
+          <h3 className="text-sm font-normal text-muted-foreground">
+            Monthly Burn Rate
+          </h3>
+        </div>
         <p className="text-3xl font-normal mb-3">
           <AnimatedNumber
             value={currentBurnRate}

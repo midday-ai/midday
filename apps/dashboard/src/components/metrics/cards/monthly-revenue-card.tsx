@@ -70,10 +70,8 @@ export function MonthlyRevenueCard({
   return (
     <div className="border bg-background border-border p-6 flex flex-col h-full">
       <div className="mb-4 min-h-[140px]">
-        <div className="flex items-start justify-between mb-1">
-          <h3 className="text-sm font-normal text-muted-foreground font-serif">
-            Revenue
-          </h3>
+        <div className="flex items-start justify-between h-7">
+          <h3 className="text-sm font-normal text-muted-foreground">Revenue</h3>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

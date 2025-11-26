@@ -157,12 +157,15 @@ export function RunwayCard({
     }
   }, [from, to]);
 
+  // Check if we have no data due to missing bank accounts or cash balance
+  const hasNoData = runwayChartData.length === 0;
+
   return (
     <div className="border bg-background border-border p-6 flex flex-col h-full">
       <div className="mb-4 min-h-[140px]">
-        <h3 className="text-sm font-normal mb-1 text-muted-foreground">
-          Runway
-        </h3>
+        <div className="h-7">
+          <h3 className="text-sm font-normal text-muted-foreground">Runway</h3>
+        </div>
         <p className="text-3xl font-normal">
           <NumberFlow
             value={displayRunway}
@@ -178,13 +181,22 @@ export function RunwayCard({
         <p className="text-xs mt-1 text-muted-foreground">{dateRangeDisplay}</p>
       </div>
       <div className="h-80">
-        <RunwayChart
-          data={runwayChartData}
-          height={320}
-          currency={currency}
-          locale={locale}
-          displayMode="months"
-        />
+        {hasNoData ? (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="text-xs text-muted-foreground text-center px-4">
+              Unable to calculate runway. Connect bank accounts and ensure cash
+              balance data is available.
+            </div>
+          </div>
+        ) : (
+          <RunwayChart
+            data={runwayChartData}
+            height={320}
+            currency={currency}
+            locale={locale}
+            displayMode="months"
+          />
+        )}
       </div>
     </div>
   );
