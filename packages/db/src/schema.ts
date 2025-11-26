@@ -1941,11 +1941,8 @@ export const inbox = pgTable(
       foreignColumns: [inboxAccounts.id],
       name: "inbox_inbox_account_id_fkey",
     }).onDelete("set null"),
-    foreignKey({
-      columns: [table.groupedInboxId],
-      foreignColumns: [inbox.id],
-      name: "inbox_grouped_inbox_id_fkey",
-    }).onDelete("set null"),
+    // Note: groupedInboxId self-referential foreign key constraint is defined in migration
+    // to avoid TypeScript circular reference error (inbox.id referenced before inbox is fully defined)
     unique("inbox_reference_id_key").on(table.referenceId),
     pgPolicy("Inbox can be deleted by a member of the team", {
       as: "permissive",
