@@ -243,11 +243,17 @@ export const PromptInput = ({
       if (!accept || accept.trim() === "") {
         return true;
       }
-      // Simple check: if accept includes "image/*", filter to images; otherwise allow.
-      if (accept.includes("image/*")) {
-        return f.type.startsWith("image/");
-      }
-      return true;
+      // Split accept string into individual types
+      const acceptTypes = accept.split(",").map((t) => t.trim());
+      return acceptTypes.some((type) => {
+        if (type.endsWith("/*")) {
+          // Handle wildcard types like "image/*" or "application/*"
+          const baseType = type.slice(0, -2);
+          return f.type.startsWith(`${baseType}/`);
+        }
+        // Handle specific MIME types like "application/pdf"
+        return f.type === type;
+      });
     },
     [accept],
   );

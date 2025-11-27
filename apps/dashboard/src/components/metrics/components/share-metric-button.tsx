@@ -41,7 +41,7 @@ export function ShareMetricButton({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" portal={false}>
-          <DropdownMenuItem onClick={() => setIsOpen(true)}>
+          <DropdownMenuItem onClick={() => setIsOpen(true)} className="text-xs">
             Share
           </DropdownMenuItem>
         </DropdownMenuContent>

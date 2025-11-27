@@ -17,17 +17,25 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
   return (
     <div tw="flex justify-between items-center mt-14 mb-2">
       <div tw="flex items-center">
-        <span tw="text-[22px] text-[#878787] mr-2">
+        <span
+          tw="text-[22px] text-[#878787] mr-2"
+          style={{ fontFamily: "hedvig-sans" }}
+        >
           {template.invoiceNoLabel}:
         </span>
-        <span tw="text-[22px] text-white font-mono">{invoiceNumber}</span>
+        <span tw="text-[22px] text-white" style={{ fontFamily: "hedvig-sans" }}>
+          {invoiceNumber}
+        </span>
       </div>
 
       <div tw="flex items-center">
-        <span tw="text-[22px] text-[#878787] mr-2">
+        <span
+          tw="text-[22px] text-[#878787] mr-2"
+          style={{ fontFamily: "hedvig-sans" }}
+        >
           {template.issueDateLabel}:
         </span>
-        <span tw="text-[22px] text-white font-mono">
+        <span tw="text-[22px] text-white" style={{ fontFamily: "hedvig-sans" }}>
           {issueDate
             ? format(
                 new TZDate(issueDate, template.timezone),
@@ -38,10 +46,13 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
       </div>
 
       <div tw="flex items-center">
-        <span tw="text-[22px] text-[#878787] mr-2">
+        <span
+          tw="text-[22px] text-[#878787] mr-2"
+          style={{ fontFamily: "hedvig-sans" }}
+        >
           {template.dueDateLabel}:
         </span>
-        <span tw="text-[22px] text-white font-mono">
+        <span tw="text-[22px] text-white" style={{ fontFamily: "hedvig-sans" }}>
           {dueDate
             ? format(
                 new TZDate(dueDate, template.timezone),

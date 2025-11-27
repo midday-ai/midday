@@ -11,7 +11,7 @@ export function EditorContent({ content }: Props) {
   }
 
   return (
-    <div tw="flex" style={{ lineHeight: 1.5 }}>
+    <div tw="flex" style={{ lineHeight: 1.5, fontFamily: "hedvig-sans" }}>
       {formatEditorContent(content)}
     </div>
   );

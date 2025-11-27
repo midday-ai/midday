@@ -81,9 +81,17 @@ export function ShareMetricModal({
   };
 
   const openInLinkedIn = () => {
-    const url = encodeURIComponent(shareUrl);
+    if (!shareUrl) return;
+    // Ensure URL is absolute and properly formatted
+    const absoluteUrl = shareUrl.startsWith("http")
+      ? shareUrl
+      : `https://${shareUrl}`;
+
+    // LinkedIn share URL - encode the URL parameter
+    // LinkedIn's share-offsite endpoint requires URL encoding
+    const encodedUrl = encodeURIComponent(absoluteUrl);
     window.open(
-      `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
+      `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
       "_blank",
     );
   };

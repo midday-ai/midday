@@ -16,6 +16,7 @@
     "./client": "./src/client.ts",
     "./job-client": "./src/job-client.ts",
     "./queries": "./src/queries/index.ts",
+    "./errors": "./src/errors.ts",
     "./schema": "./src/schema.ts",
     "./sql": "./src/sql.ts",
     "./utils/api-keys": "./src/utils/api-keys.ts",

@@ -17,6 +17,11 @@ import {
   publicProcedure,
 } from "@api/trpc/init";
 import {
+  InvalidReportTypeError,
+  ReportExpiredError,
+  ReportNotFoundError,
+} from "@midday/db/errors";
+import {
   createReport,
   getBurnRate,
   getChartDataByLinkId,
@@ -158,23 +163,24 @@ export const reportsRouter = createTRPCRouter({
     .query(async ({ ctx: { db }, input }) => {
       try {
         return await getChartDataByLinkId(db, input.linkId);
-      } catch (error) {
-        if (error instanceof Error) {
-          if (
-            error.message === "Report not found" ||
-            error.message === "Report has expired"
-          ) {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: error.message,
-            });
-          }
-          if (error.message === "Invalid report type") {
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message: error.message,
-            });
-          }
+      } catch (error: unknown) {
+        if (error instanceof ReportNotFoundError) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: error.message,
+          });
+        }
+        if (error instanceof ReportExpiredError) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: error.message,
+          });
+        }
+        if (error instanceof InvalidReportTypeError) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: error.message,
+          });
         }
         throw error;
       }

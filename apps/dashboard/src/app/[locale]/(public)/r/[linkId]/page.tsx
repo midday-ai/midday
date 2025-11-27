@@ -8,6 +8,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PublicMetricView } from "./public-metric-view";
 
+// Cache the page for 1 hour (3600 seconds)
+export const revalidate = 3600;
+
 type Props = {
   params: Promise<{ linkId: string }>;
 };
@@ -42,19 +45,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: `${teamName} - ${chartName}`,
       description: `Shared ${chartName} report from ${teamName}`,
-      images: [
-        {
-          url: `/r/${linkId}/opengraph-image`,
-          width: 1200,
-          height: 630,
-        },
-      ],
     },
     twitter: {
       card: "summary_large_image",
       title: `${teamName} - ${chartName}`,
       description: `Shared ${chartName} report from ${teamName}`,
-      images: [`/r/${linkId}/opengraph-image`],
     },
   };
 }

@@ -83,7 +83,8 @@ export default async function Page(props: Props) {
   const params = await props.params;
   const supabase = await createClient({ admin: true });
   const searchParams = await props.searchParams;
-  const viewer = decodeURIComponent(searchParams?.viewer as string);
+  const viewerParam = searchParams?.viewer as string | undefined;
+  const viewer = viewerParam ? decodeURIComponent(viewerParam) : undefined;
 
   const {
     data: { session },
@@ -101,7 +102,7 @@ export default async function Page(props: Props) {
     notFound();
   }
 
-  if (viewer) {
+  if (viewer && viewer.trim().length > 0) {
     try {
       const decryptedEmail = decrypt(viewer);
 
@@ -110,7 +111,8 @@ export default async function Page(props: Props) {
         waitUntil(updateInvoiceViewedAt(invoice.id!));
       }
     } catch (error) {
-      console.log(error);
+      // Silently fail if decryption fails - viewer might be invalid or malformed
+      // This is expected when accessing the invoice without a valid viewer parameter
     }
   }
 

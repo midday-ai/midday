@@ -7,6 +7,9 @@ import { ImageResponse } from "next/og";
 
 export const contentType = "image/png";
 
+// Cache the OG image for 1 hour (3600 seconds)
+export const revalidate = 3600;
+
 type Props = {
   params: Promise<{ linkId: string }>;
 };
@@ -29,9 +32,12 @@ export default async function Image({ params }: Props) {
     notFound();
   }
 
-  // Load Hedvig Letters Sans font from Google Fonts
+  const hedvigSerifFont = fetch(
+    "https://cdn.midday.ai/fonts/HedvigSerif/HedvigLettersSerif-Regular.ttf?c=1",
+  ).then((res) => res.arrayBuffer());
+
   const hedvigSansFont = fetch(
-    "https://fonts.gstatic.com/s/hedvigletterssans/v2/CHy_V_PfGVjobSBkihHWDT98RVp37w8jcOZH3B4jm11gRA.woff2",
+    "https://cdn.midday.ai/fonts/HedvigSans/HedvigLettersSans-Regular.ttf",
   ).then((res) => res.arrayBuffer());
 
   const chartName = getChartDisplayName(report.type as any);
@@ -61,6 +67,12 @@ export default async function Image({ params }: Props) {
         {
           name: "hedvig-sans",
           data: await hedvigSansFont,
+          style: "normal",
+          weight: 400,
+        },
+        {
+          name: "hedvig-serif",
+          data: await hedvigSerifFont,
           style: "normal",
           weight: 400,
         },
@@ -98,35 +110,32 @@ function ReportOgTemplate({
             {teamName[0]?.toUpperCase() || "C"}
           </div>
         )}
-
-        {/* Shared Report Badge */}
-        <div tw="flex px-4 py-1 rounded-full bg-[#292928] text-[#F5F5F3] text-[22px]">
-          <span tw="font-sans">Shared Report</span>
-        </div>
       </div>
 
       {/* Content */}
       <div tw="flex flex-col flex-1 justify-center items-center">
-        {/* Company Name */}
-        <h1 tw="text-[56px] text-white font-sans mb-8 text-center">
-          {teamName}
+        {/* Report Type */}
+        <h1
+          tw="text-[80px] text-white mb-6 text-center"
+          style={{ fontFamily: "hedvig-serif" }}
+        >
+          {chartName}
         </h1>
 
-        {/* Report Type */}
-        <h2 tw="text-[42px] text-white font-sans mb-6 text-center">
-          {chartName}
+        {/* Company Name */}
+        <h2
+          tw="text-[36px] text-white mb-8 text-center"
+          style={{ fontFamily: "hedvig-sans" }}
+        >
+          {teamName}
         </h2>
 
         {/* Date Range */}
-        <p tw="text-[28px] text-[#858585] font-sans text-center">
+        <p
+          tw="text-[28px] text-[#858585] text-center"
+          style={{ fontFamily: "hedvig-sans" }}
+        >
           {dateRangeDisplay}
-        </p>
-      </div>
-
-      {/* Footer */}
-      <div tw="flex justify-center mt-auto">
-        <p tw="text-[20px] text-[#858585] font-sans">
-          Powered by <span tw="text-white">Midday</span>
         </p>
       </div>
     </div>

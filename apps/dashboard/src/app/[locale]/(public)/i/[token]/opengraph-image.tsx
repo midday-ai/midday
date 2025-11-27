@@ -6,15 +6,16 @@ import { ImageResponse } from "next/og";
 export const contentType = "image/png";
 
 type Props = {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 };
 
 export default async function Image({ params }: Props) {
+  const { token } = await params;
   const queryClient = getQueryClient();
 
   const invoice = await queryClient.fetchQuery(
     trpc.invoice.getInvoiceByToken.queryOptions({
-      token: params.token,
+      token,
     }),
   );
 
@@ -22,9 +23,8 @@ export default async function Image({ params }: Props) {
     return new Response("Not found", { status: 404 });
   }
 
-  // Load Hedvig Letters Sans font from Google Fonts
   const hedvigSansFont = fetch(
-    "https://fonts.gstatic.com/s/hedvigletterssans/v2/CHy_V_PfGVjobSBkihHWDT98RVp37w8jcOZH3B4jm11gRA.woff2",
+    "https://cdn.midday.ai/fonts/HedvigSans/HedvigLettersSans-Regular.ttf",
   ).then((res) => res.arrayBuffer());
 
   const logoUrl = getWebsiteLogo(invoice.customer?.website);

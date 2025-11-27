@@ -85,7 +85,7 @@ export function MonthlyRevenueCard({
                   <Icons.ChevronDown size={12} className="ml-1" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48" portal={false}>
+              <DropdownMenuContent align="end" className="w-52" portal={false}>
                 <DropdownMenuRadioGroup
                   value={revenueType}
                   onValueChange={(value) =>

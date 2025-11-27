@@ -29,6 +29,11 @@ import {
 } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import {
+  InvalidReportTypeError,
+  ReportExpiredError,
+  ReportNotFoundError,
+} from "../errors";
+import {
   bankAccounts,
   inbox,
   invoices,
@@ -4038,12 +4043,12 @@ export async function getChartDataByLinkId(db: Database, linkId: string) {
   const report = await getReportByLinkId(db, linkId);
 
   if (!report) {
-    throw new Error("Report not found");
+    throw new ReportNotFoundError();
   }
 
   // Check if report has expired
   if (report.expireAt && new Date(report.expireAt) < new Date()) {
-    throw new Error("Report has expired");
+    throw new ReportExpiredError();
   }
 
   const teamId = report.teamId!;
@@ -4128,6 +4133,6 @@ export async function getChartDataByLinkId(db: Database, linkId: string) {
         data: await getSpending(db, { teamId, from, to, currency }),
       };
     default:
-      throw new Error("Invalid report type");
+      throw new InvalidReportTypeError();
   }
 }
