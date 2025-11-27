@@ -470,14 +470,16 @@ export function InboxDetails() {
             <InboxActions data={data} key={data.id} />
           </div>
 
-          <div className="flex flex-col gap-4 overflow-y-auto">
+          <div className="flex flex-col gap-4 overflow-y-auto flex-1 min-h-0 scrollbar-hide">
             {data?.filePath && (
-              <FileViewer
-                mimeType={data.contentType}
-                url={`/api/proxy?filePath=vault/${data?.filePath.join("/")}`}
-                // If the order changes, the file viewer will remount otherwise the PDF worker will crash
-                key={`${params.order}-${JSON.stringify(filterParams)}-primary`}
-              />
+              <div className="min-h-0 flex-shrink-0">
+                <FileViewer
+                  mimeType={data.contentType}
+                  url={`/api/proxy?filePath=vault/${data?.filePath.join("/")}`}
+                  // If the order changes, the file viewer will remount otherwise the PDF worker will crash
+                  key={`${params.order}-${JSON.stringify(filterParams)}-primary`}
+                />
+              </div>
             )}
 
             {data?.relatedItems &&
@@ -485,7 +487,7 @@ export function InboxDetails() {
               data.relatedItems.map(
                 (relatedItem) =>
                   relatedItem.filePath && (
-                    <div key={relatedItem.id} className="mt-4">
+                    <div key={relatedItem.id} className="min-h-0 flex-shrink-0">
                       <FileViewer
                         mimeType={relatedItem.contentType}
                         url={`/api/proxy?filePath=vault/${relatedItem.filePath.join("/")}`}

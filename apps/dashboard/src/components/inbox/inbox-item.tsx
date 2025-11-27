@@ -6,6 +6,12 @@ import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Badge } from "@midday/ui/badge";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { formatDate } from "@midday/utils/format";
 import { forwardRef } from "react";
 
@@ -50,12 +56,23 @@ export const InboxItem = forwardRef<HTMLButtonElement, Props>(
                 {!isProcessing &&
                   item.relatedCount !== undefined &&
                   item.relatedCount > 0 && (
-                    <Badge
-                      variant="outline"
-                      className="h-4 px-1.5 text-[10px] font-normal"
-                    >
-                      +{item.relatedCount}
-                    </Badge>
+                    <TooltipProvider delayDuration={100}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge
+                            variant="outline"
+                            className="h-4 px-1.5 text-[10px] font-normal"
+                          >
+                            +{item.relatedCount}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent className="text-xs px-3 py-1.5">
+                          {item.relatedCount === 1
+                            ? "1 related item grouped with this one"
+                            : `${item.relatedCount} related items grouped with this one`}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
               </div>
             </div>

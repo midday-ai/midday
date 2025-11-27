@@ -1690,7 +1690,13 @@ export async function findRelatedInboxItems(
   }
 
   // Fallback matching: same website + same amount + same date + different type
-  if (currentItem.website && currentItem.amount && currentItem.date) {
+  // Only match when current item has a known type (invoice or expense)
+  if (
+    currentItem.website &&
+    currentItem.amount &&
+    currentItem.date &&
+    (currentItem.type === "invoice" || currentItem.type === "expense")
+  ) {
     const relatedByFallback = await db
       .select({
         id: inbox.id,

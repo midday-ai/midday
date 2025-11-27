@@ -1,6 +1,6 @@
 import type { Database } from "@db/client";
 import { inbox, transactionAttachments, transactions } from "@db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { createActivity } from "./activities";
 
 export type Attachment = {
@@ -122,7 +122,18 @@ export async function deleteAttachment(
     throw new Error("Attachment not found");
   }
 
-  // Find inbox by transaction_id and set transaction_id to null and status to pending if it exists
+  // Update inbox items connected to this attachment
+  // First, update inbox items that have this specific attachmentId
+  await db
+    .update(inbox)
+    .set({
+      attachmentId: null,
+      transactionId: null,
+      status: "pending",
+    })
+    .where(eq(inbox.attachmentId, result.id));
+
+  // Also update inbox items by transaction_id (in case there are multiple inbox items for the same transaction)
   if (result.transactionId) {
     await db
       .update(inbox)
@@ -130,7 +141,13 @@ export async function deleteAttachment(
         transactionId: null,
         status: "pending",
       })
-      .where(eq(inbox.transactionId, result.transactionId));
+      .where(
+        and(
+          eq(inbox.transactionId, result.transactionId),
+          // Only update if attachmentId is null or doesn't match (to avoid double updates)
+          sql`(${inbox.attachmentId} IS NULL OR ${inbox.attachmentId} != ${result.id})`,
+        ),
+      );
   }
 
   // Delete tax_rate and tax_type from the transaction
