@@ -68,8 +68,8 @@ export const InboxItem = forwardRef<HTMLButtonElement, Props>(
                         </TooltipTrigger>
                         <TooltipContent className="text-xs px-3 py-1.5">
                           {item.relatedCount === 1
-                            ? "1 related item grouped with this one"
-                            : `${item.relatedCount} related items grouped with this one`}
+                            ? "Grouped with 1 other document"
+                            : `Grouped with ${item.relatedCount} other documents`}
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
