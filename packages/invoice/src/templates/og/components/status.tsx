@@ -26,8 +26,9 @@ export function Status({
   return (
     <div
       tw={`flex px-4 py-1 rounded-full max-w-full text-[22px] ${getStatusStyles()}`}
+      style={{ fontFamily: "hedvig-sans" }}
     >
-      <span tw="font-mono">
+      <span style={{ fontFamily: "hedvig-sans" }}>
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </span>
     </div>

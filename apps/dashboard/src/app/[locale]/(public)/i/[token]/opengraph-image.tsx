@@ -5,18 +5,17 @@ import { ImageResponse } from "next/og";
 
 export const contentType = "image/png";
 
-const CDN_URL = "https://cdn.midday.ai";
-
 type Props = {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 };
 
 export default async function Image({ params }: Props) {
+  const { token } = await params;
   const queryClient = getQueryClient();
 
   const invoice = await queryClient.fetchQuery(
     trpc.invoice.getInvoiceByToken.queryOptions({
-      token: params.token,
+      token,
     }),
   );
 
@@ -24,12 +23,8 @@ export default async function Image({ params }: Props) {
     return new Response("Not found", { status: 404 });
   }
 
-  const geistMonoRegular = fetch(
-    `${CDN_URL}/fonts/GeistMono/og/GeistMono-Regular.otf`,
-  ).then((res) => res.arrayBuffer());
-
-  const geistSansRegular = fetch(
-    `${CDN_URL}/fonts/Geist/og/Geist-Regular.otf`,
+  const hedvigSansFont = fetch(
+    "https://cdn.midday.ai/fonts/HedvigSans/HedvigLettersSans-Regular.ttf",
   ).then((res) => res.arrayBuffer());
 
   const logoUrl = getWebsiteLogo(invoice.customer?.website);
@@ -43,14 +38,8 @@ export default async function Image({ params }: Props) {
       height: 630,
       fonts: [
         {
-          name: "GeistMono",
-          data: await geistMonoRegular,
-          style: "normal",
-          weight: 400,
-        },
-        {
-          name: "GeistSans",
-          data: await geistSansRegular,
+          name: "hedvig-sans",
+          data: await hedvigSansFont,
           style: "normal",
           weight: 400,
         },

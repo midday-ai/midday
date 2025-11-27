@@ -123,7 +123,12 @@ export function ChatInput() {
       <div className="mx-auto w-full pt-2 max-w-full md:max-w-[770px] relative">
         <CommandMenu />
 
-        <PromptInput onSubmit={handleSubmit} globalDrop multiple>
+        <PromptInput
+          onSubmit={handleSubmit}
+          globalDrop
+          multiple
+          accept="application/pdf,image/*"
+        >
           <PromptInputBody>
             <PromptInputAttachments>
               {(attachment) => <PromptInputAttachment data={attachment} />}

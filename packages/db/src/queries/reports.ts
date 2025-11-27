@@ -27,10 +27,17 @@ import {
   or,
   sql,
 } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import {
+  InvalidReportTypeError,
+  ReportExpiredError,
+  ReportNotFoundError,
+} from "../errors";
 import {
   bankAccounts,
   inbox,
   invoices,
+  reports,
   teams,
   transactionCategories,
   transactions,
@@ -3955,4 +3962,177 @@ export async function getBalanceSheet(
     },
     currency,
   };
+}
+
+// Report Types for shareable metrics
+export type ReportType =
+  | "profit"
+  | "revenue"
+  | "burn_rate"
+  | "expense"
+  | "monthly_revenue"
+  | "revenue_forecast"
+  | "runway"
+  | "category_expenses";
+
+export type CreateReportParams = {
+  type: ReportType;
+  from: string;
+  to: string;
+  currency?: string;
+  teamId: string;
+  createdBy: string;
+  expireAt?: string;
+};
+
+export async function createReport(db: Database, params: CreateReportParams) {
+  const { type, from, to, currency, teamId, createdBy, expireAt } = params;
+  const linkId = nanoid(8);
+
+  const [result] = await db
+    .insert(reports)
+    .values({
+      linkId,
+      type,
+      from,
+      to,
+      currency,
+      teamId,
+      createdBy,
+      expireAt,
+    })
+    .returning({
+      id: reports.id,
+      linkId: reports.linkId,
+      type: reports.type,
+      from: reports.from,
+      to: reports.to,
+      currency: reports.currency,
+      createdAt: reports.createdAt,
+      expireAt: reports.expireAt,
+    });
+
+  return result;
+}
+
+export async function getReportByLinkId(db: Database, linkId: string) {
+  const [result] = await db
+    .select({
+      id: reports.id,
+      linkId: reports.linkId,
+      type: reports.type,
+      from: reports.from,
+      to: reports.to,
+      currency: reports.currency,
+      teamId: reports.teamId,
+      createdAt: reports.createdAt,
+      expireAt: reports.expireAt,
+      teamName: teams.name,
+      teamLogoUrl: teams.logoUrl,
+    })
+    .from(reports)
+    .leftJoin(teams, eq(reports.teamId, teams.id))
+    .where(eq(reports.linkId, linkId))
+    .limit(1);
+
+  return result;
+}
+
+export async function getChartDataByLinkId(db: Database, linkId: string) {
+  // First, validate the linkId and get the report
+  const report = await getReportByLinkId(db, linkId);
+
+  if (!report) {
+    throw new ReportNotFoundError();
+  }
+
+  // Check if report has expired
+  if (report.expireAt && new Date(report.expireAt) < new Date()) {
+    throw new ReportExpiredError();
+  }
+
+  const teamId = report.teamId!;
+  const from = report.from!;
+  const to = report.to!;
+  const currency = report.currency || "USD";
+  const type = report.type!;
+
+  // Fetch chart data based on report type
+  switch (type) {
+    case "burn_rate":
+      return {
+        type: "burn_rate" as const,
+        data: await getBurnRate(db, { teamId, from, to, currency }),
+      };
+    case "monthly_revenue":
+    case "revenue":
+      return {
+        type: "revenue" as const,
+        data: await getReports(db, {
+          teamId,
+          from,
+          to,
+          currency,
+          type: "revenue",
+          revenueType: "net",
+        }),
+      };
+    case "profit":
+      return {
+        type: "profit" as const,
+        data: await getReports(db, {
+          teamId,
+          from,
+          to,
+          currency,
+          type: "profit",
+          revenueType: "net",
+        }),
+      };
+    case "expense":
+      return {
+        type: "expense" as const,
+        data: await getExpenses(db, { teamId, from, to, currency }),
+      };
+    case "revenue_forecast":
+      return {
+        type: "revenue_forecast" as const,
+        data: await getRevenueForecast(db, {
+          teamId,
+          from,
+          to,
+          forecastMonths: 6,
+          currency,
+          revenueType: "net",
+        }),
+      };
+    case "runway": {
+      const runwayData = await getRunway(db, {
+        teamId,
+        from,
+        to,
+        currency,
+      });
+      const burnRateData = await getBurnRate(db, {
+        teamId,
+        from,
+        to,
+        currency,
+      });
+      return {
+        type: "runway" as const,
+        data: {
+          runway: runwayData,
+          burnRate: burnRateData,
+        },
+      };
+    }
+    case "category_expenses":
+      return {
+        type: "category_expenses" as const,
+        data: await getSpending(db, { teamId, from, to, currency }),
+      };
+    default:
+      throw new InvalidReportTypeError();
+  }
 }

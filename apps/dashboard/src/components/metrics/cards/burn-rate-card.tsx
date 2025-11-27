@@ -6,6 +6,7 @@ import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useMemo } from "react";
+import { ShareMetricButton } from "../components/share-metric-button";
 
 interface BurnRateCardProps {
   from: string;
@@ -56,12 +57,20 @@ export function BurnRateCard({
   }, [burnRateData]);
 
   return (
-    <div className="border bg-background border-border p-6 flex flex-col h-full">
+    <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
       <div className="mb-4 min-h-[140px]">
-        <div className="h-7">
+        <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">
             Monthly Burn Rate
           </h3>
+          <div className="opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity">
+            <ShareMetricButton
+              type="burn_rate"
+              from={from}
+              to={to}
+              currency={currency}
+            />
+          </div>
         </div>
         <p className="text-3xl font-normal mb-3">
           <AnimatedNumber

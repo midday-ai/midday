@@ -1,23 +1,39 @@
 import {
+  createReportSchema,
   getBurnRateSchema,
+  getChartDataByLinkIdSchema,
   getExpensesSchema,
   getProfitSchema,
+  getReportByLinkIdSchema,
   getRevenueForecastSchema,
   getRevenueSchema,
   getRunwaySchema,
   getSpendingSchema,
   getTaxSummarySchema,
 } from "@api/schemas/reports";
-import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@api/trpc/init";
+import {
+  InvalidReportTypeError,
+  ReportExpiredError,
+  ReportNotFoundError,
+} from "@midday/db/errors";
+import {
+  createReport,
   getBurnRate,
+  getChartDataByLinkId,
   getExpenses,
+  getReportByLinkId,
   getReports,
   getRevenueForecast,
   getRunway,
   getSpending,
   getTaxSummary,
 } from "@midday/db/queries";
+import { TRPCError } from "@trpc/server";
 
 export const reportsRouter = createTRPCRouter({
   revenue: protectedProcedure
@@ -115,5 +131,58 @@ export const reportsRouter = createTRPCRouter({
         currency: input.currency,
         revenueType: input.revenueType,
       });
+    }),
+
+  create: protectedProcedure
+    .input(createReportSchema)
+    .mutation(async ({ ctx: { db, teamId, session }, input }) => {
+      const result = await createReport(db, {
+        type: input.type,
+        from: input.from,
+        to: input.to,
+        currency: input.currency,
+        teamId: teamId!,
+        createdBy: session.user.id,
+        expireAt: input.expireAt,
+      });
+
+      return {
+        ...result,
+        shortUrl: `${process.env.MIDDAY_DASHBOARD_URL}/r/${result?.linkId}`,
+      };
+    }),
+
+  getByLinkId: publicProcedure
+    .input(getReportByLinkIdSchema)
+    .query(async ({ ctx: { db }, input }) => {
+      return getReportByLinkId(db, input.linkId);
+    }),
+
+  getChartDataByLinkId: publicProcedure
+    .input(getChartDataByLinkIdSchema)
+    .query(async ({ ctx: { db }, input }) => {
+      try {
+        return await getChartDataByLinkId(db, input.linkId);
+      } catch (error: unknown) {
+        if (error instanceof ReportNotFoundError) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: error.message,
+          });
+        }
+        if (error instanceof ReportExpiredError) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: error.message,
+          });
+        }
+        if (error instanceof InvalidReportTypeError) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: error.message,
+          });
+        }
+        throw error;
+      }
     }),
 });

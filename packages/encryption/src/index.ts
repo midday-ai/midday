@@ -49,12 +49,30 @@ export function encrypt(text: string): string {
  */
 export function decrypt(encryptedPayload: string): string {
   const key = getKey();
+
+  if (!encryptedPayload || typeof encryptedPayload !== "string") {
+    throw new Error("Invalid encrypted payload: must be a non-empty string");
+  }
+
   const dataBuffer = Buffer.from(encryptedPayload, "base64");
+  const minLength = IV_LENGTH + AUTH_TAG_LENGTH;
+
+  if (dataBuffer.length < minLength) {
+    throw new Error(
+      `Invalid encrypted payload: too short. Expected at least ${minLength} bytes, got ${dataBuffer.length}`,
+    );
+  }
 
   // Extract IV, auth tag, and encrypted data
   const iv = dataBuffer.subarray(0, IV_LENGTH);
   const authTag = dataBuffer.subarray(IV_LENGTH, IV_LENGTH + AUTH_TAG_LENGTH);
   const encryptedText = dataBuffer.subarray(IV_LENGTH + AUTH_TAG_LENGTH);
+
+  if (authTag.length !== AUTH_TAG_LENGTH) {
+    throw new Error(
+      `Invalid auth tag length: expected ${AUTH_TAG_LENGTH} bytes, got ${authTag.length}`,
+    );
+  }
 
   const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
   decipher.setAuthTag(authTag);

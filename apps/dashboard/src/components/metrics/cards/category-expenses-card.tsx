@@ -9,6 +9,7 @@ import { formatAmount } from "@/utils/format";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useMemo } from "react";
+import { ShareMetricButton } from "../components/share-metric-button";
 
 interface CategoryExpensesCardProps {
   from: string;
@@ -69,11 +70,21 @@ export function CategoryExpensesCard({
   }, [from, to]);
 
   return (
-    <div className="border bg-background border-border p-6 flex flex-col h-full">
+    <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
       <div className="mb-4 min-h-[140px]">
-        <h3 className="text-sm font-normal mb-1 text-muted-foreground">
-          Category Expense Breakdown
-        </h3>
+        <div className="flex items-start justify-between h-7">
+          <h3 className="text-sm font-normal text-muted-foreground">
+            Category Expense Breakdown
+          </h3>
+          <div className="opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity">
+            <ShareMetricButton
+              type="category_expenses"
+              from={from}
+              to={to}
+              currency={currency}
+            />
+          </div>
+        </div>
         <p className="text-3xl font-normal">
           {formatAmount({
             amount: totalExpenses,
