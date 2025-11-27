@@ -3,8 +3,15 @@ import { InboxStatus } from "@/components/inbox/inbox-status";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useUserQuery } from "@/hooks/use-user";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { Badge } from "@midday/ui/badge";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { formatDate } from "@midday/utils/format";
 import { forwardRef } from "react";
 
@@ -46,6 +53,27 @@ export const InboxItem = forwardRef<HTMLButtonElement, Props>(
                     item.displayName
                   )}
                 </div>
+                {!isProcessing &&
+                  item.relatedCount !== undefined &&
+                  item.relatedCount > 0 && (
+                    <TooltipProvider delayDuration={100}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge
+                            variant="outline"
+                            className="h-4 px-1.5 text-[10px] font-normal"
+                          >
+                            +{item.relatedCount}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent className="text-xs px-3 py-1.5">
+                          {item.relatedCount === 1
+                            ? "Grouped with 1 other document"
+                            : `Grouped with ${item.relatedCount} other documents`}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
               </div>
             </div>
             <div

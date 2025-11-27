@@ -35,7 +35,7 @@ export class InvoiceProcessor {
           model: mistral("mistral-medium-latest"),
           schema: invoiceSchema,
           temperature: 0.1,
-          abortSignal: AbortSignal.timeout(20000), // 20s
+          abortSignal: AbortSignal.timeout(30000), // 30s
           messages: [
             {
               role: "system",
@@ -143,7 +143,7 @@ export class InvoiceProcessor {
       generateObject({
         model: mistral("mistral-medium-latest"),
         schema: invoiceSchema,
-        abortSignal: AbortSignal.timeout(20000), // 20s
+        abortSignal: AbortSignal.timeout(30000), // 30s
         messages: [
           {
             role: "system",
@@ -197,10 +197,10 @@ export class InvoiceProcessor {
       tax_rate: result.tax_rate,
       tax_type: result.tax_type,
       language: result.language,
+      invoice_number: result.invoice_number ?? null,
       metadata: {
         invoice_date: result.invoice_date ?? null,
         payment_instructions: result.payment_instructions ?? null,
-        invoice_number: result.invoice_number ?? null,
         customer_name: result.customer_name ?? null,
         customer_address: result.customer_address ?? null,
         vendor_address: result.vendor_address ?? null,

@@ -3,6 +3,7 @@ import { processAttachmentSchema } from "@jobs/schema";
 import {
   createInbox,
   getInboxByFilePath,
+  groupRelatedInboxItems,
   updateInbox,
   updateInboxWithProcessedData,
 } from "@midday/db/queries";
@@ -141,8 +142,23 @@ export const processAttachment = schemaTask({
         taxRate: result.tax_rate ?? undefined,
         taxType: result.tax_type ?? undefined,
         type: result.type as "invoice" | "expense" | null | undefined,
+        invoiceNumber: result.invoice_number ?? undefined,
         status: "analyzing", // Keep analyzing until matching is complete
       });
+
+      // Group related inbox items after storing invoice number
+      try {
+        await groupRelatedInboxItems(getDb(), {
+          inboxId: inboxData.id,
+          teamId,
+        });
+      } catch (error) {
+        logger.error("Failed to group related inbox items", {
+          inboxId: inboxData.id,
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+        // Don't fail the entire process if grouping fails
+      }
 
       // NOTE: Process documents and images for classification
       await processDocument.trigger({

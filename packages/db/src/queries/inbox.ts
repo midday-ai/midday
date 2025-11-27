@@ -10,7 +10,17 @@ import {
   transactions,
 } from "@db/schema";
 import { logger } from "@midday/logger";
-import { and, asc, desc, eq, inArray, ne, notInArray, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  inArray,
+  ne,
+  notInArray,
+  or,
+  sql,
+} from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
 import { separateBlocklistEntries } from "../utils/blocklist";
 import { buildSearchQuery } from "../utils/search-query";
@@ -92,6 +102,9 @@ export async function getInbox(db: Database, params: GetInboxParams) {
   const whereConditions: SQL[] = [
     eq(inbox.teamId, teamId),
     ne(inbox.status, "deleted"),
+    // Filter out grouped items - only show primary items (where groupedInboxId IS NULL)
+    // or items that are themselves the primary (where id matches their own groupedInboxId)
+    sql`(${inbox.groupedInboxId} IS NULL)`,
   ];
 
   // Apply blocklist filter
@@ -177,6 +190,11 @@ export async function getInbox(db: Database, params: GetInboxParams) {
       senderEmail: inbox.senderEmail,
       description: inbox.description,
       inboxAccountId: inbox.inboxAccountId,
+      relatedCount: sql<number>`(
+        SELECT COUNT(*)::int
+        FROM ${inbox} AS related
+        WHERE related.grouped_inbox_id = ${inbox.id}
+      )`.as("relatedCount"),
       inboxAccount: {
         id: inboxAccounts.id,
         email: inboxAccounts.email,
@@ -258,6 +276,7 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
       senderEmail: inbox.senderEmail,
       description: inbox.description,
       inboxAccountId: inbox.inboxAccountId,
+      groupedInboxId: inbox.groupedInboxId,
       inboxAccount: {
         id: inboxAccounts.id,
         email: inboxAccounts.email,
@@ -291,8 +310,102 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
 
+  if (!result) {
+    return null;
+  }
+
+  // Determine the primary item ID
+  const primaryItemId = result.groupedInboxId || result.id;
+
+  // If this item is grouped, fetch the primary item instead
+  let primaryItem = result;
+  if (result.groupedInboxId && result.groupedInboxId !== result.id) {
+    const [primary] = await db
+      .select({
+        id: inbox.id,
+        fileName: inbox.fileName,
+        filePath: inbox.filePath,
+        displayName: inbox.displayName,
+        transactionId: inbox.transactionId,
+        amount: inbox.amount,
+        currency: inbox.currency,
+        contentType: inbox.contentType,
+        date: inbox.date,
+        status: inbox.status,
+        createdAt: inbox.createdAt,
+        website: inbox.website,
+        senderEmail: inbox.senderEmail,
+        description: inbox.description,
+        inboxAccountId: inbox.inboxAccountId,
+        groupedInboxId: inbox.groupedInboxId,
+        inboxAccount: {
+          id: inboxAccounts.id,
+          email: inboxAccounts.email,
+          provider: inboxAccounts.provider,
+        },
+        transaction: {
+          id: transactions.id,
+          amount: transactions.amount,
+          currency: transactions.currency,
+          name: transactions.name,
+          date: transactions.date,
+        },
+        suggestion: {
+          id: transactionMatchSuggestions.id,
+          transactionId: transactionMatchSuggestions.transactionId,
+          confidenceScore: transactionMatchSuggestions.confidenceScore,
+          matchType: transactionMatchSuggestions.matchType,
+          status: transactionMatchSuggestions.status,
+        },
+      })
+      .from(inbox)
+      .leftJoin(transactions, eq(inbox.transactionId, transactions.id))
+      .leftJoin(inboxAccounts, eq(inbox.inboxAccountId, inboxAccounts.id))
+      .leftJoin(
+        transactionMatchSuggestions,
+        and(
+          eq(transactionMatchSuggestions.inboxId, inbox.id),
+          eq(transactionMatchSuggestions.status, "pending"),
+        ),
+      )
+      .where(and(eq(inbox.id, primaryItemId), eq(inbox.teamId, teamId)))
+      .limit(1);
+
+    if (primary) {
+      primaryItem = primary;
+    }
+  }
+
+  // Fetch all related items (items that have this primary item as their groupedInboxId)
+  const relatedItems = await db
+    .select({
+      id: inbox.id,
+      fileName: inbox.fileName,
+      filePath: inbox.filePath,
+      displayName: inbox.displayName,
+      transactionId: inbox.transactionId,
+      amount: inbox.amount,
+      currency: inbox.currency,
+      contentType: inbox.contentType,
+      date: inbox.date,
+      status: inbox.status,
+      createdAt: inbox.createdAt,
+      website: inbox.website,
+      senderEmail: inbox.senderEmail,
+      description: inbox.description,
+      inboxAccountId: inbox.inboxAccountId,
+    })
+    .from(inbox)
+    .where(
+      and(
+        eq(inbox.groupedInboxId, primaryItemId),
+        eq(inbox.teamId, teamId),
+        ne(inbox.status, "deleted"),
+      ),
+    );
+
   // If there's a suggestion, get the suggested transaction details
-  if (result?.suggestion?.transactionId) {
+  if (primaryItem?.suggestion?.transactionId) {
     const [suggestedTransaction] = await db
       .select({
         id: transactions.id,
@@ -302,19 +415,23 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
         date: transactions.date,
       })
       .from(transactions)
-      .where(eq(transactions.id, result.suggestion.transactionId))
+      .where(eq(transactions.id, primaryItem.suggestion.transactionId))
       .limit(1);
 
     return {
-      ...result,
+      ...primaryItem,
       suggestion: {
-        ...result.suggestion,
+        ...primaryItem.suggestion,
         suggestedTransaction,
       },
+      relatedItems: relatedItems.length > 0 ? relatedItems : undefined,
     };
   }
 
-  return result;
+  return {
+    ...primaryItem,
+    relatedItems: relatedItems.length > 0 ? relatedItems : undefined,
+  };
 }
 
 export type CheckInboxAttachmentsParams = {
@@ -904,6 +1021,7 @@ export async function matchTransaction(
       taxType: inbox.taxType,
       transactionId: inbox.transactionId, // Check if already matched
       status: inbox.status,
+      groupedInboxId: inbox.groupedInboxId,
     })
     .from(inbox)
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
@@ -916,7 +1034,41 @@ export async function matchTransaction(
     throw new Error("Inbox item is already matched to a transaction");
   }
 
-  // Check if the target transaction is already matched to another inbox item
+  // Determine the primary item ID (if this item is grouped, use the primary; otherwise use this item)
+  const primaryItemId = result.groupedInboxId || result.id;
+
+  // Find all related inbox items (items in the same group)
+  const relatedItems = await db
+    .select({
+      id: inbox.id,
+      contentType: inbox.contentType,
+      filePath: inbox.filePath,
+      size: inbox.size,
+      fileName: inbox.fileName,
+      taxAmount: inbox.taxAmount,
+      taxRate: inbox.taxRate,
+      taxType: inbox.taxType,
+      transactionId: inbox.transactionId,
+      status: inbox.status,
+    })
+    .from(inbox)
+    .where(
+      and(
+        eq(inbox.teamId, teamId),
+        or(
+          eq(inbox.id, primaryItemId), // The primary item
+          eq(inbox.groupedInboxId, primaryItemId), // Items grouped to the primary
+        ),
+      ),
+    );
+
+  // Check if any related item is already matched
+  const alreadyMatched = relatedItems.find((item) => item.transactionId);
+  if (alreadyMatched) {
+    throw new Error("A related inbox item is already matched to a transaction");
+  }
+
+  // Check if the target transaction is already matched to another inbox item (not in this group)
   const [existingMatch] = await db
     .select({ id: inbox.id })
     .from(inbox)
@@ -924,7 +1076,10 @@ export async function matchTransaction(
       and(
         eq(inbox.transactionId, transactionId),
         eq(inbox.teamId, teamId),
-        ne(inbox.id, id), // Not the same inbox item
+        notInArray(
+          inbox.id,
+          relatedItems.map((item) => item.id),
+        ), // Not any of the related items
       ),
     )
     .limit(1);
@@ -933,39 +1088,49 @@ export async function matchTransaction(
     throw new Error("Transaction is already matched to another inbox item");
   }
 
-  // Insert transaction attachment
-  const [attachmentData] = await db
-    .insert(transactionAttachments)
-    .values({
-      type: result.contentType ?? "",
-      path: result.filePath ?? [],
-      transactionId,
-      size: result.size ?? 0,
-      name: result.fileName ?? "",
-      teamId,
-    })
-    .returning({ id: transactionAttachments.id });
+  // Insert transaction attachments for all related items
+  const attachmentIds = new Map<string, string>();
 
-  // Update transaction with tax data from OCR
+  for (const item of relatedItems) {
+    const [attachmentData] = await db
+      .insert(transactionAttachments)
+      .values({
+        type: item.contentType ?? "",
+        path: item.filePath ?? [],
+        transactionId,
+        size: item.size ?? 0,
+        name: item.fileName ?? "",
+        teamId,
+      })
+      .returning({ id: transactionAttachments.id });
+
+    if (attachmentData) {
+      attachmentIds.set(item.id, attachmentData.id);
+    }
+  }
+
+  // Update transaction with tax data from OCR (use primary item's tax data)
   // Transfer taxAmount if available (from OCR extraction)
   // Transfer taxRate and taxType if available
+  const primaryItem =
+    relatedItems.find((item) => item.id === primaryItemId) || result;
   const taxUpdates: {
     taxAmount?: number | null;
     taxRate?: number | null;
     taxType?: string | null;
   } = {};
 
-  if (result.taxAmount !== null && result.taxAmount !== undefined) {
-    taxUpdates.taxAmount = result.taxAmount;
+  if (primaryItem.taxAmount !== null && primaryItem.taxAmount !== undefined) {
+    taxUpdates.taxAmount = primaryItem.taxAmount;
   }
 
   if (
-    result.taxRate !== null &&
-    result.taxRate !== undefined &&
-    result.taxType
+    primaryItem.taxRate !== null &&
+    primaryItem.taxRate !== undefined &&
+    primaryItem.taxType
   ) {
-    taxUpdates.taxRate = result.taxRate;
-    taxUpdates.taxType = result.taxType;
+    taxUpdates.taxRate = primaryItem.taxRate;
+    taxUpdates.taxType = primaryItem.taxType;
   }
 
   if (Object.keys(taxUpdates).length > 0) {
@@ -975,16 +1140,19 @@ export async function matchTransaction(
       .where(eq(transactions.id, transactionId));
   }
 
-  if (attachmentData) {
-    // Update inbox with attachment and transaction IDs
-    await db
-      .update(inbox)
-      .set({
-        attachmentId: attachmentData.id,
-        transactionId: transactionId,
-        status: "done",
-      })
-      .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)));
+  // Update all related inbox items with attachment and transaction IDs
+  for (const item of relatedItems) {
+    const attachmentId = attachmentIds.get(item.id);
+    if (attachmentId) {
+      await db
+        .update(inbox)
+        .set({
+          attachmentId,
+          transactionId: transactionId,
+          status: "done",
+        })
+        .where(and(eq(inbox.id, item.id), eq(inbox.teamId, teamId)));
+    }
   }
 
   // Return updated inbox with transaction data
@@ -1036,59 +1204,92 @@ export async function unmatchTransaction(
       id: inbox.id,
       transactionId: inbox.transactionId,
       attachmentId: inbox.attachmentId,
+      groupedInboxId: inbox.groupedInboxId,
     })
     .from(inbox)
     .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)))
     .limit(1);
 
-  // LEARNING FEEDBACK: Find the original match suggestion to mark as incorrect
-  if (result?.transactionId) {
-    // Look for the match suggestion that led to this pairing
-    const [originalSuggestion] = await db
-      .select({
-        id: transactionMatchSuggestions.id,
-        status: transactionMatchSuggestions.status,
-        matchType: transactionMatchSuggestions.matchType,
-        confidenceScore: transactionMatchSuggestions.confidenceScore,
-      })
-      .from(transactionMatchSuggestions)
-      .where(
-        and(
-          eq(transactionMatchSuggestions.inboxId, id),
-          eq(transactionMatchSuggestions.transactionId, result.transactionId),
-          eq(transactionMatchSuggestions.teamId, teamId),
-          eq(transactionMatchSuggestions.status, "confirmed"),
+  if (!result) return null;
+
+  // Determine the primary item ID (if this item is grouped, use the primary; otherwise use this item)
+  const primaryItemId = result.groupedInboxId || result.id;
+
+  // Find all related inbox items (items in the same group)
+  const relatedItems = await db
+    .select({
+      id: inbox.id,
+      transactionId: inbox.transactionId,
+      attachmentId: inbox.attachmentId,
+    })
+    .from(inbox)
+    .where(
+      and(
+        eq(inbox.teamId, teamId),
+        or(
+          eq(inbox.id, primaryItemId), // The primary item
+          eq(inbox.groupedInboxId, primaryItemId), // Items grouped to the primary
         ),
-      )
-      .orderBy(desc(transactionMatchSuggestions.createdAt))
-      .limit(1);
+      ),
+    );
 
-    // Mark the suggestion as "unmatched" to provide negative feedback for learning
-    if (originalSuggestion) {
-      await db
-        .update(transactionMatchSuggestions)
-        .set({
-          status: "unmatched", // New status for post-match removal
-          userActionAt: new Date().toISOString(),
-          userId: userId || null,
-        })
-        .where(eq(transactionMatchSuggestions.id, originalSuggestion.id));
+  // Get the transaction ID from the primary item (all related items should have the same transactionId)
+  const transactionId = relatedItems.find(
+    (item) => item.transactionId,
+  )?.transactionId;
 
-      // Log for debugging/monitoring
-      logger.info("📚 UNMATCH LEARNING FEEDBACK", {
-        teamId,
-        inboxId: id,
-        transactionId: result.transactionId,
-        originalMatchType: originalSuggestion.matchType,
-        originalConfidence: Number(originalSuggestion.confidenceScore),
-        originalStatus: originalSuggestion.status,
-        message:
-          "User unmatched a previously confirmed/auto-matched pair - negative feedback for learning",
-      });
+  // LEARNING FEEDBACK: Find the original match suggestions to mark as incorrect for all related items
+  if (transactionId) {
+    for (const item of relatedItems) {
+      if (item.transactionId) {
+        // Look for the match suggestion that led to this pairing
+        const [originalSuggestion] = await db
+          .select({
+            id: transactionMatchSuggestions.id,
+            status: transactionMatchSuggestions.status,
+            matchType: transactionMatchSuggestions.matchType,
+            confidenceScore: transactionMatchSuggestions.confidenceScore,
+          })
+          .from(transactionMatchSuggestions)
+          .where(
+            and(
+              eq(transactionMatchSuggestions.inboxId, item.id),
+              eq(transactionMatchSuggestions.transactionId, transactionId),
+              eq(transactionMatchSuggestions.teamId, teamId),
+              eq(transactionMatchSuggestions.status, "confirmed"),
+            ),
+          )
+          .orderBy(desc(transactionMatchSuggestions.createdAt))
+          .limit(1);
+
+        // Mark the suggestion as "unmatched" to provide negative feedback for learning
+        if (originalSuggestion) {
+          await db
+            .update(transactionMatchSuggestions)
+            .set({
+              status: "unmatched", // New status for post-match removal
+              userActionAt: new Date().toISOString(),
+              userId: userId || null,
+            })
+            .where(eq(transactionMatchSuggestions.id, originalSuggestion.id));
+
+          // Log for debugging/monitoring
+          logger.info("📚 UNMATCH LEARNING FEEDBACK", {
+            teamId,
+            inboxId: item.id,
+            transactionId,
+            originalMatchType: originalSuggestion.matchType,
+            originalConfidence: Number(originalSuggestion.confidenceScore),
+            originalStatus: originalSuggestion.status,
+            message:
+              "User unmatched a previously confirmed/auto-matched pair - negative feedback for learning",
+          });
+        }
+      }
     }
   }
 
-  // Update inbox record
+  // Update all related inbox records
   await db
     .update(inbox)
     .set({
@@ -1096,28 +1297,40 @@ export async function unmatchTransaction(
       attachmentId: null,
       status: "pending",
     })
-    .where(and(eq(inbox.id, id), eq(inbox.teamId, teamId)));
+    .where(
+      and(
+        eq(inbox.teamId, teamId),
+        or(
+          eq(inbox.id, primaryItemId), // The primary item
+          eq(inbox.groupedInboxId, primaryItemId), // Items grouped to the primary
+        ),
+      ),
+    );
 
-  // Delete only the specific transaction attachment for this inbox item
-  if (result?.attachmentId) {
+  // Delete all transaction attachments for related items
+  const attachmentIds = relatedItems
+    .map((item) => item.attachmentId)
+    .filter((id): id is string => id !== null);
+
+  if (attachmentIds.length > 0) {
     await db
       .delete(transactionAttachments)
       .where(
         and(
-          eq(transactionAttachments.id, result.attachmentId),
+          inArray(transactionAttachments.id, attachmentIds),
           eq(transactionAttachments.teamId, teamId),
         ),
       );
   }
 
   // Check if this transaction still has other attachments before resetting tax info
-  if (result?.transactionId) {
+  if (transactionId) {
     const remainingAttachments = await db
       .select({ count: sql<number>`count(*)` })
       .from(transactionAttachments)
       .where(
         and(
-          eq(transactionAttachments.transactionId, result.transactionId),
+          eq(transactionAttachments.transactionId, transactionId),
           eq(transactionAttachments.teamId, teamId),
         ),
       );
@@ -1130,7 +1343,7 @@ export async function unmatchTransaction(
           taxRate: null,
           taxType: null,
         })
-        .where(eq(transactions.id, result.transactionId));
+        .where(eq(transactions.id, transactionId));
     }
   }
 
@@ -1278,6 +1491,7 @@ export type UpdateInboxWithProcessedDataParams = {
   taxRate?: number;
   taxType?: string;
   type?: "invoice" | "expense" | null;
+  invoiceNumber?: string;
   status?:
     | "pending"
     | "new"
@@ -1414,4 +1628,181 @@ export async function getInboxStats(db: Database, params: GetInboxStatsParams) {
       teamId,
     },
   };
+}
+
+export type FindRelatedInboxItemsParams = {
+  inboxId: string;
+  teamId: string;
+};
+
+export async function findRelatedInboxItems(
+  db: Database,
+  params: FindRelatedInboxItemsParams,
+) {
+  const { inboxId, teamId } = params;
+
+  // Get the current inbox item
+  const [currentItem] = await db
+    .select({
+      id: inbox.id,
+      invoiceNumber: inbox.invoiceNumber,
+      website: inbox.website,
+      amount: inbox.amount,
+      date: inbox.date,
+      type: inbox.type,
+      createdAt: inbox.createdAt,
+    })
+    .from(inbox)
+    .where(and(eq(inbox.id, inboxId), eq(inbox.teamId, teamId)))
+    .limit(1);
+
+  if (!currentItem) {
+    return [];
+  }
+
+  const conditions: SQL[] = [
+    eq(inbox.teamId, teamId),
+    ne(inbox.id, inboxId),
+    ne(inbox.status, "deleted"),
+    sql`${inbox.groupedInboxId} IS NULL`, // Only find items that aren't already grouped
+  ];
+
+  // Primary matching: invoice number
+  if (currentItem.invoiceNumber) {
+    const relatedByInvoiceNumber = await db
+      .select({
+        id: inbox.id,
+        invoiceNumber: inbox.invoiceNumber,
+        website: inbox.website,
+        amount: inbox.amount,
+        date: inbox.date,
+        type: inbox.type,
+        createdAt: inbox.createdAt,
+      })
+      .from(inbox)
+      .where(
+        and(...conditions, eq(inbox.invoiceNumber, currentItem.invoiceNumber)),
+      );
+
+    if (relatedByInvoiceNumber.length > 0) {
+      return relatedByInvoiceNumber;
+    }
+  }
+
+  // Fallback matching: same website + same amount + same date + different type
+  // Only match when current item has a known type (invoice or expense)
+  if (
+    currentItem.website &&
+    currentItem.amount &&
+    currentItem.date &&
+    (currentItem.type === "invoice" || currentItem.type === "expense")
+  ) {
+    const relatedByFallback = await db
+      .select({
+        id: inbox.id,
+        invoiceNumber: inbox.invoiceNumber,
+        website: inbox.website,
+        amount: inbox.amount,
+        date: inbox.date,
+        type: inbox.type,
+        createdAt: inbox.createdAt,
+      })
+      .from(inbox)
+      .where(
+        and(
+          ...conditions,
+          eq(inbox.website, currentItem.website),
+          eq(inbox.amount, currentItem.amount),
+          eq(inbox.date, currentItem.date),
+          // Different type (invoice vs expense)
+          currentItem.type === "invoice"
+            ? eq(inbox.type, "expense")
+            : eq(inbox.type, "invoice"),
+        ),
+      );
+
+    return relatedByFallback;
+  }
+
+  return [];
+}
+
+export type GroupRelatedInboxItemsParams = {
+  inboxId: string;
+  teamId: string;
+};
+
+export async function groupRelatedInboxItems(
+  db: Database,
+  params: GroupRelatedInboxItemsParams,
+) {
+  const { inboxId, teamId } = params;
+
+  // Find related items
+  const relatedItems = await findRelatedInboxItems(db, { inboxId, teamId });
+
+  if (relatedItems.length === 0) {
+    return;
+  }
+
+  // Get the current item
+  const [currentItem] = await db
+    .select({
+      id: inbox.id,
+      invoiceNumber: inbox.invoiceNumber,
+      type: inbox.type,
+      createdAt: inbox.createdAt,
+    })
+    .from(inbox)
+    .where(and(eq(inbox.id, inboxId), eq(inbox.teamId, teamId)))
+    .limit(1);
+
+  if (!currentItem) {
+    return;
+  }
+
+  // Collect all items to group (current + related)
+  const allItems = [
+    {
+      id: currentItem.id,
+      type: currentItem.type,
+      createdAt: currentItem.createdAt,
+    },
+    ...relatedItems.map((item) => ({
+      id: item.id,
+      type: item.type,
+      createdAt: item.createdAt,
+    })),
+  ];
+
+  // Determine primary item: prefer invoice type, then oldest
+  const primaryItem = allItems.reduce((primary, item) => {
+    if (item.type === "invoice" && primary.type !== "invoice") {
+      return item;
+    }
+    if (item.type === primary.type) {
+      return new Date(item.createdAt) < new Date(primary.createdAt)
+        ? item
+        : primary;
+    }
+    return primary;
+  });
+
+  // Update all items to point to the primary item
+  const itemsToUpdate = allItems
+    .filter((item) => item.id !== primaryItem.id)
+    .map((item) => item.id);
+
+  if (itemsToUpdate.length > 0) {
+    await db
+      .update(inbox)
+      .set({ groupedInboxId: primaryItem.id })
+      .where(and(inArray(inbox.id, itemsToUpdate), eq(inbox.teamId, teamId)));
+
+    logger.info("Grouped related inbox items", {
+      primaryItemId: primaryItem.id,
+      groupedItemIds: itemsToUpdate,
+      teamId,
+    });
+  }
 }

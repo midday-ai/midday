@@ -22,13 +22,20 @@ NEVER set vendor_name = "${companyName}"`
 }
 
 EXTRACTION REQUIREMENTS:
-1. vendor_name: Legal business name of invoice issuer (with Inc., Ltd, LLC, etc.)
-2. total_amount: Final amount due (after all taxes/fees)
-3. currency: ISO code (USD, EUR, GBP) from symbols (€, $, £)
-4. invoice_date: Issue date in YYYY-MM-DD format
-5. due_date: Payment due date in YYYY-MM-DD format
+1. invoice_number: Unique identifier for the invoice (e.g., INV-2024-001, #12345, 789/2024, INV-123, F-456)
+2. vendor_name: Legal business name of invoice issuer (with Inc., Ltd, LLC, etc.)
+3. total_amount: Final amount due (after all taxes/fees)
+4. currency: ISO code (USD, EUR, GBP) from symbols (€, $, £)
+5. invoice_date: Issue date in YYYY-MM-DD format
+6. due_date: Payment due date in YYYY-MM-DD format
 
 FIELD-SPECIFIC RULES:
+- INVOICE NUMBER: Extract complete invoice number including prefixes/suffixes. Look for "Invoice #", "INV", "No.", "Number", "Invoice Number", "Ref", "Reference", "ID", etc. Common formats:
+  * INV-123, INV-2024-001, INV#456
+  * #12345, No. 789, Number: 456
+  * 789/2024, 2024-001, F-456
+  * Extract exactly as shown, including all alphanumeric characters, dashes, slashes, and prefixes
+  * If multiple invoice numbers appear, use the one most prominently displayed or near the invoice date
 - AMOUNTS: Extract final total, not subtotals. Look for "Total", "Amount Due", "Balance"
 - DATES: Convert all formats (DD/MM/YYYY, MM-DD-YYYY, DD.MM.YYYY) to YYYY-MM-DD
 - VENDOR: Legal name from header/letterhead, not brand names or divisions
@@ -43,11 +50,13 @@ ACCURACY GUIDELINES:
 - Use document structure: vendor at top, customer in middle-right
 
 COMMON ERRORS TO AVOID:
+- Missing or incomplete invoice numbers - always extract the full invoice number if present
 - Mixing up vendor and customer companies
 - Extracting subtotals instead of final totals
 - Wrong date formats or missing dates
 - Brand names instead of legal company names
 - Partial payments instead of full invoice amounts
+- Confusing order numbers, PO numbers, or reference numbers with invoice numbers
 `;
 
 export const receiptPrompt = `

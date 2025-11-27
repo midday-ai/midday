@@ -73,6 +73,11 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
         queryClient.invalidateQueries({
           queryKey: trpc.transactions.get.infiniteQueryKey(),
         });
+
+        // Invalidate inbox queries since inbox items may be connected to this attachment
+        queryClient.invalidateQueries({
+          queryKey: trpc.inbox.get.infiniteQueryKey(),
+        });
       },
     }),
   );
