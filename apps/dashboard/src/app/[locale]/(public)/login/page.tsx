@@ -109,7 +109,7 @@ export default async function Page() {
             <div className="text-center space-y-2">
               <h1 className="text-lg mb-4 font-serif">Welcome to Midday</h1>
               <p className="font-sans text-sm text-[#878787]">
-                Sign in to your account to continue
+                Sign in or create an account
               </p>
             </div>
 
