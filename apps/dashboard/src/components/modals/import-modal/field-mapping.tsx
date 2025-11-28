@@ -35,7 +35,11 @@ import {
 import { capitalCase } from "change-case";
 import { useEffect, useRef, useState } from "react";
 import { Controller, useWatch } from "react-hook-form";
-import { mappableFields, useCsvContext } from "./context";
+import {
+  type ImportCsvFormData,
+  mappableFields,
+  useCsvContext,
+} from "./context";
 
 export function FieldMapping({ currencies }: { currencies: string[] }) {
   const { fileColumns, firstRows, setValue, control, watch } = useCsvContext();
@@ -240,6 +244,20 @@ function FieldRow({
 
   const description = value && firstRow ? firstRow[value as string] : undefined;
 
+  // Check if date field has valid parseable date
+  const isDateInvalid =
+    field === "date" && description && !formatDate(description);
+
+  // Check if amount field has valid parseable number
+  const parsedAmount = description
+    ? formatAmountValue({ amount: description, inverted })
+    : null;
+  const isAmountInvalid =
+    field === "amount" && description && Number.isNaN(parsedAmount);
+
+  // Combined invalid state for styling
+  const isFieldInvalid = isDateInvalid || isAmountInvalid;
+
   const formatDescription = (description?: string) => {
     if (!description) return;
 
@@ -281,6 +299,13 @@ function FieldRow({
     return description;
   };
 
+  // Get appropriate error message for invalid fields
+  const getErrorMessage = () => {
+    if (isDateInvalid) return "Invalid date format - cannot parse this date";
+    if (isAmountInvalid) return "Invalid amount - cannot parse this number";
+    return null;
+  };
+
   return (
     <>
       <div className="relative flex min-w-0 items-center gap-2">
@@ -288,11 +313,11 @@ function FieldRow({
           control={control}
           name={field}
           rules={{ required }}
-          render={({ field }) => {
+          render={({ field: controllerField }) => {
             return (
               <Select
-                value={field?.value ?? undefined}
-                onValueChange={field.onChange}
+                value={controllerField?.value ?? undefined}
+                onValueChange={controllerField.onChange}
               >
                 <SelectTrigger className="w-full relative" hideIcon={isLoading}>
                   <SelectValue placeholder={`Select ${label}`} />
@@ -309,7 +334,7 @@ function FieldRow({
                     {[
                       // Filter out empty columns
                       ...(fileColumns?.filter((column) => column !== "") || []),
-                      ...(field.value && !required ? ["None"] : []),
+                      ...(controllerField.value && !required ? ["None"] : []),
                     ]?.map((column) => {
                       return (
                         <SelectItem key={column} value={column}>
@@ -338,11 +363,15 @@ function FieldRow({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button type="button" className="cursor-help">
-                    <Icons.Info />
+                    {isFieldInvalid ? (
+                      <Icons.AlertCircle className="size-4 text-destructive" />
+                    ) : (
+                      <Icons.Info />
+                    )}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent className="p-2 text-xs">
-                  {formatDescription(description)}
+                  {getErrorMessage() ?? formatDescription(description)}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
