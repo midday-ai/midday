@@ -38,7 +38,7 @@ export function MetricsSettings({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="icon">
-          <Icons.Settings className="w-4 h-4" />
+          <Icons.Tune className="w-4 h-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" sideOffset={10}>
