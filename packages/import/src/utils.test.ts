@@ -55,6 +55,32 @@ describe("formatDate", () => {
     expect(formatDate("2023-13-45")).toBeUndefined();
   });
 
+  it("should reject invalid days for month (Feb 30, Apr 31)", () => {
+    expect(formatDate("2023-02-30")).toBeUndefined();
+    expect(formatDate("2023-04-31")).toBeUndefined();
+    expect(formatDate("2023-06-31")).toBeUndefined();
+    expect(formatDate("2023-09-31")).toBeUndefined();
+    expect(formatDate("2023-11-31")).toBeUndefined();
+  });
+
+  it("should handle leap year dates correctly", () => {
+    // 2024 is a leap year - Feb 29 is valid
+    expect(formatDate("2024-02-29")).toBe("2024-02-29");
+    // 2023 is not a leap year - Feb 29 is invalid
+    expect(formatDate("2023-02-29")).toBeUndefined();
+    // 2000 is a leap year (divisible by 400)
+    expect(formatDate("2000-02-29")).toBe("2000-02-29");
+    // 1900 was not a leap year (divisible by 100 but not 400)
+    expect(formatDate("1900-02-29")).toBeUndefined();
+  });
+
+  it("should accept valid edge-of-month dates", () => {
+    expect(formatDate("2023-01-31")).toBe("2023-01-31");
+    expect(formatDate("2023-03-31")).toBe("2023-03-31");
+    expect(formatDate("2023-04-30")).toBe("2023-04-30");
+    expect(formatDate("2023-02-28")).toBe("2023-02-28");
+  });
+
   it("should handle different date formats", () => {
     expect(formatDate("05/15/2023")).toBe("2023-05-15");
   });

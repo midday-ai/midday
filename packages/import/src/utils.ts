@@ -2,6 +2,19 @@ import * as chrono from "chrono-node";
 import { format } from "date-fns";
 
 /**
+ * Validates if a date is actually valid (handles month lengths and leap years).
+ * Creates a Date object and verifies the components match what was requested.
+ */
+function isValidDate(year: number, month: number, day: number): boolean {
+  const date = new Date(year, month - 1, day);
+  return (
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day
+  );
+}
+
+/**
  * Formats a date string into YYYY-MM-DD format.
  * For ISO-format dates (YYYY-MM-DD...), extracts the date portion directly to preserve
  * the date in the original timezone (avoids UTC conversion shifting the date).
@@ -20,10 +33,12 @@ export function formatDate(dateString: string): string | undefined {
     const y = Number(year);
     const m = Number(month);
     const d = Number(day);
-    // Validate the date components are reasonable
-    if (m >= 1 && m <= 12 && d >= 1 && d <= 31) {
+    // Validate the date is actually valid (handles month lengths and leap years)
+    if (isValidDate(y, m, d)) {
       return `${year}-${month}-${day}`;
     }
+    // Invalid ISO-format date (e.g., Feb 30), return undefined
+    return undefined;
   }
 
   // Fallback: use chrono-node for other formats (Oct 1, 2025, 01/10/2025, etc.)

@@ -9,7 +9,21 @@ export const createTransactionSchema = z.object({
   internal_id: z.string(),
   status: z.enum(["posted", "pending"]),
   method: z.enum(["card", "bank", "other"]),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format"),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
+    .refine(
+      (date) => {
+        const [year, month, day] = date.split("-").map(Number);
+        const d = new Date(year, month - 1, day);
+        return (
+          d.getFullYear() === year &&
+          d.getMonth() === month - 1 &&
+          d.getDate() === day
+        );
+      },
+      { message: "Invalid date - day does not exist for this month" },
+    ),
   amount: z.number(),
   manual: z.boolean(),
   category_slug: z.string().nullable(),
