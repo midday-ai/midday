@@ -35,6 +35,7 @@ import {
   unmatchTransaction,
   updateInbox,
 } from "@midday/db/queries";
+import { jobs } from "@midday/job-client";
 import type { ProcessAttachmentPayload } from "@midday/jobs/schema";
 import { remove } from "@midday/supabase/storage";
 import { tasks } from "@trigger.dev/sdk";
@@ -210,12 +211,14 @@ export const inboxRouter = createTRPCRouter({
   retryMatching: protectedProcedure
     .input(retryMatchingSchema)
     .mutation(async ({ ctx: { teamId }, input }) => {
-      const result = await tasks.trigger("batch-process-matching", {
+      const result = await jobs.trigger("batch-process-matching", {
         teamId: teamId!,
         inboxIds: [input.id],
       });
 
-      return { jobId: result.id };
+      return {
+        jobId: result.id,
+      };
     }),
 
   // Blocklist management

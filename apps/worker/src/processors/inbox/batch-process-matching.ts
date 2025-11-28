@@ -1,0 +1,150 @@
+import { calculateInboxSuggestions, hasSuggestion } from "@midday/db/queries";
+import type { Job } from "bullmq";
+import type { BatchProcessMatchingPayload } from "../../schemas/inbox";
+import { getDb } from "../../utils/db";
+import { triggerMatchingNotification } from "../../utils/inbox-matching-notifications";
+import { BaseProcessor } from "../base";
+
+export class BatchProcessMatchingProcessor extends BaseProcessor<BatchProcessMatchingPayload> {
+  async process(job: Job<BatchProcessMatchingPayload>): Promise<{
+    processed: number;
+    autoMatched: number;
+    suggestions: number;
+    noMatches: number;
+    errors: number;
+  }> {
+    const { teamId, inboxIds } = job.data;
+    const db = getDb();
+
+    this.logger.info(
+      {
+        teamId,
+        inboxCount: inboxIds.length,
+      },
+      "Starting batch inbox matching",
+    );
+
+    await this.updateProgress(job, 0);
+
+    let autoMatchCount = 0;
+    let suggestionCount = 0;
+    let noMatchCount = 0;
+    let errorCount = 0;
+
+    // Process in smaller batches for better performance and error isolation
+    const BATCH_SIZE = 5;
+    const totalBatches = Math.ceil(inboxIds.length / BATCH_SIZE);
+    const progressPerBatch = 100 / totalBatches;
+
+    for (let i = 0; i < inboxIds.length; i += BATCH_SIZE) {
+      const batch = inboxIds.slice(i, i + BATCH_SIZE);
+      const batchIndex = Math.floor(i / BATCH_SIZE);
+
+      const results = await Promise.allSettled(
+        batch.map(async (inboxId) => {
+          try {
+            const result = await calculateInboxSuggestions(db, {
+              teamId,
+              inboxId,
+            });
+
+            // Send notifications based on matching result
+            if (hasSuggestion(result)) {
+              await triggerMatchingNotification({
+                db,
+                teamId,
+                inboxId,
+                result,
+              });
+            }
+
+            switch (result.action) {
+              case "auto_matched":
+                autoMatchCount++;
+                // suggestion is guaranteed to exist when action is "auto_matched"
+                this.logger.info(
+                  {
+                    teamId,
+                    inboxId,
+                    transactionId: result.suggestion!.transactionId,
+                    confidence: result.suggestion!.confidenceScore,
+                  },
+                  "Auto-matched inbox item",
+                );
+                break;
+
+              case "suggestion_created":
+                suggestionCount++;
+                // suggestion is guaranteed to exist when action is "suggestion_created"
+                this.logger.info(
+                  {
+                    teamId,
+                    inboxId,
+                    transactionId: result.suggestion!.transactionId,
+                    confidence: result.suggestion!.confidenceScore,
+                  },
+                  "Created match suggestion",
+                );
+                break;
+
+              case "no_match_yet":
+                noMatchCount++;
+                break;
+            }
+
+            return result;
+          } catch (error) {
+            errorCount++;
+            this.logger.error(
+              {
+                teamId,
+                inboxId,
+                error: error instanceof Error ? error.message : "Unknown error",
+              },
+              "Failed to process inbox matching",
+            );
+            throw error;
+          }
+        }),
+      );
+
+      // Update progress after each batch
+      const currentProgress = Math.round((batchIndex + 1) * progressPerBatch);
+      await this.updateProgress(job, currentProgress);
+
+      // Log batch completion
+      const batchErrors = results.filter((r) => r.status === "rejected").length;
+      this.logger.info(
+        {
+          teamId,
+          batchIndex: batchIndex + 1,
+          batchSize: batch.length,
+          errors: batchErrors,
+        },
+        "Completed batch processing",
+      );
+    }
+
+    this.logger.info(
+      {
+        teamId,
+        summary: {
+          totalProcessed: inboxIds.length,
+          autoMatches: autoMatchCount,
+          suggestions: suggestionCount,
+          noMatches: noMatchCount,
+          errors: errorCount,
+        },
+      },
+      "Completed batch inbox matching",
+    );
+
+    return {
+      processed: inboxIds.length,
+      autoMatched: autoMatchCount,
+      suggestions: suggestionCount,
+      noMatches: noMatchCount,
+      errors: errorCount,
+    };
+  }
+}
