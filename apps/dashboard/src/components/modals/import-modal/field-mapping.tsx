@@ -35,11 +35,7 @@ import {
 import { capitalCase } from "change-case";
 import { useEffect, useRef, useState } from "react";
 import { Controller, useWatch } from "react-hook-form";
-import {
-  type ImportCsvFormData,
-  mappableFields,
-  useCsvContext,
-} from "./context";
+import { mappableFields, useCsvContext } from "./context";
 
 export function FieldMapping({ currencies }: { currencies: string[] }) {
   const { fileColumns, firstRows, setValue, control, watch } = useCsvContext();
