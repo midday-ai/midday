@@ -1,23 +1,21 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
+import { useAnalyticsFilter } from "@/hooks/use-analytics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
+import { getPeriodLabel } from "@/utils/metrics-date-utils";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
-import { getDefaultTaxType, getWidgetPeriodDates } from "@midday/utils";
+import { getDefaultTaxType } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useMemo } from "react";
 import { BaseWidget } from "./base";
-import { ConfigurableWidget } from "./configurable-widget";
-import { useConfigurableWidget } from "./use-configurable-widget";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
-import { WidgetSettings } from "./widget-settings";
 
 function getTaxTerminology(
   countryCode: string | undefined,
@@ -56,23 +54,17 @@ export function TaxSummaryWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { config, isConfiguring, setIsConfiguring, saveConfig } =
-    useConfigurableWidget("tax-summary");
+  const { from, to, period, isReady } = useAnalyticsFilter();
 
   const taxTerms = getTaxTerminology(team?.countryCode ?? undefined, t);
 
-  // Get date range based on widget config or default to trailing_12
-  const { from: fromDate, to: toDate } = useMemo(() => {
-    const period = config?.period ?? "trailing_12";
-    return getWidgetPeriodDates(period, team?.fiscalYearStartMonth);
-  }, [config?.period, team?.fiscalYearStartMonth]);
-
   const { data: yearData } = useQuery({
     ...trpc.widgets.getTaxSummary.queryOptions({
-      from: format(fromDate, "yyyy-MM-dd"),
-      to: format(toDate, "yyyy-MM-dd"),
+      from,
+      to,
     }),
     ...WIDGET_POLLING_CONFIG,
+    enabled: isReady,
   });
 
   const taxData = yearData?.result;
@@ -83,18 +75,15 @@ export function TaxSummaryWidget() {
   const isOwed = netAmount > 0;
   const hasActivity = collectedTax > 0 || paidTax > 0;
 
-  const getDescription = () => {
-    const periodKey = config?.period ?? "trailing_12";
-    const period = t(
-      `widget_period.${periodKey}` as "widget_period.fiscal_ytd",
-    );
+  const periodLabel = getPeriodLabel(period, from, to);
 
+  const getDescription = () => {
     if (!hasActivity) {
-      return `${t("tax_summary.no_activity")} · ${period}`;
+      return `${t("tax_summary.no_activity")} · ${periodLabel}`;
     }
 
     if (Math.abs(netAmount) < 100) {
-      return `${t("tax_summary.balanced")} · ${period}`;
+      return `${t("tax_summary.balanced")} · ${periodLabel}`;
     }
 
     const netStr = formatAmount({
@@ -104,10 +93,10 @@ export function TaxSummaryWidget() {
     });
 
     if (isOwed) {
-      return `${t("tax_summary.remit_amount", { amount: netStr })} · ${period}`;
+      return `${t("tax_summary.remit_amount", { amount: netStr })} · ${periodLabel}`;
     }
 
-    return `${t("tax_summary.credit_amount", { amount: netStr })} · ${period}`;
+    return `${t("tax_summary.credit_amount", { amount: netStr })} · ${periodLabel}`;
   };
 
   const handleToolCall = (params: {
@@ -134,15 +123,12 @@ export function TaxSummaryWidget() {
   const handleViewTaxSummary = () => {
     // Use dynamic terminology based on tax type (VAT/GST/Sales Tax/Tax)
     const summaryText = taxTerms.title.toLowerCase();
-    const periodLabel = t(
-      `widget_period.${config?.period ?? "trailing_12"}` as "widget_period.fiscal_ytd",
-    );
 
     handleToolCall({
       toolName: "getTaxSummary",
       toolParams: {
-        from: format(fromDate, "yyyy-MM-dd"),
-        to: format(toDate, "yyyy-MM-dd"),
+        from,
+        to,
         currency: team?.baseCurrency ?? undefined,
         showCanvas: true,
       },
@@ -151,60 +137,46 @@ export function TaxSummaryWidget() {
   };
 
   return (
-    <ConfigurableWidget
-      isConfiguring={isConfiguring}
-      settings={
-        <WidgetSettings
-          config={config}
-          onSave={saveConfig}
-          onCancel={() => setIsConfiguring(false)}
-          showPeriod
-          showRevenueType={false}
-        />
-      }
+    <BaseWidget
+      title={taxTerms.title}
+      icon={<Icons.ReceiptLong className="size-4" />}
+      description={getDescription()}
+      onClick={handleViewTaxSummary}
+      actions="See detailed analysis"
     >
-      <BaseWidget
-        title={taxTerms.title}
-        icon={<Icons.ReceiptLong className="size-4" />}
-        description={getDescription()}
-        onClick={handleViewTaxSummary}
-        actions="See detailed analysis"
-        onConfigure={() => setIsConfiguring(true)}
-      >
-        {hasActivity && taxData && (
-          <div className="flex flex-col gap-4">
-            {/* Main net amount */}
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-medium">
+      {hasActivity && taxData && (
+        <div className="flex flex-col gap-4">
+          {/* Main net amount */}
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-medium">
+              <FormatAmount
+                amount={Math.abs(netAmount)}
+                currency={taxData.currency}
+              />
+            </span>
+          </div>
+
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">
+                {taxTerms.collected}
+              </span>
+              <span className="font-medium">
                 <FormatAmount
-                  amount={Math.abs(netAmount)}
+                  amount={collectedTax}
                   currency={taxData.currency}
                 />
               </span>
             </div>
-
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">
-                  {taxTerms.collected}
-                </span>
-                <span className="font-medium">
-                  <FormatAmount
-                    amount={collectedTax}
-                    currency={taxData.currency}
-                  />
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">{taxTerms.paid}</span>
-                <span className="font-medium">
-                  <FormatAmount amount={paidTax} currency={taxData.currency} />
-                </span>
-              </div>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">{taxTerms.paid}</span>
+              <span className="font-medium">
+                <FormatAmount amount={paidTax} currency={taxData.currency} />
+              </span>
             </div>
           </div>
-        )}
-      </BaseWidget>
-    </ConfigurableWidget>
+        </div>
+      )}
+    </BaseWidget>
   );
 }

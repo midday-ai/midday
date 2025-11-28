@@ -16,7 +16,6 @@ import {
   getTaxSummarySchema,
   getTrackedTimeSchema,
   getVaultActivitySchema,
-  updateWidgetConfigSchema,
   updateWidgetPreferencesSchema,
 } from "@api/schemas/widgets";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
@@ -409,18 +408,6 @@ export const widgetsRouter = createTRPCRouter({
         teamId!,
         session.user.id,
         input.primaryWidgets,
-      );
-      return preferences;
-    }),
-
-  updateWidgetConfig: protectedProcedure
-    .input(updateWidgetConfigSchema)
-    .mutation(async ({ ctx: { teamId, session }, input }) => {
-      const preferences = await widgetPreferencesCache.updateWidgetConfig(
-        teamId!,
-        session.user.id,
-        input.widgetType,
-        input.config,
       );
       return preferences;
     }),

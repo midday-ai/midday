@@ -1,7 +1,6 @@
 "use client";
 
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
-import type { WidgetConfig } from "@midday/cache/widget-preferences-cache";
 import type { inferRouterOutputs } from "@trpc/server";
 import { type ReactNode, createContext, useContext, useRef } from "react";
 import { useStore } from "zustand";
@@ -20,7 +19,6 @@ interface WidgetState {
   // Widget State
   primaryWidgets: WidgetType[];
   availableWidgets: WidgetType[];
-  widgetConfigs: Record<string, WidgetConfig>;
 
   // Loading States
   isSaving: boolean;
@@ -46,7 +44,6 @@ export const createWidgetStore = (initialPreferences?: WidgetPreferences) => {
     primaryWidgets: initialPreferences?.primaryWidgets || ([] as WidgetType[]),
     availableWidgets:
       initialPreferences?.availableWidgets || ([] as WidgetType[]),
-    widgetConfigs: initialPreferences?.widgetConfigs || {},
     isSaving: false,
   };
 
@@ -63,7 +60,6 @@ export const createWidgetStore = (initialPreferences?: WidgetPreferences) => {
             {
               primaryWidgets: preferences.primaryWidgets,
               availableWidgets: preferences.availableWidgets,
-              widgetConfigs: preferences.widgetConfigs || {},
             },
             false,
             "setWidgetPreferences",
@@ -221,5 +217,3 @@ export const useWidgetActions = () =>
     })),
   );
 
-export const useWidgetConfig = (widgetType: WidgetType) =>
-  useWidgetStore((state) => state.widgetConfigs[widgetType]);

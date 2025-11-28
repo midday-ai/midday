@@ -1,10 +1,10 @@
+import { useAnalyticsFilter } from "@/hooks/use-analytics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
-import { endOfDay, startOfDay, subDays } from "date-fns";
 import { useRouter } from "next/navigation";
 import { BaseWidget } from "./base";
 
@@ -15,14 +15,16 @@ export function InboxWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
+  const { from, to, currency, isReady } = useAnalyticsFilter();
 
-  const { data } = useQuery(
-    trpc.widgets.getInboxStats.queryOptions({
-      from: startOfDay(subDays(new Date(), 7)).toISOString(),
-      to: endOfDay(new Date()).toISOString(),
-      currency: team?.baseCurrency ?? undefined,
+  const { data } = useQuery({
+    ...trpc.widgets.getInboxStats.queryOptions({
+      from,
+      to,
+      currency: currency ?? team?.baseCurrency ?? undefined,
     }),
-  );
+    enabled: isReady,
+  });
 
   const stats = data?.result;
 

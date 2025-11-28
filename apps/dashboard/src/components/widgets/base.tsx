@@ -10,7 +10,6 @@ interface BaseWidgetProps {
   actions: React.ReactNode;
   icon: React.ReactNode;
   children?: React.ReactNode;
-  onConfigure?: () => void;
 }
 
 export function BaseWidget({
@@ -20,7 +19,6 @@ export function BaseWidget({
   description,
   actions,
   icon,
-  onConfigure,
 }: BaseWidgetProps) {
   const isCustomizing = useIsCustomizing();
   const { setIsCustomizing } = useWidgetActions();
@@ -46,31 +44,6 @@ export function BaseWidget({
             <span className="text-[#666666]">{icon}</span>
             <h3 className="text-xs text-[#666666] font-medium">{title}</h3>
           </div>
-          {onConfigure && !isCustomizing && (
-            <button
-              type="button"
-              onMouseDown={(e) => {
-                e.stopPropagation();
-              }}
-              onMouseUp={(e) => {
-                e.stopPropagation();
-              }}
-              onTouchStart={(e) => {
-                e.stopPropagation();
-              }}
-              onTouchEnd={(e) => {
-                e.stopPropagation();
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                onConfigure();
-              }}
-              className="opacity-0 group-hover:opacity-100 transition-opacity text-[#666666] hover:text-primary"
-            >
-              <Icons.Settings className="size-3.5" />
-            </button>
-          )}
         </div>
 
         {typeof description === "string" ? (

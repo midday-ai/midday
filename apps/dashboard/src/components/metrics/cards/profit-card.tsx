@@ -3,18 +3,9 @@
 import { AnimatedNumber } from "@/components/animated-number";
 import { ProfitChart } from "@/components/charts/profit-chart";
 import { useTRPC } from "@/trpc/client";
-import { Button } from "@midday/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface ProfitCardProps {
@@ -24,6 +15,7 @@ interface ProfitCardProps {
   locale?: string;
   isCustomizing: boolean;
   wiggleClass?: string;
+  revenueType?: "net" | "gross";
 }
 
 export function ProfitCard({
@@ -33,9 +25,9 @@ export function ProfitCard({
   locale,
   isCustomizing,
   wiggleClass,
+  revenueType = "net",
 }: ProfitCardProps) {
   const trpc = useTRPC();
-  const [revenueType, setRevenueType] = useState<"net" | "gross">("net");
 
   const { data: profitData } = useQuery(
     trpc.reports.profit.queryOptions({
@@ -82,33 +74,6 @@ export function ProfitCard({
             Profit & Loss
           </h3>
           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 px-2 text-xs border border-border"
-                >
-                  {revenueType === "net" ? "Net" : "Gross"}
-                  <Icons.ChevronDown size={12} className="ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48" portal={false}>
-                <DropdownMenuRadioGroup
-                  value={revenueType}
-                  onValueChange={(value) =>
-                    setRevenueType(value as "net" | "gross")
-                  }
-                >
-                  <DropdownMenuRadioItem value="net">
-                    Net Profit (ex tax)
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="gross">
-                    Gross Profit (inc tax)
-                  </DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
             <ShareMetricButton
               type="profit"
               from={from}

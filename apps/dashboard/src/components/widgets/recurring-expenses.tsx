@@ -1,48 +1,32 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
+import { useAnalyticsFilter } from "@/hooks/use-analytics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useTeamQuery } from "@/hooks/use-team";
-import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
+import { getPeriodLabel } from "@/utils/metrics-date-utils";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
-import { getWidgetPeriodDates } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { useRouter } from "next/navigation";
-import { useMemo } from "react";
 import { BaseWidget } from "./base";
-import { ConfigurableWidget } from "./configurable-widget";
-import { useConfigurableWidget } from "./use-configurable-widget";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
-import { WidgetSettings } from "./widget-settings";
 
 export function RecurringExpensesWidget() {
   const trpc = useTRPC();
-  const router = useRouter();
   const { data: team } = useTeamQuery();
-  const t = useI18n();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { config, isConfiguring, setIsConfiguring, saveConfig } =
-    useConfigurableWidget("recurring-expenses");
-
-  const { from, to } = useMemo(() => {
-    const period = config?.period ?? "trailing_12";
-    return getWidgetPeriodDates(period, team?.fiscalYearStartMonth);
-  }, [config?.period, team?.fiscalYearStartMonth]);
-
-  const fromStr = format(from, "yyyy-MM-dd");
-  const toStr = format(to, "yyyy-MM-dd");
+  const { from, to, period, isReady } = useAnalyticsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getRecurringExpenses.queryOptions({
-      from: fromStr,
-      to: toStr,
+      from,
+      to,
     }),
     ...WIDGET_POLLING_CONFIG,
+    enabled: isReady,
   });
 
   const recurringData = data?.result;
@@ -82,16 +66,14 @@ export function RecurringExpensesWidget() {
     });
   };
 
-  const handleViewRecurring = () => {
-    const periodLabel = t(
-      `widget_period.${config?.period ?? "trailing_12"}` as "widget_period.fiscal_ytd",
-    );
+  const periodLabel = getPeriodLabel(period, from, to);
 
+  const handleViewRecurring = () => {
     handleToolCall({
       toolName: "getExpenses",
       toolParams: {
-        from: fromStr,
-        to: toStr,
+        from,
+        to,
         currency: team?.baseCurrency ?? undefined,
         showCanvas: true,
       },
@@ -100,38 +82,24 @@ export function RecurringExpensesWidget() {
   };
 
   return (
-    <ConfigurableWidget
-      isConfiguring={isConfiguring}
-      settings={
-        <WidgetSettings
-          config={config}
-          onSave={saveConfig}
-          onCancel={() => setIsConfiguring(false)}
-          showPeriod
-          showRevenueType={false}
-        />
-      }
+    <BaseWidget
+      title="Recurring Expenses"
+      icon={<Icons.Repeat className="size-4" />}
+      description={getDescription()}
+      onClick={handleViewRecurring}
+      actions="View all recurring"
     >
-      <BaseWidget
-        title="Recurring Expenses"
-        icon={<Icons.Repeat className="size-4" />}
-        description={getDescription()}
-        onClick={handleViewRecurring}
-        actions="View all recurring"
-        onConfigure={() => setIsConfiguring(true)}
-      >
-        {recurringData && recurringData.summary.totalExpenses > 0 && (
-          <div className="flex items-baseline w-full">
-            <span className="text-3xl">
-              <FormatAmount
-                amount={recurringData.summary.totalMonthlyEquivalent}
-                currency={recurringData.summary.currency}
-              />
-            </span>
-            <span className="text-xs text-muted-foreground ml-1">/month</span>
-          </div>
-        )}
-      </BaseWidget>
-    </ConfigurableWidget>
+      {recurringData && recurringData.summary.totalExpenses > 0 && (
+        <div className="flex items-baseline w-full">
+          <span className="text-3xl">
+            <FormatAmount
+              amount={recurringData.summary.totalMonthlyEquivalent}
+              currency={recurringData.summary.currency}
+            />
+          </span>
+          <span className="text-xs text-muted-foreground ml-1">/month</span>
+        </div>
+      )}
+    </BaseWidget>
   );
 }

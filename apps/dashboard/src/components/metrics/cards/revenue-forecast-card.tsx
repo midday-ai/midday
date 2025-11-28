@@ -15,6 +15,7 @@ interface RevenueForecastCardProps {
   locale?: string;
   isCustomizing: boolean;
   wiggleClass?: string;
+  revenueType?: "net" | "gross";
 }
 
 export function RevenueForecastCard({
@@ -22,6 +23,7 @@ export function RevenueForecastCard({
   to,
   currency = "USD",
   locale,
+  revenueType = "net",
 }: RevenueForecastCardProps) {
   const trpc = useTRPC();
 
@@ -31,7 +33,7 @@ export function RevenueForecastCard({
       to,
       forecastMonths: 6,
       currency,
-      revenueType: "net",
+      revenueType,
     }),
   );
 

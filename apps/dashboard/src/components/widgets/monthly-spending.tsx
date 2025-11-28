@@ -1,43 +1,32 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
+import { useAnalyticsFilter } from "@/hooks/use-analytics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useTeamQuery } from "@/hooks/use-team";
-import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
+import { getPeriodLabel } from "@/utils/metrics-date-utils";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
-import { getWidgetPeriodDates } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { useMemo } from "react";
 import { BaseWidget } from "./base";
-import { ConfigurableWidget } from "./configurable-widget";
-import { useConfigurableWidget } from "./use-configurable-widget";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
-import { WidgetSettings } from "./widget-settings";
 
 export function MonthlySpendingWidget() {
   const trpc = useTRPC();
   const { data: team } = useTeamQuery();
-  const t = useI18n();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { config, isConfiguring, setIsConfiguring, saveConfig } =
-    useConfigurableWidget("monthly-spending");
-
-  const { from, to } = useMemo(() => {
-    const period = config?.period ?? "trailing_12";
-    return getWidgetPeriodDates(period, team?.fiscalYearStartMonth);
-  }, [config?.period, team?.fiscalYearStartMonth]);
+  const { from, to, period, isReady } = useAnalyticsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getMonthlySpending.queryOptions({
-      from: format(from, "yyyy-MM-dd"),
-      to: format(to, "yyyy-MM-dd"),
+      from,
+      to,
     }),
     ...WIDGET_POLLING_CONFIG,
+    enabled: isReady,
   });
 
   const spending = data?.result;
@@ -76,16 +65,14 @@ export function MonthlySpendingWidget() {
     });
   };
 
-  const handleSeeExpenses = () => {
-    const periodLabel = t(
-      `widget_period.${config?.period ?? "trailing_12"}` as "widget_period.fiscal_ytd",
-    );
+  const periodLabel = getPeriodLabel(period, from, to);
 
+  const handleSeeExpenses = () => {
     handleToolCall({
       toolName: "getSpending",
       toolParams: {
-        from: format(from, "yyyy-MM-dd"),
-        to: format(to, "yyyy-MM-dd"),
+        from,
+        to,
         currency: team?.baseCurrency ?? undefined,
         showCanvas: true,
       },
@@ -94,35 +81,21 @@ export function MonthlySpendingWidget() {
   };
 
   return (
-    <ConfigurableWidget
-      isConfiguring={isConfiguring}
-      settings={
-        <WidgetSettings
-          config={config}
-          onSave={saveConfig}
-          onCancel={() => setIsConfiguring(false)}
-          showPeriod
-          showRevenueType={false}
-        />
-      }
+    <BaseWidget
+      title="Monthly Spending"
+      icon={<Icons.Transactions className="size-4" />}
+      description={getDescription()}
+      onClick={handleSeeExpenses}
+      actions="See biggest cost"
     >
-      <BaseWidget
-        title="Monthly Spending"
-        icon={<Icons.Transactions className="size-4" />}
-        description={getDescription()}
-        onClick={handleSeeExpenses}
-        actions="See biggest cost"
-        onConfigure={() => setIsConfiguring(true)}
-      >
-        {spending && spending.totalSpending > 0 && (
-          <p className="text-3xl">
-            <FormatAmount
-              amount={spending.totalSpending}
-              currency={spending.currency}
-            />
-          </p>
-        )}
-      </BaseWidget>
-    </ConfigurableWidget>
+      {spending && spending.totalSpending > 0 && (
+        <p className="text-3xl">
+          <FormatAmount
+            amount={spending.totalSpending}
+            currency={spending.currency}
+          />
+        </p>
+      )}
+    </BaseWidget>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { ChatHistory } from "@/components/chat/chat-history";
+import { AnalyticsFilter } from "@/components/metrics/components/analytics-filter";
 import { Customize } from "@/components/widgets/customize";
 import { useUserQuery } from "@/hooks/use-user";
 import { TZDate } from "@date-fns/tz";
@@ -64,6 +65,7 @@ export function WidgetsHeader() {
       </div>
 
       <div className="flex items-center space-x-2" data-no-close>
+        <AnalyticsFilter />
         <div className="hidden md:block">
           <Customize />
         </div>

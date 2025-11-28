@@ -1,53 +1,40 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
+import { useAnalyticsFilter } from "@/hooks/use-analytics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useTeamQuery } from "@/hooks/use-team";
-import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
+import { getPeriodLabel } from "@/utils/metrics-date-utils";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
-import { getWidgetPeriodDates } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useMemo } from "react";
 import { Line, LineChart, ResponsiveContainer } from "recharts";
 import { BaseWidget } from "./base";
-import { ConfigurableWidget } from "./configurable-widget";
-import { useConfigurableWidget } from "./use-configurable-widget";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
-import { WidgetSettings } from "./widget-settings";
 
 export function RevenueForecastWidget() {
   const trpc = useTRPC();
   const { data: team } = useTeamQuery();
-  const t = useI18n();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { config, isConfiguring, setIsConfiguring, saveConfig } =
-    useConfigurableWidget("revenue-forecast");
+  const { from, to, period, revenueType, currency, isReady } =
+    useAnalyticsFilter();
 
   const forecastMonths = 6;
 
-  const { from, to } = useMemo(() => {
-    const period = config?.period ?? "trailing_12";
-    return getWidgetPeriodDates(period, team?.fiscalYearStartMonth);
-  }, [config?.period, team?.fiscalYearStartMonth]);
-
-  // Ensure widget and tool use identical parameters
-  const fromStr = format(from, "yyyy-MM-dd");
-  const toStr = format(to, "yyyy-MM-dd");
-
   const { data } = useQuery({
     ...trpc.reports.revenueForecast.queryOptions({
-      from: fromStr,
-      to: toStr,
+      from,
+      to,
       forecastMonths,
-      currency: team?.baseCurrency ?? undefined,
-      revenueType: "net",
+      currency: currency ?? team?.baseCurrency ?? undefined,
+      revenueType,
     }),
     ...WIDGET_POLLING_CONFIG,
+    enabled: isReady,
   });
 
   const handleToolCall = (params: {
@@ -71,18 +58,16 @@ export function RevenueForecastWidget() {
     });
   };
 
-  const handleViewDetails = () => {
-    const periodLabel = t(
-      `widget_period.${config?.period ?? "trailing_12"}` as "widget_period.fiscal_ytd",
-    );
+  const periodLabel = getPeriodLabel(period, from, to);
 
+  const handleViewDetails = () => {
     handleToolCall({
       toolName: "getForecast",
       toolParams: {
-        from: fromStr,
-        to: toStr,
-        currency: team?.baseCurrency ?? undefined,
-        revenueType: "net",
+        from,
+        to,
+        currency: (currency || team?.baseCurrency) ?? undefined,
+        revenueType,
         forecastMonths,
         showCanvas: true,
       },
@@ -110,74 +95,62 @@ export function RevenueForecastWidget() {
     : [];
 
   const nextMonthProjection = data?.summary?.nextMonthProjection ?? 0;
-  const currency = data?.summary?.currency || team?.baseCurrency || "USD";
+  const displayCurrency =
+    data?.summary?.currency || team?.baseCurrency || "USD";
 
   return (
-    <ConfigurableWidget
-      isConfiguring={isConfiguring}
-      settings={
-        <WidgetSettings
-          config={config}
-          onSave={saveConfig}
-          onCancel={() => setIsConfiguring(false)}
-          showPeriod
-        />
-      }
-    >
-      <BaseWidget
-        title="Forecast"
-        icon={<Icons.TrendingUp className="size-4" />}
-        onConfigure={() => setIsConfiguring(true)}
-        description={
-          <div className="flex flex-col gap-3">
-            <p className="text-sm text-[#878787]">Revenue projection</p>
+    <BaseWidget
+      title="Forecast"
+      icon={<Icons.TrendingUp className="size-4" />}
+      description={
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-[#878787]">Revenue projection</p>
 
-            {/* Simple trend line chart */}
-            {chartData.length > 0 ? (
-              <div className="h-12 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={chartData}
-                    margin={{ top: 1, right: 0, left: 0, bottom: 1 }}
-                  >
-                    <Line
-                      isAnimationActive={false}
-                      type="monotone"
-                      dataKey="value"
-                      stroke="hsl(var(--foreground))"
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="h-12 w-full flex items-center">
-                <div className="text-xs text-muted-foreground">
-                  No data available
-                </div>
-              </div>
-            )}
-
-            {data?.summary && (
-              <p className="text-sm text-[#666666]">
-                Next month projection{" "}
-                <span className="font-medium text-foreground">
-                  +
-                  <FormatAmount
-                    amount={nextMonthProjection}
-                    currency={currency}
+          {/* Simple trend line chart */}
+          {chartData.length > 0 ? (
+            <div className="h-12 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={chartData}
+                  margin={{ top: 1, right: 0, left: 0, bottom: 1 }}
+                >
+                  <Line
+                    isAnimationActive={false}
+                    type="monotone"
+                    dataKey="value"
+                    stroke="hsl(var(--foreground))"
+                    strokeWidth={2}
+                    dot={false}
                   />
-                </span>
-              </p>
-            )}
-          </div>
-        }
-        actions="View forecast details"
-        onClick={handleViewDetails}
-      >
-        <div />
-      </BaseWidget>
-    </ConfigurableWidget>
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="h-12 w-full flex items-center">
+              <div className="text-xs text-muted-foreground">
+                No data available
+              </div>
+            </div>
+          )}
+
+          {data?.summary && (
+            <p className="text-sm text-[#666666]">
+              Next month projection{" "}
+              <span className="font-medium text-foreground">
+                +
+                <FormatAmount
+                  amount={nextMonthProjection}
+                  currency={displayCurrency}
+                />
+              </span>
+            </p>
+          )}
+        </div>
+      }
+      actions="View forecast details"
+      onClick={handleViewDetails}
+    >
+      <div />
+    </BaseWidget>
   );
 }

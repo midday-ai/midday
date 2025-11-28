@@ -1,8 +1,7 @@
 "use client";
 
+import { useAnalyticsFilter } from "@/hooks/use-analytics-filter";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { useMetricsParams } from "@/hooks/use-metrics-params";
-import { useTeamQuery } from "@/hooks/use-team";
 import { useUserQuery } from "@/hooks/use-user";
 import { useMemo, useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
@@ -19,22 +18,15 @@ import { SortableChartCard } from "./components/sortable-chart-card";
 import { type ChartId, DEFAULT_CHART_ORDER } from "./utils/chart-types";
 
 export function MetricsView() {
-  const { data: team } = useTeamQuery();
   const { data: user } = useUserQuery();
-  const { from, to, setParams } = useMetricsParams();
+  const { from, to, currency, revenueType } = useAnalyticsFilter();
   const [isCustomizing, setIsCustomizing] = useState(false);
   const [chartOrder, setChartOrder] = useLocalStorage<ChartId[]>(
     "metrics-chart-order",
     DEFAULT_CHART_ORDER,
   );
-  const [selectedCurrency, setSelectedCurrency] = useLocalStorage<
-    string | null
-  >("metrics-display-currency", null);
   const gridRef = useRef<HTMLDivElement>(null!);
 
-  const baseCurrency = team?.baseCurrency ?? undefined;
-  // Use selected currency if set, otherwise fall back to base currency
-  const currency = selectedCurrency ?? baseCurrency;
   const locale = user?.locale ?? undefined;
 
   // Ensure all charts are in the order (handle new charts being added)
@@ -60,13 +52,6 @@ export function MetricsView() {
     return `wiggle-${wiggleIndex}`;
   };
 
-  const handleDateRangeChange = (newFrom: string, newTo: string) => {
-    setParams({
-      from: newFrom,
-      to: newTo,
-    });
-  };
-
   // Chart component mapping
   const renderChart = (chartId: ChartId, index: number) => {
     const wiggleClass = getWiggleClass(index);
@@ -77,6 +62,7 @@ export function MetricsView() {
       locale,
       isCustomizing,
       wiggleClass,
+      revenueType,
     };
 
     const chartContent = (() => {
@@ -120,15 +106,8 @@ export function MetricsView() {
   return (
     <div className="flex flex-col gap-6" ref={gridRef}>
       <MetricsHeader
-        from={from}
-        to={to}
-        fiscalYearStartMonth={team?.fiscalYearStartMonth}
         isCustomizing={isCustomizing}
         onCustomizeToggle={() => setIsCustomizing(!isCustomizing)}
-        onDateRangeChange={handleDateRangeChange}
-        baseCurrency={baseCurrency}
-        selectedCurrency={selectedCurrency}
-        onCurrencyChange={setSelectedCurrency}
       />
 
       <MetricsGrid
