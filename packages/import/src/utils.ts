@@ -4,7 +4,7 @@ import { format, isValid, parseISO } from "date-fns";
 
 /** Check if date string has explicit timezone (Z, UTC, GMT, or offset after time) */
 const hasTimezone = (s: string) =>
-  /Z$|UTC|GMT|\d{2}:\d{2}(:\d{2})?\s*[+-]\d{2}(:?\d{2})?$/i.test(s);
+  /Z$|\bUTC\b|\bGMT\b|\d{2}:\d{2}(:\d{2})?\s*[+-]\d{2}(:?\d{2})?$/i.test(s);
 
 /**
  * Formats a date string into YYYY-MM-DD format.
