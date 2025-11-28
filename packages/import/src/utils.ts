@@ -1,75 +1,34 @@
-import { isValid, parse, parseISO } from "date-fns";
+import * as chrono from "chrono-node";
+import { isValid, parseISO } from "date-fns";
 
-function ensureValidYear(dateString: string | undefined): string | undefined {
-  if (!dateString) return undefined;
+/**
+ * Formats a date string into YYYY-MM-DD format.
+ * Uses parseISO for fast ISO format parsing, falls back to chrono-node for other formats.
+ * Extracts date components directly to avoid timezone-related date shifts.
+ */
+export function formatDate(dateString: string): string | undefined {
+  if (!dateString?.trim()) return undefined;
 
-  const [year, month, day] = dateString.split("-");
-  const correctedYear =
-    year?.length === 4
-      ? year.startsWith("20")
-        ? year
-        : `20${year.slice(2)}`
-      : `20${year}`;
+  const trimmed = dateString.trim();
 
-  return `${correctedYear}-${month}-${day}`;
-}
-
-export function formatDate(date: string) {
-  const formats = [
-    "dd/MMM/yyyy",
-    "dd/MM/yyyy",
-    "yyyy-MM-dd",
-    "MM/dd/yyyy",
-    "dd.MM.yyyy",
-    "dd-MM-yyyy",
-    "yyyy/MM/dd",
-    "MM-dd-yyyy",
-    "yyyy.MM.dd",
-    "dd MMM yyyy",
-    "MMM dd, yyyy",
-    "MMMM dd, yyyy",
-    "yyyy-MM-dd'T'HH:mm:ss",
-    "yyyy-MM-dd HH:mm:ss",
-    "dd/MM/yyyy HH:mm:ss",
-    "MM/dd/yyyy HH:mm:ss",
-    "yyyy/MM/dd HH:mm:ss",
-    "dd.MM.yyyy HH:mm:ss",
-    "dd-MM-yyyy HH:mm:ss",
-    "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-    "yyyy-MM-dd'T'HH:mm:ss",
-    "d/M/yy",
-  ];
-
-  for (const format of formats) {
-    const parsedDate = parse(date, format, new Date());
-    if (isValid(parsedDate)) {
-      return ensureValidYear(parsedDate.toISOString().split("T")[0]);
-    }
+  // Fast path: try parseISO first for ISO-like formats (2025-10-01, 2025-10-01T00:00:00, etc.)
+  const isoDate = parseISO(trimmed);
+  if (isValid(isoDate)) {
+    const year = isoDate.getFullYear();
+    const month = String(isoDate.getMonth() + 1).padStart(2, "0");
+    const day = String(isoDate.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   }
 
-  try {
-    const parsedDate = parseISO(date);
-    if (isValid(parsedDate)) {
-      return ensureValidYear(parsedDate.toISOString().split("T")[0]);
-    }
-  } catch {
-    // Continue if parseISO fails
-  }
+  // Fallback: use chrono-node for other formats (Oct 1, 2025, 01/10/2025 UTC, etc.)
+  const parsed = chrono.parseDate(trimmed);
+  if (!parsed) return undefined;
 
-  // If the date includes a time, we don't need to remove the time.
-  const value = date.includes("T") ? date : date.replace(/[^0-9-\.\/]/g, "");
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+  const day = String(parsed.getDate()).padStart(2, "0");
 
-  try {
-    const parsedDate = parseISO(value);
-    if (isValid(parsedDate)) {
-      return ensureValidYear(parsedDate.toISOString().split("T")[0]);
-    }
-  } catch {
-    // Continue if parseISO fails
-  }
-
-  // If all parsing attempts fail, return undefined
-  return undefined;
+  return `${year}-${month}-${day}`;
 }
 
 export function formatAmountValue({

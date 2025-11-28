@@ -9,7 +9,7 @@ export const createTransactionSchema = z.object({
   internal_id: z.string(),
   status: z.enum(["posted", "pending"]),
   method: z.enum(["card", "bank", "other"]),
-  date: z.coerce.date(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format"),
   amount: z.number(),
   manual: z.boolean(),
   category_slug: z.string().nullable(),

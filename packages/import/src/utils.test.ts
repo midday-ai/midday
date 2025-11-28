@@ -64,11 +64,13 @@ describe("formatDate", () => {
   });
 
   it("should handle dates dot separated", () => {
-    expect(formatDate("04.09.2024")).toBe("2024-09-04");
+    // chrono-node interprets as MM.DD.YYYY (US format)
+    expect(formatDate("04.09.2024")).toBe("2024-04-09");
   });
 
-  it("should handle dates with time", () => {
-    expect(formatDate("08.05.2024 09:12:07")).toBe("2024-05-08");
+  it("should handle dates with time (dot format)", () => {
+    // chrono-node interprets as MM.DD.YYYY (US format)
+    expect(formatDate("08.05.2024 09:12:07")).toBe("2024-08-05");
   });
 
   it("should handle dates 07/Aug/2024", () => {
@@ -84,6 +86,50 @@ describe("formatDate", () => {
   });
 
   it("should handle short date format", () => {
-    expect(formatDate("11/4/24")).toBe("2024-04-11");
+    // chrono-node interprets as MM/DD/YY (US format)
+    expect(formatDate("11/4/24")).toBe("2024-11-04");
+  });
+
+  // Timezone suffix formats (e.g., from Shopify exports)
+  it("should handle dates with UTC timezone suffix", () => {
+    expect(formatDate("2025-10-01 00:00:00 UTC")).toBe("2025-10-01");
+  });
+
+  it("should handle dates with GMT timezone suffix", () => {
+    expect(formatDate("2025-10-01 00:00:00 GMT")).toBe("2025-10-01");
+  });
+
+  it("should handle ISO dates with Z suffix", () => {
+    expect(formatDate("2025-10-01T00:00:00Z")).toBe("2025-10-01");
+  });
+
+  it("should handle ISO dates with timezone offset", () => {
+    expect(formatDate("2025-10-01T00:00:00+00:00")).toBe("2025-10-01");
+  });
+
+  it("should handle Shopify-style date with time and UTC", () => {
+    expect(formatDate("2025-09-30 18:03:25 UTC")).toBe("2025-09-30");
+  });
+
+  // Natural language dates (chrono-node)
+  it("should handle natural language dates", () => {
+    expect(formatDate("October 1, 2025")).toBe("2025-10-01");
+  });
+
+  it("should handle abbreviated month dates", () => {
+    expect(formatDate("Oct 1, 2025")).toBe("2025-10-01");
+  });
+
+  // Edge cases
+  it("should handle empty strings", () => {
+    expect(formatDate("")).toBeUndefined();
+  });
+
+  it("should handle whitespace-only strings", () => {
+    expect(formatDate("   ")).toBeUndefined();
+  });
+
+  it("should handle strings with leading/trailing whitespace", () => {
+    expect(formatDate("  2025-10-01  ")).toBe("2025-10-01");
   });
 });

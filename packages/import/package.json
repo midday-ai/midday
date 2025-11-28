@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "change-case": "^5.4.4",
+    "chrono-node": "^2.9.0",
+    "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "uuid": "^13.0.0"
   },
