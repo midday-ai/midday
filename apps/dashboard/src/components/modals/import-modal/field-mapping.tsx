@@ -253,9 +253,7 @@ function FieldRow({
     ? formatAmountValue({ amount: description, inverted })
     : null;
   const isAmountInvalid =
-    field === "amount" &&
-    description &&
-    (parsedAmount === null || Number.isNaN(parsedAmount));
+    field === "amount" && description && Number.isNaN(parsedAmount);
 
   // Combined invalid state for styling
   const isFieldInvalid = isDateInvalid || isAmountInvalid;
