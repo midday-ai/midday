@@ -1,6 +1,7 @@
 "use client";
 
 import { importTransactionsAction } from "@/actions/transactions/import-transactions";
+import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
 import { useSyncStatus } from "@/hooks/use-sync-status";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useUpload } from "@/hooks/use-upload";
@@ -35,6 +36,7 @@ export function ImportModal() {
   const defaultCurrency = team?.baseCurrency || "USD";
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const invalidateTransactionQueries = useInvalidateTransactionQueries();
   const [runId, setRunId] = useState<string | undefined>();
   const [accessToken, setAccessToken] = useState<string | undefined>();
   const [isImporting, setIsImporting] = useState(false);
@@ -157,20 +159,16 @@ export function ImportModal() {
       setRunId(undefined);
       setAccessToken(undefined);
 
-      queryClient.invalidateQueries({
-        queryKey: trpc.transactions.get.queryKey(),
-      });
+      // Invalidate all transaction-related queries (transactions, reports, widgets)
+      invalidateTransactionQueries();
 
+      // Also invalidate bank-related queries
       queryClient.invalidateQueries({
         queryKey: trpc.bankAccounts.get.queryKey(),
       });
 
       queryClient.invalidateQueries({
         queryKey: trpc.bankConnections.get.queryKey(),
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: trpc.reports.pathKey(),
       });
 
       toast({
