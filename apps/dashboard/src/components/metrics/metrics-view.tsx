@@ -27,9 +27,14 @@ export function MetricsView() {
     "metrics-chart-order",
     DEFAULT_CHART_ORDER,
   );
+  const [selectedCurrency, setSelectedCurrency] = useLocalStorage<
+    string | null
+  >("metrics-display-currency", null);
   const gridRef = useRef<HTMLDivElement>(null!);
 
-  const currency = team?.baseCurrency ?? undefined;
+  const baseCurrency = team?.baseCurrency ?? undefined;
+  // Use selected currency if set, otherwise fall back to base currency
+  const currency = selectedCurrency ?? baseCurrency;
   const locale = user?.locale ?? undefined;
 
   // Ensure all charts are in the order (handle new charts being added)
@@ -121,6 +126,9 @@ export function MetricsView() {
         isCustomizing={isCustomizing}
         onCustomizeToggle={() => setIsCustomizing(!isCustomizing)}
         onDateRangeChange={handleDateRangeChange}
+        baseCurrency={baseCurrency}
+        selectedCurrency={selectedCurrency}
+        onCurrencyChange={setSelectedCurrency}
       />
 
       <MetricsGrid

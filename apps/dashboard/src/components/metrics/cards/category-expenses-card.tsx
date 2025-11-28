@@ -121,8 +121,8 @@ export function CategoryExpensesCard({
             locale={locale}
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            No expense data available
+          <div className="flex items-center justify-center h-full text-xs text-muted-foreground -mt-10">
+            No expense data available.
           </div>
         )}
       </div>

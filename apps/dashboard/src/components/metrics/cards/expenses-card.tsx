@@ -65,8 +65,8 @@ export function ExpensesCard({
         {expenseData?.result && expenseData.result.length > 0 ? (
           <StackedBarChart data={expenseData} height={320} />
         ) : (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            No expense data available
+          <div className="flex items-center justify-center h-full text-xs text-muted-foreground -mt-10">
+            No expense data available.
           </div>
         )}
       </div>

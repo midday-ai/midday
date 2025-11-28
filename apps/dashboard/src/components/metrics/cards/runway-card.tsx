@@ -191,11 +191,8 @@ export function RunwayCard({
       </div>
       <div className="h-80">
         {hasNoData ? (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="text-xs text-muted-foreground text-center px-4">
-              Unable to calculate runway. Connect bank accounts and ensure cash
-              balance data is available.
-            </div>
+          <div className="flex items-center justify-center h-full text-xs text-muted-foreground -mt-10">
+            No balance data available.
           </div>
         ) : (
           <RunwayChart
