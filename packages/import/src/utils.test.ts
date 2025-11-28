@@ -117,6 +117,15 @@ describe("formatDate", () => {
     expect(formatDate("2025-10-01T00:00:00-0800")).toBe("2025-10-01");
   });
 
+  it("should preserve date in source timezone (not shift to UTC)", () => {
+    // Late-night dates with negative offsets would shift to next day if converted to UTC
+    // e.g., 2025-10-01T23:00:00-05:00 is 2025-10-02T04:00:00Z in UTC
+    // We should preserve the original date (2025-10-01), not the UTC date (2025-10-02)
+    expect(formatDate("2025-10-01T23:00:00-05:00")).toBe("2025-10-01");
+    expect(formatDate("2025-10-01T20:00:00-08:00")).toBe("2025-10-01");
+    expect(formatDate("2025-10-01T22:00:00-03:00")).toBe("2025-10-01");
+  });
+
   it("should handle space before timezone offset", () => {
     expect(formatDate("2025-10-01 00:00:00+00:00")).toBe("2025-10-01");
     expect(formatDate("2025-10-01 12:00:00-05:00")).toBe("2025-10-01");

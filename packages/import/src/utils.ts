@@ -1,33 +1,36 @@
-import { utc } from "@date-fns/utc";
 import * as chrono from "chrono-node";
-import { format, isValid, parseISO } from "date-fns";
-
-/** Check if date string has explicit timezone (Z, UTC, GMT, or offset after time) */
-const hasTimezone = (s: string) =>
-  /Z$|\bUTC\b|\bGMT\b|\d{2}:\d{2}(:\d{2})?\s*[+-]\d{2}(:?\d{2})?$/i.test(s);
+import { format } from "date-fns";
 
 /**
  * Formats a date string into YYYY-MM-DD format.
- * Uses parseISO for fast ISO format parsing, falls back to chrono-node for other formats.
- * Preserves UTC dates when timezone info is present, otherwise uses local timezone.
+ * For ISO-format dates (YYYY-MM-DD...), extracts the date portion directly to preserve
+ * the date in the original timezone (avoids UTC conversion shifting the date).
+ * Falls back to chrono-node for other formats.
  */
 export function formatDate(dateString: string): string | undefined {
   if (!dateString?.trim()) return undefined;
 
   const trimmed = dateString.trim();
-  const opts = hasTimezone(trimmed) ? { in: utc } : undefined;
 
-  // Fast path: try parseISO first for ISO-like formats (2025-10-01, 2025-10-01T00:00:00, etc.)
-  const isoDate = parseISO(trimmed);
-  if (isValid(isoDate)) {
-    return format(isoDate, "yyyy-MM-dd", opts);
+  // Fast path: extract date directly from ISO-like formats (YYYY-MM-DD...)
+  // This preserves the date in the source timezone instead of converting to UTC
+  const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    const [, year, month, day] = isoMatch;
+    const y = Number(year);
+    const m = Number(month);
+    const d = Number(day);
+    // Validate the date components are reasonable
+    if (m >= 1 && m <= 12 && d >= 1 && d <= 31) {
+      return `${year}-${month}-${day}`;
+    }
   }
 
-  // Fallback: use chrono-node for other formats (Oct 1, 2025, 01/10/2025 UTC, etc.)
+  // Fallback: use chrono-node for other formats (Oct 1, 2025, 01/10/2025, etc.)
   const parsed = chrono.parseDate(trimmed);
   if (!parsed) return undefined;
 
-  return format(parsed, "yyyy-MM-dd", opts);
+  return format(parsed, "yyyy-MM-dd");
 }
 
 export function formatAmountValue({
