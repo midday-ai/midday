@@ -107,6 +107,21 @@ describe("formatDate", () => {
     expect(formatDate("2025-10-01T00:00:00+00:00")).toBe("2025-10-01");
   });
 
+  it("should handle timezone offset without colon (+0000 format)", () => {
+    expect(formatDate("2025-10-01T00:00:00+0000")).toBe("2025-10-01");
+    expect(formatDate("2025-10-01T05:30:00+0530")).toBe("2025-10-01");
+  });
+
+  it("should handle negative timezone offsets", () => {
+    expect(formatDate("2025-10-01T00:00:00-05:00")).toBe("2025-10-01");
+    expect(formatDate("2025-10-01T00:00:00-0800")).toBe("2025-10-01");
+  });
+
+  it("should handle space before timezone offset", () => {
+    expect(formatDate("2025-10-01 00:00:00+00:00")).toBe("2025-10-01");
+    expect(formatDate("2025-10-01 12:00:00-05:00")).toBe("2025-10-01");
+  });
+
   it("should handle Shopify-style date with time and UTC", () => {
     expect(formatDate("2025-09-30 18:03:25 UTC")).toBe("2025-09-30");
   });

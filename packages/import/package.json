@@ -11,10 +11,10 @@
     "test": "bun test src"
   },
   "dependencies": {
+    "@date-fns/utc": "^2.1.1",
     "change-case": "^5.4.4",
     "chrono-node": "^2.9.0",
     "date-fns": "^4.1.0",
-    "date-fns-tz": "^3.2.0",
     "uuid": "^13.0.0"
   },
   "exports": {
