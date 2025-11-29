@@ -1,18 +1,7 @@
 "use client";
 
-import { cn } from "@midday/ui/cn";
 import { useQueryState } from "nuqs";
-
-const tabs = [
-  {
-    name: "All",
-    value: "all",
-  },
-  {
-    name: "Installed",
-    value: "installed",
-  },
-];
+import { Tabs, TabsList, TabsTrigger } from "@midday/ui/tabs";
 
 export function AppsTabs() {
   const [currentTab, setTab] = useQueryState("tab", {
@@ -20,23 +9,15 @@ export function AppsTabs() {
   });
 
   return (
-    <div className="flex">
-      {tabs.map((tab) => (
-        <button
-          onClick={() => setTab(tab.value)}
-          key={tab.value}
-          type="button"
-          className={cn(
-            "text-sm transition-colors px-4",
-            "dark:bg-[#1D1D1D] dark:text-[#878787]",
-            "bg-white text-gray-600",
-            currentTab === tab.value &&
-              "text-primary dark:bg-[#2C2C2C] bg-gray-100",
-          )}
-        >
-          {tab.name}
-        </button>
-      ))}
-    </div>
+    <Tabs value={currentTab ?? "all"} onValueChange={setTab}>
+      <TabsList className="h-9">
+        <TabsTrigger value="all" className="h-full px-2 py-0 text-xs">
+          All
+        </TabsTrigger>
+        <TabsTrigger value="installed" className="h-full px-2 py-0 text-xs">
+          Installed
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
   );
 }
