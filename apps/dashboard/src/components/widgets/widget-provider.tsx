@@ -216,4 +216,3 @@ export const useWidgetActions = () =>
       setSaving: state.setSaving,
     })),
   );
-

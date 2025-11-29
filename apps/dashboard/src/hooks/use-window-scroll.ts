@@ -38,4 +38,3 @@ export function useWindowScroll(options: UseWindowScrollOptions = {}) {
 
   return { scrollY, isScrolled };
 }
-
