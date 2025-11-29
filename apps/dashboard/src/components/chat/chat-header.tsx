@@ -14,7 +14,7 @@ export function ChatHeader() {
       <ChatNavigation />
       <ChatTitle />
       {!isHome && (
-        <div className="absolute right-0 flex items-center gap-4">
+        <div className="absolute right-0 flex items-center gap-2">
           <NewChatButton />
           <ChatHistory />
         </div>
