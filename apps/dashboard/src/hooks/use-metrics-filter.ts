@@ -139,9 +139,10 @@ export function useMetricsFilter() {
     fiscalYearStartMonth,
   ]);
 
-  // Sync URL params to store when they change (but not on initial load)
+  // Sync URL params to store when they change (but not when URL is at defaults)
   useEffect(() => {
     if (!storeIsReady) return;
+    if (isAtDefaults) return; // Don't sync if URL is at defaults (use localStorage values instead)
 
     syncFromUrl(
       params.period,
@@ -157,6 +158,7 @@ export function useMetricsFilter() {
     params.from,
     params.to,
     storeIsReady,
+    isAtDefaults,
     syncFromUrl,
   ]);
 
