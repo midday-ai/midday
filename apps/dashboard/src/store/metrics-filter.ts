@@ -12,6 +12,32 @@ const getStorageKey = (teamId: string | undefined): string => {
 
 type RevenueType = "gross" | "net";
 
+/**
+ * Type guard to check if a string is a valid PeriodOption
+ */
+function isPeriodOption(
+  value: string | null | undefined,
+): value is PeriodOption {
+  if (!value) return false;
+  const validPeriods: PeriodOption[] = [
+    "3-months",
+    "6-months",
+    "1-year",
+    "2-years",
+    "5-years",
+    "fiscal-year",
+    "custom",
+  ];
+  return validPeriods.includes(value as PeriodOption);
+}
+
+/**
+ * Type guard to check if a string is a valid RevenueType
+ */
+function isRevenueType(value: string | null | undefined): value is RevenueType {
+  return value === "gross" || value === "net";
+}
+
 interface StoredPreferences {
   period: PeriodOption;
   revenueType: RevenueType;
@@ -44,6 +70,22 @@ const savePreferences = (
   } catch {
     // Ignore errors
   }
+};
+
+/**
+ * Helper function to save current preferences to localStorage
+ * Extracts the current state and saves it, reducing code duplication
+ */
+const saveCurrentPreferences = (state: MetricsFilterState): void => {
+  if (!state.teamId) return;
+  const prefs: StoredPreferences = {
+    period: state.period,
+    revenueType: state.revenueType,
+    currency: state.currency,
+    customFrom: state.customFrom,
+    customTo: state.customTo,
+  };
+  savePreferences(prefs, state.teamId);
 };
 
 interface MetricsFilterState {
@@ -88,72 +130,66 @@ export const useMetricsFilterStore = create<MetricsFilterState>()(
     from: "",
     to: "",
 
+    /**
+     * Update the period filter and save to localStorage
+     */
     setPeriod: (period) => {
-      const state = get();
-      set({ period });
-      // Save to localStorage
-      const prefs: StoredPreferences = {
-        period,
-        revenueType: state.revenueType,
-        currency: state.currency,
-        customFrom: state.customFrom,
-        customTo: state.customTo,
-      };
-      savePreferences(prefs, state.teamId);
-    },
-
-    setRevenueType: (revenueType) => {
-      const state = get();
-      set({ revenueType });
-      // Save to localStorage
-      const prefs: StoredPreferences = {
-        period: state.period,
-        revenueType,
-        currency: state.currency,
-        customFrom: state.customFrom,
-        customTo: state.customTo,
-      };
-      savePreferences(prefs, state.teamId);
-    },
-
-    setCurrency: (currency) => {
-      const state = get();
-      set({ currency });
-      // Save to localStorage
-      const prefs: StoredPreferences = {
-        period: state.period,
-        revenueType: state.revenueType,
-        currency,
-        customFrom: state.customFrom,
-        customTo: state.customTo,
-      };
-      savePreferences(prefs, state.teamId);
-    },
-
-    setDateRange: (from, to) => {
-      const state = get();
-      set({
-        from,
-        to,
-        period: "custom" as PeriodOption,
-        customFrom: from,
-        customTo: to,
+      set((state) => {
+        saveCurrentPreferences({ ...state, period });
+        return { period };
       });
-      // Save to localStorage
-      const prefs: StoredPreferences = {
-        period: "custom",
-        revenueType: state.revenueType,
-        currency: state.currency,
-        customFrom: from,
-        customTo: to,
-      };
-      savePreferences(prefs, state.teamId);
     },
 
+    /**
+     * Update the revenue type filter and save to localStorage
+     */
+    setRevenueType: (revenueType) => {
+      set((state) => {
+        saveCurrentPreferences({ ...state, revenueType });
+        return { revenueType };
+      });
+    },
+
+    /**
+     * Update the currency filter and save to localStorage
+     * null = base currency, string = specific currency
+     */
+    setCurrency: (currency) => {
+      set((state) => {
+        saveCurrentPreferences({ ...state, currency });
+        return { currency };
+      });
+    },
+
+    /**
+     * Update the custom date range and save to localStorage
+     * Automatically sets period to "custom"
+     */
+    setDateRange: (from, to) => {
+      set((state) => {
+        const updates = {
+          from,
+          to,
+          period: "custom" as PeriodOption,
+          customFrom: from,
+          customTo: to,
+        };
+        saveCurrentPreferences({ ...state, ...updates });
+        return updates;
+      });
+    },
+
+    /**
+     * Update the fiscal year start month
+     */
     setFiscalYearStartMonth: (month) => {
       set({ fiscalYearStartMonth: month });
     },
 
+    /**
+     * Initialize the store with team ID and fiscal year settings
+     * Loads preferences from localStorage
+     */
     initialize: (teamId, fiscalYearStartMonth) => {
       set({
         teamId,
@@ -163,6 +199,9 @@ export const useMetricsFilterStore = create<MetricsFilterState>()(
       get().loadFromStorage(teamId);
     },
 
+    /**
+     * Load preferences from localStorage for the given team
+     */
     loadFromStorage: (teamId) => {
       const stored = getStoredPreferences(teamId);
       if (stored) {
@@ -177,6 +216,11 @@ export const useMetricsFilterStore = create<MetricsFilterState>()(
       set({ isReady: true });
     },
 
+    /**
+     * Sync URL parameters to store state
+     * Only updates fields that are provided and valid
+     * Saves updated preferences to localStorage
+     */
     syncFromUrl: (
       period?: string | null,
       revenueType?: string | null,
@@ -187,15 +231,22 @@ export const useMetricsFilterStore = create<MetricsFilterState>()(
       const state = get();
       const updates: Partial<MetricsFilterState> = {};
 
-      if (period) {
-        updates.period = period as PeriodOption;
+      // Validate and set period if provided
+      if (period && isPeriodOption(period)) {
+        updates.period = period;
       }
-      if (revenueType) {
-        updates.revenueType = revenueType as RevenueType;
+
+      // Validate and set revenue type if provided
+      if (revenueType && isRevenueType(revenueType)) {
+        updates.revenueType = revenueType;
       }
+
+      // Set currency if provided (can be null for base currency)
       if (currency !== undefined) {
         updates.currency = currency ?? null;
       }
+
+      // Set custom date range if both dates are provided
       if (from && to) {
         updates.from = from;
         updates.to = to;
@@ -203,20 +254,10 @@ export const useMetricsFilterStore = create<MetricsFilterState>()(
         updates.customTo = to;
       }
 
+      // Apply updates and save to localStorage
       if (Object.keys(updates).length > 0) {
         set(updates);
-        // Save to localStorage if we have teamId
-        if (state.teamId) {
-          const prefs: StoredPreferences = {
-            period: (updates.period ?? state.period) as PeriodOption,
-            revenueType: (updates.revenueType ??
-              state.revenueType) as RevenueType,
-            currency: updates.currency ?? state.currency,
-            customFrom: updates.customFrom ?? state.customFrom,
-            customTo: updates.customTo ?? state.customTo,
-          };
-          savePreferences(prefs, state.teamId);
-        }
+        saveCurrentPreferences({ ...state, ...updates });
       }
     },
   }),
