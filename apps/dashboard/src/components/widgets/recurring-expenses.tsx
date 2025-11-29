@@ -1,9 +1,8 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
-import { useAnalyticsFilter } from "@/hooks/use-analytics-filter";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
 import { getPeriodLabel } from "@/utils/metrics-date-utils";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
@@ -14,11 +13,10 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 
 export function RecurringExpensesWidget() {
   const trpc = useTRPC();
-  const { data: team } = useTeamQuery();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, period, isReady } = useAnalyticsFilter();
+  const { from, to, period, currency, isReady } = useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getRecurringExpenses.queryOptions({
@@ -74,7 +72,7 @@ export function RecurringExpensesWidget() {
       toolParams: {
         from,
         to,
-        currency: team?.baseCurrency ?? undefined,
+        currency: currency,
         showCanvas: true,
       },
       text: `Show recurring expenses for ${periodLabel}`,
@@ -94,7 +92,7 @@ export function RecurringExpensesWidget() {
           <span className="text-3xl">
             <FormatAmount
               amount={recurringData.summary.totalMonthlyEquivalent}
-              currency={recurringData.summary.currency}
+              currency={currency || "USD"}
             />
           </span>
           <span className="text-xs text-muted-foreground ml-1">/month</span>

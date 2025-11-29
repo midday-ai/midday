@@ -1,8 +1,8 @@
 "use client";
 
-import { useAnalyticsFilter } from "@/hooks/use-analytics-filter";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useUserQuery } from "@/hooks/use-user";
 import { useMemo, useRef } from "react";
 import { useOnClickOutside } from "usehooks-ts";
@@ -19,7 +19,7 @@ import { type ChartId, DEFAULT_CHART_ORDER } from "./utils/chart-types";
 
 export function MetricsView() {
   const { data: user } = useUserQuery();
-  const { from, to, currency, revenueType } = useAnalyticsFilter();
+  const { from, to, currency, revenueType } = useMetricsFilter();
   const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
   const [chartOrder, setChartOrder] = useLocalStorage<ChartId[]>(
     "metrics-chart-order",
@@ -55,11 +55,10 @@ export function MetricsView() {
   // Chart component mapping
   const renderChart = (chartId: ChartId, index: number) => {
     const wiggleClass = getWiggleClass(index);
-    const currencyValue: string | undefined = currency ?? undefined;
     const commonProps = {
       from,
       to,
-      currency: currencyValue,
+      currency,
       locale,
       isCustomizing,
       wiggleClass,

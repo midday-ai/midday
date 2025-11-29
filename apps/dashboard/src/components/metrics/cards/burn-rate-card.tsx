@@ -33,7 +33,6 @@ export function BurnRateCard({
   const { isMetricsTab } = useOverviewTab();
   const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
     useMetricsCustomize();
-  const currencyValue = currency ?? undefined;
 
   const longPressHandlers = useLongPress({
     onLongPress: () => setIsCustomizing(true),
@@ -45,7 +44,7 @@ export function BurnRateCard({
     ...trpc.reports.burnRate.queryOptions({
       from,
       to,
-      currency: currencyValue,
+      currency: currency,
     }),
     enabled: isMetricsTab,
   });
@@ -89,14 +88,14 @@ export function BurnRateCard({
               type="burn_rate"
               from={from}
               to={to}
-              currency={currencyValue}
+              currency={currency}
             />
           </div>
         </div>
         <p className="text-3xl font-normal mb-3">
           <AnimatedNumber
             value={currentBurnRate}
-            currency={currencyValue || "USD"}
+            currency={currency || "USD"}
             locale={locale}
             maximumFractionDigits={0}
           />
@@ -121,7 +120,7 @@ export function BurnRateCard({
         <BurnRateChart
           data={burnRateChartData}
           height={320}
-          currency={currencyValue}
+          currency={currency}
           locale={locale}
         />
       </div>

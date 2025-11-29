@@ -1,9 +1,8 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
-import { useAnalyticsFilter } from "@/hooks/use-analytics-filter";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
 import { getPeriodLabel } from "@/utils/metrics-date-utils";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
@@ -14,11 +13,10 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 
 export function MonthlySpendingWidget() {
   const trpc = useTRPC();
-  const { data: team } = useTeamQuery();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, period, isReady } = useAnalyticsFilter();
+  const { from, to, period, currency, isReady } = useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getMonthlySpending.queryOptions({
@@ -73,7 +71,7 @@ export function MonthlySpendingWidget() {
       toolParams: {
         from,
         to,
-        currency: team?.baseCurrency ?? undefined,
+        currency: currency,
         showCanvas: true,
       },
       text: `Show spending analysis for ${periodLabel}`,
@@ -92,7 +90,7 @@ export function MonthlySpendingWidget() {
         <p className="text-3xl">
           <FormatAmount
             amount={spending.totalSpending}
-            currency={spending.currency}
+            currency={currency || "USD"}
           />
         </p>
       )}

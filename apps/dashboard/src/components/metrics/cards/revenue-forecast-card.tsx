@@ -32,7 +32,6 @@ export function RevenueForecastCard({
   const trpc = useTRPC();
   const { isMetricsTab } = useOverviewTab();
   const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
-  const currencyValue = currency ?? undefined;
 
   const longPressHandlers = useLongPress({
     onLongPress: () => setIsCustomizing(true),
@@ -45,7 +44,7 @@ export function RevenueForecastCard({
       from,
       to,
       forecastMonths: 6,
-      currency: currencyValue,
+      currency: currency,
       revenueType,
     }),
     enabled: isMetricsTab,
@@ -112,14 +111,14 @@ export function RevenueForecastCard({
               type="revenue_forecast"
               from={from}
               to={to}
-              currency={currencyValue}
+              currency={currency}
             />
           </div>
         </div>
         <p className="text-3xl font-normal">
           <AnimatedNumber
             value={forecastedRevenue}
-            currency={currencyValue || "USD"}
+            currency={currency || "USD"}
             locale={locale}
             maximumFractionDigits={0}
           />
@@ -146,7 +145,7 @@ export function RevenueForecastCard({
         <RevenueForecastChart
           data={revenueForecastChartData}
           height={320}
-          currency={currencyValue}
+          currency={currency}
           locale={locale}
           forecastStartIndex={forecastStartIndex}
         />

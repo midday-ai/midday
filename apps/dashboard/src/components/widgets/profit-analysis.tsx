@@ -1,8 +1,7 @@
 "use client";
 
-import { useAnalyticsFilter } from "@/hooks/use-analytics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useTeamQuery } from "@/hooks/use-team";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
@@ -25,18 +24,18 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 
 export function ProfitAnalysisWidget() {
   const trpc = useTRPC();
-  const { data: team } = useTeamQuery();
   const { data: user } = useUserQuery();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, period, revenueType, isReady } = useAnalyticsFilter();
+  const { from, to, period, revenueType, currency, isReady } =
+    useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.reports.profit.queryOptions({
       from,
       to,
-      currency: team?.baseCurrency ?? undefined,
+      currency,
       revenueType,
     }),
     ...WIDGET_POLLING_CONFIG,
@@ -73,7 +72,7 @@ export function ProfitAnalysisWidget() {
       toolParams: {
         from,
         to,
-        currency: team?.baseCurrency ?? undefined,
+        currency,
         revenueType,
         showCanvas: true,
       },
@@ -84,7 +83,7 @@ export function ProfitAnalysisWidget() {
   const formatCurrency = (amount: number) => {
     return formatAmount({
       amount,
-      currency: data?.summary?.currency || team?.baseCurrency || "USD",
+      currency: currency || "USD",
       locale: user?.locale,
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,

@@ -1,7 +1,6 @@
 import { FormatAmount } from "@/components/format-amount";
-import { useAnalyticsFilter } from "@/hooks/use-analytics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useTeamQuery } from "@/hooks/use-team";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTRPC } from "@/trpc/client";
 import { getPeriodLabel } from "@/utils/metrics-date-utils";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
@@ -12,17 +11,17 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 
 export function RevenueSummaryWidget() {
   const trpc = useTRPC();
-  const { data: team } = useTeamQuery();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, revenueType, period, isReady } = useAnalyticsFilter();
+  const { from, to, revenueType, period, currency, isReady } =
+    useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getRevenueSummary.queryOptions({
       from,
       to,
-      currency: team?.baseCurrency ?? undefined,
+      currency,
       revenueType,
     }),
     ...WIDGET_POLLING_CONFIG,
@@ -59,7 +58,7 @@ export function RevenueSummaryWidget() {
       toolParams: {
         from,
         to,
-        currency: team?.baseCurrency ?? undefined,
+        currency,
         revenueType,
         showCanvas: true,
       },
@@ -86,7 +85,7 @@ export function RevenueSummaryWidget() {
           <h2 className="text-2xl font-normal">
             <FormatAmount
               amount={data.result.totalRevenue}
-              currency={data.result.currency || "USD"}
+              currency={currency || "USD"}
             />
           </h2>
         )}

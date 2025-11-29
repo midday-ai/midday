@@ -1,6 +1,6 @@
 "use client";
 
-import { useAnalyticsFilter } from "@/hooks/use-analytics-filter";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
 import type { PeriodOption } from "@/utils/metrics-date-utils";
@@ -50,6 +50,7 @@ export function AnalyticsFilter() {
     period,
     revenueType,
     currency,
+    effectiveCurrency,
     from,
     to,
     fiscalYearStartMonth,
@@ -57,15 +58,19 @@ export function AnalyticsFilter() {
     updateRevenueType,
     updateCurrency,
     updateDateRange,
-  } = useAnalyticsFilter();
+  } = useMetricsFilter();
 
   const { data: currencies } = useQuery(
     trpc.bankAccounts.currencies.queryOptions(),
   );
 
-  // Get unique currencies from bank accounts
+  const baseCurrency = team?.baseCurrency;
+
+  // Get unique currencies from bank accounts, excluding base currency
   const uniqueCurrencies = currencies
-    ? [...new Set(currencies.map((c) => c.currency).filter(Boolean))].sort()
+    ? [...new Set(currencies.map((c) => c.currency).filter(Boolean))]
+        .filter((curr) => curr !== baseCurrency)
+        .sort()
     : [];
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -98,8 +103,6 @@ export function AnalyticsFilter() {
     const option = PERIOD_OPTIONS.find((opt) => opt.value === period);
     return option?.label || "1 year";
   };
-
-  const baseCurrency = team?.baseCurrency;
 
   return (
     <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
@@ -244,7 +247,7 @@ export function AnalyticsFilter() {
                 CURRENCY
               </DropdownMenuLabel>
               <DropdownMenuRadioGroup
-                value={currency || "base"}
+                value={effectiveCurrency ?? "base"}
                 onValueChange={(value) =>
                   updateCurrency(value === "base" ? null : value)
                 }
@@ -253,7 +256,7 @@ export function AnalyticsFilter() {
                   value="base"
                   className={cn(
                     "text-xs",
-                    (!currency || currency === "base") &&
+                    !effectiveCurrency &&
                       "dark:bg-[#131313] dark:data-[state=checked]:bg-[#131313]",
                     "hover:dark:bg-[#131313]",
                   )}
@@ -266,7 +269,7 @@ export function AnalyticsFilter() {
                     value={curr}
                     className={cn(
                       "text-xs",
-                      currency === curr &&
+                      effectiveCurrency === curr &&
                         "dark:bg-[#131313] dark:data-[state=checked]:bg-[#131313]",
                       "hover:dark:bg-[#131313]",
                     )}

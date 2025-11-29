@@ -1,6 +1,5 @@
-import { useAnalyticsFilter } from "@/hooks/use-analytics-filter";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useTeamQuery } from "@/hooks/use-team";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
@@ -13,18 +12,17 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 
 export function CashFlowWidget() {
   const trpc = useTRPC();
-  const { data: team } = useTeamQuery();
   const { data: user } = useUserQuery();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, period, isReady } = useAnalyticsFilter();
+  const { from, to, period, currency, isReady } = useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getCashFlow.queryOptions({
       from,
       to,
-      currency: team?.baseCurrency ?? undefined,
+      currency: currency,
       period: "monthly",
     }),
     ...WIDGET_POLLING_CONFIG,
@@ -60,7 +58,7 @@ export function CashFlowWidget() {
       toolParams: {
         from,
         to,
-        currency: team?.baseCurrency ?? undefined,
+        currency: currency,
         period: "monthly",
         showCanvas: true,
       },
@@ -97,7 +95,10 @@ export function CashFlowWidget() {
       <div className="flex flex-col gap-2">
         <h2 className="text-2xl font-normal">
           {data &&
-            formatCashFlow(data.result.netCashFlow ?? 0, data.result.currency!)}
+            formatCashFlow(
+              data.result.netCashFlow ?? 0,
+              currency || "USD",
+            )}
         </h2>
       </div>
     </BaseWidget>

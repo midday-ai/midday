@@ -35,7 +35,6 @@ export function CategoryExpensesCard({
   const { isMetricsTab } = useOverviewTab();
   const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
     useMetricsCustomize();
-  const currencyValue = currency ?? undefined;
 
   const longPressHandlers = useLongPress({
     onLongPress: () => setIsCustomizing(true),
@@ -48,7 +47,7 @@ export function CategoryExpensesCard({
     ...trpc.reports.spending.queryOptions({
       from,
       to,
-      currency: currencyValue,
+      currency: currency,
     }),
     enabled: isMetricsTab,
   });
@@ -101,14 +100,14 @@ export function CategoryExpensesCard({
               type="category_expenses"
               from={from}
               to={to}
-              currency={currencyValue}
+              currency={currency}
             />
           </div>
         </div>
         <p className="text-3xl font-normal">
           {formatAmount({
             amount: totalExpenses,
-            currency: currencyValue || "USD",
+            currency: currency || "USD",
             locale,
             maximumFractionDigits: 0,
           })}
@@ -137,7 +136,7 @@ export function CategoryExpensesCard({
           <CategoryExpenseDonutChart
             data={categoryDonutChartData}
             height={320}
-            currency={currencyValue}
+            currency={currency}
             locale={locale}
           />
         ) : (

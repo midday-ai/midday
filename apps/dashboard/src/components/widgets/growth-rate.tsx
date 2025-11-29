@@ -1,6 +1,5 @@
-import { useAnalyticsFilter } from "@/hooks/use-analytics-filter";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
 import { getPeriodLabel } from "@/utils/metrics-date-utils";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
@@ -11,17 +10,17 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 
 export function GrowthRateWidget() {
   const trpc = useTRPC();
-  const { data: team } = useTeamQuery();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, period, revenueType, isReady } = useAnalyticsFilter();
+  const { from, to, period, revenueType, currency, isReady } =
+    useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getGrowthRate.queryOptions({
       from,
       to,
-      currency: team?.baseCurrency ?? undefined,
+      currency: currency,
       type: "revenue",
       revenueType,
       period: "quarterly",
@@ -60,7 +59,7 @@ export function GrowthRateWidget() {
       toolParams: {
         from,
         to,
-        currency: team?.baseCurrency ?? undefined,
+        currency: currency,
         type: "revenue",
         revenueType,
         period: "quarterly",

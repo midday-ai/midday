@@ -1,9 +1,8 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
-import { useAnalyticsFilter } from "@/hooks/use-analytics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useTeamQuery } from "@/hooks/use-team";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTRPC } from "@/trpc/client";
 import { getPeriodLabel } from "@/utils/metrics-date-utils";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
@@ -16,12 +15,11 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 
 export function RevenueForecastWidget() {
   const trpc = useTRPC();
-  const { data: team } = useTeamQuery();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
   const { from, to, period, revenueType, currency, isReady } =
-    useAnalyticsFilter();
+    useMetricsFilter();
 
   const forecastMonths = 6;
 
@@ -30,7 +28,7 @@ export function RevenueForecastWidget() {
       from,
       to,
       forecastMonths,
-      currency: currency ?? team?.baseCurrency ?? undefined,
+      currency,
       revenueType,
     }),
     ...WIDGET_POLLING_CONFIG,
@@ -66,7 +64,7 @@ export function RevenueForecastWidget() {
       toolParams: {
         from,
         to,
-        currency: (currency || team?.baseCurrency) ?? undefined,
+        currency,
         revenueType,
         forecastMonths,
         showCanvas: true,
@@ -95,8 +93,6 @@ export function RevenueForecastWidget() {
     : [];
 
   const nextMonthProjection = data?.summary?.nextMonthProjection ?? 0;
-  const displayCurrency =
-    data?.summary?.currency || team?.baseCurrency || "USD";
 
   return (
     <BaseWidget
@@ -140,7 +136,7 @@ export function RevenueForecastWidget() {
                 +
                 <FormatAmount
                   amount={nextMonthProjection}
-                  currency={displayCurrency}
+                  currency={currency || "USD"}
                 />
               </span>
             </p>

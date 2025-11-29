@@ -1,6 +1,6 @@
 import { FormatAmount } from "@/components/format-amount";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
@@ -10,17 +10,18 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 
 export function OutstandingInvoicesWidget() {
   const trpc = useTRPC();
-  const { data: team } = useTeamQuery();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
+  const { currency, isReady } = useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getOutstandingInvoices.queryOptions({
-      currency: team?.baseCurrency ?? undefined,
+      currency: currency,
       status: ["unpaid", "overdue"],
     }),
     ...WIDGET_POLLING_CONFIG,
+    enabled: isReady,
   });
 
   const handleToolCall = (params: {
@@ -68,7 +69,7 @@ export function OutstandingInvoicesWidget() {
                 {data.result.count} unpaid and{" "}
                 <FormatAmount
                   amount={data.result.totalAmount}
-                  currency={data.result.currency}
+                  currency={currency || "USD"}
                 />{" "}
                 in outstanding invoices
               </span>

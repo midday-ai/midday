@@ -32,7 +32,6 @@ export function MonthlyRevenueCard({
   const trpc = useTRPC();
   const { isMetricsTab } = useOverviewTab();
   const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
-  const currencyValue = currency ?? undefined;
 
   const longPressHandlers = useLongPress({
     onLongPress: () => setIsCustomizing(true),
@@ -44,7 +43,7 @@ export function MonthlyRevenueCard({
     ...trpc.reports.revenue.queryOptions({
       from,
       to,
-      currency: currencyValue,
+      currency: currency,
       revenueType,
     }),
     enabled: isMetricsTab,
@@ -88,14 +87,14 @@ export function MonthlyRevenueCard({
               type="monthly_revenue"
               from={from}
               to={to}
-              currency={currencyValue}
+              currency={currency}
             />
           </div>
         </div>
         <p className="text-3xl font-normal mb-3">
           <AnimatedNumber
             value={totalRevenue}
-            currency={currencyValue || "USD"}
+            currency={currency || "USD"}
             locale={locale}
             maximumFractionDigits={0}
           />
@@ -129,7 +128,7 @@ export function MonthlyRevenueCard({
         <MonthlyRevenueChart
           data={monthlyRevenueChartData}
           height={320}
-          currency={currencyValue}
+          currency={currency}
           locale={locale}
         />
       </div>

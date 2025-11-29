@@ -31,7 +31,6 @@ export function ExpensesCard({
   const { isMetricsTab } = useOverviewTab();
   const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
     useMetricsCustomize();
-  const currencyValue = currency ?? undefined;
 
   const longPressHandlers = useLongPress({
     onLongPress: () => setIsCustomizing(true),
@@ -43,7 +42,7 @@ export function ExpensesCard({
     ...trpc.reports.expense.queryOptions({
       from,
       to,
-      currency: currencyValue,
+      currency: currency,
     }),
     enabled: isMetricsTab,
   });
@@ -68,14 +67,14 @@ export function ExpensesCard({
               type="expense"
               from={from}
               to={to}
-              currency={currencyValue}
+              currency={currency}
             />
           </div>
         </div>
         <p className="text-3xl font-normal mb-3">
           <AnimatedNumber
             value={averageExpense}
-            currency={currencyValue || "USD"}
+            currency={currency || "USD"}
             locale={locale}
             maximumFractionDigits={0}
           />

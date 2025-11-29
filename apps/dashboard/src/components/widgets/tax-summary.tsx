@@ -1,9 +1,8 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
-import { useAnalyticsFilter } from "@/hooks/use-analytics-filter";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useTeamQuery } from "@/hooks/use-team";
 import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
@@ -48,13 +47,12 @@ function getTaxTerminology(
 
 export function TaxSummaryWidget() {
   const trpc = useTRPC();
-  const { data: team } = useTeamQuery();
   const t = useI18n();
   const { data: user } = useUserQuery();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, period, isReady } = useAnalyticsFilter();
+  const { from, to, period, currency, isReady } = useMetricsFilter();
 
   const taxTerms = getTaxTerminology(team?.countryCode ?? undefined, t);
 
@@ -88,7 +86,7 @@ export function TaxSummaryWidget() {
 
     const netStr = formatAmount({
       amount: Math.abs(netAmount),
-      currency: taxData?.currency || "USD",
+      currency: currency || "USD",
       locale: user?.locale,
     });
 
@@ -129,7 +127,7 @@ export function TaxSummaryWidget() {
       toolParams: {
         from,
         to,
-        currency: team?.baseCurrency ?? undefined,
+        currency: currency,
         showCanvas: true,
       },
       text: `Show ${summaryText} for ${periodLabel}`,
@@ -151,7 +149,7 @@ export function TaxSummaryWidget() {
             <span className="text-3xl font-medium">
               <FormatAmount
                 amount={Math.abs(netAmount)}
-                currency={taxData.currency}
+                currency={currency || "USD"}
               />
             </span>
           </div>
@@ -164,14 +162,17 @@ export function TaxSummaryWidget() {
               <span className="font-medium">
                 <FormatAmount
                   amount={collectedTax}
-                  currency={taxData.currency}
+                  currency={currency || "USD"}
                 />
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">{taxTerms.paid}</span>
               <span className="font-medium">
-                <FormatAmount amount={paidTax} currency={taxData.currency} />
+                <FormatAmount
+                  amount={paidTax}
+                  currency={currency || "USD"}
+                />
               </span>
             </div>
           </div>

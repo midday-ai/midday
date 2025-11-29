@@ -35,7 +35,6 @@ export function ProfitCard({
   const { isMetricsTab } = useOverviewTab();
   const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
     useMetricsCustomize();
-  const currencyValue = currency ?? undefined;
 
   const longPressHandlers = useLongPress({
     onLongPress: () => setIsCustomizing(true),
@@ -47,7 +46,7 @@ export function ProfitCard({
     ...trpc.reports.profit.queryOptions({
       from,
       to,
-      currency: currencyValue,
+      currency: currency,
       revenueType,
     }),
     enabled: isMetricsTab,
@@ -99,14 +98,14 @@ export function ProfitCard({
               type="profit"
               from={from}
               to={to}
-              currency={currencyValue}
+              currency={currency}
             />
           </div>
         </div>
         <p className="text-3xl font-normal">
           <AnimatedNumber
             value={totalProfit}
-            currency={currencyValue || "USD"}
+            currency={currency || "USD"}
             locale={locale}
             maximumFractionDigits={0}
           />
@@ -117,7 +116,7 @@ export function ProfitCard({
         <ProfitChart
           data={profitChartData}
           height={320}
-          currency={currencyValue}
+          currency={currency}
           locale={locale}
         />
       </div>

@@ -1,6 +1,5 @@
-import { useAnalyticsFilter } from "@/hooks/use-analytics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useTeamQuery } from "@/hooks/use-team";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
@@ -10,17 +9,16 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 
 export function RunwayWidget() {
   const trpc = useTRPC();
-  const { data: team } = useTeamQuery();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, currency, isReady } = useAnalyticsFilter();
+  const { from, to, currency, isReady } = useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getRunway.queryOptions({
       from,
       to,
-      currency: currency ?? team?.baseCurrency ?? undefined,
+      currency,
     }),
     ...WIDGET_POLLING_CONFIG,
     enabled: isReady,
@@ -58,7 +56,7 @@ export function RunwayWidget() {
           toolParams: {
             from,
             to,
-            currency: (currency || team?.baseCurrency) ?? undefined,
+            currency,
             showCanvas: true,
           },
           text: "Show cash runway",

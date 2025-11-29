@@ -27,7 +27,6 @@ export function RunwayCard({ from, to, currency, locale }: RunwayCardProps) {
   const { data: user } = useUserQuery();
   const { isMetricsTab } = useOverviewTab();
   const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
-  const currencyValue = currency ?? undefined;
 
   const longPressHandlers = useLongPress({
     onLongPress: () => setIsCustomizing(true),
@@ -42,7 +41,7 @@ export function RunwayCard({ from, to, currency, locale }: RunwayCardProps) {
     ...trpc.reports.runway.queryOptions({
       from,
       to,
-      currency: currencyValue,
+      currency: currency,
     }),
     enabled: isMetricsTab,
   });
@@ -50,7 +49,7 @@ export function RunwayCard({ from, to, currency, locale }: RunwayCardProps) {
   // Fetch cash balance for runway chart
   const { data: cashBalanceData } = useQuery({
     ...trpc.widgets.getAccountBalances.queryOptions({
-      currency: currencyValue,
+      currency: currency,
     }),
     enabled: isMetricsTab,
   });
@@ -60,7 +59,7 @@ export function RunwayCard({ from, to, currency, locale }: RunwayCardProps) {
     ...trpc.reports.burnRate.queryOptions({
       from,
       to,
-      currency: currencyValue,
+      currency: currency,
     }),
     enabled: isMetricsTab,
   });
@@ -188,7 +187,7 @@ export function RunwayCard({ from, to, currency, locale }: RunwayCardProps) {
               type="runway"
               from={from}
               to={to}
-              currency={currencyValue}
+              currency={currency}
             />
           </div>
         </div>
@@ -215,7 +214,7 @@ export function RunwayCard({ from, to, currency, locale }: RunwayCardProps) {
           <RunwayChart
             data={runwayChartData}
             height={320}
-            currency={currencyValue}
+            currency={currency}
             locale={locale}
             displayMode="months"
           />
