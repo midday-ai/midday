@@ -1,5 +1,7 @@
 "use client";
 
+import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
+import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { usePathname } from "next/navigation";
@@ -7,8 +9,13 @@ import { useIsCustomizing, useWidgetActions } from "./widget-provider";
 
 export function Customize() {
   const pathname = usePathname();
-  const isCustomizing = useIsCustomizing();
-  const { setIsCustomizing } = useWidgetActions();
+  const { isMetricsTab } = useOverviewTab();
+  const widgetsIsCustomizing = useIsCustomizing();
+  const { setIsCustomizing: setWidgetsCustomizing } = useWidgetActions();
+  const {
+    isCustomizing: metricsIsCustomizing,
+    setIsCustomizing: setMetricsCustomizing,
+  } = useMetricsCustomize();
 
   const isOnRootPath = pathname === "/" || pathname === "";
 
@@ -16,13 +23,25 @@ export function Customize() {
     return null;
   }
 
+  const isCustomizing = isMetricsTab
+    ? metricsIsCustomizing
+    : widgetsIsCustomizing;
+
+  const handleToggle = () => {
+    if (isMetricsTab) {
+      setMetricsCustomizing(!metricsIsCustomizing);
+    } else {
+      setWidgetsCustomizing(!widgetsIsCustomizing);
+    }
+  };
+
   return (
     <Button
       variant="outline"
-      className="space-x-2 px-3"
-      onClick={() => setIsCustomizing(!isCustomizing)}
+      size="icon"
+      className="h-9 w-9"
+      onClick={handleToggle}
     >
-      <span>{isCustomizing ? "Save" : "Customize"}</span>
       {isCustomizing ? (
         <Icons.Check size={16} />
       ) : (

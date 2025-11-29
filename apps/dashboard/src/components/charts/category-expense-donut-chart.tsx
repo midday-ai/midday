@@ -97,11 +97,7 @@ export function CategoryExpenseDonutChart({
             backgroundSize: "12px 12px",
           }}
         />
-        <ResponsiveContainer
-          width="100%"
-          height="100%"
-          className="relative z-10"
-        >
+        <ResponsiveContainer width="100%" height="100%" className="relative">
           <PieChart>
             <Pie
               data={chartData}

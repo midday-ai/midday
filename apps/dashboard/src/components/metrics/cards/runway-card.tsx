@@ -1,8 +1,12 @@
 "use client";
 
 import { RunwayChart } from "@/components/charts/runway-chart";
+import { useLongPress } from "@/hooks/use-long-press";
+import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
+import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import { cn } from "@midday/ui/cn";
 import NumberFlow from "@number-flow/react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -18,41 +22,47 @@ interface RunwayCardProps {
   wiggleClass?: string;
 }
 
-export function RunwayCard({
-  from,
-  to,
-  currency = "USD",
-  locale,
-}: RunwayCardProps) {
+export function RunwayCard({ from, to, currency, locale }: RunwayCardProps) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
+  const { isMetricsTab } = useOverviewTab();
+  const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
+
+  const longPressHandlers = useLongPress({
+    onLongPress: () => setIsCustomizing(true),
+    threshold: 500,
+    disabled: isCustomizing,
+  });
   const [displayRunway, setDisplayRunway] = useState<number>(0);
   const displayRunwayRef = useRef<number>(0);
   const hasInitializedRef = useRef<boolean>(false);
 
-  const { data: runwayData } = useQuery(
-    trpc.reports.runway.queryOptions({
+  const { data: runwayData } = useQuery({
+    ...trpc.reports.runway.queryOptions({
       from,
       to,
-      currency,
+      currency: currency,
     }),
-  );
+    enabled: isMetricsTab,
+  });
 
   // Fetch cash balance for runway chart
-  const { data: cashBalanceData } = useQuery(
-    trpc.widgets.getAccountBalances.queryOptions({
-      currency,
+  const { data: cashBalanceData } = useQuery({
+    ...trpc.widgets.getAccountBalances.queryOptions({
+      currency: currency,
     }),
-  );
+    enabled: isMetricsTab,
+  });
 
   // Fetch burn rate data for calculations
-  const { data: burnRateData } = useQuery(
-    trpc.reports.burnRate.queryOptions({
+  const { data: burnRateData } = useQuery({
+    ...trpc.reports.burnRate.queryOptions({
       from,
       to,
-      currency,
+      currency: currency,
     }),
-  );
+    enabled: isMetricsTab,
+  });
 
   // Transform runway data - need to calculate monthly projections
   const runwayChartData = useMemo<
@@ -162,7 +172,13 @@ export function RunwayCard({
   const hasNoData = runwayChartData.length === 0;
 
   return (
-    <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
+    <div
+      className={cn(
+        "border bg-background border-border p-6 flex flex-col h-full relative group",
+        !isCustomizing && "cursor-pointer",
+      )}
+      {...longPressHandlers}
+    >
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">Runway</h3>

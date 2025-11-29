@@ -39,24 +39,9 @@ export const WIDGET_TYPES = [
 
 export type WidgetType = (typeof WIDGET_TYPES)[number];
 
-export type WidgetPeriod =
-  | "fiscal_ytd"
-  | "fiscal_year"
-  | "current_quarter"
-  | "trailing_12"
-  | "current_month";
-
-export type RevenueType = "net" | "gross";
-
-export interface WidgetConfig {
-  period?: WidgetPeriod;
-  revenueType?: RevenueType;
-}
-
 export interface WidgetPreferences {
   primaryWidgets: WidgetType[];
   availableWidgets: WidgetType[];
-  widgetConfigs?: Record<string, WidgetConfig>; // key is widgetType
 }
 
 export const DEFAULT_WIDGET_ORDER: WidgetType[] = [...WIDGET_TYPES];
@@ -212,27 +197,6 @@ class WidgetPreferencesCache extends RedisCache {
     const newPreferences: WidgetPreferences = {
       primaryWidgets: newPrimaryWidgets,
       availableWidgets,
-      widgetConfigs: currentPreferences.widgetConfigs,
-    };
-
-    await this.setWidgetPreferences(teamId, userId, newPreferences);
-    return newPreferences;
-  }
-
-  async updateWidgetConfig(
-    teamId: string,
-    userId: string,
-    widgetType: WidgetType,
-    config: WidgetConfig,
-  ): Promise<WidgetPreferences> {
-    const currentPreferences = await this.getWidgetPreferences(teamId, userId);
-
-    const newPreferences: WidgetPreferences = {
-      ...currentPreferences,
-      widgetConfigs: {
-        ...(currentPreferences.widgetConfigs || {}),
-        [widgetType]: config,
-      },
     };
 
     await this.setWidgetPreferences(teamId, userId, newPreferences);

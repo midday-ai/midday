@@ -1,5 +1,5 @@
 import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useTeamQuery } from "@/hooks/use-team";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
@@ -10,19 +10,19 @@ import { BaseWidget } from "./base";
 
 export function InboxWidget() {
   const trpc = useTRPC();
-  const { data: team } = useTeamQuery();
   const router = useRouter();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
+  const { currency } = useMetricsFilter();
 
-  const { data } = useQuery(
-    trpc.widgets.getInboxStats.queryOptions({
+  const { data } = useQuery({
+    ...trpc.widgets.getInboxStats.queryOptions({
       from: startOfDay(subDays(new Date(), 7)).toISOString(),
       to: endOfDay(new Date()).toISOString(),
-      currency: team?.baseCurrency ?? undefined,
+      currency,
     }),
-  );
+  });
 
   const stats = data?.result;
 

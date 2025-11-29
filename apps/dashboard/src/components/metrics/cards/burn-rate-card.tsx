@@ -2,7 +2,11 @@
 
 import { AnimatedNumber } from "@/components/animated-number";
 import { BurnRateChart } from "@/components/charts/burn-rate-chart";
+import { useLongPress } from "@/hooks/use-long-press";
+import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
+import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useTRPC } from "@/trpc/client";
+import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useMemo } from "react";
@@ -20,20 +24,30 @@ interface BurnRateCardProps {
 export function BurnRateCard({
   from,
   to,
-  currency = "USD",
+  currency,
   locale,
   isCustomizing,
   wiggleClass,
 }: BurnRateCardProps) {
   const trpc = useTRPC();
+  const { isMetricsTab } = useOverviewTab();
+  const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
+    useMetricsCustomize();
 
-  const { data: burnRateData } = useQuery(
-    trpc.reports.burnRate.queryOptions({
+  const longPressHandlers = useLongPress({
+    onLongPress: () => setIsCustomizing(true),
+    threshold: 500,
+    disabled: metricsIsCustomizing,
+  });
+
+  const { data: burnRateData } = useQuery({
+    ...trpc.reports.burnRate.queryOptions({
       from,
       to,
-      currency,
+      currency: currency,
     }),
-  );
+    enabled: isMetricsTab,
+  });
 
   // Transform burn rate data
   const burnRateChartData = useMemo(() => {
@@ -57,7 +71,13 @@ export function BurnRateCard({
   }, [burnRateData]);
 
   return (
-    <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
+    <div
+      className={cn(
+        "border bg-background border-border p-6 flex flex-col h-full relative group",
+        !metricsIsCustomizing && "cursor-pointer",
+      )}
+      {...longPressHandlers}
+    >
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">
@@ -75,7 +95,7 @@ export function BurnRateCard({
         <p className="text-3xl font-normal mb-3">
           <AnimatedNumber
             value={currentBurnRate}
-            currency={currency}
+            currency={currency || "USD"}
             locale={locale}
             maximumFractionDigits={0}
           />

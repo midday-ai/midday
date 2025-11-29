@@ -26,5 +26,3 @@ export {
   getFiscalYearDates,
   getFiscalYearToDate,
 } from "./fiscal-year";
-
-export { getWidgetPeriodDates } from "./widget-period";

@@ -5,6 +5,8 @@ import { RecordButton } from "@/components/chat/record-button";
 import { SuggestedActionsButton } from "@/components/suggested-actions-button";
 import { WebSearchButton } from "@/components/web-search-button";
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useOverviewTab } from "@/hooks/use-overview-tab";
+import { useWindowScroll } from "@/hooks/use-window-scroll";
 import { useChatStore } from "@/store/chat";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import {
@@ -27,7 +29,7 @@ import {
   PromptInputTools,
 } from "@midday/ui/prompt-input";
 import { parseAsString, useQueryState } from "nuqs";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 export interface ChatInputMessage extends PromptInputMessage {
   metadata?: {
@@ -38,11 +40,16 @@ export interface ChatInputMessage extends PromptInputMessage {
 
 export function ChatInput() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isFocused, setIsFocused] = useState(false);
 
   const status = useChatStatus();
   const { sendMessage, stop } = useChatActions();
   const chatId = useChatId();
   const { setChatId, isHome } = useChatInterface();
+  const { isMetricsTab } = useOverviewTab();
+  const { isScrolled } = useWindowScroll();
+
+  const shouldMinimize = isMetricsTab && isScrolled && !isFocused;
 
   const [, clearSuggestions] = useDataPart<{ prompts: string[] }>(
     "suggestions",
@@ -120,7 +127,12 @@ export function ChatInput() {
         isHome && "chat-input-static",
       )}
     >
-      <div className="mx-auto w-full pt-2 max-w-full md:max-w-[770px] relative">
+      <div
+        className={cn(
+          "mx-auto w-full pt-2 max-w-full relative transition-all duration-300 ease-in-out",
+          shouldMinimize ? "md:max-w-[400px]" : "md:max-w-[770px]",
+        )}
+      >
         <CommandMenu />
 
         <PromptInput
@@ -128,8 +140,16 @@ export function ChatInput() {
           globalDrop
           multiple
           accept="application/pdf,image/*"
+          className={cn(
+            "transition-all duration-300 ease-in-out",
+            shouldMinimize && "flex flex-row items-center p-2",
+          )}
         >
-          <PromptInputBody>
+          <PromptInputBody
+            className={cn(
+              shouldMinimize && "flex-row flex-1 items-center pr-2",
+            )}
+          >
             <PromptInputAttachments>
               {(attachment) => <PromptInputAttachment data={attachment} />}
             </PromptInputAttachments>
@@ -137,6 +157,12 @@ export function ChatInput() {
               ref={textareaRef}
               autoFocus
               onChange={handleInputChange}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              className={cn(
+                "transition-[height,min-height,max-height,padding] duration-300 ease-in-out",
+                shouldMinimize && "min-h-[32px] max-h-[32px] h-8 py-1 px-2",
+              )}
               onKeyDown={(e) => {
                 // Handle Enter key for commands
                 if (e.key === "Enter" && showCommands) {
@@ -191,15 +217,35 @@ export function ChatInput() {
               placeholder={isWebSearch ? "Search the web" : "Ask anything"}
             />
           </PromptInputBody>
-          <PromptInputToolbar>
+          <PromptInputToolbar
+            className={cn(shouldMinimize && "pb-0 px-0 flex-shrink-0")}
+          >
             <PromptInputTools>
-              <PromptInputActionAddAttachments />
-              <SuggestedActionsButton />
-              <WebSearchButton />
+              <div
+                className={cn(
+                  "flex items-center gap-2 transition-all duration-300 ease-in-out",
+                  shouldMinimize
+                    ? "opacity-0 scale-95 -translate-x-2 pointer-events-none"
+                    : "opacity-100 scale-100 translate-x-0",
+                )}
+              >
+                <PromptInputActionAddAttachments />
+                <SuggestedActionsButton />
+                <WebSearchButton />
+              </div>
             </PromptInputTools>
 
             <PromptInputTools>
-              <RecordButton size={16} />
+              <div
+                className={cn(
+                  "transition-all duration-300 ease-in-out",
+                  shouldMinimize
+                    ? "opacity-0 scale-95 -translate-x-2 pointer-events-none"
+                    : "opacity-100 scale-100 translate-x-0",
+                )}
+              >
+                <RecordButton size={16} />
+              </div>
               <PromptInputSubmit
                 disabled={
                   // Enable button when streaming so user can stop

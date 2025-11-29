@@ -1,5 +1,6 @@
 import { FormatAmount } from "@/components/format-amount";
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
@@ -12,16 +13,18 @@ export function AccountBalancesWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
+  const { currency } = useMetricsFilter();
 
   // Fetch combined account balances
   const { data } = useQuery({
-    ...trpc.widgets.getAccountBalances.queryOptions({}),
+    ...trpc.widgets.getAccountBalances.queryOptions({
+      currency,
+    }),
     ...WIDGET_POLLING_CONFIG,
   });
 
   const balanceData = data?.result;
   const totalBalance = balanceData?.totalBalance ?? 0;
-  const currency = balanceData?.currency ?? "USD";
   const accountCount = balanceData?.accountCount ?? 0;
 
   const handleToolCall = (params: {
@@ -76,7 +79,7 @@ export function AccountBalancesWidget() {
         <div className="flex flex-col gap-2">
           <h2 className="text-2xl font-normal">
             <FormatAmount
-              currency={currency}
+              currency={currency || "USD"}
               amount={totalBalance}
               minimumFractionDigits={0}
               maximumFractionDigits={0}

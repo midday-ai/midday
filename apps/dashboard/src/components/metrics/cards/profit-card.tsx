@@ -2,19 +2,14 @@
 
 import { AnimatedNumber } from "@/components/animated-number";
 import { ProfitChart } from "@/components/charts/profit-chart";
+import { useLongPress } from "@/hooks/use-long-press";
+import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
+import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useTRPC } from "@/trpc/client";
-import { Button } from "@midday/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { Icons } from "@midday/ui/icons";
+import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface ProfitCardProps {
@@ -24,27 +19,38 @@ interface ProfitCardProps {
   locale?: string;
   isCustomizing: boolean;
   wiggleClass?: string;
+  revenueType?: "net" | "gross";
 }
 
 export function ProfitCard({
   from,
   to,
-  currency = "USD",
+  currency,
   locale,
   isCustomizing,
   wiggleClass,
+  revenueType = "net",
 }: ProfitCardProps) {
   const trpc = useTRPC();
-  const [revenueType, setRevenueType] = useState<"net" | "gross">("net");
+  const { isMetricsTab } = useOverviewTab();
+  const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
+    useMetricsCustomize();
 
-  const { data: profitData } = useQuery(
-    trpc.reports.profit.queryOptions({
+  const longPressHandlers = useLongPress({
+    onLongPress: () => setIsCustomizing(true),
+    threshold: 500,
+    disabled: metricsIsCustomizing,
+  });
+
+  const { data: profitData } = useQuery({
+    ...trpc.reports.profit.queryOptions({
       from,
       to,
-      currency,
+      currency: currency,
       revenueType,
     }),
-  );
+    enabled: isMetricsTab,
+  });
 
   // Transform profit data
   const profitChartData = useMemo(() => {
@@ -75,40 +81,19 @@ export function ProfitCard({
   }, [from, to]);
 
   return (
-    <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
+    <div
+      className={cn(
+        "border bg-background border-border p-6 flex flex-col h-full relative group",
+        !metricsIsCustomizing && "cursor-pointer",
+      )}
+      {...longPressHandlers}
+    >
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">
             Profit & Loss
           </h3>
           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 group-has-[*[data-state=open]]:opacity-100 transition-opacity">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 px-2 text-xs border border-border"
-                >
-                  {revenueType === "net" ? "Net" : "Gross"}
-                  <Icons.ChevronDown size={12} className="ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48" portal={false}>
-                <DropdownMenuRadioGroup
-                  value={revenueType}
-                  onValueChange={(value) =>
-                    setRevenueType(value as "net" | "gross")
-                  }
-                >
-                  <DropdownMenuRadioItem value="net">
-                    Net Profit (ex tax)
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="gross">
-                    Gross Profit (inc tax)
-                  </DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
             <ShareMetricButton
               type="profit"
               from={from}
@@ -120,7 +105,7 @@ export function ProfitCard({
         <p className="text-3xl font-normal">
           <AnimatedNumber
             value={totalProfit}
-            currency={currency}
+            currency={currency || "USD"}
             locale={locale}
             maximumFractionDigits={0}
           />

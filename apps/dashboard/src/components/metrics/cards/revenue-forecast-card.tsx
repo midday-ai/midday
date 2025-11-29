@@ -2,7 +2,11 @@
 
 import { AnimatedNumber } from "@/components/animated-number";
 import { RevenueForecastChart } from "@/components/charts/revenue-forecast-chart";
+import { useLongPress } from "@/hooks/use-long-press";
+import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
+import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useTRPC } from "@/trpc/client";
+import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useMemo } from "react";
@@ -15,25 +19,36 @@ interface RevenueForecastCardProps {
   locale?: string;
   isCustomizing: boolean;
   wiggleClass?: string;
+  revenueType?: "net" | "gross";
 }
 
 export function RevenueForecastCard({
   from,
   to,
-  currency = "USD",
+  currency,
   locale,
+  revenueType = "net",
 }: RevenueForecastCardProps) {
   const trpc = useTRPC();
+  const { isMetricsTab } = useOverviewTab();
+  const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
 
-  const { data: revenueForecastData } = useQuery(
-    trpc.reports.revenueForecast.queryOptions({
+  const longPressHandlers = useLongPress({
+    onLongPress: () => setIsCustomizing(true),
+    threshold: 500,
+    disabled: isCustomizing,
+  });
+
+  const { data: revenueForecastData } = useQuery({
+    ...trpc.reports.revenueForecast.queryOptions({
       from,
       to,
       forecastMonths: 6,
-      currency,
-      revenueType: "net",
+      currency: currency,
+      revenueType,
     }),
-  );
+    enabled: isMetricsTab,
+  });
 
   // Transform revenue forecast data
   const revenueForecastChartData = useMemo(() => {
@@ -79,7 +94,13 @@ export function RevenueForecastCard({
   }, [from, to]);
 
   return (
-    <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
+    <div
+      className={cn(
+        "border bg-background border-border p-6 flex flex-col h-full relative group",
+        !isCustomizing && "cursor-pointer",
+      )}
+      {...longPressHandlers}
+    >
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">
@@ -97,7 +118,7 @@ export function RevenueForecastCard({
         <p className="text-3xl font-normal">
           <AnimatedNumber
             value={forecastedRevenue}
-            currency={currency}
+            currency={currency || "USD"}
             locale={locale}
             maximumFractionDigits={0}
           />

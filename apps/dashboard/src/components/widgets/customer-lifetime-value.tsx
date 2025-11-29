@@ -2,7 +2,7 @@
 
 import { FormatAmount } from "@/components/format-amount";
 import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useTeamQuery } from "@/hooks/use-team";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
@@ -13,15 +13,15 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 
 export function CustomerLifetimeValueWidget() {
   const trpc = useTRPC();
-  const { data: team } = useTeamQuery();
   const router = useRouter();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
+  const { currency } = useMetricsFilter();
 
   const { data, isLoading } = useQuery({
     ...trpc.widgets.getCustomerLifetimeValue.queryOptions({
-      currency: team?.baseCurrency ?? undefined,
+      currency: currency,
     }),
     ...WIDGET_POLLING_CONFIG,
   });
@@ -60,7 +60,7 @@ export function CustomerLifetimeValueWidget() {
 
   const result = data?.result;
   const summary = result?.summary;
-  const currency = summary?.currency || team?.baseCurrency || "USD";
+  const displayCurrency = currency || "USD";
 
   // Calculate active customer percentage
   const activePercentage =
@@ -81,7 +81,7 @@ export function CustomerLifetimeValueWidget() {
                 <p className="text-2xl font-medium">
                   <FormatAmount
                     amount={summary.averageCLV}
-                    currency={currency}
+                    currency={displayCurrency}
                   />
                 </p>
                 <span className="text-xs text-[#878787]">avg. CLV</span>

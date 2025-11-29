@@ -1,7 +1,7 @@
 "use client";
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
-import { useTeamQuery } from "@/hooks/use-team";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
@@ -15,10 +15,10 @@ export function InvoicePaymentScoreWidget() {
   const trpc = useTRPC();
   const { data } = useQuery(trpc.invoice.paymentStatus.queryOptions());
   const t = useI18n();
-  const { data: team } = useTeamQuery();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
+  const { currency } = useMetricsFilter();
 
   const scorePercentage = data?.score ?? 0;
 
@@ -52,7 +52,7 @@ export function InvoicePaymentScoreWidget() {
       toolParams: {
         from: format(from, "yyyy-MM-dd"),
         to: format(to, "yyyy-MM-dd"),
-        currency: team?.baseCurrency ?? undefined,
+        currency: currency,
         showCanvas: true,
       },
       text: "Show invoice payment analysis",
