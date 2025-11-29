@@ -43,7 +43,7 @@ const REVENUE_TYPE_OPTIONS: Array<{ value: "gross" | "net"; label: string }> = [
   { value: "net", label: "Net Revenue (ex tax)" },
 ];
 
-export function AnalyticsFilter() {
+export function MetricsFilter() {
   const { data: team } = useTeamQuery();
   const trpc = useTRPC();
   const {

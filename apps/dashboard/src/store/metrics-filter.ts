@@ -3,7 +3,7 @@
 import type { PeriodOption } from "@/utils/metrics-date-utils";
 import { create } from "zustand";
 
-const STORAGE_KEY_BASE = "analytics-filter-preferences";
+const STORAGE_KEY_BASE = "metrics-filter-preferences";
 
 const getStorageKey = (teamId: string | undefined): string => {
   if (!teamId) return STORAGE_KEY_BASE;

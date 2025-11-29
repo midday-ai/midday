@@ -12,5 +12,5 @@ export const Cookies = {
 
 export const LocalStorageKeys = {
   MatchLearningToastSeen: "match-learning-toast-seen",
-  AnalyticsFilter: "analytics-filter-preferences",
+  MetricsFilter: "metrics-filter-preferences",
 };
