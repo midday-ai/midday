@@ -29,7 +29,7 @@ import {
   PromptInputTools,
 } from "@midday/ui/prompt-input";
 import { parseAsString, useQueryState } from "nuqs";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export interface ChatInputMessage extends PromptInputMessage {
   metadata?: {
@@ -40,7 +40,10 @@ export interface ChatInputMessage extends PromptInputMessage {
 
 export function ChatInput() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isFocused, setIsFocused] = useState(false);
+  const [isInteractingWithButtons, setIsInteractingWithButtons] =
+    useState(false);
 
   const status = useChatStatus();
   const { sendMessage, stop } = useChatActions();
@@ -48,8 +51,6 @@ export function ChatInput() {
   const { setChatId, isHome } = useChatInterface();
   const { isMetricsTab } = useOverviewTab();
   const { isScrolled } = useWindowScroll();
-
-  const shouldMinimize = isMetricsTab && isScrolled && !isFocused;
 
   const [, clearSuggestions] = useDataPart<{ prompts: string[] }>(
     "suggestions",
@@ -73,6 +74,14 @@ export function ChatInput() {
     handleKeyDown,
     resetCommandState,
   } = useChatStore();
+
+  // Don't minimize if commands are shown, input is focused, or buttons are being interacted with
+  const shouldMinimize =
+    isMetricsTab &&
+    isScrolled &&
+    !isFocused &&
+    !showCommands &&
+    !isInteractingWithButtons;
 
   const handleSubmit = (message: ChatInputMessage) => {
     const hasText = Boolean(message.text);
@@ -128,6 +137,7 @@ export function ChatInput() {
       )}
     >
       <div
+        ref={containerRef}
         className={cn(
           "mx-auto w-full pt-2 max-w-full relative transition-all duration-300 ease-in-out",
           shouldMinimize ? "md:max-w-[400px]" : "md:max-w-[770px]",
@@ -158,7 +168,10 @@ export function ChatInput() {
               autoFocus
               onChange={handleInputChange}
               onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
+              onBlur={() => {
+                // Allow normal blur - shouldMinimize already checks for showCommands
+                setIsFocused(false);
+              }}
               className={cn(
                 "transition-[height,min-height,max-height,padding] duration-300 ease-in-out",
                 shouldMinimize && "min-h-[32px] max-h-[32px] h-8 py-1 px-2",
@@ -219,6 +232,16 @@ export function ChatInput() {
           </PromptInputBody>
           <PromptInputToolbar
             className={cn(shouldMinimize && "pb-0 px-0 flex-shrink-0")}
+            onMouseDown={() => setIsInteractingWithButtons(true)}
+            onMouseUp={() => {
+              // Delay to allow button click to complete
+              setTimeout(() => setIsInteractingWithButtons(false), 100);
+            }}
+            onFocus={() => setIsInteractingWithButtons(true)}
+            onBlur={() => {
+              // Delay to allow button click to complete
+              setTimeout(() => setIsInteractingWithButtons(false), 100);
+            }}
           >
             <PromptInputTools>
               <div

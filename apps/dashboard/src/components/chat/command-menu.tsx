@@ -25,15 +25,22 @@ export function CommandMenu() {
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
 
-  // Close command menu when clicking outside (but not on the toggle button)
+  // Close command menu when clicking outside (but not on the toggle button or input toolbar buttons)
   useOnClickOutside(commandListRef as RefObject<HTMLElement>, (event) => {
     if (showCommands) {
-      // Check if the click was on the suggested actions toggle button
       const target = event.target as Element;
       const isToggleButton = target.closest("[data-suggested-actions-toggle]");
+      // Don't close if clicking on buttons within the PromptInput toolbar
+      // Check if the clicked element is a button or inside a button
+      const clickedButton = target.closest("button");
+      const isToolbarButton =
+        clickedButton !== null &&
+        (clickedButton.closest("form") !== null ||
+          clickedButton.type === "button" ||
+          clickedButton.type === "submit");
 
-      // Only close if it's not the toggle button
-      if (!isToggleButton) {
+      // Only close if it's not the toggle button or toolbar buttons
+      if (!isToggleButton && !isToolbarButton) {
         setShowCommands(false);
       }
     }
@@ -76,6 +83,7 @@ export function CommandMenu() {
   return (
     <div
       ref={commandListRef}
+      data-command-menu
       className="absolute bottom-full left-0 right-0 mb-2 w-full z-30"
     >
       <AnimatedSizeContainer
@@ -103,6 +111,10 @@ export function CommandMenu() {
                     ? "bg-black/5 dark:bg-white/5"
                     : "hover:bg-black/5 dark:hover:bg-white/5",
                 )}
+                onMouseDown={(e) => {
+                  // Prevent input from losing focus when clicking on command
+                  e.preventDefault();
+                }}
                 onClick={() => handleCommandExecution(command)}
                 data-index={index}
               >

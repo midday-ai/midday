@@ -411,7 +411,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 /* Chat input positioning for small viewport heights on homepage */
-@media (max-height: 860px) {
+@media (max-height: 910px) {
   .chat-input-wrapper-static {
     position: relative !important;
     bottom: auto !important;
