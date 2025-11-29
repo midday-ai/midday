@@ -218,9 +218,7 @@ export function ChatInput() {
             />
           </PromptInputBody>
           <PromptInputToolbar
-            className={cn(
-              shouldMinimize && "pb-0 px-0 flex-shrink-0",
-            )}
+            className={cn(shouldMinimize && "pb-0 px-0 flex-shrink-0")}
           >
             <PromptInputTools>
               <div
