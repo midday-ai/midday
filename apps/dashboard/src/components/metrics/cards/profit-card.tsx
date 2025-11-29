@@ -16,27 +16,31 @@ interface ProfitCardProps {
   isCustomizing: boolean;
   wiggleClass?: string;
   revenueType?: "net" | "gross";
+  isReady?: boolean;
 }
 
 export function ProfitCard({
   from,
   to,
-  currency = "USD",
+  currency,
   locale,
   isCustomizing,
   wiggleClass,
   revenueType = "net",
+  isReady = true,
 }: ProfitCardProps) {
   const trpc = useTRPC();
+  const currencyValue = currency ?? undefined;
 
-  const { data: profitData } = useQuery(
-    trpc.reports.profit.queryOptions({
+  const { data: profitData } = useQuery({
+    ...trpc.reports.profit.queryOptions({
       from,
       to,
-      currency,
+      currency: currencyValue,
       revenueType,
     }),
-  );
+    enabled: isReady,
+  });
 
   // Transform profit data
   const profitChartData = useMemo(() => {
@@ -78,14 +82,14 @@ export function ProfitCard({
               type="profit"
               from={from}
               to={to}
-              currency={currency}
+              currency={currencyValue}
             />
           </div>
         </div>
         <p className="text-3xl font-normal">
           <AnimatedNumber
             value={totalProfit}
-            currency={currency}
+            currency={currencyValue || "USD"}
             locale={locale}
             maximumFractionDigits={0}
           />
@@ -96,7 +100,7 @@ export function ProfitCard({
         <ProfitChart
           data={profitChartData}
           height={320}
-          currency={currency}
+          currency={currencyValue}
           locale={locale}
         />
       </div>

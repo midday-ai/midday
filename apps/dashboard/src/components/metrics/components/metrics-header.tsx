@@ -23,9 +23,10 @@ export function MetricsHeader({
 
         <Button
           variant="outline"
-          className="space-x-2 px-3"
+          size="icon"
           onClick={onCustomizeToggle}
           data-no-close
+          className="h-9 w-9"
         >
           {isCustomizing ? (
             <Icons.Check size={16} />

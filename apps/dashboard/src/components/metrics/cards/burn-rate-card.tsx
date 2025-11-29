@@ -15,25 +15,29 @@ interface BurnRateCardProps {
   locale?: string;
   isCustomizing: boolean;
   wiggleClass?: string;
+  isReady?: boolean;
 }
 
 export function BurnRateCard({
   from,
   to,
-  currency = "USD",
+  currency,
   locale,
   isCustomizing,
   wiggleClass,
+  isReady = true,
 }: BurnRateCardProps) {
   const trpc = useTRPC();
+  const currencyValue = currency ?? undefined;
 
-  const { data: burnRateData } = useQuery(
-    trpc.reports.burnRate.queryOptions({
+  const { data: burnRateData } = useQuery({
+    ...trpc.reports.burnRate.queryOptions({
       from,
       to,
-      currency,
+      currency: currencyValue,
     }),
-  );
+    enabled: isReady,
+  });
 
   // Transform burn rate data
   const burnRateChartData = useMemo(() => {
@@ -68,14 +72,14 @@ export function BurnRateCard({
               type="burn_rate"
               from={from}
               to={to}
-              currency={currency}
+              currency={currencyValue}
             />
           </div>
         </div>
         <p className="text-3xl font-normal mb-3">
           <AnimatedNumber
             value={currentBurnRate}
-            currency={currency}
+            currency={currencyValue || "USD"}
             locale={locale}
             maximumFractionDigits={0}
           />
@@ -100,7 +104,7 @@ export function BurnRateCard({
         <BurnRateChart
           data={burnRateChartData}
           height={320}
-          currency={currency}
+          currency={currencyValue}
           locale={locale}
         />
       </div>

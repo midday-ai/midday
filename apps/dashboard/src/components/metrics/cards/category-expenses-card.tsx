@@ -18,26 +18,29 @@ interface CategoryExpensesCardProps {
   locale?: string;
   isCustomizing: boolean;
   wiggleClass?: string;
+  isReady?: boolean;
 }
 
 export function CategoryExpensesCard({
   from,
   to,
-  currency = "USD",
+  currency,
   locale,
   isCustomizing,
-  wiggleClass,
+  isReady = true,
 }: CategoryExpensesCardProps) {
   const trpc = useTRPC();
+  const currencyValue = currency ?? undefined;
 
   // Get spending data for categories
-  const { data: spendingData } = useQuery(
-    trpc.reports.spending.queryOptions({
+  const { data: spendingData } = useQuery({
+    ...trpc.reports.spending.queryOptions({
       from,
       to,
-      currency,
+      currency: currencyValue,
     }),
-  );
+    enabled: isReady,
+  });
 
   const categoryDonutChartData = useMemo(() => {
     if (!spendingData || spendingData.length === 0) return [];
@@ -81,14 +84,14 @@ export function CategoryExpensesCard({
               type="category_expenses"
               from={from}
               to={to}
-              currency={currency}
+              currency={currencyValue}
             />
           </div>
         </div>
         <p className="text-3xl font-normal">
           {formatAmount({
             amount: totalExpenses,
-            currency,
+            currency: currencyValue || "USD",
             locale,
             maximumFractionDigits: 0,
           })}
@@ -117,7 +120,7 @@ export function CategoryExpensesCard({
           <CategoryExpenseDonutChart
             data={categoryDonutChartData}
             height={320}
-            currency={currency}
+            currency={currencyValue}
             locale={locale}
           />
         ) : (

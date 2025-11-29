@@ -16,26 +16,30 @@ interface RevenueForecastCardProps {
   isCustomizing: boolean;
   wiggleClass?: string;
   revenueType?: "net" | "gross";
+  isReady?: boolean;
 }
 
 export function RevenueForecastCard({
   from,
   to,
-  currency = "USD",
+  currency,
   locale,
   revenueType = "net",
+  isReady = true,
 }: RevenueForecastCardProps) {
   const trpc = useTRPC();
+  const currencyValue = currency ?? undefined;
 
-  const { data: revenueForecastData } = useQuery(
-    trpc.reports.revenueForecast.queryOptions({
+  const { data: revenueForecastData } = useQuery({
+    ...trpc.reports.revenueForecast.queryOptions({
       from,
       to,
       forecastMonths: 6,
-      currency,
+      currency: currencyValue,
       revenueType,
     }),
-  );
+    enabled: isReady,
+  });
 
   // Transform revenue forecast data
   const revenueForecastChartData = useMemo(() => {
@@ -92,14 +96,14 @@ export function RevenueForecastCard({
               type="revenue_forecast"
               from={from}
               to={to}
-              currency={currency}
+              currency={currencyValue}
             />
           </div>
         </div>
         <p className="text-3xl font-normal">
           <AnimatedNumber
             value={forecastedRevenue}
-            currency={currency}
+            currency={currencyValue || "USD"}
             locale={locale}
             maximumFractionDigits={0}
           />
@@ -126,7 +130,7 @@ export function RevenueForecastCard({
         <RevenueForecastChart
           data={revenueForecastChartData}
           height={320}
-          currency={currency}
+          currency={currencyValue}
           locale={locale}
           forecastStartIndex={forecastStartIndex}
         />

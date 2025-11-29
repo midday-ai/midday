@@ -16,43 +16,49 @@ interface RunwayCardProps {
   locale?: string;
   isCustomizing: boolean;
   wiggleClass?: string;
+  isReady?: boolean;
 }
 
 export function RunwayCard({
   from,
   to,
-  currency = "USD",
+  currency,
   locale,
+  isReady = true,
 }: RunwayCardProps) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
+  const currencyValue = currency ?? undefined;
   const [displayRunway, setDisplayRunway] = useState<number>(0);
   const displayRunwayRef = useRef<number>(0);
   const hasInitializedRef = useRef<boolean>(false);
 
-  const { data: runwayData } = useQuery(
-    trpc.reports.runway.queryOptions({
+  const { data: runwayData } = useQuery({
+    ...trpc.reports.runway.queryOptions({
       from,
       to,
-      currency,
+      currency: currencyValue,
     }),
-  );
+    enabled: isReady,
+  });
 
   // Fetch cash balance for runway chart
-  const { data: cashBalanceData } = useQuery(
-    trpc.widgets.getAccountBalances.queryOptions({
-      currency,
+  const { data: cashBalanceData } = useQuery({
+    ...trpc.widgets.getAccountBalances.queryOptions({
+      currency: currencyValue,
     }),
-  );
+    enabled: isReady,
+  });
 
   // Fetch burn rate data for calculations
-  const { data: burnRateData } = useQuery(
-    trpc.reports.burnRate.queryOptions({
+  const { data: burnRateData } = useQuery({
+    ...trpc.reports.burnRate.queryOptions({
       from,
       to,
-      currency,
+      currency: currencyValue,
     }),
-  );
+    enabled: isReady,
+  });
 
   // Transform runway data - need to calculate monthly projections
   const runwayChartData = useMemo<
@@ -171,7 +177,7 @@ export function RunwayCard({
               type="runway"
               from={from}
               to={to}
-              currency={currency}
+              currency={currencyValue}
             />
           </div>
         </div>
@@ -198,7 +204,7 @@ export function RunwayCard({
           <RunwayChart
             data={runwayChartData}
             height={320}
-            currency={currency}
+            currency={currencyValue}
             locale={locale}
             displayMode="months"
           />

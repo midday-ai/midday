@@ -19,7 +19,7 @@ import { type ChartId, DEFAULT_CHART_ORDER } from "./utils/chart-types";
 
 export function MetricsView() {
   const { data: user } = useUserQuery();
-  const { from, to, currency, revenueType } = useAnalyticsFilter();
+  const { from, to, currency, revenueType, isReady } = useAnalyticsFilter();
   const [isCustomizing, setIsCustomizing] = useState(false);
   const [chartOrder, setChartOrder] = useLocalStorage<ChartId[]>(
     "metrics-chart-order",
@@ -55,14 +55,16 @@ export function MetricsView() {
   // Chart component mapping
   const renderChart = (chartId: ChartId, index: number) => {
     const wiggleClass = getWiggleClass(index);
+    const currencyValue: string | undefined = currency ?? undefined;
     const commonProps = {
       from,
       to,
-      currency,
+      currency: currencyValue,
       locale,
       isCustomizing,
       wiggleClass,
       revenueType,
+      isReady,
     };
 
     const chartContent = (() => {

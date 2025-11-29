@@ -19,7 +19,8 @@ export function Customize() {
   return (
     <Button
       variant="outline"
-      className="space-x-2 px-3"
+      size="icon"
+      className="h-9 w-9"
       onClick={() => setIsCustomizing(!isCustomizing)}
     >
       {isCustomizing ? (

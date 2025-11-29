@@ -13,25 +13,29 @@ interface ExpensesCardProps {
   locale?: string;
   isCustomizing: boolean;
   wiggleClass?: string;
+  isReady?: boolean;
 }
 
 export function ExpensesCard({
   from,
   to,
-  currency = "USD",
+  currency,
   locale,
   isCustomizing,
   wiggleClass,
+  isReady = true,
 }: ExpensesCardProps) {
   const trpc = useTRPC();
+  const currencyValue = currency ?? undefined;
 
-  const { data: expenseData } = useQuery(
-    trpc.reports.expense.queryOptions({
+  const { data: expenseData } = useQuery({
+    ...trpc.reports.expense.queryOptions({
       from,
       to,
-      currency,
+      currency: currencyValue,
     }),
-  );
+    enabled: isReady,
+  });
 
   const averageExpense = expenseData?.summary?.averageExpense ?? 0;
 
@@ -47,14 +51,14 @@ export function ExpensesCard({
               type="expense"
               from={from}
               to={to}
-              currency={currency}
+              currency={currencyValue}
             />
           </div>
         </div>
         <p className="text-3xl font-normal mb-3">
           <AnimatedNumber
             value={averageExpense}
-            currency={currency}
+            currency={currencyValue || "USD"}
             locale={locale}
             maximumFractionDigits={0}
           />

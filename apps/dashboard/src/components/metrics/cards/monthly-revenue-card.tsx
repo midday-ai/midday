@@ -15,28 +15,30 @@ interface MonthlyRevenueCardProps {
   locale?: string;
   isCustomizing: boolean;
   wiggleClass?: string;
-  revenueType?: "net" | "gross";
+  revenueType: "net" | "gross";
+  isReady?: boolean;
 }
 
 export function MonthlyRevenueCard({
   from,
   to,
-  currency = "USD",
+  currency,
   locale,
-  isCustomizing,
-  wiggleClass,
   revenueType = "net",
+  isReady = true,
 }: MonthlyRevenueCardProps) {
   const trpc = useTRPC();
+  const currencyValue = currency ?? undefined;
 
-  const { data: revenueData } = useQuery(
-    trpc.reports.revenue.queryOptions({
+  const { data: revenueData } = useQuery({
+    ...trpc.reports.revenue.queryOptions({
       from,
       to,
-      currency,
+      currency: currencyValue,
       revenueType,
     }),
-  );
+    enabled: isReady,
+  });
 
   // Transform revenue data
   const monthlyRevenueChartData = useMemo(() => {
@@ -70,14 +72,14 @@ export function MonthlyRevenueCard({
               type="monthly_revenue"
               from={from}
               to={to}
-              currency={currency}
+              currency={currencyValue}
             />
           </div>
         </div>
         <p className="text-3xl font-normal mb-3">
           <AnimatedNumber
             value={totalRevenue}
-            currency={currency}
+            currency={currencyValue || "USD"}
             locale={locale}
             maximumFractionDigits={0}
           />
@@ -111,7 +113,7 @@ export function MonthlyRevenueCard({
         <MonthlyRevenueChart
           data={monthlyRevenueChartData}
           height={320}
-          currency={currency}
+          currency={currencyValue}
           locale={locale}
         />
       </div>
