@@ -4,6 +4,7 @@ import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
+import { endOfDay, startOfDay, subDays } from "date-fns";
 import { useRouter } from "next/navigation";
 import { BaseWidget } from "./base";
 
@@ -13,12 +14,12 @@ export function InboxWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, currency } = useMetricsFilter();
+  const { currency } = useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getInboxStats.queryOptions({
-      from,
-      to,
+      from: startOfDay(subDays(new Date(), 7)).toISOString(),
+      to: endOfDay(new Date()).toISOString(),
       currency,
     }),
   });
