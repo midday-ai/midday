@@ -140,8 +140,16 @@ export function ChatInput() {
           globalDrop
           multiple
           accept="application/pdf,image/*"
+          className={cn(
+            "transition-all duration-300 ease-in-out",
+            shouldMinimize && "flex flex-row items-center p-2",
+          )}
         >
-          <PromptInputBody>
+          <PromptInputBody
+            className={cn(
+              shouldMinimize && "flex-row flex-1 items-center pr-2",
+            )}
+          >
             <PromptInputAttachments>
               {(attachment) => <PromptInputAttachment data={attachment} />}
             </PromptInputAttachments>
@@ -151,6 +159,10 @@ export function ChatInput() {
               onChange={handleInputChange}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
+              className={cn(
+                "transition-[height,min-height,max-height,padding] duration-300 ease-in-out",
+                shouldMinimize && "min-h-[32px] max-h-[32px] h-8 py-1 px-2",
+              )}
               onKeyDown={(e) => {
                 // Handle Enter key for commands
                 if (e.key === "Enter" && showCommands) {
@@ -205,7 +217,11 @@ export function ChatInput() {
               placeholder={isWebSearch ? "Search the web" : "Ask anything"}
             />
           </PromptInputBody>
-          <PromptInputToolbar>
+          <PromptInputToolbar
+            className={cn(
+              shouldMinimize && "pb-0 px-0 flex-shrink-0",
+            )}
+          >
             <PromptInputTools>
               <div
                 className={cn(

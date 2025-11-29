@@ -237,7 +237,7 @@ export function AnalyticsFilter() {
           </DropdownMenuRadioGroup>
         </DropdownMenuGroup>
 
-        {uniqueCurrencies.length > 1 && (
+        {uniqueCurrencies.length > 0 && (
           <>
             <DropdownMenuSeparator />
 
