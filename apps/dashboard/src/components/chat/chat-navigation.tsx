@@ -1,6 +1,7 @@
 "use client";
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useChatActions } from "@ai-sdk-tools/store";
 import { Button } from "@midday/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -10,10 +11,13 @@ export function ChatNavigation() {
   const router = useRouter();
   const { reset } = useChatActions();
   const { isHome } = useChatInterface();
+  const { tab } = useOverviewTab();
 
   const handleBack = () => {
     reset();
-    router.push("/");
+    // Preserve tab query parameter when navigating back
+    const backPath = tab && tab !== "overview" ? `/?tab=${tab}` : "/";
+    router.push(backPath);
   };
 
   if (isHome) return null;

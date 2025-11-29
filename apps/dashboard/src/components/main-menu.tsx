@@ -9,7 +9,6 @@ import { useEffect, useState } from "react";
 
 const icons = {
   "/": () => <Icons.Overview size={20} />,
-  "/metrics": () => <Icons.ShowChart size={20} />,
   "/transactions": () => <Icons.Transactions size={20} />,
   "/invoices": () => <Icons.Invoice size={20} />,
   "/tracker": () => <Icons.Tracker size={20} />,
@@ -24,12 +23,6 @@ const items = [
   {
     path: "/",
     name: "Overview",
-    children: [
-      {
-        path: "/metrics",
-        name: "Metrics",
-      },
-    ],
   },
   {
     path: "/transactions",

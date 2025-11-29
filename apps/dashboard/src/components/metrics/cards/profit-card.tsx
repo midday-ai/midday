@@ -2,7 +2,11 @@
 
 import { AnimatedNumber } from "@/components/animated-number";
 import { ProfitChart } from "@/components/charts/profit-chart";
+import { useLongPress } from "@/hooks/use-long-press";
+import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
+import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useTRPC } from "@/trpc/client";
+import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useMemo } from "react";
@@ -16,7 +20,6 @@ interface ProfitCardProps {
   isCustomizing: boolean;
   wiggleClass?: string;
   revenueType?: "net" | "gross";
-  isReady?: boolean;
 }
 
 export function ProfitCard({
@@ -27,10 +30,18 @@ export function ProfitCard({
   isCustomizing,
   wiggleClass,
   revenueType = "net",
-  isReady = true,
 }: ProfitCardProps) {
   const trpc = useTRPC();
+  const { isMetricsTab } = useOverviewTab();
+  const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
+    useMetricsCustomize();
   const currencyValue = currency ?? undefined;
+
+  const longPressHandlers = useLongPress({
+    onLongPress: () => setIsCustomizing(true),
+    threshold: 500,
+    disabled: metricsIsCustomizing,
+  });
 
   const { data: profitData } = useQuery({
     ...trpc.reports.profit.queryOptions({
@@ -39,7 +50,7 @@ export function ProfitCard({
       currency: currencyValue,
       revenueType,
     }),
-    enabled: isReady,
+    enabled: isMetricsTab,
   });
 
   // Transform profit data
@@ -71,7 +82,13 @@ export function ProfitCard({
   }, [from, to]);
 
   return (
-    <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
+    <div
+      className={cn(
+        "border bg-background border-border p-6 flex flex-col h-full relative group",
+        !metricsIsCustomizing && "cursor-pointer",
+      )}
+      {...longPressHandlers}
+    >
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">

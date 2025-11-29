@@ -4,8 +4,12 @@ import {
   CategoryExpenseDonutChart,
   grayShades,
 } from "@/components/charts/category-expense-donut-chart";
+import { useLongPress } from "@/hooks/use-long-press";
+import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
+import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
+import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useMemo } from "react";
@@ -18,7 +22,6 @@ interface CategoryExpensesCardProps {
   locale?: string;
   isCustomizing: boolean;
   wiggleClass?: string;
-  isReady?: boolean;
 }
 
 export function CategoryExpensesCard({
@@ -27,10 +30,18 @@ export function CategoryExpensesCard({
   currency,
   locale,
   isCustomizing,
-  isReady = true,
 }: CategoryExpensesCardProps) {
   const trpc = useTRPC();
+  const { isMetricsTab } = useOverviewTab();
+  const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
+    useMetricsCustomize();
   const currencyValue = currency ?? undefined;
+
+  const longPressHandlers = useLongPress({
+    onLongPress: () => setIsCustomizing(true),
+    threshold: 500,
+    disabled: metricsIsCustomizing,
+  });
 
   // Get spending data for categories
   const { data: spendingData } = useQuery({
@@ -39,7 +50,7 @@ export function CategoryExpensesCard({
       to,
       currency: currencyValue,
     }),
-    enabled: isReady,
+    enabled: isMetricsTab,
   });
 
   const categoryDonutChartData = useMemo(() => {
@@ -73,7 +84,13 @@ export function CategoryExpensesCard({
   }, [from, to]);
 
   return (
-    <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
+    <div
+      className={cn(
+        "border bg-background border-border p-6 flex flex-col h-full relative group",
+        !metricsIsCustomizing && "cursor-pointer",
+      )}
+      {...longPressHandlers}
+    >
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">

@@ -2,7 +2,11 @@
 
 import { AnimatedNumber } from "@/components/animated-number";
 import { MonthlyRevenueChart } from "@/components/charts/monthly-revenue-chart";
+import { useLongPress } from "@/hooks/use-long-press";
+import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
+import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useTRPC } from "@/trpc/client";
+import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useMemo } from "react";
@@ -16,7 +20,6 @@ interface MonthlyRevenueCardProps {
   isCustomizing: boolean;
   wiggleClass?: string;
   revenueType: "net" | "gross";
-  isReady?: boolean;
 }
 
 export function MonthlyRevenueCard({
@@ -25,10 +28,17 @@ export function MonthlyRevenueCard({
   currency,
   locale,
   revenueType = "net",
-  isReady = true,
 }: MonthlyRevenueCardProps) {
   const trpc = useTRPC();
+  const { isMetricsTab } = useOverviewTab();
+  const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
   const currencyValue = currency ?? undefined;
+
+  const longPressHandlers = useLongPress({
+    onLongPress: () => setIsCustomizing(true),
+    threshold: 500,
+    disabled: isCustomizing,
+  });
 
   const { data: revenueData } = useQuery({
     ...trpc.reports.revenue.queryOptions({
@@ -37,7 +47,7 @@ export function MonthlyRevenueCard({
       currency: currencyValue,
       revenueType,
     }),
-    enabled: isReady,
+    enabled: isMetricsTab,
   });
 
   // Transform revenue data
@@ -63,7 +73,13 @@ export function MonthlyRevenueCard({
   }, [revenueData]);
 
   return (
-    <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
+    <div
+      className={cn(
+        "border bg-background border-border p-6 flex flex-col h-full relative group",
+        !isCustomizing && "cursor-pointer",
+      )}
+      {...longPressHandlers}
+    >
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">Revenue</h3>

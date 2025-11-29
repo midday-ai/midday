@@ -2,7 +2,11 @@
 
 import { AnimatedNumber } from "@/components/animated-number";
 import { StackedBarChart } from "@/components/charts/stacked-bar-chart";
+import { useLongPress } from "@/hooks/use-long-press";
+import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
+import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useTRPC } from "@/trpc/client";
+import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
 import { ShareMetricButton } from "../components/share-metric-button";
 
@@ -13,7 +17,6 @@ interface ExpensesCardProps {
   locale?: string;
   isCustomizing: boolean;
   wiggleClass?: string;
-  isReady?: boolean;
 }
 
 export function ExpensesCard({
@@ -23,10 +26,18 @@ export function ExpensesCard({
   locale,
   isCustomizing,
   wiggleClass,
-  isReady = true,
 }: ExpensesCardProps) {
   const trpc = useTRPC();
+  const { isMetricsTab } = useOverviewTab();
+  const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
+    useMetricsCustomize();
   const currencyValue = currency ?? undefined;
+
+  const longPressHandlers = useLongPress({
+    onLongPress: () => setIsCustomizing(true),
+    threshold: 500,
+    disabled: metricsIsCustomizing,
+  });
 
   const { data: expenseData } = useQuery({
     ...trpc.reports.expense.queryOptions({
@@ -34,13 +45,19 @@ export function ExpensesCard({
       to,
       currency: currencyValue,
     }),
-    enabled: isReady,
+    enabled: isMetricsTab,
   });
 
   const averageExpense = expenseData?.summary?.averageExpense ?? 0;
 
   return (
-    <div className="border bg-background border-border p-6 flex flex-col h-full relative group">
+    <div
+      className={cn(
+        "border bg-background border-border p-6 flex flex-col h-full relative group",
+        !metricsIsCustomizing && "cursor-pointer",
+      )}
+      {...longPressHandlers}
+    >
       <div className="mb-4 min-h-[140px]">
         <div className="flex items-start justify-between h-7">
           <h3 className="text-sm font-normal text-muted-foreground">

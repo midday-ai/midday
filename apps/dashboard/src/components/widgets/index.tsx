@@ -1,13 +1,17 @@
 "use client";
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useOverviewTab } from "@/hooks/use-overview-tab";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
+import { TabsContent } from "@midday/ui/tabs";
 import type { inferRouterOutputs } from "@trpc/server";
 import { Suspense } from "react";
+import { MetricsView } from "../metrics/metrics-view";
 import { SuggestedActions } from "../suggested-actions";
 import { WidgetsHeader } from "./header";
+import { OverviewTabs } from "./overview-tabs";
 import { WidgetProvider, useIsCustomizing } from "./widget-provider";
 import { WidgetsGrid } from "./widgets-grid";
 
@@ -34,6 +38,7 @@ function SuggestedActionsSkeleton() {
 function WidgetsContent() {
   const { isChatPage, isHome } = useChatInterface();
   const isCustomizing = useIsCustomizing();
+  const { tab } = useOverviewTab();
 
   if (isChatPage) {
     return null;
@@ -47,12 +52,19 @@ function WidgetsContent() {
       )}
     >
       <WidgetsHeader />
-      <WidgetsGrid />
-      {!isCustomizing && (
-        <Suspense fallback={<SuggestedActionsSkeleton />}>
-          <SuggestedActions />
-        </Suspense>
-      )}
+      <OverviewTabs>
+        <TabsContent value="overview" className="mt-6">
+          <WidgetsGrid />
+          {!isCustomizing && (
+            <Suspense fallback={<SuggestedActionsSkeleton />}>
+              <SuggestedActions />
+            </Suspense>
+          )}
+        </TabsContent>
+        <TabsContent value="metrics" className="mt-6">
+          <MetricsView />
+        </TabsContent>
+      </OverviewTabs>
     </div>
   );
 }

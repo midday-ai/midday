@@ -2,8 +2,9 @@
 
 import { useAnalyticsFilter } from "@/hooks/use-analytics-filter";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useUserQuery } from "@/hooks/use-user";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import { useOnClickOutside } from "usehooks-ts";
 import { BurnRateCard } from "./cards/burn-rate-card";
 import { CategoryExpensesCard } from "./cards/category-expenses-card";
@@ -13,14 +14,13 @@ import { ProfitCard } from "./cards/profit-card";
 import { RevenueForecastCard } from "./cards/revenue-forecast-card";
 import { RunwayCard } from "./cards/runway-card";
 import { MetricsGrid } from "./components/metrics-grid";
-import { MetricsHeader } from "./components/metrics-header";
 import { SortableChartCard } from "./components/sortable-chart-card";
 import { type ChartId, DEFAULT_CHART_ORDER } from "./utils/chart-types";
 
 export function MetricsView() {
   const { data: user } = useUserQuery();
-  const { from, to, currency, revenueType, isReady } = useAnalyticsFilter();
-  const [isCustomizing, setIsCustomizing] = useState(false);
+  const { from, to, currency, revenueType } = useAnalyticsFilter();
+  const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
   const [chartOrder, setChartOrder] = useLocalStorage<ChartId[]>(
     "metrics-chart-order",
     DEFAULT_CHART_ORDER,
@@ -64,7 +64,6 @@ export function MetricsView() {
       isCustomizing,
       wiggleClass,
       revenueType,
-      isReady,
     };
 
     const chartContent = (() => {
@@ -107,11 +106,6 @@ export function MetricsView() {
 
   return (
     <div className="flex flex-col gap-6" ref={gridRef}>
-      <MetricsHeader
-        isCustomizing={isCustomizing}
-        onCustomizeToggle={() => setIsCustomizing(!isCustomizing)}
-      />
-
       <MetricsGrid
         orderedCharts={orderedCharts}
         isCustomizing={isCustomizing}
