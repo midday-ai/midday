@@ -468,8 +468,8 @@ pub fn run() {
                 WebviewUrl::External(tauri::Url::parse(&app_url).unwrap()),
             )
             .title("Midday")
-            .inner_size(1450.0, 900.0)
-            .min_inner_size(1450.0, 900.0)
+            .inner_size(1450.0, 910.0)
+            .min_inner_size(1450.0, 910.0)
             .user_agent("Mozilla/5.0 (compatible; Midday Desktop App)")
             .decorations(false)
             .visible(false)
