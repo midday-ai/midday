@@ -16,7 +16,7 @@ export function MonthlySpendingWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, period, currency, isReady } = useMetricsFilter();
+  const { from, to, period, currency } = useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getMonthlySpending.queryOptions({
@@ -24,7 +24,6 @@ export function MonthlySpendingWidget() {
       to,
     }),
     ...WIDGET_POLLING_CONFIG,
-    enabled: isReady,
   });
 
   const spending = data?.result;

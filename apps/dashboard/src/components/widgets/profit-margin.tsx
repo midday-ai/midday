@@ -13,10 +13,7 @@ export function ProfitMarginWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, period, revenueType, currency, isReady } =
-    useMetricsFilter();
-
-  console.log("currency", currency);
+  const { from, to, period, revenueType, currency } = useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getProfitMargin.queryOptions({
@@ -26,7 +23,6 @@ export function ProfitMarginWidget() {
       revenueType,
     }),
     ...WIDGET_POLLING_CONFIG,
-    enabled: isReady,
   });
 
   const handleToolCall = (params: {

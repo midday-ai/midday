@@ -28,8 +28,7 @@ export function ProfitAnalysisWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, period, revenueType, currency, isReady } =
-    useMetricsFilter();
+  const { from, to, period, revenueType, currency } = useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.reports.profit.queryOptions({
@@ -39,7 +38,6 @@ export function ProfitAnalysisWidget() {
       revenueType,
     }),
     ...WIDGET_POLLING_CONFIG,
-    enabled: isReady,
   });
 
   const handleToolCall = (params: {

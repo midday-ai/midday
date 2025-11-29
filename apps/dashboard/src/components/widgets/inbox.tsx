@@ -13,7 +13,7 @@ export function InboxWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, currency, isReady } = useMetricsFilter();
+  const { from, to, currency } = useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getInboxStats.queryOptions({
@@ -21,7 +21,6 @@ export function InboxWidget() {
       to,
       currency,
     }),
-    enabled: isReady,
   });
 
   const stats = data?.result;

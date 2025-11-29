@@ -18,7 +18,7 @@ export function CategoryExpensesWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, period, currency, isReady } = useMetricsFilter();
+  const { from, to, period, currency } = useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getCategoryExpenses.queryOptions({
@@ -27,7 +27,6 @@ export function CategoryExpensesWidget() {
       limit: 3,
     }),
     ...WIDGET_POLLING_CONFIG,
-    enabled: isReady,
   });
 
   const categoryData = data?.result;

@@ -14,8 +14,7 @@ export function RevenueSummaryWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, revenueType, period, currency, isReady } =
-    useMetricsFilter();
+  const { from, to, revenueType, period, currency } = useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getRevenueSummary.queryOptions({
@@ -25,7 +24,6 @@ export function RevenueSummaryWidget() {
       revenueType,
     }),
     ...WIDGET_POLLING_CONFIG,
-    enabled: isReady,
   });
 
   const handleToolCall = (params: {

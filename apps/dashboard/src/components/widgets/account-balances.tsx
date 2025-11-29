@@ -13,7 +13,7 @@ export function AccountBalancesWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { currency, isReady } = useMetricsFilter();
+  const { currency } = useMetricsFilter();
 
   // Fetch combined account balances
   const { data } = useQuery({
@@ -21,7 +21,6 @@ export function AccountBalancesWidget() {
       currency,
     }),
     ...WIDGET_POLLING_CONFIG,
-    enabled: isReady,
   });
 
   const balanceData = data?.result;

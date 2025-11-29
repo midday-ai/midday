@@ -13,8 +13,7 @@ export function GrowthRateWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, period, revenueType, currency, isReady } =
-    useMetricsFilter();
+  const { from, to, period, revenueType, currency } = useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getGrowthRate.queryOptions({
@@ -26,7 +25,6 @@ export function GrowthRateWidget() {
       period: "quarterly",
     }),
     ...WIDGET_POLLING_CONFIG,
-    enabled: isReady,
   });
 
   const handleToolCall = (params: {

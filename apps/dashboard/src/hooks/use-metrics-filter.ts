@@ -56,7 +56,7 @@ function isRevenueType(
  * - If URL is not at defaults and has a value, use URL param
  * - Otherwise, use store (localStorage) value
  */
-function getEffectiveValue<T>(
+function getEffectiveValue<T extends string>(
   storeIsReady: boolean,
   isAtDefaults: boolean,
   urlValue: string | null | undefined,
@@ -65,16 +65,13 @@ function getEffectiveValue<T>(
   typeGuard?: (value: string | null | undefined) => value is T,
 ): T {
   if (!storeIsReady) {
-    if (typeGuard?.(urlValue) && urlValue) {
-      return urlValue;
+    if (urlValue && typeGuard?.(urlValue)) {
+      return urlValue as T;
     }
     return defaultValue;
   }
-  if (!isAtDefaults && urlValue) {
-    if (typeGuard?.(urlValue)) {
-      return urlValue;
-    }
-    return defaultValue;
+  if (!isAtDefaults && urlValue && typeGuard?.(urlValue)) {
+    return urlValue as T;
   }
   return storeValue;
 }
@@ -322,7 +319,6 @@ export function useMetricsFilter() {
     from: dateRange.from,
     to: dateRange.to,
     fiscalYearStartMonth,
-    isReady: storeIsReady,
     updatePeriod,
     updateRevenueType,
     updateCurrency,

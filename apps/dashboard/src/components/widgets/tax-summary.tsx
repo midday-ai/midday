@@ -3,6 +3,7 @@
 import { FormatAmount } from "@/components/format-amount";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
+import { useTeamQuery } from "@/hooks/use-team";
 import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
@@ -12,7 +13,6 @@ import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { getDefaultTaxType } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
 
@@ -49,10 +49,11 @@ export function TaxSummaryWidget() {
   const trpc = useTRPC();
   const t = useI18n();
   const { data: user } = useUserQuery();
+  const { data: team } = useTeamQuery();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, period, currency, isReady } = useMetricsFilter();
+  const { from, to, period, currency } = useMetricsFilter();
 
   const taxTerms = getTaxTerminology(team?.countryCode ?? undefined, t);
 
@@ -62,7 +63,6 @@ export function TaxSummaryWidget() {
       to,
     }),
     ...WIDGET_POLLING_CONFIG,
-    enabled: isReady,
   });
 
   const taxData = yearData?.result;

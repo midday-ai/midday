@@ -13,7 +13,7 @@ export function OutstandingInvoicesWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { currency, isReady } = useMetricsFilter();
+  const { currency } = useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getOutstandingInvoices.queryOptions({
@@ -21,7 +21,6 @@ export function OutstandingInvoicesWidget() {
       status: ["unpaid", "overdue"],
     }),
     ...WIDGET_POLLING_CONFIG,
-    enabled: isReady,
   });
 
   const handleToolCall = (params: {

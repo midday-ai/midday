@@ -16,7 +16,7 @@ export function CashFlowWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, period, currency, isReady } = useMetricsFilter();
+  const { from, to, period, currency } = useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getCashFlow.queryOptions({
@@ -26,7 +26,6 @@ export function CashFlowWidget() {
       period: "monthly",
     }),
     ...WIDGET_POLLING_CONFIG,
-    enabled: isReady,
   });
 
   const handleToolCall = (params: {

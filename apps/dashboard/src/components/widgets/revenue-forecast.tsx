@@ -18,8 +18,7 @@ export function RevenueForecastWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, period, revenueType, currency, isReady } =
-    useMetricsFilter();
+  const { from, to, period, revenueType, currency } = useMetricsFilter();
 
   const forecastMonths = 6;
 
@@ -32,7 +31,6 @@ export function RevenueForecastWidget() {
       revenueType,
     }),
     ...WIDGET_POLLING_CONFIG,
-    enabled: isReady,
   });
 
   const handleToolCall = (params: {

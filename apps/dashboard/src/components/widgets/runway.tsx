@@ -12,7 +12,7 @@ export function RunwayWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { from, to, currency, isReady } = useMetricsFilter();
+  const { from, to, currency } = useMetricsFilter();
 
   const { data } = useQuery({
     ...trpc.widgets.getRunway.queryOptions({
@@ -21,7 +21,6 @@ export function RunwayWidget() {
       currency,
     }),
     ...WIDGET_POLLING_CONFIG,
-    enabled: isReady,
   });
 
   const handleToolCall = (params: {

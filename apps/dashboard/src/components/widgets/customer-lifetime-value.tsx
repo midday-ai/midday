@@ -17,14 +17,13 @@ export function CustomerLifetimeValueWidget() {
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
-  const { currency, isReady } = useMetricsFilter();
+  const { currency } = useMetricsFilter();
 
   const { data, isLoading } = useQuery({
     ...trpc.widgets.getCustomerLifetimeValue.queryOptions({
       currency: currency,
     }),
     ...WIDGET_POLLING_CONFIG,
-    enabled: isReady,
   });
 
   const handleToolCall = (params: {
