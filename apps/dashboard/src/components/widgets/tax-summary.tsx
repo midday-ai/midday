@@ -1,8 +1,8 @@
 "use client";
 
 import { FormatAmount } from "@/components/format-amount";
-import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useUserQuery } from "@/hooks/use-user";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
@@ -169,10 +169,7 @@ export function TaxSummaryWidget() {
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">{taxTerms.paid}</span>
               <span className="font-medium">
-                <FormatAmount
-                  amount={paidTax}
-                  currency={currency || "USD"}
-                />
+                <FormatAmount amount={paidTax} currency={currency || "USD"} />
               </span>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import { FormatAmount } from "@/components/format-amount";
-import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";

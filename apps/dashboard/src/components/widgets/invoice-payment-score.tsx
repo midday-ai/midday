@@ -1,7 +1,7 @@
 "use client";
 
-import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";

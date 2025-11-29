@@ -1,7 +1,7 @@
 "use client";
 
-import { useQueryState } from "nuqs";
 import { Tabs, TabsList, TabsTrigger } from "@midday/ui/tabs";
+import { useQueryState } from "nuqs";
 
 export function AppsTabs() {
   const [currentTab, setTab] = useQueryState("tab", {

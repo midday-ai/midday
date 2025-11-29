@@ -1,5 +1,5 @@
-import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
@@ -95,10 +95,7 @@ export function CashFlowWidget() {
       <div className="flex flex-col gap-2">
         <h2 className="text-2xl font-normal">
           {data &&
-            formatCashFlow(
-              data.result.netCashFlow ?? 0,
-              currency || "USD",
-            )}
+            formatCashFlow(data.result.netCashFlow ?? 0, currency || "USD")}
         </h2>
       </div>
     </BaseWidget>

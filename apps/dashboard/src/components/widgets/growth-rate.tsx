@@ -1,5 +1,5 @@
-import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTRPC } from "@/trpc/client";
 import { getPeriodLabel } from "@/utils/metrics-date-utils";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
