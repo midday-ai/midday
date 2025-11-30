@@ -1,4 +1,4 @@
-import type { UIChatMessage } from "@api/ai/types";
+import type { UIChatMessage } from "@midday/api/ai/types";
 import { type SQL, relations, sql } from "drizzle-orm";
 import {
   bigint,
