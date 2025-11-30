@@ -8,8 +8,14 @@ import {
 
 export const queuesRouter = createTRPCRouter({
   list: publicProcedure.query(async () => {
-    const metrics = await getAllQueueMetrics();
-    return metrics;
+    try {
+      const metrics = await getAllQueueMetrics();
+      return metrics;
+    } catch (error) {
+      console.error("[queues.list] Error fetching queue metrics:", error);
+      // Return empty array if queues aren't initialized yet
+      return [];
+    }
   }),
 
   get: publicProcedure

@@ -52,8 +52,17 @@ primary_region = 'fra'
     timeout = "10s"
     path = "/health"
 
+# VM configuration for worker process
 [[vm]]
-  memory = '3gb'
+  processes = ["worker"]
+  memory = '2gb'
   cpu_kind = 'shared'
   cpus = 2
+
+# VM configuration for board process
+[[vm]]
+  processes = ["board"]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
 

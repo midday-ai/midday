@@ -162,72 +162,84 @@ export const jobsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const allQueues = Array.from(getQueues().values());
-      const allJobs: Array<{
-        id: string;
-        name: string;
-        queueName: string;
-        data: any;
-        timestamp: number;
-        processedOn?: number;
-        finishedOn?: number;
-        failedReason?: string;
-        attemptsMade: number;
-        status: "completed" | "failed";
-      }> = [];
+      try {
+        const allQueues = Array.from(getQueues().values());
 
-      // Get recent completed and failed jobs from all queues
-      for (const queue of allQueues) {
-        try {
-          const [completed, failed] = await Promise.all([
-            queue.getCompleted(0, input.limit - 1),
-            queue.getFailed(0, input.limit - 1),
-          ]);
-
-          for (const job of completed) {
-            allJobs.push({
-              id: job.id!,
-              name: job.name,
-              queueName: queue.name,
-              data: job.data,
-              timestamp: job.timestamp || 0,
-              processedOn: job.processedOn,
-              finishedOn: job.finishedOn,
-              attemptsMade: job.attemptsMade,
-              status: "completed",
-            });
-          }
-
-          for (const job of failed) {
-            allJobs.push({
-              id: job.id!,
-              name: job.name,
-              queueName: queue.name,
-              data: job.data,
-              timestamp: job.timestamp || 0,
-              processedOn: job.processedOn,
-              finishedOn: job.finishedOn,
-              failedReason: job.failedReason,
-              attemptsMade: job.attemptsMade,
-              status: "failed",
-            });
-          }
-        } catch (error) {
-          console.error(
-            `Error fetching recent jobs from queue ${queue.name}:`,
-            error,
-          );
+        // If no queues are initialized, return empty array
+        if (allQueues.length === 0) {
+          return [];
         }
+
+        const allJobs: Array<{
+          id: string;
+          name: string;
+          queueName: string;
+          data: any;
+          timestamp: number;
+          processedOn?: number;
+          finishedOn?: number;
+          failedReason?: string;
+          attemptsMade: number;
+          status: "completed" | "failed";
+        }> = [];
+
+        // Get recent completed and failed jobs from all queues
+        for (const queue of allQueues) {
+          try {
+            const [completed, failed] = await Promise.all([
+              queue.getCompleted(0, input.limit - 1),
+              queue.getFailed(0, input.limit - 1),
+            ]);
+
+            for (const job of completed) {
+              allJobs.push({
+                id: job.id!,
+                name: job.name,
+                queueName: queue.name,
+                data: job.data,
+                timestamp: job.timestamp || 0,
+                processedOn: job.processedOn,
+                finishedOn: job.finishedOn,
+                attemptsMade: job.attemptsMade,
+                status: "completed",
+              });
+            }
+
+            for (const job of failed) {
+              allJobs.push({
+                id: job.id!,
+                name: job.name,
+                queueName: queue.name,
+                data: job.data,
+                timestamp: job.timestamp || 0,
+                processedOn: job.processedOn,
+                finishedOn: job.finishedOn,
+                failedReason: job.failedReason,
+                attemptsMade: job.attemptsMade,
+                status: "failed",
+              });
+            }
+          } catch (error) {
+            console.error(
+              `Error fetching recent jobs from queue ${queue.name}:`,
+              error,
+            );
+          }
+        }
+
+        // Sort by finishedOn or timestamp (most recent first)
+        allJobs.sort((a, b) => {
+          const timeA = a.finishedOn || a.processedOn || a.timestamp;
+          const timeB = b.finishedOn || b.processedOn || b.timestamp;
+          return timeB - timeA;
+        });
+
+        // Return only the requested limit
+        return allJobs.slice(0, input.limit);
+      } catch (error) {
+        console.error("[jobs.recent] Error fetching recent jobs:", error);
+        // Return empty array if there's an error
+        return [];
       }
-
-      // Sort by finishedOn or timestamp (most recent first)
-      allJobs.sort((a, b) => {
-        const timeA = a.finishedOn || a.processedOn || a.timestamp;
-        const timeB = b.finishedOn || b.processedOn || b.timestamp;
-        return timeB - timeA;
-      });
-
-      // Return only the requested limit
-      return allJobs.slice(0, input.limit);
     }),
 });
