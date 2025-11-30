@@ -5,13 +5,14 @@ FROM oven/bun:1.2.22 AS base
 FROM base AS turbo-cli
 RUN bun add -g turbo
 
-# Builder stage
+# Builder stage - prune both worker and board workspaces
 FROM turbo-cli AS builder
 WORKDIR /app
 # Copy all files
 COPY . .
-# Use turbo CLI from Bun global install to prune workspaces
-RUN turbo prune @midday/worker --docker
+# Prune both workspaces separately
+RUN turbo prune @midday/worker --docker --out-dir=out/worker
+RUN turbo prune @midday/board --docker --out-dir=out/board
 
 # Installer stage
 FROM base AS installer
@@ -24,25 +25,40 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# First install the dependencies (as they change less often)
-COPY --from=builder /app/out/json/ .
-COPY --from=builder /app/out/full/ .
-# Remove any lockfile that might have been copied (turbo prune may include a partial one)
+# Copy package.json files from worker pruned workspace first
+COPY --from=builder /app/out/worker/json/ .
+# Copy package.json files from board pruned workspace (will merge/overwrite as needed)
+COPY --from=builder /app/out/board/json/ .
+
+# Copy full source from worker pruned workspace
+COPY --from=builder /app/out/worker/full/ .
+# Copy full source from board pruned workspace (will merge/overwrite as needed)
+COPY --from=builder /app/out/board/full/ .
+
+# Remove any lockfile that might have been copied
 RUN rm -f bun.lock
 # Generate a fresh lockfile
 RUN bun install
 
-# Runner stage (same as installer to avoid another copy)
+# Build the board Next.js app
+WORKDIR /app/apps/board
+RUN bun run build
+
+# Runner stage
 FROM installer AS runner
 
-# Set the worker directory as working directory
-WORKDIR /app/apps/worker
+# Set working directory to app root
+WORKDIR /app
 
 # Set environment variables
 ENV NODE_ENV=production
 
-# Expose the port the worker runs on
-EXPOSE 8080
+# Copy and make entrypoint script executable
+COPY apps/worker/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
-# Run the worker directly with Bun
-CMD ["bun", "run", "src/index.ts"]
+# Expose both ports
+EXPOSE 8080 3002
+
+# Use entrypoint script - process group will pass 'worker' or 'board' as argument
+CMD ["/app/entrypoint.sh"]
