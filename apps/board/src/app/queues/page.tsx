@@ -3,6 +3,10 @@ import { RecentJobs } from "@/components/recent-jobs";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import { Suspense } from "react";
 
+// Force dynamic rendering - this page requires runtime data from Redis
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function QueuesPage() {
   // Prefetch data on the server
   prefetch(trpc.queues.list.queryOptions());

@@ -1,6 +1,15 @@
 import { ensureInitialized } from "@/lib/init";
 
 export async function createTRPCContext() {
+  // Skip initialization during build time
+  if (
+    process.env.NEXT_PHASE === "phase-production-build" ||
+    process.env.NEXT_PHASE === "phase-development-build" ||
+    !process.env.REDIS_QUEUE_URL
+  ) {
+    return {};
+  }
+
   // Ensure queues are initialized (non-blocking - will fail gracefully if Redis is unavailable)
   try {
     await ensureInitialized();

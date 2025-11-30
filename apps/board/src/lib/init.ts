@@ -8,6 +8,19 @@ let initializationPromise: Promise<void> | null = null;
  * Uses a shared promise to prevent multiple concurrent initializations
  */
 export async function ensureInitialized() {
+  // Skip initialization during build time (when REDIS_QUEUE_URL might not be available)
+  // Check if we're in a build context by checking for Next.js build indicators
+  if (
+    process.env.NEXT_PHASE === "phase-production-build" ||
+    process.env.NEXT_PHASE === "phase-development-build" ||
+    !process.env.REDIS_QUEUE_URL
+  ) {
+    console.log(
+      "[ensureInitialized] Skipping initialization during build or missing REDIS_QUEUE_URL",
+    );
+    return;
+  }
+
   if (initialized) {
     return;
   }
@@ -28,7 +41,8 @@ export async function ensureInitialized() {
     startAdmin(),
     new Promise<void>((_, reject) =>
       setTimeout(
-        () => reject(new Error("Queue initialization timeout after 10 seconds")),
+        () =>
+          reject(new Error("Queue initialization timeout after 10 seconds")),
         10000,
       ),
     ),
