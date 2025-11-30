@@ -10,6 +10,7 @@ import {
   getUserNotificationPreferences,
   upsertNotificationSetting,
 } from "@midday/db/queries";
+import { getUserSettingsNotificationTypes } from "@midday/notifications";
 
 export const notificationSettingsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -24,7 +25,14 @@ export const notificationSettingsRouter = createTRPCRouter({
 
   // Get all notification types with their current settings for the user
   getAll: protectedProcedure.query(async ({ ctx: { db, session, teamId } }) => {
-    return getUserNotificationPreferences(db, session.user.id, teamId!);
+    const notificationTypes = getUserSettingsNotificationTypes();
+
+    return getUserNotificationPreferences(
+      db,
+      session.user.id,
+      teamId!,
+      notificationTypes,
+    );
   }),
 
   // Update a single notification setting

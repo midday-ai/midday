@@ -1,12 +1,15 @@
-import {
-  type NotificationType,
-  getUserSettingsNotificationTypes,
-} from "@midday/notifications";
 import { and, eq } from "drizzle-orm";
 import type { Database } from "../client";
 import { notificationSettings } from "../schema";
 
 export type NotificationChannel = "in_app" | "email" | "push";
+
+export interface NotificationTypeConfig {
+  type: string;
+  channels: NotificationChannel[];
+  category?: string;
+  order?: number;
+}
 
 export interface NotificationSetting {
   id: string;
@@ -131,6 +134,7 @@ export async function getUserNotificationPreferences(
   db: Database,
   userId: string,
   teamId: string,
+  notificationTypes: NotificationTypeConfig[],
 ): Promise<
   {
     type: string;
@@ -141,9 +145,6 @@ export async function getUserNotificationPreferences(
   }[]
 > {
   const userSettings = await getNotificationSettings(db, { userId, teamId });
-
-  // Get notification types that should appear in user settings
-  const notificationTypes = getUserSettingsNotificationTypes();
 
   return notificationTypes.map((notificationType) => ({
     type: notificationType.type,

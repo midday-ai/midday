@@ -340,7 +340,6 @@
         "@midday/encryption": "workspace:*",
         "@midday/invoice": "workspace:*",
         "@midday/logger": "workspace:*",
-        "@midday/notifications": "workspace:*",
         "@midday/utils": "workspace:*",
         "@sindresorhus/slugify": "^3.0.0",
         "@types/pg": "^8.15.6",
