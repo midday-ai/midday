@@ -1,12 +1,14 @@
 "use client";
 
-import { trpc } from "@/lib/trpc-react";
+import { useTRPC } from "@/lib/trpc-react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { QueueActivityChart } from "./queue-activity-chart";
 import { QueueCard } from "./queue-card";
 
 export function QueueOverview() {
-  const { data: queues, isLoading } = trpc.queues.list.useQuery();
+  const trpc = useTRPC();
+  const { data: queues } = useSuspenseQuery(trpc.queues.list.queryOptions());
 
   // Generate mock chart data for now (can be enhanced with real time-series data)
   const chartData = useMemo(() => {
@@ -27,10 +29,6 @@ export function QueueOverview() {
     }
     return data;
   }, []);
-
-  if (isLoading) {
-    return <div className="text-muted-foreground">Loading...</div>;
-  }
 
   if (!queues || queues.length === 0) {
     return <div className="text-muted-foreground">No queues found</div>;

@@ -1,8 +1,9 @@
 "use client";
 
-import { trpc } from "@/lib/trpc-react";
+import { useTRPC } from "@/lib/trpc-react";
 import { Button } from "@midday/ui/button";
 import { Skeleton } from "@midday/ui/skeleton";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
@@ -38,24 +39,34 @@ interface JobDetailProps {
 
 export function JobDetail({ queueName, jobId }: JobDetailProps) {
   const router = useRouter();
-  const { data: job, isLoading } = trpc.jobs.get.useQuery({
-    queueName,
-    jobId,
-  });
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
 
-  const utils = trpc.useUtils();
-  const retryMutation = trpc.jobs.retry.useMutation({
-    onSuccess: () => {
-      // Refetch job data
-      utils.jobs.get.invalidate({ queueName, jobId });
-    },
-  });
+  const { data: job, isLoading } = useQuery(
+    trpc.jobs.get.queryOptions({
+      queueName,
+      jobId,
+    }),
+  );
 
-  const removeMutation = trpc.jobs.remove.useMutation({
-    onSuccess: () => {
-      router.push(`/queues/${queueName}`);
-    },
-  });
+  const retryMutation = useMutation(
+    trpc.jobs.retry.mutationOptions({
+      onSuccess: () => {
+        // Refetch job data
+        queryClient.invalidateQueries({
+          queryKey: trpc.jobs.get.queryKey({ queueName, jobId }),
+        });
+      },
+    }),
+  );
+
+  const removeMutation = useMutation(
+    trpc.jobs.remove.mutationOptions({
+      onSuccess: () => {
+        router.push(`/queues/${queueName}`);
+      },
+    }),
+  );
 
   const actionLoading = retryMutation.isPending || removeMutation.isPending;
 

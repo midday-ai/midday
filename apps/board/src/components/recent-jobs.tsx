@@ -1,6 +1,6 @@
 "use client";
 
-import { trpc } from "@/lib/trpc-react";
+import { useTRPC } from "@/lib/trpc-react";
 import {
   Table,
   TableBody,
@@ -9,64 +9,17 @@ import {
   TableHeader,
   TableRow,
 } from "@midday/ui/table";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { JobStatus } from "./job-status";
 
 export function RecentJobs() {
   const router = useRouter();
-  const { data: jobs, isLoading } = trpc.jobs.recent.useQuery({ limit: 20 });
-
-  if (isLoading) {
-    return (
-      <div className="w-full">
-        <div className="overflow-x-auto overscroll-x-none md:border-l md:border-r border-border scrollbar-hide">
-          <Table>
-            <TableHeader className="border-l-0 border-r-0">
-              <TableRow className="h-[45px] hover:bg-transparent">
-                <TableHead className="w-[200px] min-w-[200px] px-3 md:px-4 py-2">
-                  Queue
-                </TableHead>
-                <TableHead className="w-[250px] min-w-[250px] px-3 md:px-4 py-2">
-                  Job Name
-                </TableHead>
-                <TableHead className="w-[120px] min-w-[120px] px-3 md:px-4 py-2">
-                  Status
-                </TableHead>
-                <TableHead className="w-[180px] min-w-[180px] px-3 md:px-4 py-2">
-                  Finished
-                </TableHead>
-                <TableHead className="w-[100px] min-w-[100px] px-3 md:px-4 py-2">
-                  Attempts
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody className="border-l-0 border-r-0">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <TableRow key={i} className="h-[40px] md:h-[45px]">
-                  <TableCell className="px-3 md:px-4 py-2">
-                    <div className="h-4 w-32 bg-muted animate-pulse" />
-                  </TableCell>
-                  <TableCell className="px-3 md:px-4 py-2">
-                    <div className="h-4 w-40 bg-muted animate-pulse" />
-                  </TableCell>
-                  <TableCell className="px-3 md:px-4 py-2">
-                    <div className="h-5 w-20 bg-muted animate-pulse rounded-full" />
-                  </TableCell>
-                  <TableCell className="px-3 md:px-4 py-2">
-                    <div className="h-4 w-24 bg-muted animate-pulse" />
-                  </TableCell>
-                  <TableCell className="px-3 md:px-4 py-2">
-                    <div className="h-4 w-12 bg-muted animate-pulse" />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-    );
-  }
+  const trpc = useTRPC();
+  const { data: jobs } = useSuspenseQuery(
+    trpc.jobs.recent.queryOptions({ limit: 20 }),
+  );
 
   if (!jobs || jobs.length === 0) {
     return (

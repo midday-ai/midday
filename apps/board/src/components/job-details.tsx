@@ -1,9 +1,10 @@
 "use client";
 
 import { useJobParams } from "@/hooks/use-job-params";
-import { trpc } from "@/lib/trpc-react";
+import { useTRPC } from "@/lib/trpc-react";
 import { Button } from "@midday/ui/button";
 import { Skeleton } from "@midday/ui/skeleton";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { JobStatus } from "./job-status";
 import { JsonViewer } from "./json-viewer";
@@ -11,32 +12,46 @@ import { JsonViewer } from "./json-viewer";
 export function JobDetails() {
   console.log("JobDetails rendered");
   const { jobId, queueName, setParams } = useJobParams();
-  const { data: job, isLoading } = trpc.jobs.get.useQuery(
-    {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const { data: job, isLoading } = useQuery({
+    ...trpc.jobs.get.queryOptions({
       queueName: queueName!,
       jobId: jobId!,
-    },
-    {
-      enabled: Boolean(jobId && queueName),
-    },
+    }),
+    enabled: Boolean(jobId && queueName),
+  });
+
+  const retryMutation = useMutation(
+    trpc.jobs.retry.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.jobs.get.queryKey({ queueName: queueName!, jobId: jobId! }),
+        });
+        queryClient.invalidateQueries({
+          queryKey: trpc.jobs.list.queryKey(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: trpc.jobs.recent.queryKey(),
+        });
+      },
+    }),
   );
 
-  const utils = trpc.useUtils();
-  const retryMutation = trpc.jobs.retry.useMutation({
-    onSuccess: () => {
-      utils.jobs.get.invalidate({ queueName: queueName!, jobId: jobId! });
-      utils.jobs.list.invalidate();
-      utils.jobs.recent.invalidate();
-    },
-  });
-
-  const removeMutation = trpc.jobs.remove.useMutation({
-    onSuccess: () => {
-      utils.jobs.list.invalidate();
-      utils.jobs.recent.invalidate();
-      setParams({ jobId: null, queueName: null });
-    },
-  });
+  const removeMutation = useMutation(
+    trpc.jobs.remove.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.jobs.list.queryKey(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: trpc.jobs.recent.queryKey(),
+        });
+        setParams({ jobId: null, queueName: null });
+      },
+    }),
+  );
 
   const actionLoading = retryMutation.isPending || removeMutation.isPending;
 

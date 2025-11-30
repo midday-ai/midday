@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import "../styles/globals.css";
 import "@midday/ui/globals.css";
 import { Sidebar } from "@/components/sidebar";
-import { TRPCProvider } from "@/lib/trpc-react";
+import { TRPCReactProvider } from "@/lib/trpc-react";
+import { HydrateClient } from "@/trpc/server";
 import { cn } from "@midday/ui/cn";
 import { Hedvig_Letters_Sans, Hedvig_Letters_Serif } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
@@ -40,14 +41,16 @@ export default function RootLayout({
         )}
       >
         <NuqsAdapter>
-          <TRPCProvider>
-            <div className="relative">
-              <Sidebar />
-              <div className="md:ml-[70px] pb-4">
-                <div className="px-4 md:px-8">{children}</div>
+          <TRPCReactProvider>
+            <HydrateClient>
+              <div className="relative">
+                <Sidebar />
+                <div className="md:ml-[70px] pb-4">
+                  <div className="px-4 md:px-8">{children}</div>
+                </div>
               </div>
-            </div>
-          </TRPCProvider>
+            </HydrateClient>
+          </TRPCReactProvider>
         </NuqsAdapter>
       </body>
     </html>

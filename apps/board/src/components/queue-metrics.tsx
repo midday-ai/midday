@@ -1,8 +1,9 @@
 "use client";
 
-import { trpc } from "@/lib/trpc-react";
+import { useTRPC } from "@/lib/trpc-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { cn } from "@midday/ui/cn";
+import { useQuery } from "@tanstack/react-query";
 
 interface QueueMetricsProps {
   queueName: string;
@@ -17,9 +18,12 @@ export function QueueMetrics({
   selectedStatus,
   onStatusChange,
 }: QueueMetricsProps) {
-  const { data: queue, isLoading } = trpc.queues.get.useQuery({
-    name: queueName,
-  });
+  const trpc = useTRPC();
+  const { data: queue, isLoading } = useQuery(
+    trpc.queues.get.queryOptions({
+      name: queueName,
+    }),
+  );
 
   if (isLoading) {
     return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { trpc } from "@/lib/trpc-react";
+import { useTRPC } from "@/lib/trpc-react";
 import {
   Table,
   TableBody,
@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@midday/ui/table";
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 
@@ -19,12 +20,15 @@ interface JobTableProps {
 
 export function JobTable({ queueName, status }: JobTableProps) {
   const router = useRouter();
-  const { data, isLoading } = trpc.jobs.list.useQuery({
-    queueName,
-    status,
-    page: 1,
-    pageSize: 50,
-  });
+  const trpc = useTRPC();
+  const { data, isLoading } = useQuery(
+    trpc.jobs.list.queryOptions({
+      queueName,
+      status,
+      page: 1,
+      pageSize: 50,
+    }),
+  );
 
   const jobs = data?.jobs || [];
 

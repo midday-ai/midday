@@ -60,13 +60,14 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes - tRPC needs to handle auth itself if needed)
+     * Match all request paths except for:
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - health (health check endpoint)
+     *
+     * Note: API routes (including tRPC) are now protected by auth
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|health).*)",
+    "/((?!_next/static|_next/image|favicon.ico|health).*)",
   ],
 };
