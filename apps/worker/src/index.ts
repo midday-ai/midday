@@ -115,7 +115,7 @@ const port = Number.parseInt(process.env.PORT || "8080", 10);
 
 Bun.serve({
   port,
-  hostname: "0.0.0.0", // Listen on all interfaces (required for Fly.io)
+  hostname: "0.0.0.0", // Listen on all interfaces
   fetch: app.fetch,
 });
 
