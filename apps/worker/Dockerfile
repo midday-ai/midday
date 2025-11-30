@@ -26,11 +26,9 @@ RUN apt-get update && apt-get install -y \
 
 # First install the dependencies (as they change less often)
 COPY --from=builder /app/out/json/ .
+COPY --from=builder /app/out/full/ .
 # Don't copy the lockfile, allow Bun to generate a fresh one
 RUN bun install
-
-# Copy the full source code
-COPY --from=builder /app/out/full/ .
 
 # Runner stage (same as installer to avoid another copy)
 FROM installer AS runner
