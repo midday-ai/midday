@@ -31,7 +31,7 @@ export function Sidebar() {
         </Link>
       </div>
 
-      <div className="flex flex-col w-full pt-[70px] flex-1">
+      <div className="flex flex-col w-full pt-[70px] flex-1 border-b border-border mb-3">
         <MainMenu isExpanded={isExpanded} />
       </div>
 
