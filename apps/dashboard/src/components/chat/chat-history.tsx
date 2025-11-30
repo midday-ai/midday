@@ -26,7 +26,7 @@ const ChatHistoryContext = createContext<{
   setIsOpen: (open: boolean) => void;
 } | null>(null);
 
-function useChatHistoryContext() {
+export function useChatHistoryContext() {
   const context = useContext(ChatHistoryContext);
   if (!context) {
     throw new Error(
