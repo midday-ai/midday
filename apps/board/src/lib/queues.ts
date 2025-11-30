@@ -26,8 +26,7 @@ export async function initializeQueuesFromNames(
       if (typeof redisOptions === "string") {
         // URL string - create Redis instance with proper options for Upstash
         redisConnection = new Redis(redisOptions, {
-          // Force IPv4 for Upstash (Fly.io IPv6 can cause connection issues)
-          family: 4,
+          family: isProduction ? 6 : 4, // IPv6 for Fly.io production, IPv4 for local
           maxRetriesPerRequest: null, // Required for BullMQ
           enableReadyCheck: false, // BullMQ handles this
           lazyConnect: true,
@@ -56,7 +55,7 @@ export async function initializeQueuesFromNames(
         // Options object - create Redis instance
         redisConnection = new Redis({
           ...redisOptions,
-          family: redisOptions.family || 4, // Default to IPv4 for Upstash
+          family: redisOptions.family || (isProduction ? 6 : 4), // IPv6 for production, IPv4 for local
           maxRetriesPerRequest: null,
           enableReadyCheck: false,
           lazyConnect: true,
