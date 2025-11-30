@@ -1,15 +1,14 @@
 import { Worker, type WorkerOptions } from "bullmq";
+import { Hono } from "hono";
+import { setupBullBoard } from "./bull-board";
 import { getRedisConnection } from "./config";
 import { checkHealth } from "./health";
 import { getProcessor } from "./processors/registry";
 
 // Initialize Redis connection
-getRedisConnection()
-  .connect()
-  .catch((err) => {
-    console.error("Failed to connect to Redis:", err);
-    process.exit(1);
-  });
+// BullMQ will handle connection automatically with lazyConnect: true
+// Workers will connect when they start processing jobs
+getRedisConnection();
 
 /**
  * Worker options for inbox queue
@@ -103,25 +102,76 @@ transactionsWorker.on("failed", (job, err) => {
   console.error(`Transaction job failed: ${job?.name} (${job?.id})`, err);
 });
 
-// Health check HTTP server
+// Basic auth middleware for Bull Board
+const basicAuth = () => {
+  const username = process.env.BULL_BOARD_USERNAME;
+  const password = process.env.BULL_BOARD_PASSWORD;
+
+  if (!username) {
+    throw new Error("BULL_BOARD_USERNAME environment variable is required");
+  }
+
+  if (!password) {
+    throw new Error("BULL_BOARD_PASSWORD environment variable is required");
+  }
+
+  return async (c: any, next: () => Promise<void>) => {
+    const authHeader = c.req.header("Authorization");
+
+    if (!authHeader || !authHeader.startsWith("Basic ")) {
+      return c.text("Unauthorized", 401, {
+        "WWW-Authenticate": 'Basic realm="Bull Board"',
+      });
+    }
+
+    try {
+      const credentials = Buffer.from(authHeader.slice(6), "base64")
+        .toString()
+        .split(":");
+      const [providedUsername, providedPassword] = credentials;
+
+      // Validate both username and password
+      if (
+        !providedUsername ||
+        !providedPassword ||
+        providedUsername !== username ||
+        providedPassword !== password
+      ) {
+        return c.text("Unauthorized", 401, {
+          "WWW-Authenticate": 'Basic realm="Bull Board"',
+        });
+      }
+
+      await next();
+    } catch (error) {
+      return c.text("Unauthorized", 401, {
+        "WWW-Authenticate": 'Basic realm="Bull Board"',
+      });
+    }
+  };
+};
+
+// Create Hono app
+const app = new Hono();
+
+// Health check endpoint (no auth required)
+app.get("/health", async (c) => {
+  const health = await checkHealth();
+  return c.json(health, health.status === "ok" ? 200 : 503);
+});
+
+// Bull Board routes (protected by basic auth)
+app.use("/admin/queues/*", basicAuth());
+setupBullBoard(app);
+
+// Start server
 const port = Number.parseInt(process.env.PORT || "8080", 10);
 
 Bun.serve({
   port,
-  async fetch(req) {
-    const url = new URL(req.url);
-
-    if (url.pathname === "/health") {
-      const health = await checkHealth();
-      return new Response(JSON.stringify(health), {
-        headers: { "Content-Type": "application/json" },
-        status: health.status === "ok" ? 200 : 503,
-      });
-    }
-
-    return new Response("Not Found", { status: 404 });
-  },
+  fetch: app.fetch,
 });
 
-console.log(`Worker health check server running on port ${port}`);
+console.log(`Worker server running on port ${port}`);
+console.log(`Bull Board available at http://localhost:${port}/admin/queues`);
 console.log("Workers initialized and ready to process jobs");
