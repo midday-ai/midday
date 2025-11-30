@@ -53,7 +53,14 @@ export async function startAdmin(config?: Partial<AdminConfig>) {
     }
   }
 
+  const queuesCount = adminConfig.queues.length;
   console.log(
-    `Queue Board initialized with ${adminConfig.queues.length} queues`,
+    `Queue Board initialized with ${queuesCount} queues: ${(adminConfig.queues as string[]).join(", ")}`,
   );
+
+  // Log Redis URL (masked for security)
+  if (redisUrl) {
+    const maskedUrl = redisUrl.replace(/:[^:@]+@/, ":****@");
+    console.log(`[Queue Board] Using Redis URL: ${maskedUrl}`);
+  }
 }

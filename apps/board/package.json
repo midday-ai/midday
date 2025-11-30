@@ -16,6 +16,7 @@
     "@trpc/client": "^11.7.2",
     "@trpc/react-query": "^11.7.2",
     "@trpc/server": "^11.7.2",
+    "@trpc/tanstack-react-query": "^11.7.2",
     "bullmq": "^5.65.0",
     "date-fns": "^4.1.0",
     "ioredis": "^5.8.2",
