@@ -1,0 +1,41 @@
+{
+  "name": "@midday/board",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3002",
+    "build": "next build",
+    "start": "next start -p 3002",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write ."
+  },
+  "dependencies": {
+    "@midday/ui": "workspace:*",
+    "@tanstack/react-query": "^5.90.11",
+    "@trpc/client": "^11.7.2",
+    "@trpc/react-query": "^11.7.2",
+    "@trpc/server": "^11.7.2",
+    "bullmq": "^5.65.0",
+    "date-fns": "^4.1.0",
+    "ioredis": "^5.8.2",
+    "next": "16.0.5",
+    "nuqs": "^2.8.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-icons": "^5.5.0",
+    "recharts": "2.15.3",
+    "superjson": "^2.2.6",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@midday/tsconfig": "workspace:*",
+    "@types/node": "^24.10.1",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "autoprefixer": "^10.4.22",
+    "tailwindcss": "^3.4.13",
+    "tailwindcss-animate": "^1.0.7",
+    "typescript": "^5.9.3"
+  }
+}
