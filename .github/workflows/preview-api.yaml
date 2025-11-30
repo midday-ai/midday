@@ -1,4 +1,4 @@
-name: Fly Deploy
+name: Preview Deployment - API
 permissions:
   contents: read
 on:

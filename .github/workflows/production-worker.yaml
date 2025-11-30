@@ -1,4 +1,4 @@
-name: Fly Deploy
+name: Production Deployment - Worker
 permissions:
   contents: read
 on:

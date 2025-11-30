@@ -27,7 +27,9 @@ RUN apt-get update && apt-get install -y \
 # First install the dependencies (as they change less often)
 COPY --from=builder /app/out/json/ .
 COPY --from=builder /app/out/full/ .
-# Don't copy the lockfile, allow Bun to generate a fresh one
+# Remove any lockfile that might have been copied (turbo prune may include a partial one)
+RUN rm -f bun.lock
+# Generate a fresh lockfile
 RUN bun install
 
 # Runner stage (same as installer to avoid another copy)

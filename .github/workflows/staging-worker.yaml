@@ -1,4 +1,4 @@
-name: Fly Deploy
+name: Staging Deployment - Worker
 permissions:
   contents: read
 on:
