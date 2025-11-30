@@ -11,7 +11,7 @@ primary_region = 'fra'
   worker = "/app/entrypoint.sh worker"
   board = "/app/entrypoint.sh board"
 
-# Service for worker process (port 8080)
+# HTTP service for worker process (port 8080)
 [[services]]
   processes = ["worker"]
   internal_port = 8080
@@ -35,7 +35,7 @@ primary_region = 'fra'
     timeout = "10s"
     path = "/health"
 
-# Service for board process (port 3002)
+# HTTP service for board process (port 3002)
 [[services]]
   processes = ["board"]
   internal_port = 3002

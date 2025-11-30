@@ -3,8 +3,6 @@ import { Hono } from "hono";
 import { getRedisConnection } from "./config";
 import { checkHealth } from "./health";
 import { getProcessor } from "./processors/registry";
-import { inboxProviderQueue, inboxQueue } from "./queues/inbox";
-import { transactionsQueue } from "./queues/transactions";
 
 // Initialize Redis connection
 // BullMQ will handle connection automatically with lazyConnect: true
@@ -112,10 +110,6 @@ app.get("/health", async (c) => {
   return c.json(health, health.status === "ok" ? 200 : 503);
 });
 
-// Note: Queue Board is now a separate Next.js app
-// Run it with: cd apps/board && bun run dev
-// It will connect to the same Redis instance and discover queues automatically
-
 // Start server
 const port = Number.parseInt(process.env.PORT || "8080", 10);
 
@@ -126,4 +120,3 @@ Bun.serve({
 
 console.log(`Worker server running on port ${port}`);
 console.log("Workers initialized and ready to process jobs");
-console.log("To access queue board, run: cd apps/board && bun run dev");
