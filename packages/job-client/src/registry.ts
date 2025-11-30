@@ -1,34 +1,60 @@
 import type { Queue } from "bullmq";
-import { inboxProviderQueue, inboxQueue, transactionsQueue } from "./config";
+import {
+  getInboxProviderQueue,
+  getInboxQueue,
+  getTransactionsQueue,
+} from "./config";
+
+/**
+ * Job registry - maps job names to their queue getters
+ * Queues are created lazily when accessed
+ */
+function createJobRegistry(): Map<string, Queue> {
+  const inboxQueue = getInboxQueue();
+  const inboxProviderQueue = getInboxProviderQueue();
+  const transactionsQueue = getTransactionsQueue();
+
+  return new Map<string, Queue>([
+    // Inbox jobs
+    ["embed-inbox", inboxQueue],
+    ["batch-process-matching", inboxQueue],
+    ["match-transactions-bidirectional", inboxQueue],
+    ["process-attachment", inboxQueue],
+    ["slack-upload", inboxQueue],
+    ["no-match-scheduler", inboxQueue],
+
+    // Inbox provider jobs
+    ["inbox-provider-initial-setup", inboxProviderQueue],
+    ["inbox-provider-scheduler", inboxProviderQueue],
+    ["inbox-provider-sync-account", inboxProviderQueue],
+
+    // Transaction jobs
+    ["export-transactions", transactionsQueue],
+    ["process-export", transactionsQueue],
+  ]);
+}
+
+let _jobRegistry: Map<string, Queue> | null = null;
 
 /**
  * Job registry - maps job names to their queues
- * As we add more queues, we'll add them here
+ * Lazy initialization: created on first access
  */
-export const jobRegistry = new Map<string, Queue>([
-  // Inbox jobs
-  ["embed-inbox", inboxQueue],
-  ["batch-process-matching", inboxQueue],
-  ["match-transactions-bidirectional", inboxQueue],
-  ["process-attachment", inboxQueue],
-  ["slack-upload", inboxQueue],
-  ["no-match-scheduler", inboxQueue],
+export function getJobRegistry(): Map<string, Queue> {
+  if (!_jobRegistry) {
+    _jobRegistry = createJobRegistry();
+  }
+  return _jobRegistry;
+}
 
-  // Inbox provider jobs
-  ["inbox-provider-initial-setup", inboxProviderQueue],
-  ["inbox-provider-scheduler", inboxProviderQueue],
-  ["inbox-provider-sync-account", inboxProviderQueue],
-
-  // Transaction jobs
-  ["export-transactions", transactionsQueue],
-  ["process-export", transactionsQueue],
-]);
+// Export for backward compatibility (lazy)
+export const jobRegistry = getJobRegistry();
 
 /**
  * Get queue for a job name
  */
 export function getQueueForJob(jobName: string): Queue {
-  const queue = jobRegistry.get(jobName);
+  const queue = getJobRegistry().get(jobName);
   if (!queue) {
     throw new Error(`No queue registered for job: ${jobName}`);
   }
@@ -40,8 +66,9 @@ export function getQueueForJob(jobName: string): Queue {
  */
 export function getQueueNameForJob(jobName: string): string {
   // Check which queue this job belongs to
-  if (jobRegistry.has(jobName)) {
-    const queue = jobRegistry.get(jobName)!;
+  const registry = getJobRegistry();
+  if (registry.has(jobName)) {
+    const queue = registry.get(jobName)!;
     // Get queue name from the queue instance
     return queue.name;
   }

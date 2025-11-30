@@ -51,51 +51,83 @@ function getRedisConnection(): Redis {
   return redisConnection;
 }
 
+// Lazy queue instances - created on first access
+let _inboxQueue: Queue | null = null;
+let _inboxProviderQueue: Queue | null = null;
+let _transactionsQueue: Queue | null = null;
+let _flowProducer: FlowProducer | null = null;
+
 /**
- * Default queue options
+ * Get default queue options (lazy Redis connection)
  */
-const defaultQueueOptions: QueueOptions = {
-  connection: getRedisConnection(),
-  defaultJobOptions: {
-    attempts: 3,
-    backoff: {
-      type: "exponential",
-      delay: 1000,
+function getDefaultQueueOptions(): QueueOptions {
+  return {
+    connection: getRedisConnection(),
+    defaultJobOptions: {
+      attempts: 3,
+      backoff: {
+        type: "exponential",
+        delay: 1000,
+      },
+      removeOnComplete: {
+        age: 24 * 3600, // Keep completed jobs for 24 hours
+        count: 1000, // Keep max 1000 completed jobs
+      },
+      removeOnFail: {
+        age: 7 * 24 * 3600, // Keep failed jobs for 7 days
+      },
     },
-    removeOnComplete: {
-      age: 24 * 3600, // Keep completed jobs for 24 hours
-      count: 1000, // Keep max 1000 completed jobs
-    },
-    removeOnFail: {
-      age: 7 * 24 * 3600, // Keep failed jobs for 7 days
-    },
-  },
-};
+  };
+}
 
 /**
  * Inbox queue - Main queue for inbox processing jobs
+ * Lazy initialization: created on first access
  */
-export const inboxQueue = new Queue("inbox", defaultQueueOptions);
+export function getInboxQueue(): Queue {
+  if (!_inboxQueue) {
+    _inboxQueue = new Queue("inbox", getDefaultQueueOptions());
+  }
+  return _inboxQueue;
+}
 
 /**
  * Inbox provider queue - Gmail provider sync jobs
+ * Lazy initialization: created on first access
  */
-export const inboxProviderQueue = new Queue("inbox-provider", {
-  ...defaultQueueOptions,
-  defaultJobOptions: {
-    ...defaultQueueOptions.defaultJobOptions,
-    attempts: 2, // Fewer retries for provider jobs
-  },
-});
+export function getInboxProviderQueue(): Queue {
+  if (!_inboxProviderQueue) {
+    _inboxProviderQueue = new Queue("inbox-provider", {
+      ...getDefaultQueueOptions(),
+      defaultJobOptions: {
+        ...getDefaultQueueOptions().defaultJobOptions,
+        attempts: 2, // Fewer retries for provider jobs
+      },
+    });
+  }
+  return _inboxProviderQueue;
+}
 
 /**
  * Transactions queue - For transaction export and processing jobs
+ * Lazy initialization: created on first access
  */
-export const transactionsQueue = new Queue("transactions", defaultQueueOptions);
+export function getTransactionsQueue(): Queue {
+  if (!_transactionsQueue) {
+    _transactionsQueue = new Queue("transactions", getDefaultQueueOptions());
+  }
+  return _transactionsQueue;
+}
 
 /**
  * FlowProducer for job dependencies
+ * Lazy initialization: created on first access
  */
-export const flowProducer = new FlowProducer({
-  connection: getRedisConnection(),
-});
+export function getFlowProducer(): FlowProducer {
+  if (!_flowProducer) {
+    _flowProducer = new FlowProducer({
+      connection: getRedisConnection(),
+    });
+  }
+  return _flowProducer;
+}

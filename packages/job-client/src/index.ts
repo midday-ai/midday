@@ -5,11 +5,12 @@
  *   import { jobs } from "@midday/job-client";
  *   await jobs.trigger("batch-process-matching", { teamId, inboxIds });
  */
+// Export getter functions for lazy queue initialization
 export {
-  inboxQueue,
-  inboxProviderQueue,
-  transactionsQueue,
-  flowProducer,
+  getInboxQueue,
+  getInboxProviderQueue,
+  getTransactionsQueue,
+  getFlowProducer,
 } from "./config";
 export { jobs, createJobFlow, getJobStatus } from "./client";
 export { jobRegistry, getQueueForJob, getQueueNameForJob } from "./registry";

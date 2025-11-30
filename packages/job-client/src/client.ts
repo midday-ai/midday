@@ -1,9 +1,9 @@
 import type { JobsOptions } from "bullmq";
 import {
-  flowProducer,
-  inboxProviderQueue,
-  inboxQueue,
-  transactionsQueue,
+  getFlowProducer,
+  getInboxProviderQueue,
+  getInboxQueue,
+  getTransactionsQueue,
 } from "./config";
 import { getQueueForJob, getQueueNameForJob } from "./registry";
 import type { Job as JobType } from "./types";
@@ -116,7 +116,7 @@ export async function createJobFlow(
     })),
   };
 
-  const addedFlow = await flowProducer.add(flow);
+  const addedFlow = await getFlowProducer().add(flow);
 
   return { id: addedFlow.job.id! };
 }
@@ -133,14 +133,17 @@ export async function getJobStatus(jobId: string): Promise<{
   result?: unknown;
   error?: string;
 } | null> {
-  // Queue names and their instances - order by most likely to contain the job
+  // Queue names and their getters - order by most likely to contain the job
+  // Queues are created lazily when accessed
   const queueConfigs = [
-    { name: "transactions", queue: transactionsQueue },
-    { name: "inbox", queue: inboxQueue },
-    { name: "inbox-provider", queue: inboxProviderQueue },
+    { name: "transactions", getQueue: getTransactionsQueue },
+    { name: "inbox", getQueue: getInboxQueue },
+    { name: "inbox-provider", getQueue: getInboxProviderQueue },
   ];
 
-  for (const { name: queueName, queue } of queueConfigs) {
+  for (const { name: queueName, getQueue } of queueConfigs) {
+    // Get the queue lazily (only creates it when accessed)
+    const queue = getQueue();
     // Get the Redis client from the queue
     // BullMQ queue.client returns a Promise<Redis>
     const client = await queue.client;
