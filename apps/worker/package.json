@@ -32,6 +32,7 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/react": "^18.3.12"
   }
 }

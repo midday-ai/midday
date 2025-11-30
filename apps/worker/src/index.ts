@@ -103,55 +103,6 @@ transactionsWorker.on("failed", (job, err) => {
   console.error(`Transaction job failed: ${job?.name} (${job?.id})`, err);
 });
 
-// Basic auth middleware for Bull Board
-const basicAuth = () => {
-  const username = process.env.BULL_BOARD_USERNAME;
-  const password = process.env.BULL_BOARD_PASSWORD;
-
-  if (!username) {
-    throw new Error("BULL_BOARD_USERNAME environment variable is required");
-  }
-
-  if (!password) {
-    throw new Error("BULL_BOARD_PASSWORD environment variable is required");
-  }
-
-  return async (c: any, next: () => Promise<void>) => {
-    const authHeader = c.req.header("Authorization");
-
-    if (!authHeader || !authHeader.startsWith("Basic ")) {
-      return c.text("Unauthorized", 401, {
-        "WWW-Authenticate": 'Basic realm="Bull Board"',
-      });
-    }
-
-    try {
-      const credentials = Buffer.from(authHeader.slice(6), "base64")
-        .toString()
-        .split(":");
-      const [providedUsername, providedPassword] = credentials;
-
-      // Validate both username and password
-      if (
-        !providedUsername ||
-        !providedPassword ||
-        providedUsername !== username ||
-        providedPassword !== password
-      ) {
-        return c.text("Unauthorized", 401, {
-          "WWW-Authenticate": 'Basic realm="Bull Board"',
-        });
-      }
-
-      await next();
-    } catch (error) {
-      return c.text("Unauthorized", 401, {
-        "WWW-Authenticate": 'Basic realm="Bull Board"',
-      });
-    }
-  };
-};
-
 // Create Hono app
 const app = new Hono();
 
@@ -162,7 +113,7 @@ app.get("/health", async (c) => {
 });
 
 // Note: Queue Board is now a separate Next.js app
-// Run it with: cd apps/board && npm run dev
+// Run it with: cd apps/board && bun run dev
 // It will connect to the same Redis instance and discover queues automatically
 
 // Start server
@@ -175,4 +126,4 @@ Bun.serve({
 
 console.log(`Worker server running on port ${port}`);
 console.log("Workers initialized and ready to process jobs");
-console.log("To access queue board, run: cd apps/board && npm run dev");
+console.log("To access queue board, run: cd apps/board && bun run dev");
