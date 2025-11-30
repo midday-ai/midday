@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  ChatHistoryButton,
+  ChatHistoryDropdown,
+  ChatHistoryProvider,
+  useChatHistoryContext,
+} from "@/components/chat/chat-history";
 import { CommandMenu } from "@/components/chat/command-menu";
 import { RecordButton } from "@/components/chat/record-button";
 import { SuggestedActionsButton } from "@/components/suggested-actions-button";
@@ -38,7 +44,7 @@ export interface ChatInputMessage extends PromptInputMessage {
   };
 }
 
-export function ChatInput() {
+function ChatInputContent() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFocused, setIsFocused] = useState(false);
@@ -51,6 +57,7 @@ export function ChatInput() {
   const { setChatId, isHome } = useChatInterface();
   const { isMetricsTab } = useOverviewTab();
   const { isScrolled } = useWindowScroll();
+  const { isOpen: isHistoryOpen } = useChatHistoryContext();
 
   const [, clearSuggestions] = useDataPart<{ prompts: string[] }>(
     "suggestions",
@@ -75,12 +82,13 @@ export function ChatInput() {
     resetCommandState,
   } = useChatStore();
 
-  // Don't minimize if commands are shown, input is focused, or buttons are being interacted with
+  // Don't minimize if commands are shown, history is open, input is focused, or buttons are being interacted with
   const shouldMinimize =
     isMetricsTab &&
     isScrolled &&
     !isFocused &&
     !showCommands &&
+    !isHistoryOpen &&
     !isInteractingWithButtons;
 
   const handleSubmit = (message: ChatInputMessage) => {
@@ -129,167 +137,178 @@ export function ChatInput() {
 
   return (
     <div
+      ref={containerRef}
       className={cn(
-        "fixed bottom-6 z-20 transition-all duration-300 ease-in-out",
+        "mx-auto w-full pt-2 max-w-full relative transition-all duration-300 ease-in-out",
+        shouldMinimize ? "md:max-w-[400px]" : "md:max-w-[770px]",
+      )}
+    >
+      <CommandMenu />
+      <ChatHistoryDropdown />
+
+      <PromptInput
+        onSubmit={handleSubmit}
+        globalDrop
+        multiple
+        accept="application/pdf,image/*"
+        className={cn(
+          "transition-all duration-300 ease-in-out",
+          shouldMinimize && "flex flex-row items-center p-2",
+        )}
+      >
+        <PromptInputBody
+          className={cn(shouldMinimize && "flex-row flex-1 items-center pr-2")}
+        >
+          <PromptInputAttachments>
+            {(attachment) => <PromptInputAttachment data={attachment} />}
+          </PromptInputAttachments>
+          <PromptInputTextarea
+            ref={textareaRef}
+            autoFocus
+            onChange={handleInputChange}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => {
+              // Allow normal blur - shouldMinimize already checks for showCommands
+              setIsFocused(false);
+            }}
+            className={cn(
+              "transition-[height,min-height,max-height,padding] duration-300 ease-in-out",
+              shouldMinimize && "min-h-[32px] max-h-[32px] h-8 py-1 px-2",
+            )}
+            onKeyDown={(e) => {
+              // Handle Enter key for commands
+              if (e.key === "Enter" && showCommands) {
+                e.preventDefault();
+                const selectedCommand = filteredCommands[selectedCommandIndex];
+                if (selectedCommand) {
+                  // Execute command through the store
+                  if (!chatId) return;
+
+                  // Clear old suggestions before sending new message
+                  clearSuggestions();
+
+                  setChatId(chatId);
+
+                  sendMessage({
+                    role: "user",
+                    parts: [{ type: "text", text: selectedCommand.title }],
+                    metadata: {
+                      toolCall: {
+                        toolName: selectedCommand.toolName,
+                        toolParams: selectedCommand.toolParams,
+                      },
+                    },
+                  });
+
+                  setInput("");
+                  resetCommandState();
+                }
+                return;
+              }
+
+              // Handle Enter key for normal messages - trigger form submission
+              if (e.key === "Enter" && !showCommands && !e.shiftKey) {
+                // Don't submit if IME composition is in progress
+                if (e.nativeEvent.isComposing) {
+                  return;
+                }
+
+                e.preventDefault();
+                const form = e.currentTarget.form;
+                if (form) {
+                  form.requestSubmit();
+                }
+                return;
+              }
+
+              // Handle other keys normally
+              handleKeyDown(e);
+            }}
+            value={input}
+            placeholder={isWebSearch ? "Search the web" : "Ask anything"}
+          />
+        </PromptInputBody>
+        <PromptInputToolbar
+          className={cn(shouldMinimize && "pb-0 px-0 flex-shrink-0")}
+          onMouseDown={() => setIsInteractingWithButtons(true)}
+          onMouseUp={() => {
+            // Delay to allow button click to complete
+            setTimeout(() => setIsInteractingWithButtons(false), 100);
+          }}
+          onFocus={() => setIsInteractingWithButtons(true)}
+          onBlur={() => {
+            // Delay to allow button click to complete
+            setTimeout(() => setIsInteractingWithButtons(false), 100);
+          }}
+        >
+          <PromptInputTools>
+            <div
+              className={cn(
+                "flex items-center gap-2 transition-all duration-300 ease-in-out",
+                shouldMinimize
+                  ? "opacity-0 scale-95 -translate-x-2 pointer-events-none"
+                  : "opacity-100 scale-100 translate-x-0",
+              )}
+            >
+              <PromptInputActionAddAttachments />
+              <SuggestedActionsButton />
+              <WebSearchButton />
+              <ChatHistoryButton />
+            </div>
+          </PromptInputTools>
+
+          <PromptInputTools>
+            <div
+              className={cn(
+                "transition-all duration-300 ease-in-out",
+                shouldMinimize
+                  ? "opacity-0 scale-95 -translate-x-2 pointer-events-none"
+                  : "opacity-100 scale-100 translate-x-0",
+              )}
+            >
+              <RecordButton size={16} />
+            </div>
+            <PromptInputSubmit
+              disabled={
+                // Enable button when streaming so user can stop
+                status === "streaming" || status === "submitted"
+                  ? false
+                  : (!input && !status) ||
+                    isUploading ||
+                    isRecording ||
+                    isProcessing
+              }
+              status={status}
+              onClick={
+                status === "streaming" || status === "submitted"
+                  ? handleStopClick
+                  : undefined
+              }
+            />
+          </PromptInputTools>
+        </PromptInputToolbar>
+      </PromptInput>
+    </div>
+  );
+}
+
+export function ChatInput() {
+  const { isHome } = useChatInterface();
+  const [selectedType] = useQueryState("artifact-type", parseAsString);
+  const isCanvasVisible = !!selectedType;
+
+  return (
+    <div
+      className={cn(
+        "fixed bottom-6 z-[100] transition-all duration-300 ease-in-out",
         "left-0 md:left-[70px] px-4 md:px-6",
         isCanvasVisible ? "right-0 md:right-[603px]" : "right-0",
         isHome && "chat-input-static",
       )}
     >
-      <div
-        ref={containerRef}
-        className={cn(
-          "mx-auto w-full pt-2 max-w-full relative transition-all duration-300 ease-in-out",
-          shouldMinimize ? "md:max-w-[400px]" : "md:max-w-[770px]",
-        )}
-      >
-        <CommandMenu />
-
-        <PromptInput
-          onSubmit={handleSubmit}
-          globalDrop
-          multiple
-          accept="application/pdf,image/*"
-          className={cn(
-            "transition-all duration-300 ease-in-out",
-            shouldMinimize && "flex flex-row items-center p-2",
-          )}
-        >
-          <PromptInputBody
-            className={cn(
-              shouldMinimize && "flex-row flex-1 items-center pr-2",
-            )}
-          >
-            <PromptInputAttachments>
-              {(attachment) => <PromptInputAttachment data={attachment} />}
-            </PromptInputAttachments>
-            <PromptInputTextarea
-              ref={textareaRef}
-              autoFocus
-              onChange={handleInputChange}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => {
-                // Allow normal blur - shouldMinimize already checks for showCommands
-                setIsFocused(false);
-              }}
-              className={cn(
-                "transition-[height,min-height,max-height,padding] duration-300 ease-in-out",
-                shouldMinimize && "min-h-[32px] max-h-[32px] h-8 py-1 px-2",
-              )}
-              onKeyDown={(e) => {
-                // Handle Enter key for commands
-                if (e.key === "Enter" && showCommands) {
-                  e.preventDefault();
-                  const selectedCommand =
-                    filteredCommands[selectedCommandIndex];
-                  if (selectedCommand) {
-                    // Execute command through the store
-                    if (!chatId) return;
-
-                    // Clear old suggestions before sending new message
-                    clearSuggestions();
-
-                    setChatId(chatId);
-
-                    sendMessage({
-                      role: "user",
-                      parts: [{ type: "text", text: selectedCommand.title }],
-                      metadata: {
-                        toolCall: {
-                          toolName: selectedCommand.toolName,
-                          toolParams: selectedCommand.toolParams,
-                        },
-                      },
-                    });
-
-                    setInput("");
-                    resetCommandState();
-                  }
-                  return;
-                }
-
-                // Handle Enter key for normal messages - trigger form submission
-                if (e.key === "Enter" && !showCommands && !e.shiftKey) {
-                  // Don't submit if IME composition is in progress
-                  if (e.nativeEvent.isComposing) {
-                    return;
-                  }
-
-                  e.preventDefault();
-                  const form = e.currentTarget.form;
-                  if (form) {
-                    form.requestSubmit();
-                  }
-                  return;
-                }
-
-                // Handle other keys normally
-                handleKeyDown(e);
-              }}
-              value={input}
-              placeholder={isWebSearch ? "Search the web" : "Ask anything"}
-            />
-          </PromptInputBody>
-          <PromptInputToolbar
-            className={cn(shouldMinimize && "pb-0 px-0 flex-shrink-0")}
-            onMouseDown={() => setIsInteractingWithButtons(true)}
-            onMouseUp={() => {
-              // Delay to allow button click to complete
-              setTimeout(() => setIsInteractingWithButtons(false), 100);
-            }}
-            onFocus={() => setIsInteractingWithButtons(true)}
-            onBlur={() => {
-              // Delay to allow button click to complete
-              setTimeout(() => setIsInteractingWithButtons(false), 100);
-            }}
-          >
-            <PromptInputTools>
-              <div
-                className={cn(
-                  "flex items-center gap-2 transition-all duration-300 ease-in-out",
-                  shouldMinimize
-                    ? "opacity-0 scale-95 -translate-x-2 pointer-events-none"
-                    : "opacity-100 scale-100 translate-x-0",
-                )}
-              >
-                <PromptInputActionAddAttachments />
-                <SuggestedActionsButton />
-                <WebSearchButton />
-              </div>
-            </PromptInputTools>
-
-            <PromptInputTools>
-              <div
-                className={cn(
-                  "transition-all duration-300 ease-in-out",
-                  shouldMinimize
-                    ? "opacity-0 scale-95 -translate-x-2 pointer-events-none"
-                    : "opacity-100 scale-100 translate-x-0",
-                )}
-              >
-                <RecordButton size={16} />
-              </div>
-              <PromptInputSubmit
-                disabled={
-                  // Enable button when streaming so user can stop
-                  status === "streaming" || status === "submitted"
-                    ? false
-                    : (!input && !status) ||
-                      isUploading ||
-                      isRecording ||
-                      isProcessing
-                }
-                status={status}
-                onClick={
-                  status === "streaming" || status === "submitted"
-                    ? handleStopClick
-                    : undefined
-                }
-              />
-            </PromptInputTools>
-          </PromptInputToolbar>
-        </PromptInput>
-      </div>
+      <ChatHistoryProvider>
+        <ChatInputContent />
+      </ChatHistoryProvider>
     </div>
   );
 }

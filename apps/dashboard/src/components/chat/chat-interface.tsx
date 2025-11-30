@@ -185,7 +185,7 @@ export function ChatInterface({ geo }: Props) {
 
                 <div
                   className={cn(
-                    "fixed bottom-32 z-10 transition-all duration-300 ease-in-out",
+                    "fixed bottom-32 z-0 transition-all duration-300 ease-in-out",
                     "left-0 md:left-[70px] px-4 md:px-6",
                     showCanvas ? "right-0 md:right-[603px]" : "right-0",
                   )}

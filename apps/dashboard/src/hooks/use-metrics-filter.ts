@@ -288,11 +288,8 @@ export function useMetricsFilter() {
     // When base currency is selected (null), remove the param from URL
     // When a specific currency is selected, set it in the URL
     if (currency === null) {
-      // Remove currency param - use callback form to explicitly remove it
-      setParams((prev) => {
-        const { currency: _, ...rest } = prev;
-        return rest;
-      });
+      // Explicitly set to null to clear the currency param from URL
+      setParams({ currency: null });
     } else {
       setParams({ currency });
     }

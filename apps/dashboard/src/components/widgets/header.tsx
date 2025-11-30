@@ -1,10 +1,11 @@
 "use client";
 
-import { ChatHistory } from "@/components/chat/chat-history";
 import { MetricsFilter } from "@/components/metrics/components/metrics-filter";
 import { Customize } from "@/components/widgets/customize";
 import { useUserQuery } from "@/hooks/use-user";
 import { TZDate } from "@date-fns/tz";
+import { cn } from "@midday/ui/cn";
+import { TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { useEffect, useState } from "react";
 import { useIsCustomizing } from "./widget-provider";
 
@@ -49,7 +50,7 @@ export function WidgetsHeader() {
   }, [user?.timezone]);
 
   return (
-    <div className="flex justify-between items-start mb-6">
+    <div className="flex justify-between items-end mb-6">
       <div>
         <h1 className="text-[30px] font-serif leading-normal mb-1">
           <span>{greeting} </span>
@@ -64,12 +65,35 @@ export function WidgetsHeader() {
         </p>
       </div>
 
-      <div className="flex items-center space-x-2" data-no-close>
-        <MetricsFilter />
+      <div className="flex items-center gap-2" data-no-close>
         <div className="hidden md:block">
           <Customize />
         </div>
-        <ChatHistory />
+        <MetricsFilter />
+        <div className="ml-2 relative flex items-stretch bg-[#f7f7f7] dark:bg-[#131313] w-fit">
+          <TabsList className="flex items-stretch h-auto p-0 bg-transparent">
+            <TabsTrigger
+              value="overview"
+              className={cn(
+                "group relative flex items-center gap-1.5 px-3 py-1.5 text-[14px] transition-all whitespace-nowrap border border-transparent h-9 min-h-9",
+                "text-[#707070] hover:text-black bg-[#f7f7f7] dark:text-[#666666] dark:hover:text-white dark:bg-[#131313] mb-0 relative z-[1]",
+                "data-[state=active]:text-black data-[state=active]:bg-[#e6e6e6] dark:data-[state=active]:text-white dark:data-[state=active]:bg-[#1d1d1d] data-[state=active]:mb-[-1px] data-[state=active]:z-10",
+              )}
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger
+              value="metrics"
+              className={cn(
+                "group relative flex items-center gap-1.5 px-3 py-1.5 text-[14px] transition-all whitespace-nowrap border border-transparent h-9 min-h-9",
+                "text-[#707070] hover:text-black bg-[#f7f7f7] dark:text-[#666666] dark:hover:text-white dark:bg-[#131313] mb-0 relative z-[1]",
+                "data-[state=active]:text-black data-[state=active]:bg-[#e6e6e6] dark:data-[state=active]:text-white dark:data-[state=active]:bg-[#1d1d1d] data-[state=active]:mb-[-1px] data-[state=active]:z-10",
+              )}
+            >
+              Metrics
+            </TabsTrigger>
+          </TabsList>
+        </div>
       </div>
     </div>
   );
