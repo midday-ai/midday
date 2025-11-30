@@ -9,7 +9,17 @@ export async function startAdmin(config?: Partial<AdminConfig>) {
 
   if (!redisUrl && !config?.redis) {
     throw new Error(
-      "REDIS_QUEUE_URL environment variable or redis config is required",
+      `REDIS_QUEUE_URL environment variable or redis config is required. Current value: ${redisUrl === undefined ? "undefined" : `"${redisUrl}"`}`,
+    );
+  }
+
+  if (
+    redisUrl &&
+    !redisUrl.startsWith("redis://") &&
+    !redisUrl.startsWith("rediss://")
+  ) {
+    throw new Error(
+      `Invalid REDIS_QUEUE_URL format. Expected redis:// or rediss:// URL, got: "${redisUrl}"`,
     );
   }
 

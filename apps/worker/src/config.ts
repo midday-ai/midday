@@ -24,13 +24,16 @@ export function getRedisConnection(): Redis {
     maxRetriesPerRequest: null, // Required for BullMQ
     enableReadyCheck: false, // BullMQ handles this
     lazyConnect: true,
+    // Force IPv4 for Upstash (Fly.io IPv6 can cause connection issues)
+    family: 4,
     ...(isProduction && {
-      // Production settings
-      connectTimeout: 10000,
+      // Production settings for Upstash/Fly.io
+      connectTimeout: 15000, // Longer timeout for Upstash
       retryStrategy: (times) => {
         const delay = Math.min(times * 50, 2000);
         return delay;
       },
+      enableOfflineQueue: false, // Don't queue commands when offline
     }),
   });
 
@@ -67,12 +70,15 @@ export function getFlowRedisConnection(): Redis {
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
     lazyConnect: true,
+    // Force IPv4 for Upstash (Fly.io IPv6 can cause connection issues)
+    family: 4,
     ...(isProduction && {
-      connectTimeout: 10000,
+      connectTimeout: 15000, // Longer timeout for Upstash
       retryStrategy: (times) => {
         const delay = Math.min(times * 50, 2000);
         return delay;
       },
+      enableOfflineQueue: false, // Don't queue commands when offline
     }),
   });
 
