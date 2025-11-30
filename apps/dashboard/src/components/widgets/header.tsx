@@ -65,12 +65,12 @@ export function WidgetsHeader() {
         </p>
       </div>
 
-      <div className="flex items-center space-x-2" data-no-close>
-        <MetricsFilter />
+      <div className="flex items-center gap-2" data-no-close>
         <div className="hidden md:block">
           <Customize />
         </div>
-        <div className="relative flex items-stretch bg-[#f7f7f7] dark:bg-[#131313] w-fit">
+        <MetricsFilter />
+        <div className="ml-2 relative flex items-stretch bg-[#f7f7f7] dark:bg-[#131313] w-fit">
           <TabsList className="flex items-stretch h-auto p-0 bg-transparent">
             <TabsTrigger
               value="overview"

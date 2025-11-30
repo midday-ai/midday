@@ -53,7 +53,7 @@ export default async function Overview(props: Props) {
 
         <ChatInterface geo={geo} />
 
-        {/* {process.env.NODE_ENV === "development" && (
+        {process.env.NODE_ENV === "development" && (
           <AIDevtools
             config={{
               streamCapture: {
@@ -63,7 +63,7 @@ export default async function Overview(props: Props) {
               },
             }}
           />
-        )} */}
+        )}
       </ChatProvider>
     </HydrateClient>
   );

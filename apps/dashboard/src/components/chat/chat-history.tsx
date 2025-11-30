@@ -272,7 +272,7 @@ export function ChatHistoryDropdown() {
     <div
       ref={historyListRef}
       data-chat-history-menu
-      className="absolute bottom-full left-0 right-0 mb-2 w-full z-30"
+      className="absolute bottom-full left-0 right-0 mb-2 w-full z-[100]"
     >
       <AnimatedSizeContainer
         height
