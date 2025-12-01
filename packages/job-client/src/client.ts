@@ -1,10 +1,3 @@
-import type { JobsOptions } from "bullmq";
-import {
-  getFlowProducer,
-  getInboxProviderQueue,
-  getInboxQueue,
-  getTransactionsQueue,
-} from "./config";
 import { getQueueForJob, getQueueNameForJob } from "./registry";
 import type { Job as JobType } from "./types";
 
@@ -116,6 +109,9 @@ export async function createJobFlow(
     })),
   };
 
+  // Lazy import to avoid pulling in BullMQ types during typecheck
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { getFlowProducer } = require("./config");
   const addedFlow = await getFlowProducer().add(flow);
 
   return { id: addedFlow.job.id! };
@@ -135,6 +131,14 @@ export async function getJobStatus(jobId: string): Promise<{
 } | null> {
   // Queue names and their getters - order by most likely to contain the job
   // Queues are created lazily when accessed
+  // Use dynamic import to avoid pulling in BullMQ types during typecheck
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const {
+    getTransactionsQueue,
+    getInboxQueue,
+    getInboxProviderQueue,
+  } = require("./config");
+
   const queueConfigs = [
     { name: "transactions", getQueue: getTransactionsQueue },
     { name: "inbox", getQueue: getInboxQueue },

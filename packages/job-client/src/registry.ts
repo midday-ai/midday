@@ -1,73 +1,71 @@
 import type { Queue } from "bullmq";
-import {
-  getInboxProviderQueue,
-  getInboxQueue,
-  getTransactionsQueue,
-} from "./config";
 
 /**
- * Job registry - maps job names to their queue getters
- * Queues are created lazily when accessed
+ * Job registry - maps job names to their queue types
+ * Queues are created lazily when accessed (only at runtime, not during typecheck)
  */
-function createJobRegistry(): Map<string, Queue> {
-  const inboxQueue = getInboxQueue();
-  const inboxProviderQueue = getInboxProviderQueue();
-  const transactionsQueue = getTransactionsQueue();
+const JOB_QUEUE_MAP: Record<
+  string,
+  "inbox" | "inbox-provider" | "transactions"
+> = {
+  // Inbox jobs
+  "embed-inbox": "inbox",
+  "batch-process-matching": "inbox",
+  "match-transactions-bidirectional": "inbox",
+  "process-attachment": "inbox",
+  "slack-upload": "inbox",
+  "no-match-scheduler": "inbox",
 
-  return new Map<string, Queue>([
-    // Inbox jobs
-    ["embed-inbox", inboxQueue],
-    ["batch-process-matching", inboxQueue],
-    ["match-transactions-bidirectional", inboxQueue],
-    ["process-attachment", inboxQueue],
-    ["slack-upload", inboxQueue],
-    ["no-match-scheduler", inboxQueue],
+  // Inbox provider jobs
+  "inbox-provider-initial-setup": "inbox-provider",
+  "inbox-provider-scheduler": "inbox-provider",
+  "inbox-provider-sync-account": "inbox-provider",
 
-    // Inbox provider jobs
-    ["inbox-provider-initial-setup", inboxProviderQueue],
-    ["inbox-provider-scheduler", inboxProviderQueue],
-    ["inbox-provider-sync-account", inboxProviderQueue],
-
-    // Transaction jobs
-    ["export-transactions", transactionsQueue],
-    ["process-export", transactionsQueue],
-  ]);
-}
-
-let _jobRegistry: Map<string, Queue> | null = null;
+  // Transaction jobs
+  "export-transactions": "transactions",
+  "process-export": "transactions",
+} as const;
 
 /**
- * Job registry - maps job names to their queues
- * Lazy initialization: created on first access
- */
-export function getJobRegistry(): Map<string, Queue> {
-  if (!_jobRegistry) {
-    _jobRegistry = createJobRegistry();
-  }
-  return _jobRegistry;
-}
-
-/**
- * Get queue for a job name
+ * Get queue for a job name - lazy evaluation to avoid typecheck issues
+ * Uses dynamic import to prevent TypeScript from resolving BullMQ types during typecheck
  */
 export function getQueueForJob(jobName: string): Queue {
-  const queue = getJobRegistry().get(jobName);
-  if (!queue) {
+  const queueType = JOB_QUEUE_MAP[jobName];
+  if (!queueType) {
     throw new Error(`No queue registered for job: ${jobName}`);
   }
-  return queue;
+
+  // Use dynamic import to avoid pulling in BullMQ types during typecheck
+  // This is evaluated at runtime, not during TypeScript compilation
+  switch (queueType) {
+    case "inbox": {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { getInboxQueue } = require("./config");
+      return getInboxQueue();
+    }
+    case "inbox-provider": {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { getInboxProviderQueue } = require("./config");
+      return getInboxProviderQueue();
+    }
+    case "transactions": {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { getTransactionsQueue } = require("./config");
+      return getTransactionsQueue();
+    }
+    default:
+      throw new Error(`Unknown queue type: ${queueType}`);
+  }
 }
 
 /**
  * Get queue name for a job (for flows)
  */
 export function getQueueNameForJob(jobName: string): string {
-  // Check which queue this job belongs to
-  const registry = getJobRegistry();
-  if (registry.has(jobName)) {
-    const queue = registry.get(jobName)!;
-    // Get queue name from the queue instance
-    return queue.name;
+  const queueType = JOB_QUEUE_MAP[jobName];
+  if (!queueType) {
+    throw new Error(`No queue registered for job: ${jobName}`);
   }
-  throw new Error(`No queue registered for job: ${jobName}`);
+  return queueType;
 }
