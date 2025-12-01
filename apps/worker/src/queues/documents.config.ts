@@ -27,10 +27,12 @@ const documentsQueueOptions: QueueOptions = {
  * Worker options for documents queue
  * Concurrency: 50 (matching Trigger.dev's process-document concurrencyLimit)
  * Documents processing can be CPU/memory intensive, so we keep it at 50
+ * Lock duration: 120000ms (2 minutes) to handle long-running classification jobs
  */
 const documentsWorkerOptions: WorkerOptions = {
   connection: getRedisConnection(),
   concurrency: 50,
+  lockDuration: 120000, // 2 minutes - jobs can take up to 60s, add buffer for safety
   limiter: {
     max: 100,
     duration: 1000, // 100 jobs per second max

@@ -7,13 +7,9 @@ import { parseOfficeAsync } from "officeparser";
 import { cleanText, extractTextFromRtf } from "../utils";
 import { retryCall } from "../utils/retry";
 
-// Initialize Google Generative AI client for PDF extraction
-const GOOGLE_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-const google = GOOGLE_API_KEY
-  ? createGoogleGenerativeAI({
-      apiKey: GOOGLE_API_KEY,
-    })
-  : null;
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY!,
+});
 
 export async function loadDocument({
   content,

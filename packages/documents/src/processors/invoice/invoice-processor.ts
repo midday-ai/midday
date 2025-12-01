@@ -7,13 +7,9 @@ import type { GetDocumentRequest } from "../../types";
 import { getDomainFromEmail, removeProtocolFromDomain } from "../../utils";
 import { retryCall } from "../../utils/retry";
 
-// Initialize Google Generative AI client for PDF extraction
-const GOOGLE_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-const google = GOOGLE_API_KEY
-  ? createGoogleGenerativeAI({
-      apiKey: GOOGLE_API_KEY,
-    })
-  : null;
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY!,
+});
 
 export class InvoiceProcessor {
   // Check if the extracted data meets minimum quality standards
