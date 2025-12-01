@@ -6,6 +6,8 @@
     "moduleDetection": "force",
     "allowJs": true,
     "moduleResolution": "bundler",
+    "resolvePackageJsonExports": false,
+    "resolvePackageJsonImports": false,
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
