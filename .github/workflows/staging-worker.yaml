@@ -13,10 +13,10 @@ on:
       - "!packages/ui/**"
 jobs:
   deploy:
-    name: 🚀 Deploy to Fly Staging
+    name: 🚀 Deploy to Fly Worker Staging
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    concurrency: fly-staging
+    concurrency: fly-worker-staging
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2

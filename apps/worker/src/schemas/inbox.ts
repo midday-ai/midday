@@ -43,7 +43,7 @@ export const processAttachmentSchema = z.object({
 export type ProcessAttachmentPayload = z.infer<typeof processAttachmentSchema>;
 
 export const noMatchSchedulerSchema = z.object({
-  teamId: z.string().uuid(),
+  // Empty payload - scheduler runs globally
 });
 
 export type NoMatchSchedulerPayload = z.infer<typeof noMatchSchedulerSchema>;
@@ -59,7 +59,6 @@ export type SlackUploadPayload = z.infer<typeof slackUploadSchema>;
 
 // Provider schemas
 export const inboxProviderInitialSetupSchema = z.object({
-  teamId: z.string().uuid(),
   inboxAccountId: z.string().uuid(),
 });
 
@@ -68,8 +67,8 @@ export type InboxProviderInitialSetupPayload = z.infer<
 >;
 
 export const inboxProviderSyncAccountSchema = z.object({
-  teamId: z.string().uuid(),
-  inboxAccountId: z.string().uuid(),
+  id: z.string().uuid(), // Inbox account ID
+  manualSync: z.boolean().optional(),
 });
 
 export type InboxProviderSyncAccountPayload = z.infer<

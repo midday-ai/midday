@@ -15,6 +15,7 @@
   "exports": {
     "./client": "./src/client.ts",
     "./job-client": "./src/job-client.ts",
+    "./worker-client": "./src/worker-client.ts",
     "./queries": "./src/queries/index.ts",
     "./errors": "./src/errors.ts",
     "./schema": "./src/schema.ts",

@@ -1,6 +1,6 @@
 import { PassThrough } from "node:stream";
 import { writeToString } from "@fast-csv/format";
-import { createShortLink } from "@midday/db/queries";
+import { createShortLink, updateDocumentByPath } from "@midday/db/queries";
 import { createClient } from "@midday/supabase/job";
 import { signedUrl } from "@midday/supabase/storage";
 import { getAppUrl } from "@midday/utils/envs";
@@ -83,6 +83,7 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
 
       const result = await processExportProcessor.processTransactions({
         ids: batch,
+        teamId,
         locale,
         dateFormat,
         onProgress: async (progress: number) => {
@@ -190,10 +191,13 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
     await this.updateProgress(job, 95);
 
     // Update documents table (non-critical)
-    await supabase
-      .from("documents")
-      .update({ processing_status: "completed" })
-      .eq("name", fullPath);
+    const db = getDb();
+    const pathTokens = fullPath.split("/");
+    await updateDocumentByPath(db, {
+      pathTokens,
+      teamId,
+      processingStatus: "completed",
+    });
 
     // Create short link if email is enabled
     if (settings.sendEmail && settings.accountantEmail) {

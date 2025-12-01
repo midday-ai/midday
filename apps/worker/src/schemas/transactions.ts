@@ -27,8 +27,20 @@ export type ExportTransactionsPayload = z.infer<
 
 export const processExportSchema = z.object({
   ids: z.array(z.string().uuid()),
+  teamId: z.string().uuid(),
   locale: z.string(),
   dateFormat: z.string().nullable().optional(),
 });
 
 export type ProcessExportPayload = z.infer<typeof processExportSchema>;
+
+export const processTransactionAttachmentSchema = z.object({
+  transactionId: z.string().uuid(),
+  mimetype: z.string(),
+  filePath: z.array(z.string()),
+  teamId: z.string().uuid(),
+});
+
+export type ProcessTransactionAttachmentPayload = z.infer<
+  typeof processTransactionAttachmentSchema
+>;

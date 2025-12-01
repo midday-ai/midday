@@ -1,16 +1,16 @@
 import type { Database } from "@midday/db/client";
-import { createJobDb } from "@midday/db/job-client";
+import { getWorkerDb } from "@midday/db/worker-client";
 
 /**
  * Get database instance for worker jobs
- * Creates a fresh instance for each job (similar to trigger.dev pattern)
+ * Uses a shared connection pool optimized for BullMQ concurrent job processing
+ * This is appropriate for a stateful server handling many concurrent jobs
  */
 let dbInstance: Database | null = null;
 
 export function getDb(): Database {
   if (!dbInstance) {
-    const dbObj = createJobDb();
-    dbInstance = dbObj.db;
+    dbInstance = getWorkerDb();
   }
   return dbInstance;
 }

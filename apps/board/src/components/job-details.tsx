@@ -10,7 +10,6 @@ import { JobStatus } from "./job-status";
 import { JsonViewer } from "./json-viewer";
 
 export function JobDetails() {
-  console.log("JobDetails rendered");
   const { jobId, queueName, setParams } = useJobParams();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -27,7 +26,10 @@ export function JobDetails() {
     trpc.jobs.retry.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: trpc.jobs.get.queryKey({ queueName: queueName!, jobId: jobId! }),
+          queryKey: trpc.jobs.get.queryKey({
+            queueName: queueName!,
+            jobId: jobId!,
+          }),
         });
         queryClient.invalidateQueries({
           queryKey: trpc.jobs.list.queryKey(),

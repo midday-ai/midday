@@ -12,9 +12,9 @@ on:
       - "!packages/ui/**"
 jobs:
   deploy:
-    name: 🚀 Deploy to Fly Preview
+    name: 🚀 Deploy to Fly API Preview
     runs-on: ubuntu-latest
-    concurrency: fly-preview
+    concurrency: fly-api-preview
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4

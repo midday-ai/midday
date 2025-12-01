@@ -1,3 +1,4 @@
+import { getTransactionsByIds } from "@midday/db/queries";
 import { createClient } from "@midday/supabase/job";
 import { download } from "@midday/supabase/storage";
 import { ensureFileExtension } from "@midday/utils";
@@ -5,6 +6,7 @@ import { getTaxTypeLabel, resolveTaxValues } from "@midday/utils/tax";
 import type { Job } from "bullmq";
 import { format, parseISO } from "date-fns";
 import type { ProcessExportPayload } from "../../schemas/transactions";
+import { getDb } from "../../utils/db";
 import { processBatch } from "../../utils/process-batch";
 import { BaseProcessor } from "../base";
 
@@ -17,6 +19,7 @@ export class ProcessExportProcessor extends BaseProcessor<ProcessExportPayload> 
    */
   async processTransactions(params: {
     ids: string[];
+    teamId: string;
     locale: string;
     dateFormat?: string | null;
     onProgress?: (progress: number) => Promise<void>;
@@ -28,44 +31,32 @@ export class ProcessExportProcessor extends BaseProcessor<ProcessExportPayload> 
       blob: Blob | undefined;
     }>;
   }> {
-    const { ids, locale, dateFormat, onProgress } = params;
-    const supabase = createClient();
+    const { ids, teamId, locale, dateFormat, onProgress } = params;
+    const supabase = createClient(); // Keep for storage operations
+    const db = getDb();
 
     if (onProgress) await onProgress(10);
 
-    const { data: transactionsData } = await supabase
-      .from("transactions")
-      .select(`
-        id,
-        date,
-        name,
-        description,
-        amount,
-        note,
-        balance,
-        currency,
-        counterparty_name,
-        tax_type,
-        tax_rate,
-        tax_amount,
-        attachments:transaction_attachments(*),
-        category:transaction_categories(id, name, description, tax_rate, tax_type, tax_reporting_code),
-        bank_account:bank_accounts(id, name),
-        tags:transaction_tags(id, tag:tags(id, name)),
-        status
-      `)
-      .in("id", ids)
-      .throwOnError();
+    const transactionsData = await getTransactionsByIds(db, {
+      ids,
+      teamId,
+    });
 
     if (onProgress) await onProgress(30);
+
+    // Track global transaction index across batches to ensure unique rowId
+    let globalTransactionIndex = 0;
 
     const attachments = await processBatch(
       transactionsData ?? [],
       ATTACHMENT_BATCH_SIZE,
       async (batch) => {
         const batchAttachments = await Promise.all(
-          batch.flatMap((transaction, idx) => {
-            const rowId = idx + 1;
+          batch.flatMap((transaction) => {
+            // Increment global index for each transaction (1-based)
+            globalTransactionIndex += 1;
+            const rowId = globalTransactionIndex;
+
             return (transaction.attachments ?? []).map(
               async (attachment, idx2: number) => {
                 const originalName = attachment.name || "attachment";
@@ -178,6 +169,7 @@ export class ProcessExportProcessor extends BaseProcessor<ProcessExportPayload> 
   }> {
     return this.processTransactions({
       ids: job.data.ids,
+      teamId: job.data.teamId,
       locale: job.data.locale,
       dateFormat: job.data.dateFormat,
       onProgress: async (progress) => {

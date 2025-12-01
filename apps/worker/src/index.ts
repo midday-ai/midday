@@ -1,8 +1,11 @@
-import { Worker, type WorkerOptions } from "bullmq";
+import { closeWorkerDb } from "@midday/db/worker-client";
+import { Worker } from "bullmq";
 import { Hono } from "hono";
 import { getRedisConnection } from "./config";
 import { checkHealth } from "./health";
 import { getProcessor } from "./processors/registry";
+import { queueConfigs } from "./queues";
+import { registerStaticSchedulers } from "./schedulers/registry";
 
 // Initialize Redis connection
 // BullMQ will handle connection automatically with lazyConnect: true
@@ -10,95 +13,46 @@ import { getProcessor } from "./processors/registry";
 getRedisConnection();
 
 /**
- * Worker options for inbox queue
- * Concurrency: 50 (matching process-attachment)
+ * Create workers dynamically from queue configurations
  */
-const inboxWorkerOptions: WorkerOptions = {
-  connection: getRedisConnection(),
-  concurrency: 50,
-  limiter: {
-    max: 100,
-    duration: 1000, // 100 jobs per second max
-  },
-};
+const workers = queueConfigs.map((config) => {
+  const worker = new Worker(
+    config.name,
+    async (job) => {
+      const processor = getProcessor(job.name);
+      if (!processor) {
+        throw new Error(`No processor registered for job: ${job.name}`);
+      }
+      return processor.handle(job);
+    },
+    config.workerOptions,
+  );
 
-/**
- * Worker options for inbox provider queue
- * Concurrency: 10
- */
-const inboxProviderWorkerOptions: WorkerOptions = {
-  connection: getRedisConnection(),
-  concurrency: 10,
-};
-
-// Create workers with processor registry
-const inboxWorker = new Worker(
-  "inbox",
-  async (job) => {
-    const processor = getProcessor(job.name);
-    if (!processor) {
-      throw new Error(`No processor registered for job: ${job.name}`);
+  // Register event handlers if provided
+  if (config.eventHandlers) {
+    if (config.eventHandlers.onCompleted) {
+      worker.on("completed", (job) => {
+        config.eventHandlers!.onCompleted!({
+          name: job.name,
+          id: job.id,
+        });
+      });
     }
-    return processor.handle(job);
-  },
-  inboxWorkerOptions,
-);
 
-const inboxProviderWorker = new Worker(
-  "inbox-provider",
-  async (job) => {
-    const processor = getProcessor(job.name);
-    if (!processor) {
-      throw new Error(`No processor registered for job: ${job.name}`);
+    if (config.eventHandlers.onFailed) {
+      worker.on("failed", (job, err) => {
+        config.eventHandlers!.onFailed!(job ?? null, err);
+      });
     }
-    return processor.handle(job);
-  },
-  inboxProviderWorkerOptions,
-);
+  }
 
-/**
- * Worker options for transactions queue
- * Concurrency: 10 (matching export-transactions)
- * Increased stall interval for long-running export jobs
- */
-const transactionsWorkerOptions: WorkerOptions = {
-  connection: getRedisConnection(),
-  concurrency: 10,
-  stalledInterval: 5 * 60 * 1000, // 5 minutes - allow jobs to run longer before considering them stalled
-  maxStalledCount: 1, // Only retry once if stalled
-};
-
-const transactionsWorker = new Worker(
-  "transactions",
-  async (job) => {
-    const processor = getProcessor(job.name);
-    if (!processor) {
-      throw new Error(`No processor registered for job: ${job.name}`);
-    }
-    return processor.handle(job);
-  },
-  transactionsWorkerOptions,
-);
-
-// Worker event handlers
-inboxWorker.on("completed", (job) => {
-  console.log(`Inbox job completed: ${job.name} (${job.id})`);
+  return worker;
 });
 
-inboxWorker.on("failed", (job, err) => {
-  console.error(`Inbox job failed: ${job?.name} (${job?.id})`, err);
-});
-
-inboxProviderWorker.on("completed", (job) => {
-  console.log(`Inbox provider job completed: ${job.name} (${job.id})`);
-});
-
-inboxProviderWorker.on("failed", (job, err) => {
-  console.error(`Inbox provider job failed: ${job?.name} (${job?.id})`, err);
-});
-
-transactionsWorker.on("failed", (job, err) => {
-  console.error(`Transaction job failed: ${job?.name} (${job?.id})`, err);
+// Register static schedulers on startup
+registerStaticSchedulers().catch((error) => {
+  console.error("Failed to register static schedulers:", error);
+  process.exit(1);
 });
 
 // Create Hono app
@@ -121,3 +75,23 @@ Bun.serve({
 
 console.log(`Worker server running on port ${port}`);
 console.log("Workers initialized and ready to process jobs");
+
+/**
+ * Graceful shutdown handlers
+ * Close database connections and workers cleanly on process termination
+ */
+const shutdown = async (signal: string) => {
+  console.log(`Received ${signal}, starting graceful shutdown...`);
+
+  // Close all workers
+  await Promise.all(workers.map((worker) => worker.close()));
+
+  // Close database connections
+  await closeWorkerDb();
+
+  console.log("Graceful shutdown complete");
+  process.exit(0);
+};
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));

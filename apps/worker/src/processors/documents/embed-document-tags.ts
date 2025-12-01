@@ -1,0 +1,181 @@
+import {
+  getDocumentTagEmbeddings,
+  updateDocumentProcessingStatus,
+  upsertDocumentTagAssignments,
+  upsertDocumentTagEmbeddings,
+  upsertDocumentTags,
+} from "@midday/db/queries";
+import { Embed } from "@midday/documents/embed";
+import slugify from "@sindresorhus/slugify";
+import type { Job } from "bullmq";
+import type { EmbedDocumentTagsPayload } from "../../schemas/documents";
+import { getDb } from "../../utils/db";
+import { BaseProcessor } from "../base";
+
+/**
+ * Embed document tags and create tag assignments
+ * This is the final step in document processing that marks documents as completed
+ */
+export class EmbedDocumentTagsProcessor extends BaseProcessor<EmbedDocumentTagsPayload> {
+  async process(job: Job<EmbedDocumentTagsPayload>): Promise<void> {
+    const { documentId, tags, teamId } = job.data;
+    const db = getDb();
+
+    await this.updateProgress(job, 5);
+
+    this.logger.info(
+      {
+        documentId,
+        tagsCount: tags.length,
+        teamId,
+      },
+      "Embedding document tags",
+    );
+
+    const embed = new Embed();
+
+    await this.updateProgress(job, 10);
+
+    // 1. Generate slugs for all incoming tags
+    const tagsWithSlugs = tags.map((tag) => ({
+      name: tag,
+      slug: slugify(tag),
+    }));
+
+    const slugs = tagsWithSlugs.map((t) => t.slug);
+
+    await this.updateProgress(job, 20);
+
+    // 2. Check existing embeddings in document_tag_embeddings
+    const existingEmbeddingsData = await getDocumentTagEmbeddings(db, {
+      slugs,
+    });
+
+    const existingEmbeddingSlugs = new Set(
+      existingEmbeddingsData.map((e: { slug: string }) => e.slug),
+    );
+
+    await this.updateProgress(job, 30);
+
+    // 3. Identify tags needing new embeddings
+    const tagsToEmbed = tagsWithSlugs.filter(
+      (tag) => !existingEmbeddingSlugs.has(tag.slug),
+    );
+    const newTagNames = tagsToEmbed.map((t) => t.name);
+
+    await this.updateProgress(job, 40);
+
+    // 4. Generate and insert new embeddings if any
+    if (newTagNames.length > 0) {
+      this.logger.info(
+        {
+          documentId,
+          newTagsCount: newTagNames.length,
+        },
+        "Generating embeddings for new tags",
+      );
+
+      const { embeddings, model } = await embed.embedMany(newTagNames);
+
+      if (!embeddings || embeddings.length !== newTagNames.length) {
+        this.logger.error(
+          {
+            documentId,
+            embeddingsLength: embeddings?.length,
+            expectedLength: newTagNames.length,
+          },
+          "Embeddings result is missing or length mismatch",
+        );
+        throw new Error("Failed to generate embeddings for all new tags.");
+      }
+
+      const newEmbeddingsToInsert = tagsToEmbed.map((tag, index) => ({
+        name: tag.name,
+        slug: tag.slug,
+        embedding: JSON.stringify(embeddings[index]),
+        model,
+      }));
+
+      // Upsert embeddings to handle potential race conditions or duplicates
+      await upsertDocumentTagEmbeddings(db, newEmbeddingsToInsert);
+
+      this.logger.info(
+        {
+          documentId,
+          insertedCount: newEmbeddingsToInsert.length,
+        },
+        "Successfully inserted/updated embeddings",
+      );
+    } else {
+      this.logger.info(
+        {
+          documentId,
+        },
+        "No new tags to embed",
+      );
+    }
+
+    await this.updateProgress(job, 60);
+
+    // 5. Upsert all tags into document_tags for the team
+    const tagsToUpsert = tagsWithSlugs.map((tag) => ({
+      name: tag.name,
+      slug: tag.slug,
+      teamId: teamId,
+    }));
+
+    const upsertedTagsData = await upsertDocumentTags(db, tagsToUpsert);
+
+    if (!upsertedTagsData || upsertedTagsData.length === 0) {
+      this.logger.error(
+        {
+          documentId,
+        },
+        "Upsert operation returned no data for document tags",
+      );
+      throw new Error("Failed to get IDs from upserted document tags.");
+    }
+
+    await this.updateProgress(job, 80);
+
+    const allTagIds = upsertedTagsData.map(
+      (t: { id: string; slug: string }) => t.id,
+    );
+
+    // 6. Create assignments in document_tag_assignments using upsert
+    if (allTagIds.length > 0) {
+      const assignmentsToInsert = allTagIds.map((tagId: string) => ({
+        documentId: documentId,
+        tagId: tagId,
+        teamId: teamId,
+      }));
+
+      await upsertDocumentTagAssignments(db, assignmentsToInsert);
+
+      await this.updateProgress(job, 90);
+
+      // Update the document processing status to completed
+      await updateDocumentProcessingStatus(db, {
+        id: documentId,
+        processingStatus: "completed",
+      });
+
+      this.logger.info(
+        {
+          documentId,
+          tagsAssigned: allTagIds.length,
+        },
+        "Document tags embedded and assigned successfully",
+      );
+    } else {
+      this.logger.warn(
+        {
+          documentId,
+        },
+        "No tags resulted from the upsert process, cannot assign",
+      );
+    }
+
+    await this.updateProgress(job, 100);
+  }
+}

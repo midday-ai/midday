@@ -1514,6 +1514,37 @@ export async function getInboxByFilePath(
   return result;
 }
 
+export type GetExistingInboxAttachmentsByReferenceIdsParams = {
+  referenceIds: string[];
+  teamId: string;
+};
+
+export async function getExistingInboxAttachmentsByReferenceIds(
+  db: Database,
+  params: GetExistingInboxAttachmentsByReferenceIdsParams,
+) {
+  const { referenceIds, teamId } = params;
+
+  if (referenceIds.length === 0) {
+    return [];
+  }
+
+  const results = await db
+    .select({
+      referenceId: inbox.referenceId,
+    })
+    .from(inbox)
+    .where(
+      and(
+        inArray(inbox.referenceId, referenceIds),
+        eq(inbox.teamId, teamId),
+        ne(inbox.status, "deleted"),
+      ),
+    );
+
+  return results;
+}
+
 export type CreateInboxParams = {
   displayName: string;
   teamId: string;

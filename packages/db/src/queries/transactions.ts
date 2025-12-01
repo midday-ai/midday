@@ -1375,6 +1375,119 @@ export async function updateTransaction(
   return getFullTransactionData(db, result.id, teamId);
 }
 
+export type GetTransactionsByIdsParams = {
+  ids: string[];
+  teamId: string;
+};
+
+export async function getTransactionsByIds(
+  db: Database,
+  params: GetTransactionsByIdsParams,
+) {
+  const { ids, teamId } = params;
+
+  if (ids.length === 0) {
+    return [];
+  }
+
+  // Return snake_case structure to match Supabase REST API response format
+  const results = await db
+    .select({
+      id: transactions.id,
+      date: transactions.date,
+      name: transactions.name,
+      description: transactions.description,
+      amount: transactions.amount,
+      note: transactions.note,
+      balance: transactions.balance,
+      currency: transactions.currency,
+      counterparty_name: transactions.counterpartyName,
+      tax_type: transactions.taxType,
+      tax_rate: transactions.taxRate,
+      tax_amount: transactions.taxAmount,
+      status: transactions.status,
+      attachments: sql<
+        Array<{
+          id: string;
+          name: string | null;
+          path: string[] | null;
+          type: string | null;
+          size: number | null;
+        }>
+      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transactionAttachments.id}, 'name', ${transactionAttachments.name}, 'path', ${transactionAttachments.path}, 'type', ${transactionAttachments.type}, 'size', ${transactionAttachments.size})) FILTER (WHERE ${transactionAttachments.id} IS NOT NULL), '[]'::json)`.as(
+        "attachments",
+      ),
+      category: sql<{
+        id: string;
+        name: string | null;
+        description: string | null;
+        tax_rate: number | null;
+        tax_type: string | null;
+        tax_reporting_code: string | null;
+      } | null>`json_build_object('id', ${transactionCategories.id}, 'name', ${transactionCategories.name}, 'description', ${transactionCategories.description}, 'tax_rate', ${transactionCategories.taxRate}, 'tax_type', ${transactionCategories.taxType}, 'tax_reporting_code', ${transactionCategories.taxReportingCode})`.as(
+        "category",
+      ),
+      bank_account: sql<{
+        id: string;
+        name: string | null;
+      } | null>`json_build_object('id', ${bankAccounts.id}, 'name', ${bankAccounts.name})`.as(
+        "bank_account",
+      ),
+      tags: sql<
+        Array<{ id: string; tag: { id: string; name: string | null } }>
+      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transactionTags.id}, 'tag', jsonb_build_object('id', ${tags.id}, 'name', ${tags.name}))) FILTER (WHERE ${transactionTags.id} IS NOT NULL), '[]'::json)`.as(
+        "tags",
+      ),
+    })
+    .from(transactions)
+    .leftJoin(
+      transactionCategories,
+      and(
+        eq(transactions.categorySlug, transactionCategories.slug),
+        eq(transactionCategories.teamId, teamId),
+      ),
+    )
+    .leftJoin(
+      bankAccounts,
+      and(
+        eq(transactions.bankAccountId, bankAccounts.id),
+        eq(bankAccounts.teamId, teamId),
+      ),
+    )
+    .leftJoin(
+      transactionTags,
+      and(
+        eq(transactionTags.transactionId, transactions.id),
+        eq(transactionTags.teamId, teamId),
+      ),
+    )
+    .leftJoin(
+      tags,
+      and(eq(tags.id, transactionTags.tagId), eq(tags.teamId, teamId)),
+    )
+    .leftJoin(
+      transactionAttachments,
+      and(
+        eq(transactionAttachments.transactionId, transactions.id),
+        eq(transactionAttachments.teamId, teamId),
+      ),
+    )
+    .where(and(inArray(transactions.id, ids), eq(transactions.teamId, teamId)))
+    .groupBy(
+      transactions.id,
+      transactionCategories.id,
+      transactionCategories.name,
+      transactionCategories.description,
+      transactionCategories.taxRate,
+      transactionCategories.taxType,
+      transactionCategories.taxReportingCode,
+      bankAccounts.id,
+      bankAccounts.name,
+    );
+
+  return results;
+}
+
 type UpdateTransactionsData = {
   ids: string[];
   teamId: string;
