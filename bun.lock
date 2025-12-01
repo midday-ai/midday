@@ -82,7 +82,7 @@
         "react-icons": "^5.5.0",
         "recharts": "2.15.3",
         "superjson": "^2.2.6",
-        "zod": "^4.1.13",
+        "zod": "^4.1.12",
       },
       "devDependencies": {
         "@midday/tsconfig": "workspace:*",
@@ -288,7 +288,7 @@
         "ioredis": "^5.8.2",
         "node-xlsx": "^0.24.0",
         "pino": "^10.1.0",
-        "zod": "^4.1.13",
+        "zod": "^4.1.12",
       },
       "devDependencies": {
         "@types/bun": "latest",
@@ -465,7 +465,7 @@
       "dependencies": {
         "bullmq": "^5.65.0",
         "ioredis": "^5.8.2",
-        "zod": "^4.1.13",
+        "zod": "^4.1.12",
       },
       "devDependencies": {
         "@types/bun": "latest",

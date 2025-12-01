@@ -11,7 +11,7 @@
   "dependencies": {
     "bullmq": "^5.65.0",
     "ioredis": "^5.8.2",
-    "zod": "^4.1.13"
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/bun": "latest"
