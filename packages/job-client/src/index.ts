@@ -13,6 +13,6 @@ export {
   getFlowProducer,
 } from "./config";
 export { jobs, createJobFlow, getJobStatus } from "./client";
-export { jobRegistry, getQueueForJob, getQueueNameForJob } from "./registry";
+export { getQueueForJob, getQueueNameForJob } from "./registry";
 export type { JobOptions } from "./client";
 export type { Job, InboxJob, TransactionJob } from "./types";

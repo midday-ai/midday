@@ -47,9 +47,6 @@ export function getJobRegistry(): Map<string, Queue> {
   return _jobRegistry;
 }
 
-// Export for backward compatibility (lazy)
-export const jobRegistry = getJobRegistry();
-
 /**
  * Get queue for a job name
  */
