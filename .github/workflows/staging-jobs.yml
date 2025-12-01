@@ -7,7 +7,7 @@ on:
       - packages/jobs/**
 jobs:
   deploy-staging:
-    runs-on: ubuntu-latest-m
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4

@@ -11,6 +11,7 @@
     "noEmit": true,
     "strict": true,
     "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": false,
@@ -29,6 +30,11 @@
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo"
   },
-  "exclude": ["node_modules", "../../packages/job-client/**/*"],
+  "exclude": [
+    "node_modules",
+    "../../packages/job-client/**/*",
+    "**/node_modules/bullmq/**/*",
+    "**/node_modules/ioredis/**/*"
+  ],
   "include": ["src/**/*.ts"]
 }

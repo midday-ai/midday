@@ -10,7 +10,7 @@ on:
 
 jobs:
   draft:
-    runs-on: ubuntu-latest-m
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     outputs:
       version: ${{ steps.read_version.outputs.value }}

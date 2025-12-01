@@ -14,7 +14,7 @@ on:
 jobs:
   deploy:
     name: 🚀 Deploy to Fly Staging
-    runs-on: ubuntu-latest-m
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     concurrency: fly-staging
     steps:
