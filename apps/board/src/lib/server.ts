@@ -13,13 +13,9 @@ export async function startAdmin(config?: Partial<AdminConfig>) {
     );
   }
 
-  if (
-    redisUrl &&
-    !redisUrl.startsWith("redis://") &&
-    !redisUrl.startsWith("rediss://")
-  ) {
+  if (redisUrl && !redisUrl.startsWith("redis://")) {
     throw new Error(
-      `Invalid REDIS_QUEUE_URL format. Expected redis:// or rediss:// URL, got: "${redisUrl}"`,
+      `Invalid REDIS_QUEUE_URL format. Expected redis:// URL, got: "${redisUrl}"`,
     );
   }
 

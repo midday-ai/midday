@@ -10,7 +10,7 @@ The API requires the following environment variables:
 REDIS_URL=redis://localhost:6379
 
 # Production (Upstash Redis via Fly.io):
-# REDIS_URL=rediss://:password@fly-midday-redis.upstash.io:6379
+# REDIS_URL=redis://:password@fly-midday-redis.upstash.io:6379
 ```
 
 #### Local Development Setup

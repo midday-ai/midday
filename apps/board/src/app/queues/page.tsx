@@ -21,7 +21,9 @@ export default async function QueuesPage() {
           </h1>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <Suspense fallback={<div className="text-muted-foreground">Loading...</div>}>
+          <Suspense
+            fallback={<div className="text-muted-foreground">Loading...</div>}
+          >
             <QueueList />
           </Suspense>
         </div>
@@ -30,7 +32,9 @@ export default async function QueuesPage() {
           <h2 className="text-[18px] font-normal font-serif text-primary mb-4">
             Recent Jobs
           </h2>
-          <Suspense fallback={<div className="text-muted-foreground">Loading...</div>}>
+          <Suspense
+            fallback={<div className="text-muted-foreground">Loading...</div>}
+          >
             <RecentJobs />
           </Suspense>
         </div>
