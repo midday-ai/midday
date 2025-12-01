@@ -1,4 +1,4 @@
-import { obStatusSchema, getJobStatusSchema } from "@api/schemas/jobs";
+import { getJobStatusSchemaheobStatusSchema } from "@api/schemas/jobs";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 // import { getJobStatus } from "@midday/job-client";
 
