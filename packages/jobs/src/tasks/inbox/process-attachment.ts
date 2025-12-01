@@ -81,11 +81,34 @@ export const processAttachment = schemaTask({
         inboxAccountId,
         status: "processing", // Set as processing when created by job
       });
-    } else if (inboxData.status === "processing") {
-      logger.info("Found existing inbox item already in processing status", {
-        inboxId: inboxData.id,
-        filePath: filePath.join("/"),
-      });
+    } else if (
+      inboxData.status === "processing" ||
+      inboxData.status === "new"
+    ) {
+      // Check if item is stuck (processing for more than 5 minutes)
+      const STUCK_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
+      const createdAt = inboxData.createdAt
+        ? new Date(inboxData.createdAt).getTime()
+        : null;
+      const now = Date.now();
+      const isStuck = createdAt && now - createdAt > STUCK_THRESHOLD_MS;
+
+      if (isStuck) {
+        logger.warn("Found stuck inbox item, recovering", {
+          inboxId: inboxData.id,
+          filePath: filePath.join("/"),
+          status: inboxData.status,
+          ageMinutes: createdAt ? Math.round((now - createdAt) / 60000) : null,
+        });
+        // Reset status to allow processing to continue
+        // The status will be updated to "analyzing" during processing
+      } else {
+        logger.info("Found existing inbox item in processing status", {
+          inboxId: inboxData.id,
+          filePath: filePath.join("/"),
+          status: inboxData.status,
+        });
+      }
     } else {
       logger.info("Found existing inbox item with status", {
         inboxId: inboxData.id,

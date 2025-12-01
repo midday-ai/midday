@@ -16,6 +16,7 @@ import {
   desc,
   eq,
   inArray,
+  lt,
   ne,
   notInArray,
   or,
@@ -1496,10 +1497,41 @@ export async function getInboxByFilePath(
 ) {
   const { filePath, teamId } = params;
 
+  // First, try to find items in processing/new status (most recent first)
+  const processingItem = await db
+    .select({
+      id: inbox.id,
+      status: inbox.status,
+      createdAt: inbox.createdAt,
+    })
+    .from(inbox)
+    .where(
+      and(
+        eq(inbox.filePath, filePath),
+        eq(inbox.teamId, teamId),
+        ne(inbox.status, "deleted"),
+        or(eq(inbox.status, "processing"), eq(inbox.status, "new")),
+      ),
+    )
+    .orderBy(desc(inbox.createdAt))
+    .limit(1);
+
+  // If we found a processing/new item, return it (most recent)
+  if (processingItem.length > 0 && processingItem[0]) {
+    const item = processingItem[0];
+    return {
+      id: item.id,
+      status: item.status,
+      createdAt: item.createdAt,
+    };
+  }
+
+  // Otherwise, return the most recent item regardless of status
   const [result] = await db
     .select({
       id: inbox.id,
       status: inbox.status,
+      createdAt: inbox.createdAt,
     })
     .from(inbox)
     .where(
@@ -1509,9 +1541,57 @@ export async function getInboxByFilePath(
         ne(inbox.status, "deleted"),
       ),
     )
+    .orderBy(desc(inbox.createdAt))
     .limit(1);
 
-  return result;
+  if (!result) {
+    return undefined;
+  }
+
+  return {
+    id: result.id,
+    status: result.status,
+    createdAt: result.createdAt,
+  };
+}
+
+export type GetStuckInboxItemsParams = {
+  teamId: string;
+  thresholdMinutes?: number;
+};
+
+/**
+ * Find inbox items stuck in "processing" or "new" status for longer than threshold
+ * Useful for cleanup jobs to recover stuck items
+ */
+export async function getStuckInboxItems(
+  db: Database,
+  params: GetStuckInboxItemsParams,
+) {
+  const { teamId, thresholdMinutes = 5 } = params;
+  const thresholdMs = thresholdMinutes * 60 * 1000;
+  const thresholdDate = new Date(Date.now() - thresholdMs).toISOString();
+
+  const stuckItems = await db
+    .select({
+      id: inbox.id,
+      status: inbox.status,
+      createdAt: inbox.createdAt,
+      filePath: inbox.filePath,
+      displayName: inbox.displayName,
+    })
+    .from(inbox)
+    .where(
+      and(
+        eq(inbox.teamId, teamId),
+        ne(inbox.status, "deleted"),
+        or(eq(inbox.status, "processing"), eq(inbox.status, "new")),
+        lt(inbox.createdAt, thresholdDate),
+      ),
+    )
+    .orderBy(desc(inbox.createdAt));
+
+  return stuckItems;
 }
 
 export type GetExistingInboxAttachmentsByReferenceIdsParams = {
