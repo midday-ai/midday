@@ -9,8 +9,16 @@ export const revalidate = 0;
 
 export default async function HomePage() {
   // Prefetch queue data on the server
-  prefetch(trpc.queues.list.queryOptions());
-  prefetch(trpc.jobs.recent.queryOptions({ limit: 20 }));
+  // Wrap in try/catch to prevent errors from bubbling up and being redacted
+  try {
+    await Promise.all([
+      prefetch(trpc.queues.list.queryOptions()),
+      prefetch(trpc.jobs.recent.queryOptions({ limit: 20 })),
+    ]);
+  } catch (error) {
+    // Log error but don't throw - allow page to render with empty state
+    console.error("[HomePage] Error prefetching data:", error);
+  }
 
   return (
     <HydrateClient>
