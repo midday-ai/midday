@@ -62,44 +62,62 @@ export async function initializeQueuesFromNames(
         });
       }
 
-      // Connect to Redis if lazyConnect is enabled
-      const currentStatus = redisConnection.status || "unknown";
-      if (currentStatus !== "ready" && currentStatus !== "connecting") {
-        try {
-          console.log(
-            `[Board Redis Queue ${name}] Connecting to Redis (current status: ${currentStatus})...`,
-          );
-          await redisConnection.connect();
+      // Register the queue FIRST (before connection attempt)
+      // This ensures queues are available even if connection takes time
+      const queue = new BullMQQueue(name, {
+        connection: redisConnection,
+      });
+      queues.set(name, queue);
+      console.log(
+        `[Board Redis Queue ${name}] Queue registered (connection status: ${redisConnection.status || "unknown"})`,
+      );
 
-          // Verify connection by doing a simple ping
-          try {
-            const pong = await redisConnection.ping();
+      // Connect to Redis in background (don't block queue registration)
+      // Only connect if not already connecting or ready
+      const currentStatus = redisConnection.status || "unknown";
+      if (
+        currentStatus !== "ready" &&
+        currentStatus !== "connecting" &&
+        currentStatus !== "wait"
+      ) {
+        // Start connection in background with timeout
+        const connectionTimeout = isProduction ? 20000 : 10000; // 20s for production, 10s for dev
+
+        Promise.race([
+          redisConnection.connect(),
+          new Promise<never>((_, reject) =>
+            setTimeout(
+              () =>
+                reject(
+                  new Error(
+                    `Redis connection timeout after ${connectionTimeout / 1000}s`,
+                  ),
+                ),
+              connectionTimeout,
+            ),
+          ),
+        ])
+          .then(() => {
+            // Verify connection with ping
+            return redisConnection.ping();
+          })
+          .then((pong) => {
             console.log(
-              `[Board Redis Queue ${name}] Successfully connected and verified (ping: ${pong}, status: ${redisConnection.status})`,
+              `[Board Redis Queue ${name}] Successfully connected and verified (ping: ${pong})`,
             );
-          } catch (pingError) {
-            console.warn(
-              `[Board Redis Queue ${name}] Connected but ping failed:`,
-              pingError,
+          })
+          .catch((error) => {
+            console.error(
+              `[Board Redis Queue ${name}] Connection error (will retry on first use):`,
+              error.message || error,
             );
-          }
-        } catch (error) {
-          console.error(
-            `[Board Redis Queue ${name}] Failed to connect:`,
-            error,
-          );
-          // Continue anyway - connection might be established later
-        }
+            // Don't throw - queue is registered and will connect when needed
+          });
       } else {
         console.log(
           `[Board Redis Queue ${name}] Redis connection already ${currentStatus}`,
         );
       }
-
-      const queue = new BullMQQueue(name, {
-        connection: redisConnection,
-      });
-      queues.set(name, queue);
     }
   }
 }

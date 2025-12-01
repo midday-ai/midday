@@ -42,6 +42,18 @@ WORKDIR /app/apps/board
 ENV NODE_ENV=production
 ENV PORT=3002
 
+# Required environment variables (must be provided at runtime):
+# - REDIS_QUEUE_URL: Redis connection URL for BullMQ queues
+#   Example: redis://localhost:6379 or rediss://:password@host:6379
+#
+# Optional environment variables:
+# - BOARD_USERNAME: Basic auth username (recommended for production)
+# - BOARD_PASSWORD: Basic auth password (recommended for production)
+#
+# These can be set via:
+#   docker run -e REDIS_QUEUE_URL=redis://... -e BOARD_USERNAME=... -e BOARD_PASSWORD=...
+#   Or via docker-compose.yml or orchestration platform secrets
+
 # Build the Next.js app
 RUN bun run build
 

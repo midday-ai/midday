@@ -37,13 +37,22 @@ export async function ensureInitialized() {
   }
 
   // Create initialization promise with timeout
+  // Use longer timeout in production (30s) vs development (10s)
+  const isProduction =
+    process.env.NODE_ENV === "production" || process.env.FLY_APP_NAME;
+  const timeout = isProduction ? 30000 : 10000;
+
   initializationPromise = Promise.race([
     startAdmin(),
     new Promise<void>((_, reject) =>
       setTimeout(
         () =>
-          reject(new Error("Queue initialization timeout after 10 seconds")),
-        10000,
+          reject(
+            new Error(
+              `Queue initialization timeout after ${timeout / 1000} seconds`,
+            ),
+          ),
+        timeout,
       ),
     ),
   ]) as Promise<void>;
