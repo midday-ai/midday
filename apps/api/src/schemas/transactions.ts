@@ -827,3 +827,18 @@ export const transactionAttachmentPreSignedUrlResponseSchema = z.object({
 export const createTransactionsResponseSchema = z.array(
   transactionResponseSchema,
 );
+
+export const exportTransactionsSchema = z.object({
+  transactionIds: z.array(z.string().uuid()).min(1),
+  dateFormat: z.string().optional(),
+  locale: z.string().optional().default("en"),
+  exportSettings: z
+    .object({
+      csvDelimiter: z.string(),
+      includeCSV: z.boolean(),
+      includeXLSX: z.boolean(),
+      sendEmail: z.boolean(),
+      accountantEmail: z.string().email().optional(),
+    })
+    .optional(),
+});

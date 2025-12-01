@@ -1,11 +1,12 @@
 "use client";
 
-import { exportTransactionsAction } from "@/actions/export-transactions-action";
+import { useJobStatus } from "@/hooks/use-job-status";
 import { useTeamMutation, useTeamQuery } from "@/hooks/use-team";
 import { useUserQuery } from "@/hooks/use-user";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useExportStore } from "@/store/export";
 import { useTransactionsStore } from "@/store/transactions";
+import { useTRPC } from "@/trpc/client";
 import {
   Accordion,
   AccordionContent,
@@ -34,7 +35,7 @@ import { Separator } from "@midday/ui/separator";
 import { Spinner } from "@midday/ui/spinner";
 import { Switch } from "@midday/ui/switch";
 import NumberFlow from "@number-flow/react";
-import { useAction } from "next-safe-action/hooks";
+import { useMutation } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { z } from "zod/v3";
 
@@ -76,11 +77,37 @@ export function ExportTransactionsModal({
   isOpen,
   onOpenChange,
 }: ExportTransactionsModalProps) {
-  const { setExportData, setIsExporting } = useExportStore();
+  const { exportData, setExportData, setIsExporting } = useExportStore();
   const { rowSelection, setRowSelection } = useTransactionsStore();
   const { data: user } = useUserQuery();
   const { data: team } = useTeamQuery();
   const teamMutation = useTeamMutation();
+  const trpc = useTRPC();
+
+  // Poll job status if we have a job ID
+  const {
+    status: jobStatus,
+    progress,
+    error: jobError,
+  } = useJobStatus({
+    jobId: exportData?.runId,
+    enabled: !!exportData?.runId && isOpen,
+  });
+
+  // Handle job completion/failure
+  useEffect(() => {
+    if (jobStatus === "completed") {
+      setIsExporting(false);
+      // Delay clearing exportData to allow export bar to show completion
+      setTimeout(() => {
+        setExportData(undefined);
+      }, 2000);
+      onOpenChange(false);
+    } else if (jobStatus === "failed") {
+      setIsExporting(false);
+      setExportData(undefined);
+    }
+  }, [jobStatus, setIsExporting, setExportData, onOpenChange]);
 
   const ids = Object.keys(rowSelection);
   const totalSelected = ids.length;
@@ -108,24 +135,24 @@ export function ExportTransactionsModal({
     }
   }, [team?.exportSettings, form]);
 
-  const { execute, status } = useAction(exportTransactionsAction, {
-    onSuccess: ({ data }) => {
-      if (data?.id && data?.publicAccessToken) {
-        setExportData({
-          runId: data.id,
-          accessToken: data.publicAccessToken,
-        });
+  const exportMutation = useMutation(
+    trpc.transactions.export.mutationOptions({
+      onSuccess: (data) => {
+        if (data?.id) {
+          setExportData({
+            runId: data.id,
+          });
 
-        setRowSelection(() => ({}));
+          setRowSelection(() => ({}));
+          // Don't set isExporting to false here - let job status handle it
+          // Don't close modal immediately - wait for job to complete
+        }
+      },
+      onError: () => {
         setIsExporting(false);
-      }
-
-      onOpenChange(false);
-    },
-    onError: () => {
-      setIsExporting(false);
-    },
-  });
+      },
+    }),
+  );
 
   const onSubmit = async (values: z.infer<typeof exportSettingsSchema>) => {
     setIsExporting(true);
@@ -134,7 +161,7 @@ export function ExportTransactionsModal({
       exportSettings: values,
     });
 
-    execute({
+    exportMutation.mutate({
       transactionIds: ids,
       dateFormat: user?.dateFormat ?? undefined,
       locale: user?.locale ?? undefined,
@@ -142,7 +169,10 @@ export function ExportTransactionsModal({
     });
   };
 
-  const isExporting = status === "executing";
+  const isExporting =
+    exportMutation.isPending ||
+    jobStatus === "active" ||
+    jobStatus === "waiting";
   const sendEmail = form.watch("sendEmail");
   const includeCSV = form.watch("includeCSV");
 
