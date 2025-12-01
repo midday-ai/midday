@@ -157,7 +157,6 @@ export const inboxRouter = createTRPCRouter({
   processAttachments: protectedProcedure
     .input(processAttachmentsSchema)
     .mutation(async ({ ctx: { teamId }, input }) => {
-      // Trigger BullMQ jobs for each attachment
       const jobResults = await Promise.all(
         input.map((item) =>
           triggerJob(
