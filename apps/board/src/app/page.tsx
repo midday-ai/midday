@@ -14,6 +14,7 @@ export default async function HomePage() {
     await Promise.all([
       prefetch(trpc.queues.list.queryOptions()),
       prefetch(trpc.jobs.recent.queryOptions({ limit: 20 })),
+      prefetch(trpc.jobs.activity.queryOptions({ hours: 12 })),
     ]);
   } catch (error) {
     // Log error but don't throw - allow page to render with empty state

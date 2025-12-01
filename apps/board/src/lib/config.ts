@@ -23,4 +23,3 @@ export function getAdminConfig(): AdminConfig {
   }
   return adminConfig;
 }
-

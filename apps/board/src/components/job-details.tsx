@@ -3,10 +3,21 @@
 import { useJobParams } from "@/hooks/use-job-params";
 import { useTRPC } from "@/lib/trpc-react";
 import { Button } from "@midday/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@midday/ui/dialog";
 import { Skeleton } from "@midday/ui/skeleton";
+import { Textarea } from "@midday/ui/textarea";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { useState } from "react";
 import { JobStatus } from "./job-status";
+import { JobTimeline } from "./job-timeline";
 import { JsonViewer } from "./json-viewer";
 
 export function JobDetails() {
@@ -55,7 +66,58 @@ export function JobDetails() {
     }),
   );
 
-  const actionLoading = retryMutation.isPending || removeMutation.isPending;
+  const copyJobMutation = useMutation(
+    trpc.jobs.copyJob.mutationOptions({
+      onSuccess: (data) => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.jobs.list.queryKey(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: trpc.jobs.recent.queryKey(),
+        });
+        // Navigate to the new job
+        setParams({ jobId: data.id, queueName: queueName! });
+      },
+    }),
+  );
+
+  const editAndRetryMutation = useMutation(
+    trpc.jobs.editAndRetry.mutationOptions({
+      onSuccess: (data) => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.jobs.list.queryKey(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: trpc.jobs.recent.queryKey(),
+        });
+        // Navigate to the new job
+        setParams({ jobId: data.id, queueName: queueName! });
+      },
+    }),
+  );
+
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editedData, setEditedData] = useState("");
+
+  const actionLoading =
+    retryMutation.isPending ||
+    removeMutation.isPending ||
+    copyJobMutation.isPending ||
+    editAndRetryMutation.isPending;
+
+  const handleEditAndRetry = () => {
+    try {
+      const parsedData = editedData.trim() ? JSON.parse(editedData) : undefined;
+      editAndRetryMutation.mutate({
+        queueName: queueName!,
+        jobId: jobId!,
+        data: parsedData,
+      });
+      setEditDialogOpen(false);
+    } catch (error) {
+      alert("Invalid JSON. Please check your input.");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -94,6 +156,61 @@ export function JobDetails() {
           <p className="text-sm text-muted-foreground">{job.name}</p>
         </div>
         <div className="flex gap-2">
+          <Button
+            type="button"
+            onClick={() =>
+              copyJobMutation.mutate({
+                queueName: queueName!,
+                jobId: jobId!,
+              })
+            }
+            disabled={actionLoading}
+            variant="outline"
+            size="sm"
+          >
+            Copy Job
+          </Button>
+          <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                type="button"
+                disabled={actionLoading}
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setEditedData(JSON.stringify(job.data, null, 2));
+                }}
+              >
+                Edit & Retry
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Edit Job Data</DialogTitle>
+                <DialogDescription>
+                  Modify the job data and create a new job with the updated
+                  payload.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <Textarea
+                  value={editedData}
+                  onChange={(e) => setEditedData(e.target.value)}
+                  className="font-mono text-sm min-h-[300px]"
+                  placeholder='{"key": "value"}'
+                />
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setEditDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button onClick={handleEditAndRetry}>Create Job</Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
           {job.state === "failed" && (
             <Button
               type="button"
@@ -122,6 +239,17 @@ export function JobDetails() {
       </div>
 
       <div className="space-y-6">
+        {/* Timeline */}
+        <div>
+          <div className="text-xs text-muted-foreground mb-4">Timeline</div>
+          <JobTimeline
+            timestamp={job.timestamp}
+            processedOn={job.processedOn}
+            finishedOn={job.finishedOn}
+            attemptsMade={job.attemptsMade}
+          />
+        </div>
+
         <div className="space-y-4">
           <div>
             <div className="text-xs text-muted-foreground mb-2">Status</div>
@@ -140,38 +268,6 @@ export function JobDetails() {
                           : "waiting"
               }
             />
-          </div>
-
-          <div>
-            <div className="text-xs text-muted-foreground mb-2">Created</div>
-            <div className="text-sm">
-              {format(new Date(job.timestamp), "PPpp")}
-            </div>
-          </div>
-
-          {job.processedOn && (
-            <div>
-              <div className="text-xs text-muted-foreground mb-2">
-                Processed
-              </div>
-              <div className="text-sm">
-                {format(new Date(job.processedOn), "PPpp")}
-              </div>
-            </div>
-          )}
-
-          {job.finishedOn && (
-            <div>
-              <div className="text-xs text-muted-foreground mb-2">Finished</div>
-              <div className="text-sm">
-                {format(new Date(job.finishedOn), "PPpp")}
-              </div>
-            </div>
-          )}
-
-          <div>
-            <div className="text-xs text-muted-foreground mb-2">Attempts</div>
-            <div className="text-sm">{job.attemptsMade}</div>
           </div>
 
           {job.progress !== undefined && job.progress !== null && (

@@ -2,6 +2,7 @@ import { calculateInboxSuggestions, hasSuggestion } from "@midday/db/queries";
 import type { Job } from "bullmq";
 import type { BatchProcessMatchingPayload } from "../../schemas/inbox";
 import { getDb } from "../../utils/db";
+import { classifyError } from "../../utils/error-classification";
 import { triggerMatchingNotification } from "../../utils/inbox-matching-notifications";
 import { BaseProcessor } from "../base";
 
@@ -95,14 +96,19 @@ export class BatchProcessMatchingProcessor extends BaseProcessor<BatchProcessMat
             return result;
           } catch (error) {
             errorCount++;
+            const classified = classifyError(error);
+
             this.logger.error(
               {
                 teamId,
                 inboxId,
                 error: error instanceof Error ? error.message : "Unknown error",
+                errorCategory: classified.category,
+                retryable: classified.retryable,
               },
               "Failed to process inbox matching",
             );
+
             throw error;
           }
         }),

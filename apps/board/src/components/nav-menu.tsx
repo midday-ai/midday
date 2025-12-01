@@ -3,7 +3,13 @@
 import { cn } from "@midday/ui/cn";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MdOutlineDashboard, MdOutlineViewList } from "react-icons/md";
+import {
+  MdOutlineAnalytics,
+  MdOutlineDashboard,
+  MdOutlineErrorOutline,
+  MdOutlineHistory,
+  MdOutlineViewList,
+} from "react-icons/md";
 
 const items = [
   {
@@ -15,6 +21,21 @@ const items = [
     path: "/queues",
     name: "Queues",
     icon: MdOutlineViewList,
+  },
+  {
+    path: "/runs",
+    name: "Runs",
+    icon: MdOutlineHistory,
+  },
+  {
+    path: "/errors",
+    name: "Errors",
+    icon: MdOutlineErrorOutline,
+  },
+  {
+    path: "/analytics",
+    name: "Analytics",
+    icon: MdOutlineAnalytics,
   },
 ];
 

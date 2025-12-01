@@ -25,14 +25,15 @@ const inboxQueueOptions: QueueOptions = {
 
 /**
  * Worker options for inbox queue
- * Concurrency: 50 (matching process-attachment)
+ * Concurrency: 100 (increased from 50 for faster processing)
+ * Optimized to reduce duplicate downloads and overhead
  */
 const inboxWorkerOptions: WorkerOptions = {
   connection: getRedisConnection(),
-  concurrency: 50,
+  concurrency: 100, // Increased from 50 for better throughput
   limiter: {
-    max: 100,
-    duration: 1000, // 100 jobs per second max
+    max: 200, // Increased from 100 for higher throughput
+    duration: 1000, // 200 jobs per second max
   },
 };
 

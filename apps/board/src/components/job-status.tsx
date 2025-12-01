@@ -32,4 +32,3 @@ export function JobStatus({
     </div>
   );
 }
-

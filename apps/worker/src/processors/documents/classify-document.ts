@@ -5,6 +5,7 @@ import { triggerJob } from "@midday/job-client";
 import type { Job } from "bullmq";
 import type { ClassifyDocumentPayload } from "../../schemas/documents";
 import { getDb } from "../../utils/db";
+import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";
 
 /**
@@ -14,8 +15,6 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
   async process(job: Job<ClassifyDocumentPayload>): Promise<void> {
     const { content, fileName, teamId } = job.data;
     const db = getDb();
-
-    await this.updateProgress(job, 10);
 
     // fileName is the full path (e.g., "teamId/filename.pdf")
     // We need to split it into pathTokens for updateDocumentByPath
@@ -31,12 +30,12 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
       "Classifying document",
     );
 
-    await this.updateProgress(job, 30);
-
     const classifier = new DocumentClassifier();
-    const result = await classifier.classifyDocument({ content });
-
-    await this.updateProgress(job, 60);
+    const result = await withTimeout(
+      classifier.classifyDocument({ content }),
+      TIMEOUTS.EXTERNAL_API,
+      `Document classification timed out after ${TIMEOUTS.EXTERNAL_API}ms`,
+    );
 
     const updatedDocs = await updateDocumentByPath(db, {
       pathTokens,
@@ -70,8 +69,6 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
       );
     }
 
-    await this.updateProgress(job, 80);
-
     if (result.tags && result.tags.length > 0) {
       this.logger.info(
         {
@@ -81,6 +78,7 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
         "Triggering document tag embedding",
       );
 
+      // Trigger tag embedding (fire and forget)
       await triggerJob(
         "embed-document-tags",
         {
@@ -98,7 +96,5 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
         "No tags found, document processing completed",
       );
     }
-
-    await this.updateProgress(job, 100);
   }
 }

@@ -1,10 +1,6 @@
+import { getAllQueueMetrics, getQueue, getQueueMetrics } from "@/lib/queues";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../init";
-import {
-  getAllQueueMetrics,
-  getQueue,
-  getQueueMetrics,
-} from "@/lib/queues";
 
 export const queuesRouter = createTRPCRouter({
   list: publicProcedure.query(async () => {
@@ -64,7 +60,9 @@ export const queuesRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string(),
-        status: z.enum(["completed", "wait", "active", "delayed", "failed"]).optional(),
+        status: z
+          .enum(["completed", "wait", "active", "delayed", "failed"])
+          .optional(),
         grace: z.number().optional(),
       }),
     )
@@ -79,4 +77,3 @@ export const queuesRouter = createTRPCRouter({
       return { success: true, message: "Queue cleaned" };
     }),
 });
-

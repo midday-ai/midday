@@ -1,5 +1,6 @@
 import type { Job } from "bullmq";
 import pino from "pino";
+import { classifyError } from "../utils/error-classification";
 
 const logger = pino({
   level: process.env.LOG_LEVEL || "info",
@@ -85,6 +86,7 @@ export abstract class BaseProcessor<TData = unknown> {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
       const errorStack = error instanceof Error ? error.stack : undefined;
+      const classified = classifyError(error);
 
       this.logger.error(
         {
@@ -94,6 +96,8 @@ export abstract class BaseProcessor<TData = unknown> {
           maxAttempts: job.opts.attempts,
           duration: `${duration}ms`,
           error: errorMessage,
+          errorCategory: classified.category,
+          retryable: classified.retryable,
           stack: errorStack,
         },
         "Job failed",

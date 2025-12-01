@@ -1,4 +1,4 @@
-import { QueueList } from "@/components/queue-list";
+import { RunsTable } from "@/components/runs-table";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import { Suspense } from "react";
 
@@ -6,13 +6,14 @@ import { Suspense } from "react";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function QueuesPage() {
-  // Prefetch data on the server
+export default async function RunsPage() {
+  // Prefetch recent jobs data on the server
+  // Wrap in try/catch to prevent errors from bubbling up and being redacted
   try {
-    await prefetch(trpc.queues.list.queryOptions());
+    await prefetch(trpc.jobs.recent.queryOptions({ limit: 50 }));
   } catch (error) {
     // Log error but don't throw - allow page to render with empty state
-    console.error("[QueuesPage] Error prefetching data:", error);
+    console.error("[RunsPage] Error prefetching data:", error);
   }
 
   return (
@@ -20,13 +21,15 @@ export default async function QueuesPage() {
       <div className="flex flex-col gap-6">
         <div className="pt-6">
           <h1 className="text-[18px] font-normal font-serif text-primary mb-2">
-            Queues
+            Runs
           </h1>
         </div>
         <Suspense
-          fallback={<div className="text-muted-foreground">Loading...</div>}
+          fallback={
+            <div className="text-muted-foreground">Loading runs...</div>
+          }
         >
-          <QueueList />
+          <RunsTable />
         </Suspense>
       </div>
     </HydrateClient>

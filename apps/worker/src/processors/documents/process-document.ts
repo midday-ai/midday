@@ -8,6 +8,7 @@ import convert from "heic-convert";
 import sharp from "sharp";
 import type { ProcessDocumentPayload } from "../../schemas/documents";
 import { getDb } from "../../utils/db";
+import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";
 
 const MAX_SIZE = 1500;
@@ -22,10 +23,6 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
     const supabase = createClient();
     const db = getDb();
 
-    await this.updateProgress(job, 5);
-
-    // Create activity for document upload (via Trigger.dev for now)
-    // TODO: Port notification system to BullMQ
     this.logger.info(
       {
         teamId,
@@ -35,19 +32,21 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
       "Processing document",
     );
 
-    await this.updateProgress(job, 10);
-
     try {
-      // If the file is a HEIC we need to convert it to a JPG
-      if (mimetype === "image/heic") {
-        this.logger.info(
-          { filePath: filePath.join("/") },
-          "Converting HEIC to JPG",
-        );
+      const fileName = filePath.join("/");
+      let fileData: Blob | null = null;
+      let processedMimetype = mimetype;
 
-        const { data } = await supabase.storage
-          .from("vault")
-          .download(filePath.join("/"));
+      // Download file once and reuse for all operations
+      // For HEIC files, we'll convert and reuse the converted data
+      if (mimetype === "image/heic") {
+        this.logger.info({ filePath: fileName }, "Converting HEIC to JPG");
+
+        const { data } = await withTimeout(
+          supabase.storage.from("vault").download(fileName),
+          TIMEOUTS.FILE_DOWNLOAD,
+          `File download timed out after ${TIMEOUTS.FILE_DOWNLOAD}ms`,
+        );
 
         if (!data) {
           throw new Error("File not found");
@@ -55,88 +54,170 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
 
         const buffer = await data.arrayBuffer();
 
-        const decodedImage = await convert({
-          // @ts-ignore
-          buffer: new Uint8Array(buffer),
-          format: "JPEG",
-          quality: 1,
-        });
+        // Edge case: Validate buffer is not empty
+        if (buffer.byteLength === 0) {
+          throw new Error("Downloaded file is empty");
+        }
 
-        const image = await sharp(decodedImage)
-          .rotate()
-          .resize({ width: MAX_SIZE })
-          .toFormat("jpeg")
-          .toBuffer();
+        let decodedImage: ArrayBuffer;
+        try {
+          decodedImage = await convert({
+            // @ts-ignore
+            buffer: new Uint8Array(buffer),
+            format: "JPEG",
+            quality: 1,
+          });
+        } catch (error) {
+          this.logger.error(
+            {
+              filePath: fileName,
+              error: error instanceof Error ? error.message : "Unknown error",
+            },
+            "Failed to decode HEIC image - file may be corrupted",
+          );
+          throw new Error(
+            `Failed to convert HEIC image: ${error instanceof Error ? error.message : "Unknown error"}`,
+          );
+        }
 
-        // Upload the converted image with .jpg extension
-        const { data: uploadedData } = await supabase.storage
-          .from("vault")
-          .upload(filePath.join("/"), image, {
+        // Edge case: Validate decoded image
+        if (!decodedImage || decodedImage.byteLength === 0) {
+          throw new Error("Decoded image is empty");
+        }
+
+        let image: Buffer;
+        try {
+          image = await sharp(Buffer.from(decodedImage))
+            .rotate()
+            .resize({ width: MAX_SIZE })
+            .toFormat("jpeg")
+            .toBuffer();
+        } catch (error) {
+          this.logger.error(
+            {
+              filePath: fileName,
+              error: error instanceof Error ? error.message : "Unknown error",
+            },
+            "Failed to process image with sharp - file may be corrupted",
+          );
+          throw new Error(
+            `Failed to process image: ${error instanceof Error ? error.message : "Unknown error"}`,
+          );
+        }
+
+        // Upload the converted image
+        const { data: uploadedData } = await withTimeout(
+          supabase.storage.from("vault").upload(fileName, image, {
             contentType: "image/jpeg",
             upsert: true,
-          });
+          }),
+          TIMEOUTS.FILE_UPLOAD,
+          `File upload timed out after ${TIMEOUTS.FILE_UPLOAD}ms`,
+        );
 
         if (!uploadedData) {
           throw new Error("Failed to upload converted image");
         }
+
+        // Create Blob from converted image for reuse
+        fileData = new Blob([image], { type: "image/jpeg" });
+        processedMimetype = "image/jpeg";
+      } else {
+        // Download file for non-HEIC files
+        const { data } = await withTimeout(
+          supabase.storage.from("vault").download(fileName),
+          TIMEOUTS.FILE_DOWNLOAD,
+          `File download timed out after ${TIMEOUTS.FILE_DOWNLOAD}ms`,
+        );
+
+        if (!data) {
+          throw new Error("File not found");
+        }
+
+        fileData = data;
       }
 
-      await this.updateProgress(job, 30);
-
-      // If the file is an image, we have a special classifier for it
-      if (mimetype.startsWith("image/")) {
+      // If the file is an image, trigger image classification
+      if (processedMimetype.startsWith("image/")) {
         this.logger.info(
           {
-            fileName: filePath.join("/"),
+            fileName,
             teamId,
           },
           "Triggering image classification",
         );
 
-        await this.updateProgress(job, 50);
-
-        // Trigger image classification via BullMQ
+        // Trigger image classification via BullMQ (fire and forget)
         await triggerJob(
           "classify-image",
           {
-            fileName: filePath.join("/"),
+            fileName,
             teamId,
           },
           "documents",
         );
 
-        await this.updateProgress(job, 100);
         return;
       }
 
-      await this.updateProgress(job, 40);
+      // Process document: load and classify
+      let document: string;
+      try {
+        const loadedDoc = await loadDocument({
+          content: fileData,
+          metadata: { mimetype: processedMimetype },
+        });
 
-      const { data: fileData } = await supabase.storage
-        .from("vault")
-        .download(filePath.join("/"));
+        if (!loadedDoc) {
+          throw new Error("Failed to load document");
+        }
 
-      if (!fileData) {
-        throw new Error("File not found");
+        document = loadedDoc;
+      } catch (error) {
+        this.logger.error(
+          {
+            fileName,
+            teamId,
+            mimetype: processedMimetype,
+            error: error instanceof Error ? error.message : "Unknown error",
+          },
+          "Failed to load document - file may be corrupted or unsupported",
+        );
+        throw new Error(
+          `Failed to load document: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
       }
 
-      await this.updateProgress(job, 50);
-
-      const document = await loadDocument({
-        content: fileData,
-        metadata: { mimetype },
-      });
-
-      if (!document) {
-        throw new Error("Document not found");
+      // Edge case: Validate document has content
+      if (!document || document.trim().length === 0) {
+        this.logger.warn(
+          {
+            fileName,
+            teamId,
+          },
+          "Document loaded but has no extractable content",
+        );
+        // Don't throw - still try to classify, might be an image-only document
       }
-
-      await this.updateProgress(job, 60);
 
       const sample = getContentSample(document);
 
+      // Edge case: Validate sample has content
+      if (!sample || sample.trim().length === 0) {
+        this.logger.warn(
+          {
+            fileName,
+            teamId,
+            contentLength: document.length,
+          },
+          "Document sample is empty, skipping classification",
+        );
+        return; // Skip classification if no content
+      }
+
       this.logger.info(
         {
-          fileName: filePath.join("/"),
+          fileName,
           teamId,
           contentLength: document.length,
           sampleLength: sample.length,
@@ -144,34 +225,26 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         "Triggering document classification",
       );
 
-      await this.updateProgress(job, 70);
-
-      // Trigger document classification via BullMQ
+      // Trigger document classification via BullMQ (fire and forget)
       await triggerJob(
         "classify-document",
         {
           content: sample,
-          fileName: filePath.join("/"),
+          fileName,
           teamId,
         },
         "documents",
       );
 
-      await this.updateProgress(job, 90);
-
-      // Create activity for successful document processing (via Trigger.dev)
-      // TODO: Port notification system to BullMQ
       this.logger.info(
         {
-          fileName: filePath.join("/"),
+          fileName,
           teamId,
           contentLength: document.length,
           sampleLength: sample.length,
         },
         "Document processing completed",
       );
-
-      await this.updateProgress(job, 100);
     } catch (error) {
       this.logger.error(
         {

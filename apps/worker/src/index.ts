@@ -7,10 +7,14 @@ import { getProcessor } from "./processors/registry";
 import { queueConfigs } from "./queues";
 import { registerStaticSchedulers } from "./schedulers/registry";
 
-// Initialize Redis connection
-// BullMQ will handle connection automatically with lazyConnect: true
-// Workers will connect when they start processing jobs
-getRedisConnection();
+// Initialize Redis connection eagerly
+// Workers need Redis immediately, so connect at startup to fail fast if unavailable
+const redisConnection = getRedisConnection();
+
+// Wait for connection to be ready before starting workers
+redisConnection.once("ready", () => {
+  console.log("[Redis Queue] Connection ready, workers can start processing");
+});
 
 /**
  * Create workers dynamically from queue configurations
@@ -83,13 +87,37 @@ console.log("Workers initialized and ready to process jobs");
 const shutdown = async (signal: string) => {
   console.log(`Received ${signal}, starting graceful shutdown...`);
 
-  // Close all workers
-  await Promise.all(workers.map((worker) => worker.close()));
+  const SHUTDOWN_TIMEOUT = 30_000; // 30 seconds max for shutdown
 
-  // Close database connections
-  await closeWorkerDb();
+  const shutdownPromise = (async () => {
+    try {
+      // Stop accepting new jobs
+      console.log("Stopping workers from accepting new jobs...");
+      await Promise.all(workers.map((worker) => worker.close()));
 
-  console.log("Graceful shutdown complete");
+      // Wait a bit for in-flight jobs to complete
+      console.log("Waiting for in-flight jobs to complete...");
+      await new Promise((resolve) => setTimeout(resolve, 5000)); // 5 seconds grace period
+
+      // Close database connections
+      console.log("Closing database connections...");
+      await closeWorkerDb();
+
+      console.log("Graceful shutdown complete");
+    } catch (error) {
+      console.error("Error during shutdown:", error);
+    }
+  })();
+
+  // Race shutdown against timeout
+  const timeoutPromise = new Promise<void>((resolve) => {
+    setTimeout(() => {
+      console.warn("Shutdown timeout reached, forcing exit");
+      resolve();
+    }, SHUTDOWN_TIMEOUT);
+  });
+
+  await Promise.race([shutdownPromise, timeoutPromise]);
   process.exit(0);
 };
 

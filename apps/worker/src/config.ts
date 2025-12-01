@@ -23,7 +23,9 @@ export function getRedisConnection(): Redis {
   redisConnection = new Redis(redisUrl, {
     maxRetriesPerRequest: null, // Required for BullMQ
     enableReadyCheck: false, // BullMQ handles this
-    lazyConnect: true,
+    // Connect eagerly for workers - fail fast if Redis is unavailable
+    // Workers need Redis immediately to process jobs
+    lazyConnect: false,
     family: isProduction ? 6 : 4, // IPv6 for Fly.io production, IPv4 for local
     ...(isProduction && {
       // Production settings for Upstash/Fly.io
