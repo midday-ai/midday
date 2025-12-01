@@ -25,8 +25,10 @@
       "@jobs/*": ["../../packages/jobs/src/*"],
       "@db/*": ["../../packages/db/src/*"]
     },
-    "types": ["bun-types"]
+    "types": ["bun-types"],
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
-  "exclude": ["node_modules"],
+  "exclude": ["node_modules", "../../packages/job-client/**/*"],
   "include": ["src/**/*.ts"]
 }
