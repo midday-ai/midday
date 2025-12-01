@@ -1,4 +1,4 @@
-import { mistral } from "@ai-sdk/mistral";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { documentClassifierPrompt, imageClassifierPrompt } from "../prompt";
 import { documentClassifierSchema, imageClassifierSchema } from "../schema";
@@ -7,10 +7,16 @@ import type {
   DocumentClassifierRequest,
 } from "../types";
 
+const GOOGLE_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
+
+const google = createGoogleGenerativeAI({
+  apiKey: GOOGLE_API_KEY,
+});
+
 export class DocumentClassifier {
   async #processDocument({ content }: DocumentClassifierRequest) {
     const result = await generateObject({
-      model: mistral("mistral-medium-latest"),
+      model: google("gemini-2.5-flash"),
       schema: documentClassifierSchema,
       temperature: 0.3,
       messages: [
@@ -30,7 +36,7 @@ export class DocumentClassifier {
 
   async #processImage(request: DocumentClassifierImageRequest) {
     const result = await generateObject({
-      model: mistral("mistral-medium-latest"),
+      model: google("gemini-2.5-flash"),
       schema: imageClassifierSchema,
       temperature: 0.3,
       messages: [

@@ -1,10 +1,14 @@
-import { mistral } from "@ai-sdk/mistral";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { createReceiptPrompt, receiptPrompt } from "../../prompt";
 import { receiptSchema } from "../../schema";
 import type { GetDocumentRequest } from "../../types";
 import { getDomainFromEmail, removeProtocolFromDomain } from "../../utils";
 import { retryCall } from "../../utils/retry";
+
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY!,
+});
 
 export class ReceiptProcessor {
   async #processDocument({ documentUrl, companyName }: GetDocumentRequest) {
@@ -18,7 +22,7 @@ export class ReceiptProcessor {
 
     const result = await retryCall(() =>
       generateObject({
-        model: mistral("mistral-medium-latest"),
+        model: google("gemini-2.5-flash"),
         schema: receiptSchema,
         temperature: 0.1,
         abortSignal: AbortSignal.timeout(20000), // 20s
@@ -37,11 +41,6 @@ export class ReceiptProcessor {
             ],
           },
         ],
-        providerOptions: {
-          mistral: {
-            documentImageLimit: 4,
-          },
-        },
       }),
     );
 
