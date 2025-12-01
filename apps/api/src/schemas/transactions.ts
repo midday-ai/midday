@@ -838,7 +838,24 @@ export const exportTransactionsSchema = z.object({
       includeCSV: z.boolean(),
       includeXLSX: z.boolean(),
       sendEmail: z.boolean(),
-      accountantEmail: z.string().email().optional(),
+      accountantEmail: z.string().optional(),
     })
+    .refine(
+      (data) => {
+        // Only validate email if sendEmail is true
+        if (data.sendEmail) {
+          if (!data.accountantEmail || data.accountantEmail.trim() === "") {
+            return false;
+          }
+          return z.string().email().safeParse(data.accountantEmail.trim())
+            .success;
+        }
+        return true;
+      },
+      {
+        message: "Invalid email address",
+        path: ["accountantEmail"],
+      },
+    )
     .optional(),
 });
