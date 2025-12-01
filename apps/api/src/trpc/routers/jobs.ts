@@ -1,11 +1,11 @@
-import { getJobStatusSchema } from "@api/schemas/jobs";
+import { getJobStatusSchemaheobStatusSchema } from "@api/schemas/jobs";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 // import { getJobStatus } from "@midday/job-client";
 
 export const jobsRouter = createTRPCRouter({
   getStatus: protectedProcedure
     .input(getJobStatusSchema)
-    .query(async ({ input }) => {
+    .query(async ({ input }): Promise<JobStatus> => {
       //   const status = await getJobStatus(input.jobId);
 
       //   if (!status) {
@@ -14,6 +14,7 @@ export const jobsRouter = createTRPCRouter({
 
       //   return status;
 
-      return null;
+      // Temporary placeholder until job-client is integrated
+      throw new Error("Job status not implemented yet");
     }),
 });

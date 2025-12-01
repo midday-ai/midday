@@ -32,7 +32,6 @@
         "@midday/engine-client": "workspace:*",
         "@midday/inbox": "workspace:*",
         "@midday/invoice": "workspace:*",
-        "@midday/job-client": "workspace:*",
         "@midday/jobs": "workspace:*",
         "@midday/location": "workspace:*",
         "@midday/logger": "workspace:*",

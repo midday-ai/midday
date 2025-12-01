@@ -7,7 +7,7 @@ on:
       - packages/jobs/**
 jobs:
   deploy-production:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-m
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4

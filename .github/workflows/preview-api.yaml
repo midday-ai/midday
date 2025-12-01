@@ -13,7 +13,7 @@ on:
 jobs:
   deploy:
     name: 🚀 Deploy to Fly Preview
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-m
     concurrency: fly-preview
     timeout-minutes: 30
     steps:
@@ -21,6 +21,25 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: v1.2.23
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            **/node_modules
+            .turbo
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+      - name: Cache TypeScript build info
+        uses: actions/cache@v4
+        with:
+          path: |
+            apps/api/.tsbuildinfo
+            **/.tsbuildinfo
+          key: ${{ runner.os }}-ts-${{ hashFiles('apps/api/tsconfig.json', 'apps/api/src/**/*.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-ts-
       - name: Install dependencies
         run: bun install
       - name: 🏗 Build @midday/engine
