@@ -39,7 +39,7 @@ export async function triggerJob(
 /**
  * Known queue names in the worker system
  */
-const KNOWN_QUEUES = ["transactions", "inbox", "inbox-provider"];
+const KNOWN_QUEUES = ["transactions", "inbox", "inbox-provider", "documents"];
 
 /**
  * Get job status by ID

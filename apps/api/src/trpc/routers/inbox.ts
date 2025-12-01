@@ -37,9 +37,9 @@ import {
   unmatchTransaction,
   updateInbox,
 } from "@midday/db/queries";
-import { remove } from "@midday/supabase/storage";
 import { triggerJob } from "@midday/job-client";
 import type { ProcessAttachmentPayload } from "@midday/jobs/schema";
+import { remove } from "@midday/supabase/storage";
 
 export const inboxRouter = createTRPCRouter({
   get: protectedProcedure
