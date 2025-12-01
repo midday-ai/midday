@@ -28,13 +28,17 @@
   },
   "dependencies": {
     "@date-fns/utc": "^2.1.1",
+    "@midday/cache": "workspace:*",
     "@midday/categories": "workspace:*",
     "@midday/encryption": "workspace:*",
     "@midday/invoice": "workspace:*",
     "@midday/logger": "workspace:*",
+    "@midday/utils": "workspace:*",
+    "@sindresorhus/slugify": "^3.0.0",
     "@types/pg": "^8.15.6",
     "drizzle-orm": "^0.44.7",
     "camelcase-keys": "^10.0.1",
+    "nanoid": "^5.1.6",
     "pg": "^8.16.3",
     "snakecase-keys": "^9.0.2"
   },
