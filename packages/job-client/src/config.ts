@@ -1,14 +1,12 @@
-import type { QueueOptions } from "bullmq";
-import { FlowProducer, Queue } from "bullmq";
-import Redis from "ioredis";
+// No imports - using require() to avoid pulling in BullMQ types during typecheck
 
-let redisConnection: Redis | null = null;
+let redisConnection: any = null;
 
 /**
  * Create Redis connection - throws if REDIS_QUEUE_URL is not available
  * This ensures queues always have a valid connection
  */
-function createRedisConnection(): Redis {
+function createRedisConnection(): any {
   const redisUrl = process.env.REDIS_QUEUE_URL;
 
   if (!redisUrl) {
@@ -18,6 +16,8 @@ function createRedisConnection(): Redis {
   const isProduction =
     process.env.NODE_ENV === "production" || process.env.FLY_APP_NAME;
 
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const Redis = require("ioredis");
   const connection = new Redis(redisUrl, {
     maxRetriesPerRequest: null, // Required for BullMQ
     enableReadyCheck: false, // BullMQ handles this
@@ -25,14 +25,14 @@ function createRedisConnection(): Redis {
     ...(isProduction && {
       // Production settings
       connectTimeout: 10000,
-      retryStrategy: (times) => {
+      retryStrategy: (times: number) => {
         const delay = Math.min(times * 50, 2000);
         return delay;
       },
     }),
   });
 
-  connection.on("error", (err) => {
+  connection.on("error", (err: any) => {
     console.error("[Job Client Redis] Connection error:", err);
   });
 
@@ -43,7 +43,7 @@ function createRedisConnection(): Redis {
  * Get or create Redis connection for BullMQ
  * Uses REDIS_QUEUE_URL (separate from cache Redis)
  */
-function getRedisConnection(): Redis {
+function getRedisConnection(): any {
   if (redisConnection) {
     return redisConnection;
   }
@@ -52,15 +52,15 @@ function getRedisConnection(): Redis {
 }
 
 // Lazy queue instances - created on first access
-let _inboxQueue: Queue | null = null;
-let _inboxProviderQueue: Queue | null = null;
-let _transactionsQueue: Queue | null = null;
-let _flowProducer: FlowProducer | null = null;
+let _inboxQueue: any = null;
+let _inboxProviderQueue: any = null;
+let _transactionsQueue: any = null;
+let _flowProducer: any = null;
 
 /**
  * Get default queue options (lazy Redis connection)
  */
-function getDefaultQueueOptions(): QueueOptions {
+function getDefaultQueueOptions(): any {
   return {
     connection: getRedisConnection(),
     defaultJobOptions: {
@@ -84,8 +84,10 @@ function getDefaultQueueOptions(): QueueOptions {
  * Inbox queue - Main queue for inbox processing jobs
  * Lazy initialization: created on first access
  */
-export function getInboxQueue(): Queue {
+export function getInboxQueue(): any {
   if (!_inboxQueue) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Queue } = require("bullmq");
     _inboxQueue = new Queue("inbox", getDefaultQueueOptions());
   }
   return _inboxQueue;
@@ -95,8 +97,10 @@ export function getInboxQueue(): Queue {
  * Inbox provider queue - Gmail provider sync jobs
  * Lazy initialization: created on first access
  */
-export function getInboxProviderQueue(): Queue {
+export function getInboxProviderQueue(): any {
   if (!_inboxProviderQueue) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Queue } = require("bullmq");
     _inboxProviderQueue = new Queue("inbox-provider", {
       ...getDefaultQueueOptions(),
       defaultJobOptions: {
@@ -112,8 +116,10 @@ export function getInboxProviderQueue(): Queue {
  * Transactions queue - For transaction export and processing jobs
  * Lazy initialization: created on first access
  */
-export function getTransactionsQueue(): Queue {
+export function getTransactionsQueue(): any {
   if (!_transactionsQueue) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Queue } = require("bullmq");
     _transactionsQueue = new Queue("transactions", getDefaultQueueOptions());
   }
   return _transactionsQueue;
@@ -123,8 +129,10 @@ export function getTransactionsQueue(): Queue {
  * FlowProducer for job dependencies
  * Lazy initialization: created on first access
  */
-export function getFlowProducer(): FlowProducer {
+export function getFlowProducer(): any {
   if (!_flowProducer) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { FlowProducer } = require("bullmq");
     _flowProducer = new FlowProducer({
       connection: getRedisConnection(),
     });

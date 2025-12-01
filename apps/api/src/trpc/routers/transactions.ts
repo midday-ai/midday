@@ -21,7 +21,7 @@ import {
   updateTransaction,
   updateTransactions,
 } from "@midday/db/queries";
-import { jobs } from "@midday/job-client";
+// import { jobs } from "@midday/job-client";
 import type { EmbedTransactionPayload } from "@midday/jobs/schema";
 import { tasks } from "@trigger.dev/sdk";
 
@@ -125,15 +125,17 @@ export const transactionsRouter = createTRPCRouter({
         throw new Error("Team not found");
       }
 
-      const result = await jobs.trigger("export-transactions", {
-        teamId,
-        userId: session.user.id,
-        locale: input.locale,
-        transactionIds: input.transactionIds,
-        dateFormat: input.dateFormat,
-        exportSettings: input.exportSettings,
-      });
+      // const result = await jobs.trigger("export-transactions", {
+      //   teamId,
+      //   userId: session.user.id,
+      //   locale: input.locale,
+      //   transactionIds: input.transactionIds,
+      //   dateFormat: input.dateFormat,
+      //   exportSettings: input.exportSettings,
+      // });
 
-      return result;
+      // return result;
+
+      return null;
     }),
 });

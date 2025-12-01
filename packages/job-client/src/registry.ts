@@ -1,4 +1,20 @@
-import type { Queue } from "bullmq";
+/**
+ * Minimal Queue interface - only includes methods we actually use
+ * This avoids pulling in the full BullMQ Queue type during typecheck
+ */
+interface MinimalQueue {
+  add: (
+    name: string,
+    data: unknown,
+    options?: Record<string, unknown>,
+  ) => Promise<{ id: string | number | undefined }>;
+  name: string;
+  client: Promise<{
+    hgetall: (key: string) => Promise<Record<string, string>>;
+    zscore: (key: string, member: string) => Promise<number | null>;
+    lpos: (key: string, element: string) => Promise<number | null>;
+  }>;
+}
 
 /**
  * Job registry - maps job names to their queue types
@@ -29,8 +45,9 @@ const JOB_QUEUE_MAP: Record<
 /**
  * Get queue for a job name - lazy evaluation to avoid typecheck issues
  * Uses dynamic import to prevent TypeScript from resolving BullMQ types during typecheck
+ * Returns MinimalQueue to avoid pulling in full BullMQ types
  */
-export function getQueueForJob(jobName: string): Queue {
+export function getQueueForJob(jobName: string): MinimalQueue {
   const queueType = JOB_QUEUE_MAP[jobName];
   if (!queueType) {
     throw new Error(`No queue registered for job: ${jobName}`);

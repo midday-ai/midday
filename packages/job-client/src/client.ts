@@ -44,7 +44,7 @@ export const jobs = {
 
     const addedJob = await queue.add(name, data, jobOptions);
 
-    return { id: addedJob.id! };
+    return { id: String(addedJob.id ?? "") };
   },
 };
 
