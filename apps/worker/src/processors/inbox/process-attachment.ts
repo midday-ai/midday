@@ -152,8 +152,11 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
     // Create inbox item if it doesn't exist (for non-manual uploads)
     // or update existing item status if it was created manually
     if (!inboxData) {
-      this.logger.info({ filePath: fileName }, "Creating new inbox item");
-      inboxData = await createInbox(db, {
+      this.logger.info(
+        { filePath: fileName, referenceId },
+        "Creating new inbox item",
+      );
+      const createdData = await createInbox(db, {
         // NOTE: If we can't parse the name using OCR this will be the fallback name
         displayName: filename ?? "Unknown",
         teamId,
@@ -167,6 +170,47 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         inboxAccountId,
         status: "processing", // Set as processing when created by job
       });
+
+      // Check if this was a duplicate (createInbox returns existing item on conflict)
+      // We compare the filePath to see if this is a different job trying to create the same item
+      if (createdData) {
+        const existingFilePath = createdData.filePath?.join("/");
+        const currentFilePath = filePath.join("/");
+
+        // If the filePath is different, this is a duplicate from a different upload
+        if (existingFilePath && existingFilePath !== currentFilePath) {
+          this.logger.info(
+            {
+              inboxId: createdData.id,
+              status: createdData.status,
+              referenceId,
+              existingFilePath,
+              currentFilePath,
+            },
+            "Found existing inbox item with different filePath, skipping duplicate",
+          );
+          return;
+        }
+
+        // If the item is already processed (not new/processing), skip
+        if (
+          createdData.status !== "processing" &&
+          createdData.status !== "new"
+        ) {
+          this.logger.info(
+            {
+              inboxId: createdData.id,
+              status: createdData.status,
+              referenceId,
+              filePath: fileName,
+            },
+            "Found existing inbox item via referenceId conflict, skipping duplicate",
+          );
+          return;
+        }
+      }
+
+      inboxData = createdData;
     } else if (inboxData.status === "processing") {
       this.logger.info(
         {

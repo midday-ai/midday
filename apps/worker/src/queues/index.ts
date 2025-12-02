@@ -1,6 +1,7 @@
 import type { QueueConfig } from "../types/queue-config";
 import { documentsQueueConfig } from "./documents.config";
 import { inboxProviderQueueConfig, inboxQueueConfig } from "./inbox.config";
+import { notificationsQueueConfig } from "./notifications.config";
 import { transactionsQueueConfig } from "./transactions.config";
 
 /**
@@ -12,4 +13,5 @@ export const queueConfigs: QueueConfig[] = [
   inboxProviderQueueConfig,
   transactionsQueueConfig,
   documentsQueueConfig,
+  notificationsQueueConfig,
 ];

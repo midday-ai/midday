@@ -83,11 +83,35 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
       await this.updateProgress(job, 20);
 
       // Filter out attachments that are already processed
+      const referenceIds = attachments.map(
+        (attachment) => attachment.referenceId,
+      );
+
+      this.logger.info(
+        {
+          accountId: inboxAccountId,
+          referenceIds: referenceIds,
+          referenceIdsCount: referenceIds.length,
+        },
+        "Checking for existing attachments by referenceIds",
+      );
+
       const existingAttachmentsResults =
         await getExistingInboxAttachmentsByReferenceIds(db, {
-          referenceIds: attachments.map((attachment) => attachment.referenceId),
+          referenceIds,
           teamId: accountRow.teamId,
         });
+
+      this.logger.info(
+        {
+          accountId: inboxAccountId,
+          existingCount: existingAttachmentsResults.length,
+          existingReferenceIds: existingAttachmentsResults.map(
+            (r) => r.referenceId,
+          ),
+        },
+        "Found existing attachments in database",
+      );
 
       const existingAttachments = {
         data: existingAttachmentsResults.map((r) => ({
@@ -109,14 +133,36 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
       let skippedBlockedDomain = 0;
       let skippedBlockedEmail = 0;
 
+      // Create a Set for O(1) lookup
+      const existingReferenceIdSet = new Set(
+        existingAttachments.data?.map((e) => e.reference_id) ?? [],
+      );
+
+      this.logger.info(
+        {
+          accountId: inboxAccountId,
+          existingSetSize: existingReferenceIdSet.size,
+          sampleExisting: Array.from(existingReferenceIdSet).slice(0, 3),
+          sampleAttachments: attachments.slice(0, 3).map((a) => ({
+            referenceId: a.referenceId,
+            filename: a.filename,
+          })),
+        },
+        "Comparing attachments with existing set",
+      );
+
       const filteredAttachments = attachments.filter((attachment) => {
         // Skip if already exists in database
-        if (
-          existingAttachments.data?.some(
-            (existing) => existing.reference_id === attachment.referenceId,
-          )
-        ) {
+        const exists = existingReferenceIdSet.has(attachment.referenceId);
+        if (exists) {
           skippedAlreadyProcessed++;
+          this.logger.debug(
+            {
+              referenceId: attachment.referenceId,
+              filename: attachment.filename,
+            },
+            "Skipping already processed attachment",
+          );
           return false;
         }
 
@@ -241,8 +287,32 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
 
         await this.updateProgress(job, 80);
 
-        // Trigger notification (via Trigger.dev for now)
-        // TODO: Port notification system to BullMQ
+        // Send notification for new inbox items
+        try {
+          await triggerJob(
+            "notification",
+            {
+              type: "inbox_new",
+              teamId: accountRow.teamId,
+              totalCount: uploadedAttachments.length,
+              inboxType: "sync",
+              source: "system",
+              provider: accountRow.provider,
+            },
+            "notifications",
+          );
+        } catch (error) {
+          // Don't fail the entire process if notification fails
+          this.logger.warn(
+            {
+              accountId: inboxAccountId,
+              teamId: accountRow.teamId,
+              error: error instanceof Error ? error.message : "Unknown error",
+            },
+            "Failed to trigger inbox_new notification",
+          );
+        }
+
         this.logger.info(
           {
             accountId: inboxAccountId,

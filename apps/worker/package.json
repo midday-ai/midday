@@ -18,6 +18,7 @@
     "@midday/engine": "workspace:*",
     "@midday/engine-client": "workspace:*",
     "@midday/job-client": "workspace:*",
+    "@midday/jobs": "workspace:*",
     "@midday/notifications": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/utils": "workspace:*",

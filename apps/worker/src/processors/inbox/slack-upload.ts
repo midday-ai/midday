@@ -7,6 +7,7 @@ import {
   updateInboxWithProcessedData,
 } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
+import { Notifications } from "@midday/notifications";
 import { createClient } from "@midday/supabase/job";
 import { getExtensionFromMimeType } from "@midday/utils";
 import type { Job } from "bullmq";
@@ -83,13 +84,30 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
 
       await this.updateProgress(job, 90);
 
-      // Note: Slack notification would need to be handled separately
+      // Note: Slack message posting would need to be handled separately
       // as we don't have access to token/channelId/threadId in this processor
       // This could be passed via job data or stored in a separate table
 
       if (updatedInbox?.amount) {
-        // Trigger notification job (via Trigger.dev for now)
-        // TODO: Port notification system to BullMQ or create notification processor
+        // Send notification for Slack upload
+        // try {
+        //   const notifications = new Notifications(db);
+        //   await notifications.create("inbox_new", teamId, {
+        //     totalCount: 1,
+        //     inboxType: "slack",
+        //   });
+        // } catch (error) {
+        //   // Don't fail the entire process if notification fails
+        //   this.logger.warn(
+        //     {
+        //       inboxId: updatedInbox.id,
+        //       teamId,
+        //       error: error instanceof Error ? error.message : "Unknown error",
+        //     },
+        //     "Failed to create inbox_new notification",
+        //   );
+        // }
+
         this.logger.info(
           {
             inboxId: updatedInbox.id,

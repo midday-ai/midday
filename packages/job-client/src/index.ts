@@ -1,6 +1,9 @@
 import { getQueue } from "./queues";
 import type { JobStatus, JobStatusResponse, JobTriggerResponse } from "./types";
 
+// Re-export getQueue for use in API routes that need direct queue access
+export { getQueue } from "./queues";
+
 /**
  * Trigger a job in the specified queue
  * @param jobName - Name of the job (e.g., "export-transactions")
@@ -39,7 +42,13 @@ export async function triggerJob(
 /**
  * Known queue names in the worker system
  */
-const KNOWN_QUEUES = ["transactions", "inbox", "inbox-provider", "documents"];
+const KNOWN_QUEUES = [
+  "transactions",
+  "inbox",
+  "inbox-provider",
+  "documents",
+  "notifications",
+];
 
 /**
  * Get job status by ID

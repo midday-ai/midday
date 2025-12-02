@@ -1609,18 +1609,46 @@ export async function getExistingInboxAttachmentsByReferenceIds(
     return [];
   }
 
+  // Filter out any null/undefined referenceIds to avoid SQL issues
+  const validReferenceIds = referenceIds.filter(
+    (id): id is string => id != null && id !== "",
+  );
+
+  if (validReferenceIds.length === 0) {
+    return [];
+  }
+
+  logger.info(
+    {
+      teamId,
+      referenceIdsCount: validReferenceIds.length,
+      sampleIds: validReferenceIds.slice(0, 3),
+    },
+    "Querying for existing inbox attachments by referenceIds",
+  );
+
   const results = await db
     .select({
       referenceId: inbox.referenceId,
+      status: inbox.status,
     })
     .from(inbox)
     .where(
       and(
-        inArray(inbox.referenceId, referenceIds),
+        inArray(inbox.referenceId, validReferenceIds),
         eq(inbox.teamId, teamId),
         ne(inbox.status, "deleted"),
       ),
     );
+
+  logger.info(
+    {
+      teamId,
+      foundCount: results.length,
+      foundIds: results.map((r) => r.referenceId).slice(0, 3),
+    },
+    "Found existing inbox attachments",
+  );
 
   return results;
 }
@@ -1661,6 +1689,107 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
     status = "new",
   } = params;
 
+  // If we have a referenceId, use ON CONFLICT to handle race conditions
+  // where multiple jobs try to create the same inbox item simultaneously
+  if (referenceId) {
+    logger.info(
+      { referenceId, teamId, filePath },
+      "Creating inbox item with referenceId (using ON CONFLICT)",
+    );
+
+    const [result] = await db
+      .insert(inbox)
+      .values({
+        displayName,
+        teamId,
+        filePath,
+        fileName,
+        contentType,
+        size,
+        referenceId,
+        website,
+        senderEmail,
+        inboxAccountId,
+        status,
+      })
+      .onConflictDoNothing({
+        target: inbox.referenceId,
+      })
+      .returning({
+        id: inbox.id,
+        fileName: inbox.fileName,
+        filePath: inbox.filePath,
+        displayName: inbox.displayName,
+        transactionId: inbox.transactionId,
+        amount: inbox.amount,
+        currency: inbox.currency,
+        contentType: inbox.contentType,
+        date: inbox.date,
+        status: inbox.status,
+        createdAt: inbox.createdAt,
+        website: inbox.website,
+        senderEmail: inbox.senderEmail,
+        description: inbox.description,
+        referenceId: inbox.referenceId,
+        size: inbox.size,
+        inboxAccountId: inbox.inboxAccountId,
+      });
+
+    // If insert was skipped due to conflict, fetch the existing row
+    if (!result) {
+      logger.info(
+        { referenceId, teamId },
+        "Insert skipped due to referenceId conflict, fetching existing row",
+      );
+
+      const [existingRow] = await db
+        .select({
+          id: inbox.id,
+          fileName: inbox.fileName,
+          filePath: inbox.filePath,
+          displayName: inbox.displayName,
+          transactionId: inbox.transactionId,
+          amount: inbox.amount,
+          currency: inbox.currency,
+          contentType: inbox.contentType,
+          date: inbox.date,
+          status: inbox.status,
+          createdAt: inbox.createdAt,
+          website: inbox.website,
+          senderEmail: inbox.senderEmail,
+          description: inbox.description,
+          referenceId: inbox.referenceId,
+          size: inbox.size,
+          inboxAccountId: inbox.inboxAccountId,
+        })
+        .from(inbox)
+        .where(
+          and(eq(inbox.referenceId, referenceId), eq(inbox.teamId, teamId)),
+        )
+        .limit(1);
+
+      logger.info(
+        {
+          referenceId,
+          teamId,
+          existingId: existingRow?.id,
+          existingStatus: existingRow?.status,
+        },
+        "Fetched existing inbox item",
+      );
+
+      return existingRow;
+    }
+
+    logger.info(
+      { referenceId, teamId, newId: result.id },
+      "Successfully created new inbox item",
+    );
+
+    return result;
+  }
+
+  // No referenceId - regular insert (for manual uploads)
   const [result] = await db
     .insert(inbox)
     .values({

@@ -73,7 +73,7 @@ import { startAdmin } from '@midday/board';
 
 await startAdmin({
   redis: { host: 'localhost', port: 6379 },
-  queues: ['transactions', 'inbox', 'inbox-provider'],
+  queues: ['transactions', 'inbox', 'inbox-provider', 'documents', 'notifications'],
   port: 3002,
 });
 ```
@@ -84,6 +84,8 @@ The admin automatically discovers queues from Redis. By default, it looks for:
 - `transactions`
 - `inbox`
 - `inbox-provider`
+- `documents`
+- `notifications`
 
 You can customize this by passing queue names to `startAdmin()`.
 

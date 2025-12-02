@@ -95,3 +95,35 @@ export function batchPrefetch<T extends ReturnType<TRPCQueryOptions<any>>>(
     }
   }
 }
+
+/**
+ * Get a tRPC client for server-side API routes
+ * Use this when you need to call mutations from API routes (e.g., webhooks, callbacks)
+ * For queries, use the `trpc` proxy with `queryOptions` instead
+ */
+export async function getTRPCClient() {
+  const supabase = await createClient();
+  const cookieStore = await cookies();
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  return createTRPCClient<AppRouter>({
+    links: [
+      httpBatchLink({
+        url: `${process.env.NEXT_PUBLIC_API_URL}/trpc`,
+        transformer: superjson,
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+          "x-user-timezone": await getTimezone(),
+          "x-user-locale": await getLocale(),
+          "x-user-country": await getCountryCode(),
+          ...(cookieStore.get(Cookies.ForcePrimary)?.value === "true" && {
+            "x-force-primary": "true",
+          }),
+        },
+      }),
+    ],
+  });
+}
