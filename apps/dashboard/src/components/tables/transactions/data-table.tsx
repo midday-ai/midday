@@ -28,7 +28,15 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { AnimatePresence } from "framer-motion";
-import { use, useDeferredValue, useEffect, useMemo, useState } from "react";
+import {
+  use,
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useInView } from "react-intersection-observer";
 import { BottomBar } from "./bottom-bar";
@@ -48,8 +56,14 @@ export function DataTable({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { filter, hasFilters } = useTransactionFilterParamsWithPersistence();
-  const { setRowSelection, rowSelection, setColumns, setCanDelete } =
-    useTransactionsStore();
+  const {
+    setRowSelection,
+    rowSelection,
+    setColumns,
+    setCanDelete,
+    lastClickedIndex,
+    setLastClickedIndex,
+  } = useTransactionsStore();
   const deferredSearch = useDeferredValue(filter.q);
   const { params } = useSortParams();
   const { ref, inView } = useInView();
@@ -157,6 +171,12 @@ export function DataTable({
     };
   }, [shouldPollForEnrichment, refetch]);
 
+  // Handle shift-click range selection
+  // Note: This function will be updated after table creation to use table.getRowModel().rows
+  const handleShiftClickRangeRef = useRef<
+    (startIndex: number, endIndex: number) => void
+  >(() => {});
+
   const table = useReactTable({
     getRowId: (row) => row?.id,
     data: tableData,
@@ -243,8 +263,48 @@ export function DataTable({
       editTransaction: (id: string) => {
         setParams({ editTransaction: id });
       },
+      handleShiftClickRange: (startIndex: number, endIndex: number) =>
+        handleShiftClickRangeRef.current(startIndex, endIndex),
+      lastClickedIndex,
+      setLastClickedIndex,
     },
   });
+
+  // Update handleShiftClickRange to use the table
+  handleShiftClickRangeRef.current = useCallback(
+    (startIndex: number, endIndex: number) => {
+      const rows = table.getRowModel().rows;
+      const start = Math.min(startIndex, endIndex);
+      const end = Math.max(startIndex, endIndex);
+
+      // Check if all items in range are already selected
+      let allSelected = true;
+      for (let i = start; i <= end; i++) {
+        const row = rows[i];
+        if (row && !rowSelection[row.id]) {
+          allSelected = false;
+          break;
+        }
+      }
+
+      // Toggle: if all selected, deselect; otherwise select all
+      setRowSelection((prev) => {
+        const newSelection = { ...prev };
+        for (let i = start; i <= end; i++) {
+          const row = rows[i];
+          if (row) {
+            if (allSelected) {
+              delete newSelection[row.id];
+            } else {
+              newSelection[row.id] = true;
+            }
+          }
+        }
+        return newSelection;
+      });
+    },
+    [table, rowSelection, setRowSelection],
+  );
 
   // Use the reusable sticky columns hook
   const { getStickyStyle, getStickyClassName } = useStickyColumns({
@@ -345,7 +405,7 @@ export function DataTable({
 
                 <TableBody className="border-l-0 border-r-0">
                   {table.getRowModel().rows?.length ? (
-                    table.getRowModel().rows.map((row) => (
+                    table.getRowModel().rows.map((row, rowIndex) => (
                       <TableRow
                         key={row.id}
                         className="group h-[40px] md:h-[45px] cursor-pointer select-text hover:bg-[#F2F1EF] hover:dark:bg-[#0f0f0f]"
@@ -359,6 +419,7 @@ export function DataTable({
                             )}
                             style={getStickyStyle(cell.column.id)}
                             onClick={() => {
+                              // Handle other column clicks (select column is handled in SelectCell)
                               if (
                                 cell.column.id !== "select" &&
                                 cell.column.id !== "actions" &&

@@ -32,8 +32,23 @@ const SelectCell = memo(
   ({
     checked,
     onChange,
-  }: { checked: boolean; onChange: (value: boolean) => void }) => (
-    <Checkbox checked={checked} onCheckedChange={onChange} />
+    onShiftClick,
+  }: {
+    checked: boolean;
+    onChange: (value: boolean) => void;
+    onShiftClick?: () => void;
+  }) => (
+    <div
+      onClick={(e) => {
+        if (e.shiftKey && onShiftClick) {
+          e.preventDefault();
+          e.stopPropagation();
+          onShiftClick();
+        }
+      }}
+    >
+      <Checkbox checked={checked} onCheckedChange={onChange} />
+    </div>
   ),
 );
 
@@ -243,12 +258,36 @@ export const columns: ColumnDef<Transaction>[] = [
       className:
         "md:sticky bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:opacity-0 after:z-[-1]",
     },
-    cell: ({ row }) => (
-      <SelectCell
-        checked={row.getIsSelected()}
-        onChange={(value) => row.toggleSelected(!!value)}
-      />
-    ),
+    cell: ({ row, table }) => {
+      const meta = table.options.meta;
+      const rows = table.getRowModel().rows;
+      const rowIndex = rows.findIndex((r) => r.id === row.id);
+      const handleShiftClick = () => {
+        if (
+          meta?.lastClickedIndex !== null &&
+          meta?.lastClickedIndex !== undefined &&
+          meta?.handleShiftClickRange
+        ) {
+          meta.handleShiftClickRange(meta.lastClickedIndex, rowIndex);
+        }
+        if (meta?.setLastClickedIndex) {
+          meta.setLastClickedIndex(rowIndex);
+        }
+      };
+
+      return (
+        <SelectCell
+          checked={row.getIsSelected()}
+          onChange={(value) => {
+            row.toggleSelected(!!value);
+            if (meta?.setLastClickedIndex) {
+              meta.setLastClickedIndex(rowIndex);
+            }
+          }}
+          onShiftClick={handleShiftClick}
+        />
+      );
+    },
     enableSorting: false,
     enableHiding: false,
   },
