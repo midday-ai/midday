@@ -220,8 +220,21 @@ export async function getInbox(db: Database, params: GetInboxParams) {
     } else {
       query.orderBy(asc(inbox.displayName));
     }
+  } else if (sort === "document_date") {
+    // Sort by extracted document date (inbox.date)
+    if (order === "desc") {
+      // Newest first: NULL dates at the end
+      query.orderBy(
+        sql`${inbox.date} DESC NULLS LAST, ${inbox.createdAt} DESC`,
+      );
+    } else {
+      // Oldest first: NULL dates at the beginning
+      query.orderBy(
+        sql`${inbox.date} ASC NULLS FIRST, ${inbox.createdAt} ASC`,
+      );
+    }
   } else {
-    // Default to date sorting
+    // Default to createdAt sorting
     if (order === "desc") {
       query.orderBy(asc(inbox.createdAt)); // Reverse order for desc
     } else {
@@ -575,6 +588,101 @@ export async function deleteInbox(db: Database, params: DeleteInboxParams) {
     ...deleted,
     filePath: inboxItem?.filePath,
   };
+}
+
+export type DeleteInboxManyParams = {
+  ids: string[];
+  teamId: string;
+};
+
+export async function deleteInboxMany(
+  db: Database,
+  params: DeleteInboxManyParams,
+) {
+  const { ids, teamId } = params;
+
+  if (ids.length === 0) {
+    return [];
+  }
+
+  // Get all inbox items to check attachments and get filePaths
+  const inboxItems = await db
+    .select({
+      id: inbox.id,
+      transactionId: inbox.transactionId,
+      attachmentId: inbox.attachmentId,
+      filePath: inbox.filePath,
+    })
+    .from(inbox)
+    .where(and(eq(inbox.teamId, teamId), inArray(inbox.id, ids)));
+
+  const results: Array<{ id: string; filePath: string[] | null }> = [];
+
+  // Process each inbox item
+  for (const item of inboxItems) {
+    try {
+      // Clean up transaction attachment if it exists
+      if (item.attachmentId && item.transactionId) {
+        // Delete the specific transaction attachment for this inbox item
+        await db
+          .delete(transactionAttachments)
+          .where(
+            and(
+              eq(transactionAttachments.id, item.attachmentId),
+              eq(transactionAttachments.teamId, teamId),
+            ),
+          );
+
+        // Check if this transaction still has other attachments before resetting tax info
+        const remainingAttachments = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(transactionAttachments)
+          .where(
+            and(
+              eq(transactionAttachments.transactionId, item.transactionId),
+              eq(transactionAttachments.teamId, teamId),
+            ),
+          );
+
+        // Only reset tax rate and type if no more attachments exist for this transaction
+        if (remainingAttachments[0]?.count === 0) {
+          await db
+            .update(transactions)
+            .set({
+              taxRate: null,
+              taxType: null,
+            })
+            .where(eq(transactions.id, item.transactionId));
+        }
+      }
+
+      // Mark inbox item as deleted and clear attachment/transaction references
+      const [deleted] = await db
+        .update(inbox)
+        .set({
+          status: "deleted",
+          transactionId: null,
+          attachmentId: null,
+        })
+        .where(and(eq(inbox.id, item.id), eq(inbox.teamId, teamId)))
+        .returning({
+          id: inbox.id,
+          filePath: inbox.filePath,
+        });
+
+      if (deleted) {
+        results.push({
+          id: deleted.id,
+          filePath: deleted.filePath,
+        });
+      }
+    } catch (error) {
+      // Log error but continue with other items
+      logger.error(`Failed to delete inbox item ${item.id}:`, error);
+    }
+  }
+
+  return results;
 }
 
 export type GetInboxSearchParams = {

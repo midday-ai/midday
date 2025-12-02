@@ -149,6 +149,17 @@ export const deleteInboxSchema = z
     description: "Schema for deleting an inbox item by its ID.",
   });
 
+export const deleteInboxManySchema = z
+  .array(z.string().uuid())
+  .min(1)
+  .openapi({
+    description: "Schema for bulk deleting inbox items by their IDs.",
+    example: [
+      "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
+      "a1b2c3d4-5678-4e7a-9c1a-2b7c1e24c2a4",
+    ],
+  });
+
 export const createInboxItemSchema = z.object({
   filename: z.string(),
   mimetype: z.string(),

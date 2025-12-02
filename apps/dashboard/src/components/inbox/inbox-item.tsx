@@ -2,6 +2,7 @@ import { FormatAmount } from "@/components/format-amount";
 import { InboxStatus } from "@/components/inbox/inbox-status";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useUserQuery } from "@/hooks/use-user";
+import { useInboxStore } from "@/store/inbox";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Badge } from "@midday/ui/badge";
 import { cn } from "@midday/ui/cn";
@@ -18,28 +19,64 @@ import { forwardRef } from "react";
 type Props = {
   item: RouterOutputs["inbox"]["get"]["data"][number];
   index: number;
+  onItemClick?: (e: React.MouseEvent, index: number) => void;
 };
 
 export const InboxItem = forwardRef<HTMLButtonElement, Props>(
-  function InboxItem({ item, index }, ref) {
+  function InboxItem({ item, index, onItemClick }, ref) {
     const { params, setParams } = useInboxParams();
     const { data: user } = useUserQuery();
+    const {
+      selectedIds,
+      toggleSelection,
+      setLastClickedIndex,
+      clearSelection,
+    } = useInboxStore();
 
-    const isSelected =
+    const isNavigationSelected =
       params.inboxId === item.id || (!params.inboxId && index === 0);
+    const isBulkSelected = selectedIds[item.id] === true;
+    const isSelectionMode = Object.keys(selectedIds).length > 0;
+    const isSelected =
+      isBulkSelected || (!isSelectionMode && isNavigationSelected);
     const isProcessing = item.status === "processing" || item.status === "new";
+
+    const handleClick = (e: React.MouseEvent) => {
+      // If shift is held, handle range selection
+      if (e.shiftKey) {
+        onItemClick?.(e, index);
+        return;
+      }
+
+      // If Cmd/Ctrl is held, toggle selection and navigate
+      if (e.metaKey || e.ctrlKey) {
+        toggleSelection(item.id);
+        setLastClickedIndex(index);
+        // Still navigate when Cmd/Ctrl clicking
+        if (!isBulkSelected) {
+          setParams({ inboxId: item.id });
+        }
+        return;
+      }
+
+      // Regular click: navigate and clear selection if any items are selected
+      if (isSelectionMode) {
+        clearSelection();
+      }
+      setParams({ inboxId: item.id });
+    };
 
     return (
       <button
         ref={ref}
         type="button"
-        onClick={() => {
-          setParams({ inboxId: item.id });
-        }}
+        onClick={handleClick}
         key={item.id}
         className={cn(
-          "flex flex-col w-full items-start gap-2 border p-4 text-left text-sm h-[90px]",
-          isSelected && "bg-accent border-[#DCDAD2] dark:border-[#2C2C2C]",
+          "flex flex-col w-full items-start gap-2 border p-4 text-left text-sm h-[90px] transition-colors",
+          (isNavigationSelected && !isSelectionMode) || isBulkSelected
+            ? "bg-accent border-[#DCDAD2] dark:border-[#2C2C2C]"
+            : "",
         )}
       >
         <div className="flex w-full flex-col gap-1">
