@@ -25,6 +25,7 @@ interface ChatStatusIndicatorsProps {
   artifactType?: ArtifactType | null;
   currentSection?: string | null;
   bankAccountRequired?: boolean;
+  hasTextContent?: boolean;
 }
 
 export function ChatStatusIndicators({
@@ -35,6 +36,7 @@ export function ChatStatusIndicators({
   artifactType,
   currentSection,
   bankAccountRequired = false,
+  hasTextContent = false,
 }: ChatStatusIndicatorsProps) {
   // Don't show status indicators when bank account is required
   if (bankAccountRequired) {
@@ -51,7 +53,9 @@ export function ChatStatusIndicators({
   // Show artifact status when:
   // 1. Tool is actively running and maps to an artifact, OR
   // 2. Artifact exists and is still being built (not complete or still streaming)
+  // BUT NOT when text content is already streaming
   const shouldShowArtifactStatus =
+    !hasTextContent &&
     resolvedArtifactType &&
     artifactStage &&
     (currentToolCall || (artifactStage !== "analysis_ready" && isStreaming));

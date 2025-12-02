@@ -11,6 +11,12 @@ import { ForecastCanvas } from "./forecast-canvas";
 import { GrowthRateCanvas } from "./growth-rate-canvas";
 import { HealthReportCanvas } from "./health-report-canvas";
 import { InvoicePaymentCanvas } from "./invoice-payment-canvas";
+import { MetricsBreakdownCategoriesCanvas } from "./metrics-breakdown-categories-canvas";
+import { MetricsBreakdownCustomersCanvas } from "./metrics-breakdown-customers-canvas";
+import { MetricsBreakdownInvoicesCanvas } from "./metrics-breakdown-invoices-canvas";
+import { MetricsBreakdownSummaryCanvas } from "./metrics-breakdown-summary-canvas";
+import { MetricsBreakdownTransactionsCanvas } from "./metrics-breakdown-transactions-canvas";
+import { MetricsBreakdownVendorsCanvas } from "./metrics-breakdown-vendors-canvas";
 import { ProfitCanvas } from "./profit-canvas";
 import { RevenueCanvas } from "./revenue-canvas";
 import { RunwayCanvas } from "./runway-canvas";
@@ -62,6 +68,18 @@ export function Canvas() {
         return <StressTestCanvas />;
       case "invoice-payment-canvas":
         return <InvoicePaymentCanvas />;
+      case "breakdown-summary-canvas":
+        return <MetricsBreakdownSummaryCanvas />;
+      case "breakdown-transactions-canvas":
+        return <MetricsBreakdownTransactionsCanvas />;
+      case "breakdown-invoices-canvas":
+        return <MetricsBreakdownInvoicesCanvas />;
+      case "breakdown-categories-canvas":
+        return <MetricsBreakdownCategoriesCanvas />;
+      case "breakdown-vendors-canvas":
+        return <MetricsBreakdownVendorsCanvas />;
+      case "breakdown-customers-canvas":
+        return <MetricsBreakdownCustomersCanvas />;
       default:
         return null;
     }

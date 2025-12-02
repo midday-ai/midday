@@ -444,3 +444,28 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     min-height: calc(100vh - 764px);
   }
 }
+
+/* Chart selection overlay - exclude labels from background effect */
+/* Ensure chart axis labels are not affected by the overlay */
+.recharts-wrapper .recharts-xAxis .recharts-cartesian-axis-tick text,
+.recharts-wrapper .recharts-yAxis .recharts-cartesian-axis-tick text {
+  position: relative;
+  z-index: 10 !important;
+  user-select: none !important;
+  pointer-events: none !important;
+  isolation: isolate;
+}
+
+/* Ensure the overlay doesn't affect labels */
+.chart-selection-overlay {
+  isolation: isolate;
+}
+
+/* Dark mode support for chart selection overlay */
+.dark .chart-selection-overlay {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .chart-selection-border {
+  border-left-color: #999999 !important;
+}

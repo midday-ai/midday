@@ -7,7 +7,8 @@ export type ArtifactStage =
   | "loading"
   | "chart_ready"
   | "metrics_ready"
-  | "analysis_ready";
+  | "analysis_ready"
+  | "data_ready";
 
 export type ArtifactType =
   | "burn-rate-canvas"
@@ -24,7 +25,13 @@ export type ArtifactType =
   | "forecast-canvas"
   | "stress-test-canvas"
   | "invoice-payment-canvas"
-  | "health-report-canvas";
+  | "health-report-canvas"
+  | "breakdown-summary-canvas"
+  | "breakdown-transactions-canvas"
+  | "breakdown-invoices-canvas"
+  | "breakdown-categories-canvas"
+  | "breakdown-vendors-canvas"
+  | "breakdown-customers-canvas";
 
 /**
  * Maps tool names to artifact types
@@ -56,6 +63,7 @@ export const TOOL_TO_ARTIFACT_MAP: Record<string, ArtifactType> = {
   stressTest: "stress-test-canvas",
   getCashFlowStressTest: "stress-test-canvas",
   getInvoicePaymentAnalysis: "invoice-payment-canvas",
+  getMetricsBreakdown: "breakdown-summary-canvas",
 };
 
 /**
@@ -66,6 +74,7 @@ export const STAGE_TO_SECTION_MAP: Record<ArtifactStage, string | null> = {
   chart_ready: "Metrics",
   metrics_ready: "Summary",
   analysis_ready: null, // Complete, no section in progress
+  data_ready: "Summary",
 };
 
 /**
@@ -76,6 +85,7 @@ const DEFAULT_STAGE_MESSAGES: Record<ArtifactStage, string> = {
   chart_ready: "Chart data ready, calculating metrics...",
   metrics_ready: "Metrics calculated, generating insights...",
   analysis_ready: "Analysis complete",
+  data_ready: "Data ready, generating insights...",
 };
 
 /**
@@ -161,6 +171,37 @@ const CUSTOM_STAGE_MESSAGES: Partial<
     chart_ready: "Chart data ready, calculating metrics...",
     metrics_ready: "Metrics calculated, generating insights...",
     analysis_ready: "Analysis complete",
+  },
+  "breakdown-summary-canvas": {
+    loading: "Preparing breakdown summary...",
+    chart_ready: "Chart data ready, calculating metrics...",
+    metrics_ready: "Metrics calculated, generating insights...",
+    analysis_ready: "Analysis complete",
+  },
+  "breakdown-transactions-canvas": {
+    loading: "Loading transactions...",
+    metrics_ready: "Transactions ready",
+    analysis_ready: "Complete",
+  },
+  "breakdown-invoices-canvas": {
+    loading: "Loading invoices...",
+    metrics_ready: "Invoices ready",
+    analysis_ready: "Complete",
+  },
+  "breakdown-categories-canvas": {
+    loading: "Loading categories...",
+    metrics_ready: "Categories ready",
+    analysis_ready: "Complete",
+  },
+  "breakdown-vendors-canvas": {
+    loading: "Loading vendors...",
+    metrics_ready: "Vendors ready",
+    analysis_ready: "Complete",
+  },
+  "breakdown-customers-canvas": {
+    loading: "Loading customers...",
+    metrics_ready: "Customers ready",
+    analysis_ready: "Complete",
   },
 };
 

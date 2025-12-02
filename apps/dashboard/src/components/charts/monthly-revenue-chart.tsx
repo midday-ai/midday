@@ -16,6 +16,7 @@ import {
   createCompactTickFormatter,
   useChartMargin,
 } from "./chart-utils";
+import { SelectableChartWrapper } from "./selectable-chart-wrapper";
 
 interface MonthlyRevenueData {
   month: string;
@@ -33,6 +34,17 @@ interface MonthlyRevenueChartProps {
   showLegend?: boolean;
   currency?: string;
   locale?: string;
+  enableSelection?: boolean;
+  onSelectionChange?: (
+    startDate: string | null,
+    endDate: string | null,
+  ) => void;
+  onSelectionComplete?: (
+    startDate: string,
+    endDate: string,
+    chartType: string,
+  ) => void;
+  onSelectionStateChange?: (isSelecting: boolean) => void;
 }
 
 // Custom tooltip component
@@ -86,6 +98,10 @@ export function MonthlyRevenueChart({
   height = 320,
   currency = "USD",
   locale,
+  enableSelection = false,
+  onSelectionChange,
+  onSelectionComplete,
+  onSelectionStateChange,
 }: MonthlyRevenueChartProps) {
   // Use the compact tick formatter
   const tickFormatter = createCompactTickFormatter();
@@ -93,7 +109,7 @@ export function MonthlyRevenueChart({
   // Calculate margin using the utility hook
   const { marginLeft } = useChartMargin(data, "amount", tickFormatter);
 
-  return (
+  const chartContent = (
     <div className="w-full">
       {/* Chart */}
       <div style={{ height }}>
@@ -157,5 +173,21 @@ export function MonthlyRevenueChart({
         </ResponsiveContainer>
       </div>
     </div>
+  );
+
+  return (
+    <SelectableChartWrapper
+      data={data}
+      dateKey="month"
+      enableSelection={enableSelection}
+      onSelectionChange={onSelectionChange}
+      onSelectionComplete={(startDate, endDate) => {
+        onSelectionComplete?.(startDate, endDate, "monthly-revenue");
+      }}
+      onSelectionStateChange={onSelectionStateChange}
+      chartType="monthly-revenue"
+    >
+      {chartContent}
+    </SelectableChartWrapper>
   );
 }

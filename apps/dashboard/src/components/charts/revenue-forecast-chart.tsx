@@ -19,6 +19,7 @@ import {
   useChartMargin,
 } from "./chart-utils";
 import type { BaseChartProps } from "./chart-utils";
+import { SelectableChartWrapper } from "./selectable-chart-wrapper";
 
 interface ForecastData {
   month: string;
@@ -32,6 +33,17 @@ interface RevenueForecastChartProps extends Omit<BaseChartProps, "data"> {
   currency?: string;
   locale?: string;
   forecastStartIndex?: number;
+  enableSelection?: boolean;
+  onSelectionChange?: (
+    startDate: string | null,
+    endDate: string | null,
+  ) => void;
+  onSelectionComplete?: (
+    startDate: string,
+    endDate: string,
+    chartType: string,
+  ) => void;
+  onSelectionStateChange?: (isSelecting: boolean) => void;
 }
 
 // Custom tooltip component
@@ -105,6 +117,10 @@ export function RevenueForecastChart({
   currency = "USD",
   locale,
   forecastStartIndex,
+  enableSelection = false,
+  onSelectionChange,
+  onSelectionComplete,
+  onSelectionStateChange,
 }: RevenueForecastChartProps) {
   // Normalize data - use data prop directly, fallback to empty array
   const normalizedData = useMemo(() => {
@@ -188,7 +204,7 @@ export function RevenueForecastChart({
     return { min: minWithPadding, max: maxWithPadding };
   }, [normalizedData]);
 
-  return (
+  const chartContent = (
     <div className={`w-full ${className}`}>
       {/* Chart */}
       <div style={{ height }}>
@@ -305,5 +321,21 @@ export function RevenueForecastChart({
         </ResponsiveContainer>
       </div>
     </div>
+  );
+
+  return (
+    <SelectableChartWrapper
+      data={normalizedData}
+      dateKey="month"
+      enableSelection={enableSelection}
+      onSelectionChange={onSelectionChange}
+      onSelectionComplete={(startDate, endDate) => {
+        onSelectionComplete?.(startDate, endDate, "revenue-forecast");
+      }}
+      onSelectionStateChange={onSelectionStateChange}
+      chartType="revenue-forecast"
+    >
+      {chartContent}
+    </SelectableChartWrapper>
   );
 }

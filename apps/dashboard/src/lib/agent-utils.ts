@@ -64,6 +64,7 @@ export const getToolMessage = (toolName: string | null) => {
     taxSummary: "Preparing your tax summary...",
     getTaxSummary: "Preparing your tax summary...",
     getForecast: "Generating your revenue forecast...",
+    getMetricsBreakdown: "Preparing your financial breakdown...",
 
     // Analytics tools
     businessHealth: "Computing your business health score...",

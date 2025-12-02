@@ -5,9 +5,12 @@ import { StackedBarChart } from "@/components/charts/stacked-bar-chart";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useOverviewTab } from "@/hooks/use-overview-tab";
+import { useChatStore } from "@/store/chat";
 import { useTRPC } from "@/trpc/client";
+import { generateChartSelectionMessage } from "@/utils/chart-selection-message";
 import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface ExpensesCardProps {
@@ -31,11 +34,13 @@ export function ExpensesCard({
   const { isMetricsTab } = useOverviewTab();
   const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
     useMetricsCustomize();
+  const setInput = useChatStore((state) => state.setInput);
+  const [isSelecting, setIsSelecting] = useState(false);
 
   const longPressHandlers = useLongPress({
     onLongPress: () => setIsCustomizing(true),
     threshold: 500,
-    disabled: metricsIsCustomizing,
+    disabled: metricsIsCustomizing || isSelecting,
   });
 
   const { data: expenseData } = useQuery({
@@ -83,7 +88,20 @@ export function ExpensesCard({
       </div>
       <div className="h-80">
         {expenseData?.result && expenseData.result.length > 0 ? (
-          <StackedBarChart data={expenseData} height={320} />
+          <StackedBarChart
+            data={expenseData}
+            height={320}
+            enableSelection={true}
+            onSelectionStateChange={setIsSelecting}
+            onSelectionComplete={(startDate, endDate, chartType) => {
+              const message = generateChartSelectionMessage(
+                startDate,
+                endDate,
+                chartType,
+              );
+              setInput(message);
+            }}
+          />
         ) : (
           <div className="flex items-center justify-center h-full text-xs text-muted-foreground -mt-10">
             No expense data available.

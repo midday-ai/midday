@@ -137,6 +137,11 @@ export const TOOL_CONFIGS: Record<string, ToolConfig> = {
     icon: TrendingUp,
     description: "Generating revenue forecast",
   },
+  getMetricsBreakdown: {
+    name: "Financial Breakdown",
+    icon: BarChart3,
+    description: "Preparing financial breakdown",
+  },
 
   // Analytics tools
   businessHealth: {

@@ -20,6 +20,7 @@ import {
   createCompactTickFormatter,
   useChartMargin,
 } from "./chart-utils";
+import { SelectableChartWrapper } from "./selectable-chart-wrapper";
 
 const ToolTipContent = ({
   active,
@@ -60,7 +61,28 @@ const ToolTipContent = ({
   );
 };
 
-export function StackedBarChart({ data, height = 290 }) {
+export function StackedBarChart({
+  data,
+  height = 290,
+  enableSelection = false,
+  onSelectionChange,
+  onSelectionComplete,
+  onSelectionStateChange,
+}: {
+  data: any;
+  height?: number;
+  enableSelection?: boolean;
+  onSelectionChange?: (
+    startDate: string | null,
+    endDate: string | null,
+  ) => void;
+  onSelectionComplete?: (
+    startDate: string,
+    endDate: string,
+    chartType: string,
+  ) => void;
+  onSelectionStateChange?: (isSelecting: boolean) => void;
+}) {
   const tickFormatter = createCompactTickFormatter();
 
   const formattedData = data.result.map((item) => ({
@@ -75,7 +97,7 @@ export function StackedBarChart({ data, height = 290 }) {
   // Calculate margin using the utility hook
   const { marginLeft } = useChartMargin(formattedData, "total", tickFormatter);
 
-  return (
+  const chartContent = (
     <div className="w-full relative">
       <div className="space-x-4 absolute right-0 -top-10 hidden md:flex">
         <div className="flex space-x-2 items-center">
@@ -234,5 +256,21 @@ export function StackedBarChart({ data, height = 290 }) {
         </ResponsiveContainer>
       </div>
     </div>
+  );
+
+  return (
+    <SelectableChartWrapper
+      data={formattedData}
+      dateKey="date"
+      enableSelection={enableSelection}
+      onSelectionChange={onSelectionChange}
+      onSelectionComplete={(startDate, endDate) => {
+        onSelectionComplete?.(startDate, endDate, "stacked-bar");
+      }}
+      onSelectionStateChange={onSelectionStateChange}
+      chartType="stacked-bar"
+    >
+      {chartContent}
+    </SelectableChartWrapper>
   );
 }
