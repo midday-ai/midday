@@ -5,6 +5,7 @@ import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useRealtime } from "@/hooks/use-realtime";
 import { useUserQuery } from "@/hooks/use-user";
+import { useInboxStore } from "@/store/inbox";
 import { useTRPC } from "@/trpc/client";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import {
@@ -16,6 +17,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useInView } from "react-intersection-observer";
 import { useBoolean, useCounter, useDebounceCallback } from "usehooks-ts";
+import { InboxBulkActions } from "./inbox-bulk-actions";
 import { InboxDetails } from "./inbox-details";
 import { NoResults } from "./inbox-empty";
 import { InboxItem } from "./inbox-item";
@@ -28,6 +30,12 @@ export function InboxView() {
   const { data: user } = useUserQuery();
   const { params, setParams } = useInboxParams();
   const { params: filter, hasFilter } = useInboxFilterParams();
+  const {
+    lastClickedIndex,
+    selectRange,
+    setLastClickedIndex,
+    toggleSelection,
+  } = useInboxStore();
 
   const allSeenIdsRef = useRef(new Set<string>());
   const itemRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
@@ -206,6 +214,22 @@ export function InboxView() {
     [tableData, params, setParams],
   );
 
+  // Handle item click for selection
+  const handleItemClick = (e: React.MouseEvent, index: number) => {
+    if (e.shiftKey && lastClickedIndex !== null) {
+      // Shift-click: select range
+      selectRange(lastClickedIndex, index, tableData);
+      setLastClickedIndex(index);
+    } else {
+      // Regular click: toggle selection
+      const item = tableData[index];
+      if (item) {
+        toggleSelection(item.id);
+        setLastClickedIndex(index);
+      }
+    }
+  };
+
   // Scroll selected inbox item to center of viewport (only on keyboard navigation)
   useEffect(() => {
     const inboxId = params.inboxId;
@@ -300,6 +324,7 @@ export function InboxView() {
                       }}
                       item={item}
                       index={index}
+                      onItemClick={handleItemClick}
                     />
                   </motion.div>
                 );
@@ -312,6 +337,7 @@ export function InboxView() {
       </div>
 
       <InboxDetails />
+      <InboxBulkActions />
     </div>
   );
 }

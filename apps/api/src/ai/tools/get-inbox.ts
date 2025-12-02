@@ -25,7 +25,7 @@ const getInboxSchema = z.object({
     .optional()
     .describe("Status filter"),
   sort: z
-    .enum(["date", "alphabetical"])
+    .enum(["date", "alphabetical", "document_date"])
     .nullable()
     .optional()
     .describe("Sort field"),

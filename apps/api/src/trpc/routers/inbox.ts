@@ -4,6 +4,7 @@ import {
   createInboxItemSchema,
   declineMatchSchema,
   deleteInboxBlocklistSchema,
+  deleteInboxManySchema,
   deleteInboxSchema,
   getInboxBlocklistSchema,
   getInboxByIdSchema,
@@ -26,6 +27,7 @@ import {
   deleteInbox,
   deleteInboxBlocklist,
   deleteInboxEmbedding,
+  deleteInboxMany,
   getInbox,
   getInboxBlocklist,
   getInboxById,
@@ -94,6 +96,48 @@ export const inboxRouter = createTRPCRouter({
         inboxId: input.id,
         teamId: teamId!,
       });
+    }),
+
+  deleteMany: protectedProcedure
+    .input(deleteInboxManySchema)
+    .mutation(async ({ ctx: { db, supabase, teamId }, input }) => {
+      // Delete inbox items and get filePaths for storage cleanup
+      const results = await deleteInboxMany(db, {
+        ids: input,
+        teamId: teamId!,
+      });
+
+      // Delete files from storage and embeddings
+      for (const result of results) {
+        // Delete file from storage if filePath exists
+        if (result?.filePath && result.filePath.length > 0) {
+          try {
+            await remove(supabase, {
+              bucket: "vault",
+              path: result.filePath,
+            });
+          } catch (error) {
+            // Log error but don't fail the deletion if file doesn't exist in storage
+            console.error(
+              `Failed to delete file from storage for ${result.id}:`,
+              error,
+            );
+          }
+        }
+
+        // Delete embedding
+        try {
+          await deleteInboxEmbedding(db, {
+            inboxId: result.id,
+            teamId: teamId!,
+          });
+        } catch (error) {
+          // Log error but continue with other items
+          console.error(`Failed to delete embedding for ${result.id}:`, error);
+        }
+      }
+
+      return results;
     }),
 
   create: protectedProcedure
