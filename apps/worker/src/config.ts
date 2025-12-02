@@ -1,6 +1,17 @@
 import Redis from "ioredis";
 
 let redisConnection: Redis | null = null;
+let keepAliveInterval: ReturnType<typeof setInterval> | null = null;
+
+/**
+ * Connection state tracking
+ */
+let connectionState:
+  | "connecting"
+  | "connected"
+  | "ready"
+  | "reconnecting"
+  | "disconnected" = "disconnected";
 
 /**
  * Get or create Redis connection for BullMQ
@@ -27,10 +38,13 @@ export function getRedisConnection(): Redis {
     // Workers need Redis immediately to process jobs
     lazyConnect: false,
     family: isProduction ? 6 : 4, // IPv6 for Fly.io production, IPv4 for local
+    keepAlive: 30000, // Keep connection alive with 30s keepAlive to prevent idle timeouts
     ...(isProduction && {
       // Production settings for Upstash/Fly.io
       connectTimeout: 15000, // Longer timeout for Upstash
       retryStrategy: (times) => {
+        // Always return a number to ensure infinite retries
+        // Exponential backoff: 50ms, 100ms, 150ms... up to 2000ms max
         const delay = Math.min(times * 50, 2000);
         return delay;
       },
@@ -38,19 +52,72 @@ export function getRedisConnection(): Redis {
     }),
   });
 
+  // Connection state event handlers
   redisConnection.on("error", (err) => {
     console.error("[Redis Queue] Connection error:", err);
+    connectionState = "disconnected";
   });
 
   redisConnection.on("connect", () => {
     console.log("[Redis Queue] Connected");
+    connectionState = "connected";
   });
 
   redisConnection.on("ready", () => {
     console.log("[Redis Queue] Ready");
+    connectionState = "ready";
+
+    // Start periodic keep-alive ping when connection is ready
+    if (keepAliveInterval) {
+      clearInterval(keepAliveInterval);
+    }
+
+    keepAliveInterval = setInterval(async () => {
+      if (redisConnection && connectionState === "ready") {
+        try {
+          await redisConnection.ping();
+        } catch (error) {
+          console.error("[Redis Queue] Keep-alive ping failed:", error);
+        }
+      }
+    }, 30000); // Ping every 30 seconds
+  });
+
+  redisConnection.on("reconnecting", (delay: number) => {
+    console.log(`[Redis Queue] Reconnecting in ${delay}ms...`);
+    connectionState = "reconnecting";
+  });
+
+  redisConnection.on("close", () => {
+    console.log("[Redis Queue] Connection closed");
+    connectionState = "disconnected";
+
+    // Clear keep-alive interval when connection closes
+    if (keepAliveInterval) {
+      clearInterval(keepAliveInterval);
+      keepAliveInterval = null;
+    }
+  });
+
+  redisConnection.on("end", () => {
+    console.log("[Redis Queue] Connection ended");
+    connectionState = "disconnected";
+
+    // Clear keep-alive interval when connection ends
+    if (keepAliveInterval) {
+      clearInterval(keepAliveInterval);
+      keepAliveInterval = null;
+    }
   });
 
   return redisConnection;
+}
+
+/**
+ * Get current connection state
+ */
+export function getConnectionState(): typeof connectionState {
+  return connectionState;
 }
 
 /**
@@ -72,14 +139,37 @@ export function getFlowRedisConnection(): Redis {
     enableReadyCheck: false,
     lazyConnect: true,
     family: isProduction ? 6 : 4, // IPv6 for Fly.io production, IPv4 for local
+    keepAlive: 30000, // Keep connection alive with 30s keepAlive to prevent idle timeouts
     ...(isProduction && {
       connectTimeout: 15000, // Longer timeout for Upstash
       retryStrategy: (times) => {
+        // Always return a number to ensure infinite retries
         const delay = Math.min(times * 50, 2000);
         return delay;
       },
       enableOfflineQueue: false, // Don't queue commands when offline
     }),
+  });
+
+  // Add event handlers for FlowProducer connection monitoring
+  connection.on("error", (err) => {
+    console.error("[Redis FlowProducer] Connection error:", err);
+  });
+
+  connection.on("connect", () => {
+    console.log("[Redis FlowProducer] Connected");
+  });
+
+  connection.on("ready", () => {
+    console.log("[Redis FlowProducer] Ready");
+  });
+
+  connection.on("reconnecting", (delay: number) => {
+    console.log(`[Redis FlowProducer] Reconnecting in ${delay}ms...`);
+  });
+
+  connection.on("close", () => {
+    console.log("[Redis FlowProducer] Connection closed");
   });
 
   return connection;

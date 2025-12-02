@@ -1,7 +1,7 @@
 import { closeWorkerDb } from "@midday/db/worker-client";
 import { Worker } from "bullmq";
 import { Hono } from "hono";
-import { getRedisConnection } from "./config";
+import { getConnectionState, getRedisConnection } from "./config";
 import { checkHealth } from "./health";
 import { getProcessor } from "./processors/registry";
 import { queueConfigs } from "./queues";
@@ -62,7 +62,51 @@ registerStaticSchedulers().catch((error) => {
 // Create Hono app
 const app = new Hono();
 
-// Health check endpoint (no auth required)
+/**
+ * Quick Redis health check for uptime monitoring
+ * Checks Redis connection state and performs a ping
+ */
+async function checkRedisHealth() {
+  const connectionState = getConnectionState();
+  const redis = getRedisConnection();
+
+  // Check if Redis is ready/connected
+  if (connectionState === "ready" || connectionState === "connected") {
+    try {
+      // Quick ping with timeout
+      const pingPromise = redis.ping();
+      const timeoutPromise = new Promise<string>((_, reject) => {
+        setTimeout(() => reject(new Error("Redis ping timeout")), 3000);
+      });
+
+      await Promise.race([pingPromise, timeoutPromise]);
+      return { status: "ok" as const, redis: "connected" as const };
+    } catch (error) {
+      return {
+        status: "error" as const,
+        redis: "disconnected" as const,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+
+  // Redis not ready
+  return {
+    status: "error" as const,
+    redis: "disconnected" as const,
+    redisState: connectionState,
+  };
+}
+
+// Simple ping endpoint for fast uptime monitoring (no auth required)
+// Checks Redis connection state - critical for worker functionality
+app.get("/", async (c) => {
+  const health = await checkRedisHealth();
+  return c.json(health, health.status === "ok" ? 200 : 503);
+});
+
+// Detailed health check endpoint (no auth required)
+// Checks Redis and database connections for comprehensive monitoring
 app.get("/health", async (c) => {
   const health = await checkHealth();
   return c.json(health, health.status === "ok" ? 200 : 503);

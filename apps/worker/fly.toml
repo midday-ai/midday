@@ -11,8 +11,8 @@ primary_region = 'fra'
   worker = "/app/entrypoint.sh worker"
   board = "/app/entrypoint.sh board"
 
-# Internal service for worker process (port 8080)
-# No external ports - worker only needs health checks internally
+# HTTP service for worker process (port 8080)
+# Exposed externally for uptime monitoring
 [[services]]
   processes = ["worker"]
   internal_port = 8080
@@ -20,6 +20,14 @@ primary_region = 'fra'
   auto_stop_machines = 'off'
   auto_start_machines = true
   min_machines_running = 1
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = "80"
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = "443"
 
   [[services.checks]]
     grace_period = "10s"

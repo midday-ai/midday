@@ -28,10 +28,13 @@ function getRedisConnection(): Redis {
     enableReadyCheck: false, // BullMQ handles this
     lazyConnect: true,
     family: isProduction ? 6 : 4, // IPv6 for Fly.io production, IPv4 for local
+    keepAlive: 30000, // Keep connection alive with 30s keepAlive to prevent idle timeouts
     ...(isProduction && {
       // Production settings for Upstash/Fly.io
       connectTimeout: 15000, // Longer timeout for Upstash
       retryStrategy: (times) => {
+        // Always return a number to ensure infinite retries
+        // Exponential backoff: 50ms, 100ms, 150ms... up to 2000ms max
         const delay = Math.min(times * 50, 2000);
         return delay;
       },
@@ -49,6 +52,18 @@ function getRedisConnection(): Redis {
 
   redisConnection.on("ready", () => {
     console.log("[Job Client Redis] Ready");
+  });
+
+  redisConnection.on("reconnecting", (delay: number) => {
+    console.log(`[Job Client Redis] Reconnecting in ${delay}ms...`);
+  });
+
+  redisConnection.on("close", () => {
+    console.log("[Job Client Redis] Connection closed");
+  });
+
+  redisConnection.on("end", () => {
+    console.log("[Job Client Redis] Connection ended");
   });
 
   return redisConnection;
@@ -92,4 +107,3 @@ export function getQueue(queueName: string): Queue {
 export function getQueueNames(): string[] {
   return Array.from(queues.keys());
 }
-
