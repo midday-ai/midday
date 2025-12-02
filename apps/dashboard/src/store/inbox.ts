@@ -37,7 +37,8 @@ export const useInboxStore = create<InboxState>()((set, get) => ({
     // Check if all items in range are already selected
     let allSelected = true;
     for (let i = start; i <= end; i++) {
-      if (items[i] && !currentSelectedIds[items[i].id]) {
+      const item = items[i];
+      if (item && !currentSelectedIds[item.id]) {
         allSelected = false;
         break;
       }
@@ -45,11 +46,12 @@ export const useInboxStore = create<InboxState>()((set, get) => ({
 
     // Toggle: if all selected, deselect; otherwise select all
     for (let i = start; i <= end; i++) {
-      if (items[i]) {
+      const item = items[i];
+      if (item) {
         if (allSelected) {
-          delete newSelectedIds[items[i].id];
+          delete newSelectedIds[item.id];
         } else {
-          newSelectedIds[items[i].id] = true;
+          newSelectedIds[item.id] = true;
         }
       }
     }

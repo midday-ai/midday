@@ -64,11 +64,11 @@ export function InboxBulkActions() {
     <>
       <AnimatePresence>
         <motion.div
-          className="h-12 fixed left-[50%] bottom-2 w-[400px] -ml-[200px] z-50"
+          className="h-12 fixed bottom-2 left-0 right-0 pointer-events-none flex justify-center z-50"
           animate={{ y: isOpen ? 0 : 100 }}
           initial={{ y: 100 }}
         >
-          <div className="mx-2 md:mx-0 backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-12 justify-between items-center flex px-4 border dark:border-[#2C2C2C]">
+          <div className="pointer-events-auto backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-12 justify-between items-center flex px-4 border dark:border-[#2C2C2C] min-w-[400px]">
             <span className="text-sm text-[#878787]">
               <NumberFlow value={selectedCount} /> selected
             </span>
