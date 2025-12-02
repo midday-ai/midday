@@ -133,7 +133,7 @@ export const getTransactionsTool = tool({
         assignees: assignees ?? null,
         type: type ?? null,
         recurring: recurring ?? null,
-        amount_range:
+        amountRange:
           amountRange?.filter((val): val is number => val !== null) ?? null,
         amount: amount ?? null,
         currency: currency ?? null,

@@ -58,7 +58,7 @@ export type GetTransactionsParams = {
   start?: string | null;
   end?: string | null;
   recurring?: string[] | null;
-  amount_range?: number[] | null;
+  amountRange?: number[] | null;
   amount?: string[] | null;
   manual?: "include" | "exclude" | null;
 };
@@ -89,7 +89,7 @@ export async function getTransactions(
     assignees: filterAssignees,
     recurring: filterRecurring,
     amount: filterAmount,
-    amount_range: filterAmountRange,
+    amountRange: filterAmountRange,
     manual: filterManual,
   } = params;
 

@@ -31,6 +31,7 @@ export default async function Transactions(props: Props) {
   await queryClient.fetchInfiniteQuery(
     trpc.transactions.get.infiniteQueryOptions({
       ...filter,
+      amountRange: filter.amount_range ?? null,
       sort,
     }),
   );
