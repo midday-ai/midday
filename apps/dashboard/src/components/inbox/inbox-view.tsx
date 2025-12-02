@@ -173,6 +173,12 @@ export function InboxView() {
     }
   }, [tableData, params.inboxId, setParams]);
 
+  // Clear lastClickedIndex when sort/filter params change
+  // since item positions in tableData will change
+  useEffect(() => {
+    setLastClickedIndex(null);
+  }, [params.sort, params.order, filter.q, filter.status]);
+
   // Arrow key navigation
   useHotkeys(
     "up",
