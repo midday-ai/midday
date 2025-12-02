@@ -64,6 +64,7 @@ export function DataTable({
   const infiniteQueryOptions = trpc.transactions.get.infiniteQueryOptions(
     {
       ...filter,
+      amountRange: filter.amount_range ?? null,
       q: deferredSearch,
       sort: params.sort,
       // When filters are active, load all results for analysis/export
