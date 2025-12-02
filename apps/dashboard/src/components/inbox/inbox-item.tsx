@@ -26,8 +26,12 @@ export const InboxItem = forwardRef<HTMLButtonElement, Props>(
   function InboxItem({ item, index, onItemClick }, ref) {
     const { params, setParams } = useInboxParams();
     const { data: user } = useUserQuery();
-    const { selectedIds, toggleSelection, setLastClickedIndex } =
-      useInboxStore();
+    const {
+      selectedIds,
+      toggleSelection,
+      setLastClickedIndex,
+      clearSelection,
+    } = useInboxStore();
 
     const isNavigationSelected =
       params.inboxId === item.id || (!params.inboxId && index === 0);
@@ -55,14 +59,11 @@ export const InboxItem = forwardRef<HTMLButtonElement, Props>(
         return;
       }
 
-      // Regular click: toggle selection
-      toggleSelection(item.id);
-      setLastClickedIndex(index);
-
-      // Navigate only if this item wasn't already selected
-      if (!isBulkSelected) {
-        setParams({ inboxId: item.id });
+      // Regular click: navigate and clear selection if any items are selected
+      if (isSelectionMode) {
+        clearSelection();
       }
+      setParams({ inboxId: item.id });
     };
 
     return (
