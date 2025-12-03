@@ -2,8 +2,6 @@
  * Constants for metrics breakdown artifacts
  */
 
-export const METRICS_BREAKDOWN_ARTIFACT_TYPE = "breakdown-summary-canvas";
-
 export const METRICS_BREAKDOWN_MONTHLY_PATTERN =
   /^breakdown-summary-canvas-\d{4}-\d{2}$/;
 
@@ -19,7 +17,7 @@ export function isMonthlyBreakdownType(type: string): boolean {
  */
 export function getBaseBreakdownType(type: string): string {
   if (isMonthlyBreakdownType(type)) {
-    return METRICS_BREAKDOWN_ARTIFACT_TYPE;
+    return "breakdown-summary-canvas";
   }
   return type;
 }

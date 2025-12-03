@@ -1,8 +1,5 @@
 import { ErrorBoundary } from "@/components/error-boundary";
-import {
-  METRICS_BREAKDOWN_ARTIFACT_TYPE,
-  isMonthlyBreakdownType,
-} from "@/lib/metrics-breakdown-constants";
+import { isMonthlyBreakdownType } from "@/lib/metrics-breakdown-constants";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { parseAsString, useQueryState } from "nuqs";
 import { useCallback } from "react";
@@ -74,7 +71,7 @@ export function Canvas() {
         return <StressTestCanvas />;
       case "invoice-payment-canvas":
         return <InvoicePaymentCanvas />;
-      case METRICS_BREAKDOWN_ARTIFACT_TYPE:
+      case "breakdown-summary-canvas":
         return <MetricsBreakdownSummaryCanvas />;
       default:
         return null;

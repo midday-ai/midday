@@ -3,8 +3,6 @@
  * Supports all canvas types that use the standard stage pattern
  */
 
-import { METRICS_BREAKDOWN_ARTIFACT_TYPE } from "./metrics-breakdown-constants";
-
 export type ArtifactStage =
   | "loading"
   | "chart_ready"
@@ -28,12 +26,7 @@ export type ArtifactType =
   | "stress-test-canvas"
   | "invoice-payment-canvas"
   | "health-report-canvas"
-  | "breakdown-summary-canvas"
-  | "breakdown-transactions-canvas"
-  | "breakdown-invoices-canvas"
-  | "breakdown-categories-canvas"
-  | "breakdown-vendors-canvas"
-  | "breakdown-customers-canvas";
+  | "breakdown-summary-canvas";
 
 /**
  * Maps tool names to artifact types
@@ -65,7 +58,7 @@ export const TOOL_TO_ARTIFACT_MAP: Record<string, ArtifactType> = {
   stressTest: "stress-test-canvas",
   getCashFlowStressTest: "stress-test-canvas",
   getInvoicePaymentAnalysis: "invoice-payment-canvas",
-  getMetricsBreakdown: METRICS_BREAKDOWN_ARTIFACT_TYPE,
+  getMetricsBreakdown: "breakdown-summary-canvas",
 };
 
 /**
@@ -174,36 +167,11 @@ const CUSTOM_STAGE_MESSAGES: Partial<
     metrics_ready: "Metrics calculated, generating insights...",
     analysis_ready: "Analysis complete",
   },
-  [METRICS_BREAKDOWN_ARTIFACT_TYPE]: {
+  "breakdown-summary-canvas": {
     loading: "Preparing breakdown summary...",
     chart_ready: "Chart data ready, calculating metrics...",
     metrics_ready: "Metrics calculated, generating insights...",
     analysis_ready: "Analysis complete",
-  },
-  "breakdown-transactions-canvas": {
-    loading: "Loading transactions...",
-    metrics_ready: "Transactions ready",
-    analysis_ready: "Complete",
-  },
-  "breakdown-invoices-canvas": {
-    loading: "Loading invoices...",
-    metrics_ready: "Invoices ready",
-    analysis_ready: "Complete",
-  },
-  "breakdown-categories-canvas": {
-    loading: "Loading categories...",
-    metrics_ready: "Categories ready",
-    analysis_ready: "Complete",
-  },
-  "breakdown-vendors-canvas": {
-    loading: "Loading vendors...",
-    metrics_ready: "Vendors ready",
-    analysis_ready: "Complete",
-  },
-  "breakdown-customers-canvas": {
-    loading: "Loading customers...",
-    metrics_ready: "Customers ready",
-    analysis_ready: "Complete",
   },
 };
 

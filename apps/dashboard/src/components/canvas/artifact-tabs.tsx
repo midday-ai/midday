@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  METRICS_BREAKDOWN_ARTIFACT_TYPE,
   METRICS_BREAKDOWN_MONTHLY_PATTERN,
   getBaseBreakdownType,
   isMonthlyBreakdownType,
@@ -36,11 +35,11 @@ const ARTIFACT_TYPE_LABELS: Record<string, string> = {
   "spending-canvas": "Spending",
   "stress-test-canvas": "Stress Test",
   "tax-summary-canvas": "Tax Summary",
-  [METRICS_BREAKDOWN_ARTIFACT_TYPE]: "Summary",
+  "breakdown-summary-canvas": "Summary",
 };
 
 const ARTIFACT_ORDER: Record<string, number> = {
-  [METRICS_BREAKDOWN_ARTIFACT_TYPE]: 1,
+  "breakdown-summary-canvas": 1,
 };
 
 /**
