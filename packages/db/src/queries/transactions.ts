@@ -761,6 +761,21 @@ export async function deleteTransactions(
   db: Database,
   params: DeleteTransactionsParams,
 ) {
+  // Clear inbox items that reference these transactions before deleting
+  await db
+    .update(inbox)
+    .set({
+      transactionId: null,
+      attachmentId: null,
+      status: "pending",
+    })
+    .where(
+      and(
+        eq(inbox.teamId, params.teamId),
+        inArray(inbox.transactionId, params.ids),
+      ),
+    );
+
   return db
     .delete(transactions)
     .where(

@@ -110,6 +110,15 @@ export function DataTable({
     trpc.transactions.deleteMany.mutationOptions({
       onSuccess: () => {
         refetch();
+
+        // Invalidate inbox queries since matched inbox items are cleared
+        queryClient.invalidateQueries({
+          queryKey: trpc.inbox.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.inbox.getById.queryKey(),
+        });
       },
     }),
   );
