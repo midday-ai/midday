@@ -24,6 +24,7 @@ type Props = {
   value?: string;
   onChange: (value: SelectedItem) => void;
   popoverProps?: React.ComponentProps<typeof PopoverContent>;
+  modal?: boolean;
 };
 
 export function SelectAccount({
@@ -31,6 +32,7 @@ export function SelectAccount({
   onChange,
   value,
   popoverProps,
+  modal,
 }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -104,6 +106,7 @@ export function SelectAccount({
         createBankAccountMutation.mutate({ name, manual: true });
       }}
       popoverProps={popoverProps}
+      modal={modal}
       renderSelectedItem={(selectedItem) => {
         return (
           <TransactionBankAccount

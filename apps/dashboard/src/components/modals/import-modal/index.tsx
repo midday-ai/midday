@@ -190,8 +190,8 @@ export function ImportModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={onclose}>
-      <DialogContent>
-        <div className="p-4 pb-0">
+      <DialogContent className="overflow-visible">
+        <div className="p-4 pb-0 max-h-[calc(100svh-10vw)] overflow-y-auto overflow-x-visible">
           <DialogHeader>
             <div className="flex space-x-4 items-center mb-4">
               {!params.hide && (
@@ -212,11 +212,11 @@ export function ImportModal() {
               {page === "select-file" &&
                 "Upload a CSV file of your transactions."}
               {page === "confirm-import" &&
-                "We’ve mapped each column to what we believe is correct, but please review the data below to confirm it’s accurate."}
+                "We've mapped each column to what we believe is correct, but please review the data below to confirm it's accurate."}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="relative">
+          <div className="relative overflow-visible">
             <AnimatedSizeContainer height>
               <ImportCsvContext.Provider
                 value={{
@@ -229,7 +229,7 @@ export function ImportModal() {
                   setValue,
                 }}
               >
-                <div>
+                <div className="overflow-visible">
                   <form
                     className="flex flex-col gap-y-4"
                     onSubmit={handleSubmit(async (data) => {

@@ -142,12 +142,14 @@ export function DataTable({
     return tableData.map((row) => row?.id);
   }, [tableData]);
 
-  // Only poll if the first transaction needs enrichment
+  // Only poll for enrichment on the first page (most recent transactions)
+  // This prevents unnecessary polling for old transactions that may never be enriched
   const shouldPollForEnrichment = useMemo(() => {
-    if (tableData.length === 0) return false;
-    // Focus on the first transaction (most recent) since table is sorted by date desc
-    return !tableData.at(0)?.enrichmentCompleted;
-  }, [tableData]);
+    const firstPage = data?.pages?.[0]?.data;
+    if (!firstPage || firstPage.length === 0) return false;
+    // Check if any transaction in the first page needs enrichment
+    return firstPage.some((row) => !row?.enrichmentCompleted);
+  }, [data]);
 
   // Poll for enrichment completion when needed
   useEffect(() => {
