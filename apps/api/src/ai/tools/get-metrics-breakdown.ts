@@ -582,13 +582,22 @@ Provide a concise analysis (3-4 sentences) highlighting key insights, trends, an
             }
           }
         }
-        // Recalculate percentages and sort
+        // Recalculate percentages and formattedAmount, then sort
         const aggregatedTransactions = Array.from(transactionMap.values())
           .map((tx) => {
             const totalForPercentage =
               tx.amount < 0 ? totalExpenses : totalRevenue;
+            // Always recalculate formattedAmount from the aggregated amount
+            const recalculatedFormattedAmount = formatAmount({
+              amount: tx.amount,
+              currency: targetCurrency,
+              locale,
+            });
             return {
-              ...tx,
+              name: tx.name,
+              category: tx.category,
+              amount: tx.amount,
+              formattedAmount: recalculatedFormattedAmount,
               percentage:
                 totalForPercentage > 0
                   ? (Math.abs(tx.amount) / totalForPercentage) * 100
