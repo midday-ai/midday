@@ -42,6 +42,7 @@ export function TrackerTimer({
   const [holdProgress, setHoldProgress] = useState(0);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
   const holdProgressRef = useRef<NodeJS.Timeout | null>(null);
+  const holdInitialStateRef = useRef<boolean>(false); // Store initial isThisProjectRunning state when hold starts
 
   // Get current timer status - reduced refetch frequency
   const { data: timerStatus } = useQuery({
@@ -50,6 +51,7 @@ export function TrackerTimer({
       // Only refetch if there's a running timer, and less frequently
       return query.state.data?.isRunning ? 60000 : false; // Sync every 60 seconds when running
     },
+    refetchOnWindowFocus: true, // Refetch when window regains focus to sync after long unfocused periods
     staleTime: 30000, // Consider data fresh for 30 seconds
   });
 
@@ -167,7 +169,12 @@ export function TrackerTimer({
 
   // Hold-to-stop handlers
   const startHolding = useCallback(() => {
-    if (!isThisProjectRunning) return;
+    // Capture the initial state to prevent issues if refetch occurs during hold
+    const initialIsRunning = isThisProjectRunning;
+    if (!initialIsRunning) return;
+
+    // Store the initial state for use throughout the hold operation
+    holdInitialStateRef.current = initialIsRunning;
 
     setIsHolding(true);
     setHoldProgress(0);
@@ -179,9 +186,12 @@ export function TrackerTimer({
       setHoldProgress(Math.min(progress, 100));
     }, 100);
 
-    // Execute stop after 1.5 seconds
+    // Execute stop after 1.5 seconds - use stored initial state
     holdTimerRef.current = setTimeout(() => {
-      stopTimerMutation.mutate({});
+      // Only stop if the initial state was running (prevent stop if state changed during hold)
+      if (holdInitialStateRef.current) {
+        stopTimerMutation.mutate({});
+      }
       resetHold();
     }, 1500);
   }, [isThisProjectRunning, stopTimerMutation]);
@@ -189,6 +199,7 @@ export function TrackerTimer({
   const resetHold = useCallback(() => {
     setIsHolding(false);
     setHoldProgress(0);
+    holdInitialStateRef.current = false; // Reset initial state
 
     if (holdTimerRef.current) {
       clearTimeout(holdTimerRef.current);
