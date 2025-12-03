@@ -17,6 +17,7 @@ export function useGlobalTimerStatus() {
   const { data: timerStatus } = useQuery({
     ...trpc.trackerEntries.getTimerStatus.queryOptions(),
     refetchInterval: false, // Don't refetch automatically
+    refetchOnWindowFocus: true, // Refetch when window regains focus to sync after long unfocused periods
     staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   });
 
