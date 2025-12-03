@@ -150,6 +150,7 @@ function ChatInputContent() {
         accept="application/pdf,image/*"
         className={cn(
           "transition-all duration-300 ease-in-out",
+          "!bg-[rgba(247,247,247,0.85)] dark:!bg-[rgba(19,19,19,0.7)] backdrop-blur-lg",
           shouldMinimize &&
             "flex flex-row items-center p-2 chat-input-minimized",
         )}
