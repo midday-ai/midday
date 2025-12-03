@@ -349,43 +349,65 @@ export const getMetricsBreakdownTool = tool({
 
           const transactionCount = filteredTransactions.length;
 
-          // Format transactions
-          const formattedTransactions = filteredTransactions.map((tx) => {
+          // Format transactions and calculate totals from filtered transactions
+          // This ensures percentages are calculated against the same transaction set that's displayed
+          // First pass: calculate amounts and totals
+          const transactionAmounts = filteredTransactions.map((tx) => {
             const txAmount =
               tx.baseCurrency === targetCurrency && tx.baseAmount != null
                 ? tx.baseAmount
                 : tx.amount;
-
-            const formatted = formatAmount({
-              amount: Math.abs(txAmount),
-              currency: tx.baseCurrency || tx.currency || targetCurrency,
-              locale,
-            });
-
-            const totalForPercentage = txAmount < 0 ? expenses : revenue;
-            const percentage =
-              totalForPercentage > 0
-                ? (Math.abs(txAmount) / totalForPercentage) * 100
-                : 0;
-
-            return {
-              id: tx.id,
-              date: format(new Date(tx.date), "MMM d, yyyy"),
-              name: tx.name,
-              amount: txAmount,
-              formattedAmount:
-                formatted ||
-                `${targetCurrency}${Math.abs(txAmount).toLocaleString()}`,
-              category: tx.category?.name || "Uncategorized",
-              type: (txAmount >= 0 ? "income" : "expense") as
-                | "income"
-                | "expense",
-              vendor: tx.name,
-              percentage,
-            };
+            return txAmount;
           });
 
-          const relevantTransactions = formattedTransactions
+          // Calculate totals from filtered transactions for accurate percentage calculations
+          const monthTotalExpenses = Math.abs(
+            transactionAmounts
+              .filter((amount) => amount < 0)
+              .reduce((sum, amount) => sum + amount, 0),
+          );
+          const monthTotalRevenue = transactionAmounts
+            .filter((amount) => amount > 0)
+            .reduce((sum, amount) => sum + amount, 0);
+
+          // Second pass: format transactions with percentage calculations using the calculated totals
+          const formattedTransactionsWithPercentages = filteredTransactions.map(
+            (tx, index) => {
+              const txAmount = transactionAmounts[index]!;
+
+              const formatted = formatAmount({
+                amount: Math.abs(txAmount),
+                currency: tx.baseCurrency || tx.currency || targetCurrency,
+                locale,
+              });
+
+              // Calculate percentage impact using calculated totals from filtered transactions
+              const totalForPercentage =
+                txAmount < 0 ? monthTotalExpenses : monthTotalRevenue;
+              const percentage =
+                totalForPercentage > 0
+                  ? (Math.abs(txAmount) / totalForPercentage) * 100
+                  : 0;
+
+              return {
+                id: tx.id,
+                date: format(new Date(tx.date), "MMM d, yyyy"),
+                name: tx.name,
+                amount: txAmount,
+                formattedAmount:
+                  formatted ||
+                  `${targetCurrency}${Math.abs(txAmount).toLocaleString()}`,
+                category: tx.category?.name || "Uncategorized",
+                type: (txAmount >= 0 ? "income" : "expense") as
+                  | "income"
+                  | "expense",
+                vendor: tx.name,
+                percentage,
+              };
+            },
+          );
+
+          const relevantTransactions = formattedTransactionsWithPercentages
             .sort((a, b) => b.percentage - a.percentage)
             .slice(0, 10);
 
@@ -664,15 +686,32 @@ Write it as natural, flowing text.`,
           text: responseText,
         };
 
+        // Format aggregated transactions to match expected structure
+        const formattedAggregatedTransactions = aggregatedTransactions.map(
+          (tx) => ({
+            id: `aggregated-${tx.name}-${tx.category}`, // Synthetic ID for aggregated transactions
+            date: `${format(new Date(finalFrom), "MMM d")} - ${format(new Date(finalTo), "MMM d, yyyy")}`, // Date range
+            name: tx.name,
+            amount: tx.amount,
+            formattedAmount: tx.formattedAmount,
+            category: tx.category,
+            type: (tx.amount >= 0 ? "income" : "expense") as
+              | "income"
+              | "expense",
+            vendor: tx.name,
+            percentage: tx.percentage,
+          }),
+        );
+
         return {
           summary: {
-            revenue: 0,
-            expenses: 0,
-            profit: 0,
-            transactionCount: 0,
+            revenue: totalRevenue,
+            expenses: totalExpenses,
+            profit: totalProfit,
+            transactionCount: totalTransactionCount,
           },
-          transactions: [],
-          categories: [],
+          transactions: formattedAggregatedTransactions,
+          categories: aggregatedCategories,
           currency: targetCurrency,
         };
       }
@@ -792,13 +831,10 @@ Write it as natural, flowing text.`,
 
       const transactionCount = filteredTransactions.length;
 
-      // Use summary totals (which already account for filtering and currency conversion)
-      // These match what's shown in the summary metrics
-      const totalExpenses = expenses; // Already calculated from periodSummary
-      const totalRevenue = revenue; // Already calculated from revenueResult
-
-      // Format transactions and calculate percentage impact
-      const formattedTransactions = filteredTransactions.map((tx) => {
+      // Format transactions and calculate totals from filtered transactions
+      // This ensures percentages are calculated against the same transaction set that's displayed
+      // First pass: calculate amounts and totals
+      const transactionAmounts = filteredTransactions.map((tx) => {
         // Use same currency conversion logic as summary queries
         // If baseCurrency matches targetCurrency AND baseAmount is not NULL, use baseAmount
         // Otherwise, use amount
@@ -806,40 +842,61 @@ Write it as natural, flowing text.`,
           tx.baseCurrency === targetCurrency && tx.baseAmount != null
             ? tx.baseAmount
             : tx.amount;
-
-        const formatted = formatAmount({
-          amount: Math.abs(txAmount),
-          currency: tx.baseCurrency || tx.currency || targetCurrency,
-          locale,
-        });
-
-        // Calculate percentage impact using summary totals
-        // For expenses: percentage of total expenses from summary
-        // For income: percentage of total revenue from summary
-        const totalForPercentage = txAmount < 0 ? totalExpenses : totalRevenue;
-        const percentage =
-          totalForPercentage > 0
-            ? (Math.abs(txAmount) / totalForPercentage) * 100
-            : 0;
-
-        return {
-          id: tx.id,
-          date: format(new Date(tx.date), "MMM d, yyyy"),
-          name: tx.name,
-          amount: txAmount,
-          formattedAmount:
-            formatted ||
-            `${targetCurrency}${Math.abs(txAmount).toLocaleString()}`,
-          category: tx.category?.name || "Uncategorized",
-          type: (txAmount >= 0 ? "income" : "expense") as "income" | "expense",
-          vendor: tx.name,
-          percentage,
-        };
+        return txAmount;
       });
+
+      // Calculate totals from filtered transactions for accurate percentage calculations
+      const totalExpenses = Math.abs(
+        transactionAmounts
+          .filter((amount) => amount < 0)
+          .reduce((sum, amount) => sum + amount, 0),
+      );
+      const totalRevenue = transactionAmounts
+        .filter((amount) => amount > 0)
+        .reduce((sum, amount) => sum + amount, 0);
+
+      // Second pass: format transactions with percentage calculations using the calculated totals
+      const formattedTransactionsWithPercentages = filteredTransactions.map(
+        (tx, index) => {
+          const txAmount = transactionAmounts[index]!;
+
+          const formatted = formatAmount({
+            amount: Math.abs(txAmount),
+            currency: tx.baseCurrency || tx.currency || targetCurrency,
+            locale,
+          });
+
+          // Calculate percentage impact using calculated totals from filtered transactions
+          // For expenses: percentage of total expenses from filtered transactions
+          // For income: percentage of total revenue from filtered transactions
+          const totalForPercentage =
+            txAmount < 0 ? totalExpenses : totalRevenue;
+          const percentage =
+            totalForPercentage > 0
+              ? (Math.abs(txAmount) / totalForPercentage) * 100
+              : 0;
+
+          return {
+            id: tx.id,
+            date: format(new Date(tx.date), "MMM d, yyyy"),
+            name: tx.name,
+            amount: txAmount,
+            formattedAmount:
+              formatted ||
+              `${targetCurrency}${Math.abs(txAmount).toLocaleString()}`,
+            category: tx.category?.name || "Uncategorized",
+            type: (txAmount >= 0 ? "income" : "expense") as
+              | "income"
+              | "expense",
+            vendor: tx.name,
+            percentage,
+          };
+        },
+      );
 
       // Sort by percentage impact (descending) - most impactful first
       // Limit to top 10 transactions
-      const relevantTransactions = formattedTransactions
+      const relevantTransactions = formattedTransactionsWithPercentages
         .sort((a, b) => b.percentage - a.percentage)
         .slice(0, 10);
 

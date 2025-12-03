@@ -175,7 +175,7 @@ export function ArtifactTabs() {
 
       actions.dismiss(type);
     },
-    [activeType, available, actions, setSelectedType],
+    [activeType, sortedAvailable, actions, setSelectedType],
   );
 
   const handleCloseCanvas = useCallback(() => {
