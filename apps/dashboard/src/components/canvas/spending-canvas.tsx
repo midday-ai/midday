@@ -11,6 +11,7 @@ import {
   SkeletonCard,
   SkeletonLine,
 } from "@/components/canvas/base/skeleton";
+import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { formatAmount } from "@/utils/format";
 import { useArtifact } from "@ai-sdk-tools/artifacts/client";
@@ -32,6 +33,7 @@ export function SpendingCanvas() {
   const [artifact] = useArtifact(spendingArtifact, { version });
   const { data, status } = artifact;
   const { data: user } = useUserQuery();
+  const { setParams } = useTransactionParams();
 
   const isLoading = status === "loading";
   const stage = data?.stage;
@@ -92,8 +94,12 @@ export function SpendingCanvas() {
                   <TableBody>
                     {transactions.slice(0, 10).map((transaction, index) => (
                       <TableRow
-                        key={`${transaction.date}-${transaction.vendor}-${transaction.amount}-${index}`}
+                        key={transaction.id}
+                        onClick={() =>
+                          setParams({ transactionId: transaction.id })
+                        }
                         className={cn(
+                          "cursor-pointer hover:bg-[#F2F1EF] dark:hover:bg-[#0f0f0f] transition-colors",
                           index === transactions.slice(0, 10).length - 1 &&
                             "border-b-0",
                         )}

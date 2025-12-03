@@ -3,6 +3,8 @@
  * Supports all canvas types that use the standard stage pattern
  */
 
+import { METRICS_BREAKDOWN_ARTIFACT_TYPE } from "./metrics-breakdown-constants";
+
 export type ArtifactStage =
   | "loading"
   | "chart_ready"
@@ -63,7 +65,7 @@ export const TOOL_TO_ARTIFACT_MAP: Record<string, ArtifactType> = {
   stressTest: "stress-test-canvas",
   getCashFlowStressTest: "stress-test-canvas",
   getInvoicePaymentAnalysis: "invoice-payment-canvas",
-  getMetricsBreakdown: "breakdown-summary-canvas",
+  getMetricsBreakdown: METRICS_BREAKDOWN_ARTIFACT_TYPE,
 };
 
 /**
@@ -172,7 +174,7 @@ const CUSTOM_STAGE_MESSAGES: Partial<
     metrics_ready: "Metrics calculated, generating insights...",
     analysis_ready: "Analysis complete",
   },
-  "breakdown-summary-canvas": {
+  [METRICS_BREAKDOWN_ARTIFACT_TYPE]: {
     loading: "Preparing breakdown summary...",
     chart_ready: "Chart data ready, calculating metrics...",
     metrics_ready: "Metrics calculated, generating insights...",

@@ -118,6 +118,7 @@ export const getSpendingTool = tool({
           const share = totalSpending > 0 ? (amount / totalSpending) * 100 : 0;
 
           return {
+            id: transaction.id,
             date: formatDate(transaction.date),
             vendor: transaction.name,
             category: transaction.category?.name || "Uncategorized",
