@@ -142,11 +142,11 @@ export function DataTable({
     return tableData.map((row) => row?.id);
   }, [tableData]);
 
-  // Only poll if the first transaction needs enrichment
+  // Poll if any transaction needs enrichment
   const shouldPollForEnrichment = useMemo(() => {
     if (tableData.length === 0) return false;
-    // Focus on the first transaction (most recent) since table is sorted by date desc
-    return !tableData.at(0)?.enrichmentCompleted;
+    // Check if ANY transaction needs enrichment, not just the first one
+    return tableData.some((row) => !row?.enrichmentCompleted);
   }, [tableData]);
 
   // Poll for enrichment completion when needed
