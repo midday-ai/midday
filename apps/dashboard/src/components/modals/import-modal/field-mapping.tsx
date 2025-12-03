@@ -46,6 +46,13 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
   const abortControllerRef = useRef<AbortController | null>(null);
   const trpc = useTRPC();
   const { data: bankAccounts } = useQuery(trpc.bankAccounts.get.queryOptions());
+  // Use ref to access latest bankAccounts without triggering effect
+  const bankAccountsRef = useRef(bankAccounts);
+
+  // Keep ref updated with latest bankAccounts value
+  useEffect(() => {
+    bankAccountsRef.current = bankAccounts;
+  }, [bankAccounts]);
 
   useEffect(() => {
     if (!fileColumns || !firstRows) {
@@ -81,7 +88,6 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
             if (partialObject) {
               // Merge partial updates into final mapping
               finalMapping = { ...finalMapping, ...partialObject };
-              console.log(finalMapping);
 
               // Process field mappings as they come in
               for (const [field, value] of Object.entries(partialObject)) {
@@ -123,8 +129,10 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
               });
 
               // Find and pre-select account with matching currency
-              if (bankAccounts && bankAccounts.length > 0) {
-                const matchingAccount = bankAccounts.find(
+              // Use ref to get latest value without triggering effect
+              const currentBankAccounts = bankAccountsRef.current;
+              if (currentBankAccounts && currentBankAccounts.length > 0) {
+                const matchingAccount = currentBankAccounts.find(
                   (account) =>
                     account.currency?.toUpperCase() === detectedCurrency,
                 );
@@ -157,7 +165,7 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
     return () => {
       abortController.abort();
     };
-  }, [fileColumns, firstRows, setValue, bankAccounts]);
+  }, [fileColumns, firstRows, setValue]);
 
   return (
     <div className="mt-6">
