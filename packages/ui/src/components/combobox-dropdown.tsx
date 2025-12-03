@@ -39,6 +39,7 @@ type Props<T> = {
   onCreate?: (value: string) => void;
   headless?: boolean;
   className?: string;
+  modal?: boolean;
 };
 
 export function ComboboxDropdown<T extends ComboboxItem>({
@@ -56,6 +57,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
   disabled,
   onCreate,
   className,
+  modal = true,
 }: Props<T>) {
   const [open, setOpen] = React.useState(false);
   const [internalSelectedItem, setInternalSelectedItem] = React.useState<
@@ -149,7 +151,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen} modal>
+    <Popover open={open} onOpenChange={setOpen} modal={modal}>
       <PopoverTrigger asChild disabled={disabled} className="w-full">
         <Button
           variant="outline"
@@ -172,8 +174,8 @@ export function ComboboxDropdown<T extends ComboboxItem>({
       </PopoverTrigger>
 
       <PopoverContent
-        className="p-0"
         {...popoverProps}
+        className={cn("p-0", popoverProps?.className)}
         style={{
           width: "var(--radix-popover-trigger-width)",
           ...popoverProps?.style,

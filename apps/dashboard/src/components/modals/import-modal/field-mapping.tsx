@@ -4,6 +4,7 @@ import { generateCsvMapping } from "@/actions/ai/generate-csv-mapping";
 import { SelectAccount } from "@/components/select-account";
 import { SelectCurrency } from "@/components/select-currency";
 import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
 import { readStreamableValue } from "@ai-sdk/rsc";
 import { formatAmountValue, formatDate } from "@midday/import";
@@ -32,6 +33,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import { useQuery } from "@tanstack/react-query";
 import { capitalCase } from "change-case";
 import { useEffect, useRef, useState } from "react";
 import { Controller, useWatch } from "react-hook-form";
@@ -42,6 +44,8 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [showCurrency, setShowCurrency] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const trpc = useTRPC();
+  const { data: bankAccounts } = useQuery(trpc.bankAccounts.get.queryOptions());
 
   useEffect(() => {
     if (!fileColumns || !firstRows) {
@@ -67,12 +71,19 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
     generateCsvMapping(fileColumns, firstRows)
       .then(async ({ object }) => {
         try {
+          let finalMapping: Record<string, string> = {};
+
           for await (const partialObject of readStreamableValue(object)) {
             if (abortController.signal.aborted) {
               break;
             }
 
             if (partialObject) {
+              // Merge partial updates into final mapping
+              finalMapping = { ...finalMapping, ...partialObject };
+              console.log(finalMapping);
+
+              // Process field mappings as they come in
               for (const [field, value] of Object.entries(partialObject)) {
                 if (
                   Object.keys(mappableFields).includes(field) &&
@@ -83,6 +94,50 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
                   setValue(field as keyof typeof mappableFields, value, {
                     shouldValidate: true,
                   });
+                }
+              }
+            }
+          }
+
+          // Process currency after stream completes
+          const currencyValue = finalMapping.currency;
+          if (currencyValue && typeof currencyValue === "string") {
+            let detectedCurrency: string | null = null;
+
+            // Check if it's a column name or a currency code
+            if (fileColumns.includes(currencyValue)) {
+              // It's a column name, extract currency from first row
+              const firstRow = firstRows?.at(0);
+              if (firstRow?.[currencyValue]) {
+                detectedCurrency = firstRow[currencyValue].trim().toUpperCase();
+              }
+            } else {
+              // It's a detected currency code
+              detectedCurrency = currencyValue.trim().toUpperCase();
+            }
+
+            // Set currency if detected
+            if (detectedCurrency) {
+              setValue("currency", detectedCurrency, {
+                shouldValidate: true,
+              });
+
+              // Find and pre-select account with matching currency
+              if (bankAccounts && bankAccounts.length > 0) {
+                const matchingAccount = bankAccounts.find(
+                  (account) =>
+                    account.currency?.toUpperCase() === detectedCurrency,
+                );
+
+                if (matchingAccount) {
+                  setValue("bank_account_id", matchingAccount.id, {
+                    shouldValidate: true,
+                  });
+                  // Hide currency selector since account has currency
+                  setShowCurrency(false);
+                } else {
+                  // No matching account, show currency selector
+                  setShowCurrency(true);
                 }
               }
             }
@@ -102,7 +157,7 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
     return () => {
       abortController.abort();
     };
-  }, [fileColumns, firstRows, setValue]);
+  }, [fileColumns, firstRows, setValue, bankAccounts]);
 
   return (
     <div className="mt-6">
@@ -166,8 +221,12 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
               className="w-full"
               placeholder="Select account"
               value={value}
+              modal={false}
               popoverProps={{
-                className: "z-[100]",
+                className: "z-[9999]",
+                portal: true,
+                avoidCollisions: true,
+                collisionPadding: 8,
               }}
               onChange={(account) => {
                 onChange(account.id);
