@@ -5,11 +5,13 @@ import { ProfitChart } from "@/components/charts/profit-chart";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
 import { useOverviewTab } from "@/hooks/use-overview-tab";
+import { useChatStore } from "@/store/chat";
 import { useTRPC } from "@/trpc/client";
+import { generateChartSelectionMessage } from "@/utils/chart-selection-message";
 import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ShareMetricButton } from "../components/share-metric-button";
 
 interface ProfitCardProps {
@@ -35,11 +37,13 @@ export function ProfitCard({
   const { isMetricsTab } = useOverviewTab();
   const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
     useMetricsCustomize();
+  const setInput = useChatStore((state) => state.setInput);
+  const [isSelecting, setIsSelecting] = useState(false);
 
   const longPressHandlers = useLongPress({
     onLongPress: () => setIsCustomizing(true),
     threshold: 500,
-    disabled: metricsIsCustomizing,
+    disabled: metricsIsCustomizing || isSelecting,
   });
 
   const { data: profitData } = useQuery({
@@ -118,6 +122,16 @@ export function ProfitCard({
           height={320}
           currency={currency}
           locale={locale}
+          enableSelection={true}
+          onSelectionStateChange={setIsSelecting}
+          onSelectionComplete={(startDate, endDate, chartType) => {
+            const message = generateChartSelectionMessage(
+              startDate,
+              endDate,
+              chartType,
+            );
+            setInput(message);
+          }}
         />
       </div>
     </div>

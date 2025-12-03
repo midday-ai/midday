@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  METRICS_BREAKDOWN_MONTHLY_PATTERN,
+  getBaseBreakdownType,
+  isMonthlyBreakdownType,
+} from "@/lib/metrics-breakdown-constants";
 import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import { cn } from "@midday/ui/cn";
 import {
@@ -9,8 +14,9 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
+import { format, parseISO } from "date-fns";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 const ARTIFACT_TYPE_LABELS: Record<string, string> = {
@@ -29,7 +35,77 @@ const ARTIFACT_TYPE_LABELS: Record<string, string> = {
   "spending-canvas": "Spending",
   "stress-test-canvas": "Stress Test",
   "tax-summary-canvas": "Tax Summary",
+  "breakdown-summary-canvas": "Summary",
 };
+
+const ARTIFACT_ORDER: Record<string, number> = {
+  "breakdown-summary-canvas": 1,
+};
+
+/**
+ * Extract month key from monthly breakdown type and format as label
+ * Uses displayDate from artifact data if available, otherwise parses artifact type
+ */
+function getMonthlyBreakdownLabel(
+  type: string,
+  artifactData?: { displayDate?: string; from?: string },
+): string {
+  // Try to use displayDate from artifact data first
+  if (artifactData?.displayDate) {
+    try {
+      return format(parseISO(artifactData.displayDate), "MMM yyyy");
+    } catch {
+      // Fall through to parsing artifact type
+    }
+  }
+
+  // Fallback to using from date
+  if (artifactData?.from) {
+    try {
+      return format(parseISO(artifactData.from), "MMM yyyy");
+    } catch {
+      // Fall through to parsing artifact type
+    }
+  }
+
+  // Fallback to parsing artifact type
+  const match = type.match(METRICS_BREAKDOWN_MONTHLY_PATTERN);
+  if (match) {
+    const fullMatch = type.match(/^breakdown-summary-canvas-(\d{4})-(\d{2})$/);
+    if (fullMatch) {
+      const [, year, month] = fullMatch;
+      const date = parseISO(`${year}-${month}-01`);
+      return format(date, "MMM yyyy");
+    }
+  }
+  return type;
+}
+
+/**
+ * Get the base type for ordering (removes monthly suffix)
+ */
+function getBaseArtifactType(type: string): string {
+  return getBaseBreakdownType(type);
+}
+
+function getArtifactOrder(type: string): number {
+  const baseType = getBaseArtifactType(type);
+  return ARTIFACT_ORDER[baseType] ?? 999;
+}
+
+/**
+ * Get label for an artifact type, handling monthly breakdowns
+ * Uses artifact data if provided to get displayDate
+ */
+function getArtifactLabel(
+  type: string,
+  artifactData?: { displayDate?: string; from?: string },
+): string {
+  if (isMonthlyBreakdownType(type)) {
+    return getMonthlyBreakdownLabel(type, artifactData);
+  }
+  return ARTIFACT_TYPE_LABELS[type] || type;
+}
 
 export function ArtifactTabs() {
   const [selectedType, setSelectedType] = useQueryState(
@@ -48,6 +124,29 @@ export function ArtifactTabs() {
 
   const { available, activeType, byType } = data;
 
+  const sortedAvailable = useMemo(() => {
+    return [...available].sort((a, b) => {
+      const orderA = getArtifactOrder(a);
+      const orderB = getArtifactOrder(b);
+
+      // If same order, sort monthly breakdowns chronologically
+      if (
+        orderA === orderB &&
+        isMonthlyBreakdownType(a) &&
+        isMonthlyBreakdownType(b)
+      ) {
+        return a.localeCompare(b); // This will sort YYYY-MM chronologically
+      }
+
+      // If same order and both are monthly breakdowns, sort chronologically
+      if (orderA === orderB) {
+        return 0;
+      }
+
+      return orderA - orderB;
+    });
+  }, [available]);
+
   const handleTabClick = useCallback(
     (type: string) => {
       actions.setValue(type);
@@ -61,12 +160,12 @@ export function ArtifactTabs() {
       e.stopPropagation();
 
       // If this is the last tab, close the canvas
-      if (available.length === 1) {
+      if (sortedAvailable.length === 1) {
         actions.setValue(null);
         setSelectedType(null);
       } else if (type === activeType) {
         // If dismissing the active type, switch to another available type
-        const otherTypes = available.filter((t) => t !== type);
+        const otherTypes = sortedAvailable.filter((t) => t !== type);
         if (otherTypes.length > 0) {
           actions.setValue(otherTypes[0] ?? null);
           setSelectedType(otherTypes[0] ?? null);
@@ -75,7 +174,7 @@ export function ArtifactTabs() {
 
       actions.dismiss(type);
     },
-    [activeType, available, actions, setSelectedType],
+    [activeType, sortedAvailable, actions, setSelectedType],
   );
 
   const handleCloseCanvas = useCallback(() => {
@@ -84,26 +183,28 @@ export function ArtifactTabs() {
   }, [actions, setSelectedType]);
 
   const handleNavigateLeft = useCallback(() => {
-    if (available.length <= 1) return;
-    const currentIndex = available.indexOf(activeType ?? "");
+    if (sortedAvailable.length <= 1) return;
+    const currentIndex = sortedAvailable.indexOf(activeType ?? "");
     if (currentIndex === -1) return;
-    const newIndex = currentIndex > 0 ? currentIndex - 1 : available.length - 1;
-    const newType = available[newIndex];
+    const newIndex =
+      currentIndex > 0 ? currentIndex - 1 : sortedAvailable.length - 1;
+    const newType = sortedAvailable[newIndex];
     if (newType) {
       handleTabClick(newType);
     }
-  }, [available, activeType, handleTabClick]);
+  }, [sortedAvailable, activeType, handleTabClick]);
 
   const handleNavigateRight = useCallback(() => {
-    if (available.length <= 1) return;
-    const currentIndex = available.indexOf(activeType ?? "");
+    if (sortedAvailable.length <= 1) return;
+    const currentIndex = sortedAvailable.indexOf(activeType ?? "");
     if (currentIndex === -1) return;
-    const newIndex = currentIndex < available.length - 1 ? currentIndex + 1 : 0;
-    const newType = available[newIndex];
+    const newIndex =
+      currentIndex < sortedAvailable.length - 1 ? currentIndex + 1 : 0;
+    const newType = sortedAvailable[newIndex];
     if (newType) {
       handleTabClick(newType);
     }
-  }, [available, activeType, handleTabClick]);
+  }, [sortedAvailable, activeType, handleTabClick]);
 
   // Keyboard navigation: Left/Right arrows to switch tabs, ESC to close canvas
   useHotkeys(
@@ -113,7 +214,7 @@ export function ArtifactTabs() {
       handleNavigateLeft();
     },
     {
-      enabled: available.length > 1 && Boolean(selectedType),
+      enabled: sortedAvailable.length > 1 && Boolean(selectedType),
     },
   );
 
@@ -124,7 +225,7 @@ export function ArtifactTabs() {
       handleNavigateRight();
     },
     {
-      enabled: available.length > 1 && Boolean(selectedType),
+      enabled: sortedAvailable.length > 1 && Boolean(selectedType),
     },
   );
 
@@ -139,17 +240,24 @@ export function ArtifactTabs() {
     },
   );
 
-  if (available.length === 0) {
+  if (sortedAvailable.length === 0) {
     return null;
   }
 
   return (
     <div className="flex items-center gap-1 h-10 min-h-10 max-h-10">
-      {available.map((type) => {
+      {sortedAvailable.map((type) => {
         const isActive = type === activeType;
-        const label = ARTIFACT_TYPE_LABELS[type] || type;
         const versions = byType[type] || [];
         const hasMultipleVersions = versions.length > 1;
+        // Get artifact data for label (use first version or current)
+        const artifactForLabel =
+          versions[0]?.payload ||
+          (data.current?.type === type ? data.current.payload : undefined);
+        const artifactData = artifactForLabel as
+          | { displayDate?: string; from?: string }
+          | undefined;
+        const label = getArtifactLabel(type, artifactData);
 
         return (
           <div

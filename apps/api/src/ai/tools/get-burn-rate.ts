@@ -31,7 +31,7 @@ const getBurnRateSchema = z.object({
 
 export const getBurnRateTool = tool({
   description:
-    "Calculate monthly cash burn rate - shows how much money the business spends per month with trends, average monthly burn, and changes over time.",
+    "Calculate monthly cash burn rate - shows how much money the business spends per month with trends, average monthly burn, and changes over time. DO NOT use this tool if the user requests a 'breakdown' - use getMetricsBreakdown instead.",
   inputSchema: getBurnRateSchema,
   execute: async function* (
     { from, to, currency, showCanvas },

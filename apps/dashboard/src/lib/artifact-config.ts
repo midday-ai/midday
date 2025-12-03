@@ -7,7 +7,8 @@ export type ArtifactStage =
   | "loading"
   | "chart_ready"
   | "metrics_ready"
-  | "analysis_ready";
+  | "analysis_ready"
+  | "data_ready";
 
 export type ArtifactType =
   | "burn-rate-canvas"
@@ -24,7 +25,8 @@ export type ArtifactType =
   | "forecast-canvas"
   | "stress-test-canvas"
   | "invoice-payment-canvas"
-  | "health-report-canvas";
+  | "health-report-canvas"
+  | "breakdown-summary-canvas";
 
 /**
  * Maps tool names to artifact types
@@ -56,6 +58,7 @@ export const TOOL_TO_ARTIFACT_MAP: Record<string, ArtifactType> = {
   stressTest: "stress-test-canvas",
   getCashFlowStressTest: "stress-test-canvas",
   getInvoicePaymentAnalysis: "invoice-payment-canvas",
+  getMetricsBreakdown: "breakdown-summary-canvas",
 };
 
 /**
@@ -66,6 +69,7 @@ export const STAGE_TO_SECTION_MAP: Record<ArtifactStage, string | null> = {
   chart_ready: "Metrics",
   metrics_ready: "Summary",
   analysis_ready: null, // Complete, no section in progress
+  data_ready: "Summary",
 };
 
 /**
@@ -76,6 +80,7 @@ const DEFAULT_STAGE_MESSAGES: Record<ArtifactStage, string> = {
   chart_ready: "Chart data ready, calculating metrics...",
   metrics_ready: "Metrics calculated, generating insights...",
   analysis_ready: "Analysis complete",
+  data_ready: "Data ready, generating insights...",
 };
 
 /**
@@ -158,6 +163,12 @@ const CUSTOM_STAGE_MESSAGES: Partial<
   },
   "invoice-payment-canvas": {
     loading: "Preparing invoice payment analysis...",
+    chart_ready: "Chart data ready, calculating metrics...",
+    metrics_ready: "Metrics calculated, generating insights...",
+    analysis_ready: "Analysis complete",
+  },
+  "breakdown-summary-canvas": {
+    loading: "Preparing breakdown summary...",
     chart_ready: "Chart data ready, calculating metrics...",
     metrics_ready: "Metrics calculated, generating insights...",
     analysis_ready: "Analysis complete",

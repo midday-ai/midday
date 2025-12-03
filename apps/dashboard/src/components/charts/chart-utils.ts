@@ -176,3 +176,70 @@ export interface BaseChartProps {
   className?: string;
   showAnimation?: boolean;
 }
+
+// Get date from data index for chart selection
+export function getDateFromDataIndex(
+  data: any[],
+  index: number,
+  dateKey: string,
+): Date | null {
+  if (index < 0 || index >= data.length) return null;
+
+  const item = data[index];
+  const dateValue = item[dateKey];
+
+  if (dateValue instanceof Date) {
+    return dateValue;
+  }
+
+  if (typeof dateValue === "string") {
+    const parsed = new Date(dateValue);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed;
+    }
+  }
+
+  return null;
+}
+
+// Format date range for display
+export function formatDateRange(
+  startDate: Date,
+  endDate: Date,
+  locale?: string,
+): string {
+  const startMonth = startDate.toLocaleString(locale || "en-US", {
+    month: "long",
+  });
+  const endMonth = endDate.toLocaleString(locale || "en-US", { month: "long" });
+
+  if (startMonth === endMonth) {
+    return startMonth;
+  }
+
+  return `${startMonth} to ${endMonth}`;
+}
+
+// Get chart type name for natural language
+export function getChartTypeName(chartId: string): string {
+  const chartTypeMap: Record<string, string> = {
+    "monthly-revenue": "revenue",
+    revenue: "revenue",
+    profit: "profit",
+    "burn-rate": "burn rate",
+    expenses: "expenses",
+    "revenue-forecast": "revenue forecast",
+    runway: "runway",
+    "category-expenses": "category expenses",
+    "stacked-bar": "expenses",
+    "revenue-trend": "revenue trends",
+    "cash-flow": "cash flow",
+    "growth-rate": "growth rate",
+    "business-health-score": "business health score",
+    "invoice-payment": "invoice payments",
+    "tax-trend": "tax trends",
+    "stress-test": "cash flow stress test",
+  };
+
+  return chartTypeMap[chartId] || chartId;
+}

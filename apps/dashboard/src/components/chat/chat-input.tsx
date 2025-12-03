@@ -14,7 +14,6 @@ import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useWindowScroll } from "@/hooks/use-window-scroll";
 import { useChatStore } from "@/store/chat";
-import { useArtifacts } from "@ai-sdk-tools/artifacts/client";
 import {
   useChatActions,
   useChatId,
@@ -50,11 +49,10 @@ function ChatInputContent() {
   const [isFocused, setIsFocused] = useState(false);
   const [isInteractingWithButtons, setIsInteractingWithButtons] =
     useState(false);
-
   const status = useChatStatus();
   const { sendMessage, stop } = useChatActions();
   const chatId = useChatId();
-  const { setChatId, isHome } = useChatInterface();
+  const { setChatId } = useChatInterface();
   const { isMetricsTab } = useOverviewTab();
   const { isScrolled } = useWindowScroll();
   const { isOpen: isHistoryOpen } = useChatHistoryContext();
@@ -64,8 +62,6 @@ function ChatInputContent() {
   );
 
   const [selectedType] = useQueryState("artifact-type", parseAsString);
-
-  const isCanvasVisible = !!selectedType;
 
   const {
     input,
@@ -82,14 +78,15 @@ function ChatInputContent() {
     resetCommandState,
   } = useChatStore();
 
-  // Don't minimize if commands are shown, history is open, input is focused, or buttons are being interacted with
+  // Don't minimize if commands are shown, history is open, input is focused, buttons are being interacted with, or input has content
   const shouldMinimize =
     isMetricsTab &&
     isScrolled &&
     !isFocused &&
     !showCommands &&
     !isHistoryOpen &&
-    !isInteractingWithButtons;
+    !isInteractingWithButtons &&
+    !input.trim();
 
   const handleSubmit = (message: ChatInputMessage) => {
     const hasText = Boolean(message.text);
@@ -153,7 +150,9 @@ function ChatInputContent() {
         accept="application/pdf,image/*"
         className={cn(
           "transition-all duration-300 ease-in-out",
-          shouldMinimize && "flex flex-row items-center p-2",
+          "!bg-[rgba(247,247,247,0.85)] dark:!bg-[rgba(19,19,19,0.7)] backdrop-blur-lg",
+          shouldMinimize &&
+            "flex flex-row items-center p-2 chat-input-minimized",
         )}
       >
         <PromptInputBody
@@ -174,6 +173,8 @@ function ChatInputContent() {
             className={cn(
               "transition-[height,min-height,max-height,padding] duration-300 ease-in-out",
               shouldMinimize && "min-h-[32px] max-h-[32px] h-8 py-1 px-2",
+              shouldMinimize &&
+                "text-ellipsis overflow-hidden whitespace-nowrap",
             )}
             onKeyDown={(e) => {
               // Handle Enter key for commands

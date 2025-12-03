@@ -54,6 +54,7 @@ export const spendingArtifact = artifact(
     transactions: z
       .array(
         z.object({
+          id: z.string(),
           date: z.string(),
           vendor: z.string(),
           category: z.string(),

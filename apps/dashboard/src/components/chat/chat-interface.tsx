@@ -105,6 +105,7 @@ export function ChatInterface({ geo }: Props) {
     artifactType,
     currentSection,
     bankAccountRequired,
+    hasTextContent,
   } = useChatStatus(messages, status);
 
   const [selectedType, setSelectedType] = useQueryState(
@@ -179,6 +180,7 @@ export function ChatInterface({ geo }: Props) {
                       artifactType={artifactType}
                       currentSection={currentSection}
                       bankAccountRequired={bankAccountRequired}
+                      hasTextContent={hasTextContent}
                     />
                   </div>
                 </ConversationContent>
