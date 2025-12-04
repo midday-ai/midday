@@ -6,6 +6,7 @@ export function useCustomerParams() {
     createCustomer: parseAsBoolean,
     name: parseAsString,
     q: parseAsString,
+    details: parseAsBoolean,
   });
 
   return {

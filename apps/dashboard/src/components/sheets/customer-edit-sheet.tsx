@@ -27,9 +27,9 @@ import { CustomerForm } from "../forms/customer-form";
 export function CustomerEditSheet() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const { setParams, customerId } = useCustomerParams();
+  const { setParams, customerId, details } = useCustomerParams();
 
-  const isOpen = Boolean(customerId);
+  const isOpen = Boolean(customerId && !details);
 
   const { data: customer } = useQuery(
     trpc.customers.getById.queryOptions(

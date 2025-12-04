@@ -2,6 +2,7 @@
 
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
+import { useCustomerParams } from "@/hooks/use-customer-params";
 import { getDueDateStatus } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
@@ -14,7 +15,7 @@ import { TooltipProvider } from "@midday/ui/tooltip";
 import { formatDate } from "@midday/utils/format";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format, formatDistanceToNow } from "date-fns";
-import * as React from "react";
+import type { MouseEvent } from "react";
 import { ActionsMenu } from "./actions-menu";
 
 export type Invoice = NonNullable<
@@ -123,26 +124,64 @@ export const columns: ColumnDef<Invoice>[] = [
       const customer = row.original.customer;
       const name = customer?.name || row.original.customerName;
       const viewAt = row.original.viewedAt;
+      const customerId = customer?.id || row.original.customerId;
+      const { setParams } = useCustomerParams();
 
       if (!name) return "-";
 
+      const handleCustomerClick = (e: MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
+        if (customerId) {
+          setParams({
+            customerId,
+            details: true,
+          });
+        }
+      };
+
       return (
         <div className="flex items-center space-x-2">
-          <Avatar className="size-5">
-            {customer?.website && (
-              <AvatarImageNext
-                src={getWebsiteLogo(customer?.website)}
-                alt={`${name} logo`}
-                width={20}
-                height={20}
-                quality={100}
-              />
-            )}
-            <AvatarFallback className="text-[9px] font-medium">
-              {name?.[0]}
-            </AvatarFallback>
-          </Avatar>
-          <span className="truncate">{name}</span>
+          {customerId ? (
+            <button
+              type="button"
+              onClick={handleCustomerClick}
+              className="flex items-center space-x-2 text-left"
+            >
+              <Avatar className="size-5">
+                {customer?.website && (
+                  <AvatarImageNext
+                    src={getWebsiteLogo(customer?.website)}
+                    alt={`${name} logo`}
+                    width={20}
+                    height={20}
+                    quality={100}
+                  />
+                )}
+                <AvatarFallback className="text-[9px] font-medium">
+                  {name?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <span className="truncate">{name}</span>
+            </button>
+          ) : (
+            <>
+              <Avatar className="size-5">
+                {customer?.website && (
+                  <AvatarImageNext
+                    src={getWebsiteLogo(customer?.website)}
+                    alt={`${name} logo`}
+                    width={20}
+                    height={20}
+                    quality={100}
+                  />
+                )}
+                <AvatarFallback className="text-[9px] font-medium">
+                  {name?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <span className="truncate">{name}</span>
+            </>
+          )}
 
           {viewAt && row.original.status !== "paid" && (
             <TooltipProvider delayDuration={0}>

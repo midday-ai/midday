@@ -746,22 +746,23 @@ export async function getInvoiceSummary(
         )
         .limit(1);
 
-      const convertedAmount = exchangeRate?.rate
-        ? amount * Number(exchangeRate.rate)
-        : amount; // Fallback if no exchange rate found
+      if (exchangeRate?.rate) {
+        const convertedAmount = amount * Number(exchangeRate.rate);
+        totalAmount += convertedAmount;
 
-      totalAmount += convertedAmount;
-
-      const existing = currencyBreakdown.get(currency) || {
-        amount: 0,
-        count: 0,
-        convertedAmount: 0,
-      };
-      currencyBreakdown.set(currency, {
-        amount: existing.amount + amount,
-        count: existing.count + 1,
-        convertedAmount: existing.convertedAmount + convertedAmount,
-      });
+        const existing = currencyBreakdown.get(currency) || {
+          amount: 0,
+          count: 0,
+          convertedAmount: 0,
+        };
+        currencyBreakdown.set(currency, {
+          amount: existing.amount + amount,
+          count: existing.count + 1,
+          convertedAmount: existing.convertedAmount + convertedAmount,
+        });
+      }
+      // Skip invoices with missing exchange rates to avoid mixing currencies
+      // This prevents silently producing incorrect totals
     }
   }
 
@@ -775,9 +776,16 @@ export async function getInvoiceSummary(
     }))
     .sort((a, b) => b.originalAmount - a.originalAmount);
 
+  // Count only invoices that were successfully included in the calculation
+  // (i.e., invoices with valid exchange rates or in base currency)
+  const invoiceCount = Array.from(currencyBreakdown.values()).reduce(
+    (sum, data) => sum + data.count,
+    0,
+  );
+
   return {
     totalAmount: Math.round(totalAmount * 100) / 100, // Round to 2 decimal places
-    invoiceCount: invoiceData.length,
+    invoiceCount,
     currency: baseCurrency,
     breakdown: breakdown.length > 1 ? breakdown : undefined, // Only include if multiple currencies
   };

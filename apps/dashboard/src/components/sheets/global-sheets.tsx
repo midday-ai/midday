@@ -7,6 +7,7 @@ import { SearchModal } from "@/components/search/search-modal";
 import { CategoryCreateSheet } from "@/components/sheets/category-create-sheet";
 import { CategoryEditSheet } from "@/components/sheets/category-edit-sheet";
 import { CustomerCreateSheet } from "@/components/sheets/customer-create-sheet";
+import { CustomerDetailsSheet } from "@/components/sheets/customer-details-sheet";
 import { CustomerEditSheet } from "@/components/sheets/customer-edit-sheet";
 import { DocumentSheet } from "@/components/sheets/document-sheet";
 import { InboxDetailsSheet } from "@/components/sheets/inbox-details-sheet";
@@ -32,6 +33,7 @@ export function GlobalSheets() {
       <CategoryEditSheet />
 
       <CustomerCreateSheet />
+      <CustomerDetailsSheet />
       <CustomerEditSheet />
 
       <ProductCreateSheet />

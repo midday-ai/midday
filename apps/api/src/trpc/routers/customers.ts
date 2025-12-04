@@ -1,6 +1,7 @@
 import {
   deleteCustomerSchema,
   getCustomerByIdSchema,
+  getCustomerInvoiceSummarySchema,
   getCustomersSchema,
   upsertCustomerSchema,
 } from "@api/schemas/customers";
@@ -8,6 +9,7 @@ import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
   deleteCustomer,
   getCustomerById,
+  getCustomerInvoiceSummary,
   getCustomers,
   upsertCustomer,
 } from "@midday/db/queries";
@@ -47,6 +49,15 @@ export const customersRouter = createTRPCRouter({
         ...input,
         teamId: teamId!,
         userId: session.user.id,
+      });
+    }),
+
+  getInvoiceSummary: protectedProcedure
+    .input(getCustomerInvoiceSummarySchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      return getCustomerInvoiceSummary(db, {
+        customerId: input.id,
+        teamId: teamId!,
       });
     }),
 });
