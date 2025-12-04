@@ -776,9 +776,16 @@ export async function getInvoiceSummary(
     }))
     .sort((a, b) => b.originalAmount - a.originalAmount);
 
+  // Count only invoices that were successfully included in the calculation
+  // (i.e., invoices with valid exchange rates or in base currency)
+  const invoiceCount = Array.from(currencyBreakdown.values()).reduce(
+    (sum, data) => sum + data.count,
+    0,
+  );
+
   return {
     totalAmount: Math.round(totalAmount * 100) / 100, // Round to 2 decimal places
-    invoiceCount: invoiceData.length,
+    invoiceCount,
     currency: baseCurrency,
     breakdown: breakdown.length > 1 ? breakdown : undefined, // Only include if multiple currencies
   };

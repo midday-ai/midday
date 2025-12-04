@@ -102,11 +102,7 @@ export function CustomerForm({ data }: Props) {
   const queryClient = useQueryClient();
   const isEdit = !!data;
 
-  const {
-    setParams: setCustomerParams,
-    name,
-    createCustomer,
-  } = useCustomerParams();
+  const { setParams: setCustomerParams, name } = useCustomerParams();
   const { setParams: setInvoiceParams, type } = useInvoiceParams();
   const fromInvoice = type === "create" || type === "edit";
 
@@ -134,8 +130,11 @@ export function CustomerForm({ data }: Props) {
         // and don't close the customer form (to keep invoice sheet open)
         if (data && fromInvoice) {
           setInvoiceParams({ selectedCustomerId: data.id });
-          // Only clear createCustomer flag, keep other params to avoid closing invoice sheet
-          setCustomerParams({ createCustomer: null, name: null });
+          // Only clear createCustomer and name flags, keep type to preserve edit sheet state
+          setCustomerParams({
+            createCustomer: null,
+            name: null,
+          });
         } else {
           // Close the customer form if not from invoice
           setCustomerParams(null);

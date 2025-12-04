@@ -64,7 +64,7 @@ export function CustomerEditSheet() {
   );
 
   return (
-    <Sheet open={isOpen} onOpenChange={() => setParams(null)}>
+    <Sheet open={isOpen} onOpenChange={() => setParams({ customerId: null })}>
       <SheetContent stack>
         <SheetHeader className="mb-6 flex justify-between items-center flex-row">
           <h2 className="text-xl">Edit Customer</h2>
