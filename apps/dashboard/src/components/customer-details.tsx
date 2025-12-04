@@ -543,7 +543,7 @@ export function CustomerDetails() {
                               : "-"}
                           </TableCell>
                           <TableCell className="text-[12px] whitespace-nowrap">
-                            {invoice.amount && invoice.currency ? (
+                            {invoice.amount != null && invoice.currency ? (
                               <FormatAmount
                                 amount={invoice.amount}
                                 currency={invoice.currency}
