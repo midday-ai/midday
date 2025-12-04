@@ -278,7 +278,7 @@ export function TransactionDetails() {
               ) : (
                 <span
                   className={cn(
-                    "text-4xl select-text",
+                    "text-4xl select-text font-serif",
                     data?.amount > 0 && "text-[#00C969]",
                   )}
                 >

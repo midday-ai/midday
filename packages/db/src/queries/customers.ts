@@ -2,8 +2,10 @@ import type { Database } from "@db/client";
 import {
   customerTags,
   customers,
+  exchangeRates,
   invoices,
   tags,
+  teams,
   trackerProjects,
 } from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
@@ -426,3 +428,93 @@ export const deleteCustomer = async (
   // Return the deleted customer data
   return customerToDelete;
 };
+
+export type GetCustomerInvoiceSummaryParams = {
+  customerId: string;
+  teamId: string;
+};
+
+export async function getCustomerInvoiceSummary(
+  db: Database,
+  params: GetCustomerInvoiceSummaryParams,
+) {
+  const { customerId, teamId } = params;
+
+  // Get team's base currency first
+  const [team] = await db
+    .select({ baseCurrency: teams.baseCurrency })
+    .from(teams)
+    .where(eq(teams.id, teamId))
+    .limit(1);
+
+  const baseCurrency = team?.baseCurrency || "USD";
+
+  // Get all invoices for this customer
+  const invoiceData = await db
+    .select({
+      amount: invoices.amount,
+      currency: invoices.currency,
+      status: invoices.status,
+    })
+    .from(invoices)
+    .where(
+      and(eq(invoices.customerId, customerId), eq(invoices.teamId, teamId)),
+    );
+
+  if (invoiceData.length === 0) {
+    return {
+      totalAmount: 0,
+      paidAmount: 0,
+      outstandingAmount: 0,
+      invoiceCount: 0,
+      currency: baseCurrency,
+    };
+  }
+
+  // Convert all amounts to base currency and calculate totals
+  let totalAmount = 0;
+  let paidAmount = 0;
+  let outstandingAmount = 0;
+
+  for (const invoice of invoiceData) {
+    const amount = Number(invoice.amount) || 0;
+    const currency = invoice.currency || baseCurrency;
+
+    let convertedAmount = amount;
+
+    // Convert to base currency if different
+    if (currency !== baseCurrency) {
+      // Get exchange rate for this currency to base currency
+      const [exchangeRate] = await db
+        .select({ rate: exchangeRates.rate })
+        .from(exchangeRates)
+        .where(
+          and(
+            eq(exchangeRates.base, currency),
+            eq(exchangeRates.target, baseCurrency),
+          ),
+        )
+        .limit(1);
+
+      convertedAmount = exchangeRate?.rate
+        ? amount * Number(exchangeRate.rate)
+        : amount; // Fallback if no exchange rate found
+    }
+
+    totalAmount += convertedAmount;
+
+    if (invoice.status === "paid") {
+      paidAmount += convertedAmount;
+    } else if (invoice.status === "unpaid" || invoice.status === "overdue") {
+      outstandingAmount += convertedAmount;
+    }
+  }
+
+  return {
+    totalAmount: Math.round(totalAmount * 100) / 100,
+    paidAmount: Math.round(paidAmount * 100) / 100,
+    outstandingAmount: Math.round(outstandingAmount * 100) / 100,
+    invoiceCount: invoiceData.length,
+    currency: baseCurrency,
+  };
+}

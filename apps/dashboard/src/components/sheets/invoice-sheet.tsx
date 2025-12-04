@@ -16,7 +16,10 @@ export function InvoiceSheet() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { setParams, type, invoiceId } = useInvoiceParams();
-  const isOpen = type === "create" || type === "edit" || type === "success";
+  const isOpen =
+    type === "create" ||
+    (type === "edit" && Boolean(invoiceId)) ||
+    type === "success";
 
   // Get default settings for new invoices
   const { data: defaultSettings } = useSuspenseQuery(
