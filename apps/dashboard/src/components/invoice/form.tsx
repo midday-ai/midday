@@ -109,6 +109,7 @@ export function Form() {
       "customerId",
       "customerName",
       "template",
+      "templateId",
       "lineItems",
       "amount",
       "vat",

@@ -9,10 +9,11 @@ import { LabelInput } from "./label-input";
 export function NoteDetails() {
   const { control, watch } = useFormContext();
   const id = watch("id");
+  const templateId = watch("templateId");
 
   const trpc = useTRPC();
   const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
+    trpc.invoiceTemplates.upsert.mutationOptions(),
   );
 
   return (
@@ -20,7 +21,7 @@ export function NoteDetails() {
       <LabelInput
         name="template.noteLabel"
         onSave={(value) => {
-          updateTemplateMutation.mutate({ noteLabel: value });
+          updateTemplateMutation.mutate({ noteLabel: value, templateId });
         }}
         className="mb-2 block"
       />
@@ -38,6 +39,7 @@ export function NoteDetails() {
               onBlur={(content) => {
                 updateTemplateMutation.mutate({
                   noteDetails: content ? JSON.stringify(content) : null,
+                  templateId,
                 });
               }}
               className="min-h-[78px]"

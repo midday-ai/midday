@@ -8,10 +8,11 @@ import { Input } from "./input";
 export function InvoiceTitle() {
   const { watch } = useFormContext();
   const invoiceTitle = watch("template.title");
+  const templateId = watch("templateId");
 
   const trpc = useTRPC();
   const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
+    trpc.invoiceTemplates.upsert.mutationOptions(),
   );
 
   return (
@@ -19,7 +20,7 @@ export function InvoiceTitle() {
       className="text-[21px] font-medium mb-2 w-fit min-w-[100px] !border-none"
       name="template.title"
       onBlur={() => {
-        updateTemplateMutation.mutate({ title: invoiceTitle });
+        updateTemplateMutation.mutate({ title: invoiceTitle, templateId });
       }}
     />
   );

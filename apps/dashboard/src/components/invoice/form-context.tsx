@@ -57,6 +57,7 @@ export const invoiceFormSchema = z.object({
   id: z.string().uuid(),
   status: z.string(),
   template: invoiceTemplateSchema,
+  templateId: z.string().uuid().optional(),
   fromDetails: z.any(),
   customerDetails: z.any(),
   customerId: z.string().uuid(),
@@ -99,17 +100,23 @@ export function FormContext({
   });
 
   useEffect(() => {
+    // For new invoices, use defaultSettings templateId (auto-select default template)
+    // For existing invoices, start without templateId - user must explicitly select a template
+    // Note: invoices don't store templateId in DB, it's only used during editing session
+    const isNewInvoice = !data;
+    const templateId = isNewInvoice ? defaultSettings?.templateId : undefined;
+
     form.reset({
       ...(defaultSettings ?? {}),
       ...(data ?? {}),
-      // @ts-expect-error
       template: {
         ...(defaultSettings?.template ?? {}),
         ...(data?.template ?? {}),
       },
+      templateId,
       customerId: data?.customerId ?? defaultSettings?.customerId ?? undefined,
-    });
-  }, [data, defaultSettings]);
+    } as InvoiceFormValues);
+  }, [data, defaultSettings, form]);
 
   return <FormProvider {...form}>{children}</FormProvider>;
 }

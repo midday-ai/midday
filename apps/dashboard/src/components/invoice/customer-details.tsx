@@ -17,11 +17,12 @@ export function CustomerDetails() {
 
   const trpc = useTRPC();
   const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
+    trpc.invoiceTemplates.upsert.mutationOptions(),
   );
 
   const content = watch("customerDetails");
   const id = watch("id");
+  const templateId = watch("templateId");
 
   const { data: customer } = useQuery(
     trpc.customers.getById.queryOptions(
@@ -33,7 +34,7 @@ export function CustomerDetails() {
   );
 
   const handleLabelSave = (value: string) => {
-    updateTemplateMutation.mutate({ customerLabel: value });
+    updateTemplateMutation.mutate({ customerLabel: value, templateId });
   };
 
   const handleOnChange = (content?: JSONContent | null) => {

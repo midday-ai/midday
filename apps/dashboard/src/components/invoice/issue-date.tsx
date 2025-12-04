@@ -12,11 +12,12 @@ export function IssueDate() {
   const { setValue, watch } = useFormContext();
   const issueDate = watch("issueDate");
   const dateFormat = watch("template.dateFormat");
+  const templateId = watch("templateId");
   const [isOpen, setIsOpen] = useState(false);
 
   const trpc = useTRPC();
   const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
+    trpc.invoiceTemplates.upsert.mutationOptions(),
   );
 
   const handleSelect = (date: Date | undefined) => {
@@ -35,7 +36,7 @@ export function IssueDate() {
         <LabelInput
           name="template.issueDateLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({ issueDateLabel: value });
+            updateTemplateMutation.mutate({ issueDateLabel: value, templateId });
           }}
         />
         <span className="text-[11px] text-[#878787] font-mono">:</span>

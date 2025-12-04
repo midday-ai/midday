@@ -11,11 +11,12 @@ import { TaxInput } from "./tax-input";
 import { VATInput } from "./vat-input";
 
 export function Summary() {
-  const { control, setValue } = useFormContext();
+  const { control, setValue, watch } = useFormContext();
+  const templateId = watch("templateId");
 
   const trpc = useTRPC();
   const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
+    trpc.invoiceTemplates.upsert.mutationOptions(),
   );
 
   const includeDecimals = useWatch({
@@ -127,7 +128,7 @@ export function Summary() {
           className="flex-shrink-0 min-w-6"
           name="template.subtotalLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({ subtotalLabel: value });
+            updateTemplateMutation.mutate({ subtotalLabel: value, templateId });
           }}
         />
         <span className="text-right text-[11px] text-[#878787]">
@@ -145,7 +146,7 @@ export function Summary() {
           <LabelInput
             name="template.discountLabel"
             onSave={(value) => {
-              updateTemplateMutation.mutate({ discountLabel: value });
+              updateTemplateMutation.mutate({ discountLabel: value, templateId });
             }}
           />
 
@@ -165,7 +166,7 @@ export function Summary() {
               className="flex-shrink-0 min-w-5"
               name="template.vatLabel"
               onSave={(value) => {
-                updateTemplateMutation.mutate({ vatLabel: value });
+                updateTemplateMutation.mutate({ vatLabel: value, templateId });
               }}
             />
 
@@ -190,7 +191,7 @@ export function Summary() {
               className="flex-shrink-0 min-w-5"
               name="template.taxLabel"
               onSave={(value) => {
-                updateTemplateMutation.mutate({ taxLabel: value });
+                updateTemplateMutation.mutate({ taxLabel: value, templateId });
               }}
             />
 
@@ -212,7 +213,7 @@ export function Summary() {
         <LabelInput
           name="template.totalSummaryLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({ totalSummaryLabel: value });
+            updateTemplateMutation.mutate({ totalSummaryLabel: value, templateId });
           }}
         />
         <span className="text-right font-medium text-[21px]">

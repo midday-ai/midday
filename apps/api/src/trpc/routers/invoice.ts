@@ -413,6 +413,7 @@ export const invoiceRouter = createTRPCRouter({
         logoUrl: undefined,
         vat: undefined,
         template: savedTemplate,
+        templateId: template?.id,
       };
     },
   ),
@@ -448,6 +449,7 @@ export const invoiceRouter = createTRPCRouter({
         invoiceNumber,
         teamId: teamId!,
         userId: session?.user.id!,
+        templateId: input.templateId,
         paymentDetails: parseInputValue(input.paymentDetails),
         fromDetails: parseInputValue(input.fromDetails),
         customerDetails: parseInputValue(input.customerDetails),
