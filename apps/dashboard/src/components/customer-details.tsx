@@ -521,7 +521,7 @@ export function CustomerDetails() {
                           className="cursor-pointer hover:bg-muted/50"
                           onClick={() => {
                             // Close customer details sheet
-                            setParams({ customerId: null, type: null });
+                            setParams({ customerId: null, details: null });
                             // Open invoice details
                             setInvoiceParams({
                               invoiceId: invoice.id,
@@ -616,7 +616,7 @@ export function CustomerDetails() {
                       variant="outline"
                       onClick={() => {
                         // Close customer details sheet
-                        setParams({ customerId: null, type: null });
+                        setParams({ customerId: null, details: null });
                         // Open invoice creation with customer pre-selected
                         setInvoiceParams({
                           type: "create",
