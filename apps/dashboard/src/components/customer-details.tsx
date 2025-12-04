@@ -602,8 +602,31 @@ export function CustomerDetails() {
                   </Table>
                 </div>
               ) : (
-                <div className="text-center py-8 text-sm text-[#606060]">
-                  No invoices found
+                <div className="flex items-center justify-center py-12">
+                  <div className="flex flex-col items-center">
+                    <div className="text-center mb-6 space-y-2">
+                      <h2 className="font-medium text-sm">No invoices</h2>
+                      <p className="text-[#606060] text-xs">
+                        This customer doesn't have any invoices yet. <br />
+                        Create your first invoice for them.
+                      </p>
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        // Close customer details sheet
+                        setParams({ customerId: null, type: null });
+                        // Open invoice creation with customer pre-selected
+                        setInvoiceParams({
+                          type: "create",
+                          selectedCustomerId: customerId!,
+                        });
+                      }}
+                    >
+                      Create Invoice
+                    </Button>
+                  </div>
                 </div>
               )}
 
