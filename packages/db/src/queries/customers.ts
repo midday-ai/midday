@@ -471,6 +471,39 @@ export async function getCustomerInvoiceSummary(
     };
   }
 
+  // Collect unique currencies that need conversion (excluding base currency)
+  const currenciesToConvert = [
+    ...new Set(
+      invoiceData
+        .map((inv) => inv.currency || baseCurrency)
+        .filter((currency) => currency !== baseCurrency),
+    ),
+  ];
+
+  // Fetch all exchange rates
+  const exchangeRateMap = new Map<string, number>();
+  if (currenciesToConvert.length > 0) {
+    const exchangeRatesData = await db
+      .select({
+        base: exchangeRates.base,
+        rate: exchangeRates.rate,
+      })
+      .from(exchangeRates)
+      .where(
+        and(
+          inArray(exchangeRates.base, currenciesToConvert),
+          eq(exchangeRates.target, baseCurrency),
+        ),
+      );
+
+    // Build a map for O(1) lookup
+    for (const rateData of exchangeRatesData) {
+      if (rateData.base && rateData.rate) {
+        exchangeRateMap.set(rateData.base, Number(rateData.rate));
+      }
+    }
+  }
+
   // Convert all amounts to base currency and calculate totals
   let totalAmount = 0;
   let paidAmount = 0;
@@ -484,21 +517,8 @@ export async function getCustomerInvoiceSummary(
 
     // Convert to base currency if different
     if (currency !== baseCurrency) {
-      // Get exchange rate for this currency to base currency
-      const [exchangeRate] = await db
-        .select({ rate: exchangeRates.rate })
-        .from(exchangeRates)
-        .where(
-          and(
-            eq(exchangeRates.base, currency),
-            eq(exchangeRates.target, baseCurrency),
-          ),
-        )
-        .limit(1);
-
-      convertedAmount = exchangeRate?.rate
-        ? amount * Number(exchangeRate.rate)
-        : amount; // Fallback if no exchange rate found
+      const exchangeRate = exchangeRateMap.get(currency);
+      convertedAmount = exchangeRate ? amount * exchangeRate : amount; // Fallback if no exchange rate found
     }
 
     totalAmount += convertedAmount;

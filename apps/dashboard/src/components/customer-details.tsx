@@ -494,6 +494,15 @@ export function CustomerDetails() {
                       <TableRow
                         key={invoice.id}
                         className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => {
+                          // Close customer details sheet
+                          setParams({ customerId: null, type: null });
+                          // Open invoice details
+                          setInvoiceParams({
+                            invoiceId: invoice.id,
+                            type: "details",
+                          });
+                        }}
                       >
                         <TableCell className="text-[12px] whitespace-nowrap min-w-[100px]">
                           {invoice.invoiceNumber || "Draft"}
@@ -544,9 +553,10 @@ export function CustomerDetails() {
                             <DropdownMenuContent align="end">
                               {invoice.status !== "draft" && (
                                 <DropdownMenuItem
-                                  onClick={() =>
-                                    handleDownloadInvoice(invoice.id)
-                                  }
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDownloadInvoice(invoice.id);
+                                  }}
                                 >
                                   Download
                                 </DropdownMenuItem>

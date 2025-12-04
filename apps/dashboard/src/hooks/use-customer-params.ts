@@ -1,4 +1,9 @@
-import { parseAsBoolean, parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
+import {
+  parseAsBoolean,
+  parseAsString,
+  parseAsStringEnum,
+  useQueryStates,
+} from "nuqs";
 
 export function useCustomerParams() {
   const [params, setParams] = useQueryStates({

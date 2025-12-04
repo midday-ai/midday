@@ -53,7 +53,7 @@ export const customersRouter = createTRPCRouter({
     }),
 
   getInvoiceSummary: protectedProcedure
-    .input(getCustomerByIdSchema)
+    .input(getCustomerInvoiceSummarySchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
       return getCustomerInvoiceSummary(db, {
         customerId: input.id,
