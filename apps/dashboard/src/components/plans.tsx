@@ -14,6 +14,7 @@ import {
 import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
 import { useQuery } from "@tanstack/react-query";
 import { Check } from "lucide-react";
+import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -28,6 +29,7 @@ export function Plans() {
 
   const { data: user } = useUserQuery();
   const { data, isLoading } = useQuery(trpc.team.availablePlans.queryOptions());
+  const theme = useTheme().resolvedTheme === "dark" ? "dark" : "light";
 
   // Initialize PolarEmbedCheckout on mount
   useEffect(() => {
@@ -62,8 +64,7 @@ export function Plans() {
 
       const { url } = await response.json();
 
-      // Use dark theme
-      const checkout = await PolarEmbedCheckout.create(url, "dark");
+      const checkout = await PolarEmbedCheckout.create(url, theme);
       checkoutInstanceRef.current = checkout;
 
       // Handle checkout events
