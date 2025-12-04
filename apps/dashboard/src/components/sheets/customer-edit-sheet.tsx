@@ -29,7 +29,9 @@ export function CustomerEditSheet() {
   const queryClient = useQueryClient();
   const { setParams, customerId, type } = useCustomerParams();
 
-  const isOpen = Boolean(customerId && type === "edit");
+  const isOpen = Boolean(
+    customerId && (type === "edit" || type === "customer-edit"),
+  );
 
   const { data: customer } = useQuery(
     trpc.customers.getById.queryOptions(

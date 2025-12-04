@@ -72,7 +72,7 @@ export function DataTable() {
 
   const setOpen = (id?: string) => {
     if (id) {
-      setParams({ customerId: id, type: "details" });
+      setParams({ customerId: id, type: "customer-details" });
     } else {
       setParams(null);
     }

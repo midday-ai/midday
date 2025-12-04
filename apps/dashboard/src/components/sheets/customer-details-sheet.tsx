@@ -6,7 +6,9 @@ import { CustomerDetails } from "../customer-details";
 export function CustomerDetailsSheet() {
   const { customerId, type, setParams } = useCustomerParams();
 
-  const isOpen = Boolean(customerId && type === "details");
+  const isOpen = Boolean(
+    customerId && (type === "details" || type === "customer-details"),
+  );
 
   return (
     <Sheet

@@ -102,7 +102,11 @@ export function CustomerForm({ data }: Props) {
   const queryClient = useQueryClient();
   const isEdit = !!data;
 
-  const { setParams: setCustomerParams, name } = useCustomerParams();
+  const {
+    setParams: setCustomerParams,
+    name,
+    createCustomer,
+  } = useCustomerParams();
   const { setParams: setInvoiceParams, type } = useInvoiceParams();
   const fromInvoice = type === "create" || type === "edit";
 
@@ -126,12 +130,15 @@ export function CustomerForm({ data }: Props) {
           queryKey: trpc.search.global.queryKey(),
         });
 
-        // Close the customer form
-        setCustomerParams(null);
-
         // If the customer is created from an invoice, set the customer as the selected customer
+        // and don't close the customer form (to keep invoice sheet open)
         if (data && fromInvoice) {
           setInvoiceParams({ selectedCustomerId: data.id });
+          // Only clear createCustomer flag, keep other params to avoid closing invoice sheet
+          setCustomerParams({ createCustomer: null, name: null });
+        } else {
+          // Close the customer form if not from invoice
+          setCustomerParams(null);
         }
       },
     }),

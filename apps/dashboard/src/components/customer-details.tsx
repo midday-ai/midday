@@ -119,7 +119,7 @@ export function CustomerDetails() {
   };
 
   const handleEdit = () => {
-    setParams({ customerId: customerId!, type: "edit" });
+    setParams({ customerId: customerId!, type: "customer-edit" });
   };
 
   const filename = customer

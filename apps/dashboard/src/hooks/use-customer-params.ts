@@ -8,7 +8,12 @@ import {
 export function useCustomerParams() {
   const [params, setParams] = useQueryStates({
     customerId: parseAsString,
-    type: parseAsStringEnum(["details", "edit"]),
+    type: parseAsStringEnum([
+      "details",
+      "edit",
+      "customer-details",
+      "customer-edit",
+    ]),
     createCustomer: parseAsBoolean,
     name: parseAsString,
     q: parseAsString,
