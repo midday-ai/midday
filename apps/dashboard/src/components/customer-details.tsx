@@ -175,13 +175,16 @@ export function CustomerDetails() {
   return (
     <div className="h-full flex flex-col min-h-0 -mx-6">
       {/* Content */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide min-h-0 px-6 pb-4">
-        {/* Customer Header */}
-        <div className="text-[24px] font-serif leading-normal mb-2">
-          {customer.name}
+      <div className="flex-1 overflow-y-auto scrollbar-hide min-h-0">
+        {/* Sticky Customer Header */}
+        <div className="sticky top-0 z-10 bg-background border-b border-border px-6 py-4">
+          <div className="text-[24px] font-serif leading-normal">
+            {customer.name}
+          </div>
         </div>
 
-        <Accordion
+        <div className="px-6 pb-4">
+          <Accordion
           type="multiple"
           defaultValue={["general"]}
           className="space-y-0"
@@ -588,6 +591,7 @@ export function CustomerDetails() {
               </Button>
             )}
           </div>
+        </div>
         </div>
       </div>
 
