@@ -403,7 +403,7 @@ export function CustomerDetails() {
                     />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="z-[100]">
                   <DropdownMenuItem
                     onClick={handleShareStatement}
                     className="text-xs"
@@ -575,8 +575,11 @@ export function CustomerDetails() {
                                   <Icons.MoreHoriz className="size-4" />
                                 </button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                {invoice.status !== "draft" && (
+                              <DropdownMenuContent
+                                align="end"
+                                className="z-[100]"
+                              >
+                                {invoice.status !== "draft" ? (
                                   <DropdownMenuItem
                                     onClick={(e) => {
                                       e.stopPropagation();
@@ -584,6 +587,10 @@ export function CustomerDetails() {
                                     }}
                                   >
                                     Download
+                                  </DropdownMenuItem>
+                                ) : (
+                                  <DropdownMenuItem disabled>
+                                    No actions available
                                   </DropdownMenuItem>
                                 )}
                               </DropdownMenuContent>
