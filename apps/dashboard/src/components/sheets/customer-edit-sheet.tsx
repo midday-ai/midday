@@ -27,11 +27,9 @@ import { CustomerForm } from "../forms/customer-form";
 export function CustomerEditSheet() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const { setParams, customerId, type } = useCustomerParams();
+  const { setParams, customerId, details } = useCustomerParams();
 
-  const isOpen = Boolean(
-    customerId && (type === "edit" || type === "customer-edit"),
-  );
+  const isOpen = Boolean(customerId && !details);
 
   const { data: customer } = useQuery(
     trpc.customers.getById.queryOptions(
@@ -64,7 +62,7 @@ export function CustomerEditSheet() {
   );
 
   return (
-    <Sheet open={isOpen} onOpenChange={() => setParams({ customerId: null })}>
+    <Sheet open={isOpen} onOpenChange={() => setParams(null)}>
       <SheetContent stack>
         <SheetHeader className="mb-6 flex justify-between items-center flex-row">
           <h2 className="text-xl">Edit Customer</h2>

@@ -1,22 +1,12 @@
-import {
-  parseAsBoolean,
-  parseAsString,
-  parseAsStringEnum,
-  useQueryStates,
-} from "nuqs";
+import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 
 export function useCustomerParams() {
   const [params, setParams] = useQueryStates({
     customerId: parseAsString,
-    type: parseAsStringEnum([
-      "details",
-      "edit",
-      "customer-details",
-      "customer-edit",
-    ]),
     createCustomer: parseAsBoolean,
     name: parseAsString,
     q: parseAsString,
+    details: parseAsBoolean,
   });
 
   return {

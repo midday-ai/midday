@@ -144,7 +144,6 @@ export const columns: ColumnDef<Customer>[] = [
                 onClick={() =>
                   setParams({
                     customerId: row.original.id,
-                    type: "customer-edit",
                   })
                 }
               >

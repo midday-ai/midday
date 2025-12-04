@@ -134,7 +134,7 @@ export const columns: ColumnDef<Invoice>[] = [
         if (customerId) {
           setParams({
             customerId,
-            type: "customer-details",
+            details: true,
           });
         }
       };
