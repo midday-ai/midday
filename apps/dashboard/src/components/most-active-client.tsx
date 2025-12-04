@@ -12,14 +12,14 @@ export function MostActiveClient() {
 
   if (!data) {
     return (
-      <Card>
-        <CardHeader className="pb-3">
+      <Card className="hidden sm:block">
+        <CardHeader className="pb-2">
           <CardTitle className="font-medium text-2xl font-serif">
             No Active Client
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="pb-[34px]">
+        <CardContent className="pb-5">
           <div className="flex flex-col gap-2">
             <div>Most Active Client</div>
             <div className="text-sm text-muted-foreground">
@@ -40,14 +40,14 @@ export function MostActiveClient() {
       : `${trackerMinutes}m`;
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
+    <Card className="hidden sm:block">
+      <CardHeader className="pb-2">
         <CardTitle className="font-medium text-2xl font-serif">
           {data.customerName}
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="pb-[34px]">
+      <CardContent className="pb-5">
         <div className="flex flex-col gap-2">
           <div>Most Active Client</div>
           <div className="text-sm text-muted-foreground">

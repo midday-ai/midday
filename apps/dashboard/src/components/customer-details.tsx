@@ -185,413 +185,435 @@ export function CustomerDetails() {
 
         <div className="px-6 pb-4">
           <Accordion
-          type="multiple"
-          defaultValue={["general"]}
-          className="space-y-0"
-        >
-          {/* General Section */}
-          <AccordionItem value="general" className="border-b border-border">
-            <AccordionTrigger className="text-[16px] font-medium py-4">
-              General
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="grid grid-cols-2 gap-4 pt-0">
-                {customer.contact && (
-                  <div>
-                    <div className="text-[12px] mb-2 text-[#606060]">
-                      Contact person
+            type="multiple"
+            defaultValue={["general"]}
+            className="space-y-0"
+          >
+            {/* General Section */}
+            <AccordionItem value="general" className="border-b border-border">
+              <AccordionTrigger className="text-[16px] font-medium py-4">
+                General
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="grid grid-cols-2 gap-4 pt-0">
+                  {customer.contact && (
+                    <div>
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        Contact person
+                      </div>
+                      <div className="text-[14px]">{customer.contact}</div>
                     </div>
-                    <div className="text-[14px]">{customer.contact}</div>
-                  </div>
-                )}
-                {customer.email && (
-                  <div>
-                    <div className="text-[12px] mb-2 text-[#606060]">Email</div>
-                    <div className="text-[14px]">{customer.email}</div>
-                  </div>
-                )}
-                {customer.billingEmail && (
-                  <div>
-                    <div className="text-[12px] mb-2 text-[#606060]">
-                      Billing Email
+                  )}
+                  {customer.email && (
+                    <div>
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        Email
+                      </div>
+                      <div className="text-[14px]">{customer.email}</div>
                     </div>
-                    <div className="text-[14px]">{customer.billingEmail}</div>
-                  </div>
-                )}
-                {customer.phone && (
-                  <div>
-                    <div className="text-[12px] mb-2 text-[#606060]">Phone</div>
-                    <div className="text-[14px]">{customer.phone}</div>
-                  </div>
-                )}
-                {customer.website && (
-                  <div>
-                    <div className="text-[12px] mb-2 text-[#606060]">
-                      Website
+                  )}
+                  {customer.billingEmail && (
+                    <div>
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        Billing Email
+                      </div>
+                      <div className="text-[14px]">{customer.billingEmail}</div>
                     </div>
-                    <div className="text-[14px]">{customer.website}</div>
-                  </div>
-                )}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
+                  )}
+                  {customer.phone && (
+                    <div>
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        Phone
+                      </div>
+                      <div className="text-[14px]">{customer.phone}</div>
+                    </div>
+                  )}
+                  {customer.website && (
+                    <div>
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        Website
+                      </div>
+                      <div className="text-[14px]">{customer.website}</div>
+                    </div>
+                  )}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
 
-          {/* Details Section */}
-          <AccordionItem value="details" className="border-b border-border">
-            <AccordionTrigger className="text-[16px] font-medium py-4">
-              Details
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="grid grid-cols-2 gap-4 pt-0">
-                {customer.addressLine1 ? (
-                  <div>
-                    <div className="text-[12px] mb-2 text-[#606060]">
-                      Address
+            {/* Details Section */}
+            <AccordionItem value="details" className="border-b border-border">
+              <AccordionTrigger className="text-[16px] font-medium py-4">
+                Details
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="grid grid-cols-2 gap-4 pt-0">
+                  {customer.addressLine1 ? (
+                    <div>
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        Address
+                      </div>
+                      <div className="text-[14px]">
+                        {customer.addressLine1}
+                        {customer.addressLine2 && `, ${customer.addressLine2}`}
+                      </div>
                     </div>
-                    <div className="text-[14px]">
-                      {customer.addressLine1}
-                      {customer.addressLine2 && `, ${customer.addressLine2}`}
+                  ) : (
+                    <div>
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        Address
+                      </div>
+                      <div className="text-[14px] text-[#606060]">-</div>
                     </div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="text-[12px] mb-2 text-[#606060]">
-                      Address
+                  )}
+                  {customer.city ? (
+                    <div>
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        City
+                      </div>
+                      <div className="text-[14px]">{customer.city}</div>
                     </div>
-                    <div className="text-[14px] text-[#606060]">-</div>
-                  </div>
-                )}
-                {customer.city ? (
-                  <div>
-                    <div className="text-[12px] mb-2 text-[#606060]">City</div>
-                    <div className="text-[14px]">{customer.city}</div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="text-[12px] mb-2 text-[#606060]">City</div>
-                    <div className="text-[14px] text-[#606060]">-</div>
-                  </div>
-                )}
-                {customer.state ? (
-                  <div>
-                    <div className="text-[12px] mb-2 text-[#606060]">State</div>
-                    <div className="text-[14px]">{customer.state}</div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="text-[12px] mb-2 text-[#606060]">State</div>
-                    <div className="text-[14px] text-[#606060]">-</div>
-                  </div>
-                )}
-                {customer.zip ? (
-                  <div>
-                    <div className="text-[12px] mb-2 text-[#606060]">
-                      ZIP Code
+                  ) : (
+                    <div>
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        City
+                      </div>
+                      <div className="text-[14px] text-[#606060]">-</div>
                     </div>
-                    <div className="text-[14px]">{customer.zip}</div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="text-[12px] mb-2 text-[#606060]">
-                      ZIP Code
+                  )}
+                  {customer.state ? (
+                    <div>
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        State
+                      </div>
+                      <div className="text-[14px]">{customer.state}</div>
                     </div>
-                    <div className="text-[14px] text-[#606060]">-</div>
-                  </div>
-                )}
-                {customer.country ? (
-                  <div>
-                    <div className="text-[12px] mb-2 text-[#606060]">
-                      Country
+                  ) : (
+                    <div>
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        State
+                      </div>
+                      <div className="text-[14px] text-[#606060]">-</div>
                     </div>
-                    <div className="text-[14px]">{customer.country}</div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="text-[12px] mb-2 text-[#606060]">
-                      Country
+                  )}
+                  {customer.zip ? (
+                    <div>
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        ZIP Code
+                      </div>
+                      <div className="text-[14px]">{customer.zip}</div>
                     </div>
-                    <div className="text-[14px] text-[#606060]">-</div>
-                  </div>
-                )}
-                {customer.vatNumber ? (
-                  <div>
-                    <div className="text-[12px] mb-2 text-[#606060]">
-                      VAT Number
+                  ) : (
+                    <div>
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        ZIP Code
+                      </div>
+                      <div className="text-[14px] text-[#606060]">-</div>
                     </div>
-                    <div className="text-[14px]">{customer.vatNumber}</div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="text-[12px] mb-2 text-[#606060]">
-                      VAT Number
+                  )}
+                  {customer.country ? (
+                    <div>
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        Country
+                      </div>
+                      <div className="text-[14px]">{customer.country}</div>
                     </div>
-                    <div className="text-[14px] text-[#606060]">-</div>
-                  </div>
-                )}
-                {customer.note ? (
-                  <div className="col-span-2">
-                    <div className="text-[12px] mb-2 text-[#606060]">Note</div>
-                    <div className="text-[14px]">{customer.note}</div>
-                  </div>
-                ) : (
-                  <div className="col-span-2">
-                    <div className="text-[12px] mb-2 text-[#606060]">Note</div>
-                    <div className="text-[14px] text-[#606060]">-</div>
-                  </div>
-                )}
-                {customer.tags && customer.tags.length > 0 ? (
-                  <div className="col-span-2">
-                    <div className="text-[12px] mb-2 text-[#606060]">Tags</div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {customer.tags.map((tag) => (
-                        <Link
-                          href={`/transactions?tags=${tag.id}`}
-                          key={tag.id}
-                        >
-                          <Badge
-                            variant="tag-rounded"
-                            className="whitespace-nowrap"
+                  ) : (
+                    <div>
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        Country
+                      </div>
+                      <div className="text-[14px] text-[#606060]">-</div>
+                    </div>
+                  )}
+                  {customer.vatNumber ? (
+                    <div>
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        VAT Number
+                      </div>
+                      <div className="text-[14px]">{customer.vatNumber}</div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        VAT Number
+                      </div>
+                      <div className="text-[14px] text-[#606060]">-</div>
+                    </div>
+                  )}
+                  {customer.note ? (
+                    <div className="col-span-2">
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        Note
+                      </div>
+                      <div className="text-[14px]">{customer.note}</div>
+                    </div>
+                  ) : (
+                    <div className="col-span-2">
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        Note
+                      </div>
+                      <div className="text-[14px] text-[#606060]">-</div>
+                    </div>
+                  )}
+                  {customer.tags && customer.tags.length > 0 ? (
+                    <div className="col-span-2">
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        Tags
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {customer.tags.map((tag) => (
+                          <Link
+                            href={`/transactions?tags=${tag.id}`}
+                            key={tag.id}
                           >
-                            {tag.name}
-                          </Badge>
-                        </Link>
-                      ))}
+                            <Badge
+                              variant="tag-rounded"
+                              className="whitespace-nowrap"
+                            >
+                              {tag.name}
+                            </Badge>
+                          </Link>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="col-span-2">
-                    <div className="text-[12px] mb-2 text-[#606060]">Tags</div>
-                    <div className="text-[14px] text-[#606060]">-</div>
-                  </div>
-                )}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+                  ) : (
+                    <div className="col-span-2">
+                      <div className="text-[12px] mb-2 text-[#606060]">
+                        Tags
+                      </div>
+                      <div className="text-[14px] text-[#606060]">-</div>
+                    </div>
+                  )}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
 
-        {/* Statement Section */}
-        <div className="border-t border-border pt-6 mt-6">
-          {/* Statement Header */}
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-[16px] font-medium">Statement</h3>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="p-0 h-6 w-6">
-                  <Icons.MoreVertical
-                    size={15}
-                    className="text-muted-foreground"
-                  />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={handleShareStatement}
-                  className="text-xs"
-                >
-                  Share
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleDownloadStatement}
-                  className="text-xs"
-                >
-                  Download
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {/* Statement Content */}
-          <div data-statement-content>
-            {/* Company Title - Only visible in PDF */}
-            <div
-              className="hidden text-[32px] font-serif leading-normal mb-8"
-              data-show-in-pdf="true"
-            >
-              {customer.name}
+          {/* Statement Section */}
+          <div className="border-t border-border pt-6 mt-6">
+            {/* Statement Header */}
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-[16px] font-medium">Statement</h3>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="p-0 h-6 w-6">
+                    <Icons.MoreVertical
+                      size={15}
+                      className="text-muted-foreground"
+                    />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={handleShareStatement}
+                    className="text-xs"
+                  >
+                    Share
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleDownloadStatement}
+                    className="text-xs"
+                  >
+                    Download
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
-            {/* Summary Stats */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="border border-border px-4 py-3">
-                <div className="text-[12px] text-[#606060] mb-2">
-                  Total Amount
-                </div>
-                <div className="text-[18px] font-medium">
-                  {summary?.currency ? (
-                    <FormatAmount
-                      amount={summary.totalAmount}
-                      currency={summary.currency}
-                    />
-                  ) : (
-                    "-"
-                  )}
-                </div>
+            {/* Statement Content */}
+            <div data-statement-content>
+              {/* Company Title - Only visible in PDF */}
+              <div
+                className="hidden text-[32px] font-serif leading-normal mb-8"
+                data-show-in-pdf="true"
+              >
+                {customer.name}
               </div>
-              <div className="border border-border px-4 py-3">
-                <div className="text-[12px] text-[#606060] mb-2">Paid</div>
-                <div className="text-[18px] font-medium">
-                  {summary?.currency ? (
-                    <FormatAmount
-                      amount={summary.paidAmount}
-                      currency={summary.currency}
-                    />
-                  ) : (
-                    "-"
-                  )}
-                </div>
-              </div>
-              <div className="border border-border px-4 py-3">
-                <div className="text-[12px] text-[#606060] mb-2">
-                  Outstanding
-                </div>
-                <div className="text-[18px] font-medium">
-                  {summary?.currency ? (
-                    <FormatAmount
-                      amount={summary.outstandingAmount}
-                      currency={summary.currency}
-                    />
-                  ) : (
-                    "-"
-                  )}
-                </div>
-              </div>
-              <div className="border border-border px-4 py-3">
-                <div className="text-[12px] text-[#606060] mb-2">Invoices</div>
-                <div className="text-[18px] font-medium">
-                  {summary?.invoiceCount ?? 0}
-                </div>
-              </div>
-            </div>
 
-            {/* Invoice Table */}
-            {invoices.length > 0 ? (
-              <div ref={dropdownContainerRef}>
-                <Table>
-                  <TableHeader className="bg-muted/50">
-                    <TableRow>
-                      <TableHead className="text-[12px] font-medium text-[#606060]">
-                        Invoice
-                      </TableHead>
-                      <TableHead className="text-[12px] font-medium text-[#606060]">
-                        Date
-                      </TableHead>
-                      <TableHead className="text-[12px] font-medium text-[#606060]">
-                        Due Date
-                      </TableHead>
-                      <TableHead className="text-[12px] font-medium text-[#606060]">
-                        Amount
-                      </TableHead>
-                      <TableHead className="text-[12px] font-medium text-[#606060]">
-                        Status
-                      </TableHead>
-                      <TableHead
-                        className="text-[12px] font-medium text-[#606060] text-center w-[60px]"
-                        data-hide-in-pdf="true"
-                      >
-                        Actions
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {invoices.map((invoice) => (
-                      <TableRow
-                        key={invoice.id}
-                        className="cursor-pointer hover:bg-muted/50"
-                        onClick={() => {
-                          // Close customer details sheet
-                          setParams({ customerId: null, type: null });
-                          // Open invoice details
-                          setInvoiceParams({
-                            invoiceId: invoice.id,
-                            type: "details",
-                          });
-                        }}
-                      >
-                        <TableCell className="text-[12px] whitespace-nowrap min-w-[100px]">
-                          {invoice.invoiceNumber || "Draft"}
-                        </TableCell>
-                        <TableCell className="text-[12px] whitespace-nowrap">
-                          {invoice.issueDate
-                            ? formatDate(invoice.issueDate, "MMM d")
-                            : "-"}
-                        </TableCell>
-                        <TableCell className="text-[12px] whitespace-nowrap">
-                          {invoice.dueDate
-                            ? formatDate(invoice.dueDate, "MMM d")
-                            : "-"}
-                        </TableCell>
-                        <TableCell className="text-[12px] whitespace-nowrap">
-                          {invoice.amount && invoice.currency ? (
-                            <FormatAmount
-                              amount={invoice.amount}
-                              currency={invoice.currency}
-                            />
-                          ) : (
-                            "-"
-                          )}
-                        </TableCell>
-                        <TableCell className="text-[12px] whitespace-nowrap">
-                          <InvoiceStatus
-                            status={invoice.status as any}
-                            className="text-xs"
-                            textOnly
-                          />
-                        </TableCell>
-                        <TableCell
-                          className="text-center w-[60px]"
+              {/* Summary Stats */}
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="border border-border px-4 py-3">
+                  <div className="text-[12px] text-[#606060] mb-2">
+                    Total Amount
+                  </div>
+                  <div className="text-[18px] font-medium">
+                    {summary?.currency ? (
+                      <FormatAmount
+                        amount={summary.totalAmount}
+                        currency={summary.currency}
+                      />
+                    ) : (
+                      "-"
+                    )}
+                  </div>
+                </div>
+                <div className="border border-border px-4 py-3">
+                  <div className="text-[12px] text-[#606060] mb-2">Paid</div>
+                  <div className="text-[18px] font-medium">
+                    {summary?.currency ? (
+                      <FormatAmount
+                        amount={summary.paidAmount}
+                        currency={summary.currency}
+                      />
+                    ) : (
+                      "-"
+                    )}
+                  </div>
+                </div>
+                <div className="border border-border px-4 py-3">
+                  <div className="text-[12px] text-[#606060] mb-2">
+                    Outstanding
+                  </div>
+                  <div className="text-[18px] font-medium">
+                    {summary?.currency ? (
+                      <FormatAmount
+                        amount={summary.outstandingAmount}
+                        currency={summary.currency}
+                      />
+                    ) : (
+                      "-"
+                    )}
+                  </div>
+                </div>
+                <div className="border border-border px-4 py-3">
+                  <div className="text-[12px] text-[#606060] mb-2">
+                    Invoices
+                  </div>
+                  <div className="text-[18px] font-medium">
+                    {summary?.invoiceCount ?? 0}
+                  </div>
+                </div>
+              </div>
+
+              {/* Invoice Table */}
+              {invoices.length > 0 ? (
+                <div ref={dropdownContainerRef}>
+                  <Table>
+                    <TableHeader className="bg-muted/50">
+                      <TableRow>
+                        <TableHead className="text-[12px] font-medium text-[#606060]">
+                          Invoice
+                        </TableHead>
+                        <TableHead className="text-[12px] font-medium text-[#606060]">
+                          Date
+                        </TableHead>
+                        <TableHead className="text-[12px] font-medium text-[#606060]">
+                          Due Date
+                        </TableHead>
+                        <TableHead className="text-[12px] font-medium text-[#606060]">
+                          Amount
+                        </TableHead>
+                        <TableHead className="text-[12px] font-medium text-[#606060]">
+                          Status
+                        </TableHead>
+                        <TableHead
+                          className="text-[12px] font-medium text-[#606060] text-center w-[60px]"
                           data-hide-in-pdf="true"
                         >
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <button
-                                type="button"
-                                className="text-[#606060] hover:text-foreground transition-colors"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                }}
-                              >
-                                <Icons.MoreHoriz className="size-4" />
-                              </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              {invoice.status !== "draft" && (
-                                <DropdownMenuItem
+                          Actions
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {invoices.map((invoice) => (
+                        <TableRow
+                          key={invoice.id}
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => {
+                            // Close customer details sheet
+                            setParams({ customerId: null, type: null });
+                            // Open invoice details
+                            setInvoiceParams({
+                              invoiceId: invoice.id,
+                              type: "details",
+                            });
+                          }}
+                        >
+                          <TableCell className="text-[12px] whitespace-nowrap min-w-[100px]">
+                            {invoice.invoiceNumber || "Draft"}
+                          </TableCell>
+                          <TableCell className="text-[12px] whitespace-nowrap">
+                            {invoice.issueDate
+                              ? formatDate(invoice.issueDate, "MMM d")
+                              : "-"}
+                          </TableCell>
+                          <TableCell className="text-[12px] whitespace-nowrap">
+                            {invoice.dueDate
+                              ? formatDate(invoice.dueDate, "MMM d")
+                              : "-"}
+                          </TableCell>
+                          <TableCell className="text-[12px] whitespace-nowrap">
+                            {invoice.amount && invoice.currency ? (
+                              <FormatAmount
+                                amount={invoice.amount}
+                                currency={invoice.currency}
+                              />
+                            ) : (
+                              "-"
+                            )}
+                          </TableCell>
+                          <TableCell className="text-[12px] whitespace-nowrap">
+                            <InvoiceStatus
+                              status={invoice.status as any}
+                              className="text-xs"
+                              textOnly
+                            />
+                          </TableCell>
+                          <TableCell
+                            className="text-center w-[60px]"
+                            data-hide-in-pdf="true"
+                          >
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button
+                                  type="button"
+                                  className="text-[#606060] hover:text-foreground transition-colors"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleDownloadInvoice(invoice.id);
                                   }}
                                 >
-                                  Download
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="text-center py-8 text-sm text-[#606060]">
-                No invoices found
-              </div>
-            )}
+                                  <Icons.MoreHoriz className="size-4" />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                {invoice.status !== "draft" && (
+                                  <DropdownMenuItem
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDownloadInvoice(invoice.id);
+                                    }}
+                                  >
+                                    Download
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-sm text-[#606060]">
+                  No invoices found
+                </div>
+              )}
 
-            {/* Load More Button */}
-            {hasNextPage && (
-              <Button
-                variant="outline"
-                className="w-full mt-4 rounded-none"
-                onClick={handleLoadMore}
-                disabled={isFetchingNextPage}
-                data-hide-in-pdf="true"
-              >
-                {isFetchingNextPage ? "Loading..." : "Load More"}
-              </Button>
-            )}
+              {/* Load More Button */}
+              {hasNextPage && (
+                <Button
+                  variant="outline"
+                  className="w-full mt-4 rounded-none"
+                  onClick={handleLoadMore}
+                  disabled={isFetchingNextPage}
+                  data-hide-in-pdf="true"
+                >
+                  {isFetchingNextPage ? "Loading..." : "Load More"}
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
         </div>
       </div>
 
