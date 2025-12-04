@@ -33,6 +33,15 @@ export function TransactionsActions() {
           queryKey: trpc.transactions.get.infiniteQueryKey(),
         });
 
+        // Invalidate inbox queries since matched inbox items are cleared
+        queryClient.invalidateQueries({
+          queryKey: trpc.inbox.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.inbox.getById.queryKey(),
+        });
+
         setRowSelection({});
       },
     }),
