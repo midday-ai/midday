@@ -3736,35 +3736,47 @@ export async function getBalanceSheet(
   for (const invoice of invoicesNeedingConversion) {
     const key = `${invoice.currency}-${currency}`;
     const rate = exchangeRateMap.get(key);
-    const convertedAmount = rate ? invoice.amount * rate : invoice.amount; // Fallback if no exchange rate found
-    accountsReceivable += convertedAmount;
+    if (rate) {
+      const convertedAmount = invoice.amount * rate;
+      accountsReceivable += convertedAmount;
+    }
+    // Skip invoices with missing exchange rates to avoid mixing currencies
+    // This prevents silently producing incorrect totals
   }
 
   // Convert bills using batch-fetched rates
   for (const bill of billsNeedingConversion) {
     const key = `${bill.currency}-${currency}`;
     const rate = exchangeRateMap.get(key);
-    const convertedAmount = rate ? bill.amount * rate : bill.amount; // Fallback if no exchange rate found
-    accountsPayable += convertedAmount;
+    if (rate) {
+      const convertedAmount = bill.amount * rate;
+      accountsPayable += convertedAmount;
+    }
+    // Skip bills with missing exchange rates to avoid mixing currencies
+    // This prevents silently producing incorrect totals
   }
 
   // Convert accounts using batch-fetched rates
   for (const account of accountsNeedingConversion) {
     const key = `${account.currency}-${currency}`;
     const rate = exchangeRateMap.get(key);
-    const convertedBalance = rate ? account.balance * rate : account.balance; // Fallback if no exchange rate found
+    if (rate) {
+      const convertedBalance = account.balance * rate;
 
-    if (account.type === "credit") {
-      // Credit card balances are negative (debt owed), so we take absolute value
-      creditCardDebt += Math.abs(convertedBalance);
-    } else if (account.type === "loan") {
-      // Loan account balances are typically positive (amount owed)
-      loanAccountDebt += Math.abs(convertedBalance);
-    } else if (account.type === "other_asset") {
-      otherAssets += Math.abs(convertedBalance);
-    } else if (account.type === "other_liability") {
-      otherLiabilities += Math.abs(convertedBalance);
+      if (account.type === "credit") {
+        // Credit card balances are negative (debt owed), so we take absolute value
+        creditCardDebt += Math.abs(convertedBalance);
+      } else if (account.type === "loan") {
+        // Loan account balances are typically positive (amount owed)
+        loanAccountDebt += Math.abs(convertedBalance);
+      } else if (account.type === "other_asset") {
+        otherAssets += Math.abs(convertedBalance);
+      } else if (account.type === "other_liability") {
+        otherLiabilities += Math.abs(convertedBalance);
+      }
     }
+    // Skip accounts with missing exchange rates to avoid mixing currencies
+    // This prevents silently producing incorrect totals
   }
 
   // Classify debt as short-term vs long-term based on loan age

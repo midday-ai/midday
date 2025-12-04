@@ -746,22 +746,23 @@ export async function getInvoiceSummary(
         )
         .limit(1);
 
-      const convertedAmount = exchangeRate?.rate
-        ? amount * Number(exchangeRate.rate)
-        : amount; // Fallback if no exchange rate found
+      if (exchangeRate?.rate) {
+        const convertedAmount = amount * Number(exchangeRate.rate);
+        totalAmount += convertedAmount;
 
-      totalAmount += convertedAmount;
-
-      const existing = currencyBreakdown.get(currency) || {
-        amount: 0,
-        count: 0,
-        convertedAmount: 0,
-      };
-      currencyBreakdown.set(currency, {
-        amount: existing.amount + amount,
-        count: existing.count + 1,
-        convertedAmount: existing.convertedAmount + convertedAmount,
-      });
+        const existing = currencyBreakdown.get(currency) || {
+          amount: 0,
+          count: 0,
+          convertedAmount: 0,
+        };
+        currencyBreakdown.set(currency, {
+          amount: existing.amount + amount,
+          count: existing.count + 1,
+          convertedAmount: existing.convertedAmount + convertedAmount,
+        });
+      }
+      // Skip invoices with missing exchange rates to avoid mixing currencies
+      // This prevents silently producing incorrect totals
     }
   }
 

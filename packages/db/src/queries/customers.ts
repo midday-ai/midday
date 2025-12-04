@@ -508,27 +508,39 @@ export async function getCustomerInvoiceSummary(
   let totalAmount = 0;
   let paidAmount = 0;
   let outstandingAmount = 0;
+  let invoiceCount = 0;
 
   for (const invoice of invoiceData) {
     const amount = Number(invoice.amount) || 0;
     const currency = invoice.currency || baseCurrency;
 
     let convertedAmount = amount;
+    let canConvert = true;
 
     // Convert to base currency if different
     if (currency !== baseCurrency) {
       const exchangeRate = exchangeRateMap.get(currency);
-      convertedAmount = exchangeRate ? amount * exchangeRate : amount; // Fallback if no exchange rate found
+      if (exchangeRate) {
+        convertedAmount = amount * exchangeRate;
+      } else {
+        // Skip invoices with missing exchange rates to avoid mixing currencies
+        // This prevents silently producing incorrect totals
+        canConvert = false;
+      }
     }
 
-    // Only include invoices that are paid or outstanding in totalAmount
+    // Only include invoices that can be properly converted and are paid or outstanding
     // Draft, canceled, and scheduled invoices don't count toward financial totals
-    if (invoice.status === "paid") {
-      paidAmount += convertedAmount;
-      totalAmount += convertedAmount;
-    } else if (invoice.status === "unpaid" || invoice.status === "overdue") {
-      outstandingAmount += convertedAmount;
-      totalAmount += convertedAmount;
+    if (canConvert) {
+      if (invoice.status === "paid") {
+        paidAmount += convertedAmount;
+        totalAmount += convertedAmount;
+        invoiceCount++;
+      } else if (invoice.status === "unpaid" || invoice.status === "overdue") {
+        outstandingAmount += convertedAmount;
+        totalAmount += convertedAmount;
+        invoiceCount++;
+      }
     }
   }
 
@@ -536,7 +548,7 @@ export async function getCustomerInvoiceSummary(
     totalAmount: Math.round(totalAmount * 100) / 100,
     paidAmount: Math.round(paidAmount * 100) / 100,
     outstandingAmount: Math.round(outstandingAmount * 100) / 100,
-    invoiceCount: invoiceData.length,
+    invoiceCount,
     currency: baseCurrency,
   };
 }
