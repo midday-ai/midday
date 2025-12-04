@@ -521,12 +521,14 @@ export async function getCustomerInvoiceSummary(
       convertedAmount = exchangeRate ? amount * exchangeRate : amount; // Fallback if no exchange rate found
     }
 
-    totalAmount += convertedAmount;
-
+    // Only include invoices that are paid or outstanding in totalAmount
+    // Draft, canceled, and scheduled invoices don't count toward financial totals
     if (invoice.status === "paid") {
       paidAmount += convertedAmount;
+      totalAmount += convertedAmount;
     } else if (invoice.status === "unpaid" || invoice.status === "overdue") {
       outstandingAmount += convertedAmount;
+      totalAmount += convertedAmount;
     }
   }
 
