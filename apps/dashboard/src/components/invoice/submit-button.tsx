@@ -156,8 +156,9 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
   const invoiceNumberValid = !formState.errors.invoiceNumber;
 
   const trpc = useTRPC();
+  const templateId = watch("templateId");
   const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
+    trpc.invoiceTemplates.upsert.mutationOptions(),
   );
 
   const cancelScheduleMutation = useMutation(
@@ -173,6 +174,7 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
     if (deliveryType !== "scheduled") {
       updateTemplateMutation.mutate({
         deliveryType,
+        templateId,
       });
 
       // If changing from scheduled to another type, cancel the scheduled job

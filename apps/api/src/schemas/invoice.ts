@@ -248,6 +248,9 @@ export const draftInvoiceSchema = baseDraftInvoiceSchema.extend({
   template: upsertInvoiceTemplateSchema.openapi({
     description: "Invoice template details for the draft invoice",
   }),
+  templateId: z.string().uuid().optional().openapi({
+    description: "ID of the invoice template to save changes to",
+  }),
   paymentDetails: z.string().optional().nullable(),
   fromDetails: z.string().optional().nullable(),
   topBlock: z.any().nullable().optional().openapi({
@@ -450,6 +453,26 @@ export const upsertInvoiceProductSchema = z.object({
   price: z.number().optional().nullable(),
   currency: z.string().optional().nullable(),
   unit: z.string().optional().nullable(),
+});
+
+// Template operation schemas
+export const createInvoiceTemplateSchema = upsertInvoiceTemplateSchema.extend({
+  name: z.string().min(1, "Template name is required"),
+  isDefault: z.boolean().optional(),
+});
+
+export const updateInvoiceTemplateSchema = upsertInvoiceTemplateSchema.extend({
+  id: z.string().uuid(),
+  name: z.string().min(1, "Template name is required").optional(),
+  isDefault: z.boolean().optional(),
+});
+
+export const deleteInvoiceTemplateSchema = z.object({
+  id: z.string().uuid(),
+});
+
+export const setDefaultInvoiceTemplateSchema = z.object({
+  id: z.string().uuid(),
 });
 
 export const invoiceTemplateSchema = z.object({

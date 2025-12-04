@@ -16,12 +16,13 @@ import { ProductAwareUnitInput } from "./product-aware-unit-input";
 import { QuantityInput } from "./quantity-input";
 
 export function LineItems() {
-  const { control } = useFormContext();
+  const { control, watch } = useFormContext();
   const currency = useWatch({ control, name: "template.currency" });
+  const templateId = watch("templateId");
 
   const trpc = useTRPC();
   const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
+    trpc.invoiceTemplates.upsert.mutationOptions(),
   );
 
   const includeDecimals = useWatch({
@@ -73,6 +74,7 @@ export function LineItems() {
           onSave={(value) => {
             updateTemplateMutation.mutate({
               descriptionLabel: value,
+              templateId,
             });
           }}
           className="truncate"
@@ -83,6 +85,7 @@ export function LineItems() {
           onSave={(value) => {
             updateTemplateMutation.mutate({
               quantityLabel: value,
+              templateId,
             });
           }}
           className="truncate"
@@ -93,6 +96,7 @@ export function LineItems() {
           onSave={(value) => {
             updateTemplateMutation.mutate({
               priceLabel: value,
+              templateId,
             });
           }}
           className="truncate"
@@ -103,6 +107,7 @@ export function LineItems() {
           onSave={(value) => {
             updateTemplateMutation.mutate({
               totalLabel: value,
+              templateId,
             });
           }}
           className="text-right truncate"

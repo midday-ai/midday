@@ -107,9 +107,10 @@ const menuItems = [
 
 export function SettingsMenu() {
   const { watch, setValue } = useFormContext();
+  const templateId = watch("templateId");
   const trpc = useTRPC();
   const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
+    trpc.invoiceTemplates.upsert.mutationOptions(),
   );
 
   return (
@@ -143,6 +144,7 @@ export function SettingsMenu() {
                       });
                       updateTemplateMutation.mutate({
                         [item.key]: value,
+                        templateId,
                       });
                     }}
                   />
@@ -172,6 +174,7 @@ export function SettingsMenu() {
 
                         updateTemplateMutation.mutate({
                           [item.key]: option.value,
+                          templateId,
                         });
                       }
                     }}

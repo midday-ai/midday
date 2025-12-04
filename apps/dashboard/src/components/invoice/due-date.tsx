@@ -12,12 +12,13 @@ export function DueDate() {
   const { setValue, watch } = useFormContext();
   const dueDate = watch("dueDate");
   const dateFormat = watch("template.dateFormat");
+  const templateId = watch("templateId");
 
   const [isOpen, setIsOpen] = useState(false);
 
   const trpc = useTRPC();
   const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
+    trpc.invoiceTemplates.upsert.mutationOptions(),
   );
 
   const handleSelect = (date: Date | undefined) => {
@@ -36,7 +37,7 @@ export function DueDate() {
         <LabelInput
           name="template.dueDateLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({ dueDateLabel: value });
+            updateTemplateMutation.mutate({ dueDateLabel: value, templateId });
           }}
         />
         <span className="text-[11px] text-[#878787] font-mono">:</span>

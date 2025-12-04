@@ -9,10 +9,11 @@ import { LabelInput } from "./label-input";
 export function PaymentDetails() {
   const { control, watch } = useFormContext();
   const id = watch("id");
+  const templateId = watch("templateId");
 
   const trpc = useTRPC();
   const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
+    trpc.invoiceTemplates.upsert.mutationOptions(),
   );
 
   return (
@@ -20,7 +21,7 @@ export function PaymentDetails() {
       <LabelInput
         name="template.paymentLabel"
         onSave={(value) => {
-          updateTemplateMutation.mutate({ paymentLabel: value });
+          updateTemplateMutation.mutate({ paymentLabel: value, templateId });
         }}
         className="mb-2 block"
       />
@@ -37,6 +38,7 @@ export function PaymentDetails() {
             onBlur={(content) => {
               updateTemplateMutation.mutate({
                 paymentDetails: content ? JSON.stringify(content) : null,
+                templateId,
               });
             }}
             className="min-h-[78px]"
