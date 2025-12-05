@@ -16,7 +16,6 @@ import {
 import {
   calculateReceiptQualityScore,
   getReceiptFieldsNeedingReExtraction,
-  isReceiptDataQualityPoor,
 } from "../../utils/validation";
 import { BaseExtractionEngine } from "../base-extraction-engine";
 
@@ -104,7 +103,7 @@ export class ReceiptProcessor extends BaseExtractionEngine<
     );
   }
 
-  #getWebsite({
+  async #getWebsite({
     website,
     email,
     storeName,
@@ -113,7 +112,7 @@ export class ReceiptProcessor extends BaseExtractionEngine<
     email: string | null;
     storeName: string | null;
   }) {
-    return extractWebsite(website, email, storeName);
+    return extractWebsite(website, email, storeName, this.logger);
   }
 
   public async getReceipt(params: GetDocumentRequest) {
@@ -126,7 +125,7 @@ export class ReceiptProcessor extends BaseExtractionEngine<
       logger: this.logger,
     });
 
-    const website = this.#getWebsite({
+    const website = await this.#getWebsite({
       website: result.data.website,
       email: result.data.email,
       storeName: result.data.store_name,

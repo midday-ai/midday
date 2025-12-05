@@ -104,7 +104,7 @@ export class InvoiceProcessor extends BaseExtractionEngine<
     );
   }
 
-  #getWebsite({
+  async #getWebsite({
     website,
     email,
     vendorName,
@@ -113,7 +113,7 @@ export class InvoiceProcessor extends BaseExtractionEngine<
     email: string | null;
     vendorName: string | null;
   }) {
-    return extractWebsite(website, email, vendorName);
+    return extractWebsite(website, email, vendorName, this.logger);
   }
 
   public async getInvoice(params: GetDocumentRequest) {
@@ -126,7 +126,7 @@ export class InvoiceProcessor extends BaseExtractionEngine<
       logger: this.logger,
     });
 
-    const website = this.#getWebsite({
+    const website = await this.#getWebsite({
       website: result.data.website,
       email: result.data.email,
       vendorName: result.data.vendor_name,

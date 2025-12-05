@@ -1,4 +1,5 @@
 import type { Attachments } from "./types";
+import { lookupDomainByCompanyName } from "./utils/domain-lookup";
 
 export const allowedMimeTypes = [
   "image/heic",
@@ -129,11 +130,12 @@ export function removeProtocolFromDomain(domain: string | null): string | null {
  * Intelligently extract website from invoice/receipt data
  * Tries multiple sources: explicit website, email domain, vendor name lookup
  */
-export function extractWebsite(
+export async function extractWebsite(
   website: string | null | undefined,
   email: string | null | undefined,
   vendorName: string | null | undefined,
-): string | null {
+  logger?: ReturnType<typeof import("@midday/logger").createLoggerWithContext>,
+): Promise<string | null> {
   // First priority: explicit website field
   if (website) {
     const cleaned = removeProtocolFromDomain(website);
@@ -159,8 +161,25 @@ export function extractWebsite(
     }
   }
 
-  // Third priority: could try to infer from vendor name, but that requires external lookup
-  // For now, return null if we can't find it
+  // Third priority: lookup domain by company name using Gemini Grounding
+  if (vendorName) {
+    try {
+      const lookedUpDomain = await lookupDomainByCompanyName(
+        vendorName,
+        logger,
+      );
+      if (lookedUpDomain) {
+        return lookedUpDomain;
+      }
+    } catch (error) {
+      // Log error but don't throw - graceful degradation
+      logger?.warn("Domain lookup failed during website extraction", {
+        vendorName,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+
   return null;
 }
 
