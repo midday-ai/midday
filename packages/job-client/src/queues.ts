@@ -7,9 +7,7 @@ const queues: Map<string, Queue> = new Map();
 let redisConnection: Redis | null = null;
 
 // Create logger for Redis connection events
-const redisLogger = createLoggerWithContext({
-  component: "job-client-redis",
-});
+const redisLogger = createLoggerWithContext("job-client-redis");
 
 /**
  * Get or create Redis connection for BullMQ
@@ -49,10 +47,9 @@ function getRedisConnection(): Redis {
   });
 
   redisConnection.on("error", (err) => {
-    redisLogger.error(
-      { error: err instanceof Error ? err.message : String(err) },
-      "Redis connection error",
-    );
+    redisLogger.error("Redis connection error", {
+      error: err instanceof Error ? err.message : String(err),
+    });
   });
 
   redisConnection.on("connect", () => {
@@ -64,7 +61,7 @@ function getRedisConnection(): Redis {
   });
 
   redisConnection.on("reconnecting", (delay: number) => {
-    redisLogger.info({ delay }, "Redis reconnecting");
+    redisLogger.info("Redis reconnecting", { delay });
   });
 
   redisConnection.on("close", () => {

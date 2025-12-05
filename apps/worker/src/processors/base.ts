@@ -9,9 +9,7 @@ export abstract class BaseProcessor<TData = unknown> {
   protected logger: ReturnType<typeof createLoggerWithContext>;
 
   constructor() {
-    this.logger = createLoggerWithContext({
-      processor: this.constructor.name,
-    });
+    this.logger = createLoggerWithContext(this.constructor.name);
   }
 
   /**
@@ -26,15 +24,12 @@ export abstract class BaseProcessor<TData = unknown> {
   async handle(job: Job<TData>): Promise<unknown> {
     const startTime = Date.now();
 
-    this.logger.info(
-      {
-        jobId: job.id,
-        jobName: job.name,
-        attempt: job.attemptsMade + 1,
-        maxAttempts: job.opts.attempts,
-      },
-      "Processing job",
-    );
+    this.logger.info("Processing job", {
+      jobId: job.id,
+      jobName: job.name,
+      attempt: job.attemptsMade + 1,
+      maxAttempts: job.opts.attempts,
+    });
 
     try {
       // Update progress if job has progress tracking
@@ -46,16 +41,13 @@ export abstract class BaseProcessor<TData = unknown> {
 
       const duration = Date.now() - startTime;
 
-      this.logger.info(
-        {
-          jobId: job.id,
-          jobName: job.name,
-          duration: `${duration}ms`,
-          hasResult: result !== undefined,
-          resultType: typeof result,
-        },
-        "Job completed",
-      );
+      this.logger.info("Job completed", {
+        jobId: job.id,
+        jobName: job.name,
+        duration: `${duration}ms`,
+        hasResult: result !== undefined,
+        resultType: typeof result,
+      });
 
       // Ensure result is JSON-serializable for BullMQ
       // BullMQ stores return values as JSON strings in Redis
@@ -64,14 +56,11 @@ export abstract class BaseProcessor<TData = unknown> {
           // Test serialization to ensure it's valid JSON
           JSON.stringify(result);
         } catch (error) {
-          this.logger.error(
-            {
-              jobId: job.id,
-              jobName: job.name,
-              error: error instanceof Error ? error.message : "Unknown error",
-            },
-            "Result is not JSON-serializable",
-          );
+          this.logger.error("Result is not JSON-serializable", {
+            jobId: job.id,
+            jobName: job.name,
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
           throw new Error(
             `Job result is not JSON-serializable: ${error instanceof Error ? error.message : "Unknown error"}`,
           );
@@ -86,20 +75,17 @@ export abstract class BaseProcessor<TData = unknown> {
       const errorStack = error instanceof Error ? error.stack : undefined;
       const classified = classifyError(error);
 
-      this.logger.error(
-        {
-          jobId: job.id,
-          jobName: job.name,
-          attempt: job.attemptsMade + 1,
-          maxAttempts: job.opts.attempts,
-          duration: `${duration}ms`,
-          error: errorMessage,
-          errorCategory: classified.category,
-          retryable: classified.retryable,
-          stack: errorStack,
-        },
-        "Job failed",
-      );
+      this.logger.error("Job failed", {
+        jobId: job.id,
+        jobName: job.name,
+        attempt: job.attemptsMade + 1,
+        maxAttempts: job.opts.attempts,
+        duration: `${duration}ms`,
+        error: errorMessage,
+        errorCategory: classified.category,
+        retryable: classified.retryable,
+        stack: errorStack,
+      });
 
       // Re-throw to let BullMQ handle retries
       throw error;
@@ -114,12 +100,9 @@ export abstract class BaseProcessor<TData = unknown> {
     progress: number,
   ): Promise<void> {
     await job.updateProgress(progress);
-    this.logger.debug(
-      {
-        jobId: job.id,
-        progress: `${progress}%`,
-      },
-      "Progress updated",
-    );
+    this.logger.debug("Progress updated", {
+      jobId: job.id,
+      progress: `${progress}%`,
+    });
   }
 }

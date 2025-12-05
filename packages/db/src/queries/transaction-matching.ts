@@ -414,7 +414,7 @@ export async function findMatches(
   const thresholdAdjusted = calibration.calibratedSuggestedThreshold !== 0.6;
 
   if (thresholdAdjusted) {
-    logger.info({
+    logger.info("🔧 SUGGESTION CALIBRATION ACTIVE", {
       teamId,
       originalSuggestedThreshold: 0.6,
       calibratedSuggestedThreshold: calibration.calibratedSuggestedThreshold,
@@ -423,7 +423,7 @@ export async function findMatches(
       note: "Auto-matching uses merchant-specific patterns, not global calibration",
       totalSuggestions: calibration.totalSuggestions,
       suggestedMatchAccuracy: calibration.suggestedMatchAccuracy,
-    }, "🔧 SUGGESTION CALIBRATION ACTIVE");
+    });
   }
 
   // Conservative production weights - require stronger semantic validation for same-currency matches
@@ -459,11 +459,11 @@ export async function findMatches(
     .limit(1);
 
   if (!inboxData.length) {
-    logger.warn({
+    logger.warn("❌ INBOX ITEM MISSING", {
       inboxId,
       teamId,
       inboxDataLength: inboxData.length,
-    }, "❌ INBOX ITEM MISSING");
+    });
     return null;
   }
 
@@ -471,28 +471,28 @@ export async function findMatches(
 
   // Require inbox embedding for quality matching
   if (!inboxItem.embedding) {
-    logger.warn({
+    logger.warn("❌ INBOX EMBEDDING MISSING - skipping match", {
       inboxId,
       teamId,
       displayName: inboxItem.displayName,
-    }, "❌ INBOX EMBEDDING MISSING - skipping match");
+    });
     return null;
   }
 
   // Require actual document date for meaningful matching
   if (!inboxItem.date) {
-    logger.warn({
+    logger.warn("❌ INBOX DATE MISSING - skipping match", {
       inboxId,
       teamId,
       displayName: inboxItem.displayName,
-    }, "❌ INBOX DATE MISSING - skipping match");
+    });
     return null;
   }
 
   // Log the matched inbox item details
   logger.info(
-    { teamId, inboxId },
     `📋 INBOX: ${inboxItem.displayName} | ${inboxItem.amount} ${inboxItem.currency} | ${inboxItem.date} | ${inboxItem.type} | embedding: ${!!inboxItem.embedding}`,
+    { teamId, inboxId },
   );
 
   // Pre-calculate all complex matching parameters in JavaScript
@@ -627,7 +627,7 @@ export async function findMatches(
       .limit(5);
 
     candidateTransactions.push(...perfectMatches);
-    logger.info({
+    logger.info("🎯 QUERY 1 - Perfect financial matches", {
       inboxId,
       params: {
         inboxAmount,
@@ -645,7 +645,7 @@ export async function findMatches(
         currency: t.currency,
         embeddingScore: t.embeddingScore,
       })),
-    }, "🎯 QUERY 1 - Perfect financial matches");
+    });
 
     // QUERY 2: Perfect base currency matches (if we need more and have base currency)
     const shouldRunQuery2 =
@@ -653,13 +653,13 @@ export async function findMatches(
       inboxBaseCurrency &&
       inboxBaseCurrency !== "";
 
-    logger.info({
+    logger.info("🎯 QUERY 2 - Base currency matching check", {
       inboxId,
       candidateCount: candidateTransactions.length,
       inboxBaseCurrency,
       inboxBaseAmount,
       willRun: shouldRunQuery2,
-    }, "🎯 QUERY 2 - Base currency matching check");
+    });
 
     if (shouldRunQuery2) {
       const baseMatches = await db
@@ -756,7 +756,7 @@ export async function findMatches(
         .limit(5);
 
       candidateTransactions.push(...baseMatches);
-      logger.info({
+      logger.info("🎯 QUERY 2 - Base currency matches", {
         inboxId,
         params: {
           inboxBaseAmount,
@@ -776,7 +776,7 @@ export async function findMatches(
             Math.abs(t.baseAmount || 0) - Math.abs(inboxBaseAmount),
           ),
         })),
-      }, "🎯 QUERY 2 - Base currency matches");
+      });
     }
 
     // QUERY 3: Strong semantic matches (if we need more)
@@ -874,7 +874,7 @@ export async function findMatches(
         .limit(10);
 
       candidateTransactions.push(...semanticMatches);
-      logger.info({
+      logger.info("🎯 QUERY 3 - Strong semantic matches", {
         inboxId,
         params: {
           embeddingThreshold: EMBEDDING_THRESHOLDS.STRONG_MATCH,
@@ -888,7 +888,7 @@ export async function findMatches(
           amount: t.amount,
           embeddingScore: t.embeddingScore,
         })),
-      }, "🎯 QUERY 3 - Strong semantic matches");
+      });
     }
 
     // QUERY 4: Good semantic matches (if we still need more)
@@ -986,7 +986,7 @@ export async function findMatches(
         .limit(10);
 
       candidateTransactions.push(...goodMatches);
-      logger.info({
+      logger.info("🎯 QUERY 4 - Good semantic matches", {
         inboxId,
         params: {
           embeddingThreshold: EMBEDDING_THRESHOLDS.GOOD_MATCH,
@@ -1000,10 +1000,10 @@ export async function findMatches(
           amount: t.amount,
           embeddingScore: t.embeddingScore,
         })),
-      }, "🎯 QUERY 4 - Good semantic matches");
+      });
     }
   } catch (queryError) {
-    logger.error({
+    logger.error("💥 QUERY EXECUTION FAILED:", {
       inboxId,
       teamId,
       error:
@@ -1011,26 +1011,29 @@ export async function findMatches(
       stack: queryError instanceof Error ? queryError.stack : undefined,
       errorName:
         queryError instanceof Error ? queryError.name : typeof queryError,
-    }, "💥 QUERY EXECUTION FAILED:");
+    });
 
     // Return null to prevent the whole process from crashing
     return null;
   }
 
-  logger.info({
-    inboxId,
-    teamId,
-    candidateBreakdown: {
-      total: candidateTransactions.length,
-      sampleCandidates: candidateTransactions.slice(0, 3).map((c) => ({
-        id: c.transactionId,
-        name: c.name,
-        amount: c.amount,
-        currency: c.currency,
-        embeddingScore: c.embeddingScore,
-      })),
+  logger.info(
+    `📊 CANDIDATE ANALYSIS: Found ${candidateTransactions.length} total candidates before sorting`,
+    {
+      inboxId,
+      teamId,
+      candidateBreakdown: {
+        total: candidateTransactions.length,
+        sampleCandidates: candidateTransactions.slice(0, 3).map((c) => ({
+          id: c.transactionId,
+          name: c.name,
+          amount: c.amount,
+          currency: c.currency,
+          embeddingScore: c.embeddingScore,
+        })),
+      },
     },
-  }, `📊 CANDIDATE ANALYSIS: Found ${candidateTransactions.length} total candidates before sorting`);
+  );
 
   // Sort all candidates by match quality before processing to ensure best matches are considered first
   candidateTransactions.sort((a, b) => {
@@ -1080,35 +1083,38 @@ export async function findMatches(
     return aEmbedding - bEmbedding;
   });
 
-  logger.info({
-    inboxId,
-    teamId,
-    topCandidatesAfterSort: candidateTransactions
-      .slice(0, 3)
-      .map((c, index) => {
-        const isPerfect =
-          c.currency === inboxItem.currency &&
-          Math.abs(Math.abs(c.amount) - Math.abs(inboxItem.amount || 0)) <
-            0.01;
-        const dateDiff = inboxItem.date
-          ? Math.abs(
-              new Date(c.date).getTime() - new Date(inboxItem.date).getTime(),
-            ) /
-            (24 * 60 * 60 * 1000)
-          : null;
+  logger.info(
+    `🔄 CANDIDATE SORTING: Reordered ${candidateTransactions.length} candidates by match quality`,
+    {
+      inboxId,
+      teamId,
+      topCandidatesAfterSort: candidateTransactions
+        .slice(0, 3)
+        .map((c, index) => {
+          const isPerfect =
+            c.currency === inboxItem.currency &&
+            Math.abs(Math.abs(c.amount) - Math.abs(inboxItem.amount || 0)) <
+              0.01;
+          const dateDiff = inboxItem.date
+            ? Math.abs(
+                new Date(c.date).getTime() - new Date(inboxItem.date).getTime(),
+              ) /
+              (24 * 60 * 60 * 1000)
+            : null;
 
-        return {
-          rank: index + 1,
-          id: c.transactionId,
-          name: c.name,
-          amount: c.amount,
-          currency: c.currency,
-          isPerfectFinancialMatch: isPerfect,
-          daysFromInboxDate: dateDiff ? Math.round(dateDiff * 10) / 10 : null,
-          embeddingScore: c.embeddingScore,
-        };
-      }),
-  }, `🔄 CANDIDATE SORTING: Reordered ${candidateTransactions.length} candidates by match quality`);
+          return {
+            rank: index + 1,
+            id: c.transactionId,
+            name: c.name,
+            amount: c.amount,
+            currency: c.currency,
+            isPerfectFinancialMatch: isPerfect,
+            daysFromInboxDate: dateDiff ? Math.round(dateDiff * 10) / 10 : null,
+            embeddingScore: c.embeddingScore,
+          };
+        }),
+    },
+  );
 
   // Calculate scores and find the single best match
   let bestMatch: MatchResult | null = null;
@@ -1182,7 +1188,7 @@ export async function findMatches(
 
         // Log when we're using optimized weights for perfect matches
         if (candidate === candidateTransactions[0]) {
-          logger.info({
+          logger.info("🎯 PERFECT MATCH WEIGHT REBALANCING", {
             inboxId,
             transactionId: candidate.transactionId,
             originalWeights: {
@@ -1199,7 +1205,7 @@ export async function findMatches(
             },
             reason:
               "Perfect financial match detected - prioritizing date precision over semantic similarity",
-          }, "🎯 PERFECT MATCH WEIGHT REBALANCING");
+          });
         }
       }
 
@@ -1452,7 +1458,7 @@ export async function findMatches(
                     ) {
                       shouldAutoMatch = true;
 
-                      logger.info({
+                      logger.info("🏆 SEMANTIC MERCHANT AUTO-MATCH", {
                         teamId,
                         inboxId,
                         transactionId: candidate.transactionId,
@@ -1467,7 +1473,7 @@ export async function findMatches(
                         embeddingScore,
                         embeddingSimilarity,
                         dateScore,
-                      }, "🏆 SEMANTIC MERCHANT AUTO-MATCH");
+                      });
                     }
                   }
                 }
@@ -1502,7 +1508,7 @@ export async function findMatches(
       }
     } catch (error) {
       // ROBUSTNESS: Handle individual candidate processing errors gracefully
-      logger.error({
+      logger.error("❌ CANDIDATE PROCESSING ERROR", {
         error: error instanceof Error ? error.message : String(error),
         transactionId: candidate?.transactionId,
         inboxId: inboxItem.id,
@@ -1511,7 +1517,7 @@ export async function findMatches(
           amount: candidate?.amount,
           currency: candidate?.currency,
         },
-      }, "❌ CANDIDATE PROCESSING ERROR");
+      });
       // Skip this candidate and continue processing others
     }
   }
@@ -1539,7 +1545,7 @@ export async function findMatches(
 
   // Log the final match result
   if (bestMatch) {
-    logger.info({
+    logger.info("✅ FINAL MATCH SELECTED", {
       inboxId,
       teamId,
       selectedMatch: {
@@ -1560,9 +1566,9 @@ export async function findMatches(
         confidenceVsThreshold:
           bestMatch.confidenceScore - teamWeights.suggestedMatchThreshold,
       },
-    }, "✅ FINAL MATCH SELECTED");
+    });
   } else {
-    logger.info({
+    logger.info("❌ NO MATCH FOUND", {
       inboxId,
       teamId,
       reason: "No candidates met minimum threshold",
@@ -1577,7 +1583,7 @@ export async function findMatches(
                 (scoringDetails[0]?.finalConfidence || 0),
             }
           : null,
-    }, "❌ NO MATCH FOUND");
+    });
   }
 
   // Check if the best match was previously dismissed by the user
@@ -1590,13 +1596,13 @@ export async function findMatches(
     );
 
     if (wasDismissed) {
-      logger.info({
+      logger.info("🚫 MATCH SKIPPED - Previously dismissed", {
         teamId,
         inboxId,
         transactionId: bestMatch.transactionId,
         confidence: bestMatch.confidenceScore,
         matchType: bestMatch.matchType,
-      }, "🚫 MATCH SKIPPED - Previously dismissed");
+      });
       return null; // Don't suggest previously dismissed matches
     }
   }
@@ -2020,7 +2026,7 @@ export async function findInboxMatches(
                   ) {
                     shouldAutoMatch = true;
 
-                    logger.info({
+                    logger.info("🏆 SEMANTIC MERCHANT AUTO-MATCH (Reverse)", {
                       teamId,
                       transactionId,
                       inboxId: candidate.inboxId,
@@ -2033,7 +2039,7 @@ export async function findInboxMatches(
                       currentConfidence: confidenceScore,
                       embeddingScore,
                       dateScore,
-                    }, "🏆 SEMANTIC MERCHANT AUTO-MATCH (Reverse)");
+                    });
                   }
                 }
               }
@@ -2075,12 +2081,12 @@ export async function findInboxMatches(
 
   if (duration > 5000) {
     // Log slow queries
-    logger.warn({
+    logger.warn("⚠️ SLOW MATCHING QUERY", {
       teamId,
       transactionId,
       duration,
       candidateCount: candidateInboxItems?.length || 0,
-    }, "⚠️ SLOW MATCHING QUERY");
+    });
   }
 
   // Check if the best match was previously dismissed by the user
@@ -2093,13 +2099,13 @@ export async function findInboxMatches(
     );
 
     if (wasDismissed) {
-      logger.info({
+      logger.info("🚫 REVERSE MATCH SKIPPED - Previously dismissed", {
         teamId,
         transactionId,
         inboxId: bestMatch.inboxId,
         confidence: bestMatch.confidenceScore,
         matchType: bestMatch.matchType,
-      }, "🚫 REVERSE MATCH SKIPPED - Previously dismissed");
+      });
       return null; // Don't suggest previously dismissed matches
     }
   }

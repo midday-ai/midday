@@ -26,15 +26,12 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
     const db = getDb();
     const fileName = filePath.join("/");
 
-    this.logger.info(
-      {
-        jobId: job.id,
-        teamId,
-        fileName,
-        mimetype,
-      },
-      "🚀 Starting process-document job",
-    );
+    this.logger.info("🚀 Starting process-document job", {
+      jobId: job.id,
+      teamId,
+      fileName,
+      mimetype,
+    });
 
     // Create activity for document upload
     try {
@@ -51,14 +48,11 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
       );
     } catch (error) {
       // Don't fail the entire process if notification fails
-      this.logger.warn(
-        {
-          teamId,
-          fileName: filePath.join("/"),
-          error: error instanceof Error ? error.message : "Unknown error",
-        },
-        "Failed to trigger document_uploaded notification",
-      );
+      this.logger.warn("Failed to trigger document_uploaded notification", {
+        teamId,
+        fileName: filePath.join("/"),
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
     }
 
     try {
@@ -69,7 +63,7 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
       // Download file once and reuse for all operations
       // For HEIC files, we'll convert and reuse the converted data
       if (mimetype === "image/heic") {
-        this.logger.info({ filePath: fileName }, "Converting HEIC to JPG");
+        this.logger.info("Converting HEIC to JPG", { filePath: fileName });
 
         const { data } = await withTimeout(
           supabase.storage.from("vault").download(fileName),
@@ -98,11 +92,11 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
           });
         } catch (error) {
           this.logger.error(
+            "Failed to decode HEIC image - file may be corrupted",
             {
               filePath: fileName,
               error: error instanceof Error ? error.message : "Unknown error",
             },
-            "Failed to decode HEIC image - file may be corrupted",
           );
           throw new Error(
             `Failed to convert HEIC image: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -123,11 +117,11 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
             .toBuffer();
         } catch (error) {
           this.logger.error(
+            "Failed to process image with sharp - file may be corrupted",
             {
               filePath: fileName,
               error: error instanceof Error ? error.message : "Unknown error",
             },
-            "Failed to process image with sharp - file may be corrupted",
           );
           throw new Error(
             `Failed to process image: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -154,15 +148,12 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
       } else {
         // Download file for non-HEIC files
         const downloadStartTime = Date.now();
-        this.logger.info(
-          {
-            jobId: job.id,
-            fileName,
-            teamId,
-            mimetype: processedMimetype,
-          },
-          "⬇️ Downloading file from storage",
-        );
+        this.logger.info("⬇️ Downloading file from storage", {
+          jobId: job.id,
+          fileName,
+          teamId,
+          mimetype: processedMimetype,
+        });
 
         const { data } = await withTimeout(
           supabase.storage.from("vault").download(fileName),
@@ -171,16 +162,13 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         );
 
         const downloadDuration = Date.now() - downloadStartTime;
-        this.logger.info(
-          {
-            jobId: job.id,
-            fileName,
-            teamId,
-            fileSize: data?.size,
-            duration: `${downloadDuration}ms`,
-          },
-          "✅ File downloaded",
-        );
+        this.logger.info("✅ File downloaded", {
+          jobId: job.id,
+          fileName,
+          teamId,
+          fileSize: data?.size,
+          duration: `${downloadDuration}ms`,
+        });
 
         if (!data) {
           throw new Error("File not found");
@@ -196,12 +184,12 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
 
           if (detectionResult.detected) {
             this.logger.info(
+              "Detected file type from application/octet-stream",
               {
                 fileName,
                 teamId,
                 detectedMimetype: detectionResult.mimetype,
               },
-              "Detected file type from application/octet-stream",
             );
             processedMimetype = detectionResult.mimetype;
             // Recreate Blob with correct mimetype for further processing
@@ -211,12 +199,12 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
           } else {
             // Unknown file type - log warning and skip processing
             this.logger.warn(
+              "application/octet-stream file type could not be detected - skipping processing",
               {
                 fileName,
                 teamId,
                 header: detectionResult.buffer.subarray(0, 8).toString("hex"),
               },
-              "application/octet-stream file type could not be detected - skipping processing",
             );
             // Update document status to indicate it's not processable
             await updateDocumentByPath(db, {
@@ -228,12 +216,12 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
           }
         } catch (error) {
           this.logger.error(
+            "Failed to detect file type for application/octet-stream - will attempt to process as PDF",
             {
               fileName,
               teamId,
               error: error instanceof Error ? error.message : "Unknown error",
             },
-            "Failed to detect file type for application/octet-stream - will attempt to process as PDF",
           );
           // If detection fails, try to process as PDF (most common case)
           // Re-download the file since we may have consumed the buffer
@@ -253,13 +241,10 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
 
       // If the file is an image, trigger image classification
       if (processedMimetype.startsWith("image/")) {
-        this.logger.info(
-          {
-            fileName,
-            teamId,
-          },
-          "Triggering image classification",
-        );
+        this.logger.info("Triggering image classification", {
+          fileName,
+          teamId,
+        });
 
         // Trigger image classification via BullMQ (fire and forget)
         await triggerJob(
@@ -278,16 +263,13 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
       let document: string;
       try {
         const parseStartTime = Date.now();
-        this.logger.info(
-          {
-            jobId: job.id,
-            fileName,
-            teamId,
-            mimetype: processedMimetype,
-            fileSize: fileData?.size,
-          },
-          "📖 Parsing document content (extracting text)",
-        );
+        this.logger.info("📖 Parsing document content (extracting text)", {
+          jobId: job.id,
+          fileName,
+          teamId,
+          mimetype: processedMimetype,
+          fileSize: fileData?.size,
+        });
 
         const loadedDoc = await loadDocument({
           content: fileData,
@@ -300,18 +282,16 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
 
         document = loadedDoc;
         const parseDuration = Date.now() - parseStartTime;
-        this.logger.info(
-          {
-            jobId: job.id,
-            fileName,
-            teamId,
-            contentLength: document.length,
-            duration: `${parseDuration}ms`,
-          },
-          "✅ Document parsed successfully",
-        );
+        this.logger.info("✅ Document parsed successfully", {
+          jobId: job.id,
+          fileName,
+          teamId,
+          contentLength: document.length,
+          duration: `${parseDuration}ms`,
+        });
       } catch (error) {
         this.logger.error(
+          "❌ Failed to load document - file may be corrupted or unsupported",
           {
             jobId: job.id,
             fileName,
@@ -319,7 +299,6 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
             mimetype: processedMimetype,
             error: error instanceof Error ? error.message : "Unknown error",
           },
-          "❌ Failed to load document - file may be corrupted or unsupported",
         );
         throw new Error(
           `Failed to load document: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -328,13 +307,10 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
 
       // Edge case: Validate document has content
       if (!document || document.trim().length === 0) {
-        this.logger.warn(
-          {
-            fileName,
-            teamId,
-          },
-          "Document loaded but has no extractable content",
-        );
+        this.logger.warn("Document loaded but has no extractable content", {
+          fileName,
+          teamId,
+        });
         // Don't throw - still try to classify, might be an image-only document
       }
 
@@ -342,28 +318,22 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
 
       // Edge case: Validate sample has content
       if (!sample || sample.trim().length === 0) {
-        this.logger.warn(
-          {
-            fileName,
-            teamId,
-            contentLength: document.length,
-          },
-          "Document sample is empty, skipping classification",
-        );
+        this.logger.warn("Document sample is empty, skipping classification", {
+          fileName,
+          teamId,
+          contentLength: document.length,
+        });
         return; // Skip classification if no content
       }
 
       const classificationStartTime = Date.now();
-      this.logger.info(
-        {
-          jobId: job.id,
-          fileName,
-          teamId,
-          contentLength: document.length,
-          sampleLength: sample.length,
-        },
-        "🤖 Triggering document classification",
-      );
+      this.logger.info("🤖 Triggering document classification", {
+        jobId: job.id,
+        fileName,
+        teamId,
+        contentLength: document.length,
+        sampleLength: sample.length,
+      });
 
       // Trigger document classification via BullMQ (fire and forget)
       const classificationJobResult = await triggerJob(
@@ -377,17 +347,14 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
       );
 
       const classificationDuration = Date.now() - classificationStartTime;
-      this.logger.info(
-        {
-          jobId: job.id,
-          fileName,
-          teamId,
-          triggeredJobId: classificationJobResult.id,
-          triggeredJobName: "classify-document",
-          duration: `${classificationDuration}ms`,
-        },
-        "✅ Document classification job triggered",
-      );
+      this.logger.info("✅ Document classification job triggered", {
+        jobId: job.id,
+        fileName,
+        teamId,
+        triggeredJobId: classificationJobResult.id,
+        triggeredJobName: "classify-document",
+        duration: `${classificationDuration}ms`,
+      });
 
       // Create activity for successful document processing
       try {
@@ -406,37 +373,28 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         );
       } catch (error) {
         // Don't fail the entire process if notification fails
-        this.logger.warn(
-          {
-            teamId,
-            fileName,
-            error: error instanceof Error ? error.message : "Unknown error",
-          },
-          "Failed to trigger document_processed notification",
-        );
+        this.logger.warn("Failed to trigger document_processed notification", {
+          teamId,
+          fileName,
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
       }
 
       const totalDuration = Date.now() - processStartTime;
-      this.logger.info(
-        {
-          jobId: job.id,
-          fileName,
-          teamId,
-          contentLength: document.length,
-          sampleLength: sample.length,
-          totalDuration: `${totalDuration}ms`,
-        },
-        "🎉 process-document job completed successfully",
-      );
+      this.logger.info("🎉 process-document job completed successfully", {
+        jobId: job.id,
+        fileName,
+        teamId,
+        contentLength: document.length,
+        sampleLength: sample.length,
+        totalDuration: `${totalDuration}ms`,
+      });
     } catch (error) {
-      this.logger.error(
-        {
-          fileName: filePath.join("/"),
-          teamId,
-          error: error instanceof Error ? error.message : "Unknown error",
-        },
-        "Document processing failed",
-      );
+      this.logger.error("Document processing failed", {
+        fileName: filePath.join("/"),
+        teamId,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
 
       await updateDocumentByPath(db, {
         pathTokens: filePath,

@@ -1007,7 +1007,7 @@ export async function getInboxSearch(
 
     return data;
   } catch (error) {
-    logger.error({ error }, "Error in getInboxSearch:");
+    logger.error("Error in getInboxSearch:", { error });
     return [];
   }
 }

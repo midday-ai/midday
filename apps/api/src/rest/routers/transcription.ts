@@ -29,8 +29,7 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
     const session = c.get("session");
     const userId = session.user.id;
 
-    logger.info({
-      msg: "Starting audio transcription",
+    logger.info("Starting audio transcription", {
       userId,
       teamId,
       mimeType,
@@ -46,8 +45,7 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
       audio: audioBuffer,
     });
 
-    logger.info({
-      msg: "Audio transcription completed",
+    logger.info("Audio transcription completed", {
       userId,
       teamId,
       transcriptLength: result.text.length,
@@ -60,8 +58,7 @@ app.post("/", withRequiredScope("chat.write"), async (c) => {
       durationInSeconds: result.durationInSeconds,
     });
   } catch (error) {
-    logger.error({
-      msg: "Transcription failed",
+    logger.error("Transcription failed", {
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
     });

@@ -26,12 +26,7 @@ export class ReceiptProcessor extends BaseExtractionEngine<
   typeof receiptConfig.schema
 > {
   constructor() {
-    super(
-      receiptConfig,
-      createLoggerWithContext({
-        processor: "ReceiptProcessor",
-      }),
-    );
+    super(receiptConfig, createLoggerWithContext("ReceiptProcessor"));
   }
 
   protected getDocumentType(): string {

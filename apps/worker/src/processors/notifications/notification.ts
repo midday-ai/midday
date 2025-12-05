@@ -14,14 +14,11 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
     const { type, teamId, sendEmail = false, ...data } = job.data;
     const db = getDb();
 
-    this.logger.info(
-      {
-        type,
-        teamId,
-        sendEmail,
-      },
-      "Processing notification",
-    );
+    this.logger.info("Processing notification", {
+      type,
+      teamId,
+      sendEmail,
+    });
 
     try {
       const notifications = new Notifications(db);
@@ -29,22 +26,16 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
         sendEmail,
       });
 
-      this.logger.info(
-        {
-          type,
-          teamId,
-        },
-        "Notification created successfully",
-      );
+      this.logger.info("Notification created successfully", {
+        type,
+        teamId,
+      });
     } catch (error) {
-      this.logger.error(
-        {
-          type,
-          teamId,
-          error: error instanceof Error ? error.message : "Unknown error",
-        },
-        "Failed to create notification",
-      );
+      this.logger.error("Failed to create notification", {
+        type,
+        teamId,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
       throw error;
     }
   }

@@ -26,12 +26,7 @@ export class InvoiceProcessor extends BaseExtractionEngine<
   typeof invoiceConfig.schema
 > {
   constructor() {
-    super(
-      invoiceConfig,
-      createLoggerWithContext({
-        processor: "InvoiceProcessor",
-      }),
-    );
+    super(invoiceConfig, createLoggerWithContext("InvoiceProcessor"));
   }
 
   protected getDocumentType(): string {

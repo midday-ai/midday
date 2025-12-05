@@ -42,10 +42,7 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
     this.config = config;
     this.logger =
       logger ||
-      createLoggerWithContext({
-        processor: "BaseExtractionEngine",
-        documentType: this.getDocumentType(),
-      });
+      createLoggerWithContext(`BaseExtractionEngine:${this.getDocumentType()}`);
   }
 
   protected getDocumentType(): string {
@@ -203,13 +200,10 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
 
     // Extract critical fields first (in parallel)
     if (criticalFields.length > 0) {
-      this.logger.info(
-        {
-          fields: criticalFields,
-          count: criticalFields.length,
-        },
-        "Re-extracting critical fields in parallel",
-      );
+      this.logger.info("Re-extracting critical fields in parallel", {
+        fields: criticalFields,
+        count: criticalFields.length,
+      });
 
       const criticalResults = await Promise.allSettled(
         criticalFields.map(async (field) => {
@@ -267,13 +261,10 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
             }
             return null;
           } catch (error) {
-            this.logger.warn(
-              {
-                field,
-                error: error instanceof Error ? error.message : "Unknown error",
-              },
-              `Failed to re-extract field ${field}`,
-            );
+            this.logger.warn(`Failed to re-extract field ${field}`, {
+              field,
+              error: error instanceof Error ? error.message : "Unknown error",
+            });
             return null;
           }
         }),
@@ -289,13 +280,10 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
 
     // Extract other fields in parallel
     if (otherFields.length > 0) {
-      this.logger.info(
-        {
-          fields: otherFields,
-          count: otherFields.length,
-        },
-        "Re-extracting other fields in parallel",
-      );
+      this.logger.info("Re-extracting other fields in parallel", {
+        fields: otherFields,
+        count: otherFields.length,
+      });
 
       const otherResults = await Promise.allSettled(
         otherFields.map(async (field) => {
@@ -353,13 +341,10 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
             }
             return null;
           } catch (error) {
-            this.logger.warn(
-              {
-                field,
-                error: error instanceof Error ? error.message : "Unknown error",
-              },
-              `Failed to re-extract field ${field}`,
-            );
+            this.logger.warn(`Failed to re-extract field ${field}`, {
+              field,
+              error: error instanceof Error ? error.message : "Unknown error",
+            });
             return null;
           }
         }),
@@ -401,19 +386,16 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
       const promptComponents = promptFactory(companyName);
       const prompt = this.composePrompt(promptComponents, false);
 
-      logger.info(
-        { pass: 1, model: this.config.primaryModel },
-        "Pass 1: Extracting with primary model",
-      );
+      logger.info("Pass 1: Extracting with primary model", {
+        pass: 1,
+        model: this.config.primaryModel,
+      });
 
       result = await this.extractWithPrimaryModel(documentUrl, prompt);
     } catch (error) {
-      logger.warn(
-        {
-          error: error instanceof Error ? error.message : "Unknown error",
-        },
-        "Pass 1 failed, trying fallback model immediately",
-      );
+      logger.warn("Pass 1 failed, trying fallback model immediately", {
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
       // If primary fails completely, try fallback model immediately
       const fallbackPromptComponents = promptFactory(companyName, undefined);
       const fallbackPrompt = this.composePrompt(fallbackPromptComponents, true);
@@ -426,15 +408,12 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
 
     // Check data quality (subclasses will provide these functions)
     const qualityScore = this.calculateQualityScore(result);
-    logger.info(
-      {
-        pass: 1,
-        score: qualityScore.score,
-        issues: qualityScore.issues,
-        missingCriticalFields: qualityScore.missingCriticalFields,
-      },
-      "Pass 1 quality score",
-    );
+    logger.info("Pass 1 quality score", {
+      pass: 1,
+      score: qualityScore.score,
+      issues: qualityScore.issues,
+      missingCriticalFields: qualityScore.missingCriticalFields,
+    });
 
     // If quality is good, return result
     if (!this.isDataQualityPoor(result)) {
@@ -443,11 +422,11 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
 
     // Pass 2: Re-extract with fallback model and chain-of-thought prompt
     logger.info(
+      "Pass 1 quality poor, running Pass 2 with fallback model and chain-of-thought",
       {
         pass: 2,
         model: this.config.fallbackModel,
       },
-      "Pass 1 quality poor, running Pass 2 with fallback model and chain-of-thought",
     );
     try {
       // Detect format from initial extraction for adaptive prompts
@@ -479,13 +458,10 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
         fallbackQuality,
       );
 
-      logger.info(
-        {
-          primaryConfidence: primaryConfidence.toFixed(2),
-          fallbackConfidence: fallbackConfidence.toFixed(2),
-        },
-        "Confidence scores for Pass 2 merge",
-      );
+      logger.info("Confidence scores for Pass 2 merge", {
+        primaryConfidence: primaryConfidence.toFixed(2),
+        fallbackConfidence: fallbackConfidence.toFixed(2),
+      });
 
       // Merge results intelligently with confidence weighting
       result = this.mergeResultsWithConfidence(
@@ -497,43 +473,34 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
 
       // Re-check quality after merge
       const mergedQualityScore = this.calculateQualityScore(result);
-      logger.info(
-        {
-          pass: 2,
-          score: mergedQualityScore.score,
-          issues: mergedQualityScore.issues,
-        },
-        "Pass 2 merged quality score",
-      );
+      logger.info("Pass 2 merged quality score", {
+        pass: 2,
+        score: mergedQualityScore.score,
+        issues: mergedQualityScore.issues,
+      });
 
       // If quality is now good, return merged result
       if (!this.isDataQualityPoor(result)) {
         return { data: result, qualityScore: mergedQualityScore };
       }
     } catch (fallbackError) {
-      logger.warn(
-        {
-          error:
-            fallbackError instanceof Error
-              ? fallbackError.message
-              : "Unknown error",
-        },
-        "Pass 2 fallback extraction failed",
-      );
+      logger.warn("Pass 2 fallback extraction failed", {
+        error:
+          fallbackError instanceof Error
+            ? fallbackError.message
+            : "Unknown error",
+      });
       // Continue to Pass 3 even if Pass 2 fails
     }
 
     // Pass 3: Targeted field re-extraction for missing/invalid fields
     const fieldsToReExtract = this.getFieldsNeedingReExtraction(result);
     if (fieldsToReExtract.length > 0) {
-      logger.info(
-        {
-          pass: 3,
-          fields: fieldsToReExtract,
-          count: fieldsToReExtract.length,
-        },
-        "Pass 3: Re-extracting specific fields",
-      );
+      logger.info("Pass 3: Re-extracting specific fields", {
+        pass: 3,
+        fields: fieldsToReExtract,
+        count: fieldsToReExtract.length,
+      });
       try {
         const reExtractedFields = await this.reExtractFields(
           documentUrl,
@@ -545,24 +512,18 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
         result = this.mergeResults(result, reExtractedFields);
 
         const finalQualityScore = this.calculateQualityScore(result);
-        logger.info(
-          {
-            pass: 3,
-            score: finalQualityScore.score,
-            issues: finalQualityScore.issues,
-          },
-          "Pass 3 final quality score",
-        );
+        logger.info("Pass 3 final quality score", {
+          pass: 3,
+          score: finalQualityScore.score,
+          issues: finalQualityScore.issues,
+        });
       } catch (reExtractError) {
-        logger.warn(
-          {
-            error:
-              reExtractError instanceof Error
-                ? reExtractError.message
-                : "Unknown error",
-          },
-          "Pass 3 field re-extraction failed",
-        );
+        logger.warn("Pass 3 field re-extraction failed", {
+          error:
+            reExtractError instanceof Error
+              ? reExtractError.message
+              : "Unknown error",
+        });
         // Return what we have even if re-extraction fails
       }
     }
@@ -573,14 +534,11 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
       consistencyResult.issues.length > 0 ||
       consistencyResult.suggestedFixes.length > 0
     ) {
-      logger.info(
-        {
-          pass: 4,
-          issues: consistencyResult.issues.length,
-          suggestedFixes: consistencyResult.suggestedFixes.length,
-        },
-        "Pass 4: Cross-field consistency validation",
-      );
+      logger.info("Pass 4: Cross-field consistency validation", {
+        pass: 4,
+        issues: consistencyResult.issues.length,
+        suggestedFixes: consistencyResult.suggestedFixes.length,
+      });
 
       // Apply suggested fixes
       if (consistencyResult.suggestedFixes.length > 0) {
@@ -588,26 +546,20 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
           result,
           consistencyResult.suggestedFixes,
         );
-        logger.info(
-          {
-            fixesApplied: consistencyResult.suggestedFixes.map((f) => f.field),
-          },
-          "Applied consistency fixes",
-        );
+        logger.info("Applied consistency fixes", {
+          fixesApplied: consistencyResult.suggestedFixes.map((f) => f.field),
+        });
       }
 
       // Log consistency issues
       if (consistencyResult.issues.length > 0) {
-        logger.warn(
-          {
-            issues: consistencyResult.issues.map((i) => ({
-              field: i.field,
-              issue: i.issue,
-              severity: i.severity,
-            })),
-          },
-          "Cross-field consistency issues found",
-        );
+        logger.warn("Cross-field consistency issues found", {
+          issues: consistencyResult.issues.map((i) => ({
+            field: i.field,
+            issue: i.issue,
+            severity: i.severity,
+          })),
+        });
       }
     }
 

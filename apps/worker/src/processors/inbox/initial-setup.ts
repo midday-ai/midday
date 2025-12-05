@@ -21,7 +21,7 @@ export class InitialSetupProcessor extends BaseProcessor<InboxProviderInitialSet
 
     await this.updateProgress(job, 10);
 
-    this.logger.info({ inboxAccountId }, "Starting initial inbox setup");
+    this.logger.info("Starting initial inbox setup", { inboxAccountId });
 
     // Register dynamic scheduler for this inbox account
     // The scheduler will run every 6 hours with a random minute based on account ID
@@ -36,13 +36,10 @@ export class InitialSetupProcessor extends BaseProcessor<InboxProviderInitialSet
         cronPattern,
       });
 
-      this.logger.info(
-        {
-          inboxAccountId,
-          cronPattern,
-        },
-        "Dynamic scheduler registered for inbox account",
-      );
+      this.logger.info("Dynamic scheduler registered for inbox account", {
+        inboxAccountId,
+        cronPattern,
+      });
 
       await this.updateProgress(job, 60);
 
@@ -69,20 +66,17 @@ export class InitialSetupProcessor extends BaseProcessor<InboxProviderInitialSet
 
       await this.updateProgress(job, 100);
 
-      this.logger.info({ inboxAccountId }, "Initial inbox setup completed");
+      this.logger.info("Initial inbox setup completed", { inboxAccountId });
 
       return {
         inboxAccountId,
         schedulerRegistered: true,
       };
     } catch (error) {
-      this.logger.error(
-        {
-          inboxAccountId,
-          error: error instanceof Error ? error.message : "Unknown error",
-        },
-        "Failed to register inbox scheduler",
-      );
+      this.logger.error("Failed to register inbox scheduler", {
+        inboxAccountId,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
 
       throw error;
     }

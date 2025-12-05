@@ -20,15 +20,12 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
     // We need to split it into pathTokens for updateDocumentByPath
     const pathTokens = fileName.split("/");
 
-    this.logger.info(
-      {
-        fileName,
-        pathTokens,
-        teamId,
-        contentLength: content.length,
-      },
-      "Classifying document",
-    );
+    this.logger.info("Classifying document", {
+      fileName,
+      pathTokens,
+      teamId,
+      contentLength: content.length,
+    });
 
     const classifier = new DocumentClassifier();
     const result = await withTimeout(
@@ -41,6 +38,7 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
     let finalTitle = result.title;
     if (!finalTitle || finalTitle.trim().length === 0) {
       this.logger.warn(
+        "Classification returned null or empty title - generating fallback",
         {
           fileName,
           pathTokens,
@@ -49,7 +47,6 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
           hasDate: !!result.date,
           contentLength: content.length,
         },
-        "Classification returned null or empty title - generating fallback",
       );
 
       // Generate fallback title from available metadata
@@ -81,13 +78,10 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
 
       finalTitle = `${inferredType}${summaryPart || ` - ${fileNameWithoutExt}`}${datePart}`;
 
-      this.logger.info(
-        {
-          fileName,
-          generatedTitle: finalTitle,
-        },
-        "Generated fallback title",
-      );
+      this.logger.info("Generated fallback title", {
+        fileName,
+        generatedTitle: finalTitle,
+      });
     }
 
     const updatedDocs = await updateDocumentByPath(db, {
@@ -104,14 +98,11 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
     });
 
     if (!updatedDocs || updatedDocs.length === 0) {
-      this.logger.error(
-        {
-          fileName,
-          pathTokens,
-          teamId,
-        },
-        "Document not found for classification update",
-      );
+      this.logger.error("Document not found for classification update", {
+        fileName,
+        pathTokens,
+        teamId,
+      });
       throw new Error(`Document with path ${fileName} not found`);
     }
 
@@ -123,13 +114,10 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
     }
 
     if (result.tags && result.tags.length > 0) {
-      this.logger.info(
-        {
-          documentId: data.id,
-          tagsCount: result.tags.length,
-        },
-        "Triggering document tag embedding",
-      );
+      this.logger.info("Triggering document tag embedding", {
+        documentId: data.id,
+        tagsCount: result.tags.length,
+      });
 
       // Trigger tag embedding (fire and forget)
       await triggerJob(
@@ -142,12 +130,9 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
         "documents",
       );
     } else {
-      this.logger.info(
-        {
-          documentId: data.id,
-        },
-        "No tags found, document processing completed",
-      );
+      this.logger.info("No tags found, document processing completed", {
+        documentId: data.id,
+      });
     }
   }
 }

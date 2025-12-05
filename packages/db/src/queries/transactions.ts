@@ -826,8 +826,7 @@ export async function getSimilarTransactions(
     minSimilarityScore = 0.9,
   } = params;
 
-  logger.info({
-    msg: "Starting hybrid search for similar transactions",
+  logger.info("Starting hybrid search for similar transactions", {
     name,
     teamId,
     minSimilarityScore,
@@ -842,10 +841,10 @@ export async function getSimilarTransactions(
 
   // 1. EMBEDDING SEARCH (if transactionId provided)
   if (transactionId) {
-    logger.info({
+    logger.info("Attempting embedding search", {
       transactionId,
       teamId,
-    }, "Attempting embedding search");
+    });
 
     try {
       const sourceEmbedding = await db
@@ -867,11 +866,11 @@ export async function getSimilarTransactions(
         const sourceText = sourceEmbedding[0]!.sourceText;
         embeddingSourceText = sourceText; // Store for FTS search
 
-        logger.info({
+        logger.info("✅ Found embedding for transaction", {
           transactionId,
           sourceText,
           embeddingExists: true,
-        }, "✅ Found embedding for transaction");
+        });
 
         // Calculate similarity using cosineDistance function from Drizzle
         const similarity = sql<number>`1 - (${cosineDistance(transactionEmbeddings.embedding, sourceEmbeddingVector)})`;
@@ -918,34 +917,34 @@ export async function getSimilarTransactions(
           .where(and(...finalEmbeddingConditions))
           .orderBy(desc(similarity)); // No limit - let similarity threshold determine results
 
-        logger.info({
+        logger.info("Embedding search completed", {
           resultsFound: embeddingResults.length,
           minSimilarityScore,
           transactionId,
-        }, "Embedding search completed");
+        });
       } else {
-        logger.warn({
+        logger.warn("❌ No embedding found for transaction - will rely on FTS only", {
           transactionId,
           teamId,
           transactionName: name,
-        }, "❌ No embedding found for transaction - will rely on FTS only");
+        });
       }
     } catch (error) {
-      logger.error({
+      logger.error("Embedding search failed", {
         error: error instanceof Error ? error.message : String(error),
         transactionId,
         teamId,
-      }, "Embedding search failed");
+      });
     }
   }
 
   // 2. FTS SEARCH (always run to complement embeddings)
-  logger.info({
+  logger.info("Running FTS search", {
     name,
     teamId,
     hasEmbeddingResults: embeddingResults.length > 0,
     hasSourceEmbedding: !!embeddingSourceText,
-  }, "Running FTS search");
+  });
 
   const ftsConditions: (SQL | undefined)[] = [eq(transactions.teamId, teamId)];
 
@@ -961,8 +960,7 @@ export async function getSimilarTransactions(
     sql`to_tsquery('english', ${searchQuery}) @@ ${transactions.ftsVector}`,
   );
 
-  logger.info({
-    msg: "FTS search using term",
+  logger.info("FTS search using term", {
     searchTerm,
     searchQuery,
     usingEmbeddingSourceText: false, // Always false now - we use original name
@@ -995,8 +993,7 @@ export async function getSimilarTransactions(
     (c) => c !== undefined,
   ) as SQL[];
 
-  logger.info({
-    msg: "FTS search conditions",
+  logger.info("FTS search conditions", {
     searchTerm,
     searchQuery,
     conditionsCount: finalFtsConditions.length,
@@ -1020,8 +1017,7 @@ export async function getSimilarTransactions(
     .from(transactions)
     .where(and(...finalFtsConditions)); // No limit - get all FTS matches
 
-  logger.info({
-    msg: "FTS search completed",
+  logger.info("FTS search completed", {
     resultsFound: ftsResults.length,
     searchTerm,
     searchQuery,
@@ -1051,7 +1047,7 @@ export async function getSimilarTransactions(
   });
 
   // Log final results with structured data
-  logger.info({
+  logger.info("Hybrid search completed", {
     totalResults: allResults.length,
     uniqueResults: uniqueResults.length,
     embeddingMatches: embeddingResults.length,
@@ -1065,7 +1061,7 @@ export async function getSimilarTransactions(
       matchType: t.matchType,
       id: t.id,
     })),
-  }, "Hybrid search completed");
+  });
 
   // Remove matchType field and return all quality matches
   return uniqueResults.map(({ matchType, ...rest }) => rest);

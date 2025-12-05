@@ -50,7 +50,7 @@ export async function generateCategoryEmbedding(
     logger.info(`Generated embedding for category: "${name}"`);
     return { success: true, existed: false };
   } catch (error) {
-    logger.error({ error }, `Failed to generate embedding for "${name}":`);
+    logger.error(`Failed to generate embedding for "${name}":`, { error });
     return {
       success: false,
       existed: false,
@@ -169,7 +169,7 @@ export async function generateCategoryEmbeddingsBatch(
     }
   } catch (error) {
     // Handle batch embedding generation failure
-    logger.error({ error }, "Failed to generate batch embeddings:");
+    logger.error("Failed to generate batch embeddings:", { error });
 
     // Fall back to individual processing
     const promises = categories.map(async (category) => {

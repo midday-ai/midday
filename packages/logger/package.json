@@ -8,10 +8,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "pino": "^10.1.0",
-    "pino-pretty": "^13.1.2"
-  },
+  "dependencies": {},
   "devDependencies": {
     "typescript": "^5.9.3"
   }
