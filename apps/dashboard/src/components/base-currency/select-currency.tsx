@@ -5,7 +5,6 @@ import { useJobStatus } from "@/hooks/use-job-status";
 import { useTeamMutation } from "@/hooks/use-team";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
-import type { JobTriggerResponse } from "@midday/job-client";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import { Button } from "@midday/ui/button";
 import { useToast } from "@midday/ui/use-toast";
@@ -25,7 +24,7 @@ export function SelectCurrency() {
       onMutate: () => {
         setSyncing(true);
       },
-      onSuccess: (data: JobTriggerResponse | undefined) => {
+      onSuccess: (data) => {
         if (data?.id) {
           setJobId(data.id);
         }

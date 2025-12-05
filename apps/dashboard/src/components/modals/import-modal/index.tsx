@@ -2,7 +2,7 @@
 
 import { importTransactionsAction } from "@/actions/transactions/import-transactions";
 import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
-import { useSyncStatus } from "@/hooks/use-sync-status";
+import { useJobStatus } from "@/hooks/use-job-status";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useUpload } from "@/hooks/use-upload";
 import { useUserQuery } from "@/hooks/use-user";
@@ -37,8 +37,7 @@ export function ImportModal() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const invalidateTransactionQueries = useInvalidateTransactionQueries();
-  const [runId, setRunId] = useState<string | undefined>();
-  const [accessToken, setAccessToken] = useState<string | undefined>();
+  const [jobId, setJobId] = useState<string | undefined>();
   const [isImporting, setIsImporting] = useState(false);
   const [fileColumns, setFileColumns] = useState<string[] | null>(null);
   const [firstRows, setFirstRows] = useState<Record<string, string>[] | null>(
@@ -54,8 +53,6 @@ export function ImportModal() {
 
   const { toast } = useToast();
 
-  const { status, setStatus } = useSyncStatus({ runId, accessToken });
-
   const [params, setParams] = useQueryStates({
     step: parseAsString,
     accountId: parseAsString,
@@ -65,11 +62,15 @@ export function ImportModal() {
 
   const isOpen = params.step === "import";
 
+  const { status, progress } = useJobStatus({
+    jobId,
+    enabled: !!jobId && isOpen,
+  });
+
   const importTransactions = useAction(importTransactionsAction, {
     onSuccess: ({ data }) => {
-      if (data) {
-        setRunId(data.id);
-        setAccessToken(data.publicAccessToken);
+      if (data?.id) {
+        setJobId(data.id);
       } else {
         // If no data returned, something went wrong
         setIsImporting(false);
@@ -82,9 +83,7 @@ export function ImportModal() {
     },
     onError: () => {
       setIsImporting(false);
-      setRunId(undefined);
-      setAccessToken(undefined);
-      setStatus("FAILED");
+      setJobId(undefined);
 
       toast({
         duration: 3500,
@@ -116,8 +115,7 @@ export function ImportModal() {
     setFileColumns(null);
     setFirstRows(null);
     setPageNumber(0);
-    setRunId(undefined);
-    setAccessToken(undefined);
+    setJobId(undefined);
     reset();
 
     setParams({
@@ -141,9 +139,9 @@ export function ImportModal() {
   }, [params.type]);
 
   useEffect(() => {
-    if (status === "FAILED") {
+    if (status === "failed") {
       setIsImporting(false);
-      setRunId(undefined);
+      setJobId(undefined);
 
       toast({
         duration: 3500,
@@ -151,13 +149,12 @@ export function ImportModal() {
         title: "Something went wrong please try again or contact support.",
       });
     }
-  }, [status]);
+  }, [status, toast]);
 
   useEffect(() => {
-    if (status === "COMPLETED") {
+    if (status === "completed") {
       setIsImporting(false);
-      setRunId(undefined);
-      setAccessToken(undefined);
+      setJobId(undefined);
 
       // Invalidate all transaction-related queries (transactions, reports, widgets)
       invalidateTransactionQueries();
@@ -179,7 +176,7 @@ export function ImportModal() {
 
       onclose();
     }
-  }, [status]);
+  }, [status, toast, invalidateTransactionQueries, queryClient, trpc, onclose]);
 
   // Go to second page if file looks good
   useEffect(() => {
