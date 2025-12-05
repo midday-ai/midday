@@ -87,49 +87,46 @@ export function isCrossCurrencyMatch(
   const actualTolerancePercent = adjustedTolerance / avgAmount;
 
   // Enhanced logging with risk assessment
-  logger.info(
-    {
-      item1: {
-        currency: item1.currency,
-        amount: item1.amount,
-        baseCurrency: item1.baseCurrency,
-        baseAmount: item1.baseAmount,
-      },
-      item2: {
-        currency: item2.currency,
-        amount: item2.amount,
-        baseCurrency: item2.baseCurrency,
-        baseAmount: item2.baseAmount,
-      },
-      calculation: {
-        baseAmount1,
-        baseAmount2,
-        difference,
-        avgAmount,
-        tolerance: adjustedTolerance,
-        originalTolerancePercent: tolerancePercent,
-        effectiveTolerancePercent,
-        actualTolerancePercent,
-        minTolerance,
-      },
-      riskAssessment: {
-        amountCategory: toleranceCategory,
-        isHighRisk: actualTolerancePercent > 0.1, // Flag >10% effective tolerance
-        isConservative: actualTolerancePercent <= 0.05, // Flag ≤5% tolerance
-        toleranceSource:
-          adjustedTolerance ===
-          Math.max(15, avgAmount * effectiveTolerancePercent)
-            ? adjustedTolerance === 15 ||
-              adjustedTolerance === 25 ||
-              adjustedTolerance === 50
-              ? "minimum"
-              : "percentage"
-            : "percentage",
-      },
-      result: isMatch,
+  logger.info("💱 CROSS-CURRENCY MATCH DEBUG", {
+    item1: {
+      currency: item1.currency,
+      amount: item1.amount,
+      baseCurrency: item1.baseCurrency,
+      baseAmount: item1.baseAmount,
     },
-    "💱 CROSS-CURRENCY MATCH DEBUG",
-  );
+    item2: {
+      currency: item2.currency,
+      amount: item2.amount,
+      baseCurrency: item2.baseCurrency,
+      baseAmount: item2.baseAmount,
+    },
+    calculation: {
+      baseAmount1,
+      baseAmount2,
+      difference,
+      avgAmount,
+      tolerance: adjustedTolerance,
+      originalTolerancePercent: tolerancePercent,
+      effectiveTolerancePercent,
+      actualTolerancePercent,
+      minTolerance,
+    },
+    riskAssessment: {
+      amountCategory: toleranceCategory,
+      isHighRisk: actualTolerancePercent > 0.1, // Flag >10% effective tolerance
+      isConservative: actualTolerancePercent <= 0.05, // Flag ≤5% tolerance
+      toleranceSource:
+        adjustedTolerance ===
+        Math.max(15, avgAmount * effectiveTolerancePercent)
+          ? adjustedTolerance === 15 ||
+            adjustedTolerance === 25 ||
+            adjustedTolerance === 50
+            ? "minimum"
+            : "percentage"
+          : "percentage",
+    },
+    result: isMatch,
+  });
 
   return isMatch;
 }

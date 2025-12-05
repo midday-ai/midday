@@ -712,15 +712,12 @@ export async function getInboxSearch(
       const searchTerm = q.trim();
       const searchQuery = buildSearchQuery(searchTerm); // Use FTS format
 
-      logger.info(
-        {
-          searchTerm,
-          searchQuery,
-          teamId,
-          limit,
-        },
-        "🔍 SEARCH DEBUG:",
-      );
+      logger.info("🔍 SEARCH DEBUG:", {
+        searchTerm,
+        searchQuery,
+        teamId,
+        limit,
+      });
 
       // Check if search term is a number (for amount searching)
       const numericSearch = Number.parseFloat(
@@ -781,19 +778,16 @@ export async function getInboxSearch(
         .orderBy(desc(inbox.date), desc(inbox.createdAt)) // Most recent first
         .limit(limit);
 
-      logger.info(
-        {
-          searchTerm,
-          resultsCount: searchResults.length,
-          results: searchResults.slice(0, 3).map((r) => ({
-            id: r.id,
-            displayName: r.displayName,
-            amount: r.amount,
-            currency: r.currency,
-          })),
-        },
-        "🎯 SEARCH RESULTS:",
-      );
+      logger.info("🎯 SEARCH RESULTS:", {
+        searchTerm,
+        resultsCount: searchResults.length,
+        results: searchResults.slice(0, 3).map((r) => ({
+          id: r.id,
+          displayName: r.displayName,
+          amount: r.amount,
+          currency: r.currency,
+        })),
+      });
 
       return searchResults;
     }
@@ -890,19 +884,16 @@ export async function getInboxSearch(
           )
           .limit(20); // Get more candidates for better scoring
 
-        logger.info(
-          {
-            candidateCount: candidates.length,
-            candidates: candidates.map((c) => ({
-              displayName: c.displayName,
-              amount: c.amount,
-              currency: c.currency,
-              embeddingScore: c.embeddingScore,
-              semanticSimilarity: (1 - c.embeddingScore).toFixed(3),
-            })),
-          },
-          "🔍 Main candidates found:",
-        );
+        logger.info("🔍 Main candidates found:", {
+          candidateCount: candidates.length,
+          candidates: candidates.map((c) => ({
+            displayName: c.displayName,
+            amount: c.amount,
+            currency: c.currency,
+            embeddingScore: c.embeddingScore,
+            semanticSimilarity: (1 - c.embeddingScore).toFixed(3),
+          })),
+        });
 
         if (candidates.length > 0) {
           // Score candidates using the same logic as successful batch-process-matching
@@ -958,17 +949,14 @@ export async function getInboxSearch(
             })
             .slice(0, limit);
 
-          logger.info(
-            {
-              suggestionCount: sortedSuggestions.length,
-              suggestions: sortedSuggestions.map((s) => ({
-                displayName: s.displayName,
-                amount: s.amount,
-                confidence: s.confidenceScore,
-              })),
-            },
-            "🎯 Found and scored suggestions:",
-          );
+          logger.info("🎯 Found and scored suggestions:", {
+            suggestionCount: sortedSuggestions.length,
+            suggestions: sortedSuggestions.map((s) => ({
+              displayName: s.displayName,
+              amount: s.amount,
+              confidence: s.confidenceScore,
+            })),
+          });
 
           return sortedSuggestions;
         }
@@ -1393,19 +1381,16 @@ export async function unmatchTransaction(
             .where(eq(transactionMatchSuggestions.id, originalSuggestion.id));
 
           // Log for debugging/monitoring
-          logger.info(
-            {
-              teamId,
-              inboxId: item.id,
-              transactionId,
-              originalMatchType: originalSuggestion.matchType,
-              originalConfidence: Number(originalSuggestion.confidenceScore),
-              originalStatus: originalSuggestion.status,
-              message:
-                "User unmatched a previously confirmed/auto-matched pair - negative feedback for learning",
-            },
-            "📚 UNMATCH LEARNING FEEDBACK",
-          );
+          logger.info("📚 UNMATCH LEARNING FEEDBACK", {
+            teamId,
+            inboxId: item.id,
+            transactionId,
+            originalMatchType: originalSuggestion.matchType,
+            originalConfidence: Number(originalSuggestion.confidenceScore),
+            originalStatus: originalSuggestion.status,
+            message:
+              "User unmatched a previously confirmed/auto-matched pair - negative feedback for learning",
+          });
         }
       }
     }
@@ -1631,14 +1616,11 @@ export async function getExistingInboxAttachmentsByReferenceIds(
     return [];
   }
 
-  logger.info(
-    {
-      teamId,
-      referenceIdsCount: validReferenceIds.length,
-      sampleIds: validReferenceIds.slice(0, 3),
-    },
-    "Querying for existing inbox attachments by referenceIds",
-  );
+  logger.info("Querying for existing inbox attachments by referenceIds", {
+    teamId,
+    referenceIdsCount: validReferenceIds.length,
+    sampleIds: validReferenceIds.slice(0, 3),
+  });
 
   const results = await db
     .select({
@@ -1654,14 +1636,11 @@ export async function getExistingInboxAttachmentsByReferenceIds(
       ),
     );
 
-  logger.info(
-    {
-      teamId,
-      foundCount: results.length,
-      foundIds: results.map((r) => r.referenceId).slice(0, 3),
-    },
-    "Found existing inbox attachments",
-  );
+  logger.info("Found existing inbox attachments", {
+    teamId,
+    foundCount: results.length,
+    foundIds: results.map((r) => r.referenceId).slice(0, 3),
+  });
 
   return results;
 }
@@ -1705,10 +1684,11 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
   // If we have a referenceId, use ON CONFLICT to handle race conditions
   // where multiple jobs try to create the same inbox item simultaneously
   if (referenceId) {
-    logger.info(
-      { referenceId, teamId, filePath },
-      "Creating inbox item with referenceId (using ON CONFLICT)",
-    );
+    logger.info("Creating inbox item with referenceId (using ON CONFLICT)", {
+      referenceId,
+      teamId,
+      filePath,
+    });
 
     const [result] = await db
       .insert(inbox)
@@ -1751,8 +1731,11 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
     // If insert was skipped due to conflict, fetch the existing row
     if (!result) {
       logger.info(
-        { referenceId, teamId },
         "Insert skipped due to referenceId conflict, fetching existing row",
+        {
+          referenceId,
+          teamId,
+        },
       );
 
       const [existingRow] = await db
@@ -1781,23 +1764,21 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
         )
         .limit(1);
 
-      logger.info(
-        {
-          referenceId,
-          teamId,
-          existingId: existingRow?.id,
-          existingStatus: existingRow?.status,
-        },
-        "Fetched existing inbox item",
-      );
+      logger.info("Fetched existing inbox item", {
+        referenceId,
+        teamId,
+        existingId: existingRow?.id,
+        existingStatus: existingRow?.status,
+      });
 
       return existingRow;
     }
 
-    logger.info(
-      { referenceId, teamId, newId: result.id },
-      "Successfully created new inbox item",
-    );
+    logger.info("Successfully created new inbox item", {
+      referenceId,
+      teamId,
+      newId: result.id,
+    });
 
     return result;
   }
@@ -2160,13 +2141,10 @@ export async function groupRelatedInboxItems(
       .set({ groupedInboxId: primaryItem.id })
       .where(and(inArray(inbox.id, itemsToUpdate), eq(inbox.teamId, teamId)));
 
-    logger.info(
-      {
-        primaryItemId: primaryItem.id,
-        groupedItemIds: itemsToUpdate,
-        teamId,
-      },
-      "Grouped related inbox items",
-    );
+    logger.info("Grouped related inbox items", {
+      primaryItemId: primaryItem.id,
+      groupedItemIds: itemsToUpdate,
+      teamId,
+    });
   }
 }

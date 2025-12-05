@@ -45,7 +45,9 @@ export const apiKeysRouter = createTRPCRouter({
             }),
           });
         } catch (error) {
-          logger.error(error);
+          logger.error("Failed to send API key created email", {
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
         }
       }
 

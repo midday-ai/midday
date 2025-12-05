@@ -133,10 +133,11 @@ export async function generateCategoryEmbeddingsBatch(
           success: true,
         };
       } catch (error) {
-        logger.error(
-          { error },
-          `Failed to store embedding for "${category.name}":`,
-        );
+        logger.error("Failed to store embedding for category", {
+          name: category.name,
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+
         return {
           name: category.name,
           success: false,
