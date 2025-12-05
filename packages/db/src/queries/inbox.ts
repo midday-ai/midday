@@ -712,12 +712,15 @@ export async function getInboxSearch(
       const searchTerm = q.trim();
       const searchQuery = buildSearchQuery(searchTerm); // Use FTS format
 
-      logger.info("🔍 SEARCH DEBUG:", {
-        searchTerm,
-        searchQuery,
-        teamId,
-        limit,
-      });
+      logger.info(
+        {
+          searchTerm,
+          searchQuery,
+          teamId,
+          limit,
+        },
+        "🔍 SEARCH DEBUG:",
+      );
 
       // Check if search term is a number (for amount searching)
       const numericSearch = Number.parseFloat(
@@ -778,16 +781,19 @@ export async function getInboxSearch(
         .orderBy(desc(inbox.date), desc(inbox.createdAt)) // Most recent first
         .limit(limit);
 
-      logger.info("🎯 SEARCH RESULTS:", {
-        searchTerm,
-        resultsCount: searchResults.length,
-        results: searchResults.slice(0, 3).map((r) => ({
-          id: r.id,
-          displayName: r.displayName,
-          amount: r.amount,
-          currency: r.currency,
-        })),
-      });
+      logger.info(
+        {
+          searchTerm,
+          resultsCount: searchResults.length,
+          results: searchResults.slice(0, 3).map((r) => ({
+            id: r.id,
+            displayName: r.displayName,
+            amount: r.amount,
+            currency: r.currency,
+          })),
+        },
+        "🎯 SEARCH RESULTS:",
+      );
 
       return searchResults;
     }
@@ -885,15 +891,17 @@ export async function getInboxSearch(
           .limit(20); // Get more candidates for better scoring
 
         logger.info(
+          {
+            candidateCount: candidates.length,
+            candidates: candidates.map((c) => ({
+              displayName: c.displayName,
+              amount: c.amount,
+              currency: c.currency,
+              embeddingScore: c.embeddingScore,
+              semanticSimilarity: (1 - c.embeddingScore).toFixed(3),
+            })),
+          },
           "🔍 Main candidates found:",
-          candidates.length,
-          candidates.map((c) => ({
-            displayName: c.displayName,
-            amount: c.amount,
-            currency: c.currency,
-            embeddingScore: c.embeddingScore,
-            semanticSimilarity: (1 - c.embeddingScore).toFixed(3),
-          })),
         );
 
         if (candidates.length > 0) {
@@ -951,13 +959,15 @@ export async function getInboxSearch(
             .slice(0, limit);
 
           logger.info(
+            {
+              suggestionCount: sortedSuggestions.length,
+              suggestions: sortedSuggestions.map((s) => ({
+                displayName: s.displayName,
+                amount: s.amount,
+                confidence: s.confidenceScore,
+              })),
+            },
             "🎯 Found and scored suggestions:",
-            sortedSuggestions.length,
-            sortedSuggestions.map((s) => ({
-              displayName: s.displayName,
-              amount: s.amount,
-              confidence: s.confidenceScore,
-            })),
           );
 
           return sortedSuggestions;
@@ -997,7 +1007,7 @@ export async function getInboxSearch(
 
     return data;
   } catch (error) {
-    logger.error("Error in getInboxSearch:", error);
+    logger.error({ error }, "Error in getInboxSearch:");
     return [];
   }
 }
@@ -1383,16 +1393,19 @@ export async function unmatchTransaction(
             .where(eq(transactionMatchSuggestions.id, originalSuggestion.id));
 
           // Log for debugging/monitoring
-          logger.info("📚 UNMATCH LEARNING FEEDBACK", {
-            teamId,
-            inboxId: item.id,
-            transactionId,
-            originalMatchType: originalSuggestion.matchType,
-            originalConfidence: Number(originalSuggestion.confidenceScore),
-            originalStatus: originalSuggestion.status,
-            message:
-              "User unmatched a previously confirmed/auto-matched pair - negative feedback for learning",
-          });
+          logger.info(
+            {
+              teamId,
+              inboxId: item.id,
+              transactionId,
+              originalMatchType: originalSuggestion.matchType,
+              originalConfidence: Number(originalSuggestion.confidenceScore),
+              originalStatus: originalSuggestion.status,
+              message:
+                "User unmatched a previously confirmed/auto-matched pair - negative feedback for learning",
+            },
+            "📚 UNMATCH LEARNING FEEDBACK",
+          );
         }
       }
     }
@@ -2147,10 +2160,13 @@ export async function groupRelatedInboxItems(
       .set({ groupedInboxId: primaryItem.id })
       .where(and(inArray(inbox.id, itemsToUpdate), eq(inbox.teamId, teamId)));
 
-    logger.info("Grouped related inbox items", {
-      primaryItemId: primaryItem.id,
-      groupedItemIds: itemsToUpdate,
-      teamId,
-    });
+    logger.info(
+      {
+        primaryItemId: primaryItem.id,
+        groupedItemIds: itemsToUpdate,
+        teamId,
+      },
+      "Grouped related inbox items",
+    );
   }
 }

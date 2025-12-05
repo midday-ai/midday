@@ -842,10 +842,10 @@ export async function getSimilarTransactions(
 
   // 1. EMBEDDING SEARCH (if transactionId provided)
   if (transactionId) {
-    logger.info("Attempting embedding search", {
+    logger.info({
       transactionId,
       teamId,
-    });
+    }, "Attempting embedding search");
 
     try {
       const sourceEmbedding = await db
@@ -867,11 +867,11 @@ export async function getSimilarTransactions(
         const sourceText = sourceEmbedding[0]!.sourceText;
         embeddingSourceText = sourceText; // Store for FTS search
 
-        logger.info("✅ Found embedding for transaction", {
+        logger.info({
           transactionId,
           sourceText,
           embeddingExists: true,
-        });
+        }, "✅ Found embedding for transaction");
 
         // Calculate similarity using cosineDistance function from Drizzle
         const similarity = sql<number>`1 - (${cosineDistance(transactionEmbeddings.embedding, sourceEmbeddingVector)})`;
@@ -918,37 +918,34 @@ export async function getSimilarTransactions(
           .where(and(...finalEmbeddingConditions))
           .orderBy(desc(similarity)); // No limit - let similarity threshold determine results
 
-        logger.info("Embedding search completed", {
+        logger.info({
           resultsFound: embeddingResults.length,
           minSimilarityScore,
           transactionId,
-        });
+        }, "Embedding search completed");
       } else {
-        logger.warn(
-          "❌ No embedding found for transaction - will rely on FTS only",
-          {
-            transactionId,
-            teamId,
-            transactionName: name,
-          },
-        );
+        logger.warn({
+          transactionId,
+          teamId,
+          transactionName: name,
+        }, "❌ No embedding found for transaction - will rely on FTS only");
       }
     } catch (error) {
-      logger.error("Embedding search failed", {
+      logger.error({
         error: error instanceof Error ? error.message : String(error),
         transactionId,
         teamId,
-      });
+      }, "Embedding search failed");
     }
   }
 
   // 2. FTS SEARCH (always run to complement embeddings)
-  logger.info("Running FTS search", {
+  logger.info({
     name,
     teamId,
     hasEmbeddingResults: embeddingResults.length > 0,
     hasSourceEmbedding: !!embeddingSourceText,
-  });
+  }, "Running FTS search");
 
   const ftsConditions: (SQL | undefined)[] = [eq(transactions.teamId, teamId)];
 
@@ -1054,7 +1051,7 @@ export async function getSimilarTransactions(
   });
 
   // Log final results with structured data
-  logger.info("Hybrid search completed", {
+  logger.info({
     totalResults: allResults.length,
     uniqueResults: uniqueResults.length,
     embeddingMatches: embeddingResults.length,
@@ -1068,7 +1065,7 @@ export async function getSimilarTransactions(
       matchType: t.matchType,
       id: t.id,
     })),
-  });
+  }, "Hybrid search completed");
 
   // Remove matchType field and return all quality matches
   return uniqueResults.map(({ matchType, ...rest }) => rest);
