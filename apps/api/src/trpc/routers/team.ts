@@ -12,6 +12,7 @@ import {
   updateTeamMemberSchema,
 } from "@api/schemas/team";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import type { DeleteTeamPayload, InviteTeamMembersPayload } from "@jobs/schema";
 import {
   acceptTeamInvite,
   createTeam,
@@ -32,11 +33,7 @@ import {
   updateTeamMember,
 } from "@midday/db/queries";
 import { triggerJob } from "@midday/job-client";
-import type {
-  DeleteTeamPayload,
-  InviteTeamMembersPayload,
-  UpdateBaseCurrencyPayload,
-} from "@midday/jobs/schema";
+import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
 export const teamRouter = createTRPCRouter({
