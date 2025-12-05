@@ -31,12 +31,12 @@ import {
   updateTeamById,
   updateTeamMember,
 } from "@midday/db/queries";
+import { triggerJob } from "@midday/job-client";
 import type {
   DeleteTeamPayload,
   InviteTeamMembersPayload,
   UpdateBaseCurrencyPayload,
 } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
 export const teamRouter = createTRPCRouter({
@@ -258,10 +258,14 @@ export const teamRouter = createTRPCRouter({
   updateBaseCurrency: protectedProcedure
     .input(updateBaseCurrencySchema)
     .mutation(async ({ ctx: { teamId }, input }) => {
-      const event = await tasks.trigger("update-base-currency", {
-        teamId: teamId!,
-        baseCurrency: input.baseCurrency,
-      } satisfies UpdateBaseCurrencyPayload);
+      const event = await triggerJob(
+        "update-base-currency",
+        {
+          teamId: teamId!,
+          baseCurrency: input.baseCurrency,
+        },
+        "transactions",
+      );
 
       return event;
     }),

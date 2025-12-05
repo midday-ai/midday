@@ -44,3 +44,57 @@ export const processTransactionAttachmentSchema = z.object({
 export type ProcessTransactionAttachmentPayload = z.infer<
   typeof processTransactionAttachmentSchema
 >;
+
+export const embedTransactionSchema = z.object({
+  transactionIds: z.array(z.string().uuid()),
+  teamId: z.string().uuid(),
+});
+
+export type EmbedTransactionPayload = z.infer<typeof embedTransactionSchema>;
+
+export const enrichTransactionsSchema = z.object({
+  transactionIds: z.array(z.string().uuid()),
+  teamId: z.string().uuid(),
+});
+
+export type EnrichTransactionsPayload = z.infer<
+  typeof enrichTransactionsSchema
+>;
+
+export const importTransactionsSchema = z.object({
+  inverted: z.boolean(),
+  filePath: z.array(z.string()).optional(),
+  bankAccountId: z.string(),
+  currency: z.string(),
+  teamId: z.string(),
+  table: z.array(z.record(z.string(), z.string())).optional(),
+  mappings: z.object({
+    amount: z.string(),
+    date: z.string(),
+    description: z.string(),
+  }),
+});
+
+export type ImportTransactionsPayload = z.infer<
+  typeof importTransactionsSchema
+>;
+
+export const updateBaseCurrencySchema = z.object({
+  teamId: z.string().uuid(),
+  baseCurrency: z.string(),
+});
+
+export type UpdateBaseCurrencyPayload = z.infer<
+  typeof updateBaseCurrencySchema
+>;
+
+export const updateAccountBaseCurrencySchema = z.object({
+  accountId: z.string().uuid(),
+  currency: z.string(),
+  balance: z.number(),
+  baseCurrency: z.string(),
+});
+
+export type UpdateAccountBaseCurrencyPayload = z.infer<
+  typeof updateAccountBaseCurrencySchema
+>;

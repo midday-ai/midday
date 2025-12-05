@@ -1,6 +1,7 @@
 import type { Queue } from "bullmq";
 import { documentsQueue } from "../queues/documents";
 import { inboxProviderQueue, inboxQueue } from "../queues/inbox";
+import { ratesQueue } from "../queues/rates";
 import { transactionsQueue } from "../queues/transactions";
 import type {
   DynamicSchedulerTemplate,
@@ -22,6 +23,8 @@ function getQueueByName(queueName: string): Queue {
       return transactionsQueue;
     case "documents":
       return documentsQueue;
+    case "rates":
+      return ratesQueue;
     default:
       throw new Error(`Unknown queue: ${queueName}`);
   }
