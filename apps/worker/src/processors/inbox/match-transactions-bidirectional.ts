@@ -24,13 +24,10 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
     const { teamId, newTransactionIds } = job.data;
     const db = getDb();
 
-    this.logger.info(
-      {
-        teamId,
-        newTransactionCount: newTransactionIds.length,
-      },
-      "Starting bidirectional transaction matching",
-    );
+    this.logger.info("Starting bidirectional transaction matching", {
+      teamId,
+      newTransactionCount: newTransactionIds.length,
+    });
 
     await this.updateProgress(job, 0);
 
@@ -72,15 +69,12 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
 
             forwardMatchCount++;
 
-            this.logger.info(
-              {
-                teamId,
-                transactionId,
-                inboxId: inboxMatch.inboxId,
-                confidence: inboxMatch.confidenceScore,
-              },
-              "Auto-matched transaction to inbox",
-            );
+            this.logger.info("Auto-matched transaction to inbox", {
+              teamId,
+              transactionId,
+              inboxId: inboxMatch.inboxId,
+              confidence: inboxMatch.confidenceScore,
+            });
 
             // Send notification for auto-match
             // Get transaction data to create complete MatchResult
@@ -117,26 +111,20 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
             // Create suggestion for manual review
             forwardSuggestionCount++;
 
-            this.logger.info(
-              {
-                teamId,
-                transactionId,
-                inboxId: inboxMatch.inboxId,
-                confidence: inboxMatch.confidenceScore,
-              },
-              "Created forward match suggestion",
-            );
+            this.logger.info("Created forward match suggestion", {
+              teamId,
+              transactionId,
+              inboxId: inboxMatch.inboxId,
+              confidence: inboxMatch.confidenceScore,
+            });
           }
         }
       } catch (error) {
-        this.logger.error(
-          {
-            teamId,
-            transactionId,
-            error: error instanceof Error ? error.message : "Unknown error",
-          },
-          "Failed to process forward match",
-        );
+        this.logger.error("Failed to process forward match", {
+          teamId,
+          transactionId,
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
       }
     }
 
@@ -155,15 +143,12 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
       (item) => !matchedInboxIds.has(item.id),
     );
 
-    this.logger.info(
-      {
-        teamId,
-        totalPendingItems: pendingInboxItems.length,
-        alreadyMatchedInPhase1: matchedInboxIds.size,
-        toProcessInPhase2: unmatchedInboxItems.length,
-      },
-      "Processing reverse matching for unmatched inbox items",
-    );
+    this.logger.info("Processing reverse matching for unmatched inbox items", {
+      teamId,
+      totalPendingItems: pendingInboxItems.length,
+      alreadyMatchedInPhase1: matchedInboxIds.size,
+      toProcessInPhase2: unmatchedInboxItems.length,
+    });
 
     let reverseMatchCount = 0;
     let reverseSuggestionCount = 0;
@@ -206,28 +191,22 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
             switch (result.action) {
               case "auto_matched":
                 reverseMatchCount++;
-                this.logger.info(
-                  {
-                    teamId,
-                    inboxId: inboxItem.id,
-                    transactionId: result.suggestion?.transactionId,
-                    confidence: result.suggestion?.confidenceScore,
-                  },
-                  "Auto-matched inbox item to transaction",
-                );
+                this.logger.info("Auto-matched inbox item to transaction", {
+                  teamId,
+                  inboxId: inboxItem.id,
+                  transactionId: result.suggestion?.transactionId,
+                  confidence: result.suggestion?.confidenceScore,
+                });
                 break;
 
               case "suggestion_created":
                 reverseSuggestionCount++;
-                this.logger.info(
-                  {
-                    teamId,
-                    inboxId: inboxItem.id,
-                    transactionId: result.suggestion?.transactionId,
-                    confidence: result.suggestion?.confidenceScore,
-                  },
-                  "Created reverse match suggestion",
-                );
+                this.logger.info("Created reverse match suggestion", {
+                  teamId,
+                  inboxId: inboxItem.id,
+                  transactionId: result.suggestion?.transactionId,
+                  confidence: result.suggestion?.confidenceScore,
+                });
                 break;
 
               case "no_match_yet":
@@ -235,14 +214,11 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
                 break;
             }
           } catch (error) {
-            this.logger.error(
-              {
-                teamId,
-                inboxId: inboxItem.id,
-                error: error instanceof Error ? error.message : "Unknown error",
-              },
-              "Failed to process reverse match",
-            );
+            this.logger.error("Failed to process reverse match", {
+              teamId,
+              inboxId: inboxItem.id,
+              error: error instanceof Error ? error.message : "Unknown error",
+            });
           }
         }),
       );
@@ -256,24 +232,21 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
     const totalMatched = forwardMatchCount + reverseMatchCount;
     const totalSuggestions = forwardSuggestionCount + reverseSuggestionCount;
 
-    this.logger.info(
-      {
-        teamId,
-        summary: {
-          newTransactions: newTransactionIds.length,
-          pendingInboxItems: unmatchedInboxItems.length,
-          totalProcessed,
-          forwardMatches: forwardMatchCount,
-          reverseMatches: reverseMatchCount,
-          totalAutoMatches: totalMatched,
-          forwardSuggestions: forwardSuggestionCount,
-          reverseSuggestions: reverseSuggestionCount,
-          totalSuggestions,
-          noMatches: noMatchCount,
-        },
+    this.logger.info("Completed bidirectional transaction matching", {
+      teamId,
+      summary: {
+        newTransactions: newTransactionIds.length,
+        pendingInboxItems: unmatchedInboxItems.length,
+        totalProcessed,
+        forwardMatches: forwardMatchCount,
+        reverseMatches: reverseMatchCount,
+        totalAutoMatches: totalMatched,
+        forwardSuggestions: forwardSuggestionCount,
+        reverseSuggestions: reverseSuggestionCount,
+        totalSuggestions,
+        noMatches: noMatchCount,
       },
-      "Completed bidirectional transaction matching",
-    );
+    });
 
     return {
       processed: totalProcessed,

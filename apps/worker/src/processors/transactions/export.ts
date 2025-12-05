@@ -143,10 +143,10 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
             data: Buffer.from(arrayBuffer),
           });
         } catch (error) {
-          this.logger.warn(
-            { error, attachmentName: attachment.name },
-            "Failed to add attachment to zip",
-          );
+          this.logger.warn("Failed to add attachment to zip", {
+            error,
+            attachmentName: attachment.name,
+          });
         }
       }
     }
@@ -221,10 +221,9 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
         });
 
         if (shortLink) {
-          this.logger.debug(
-            { downloadLink: `${getAppUrl()}/s/${shortLink.shortId}` },
-            "Short link created for export",
-          );
+          this.logger.debug("Short link created for export", {
+            downloadLink: `${getAppUrl()}/s/${shortLink.shortId}`,
+          });
         }
       }
     }

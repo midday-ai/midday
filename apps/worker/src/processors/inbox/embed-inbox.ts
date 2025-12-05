@@ -19,10 +19,11 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
     const { inboxId, teamId } = job.data;
     const db = getDb();
 
-    this.logger.info(
-      { jobId: job.id, inboxId, teamId },
-      "🚀 Starting embed-inbox job",
-    );
+    this.logger.info("🚀 Starting embed-inbox job", {
+      jobId: job.id,
+      inboxId,
+      teamId,
+    });
 
     // Set status to analyzing when we start processing
     await db
@@ -30,10 +31,11 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
       .set({ status: "analyzing" })
       .where(eq(inbox.id, inboxId));
 
-    this.logger.info(
-      { jobId: job.id, inboxId, teamId },
-      "📊 Starting inbox analysis",
-    );
+    this.logger.info("📊 Starting inbox analysis", {
+      jobId: job.id,
+      inboxId,
+      teamId,
+    });
 
     // Idempotency check: Check if embedding already exists
     // This prevents duplicate processing if the job is retried or enqueued multiple times
@@ -41,8 +43,8 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
 
     if (embeddingExists) {
       this.logger.info(
-        { inboxId, teamId, jobId: job.id },
         "Inbox embedding already exists, skipping creation (idempotency check)",
+        { inboxId, teamId, jobId: job.id },
       );
       return;
     }
@@ -71,11 +73,11 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
     // Edge case: Handle empty or null data
     if (!inboxItem.displayName && !inboxItem.website) {
       this.logger.warn(
+        "Inbox item has no displayName or website, cannot generate embedding",
         {
           inboxId,
           teamId,
         },
-        "Inbox item has no displayName or website, cannot generate embedding",
       );
 
       // Set back to pending if no data to process
@@ -93,15 +95,12 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
 
     // Edge case: Empty text after preparation
     if (!text || !text.trim()) {
-      this.logger.warn(
-        {
-          inboxId,
-          teamId,
-          displayName: inboxItem.displayName,
-          website: inboxItem.website,
-        },
-        "No text to embed for inbox item after preparation",
-      );
+      this.logger.warn("No text to embed for inbox item after preparation", {
+        inboxId,
+        teamId,
+        displayName: inboxItem.displayName,
+        website: inboxItem.website,
+      });
 
       // Set back to pending if no text to process
       await db
@@ -113,15 +112,12 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
 
     try {
       const embeddingStartTime = Date.now();
-      this.logger.info(
-        {
-          jobId: job.id,
-          inboxId,
-          teamId,
-          textLength: text.length,
-        },
-        "🧮 Generating embedding for inbox item",
-      );
+      this.logger.info("🧮 Generating embedding for inbox item", {
+        jobId: job.id,
+        inboxId,
+        teamId,
+        textLength: text.length,
+      });
 
       // Generate embedding with timeout
       const { embedding, model } = await withTimeout(
@@ -131,17 +127,14 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
       );
 
       const embeddingDuration = Date.now() - embeddingStartTime;
-      this.logger.info(
-        {
-          jobId: job.id,
-          inboxId,
-          teamId,
-          embeddingDimensions: embedding.length,
-          model,
-          duration: `${embeddingDuration}ms`,
-        },
-        "✅ Embedding generated successfully",
-      );
+      this.logger.info("✅ Embedding generated successfully", {
+        jobId: job.id,
+        inboxId,
+        teamId,
+        embeddingDimensions: embedding.length,
+        model,
+        duration: `${embeddingDuration}ms`,
+      });
 
       const saveStartTime = Date.now();
       await createInboxEmbedding(db, {
@@ -154,26 +147,20 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
 
       const saveDuration = Date.now() - saveStartTime;
       const totalDuration = Date.now() - processStartTime;
-      this.logger.info(
-        {
-          jobId: job.id,
-          inboxId,
-          teamId,
-          embeddingDimensions: embedding.length,
-          saveDuration: `${saveDuration}ms`,
-          totalDuration: `${totalDuration}ms`,
-        },
-        "🎉 Inbox embedding created successfully",
-      );
+      this.logger.info("🎉 Inbox embedding created successfully", {
+        jobId: job.id,
+        inboxId,
+        teamId,
+        embeddingDimensions: embedding.length,
+        saveDuration: `${saveDuration}ms`,
+        totalDuration: `${totalDuration}ms`,
+      });
     } catch (error) {
-      this.logger.error(
-        {
-          inboxId,
-          teamId,
-          error: error instanceof Error ? error.message : "Unknown error",
-        },
-        "Failed to create inbox embedding",
-      );
+      this.logger.error("Failed to create inbox embedding", {
+        inboxId,
+        teamId,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
 
       // Set back to pending on error
       await db

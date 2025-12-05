@@ -17,13 +17,10 @@ export class BatchProcessMatchingProcessor extends BaseProcessor<BatchProcessMat
     const { teamId, inboxIds } = job.data;
     const db = getDb();
 
-    this.logger.info(
-      {
-        teamId,
-        inboxCount: inboxIds.length,
-      },
-      "Starting batch inbox matching",
-    );
+    this.logger.info("Starting batch inbox matching", {
+      teamId,
+      inboxCount: inboxIds.length,
+    });
 
     await this.updateProgress(job, 0);
 
@@ -63,29 +60,23 @@ export class BatchProcessMatchingProcessor extends BaseProcessor<BatchProcessMat
               case "auto_matched":
                 autoMatchCount++;
                 // suggestion is guaranteed to exist when action is "auto_matched"
-                this.logger.info(
-                  {
-                    teamId,
-                    inboxId,
-                    transactionId: result.suggestion!.transactionId,
-                    confidence: result.suggestion!.confidenceScore,
-                  },
-                  "Auto-matched inbox item",
-                );
+                this.logger.info("Auto-matched inbox item", {
+                  teamId,
+                  inboxId,
+                  transactionId: result.suggestion!.transactionId,
+                  confidence: result.suggestion!.confidenceScore,
+                });
                 break;
 
               case "suggestion_created":
                 suggestionCount++;
                 // suggestion is guaranteed to exist when action is "suggestion_created"
-                this.logger.info(
-                  {
-                    teamId,
-                    inboxId,
-                    transactionId: result.suggestion!.transactionId,
-                    confidence: result.suggestion!.confidenceScore,
-                  },
-                  "Created match suggestion",
-                );
+                this.logger.info("Created match suggestion", {
+                  teamId,
+                  inboxId,
+                  transactionId: result.suggestion!.transactionId,
+                  confidence: result.suggestion!.confidenceScore,
+                });
                 break;
 
               case "no_match_yet":
@@ -98,16 +89,13 @@ export class BatchProcessMatchingProcessor extends BaseProcessor<BatchProcessMat
             errorCount++;
             const classified = classifyError(error);
 
-            this.logger.error(
-              {
-                teamId,
-                inboxId,
-                error: error instanceof Error ? error.message : "Unknown error",
-                errorCategory: classified.category,
-                retryable: classified.retryable,
-              },
-              "Failed to process inbox matching",
-            );
+            this.logger.error("Failed to process inbox matching", {
+              teamId,
+              inboxId,
+              error: error instanceof Error ? error.message : "Unknown error",
+              errorCategory: classified.category,
+              retryable: classified.retryable,
+            });
 
             throw error;
           }
@@ -120,30 +108,24 @@ export class BatchProcessMatchingProcessor extends BaseProcessor<BatchProcessMat
 
       // Log batch completion
       const batchErrors = results.filter((r) => r.status === "rejected").length;
-      this.logger.info(
-        {
-          teamId,
-          batchIndex: batchIndex + 1,
-          batchSize: batch.length,
-          errors: batchErrors,
-        },
-        "Completed batch processing",
-      );
+      this.logger.info("Completed batch processing", {
+        teamId,
+        batchIndex: batchIndex + 1,
+        batchSize: batch.length,
+        errors: batchErrors,
+      });
     }
 
-    this.logger.info(
-      {
-        teamId,
-        summary: {
-          totalProcessed: inboxIds.length,
-          autoMatches: autoMatchCount,
-          suggestions: suggestionCount,
-          noMatches: noMatchCount,
-          errors: errorCount,
-        },
+    this.logger.info("Completed batch inbox matching", {
+      teamId,
+      summary: {
+        totalProcessed: inboxIds.length,
+        autoMatches: autoMatchCount,
+        suggestions: suggestionCount,
+        noMatches: noMatchCount,
+        errors: errorCount,
       },
-      "Completed batch inbox matching",
-    );
+    });
 
     return {
       processed: inboxIds.length,

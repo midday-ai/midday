@@ -33,12 +33,9 @@ export class NoMatchSchedulerProcessor extends BaseProcessor<NoMatchSchedulerPay
     // Calculate the date 90 days ago using date-fns
     const ninetyDaysAgo = subDays(new Date(), 90);
 
-    this.logger.info(
-      {
-        cutoffDate: ninetyDaysAgo.toISOString(),
-      },
-      "Starting no-match scheduler",
-    );
+    this.logger.info("Starting no-match scheduler", {
+      cutoffDate: ninetyDaysAgo.toISOString(),
+    });
 
     await this.updateProgress(job, 30);
 
@@ -68,19 +65,16 @@ export class NoMatchSchedulerProcessor extends BaseProcessor<NoMatchSchedulerPay
 
     await this.updateProgress(job, 70);
 
-    this.logger.info(
-      {
-        updatedCount: result.length,
-        cutoffDate: ninetyDaysAgo.toISOString(),
-        sampleUpdatedItems: result.slice(0, 5).map((item) => ({
-          id: item.id,
-          teamId: item.teamId,
-          displayName: item.displayName,
-          createdAt: item.createdAt,
-        })),
-      },
-      "No-match scheduler completed",
-    );
+    this.logger.info("No-match scheduler completed", {
+      updatedCount: result.length,
+      cutoffDate: ninetyDaysAgo.toISOString(),
+      sampleUpdatedItems: result.slice(0, 5).map((item) => ({
+        id: item.id,
+        teamId: item.teamId,
+        displayName: item.displayName,
+        createdAt: item.createdAt,
+      })),
+    });
 
     // Log some statistics for monitoring
     if (result.length > 0) {
@@ -94,13 +88,10 @@ export class NoMatchSchedulerProcessor extends BaseProcessor<NoMatchSchedulerPay
         {} as Record<string, number>,
       );
 
-      this.logger.info(
-        {
-          teamCounts,
-          totalTeams: Object.keys(teamCounts).length,
-        },
-        "No-match scheduler team breakdown",
-      );
+      this.logger.info("No-match scheduler team breakdown", {
+        teamCounts,
+        totalTeams: Object.keys(teamCounts).length,
+      });
     }
 
     await this.updateProgress(job, 100);

@@ -48,15 +48,12 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
 
     const connector = new InboxConnector(accountRow.provider, db);
 
-    this.logger.info(
-      {
-        accountId: inboxAccountId,
-        teamId: accountRow.teamId,
-        provider: accountRow.provider,
-        lastAccessed: accountRow.lastAccessed,
-      },
-      "Starting inbox sync",
-    );
+    this.logger.info("Starting inbox sync", {
+      accountId: inboxAccountId,
+      teamId: accountRow.teamId,
+      provider: accountRow.provider,
+      lastAccessed: accountRow.lastAccessed,
+    });
 
     await this.updateProgress(job, 10);
 
@@ -71,14 +68,11 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         fullSync: manualSync,
       });
 
-      this.logger.info(
-        {
-          accountId: inboxAccountId,
-          totalFound: attachments.length,
-          provider: accountRow.provider,
-        },
-        "Fetched attachments from provider",
-      );
+      this.logger.info("Fetched attachments from provider", {
+        accountId: inboxAccountId,
+        totalFound: attachments.length,
+        provider: accountRow.provider,
+      });
 
       await this.updateProgress(job, 20);
 
@@ -87,14 +81,11 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         (attachment) => attachment.referenceId,
       );
 
-      this.logger.info(
-        {
-          accountId: inboxAccountId,
-          referenceIds: referenceIds,
-          referenceIdsCount: referenceIds.length,
-        },
-        "Checking for existing attachments by referenceIds",
-      );
+      this.logger.info("Checking for existing attachments by referenceIds", {
+        accountId: inboxAccountId,
+        referenceIds: referenceIds,
+        referenceIdsCount: referenceIds.length,
+      });
 
       const existingAttachmentsResults =
         await getExistingInboxAttachmentsByReferenceIds(db, {
@@ -102,16 +93,13 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
           teamId: accountRow.teamId,
         });
 
-      this.logger.info(
-        {
-          accountId: inboxAccountId,
-          existingCount: existingAttachmentsResults.length,
-          existingReferenceIds: existingAttachmentsResults.map(
-            (r) => r.referenceId,
-          ),
-        },
-        "Found existing attachments in database",
-      );
+      this.logger.info("Found existing attachments in database", {
+        accountId: inboxAccountId,
+        existingCount: existingAttachmentsResults.length,
+        existingReferenceIds: existingAttachmentsResults.map(
+          (r) => r.referenceId,
+        ),
+      });
 
       const existingAttachments = {
         data: existingAttachmentsResults.map((r) => ({
@@ -138,46 +126,37 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         existingAttachments.data?.map((e) => e.reference_id) ?? [],
       );
 
-      this.logger.info(
-        {
-          accountId: inboxAccountId,
-          existingSetSize: existingReferenceIdSet.size,
-          sampleExisting: Array.from(existingReferenceIdSet).slice(0, 3),
-          sampleAttachments: attachments.slice(0, 3).map((a) => ({
-            referenceId: a.referenceId,
-            filename: a.filename,
-          })),
-        },
-        "Comparing attachments with existing set",
-      );
+      this.logger.info("Comparing attachments with existing set", {
+        accountId: inboxAccountId,
+        existingSetSize: existingReferenceIdSet.size,
+        sampleExisting: Array.from(existingReferenceIdSet).slice(0, 3),
+        sampleAttachments: attachments.slice(0, 3).map((a) => ({
+          referenceId: a.referenceId,
+          filename: a.filename,
+        })),
+      });
 
       const filteredAttachments = attachments.filter((attachment) => {
         // Skip if already exists in database
         const exists = existingReferenceIdSet.has(attachment.referenceId);
         if (exists) {
           skippedAlreadyProcessed++;
-          this.logger.debug(
-            {
-              referenceId: attachment.referenceId,
-              filename: attachment.filename,
-            },
-            "Skipping already processed attachment",
-          );
+          this.logger.debug("Skipping already processed attachment", {
+            referenceId: attachment.referenceId,
+            filename: attachment.filename,
+          });
           return false;
         }
 
         // Skip if attachment is too large
         if (attachment.size > MAX_ATTACHMENT_SIZE) {
           skippedTooLarge++;
-          this.logger.warn(
-            {
-              filename: attachment.filename,
-              size: attachment.size,
-              maxSize: MAX_ATTACHMENT_SIZE,
-              accountId: inboxAccountId,
-            },
-            "Attachment exceeds size limit",
-          );
+          this.logger.warn("Attachment exceeds size limit", {
+            filename: attachment.filename,
+            size: attachment.size,
+            maxSize: MAX_ATTACHMENT_SIZE,
+            accountId: inboxAccountId,
+          });
           return false;
         }
 
@@ -202,21 +181,18 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         return true;
       });
 
-      this.logger.info(
-        {
-          accountId: inboxAccountId,
-          totalFound: attachments.length,
-          afterFiltering: filteredAttachments.length,
-          skipped: attachments.length - filteredAttachments.length,
-          skippedByReason: {
-            alreadyProcessed: skippedAlreadyProcessed,
-            tooLarge: skippedTooLarge,
-            blockedDomain: skippedBlockedDomain,
-            blockedEmail: skippedBlockedEmail,
-          },
+      this.logger.info("Attachment filtering summary", {
+        accountId: inboxAccountId,
+        totalFound: attachments.length,
+        afterFiltering: filteredAttachments.length,
+        skipped: attachments.length - filteredAttachments.length,
+        skippedByReason: {
+          alreadyProcessed: skippedAlreadyProcessed,
+          tooLarge: skippedTooLarge,
+          blockedDomain: skippedBlockedDomain,
+          blockedEmail: skippedBlockedEmail,
         },
-        "Attachment filtering summary",
-      );
+      });
 
       await this.updateProgress(job, 40);
 
@@ -259,24 +235,18 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
 
       await this.updateProgress(job, 60);
 
-      this.logger.info(
-        {
-          accountId: inboxAccountId,
-          totalFetched: attachments.length,
-          afterFiltering: filteredAttachments.length,
-          uploaded: uploadedAttachments.length,
-        },
-        "Attachment processing summary",
-      );
+      this.logger.info("Attachment processing summary", {
+        accountId: inboxAccountId,
+        totalFetched: attachments.length,
+        afterFiltering: filteredAttachments.length,
+        uploaded: uploadedAttachments.length,
+      });
 
       if (uploadedAttachments.length > 0) {
-        this.logger.info(
-          {
-            accountId: inboxAccountId,
-            attachmentCount: uploadedAttachments.length,
-          },
-          "Triggering document processing",
-        );
+        this.logger.info("Triggering document processing", {
+          accountId: inboxAccountId,
+          attachmentCount: uploadedAttachments.length,
+        });
 
         // Trigger process-attachment jobs for each uploaded attachment
         await Promise.all(
@@ -303,24 +273,18 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
           );
         } catch (error) {
           // Don't fail the entire process if notification fails
-          this.logger.warn(
-            {
-              accountId: inboxAccountId,
-              teamId: accountRow.teamId,
-              error: error instanceof Error ? error.message : "Unknown error",
-            },
-            "Failed to trigger inbox_new notification",
-          );
-        }
-
-        this.logger.info(
-          {
+          this.logger.warn("Failed to trigger inbox_new notification", {
             accountId: inboxAccountId,
             teamId: accountRow.teamId,
-            totalCount: uploadedAttachments.length,
-          },
-          "New inbox items processed",
-        );
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
+
+        this.logger.info("New inbox items processed", {
+          accountId: inboxAccountId,
+          teamId: accountRow.teamId,
+          totalCount: uploadedAttachments.length,
+        });
       }
 
       // Update account with successful sync - mark as connected and clear errors
@@ -333,13 +297,10 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
 
       await this.updateProgress(job, 100);
 
-      this.logger.info(
-        {
-          accountId: inboxAccountId,
-          processedAttachments: uploadedAttachments.length,
-        },
-        "Inbox sync completed",
-      );
+      this.logger.info("Inbox sync completed", {
+        accountId: inboxAccountId,
+        processedAttachments: uploadedAttachments.length,
+      });
 
       return {
         accountId: inboxAccountId,
@@ -350,14 +311,11 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
       const errorMessage =
         error instanceof Error ? error.message : "Unknown sync error";
 
-      this.logger.error(
-        {
-          accountId: inboxAccountId,
-          error: errorMessage,
-          provider: accountRow.provider,
-        },
-        "Inbox sync failed",
-      );
+      this.logger.error("Inbox sync failed", {
+        accountId: inboxAccountId,
+        error: errorMessage,
+        provider: accountRow.provider,
+      });
 
       // Check if this is an authentication/authorization error
       const isAuthError = isAuthenticationError(errorMessage);
@@ -370,25 +328,19 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
           errorMessage: `Authentication failed: ${errorMessage}`,
         });
 
-        this.logger.error(
-          {
-            accountId: inboxAccountId,
-            error: errorMessage,
-            provider: accountRow.provider,
-          },
-          "Account marked as disconnected due to auth error",
-        );
+        this.logger.error("Account marked as disconnected due to auth error", {
+          accountId: inboxAccountId,
+          error: errorMessage,
+          provider: accountRow.provider,
+        });
       } else {
         // For temporary errors (network, API downtime, etc.), don't change connection status
-        this.logger.warn(
-          {
-            accountId: inboxAccountId,
-            error: errorMessage,
-            provider: accountRow.provider,
-            errorType: "temporary",
-          },
-          "Temporary sync error - connection status unchanged",
-        );
+        this.logger.warn("Temporary sync error - connection status unchanged", {
+          accountId: inboxAccountId,
+          error: errorMessage,
+          provider: accountRow.provider,
+          errorType: "temporary",
+        });
       }
 
       // Re-throw the error so the job is marked as failed

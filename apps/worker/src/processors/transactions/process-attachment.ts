@@ -22,22 +22,18 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
 
     await this.updateProgress(job, 5);
 
-    this.logger.info(
-      {
-        transactionId,
-        filePath: filePath.join("/"),
-        mimetype,
-        teamId,
-      },
-      "Processing transaction attachment",
-    );
+    this.logger.info("Processing transaction attachment", {
+      transactionId,
+      filePath: filePath.join("/"),
+      mimetype,
+      teamId,
+    });
 
     // If the file is a HEIC we need to convert it to a JPG
     if (mimetype === "image/heic") {
-      this.logger.info(
-        { filePath: filePath.join("/") },
-        "Converting HEIC to JPG",
-      );
+      this.logger.info("Converting HEIC to JPG", {
+        filePath: filePath.join("/"),
+      });
 
       await this.updateProgress(job, 10);
 
@@ -93,14 +89,11 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
 
     const document = new DocumentClient();
 
-    this.logger.info(
-      {
-        transactionId,
-        filename,
-        mimetype,
-      },
-      "Extracting tax information from document",
-    );
+    this.logger.info("Extracting tax information from document", {
+      transactionId,
+      filename,
+      mimetype,
+    });
 
     const result = await document.getInvoiceOrReceipt({
       documentUrl: signedUrlData.signedUrl,
@@ -111,14 +104,11 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
 
     // Update the transaction with the tax information
     if (result.tax_rate && result.tax_type) {
-      this.logger.info(
-        {
-          transactionId,
-          taxRate: result.tax_rate,
-          taxType: result.tax_type,
-        },
-        "Updating transaction with tax information",
-      );
+      this.logger.info("Updating transaction with tax information", {
+        transactionId,
+        taxRate: result.tax_rate,
+        taxType: result.tax_type,
+      });
 
       const db = getDb();
       await updateTransaction(db, {
@@ -128,21 +118,15 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
         taxType: result.tax_type ?? undefined,
       });
 
-      this.logger.info(
-        {
-          transactionId,
-          taxRate: result.tax_rate,
-          taxType: result.tax_type,
-        },
-        "Transaction updated with tax information",
-      );
+      this.logger.info("Transaction updated with tax information", {
+        transactionId,
+        taxRate: result.tax_rate,
+        taxType: result.tax_type,
+      });
     } else {
-      this.logger.info(
-        {
-          transactionId,
-        },
-        "No tax information found in document",
-      );
+      this.logger.info("No tax information found in document", {
+        transactionId,
+      });
     }
 
     await this.updateProgress(job, 80);
@@ -160,21 +144,15 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
         "documents",
       );
 
-      this.logger.info(
-        {
-          transactionId,
-          filePath: filePath.join("/"),
-        },
-        "Triggered document processing for classification",
-      );
+      this.logger.info("Triggered document processing for classification", {
+        transactionId,
+        filePath: filePath.join("/"),
+      });
     } catch (error) {
-      this.logger.warn(
-        {
-          transactionId,
-          error: error instanceof Error ? error.message : "Unknown error",
-        },
-        "Failed to trigger document processing (non-critical)",
-      );
+      this.logger.warn("Failed to trigger document processing (non-critical)", {
+        transactionId,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
       // Don't fail the entire process if document processing fails
     }
 

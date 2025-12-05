@@ -19,13 +19,10 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
 
     await this.updateProgress(job, 10);
 
-    this.logger.info(
-      {
-        fileName,
-        teamId,
-      },
-      "Classifying image",
-    );
+    this.logger.info("Classifying image", {
+      fileName,
+      teamId,
+    });
 
     const { data: fileData } = await supabase.storage
       .from("vault")
@@ -54,6 +51,7 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
     let finalTitle = result.title;
     if (!finalTitle || finalTitle.trim().length === 0) {
       this.logger.warn(
+        "Image classification returned null or empty title - generating fallback",
         {
           fileName,
           pathTokens,
@@ -62,7 +60,6 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
           hasDate: !!result.date,
           hasContent: !!result.content,
         },
-        "Image classification returned null or empty title - generating fallback",
       );
 
       // Generate fallback title from available metadata
@@ -98,13 +95,10 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
 
       finalTitle = `${inferredType}${summaryPart || ` - ${fileNameWithoutExt}`}${datePart}`;
 
-      this.logger.info(
-        {
-          fileName,
-          generatedTitle: finalTitle,
-        },
-        "Generated fallback title for image",
-      );
+      this.logger.info("Generated fallback title for image", {
+        fileName,
+        generatedTitle: finalTitle,
+      });
     }
 
     const updatedDocs = await updateDocumentByPath(db, {
@@ -121,14 +115,11 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
     });
 
     if (!updatedDocs || updatedDocs.length === 0) {
-      this.logger.error(
-        {
-          fileName,
-          pathTokens,
-          teamId,
-        },
-        "Document not found for image classification update",
-      );
+      this.logger.error("Document not found for image classification update", {
+        fileName,
+        pathTokens,
+        teamId,
+      });
       throw new Error(`Document with path ${fileName} not found`);
     }
 
@@ -142,30 +133,20 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
     await this.updateProgress(job, 90);
 
     if (result.tags && result.tags.length > 0) {
-      this.logger.info(
-        {
-          documentId: data.id,
-          tagsCount: result.tags.length,
-        },
-        "Triggering document tag embedding",
-      );
+      this.logger.info("Triggering document tag embedding", {
+        documentId: data.id,
+        tagsCount: result.tags.length,
+      });
 
       await triggerJob(
         "embed-document-tags",
-        {
-          documentId: data.id,
-          tags: result.tags,
-          teamId,
-        },
+        { documentId: data.id, tags: result.tags, teamId },
         "documents",
       );
     } else {
-      this.logger.info(
-        {
-          documentId: data.id,
-        },
-        "No tags found, document processing completed",
-      );
+      this.logger.info("No tags found, document processing completed", {
+        documentId: data.id,
+      });
     }
 
     await this.updateProgress(job, 100);

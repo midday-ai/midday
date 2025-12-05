@@ -23,14 +23,11 @@ export class EmbedDocumentTagsProcessor extends BaseProcessor<EmbedDocumentTagsP
 
     await this.updateProgress(job, 5);
 
-    this.logger.info(
-      {
-        documentId,
-        tagsCount: tags.length,
-        teamId,
-      },
-      "Embedding document tags",
-    );
+    this.logger.info("Embedding document tags", {
+      documentId,
+      tagsCount: tags.length,
+      teamId,
+    });
 
     const embed = new Embed();
 
@@ -67,25 +64,19 @@ export class EmbedDocumentTagsProcessor extends BaseProcessor<EmbedDocumentTagsP
 
     // 4. Generate and insert new embeddings if any
     if (newTagNames.length > 0) {
-      this.logger.info(
-        {
-          documentId,
-          newTagsCount: newTagNames.length,
-        },
-        "Generating embeddings for new tags",
-      );
+      this.logger.info("Generating embeddings for new tags", {
+        documentId,
+        newTagsCount: newTagNames.length,
+      });
 
       const { embeddings, model } = await embed.embedMany(newTagNames);
 
       if (!embeddings || embeddings.length !== newTagNames.length) {
-        this.logger.error(
-          {
-            documentId,
-            embeddingsLength: embeddings?.length,
-            expectedLength: newTagNames.length,
-          },
-          "Embeddings result is missing or length mismatch",
-        );
+        this.logger.error("Embeddings result is missing or length mismatch", {
+          documentId,
+          embeddingsLength: embeddings?.length,
+          expectedLength: newTagNames.length,
+        });
         throw new Error("Failed to generate embeddings for all new tags.");
       }
 
@@ -99,20 +90,14 @@ export class EmbedDocumentTagsProcessor extends BaseProcessor<EmbedDocumentTagsP
       // Upsert embeddings to handle potential race conditions or duplicates
       await upsertDocumentTagEmbeddings(db, newEmbeddingsToInsert);
 
-      this.logger.info(
-        {
-          documentId,
-          insertedCount: newEmbeddingsToInsert.length,
-        },
-        "Successfully inserted/updated embeddings",
-      );
+      this.logger.info("Successfully inserted/updated embeddings", {
+        documentId,
+        insertedCount: newEmbeddingsToInsert.length,
+      });
     } else {
-      this.logger.info(
-        {
-          documentId,
-        },
-        "No new tags to embed",
-      );
+      this.logger.info("No new tags to embed", {
+        documentId,
+      });
     }
 
     await this.updateProgress(job, 60);
@@ -127,12 +112,9 @@ export class EmbedDocumentTagsProcessor extends BaseProcessor<EmbedDocumentTagsP
     const upsertedTagsData = await upsertDocumentTags(db, tagsToUpsert);
 
     if (!upsertedTagsData || upsertedTagsData.length === 0) {
-      this.logger.error(
-        {
-          documentId,
-        },
-        "Upsert operation returned no data for document tags",
-      );
+      this.logger.error("Upsert operation returned no data for document tags", {
+        documentId,
+      });
       throw new Error("Failed to get IDs from upserted document tags.");
     }
 
@@ -160,19 +142,16 @@ export class EmbedDocumentTagsProcessor extends BaseProcessor<EmbedDocumentTagsP
         processingStatus: "completed",
       });
 
-      this.logger.info(
-        {
-          documentId,
-          tagsAssigned: allTagIds.length,
-        },
-        "Document tags embedded and assigned successfully",
-      );
+      this.logger.info("Document tags embedded and assigned successfully", {
+        documentId,
+        tagsAssigned: allTagIds.length,
+      });
     } else {
       this.logger.warn(
+        "No tags resulted from the upsert process, cannot assign",
         {
           documentId,
         },
-        "No tags resulted from the upsert process, cannot assign",
       );
     }
 

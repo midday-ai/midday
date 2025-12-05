@@ -108,25 +108,19 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
         //   );
         // }
 
-        this.logger.info(
-          {
-            inboxId: updatedInbox.id,
-            teamId,
-            amount: updatedInbox.amount,
-          },
-          "Slack upload processed successfully",
-        );
+        this.logger.info("Slack upload processed successfully", {
+          inboxId: updatedInbox.id,
+          teamId,
+          amount: updatedInbox.amount,
+        });
       }
 
       await this.updateProgress(job, 100);
     } catch (error) {
-      this.logger.error(
-        {
-          inboxId: inboxData.id,
-          error: error instanceof Error ? error.message : "Unknown error",
-        },
-        "Failed to process Slack upload",
-      );
+      this.logger.error("Failed to process Slack upload", {
+        inboxId: inboxData.id,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
 
       // If we end up here we could not parse the document
       // But we want to update the status so we show the record with fallback name

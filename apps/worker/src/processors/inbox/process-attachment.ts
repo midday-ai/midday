@@ -38,26 +38,23 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
     const fileName = filePath.join("/");
     let processedMimetype = mimetype;
 
-    this.logger.info(
-      {
-        jobId: job.id,
-        fileName,
-        teamId,
-        mimetype,
-        size,
-        referenceId,
-        inboxAccountId,
-      },
-      "🚀 Starting process-attachment job",
-    );
+    this.logger.info("🚀 Starting process-attachment job", {
+      jobId: job.id,
+      fileName,
+      teamId,
+      mimetype,
+      size,
+      referenceId,
+      inboxAccountId,
+    });
 
     // If the file is a HEIC we need to convert it to a JPG
     if (mimetype === "image/heic") {
       const heicStartTime = Date.now();
-      this.logger.info(
-        { filePath: fileName, jobId: job.id },
-        "📸 Converting HEIC to JPG",
-      );
+      this.logger.info("📸 Converting HEIC to JPG", {
+        filePath: fileName,
+        jobId: job.id,
+      });
 
       const { data } = await withTimeout(
         supabase.storage.from("vault").download(fileName),
@@ -86,11 +83,11 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         });
       } catch (error) {
         this.logger.error(
+          "Failed to decode HEIC image - file may be corrupted",
           {
             filePath: fileName,
             error: error instanceof Error ? error.message : "Unknown error",
           },
-          "Failed to decode HEIC image - file may be corrupted",
         );
         throw new Error(
           `Failed to convert HEIC image: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -111,11 +108,11 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           .toBuffer();
       } catch (error) {
         this.logger.error(
+          "Failed to process image with sharp - file may be corrupted",
           {
             filePath: fileName,
             error: error instanceof Error ? error.message : "Unknown error",
           },
-          "Failed to process image with sharp - file may be corrupted",
         );
         throw new Error(
           `Failed to process image: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -138,10 +135,11 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
 
       processedMimetype = "image/jpeg";
       const heicDuration = Date.now() - heicStartTime;
-      this.logger.info(
-        { filePath: fileName, jobId: job.id, duration: `${heicDuration}ms` },
-        "✅ HEIC conversion completed",
-      );
+      this.logger.info("✅ HEIC conversion completed", {
+        filePath: fileName,
+        jobId: job.id,
+        duration: `${heicDuration}ms`,
+      });
     }
 
     const filename = filePath.at(-1);
@@ -158,14 +156,11 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
 
     // Check if inbox item already exists (for retry scenarios or manual uploads)
     const inboxCheckStartTime = Date.now();
-    this.logger.info(
-      {
-        jobId: job.id,
-        filePath: fileName,
-        teamId,
-      },
-      "🔍 Checking for existing inbox item",
-    );
+    this.logger.info("🔍 Checking for existing inbox item", {
+      jobId: job.id,
+      filePath: fileName,
+      teamId,
+    });
 
     let inboxData = await getInboxByFilePath(db, {
       filePath,
@@ -173,25 +168,22 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
     });
 
     const inboxCheckDuration = Date.now() - inboxCheckStartTime;
-    this.logger.info(
-      {
-        jobId: job.id,
-        filePath: fileName,
-        existingItem: !!inboxData,
-        existingStatus: inboxData?.status,
-        teamId,
-        duration: `${inboxCheckDuration}ms`,
-      },
-      "✅ Inbox item check completed",
-    );
+    this.logger.info("✅ Inbox item check completed", {
+      jobId: job.id,
+      filePath: fileName,
+      existingItem: !!inboxData,
+      existingStatus: inboxData?.status,
+      teamId,
+      duration: `${inboxCheckDuration}ms`,
+    });
 
     // Create inbox item if it doesn't exist (for non-manual uploads)
     // or update existing item status if it was created manually
     if (!inboxData) {
-      this.logger.info(
-        { filePath: fileName, referenceId },
-        "Creating new inbox item",
-      );
+      this.logger.info("Creating new inbox item", {
+        filePath: fileName,
+        referenceId,
+      });
       const createdData = await createInbox(db, {
         // NOTE: If we can't parse the name using OCR this will be the fallback name
         displayName: filename ?? "Unknown",
@@ -216,6 +208,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         // If the filePath is different, this is a duplicate from a different upload
         if (existingFilePath && existingFilePath !== currentFilePath) {
           this.logger.info(
+            "Found existing inbox item with different filePath, skipping duplicate",
             {
               inboxId: createdData.id,
               status: createdData.status,
@@ -223,7 +216,6 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
               existingFilePath,
               currentFilePath,
             },
-            "Found existing inbox item with different filePath, skipping duplicate",
           );
           return;
         }
@@ -234,13 +226,13 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           createdData.status !== "new"
         ) {
           this.logger.info(
+            "Found existing inbox item via referenceId conflict, skipping duplicate",
             {
               inboxId: createdData.id,
               status: createdData.status,
               referenceId,
               filePath: fileName,
             },
-            "Found existing inbox item via referenceId conflict, skipping duplicate",
           );
           return;
         }
@@ -249,21 +241,18 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       inboxData = createdData;
     } else if (inboxData.status === "processing") {
       this.logger.info(
+        "Found existing inbox item already in processing status",
         {
           inboxId: inboxData.id,
           filePath: fileName,
         },
-        "Found existing inbox item already in processing status",
       );
     } else {
-      this.logger.info(
-        {
-          inboxId: inboxData.id,
-          status: inboxData.status,
-          filePath: fileName,
-        },
-        "Found existing inbox item with status",
-      );
+      this.logger.info("Found existing inbox item with status", {
+        inboxId: inboxData.id,
+        status: inboxData.status,
+        filePath: fileName,
+      });
     }
 
     if (!inboxData) {
@@ -273,13 +262,13 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
     // Create signed URL and fetch team data in parallel (they don't depend on each other)
     const preProcessingStartTime = Date.now();
     this.logger.info(
+      "⚡ Starting parallel pre-processing (signed URL + team data)",
       {
         jobId: job.id,
         inboxId: inboxData.id,
         fileName,
         teamId,
       },
-      "⚡ Starting parallel pre-processing (signed URL + team data)",
     );
 
     const [signedUrlResult, teamData] = await Promise.all([
@@ -292,14 +281,11 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           `Signed URL creation timed out after ${TIMEOUTS.EXTERNAL_API}ms`,
         );
         const signedUrlDuration = Date.now() - signedUrlStartTime;
-        this.logger.info(
-          {
-            jobId: job.id,
-            inboxId: inboxData.id,
-            duration: `${signedUrlDuration}ms`,
-          },
-          "✅ Signed URL created",
-        );
+        this.logger.info("✅ Signed URL created", {
+          jobId: job.id,
+          inboxId: inboxData.id,
+          duration: `${signedUrlDuration}ms`,
+        });
         return signedUrlData;
       })(),
       // Fetch team data to provide context for OCR extraction
@@ -307,28 +293,22 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         const teamDataStartTime = Date.now();
         const teamDataResult = await getTeamById(db, teamId);
         const teamDataDuration = Date.now() - teamDataStartTime;
-        this.logger.info(
-          {
-            jobId: job.id,
-            inboxId: inboxData.id,
-            teamName: teamDataResult?.name,
-            duration: `${teamDataDuration}ms`,
-          },
-          "✅ Team data fetched",
-        );
+        this.logger.info("✅ Team data fetched", {
+          jobId: job.id,
+          inboxId: inboxData.id,
+          teamName: teamDataResult?.name,
+          duration: `${teamDataDuration}ms`,
+        });
         return teamDataResult;
       })(),
     ]);
 
     const preProcessingDuration = Date.now() - preProcessingStartTime;
-    this.logger.info(
-      {
-        jobId: job.id,
-        inboxId: inboxData.id,
-        duration: `${preProcessingDuration}ms`,
-      },
-      "✅ Parallel pre-processing completed",
-    );
+    this.logger.info("✅ Parallel pre-processing completed", {
+      jobId: job.id,
+      inboxId: inboxData.id,
+      duration: `${preProcessingDuration}ms`,
+    });
 
     if (!signedUrlResult) {
       throw new Error("File not found");
@@ -338,16 +318,13 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       const document = new DocumentClient();
 
       const docProcessingStartTime = Date.now();
-      this.logger.info(
-        {
-          jobId: job.id,
-          inboxId: inboxData.id,
-          mimetype: processedMimetype,
-          referenceId,
-          teamName: teamData?.name,
-        },
-        "📄 Starting document processing (OCR/LLM extraction)",
-      );
+      this.logger.info("📄 Starting document processing (OCR/LLM extraction)", {
+        jobId: job.id,
+        inboxId: inboxData.id,
+        mimetype: processedMimetype,
+        referenceId,
+        teamName: teamData?.name,
+      });
 
       // Process document with timeout
       const result = await withTimeout(
@@ -361,16 +338,13 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       );
 
       const docProcessingDuration = Date.now() - docProcessingStartTime;
-      this.logger.info(
-        {
-          jobId: job.id,
-          inboxId: inboxData.id,
-          resultType: result.type,
-          hasAmount: !!result.amount,
-          duration: `${docProcessingDuration}ms`,
-        },
-        "✅ Document processing completed",
-      );
+      this.logger.info("✅ Document processing completed", {
+        jobId: job.id,
+        inboxId: inboxData.id,
+        resultType: result.type,
+        hasAmount: !!result.amount,
+        duration: `${docProcessingDuration}ms`,
+      });
 
       await updateInboxWithProcessedData(db, {
         id: inboxData.id,
@@ -394,13 +368,10 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           teamId,
         });
       } catch (error) {
-        this.logger.error(
-          {
-            inboxId: inboxData.id,
-            error: error instanceof Error ? error.message : "Unknown error",
-          },
-          "Failed to group related inbox items",
-        );
+        this.logger.error("Failed to group related inbox items", {
+          inboxId: inboxData.id,
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
         // Don't fail the entire process if grouping fails
       }
 
@@ -408,12 +379,12 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       // Process documents and embedding in parallel for better performance
       const parallelJobsStartTime = Date.now();
       this.logger.info(
+        "⚡ Triggering parallel jobs (process-document + embed-inbox)",
         {
           jobId: job.id,
           inboxId: inboxData.id,
           teamId,
         },
-        "⚡ Triggering parallel jobs (process-document + embed-inbox)",
       );
 
       const [documentJobResult, embedJobResult] = await Promise.allSettled([
@@ -428,25 +399,22 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           "documents",
         )
           .then((result) => {
-            this.logger.info(
-              {
-                jobId: job.id,
-                inboxId: inboxData.id,
-                triggeredJobId: result.id,
-                triggeredJobName: "process-document",
-              },
-              "✅ Triggered process-document job",
-            );
+            this.logger.info("✅ Triggered process-document job", {
+              jobId: job.id,
+              inboxId: inboxData.id,
+              triggeredJobId: result.id,
+              triggeredJobName: "process-document",
+            });
             return result;
           })
           .catch((error) => {
             this.logger.warn(
+              "⚠️ Failed to trigger document processing (non-critical)",
               {
                 jobId: job.id,
                 inboxId: inboxData.id,
                 error: error instanceof Error ? error.message : "Unknown error",
               },
-              "⚠️ Failed to trigger document processing (non-critical)",
             );
             // Don't fail the entire process if document processing fails
             return null;
@@ -461,41 +429,32 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           "inbox",
         )
           .then((result) => {
-            this.logger.info(
-              {
-                jobId: job.id,
-                inboxId: inboxData.id,
-                triggeredJobId: result.id,
-                triggeredJobName: "embed-inbox",
-              },
-              "✅ Triggered embed-inbox job",
-            );
+            this.logger.info("✅ Triggered embed-inbox job", {
+              jobId: job.id,
+              inboxId: inboxData.id,
+              triggeredJobId: result.id,
+              triggeredJobName: "embed-inbox",
+            });
             return result;
           })
           .catch((error) => {
-            this.logger.error(
-              {
-                jobId: job.id,
-                inboxId: inboxData.id,
-                error: error instanceof Error ? error.message : "Unknown error",
-              },
-              "❌ Failed to trigger embed-inbox job",
-            );
+            this.logger.error("❌ Failed to trigger embed-inbox job", {
+              jobId: job.id,
+              inboxId: inboxData.id,
+              error: error instanceof Error ? error.message : "Unknown error",
+            });
             throw error;
           }),
       ]);
 
       const parallelJobsDuration = Date.now() - parallelJobsStartTime;
-      this.logger.info(
-        {
-          jobId: job.id,
-          inboxId: inboxData.id,
-          documentJobStatus: documentJobResult.status,
-          embedJobStatus: embedJobResult.status,
-          duration: `${parallelJobsDuration}ms`,
-        },
-        "✅ Parallel jobs triggered",
-      );
+      this.logger.info("✅ Parallel jobs triggered", {
+        jobId: job.id,
+        inboxId: inboxData.id,
+        documentJobStatus: documentJobResult.status,
+        embedJobStatus: embedJobResult.status,
+        duration: `${parallelJobsDuration}ms`,
+      });
 
       // After embedding is complete, trigger efficient matching
       // Note: batch-process-matching will wait for embedding to complete internally
@@ -510,61 +469,52 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       );
 
       const matchingDuration = Date.now() - matchingStartTime;
-      this.logger.info(
-        {
-          jobId: job.id,
-          inboxId: inboxData.id,
-          triggeredJobId: matchingJobResult.id,
-          triggeredJobName: "batch-process-matching",
-          duration: `${matchingDuration}ms`,
-        },
-        "✅ Triggered batch-process-matching job",
-      );
+      this.logger.info("✅ Triggered batch-process-matching job", {
+        jobId: job.id,
+        inboxId: inboxData.id,
+        triggeredJobId: matchingJobResult.id,
+        triggeredJobName: "batch-process-matching",
+        duration: `${matchingDuration}ms`,
+      });
 
       const totalDuration = Date.now() - processStartTime;
-      this.logger.info(
-        {
-          jobId: job.id,
-          inboxId: inboxData.id,
-          teamId,
-          totalDuration: `${totalDuration}ms`,
-        },
-        "🎉 process-attachment job completed successfully",
-      );
+      this.logger.info("🎉 process-attachment job completed successfully", {
+        jobId: job.id,
+        inboxId: inboxData.id,
+        teamId,
+        totalDuration: `${totalDuration}ms`,
+      });
     } catch (error) {
-      this.logger.error(
-        {
-          inboxId: inboxData.id,
-          error: error instanceof Error ? error.message : "Unknown error",
-          referenceId,
-          mimetype,
-        },
-        "Document processing failed",
-      );
+      this.logger.error("Document processing failed", {
+        inboxId: inboxData.id,
+        error: error instanceof Error ? error.message : "Unknown error",
+        referenceId,
+        mimetype,
+      });
 
       // Re-throw timeout errors to trigger retry
       if (error instanceof Error && error.name === "AbortError") {
         this.logger.warn(
+          "Document processing failed with retryable error, will retry",
           {
             inboxId: inboxData.id,
             referenceId,
             errorType: error.name,
             errorMessage: error.message,
           },
-          "Document processing failed with retryable error, will retry",
         );
         throw error;
       }
 
       // For non-retryable errors, mark as pending with fallback name
       this.logger.info(
+        "Document processing failed, marking as pending with fallback name",
         {
           inboxId: inboxData.id,
           referenceId,
           errorMessage:
             error instanceof Error ? error.message : "Unknown error",
         },
-        "Document processing failed, marking as pending with fallback name",
       );
 
       await updateInbox(db, {
