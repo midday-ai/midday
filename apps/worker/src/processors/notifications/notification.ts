@@ -1,6 +1,6 @@
 import { Notifications } from "@midday/notifications";
 import type { Job } from "bullmq";
-import type { NotificationPayload } from "../../schemas/notification";
+import type { NotificationPayload } from "../../schemas/notifications";
 import { getDb } from "../../utils/db";
 import { BaseProcessor } from "../base";
 
