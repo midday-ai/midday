@@ -17,9 +17,8 @@ import {
   updateDocuments,
 } from "@midday/db/queries";
 import { isMimeTypeSupportedForProcessing } from "@midday/documents/utils";
-import type { ProcessDocumentPayload } from "@midday/jobs/schema";
+import { triggerJob } from "@midday/job-client";
 import { remove, signedUrl } from "@midday/supabase/storage";
-import { tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
 export const documentsRouter = createTRPCRouter({
@@ -114,20 +113,24 @@ export const documentsRouter = createTRPCRouter({
         return;
       }
 
-      // Trigger processing task only for supported documents
-      return tasks.batchTrigger(
-        "process-document",
-        supportedDocuments.map(
-          (item) =>
-            ({
-              payload: {
-                filePath: item.filePath,
-                mimetype: item.mimetype,
-                teamId: teamId!,
-              },
-            }) as { payload: ProcessDocumentPayload },
+      // Trigger BullMQ jobs for each supported document
+      const jobResults = await Promise.all(
+        supportedDocuments.map((item) =>
+          triggerJob(
+            "process-document",
+            {
+              filePath: item.filePath,
+              mimetype: item.mimetype,
+              teamId: teamId!,
+            },
+            "documents",
+          ),
         ),
       );
+
+      return {
+        jobs: jobResults.map((result) => ({ id: result.id })),
+      };
     }),
 
   signedUrl: protectedProcedure

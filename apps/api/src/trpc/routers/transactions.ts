@@ -1,6 +1,7 @@
 import {
   createTransactionSchema,
   deleteTransactionsSchema,
+  exportTransactionsSchema,
   getSimilarTransactionsSchema,
   getTransactionByIdSchema,
   getTransactionsSchema,
@@ -20,8 +21,8 @@ import {
   updateTransaction,
   updateTransactions,
 } from "@midday/db/queries";
+import { triggerJob } from "@midday/job-client";
 import type { EmbedTransactionPayload } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk";
 
 export const transactionsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -107,12 +108,39 @@ export const transactionsRouter = createTRPCRouter({
 
       // Trigger embedding for the newly created manual transaction
       if (transaction?.id) {
-        tasks.trigger("embed-transaction", {
-          transactionIds: [transaction.id],
-          teamId: teamId!,
-        } satisfies EmbedTransactionPayload);
+        await triggerJob(
+          "embed-transaction",
+          {
+            transactionIds: [transaction.id],
+            teamId: teamId!,
+          },
+          "transactions",
+        );
       }
 
       return transaction;
+    }),
+
+  export: protectedProcedure
+    .input(exportTransactionsSchema)
+    .mutation(async ({ input, ctx: { teamId, session } }) => {
+      if (!teamId) {
+        throw new Error("Team not found");
+      }
+
+      const result = await triggerJob(
+        "export-transactions",
+        {
+          teamId,
+          userId: session.user.id,
+          locale: input.locale,
+          transactionIds: input.transactionIds,
+          dateFormat: input.dateFormat,
+          exportSettings: input.exportSettings,
+        },
+        "transactions",
+      );
+
+      return result;
     }),
 });

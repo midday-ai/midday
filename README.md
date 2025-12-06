@@ -69,7 +69,6 @@ We are working on the documentation to get started with Midday for local develop
 - OpenPanel (Events and Analytics)
 - Polar (Payment processing)
 - Typesense (Search)
-- Mistral
 - Gemini
 - OpenAI
 

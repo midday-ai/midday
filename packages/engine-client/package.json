@@ -4,7 +4,7 @@
   "private": true,
   "main": "./src/index.ts",
   "dependencies": {
-    "hono": "^4.10.6"
+    "hono": "4.10.6"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

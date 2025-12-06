@@ -16,6 +16,7 @@ import {
   desc,
   eq,
   inArray,
+  lt,
   ne,
   notInArray,
   or,
@@ -883,17 +884,16 @@ export async function getInboxSearch(
           )
           .limit(20); // Get more candidates for better scoring
 
-        logger.info(
-          "🔍 Main candidates found:",
-          candidates.length,
-          candidates.map((c) => ({
+        logger.info("🔍 Main candidates found:", {
+          candidateCount: candidates.length,
+          candidates: candidates.map((c) => ({
             displayName: c.displayName,
             amount: c.amount,
             currency: c.currency,
             embeddingScore: c.embeddingScore,
             semanticSimilarity: (1 - c.embeddingScore).toFixed(3),
           })),
-        );
+        });
 
         if (candidates.length > 0) {
           // Score candidates using the same logic as successful batch-process-matching
@@ -949,15 +949,14 @@ export async function getInboxSearch(
             })
             .slice(0, limit);
 
-          logger.info(
-            "🎯 Found and scored suggestions:",
-            sortedSuggestions.length,
-            sortedSuggestions.map((s) => ({
+          logger.info("🎯 Found and scored suggestions:", {
+            suggestionCount: sortedSuggestions.length,
+            suggestions: sortedSuggestions.map((s) => ({
               displayName: s.displayName,
               amount: s.amount,
               confidence: s.confidenceScore,
             })),
-          );
+          });
 
           return sortedSuggestions;
         }
@@ -996,7 +995,7 @@ export async function getInboxSearch(
 
     return data;
   } catch (error) {
-    logger.error("Error in getInboxSearch:", error);
+    logger.error("Error in getInboxSearch:", { error });
     return [];
   }
 }
@@ -1496,10 +1495,41 @@ export async function getInboxByFilePath(
 ) {
   const { filePath, teamId } = params;
 
+  // First, try to find items in processing/new status (most recent first)
+  const processingItem = await db
+    .select({
+      id: inbox.id,
+      status: inbox.status,
+      createdAt: inbox.createdAt,
+    })
+    .from(inbox)
+    .where(
+      and(
+        eq(inbox.filePath, filePath),
+        eq(inbox.teamId, teamId),
+        ne(inbox.status, "deleted"),
+        or(eq(inbox.status, "processing"), eq(inbox.status, "new")),
+      ),
+    )
+    .orderBy(desc(inbox.createdAt))
+    .limit(1);
+
+  // If we found a processing/new item, return it (most recent)
+  if (processingItem.length > 0 && processingItem[0]) {
+    const item = processingItem[0];
+    return {
+      id: item.id,
+      status: item.status,
+      createdAt: item.createdAt,
+    };
+  }
+
+  // Otherwise, return the most recent item regardless of status
   const [result] = await db
     .select({
       id: inbox.id,
       status: inbox.status,
+      createdAt: inbox.createdAt,
     })
     .from(inbox)
     .where(
@@ -1509,9 +1539,110 @@ export async function getInboxByFilePath(
         ne(inbox.status, "deleted"),
       ),
     )
+    .orderBy(desc(inbox.createdAt))
     .limit(1);
 
-  return result;
+  if (!result) {
+    return undefined;
+  }
+
+  return {
+    id: result.id,
+    status: result.status,
+    createdAt: result.createdAt,
+  };
+}
+
+export type GetStuckInboxItemsParams = {
+  teamId: string;
+  thresholdMinutes?: number;
+};
+
+/**
+ * Find inbox items stuck in "processing" or "new" status for longer than threshold
+ * Useful for cleanup jobs to recover stuck items
+ */
+export async function getStuckInboxItems(
+  db: Database,
+  params: GetStuckInboxItemsParams,
+) {
+  const { teamId, thresholdMinutes = 5 } = params;
+  const thresholdMs = thresholdMinutes * 60 * 1000;
+  const thresholdDate = new Date(Date.now() - thresholdMs).toISOString();
+
+  const stuckItems = await db
+    .select({
+      id: inbox.id,
+      status: inbox.status,
+      createdAt: inbox.createdAt,
+      filePath: inbox.filePath,
+      displayName: inbox.displayName,
+    })
+    .from(inbox)
+    .where(
+      and(
+        eq(inbox.teamId, teamId),
+        ne(inbox.status, "deleted"),
+        or(eq(inbox.status, "processing"), eq(inbox.status, "new")),
+        lt(inbox.createdAt, thresholdDate),
+      ),
+    )
+    .orderBy(desc(inbox.createdAt));
+
+  return stuckItems;
+}
+
+export type GetExistingInboxAttachmentsByReferenceIdsParams = {
+  referenceIds: string[];
+  teamId: string;
+};
+
+export async function getExistingInboxAttachmentsByReferenceIds(
+  db: Database,
+  params: GetExistingInboxAttachmentsByReferenceIdsParams,
+) {
+  const { referenceIds, teamId } = params;
+
+  if (referenceIds.length === 0) {
+    return [];
+  }
+
+  // Filter out any null/undefined referenceIds to avoid SQL issues
+  const validReferenceIds = referenceIds.filter(
+    (id): id is string => id != null && id !== "",
+  );
+
+  if (validReferenceIds.length === 0) {
+    return [];
+  }
+
+  logger.info("Querying for existing inbox attachments by referenceIds", {
+    teamId,
+    referenceIdsCount: validReferenceIds.length,
+    sampleIds: validReferenceIds.slice(0, 3),
+  });
+
+  const results = await db
+    .select({
+      referenceId: inbox.referenceId,
+      status: inbox.status,
+    })
+    .from(inbox)
+    .where(
+      and(
+        inArray(inbox.referenceId, validReferenceIds),
+        eq(inbox.teamId, teamId),
+        ne(inbox.status, "deleted"),
+      ),
+    );
+
+  logger.info("Found existing inbox attachments", {
+    teamId,
+    foundCount: results.length,
+    foundIds: results.map((r) => r.referenceId).slice(0, 3),
+  });
+
+  return results;
 }
 
 export type CreateInboxParams = {
@@ -1550,6 +1681,109 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
     status = "new",
   } = params;
 
+  // If we have a referenceId, use ON CONFLICT to handle race conditions
+  // where multiple jobs try to create the same inbox item simultaneously
+  if (referenceId) {
+    logger.info("Creating inbox item with referenceId (using ON CONFLICT)", {
+      referenceId,
+      teamId,
+      filePath,
+    });
+
+    const [result] = await db
+      .insert(inbox)
+      .values({
+        displayName,
+        teamId,
+        filePath,
+        fileName,
+        contentType,
+        size,
+        referenceId,
+        website,
+        senderEmail,
+        inboxAccountId,
+        status,
+      })
+      .onConflictDoNothing({
+        target: inbox.referenceId,
+      })
+      .returning({
+        id: inbox.id,
+        fileName: inbox.fileName,
+        filePath: inbox.filePath,
+        displayName: inbox.displayName,
+        transactionId: inbox.transactionId,
+        amount: inbox.amount,
+        currency: inbox.currency,
+        contentType: inbox.contentType,
+        date: inbox.date,
+        status: inbox.status,
+        createdAt: inbox.createdAt,
+        website: inbox.website,
+        senderEmail: inbox.senderEmail,
+        description: inbox.description,
+        referenceId: inbox.referenceId,
+        size: inbox.size,
+        inboxAccountId: inbox.inboxAccountId,
+      });
+
+    // If insert was skipped due to conflict, fetch the existing row
+    if (!result) {
+      logger.info(
+        "Insert skipped due to referenceId conflict, fetching existing row",
+        {
+          referenceId,
+          teamId,
+        },
+      );
+
+      const [existingRow] = await db
+        .select({
+          id: inbox.id,
+          fileName: inbox.fileName,
+          filePath: inbox.filePath,
+          displayName: inbox.displayName,
+          transactionId: inbox.transactionId,
+          amount: inbox.amount,
+          currency: inbox.currency,
+          contentType: inbox.contentType,
+          date: inbox.date,
+          status: inbox.status,
+          createdAt: inbox.createdAt,
+          website: inbox.website,
+          senderEmail: inbox.senderEmail,
+          description: inbox.description,
+          referenceId: inbox.referenceId,
+          size: inbox.size,
+          inboxAccountId: inbox.inboxAccountId,
+        })
+        .from(inbox)
+        .where(
+          and(eq(inbox.referenceId, referenceId), eq(inbox.teamId, teamId)),
+        )
+        .limit(1);
+
+      logger.info("Fetched existing inbox item", {
+        referenceId,
+        teamId,
+        existingId: existingRow?.id,
+        existingStatus: existingRow?.status,
+      });
+
+      return existingRow;
+    }
+
+    logger.info("Successfully created new inbox item", {
+      referenceId,
+      teamId,
+      newId: result.id,
+    });
+
+    return result;
+  }
+
+  // No referenceId - regular insert (for manual uploads)
   const [result] = await db
     .insert(inbox)
     .values({

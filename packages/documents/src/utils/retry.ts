@@ -19,11 +19,18 @@ export async function retryCall<T>(
       // Only retry on timeout/network errors, not on other AI errors
       const errorMessage =
         error instanceof Error ? error.message : String(error);
+      const errorName = error instanceof Error ? error.name : "";
       const isRetryableError =
         errorMessage.includes("timeout") ||
         errorMessage.includes("TimeoutError") ||
         errorMessage.includes("aborted") ||
-        errorMessage.includes("network");
+        errorMessage.includes("network") ||
+        errorMessage.includes("503") ||
+        errorMessage.includes("503 Service Unavailable") ||
+        errorMessage.includes("goaway") ||
+        errorName === "AbortError" ||
+        errorName === "TimeoutError" ||
+        (error instanceof DOMException && error.code === 23);
 
       if (!isRetryableError) {
         throw error;

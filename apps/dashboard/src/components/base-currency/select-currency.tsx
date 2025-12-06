@@ -1,7 +1,7 @@
 "use client";
 
 import { SelectCurrency as SelectCurrencyBase } from "@/components/select-currency";
-import { useSyncStatus } from "@/hooks/use-sync-status";
+import { useJobStatus } from "@/hooks/use-job-status";
 import { useTeamMutation } from "@/hooks/use-team";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
@@ -15,8 +15,7 @@ export function SelectCurrency() {
   const trpc = useTRPC();
   const { toast } = useToast();
   const [isSyncing, setSyncing] = useState(false);
-  const [runId, setRunId] = useState<string | undefined>();
-  const [accessToken, setAccessToken] = useState<string | undefined>();
+  const [jobId, setJobId] = useState<string | undefined>();
   const updateTeamMutation = useTeamMutation();
   const { data: team } = useTeamQuery();
 
@@ -26,24 +25,27 @@ export function SelectCurrency() {
         setSyncing(true);
       },
       onSuccess: (data) => {
-        if (data) {
-          setRunId(data.id);
-          setAccessToken(data.publicAccessToken);
+        if (data?.id) {
+          setJobId(data.id);
         }
       },
       onError: () => {
-        setRunId(undefined);
+        setJobId(undefined);
+        setSyncing(false);
 
         toast({
           duration: 3500,
           variant: "error",
-          title: "Something went wrong pleaase try again.",
+          title: "Something went wrong please try again.",
         });
       },
     }),
   );
 
-  const { status, setStatus } = useSyncStatus({ runId, accessToken });
+  const { status, progress } = useJobStatus({
+    jobId,
+    enabled: !!jobId,
+  });
 
   const handleChange = async (baseCurrency: string) => {
     updateTeamMutation.mutate(
@@ -75,41 +77,42 @@ export function SelectCurrency() {
   };
 
   useEffect(() => {
-    if (status === "COMPLETED") {
+    if (status === "completed") {
       setSyncing(false);
-      setStatus(null);
-      setRunId(undefined);
+      setJobId(undefined);
       toast({
         duration: 3500,
         variant: "success",
         title: "Transactions and account balances updated.",
       });
     }
-  }, [status]);
+  }, [status, toast]);
 
   useEffect(() => {
-    if (isSyncing) {
+    if (isSyncing && jobId) {
       toast({
         title: "Updating...",
-        description: "We're updating your base currency, please wait.",
+        description: progress
+          ? `We're updating your base currency (${progress}%), please wait.`
+          : "We're updating your base currency, please wait.",
         duration: Number.POSITIVE_INFINITY,
         variant: "spinner",
       });
     }
-  }, [isSyncing]);
+  }, [isSyncing, jobId, progress, toast]);
 
   useEffect(() => {
-    if (status === "FAILED") {
+    if (status === "failed") {
       setSyncing(false);
-      setRunId(undefined);
+      setJobId(undefined);
 
       toast({
         duration: 3500,
         variant: "error",
-        title: "Something went wrong pleaase try again.",
+        title: "Something went wrong please try again.",
       });
     }
-  }, [status]);
+  }, [status, toast]);
 
   return (
     <div className="w-[200px]">

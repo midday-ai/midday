@@ -1,88 +1,152 @@
-import { mistral } from "@ai-sdk/mistral";
-import { generateObject } from "ai";
-import { createReceiptPrompt, receiptPrompt } from "../../prompt";
-import { receiptSchema } from "../../schema";
+import { createLoggerWithContext } from "@midday/logger";
+import type { z } from "zod/v4";
+import { receiptConfig } from "../../config/extraction-config";
 import type { GetDocumentRequest } from "../../types";
-import { getDomainFromEmail, removeProtocolFromDomain } from "../../utils";
-import { retryCall } from "../../utils/retry";
+import { extractWebsite } from "../../utils";
+import {
+  applyReceiptFixes,
+  validateReceiptConsistency,
+} from "../../utils/cross-field-validation";
+import { detectReceiptFormat } from "../../utils/format-detection";
+import type { DocumentFormat } from "../../utils/format-detection";
+import {
+  calculateReceiptExtractionConfidence,
+  mergeReceiptResults,
+} from "../../utils/merging";
+import {
+  calculateReceiptQualityScore,
+  getReceiptFieldsNeedingReExtraction,
+} from "../../utils/validation";
+import { BaseExtractionEngine } from "../base-extraction-engine";
 
-export class ReceiptProcessor {
-  async #processDocument({ documentUrl, companyName }: GetDocumentRequest) {
-    if (!documentUrl) {
-      throw new Error("Document URL is required");
-    }
+type ReceiptData = z.infer<typeof receiptConfig.schema>;
 
-    const prompt = companyName
-      ? createReceiptPrompt(companyName)
-      : receiptPrompt;
-
-    const result = await retryCall(() =>
-      generateObject({
-        model: mistral("mistral-medium-latest"),
-        schema: receiptSchema,
-        temperature: 0.1,
-        abortSignal: AbortSignal.timeout(20000), // 20s
-        messages: [
-          {
-            role: "system",
-            content: prompt,
-          },
-          {
-            role: "user",
-            content: [
-              {
-                type: "image",
-                image: documentUrl,
-              },
-            ],
-          },
-        ],
-        providerOptions: {
-          mistral: {
-            documentImageLimit: 4,
-          },
-        },
-      }),
-    );
-
-    return result.object;
+export class ReceiptProcessor extends BaseExtractionEngine<
+  typeof receiptConfig.schema
+> {
+  constructor() {
+    super(receiptConfig, createLoggerWithContext("ReceiptProcessor"));
   }
 
-  #getWebsite({
+  protected getDocumentType(): string {
+    return "receipt";
+  }
+
+  protected calculateQualityScore(result: ReceiptData): {
+    score: number;
+    issues: string[];
+    missingCriticalFields: string[];
+    invalidFields: string[];
+  } {
+    return calculateReceiptQualityScore(result);
+  }
+
+  protected getFieldsNeedingReExtraction(result: ReceiptData): string[] {
+    return getReceiptFieldsNeedingReExtraction(result);
+  }
+
+  protected mergeResults(
+    primary: ReceiptData,
+    secondary: Partial<ReceiptData>,
+  ): ReceiptData {
+    return mergeReceiptResults(primary, secondary);
+  }
+
+  protected validateConsistency(result: ReceiptData): {
+    isValid: boolean;
+    issues: Array<{
+      field: string;
+      issue: string;
+      severity: "error" | "warning";
+    }>;
+    suggestedFixes: Array<{
+      field: string;
+      value: any;
+      reason: string;
+    }>;
+  } {
+    return validateReceiptConsistency(result);
+  }
+
+  protected applyConsistencyFixes(
+    result: ReceiptData,
+    fixes: Array<{ field: string; value: any; reason: string }>,
+  ): ReceiptData {
+    return applyReceiptFixes(result, fixes);
+  }
+
+  protected detectFormat(result: ReceiptData): DocumentFormat | undefined {
+    return detectReceiptFormat(result);
+  }
+
+  protected calculateConfidence(
+    result: ReceiptData,
+    qualityScore: {
+      score: number;
+      missingCriticalFields: string[];
+    },
+  ): number {
+    return calculateReceiptExtractionConfidence(result, qualityScore);
+  }
+
+  protected mergeResultsWithConfidence(
+    primary: ReceiptData,
+    secondary: Partial<ReceiptData>,
+    primaryConfidence: number,
+    secondaryConfidence: number,
+  ): ReceiptData {
+    return mergeReceiptResults(
+      primary,
+      secondary,
+      primaryConfidence,
+      secondaryConfidence,
+    );
+  }
+
+  async #getWebsite({
     website,
     email,
-  }: { website: string | null; email: string | null }) {
-    if (website) {
-      return website;
-    }
-
-    return removeProtocolFromDomain(getDomainFromEmail(email));
+    storeName,
+  }: {
+    website: string | null;
+    email: string | null;
+    storeName: string | null;
+  }) {
+    return extractWebsite(website, email, storeName, this.logger);
   }
 
   public async getReceipt(params: GetDocumentRequest) {
-    const result = await this.#processDocument(params);
+    if (!params.documentUrl) {
+      throw new Error("Document URL is required");
+    }
 
-    const website = this.#getWebsite({
-      website: result.website,
-      email: result.email,
+    const result = await this.extract(params.documentUrl, {
+      companyName: params.companyName,
+      logger: this.logger,
+    });
+
+    const website = await this.#getWebsite({
+      website: result.data.website,
+      email: result.data.email,
+      storeName: result.data.store_name,
     });
 
     return {
-      ...result,
+      ...result.data,
       website,
       type: "expense",
-      date: result.date,
-      amount: result.total_amount,
-      currency: result.currency,
-      name: result.store_name,
-      tax_amount: result.tax_amount,
-      tax_rate: result.tax_rate,
-      tax_type: result.tax_type,
-      language: result.language,
+      date: result.data.date,
+      amount: result.data.total_amount,
+      currency: result.data.currency,
+      name: result.data.store_name,
+      tax_amount: result.data.tax_amount,
+      tax_rate: result.data.tax_rate,
+      tax_type: result.data.tax_type,
+      language: result.data.language,
       metadata: {
-        register_number: result.register_number ?? null,
-        cashier_name: result.cashier_name ?? null,
-        email: result.email ?? null,
+        register_number: result.data.register_number ?? null,
+        cashier_name: result.data.cashier_name ?? null,
+        email: result.data.email ?? null,
       },
     };
   }

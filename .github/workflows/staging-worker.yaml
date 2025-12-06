@@ -1,0 +1,60 @@
+name: Staging Deployment - Worker
+permissions:
+  contents: read
+on:
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - apps/worker/**
+      - apps/board/**
+      - packages/**
+      - "!packages/email/**"
+      - "!packages/ui/**"
+jobs:
+  deploy:
+    name: 🚀 Deploy to Fly Worker Staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency: fly-worker-staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: v1.2.23
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            **/node_modules
+            .turbo
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+      - name: Cache TypeScript build info
+        uses: actions/cache@v4
+        with:
+          path: |
+            apps/worker/.tsbuildinfo
+            **/.tsbuildinfo
+          key: ${{ runner.os }}-ts-${{ hashFiles('apps/worker/tsconfig.json', 'apps/worker/src/**/*.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-ts-
+      - name: Install dependencies
+        run: bun install
+      - name: 🏗 Build @midday/engine
+        run: bunx turbo run build --filter=@midday/engine...
+      - name: 🔦 Run linter
+        run: bun run lint
+        working-directory: ./apps/worker
+      - name: 🪐 Check TypeScript
+        run: bun run typecheck
+        working-directory: ./apps/worker
+      # - name: 🧪 Run unit tests
+      #   run: bun run test
+      #   working-directory: ./apps/worker
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only --dockerfile apps/worker/Dockerfile --config apps/worker/fly-staging.toml
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

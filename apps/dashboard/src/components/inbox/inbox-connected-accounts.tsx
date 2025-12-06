@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncStatus } from "@/hooks/use-sync-status";
+import { useJobStatus } from "@/hooks/use-job-status";
 import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback } from "@midday/ui/avatar";
@@ -35,13 +35,15 @@ type InboxAccount = NonNullable<RouterOutputs["inboxAccounts"]["get"]>[number];
 function InboxAccountItem({ account }: { account: InboxAccount }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const [runId, setRunId] = useState<string | undefined>();
-  const [accessToken, setAccessToken] = useState<string | undefined>();
+  const [jobId, setJobId] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
   const { toast, dismiss } = useToast();
   const router = useRouter();
 
-  const { status, setStatus, result } = useSyncStatus({ runId, accessToken });
+  const { status, progress, result } = useJobStatus({
+    jobId,
+    enabled: !!jobId,
+  });
 
   const syncInboxAccountMutation = useMutation(
     trpc.inboxAccounts.sync.mutationOptions({
@@ -49,15 +51,13 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
         setSyncing(true);
       },
       onSuccess: (data) => {
-        if (data) {
-          setRunId(data.id);
-          setAccessToken(data.publicAccessToken);
+        if (data?.id) {
+          setJobId(data.id);
         }
       },
       onError: () => {
         setSyncing(false);
-        setRunId(undefined);
-        setStatus("FAILED");
+        setJobId(undefined);
 
         toast({
           duration: 3500,
@@ -81,13 +81,16 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
   }, [isSyncing]);
 
   useEffect(() => {
-    if (status === "COMPLETED") {
+    if (status === "completed") {
       dismiss();
-      setRunId(undefined);
+      setJobId(undefined);
       setSyncing(false);
 
       // Show success toast with attachment count
-      const attachmentCount = result?.attachmentsProcessed || 0;
+      const attachmentCount =
+        result && typeof result === "object" && "attachmentsProcessed" in result
+          ? (result as { attachmentsProcessed: number }).attachmentsProcessed
+          : 0;
       const description =
         attachmentCount > 0
           ? `Found ${attachmentCount} new ${attachmentCount === 1 ? "attachment" : "attachments"}.`
@@ -108,12 +111,12 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
         queryKey: trpc.inbox.get.queryKey(),
       });
     }
-  }, [status]);
+  }, [status, result, dismiss, toast, queryClient, trpc]);
 
   useEffect(() => {
-    if (status === "FAILED") {
+    if (status === "failed") {
       setSyncing(false);
-      setRunId(undefined);
+      setJobId(undefined);
 
       queryClient.invalidateQueries({
         queryKey: trpc.inboxAccounts.get.queryKey(),
@@ -125,7 +128,7 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
         title: "Inbox sync failed, please try again.",
       });
     }
-  }, [status]);
+  }, [status, toast, queryClient, trpc]);
 
   const handleManualSync = () => {
     syncInboxAccountMutation.mutate({

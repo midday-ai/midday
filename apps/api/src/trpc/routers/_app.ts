@@ -17,6 +17,7 @@ import { institutionsRouter } from "./institutions";
 import { invoiceRouter } from "./invoice";
 import { invoiceProductsRouter } from "./invoice-products";
 import { invoiceTemplateRouter } from "./invoice-template";
+import { jobsRouter } from "./jobs";
 import { notificationSettingsRouter } from "./notification-settings";
 import { notificationsRouter } from "./notifications";
 import { oauthApplicationsRouter } from "./oauth-applications";
@@ -51,6 +52,7 @@ export const appRouter = createTRPCRouter({
   inboxAccounts: inboxAccountsRouter,
   institutions: institutionsRouter,
   invoice: invoiceRouter,
+  jobs: jobsRouter,
   invoiceProducts: invoiceProductsRouter,
   invoiceTemplate: invoiceTemplateRouter,
   reports: reportsRouter,
