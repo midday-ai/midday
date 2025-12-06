@@ -28,12 +28,15 @@
     "drizzle-orm": "^0.44.7",
     "hono": "4.10.6",
     "ioredis": "^5.8.2",
+    "heic-convert": "1.2.4",
     "node-xlsx": "^0.24.0",
     "pino": "^10.1.0",
+    "sharp": "0.34.5",
     "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/heic-convert": "1.2.3",
     "@types/react": "^18.3.12"
   }
 }
