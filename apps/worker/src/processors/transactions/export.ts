@@ -109,6 +109,19 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
 
     const attachments = batchResults.flatMap((r) => r.attachments);
 
+    // Find column indices by key
+    const idColumnIndex = columns.findIndex((c) => c.key === "id");
+    const amountColumnIndex = columns.findIndex((c) => c.key === "amount");
+
+    // Create a map of transaction ID -> type (expense/income) based on amount
+    const transactionTypeMap = new Map<string, "expense" | "income">();
+    for (const row of rows) {
+      const transactionId = row[idColumnIndex] as string;
+      const amount = row[amountColumnIndex] as number;
+      const type = amount < 0 ? "expense" : "income";
+      transactionTypeMap.set(transactionId, type);
+    }
+
     await this.updateProgress(job, 80);
 
     // Prepare all files before creating zip
@@ -120,7 +133,10 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
         headers: columns.map((c) => c.label),
         delimiter: settings.csvDelimiter,
       });
-      files.push({ name: "transactions.csv", data: Buffer.from(csv, "utf-8") });
+      files.push({
+        name: "data/transactions.csv",
+        data: Buffer.from(csv, "utf-8"),
+      });
     }
 
     // Generate XLSX if enabled
@@ -130,16 +146,22 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
         ...rows.map((row) => row.map((cell) => cell ?? "")),
       ];
       const buffer = xlsx.build([{ name: "Transactions", data, options: {} }]);
-      files.push({ name: "transactions.xlsx", data: Buffer.from(buffer) });
+      files.push({
+        name: "data/transactions.xlsx",
+        data: Buffer.from(buffer),
+      });
     }
 
-    // Convert attachments to buffers
+    // Convert attachments to buffers, organized by transaction type
     for (const attachment of attachments) {
       if (attachment.blob) {
         try {
           const arrayBuffer = await attachment.blob.arrayBuffer();
+          const transactionType =
+            transactionTypeMap.get(attachment.id) ?? "expense";
+          const attachmentPath = `attachments/${transactionType}/${attachment.name}`;
           files.push({
-            name: attachment.name,
+            name: attachmentPath,
             data: Buffer.from(arrayBuffer),
           });
         } catch (error) {
