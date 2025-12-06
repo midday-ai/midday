@@ -50,10 +50,67 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
     // We need to split it into pathTokens for updateDocumentByPath
     const pathTokens = fileName.split("/");
 
+    // Validate title extraction - log if null and generate fallback
+    let finalTitle = result.title;
+    if (!finalTitle || finalTitle.trim().length === 0) {
+      this.logger.warn(
+        {
+          fileName,
+          pathTokens,
+          teamId,
+          hasSummary: !!result.summary,
+          hasDate: !!result.date,
+          hasContent: !!result.content,
+        },
+        "Image classification returned null or empty title - generating fallback",
+      );
+
+      // Generate fallback title from available metadata
+      const fileNameWithoutExt =
+        fileName
+          .split("/")
+          .pop()
+          ?.replace(/\.[^/.]+$/, "") || "Image";
+      const datePart = result.date ? ` - ${result.date}` : "";
+      const summaryPart = result.summary
+        ? ` - ${result.summary.substring(0, 50)}${result.summary.length > 50 ? "..." : ""}`
+        : "";
+
+      // Try to infer type from summary or content
+      const contentSample = (
+        result.content ||
+        result.summary ||
+        ""
+      ).toLowerCase();
+      let inferredType = "Image";
+      if (contentSample.includes("receipt")) {
+        inferredType = "Receipt";
+      } else if (
+        contentSample.includes("invoice") ||
+        contentSample.includes("inv")
+      ) {
+        inferredType = "Invoice";
+      } else if (contentSample.includes("logo")) {
+        inferredType = "Logo";
+      } else if (contentSample.includes("photo")) {
+        inferredType = "Photo";
+      }
+
+      finalTitle = `${inferredType}${summaryPart || ` - ${fileNameWithoutExt}`}${datePart}`;
+
+      this.logger.info(
+        {
+          fileName,
+          generatedTitle: finalTitle,
+        },
+        "Generated fallback title for image",
+      );
+    }
+
     const updatedDocs = await updateDocumentByPath(db, {
       pathTokens,
       teamId,
-      title: result.title ?? undefined,
+      title: finalTitle ?? undefined,
       summary: result.summary ?? undefined,
       content: result.content ? limitWords(result.content, 10000) : undefined,
       date: result.date ?? undefined,

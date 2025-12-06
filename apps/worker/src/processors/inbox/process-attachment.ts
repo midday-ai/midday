@@ -21,6 +21,7 @@ const MAX_SIZE = 1500;
 
 export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentPayload> {
   async process(job: Job<ProcessAttachmentPayload>): Promise<void> {
+    const processStartTime = Date.now();
     const {
       teamId,
       mimetype,
@@ -37,9 +38,26 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
     const fileName = filePath.join("/");
     let processedMimetype = mimetype;
 
+    this.logger.info(
+      {
+        jobId: job.id,
+        fileName,
+        teamId,
+        mimetype,
+        size,
+        referenceId,
+        inboxAccountId,
+      },
+      "🚀 Starting process-attachment job",
+    );
+
     // If the file is a HEIC we need to convert it to a JPG
     if (mimetype === "image/heic") {
-      this.logger.info({ filePath: fileName }, "Converting HEIC to JPG");
+      const heicStartTime = Date.now();
+      this.logger.info(
+        { filePath: fileName, jobId: job.id },
+        "📸 Converting HEIC to JPG",
+      );
 
       const { data } = await withTimeout(
         supabase.storage.from("vault").download(fileName),
@@ -119,6 +137,11 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       }
 
       processedMimetype = "image/jpeg";
+      const heicDuration = Date.now() - heicStartTime;
+      this.logger.info(
+        { filePath: fileName, jobId: job.id, duration: `${heicDuration}ms` },
+        "✅ HEIC conversion completed",
+      );
     }
 
     const filename = filePath.at(-1);
@@ -134,19 +157,32 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
     }
 
     // Check if inbox item already exists (for retry scenarios or manual uploads)
+    const inboxCheckStartTime = Date.now();
+    this.logger.info(
+      {
+        jobId: job.id,
+        filePath: fileName,
+        teamId,
+      },
+      "🔍 Checking for existing inbox item",
+    );
+
     let inboxData = await getInboxByFilePath(db, {
       filePath,
       teamId,
     });
 
+    const inboxCheckDuration = Date.now() - inboxCheckStartTime;
     this.logger.info(
       {
+        jobId: job.id,
         filePath: fileName,
         existingItem: !!inboxData,
         existingStatus: inboxData?.status,
         teamId,
+        duration: `${inboxCheckDuration}ms`,
       },
-      "Processing attachment",
+      "✅ Inbox item check completed",
     );
 
     // Create inbox item if it doesn't exist (for non-manual uploads)
@@ -234,37 +270,89 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       throw new Error("Inbox data not found");
     }
 
-    // Create signed URL for document processing
-    const { data: signedUrlData } = await withTimeout(
-      supabase.storage.from("vault").createSignedUrl(fileName, 60),
-      TIMEOUTS.EXTERNAL_API,
-      `Signed URL creation timed out after ${TIMEOUTS.EXTERNAL_API}ms`,
+    // Create signed URL and fetch team data in parallel (they don't depend on each other)
+    const preProcessingStartTime = Date.now();
+    this.logger.info(
+      {
+        jobId: job.id,
+        inboxId: inboxData.id,
+        fileName,
+        teamId,
+      },
+      "⚡ Starting parallel pre-processing (signed URL + team data)",
     );
 
-    if (!signedUrlData) {
+    const [signedUrlResult, teamData] = await Promise.all([
+      // Create signed URL for document processing
+      (async () => {
+        const signedUrlStartTime = Date.now();
+        const { data: signedUrlData } = await withTimeout(
+          supabase.storage.from("vault").createSignedUrl(fileName, 60),
+          TIMEOUTS.EXTERNAL_API,
+          `Signed URL creation timed out after ${TIMEOUTS.EXTERNAL_API}ms`,
+        );
+        const signedUrlDuration = Date.now() - signedUrlStartTime;
+        this.logger.info(
+          {
+            jobId: job.id,
+            inboxId: inboxData.id,
+            duration: `${signedUrlDuration}ms`,
+          },
+          "✅ Signed URL created",
+        );
+        return signedUrlData;
+      })(),
+      // Fetch team data to provide context for OCR extraction
+      (async () => {
+        const teamDataStartTime = Date.now();
+        const teamDataResult = await getTeamById(db, teamId);
+        const teamDataDuration = Date.now() - teamDataStartTime;
+        this.logger.info(
+          {
+            jobId: job.id,
+            inboxId: inboxData.id,
+            teamName: teamDataResult?.name,
+            duration: `${teamDataDuration}ms`,
+          },
+          "✅ Team data fetched",
+        );
+        return teamDataResult;
+      })(),
+    ]);
+
+    const preProcessingDuration = Date.now() - preProcessingStartTime;
+    this.logger.info(
+      {
+        jobId: job.id,
+        inboxId: inboxData.id,
+        duration: `${preProcessingDuration}ms`,
+      },
+      "✅ Parallel pre-processing completed",
+    );
+
+    if (!signedUrlResult) {
       throw new Error("File not found");
     }
 
     try {
-      // Fetch team data to provide context for OCR extraction
-      const teamData = await getTeamById(db, teamId);
-
       const document = new DocumentClient();
 
+      const docProcessingStartTime = Date.now();
       this.logger.info(
         {
+          jobId: job.id,
           inboxId: inboxData.id,
           mimetype: processedMimetype,
           referenceId,
           teamName: teamData?.name,
         },
-        "Starting document processing",
+        "📄 Starting document processing (OCR/LLM extraction)",
       );
 
       // Process document with timeout
       const result = await withTimeout(
         document.getInvoiceOrReceipt({
-          documentUrl: signedUrlData.signedUrl,
+          documentUrl: signedUrlResult.signedUrl,
           mimetype: processedMimetype,
           companyName: teamData?.name,
         }),
@@ -272,13 +360,16 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         `Document processing timed out after ${TIMEOUTS.DOCUMENT_PROCESSING}ms`,
       );
 
+      const docProcessingDuration = Date.now() - docProcessingStartTime;
       this.logger.info(
         {
+          jobId: job.id,
           inboxId: inboxData.id,
           resultType: result.type,
           hasAmount: !!result.amount,
+          duration: `${docProcessingDuration}ms`,
         },
-        "Document processing completed",
+        "✅ Document processing completed",
       );
 
       await updateInboxWithProcessedData(db, {
@@ -315,6 +406,16 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
 
       // Trigger parallel jobs (non-blocking)
       // Process documents and embedding in parallel for better performance
+      const parallelJobsStartTime = Date.now();
+      this.logger.info(
+        {
+          jobId: job.id,
+          inboxId: inboxData.id,
+          teamId,
+        },
+        "⚡ Triggering parallel jobs (process-document + embed-inbox)",
+      );
+
       const [documentJobResult, embedJobResult] = await Promise.allSettled([
         // Process documents and images for classification
         triggerJob(
@@ -325,17 +426,31 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
             teamId,
           },
           "documents",
-        ).catch((error) => {
-          this.logger.warn(
-            {
-              inboxId: inboxData.id,
-              error: error instanceof Error ? error.message : "Unknown error",
-            },
-            "Failed to trigger document processing (non-critical)",
-          );
-          // Don't fail the entire process if document processing fails
-          return null;
-        }),
+        )
+          .then((result) => {
+            this.logger.info(
+              {
+                jobId: job.id,
+                inboxId: inboxData.id,
+                triggeredJobId: result.id,
+                triggeredJobName: "process-document",
+              },
+              "✅ Triggered process-document job",
+            );
+            return result;
+          })
+          .catch((error) => {
+            this.logger.warn(
+              {
+                jobId: job.id,
+                inboxId: inboxData.id,
+                error: error instanceof Error ? error.message : "Unknown error",
+              },
+              "⚠️ Failed to trigger document processing (non-critical)",
+            );
+            // Don't fail the entire process if document processing fails
+            return null;
+          }),
         // Create embedding (non-blocking - allows parallel processing)
         triggerJob(
           "embed-inbox",
@@ -344,22 +459,48 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
             teamId,
           },
           "inbox",
-        ),
+        )
+          .then((result) => {
+            this.logger.info(
+              {
+                jobId: job.id,
+                inboxId: inboxData.id,
+                triggeredJobId: result.id,
+                triggeredJobName: "embed-inbox",
+              },
+              "✅ Triggered embed-inbox job",
+            );
+            return result;
+          })
+          .catch((error) => {
+            this.logger.error(
+              {
+                jobId: job.id,
+                inboxId: inboxData.id,
+                error: error instanceof Error ? error.message : "Unknown error",
+              },
+              "❌ Failed to trigger embed-inbox job",
+            );
+            throw error;
+          }),
       ]);
 
-      if (embedJobResult.status === "fulfilled") {
-        this.logger.info(
-          {
-            inboxId: inboxData.id,
-            teamId,
-          },
-          "Triggered inbox embedding",
-        );
-      }
+      const parallelJobsDuration = Date.now() - parallelJobsStartTime;
+      this.logger.info(
+        {
+          jobId: job.id,
+          inboxId: inboxData.id,
+          documentJobStatus: documentJobResult.status,
+          embedJobStatus: embedJobResult.status,
+          duration: `${parallelJobsDuration}ms`,
+        },
+        "✅ Parallel jobs triggered",
+      );
 
       // After embedding is complete, trigger efficient matching
       // Note: batch-process-matching will wait for embedding to complete internally
-      await triggerJob(
+      const matchingStartTime = Date.now();
+      const matchingJobResult = await triggerJob(
         "batch-process-matching",
         {
           teamId,
@@ -368,12 +509,27 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         "inbox",
       );
 
+      const matchingDuration = Date.now() - matchingStartTime;
       this.logger.info(
         {
+          jobId: job.id,
+          inboxId: inboxData.id,
+          triggeredJobId: matchingJobResult.id,
+          triggeredJobName: "batch-process-matching",
+          duration: `${matchingDuration}ms`,
+        },
+        "✅ Triggered batch-process-matching job",
+      );
+
+      const totalDuration = Date.now() - processStartTime;
+      this.logger.info(
+        {
+          jobId: job.id,
           inboxId: inboxData.id,
           teamId,
+          totalDuration: `${totalDuration}ms`,
         },
-        "Triggered efficient inbox matching",
+        "🎉 process-attachment job completed successfully",
       );
     } catch (error) {
       this.logger.error(

@@ -15,8 +15,14 @@ import { BaseProcessor } from "../base";
 
 export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
   async process(job: Job<EmbedInboxPayload>): Promise<void> {
+    const processStartTime = Date.now();
     const { inboxId, teamId } = job.data;
     const db = getDb();
+
+    this.logger.info(
+      { jobId: job.id, inboxId, teamId },
+      "🚀 Starting embed-inbox job",
+    );
 
     // Set status to analyzing when we start processing
     await db
@@ -24,7 +30,10 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
       .set({ status: "analyzing" })
       .where(eq(inbox.id, inboxId));
 
-    this.logger.info({ inboxId, teamId }, "Starting inbox analysis");
+    this.logger.info(
+      { jobId: job.id, inboxId, teamId },
+      "📊 Starting inbox analysis",
+    );
 
     // Idempotency check: Check if embedding already exists
     // This prevents duplicate processing if the job is retried or enqueued multiple times
@@ -103,13 +112,15 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
     }
 
     try {
+      const embeddingStartTime = Date.now();
       this.logger.info(
         {
+          jobId: job.id,
           inboxId,
           teamId,
           textLength: text.length,
         },
-        "Generating embedding for inbox item",
+        "🧮 Generating embedding for inbox item",
       );
 
       // Generate embedding with timeout
@@ -119,6 +130,20 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
         `Embedding generation timed out after ${TIMEOUTS.EMBEDDING}ms`,
       );
 
+      const embeddingDuration = Date.now() - embeddingStartTime;
+      this.logger.info(
+        {
+          jobId: job.id,
+          inboxId,
+          teamId,
+          embeddingDimensions: embedding.length,
+          model,
+          duration: `${embeddingDuration}ms`,
+        },
+        "✅ Embedding generated successfully",
+      );
+
+      const saveStartTime = Date.now();
       await createInboxEmbedding(db, {
         inboxId,
         teamId,
@@ -127,13 +152,18 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
         model,
       });
 
+      const saveDuration = Date.now() - saveStartTime;
+      const totalDuration = Date.now() - processStartTime;
       this.logger.info(
         {
+          jobId: job.id,
           inboxId,
           teamId,
           embeddingDimensions: embedding.length,
+          saveDuration: `${saveDuration}ms`,
+          totalDuration: `${totalDuration}ms`,
         },
-        "Inbox embedding created successfully",
+        "🎉 Inbox embedding created successfully",
       );
     } catch (error) {
       this.logger.error(

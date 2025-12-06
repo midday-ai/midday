@@ -1,8 +1,12 @@
+import { createLoggerWithContext } from "@midday/logger";
 import { getQueue } from "./queues";
 import type { JobStatus, JobStatusResponse, JobTriggerResponse } from "./types";
 
 // Re-export getQueue for use in API routes that need direct queue access
 export { getQueue } from "./queues";
+
+// Create logger with job-client context
+export const logger = createLoggerWithContext({ component: "job-client" });
 
 /**
  * Trigger a job in the specified queue
@@ -17,6 +21,7 @@ export async function triggerJob(
   queueName: string,
 ): Promise<JobTriggerResponse> {
   const queue = getQueue(queueName);
+  const enqueueStartTime = Date.now();
 
   try {
     const job = await queue.add(jobName, payload);
@@ -27,13 +32,31 @@ export async function triggerJob(
       );
     }
 
+    const enqueueDuration = Date.now() - enqueueStartTime;
+    logger.info(
+      {
+        jobName,
+        jobId: job.id,
+        queueName,
+        duration: `${enqueueDuration}ms`,
+      },
+      "✅ Enqueued job",
+    );
+
     return {
       id: job.id,
     };
   } catch (error) {
-    console.error(
-      `[Job Client] Error triggering job ${jobName} in queue ${queueName}:`,
-      error,
+    const enqueueDuration = Date.now() - enqueueStartTime;
+    logger.error(
+      {
+        jobName,
+        queueName,
+        duration: `${enqueueDuration}ms`,
+        error: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      "❌ Error triggering job",
     );
     throw error;
   }

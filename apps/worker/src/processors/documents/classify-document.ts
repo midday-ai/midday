@@ -37,10 +37,63 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
       `Document classification timed out after ${TIMEOUTS.EXTERNAL_API}ms`,
     );
 
+    // Validate title extraction - log if null and generate fallback
+    let finalTitle = result.title;
+    if (!finalTitle || finalTitle.trim().length === 0) {
+      this.logger.warn(
+        {
+          fileName,
+          pathTokens,
+          teamId,
+          hasSummary: !!result.summary,
+          hasDate: !!result.date,
+          contentLength: content.length,
+        },
+        "Classification returned null or empty title - generating fallback",
+      );
+
+      // Generate fallback title from available metadata
+      const fileNameWithoutExt =
+        fileName
+          .split("/")
+          .pop()
+          ?.replace(/\.[^/.]+$/, "") || "Document";
+      const datePart = result.date ? ` - ${result.date}` : "";
+      const summaryPart = result.summary
+        ? ` - ${result.summary.substring(0, 50)}${result.summary.length > 50 ? "..." : ""}`
+        : "";
+
+      // Try to extract company name or key info from content sample
+      const contentSample = content.substring(0, 200).toLowerCase();
+      let inferredType = "Document";
+      if (contentSample.includes("invoice") || contentSample.includes("inv")) {
+        inferredType = "Invoice";
+      } else if (contentSample.includes("receipt")) {
+        inferredType = "Receipt";
+      } else if (
+        contentSample.includes("contract") ||
+        contentSample.includes("agreement")
+      ) {
+        inferredType = "Contract";
+      } else if (contentSample.includes("report")) {
+        inferredType = "Report";
+      }
+
+      finalTitle = `${inferredType}${summaryPart || ` - ${fileNameWithoutExt}`}${datePart}`;
+
+      this.logger.info(
+        {
+          fileName,
+          generatedTitle: finalTitle,
+        },
+        "Generated fallback title",
+      );
+    }
+
     const updatedDocs = await updateDocumentByPath(db, {
       pathTokens,
       teamId,
-      title: result.title ?? undefined,
+      title: finalTitle ?? undefined,
       summary: result.summary ?? undefined,
       content: limitWords(content, 10000),
       date: result.date ?? undefined,

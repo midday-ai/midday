@@ -1,9 +1,15 @@
+import { createLoggerWithContext } from "@midday/logger";
 import type { QueueOptions } from "bullmq";
 import { Queue } from "bullmq";
 import Redis from "ioredis";
 
 const queues: Map<string, Queue> = new Map();
 let redisConnection: Redis | null = null;
+
+// Create logger for Redis connection events
+const redisLogger = createLoggerWithContext({
+  component: "job-client-redis",
+});
 
 /**
  * Get or create Redis connection for BullMQ
@@ -43,27 +49,30 @@ function getRedisConnection(): Redis {
   });
 
   redisConnection.on("error", (err) => {
-    console.error("[Job Client Redis] Connection error:", err);
+    redisLogger.error(
+      { error: err instanceof Error ? err.message : String(err) },
+      "Redis connection error",
+    );
   });
 
   redisConnection.on("connect", () => {
-    console.log("[Job Client Redis] Connected");
+    redisLogger.info("Redis connected");
   });
 
   redisConnection.on("ready", () => {
-    console.log("[Job Client Redis] Ready");
+    redisLogger.info("Redis ready");
   });
 
   redisConnection.on("reconnecting", (delay: number) => {
-    console.log(`[Job Client Redis] Reconnecting in ${delay}ms...`);
+    redisLogger.info({ delay }, "Redis reconnecting");
   });
 
   redisConnection.on("close", () => {
-    console.log("[Job Client Redis] Connection closed");
+    redisLogger.info("Redis connection closed");
   });
 
   redisConnection.on("end", () => {
-    console.log("[Job Client Redis] Connection ended");
+    redisLogger.info("Redis connection ended");
   });
 
   return redisConnection;

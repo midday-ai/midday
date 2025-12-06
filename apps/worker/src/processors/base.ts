@@ -1,19 +1,17 @@
+import { createLoggerWithContext } from "@midday/logger";
 import type { Job } from "bullmq";
-import pino from "pino";
 import { classifyError } from "../utils/error-classification";
-
-const logger = pino({
-  level: process.env.LOG_LEVEL || "info",
-});
 
 /**
  * Base processor class with error handling, retries, and logging
  */
 export abstract class BaseProcessor<TData = unknown> {
-  protected logger: pino.Logger;
+  protected logger: ReturnType<typeof createLoggerWithContext>;
 
   constructor() {
-    this.logger = logger.child({ processor: this.constructor.name });
+    this.logger = createLoggerWithContext({
+      processor: this.constructor.name,
+    });
   }
 
   /**

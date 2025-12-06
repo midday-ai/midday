@@ -20,17 +20,20 @@ const MAX_SIZE = 1500;
  */
 export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPayload> {
   async process(job: Job<ProcessDocumentPayload>): Promise<void> {
+    const processStartTime = Date.now();
     const { mimetype, filePath, teamId } = job.data;
     const supabase = createClient();
     const db = getDb();
+    const fileName = filePath.join("/");
 
     this.logger.info(
       {
+        jobId: job.id,
         teamId,
-        fileName: filePath.join("/"),
+        fileName,
         mimetype,
       },
-      "Processing document",
+      "🚀 Starting process-document job",
     );
 
     // Create activity for document upload
@@ -150,10 +153,33 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         processedMimetype = "image/jpeg";
       } else {
         // Download file for non-HEIC files
+        const downloadStartTime = Date.now();
+        this.logger.info(
+          {
+            jobId: job.id,
+            fileName,
+            teamId,
+            mimetype: processedMimetype,
+          },
+          "⬇️ Downloading file from storage",
+        );
+
         const { data } = await withTimeout(
           supabase.storage.from("vault").download(fileName),
           TIMEOUTS.FILE_DOWNLOAD,
           `File download timed out after ${TIMEOUTS.FILE_DOWNLOAD}ms`,
+        );
+
+        const downloadDuration = Date.now() - downloadStartTime;
+        this.logger.info(
+          {
+            jobId: job.id,
+            fileName,
+            teamId,
+            fileSize: data?.size,
+            duration: `${downloadDuration}ms`,
+          },
+          "✅ File downloaded",
         );
 
         if (!data) {
@@ -251,6 +277,18 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
       // Process document: load and classify
       let document: string;
       try {
+        const parseStartTime = Date.now();
+        this.logger.info(
+          {
+            jobId: job.id,
+            fileName,
+            teamId,
+            mimetype: processedMimetype,
+            fileSize: fileData?.size,
+          },
+          "📖 Parsing document content (extracting text)",
+        );
+
         const loadedDoc = await loadDocument({
           content: fileData,
           metadata: { mimetype: processedMimetype },
@@ -261,15 +299,27 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         }
 
         document = loadedDoc;
+        const parseDuration = Date.now() - parseStartTime;
+        this.logger.info(
+          {
+            jobId: job.id,
+            fileName,
+            teamId,
+            contentLength: document.length,
+            duration: `${parseDuration}ms`,
+          },
+          "✅ Document parsed successfully",
+        );
       } catch (error) {
         this.logger.error(
           {
+            jobId: job.id,
             fileName,
             teamId,
             mimetype: processedMimetype,
             error: error instanceof Error ? error.message : "Unknown error",
           },
-          "Failed to load document - file may be corrupted or unsupported",
+          "❌ Failed to load document - file may be corrupted or unsupported",
         );
         throw new Error(
           `Failed to load document: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -303,18 +353,20 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         return; // Skip classification if no content
       }
 
+      const classificationStartTime = Date.now();
       this.logger.info(
         {
+          jobId: job.id,
           fileName,
           teamId,
           contentLength: document.length,
           sampleLength: sample.length,
         },
-        "Triggering document classification",
+        "🤖 Triggering document classification",
       );
 
       // Trigger document classification via BullMQ (fire and forget)
-      await triggerJob(
+      const classificationJobResult = await triggerJob(
         "classify-document",
         {
           content: sample,
@@ -322,6 +374,19 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
           teamId,
         },
         "documents",
+      );
+
+      const classificationDuration = Date.now() - classificationStartTime;
+      this.logger.info(
+        {
+          jobId: job.id,
+          fileName,
+          teamId,
+          triggeredJobId: classificationJobResult.id,
+          triggeredJobName: "classify-document",
+          duration: `${classificationDuration}ms`,
+        },
+        "✅ Document classification job triggered",
       );
 
       // Create activity for successful document processing
@@ -351,14 +416,17 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         );
       }
 
+      const totalDuration = Date.now() - processStartTime;
       this.logger.info(
         {
+          jobId: job.id,
           fileName,
           teamId,
           contentLength: document.length,
           sampleLength: sample.length,
+          totalDuration: `${totalDuration}ms`,
         },
-        "Document processing completed",
+        "🎉 process-document job completed successfully",
       );
     } catch (error) {
       this.logger.error(

@@ -18,10 +18,52 @@ export const classifyDocument = schemaTask({
       const classifier = new DocumentClassifier();
       const result = await classifier.classifyDocument({ content });
 
+      // Validate title extraction - log if null and generate fallback
+      let finalTitle = result.title;
+      if (!finalTitle || finalTitle.trim().length === 0) {
+        console.warn(
+          `Classification returned null or empty title for ${fileName} - generating fallback`,
+        );
+
+        // Generate fallback title from available metadata
+        const fileNameWithoutExt =
+          fileName
+            .split("/")
+            .pop()
+            ?.replace(/\.[^/.]+$/, "") || "Document";
+        const datePart = result.date ? ` - ${result.date}` : "";
+        const summaryPart = result.summary
+          ? ` - ${result.summary.substring(0, 50)}${result.summary.length > 50 ? "..." : ""}`
+          : "";
+
+        // Try to extract company name or key info from content sample
+        const contentSample = content.substring(0, 200).toLowerCase();
+        let inferredType = "Document";
+        if (
+          contentSample.includes("invoice") ||
+          contentSample.includes("inv")
+        ) {
+          inferredType = "Invoice";
+        } else if (contentSample.includes("receipt")) {
+          inferredType = "Receipt";
+        } else if (
+          contentSample.includes("contract") ||
+          contentSample.includes("agreement")
+        ) {
+          inferredType = "Contract";
+        } else if (contentSample.includes("report")) {
+          inferredType = "Report";
+        }
+
+        finalTitle = `${inferredType}${summaryPart || ` - ${fileNameWithoutExt}`}${datePart}`;
+
+        console.info(`Generated fallback title: ${finalTitle}`);
+      }
+
       const data = await updateDocumentByFileName(getDb(), {
         fileName,
         teamId,
-        title: result.title ?? undefined,
+        title: finalTitle ?? undefined,
         summary: result.summary ?? undefined,
         content: limitWords(content, 10000),
         date: result.date ?? undefined,

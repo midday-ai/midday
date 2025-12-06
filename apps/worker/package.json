@@ -19,6 +19,7 @@
     "@midday/engine-client": "workspace:*",
     "@midday/job-client": "workspace:*",
     "@midday/jobs": "workspace:*",
+    "@midday/logger": "workspace:*",
     "@midday/notifications": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/utils": "workspace:*",
@@ -31,7 +32,6 @@
     "ioredis": "^5.8.2",
     "heic-convert": "1.2.4",
     "node-xlsx": "^0.24.0",
-    "pino": "^10.1.0",
     "sharp": "0.34.5",
     "zod": "^4.1.12"
   },
