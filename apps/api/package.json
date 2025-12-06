@@ -46,7 +46,7 @@
     "ai": "5.0.87",
     "camelcase-keys": "^10.0.1",
     "date-fns": "^4.1.0",
-    "hono": "^4.10.6",
+    "hono": "4.10.6",
     "hono-rate-limiter": "^0.4.2",
     "jose": "^6.1.2",
     "nanoid": "^5.1.6",
