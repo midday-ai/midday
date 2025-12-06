@@ -179,3 +179,5 @@ export function limitWords(text: string, maxWords: number): string {
 
   return words.slice(0, maxWords).join(" ");
 }
+
+export { mapLanguageCodeToPostgresConfig } from "./utils/language-mapping";

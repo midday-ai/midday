@@ -3,9 +3,9 @@ import {
   differenceInDays,
   differenceInMonths,
   format,
-  isSameYear,
   startOfDay,
 } from "date-fns";
+import { normalizeCurrencyCode } from "./currency";
 
 export function formatSize(bytes: number): string {
   const units = ["byte", "kilobyte", "megabyte", "gigabyte", "terabyte"];
@@ -40,16 +40,33 @@ export function formatAmount({
     return;
   }
 
+  // Normalize currency code to ISO 4217 format
+  const normalizedCurrency = normalizeCurrencyCode(currency);
+
   // Fix: locale can be null, but Intl.NumberFormat expects string | string[] | undefined
   // So, if locale is null, pass undefined instead
   const safeLocale = locale ?? undefined;
 
-  return Intl.NumberFormat(safeLocale, {
-    style: "currency",
-    currency,
-    minimumFractionDigits,
-    maximumFractionDigits,
-  }).format(amount);
+  try {
+    return Intl.NumberFormat(safeLocale, {
+      style: "currency",
+      currency: normalizedCurrency,
+      minimumFractionDigits,
+      maximumFractionDigits,
+    }).format(amount);
+  } catch (error) {
+    // Fallback to USD if currency is invalid
+    console.warn(
+      `Invalid currency code: ${currency} (normalized to ${normalizedCurrency}), falling back to USD`,
+      error,
+    );
+    return Intl.NumberFormat(safeLocale, {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits,
+      maximumFractionDigits,
+    }).format(amount);
+  }
 }
 
 export function secondsToHoursAndMinutes(seconds: number) {

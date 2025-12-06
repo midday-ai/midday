@@ -37,6 +37,40 @@ export async function triggerJob(
 }
 
 /**
+ * Trigger a job and wait for it to complete
+ * @param jobName - Name of the job (e.g., "embed-inbox")
+ * @param payload - Job payload data
+ * @param queueName - Name of the queue (e.g., "transactions", "inbox", "inbox-provider")
+ * @returns Job result after completion
+ */
+export async function triggerJobAndWait(
+  jobName: string,
+  payload: unknown,
+  queueName: string,
+): Promise<unknown> {
+  const queue = getQueue(queueName);
+
+  try {
+    const job = await queue.add(jobName, payload);
+
+    if (!job?.id) {
+      throw new Error(
+        `Failed to create job: ${jobName} in queue: ${queueName}`,
+      );
+    }
+
+    // Wait for the job to complete
+    return await job.waitUntilFinished();
+  } catch (error) {
+    console.error(
+      `[Job Client] Error triggering and waiting for job ${jobName} in queue ${queueName}:`,
+      error,
+    );
+    throw error;
+  }
+}
+
+/**
  * Known queue names in the worker system
  */
 const KNOWN_QUEUES = ["transactions", "inbox", "inbox-provider", "documents"];

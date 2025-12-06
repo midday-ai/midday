@@ -24,7 +24,7 @@ export async function startAdmin(config?: Partial<AdminConfig>) {
   // Default queue names if not provided
   const queueNames = config?.queues?.length
     ? config.queues
-    : ["transactions", "inbox", "inbox-provider"];
+    : ["transactions", "inbox", "inbox-provider", "documents"];
 
   const adminConfig: AdminConfig = {
     redis: redisConfig as any,

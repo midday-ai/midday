@@ -1,5 +1,5 @@
 import { updateDocumentByPath } from "@midday/db/queries";
-import { limitWords } from "@midday/documents";
+import { limitWords, mapLanguageCodeToPostgresConfig } from "@midday/documents";
 import { DocumentClassifier } from "@midday/documents/classifier";
 import { triggerJob } from "@midday/job-client";
 import type { Job } from "bullmq";
@@ -45,7 +45,7 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
       summary: result.summary ?? undefined,
       content: limitWords(content, 10000),
       date: result.date ?? undefined,
-      language: result.language ?? undefined,
+      language: mapLanguageCodeToPostgresConfig(result.language),
       // If the document has no tags, we consider it as processed
       processingStatus:
         !result.tags || result.tags.length === 0 ? "completed" : undefined,

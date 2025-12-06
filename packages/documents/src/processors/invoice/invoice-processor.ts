@@ -1,12 +1,19 @@
-import { mistral } from "@ai-sdk/mistral";
-import { generateObject } from "ai";
-import { extractText, getDocumentProxy } from "unpdf";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { generateObject, generateText } from "ai";
 import type { z } from "zod/v4";
 import { createInvoicePrompt, invoicePrompt } from "../../prompt";
 import { invoiceSchema } from "../../schema";
 import type { GetDocumentRequest } from "../../types";
 import { getDomainFromEmail, removeProtocolFromDomain } from "../../utils";
 import { retryCall } from "../../utils/retry";
+
+// Initialize Google Generative AI client for PDF extraction
+const GOOGLE_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+const google = GOOGLE_API_KEY
+  ? createGoogleGenerativeAI({
+      apiKey: GOOGLE_API_KEY,
+    })
+  : null;
 
 export class InvoiceProcessor {
   // Check if the extracted data meets minimum quality standards
@@ -30,35 +37,32 @@ export class InvoiceProcessor {
         ? createInvoicePrompt(companyName)
         : invoicePrompt;
 
-      const result = await retryCall(() =>
-        generateObject({
-          model: mistral("mistral-medium-latest"),
-          schema: invoiceSchema,
-          temperature: 0.1,
-          abortSignal: AbortSignal.timeout(30000), // 30s
-          messages: [
-            {
-              role: "system",
-              content: prompt,
-            },
-            {
-              role: "user",
-              content: [
-                {
-                  type: "file",
-
-                  data: documentUrl,
-                  mediaType: "application/pdf",
-                },
-              ],
-            },
-          ],
-          providerOptions: {
-            mistral: {
-              documentPageLimit: 10,
-            },
-          },
-        }),
+      const result = await retryCall(
+        () =>
+          generateObject({
+            model: google("gemini-2.5-flash"),
+            schema: invoiceSchema,
+            temperature: 0.1,
+            abortSignal: AbortSignal.timeout(60000), // 60s timeout for PDF processing
+            messages: [
+              {
+                role: "system",
+                content: prompt,
+              },
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "file",
+                    data: documentUrl,
+                    mediaType: "application/pdf",
+                  },
+                ],
+              },
+            ],
+          }),
+        2, // 2 retries (3 total attempts)
+        2000, // Start with 2s delay
       );
 
       // Check data quality and merge with fallback if poor
@@ -128,41 +132,98 @@ export class InvoiceProcessor {
       throw new Error("Document URL is required");
     }
 
-    const response = await fetch(documentUrl);
-    const content = await response.arrayBuffer();
-    const pdf = await getDocumentProxy(content);
+    if (!google) {
+      throw new Error(
+        "GOOGLE_GENERATIVE_AI_API_KEY environment variable is required for PDF extraction",
+      );
+    }
 
-    const { text } = await extractText(pdf, {
-      mergePages: true,
-    });
+    try {
+      // Extract text from PDF using Gemini
+      const response = await fetch(documentUrl);
+      const content = await response.arrayBuffer();
+      const base64Content = Buffer.from(content).toString("base64");
+      const dataUri = `data:application/pdf;base64,${base64Content}`;
 
-    // Unsupported Unicode escape sequence
-    const cleanedText = text.replaceAll("\u0000", "");
-
-    const result = await retryCall(() =>
-      generateObject({
-        model: mistral("mistral-medium-latest"),
-        schema: invoiceSchema,
-        abortSignal: AbortSignal.timeout(30000), // 30s
-        messages: [
-          {
-            role: "system",
-            content: invoicePrompt,
-          },
-          {
-            role: "user",
-            content: [
+      const textResult = await retryCall(
+        () =>
+          generateText({
+            model: google("gemini-2.5-flash"),
+            abortSignal: AbortSignal.timeout(60000), // 60s timeout for PDF extraction
+            messages: [
               {
-                type: "text",
-                text: cleanedText,
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: "Extract all text from this PDF document. Return only the extracted text, preserving the structure and formatting as much as possible.",
+                  },
+                  {
+                    type: "file",
+                    data: dataUri,
+                    mediaType: "application/pdf",
+                  },
+                ],
               },
             ],
-          },
-        ],
-      }),
-    );
+          }),
+        2, // 2 retries (3 total attempts)
+        2000, // Start with 2s delay
+      );
 
-    return result.object;
+      const cleanedText = textResult.text ?? "";
+
+      if (!cleanedText) {
+        throw new Error("Gemini PDF extraction returned empty text");
+      }
+
+      // Process extracted text with LLM to extract structured data
+      const result = await retryCall(
+        () =>
+          generateObject({
+            model: google("gemini-2.5-flash"),
+            schema: invoiceSchema,
+            abortSignal: AbortSignal.timeout(30000), // 30s
+            messages: [
+              {
+                role: "system",
+                content: invoicePrompt,
+              },
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: cleanedText,
+                  },
+                ],
+              },
+            ],
+          }),
+        2, // 2 retries (3 total attempts)
+        2000, // Start with 2s delay
+      );
+
+      return result.object;
+    } catch (error) {
+      // Log detailed error information for debugging
+      const errorDetails: Record<string, unknown> = {
+        error: error instanceof Error ? error.message : String(error),
+        errorName: error instanceof Error ? error.name : typeof error,
+      };
+      if (error instanceof Error && error.stack) {
+        errorDetails.errorStack = error.stack;
+      }
+      console.error(
+        "Invoice fallback extraction failed after retries:",
+        errorDetails,
+      );
+      // Re-throw the error so the caller can handle it
+      // This allows the primary processing result to be returned if fallback fails
+      throw new Error(
+        `PDF fallback extraction failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   #getWebsite({

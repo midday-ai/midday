@@ -7,7 +7,7 @@ import {
   updateInboxWithProcessedData,
 } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
-import { triggerJob } from "@midday/job-client";
+import { triggerJob, triggerJobAndWait } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
 import convert from "heic-convert";
@@ -249,7 +249,9 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       await this.updateProgress(job, 80);
 
       // Create embedding and wait for completion
-      const embedJob = await triggerJob(
+      // Note: This waits for the embedding to complete, but multiple process-attachment
+      // jobs can still run in parallel since they're in the same queue with concurrency 50
+      await triggerJobAndWait(
         "embed-inbox",
         {
           inboxId: inboxData.id,
@@ -261,10 +263,9 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       this.logger.info(
         {
           inboxId: inboxData.id,
-          embedJobId: embedJob.id,
           teamId,
         },
-        "Triggered inbox embedding",
+        "Inbox embedding completed",
       );
 
       await this.updateProgress(job, 90);

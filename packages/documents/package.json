@@ -29,7 +29,6 @@
     "langchain": "^1.0.5",
     "mammoth": "^1.11.0",
     "officeparser": "5.2.2",
-    "unpdf": "^1.4.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {

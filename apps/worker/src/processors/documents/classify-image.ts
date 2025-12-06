@@ -1,5 +1,5 @@
 import { updateDocumentByPath } from "@midday/db/queries";
-import { limitWords } from "@midday/documents";
+import { limitWords, mapLanguageCodeToPostgresConfig } from "@midday/documents";
 import { DocumentClassifier } from "@midday/documents/classifier";
 import { triggerJob } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
@@ -57,7 +57,7 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
       summary: result.summary ?? undefined,
       content: result.content ? limitWords(result.content, 10000) : undefined,
       date: result.date ?? undefined,
-      language: result.language ?? undefined,
+      language: mapLanguageCodeToPostgresConfig(result.language),
       // If the document has no tags, we consider it as processed
       processingStatus:
         !result.tags || result.tags.length === 0 ? "completed" : undefined,
