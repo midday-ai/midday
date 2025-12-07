@@ -19,7 +19,7 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
     const { inboxId, teamId } = job.data;
     const db = getDb();
 
-    this.logger.info("🚀 Starting embed-inbox job", {
+    this.logger.info("Starting embed-inbox job", {
       jobId: job.id,
       inboxId,
       teamId,
@@ -31,7 +31,7 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
       .set({ status: "analyzing" })
       .where(eq(inbox.id, inboxId));
 
-    this.logger.info("📊 Starting inbox analysis", {
+    this.logger.info("Starting inbox analysis", {
       jobId: job.id,
       inboxId,
       teamId,
@@ -127,7 +127,7 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
       );
 
       const embeddingDuration = Date.now() - embeddingStartTime;
-      this.logger.info("✅ Embedding generated successfully", {
+      this.logger.info("Embedding generated successfully", {
         jobId: job.id,
         inboxId,
         teamId,

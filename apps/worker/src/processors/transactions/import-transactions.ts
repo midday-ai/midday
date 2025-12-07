@@ -26,7 +26,7 @@ export class ImportTransactionsProcessor extends BaseProcessor<ImportTransaction
     const db = getDb();
     const supabase = createClient();
 
-    this.logger.info("🚀 Starting import-transactions job", {
+    this.logger.info("Starting import-transactions job", {
       jobId: job.id,
       teamId,
       filePath: filePath?.join("/"),

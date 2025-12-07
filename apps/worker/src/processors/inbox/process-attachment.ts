@@ -38,7 +38,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
     const fileName = filePath.join("/");
     let processedMimetype = mimetype;
 
-    this.logger.info("🚀 Starting process-attachment job", {
+    this.logger.info("Starting process-attachment job", {
       jobId: job.id,
       fileName,
       teamId,
@@ -135,7 +135,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
 
       processedMimetype = "image/jpeg";
       const heicDuration = Date.now() - heicStartTime;
-      this.logger.info("✅ HEIC conversion completed", {
+      this.logger.info("HEIC conversion completed", {
         filePath: fileName,
         jobId: job.id,
         duration: `${heicDuration}ms`,
@@ -156,7 +156,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
 
     // Check if inbox item already exists (for retry scenarios or manual uploads)
     const inboxCheckStartTime = Date.now();
-    this.logger.info("🔍 Checking for existing inbox item", {
+    this.logger.info("Checking for existing inbox item", {
       jobId: job.id,
       filePath: fileName,
       teamId,
@@ -168,7 +168,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
     });
 
     const inboxCheckDuration = Date.now() - inboxCheckStartTime;
-    this.logger.info("✅ Inbox item check completed", {
+    this.logger.info("Inbox item check completed", {
       jobId: job.id,
       filePath: fileName,
       existingItem: !!inboxData,
@@ -281,7 +281,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           `Signed URL creation timed out after ${TIMEOUTS.EXTERNAL_API}ms`,
         );
         const signedUrlDuration = Date.now() - signedUrlStartTime;
-        this.logger.info("✅ Signed URL created", {
+        this.logger.info("Signed URL created", {
           jobId: job.id,
           inboxId: inboxData.id,
           duration: `${signedUrlDuration}ms`,
@@ -293,7 +293,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         const teamDataStartTime = Date.now();
         const teamDataResult = await getTeamById(db, teamId);
         const teamDataDuration = Date.now() - teamDataStartTime;
-        this.logger.info("✅ Team data fetched", {
+        this.logger.info("Team data fetched", {
           jobId: job.id,
           inboxId: inboxData.id,
           teamName: teamDataResult?.name,
@@ -304,7 +304,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
     ]);
 
     const preProcessingDuration = Date.now() - preProcessingStartTime;
-    this.logger.info("✅ Parallel pre-processing completed", {
+    this.logger.info("Parallel pre-processing completed", {
       jobId: job.id,
       inboxId: inboxData.id,
       duration: `${preProcessingDuration}ms`,
@@ -338,7 +338,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       );
 
       const docProcessingDuration = Date.now() - docProcessingStartTime;
-      this.logger.info("✅ Document processing completed", {
+      this.logger.info("Document processing completed", {
         jobId: job.id,
         inboxId: inboxData.id,
         resultType: result.type,
@@ -399,7 +399,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           "documents",
         )
           .then((result) => {
-            this.logger.info("✅ Triggered process-document job", {
+            this.logger.info("Triggered process-document job", {
               jobId: job.id,
               inboxId: inboxData.id,
               triggeredJobId: result.id,
@@ -429,7 +429,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           "inbox",
         )
           .then((result) => {
-            this.logger.info("✅ Triggered embed-inbox job", {
+            this.logger.info("Triggered embed-inbox job", {
               jobId: job.id,
               inboxId: inboxData.id,
               triggeredJobId: result.id,
@@ -438,7 +438,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
             return result;
           })
           .catch((error) => {
-            this.logger.error("❌ Failed to trigger embed-inbox job", {
+            this.logger.error("Failed to trigger embed-inbox job", {
               jobId: job.id,
               inboxId: inboxData.id,
               error: error instanceof Error ? error.message : "Unknown error",
@@ -448,7 +448,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       ]);
 
       const parallelJobsDuration = Date.now() - parallelJobsStartTime;
-      this.logger.info("✅ Parallel jobs triggered", {
+      this.logger.info("Parallel jobs triggered", {
         jobId: job.id,
         inboxId: inboxData.id,
         documentJobStatus: documentJobResult.status,
@@ -469,7 +469,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       );
 
       const matchingDuration = Date.now() - matchingStartTime;
-      this.logger.info("✅ Triggered batch-process-matching job", {
+      this.logger.info("Triggered batch-process-matching job", {
         jobId: job.id,
         inboxId: inboxData.id,
         triggeredJobId: matchingJobResult.id,

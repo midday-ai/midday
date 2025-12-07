@@ -9,7 +9,7 @@ export abstract class BaseProcessor<TData = unknown> {
   protected logger: ReturnType<typeof createLoggerWithContext>;
 
   constructor() {
-    this.logger = createLoggerWithContext(this.constructor.name);
+    this.logger = createLoggerWithContext(`worker:${this.constructor.name}`);
   }
 
   /**

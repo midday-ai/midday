@@ -14,7 +14,7 @@ export class UpdateBaseCurrencyProcessor extends BaseProcessor<UpdateBaseCurrenc
     const { teamId, baseCurrency } = job.data;
     const db = getDb();
 
-    this.logger.info("🚀 Starting update-base-currency job", {
+    this.logger.info("Starting update-base-currency job", {
       jobId: job.id,
       teamId,
       baseCurrency,

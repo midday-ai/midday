@@ -1,4 +1,6 @@
-import { logger } from "@midday/logger";
+import { createLoggerWithContext } from "@midday/logger";
+
+const logger = createLoggerWithContext("matching");
 
 // Configuration constants
 export const EMBEDDING_THRESHOLDS = {
@@ -87,7 +89,7 @@ export function isCrossCurrencyMatch(
   const actualTolerancePercent = adjustedTolerance / avgAmount;
 
   // Enhanced logging with risk assessment
-  logger.info("💱 CROSS-CURRENCY MATCH DEBUG", {
+  logger.info("CROSS-CURRENCY MATCH DEBUG", {
     item1: {
       currency: item1.currency,
       amount: item1.amount,

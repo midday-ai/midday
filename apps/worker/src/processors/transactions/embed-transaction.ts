@@ -23,7 +23,7 @@ export class EmbedTransactionProcessor extends BaseProcessor<EmbedTransactionPay
     const { transactionIds, teamId } = job.data;
     const db = getDb();
 
-    this.logger.info("🚀 Starting embed-transaction job", {
+    this.logger.info("Starting embed-transaction job", {
       jobId: job.id,
       teamId,
       transactionCount: transactionIds.length,

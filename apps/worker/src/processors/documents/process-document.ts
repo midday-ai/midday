@@ -26,7 +26,7 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
     const db = getDb();
     const fileName = filePath.join("/");
 
-    this.logger.info("🚀 Starting process-document job", {
+    this.logger.info("Starting process-document job", {
       jobId: job.id,
       teamId,
       fileName,
@@ -148,7 +148,7 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
       } else {
         // Download file for non-HEIC files
         const downloadStartTime = Date.now();
-        this.logger.info("⬇️ Downloading file from storage", {
+        this.logger.info("Downloading file from storage", {
           jobId: job.id,
           fileName,
           teamId,
@@ -162,7 +162,7 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         );
 
         const downloadDuration = Date.now() - downloadStartTime;
-        this.logger.info("✅ File downloaded", {
+        this.logger.info("File downloaded", {
           jobId: job.id,
           fileName,
           teamId,
@@ -282,7 +282,7 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
 
         document = loadedDoc;
         const parseDuration = Date.now() - parseStartTime;
-        this.logger.info("✅ Document parsed successfully", {
+        this.logger.info("Document parsed successfully", {
           jobId: job.id,
           fileName,
           teamId,
@@ -347,7 +347,7 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
       );
 
       const classificationDuration = Date.now() - classificationStartTime;
-      this.logger.info("✅ Document classification job triggered", {
+      this.logger.info("Document classification job triggered", {
         jobId: job.id,
         fileName,
         teamId,

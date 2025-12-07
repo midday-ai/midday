@@ -1,3 +1,4 @@
+import { createLoggerWithContext } from "@midday/logger";
 import type { Queue } from "bullmq";
 import { documentsQueue } from "../queues/documents";
 import { inboxProviderQueue, inboxQueue } from "../queues/inbox";
@@ -9,6 +10,8 @@ import type {
   StaticSchedulerConfig,
 } from "../types/scheduler-config";
 import { dynamicSchedulerTemplates, staticSchedulerConfigs } from "./index";
+
+const logger = createLoggerWithContext("scheduler");
 
 /**
  * Get queue instance by name
@@ -49,9 +52,9 @@ const registeredStaticSchedulers = new Map<string, Queue>();
  * Uses BullMQ's upsertJobScheduler API (v5.16.0+) for better deduplication
  */
 export async function registerStaticSchedulers(): Promise<void> {
-  console.log(
-    `Registering ${staticSchedulerConfigs.length} static scheduler(s)...`,
-  );
+  logger.info("Registering static schedulers", {
+    count: staticSchedulerConfigs.length,
+  });
 
   for (const config of staticSchedulerConfigs) {
     try {
@@ -79,21 +82,22 @@ export async function registerStaticSchedulers(): Promise<void> {
 
       registeredStaticSchedulers.set(config.name, queue);
 
-      console.log(
-        `✅ Registered static scheduler: ${config.name} (${config.cron})`,
-      );
+      logger.info("Registered static scheduler", {
+        name: config.name,
+        cron: config.cron,
+      });
     } catch (error) {
-      console.error(
-        `❌ Failed to register static scheduler ${config.name}:`,
-        error,
-      );
+      logger.error("Failed to register static scheduler", {
+        name: config.name,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
       throw error;
     }
   }
 
-  console.log(
-    `Successfully registered ${registeredStaticSchedulers.size} static scheduler(s)`,
-  );
+  logger.info("Successfully registered static schedulers", {
+    count: registeredStaticSchedulers.size,
+  });
 }
 
 /**
@@ -118,9 +122,9 @@ export async function registerDynamicScheduler(
 
   // Check if already registered
   if (registeredDynamicSchedulers.has(jobKey)) {
-    console.log(
-      `⚠️  Dynamic scheduler already registered: ${jobKey}, skipping...`,
-    );
+    logger.warn("Dynamic scheduler already registered, skipping", {
+      jobKey,
+    });
     return;
   }
 
@@ -149,9 +153,15 @@ export async function registerDynamicScheduler(
 
     registeredDynamicSchedulers.set(jobKey, queue);
 
-    console.log(`✅ Registered dynamic scheduler: ${jobKey} (${cronPattern})`);
+    logger.info("Registered dynamic scheduler", {
+      jobKey,
+      cronPattern,
+    });
   } catch (error) {
-    console.error(`❌ Failed to register dynamic scheduler ${jobKey}:`, error);
+    logger.error("Failed to register dynamic scheduler", {
+      jobKey,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
     throw error;
   }
 }
@@ -174,7 +184,7 @@ export async function unregisterDynamicScheduler(
   const jobKey = templateConfig.jobKey(accountId);
 
   if (!registeredDynamicSchedulers.has(jobKey)) {
-    console.log(`⚠️  Dynamic scheduler not registered: ${jobKey}`);
+    logger.warn("Dynamic scheduler not registered", { jobKey });
     return;
   }
 
@@ -190,12 +200,12 @@ export async function unregisterDynamicScheduler(
 
     registeredDynamicSchedulers.delete(jobKey);
 
-    console.log(`✅ Unregistered dynamic scheduler: ${jobKey}`);
+    logger.info("Unregistered dynamic scheduler", { jobKey });
   } catch (error) {
-    console.error(
-      `❌ Failed to unregister dynamic scheduler ${jobKey}:`,
-      error,
-    );
+    logger.error("Failed to unregister dynamic scheduler", {
+      jobKey,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
     throw error;
   }
 }

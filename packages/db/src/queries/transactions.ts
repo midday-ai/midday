@@ -18,7 +18,9 @@ import {
   REVENUE_CATEGORIES,
 } from "@midday/categories";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
-import { logger } from "@midday/logger";
+import { createLoggerWithContext } from "@midday/logger";
+
+const logger = createLoggerWithContext("transactions");
 import { resolveTaxValues } from "@midday/utils/tax";
 import {
   and,
@@ -866,7 +868,7 @@ export async function getSimilarTransactions(
         const sourceText = sourceEmbedding[0]!.sourceText;
         embeddingSourceText = sourceText; // Store for FTS search
 
-        logger.info("✅ Found embedding for transaction", {
+        logger.info("Found embedding for transaction", {
           transactionId,
           sourceText,
           embeddingExists: true,
@@ -923,11 +925,14 @@ export async function getSimilarTransactions(
           transactionId,
         });
       } else {
-        logger.warn("❌ No embedding found for transaction - will rely on FTS only", {
-          transactionId,
-          teamId,
-          transactionName: name,
-        });
+        logger.warn(
+          "No embedding found for transaction - will rely on FTS only",
+          {
+            transactionId,
+            teamId,
+            transactionName: name,
+          },
+        );
       }
     } catch (error) {
       logger.error("Embedding search failed", {

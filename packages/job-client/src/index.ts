@@ -33,7 +33,7 @@ export async function triggerJob(
     }
 
     const enqueueDuration = Date.now() - enqueueStartTime;
-    logger.info("✅ Enqueued job", {
+    logger.info("Enqueued job", {
       jobName,
       jobId: job.id,
       queueName,
@@ -45,7 +45,7 @@ export async function triggerJob(
     };
   } catch (error) {
     const enqueueDuration = Date.now() - enqueueStartTime;
-    logger.error("❌ Error triggering job", {
+    logger.error("Error triggering job", {
       jobName,
       queueName,
       duration: `${enqueueDuration}ms`,

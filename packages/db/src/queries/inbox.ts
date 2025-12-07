@@ -9,7 +9,9 @@ import {
   transactionMatchSuggestions,
   transactions,
 } from "@db/schema";
-import { logger } from "@midday/logger";
+import { createLoggerWithContext } from "@midday/logger";
+
+const logger = createLoggerWithContext("inbox");
 import {
   and,
   asc,
@@ -715,7 +717,7 @@ export async function getInboxSearch(
       const searchTerm = q.trim();
       const searchQuery = buildSearchQuery(searchTerm); // Use FTS format
 
-      logger.info("🔍 SEARCH DEBUG:", {
+      logger.info("SEARCH DEBUG:", {
         searchTerm,
         searchQuery,
         teamId,
@@ -781,7 +783,7 @@ export async function getInboxSearch(
         .orderBy(desc(inbox.date), desc(inbox.createdAt)) // Most recent first
         .limit(limit);
 
-      logger.info("🎯 SEARCH RESULTS:", {
+      logger.info("SEARCH RESULTS:", {
         searchTerm,
         resultsCount: searchResults.length,
         results: searchResults.slice(0, 3).map((r) => ({
@@ -887,7 +889,7 @@ export async function getInboxSearch(
           )
           .limit(20); // Get more candidates for better scoring
 
-        logger.info("🔍 Main candidates found:", {
+        logger.info("Main candidates found:", {
           candidateCount: candidates.length,
           candidates: candidates.map((c) => ({
             displayName: c.displayName,
@@ -952,7 +954,7 @@ export async function getInboxSearch(
             })
             .slice(0, limit);
 
-          logger.info("🎯 Found and scored suggestions:", {
+          logger.info("Found and scored suggestions:", {
             suggestionCount: sortedSuggestions.length,
             suggestions: sortedSuggestions.map((s) => ({
               displayName: s.displayName,
@@ -1384,7 +1386,7 @@ export async function unmatchTransaction(
             .where(eq(transactionMatchSuggestions.id, originalSuggestion.id));
 
           // Log for debugging/monitoring
-          logger.info("📚 UNMATCH LEARNING FEEDBACK", {
+          logger.info("UNMATCH LEARNING FEEDBACK", {
             teamId,
             inboxId: item.id,
             transactionId,

@@ -36,7 +36,7 @@ export class EnrichTransactionProcessor extends BaseProcessor<EnrichTransactions
     const { transactionIds, teamId } = job.data;
     const db = getDb();
 
-    this.logger.info("🚀 Starting enrich-transactions job", {
+    this.logger.info("Starting enrich-transactions job", {
       jobId: job.id,
       teamId,
       transactionCount: transactionIds.length,

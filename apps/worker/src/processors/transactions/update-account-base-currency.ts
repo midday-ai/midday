@@ -22,7 +22,7 @@ export class UpdateAccountBaseCurrencyProcessor extends BaseProcessor<UpdateAcco
     const { accountId, currency, balance, baseCurrency } = job.data;
     const db = getDb();
 
-    this.logger.info("🚀 Starting update-account-base-currency job", {
+    this.logger.info("Starting update-account-base-currency job", {
       jobId: job.id,
       accountId,
       currency,
