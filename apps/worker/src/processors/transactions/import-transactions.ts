@@ -21,15 +21,8 @@ const BATCH_SIZE = 500;
  */
 export class ImportTransactionsProcessor extends BaseProcessor<ImportTransactionsPayload> {
   async process(job: Job<ImportTransactionsPayload>): Promise<void> {
-    const {
-      teamId,
-      filePath,
-      bankAccountId,
-      currency,
-      mappings,
-      inverted,
-      table,
-    } = job.data;
+    const { teamId, filePath, bankAccountId, currency, mappings, inverted } =
+      job.data;
     const db = getDb();
     const supabase = createClient();
 
@@ -63,6 +56,7 @@ export class ImportTransactionsProcessor extends BaseProcessor<ImportTransaction
     const allTransactionIds: string[] = [];
 
     await new Promise<void>((resolve, reject) => {
+      // @ts-expect-error - Papa.parse overload resolution issue with string type
       Papa.parse(content, {
         header: true,
         skipEmptyLines: true,
@@ -70,7 +64,7 @@ export class ImportTransactionsProcessor extends BaseProcessor<ImportTransaction
         complete: () => {
           resolve();
         },
-        error: (error) => {
+        error: (error: Papa.ParseError) => {
           reject(error);
         },
         chunk: async (
@@ -115,10 +109,26 @@ export class ImportTransactionsProcessor extends BaseProcessor<ImportTransaction
             validTransactions,
             BATCH_SIZE,
             async (batch) => {
+              // Transform snake_case to camelCase for Drizzle schema
+              const transformedBatch = batch.map((t) => ({
+                name: t.name,
+                date: t.date,
+                method: t.method as "other" | "card_purchase" | "transfer",
+                amount: t.amount,
+                currency: t.currency,
+                teamId: t.team_id,
+                bankAccountId: t.bank_account_id,
+                internalId: t.internal_id,
+                status: t.status,
+                manual: t.manual,
+                categorySlug: t.category_slug,
+                notified: true,
+              }));
+
               // Upsert transactions with onConflict on internalId
               const upserted = await db
                 .insert(transactions)
-                .values(batch)
+                .values(transformedBatch)
                 .onConflictDoUpdate({
                   target: [transactions.internalId],
                   set: {

@@ -25,7 +25,7 @@
     "@midday/utils": "workspace:*",
     "@types/archiver": "^7.0.0",
     "archiver": "^7.0.1",
-    "bullmq": "^5.65.0",
+    "bullmq": "^5.65.1",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.44.7",
     "hono": "4.10.7",
@@ -38,6 +38,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/heic-convert": "1.2.3",
+    "@types/papaparse": "^5.5.1",
     "@types/react": "^18.3.12"
   }
 }
