@@ -12,6 +12,7 @@ export const transformFormValuesToDraft = (values: InvoiceFormValues) => {
         fromDetails: JSON.stringify(values.fromDetails),
       }),
     },
+    ...(values.templateId && { templateId: values.templateId }),
     ...(values.paymentDetails && {
       paymentDetails: JSON.stringify(values.paymentDetails),
     }),

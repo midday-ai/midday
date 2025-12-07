@@ -12,6 +12,7 @@ import { useFormContext } from "react-hook-form";
 export function Logo() {
   const { watch, setValue } = useFormContext();
   const logoUrl = watch("template.logoUrl");
+  const templateId = watch("templateId");
   const { uploadFile, isLoading } = useUpload();
   const { toast } = useToast();
 
@@ -19,7 +20,7 @@ export function Logo() {
 
   const trpc = useTRPC();
   const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
+    trpc.invoiceTemplates.upsert.mutationOptions(),
   );
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,7 +38,7 @@ export function Logo() {
           shouldDirty: true,
         });
 
-        updateTemplateMutation.mutate({ logoUrl: url });
+        updateTemplateMutation.mutate({ logoUrl: url, templateId });
       } catch (error) {
         toast({
           title: "Something went wrong, please try again.",
@@ -68,7 +69,7 @@ export function Logo() {
                   shouldValidate: true,
                   shouldDirty: true,
                 });
-                updateTemplateMutation.mutate({ logoUrl: null });
+                updateTemplateMutation.mutate({ logoUrl: null, templateId });
               }}
             >
               <Icons.Clear className="size-4" />

@@ -23,9 +23,10 @@ export function InvoiceNo() {
     formState: { errors },
   } = useFormContext();
   const invoiceNumber = watch("invoiceNumber");
+  const templateId = watch("templateId");
   const trpc = useTRPC();
   const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
+    trpc.invoiceTemplates.upsert.mutationOptions(),
   );
 
   const { type } = useInvoiceParams();
@@ -61,7 +62,7 @@ export function InvoiceNo() {
         <LabelInput
           name="template.invoiceNoLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({ invoiceNoLabel: value });
+            updateTemplateMutation.mutate({ invoiceNoLabel: value, templateId });
           }}
           className="truncate"
         />

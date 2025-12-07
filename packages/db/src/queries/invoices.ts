@@ -583,6 +583,7 @@ type DraftInvoiceTemplateParams = {
 type DraftInvoiceParams = {
   id: string;
   template: DraftInvoiceTemplateParams;
+  templateId?: string;
   fromDetails?: string | null;
   customerDetails?: string | null;
   customerId?: string | null;
@@ -613,6 +614,7 @@ export async function draftInvoice(db: Database, params: DraftInvoiceParams) {
     userId,
     token,
     template,
+    templateId,
     paymentDetails,
     fromDetails,
     customerDetails,
@@ -623,6 +625,19 @@ export async function draftInvoice(db: Database, params: DraftInvoiceParams) {
   const useToken = token ?? (await generateToken(id));
 
   const { paymentDetails: _, fromDetails: __, ...restTemplate } = template;
+
+  // If templateId is provided, save template changes to the template
+  if (templateId) {
+    const { updateInvoiceTemplate } = await import("./invoice-templates");
+    await updateInvoiceTemplate(db, {
+      id: templateId,
+      teamId,
+      ...restTemplate,
+      paymentDetails: paymentDetails ?? null,
+      fromDetails: fromDetails ?? null,
+      noteDetails: noteDetails ?? null,
+    });
+  }
 
   const [result] = await db
     .insert(invoices)
