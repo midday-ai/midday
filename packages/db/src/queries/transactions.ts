@@ -19,8 +19,6 @@ import {
 } from "@midday/categories";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { createLoggerWithContext } from "@midday/logger";
-
-const logger = createLoggerWithContext("transactions");
 import { resolveTaxValues } from "@midday/utils/tax";
 import {
   and,
@@ -43,6 +41,8 @@ import type { SQL } from "drizzle-orm/sql/sql";
 import { nanoid } from "nanoid";
 import { createActivity } from "./activities";
 import { type Attachment, createAttachments } from "./transaction-attachments";
+
+const logger = createLoggerWithContext("transactions");
 
 export type GetTransactionsParams = {
   teamId: string;
