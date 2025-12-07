@@ -29,5 +29,10 @@
     "types": ["bun-types"]
   },
   "exclude": ["node_modules"],
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "references": [
+    {
+      "path": "../../packages/engine-client"
+    }
+  ]
 }

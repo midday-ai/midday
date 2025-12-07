@@ -16,7 +16,6 @@ import {
 import {
   calculateQualityScore,
   getFieldsNeedingReExtraction,
-  isDataQualityPoor,
 } from "../../utils/validation";
 import { BaseExtractionEngine } from "../base-extraction-engine";
 

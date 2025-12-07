@@ -3,6 +3,15 @@
   "include": ["src"],
   "exclude": ["node_modules"],
   "compilerOptions": {
-    "baseUrl": "."
-  }
+    "baseUrl": ".",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "incremental": true
+  },
+  "references": [
+    {
+      "path": "../../apps/engine"
+    }
+  ]
 }
