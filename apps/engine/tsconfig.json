@@ -15,7 +15,10 @@
     "moduleDetection": "force",
     "allowJs": true,
     "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true
   },
   "include": ["src"],
   "exclude": ["dist", "node_modules"]

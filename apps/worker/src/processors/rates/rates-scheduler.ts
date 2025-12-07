@@ -1,5 +1,5 @@
-import { client } from "@engine/client";
 import { upsertExchangeRates } from "@midday/db/queries";
+import { client } from "@midday/engine-client";
 import type { Job } from "bullmq";
 import type { RatesSchedulerPayload } from "../../schemas/rates";
 import { getDb } from "../../utils/db";
