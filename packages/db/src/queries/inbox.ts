@@ -677,7 +677,12 @@ export async function deleteInboxMany(
       }
     } catch (error) {
       // Log error but continue with other items
-      logger.error(`Failed to delete inbox item ${item.id}:`, { error });
+      logger.error(`Failed to delete inbox item ${item.id}:`, {
+        error:
+          error instanceof Error
+            ? { message: error.message, stack: error.stack }
+            : { message: String(error) },
+      });
     }
   }
 

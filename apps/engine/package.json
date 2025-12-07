@@ -28,7 +28,10 @@
     "wrangler": "^4.50.0"
   },
   "exports": {
-    ".": "./dist/index.js",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
     "./gocardless/utils": "./src/providers/gocardless/utils.ts"
   }
 }
