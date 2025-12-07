@@ -1,14 +1,17 @@
+import { createBullBoard } from "@bull-board/api";
+import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
+import { HonoAdapter } from "@bull-board/hono";
 import { closeWorkerDb } from "@midday/db/worker-client";
 import { Worker } from "bullmq";
 import { Hono } from "hono";
+import { basicAuth } from "hono/basic-auth";
+import { serveStatic } from "hono/bun";
 import { getConnectionState, getRedisConnection } from "./config";
 import { checkHealth } from "./health";
 import { getProcessor } from "./processors/registry";
-import { queueConfigs } from "./queues";
+import { getAllQueues, queueConfigs } from "./queues";
 import { registerStaticSchedulers } from "./schedulers/registry";
 
-// Initialize Redis connection eagerly
-// Workers need Redis immediately, so connect at startup to fail fast if unavailable
 const redisConnection = getRedisConnection();
 
 // Wait for connection to be ready before starting workers
@@ -62,6 +65,55 @@ registerStaticSchedulers().catch((error) => {
 // Create Hono app
 const app = new Hono();
 
+const basePath = "/admin";
+
+// Authentication middleware for BullBoard
+if (process.env.BOARD_USERNAME && process.env.BOARD_PASSWORD) {
+  app.use(
+    basePath,
+    basicAuth({
+      username: process.env.BOARD_USERNAME,
+      password: process.env.BOARD_PASSWORD,
+    }),
+  );
+
+  app.use(
+    `${basePath}/*`,
+    basicAuth({
+      username: process.env.BOARD_USERNAME,
+      password: process.env.BOARD_PASSWORD,
+    }),
+  );
+}
+
+// Initialize BullBoard
+function initializeBullBoard() {
+  const queues = getAllQueues();
+
+  if (queues.length === 0) {
+    console.warn("No queues found when initializing BullBoard");
+    return;
+  }
+
+  const serverAdapter = new HonoAdapter(serveStatic);
+  serverAdapter.setBasePath(basePath);
+
+  createBullBoard({
+    queues: queues.map((queue) => new BullMQAdapter(queue)),
+    serverAdapter,
+  });
+
+  app.route(basePath, serverAdapter.registerPlugin());
+
+  console.log(
+    `BullBoard initialized with ${queues.length} queues:`,
+    queues.map((q) => q.name),
+  );
+}
+
+// Initialize BullBoard on startup
+initializeBullBoard();
+
 /**
  * Quick Redis health check for uptime monitoring
  * Checks Redis connection state and performs a ping
@@ -98,8 +150,7 @@ async function checkRedisHealth() {
   };
 }
 
-// Simple ping endpoint for fast uptime monitoring (no auth required)
-// Checks Redis connection state - critical for worker functionality
+// Checks Redis connection state
 app.get("/", async (c) => {
   const health = await checkRedisHealth();
   return c.json(health, health.status === "ok" ? 200 : 503);
@@ -108,8 +159,27 @@ app.get("/", async (c) => {
 // Detailed health check endpoint (no auth required)
 // Checks Redis and database connections for comprehensive monitoring
 app.get("/health", async (c) => {
-  const health = await checkHealth();
-  return c.json(health, health.status === "ok" ? 200 : 503);
+  try {
+    const health = await checkHealth();
+    return c.json(health, health.status === "ok" ? 200 : 503);
+  } catch (error) {
+    return c.json(
+      {
+        status: "error",
+        error: error instanceof Error ? error.message : "Health check failed",
+      },
+      500,
+    );
+  }
+});
+
+// Dashboard info endpoint
+app.get("/info", (c) => {
+  const queues = getAllQueues();
+  return c.json({
+    queues: queues.map((q) => ({ name: q.name })),
+    dashboardUrl: `${basePath}/queues`,
+  });
 });
 
 // Start server
@@ -117,7 +187,7 @@ const port = Number.parseInt(process.env.PORT || "8080", 10);
 
 Bun.serve({
   port,
-  hostname: "0.0.0.0", // Listen on all interfaces
+  hostname: "::",
   fetch: app.fetch,
 });
 

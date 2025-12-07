@@ -11,15 +11,9 @@ case "$PROCESS" in
     cd /app/apps/worker
     exec bun run src/index.ts
     ;;
-  board)
-    echo "Starting board process..."
-    export PORT="${PORT:-3002}"
-    cd /app/apps/board
-    exec bun run start
-    ;;
   *)
     echo "Unknown process: $PROCESS"
-    echo "Usage: $0 [worker|board]"
+    echo "Usage: $0 [worker]"
     exit 1
     ;;
 esac

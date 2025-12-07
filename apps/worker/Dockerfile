@@ -5,14 +5,13 @@ FROM oven/bun:1.2.22 AS base
 FROM base AS turbo-cli
 RUN bun add -g turbo
 
-# Builder stage - prune both worker and board workspaces
+# Builder stage - prune worker workspace
 FROM turbo-cli AS builder
 WORKDIR /app
 # Copy all files
 COPY . .
-# Prune both workspaces separately
+# Prune worker workspace
 RUN turbo prune @midday/worker --docker --out-dir=out/worker
-RUN turbo prune @midday/board --docker --out-dir=out/board
 
 # Installer stage
 FROM base AS installer
@@ -25,24 +24,16 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy package.json files from worker pruned workspace first
+# Copy package.json files from worker pruned workspace
 COPY --from=builder /app/out/worker/json/ .
-# Copy package.json files from board pruned workspace (will merge/overwrite as needed)
-COPY --from=builder /app/out/board/json/ .
 
 # Copy full source from worker pruned workspace
 COPY --from=builder /app/out/worker/full/ .
-# Copy full source from board pruned workspace (will merge/overwrite as needed)
-COPY --from=builder /app/out/board/full/ .
 
 # Remove any lockfile that might have been copied
 RUN rm -f bun.lock
 # Generate a fresh lockfile
 RUN bun install
-
-# Build the board Next.js app
-WORKDIR /app/apps/board
-RUN bun run build
 
 # Runner stage
 FROM installer AS runner
@@ -57,8 +48,8 @@ ENV NODE_ENV=production
 COPY apps/worker/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# Expose both ports
-EXPOSE 8080 3002
+# Expose worker port
+EXPOSE 8080
 
-# Use entrypoint script - process group will pass 'worker' or 'board' as argument
+# Use entrypoint script - process group will pass 'worker' as argument
 CMD ["/app/entrypoint.sh"]

@@ -8,7 +8,8 @@ import {
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { deleteInboxAccount, getInboxAccounts } from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
-import { getQueue, triggerJob } from "@midday/job-client";
+import type { InitialInboxSetupPayload } from "@midday/jobs/schema";
+import { schedules, tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
 export const inboxAccountsRouter = createTRPCRouter({
@@ -61,20 +62,27 @@ export const inboxAccountsRouter = createTRPCRouter({
         teamId: teamId!,
       });
 
-      // Remove BullMQ repeatable job scheduler if it exists
+      // Remove Trigger.dev schedule if it exists
       if (data?.scheduleId) {
         try {
-          const queue = getQueue("inbox-provider");
-          // The scheduleId stored in DB is the job key (e.g., "inbox-sync-{accountId}")
-          // The scheduler ID in BullMQ is "scheduler:{jobKey}"
-          const schedulerId = `scheduler:${data.scheduleId}`;
-          await queue.removeJobScheduler(schedulerId);
+          // Try to delete by schedule ID first (stored in DB)
+          await schedules.del(data.scheduleId);
         } catch (error) {
-          // Log error but don't fail the deletion if scheduler removal fails
-          console.error(
-            `Failed to remove scheduler for inbox account ${input.id}:`,
-            error,
-          );
+          // If that fails, try deleting by deduplication key as fallback
+          try {
+            const deduplicationKey = `${input.id}-inbox-sync-scheduler`;
+            await schedules.del(deduplicationKey);
+          } catch (fallbackError) {
+            // Log error but don't fail the deletion if scheduler removal fails
+            console.error(
+              `Failed to remove Trigger.dev scheduler for inbox account ${input.id}:`,
+              error instanceof Error ? error.message : error,
+              "Fallback error:",
+              fallbackError instanceof Error
+                ? fallbackError.message
+                : fallbackError,
+            );
+          }
         }
       }
 
@@ -84,29 +92,21 @@ export const inboxAccountsRouter = createTRPCRouter({
   sync: protectedProcedure
     .input(syncInboxAccountSchema)
     .mutation(async ({ input }) => {
-      const job = await triggerJob(
-        "sync-scheduler",
-        {
-          id: input.id,
-          manualSync: input.manualSync || false,
-        },
-        "inbox-provider",
-      );
+      const event = await tasks.trigger("sync-inbox-account", {
+        id: input.id,
+        manualSync: input.manualSync || false,
+      });
 
-      return { id: job.id };
+      return { id: event.id };
     }),
 
   initialSetup: protectedProcedure
     .input(initialSetupInboxAccountSchema)
     .mutation(async ({ input }) => {
-      const job = await triggerJob(
-        "initial-setup",
-        {
-          inboxAccountId: input.inboxAccountId,
-        },
-        "inbox-provider",
-      );
+      const event = await tasks.trigger("initial-inbox-setup", {
+        id: input.inboxAccountId,
+      } satisfies InitialInboxSetupPayload);
 
-      return { id: job.id };
+      return { id: event.id };
     }),
 });
