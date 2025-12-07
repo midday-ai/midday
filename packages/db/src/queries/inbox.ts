@@ -230,9 +230,7 @@ export async function getInbox(db: Database, params: GetInboxParams) {
       );
     } else {
       // Oldest first: NULL dates at the beginning
-      query.orderBy(
-        sql`${inbox.date} ASC NULLS FIRST, ${inbox.createdAt} ASC`,
-      );
+      query.orderBy(sql`${inbox.date} ASC NULLS FIRST, ${inbox.createdAt} ASC`);
     }
   } else {
     // Default to createdAt sorting
@@ -679,7 +677,7 @@ export async function deleteInboxMany(
       }
     } catch (error) {
       // Log error but continue with other items
-      logger.error(`Failed to delete inbox item ${item.id}:`, error);
+      logger.error(`Failed to delete inbox item ${item.id}:`, { error });
     }
   }
 

@@ -4,10 +4,8 @@
   "exclude": ["node_modules"],
   "compilerOptions": {
     "baseUrl": ".",
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true,
-    "incremental": true
+    "composite": false,
+    "noEmit": true
   },
   "references": [
     {
