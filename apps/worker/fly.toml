@@ -6,14 +6,7 @@ primary_region = 'fra'
 [env]
   NODE_ENV = 'production'
 
-# Process group: worker
-[processes]
-  worker = "/app/entrypoint.sh worker"
-
-# HTTP service for worker process (port 8080)
-# Exposed externally for uptime monitoring and BullBoard dashboard
 [[services]]
-  processes = ["worker"]
   internal_port = 8080
   protocol = "tcp"
   auto_stop_machines = 'off'
@@ -37,7 +30,6 @@ primary_region = 'fra'
 
 # VM configuration for worker process
 [[vm]]
-  processes = ["worker"]
   memory = '2gb'
   cpu_kind = 'shared'
   cpus = 2
