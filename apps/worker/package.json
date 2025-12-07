@@ -18,6 +18,7 @@
     "@midday/engine": "workspace:*",
     "@midday/engine-client": "workspace:*",
     "@midday/job-client": "workspace:*",
+    "@midday/import": "workspace:*",
     "@midday/jobs": "workspace:*",
     "@midday/logger": "workspace:*",
     "@midday/notifications": "workspace:*",
