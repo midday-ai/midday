@@ -5,8 +5,6 @@
   "compilerOptions": {
     "baseUrl": ".",
     "composite": true,
-    "declaration": true,
-    "declarationMap": true,
     "incremental": true
   },
   "references": [
