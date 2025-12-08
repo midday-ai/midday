@@ -1,3 +1,6 @@
+// Import Sentry instrumentation first, before any other modules
+import "./instrument";
+
 import { createBullBoard } from "@bull-board/api";
 import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 import { HonoAdapter } from "@bull-board/hono";

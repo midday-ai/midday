@@ -47,5 +47,5 @@ ENV NODE_ENV=production
 # Expose worker port
 EXPOSE 8080
 
-# Run the worker directly with Bun, preloading Sentry instrumentation
-CMD ["bun", "--preload", "./src/instrument.ts", "run", "src/index.ts"]
+# Run the worker directly with Bun
+CMD ["bun", "run", "src/index.ts"]
