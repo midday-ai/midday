@@ -6,7 +6,7 @@ import {
 import { inbox } from "@midday/db/schema";
 import type { Job } from "bullmq";
 import { eq } from "drizzle-orm";
-import type { EmbedInboxPayload } from "../../schemas/inbox";
+import { type EmbedInboxPayload, embedInboxSchema } from "../../schemas/inbox";
 import { getDb } from "../../utils/db";
 import { generateEmbedding } from "../../utils/embeddings";
 import { prepareInboxText } from "../../utils/text-preparation";
@@ -14,6 +14,28 @@ import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";
 
 export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
+  protected getPayloadSchema() {
+    return embedInboxSchema;
+  }
+
+  protected async shouldProcess(job: Job<EmbedInboxPayload>): Promise<boolean> {
+    const { inboxId } = job.data;
+    const db = getDb();
+
+    // Idempotency check: Check if embedding already exists
+    const embeddingExists = await checkInboxEmbeddingExists(db, { inboxId });
+
+    if (embeddingExists) {
+      this.logger.info(
+        "Inbox embedding already exists, skipping (idempotency check)",
+        { inboxId, teamId: job.data.teamId, jobId: job.id },
+      );
+      return false;
+    }
+
+    return true;
+  }
+
   async process(job: Job<EmbedInboxPayload>): Promise<void> {
     const processStartTime = Date.now();
     const { inboxId, teamId } = job.data;
@@ -25,37 +47,29 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
       teamId,
     });
 
+    await this.updateProgress(
+      job,
+      this.ProgressMilestones.STARTED,
+      "Starting embedding",
+    );
+
     // Set status to analyzing when we start processing
     await db
       .update(inbox)
       .set({ status: "analyzing" })
       .where(eq(inbox.id, inboxId));
 
-    this.logger.info("Starting inbox analysis", {
-      jobId: job.id,
-      inboxId,
-      teamId,
-    });
+    await this.updateProgress(
+      job,
+      this.ProgressMilestones.VALIDATED,
+      "Status updated",
+    );
 
-    // Idempotency check: Check if embedding already exists
-    // This prevents duplicate processing if the job is retried or enqueued multiple times
-    const embeddingExists = await checkInboxEmbeddingExists(db, { inboxId });
-
-    if (embeddingExists) {
-      this.logger.info(
-        "Inbox embedding already exists, skipping creation (idempotency check)",
-        { inboxId, teamId, jobId: job.id },
-      );
-
-      // Reset status to pending since we're skipping processing
-      // This matches the pattern of other early-return paths
-      await db
-        .update(inbox)
-        .set({ status: "pending" })
-        .where(eq(inbox.id, inboxId));
-
-      return;
-    }
+    await this.updateProgress(
+      job,
+      this.ProgressMilestones.FETCHED,
+      "Fetching inbox data",
+    );
 
     // Get inbox data
     const inboxData = await getInboxForEmbedding(db, { inboxId });
@@ -77,6 +91,12 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
         .where(eq(inbox.id, inboxId));
       throw new Error(`Inbox item not found: ${inboxId}`);
     }
+
+    await this.updateProgress(
+      job,
+      this.ProgressMilestones.PROCESSING,
+      "Preparing text",
+    );
 
     // Edge case: Handle empty or null data
     if (!inboxItem.displayName && !inboxItem.website) {
@@ -119,6 +139,12 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
     }
 
     try {
+      await this.updateProgress(
+        job,
+        this.ProgressMilestones.HALFWAY,
+        "Generating embedding",
+      );
+
       const embeddingStartTime = Date.now();
       this.logger.info("🧮 Generating embedding for inbox item", {
         jobId: job.id,
@@ -144,6 +170,12 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
         duration: `${embeddingDuration}ms`,
       });
 
+      await this.updateProgress(
+        job,
+        this.ProgressMilestones.NEARLY_DONE,
+        "Saving embedding",
+      );
+
       const saveStartTime = Date.now();
       await createInboxEmbedding(db, {
         inboxId,
@@ -155,6 +187,13 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
 
       const saveDuration = Date.now() - saveStartTime;
       const totalDuration = Date.now() - processStartTime;
+
+      await this.updateProgress(
+        job,
+        this.ProgressMilestones.COMPLETED,
+        "Embedding saved",
+      );
+
       this.logger.info("🎉 Inbox embedding created successfully", {
         jobId: job.id,
         inboxId,

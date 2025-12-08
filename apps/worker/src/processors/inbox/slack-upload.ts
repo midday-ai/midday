@@ -14,6 +14,7 @@ import type { Job } from "bullmq";
 import { format } from "date-fns";
 import type { SlackUploadPayload } from "../../schemas/inbox";
 import { getDb } from "../../utils/db";
+import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";
 
 export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
@@ -50,10 +51,12 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
     try {
       const document = new DocumentClient();
 
-      // Download file from vault for processing
-      const { data: fileData } = await supabase.storage
-        .from("vault")
-        .download(filePath.join("/"));
+      // Download file from vault for processing with timeout
+      const { data: fileData } = await withTimeout(
+        supabase.storage.from("vault").download(filePath.join("/")),
+        TIMEOUTS.FILE_DOWNLOAD,
+        `File download timed out after ${TIMEOUTS.FILE_DOWNLOAD}ms`,
+      );
 
       if (!fileData) {
         throw new Error("File not found in vault");
@@ -64,10 +67,14 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
 
       await this.updateProgress(job, 60);
 
-      const result = await document.getInvoiceOrReceipt({
-        content: base64Content,
-        mimetype,
-      });
+      const result = await withTimeout(
+        document.getInvoiceOrReceipt({
+          content: base64Content,
+          mimetype,
+        }),
+        TIMEOUTS.DOCUMENT_PROCESSING,
+        `Document processing timed out after ${TIMEOUTS.DOCUMENT_PROCESSING}ms`,
+      );
 
       await this.updateProgress(job, 80);
 

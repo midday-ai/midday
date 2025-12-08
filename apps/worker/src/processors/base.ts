@@ -1,6 +1,13 @@
 import { createLoggerWithContext } from "@midday/logger";
 import type { Job } from "bullmq";
-import { classifyError } from "../utils/error-classification";
+import type { ZodSchema } from "zod";
+import {
+  NonRetryableError,
+  classifyError,
+  getMaxRetries,
+  getRetryDelay,
+  isNonRetryableError,
+} from "../utils/error-classification";
 
 /**
  * Base processor class with error handling, retries, and logging
@@ -13,10 +20,44 @@ export abstract class BaseProcessor<TData = unknown> {
   }
 
   /**
+   * Optional Zod schema for payload validation
+   * Override this in subclasses to enable automatic payload validation
+   */
+  protected getPayloadSchema(): ZodSchema<TData> | null {
+    return null;
+  }
+
+  /**
    * Process the job
    * Override this method in subclasses
    */
   abstract process(job: Job<TData>): Promise<unknown>;
+
+  /**
+   * Validate job payload using Zod schema if provided
+   */
+  protected validatePayload(job: Job<TData>): TData {
+    const schema = this.getPayloadSchema();
+    if (!schema) {
+      return job.data;
+    }
+
+    try {
+      return schema.parse(job.data) as TData;
+    } catch (error) {
+      this.logger.error("Payload validation failed", {
+        jobId: job.id,
+        jobName: job.name,
+        error: error instanceof Error ? error.message : "Unknown error",
+        payload: JSON.stringify(job.data),
+      });
+      throw new NonRetryableError(
+        `Invalid job payload: ${error instanceof Error ? error.message : "Unknown error"}`,
+        error,
+        "validation",
+      );
+    }
+  }
 
   /**
    * Main handler called by BullMQ worker
@@ -32,12 +73,36 @@ export abstract class BaseProcessor<TData = unknown> {
     });
 
     try {
-      // Update progress if job has progress tracking
-      if (job.opts.removeOnComplete !== false) {
-        await job.updateProgress(0);
+      // Validate payload if schema is provided
+      const validatedData = this.validatePayload(job);
+
+      // Check idempotency
+      const shouldProcess = await this.shouldProcess(job);
+      if (!shouldProcess) {
+        this.logger.info("Skipping job due to idempotency check", {
+          jobId: job.id,
+          jobName: job.name,
+          idempotencyKey: this.getIdempotencyKey(job),
+        });
+        return { skipped: true, reason: "idempotency" };
       }
 
-      const result = await this.process(job);
+      // Update progress if job has progress tracking
+      if (job.opts.removeOnComplete !== false) {
+        await this.updateProgress(
+          job,
+          this.ProgressMilestones.STARTED,
+          "Job started",
+        );
+      }
+
+      // Create a new job object with validated data
+      const validatedJob = {
+        ...job,
+        data: validatedData,
+      } as Job<TData>;
+
+      const result = await this.process(validatedJob);
 
       const duration = Date.now() - startTime;
 
@@ -54,12 +119,26 @@ export abstract class BaseProcessor<TData = unknown> {
       if (result !== undefined && result !== null) {
         try {
           // Test serialization to ensure it's valid JSON
-          JSON.stringify(result);
+          const serialized = JSON.stringify(result);
+          // Check result size (BullMQ has limits, typically 512MB)
+          const sizeInMB = new Blob([serialized]).size / (1024 * 1024);
+          if (sizeInMB > 100) {
+            this.logger.warn("Large job result detected", {
+              jobId: job.id,
+              jobName: job.name,
+              sizeMB: sizeInMB.toFixed(2),
+            });
+          }
         } catch (error) {
           this.logger.error("Result is not JSON-serializable", {
             jobId: job.id,
             jobName: job.name,
             error: error instanceof Error ? error.message : "Unknown error",
+            resultType: typeof result,
+            resultKeys:
+              result && typeof result === "object"
+                ? Object.keys(result)
+                : undefined,
           });
           throw new Error(
             `Job result is not JSON-serializable: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -75,34 +154,136 @@ export abstract class BaseProcessor<TData = unknown> {
       const errorStack = error instanceof Error ? error.stack : undefined;
       const classified = classifyError(error);
 
+      // Check if this is a non-retryable error
+      const isNonRetryable = isNonRetryableError(error);
+      const shouldRetry = classified.retryable && !isNonRetryable;
+      const remainingAttempts =
+        (job.opts.attempts ?? 3) - (job.attemptsMade + 1);
+
       this.logger.error("Job failed", {
         jobId: job.id,
         jobName: job.name,
         attempt: job.attemptsMade + 1,
         maxAttempts: job.opts.attempts,
+        remainingAttempts,
         duration: `${duration}ms`,
         error: errorMessage,
         errorCategory: classified.category,
         retryable: classified.retryable,
+        isNonRetryable,
+        shouldRetry,
+        suggestedRetryDelay: getRetryDelay(error),
+        suggestedMaxRetries: getMaxRetries(error),
         stack: errorStack,
       });
 
-      // Re-throw to let BullMQ handle retries
+      // For non-retryable errors, remove the job from retry queue
+      // This prevents unnecessary retries and reduces Redis storage
+      if (isNonRetryable && remainingAttempts > 0) {
+        try {
+          // Move the job to failed state immediately
+          // BullMQ will handle this, but we log it for visibility
+          this.logger.info(
+            "Marking job as non-retryable, skipping remaining attempts",
+            {
+              jobId: job.id,
+              jobName: job.name,
+              category: classified.category,
+            },
+          );
+        } catch (removeError) {
+          this.logger.warn("Failed to remove non-retryable job from queue", {
+            jobId: job.id,
+            error:
+              removeError instanceof Error
+                ? removeError.message
+                : "Unknown error",
+          });
+        }
+      }
+
+      // Wrap non-retryable errors in NonRetryableError if not already wrapped
+      // This helps BullMQ and monitoring systems identify non-retryable failures
+      if (!shouldRetry && !isNonRetryable) {
+        const wrappedError = new NonRetryableError(
+          errorMessage,
+          error,
+          classified.category,
+        );
+        throw wrappedError;
+      }
+
+      // Re-throw original error for retryable cases
       throw error;
     }
   }
 
   /**
    * Update job progress
+   * @param job - The BullMQ job
+   * @param progress - Progress percentage (0-100)
+   * @param message - Optional progress message
    */
   protected async updateProgress(
     job: Job<TData>,
     progress: number,
+    message?: string,
   ): Promise<void> {
-    await job.updateProgress(progress);
-    this.logger.debug("Progress updated", {
-      jobId: job.id,
-      progress: `${progress}%`,
-    });
+    // Clamp progress to 0-100
+    const clampedProgress = Math.max(0, Math.min(100, progress));
+
+    try {
+      await job.updateProgress(clampedProgress);
+      this.logger.debug("Progress updated", {
+        jobId: job.id,
+        progress: `${clampedProgress}%`,
+        message,
+      });
+    } catch (error) {
+      // Don't fail the job if progress update fails
+      this.logger.warn("Failed to update job progress", {
+        jobId: job.id,
+        progress: clampedProgress,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+
+  /**
+   * Standard progress milestones for common job patterns
+   */
+  protected readonly ProgressMilestones = {
+    STARTED: 0,
+    VALIDATED: 5,
+    FETCHED: 10,
+    PROCESSING: 25,
+    HALFWAY: 50,
+    NEARLY_DONE: 75,
+    FINALIZING: 90,
+    COMPLETED: 100,
+  } as const;
+
+  /**
+   * Check if a job should be processed (idempotency check)
+   * Override this in subclasses to implement custom idempotency logic
+   * @param job - The BullMQ job
+   * @returns true if job should be processed, false if it should be skipped
+   */
+  protected async shouldProcess(job: Job<TData>): Promise<boolean> {
+    // Default: always process
+    // Subclasses can override to implement idempotency checks
+    return true;
+  }
+
+  /**
+   * Generate an idempotency key for a job
+   * Override this in subclasses to generate custom idempotency keys
+   * @param job - The BullMQ job
+   * @returns An idempotency key string or null if no key should be used
+   */
+  protected getIdempotencyKey(job: Job<TData>): string | null {
+    // Default: use job ID as idempotency key
+    // Subclasses can override to generate more specific keys
+    return job.id ?? null;
   }
 }

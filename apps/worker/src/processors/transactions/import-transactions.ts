@@ -10,6 +10,7 @@ import Papa from "papaparse";
 import type { ImportTransactionsPayload } from "../../schemas/transactions";
 import { getDb } from "../../utils/db";
 import { processBatch } from "../../utils/process-batch";
+import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";
 
 const BATCH_SIZE = 500;
@@ -38,12 +39,18 @@ export class ImportTransactionsProcessor extends BaseProcessor<ImportTransaction
       throw new Error("File path is required");
     }
 
-    await this.updateProgress(job, 10);
+    await this.updateProgress(
+      job,
+      this.ProgressMilestones.FETCHED,
+      "Downloading file",
+    );
 
-    // Download file from Supabase storage
-    const { data: fileData } = await supabase.storage
-      .from("vault")
-      .download(filePath.join("/"));
+    // Download file from Supabase storage with timeout
+    const { data: fileData } = await withTimeout(
+      supabase.storage.from("vault").download(filePath.join("/")),
+      TIMEOUTS.FILE_DOWNLOAD,
+      `File download timed out after ${TIMEOUTS.FILE_DOWNLOAD}ms`,
+    );
 
     const content = await fileData?.text();
 

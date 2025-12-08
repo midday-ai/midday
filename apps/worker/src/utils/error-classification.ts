@@ -21,6 +21,25 @@ export interface ClassifiedError {
 }
 
 /**
+ * Custom error class for non-retryable errors
+ * When thrown, this error signals that the job should not be retried
+ */
+export class NonRetryableError extends Error {
+  constructor(
+    message: string,
+    public readonly originalError?: unknown,
+    public readonly category: ErrorCategory = "non_retryable",
+  ) {
+    super(message);
+    this.name = "NonRetryableError";
+    // Maintain stack trace
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, NonRetryableError);
+    }
+  }
+}
+
+/**
  * Classify an error to determine retry strategy
  */
 export function classifyError(error: unknown): ClassifiedError {
@@ -164,4 +183,82 @@ export function isRetryableError(error: unknown): boolean {
 export function getRetryDelay(error: unknown): number {
   const classified = classifyError(error);
   return classified.retryDelay || 1000;
+}
+
+/**
+ * Get suggested max retries for an error
+ */
+export function getMaxRetries(error: unknown): number {
+  const classified = classifyError(error);
+  return classified.maxRetries ?? 3;
+}
+
+/**
+ * Check if error is a NonRetryableError
+ */
+export function isNonRetryableError(error: unknown): boolean {
+  return error instanceof NonRetryableError;
+}
+
+/**
+ * Get BullMQ job options based on error classification
+ * Use this when enqueueing jobs that might fail with specific error types
+ */
+export function getJobRetryOptions(errorCategory?: ErrorCategory): {
+  attempts: number;
+  backoff: {
+    type: "exponential" | "fixed";
+    delay: number;
+  };
+  removeOnFail: boolean | { age: number; count?: number };
+} {
+  switch (errorCategory) {
+    case "rate_limit":
+      return {
+        attempts: 5,
+        backoff: {
+          type: "exponential",
+          delay: 5000, // 5 seconds for rate limits
+        },
+        removeOnFail: {
+          age: 7 * 24 * 3600, // Keep for 7 days
+        },
+      };
+    case "timeout":
+    case "network":
+      return {
+        attempts: 3,
+        backoff: {
+          type: "exponential",
+          delay: 2000,
+        },
+        removeOnFail: {
+          age: 7 * 24 * 3600,
+        },
+      };
+    case "validation":
+    case "not_found":
+    case "unauthorized":
+      return {
+        attempts: 1, // Don't retry non-retryable errors
+        backoff: {
+          type: "fixed",
+          delay: 0,
+        },
+        removeOnFail: {
+          age: 24 * 3600, // Keep for 1 day only
+        },
+      };
+    default:
+      return {
+        attempts: 3,
+        backoff: {
+          type: "exponential",
+          delay: 1000,
+        },
+        removeOnFail: {
+          age: 7 * 24 * 3600,
+        },
+      };
+  }
 }

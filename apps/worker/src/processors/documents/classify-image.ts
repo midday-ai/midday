@@ -6,6 +6,7 @@ import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
 import type { ClassifyImagePayload } from "../../schemas/documents";
 import { getDb } from "../../utils/db";
+import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";
 
 /**
@@ -24,9 +25,11 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
       teamId,
     });
 
-    const { data: fileData } = await supabase.storage
-      .from("vault")
-      .download(fileName);
+    const { data: fileData } = await withTimeout(
+      supabase.storage.from("vault").download(fileName),
+      TIMEOUTS.FILE_DOWNLOAD,
+      `File download timed out after ${TIMEOUTS.FILE_DOWNLOAD}ms`,
+    );
 
     if (!fileData) {
       throw new Error("File not found");
@@ -39,7 +42,11 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
     await this.updateProgress(job, 50);
 
     const classifier = new DocumentClassifier();
-    const result = await classifier.classifyImage({ content });
+    const result = await withTimeout(
+      classifier.classifyImage({ content }),
+      TIMEOUTS.EXTERNAL_API,
+      `Image classification timed out after ${TIMEOUTS.EXTERNAL_API}ms`,
+    );
 
     await this.updateProgress(job, 70);
 

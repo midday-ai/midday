@@ -1,12 +1,18 @@
 import { calculateInboxSuggestions, hasSuggestion } from "@midday/db/queries";
 import type { Job } from "bullmq";
-import type { BatchProcessMatchingPayload } from "../../schemas/inbox";
+import {
+  type BatchProcessMatchingPayload,
+  batchProcessMatchingSchema,
+} from "../../schemas/inbox";
 import { getDb } from "../../utils/db";
 import { classifyError } from "../../utils/error-classification";
 import { triggerMatchingNotification } from "../../utils/inbox-matching-notifications";
 import { BaseProcessor } from "../base";
 
 export class BatchProcessMatchingProcessor extends BaseProcessor<BatchProcessMatchingPayload> {
+  protected getPayloadSchema() {
+    return batchProcessMatchingSchema;
+  }
   async process(job: Job<BatchProcessMatchingPayload>): Promise<{
     processed: number;
     autoMatched: number;
@@ -22,7 +28,11 @@ export class BatchProcessMatchingProcessor extends BaseProcessor<BatchProcessMat
       inboxCount: inboxIds.length,
     });
 
-    await this.updateProgress(job, 0);
+    await this.updateProgress(
+      job,
+      this.ProgressMilestones.STARTED,
+      `Processing ${inboxIds.length} inbox items`,
+    );
 
     let autoMatchCount = 0;
     let suggestionCount = 0;
@@ -104,7 +114,11 @@ export class BatchProcessMatchingProcessor extends BaseProcessor<BatchProcessMat
 
       // Update progress after each batch
       const currentProgress = Math.round((batchIndex + 1) * progressPerBatch);
-      await this.updateProgress(job, currentProgress);
+      await this.updateProgress(
+        job,
+        currentProgress,
+        `Processed batch ${batchIndex + 1} of ${totalBatches}`,
+      );
 
       // Log batch completion
       const batchErrors = results.filter((r) => r.status === "rejected").length;

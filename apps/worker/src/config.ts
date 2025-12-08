@@ -114,13 +114,6 @@ export function getRedisConnection(): Redis {
 }
 
 /**
- * Get current connection state
- */
-export function getConnectionState(): typeof connectionState {
-  return connectionState;
-}
-
-/**
  * Create a separate Redis connection for FlowProducer
  * BullMQ best practice: separate connections for Queue, Worker, and FlowProducer
  */

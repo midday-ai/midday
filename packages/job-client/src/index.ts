@@ -94,59 +94,94 @@ export async function triggerChildJob(
   queueName: string,
   parentJobId: string,
   parentQueueName?: string,
+  options?: {
+    maxRetries?: number;
+    retryDelay?: number;
+  },
 ): Promise<JobTriggerResponse> {
   const queue = getQueue(queueName);
   const enqueueStartTime = Date.now();
+  const maxRetries = options?.maxRetries ?? 3;
+  const retryDelay = options?.retryDelay ?? 1000;
 
-  try {
-    // BullMQ parent-child pattern: child job waits for parent to complete
-    // The child will wait in "waiting-children" state until parent completes successfully
-    // Format: parent.queue should be the queue name string (not queueQualifiedName)
-    const jobOptions: Parameters<typeof queue.add>[2] = {
-      parent: {
-        id: parentJobId,
-        queue: parentQueueName ?? queueName,
-      },
-    };
+  let lastError: Error | null = null;
 
-    const job = await queue.add(jobName, payload, jobOptions);
+  // Retry logic for child job enqueue failures
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      // BullMQ parent-child pattern: child job waits for parent to complete
+      // The child will wait in "waiting-children" state until parent completes successfully
+      // Format: parent.queue should be the queue name string (not queueQualifiedName)
+      const jobOptions: Parameters<typeof queue.add>[2] = {
+        parent: {
+          id: parentJobId,
+          queue: parentQueueName ?? queueName,
+        },
+        attempts: 1, // Child jobs inherit parent's retry behavior
+      };
 
-    if (!job?.id) {
-      throw new Error(
-        `Failed to create child job: ${jobName} in queue: ${queueName}`,
-      );
+      const job = await queue.add(jobName, payload, jobOptions);
+
+      if (!job?.id) {
+        throw new Error(
+          `Failed to create child job: ${jobName} in queue: ${queueName}`,
+        );
+      }
+
+      const enqueueDuration = Date.now() - enqueueStartTime;
+      logger.info("Enqueued child job", {
+        jobName,
+        jobId: job.id,
+        queueName,
+        parentJobId,
+        parentQueueName: parentQueueName ?? queueName,
+        attempt,
+        duration: `${enqueueDuration}ms`,
+      });
+
+      return {
+        id: job.id,
+      };
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      const enqueueDuration = Date.now() - enqueueStartTime;
+
+      if (attempt < maxRetries) {
+        const delay = retryDelay * attempt; // Exponential backoff
+        logger.warn("Failed to enqueue child job, retrying", {
+          jobName,
+          queueName,
+          parentJobId,
+          attempt,
+          maxRetries,
+          delay,
+          error: lastError.message,
+        });
+
+        // Wait before retrying
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      } else {
+        logger.error("Error triggering child job after retries", {
+          jobName,
+          queueName,
+          parentJobId,
+          parentQueueName: parentQueueName ?? queueName,
+          attempts: maxRetries,
+          duration: `${enqueueDuration}ms`,
+          error: lastError.message,
+          stack: lastError.stack,
+        });
+      }
     }
-
-    const enqueueDuration = Date.now() - enqueueStartTime;
-    logger.info("Enqueued child job", {
-      jobName,
-      jobId: job.id,
-      queueName,
-      parentJobId,
-      parentQueueName: parentQueueName ?? queueName,
-      duration: `${enqueueDuration}ms`,
-    });
-
-    return {
-      id: job.id,
-    };
-  } catch (error) {
-    const enqueueDuration = Date.now() - enqueueStartTime;
-    logger.error("Error triggering child job", {
-      jobName,
-      queueName,
-      parentJobId,
-      parentQueueName: parentQueueName ?? queueName,
-      duration: `${enqueueDuration}ms`,
-      error: error instanceof Error ? error.message : "Unknown error",
-      stack: error instanceof Error ? error.stack : undefined,
-    });
-    throw error;
   }
+
+  // If we get here, all retries failed
+  throw lastError || new Error("Failed to enqueue child job after retries");
 }
 
 /**
  * Known queue names in the worker system
+ * Must match the queues defined in apps/worker/src/queues/index.ts
  */
 const KNOWN_QUEUES = [
   "transactions",
@@ -154,6 +189,7 @@ const KNOWN_QUEUES = [
   "inbox-provider",
   "documents",
   "notifications",
+  "rates",
 ];
 
 /**

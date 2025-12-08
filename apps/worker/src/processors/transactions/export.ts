@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import xlsx from "node-xlsx";
 import type { ExportTransactionsPayload } from "../../schemas/transactions";
 import { getDb } from "../../utils/db";
+import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";
 import { ProcessExportProcessor } from "./process-export";
 
@@ -198,13 +199,15 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
 
     const fullPath = `${path}/${fileName}`;
 
-    // Upload to Supabase storage
-    const { error: uploadError } = await supabase.storage
-      .from("vault")
-      .upload(fullPath, zip, {
+    // Upload to Supabase storage with timeout
+    const { error: uploadError } = await withTimeout(
+      supabase.storage.from("vault").upload(fullPath, zip, {
         upsert: true,
         contentType: "application/zip",
-      });
+      }),
+      TIMEOUTS.FILE_UPLOAD,
+      `File upload timed out after ${TIMEOUTS.FILE_UPLOAD}ms`,
+    );
 
     if (uploadError) {
       throw new Error(`Failed to upload export file: ${uploadError.message}`);
