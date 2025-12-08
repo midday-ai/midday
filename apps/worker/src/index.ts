@@ -6,8 +6,7 @@ import { Worker } from "bullmq";
 import { Hono } from "hono";
 import { basicAuth } from "hono/basic-auth";
 import { serveStatic } from "hono/bun";
-import { getConnectionState, getRedisConnection } from "./config";
-import { checkHealth } from "./health";
+import { getRedisConnection } from "./config";
 import { getProcessor } from "./processors/registry";
 import { getAllQueues, queueConfigs } from "./queues";
 import { registerStaticSchedulers } from "./schedulers/registry";
@@ -114,63 +113,14 @@ function initializeBullBoard() {
 // Initialize BullBoard on startup
 initializeBullBoard();
 
-/**
- * Quick Redis health check for uptime monitoring
- * Checks Redis connection state and performs a ping
- */
-async function checkRedisHealth() {
-  const connectionState = getConnectionState();
-  const redis = getRedisConnection();
-
-  // Check if Redis is ready/connected
-  if (connectionState === "ready" || connectionState === "connected") {
-    try {
-      // Quick ping with timeout
-      const pingPromise = redis.ping();
-      const timeoutPromise = new Promise<string>((_, reject) => {
-        setTimeout(() => reject(new Error("Redis ping timeout")), 3000);
-      });
-
-      await Promise.race([pingPromise, timeoutPromise]);
-      return { status: "ok" as const, redis: "connected" as const };
-    } catch (error) {
-      return {
-        status: "error" as const,
-        redis: "disconnected" as const,
-        error: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
-
-  // Redis not ready
-  return {
-    status: "error" as const,
-    redis: "disconnected" as const,
-    redisState: connectionState,
-  };
-}
-
-// Checks Redis connection state
-app.get("/", async (c) => {
-  const health = await checkRedisHealth();
-  return c.json(health, health.status === "ok" ? 200 : 503);
+// Health check endpoint - verifies service is running
+app.get("/", (c) => {
+  return c.json({ status: "ok" }, 200);
 });
 
-// Detailed health check endpoint (no auth required)
-// Checks Redis and database connections for comprehensive monitoring
-app.get("/health", async (c) => {
-  try {
-    const health = await checkHealth();
-    return c.json(health, health.status === "ok" ? 200 : 503);
-  } catch (error) {
-    return c.json(
-      {
-        status: "error",
-        error: error instanceof Error ? error.message : "Health check failed",
-      },
-      500,
-    );
-  }
+// Health check endpoint - verifies service is running
+app.get("/health", (c) => {
+  return c.json({ status: "ok" }, 200);
 });
 
 // Dashboard info endpoint

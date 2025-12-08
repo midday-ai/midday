@@ -48,7 +48,7 @@ export function UserMenu({ onlySignOut }: Props) {
             <DropdownMenuLabel>
               <div className="flex justify-between items-center">
                 <div className="flex flex-col">
-                  <span className="truncate line-clamp-1 max-w-[155px] block">
+                  <span className="truncate line-clamp-1 max-w-[155px] block text-xs">
                     {user?.fullName}
                   </span>
                   <span className="truncate text-xs text-[#606060] font-normal">
@@ -62,21 +62,21 @@ export function UserMenu({ onlySignOut }: Props) {
 
             <DropdownMenuGroup>
               <Link prefetch href="/account">
-                <DropdownMenuItem>Account</DropdownMenuItem>
+                <DropdownMenuItem className="text-xs">Account</DropdownMenuItem>
               </Link>
 
               <Link prefetch href="/account/support">
-                <DropdownMenuItem>Support</DropdownMenuItem>
+                <DropdownMenuItem className="text-xs">Support</DropdownMenuItem>
               </Link>
 
               <Link prefetch href="/account/teams">
-                <DropdownMenuItem>Teams</DropdownMenuItem>
+                <DropdownMenuItem className="text-xs">Teams</DropdownMenuItem>
               </Link>
             </DropdownMenuGroup>
 
             <DropdownMenuSeparator />
             <div className="flex flex-row justify-between items-center p-2">
-              <p className="text-sm">Theme</p>
+              <p className="text-xs">Theme</p>
               <ThemeSwitch />
             </div>
             <DropdownMenuSeparator />
