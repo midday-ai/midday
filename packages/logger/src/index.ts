@@ -1,10 +1,9 @@
 import pino from "pino";
 
 /**
- * Check if we're in development mode
+ * Check if we're in pretty mode
  */
-const isDevelopment =
-  process.env.NODE_ENV !== "production" && !process.env.FLY_APP_NAME;
+const isPretty = process.env.LOG_PRETTY === "true";
 
 /**
  * Create the base pino logger instance
@@ -12,7 +11,7 @@ const isDevelopment =
 const baseLogger = pino({
   level: process.env.LOG_LEVEL || "info",
   // Use pretty printing in development, structured JSON in production
-  ...(isDevelopment && {
+  ...(isPretty && {
     transport: {
       target: "pino-pretty",
       options: {
