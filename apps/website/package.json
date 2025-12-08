@@ -14,21 +14,21 @@
   "dependencies": {
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
-    "@openpanel/nextjs": "^1.0.12",
+    "@openpanel/nextjs": "^1.1.1",
     "@openstatus/react": "^0.0.3",
     "@team-plain/typescript-sdk": "5.11.0",
     "@uidotdev/usehooks": "^2.4.1",
     "date-fns": "^4.1.0",
-    "framer-motion": "^12.23.24",
+    "framer-motion": "^12.23.25",
     "geist": "^1.5.1",
     "next": "16.0.7",
     "next-mdx-remote": "^5.0.0",
     "next-safe-action": "^8.0.11",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
     "react-hls-player": "^3.0.7",
     "react-use-draggable-scroll": "^0.4.7",
-    "resend": "^6.4.2",
+    "resend": "^6.5.2",
     "server-only": "^0.0.1",
     "sharp": "0.34.5",
     "sugar-high": "^0.9.5"
@@ -36,6 +36,6 @@
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@types/node": "^24.10.1",
-    "@types/react": "19.2.5"
+    "@types/react": "19.2.7"
   }
 }

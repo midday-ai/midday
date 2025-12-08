@@ -59,8 +59,8 @@ export function TransactionEditForm({ transaction }: Props) {
   const updateTransactionMutation = useMutation(
     trpc.transactions.update.mutationOptions({
       onSuccess: (_, variables) => {
-        // If internal (exclude from analytics) changed, invalidate reports and widgets
-        if ("internal" in variables) {
+        // If category or internal (exclude from analytics) changed, invalidate reports and widgets
+        if ("categorySlug" in variables || "internal" in variables) {
           invalidateTransactionQueries();
         } else {
           // Otherwise just invalidate transaction queries

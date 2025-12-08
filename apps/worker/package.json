@@ -44,6 +44,6 @@
     "@types/bun": "latest",
     "@types/heic-convert": "1.2.3",
     "@types/papaparse": "^5.5.1",
-    "@types/react": "^18.3.12"
+    "@types/react": "^19.2.7"
   }
 }
