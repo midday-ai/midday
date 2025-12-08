@@ -24,7 +24,7 @@ type ProcessAttachmentInput = {
 
 type Props = {
   children: ReactNode;
-  onUploadComplete?: () => void;
+  onUploadComplete?: (inboxId?: string) => void;
 };
 
 export function UploadZone({ children, onUploadComplete }: Props) {
@@ -100,6 +100,10 @@ export function UploadZone({ children, onUploadComplete }: Props) {
         queryKey: trpc.inbox.get.queryKey(),
       });
 
+      queryClient.invalidateQueries({
+        queryKey: trpc.inbox.get.infiniteQueryKey(),
+      });
+
       const results = (await Promise.all(
         files.map(async (file: File, idx: number) =>
           resumableUpload(supabase, {
@@ -146,7 +150,7 @@ export function UploadZone({ children, onUploadComplete }: Props) {
       setShowProgress(false);
       setToastId(undefined);
       dismiss(toastId);
-      onUploadComplete?.();
+      onUploadComplete?.(inboxItems[0]?.id);
     } catch (error) {
       // Refresh inbox to show current state after error
       queryClient.invalidateQueries({

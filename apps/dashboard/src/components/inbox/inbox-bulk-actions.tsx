@@ -51,6 +51,14 @@ export function InboxBulkActions() {
           queryKey: trpc.inbox.getById.queryKey(),
         });
 
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.get.queryKey(),
+        });
+
         clearSelection();
       },
     }),

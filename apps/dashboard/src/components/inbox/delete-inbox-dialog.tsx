@@ -1,5 +1,7 @@
 "use client";
 
+import { revalidateInbox } from "@/actions/revalidate-action";
+import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useTRPC } from "@/trpc/client";
 import {
@@ -14,6 +16,7 @@ import {
 } from "@midday/ui/alert-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type Props = {
@@ -31,7 +34,9 @@ export function DeleteInboxDialog({
 }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { setParams, params } = useInboxParams();
+  const { params: filter } = useInboxFilterParams();
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Check if inbox item has transaction attachments
@@ -96,9 +101,9 @@ export function DeleteInboxDialog({
           inboxId: nextInboxId,
         });
 
-        return { previousData };
+        return { previousData, allInboxes };
       },
-      onSuccess: () => {
+      onSuccess: async (_, __, context) => {
         queryClient.invalidateQueries({
           queryKey: trpc.inbox.get.infiniteQueryKey(),
         });
@@ -106,6 +111,33 @@ export function DeleteInboxDialog({
         queryClient.invalidateQueries({
           queryKey: trpc.search.global.queryKey(),
         });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.get.queryKey(),
+        });
+
+        // Revalidate server-side cache
+        await revalidateInbox();
+
+        // Check if inbox is now empty after deletion
+        // Use the optimistically updated data from onMutate
+        const remainingInboxes = (context?.allInboxes ?? []).filter(
+          (item) => item.id !== id,
+        );
+
+        const hasFilters = Object.values(filter).some(
+          (value) => value !== null,
+        );
+
+        // If inbox is empty and no filters, navigate to show empty state
+        if (remainingInboxes.length === 0 && !hasFilters) {
+          setParams({ inboxId: null, connected: null });
+          router.push("/inbox", { scroll: false });
+        }
 
         onOpenChange(false);
       },

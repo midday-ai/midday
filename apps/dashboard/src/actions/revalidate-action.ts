@@ -12,3 +12,7 @@ export async function revalidateAfterTeamChange() {
   // Redirect to home after revalidating
   redirect("/");
 }
+
+export async function revalidateInbox() {
+  revalidatePath("/inbox");
+}

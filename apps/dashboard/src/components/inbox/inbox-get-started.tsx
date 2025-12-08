@@ -1,7 +1,10 @@
 "use client";
 
+import { revalidateInbox } from "@/actions/revalidate-action";
 import { ConnectGmail } from "@/components/inbox/connect-gmail";
+import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useUserQuery } from "@/hooks/use-user";
+import { useTRPC } from "@/trpc/client";
 import { getInboxEmail } from "@midday/inbox";
 import {
   Accordion,
@@ -9,16 +12,29 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@midday/ui/accordion";
-import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { CopyInput } from "../copy-input";
 import { UploadZone } from "./inbox-upload-zone";
 
 export function InboxGetStarted() {
   const { data: user } = useUserQuery();
-  const router = useRouter();
+  const { setParams } = useInboxParams();
+  const queryClient = useQueryClient();
+  const trpc = useTRPC();
 
-  const handleUpload = () => {
-    router.push("/inbox?connected=true", { scroll: false });
+  const handleUpload = async (inboxId?: string) => {
+    // Invalidate client-side queries
+    await queryClient.invalidateQueries({
+      queryKey: trpc.inbox.get.infiniteQueryKey(),
+    });
+
+    // Revalidate server-side cache
+    await revalidateInbox();
+
+    // Navigate to inbox
+    if (inboxId) {
+      setParams({ inboxId });
+    }
   };
 
   return (
