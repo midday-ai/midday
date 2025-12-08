@@ -1,4 +1,6 @@
-import { getQueryClient, getTRPCClient, trpc } from "@/trpc/server";
+import { getQueryClient, trpc } from "@/trpc/server";
+import type { InitialInboxSetupPayload } from "@midday/jobs/schema";
+import { tasks } from "@trigger.dev/sdk";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -29,10 +31,9 @@ export async function GET(request: Request) {
       );
     }
 
-    const client = await getTRPCClient();
-    await client.inboxAccounts.initialSetup.mutate({
-      inboxAccountId: account.id,
-    });
+    await tasks.trigger("initial-inbox-setup", {
+      id: account.id,
+    } satisfies InitialInboxSetupPayload);
 
     return NextResponse.redirect(
       new URL(`/inbox?connected=true&provider=${state}`, request.url),
