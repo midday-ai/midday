@@ -233,9 +233,9 @@ export abstract class BaseProcessor<TData = unknown> {
     const clampedProgress = Math.max(0, Math.min(100, progress));
 
     try {
-      // Check if updateProgress method exists before calling it
+      // Check if updateProgress method exists and is callable
       // Some job types or BullMQ versions may not have this method
-      if (typeof job.updateProgress === "function") {
+      if (job.updateProgress && typeof job.updateProgress === "function") {
         await job.updateProgress(clampedProgress);
         this.logger.debug("Progress updated", {
           jobId: job.id,

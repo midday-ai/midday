@@ -90,10 +90,7 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
         onProgress: async (progress: number) => {
           const batchProgress =
             currentProgress + (progress / 100) * progressPerBatch;
-          // Check if updateProgress method exists before calling it
-          if (typeof job.updateProgress === "function") {
-            await job.updateProgress(Math.round(batchProgress));
-          }
+          await this.updateProgress(job, Math.round(batchProgress));
         },
       });
 

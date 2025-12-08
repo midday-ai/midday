@@ -1,8 +1,14 @@
 import type { Database } from "@db/client";
 import { activities } from "@db/schema";
 import type { activityStatusEnum, activityTypeEnum } from "@db/schema";
-import { and, desc, eq, inArray, lte, ne } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, lte, ne, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
+
+/**
+ * Activity type returned from database queries
+ * Uses Drizzle's inferred select type for type safety
+ */
+export type Activity = typeof activities.$inferSelect;
 
 type CreateActivityParams = {
   teamId: string;
@@ -161,4 +167,95 @@ export async function getActivities(db: Database, params: GetActivitiesParams) {
     },
     data,
   };
+}
+
+export type FindRecentInboxNewActivityParams = {
+  teamId: string;
+  userId?: string;
+  timeWindowMinutes?: number;
+};
+
+/**
+ * Find the most recent unread inbox_new activity for a team/user within a time window
+ * Used to combine multiple inbox_new notifications into a single one
+ * @deprecated Use findRecentActivity instead
+ */
+export async function findRecentInboxNewActivity(
+  db: Database,
+  params: FindRecentInboxNewActivityParams,
+) {
+  return findRecentActivity(db, {
+    ...params,
+    type: "inbox_new",
+  });
+}
+
+export type FindRecentActivityParams = {
+  teamId: string;
+  userId?: string;
+  type: (typeof activityTypeEnum.enumValues)[number];
+  timeWindowMinutes?: number;
+};
+
+/**
+ * Find the most recent unread activity of a specific type for a team/user within a time window
+ * Used to combine multiple notifications of the same type into a single one
+ */
+export async function findRecentActivity(
+  db: Database,
+  params: FindRecentActivityParams,
+) {
+  const { teamId, userId, type, timeWindowMinutes = 5 } = params;
+
+  const timeWindowAgo = new Date(
+    Date.now() - timeWindowMinutes * 60 * 1000,
+  ).toISOString();
+
+  const conditions: SQL[] = [
+    eq(activities.teamId, teamId),
+    eq(activities.type, type as any),
+    eq(activities.status, "unread"),
+    gte(activities.createdAt, timeWindowAgo),
+  ];
+
+  if (userId) {
+    conditions.push(eq(activities.userId, userId));
+  }
+
+  const [result] = await db
+    .select()
+    .from(activities)
+    .where(and(...conditions))
+    .orderBy(desc(activities.createdAt))
+    .limit(1);
+
+  return result ?? null;
+}
+
+export type UpdateActivityMetadataParams = {
+  activityId: string;
+  teamId: string;
+  metadata: Record<string, any>;
+};
+
+/**
+ * Update the metadata field of an activity
+ * Used to combine notifications by updating their metadata
+ */
+export async function updateActivityMetadata(
+  db: Database,
+  params: UpdateActivityMetadataParams,
+) {
+  const { activityId, teamId, metadata } = params;
+
+  const [result] = await db
+    .update(activities)
+    .set({
+      metadata: metadata as any,
+      createdAt: new Date().toISOString(), // Refresh timestamp to show it's updated
+    })
+    .where(and(eq(activities.id, activityId), eq(activities.teamId, teamId)))
+    .returning();
+
+  return result ?? null;
 }
