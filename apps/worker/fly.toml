@@ -1,3 +1,8 @@
+# fly.toml app configuration file generated for midday-worker on 2025-12-08T11:47:51+01:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
 app = 'midday-worker'
 primary_region = 'fra'
 
@@ -6,31 +11,30 @@ primary_region = 'fra'
 [env]
   NODE_ENV = 'production'
 
-[[services]]
+[http_service]
   internal_port = 8080
-  protocol = "tcp"
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[services]]
+  protocol = 'tcp'
+  internal_port = 8080
   auto_stop_machines = 'off'
   auto_start_machines = true
   min_machines_running = 2
 
   [[services.ports]]
-    handlers = ["http"]
-    port = "80"
+    port = 80
+    handlers = ['http']
 
   [[services.ports]]
-    handlers = ["tls", "http"]
-    port = "443"
+    port = 443
+    handlers = ['tls', 'http']
 
-  [[services.checks]]
-    grace_period = "10s"
-    interval = "45s"
-    method = "GET"
-    timeout = "10s"
-    path = "/health"
-
-# VM configuration for worker process
 [[vm]]
   memory = '2gb'
   cpu_kind = 'shared'
   cpus = 2
-
