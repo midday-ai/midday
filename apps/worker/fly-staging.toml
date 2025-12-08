@@ -15,11 +15,11 @@ primary_region = 'fra'
 
   [[services.ports]]
     handlers = ["http"]
-    port = "80"
+    port = 80
 
   [[services.ports]]
     handlers = ["tls", "http"]
-    port = "443"
+    port = 443
 
   [[services.checks]]
     grace_period = "10s"
