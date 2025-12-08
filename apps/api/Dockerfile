@@ -52,5 +52,5 @@ ENV NODE_ENV=production
 # Expose the port the API runs on
 EXPOSE 3000
 
-# Run the API directly with Bun
-CMD ["bun", "run", "src/index.ts"]
+# Run the API directly with Bun, preloading Sentry instrumentation
+CMD ["bun", "--preload", "./src/instrument.ts", "run", "src/index.ts"]

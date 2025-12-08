@@ -38,18 +38,14 @@ RUN bun install
 # Runner stage
 FROM installer AS runner
 
-# Set working directory to app root
-WORKDIR /app
+# Set the worker directory as working directory
+WORKDIR /app/apps/worker
 
 # Set environment variables
 ENV NODE_ENV=production
 
-# Copy and make entrypoint script executable
-COPY apps/worker/entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-
 # Expose worker port
 EXPOSE 8080
 
-# Use entrypoint script - process group will pass 'worker' as argument
-CMD ["/app/entrypoint.sh"]
+# Run the worker directly with Bun, preloading Sentry instrumentation
+CMD ["bun", "--preload", "./src/instrument.ts", "run", "src/index.ts"]
