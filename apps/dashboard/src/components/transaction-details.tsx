@@ -70,13 +70,14 @@ export function TransactionDetails() {
   const updateTransactionMutation = useMutation(
     trpc.transactions.update.mutationOptions({
       onSuccess: (_, variables) => {
-        queryClient.invalidateQueries({
-          queryKey: trpc.transactions.get.infiniteQueryKey(),
-        });
-
-        // If category changed, invalidate reports and widgets
-        if ("categorySlug" in variables) {
+        // If category or internal (exclude from analytics) changed, invalidate reports and widgets
+        if ("categorySlug" in variables || "internal" in variables) {
           invalidateTransactionQueries();
+        } else {
+          // Otherwise just invalidate transaction queries
+          queryClient.invalidateQueries({
+            queryKey: trpc.transactions.get.infiniteQueryKey(),
+          });
         }
       },
       onMutate: async (variables) => {

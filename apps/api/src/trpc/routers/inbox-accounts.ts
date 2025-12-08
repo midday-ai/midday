@@ -2,14 +2,13 @@ import {
   connectInboxAccountSchema,
   deleteInboxAccountSchema,
   exchangeCodeForAccountSchema,
-  initialSetupInboxAccountSchema,
+  // initialSetupInboxAccountSchema,
   syncInboxAccountSchema,
 } from "@api/schemas/inbox-accounts";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { deleteInboxAccount, getInboxAccounts } from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
-import { triggerJob } from "@midday/job-client";
-import { schedules } from "@trigger.dev/sdk";
+import { schedules, tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
 export const inboxAccountsRouter = createTRPCRouter({
@@ -62,28 +61,8 @@ export const inboxAccountsRouter = createTRPCRouter({
         teamId: teamId!,
       });
 
-      // Remove Trigger.dev schedule if it exists
       if (data?.scheduleId) {
-        try {
-          // Try to delete by schedule ID first (stored in DB)
-          await schedules.del(data.scheduleId);
-        } catch (error) {
-          // If that fails, try deleting by deduplication key as fallback
-          try {
-            const deduplicationKey = `${input.id}-inbox-sync-scheduler`;
-            await schedules.del(deduplicationKey);
-          } catch (fallbackError) {
-            // Log error but don't fail the deletion if scheduler removal fails
-            console.error(
-              `Failed to remove Trigger.dev scheduler for inbox account ${input.id}:`,
-              error instanceof Error ? error.message : error,
-              "Fallback error:",
-              fallbackError instanceof Error
-                ? fallbackError.message
-                : fallbackError,
-            );
-          }
-        }
+        await schedules.del(data.scheduleId);
       }
 
       return data;
@@ -92,29 +71,25 @@ export const inboxAccountsRouter = createTRPCRouter({
   sync: protectedProcedure
     .input(syncInboxAccountSchema)
     .mutation(async ({ input }) => {
-      const job = await triggerJob(
-        "sync-scheduler",
-        {
-          id: input.id,
-          manualSync: input.manualSync || false,
-        },
-        "inbox-provider",
-      );
+      const event = await tasks.trigger("sync-inbox-account", {
+        id: input.id,
+        manualSync: input.manualSync || false,
+      });
 
-      return { id: job.id };
+      return event;
     }),
 
-  initialSetup: protectedProcedure
-    .input(initialSetupInboxAccountSchema)
-    .mutation(async ({ input }) => {
-      const job = await triggerJob(
-        "initial-setup",
-        {
-          inboxAccountId: input.inboxAccountId,
-        },
-        "inbox-provider",
-      );
+  // initialSetup: protectedProcedure
+  //   .input(initialSetupInboxAccountSchema)
+  //   .mutation(async ({ input }) => {
+  //     const job = await triggerJob(
+  //       "initial-setup",
+  //       {
+  //         inboxAccountId: input.inboxAccountId,
+  //       },
+  //       "inbox-provider",
+  //     );
 
-      return { id: job.id };
-    }),
+  //     return { id: job.id };
+  //   }),
 });

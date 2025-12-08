@@ -233,12 +233,23 @@ export abstract class BaseProcessor<TData = unknown> {
     const clampedProgress = Math.max(0, Math.min(100, progress));
 
     try {
-      await job.updateProgress(clampedProgress);
-      this.logger.debug("Progress updated", {
-        jobId: job.id,
-        progress: `${clampedProgress}%`,
-        message,
-      });
+      // Check if updateProgress method exists before calling it
+      // Some job types or BullMQ versions may not have this method
+      if (typeof job.updateProgress === "function") {
+        await job.updateProgress(clampedProgress);
+        this.logger.debug("Progress updated", {
+          jobId: job.id,
+          progress: `${clampedProgress}%`,
+          message,
+        });
+      } else {
+        // Silently skip if updateProgress is not available
+        this.logger.debug("Progress update skipped (method not available)", {
+          jobId: job.id,
+          progress: `${clampedProgress}%`,
+          message,
+        });
+      }
     } catch (error) {
       // Don't fail the job if progress update fails
       this.logger.warn("Failed to update job progress", {

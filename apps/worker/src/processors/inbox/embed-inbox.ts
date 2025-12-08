@@ -19,7 +19,7 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
   }
 
   protected async shouldProcess(job: Job<EmbedInboxPayload>): Promise<boolean> {
-    const { inboxId } = job.data;
+    const { inboxId, teamId } = job.data;
     const db = getDb();
 
     // Idempotency check: Check if embedding already exists
@@ -28,8 +28,14 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
     if (embeddingExists) {
       this.logger.info(
         "Inbox embedding already exists, skipping (idempotency check)",
-        { inboxId, teamId: job.data.teamId, jobId: job.id },
+        { inboxId, teamId, jobId: job.id },
       );
+      // If embedding already exists, ensure status is not stuck in "analyzing"
+      // Set to pending so batch-process-matching can process it
+      await db
+        .update(inbox)
+        .set({ status: "pending" })
+        .where(eq(inbox.id, inboxId));
       return false;
     }
 
@@ -202,6 +208,13 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
         saveDuration: `${saveDuration}ms`,
         totalDuration: `${totalDuration}ms`,
       });
+
+      // After embedding is created, set status to pending so batch-process-matching can process it
+      // Don't leave it as "analyzing" - let the matching job handle status updates
+      await db
+        .update(inbox)
+        .set({ status: "pending" })
+        .where(eq(inbox.id, inboxId));
     } catch (error) {
       this.logger.error("Failed to create inbox embedding", {
         inboxId,

@@ -7,7 +7,7 @@ import {
   updateInboxWithProcessedData,
 } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
-import { triggerChildJob, triggerJob } from "@midday/job-client";
+import { triggerJob } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
 import convert from "heic-convert";
@@ -466,40 +466,36 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       // 3. BullMQ automatically keeps the child in "waiting-children" state until parent completes
       // 4. Once embed-inbox completes successfully, batch-process-matching becomes available for processing
       // 5. This ensures the embedding exists when findMatches() runs, preventing silent failures
+      // Trigger batch-process-matching directly (not as child job)
+      // This is simpler and more reliable than parent-child relationships which can fail
+      // when parent jobs complete quickly. The batch-process-matching job will check
+      // if the embedding exists before processing, so it's safe to trigger immediately.
       if (embedJobResult.status === "fulfilled" && embedJobResult.value) {
-        const embedJobId = embedJobResult.value.id;
         const matchingStartTime = Date.now();
 
         try {
-          const matchingJobResult = await triggerChildJob(
+          const matchingJobResult = await triggerJob(
             "batch-process-matching",
             {
               teamId,
               inboxIds: [inboxData.id],
             },
             "inbox",
-            embedJobId, // Parent job ID - makes batch-process-matching a child
-            "inbox", // Parent queue name - must match queue where embed-inbox was added
           );
 
           const matchingDuration = Date.now() - matchingStartTime;
-          this.logger.info(
-            "Triggered batch-process-matching as child of embed-inbox",
-            {
-              jobId: job.id,
-              inboxId: inboxData.id,
-              embedJobId,
-              matchingJobId: matchingJobResult.id,
-              triggeredJobName: "batch-process-matching",
-              relationship: "child-waits-for-parent",
-              duration: `${matchingDuration}ms`,
-            },
-          );
+          this.logger.info("Triggered batch-process-matching", {
+            jobId: job.id,
+            inboxId: inboxData.id,
+            embedJobId: embedJobResult.value.id,
+            matchingJobId: matchingJobResult.id,
+            triggeredJobName: "batch-process-matching",
+            duration: `${matchingDuration}ms`,
+          });
         } catch (error) {
           this.logger.error("Failed to trigger batch-process-matching job", {
             jobId: job.id,
             inboxId: inboxData.id,
-            embedJobId,
             error: error instanceof Error ? error.message : "Unknown error",
             errorStack: error instanceof Error ? error.stack : undefined,
           });
@@ -507,6 +503,32 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           // The matching can be retried later via scheduler or manual trigger
           // Note: If embed-inbox completes but matching wasn't enqueued, the scheduler
           // will eventually pick it up via the no-match-scheduler
+          // However, we should update status to pending to prevent getting stuck in "analyzing"
+          try {
+            await updateInboxWithProcessedData(db, {
+              id: inboxData.id,
+              status: "pending",
+            });
+            this.logger.info(
+              "Updated inbox status to pending after matching job failed to trigger",
+              {
+                jobId: job.id,
+                inboxId: inboxData.id,
+              },
+            );
+          } catch (updateError) {
+            this.logger.error(
+              "Failed to update inbox status after matching job failure",
+              {
+                jobId: job.id,
+                inboxId: inboxData.id,
+                error:
+                  updateError instanceof Error
+                    ? updateError.message
+                    : "Unknown error",
+              },
+            );
+          }
         }
       } else {
         // embed-inbox job failed to trigger - cannot create child relationship
@@ -527,6 +549,32 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
             note: "Matching will be handled by scheduler when embedding completes",
           },
         );
+        // Update status to pending since we can't proceed with matching without embedding
+        try {
+          await updateInboxWithProcessedData(db, {
+            id: inboxData.id,
+            status: "pending",
+          });
+          this.logger.info(
+            "Updated inbox status to pending after embed-inbox job failed to trigger",
+            {
+              jobId: job.id,
+              inboxId: inboxData.id,
+            },
+          );
+        } catch (updateError) {
+          this.logger.error(
+            "Failed to update inbox status after embed-inbox job failure",
+            {
+              jobId: job.id,
+              inboxId: inboxData.id,
+              error:
+                updateError instanceof Error
+                  ? updateError.message
+                  : "Unknown error",
+            },
+          );
+        }
       }
 
       const totalDuration = Date.now() - processStartTime;

@@ -70,5 +70,10 @@ export function useInvalidateTransactionQueries() {
     queryClient.invalidateQueries({
       queryKey: trpc.widgets.getRecurringExpenses.queryKey(),
     });
+
+    // Invalidate global search
+    queryClient.invalidateQueries({
+      queryKey: trpc.search.global.queryKey(),
+    });
   };
 }
