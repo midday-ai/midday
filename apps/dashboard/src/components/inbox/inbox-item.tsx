@@ -14,6 +14,7 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { formatDate } from "@midday/utils/format";
+import { getTaxTypeLabel } from "@midday/utils/tax";
 import { forwardRef } from "react";
 
 type Props = {
@@ -129,12 +130,43 @@ export const InboxItem = forwardRef<HTMLButtonElement, Props>(
           <div className="flex">
             <div className="text-xs font-medium select-text">
               {isProcessing && <Skeleton className="h-3 w-[50px]" />}
-              {!isProcessing && item?.currency && (
-                <FormatAmount
-                  amount={item.amount ?? 0}
-                  currency={item.currency}
-                />
-              )}
+              {!isProcessing &&
+                item?.currency &&
+                (item?.taxAmount && item.taxAmount > 0 && item.currency ? (
+                  <TooltipProvider delayDuration={100}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="cursor-help">
+                          <FormatAmount
+                            amount={item.amount ?? 0}
+                            currency={item.currency}
+                          />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs px-2 py-1">
+                        <div className="flex flex-col gap-0.5">
+                          <span>
+                            {item.taxType &&
+                              `${getTaxTypeLabel(item.taxType)} `}
+                            <FormatAmount
+                              amount={item.taxAmount}
+                              currency={item.currency}
+                              maximumFractionDigits={2}
+                            />
+                            {item.taxRate &&
+                              item.taxRate > 0 &&
+                              ` (${item.taxRate}%)`}
+                          </span>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <FormatAmount
+                    amount={item.amount ?? 0}
+                    currency={item.currency}
+                  />
+                ))}
             </div>
 
             <div className="ml-auto">

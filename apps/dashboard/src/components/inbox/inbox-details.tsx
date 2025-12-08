@@ -30,6 +30,7 @@ import {
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import { formatDate, getInitials } from "@midday/utils/format";
+import { getTaxTypeLabel } from "@midday/utils/tax";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -445,12 +446,46 @@ export function InboxDetails() {
                   {isProcessing && !data.currency && (
                     <Skeleton className="h-3 w-[50px]" />
                   )}
-                  {data.currency && data.amount != null && (
-                    <FormatAmount
-                      amount={data.amount}
-                      currency={data.currency}
-                    />
-                  )}
+                  {data.currency &&
+                    data.amount != null &&
+                    (!isProcessing &&
+                    data?.taxAmount &&
+                    data.taxAmount > 0 &&
+                    data.currency ? (
+                      <TooltipProvider delayDuration={100}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-help">
+                              <FormatAmount
+                                amount={data.amount}
+                                currency={data.currency}
+                              />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className="text-xs px-2 py-1">
+                            <div className="flex flex-col gap-0.5">
+                              <span>
+                                {data.taxType &&
+                                  `${getTaxTypeLabel(data.taxType)} `}
+                                <FormatAmount
+                                  amount={data.taxAmount}
+                                  currency={data.currency}
+                                  maximumFractionDigits={2}
+                                />
+                                {data.taxRate &&
+                                  data.taxRate > 0 &&
+                                  ` (${data.taxRate}%)`}
+                              </span>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      <FormatAmount
+                        amount={data.amount}
+                        currency={data.currency}
+                      />
+                    ))}
                 </div>
               </div>
             </div>
