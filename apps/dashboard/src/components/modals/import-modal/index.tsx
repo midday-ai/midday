@@ -176,7 +176,7 @@ export function ImportModal() {
 
       onclose();
     }
-  }, [status, toast, invalidateTransactionQueries, queryClient, trpc, onclose]);
+  }, [status]);
 
   // Go to second page if file looks good
   useEffect(() => {

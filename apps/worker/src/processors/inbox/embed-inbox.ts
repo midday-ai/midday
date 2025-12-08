@@ -46,6 +46,14 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
         "Inbox embedding already exists, skipping creation (idempotency check)",
         { inboxId, teamId, jobId: job.id },
       );
+
+      // Reset status to pending since we're skipping processing
+      // This matches the pattern of other early-return paths
+      await db
+        .update(inbox)
+        .set({ status: "pending" })
+        .where(eq(inbox.id, inboxId));
+
       return;
     }
 

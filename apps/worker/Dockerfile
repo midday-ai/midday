@@ -49,3 +49,4 @@ EXPOSE 8080
 
 # Run the worker directly with Bun
 CMD ["bun", "run", "src/index.ts"]
+

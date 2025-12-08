@@ -15,7 +15,7 @@ if (process.env.NODE_ENV === "production" && process.env.SENTRY_DSN) {
     // We recommend adjusting this value in production
     // Learn more at
     // https://docs.sentry.io/platforms/javascript/configuration/options/#traces-sample-rate
-    tracesSampleRate: 1.0,
+    tracesSampleRate: 0.5,
 
     // Enable logs to be sent to Sentry
     enableLogs: true,

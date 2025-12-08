@@ -38,7 +38,7 @@ import {
   updateInbox,
 } from "@midday/db/queries";
 import { triggerJob } from "@midday/job-client";
-import type { ProcessAttachmentPayload } from "@midday/jobs/schema";
+import { logger } from "@midday/logger";
 import { remove } from "@midday/supabase/storage";
 
 export const inboxRouter = createTRPCRouter({
@@ -176,10 +176,28 @@ export const inboxRouter = createTRPCRouter({
         ),
       );
 
-      // Send notification for user uploads (via Trigger.dev for now)
-      // TODO: Port notification system to BullMQ
-      // Note: Notification jobs are still handled by Trigger.dev
+      // Send notification for user uploads
       // This is a non-critical operation, so we don't await it
+      if (input.length > 0) {
+        try {
+          await triggerJob(
+            "notification",
+            {
+              type: "inbox_new",
+              teamId: teamId!,
+              totalCount: input.length,
+              inboxType: "upload",
+            },
+            "notifications",
+          );
+        } catch (error) {
+          // Don't fail the entire process if notification fails
+          logger.warn("Failed to trigger inbox_new notification", {
+            teamId: teamId!,
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
+      }
 
       return {
         jobs: jobResults.map((result) => ({ id: result.id })),

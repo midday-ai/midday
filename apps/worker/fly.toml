@@ -26,6 +26,13 @@ primary_region = 'fra'
     port = 443
     handlers = ['tls', 'http']
 
+  [[services.checks]]
+    grace_period = "10s"
+    interval = "45s"
+    method = "GET"
+    timeout = "10s"
+    path = "/health"
+
 [[vm]]
   memory = '2gb'
   cpu_kind = 'shared'

@@ -7,7 +7,7 @@ import {
   updateInboxWithProcessedData,
 } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
-import { triggerJob } from "@midday/job-client";
+import { triggerChildJob, triggerJob } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
 import convert from "heic-convert";
@@ -456,26 +456,78 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         duration: `${parallelJobsDuration}ms`,
       });
 
-      // After embedding is complete, trigger efficient matching
-      // Note: batch-process-matching will wait for embedding to complete internally
-      const matchingStartTime = Date.now();
-      const matchingJobResult = await triggerJob(
-        "batch-process-matching",
-        {
-          teamId,
-          inboxIds: [inboxData.id],
-        },
-        "inbox",
-      );
+      // Add batch-process-matching as a child job of embed-inbox
+      // This follows BullMQ's parent-child pattern where the child job automatically
+      // waits for the parent to complete before processing.
+      //
+      // How it works:
+      // 1. embed-inbox is the parent job (runs first)
+      // 2. batch-process-matching is added as a child with parent: { id: embedJobId, queue: "inbox" }
+      // 3. BullMQ automatically keeps the child in "waiting-children" state until parent completes
+      // 4. Once embed-inbox completes successfully, batch-process-matching becomes available for processing
+      // 5. This ensures the embedding exists when findMatches() runs, preventing silent failures
+      if (embedJobResult.status === "fulfilled" && embedJobResult.value) {
+        const embedJobId = embedJobResult.value.id;
+        const matchingStartTime = Date.now();
 
-      const matchingDuration = Date.now() - matchingStartTime;
-      this.logger.info("Triggered batch-process-matching job", {
-        jobId: job.id,
-        inboxId: inboxData.id,
-        triggeredJobId: matchingJobResult.id,
-        triggeredJobName: "batch-process-matching",
-        duration: `${matchingDuration}ms`,
-      });
+        try {
+          const matchingJobResult = await triggerChildJob(
+            "batch-process-matching",
+            {
+              teamId,
+              inboxIds: [inboxData.id],
+            },
+            "inbox",
+            embedJobId, // Parent job ID - makes batch-process-matching a child
+            "inbox", // Parent queue name - must match queue where embed-inbox was added
+          );
+
+          const matchingDuration = Date.now() - matchingStartTime;
+          this.logger.info(
+            "Triggered batch-process-matching as child of embed-inbox",
+            {
+              jobId: job.id,
+              inboxId: inboxData.id,
+              embedJobId,
+              matchingJobId: matchingJobResult.id,
+              triggeredJobName: "batch-process-matching",
+              relationship: "child-waits-for-parent",
+              duration: `${matchingDuration}ms`,
+            },
+          );
+        } catch (error) {
+          this.logger.error("Failed to trigger batch-process-matching job", {
+            jobId: job.id,
+            inboxId: inboxData.id,
+            embedJobId,
+            error: error instanceof Error ? error.message : "Unknown error",
+            errorStack: error instanceof Error ? error.stack : undefined,
+          });
+          // Don't fail the entire process if matching job fails to enqueue
+          // The matching can be retried later via scheduler or manual trigger
+          // Note: If embed-inbox completes but matching wasn't enqueued, the scheduler
+          // will eventually pick it up via the no-match-scheduler
+        }
+      } else {
+        // embed-inbox job failed to trigger - cannot create child relationship
+        // Log warning but don't fail - the attachment processing succeeded
+        // Matching will be handled by the scheduler when embedding eventually completes
+        this.logger.warn(
+          "Embed-inbox job failed to trigger, skipping batch-process-matching child job",
+          {
+            jobId: job.id,
+            inboxId: inboxData.id,
+            embedJobStatus: embedJobResult.status,
+            embedJobError:
+              embedJobResult.status === "rejected" && embedJobResult.reason
+                ? embedJobResult.reason instanceof Error
+                  ? embedJobResult.reason.message
+                  : String(embedJobResult.reason)
+                : undefined,
+            note: "Matching will be handled by scheduler when embedding completes",
+          },
+        );
+      }
 
       const totalDuration = Date.now() - processStartTime;
       this.logger.info("🎉 process-attachment job completed successfully", {

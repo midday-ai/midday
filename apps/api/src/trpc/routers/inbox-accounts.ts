@@ -8,8 +8,8 @@ import {
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { deleteInboxAccount, getInboxAccounts } from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
-import type { InitialInboxSetupPayload } from "@midday/jobs/schema";
-import { schedules, tasks } from "@trigger.dev/sdk";
+import { triggerJob } from "@midday/job-client";
+import { schedules } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
 export const inboxAccountsRouter = createTRPCRouter({
@@ -92,21 +92,29 @@ export const inboxAccountsRouter = createTRPCRouter({
   sync: protectedProcedure
     .input(syncInboxAccountSchema)
     .mutation(async ({ input }) => {
-      const event = await tasks.trigger("sync-inbox-account", {
-        id: input.id,
-        manualSync: input.manualSync || false,
-      });
+      const job = await triggerJob(
+        "sync-scheduler",
+        {
+          id: input.id,
+          manualSync: input.manualSync || false,
+        },
+        "inbox-provider",
+      );
 
-      return { id: event.id };
+      return { id: job.id };
     }),
 
   initialSetup: protectedProcedure
     .input(initialSetupInboxAccountSchema)
     .mutation(async ({ input }) => {
-      const event = await tasks.trigger("initial-inbox-setup", {
-        id: input.inboxAccountId,
-      } satisfies InitialInboxSetupPayload);
+      const job = await triggerJob(
+        "initial-setup",
+        {
+          inboxAccountId: input.inboxAccountId,
+        },
+        "inbox-provider",
+      );
 
-      return { id: event.id };
+      return { id: job.id };
     }),
 });
