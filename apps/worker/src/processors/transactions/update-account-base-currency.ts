@@ -1,17 +1,18 @@
-import { getExchangeRate } from "@midday/db/queries";
-import { bankAccounts, transactions } from "@midday/db/schema";
+import {
+  bulkUpdateTransactionsBaseCurrency,
+  getBankAccountTeamId,
+  getExchangeRate,
+  getTransactionsByAccountId,
+  updateBankAccount,
+} from "@midday/db/queries";
 import type { Job } from "bullmq";
-import { eq, sql } from "drizzle-orm";
 import type { UpdateAccountBaseCurrencyPayload } from "../../schemas/transactions";
 import {
   getAccountBalance,
   getTransactionAmount,
 } from "../../utils/base-currency";
 import { getDb } from "../../utils/db";
-import { processBatch } from "../../utils/process-batch";
 import { BaseProcessor } from "../base";
-
-const BATCH_LIMIT = 500;
 
 /**
  * Updates base currency for a specific account
@@ -28,8 +29,6 @@ export class UpdateAccountBaseCurrencyProcessor extends BaseProcessor<UpdateAcco
       currency,
       baseCurrency,
     });
-
-    await this.updateProgress(job, 10);
 
     // Get exchange rate
     const exchangeRate = await getExchangeRate(db, {
@@ -48,31 +47,31 @@ export class UpdateAccountBaseCurrencyProcessor extends BaseProcessor<UpdateAcco
 
     const rate = Number(exchangeRate.rate);
 
-    await this.updateProgress(job, 20);
-
     // Update account base balance and base currency
-    await db
-      .update(bankAccounts)
-      .set({
-        baseBalance: getAccountBalance({
-          currency,
-          balance,
-          baseCurrency,
-          rate,
-        }),
-        baseCurrency,
-      })
-      .where(eq(bankAccounts.id, accountId));
+    // Get teamId from account - we need to find it first
+    const teamId = await getBankAccountTeamId(db, { id: accountId });
 
-    await this.updateProgress(job, 40);
+    if (!teamId) {
+      throw new Error(`Account not found: ${accountId}`);
+    }
+
+    await updateBankAccount(db, {
+      id: accountId,
+      teamId,
+      baseBalance: getAccountBalance({
+        currency,
+        balance,
+        baseCurrency,
+        rate,
+      }),
+      baseCurrency,
+    });
 
     // Get all transactions for this account
-    const transactionsData = await db
-      .select()
-      .from(transactions)
-      .where(eq(transactions.bankAccountId, accountId));
-
-    await this.updateProgress(job, 60);
+    const transactionsData = await getTransactionsByAccountId(db, {
+      accountId,
+      teamId,
+    });
 
     // Format transactions with base amounts
     const formattedTransactions = transactionsData.map((transaction) => {
@@ -90,25 +89,15 @@ export class UpdateAccountBaseCurrencyProcessor extends BaseProcessor<UpdateAcco
       };
     });
 
-    await this.updateProgress(job, 80);
-
-    // Upsert transactions in batches
-    await processBatch(formattedTransactions, BATCH_LIMIT, async (batch) => {
-      await db
-        .insert(transactions)
-        .values(batch)
-        .onConflictDoUpdate({
-          target: [transactions.internalId],
-          set: {
-            baseAmount: sql`excluded.base_amount`,
-            baseCurrency: sql`excluded.base_currency`,
-          },
-        });
-
-      return batch;
+    // Bulk update transactions with base currency/amount
+    await bulkUpdateTransactionsBaseCurrency(db, {
+      transactions: formattedTransactions.map((tx) => ({
+        id: tx.id,
+        baseAmount: tx.baseAmount,
+        baseCurrency: tx.baseCurrency,
+      })),
+      teamId,
     });
-
-    await this.updateProgress(job, 100);
 
     this.logger.info("Update account base currency completed", {
       accountId,

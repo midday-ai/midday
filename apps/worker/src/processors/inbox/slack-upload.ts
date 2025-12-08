@@ -23,8 +23,6 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
     const supabase = createClient();
     const db = getDb();
 
-    await this.updateProgress(job, 10);
-
     // Note: Slack-specific fields (token, channelId, threadId, file.url) would need to be
     // passed differently or stored temporarily. For now, we'll process the uploaded file.
     // The file should already be uploaded to vault by the time this job runs.
@@ -33,8 +31,6 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
     if (!filename) {
       throw new Error("Filename not found in file path");
     }
-
-    await this.updateProgress(job, 20);
 
     // Get inbox item that was created
     const inboxData = await getInboxByFilePath(db, {
@@ -45,8 +41,6 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
     if (!inboxData) {
       throw new Error("Inbox data not found");
     }
-
-    await this.updateProgress(job, 40);
 
     try {
       const document = new DocumentClient();
@@ -65,8 +59,6 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
       const buffer = await fileData.arrayBuffer();
       const base64Content = Buffer.from(buffer).toString("base64");
 
-      await this.updateProgress(job, 60);
-
       const result = await withTimeout(
         document.getInvoiceOrReceipt({
           content: base64Content,
@@ -75,8 +67,6 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
         TIMEOUTS.DOCUMENT_PROCESSING,
         `Document processing timed out after ${TIMEOUTS.DOCUMENT_PROCESSING}ms`,
       );
-
-      await this.updateProgress(job, 80);
 
       const updatedInbox = await updateInboxWithProcessedData(db, {
         id: inboxData.id,
@@ -88,8 +78,6 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
         type: result.type as "invoice" | "expense" | null | undefined,
         status: "pending",
       });
-
-      await this.updateProgress(job, 90);
 
       // Note: Slack message posting would need to be handled separately
       // as we don't have access to token/channelId/threadId in this processor
@@ -121,8 +109,6 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
           amount: updatedInbox.amount,
         });
       }
-
-      await this.updateProgress(job, 100);
     } catch (error) {
       this.logger.error("Failed to process Slack upload", {
         inboxId: inboxData.id,

@@ -1,7 +1,6 @@
-import { inbox } from "@midday/db/schema";
+import { updateInboxStatusToNoMatch } from "@midday/db/queries";
 import type { Job } from "bullmq";
 import { subDays } from "date-fns";
-import { and, eq, lt, sql } from "drizzle-orm";
 import type { NoMatchSchedulerPayload } from "../../schemas/inbox";
 import { getDb } from "../../utils/db";
 import { BaseProcessor } from "../base";
@@ -28,8 +27,6 @@ export class NoMatchSchedulerProcessor extends BaseProcessor<NoMatchSchedulerPay
 
     const db = getDb();
 
-    await this.updateProgress(job, 10);
-
     // Calculate the date 90 days ago using date-fns
     const ninetyDaysAgo = subDays(new Date(), 90);
 
@@ -37,38 +34,18 @@ export class NoMatchSchedulerProcessor extends BaseProcessor<NoMatchSchedulerPay
       cutoffDate: ninetyDaysAgo.toISOString(),
     });
 
-    await this.updateProgress(job, 30);
-
     // Find inbox items that are:
     // 1. In "pending" status (waiting for matches)
     // 2. Created more than 90 days ago
     // 3. Not already matched to a transaction
-    const result = await db
-      .update(inbox)
-      .set({
-        status: "no_match",
-      })
-      .where(
-        and(
-          eq(inbox.status, "pending"),
-          lt(inbox.createdAt, ninetyDaysAgo.toISOString()),
-          // Make sure they're not already matched
-          sql`${inbox.transactionId} IS NULL`,
-        ),
-      )
-      .returning({
-        id: inbox.id,
-        teamId: inbox.teamId,
-        displayName: inbox.displayName,
-        createdAt: inbox.createdAt,
-      });
-
-    await this.updateProgress(job, 70);
+    const result = await updateInboxStatusToNoMatch(db, {
+      cutoffDate: ninetyDaysAgo.toISOString(),
+    });
 
     this.logger.info("No-match scheduler completed", {
-      updatedCount: result.length,
+      updatedCount: result.updatedCount,
       cutoffDate: ninetyDaysAgo.toISOString(),
-      sampleUpdatedItems: result.slice(0, 5).map((item) => ({
+      sampleUpdatedItems: result.updatedItems.slice(0, 5).map((item) => ({
         id: item.id,
         teamId: item.teamId,
         displayName: item.displayName,
@@ -77,8 +54,8 @@ export class NoMatchSchedulerProcessor extends BaseProcessor<NoMatchSchedulerPay
     });
 
     // Log some statistics for monitoring
-    if (result.length > 0) {
-      const teamCounts = result.reduce(
+    if (result.updatedItems.length > 0) {
+      const teamCounts = result.updatedItems.reduce(
         (acc, item) => {
           if (item.teamId) {
             acc[item.teamId] = (acc[item.teamId] || 0) + 1;
@@ -94,10 +71,8 @@ export class NoMatchSchedulerProcessor extends BaseProcessor<NoMatchSchedulerPay
       });
     }
 
-    await this.updateProgress(job, 100);
-
     return {
-      updatedCount: result.length,
+      updatedCount: result.updatedCount,
       cutoffDate: ninetyDaysAgo.toISOString(),
     };
   }

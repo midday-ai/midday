@@ -18,8 +18,6 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
     const supabase = createClient();
     const db = getDb();
 
-    await this.updateProgress(job, 10);
-
     this.logger.info("Classifying image", {
       fileName,
       teamId,
@@ -35,11 +33,7 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
       throw new Error("File not found");
     }
 
-    await this.updateProgress(job, 30);
-
     const content = await fileData.arrayBuffer();
-
-    await this.updateProgress(job, 50);
 
     const classifier = new DocumentClassifier();
     const result = await withTimeout(
@@ -47,8 +41,6 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
       TIMEOUTS.EXTERNAL_API,
       `Image classification timed out after ${TIMEOUTS.EXTERNAL_API}ms`,
     );
-
-    await this.updateProgress(job, 70);
 
     // fileName is the full path (e.g., "teamId/filename.jpg")
     // We need to split it into pathTokens for updateDocumentByPath
@@ -137,8 +129,6 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
       );
     }
 
-    await this.updateProgress(job, 90);
-
     if (result.tags && result.tags.length > 0) {
       this.logger.info("Triggering document tag embedding", {
         documentId: data.id,
@@ -155,7 +145,5 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
         documentId: data.id,
       });
     }
-
-    await this.updateProgress(job, 100);
   }
 }

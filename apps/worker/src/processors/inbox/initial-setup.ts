@@ -19,15 +19,11 @@ export class InitialSetupProcessor extends BaseProcessor<InboxProviderInitialSet
     const { inboxAccountId } = job.data;
     const db = getDb();
 
-    await this.updateProgress(job, 10);
-
     this.logger.info("Starting initial inbox setup", { inboxAccountId });
 
     // Register dynamic scheduler for this inbox account
     // The scheduler will run every 6 hours with a random minute based on account ID
     const cronPattern = generateQuarterDailyCronTag(inboxAccountId);
-
-    await this.updateProgress(job, 30);
 
     try {
       await registerDynamicScheduler({
@@ -41,8 +37,6 @@ export class InitialSetupProcessor extends BaseProcessor<InboxProviderInitialSet
         cronPattern,
       });
 
-      await this.updateProgress(job, 60);
-
       // Store the scheduler job key in the database (similar to scheduleId in Trigger.dev)
       // The job key is: `inbox-sync-${inboxAccountId}`
       const schedulerJobKey = `inbox-sync-${inboxAccountId}`;
@@ -51,8 +45,6 @@ export class InitialSetupProcessor extends BaseProcessor<InboxProviderInitialSet
         id: inboxAccountId,
         scheduleId: schedulerJobKey, // Store the BullMQ repeatable job key
       });
-
-      await this.updateProgress(job, 80);
 
       // Trigger initial sync
       await triggerJob(
@@ -63,8 +55,6 @@ export class InitialSetupProcessor extends BaseProcessor<InboxProviderInitialSet
         },
         "inbox-provider",
       );
-
-      await this.updateProgress(job, 100);
 
       this.logger.info("Initial inbox setup completed", { inboxAccountId });
 

@@ -1,11 +1,10 @@
-import { transactions } from "@midday/db/schema";
+import { upsertTransactions } from "@midday/db/queries";
 import { mapTransactions } from "@midday/import/mappings";
 import { transform } from "@midday/import/transform";
 import { validateTransactions } from "@midday/import/validate";
 import { triggerJob } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
-import { sql } from "drizzle-orm";
 import Papa from "papaparse";
 import type { ImportTransactionsPayload } from "../../schemas/transactions";
 import { getDb } from "../../utils/db";
@@ -111,65 +110,58 @@ export class ImportTransactionsProcessor extends BaseProcessor<ImportTransaction
             });
           }
 
-          // Upsert transactions using Drizzle ORM
+          // Upsert transactions using db query function
           const results = await processBatch(
             validTransactions,
             BATCH_SIZE,
             async (batch) => {
               // Transform snake_case to camelCase for Drizzle schema
+              // Only include fields that exist in the validated transaction
               const transformedBatch = batch.map((t) => ({
                 name: t.name,
                 date: t.date,
-                method: t.method as "other" | "card_purchase" | "transfer",
+                method: (t.method === "card"
+                  ? "card_purchase"
+                  : t.method === "bank"
+                    ? "transfer"
+                    : "other") as "other" | "card_purchase" | "transfer",
                 amount: t.amount,
                 currency: t.currency,
                 teamId: t.team_id,
-                bankAccountId: t.bank_account_id,
+                bankAccountId: t.bank_account_id ?? null,
                 internalId: t.internal_id,
-                status: t.status,
+                status: t.status as
+                  | "pending"
+                  | "completed"
+                  | "archived"
+                  | "posted"
+                  | "excluded",
                 manual: t.manual,
-                categorySlug: t.category_slug,
+                categorySlug: t.category_slug ?? null,
+                // Optional fields that may not exist in imported transactions
+                description: null,
+                balance: null,
+                note: null,
+                counterpartyName: null,
+                merchantName: null,
+                assignedId: null,
+                internal: false,
                 notified: true,
+                baseAmount: null,
+                baseCurrency: null,
+                taxAmount: null,
+                taxRate: null,
+                taxType: null,
+                recurring: false,
+                frequency: null,
+                enrichmentCompleted: false,
               }));
 
-              // Upsert transactions with onConflict on internalId
-              const upserted = await db
-                .insert(transactions)
-                .values(transformedBatch)
-                .onConflictDoUpdate({
-                  target: [transactions.internalId],
-                  set: {
-                    // Update all fields except id and createdAt
-                    name: sql`excluded.name`,
-                    amount: sql`excluded.amount`,
-                    currency: sql`excluded.currency`,
-                    date: sql`excluded.date`,
-                    description: sql`excluded.description`,
-                    method: sql`excluded.method`,
-                    status: sql`excluded.status`,
-                    balance: sql`excluded.balance`,
-                    note: sql`excluded.note`,
-                    categorySlug: sql`excluded.category_slug`,
-                    counterpartyName: sql`excluded.counterparty_name`,
-                    merchantName: sql`excluded.merchant_name`,
-                    bankAccountId: sql`excluded.bank_account_id`,
-                    assignedId: sql`excluded.assigned_id`,
-                    internal: sql`excluded.internal`,
-                    notified: sql`excluded.notified`,
-                    manual: sql`excluded.manual`,
-                    baseAmount: sql`excluded.base_amount`,
-                    baseCurrency: sql`excluded.base_currency`,
-                    taxAmount: sql`excluded.tax_amount`,
-                    taxRate: sql`excluded.tax_rate`,
-                    taxType: sql`excluded.tax_type`,
-                    recurring: sql`excluded.recurring`,
-                    frequency: sql`excluded.frequency`,
-                    enrichmentCompleted: sql`excluded.enrichment_completed`,
-                  },
-                })
-                .returning({
-                  id: transactions.id,
-                });
+              // Upsert transactions with conflict handling on internalId
+              const upserted = await upsertTransactions(db, {
+                transactions: transformedBatch,
+                teamId,
+              });
 
               return upserted;
             },

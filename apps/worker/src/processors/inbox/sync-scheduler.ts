@@ -37,8 +37,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
       throw new Error("inboxAccountId is required");
     }
 
-    await this.updateProgress(job, 5);
-
     // Get the account info to access provider and teamId
     const accountRow = await getInboxAccountInfo(db, { id: inboxAccountId });
 
@@ -54,8 +52,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
       provider: accountRow.provider,
       lastAccessed: accountRow.lastAccessed,
     });
-
-    await this.updateProgress(job, 10);
 
     try {
       const maxResults = 50;
@@ -73,8 +69,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         totalFound: attachments.length,
         provider: accountRow.provider,
       });
-
-      await this.updateProgress(job, 20);
 
       // Filter out attachments that are already processed
       const referenceIds = attachments.map(
@@ -194,8 +188,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         },
       });
 
-      await this.updateProgress(job, 40);
-
       const uploadedAttachments = await processBatch(
         filteredAttachments,
         BATCH_SIZE,
@@ -233,8 +225,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         },
       );
 
-      await this.updateProgress(job, 60);
-
       this.logger.info("Attachment processing summary", {
         accountId: inboxAccountId,
         totalFetched: attachments.length,
@@ -254,8 +244,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
             triggerJob("process-attachment", attachment, "inbox"),
           ),
         );
-
-        await this.updateProgress(job, 80);
 
         // Send notification for new inbox items
         try {
@@ -294,8 +282,6 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         status: "connected",
         errorMessage: null,
       });
-
-      await this.updateProgress(job, 100);
 
       this.logger.info("Inbox sync completed", {
         accountId: inboxAccountId,

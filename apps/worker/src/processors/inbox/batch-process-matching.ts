@@ -28,12 +28,6 @@ export class BatchProcessMatchingProcessor extends BaseProcessor<BatchProcessMat
       inboxCount: inboxIds.length,
     });
 
-    await this.updateProgress(
-      job,
-      this.ProgressMilestones.STARTED,
-      `Processing ${inboxIds.length} inbox items`,
-    );
-
     let autoMatchCount = 0;
     let suggestionCount = 0;
     let noMatchCount = 0;
@@ -110,14 +104,6 @@ export class BatchProcessMatchingProcessor extends BaseProcessor<BatchProcessMat
             throw error;
           }
         }),
-      );
-
-      // Update progress after each batch
-      const currentProgress = Math.round((batchIndex + 1) * progressPerBatch);
-      await this.updateProgress(
-        job,
-        currentProgress,
-        `Processed batch ${batchIndex + 1} of ${totalBatches}`,
       );
 
       // Log batch completion

@@ -2162,3 +2162,83 @@ export async function groupRelatedInboxItems(
     });
   }
 }
+
+export type UpdateInboxStatusParams = {
+  id: string;
+  status:
+    | "pending"
+    | "analyzing"
+    | "no_match"
+    | "new"
+    | "archived"
+    | "processing"
+    | "done"
+    | "suggested_match";
+};
+
+/**
+ * Simple function to update inbox status by ID
+ * Used by worker processors for status updates
+ */
+export async function updateInboxStatus(
+  db: Database,
+  params: UpdateInboxStatusParams,
+) {
+  await db
+    .update(inbox)
+    .set({ status: params.status })
+    .where(eq(inbox.id, params.id));
+}
+
+export type UpdateInboxStatusToNoMatchParams = {
+  cutoffDate: string;
+};
+
+export type UpdateInboxStatusToNoMatchResult = {
+  updatedCount: number;
+  updatedItems: Array<{
+    id: string;
+    teamId: string | null;
+    displayName: string | null;
+    createdAt: string;
+  }>;
+};
+
+/**
+ * Bulk update function for no-match scheduler
+ * Updates inbox items to "no_match" status after they have been pending for 90 days
+ */
+export async function updateInboxStatusToNoMatch(
+  db: Database,
+  params: UpdateInboxStatusToNoMatchParams,
+): Promise<UpdateInboxStatusToNoMatchResult> {
+  const result = await db
+    .update(inbox)
+    .set({
+      status: "no_match",
+    })
+    .where(
+      and(
+        eq(inbox.status, "pending"),
+        lt(inbox.createdAt, params.cutoffDate),
+        // Make sure they're not already matched
+        sql`${inbox.transactionId} IS NULL`,
+      ),
+    )
+    .returning({
+      id: inbox.id,
+      teamId: inbox.teamId,
+      displayName: inbox.displayName,
+      createdAt: inbox.createdAt,
+    });
+
+  return {
+    updatedCount: result.length,
+    updatedItems: result.map((item) => ({
+      id: item.id,
+      teamId: item.teamId,
+      displayName: item.displayName,
+      createdAt: item.createdAt,
+    })),
+  };
+}

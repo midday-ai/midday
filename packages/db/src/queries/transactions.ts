@@ -1689,3 +1689,217 @@ export async function createTransactions(
   // Filter out any null results
   return fullTransactions.filter((transaction) => transaction !== null);
 }
+
+export type UpsertTransactionData = {
+  name: string;
+  date: string;
+  method: "other" | "card_purchase" | "transfer";
+  amount: number;
+  currency: string;
+  teamId: string;
+  bankAccountId: string | null;
+  internalId: string;
+  status: "pending" | "completed" | "archived" | "posted" | "excluded";
+  manual: boolean;
+  categorySlug?: string | null;
+  description?: string | null;
+  balance?: number | null;
+  note?: string | null;
+  counterpartyName?: string | null;
+  merchantName?: string | null;
+  assignedId?: string | null;
+  internal?: boolean;
+  notified?: boolean;
+  baseAmount?: number | null;
+  baseCurrency?: string | null;
+  taxAmount?: number | null;
+  taxRate?: number | null;
+  taxType?: string | null;
+  recurring?: boolean;
+  frequency?:
+    | "weekly"
+    | "biweekly"
+    | "monthly"
+    | "semi_monthly"
+    | "annually"
+    | "irregular"
+    | "unknown"
+    | null;
+  enrichmentCompleted?: boolean;
+};
+
+export type UpsertTransactionsParams = {
+  transactions: UpsertTransactionData[];
+  teamId: string;
+};
+
+/**
+ * Bulk upsert transactions with conflict handling on internalId
+ * Used by import-transactions and update-account-base-currency processors
+ */
+export async function upsertTransactions(
+  db: Database,
+  params: UpsertTransactionsParams,
+): Promise<Array<{ id: string }>> {
+  const { transactions: transactionsData, teamId } = params;
+
+  const upserted = await db
+    .insert(transactions)
+    .values(transactionsData)
+    .onConflictDoUpdate({
+      target: [transactions.internalId],
+      set: {
+        // Update all fields except id and createdAt
+        name: sql`excluded.name`,
+        amount: sql`excluded.amount`,
+        currency: sql`excluded.currency`,
+        date: sql`excluded.date`,
+        description: sql`excluded.description`,
+        method: sql`excluded.method`,
+        status: sql`excluded.status`,
+        balance: sql`excluded.balance`,
+        note: sql`excluded.note`,
+        categorySlug: sql`excluded.category_slug`,
+        counterpartyName: sql`excluded.counterparty_name`,
+        merchantName: sql`excluded.merchant_name`,
+        bankAccountId: sql`excluded.bank_account_id`,
+        assignedId: sql`excluded.assigned_id`,
+        internal: sql`excluded.internal`,
+        notified: sql`excluded.notified`,
+        manual: sql`excluded.manual`,
+        baseAmount: sql`excluded.base_amount`,
+        baseCurrency: sql`excluded.base_currency`,
+        taxAmount: sql`excluded.tax_amount`,
+        taxRate: sql`excluded.tax_rate`,
+        taxType: sql`excluded.tax_type`,
+        recurring: sql`excluded.recurring`,
+        frequency: sql`excluded.frequency`,
+        enrichmentCompleted: sql`excluded.enrichment_completed`,
+      },
+    })
+    .returning({
+      id: transactions.id,
+    });
+
+  return upserted;
+}
+
+export type GetTransactionsByAccountIdParams = {
+  accountId: string;
+  teamId: string;
+};
+
+/**
+ * Get all transactions for a specific account
+ * Used by update-account-base-currency processor
+ */
+export async function getTransactionsByAccountId(
+  db: Database,
+  params: GetTransactionsByAccountIdParams,
+) {
+  const { accountId, teamId } = params;
+
+  return db
+    .select()
+    .from(transactions)
+    .where(
+      and(
+        eq(transactions.bankAccountId, accountId),
+        eq(transactions.teamId, teamId),
+      ),
+    );
+}
+
+export type BulkUpdateTransactionsBaseCurrencyParams = {
+  transactions: Array<{
+    id: string;
+    baseAmount: number;
+    baseCurrency: string;
+  }>;
+  teamId: string;
+};
+
+/**
+ * Bulk update transactions with base currency/amount
+ * Uses batch processing internally for large datasets
+ */
+export async function bulkUpdateTransactionsBaseCurrency(
+  db: Database,
+  params: BulkUpdateTransactionsBaseCurrencyParams,
+) {
+  const { transactions: transactionsData, teamId } = params;
+  const BATCH_LIMIT = 500;
+
+  // Process in batches
+  for (let i = 0; i < transactionsData.length; i += BATCH_LIMIT) {
+    const batch = transactionsData.slice(i, i + BATCH_LIMIT);
+
+    // Get existing transactions to preserve all fields
+    const transactionIds = batch.map((tx) => tx.id);
+    const existingTransactions = await db
+      .select()
+      .from(transactions)
+      .where(
+        and(
+          inArray(transactions.id, transactionIds),
+          eq(transactions.teamId, teamId),
+        ),
+      );
+
+    // Create upsert data preserving all existing fields, updating only baseAmount and baseCurrency
+    const upsertData: UpsertTransactionData[] = existingTransactions.map(
+      (tx) => {
+        const update = batch.find((b) => b.id === tx.id);
+        return {
+          name: tx.name,
+          date: tx.date,
+          method: tx.method as "other" | "card_purchase" | "transfer",
+          amount: Number(tx.amount),
+          currency: tx.currency ?? "",
+          teamId: tx.teamId,
+          bankAccountId: tx.bankAccountId ?? null,
+          internalId: tx.internalId ?? "",
+          status: (tx.status ?? "posted") as
+            | "pending"
+            | "completed"
+            | "archived"
+            | "posted"
+            | "excluded",
+          manual: tx.manual ?? false,
+          categorySlug: tx.categorySlug,
+          description: tx.description,
+          balance: tx.balance ? Number(tx.balance) : null,
+          note: tx.note,
+          counterpartyName: tx.counterpartyName,
+          merchantName: tx.merchantName,
+          assignedId: tx.assignedId,
+          internal: tx.internal ?? false,
+          notified: tx.notified ?? false,
+          baseAmount:
+            update?.baseAmount ??
+            (tx.baseAmount ? Number(tx.baseAmount) : null),
+          baseCurrency: update?.baseCurrency ?? tx.baseCurrency ?? null,
+          taxAmount: tx.taxAmount ? Number(tx.taxAmount) : null,
+          taxRate: tx.taxRate ? Number(tx.taxRate) : null,
+          taxType: tx.taxType,
+          recurring: tx.recurring ?? false,
+          frequency: tx.frequency as
+            | "weekly"
+            | "biweekly"
+            | "monthly"
+            | "semi_monthly"
+            | "annually"
+            | "irregular"
+            | "unknown"
+            | null,
+          enrichmentCompleted: tx.enrichmentCompleted ?? false,
+        };
+      },
+    );
+
+    await upsertTransactions(db, {
+      transactions: upsertData,
+      teamId,
+    });
+  }
+}

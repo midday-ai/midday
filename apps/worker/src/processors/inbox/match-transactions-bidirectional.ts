@@ -29,8 +29,6 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
       newTransactionCount: newTransactionIds.length,
     });
 
-    await this.updateProgress(job, 0);
-
     // PHASE 1: Forward matching - Find inbox items for new transactions
     const forwardMatches = new Map<string, string>(); // transactionId -> inboxId
     let forwardMatchCount = 0;
@@ -41,11 +39,6 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
     for (let i = 0; i < newTransactionIds.length; i++) {
       const transactionId = newTransactionIds[i];
       if (!transactionId) continue;
-
-      const progress = Math.round(
-        (i / newTransactionIds.length) * phase1Progress,
-      );
-      await this.updateProgress(job, progress);
 
       try {
         const inboxMatch = await findInboxMatches(db, {
@@ -128,8 +121,6 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
       }
     }
 
-    await this.updateProgress(job, phase1Progress);
-
     // PHASE 2: Reverse matching - Find transactions for pending inbox items
     // Only process inbox items that weren't already matched in Phase 1
     const pendingInboxItems = await getPendingInboxForMatching(db, {
@@ -163,10 +154,6 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
       const batch = unmatchedInboxItems.slice(i, i + BATCH_SIZE);
       const batchIndex = Math.floor(i / BATCH_SIZE);
       const totalBatches = Math.ceil(unmatchedInboxItems.length / BATCH_SIZE);
-      const progress =
-        phase2StartProgress +
-        Math.round(((batchIndex + 1) / totalBatches) * phase2ProgressRange);
-      await this.updateProgress(job, progress);
 
       await Promise.allSettled(
         batch.map(async (inboxItem) => {
@@ -223,8 +210,6 @@ export class MatchTransactionsBidirectionalProcessor extends BaseProcessor<Match
         }),
       );
     }
-
-    await this.updateProgress(job, 100);
 
     // Final summary
     const totalProcessed =

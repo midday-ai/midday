@@ -2,10 +2,9 @@ import {
   checkInboxEmbeddingExists,
   createInboxEmbedding,
   getInboxForEmbedding,
+  updateInboxStatus,
 } from "@midday/db/queries";
-import { inbox } from "@midday/db/schema";
 import type { Job } from "bullmq";
-import { eq } from "drizzle-orm";
 import { type EmbedInboxPayload, embedInboxSchema } from "../../schemas/inbox";
 import { getDb } from "../../utils/db";
 import { generateEmbedding } from "../../utils/embeddings";
@@ -32,10 +31,7 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
       );
       // If embedding already exists, ensure status is not stuck in "analyzing"
       // Set to pending so batch-process-matching can process it
-      await db
-        .update(inbox)
-        .set({ status: "pending" })
-        .where(eq(inbox.id, inboxId));
+      await updateInboxStatus(db, { id: inboxId, status: "pending" });
       return false;
     }
 
@@ -53,56 +49,23 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
       teamId,
     });
 
-    await this.updateProgress(
-      job,
-      this.ProgressMilestones.STARTED,
-      "Starting embedding",
-    );
-
     // Set status to analyzing when we start processing
-    await db
-      .update(inbox)
-      .set({ status: "analyzing" })
-      .where(eq(inbox.id, inboxId));
-
-    await this.updateProgress(
-      job,
-      this.ProgressMilestones.VALIDATED,
-      "Status updated",
-    );
-
-    await this.updateProgress(
-      job,
-      this.ProgressMilestones.FETCHED,
-      "Fetching inbox data",
-    );
+    await updateInboxStatus(db, { id: inboxId, status: "analyzing" });
 
     // Get inbox data
     const inboxData = await getInboxForEmbedding(db, { inboxId });
 
     if (inboxData.length === 0) {
       // Set back to pending if we can't process
-      await db
-        .update(inbox)
-        .set({ status: "pending" })
-        .where(eq(inbox.id, inboxId));
+      await updateInboxStatus(db, { id: inboxId, status: "pending" });
       throw new Error(`Inbox not found: ${inboxId}`);
     }
 
     const inboxItem = inboxData[0];
     if (!inboxItem) {
-      await db
-        .update(inbox)
-        .set({ status: "pending" })
-        .where(eq(inbox.id, inboxId));
+      await updateInboxStatus(db, { id: inboxId, status: "pending" });
       throw new Error(`Inbox item not found: ${inboxId}`);
     }
-
-    await this.updateProgress(
-      job,
-      this.ProgressMilestones.PROCESSING,
-      "Preparing text",
-    );
 
     // Edge case: Handle empty or null data
     if (!inboxItem.displayName && !inboxItem.website) {
@@ -115,10 +78,7 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
       );
 
       // Set back to pending if no data to process
-      await db
-        .update(inbox)
-        .set({ status: "pending" })
-        .where(eq(inbox.id, inboxId));
+      await updateInboxStatus(db, { id: inboxId, status: "pending" });
       return;
     }
 
@@ -137,20 +97,11 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
       });
 
       // Set back to pending if no text to process
-      await db
-        .update(inbox)
-        .set({ status: "pending" })
-        .where(eq(inbox.id, inboxId));
+      await updateInboxStatus(db, { id: inboxId, status: "pending" });
       return;
     }
 
     try {
-      await this.updateProgress(
-        job,
-        this.ProgressMilestones.HALFWAY,
-        "Generating embedding",
-      );
-
       const embeddingStartTime = Date.now();
       this.logger.info("🧮 Generating embedding for inbox item", {
         jobId: job.id,
@@ -176,12 +127,6 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
         duration: `${embeddingDuration}ms`,
       });
 
-      await this.updateProgress(
-        job,
-        this.ProgressMilestones.NEARLY_DONE,
-        "Saving embedding",
-      );
-
       const saveStartTime = Date.now();
       await createInboxEmbedding(db, {
         inboxId,
@@ -194,12 +139,6 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
       const saveDuration = Date.now() - saveStartTime;
       const totalDuration = Date.now() - processStartTime;
 
-      await this.updateProgress(
-        job,
-        this.ProgressMilestones.COMPLETED,
-        "Embedding saved",
-      );
-
       this.logger.info("🎉 Inbox embedding created successfully", {
         jobId: job.id,
         inboxId,
@@ -211,10 +150,7 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
 
       // After embedding is created, set status to pending so batch-process-matching can process it
       // Don't leave it as "analyzing" - let the matching job handle status updates
-      await db
-        .update(inbox)
-        .set({ status: "pending" })
-        .where(eq(inbox.id, inboxId));
+      await updateInboxStatus(db, { id: inboxId, status: "pending" });
     } catch (error) {
       this.logger.error("Failed to create inbox embedding", {
         inboxId,
@@ -223,10 +159,7 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
       });
 
       // Set back to pending on error
-      await db
-        .update(inbox)
-        .set({ status: "pending" })
-        .where(eq(inbox.id, inboxId));
+      await updateInboxStatus(db, { id: inboxId, status: "pending" });
 
       throw error;
     }

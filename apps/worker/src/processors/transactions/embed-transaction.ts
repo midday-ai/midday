@@ -29,8 +29,6 @@ export class EmbedTransactionProcessor extends BaseProcessor<EmbedTransactionPay
       transactionCount: transactionIds.length,
     });
 
-    await this.updateProgress(job, 10);
-
     // Step 1: Attempt to enrich transactions first (non-blocking)
     try {
       this.logger.info("Triggering transaction enrichment", {
@@ -61,8 +59,6 @@ export class EmbedTransactionProcessor extends BaseProcessor<EmbedTransactionPay
       );
     }
 
-    await this.updateProgress(job, 30);
-
     // Step 2: Get transactions that need embedding
     const transactionsToEmbed = await getTransactionsForEmbedding(db, {
       transactionIds,
@@ -82,8 +78,6 @@ export class EmbedTransactionProcessor extends BaseProcessor<EmbedTransactionPay
       transactionCount: transactionsToEmbed.length,
       requestedCount: transactionIds.length,
     });
-
-    await this.updateProgress(job, 50);
 
     // Process in batches using utility
     await processBatch(transactionsToEmbed, BATCH_SIZE, async (batch) => {
@@ -141,8 +135,6 @@ export class EmbedTransactionProcessor extends BaseProcessor<EmbedTransactionPay
 
       return result;
     });
-
-    await this.updateProgress(job, 100);
 
     this.logger.info("All transaction embeddings created", {
       totalCount: transactionsToEmbed.length,

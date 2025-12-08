@@ -21,8 +21,6 @@ export class EmbedDocumentTagsProcessor extends BaseProcessor<EmbedDocumentTagsP
     const { documentId, tags, teamId } = job.data;
     const db = getDb();
 
-    await this.updateProgress(job, 5);
-
     this.logger.info("Embedding document tags", {
       documentId,
       tagsCount: tags.length,
@@ -31,8 +29,6 @@ export class EmbedDocumentTagsProcessor extends BaseProcessor<EmbedDocumentTagsP
 
     const embed = new Embed();
 
-    await this.updateProgress(job, 10);
-
     // 1. Generate slugs for all incoming tags
     const tagsWithSlugs = tags.map((tag) => ({
       name: tag,
@@ -40,8 +36,6 @@ export class EmbedDocumentTagsProcessor extends BaseProcessor<EmbedDocumentTagsP
     }));
 
     const slugs = tagsWithSlugs.map((t) => t.slug);
-
-    await this.updateProgress(job, 20);
 
     // 2. Check existing embeddings in document_tag_embeddings
     const existingEmbeddingsData = await getDocumentTagEmbeddings(db, {
@@ -52,15 +46,11 @@ export class EmbedDocumentTagsProcessor extends BaseProcessor<EmbedDocumentTagsP
       existingEmbeddingsData.map((e: { slug: string }) => e.slug),
     );
 
-    await this.updateProgress(job, 30);
-
     // 3. Identify tags needing new embeddings
     const tagsToEmbed = tagsWithSlugs.filter(
       (tag) => !existingEmbeddingSlugs.has(tag.slug),
     );
     const newTagNames = tagsToEmbed.map((t) => t.name);
-
-    await this.updateProgress(job, 40);
 
     // 4. Generate and insert new embeddings if any
     if (newTagNames.length > 0) {
@@ -100,8 +90,6 @@ export class EmbedDocumentTagsProcessor extends BaseProcessor<EmbedDocumentTagsP
       });
     }
 
-    await this.updateProgress(job, 60);
-
     // 5. Upsert all tags into document_tags for the team
     const tagsToUpsert = tagsWithSlugs.map((tag) => ({
       name: tag.name,
@@ -118,8 +106,6 @@ export class EmbedDocumentTagsProcessor extends BaseProcessor<EmbedDocumentTagsP
       throw new Error("Failed to get IDs from upserted document tags.");
     }
 
-    await this.updateProgress(job, 80);
-
     const allTagIds = upsertedTagsData.map(
       (t: { id: string; slug: string }) => t.id,
     );
@@ -133,8 +119,6 @@ export class EmbedDocumentTagsProcessor extends BaseProcessor<EmbedDocumentTagsP
       }));
 
       await upsertDocumentTagAssignments(db, assignmentsToInsert);
-
-      await this.updateProgress(job, 90);
 
       // Update the document processing status to completed
       await updateDocumentProcessingStatus(db, {
@@ -154,7 +138,5 @@ export class EmbedDocumentTagsProcessor extends BaseProcessor<EmbedDocumentTagsP
         },
       );
     }
-
-    await this.updateProgress(job, 100);
   }
 }

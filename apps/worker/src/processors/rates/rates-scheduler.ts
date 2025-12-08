@@ -24,8 +24,6 @@ export class RatesSchedulerProcessor extends BaseProcessor<RatesSchedulerPayload
 
     const db = getDb();
 
-    await this.updateProgress(job, 10);
-
     this.logger.info("Starting rates scheduler");
 
     // Fetch rates from engine API
@@ -39,8 +37,6 @@ export class RatesSchedulerProcessor extends BaseProcessor<RatesSchedulerPayload
       throw new Error("Failed to get rates from engine API");
     }
 
-    await this.updateProgress(job, 30);
-
     const { data: ratesData } = await ratesResponse.json();
 
     // Transform rates data to match database schema
@@ -53,8 +49,6 @@ export class RatesSchedulerProcessor extends BaseProcessor<RatesSchedulerPayload
       }));
     });
 
-    await this.updateProgress(job, 50);
-
     this.logger.info("Upserting exchange rates", {
       totalRates: exchangeRateData.length,
     });
@@ -64,8 +58,6 @@ export class RatesSchedulerProcessor extends BaseProcessor<RatesSchedulerPayload
       rates: exchangeRateData,
       batchSize: 500, // Match original batch size
     });
-
-    await this.updateProgress(job, 100);
 
     this.logger.info("Rates scheduler completed", {
       totalProcessed: result.totalProcessed,

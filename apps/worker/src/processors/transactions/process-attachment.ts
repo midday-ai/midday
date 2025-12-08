@@ -20,8 +20,6 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
     const { transactionId, mimetype, filePath, teamId } = job.data;
     const supabase = createClient();
 
-    await this.updateProgress(job, 5);
-
     this.logger.info("Processing transaction attachment", {
       transactionId,
       filePath: filePath.join("/"),
@@ -34,8 +32,6 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
       this.logger.info("Converting HEIC to JPG", {
         filePath: filePath.join("/"),
       });
-
-      await this.updateProgress(job, 10);
 
       const { data } = await supabase.storage
         .from("vault")
@@ -73,8 +69,6 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
       }
     }
 
-    await this.updateProgress(job, 20);
-
     const filename = filePath.at(-1);
 
     const { data: signedUrlData } = await supabase.storage
@@ -84,8 +78,6 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
     if (!signedUrlData) {
       throw new Error("File not found");
     }
-
-    await this.updateProgress(job, 30);
 
     const document = new DocumentClient();
 
@@ -99,8 +91,6 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
       documentUrl: signedUrlData.signedUrl,
       mimetype,
     });
-
-    await this.updateProgress(job, 60);
 
     // Update the transaction with the tax information
     if (result.tax_rate && result.tax_type) {
@@ -129,8 +119,6 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
       });
     }
 
-    await this.updateProgress(job, 80);
-
     // NOTE: Process documents and images for classification
     // This is non-blocking, classification happens separately
     try {
@@ -155,7 +143,5 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
       });
       // Don't fail the entire process if document processing fails
     }
-
-    await this.updateProgress(job, 100);
   }
 }

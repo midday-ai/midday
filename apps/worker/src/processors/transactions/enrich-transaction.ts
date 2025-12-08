@@ -42,8 +42,6 @@ export class EnrichTransactionProcessor extends BaseProcessor<EnrichTransactions
       transactionCount: transactionIds.length,
     });
 
-    await this.updateProgress(job, 10);
-
     // Get transactions that need enrichment
     const transactionsToEnrich = await getTransactionsForEnrichment(db, {
       transactionIds,
@@ -59,8 +57,6 @@ export class EnrichTransactionProcessor extends BaseProcessor<EnrichTransactions
       teamId,
       transactionCount: transactionsToEnrich.length,
     });
-
-    await this.updateProgress(job, 20);
 
     let totalEnriched = 0;
 
@@ -258,8 +254,6 @@ export class EnrichTransactionProcessor extends BaseProcessor<EnrichTransactions
         }
       },
     );
-
-    await this.updateProgress(job, 100);
 
     this.logger.info("Transaction enrichment completed", {
       totalEnriched,
