@@ -8,10 +8,6 @@ export const jobsRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const status = await getJobStatus(input.jobId);
 
-      if (status.status === "unknown") {
-        throw new Error(`Job with ID ${input.jobId} not found`);
-      }
-
       return status;
     }),
 });

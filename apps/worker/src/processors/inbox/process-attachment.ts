@@ -262,7 +262,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
     // Create signed URL and fetch team data in parallel (they don't depend on each other)
     const preProcessingStartTime = Date.now();
     this.logger.info(
-      "⚡ Starting parallel pre-processing (signed URL + team data)",
+      "Starting parallel pre-processing (signed URL + team data)",
       {
         jobId: job.id,
         inboxId: inboxData.id,
@@ -318,7 +318,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       const document = new DocumentClient();
 
       const docProcessingStartTime = Date.now();
-      this.logger.info("📄 Starting document processing (OCR/LLM extraction)", {
+      this.logger.info("Starting document processing (OCR/LLM extraction)", {
         jobId: job.id,
         inboxId: inboxData.id,
         mimetype: processedMimetype,
@@ -379,7 +379,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       // Process documents and embedding in parallel for better performance
       const parallelJobsStartTime = Date.now();
       this.logger.info(
-        "⚡ Triggering parallel jobs (process-document + embed-inbox)",
+        "Triggering parallel jobs (process-document + embed-inbox)",
         {
           jobId: job.id,
           inboxId: inboxData.id,
@@ -409,7 +409,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           })
           .catch((error) => {
             this.logger.warn(
-              "⚠️ Failed to trigger document processing (non-critical)",
+              "Failed to trigger document processing (non-critical)",
               {
                 jobId: job.id,
                 inboxId: inboxData.id,
@@ -578,7 +578,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       }
 
       const totalDuration = Date.now() - processStartTime;
-      this.logger.info("🎉 process-attachment job completed successfully", {
+      this.logger.info("process-attachment job completed successfully", {
         jobId: job.id,
         inboxId: inboxData.id,
         teamId,

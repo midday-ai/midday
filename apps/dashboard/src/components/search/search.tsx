@@ -157,7 +157,7 @@ const handleDesktopNavigation = async (
     const mainWindow = await Window.getByLabel("main");
 
     if (!mainWindow) {
-      console.error("❌ Main window not found for navigation");
+      console.error("Main window not found for navigation");
       return false;
     }
 
@@ -182,7 +182,7 @@ const handleDesktopNavigation = async (
 
     return true;
   } catch (error) {
-    console.error("❌ Failed to handle desktop navigation:", error);
+    console.error("Failed to handle desktop navigation:", error);
     return false;
   }
 };

@@ -19,23 +19,23 @@ import {
   validateGoldenDataset,
 } from "./golden-dataset";
 
-console.log("🔍 Validating Golden Dataset...\n");
+console.log("Validating Golden Dataset...\n");
 
 // 1. Validate dataset structure
 const validation = validateGoldenDataset();
 if (!validation.valid) {
-  console.error("❌ Dataset validation failed:");
+  console.error("Dataset validation failed:");
   for (const error of validation.errors) {
     console.error(`   ${error}`);
   }
   process.exit(1);
 }
 
-console.log("✅ Dataset structure validation passed\n");
+console.log("Dataset structure validation passed\n");
 
 // 2. Show dataset statistics
 const stats = getDatasetStats();
-console.log("📊 Dataset Statistics:");
+console.log("Dataset Statistics:");
 console.log(`   Total cases: ${stats.total}`);
 console.log("   By feedback:");
 console.log(`     - Confirmed: ${stats.byFeedback.confirmed}`);
@@ -91,7 +91,7 @@ GOLDEN_DATASET.forEach((goldenCase, index) => {
     correctPredictions++;
   } else {
     console.log(
-      `   ⚠️  Mismatch in ${id}: predicted=${predictedMatch}, actual=${actualMatch}, confidence=${actualConfidence.toFixed(3)}`,
+      `   Mismatch in ${id}: predicted=${predictedMatch}, actual=${actualMatch}, confidence=${actualConfidence.toFixed(3)}`,
     );
   }
 
@@ -105,7 +105,7 @@ GOLDEN_DATASET.forEach((goldenCase, index) => {
 
   if (confidenceGap > 0.1) {
     console.log(
-      `   📊 Large confidence gap in ${id}: actual=${actualConfidence.toFixed(3)}, expected=${expectedScores.confidenceScore.toFixed(3)}, gap=${confidenceGap.toFixed(3)}`,
+      `   Large confidence gap in ${id}: actual=${actualConfidence.toFixed(3)}, expected=${expectedScores.confidenceScore.toFixed(3)}, gap=${confidenceGap.toFixed(3)}`,
     );
   }
 });
@@ -120,22 +120,22 @@ console.log(
 console.log(`   Average confidence gap: ${avgConfidenceGap.toFixed(3)}`);
 
 if (accuracy < 0.85) {
-  console.log("   ❌ Algorithm accuracy below 85% - needs improvement");
+  console.log("   Algorithm accuracy below 85% - needs improvement");
   process.exit(1);
 } else {
-  console.log("   ✅ Algorithm accuracy acceptable");
+  console.log("   Algorithm accuracy acceptable");
 }
 
 if (avgConfidenceGap > 0.05) {
-  console.log("   ⚠️  Large confidence gaps detected - review expected scores");
+  console.log("   Large confidence gaps detected - review expected scores");
 } else {
-  console.log("   ✅ Confidence scores well-calibrated");
+  console.log("   Confidence scores well-calibrated");
 }
 
 console.log();
 
 // 4. Test cross-currency logic
-console.log("💱 Testing Cross-Currency Logic:");
+console.log("Testing Cross-Currency Logic:");
 
 const crossCurrencyCases = GOLDEN_DATASET.filter(
   (item) => item.matchType === "cross_currency",
@@ -152,7 +152,7 @@ for (const goldenCase of crossCurrencyCases) {
     crossCurrencyCorrect++;
   } else {
     console.log(
-      `   ⚠️  Cross-currency mismatch in ${id}: detected=${isCrossMatch}, should=${shouldMatch}`,
+      `   Cross-currency mismatch in ${id}: detected=${isCrossMatch}, should=${shouldMatch}`,
     );
   }
 }
@@ -163,15 +163,15 @@ console.log(
 );
 
 if (crossCurrencyAccuracy < 0.9) {
-  console.log("   ❌ Cross-currency logic needs improvement");
+  console.log("   Cross-currency logic needs improvement");
 } else {
-  console.log("   ✅ Cross-currency logic working well");
+  console.log("   Cross-currency logic working well");
 }
 
 console.log();
 
 // 5. Performance test
-console.log("⚡ Performance Test:");
+console.log("Performance Test:");
 
 const start = performance.now();
 
@@ -195,27 +195,27 @@ console.log(`   Total time: ${duration.toFixed(2)}ms`);
 console.log(`   Average per case: ${avgDuration.toFixed(3)}ms`);
 
 if (avgDuration > 1) {
-  console.log("   ⚠️  Performance slower than expected");
+  console.log("   Performance slower than expected");
 } else {
-  console.log("   ✅ Performance within acceptable limits");
+  console.log("   Performance within acceptable limits");
 }
 
 console.log();
 
 // 6. Summary and recommendations
-console.log("📋 Summary:");
+console.log("Summary:");
 if (validation.valid && accuracy >= 0.85 && avgConfidenceGap <= 0.05) {
-  console.log("✅ Golden dataset is healthy and algorithm performance is good");
+  console.log("Golden dataset is healthy and algorithm performance is good");
   console.log("   Ready for production use and algorithm changes");
 } else {
-  console.log("⚠️  Issues detected - address before making algorithm changes:");
+  console.log("Issues detected - address before making algorithm changes:");
   if (!validation.valid) console.log("   - Fix dataset validation errors");
   if (accuracy < 0.85) console.log("   - Improve algorithm accuracy");
   if (avgConfidenceGap > 0.05)
     console.log("   - Calibrate expected confidence scores");
 }
 
-console.log("\n🎯 Next steps:");
+console.log("\nNext steps:");
 console.log("   1. Run tests: bun run test:all-matching");
 console.log("   2. Monitor performance: bun run test:performance");
 console.log("   3. Update golden dataset as you get more real user feedback");

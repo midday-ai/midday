@@ -139,7 +139,7 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
       const saveDuration = Date.now() - saveStartTime;
       const totalDuration = Date.now() - processStartTime;
 
-      this.logger.info("🎉 Inbox embedding created successfully", {
+      this.logger.info("Inbox embedding created successfully", {
         jobId: job.id,
         inboxId,
         teamId,

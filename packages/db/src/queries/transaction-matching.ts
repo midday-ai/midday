@@ -493,7 +493,7 @@ export async function findMatches(
 
   // Log the matched inbox item details
   logger.info(
-    `📋 INBOX: ${inboxItem.displayName} | ${inboxItem.amount} ${inboxItem.currency} | ${inboxItem.date} | ${inboxItem.type} | embedding: ${!!inboxItem.embedding}`,
+    `INBOX: ${inboxItem.displayName} | ${inboxItem.amount} ${inboxItem.currency} | ${inboxItem.date} | ${inboxItem.type} | embedding: ${!!inboxItem.embedding}`,
     { teamId, inboxId },
   );
 
@@ -1020,7 +1020,7 @@ export async function findMatches(
   }
 
   logger.info(
-    `📊 CANDIDATE ANALYSIS: Found ${candidateTransactions.length} total candidates before sorting`,
+    `CANDIDATE ANALYSIS: Found ${candidateTransactions.length} total candidates before sorting`,
     {
       inboxId,
       teamId,
@@ -1145,7 +1145,7 @@ export async function findMatches(
       // Debug amount scoring for first candidate
       if (candidate === candidateTransactions[0]) {
         console.log(
-          `💰 AMOUNT DEBUG: inbox=${inboxItem.amount} ${inboxItem.currency}, candidate=${candidate.amount} ${candidate.currency}, score=${amountScore}`,
+          `AMOUNT DEBUG: inbox=${inboxItem.amount} ${inboxItem.currency}, candidate=${candidate.amount} ${candidate.currency}, score=${amountScore}`,
         );
       }
       const currencyScore = calculateCurrencyScore(
@@ -1156,7 +1156,7 @@ export async function findMatches(
       // Debug currency scoring for first candidate
       if (candidate === candidateTransactions[0]) {
         console.log(
-          `💱 CURRENCY DEBUG: inbox="${inboxItem.currency}", candidate="${candidate.currency}", score=${currencyScore}`,
+          `CURRENCY DEBUG: inbox="${inboxItem.currency}", candidate="${candidate.currency}", score=${currencyScore}`,
         );
       }
       const dateScore = calculateDateScore(
@@ -1382,7 +1382,7 @@ export async function findMatches(
       // Debug the first candidate
       if (candidate === candidateTransactions[0]) {
         console.log(
-          `🔍 FIRST CANDIDATE: score=${confidenceScore}, debugThreshold=${debugThreshold}, meets=${confidenceScore >= debugThreshold}`,
+          `FIRST CANDIDATE: score=${confidenceScore}, debugThreshold=${debugThreshold}, meets=${confidenceScore >= debugThreshold}`,
         );
       }
 

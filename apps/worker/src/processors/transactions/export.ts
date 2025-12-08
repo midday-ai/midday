@@ -135,7 +135,7 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
         delimiter: settings.csvDelimiter,
       });
       files.push({
-        name: "data/transactions.csv",
+        name: "transactions.csv",
         data: Buffer.from(csv, "utf-8"),
       });
     }
@@ -148,7 +148,7 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
       ];
       const buffer = xlsx.build([{ name: "Transactions", data, options: {} }]);
       files.push({
-        name: "data/transactions.xlsx",
+        name: "transactions.xlsx",
         data: Buffer.from(buffer),
       });
     }

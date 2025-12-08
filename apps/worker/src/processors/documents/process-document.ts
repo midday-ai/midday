@@ -291,7 +291,7 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         });
       } catch (error) {
         this.logger.error(
-          "❌ Failed to load document - file may be corrupted or unsupported",
+          "Failed to load document - file may be corrupted or unsupported",
           {
             jobId: job.id,
             fileName,
@@ -381,7 +381,7 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
       }
 
       const totalDuration = Date.now() - processStartTime;
-      this.logger.info("🎉 process-document job completed successfully", {
+      this.logger.info("process-document job completed successfully", {
         jobId: job.id,
         fileName,
         teamId,
