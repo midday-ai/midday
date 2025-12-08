@@ -17,7 +17,7 @@ export default defineConfig({
     },
   },
   build: {
-    external: ["sharp", "canvas", "pino"],
+    external: ["sharp", "canvas", "pino", "pino-pretty"],
   },
   dirs: ["./src/tasks"],
 });
