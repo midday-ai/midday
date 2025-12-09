@@ -31,6 +31,7 @@
         "@midday/engine": "workspace:*",
         "@midday/engine-client": "workspace:*",
         "@midday/events": "workspace:*",
+        "@midday/import": "workspace:*",
         "@midday/inbox": "workspace:*",
         "@midday/invoice": "workspace:*",
         "@midday/job-client": "workspace:*",

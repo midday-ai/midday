@@ -34,6 +34,7 @@
     "@midday/events": "workspace:*",
     "@midday/inbox": "workspace:*",
     "@midday/invoice": "workspace:*",
+    "@midday/import": "workspace:*",
     "@midday/job-client": "workspace:*",
     "@midday/jobs": "workspace:*",
     "@midday/location": "workspace:*",
