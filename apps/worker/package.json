@@ -13,7 +13,7 @@
     "@bull-board/api": "^6.15.0",
     "@bull-board/hono": "^6.15.0",
     "@fast-csv/format": "5.0.5",
-    "@hono/node-server": "^1.19.6",
+    "@hono/node-server": "^1.19.7",
     "@midday/db": "workspace:*",
     "@midday/documents": "workspace:*",
     "@midday/email": "workspace:*",
