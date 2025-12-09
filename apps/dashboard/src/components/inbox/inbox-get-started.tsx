@@ -3,6 +3,7 @@
 import { revalidateInbox } from "@/actions/revalidate-action";
 import { ConnectGmail } from "@/components/inbox/connect-gmail";
 import { useInboxParams } from "@/hooks/use-inbox-params";
+import { useRealtime } from "@/hooks/use-realtime";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { getInboxEmail } from "@midday/inbox";
@@ -13,6 +14,7 @@ import {
   AccordionTrigger,
 } from "@midday/ui/accordion";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { CopyInput } from "../copy-input";
 import { UploadZone } from "./inbox-upload-zone";
 
@@ -21,6 +23,7 @@ export function InboxGetStarted() {
   const { setParams } = useInboxParams();
   const queryClient = useQueryClient();
   const trpc = useTRPC();
+  const router = useRouter();
 
   const handleUpload = async (inboxId?: string) => {
     // Invalidate client-side queries
@@ -36,6 +39,36 @@ export function InboxGetStarted() {
       setParams({ inboxId });
     }
   };
+
+  // Listen for new inbox items via realtime subscription
+  // When a webhook creates an inbox item, detect it and refresh the page
+  useRealtime({
+    channelName: "realtime_inbox_get_started",
+    event: "INSERT",
+    table: "inbox",
+    filter: user?.teamId ? `team_id=eq.${user.teamId}` : undefined,
+    onEvent: async (payload) => {
+      if (payload.eventType === "INSERT") {
+        // Invalidate client-side queries
+        await queryClient.invalidateQueries({
+          queryKey: trpc.inbox.get.infiniteQueryKey(),
+        });
+
+        // Revalidate server-side cache
+        await revalidateInbox();
+
+        // Refresh the router to trigger server component re-render
+        // This will cause the page to check data again and switch to InboxView
+        router.refresh();
+
+        // If the new item has an ID, navigate to it
+        const newItem = payload.new as { id?: string };
+        if (newItem?.id) {
+          setParams({ inboxId: newItem.id });
+        }
+      }
+    },
+  });
 
   return (
     <UploadZone onUploadComplete={handleUpload}>
