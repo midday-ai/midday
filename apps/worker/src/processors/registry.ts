@@ -1,4 +1,5 @@
 import type { Job } from "bullmq";
+import { isDevelopment } from "../utils/env";
 import { documentProcessors } from "./documents";
 import { inboxProcessors } from "./inbox";
 import { notificationProcessors } from "./notifications";
@@ -40,7 +41,7 @@ for (const [jobName, processor] of Object.entries(ratesProcessors)) {
 }
 
 // Debug: Log all registered processors
-if (process.env.NODE_ENV !== "production") {
+if (isDevelopment()) {
   console.log("Registered processors:", Array.from(processors.keys()));
 }
 

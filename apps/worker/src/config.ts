@@ -1,4 +1,5 @@
 import Redis from "ioredis";
+import { isProduction } from "./utils/env";
 
 let redisConnection: Redis | null = null;
 let keepAliveInterval: ReturnType<typeof setInterval> | null = null;
@@ -28,8 +29,7 @@ export function getRedisConnection(): Redis {
     throw new Error("REDIS_QUEUE_URL environment variable is required");
   }
 
-  const isProduction =
-    process.env.NODE_ENV === "production" || process.env.FLY_APP_NAME;
+  const production = isProduction();
 
   redisConnection = new Redis(redisUrl, {
     maxRetriesPerRequest: null, // Required for BullMQ
@@ -37,9 +37,9 @@ export function getRedisConnection(): Redis {
     // Connect eagerly for workers - fail fast if Redis is unavailable
     // Workers need Redis immediately to process jobs
     lazyConnect: false,
-    family: isProduction ? 6 : 4, // IPv6 for Fly.io production, IPv4 for local
+    family: production ? 6 : 4, // IPv6 for Fly.io production, IPv4 for local
     keepAlive: 30000, // Keep connection alive with 30s keepAlive to prevent idle timeouts
-    ...(isProduction && {
+    ...(production && {
       // Production settings for Upstash/Fly.io
       connectTimeout: 15000, // Longer timeout for Upstash
       retryStrategy: (times) => {
@@ -124,16 +124,15 @@ export function getFlowRedisConnection(): Redis {
     throw new Error("REDIS_QUEUE_URL environment variable is required");
   }
 
-  const isProduction =
-    process.env.NODE_ENV === "production" || process.env.FLY_APP_NAME;
+  const production = isProduction();
 
   const connection = new Redis(redisUrl, {
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
     lazyConnect: true,
-    family: isProduction ? 6 : 4, // IPv6 for Fly.io production, IPv4 for local
+    family: production ? 6 : 4, // IPv6 for Fly.io production, IPv4 for local
     keepAlive: 30000, // Keep connection alive with 30s keepAlive to prevent idle timeouts
-    ...(isProduction && {
+    ...(production && {
       connectTimeout: 15000, // Longer timeout for Upstash
       retryStrategy: (times) => {
         // Always return a number to ensure infinite retries

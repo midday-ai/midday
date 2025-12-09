@@ -3,6 +3,7 @@ import { client } from "@midday/engine-client";
 import type { Job } from "bullmq";
 import type { RatesSchedulerPayload } from "../../schemas/rates";
 import { getDb } from "../../utils/db";
+import { isProduction } from "../../utils/env";
 import { BaseProcessor } from "../base";
 
 /**
@@ -15,7 +16,7 @@ export class RatesSchedulerProcessor extends BaseProcessor<RatesSchedulerPayload
     batchesProcessed: number;
   }> {
     // Only run in production
-    if (process.env.NODE_ENV !== "production" && !process.env.FLY_APP_NAME) {
+    if (!isProduction()) {
       this.logger.info(
         "Skipping rates scheduler in non-production environment",
       );

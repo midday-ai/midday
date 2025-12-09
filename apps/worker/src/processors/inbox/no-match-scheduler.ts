@@ -3,6 +3,7 @@ import type { Job } from "bullmq";
 import { subDays } from "date-fns";
 import type { NoMatchSchedulerPayload } from "../../schemas/inbox";
 import { getDb } from "../../utils/db";
+import { isProduction } from "../../utils/env";
 import { BaseProcessor } from "../base";
 
 /**
@@ -18,7 +19,7 @@ export class NoMatchSchedulerProcessor extends BaseProcessor<NoMatchSchedulerPay
     cutoffDate: string;
   }> {
     // Only run in production
-    if (process.env.NODE_ENV !== "production" && !process.env.FLY_APP_NAME) {
+    if (!isProduction()) {
       this.logger.info(
         "Skipping no-match scheduler in non-production environment",
       );
