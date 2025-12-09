@@ -263,7 +263,7 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
       let document: string;
       try {
         const parseStartTime = Date.now();
-        this.logger.info("📖 Parsing document content (extracting text)", {
+        this.logger.info("Parsing document content (extracting text)", {
           jobId: job.id,
           fileName,
           teamId,
@@ -327,7 +327,7 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
       }
 
       const classificationStartTime = Date.now();
-      this.logger.info("🤖 Triggering document classification", {
+      this.logger.info("Triggering document classification", {
         jobId: job.id,
         fileName,
         teamId,

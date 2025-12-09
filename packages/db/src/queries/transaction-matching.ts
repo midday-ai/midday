@@ -1602,7 +1602,7 @@ export async function findMatches(
     );
 
     if (wasDismissed) {
-      logger.info("🚫 MATCH SKIPPED - Previously dismissed", {
+      logger.info("MATCH SKIPPED - Previously dismissed", {
         teamId,
         inboxId,
         transactionId: bestMatch.transactionId,
@@ -2105,7 +2105,7 @@ export async function findInboxMatches(
     );
 
     if (wasDismissed) {
-      logger.info("🚫 REVERSE MATCH SKIPPED - Previously dismissed", {
+      logger.info("REVERSE MATCH SKIPPED - Previously dismissed", {
         teamId,
         transactionId,
         inboxId: bestMatch.inboxId,
