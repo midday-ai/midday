@@ -1,6 +1,5 @@
 "use client";
 
-import { importTransactionsAction } from "@/actions/transactions/import-transactions";
 import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
 import { useJobStatus } from "@/hooks/use-job-status";
 import { useTeamQuery } from "@/hooks/use-team";
@@ -21,8 +20,7 @@ import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useToast } from "@midday/ui/use-toast";
 import { stripSpecialCharacters } from "@midday/utils";
-import { useQueryClient } from "@tanstack/react-query";
-import { useAction } from "next-safe-action/hooks";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { ImportCsvContext, importSchema } from "./context";
@@ -62,36 +60,38 @@ export function ImportModal() {
 
   const isOpen = params.step === "import";
 
-  const { status, progress } = useJobStatus({
+  const { status } = useJobStatus({
     jobId,
     enabled: !!jobId && isOpen,
   });
 
-  const importTransactions = useAction(importTransactionsAction, {
-    onSuccess: ({ data }) => {
-      if (data?.id) {
-        setJobId(data.id);
-      } else {
-        // If no data returned, something went wrong
+  const importTransactions = useMutation(
+    trpc.transactions.import.mutationOptions({
+      onSuccess: (data) => {
+        if (data?.id) {
+          setJobId(data.id);
+        } else {
+          // If no data returned, something went wrong
+          setIsImporting(false);
+          toast({
+            duration: 3500,
+            variant: "error",
+            title: "Something went wrong please try again.",
+          });
+        }
+      },
+      onError: () => {
         setIsImporting(false);
+        setJobId(undefined);
+
         toast({
           duration: 3500,
           variant: "error",
           title: "Something went wrong please try again.",
         });
-      }
-    },
-    onError: () => {
-      setIsImporting(false);
-      setJobId(undefined);
-
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-  });
+      },
+    }),
+  );
 
   const {
     control,
@@ -239,7 +239,7 @@ export function ImportModal() {
                         file,
                       });
 
-                      importTransactions.execute({
+                      importTransactions.mutate({
                         filePath: path,
                         currency: data.currency,
                         bankAccountId: data.bank_account_id,
@@ -249,6 +249,7 @@ export function ImportModal() {
                           amount: data.amount,
                           date: data.date,
                           description: data.description,
+                          balance: data.balance,
                         },
                       });
                     })}

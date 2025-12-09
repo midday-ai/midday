@@ -859,3 +859,17 @@ export const exportTransactionsSchema = z.object({
     )
     .optional(),
 });
+
+export const importTransactionsSchema = z.object({
+  filePath: z.array(z.string()).optional(),
+  bankAccountId: z.string().uuid(),
+  currency: z.string(),
+  currentBalance: z.string().optional(),
+  inverted: z.boolean(),
+  mappings: z.object({
+    amount: z.string(),
+    date: z.string(),
+    description: z.string(),
+    balance: z.string().optional(),
+  }),
+});

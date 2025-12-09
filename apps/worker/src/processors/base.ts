@@ -106,13 +106,20 @@ export abstract class BaseProcessor<TData = unknown> {
 
       const duration = Date.now() - startTime;
 
-      this.logger.info("Job completed", {
-        jobId: job.id,
-        jobName: job.name,
-        duration: `${duration}ms`,
-        hasResult: result !== undefined,
-        resultType: typeof result,
-      });
+      // Wrap logger call in try-catch to prevent stream errors from crashing the job
+      // This can happen when pino-pretty transport's stream is closing
+      try {
+        this.logger.info("Job completed", {
+          jobId: job.id,
+          jobName: job.name,
+          duration: `${duration}ms`,
+          hasResult: result !== undefined,
+          resultType: typeof result,
+        });
+      } catch (logError) {
+        // Silently ignore logger errors - job already completed successfully
+        // This prevents stream encoding errors from affecting job completion
+      }
 
       // Ensure result is JSON-serializable for BullMQ
       // BullMQ stores return values as JSON strings in Redis

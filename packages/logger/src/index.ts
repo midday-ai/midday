@@ -51,43 +51,63 @@ function createLoggerAdapter(pinoLogger: pino.Logger, prefixContext?: string) {
 
   return {
     info: (message: string, data?: object) => {
-      const fullMessage = formattedContext
-        ? `${formattedContext} ${message}`
-        : message;
-      if (data) {
-        pinoLogger.info(data, fullMessage);
-      } else {
-        pinoLogger.info(fullMessage);
+      try {
+        const fullMessage = formattedContext
+          ? `${formattedContext} ${message}`
+          : message;
+        if (data) {
+          pinoLogger.info(data, fullMessage);
+        } else {
+          pinoLogger.info(fullMessage);
+        }
+      } catch (error) {
+        // Silently ignore logger stream errors to prevent crashes
+        // This can happen when pino-pretty transport's stream is closing
       }
     },
     error: (message: string, data?: object) => {
-      const fullMessage = formattedContext
-        ? `${formattedContext} ${message}`
-        : message;
-      if (data) {
-        pinoLogger.error(data, fullMessage);
-      } else {
-        pinoLogger.error(fullMessage);
+      try {
+        const fullMessage = formattedContext
+          ? `${formattedContext} ${message}`
+          : message;
+        if (data) {
+          pinoLogger.error(data, fullMessage);
+        } else {
+          pinoLogger.error(fullMessage);
+        }
+      } catch (error) {
+        // Silently ignore logger stream errors to prevent crashes
+        // This can happen when pino-pretty transport's stream is closing
       }
     },
     warn: (message: string, data?: object) => {
-      const fullMessage = formattedContext
-        ? `${formattedContext} ${message}`
-        : message;
-      if (data) {
-        pinoLogger.warn(data, fullMessage);
-      } else {
-        pinoLogger.warn(fullMessage);
+      try {
+        const fullMessage = formattedContext
+          ? `${formattedContext} ${message}`
+          : message;
+        if (data) {
+          pinoLogger.warn(data, fullMessage);
+        } else {
+          pinoLogger.warn(fullMessage);
+        }
+      } catch (error) {
+        // Silently ignore logger stream errors to prevent crashes
+        // This can happen when pino-pretty transport's stream is closing
       }
     },
     debug: (message: string, data?: object) => {
-      const fullMessage = formattedContext
-        ? `${formattedContext} ${message}`
-        : message;
-      if (data) {
-        pinoLogger.debug(data, fullMessage);
-      } else {
-        pinoLogger.debug(fullMessage);
+      try {
+        const fullMessage = formattedContext
+          ? `${formattedContext} ${message}`
+          : message;
+        if (data) {
+          pinoLogger.debug(data, fullMessage);
+        } else {
+          pinoLogger.debug(fullMessage);
+        }
+      } catch (error) {
+        // Silently ignore logger stream errors to prevent crashes
+        // This can happen when pino-pretty transport's stream is closing
       }
     },
   };

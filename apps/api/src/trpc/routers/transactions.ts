@@ -5,6 +5,7 @@ import {
   getSimilarTransactionsSchema,
   getTransactionByIdSchema,
   getTransactionsSchema,
+  importTransactionsSchema,
   searchTransactionMatchSchema,
   updateTransactionSchema,
   updateTransactionsSchema,
@@ -18,9 +19,11 @@ import {
   getTransactions,
   getTransactionsAmountFullRangeData,
   searchTransactionMatch,
+  updateBankAccount,
   updateTransaction,
   updateTransactions,
 } from "@midday/db/queries";
+import { formatAmountValue } from "@midday/import";
 import { triggerJob } from "@midday/job-client";
 import type { EmbedTransactionPayload } from "@midday/jobs/schema";
 
@@ -137,6 +140,41 @@ export const transactionsRouter = createTRPCRouter({
           transactionIds: input.transactionIds,
           dateFormat: input.dateFormat,
           exportSettings: input.exportSettings,
+        },
+        "transactions",
+      );
+
+      return result;
+    }),
+
+  import: protectedProcedure
+    .input(importTransactionsSchema)
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      if (!teamId) {
+        throw new Error("Team not found");
+      }
+
+      // Update currency for account
+      const balance = input.currentBalance
+        ? formatAmountValue({ amount: input.currentBalance })
+        : null;
+
+      await updateBankAccount(db, {
+        id: input.bankAccountId,
+        teamId,
+        currency: input.currency,
+        balance: balance ?? undefined,
+      });
+
+      const result = await triggerJob(
+        "import-transactions",
+        {
+          filePath: input.filePath,
+          bankAccountId: input.bankAccountId,
+          currency: input.currency,
+          mappings: input.mappings,
+          teamId,
+          inverted: input.inverted,
         },
         "transactions",
       );
