@@ -1,6 +1,7 @@
 import type { Database } from "@midday/db/client";
 import { updateInboxAccount } from "@midday/db/queries";
 import { encrypt } from "@midday/encryption";
+import { createLoggerWithContext } from "@midday/logger";
 import { ensureFileExtension } from "@midday/utils";
 import type { Credentials } from "google-auth-library";
 import { type Auth, type gmail_v1, google } from "googleapis";
@@ -20,6 +21,7 @@ export class GmailProvider implements OAuthProviderInterface {
   #gmail: gmail_v1.Gmail | null = null;
   #accountId: string | null = null;
   #db: Database;
+  #logger: ReturnType<typeof createLoggerWithContext>;
 
   #scopes = [
     "https://www.googleapis.com/auth/gmail.readonly",
@@ -28,6 +30,7 @@ export class GmailProvider implements OAuthProviderInterface {
 
   constructor(db: Database) {
     this.#db = db;
+    this.#logger = createLoggerWithContext("Gmail");
 
     const clientId = process.env.GMAIL_CLIENT_ID;
     const clientSecret = process.env.GMAIL_CLIENT_SECRET;
@@ -68,7 +71,7 @@ export class GmailProvider implements OAuthProviderInterface {
             });
           }
         } catch (error) {
-          console.error("Failed to update tokens in database:", error);
+          this.#logger.error("Failed to update tokens in database", { error });
         }
       },
     );
@@ -105,7 +108,7 @@ export class GmailProvider implements OAuthProviderInterface {
       this.setTokens(validTokens);
       return validTokens;
     } catch (error: unknown) {
-      console.error("Error exchanging code for tokens:", error);
+      this.#logger.error("Error exchanging code for tokens", { error });
       const message = error instanceof Error ? error.message : "Unknown error";
       throw new Error(`Failed to exchange code for tokens: ${message}`);
     }
@@ -172,7 +175,7 @@ export class GmailProvider implements OAuthProviderInterface {
         name: userInfo.name ?? undefined,
       };
     } catch (error: unknown) {
-      console.error("Error fetching user info:", error);
+      this.#logger.error("Error fetching user info", { error });
     }
   }
 
@@ -183,105 +186,65 @@ export class GmailProvider implements OAuthProviderInterface {
 
     const { maxResults = 50, lastAccessed, fullSync = false } = options;
 
+    // Detect initial sync
+    // fullSync is true when manualSync: true is passed (used for initial/manual syncs)
+    // Also treat as initial sync if lastAccessed is not set (new account)
+    const isInitialSync = fullSync || !lastAccessed;
+
     // Build date filter based on sync type and lastAccessed
     let dateFilter = "";
-    if (fullSync || !lastAccessed) {
-      // For full syncs (initial or manual) or accounts without lastAccessed, fetch last 30 days to capture recent business documents
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const formattedDate = thirtyDaysAgo.toISOString().split("T")[0];
-      dateFilter = `after:${formattedDate}`;
+    if (isInitialSync) {
+      // For initial sync, don't use date filter - fetch all emails with PDF attachments
+      // We'll stop once we have 20 attachments, so this is safe
+      // This ensures we can find emails regardless of how old they are
+      dateFilter = "";
+      this.#logger.info(
+        "Initial sync - no date filter (fetching all emails with PDF attachments)",
+        {
+          note: "Will stop once 20 attachments are collected",
+        },
+      );
     } else {
       // For subsequent syncs, sync from last access date
       // Subtract 1 day to make it inclusive since Gmail's "after:" is exclusive
       const lastAccessDate = new Date(lastAccessed);
       lastAccessDate.setDate(lastAccessDate.getDate() - 1);
-      const formattedDate = lastAccessDate.toISOString().split("T")[0]; // YYYY-MM-DD format
+      // Use UTC date to avoid timezone issues
+      const year = lastAccessDate.getUTCFullYear();
+      const month = String(lastAccessDate.getUTCMonth() + 1).padStart(2, "0");
+      const day = String(lastAccessDate.getUTCDate()).padStart(2, "0");
+      const formattedDate = `${year}-${month}-${day}`;
       dateFilter = `after:${formattedDate}`;
+      this.#logger.info("Date calculation for incremental sync", {
+        lastAccessed,
+        lastAccessDate: lastAccessDate.toISOString(),
+        formattedDate,
+        dateFilter,
+      });
     }
 
     try {
-      const query = `-from:me has:attachment filename:pdf ${dateFilter}`;
+      // Use filename:pdf filter for both initial and incremental sync (consistent)
+      const query = `-from:me has:attachment filename:pdf ${dateFilter}`.trim();
+      this.#logger.info("Query being sent to Gmail API", {
+        query,
+        maxResults,
+        dateFilter: dateFilter || "none",
+        isInitialSync,
+      });
 
-      // Fetch messages with pagination to handle high-volume days
-      const allMessages: gmail_v1.Schema$Message[] = [];
-      let nextPageToken: string | undefined;
-      const maxPagesToFetch = 3; // Limit to prevent infinite loops
-      let pagesFetched = 0;
-
-      do {
-        const listResponse = await this.#gmail.users.messages.list({
-          userId: "me",
-          maxResults: Math.min(maxResults, 50), // Gmail API max per request
-          q: query,
-          pageToken: nextPageToken,
-        });
-
-        if (listResponse.data.messages) {
-          allMessages.push(...listResponse.data.messages);
-        }
-
-        nextPageToken = listResponse.data.nextPageToken ?? undefined;
-        pagesFetched++;
-
-        // Stop if we have enough messages or hit our page limit
-      } while (
-        nextPageToken &&
-        allMessages.length < maxResults &&
-        pagesFetched < maxPagesToFetch
-      );
-
-      // Limit to maxResults to respect our system limits
-      const messages = allMessages.slice(0, maxResults);
-
-      if (!messages || messages.length === 0) {
-        console.log(
-          "No emails found with PDF attachments matching the criteria.",
-        );
-        return [];
+      // For initial sync, use specialized method that collects up to 20 attachments
+      if (isInitialSync) {
+        return await this.#fetchAttachmentsForInitialSync(query);
       }
 
-      const messageDetailsPromises = messages
-        .map((m: gmail_v1.Schema$Message) => m.id!)
-        .filter((id): id is string => Boolean(id))
-        .map((id: string) =>
-          this.#gmail!.users.messages.get({
-            userId: "me",
-            id: id,
-            format: "full",
-          })
-            .then((res) => res.data)
-            .catch((err: unknown) => {
-              console.error(
-                `Failed to fetch message ${id}:`,
-                err instanceof Error ? err.message : err,
-              );
-              return null;
-            }),
-        );
-
-      const fetchedMessages = (
-        await Promise.all(messageDetailsPromises)
-      ).filter((msg): msg is gmail_v1.Schema$Message => msg !== null);
-
-      if (fetchedMessages.length === 0) {
-        console.log("All filtered messages failed to fetch details.");
-        return [];
-      }
-
-      const allAttachmentsPromises = fetchedMessages.map((message) =>
-        this.#processMessageToAttachments(message),
-      );
-
-      const attachmentsArray = await Promise.all(allAttachmentsPromises);
-      const flattenedAttachments = attachmentsArray.flat();
-
-      return flattenedAttachments;
+      // For incremental sync, use standard batch processing
+      return await this.#fetchAttachmentsForIncrementalSync(query, maxResults);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Unknown error";
 
       // Log the full error for debugging
-      console.error("Gmail API error:", {
+      this.#logger.error("Gmail API error", {
         error: message,
         accountId: this.#accountId,
         timestamp: new Date().toISOString(),
@@ -290,36 +253,278 @@ export class GmailProvider implements OAuthProviderInterface {
       // Check if it's a specific Gmail API error and provide more context
       if (message.includes("invalid_request")) {
         throw new Error(
-          "invalid_request - This is typically caused by expired or invalid OAuth tokens. Token refresh may be needed.",
-        );
-      }
-      if (message.includes("unauthorized") || message.includes("401")) {
-        throw new Error(
-          "unauthorized - Access token is invalid or expired. Authentication required.",
+          "Invalid refresh token request. Check OAuth2 client configuration.",
         );
       }
       if (message.includes("invalid_grant")) {
         throw new Error(
-          "invalid_grant - Refresh token is invalid or expired. Re-authentication required.",
+          "Refresh token is invalid or expired. Re-authentication required.",
+        );
+      }
+      if (message.includes("unauthorized") || message.includes("401")) {
+        throw new Error(
+          "Access token is invalid or expired. Authentication required.",
         );
       }
       if (message.includes("forbidden") || message.includes("403")) {
-        throw new Error(
-          "forbidden - Insufficient permissions or quota exceeded.",
-        );
+        throw new Error("Insufficient permissions or quota exceeded.");
       }
 
       throw new Error(`Failed to fetch attachments: ${message}`);
     }
   }
 
+  /**
+   * Fetch attachments for initial sync - collects up to 20 attachments incrementally
+   */
+  async #fetchAttachmentsForInitialSync(query: string): Promise<Attachment[]> {
+    const TARGET_ATTACHMENTS = 20;
+    const MAX_PAGES = 20;
+    const MAX_MESSAGES = 200;
+
+    const allAttachments: Attachment[] = [];
+    let nextPageToken: string | undefined;
+    let pagesFetched = 0;
+    let totalMessagesProcessed = 0;
+    let lastResultSizeEstimate: number | null | undefined;
+
+    this.#logger.info("Starting initial sync", {
+      targetAttachments: TARGET_ATTACHMENTS,
+      maxPages: MAX_PAGES,
+      maxMessages: MAX_MESSAGES,
+    });
+
+    do {
+      // Fetch a page of messages
+      const listResponse = await this.#gmail!.users.messages.list({
+        userId: "me",
+        maxResults: 50, // Gmail API max per request
+        q: query,
+        pageToken: nextPageToken,
+      });
+
+      const messagesInPage = listResponse.data.messages?.length || 0;
+      lastResultSizeEstimate =
+        (listResponse.data.resultSizeEstimate as number | null | undefined) ??
+        undefined;
+
+      this.#logger.info("Message list API response (initial sync)", {
+        page: pagesFetched + 1,
+        messagesInPage,
+        totalMessagesProcessed,
+        attachmentsCollected: allAttachments.length,
+        resultSizeEstimate: lastResultSizeEstimate,
+        hasNextPage: !!listResponse.data.nextPageToken,
+      });
+
+      if (!listResponse.data.messages || messagesInPage === 0) {
+        break;
+      }
+
+      // Fetch full message details for this page
+      const fetchedMessages = await this.#fetchMessageDetails(
+        listResponse.data.messages,
+      );
+
+      // Process messages one by one until we have target attachments
+      for (const message of fetchedMessages) {
+        if (allAttachments.length >= TARGET_ATTACHMENTS) {
+          this.#logger.info("Reached target attachment count", {
+            target: TARGET_ATTACHMENTS,
+            collected: allAttachments.length,
+            messagesProcessed: totalMessagesProcessed,
+            pagesFetched: pagesFetched + 1,
+          });
+          return allAttachments;
+        }
+
+        const messageAttachments =
+          await this.#processMessageToAttachments(message);
+        allAttachments.push(...messageAttachments);
+        totalMessagesProcessed++;
+      }
+
+      nextPageToken = listResponse.data.nextPageToken ?? undefined;
+      pagesFetched++;
+
+      // Continue if we haven't reached target and there are more results
+      const hasMoreResults =
+        nextPageToken ||
+        (lastResultSizeEstimate &&
+          lastResultSizeEstimate > totalMessagesProcessed);
+
+      // Stop if we hit limits or no more pages/results
+    } while (
+      allAttachments.length < TARGET_ATTACHMENTS &&
+      (nextPageToken ||
+        (lastResultSizeEstimate &&
+          lastResultSizeEstimate > totalMessagesProcessed)) &&
+      pagesFetched < MAX_PAGES &&
+      totalMessagesProcessed < MAX_MESSAGES
+    );
+
+    this.#logger.info("Initial sync complete", {
+      totalPagesFetched: pagesFetched,
+      totalMessagesProcessed,
+      totalAttachmentsFound: allAttachments.length,
+      targetReached: allAttachments.length >= TARGET_ATTACHMENTS,
+    });
+
+    return allAttachments;
+  }
+
+  /**
+   * Fetch attachments for incremental sync - standard batch processing
+   */
+  async #fetchAttachmentsForIncrementalSync(
+    query: string,
+    maxResults: number,
+  ): Promise<Attachment[]> {
+    const MAX_PAGES = 10;
+
+    // Fetch all messages with pagination
+    const allMessages: gmail_v1.Schema$Message[] = [];
+    let nextPageToken: string | undefined;
+    let pagesFetched = 0;
+
+    do {
+      const listResponse = await this.#gmail!.users.messages.list({
+        userId: "me",
+        maxResults: Math.min(maxResults, 50), // Gmail API max per request
+        q: query,
+        pageToken: nextPageToken,
+      });
+
+      const messagesInPage = listResponse.data.messages?.length || 0;
+      this.#logger.info("Message list API response (incremental sync)", {
+        page: pagesFetched + 1,
+        messagesInPage,
+        totalMessagesSoFar: allMessages.length,
+        resultSizeEstimate: listResponse.data.resultSizeEstimate,
+        hasNextPage: !!listResponse.data.nextPageToken,
+      });
+
+      if (listResponse.data.messages) {
+        allMessages.push(...listResponse.data.messages);
+      }
+
+      nextPageToken = listResponse.data.nextPageToken ?? undefined;
+      pagesFetched++;
+
+      if (allMessages.length >= maxResults) {
+        break;
+      }
+    } while (
+      nextPageToken &&
+      pagesFetched < MAX_PAGES &&
+      allMessages.length < maxResults
+    );
+
+    this.#logger.info("Message list fetch complete", {
+      totalPagesFetched: pagesFetched,
+      totalMessagesFound: allMessages.length,
+      maxPagesLimit: MAX_PAGES,
+    });
+
+    // Limit to maxResults
+    const messages = allMessages.slice(0, maxResults);
+
+    if (!messages || messages.length === 0) {
+      this.#logger.info("No messages found matching query", {
+        query,
+        totalFound: allMessages.length,
+      });
+      return [];
+    }
+
+    // Fetch full message details
+    const fetchedMessages = await this.#fetchMessageDetails(messages);
+
+    this.#logger.info("Message details fetch summary", {
+      requested: messages.length,
+      successful: fetchedMessages.length,
+      failed: messages.length - fetchedMessages.length,
+    });
+
+    if (fetchedMessages.length === 0) {
+      this.#logger.info("All messages failed to fetch details");
+      return [];
+    }
+
+    // Process all messages to extract attachments
+    this.#logger.info("Processing messages to extract attachments", {
+      messageCount: fetchedMessages.length,
+    });
+
+    const allAttachmentsPromises = fetchedMessages.map((message) =>
+      this.#processMessageToAttachments(message),
+    );
+    const attachmentsArray = await Promise.all(allAttachmentsPromises);
+    const flattenedAttachments = attachmentsArray.flat();
+
+    this.#logger.info("Attachment extraction complete", {
+      messagesProcessed: fetchedMessages.length,
+      totalAttachmentsFound: flattenedAttachments.length,
+    });
+
+    return flattenedAttachments;
+  }
+
+  /**
+   * Fetch full message details for a list of message IDs
+   */
+  async #fetchMessageDetails(
+    messages: gmail_v1.Schema$Message[],
+  ): Promise<gmail_v1.Schema$Message[]> {
+    const messageDetailsPromises = messages
+      .map((m: gmail_v1.Schema$Message) => m.id!)
+      .filter((id): id is string => Boolean(id))
+      .map((id: string) =>
+        this.#gmail!.users.messages.get({
+          userId: "me",
+          id: id,
+          format: "full",
+        })
+          .then((res) => res.data)
+          .catch((err: unknown) => {
+            this.#logger.error("Failed to fetch message details", {
+              messageId: id,
+              error: err instanceof Error ? err.message : err,
+            });
+            return null;
+          }),
+      );
+
+    return (await Promise.all(messageDetailsPromises)).filter(
+      (msg): msg is gmail_v1.Schema$Message => msg !== null,
+    );
+  }
+
   async #processMessageToAttachments(
     message: gmail_v1.Schema$Message,
   ): Promise<Attachment[]> {
-    if (!message.id || !message.payload?.parts) {
-      console.warn(
-        `Skipping message ${message.id} due to missing ID or parts.`,
-      );
+    if (!message.id) {
+      this.#logger.warn("Skipping message - missing ID");
+      return [];
+    }
+
+    // Check if message has parts or body attachment
+    const hasParts = !!message.payload?.parts;
+    const hasBodyAttachment = !!message.payload?.body?.attachmentId;
+
+    this.#logger.info("Processing message structure", {
+      messageId: message.id,
+      hasParts,
+      partsCount: message.payload?.parts?.length || 0,
+      hasBodyAttachment,
+      mimeType: message.payload?.mimeType,
+    });
+
+    if (!hasParts && !hasBodyAttachment) {
+      this.#logger.warn("Skipping message - no parts or body attachment", {
+        messageId: message.id,
+        payloadMimeType: message.payload?.mimeType,
+      });
       return [];
     }
 
@@ -350,10 +555,64 @@ export class GmailProvider implements OAuthProviderInterface {
     }
 
     try {
-      const rawAttachments = await this.#fetchAttachments(
-        message.id,
-        message.payload.parts,
-      );
+      let rawAttachments: EmailAttachment[] = [];
+
+      // Handle messages with parts array
+      if (message.payload?.parts) {
+        rawAttachments = await this.#fetchAttachments(
+          message.id,
+          message.payload.parts,
+        );
+      }
+      // Handle messages with attachment in body (single attachment)
+      else if (message.payload?.body?.attachmentId && this.#gmail) {
+        this.#logger.info("Message has attachment in body, not parts", {
+          messageId: message.id,
+          attachmentId: message.payload.body.attachmentId,
+          filename: message.payload.filename,
+          mimeType: message.payload.mimeType,
+        });
+
+        try {
+          const attachmentResponse =
+            await this.#gmail.users.messages.attachments.get({
+              userId: "me",
+              messageId: message.id,
+              id: message.payload.body.attachmentId,
+            });
+
+          if (attachmentResponse.data.data) {
+            const mimeType = message.payload.mimeType || "application/pdf";
+            // Only include PDFs
+            if (
+              mimeType === "application/pdf" ||
+              mimeType === "application/octet-stream"
+            ) {
+              rawAttachments.push({
+                filename: message.payload.filename || "attachment.pdf",
+                mimeType: mimeType,
+                size: attachmentResponse.data.size ?? 0,
+                data: attachmentResponse.data.data,
+              });
+            }
+          }
+        } catch (error) {
+          this.#logger.error("Failed to fetch body attachment", {
+            messageId: message.id,
+            error: error instanceof Error ? error.message : error,
+          });
+        }
+      }
+
+      this.#logger.info("Raw attachments extracted from message", {
+        messageId: message.id,
+        rawAttachmentCount: rawAttachments.length,
+        attachments: rawAttachments.map((a) => ({
+          filename: a.filename,
+          mimeType: a.mimeType,
+          size: a.size,
+        })),
+      });
 
       const attachments: Attachment[] = rawAttachments.map((att) => {
         const filename = ensureFileExtension(att.filename, att.mimeType);
@@ -373,13 +632,19 @@ export class GmailProvider implements OAuthProviderInterface {
         };
       });
 
+      this.#logger.info("Processed attachments for message", {
+        messageId: message.id,
+        finalAttachmentCount: attachments.length,
+      });
+
       return attachments;
     } catch (error: unknown) {
       const messageText =
         error instanceof Error ? error.message : "Unknown error";
-      console.error(
-        `Failed to process attachments for message ${message.id}: ${messageText}`,
-      );
+      this.#logger.error("Failed to process attachments for message", {
+        messageId: message.id,
+        error: messageText,
+      });
       return [];
     }
   }
@@ -396,15 +661,27 @@ export class GmailProvider implements OAuthProviderInterface {
 
     for (const part of parts) {
       if (attachmentsCount >= maxAttachments) {
-        console.log(
-          `Reached maximum attachment limit (${maxAttachments}) for message ${messageId}. Skipping further attachments.`,
-        );
+        this.#logger.info("Reached maximum attachment limit", {
+          maxAttachments,
+          messageId,
+        });
         break;
       }
 
-      // Only process parts with PDF or octet-stream MIME types
       const mimeType = part.mimeType ?? "application/octet-stream";
 
+      // Log all parts with filenames to see what MIME types we're getting
+      if (part.filename) {
+        this.#logger.info("Found part with filename", {
+          messageId,
+          filename: part.filename,
+          mimeType,
+          hasAttachmentId: !!part.body?.attachmentId,
+          size: part.body?.size,
+        });
+      }
+
+      // Only process parts with PDF or octet-stream MIME types
       if (
         part.filename &&
         part.body?.attachmentId &&
@@ -431,12 +708,13 @@ export class GmailProvider implements OAuthProviderInterface {
         } catch (error: unknown) {
           const attachmentIdentifier =
             part.filename || `attachment with ID ${part.body.attachmentId}`;
-          const message =
+          const errorMessage =
             error instanceof Error ? error.message : "Unknown error";
-          console.error(
-            `Failed to fetch ${attachmentIdentifier} for message ${messageId}: ${message}`,
-            error,
-          );
+          this.#logger.error("Failed to fetch attachment", {
+            attachmentIdentifier,
+            messageId,
+            error: errorMessage,
+          });
         }
       }
 
@@ -448,8 +726,12 @@ export class GmailProvider implements OAuthProviderInterface {
         attachments.push(...nestedAttachments);
         attachmentsCount = attachments.length;
         if (attachmentsCount >= maxAttachments) {
-          console.log(
-            `Reached maximum attachment limit (${maxAttachments}) after processing nested parts for message ${messageId}.`,
+          this.#logger.info(
+            "Reached maximum attachment limit after processing nested parts",
+            {
+              maxAttachments,
+              messageId,
+            },
           );
           break;
         }

@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@midday/encryption": "workspace:*",
+    "@midday/logger": "workspace:*",
     "@midday/supabase": "workspace:*",
     "googleapis": "^166.0.0",
     "zod": "^4.1.13"
