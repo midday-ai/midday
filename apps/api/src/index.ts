@@ -10,9 +10,11 @@ import { routers } from "./rest/routers";
 import type { Context } from "./rest/types";
 import { createTRPCContext } from "./trpc/init";
 import { appRouter } from "./trpc/routers/_app";
+import { httpLogger } from "./utils/logger";
 
 const app = new OpenAPIHono<Context>();
 
+app.use(httpLogger());
 app.use(secureHeaders());
 
 app.use(

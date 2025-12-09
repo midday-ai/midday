@@ -10,6 +10,11 @@ const isPretty = process.env.LOG_PRETTY === "true";
  */
 const baseLogger = pino({
   level: process.env.LOG_LEVEL || "info",
+  serializers: {
+    req: pino.stdSerializers.req,
+    res: pino.stdSerializers.res,
+    err: pino.stdSerializers.err,
+  },
   // Use pretty printing in development, structured JSON in production
   ...(isPretty && {
     transport: {
@@ -19,7 +24,7 @@ const baseLogger = pino({
         translateTime: "HH:MM:ss",
         ignore: "pid,hostname",
         messageFormat: "{msg}",
-        hideObject: false,
+        hideObject: true,
         singleLine: false,
         useLevelLabels: true,
         levelFirst: true,

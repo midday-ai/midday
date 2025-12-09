@@ -32,7 +32,7 @@
     "bullmq": "^5.65.1",
     "date-fns": "^4.1.0",
     "heic-convert": "1.2.4",
-    "hono": "4.10.7",
+    "hono": "4.10.8",
     "ioredis": "^5.8.2",
     "node-xlsx": "^0.24.0",
     "papaparse": "^5.5.3",
