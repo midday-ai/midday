@@ -13,6 +13,9 @@ let connectionState:
   | "reconnecting"
   | "disconnected" = "disconnected";
 
+const isProduction =
+  process.env.NODE_ENV === "production" || process.env.FLY_APP_NAME;
+
 /**
  * Get or create Redis connection for BullMQ
  * Uses REDIS_QUEUE_URL (separate from cache Redis)
@@ -27,9 +30,6 @@ export function getRedisConnection(): Redis {
   if (!redisUrl) {
     throw new Error("REDIS_QUEUE_URL environment variable is required");
   }
-
-  const isProduction =
-    process.env.NODE_ENV === "production" || process.env.FLY_APP_NAME;
 
   redisConnection = new Redis(redisUrl, {
     maxRetriesPerRequest: null, // Required for BullMQ
@@ -123,9 +123,6 @@ export function getFlowRedisConnection(): Redis {
   if (!redisUrl) {
     throw new Error("REDIS_QUEUE_URL environment variable is required");
   }
-
-  const isProduction =
-    process.env.NODE_ENV === "production" || process.env.FLY_APP_NAME;
 
   const connection = new Redis(redisUrl, {
     maxRetriesPerRequest: null,
