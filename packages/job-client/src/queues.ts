@@ -30,7 +30,8 @@ function getRedisConnection(): Redis {
   redisConnection = new Redis(redisUrl, {
     maxRetriesPerRequest: null, // Required for BullMQ
     enableReadyCheck: false, // BullMQ handles this
-    lazyConnect: true,
+    // Connect eagerly for immediate availability - jobs can be enqueued without waiting for connection
+    lazyConnect: false,
     family: isProduction ? 6 : 4, // IPv6 for Fly.io production, IPv4 for local
     keepAlive: 30000, // Keep connection alive with 30s keepAlive to prevent idle timeouts
     ...(isProduction && {

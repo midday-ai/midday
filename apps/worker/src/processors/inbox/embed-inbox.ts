@@ -103,7 +103,7 @@ export class EmbedInboxProcessor extends BaseProcessor<EmbedInboxPayload> {
 
     try {
       const embeddingStartTime = Date.now();
-      this.logger.info("🧮 Generating embedding for inbox item", {
+      this.logger.info("Generating embedding for inbox item", {
         jobId: job.id,
         inboxId,
         teamId,

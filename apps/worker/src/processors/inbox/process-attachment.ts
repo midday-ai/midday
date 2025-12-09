@@ -51,7 +51,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
     // If the file is a HEIC we need to convert it to a JPG
     if (mimetype === "image/heic") {
       const heicStartTime = Date.now();
-      this.logger.info("📸 Converting HEIC to JPG", {
+      this.logger.info("Converting HEIC to JPG", {
         filePath: fileName,
         jobId: job.id,
       });

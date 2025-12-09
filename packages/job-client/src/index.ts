@@ -72,12 +72,22 @@ const KNOWN_QUEUES = [
 /**
  * Get job status by ID
  * Tries all known queues if queueName is not provided
+ * @param jobId - The job ID to query
+ * @param options - Optional parameters
+ * @param options.queueName - Specific queue name to search (optional)
+ * @param options.teamId - Team ID to verify authorization (required for security)
+ * @returns Job status response
+ * @throws Error if teamId is provided and doesn't match the job's teamId
  */
 export async function getJobStatus(
   jobId: string,
-  queueName?: string,
+  options?: {
+    queueName?: string;
+    teamId?: string;
+  },
 ): Promise<JobStatusResponse> {
-  const queueNames = queueName ? [queueName] : KNOWN_QUEUES;
+  const queueNames = options?.queueName ? [options.queueName] : KNOWN_QUEUES;
+  const requestingTeamId = options?.teamId;
 
   for (const name of queueNames) {
     const queue = getQueue(name);
@@ -86,6 +96,36 @@ export async function getJobStatus(
       const job = await queue.getJob(jobId);
 
       if (job) {
+        // Extract teamId from job data payload for authorization check
+        const jobData = job.data as { teamId?: string };
+        const jobTeamId = jobData?.teamId;
+
+        // If teamId is provided, verify authorization
+        if (requestingTeamId) {
+          if (!jobTeamId) {
+            // Job doesn't have teamId - this is a system job (e.g., rates-scheduler)
+            // Users should not be able to access system jobs from their team context
+            logger.warn("Attempted to access system job from team context", {
+              jobId,
+              queueName: name,
+              jobName: job.name,
+              requestingTeamId,
+            });
+            throw new Error("Job not found or access denied");
+          }
+          if (jobTeamId !== requestingTeamId) {
+            // Team IDs don't match - unauthorized access attempt
+            logger.warn("Unauthorized job access attempt", {
+              jobId,
+              queueName: name,
+              jobName: job.name,
+              requestingTeamId,
+              jobTeamId,
+            });
+            throw new Error("Job not found or access denied");
+          }
+        }
+
         const state = await job.getState();
         const progress = job.progress;
         const returnValue = job.returnvalue;
@@ -122,7 +162,14 @@ export async function getJobStatus(
         };
       }
     } catch (error) {
-      // Continue to next queue
+      // If it's an authorization error, rethrow it
+      if (
+        error instanceof Error &&
+        error.message === "Job not found or access denied"
+      ) {
+        throw error;
+      }
+      // Otherwise continue to next queue
     }
   }
 

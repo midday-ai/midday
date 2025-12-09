@@ -49,7 +49,40 @@ export function InboxBulkActions() {
 
   const deleteInboxMutation = useMutation(
     trpc.inbox.deleteMany.mutationOptions({
-      onSuccess: async () => {
+      onMutate: async () => {
+        // Cancel outgoing refetches
+        await queryClient.cancelQueries({
+          queryKey: trpc.inbox.get.infiniteQueryKey(),
+        });
+
+        // Get current data
+        const previousData = queryClient.getQueriesData({
+          queryKey: trpc.inbox.get.infiniteQueryKey(),
+        });
+
+        // Flatten the data from all pages
+        const allInboxes = previousData
+          // @ts-expect-error
+          .flatMap(([, data]) => data?.pages ?? [])
+          .flatMap((page: any) => page.data ?? []);
+
+        // Optimistically update infinite query data by filtering out deleted items
+        queryClient.setQueriesData(
+          { queryKey: trpc.inbox.get.infiniteQueryKey() },
+          (old: any) => ({
+            pages: old.pages.map((page: any) => ({
+              ...page,
+              data: page.data.filter(
+                (item: any) => !selectedIdsArray.includes(item.id),
+              ),
+            })),
+            pageParams: old.pageParams,
+          }),
+        );
+
+        return { previousData, allInboxes };
+      },
+      onSuccess: async (_, __, context) => {
         // Invalidate all related queries
         await Promise.all([
           queryClient.invalidateQueries({
@@ -70,26 +103,31 @@ export function InboxBulkActions() {
         await revalidateInbox();
 
         // Check if inbox is empty after deletion
-        const queryData = queryClient.getQueriesData({
-          queryKey: trpc.inbox.get.infiniteQueryKey(),
-        });
-
-        const allInboxes = queryData
-          // @ts-expect-error
-          .flatMap(([, data]) => data?.pages ?? [])
-          .flatMap((page: any) => page.data ?? []);
+        // Use the optimistically updated data from onMutate
+        const remainingInboxes = (context?.allInboxes ?? []).filter(
+          (item) => !selectedIdsArray.includes(item.id),
+        );
 
         const hasFilters = Object.values(filter).some(
           (value) => value !== null,
         );
 
         // Navigate to empty state if inbox is empty and no filters
-        if (allInboxes.length === 0 && !hasFilters) {
+        if (remainingInboxes.length === 0 && !hasFilters) {
           setParams({ inboxId: null, connected: null });
           router.push("/inbox", { scroll: false });
         }
 
         clearSelection();
+      },
+      onError: (_, __, context) => {
+        // Restore previous data on error
+        if (context?.previousData) {
+          queryClient.setQueriesData(
+            { queryKey: trpc.inbox.get.infiniteQueryKey() },
+            context.previousData,
+          );
+        }
       },
     }),
   );

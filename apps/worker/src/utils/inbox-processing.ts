@@ -24,7 +24,7 @@ export async function convertHeicToJpeg(
   const supabase = createClient();
   const heicStartTime = Date.now();
 
-  logger.info("📸 Converting HEIC to JPG", { filePath: fileName });
+  logger.info("Converting HEIC to JPG", { filePath: fileName });
 
   const { data } = await withTimeout(
     supabase.storage.from("vault").download(fileName),
