@@ -6,6 +6,7 @@ import type { ExtractionConfig } from "../config/extraction-config";
 import type { PromptComponents } from "../prompts/factory";
 import { createFieldSpecificPrompt } from "../prompts/field-specific";
 import type { DocumentFormat } from "../utils/format-detection";
+import { extractTextFromPdf } from "../utils/pdf-text-extract";
 import { retryCall } from "../utils/retry";
 
 const google = createGoogleGenerativeAI({
@@ -120,6 +121,58 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
   }
 
   /**
+   * Extract using text fallback - extracts text from PDF and sends as text input
+   * Used as last resort when PDF processing times out
+   */
+  protected async extractWithTextFallback(
+    documentUrl: string,
+    prompt: string,
+    model: string,
+  ): Promise<z.infer<T>> {
+    // Extract text from PDF
+    const extractedText = await extractTextFromPdf(documentUrl);
+
+    if (!extractedText) {
+      throw new Error(
+        "Failed to extract text from PDF - PDF may be image-based or corrupted",
+      );
+    }
+
+    // Modify prompt to indicate text was extracted from PDF
+    const modifiedPrompt = `${prompt}\n\nNOTE: The document content below was extracted as text from a PDF. Some formatting, layout, or visual elements may be missing. Please extract the requested information from the text content.`;
+
+    // Send extracted text as text content (not file) to Gemini
+    const result = await retryCall(
+      () =>
+        generateObject({
+          model: google(model),
+          schema: this.config.schema,
+          temperature: 0.1,
+          abortSignal: AbortSignal.timeout(this.config.timeout),
+          messages: [
+            {
+              role: "system",
+              content: modifiedPrompt,
+            },
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text" as const,
+                  text: extractedText,
+                },
+              ],
+            },
+          ],
+        }),
+      this.config.retries,
+      2000, // Start with 2s delay
+    );
+
+    return result.object as z.infer<T>;
+  }
+
+  /**
    * Analyze failure pattern to determine best refinement strategy
    */
   protected analyzeFailurePattern(
@@ -228,7 +281,7 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
                   model: google(this.config.primaryModel),
                   schema: this.config.schema,
                   temperature: 0.1,
-                  abortSignal: AbortSignal.timeout(30000),
+                  abortSignal: AbortSignal.timeout(90000),
                   messages: [
                     {
                       role: "system",
@@ -393,6 +446,57 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
 
       result = await this.extractWithPrimaryModel(documentUrl, prompt);
     } catch (error) {
+      // Check if this is a timeout error and we're processing a PDF
+      const isTimeoutError =
+        (error instanceof DOMException && error.code === 23) ||
+        (error instanceof Error &&
+          (error.name === "TimeoutError" ||
+            error.message.includes("timeout") ||
+            error.message.includes("timed out")));
+
+      const isPdfFile =
+        this.config.contentType === "file" &&
+        this.config.mediaType === "application/pdf";
+
+      // If timeout error on PDF, try text extraction fallback as last resort
+      if (isTimeoutError && isPdfFile) {
+        logger.warn(
+          "PDF extraction timed out, attempting text extraction fallback",
+          {
+            error: error instanceof Error ? error.message : "Unknown error",
+          },
+        );
+
+        try {
+          const promptComponents = promptFactory(companyName);
+          const prompt = this.composePrompt(promptComponents, false);
+
+          result = await this.extractWithTextFallback(
+            documentUrl,
+            prompt,
+            this.config.primaryModel,
+          );
+
+          logger.info("Text extraction fallback succeeded", {
+            pass: 1,
+            fallback: "text-extraction",
+          });
+
+          return {
+            data: result,
+            qualityScore: this.calculateQualityScore(result),
+          };
+        } catch (textFallbackError) {
+          logger.error("Text extraction fallback also failed", {
+            error:
+              textFallbackError instanceof Error
+                ? textFallbackError.message
+                : "Unknown error",
+          });
+          // Fall through to try fallback model
+        }
+      }
+
       logger.warn("Pass 1 failed, trying fallback model immediately", {
         error: error instanceof Error ? error.message : "Unknown error",
       });

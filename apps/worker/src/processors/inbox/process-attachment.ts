@@ -273,10 +273,12 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
 
     const [signedUrlResult, teamData] = await Promise.all([
       // Create signed URL for document processing
+      // Use 10 minutes expiration to ensure URL doesn't expire during processing
+      // (document processing timeout is 120s, plus buffer for retries and multiple passes)
       (async () => {
         const signedUrlStartTime = Date.now();
         const { data: signedUrlData } = await withTimeout(
-          supabase.storage.from("vault").createSignedUrl(fileName, 60),
+          supabase.storage.from("vault").createSignedUrl(fileName, 600),
           TIMEOUTS.EXTERNAL_API,
           `Signed URL creation timed out after ${TIMEOUTS.EXTERNAL_API}ms`,
         );
@@ -285,6 +287,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           jobId: job.id,
           inboxId: inboxData.id,
           duration: `${signedUrlDuration}ms`,
+          expirationSeconds: 600,
         });
         return signedUrlData;
       })(),

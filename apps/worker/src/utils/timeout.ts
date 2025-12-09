@@ -52,7 +52,9 @@ export async function withTimeout<T>(
  */
 export const TIMEOUTS = {
   EMBEDDING: 30_000, // 30 seconds for embedding generation
-  DOCUMENT_PROCESSING: 120_000, // 2 minutes for document processing
+  DOCUMENT_PROCESSING: 600_000, // 10 minutes for document processing
+  // Multi-pass extraction can take time: Pass 1 (primary), Pass 2 (fallback),
+  // Pass 3 (field re-extraction), Pass 4 (consistency validation), plus retries
   FILE_DOWNLOAD: 60_000, // 1 minute for file downloads
   FILE_UPLOAD: 60_000, // 1 minute for file uploads
   DATABASE_QUERY: 15_000, // 15 seconds for database queries

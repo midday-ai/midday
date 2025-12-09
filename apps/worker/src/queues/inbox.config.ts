@@ -27,14 +27,15 @@ const inboxQueueOptions: QueueOptions = {
  * Worker options for inbox queue
  * Concurrency: 100 (increased from 50 for faster processing)
  * Optimized to reduce duplicate downloads and overhead
- * Lock duration: 300000ms (5 minutes) for long-running process-attachment jobs
- * Stalled interval: 360000ms (6 minutes) to allow jobs to complete before marking as stalled
+ * Lock duration: 660000ms (11 minutes) for long-running process-attachment jobs
+ * Document processing timeout is 10 minutes, plus buffer for other operations
+ * Stalled interval: 720000ms (12 minutes) to allow jobs to complete before marking as stalled
  */
 const inboxWorkerOptions: WorkerOptions = {
   connection: getRedisConnection(),
   concurrency: 100, // Increased from 50 for better throughput
-  lockDuration: 300000, // 5 minutes - process-attachment jobs can take up to 2+ minutes (document processing + HEIC conversion + file ops)
-  stalledInterval: 360000, // 6 minutes - longer than lockDuration to avoid false stalls
+  lockDuration: 660000, // 11 minutes - document processing can take up to 10 minutes (multi-pass extraction + retries), plus buffer
+  stalledInterval: 720000, // 12 minutes - longer than lockDuration to avoid false stalls
   limiter: {
     max: 200, // Increased from 100 for higher throughput
     duration: 1000, // 200 jobs per second max
