@@ -827,3 +827,49 @@ export const transactionAttachmentPreSignedUrlResponseSchema = z.object({
 export const createTransactionsResponseSchema = z.array(
   transactionResponseSchema,
 );
+
+export const exportTransactionsSchema = z.object({
+  transactionIds: z.array(z.string().uuid()).min(1),
+  dateFormat: z.string().optional(),
+  locale: z.string().optional().default("en"),
+  exportSettings: z
+    .object({
+      csvDelimiter: z.string(),
+      includeCSV: z.boolean(),
+      includeXLSX: z.boolean(),
+      sendEmail: z.boolean(),
+      accountantEmail: z.string().optional(),
+    })
+    .refine(
+      (data) => {
+        // Only validate email if sendEmail is true
+        if (data.sendEmail) {
+          if (!data.accountantEmail || data.accountantEmail.trim() === "") {
+            return false;
+          }
+          return z.string().email().safeParse(data.accountantEmail.trim())
+            .success;
+        }
+        return true;
+      },
+      {
+        message: "Invalid email address",
+        path: ["accountantEmail"],
+      },
+    )
+    .optional(),
+});
+
+export const importTransactionsSchema = z.object({
+  filePath: z.array(z.string()).optional(),
+  bankAccountId: z.string().uuid(),
+  currency: z.string(),
+  currentBalance: z.string().optional(),
+  inverted: z.boolean(),
+  mappings: z.object({
+    amount: z.string(),
+    date: z.string(),
+    description: z.string(),
+    balance: z.string().optional(),
+  }),
+});

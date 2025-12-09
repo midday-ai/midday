@@ -2,8 +2,8 @@
 
 import { LogEvents } from "@midday/events/events";
 import { formatAmountValue } from "@midday/import";
+import { triggerJob } from "@midday/job-client";
 import type { ImportTransactionsPayload } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";
 
@@ -52,14 +52,18 @@ export const importTransactionsAction = authActionClient
         .update({ currency, balance })
         .eq("id", bankAccountId);
 
-      const event = await tasks.trigger("import-transactions", {
-        filePath,
-        bankAccountId,
-        currency,
-        mappings,
-        teamId: teamId!,
-        inverted,
-      } satisfies ImportTransactionsPayload);
+      const event = await triggerJob(
+        "import-transactions",
+        {
+          filePath,
+          bankAccountId,
+          currency,
+          mappings,
+          teamId: teamId!,
+          inverted,
+        },
+        "transactions",
+      );
 
       return event;
     },

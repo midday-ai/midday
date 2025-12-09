@@ -1,9 +1,11 @@
 import {
   createTransactionSchema,
   deleteTransactionsSchema,
+  exportTransactionsSchema,
   getSimilarTransactionsSchema,
   getTransactionByIdSchema,
   getTransactionsSchema,
+  importTransactionsSchema,
   searchTransactionMatchSchema,
   updateTransactionSchema,
   updateTransactionsSchema,
@@ -17,11 +19,13 @@ import {
   getTransactions,
   getTransactionsAmountFullRangeData,
   searchTransactionMatch,
+  updateBankAccount,
   updateTransaction,
   updateTransactions,
 } from "@midday/db/queries";
+import { formatAmountValue } from "@midday/import";
+import { triggerJob } from "@midday/job-client";
 import type { EmbedTransactionPayload } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk";
 
 export const transactionsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -107,12 +111,74 @@ export const transactionsRouter = createTRPCRouter({
 
       // Trigger embedding for the newly created manual transaction
       if (transaction?.id) {
-        tasks.trigger("embed-transaction", {
-          transactionIds: [transaction.id],
-          teamId: teamId!,
-        } satisfies EmbedTransactionPayload);
+        await triggerJob(
+          "embed-transaction",
+          {
+            transactionIds: [transaction.id],
+            teamId: teamId!,
+          },
+          "transactions",
+        );
       }
 
       return transaction;
+    }),
+
+  export: protectedProcedure
+    .input(exportTransactionsSchema)
+    .mutation(async ({ input, ctx: { teamId, session } }) => {
+      if (!teamId) {
+        throw new Error("Team not found");
+      }
+
+      const result = await triggerJob(
+        "export-transactions",
+        {
+          teamId,
+          userId: session.user.id,
+          locale: input.locale,
+          transactionIds: input.transactionIds,
+          dateFormat: input.dateFormat,
+          exportSettings: input.exportSettings,
+        },
+        "transactions",
+      );
+
+      return result;
+    }),
+
+  import: protectedProcedure
+    .input(importTransactionsSchema)
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      if (!teamId) {
+        throw new Error("Team not found");
+      }
+
+      // Update currency for account
+      const balance = input.currentBalance
+        ? formatAmountValue({ amount: input.currentBalance })
+        : null;
+
+      await updateBankAccount(db, {
+        id: input.bankAccountId,
+        teamId,
+        currency: input.currency,
+        balance: balance ?? undefined,
+      });
+
+      const result = await triggerJob(
+        "import-transactions",
+        {
+          filePath: input.filePath,
+          bankAccountId: input.bankAccountId,
+          currency: input.currency,
+          mappings: input.mappings,
+          teamId,
+          inverted: input.inverted,
+        },
+        "transactions",
+      );
+
+      return result;
     }),
 });

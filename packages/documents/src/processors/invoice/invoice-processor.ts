@@ -1,211 +1,158 @@
-import { mistral } from "@ai-sdk/mistral";
-import { generateObject } from "ai";
-import { extractText, getDocumentProxy } from "unpdf";
+import { createLoggerWithContext } from "@midday/logger";
 import type { z } from "zod/v4";
-import { createInvoicePrompt, invoicePrompt } from "../../prompt";
-import { invoiceSchema } from "../../schema";
+import { invoiceConfig } from "../../config/extraction-config";
 import type { GetDocumentRequest } from "../../types";
-import { getDomainFromEmail, removeProtocolFromDomain } from "../../utils";
-import { retryCall } from "../../utils/retry";
+import { extractWebsite } from "../../utils";
+import {
+  applyInvoiceFixes,
+  validateInvoiceConsistency,
+} from "../../utils/cross-field-validation";
+import { detectInvoiceFormat } from "../../utils/format-detection";
+import type { DocumentFormat } from "../../utils/format-detection";
+import {
+  calculateExtractionConfidence,
+  mergeInvoiceResults,
+} from "../../utils/merging";
+import {
+  calculateQualityScore,
+  getFieldsNeedingReExtraction,
+} from "../../utils/validation";
+import { BaseExtractionEngine } from "../base-extraction-engine";
 
-export class InvoiceProcessor {
-  // Check if the extracted data meets minimum quality standards
-  #isDataQualityPoor(result: z.infer<typeof invoiceSchema>): boolean {
-    const criticalFieldsMissing =
-      !result.total_amount ||
-      !result.currency ||
-      !result.vendor_name ||
-      (!result.invoice_date && !result.due_date);
+type InvoiceData = z.infer<typeof invoiceConfig.schema>;
 
-    return criticalFieldsMissing;
+export class InvoiceProcessor extends BaseExtractionEngine<
+  typeof invoiceConfig.schema
+> {
+  constructor() {
+    super(invoiceConfig, createLoggerWithContext("InvoiceProcessor"));
   }
 
-  async #processDocument({ documentUrl, companyName }: GetDocumentRequest) {
-    if (!documentUrl) {
-      throw new Error("Document URL is required");
-    }
-
-    try {
-      const prompt = companyName
-        ? createInvoicePrompt(companyName)
-        : invoicePrompt;
-
-      const result = await retryCall(() =>
-        generateObject({
-          model: mistral("mistral-medium-latest"),
-          schema: invoiceSchema,
-          temperature: 0.1,
-          abortSignal: AbortSignal.timeout(30000), // 30s
-          messages: [
-            {
-              role: "system",
-              content: prompt,
-            },
-            {
-              role: "user",
-              content: [
-                {
-                  type: "file",
-
-                  data: documentUrl,
-                  mediaType: "application/pdf",
-                },
-              ],
-            },
-          ],
-          providerOptions: {
-            mistral: {
-              documentPageLimit: 10,
-            },
-          },
-        }),
-      );
-
-      // Check data quality and merge with fallback if poor
-      if (this.#isDataQualityPoor(result.object)) {
-        console.log(
-          "Primary processing completed but data quality is poor, running OCR + LLM fallback",
-        );
-
-        try {
-          const fallbackResult = await this.#fallbackExtract(documentUrl);
-
-          const mergedResult = {
-            ...result.object,
-            total_amount:
-              result.object.total_amount || fallbackResult.total_amount,
-            currency: result.object.currency || fallbackResult.currency,
-            vendor_name:
-              result.object.vendor_name || fallbackResult.vendor_name,
-            invoice_date:
-              result.object.invoice_date || fallbackResult.invoice_date,
-            due_date: result.object.due_date || fallbackResult.due_date,
-            // Fill in other fields from fallback if missing
-            invoice_number:
-              result.object.invoice_number || fallbackResult.invoice_number,
-            customer_name:
-              result.object.customer_name || fallbackResult.customer_name,
-            vendor_address:
-              result.object.vendor_address || fallbackResult.vendor_address,
-            customer_address:
-              result.object.customer_address || fallbackResult.customer_address,
-            email: result.object.email || fallbackResult.email,
-            website: result.object.website || fallbackResult.website,
-            tax_amount: result.object.tax_amount || fallbackResult.tax_amount,
-            tax_rate: result.object.tax_rate || fallbackResult.tax_rate,
-            tax_type: result.object.tax_type || fallbackResult.tax_type,
-            payment_instructions:
-              result.object.payment_instructions ||
-              fallbackResult.payment_instructions,
-            notes: result.object.notes || fallbackResult.notes,
-            language: result.object.language || fallbackResult.language,
-            line_items:
-              result.object.line_items?.length > 0
-                ? result.object.line_items
-                : fallbackResult.line_items,
-          };
-
-          return mergedResult;
-        } catch (fallbackError) {
-          console.log("OCR + LLM fallback also failed:", fallbackError);
-          return result.object; // Return original result if fallback fails
-        }
-      }
-
-      return result.object;
-    } catch (error) {
-      console.log(
-        "Primary processing failed, falling back to OCR + LLM:",
-        error,
-      );
-      // Fallback to OCR + LLM
-      return this.#fallbackExtract(documentUrl);
-    }
+  protected getDocumentType(): string {
+    return "invoice";
   }
 
-  async #fallbackExtract(documentUrl: string) {
-    if (!documentUrl) {
-      throw new Error("Document URL is required");
-    }
+  protected calculateQualityScore(result: InvoiceData): {
+    score: number;
+    issues: string[];
+    missingCriticalFields: string[];
+    invalidFields: string[];
+  } {
+    return calculateQualityScore(result);
+  }
 
-    const response = await fetch(documentUrl);
-    const content = await response.arrayBuffer();
-    const pdf = await getDocumentProxy(content);
+  protected getFieldsNeedingReExtraction(result: InvoiceData): string[] {
+    return getFieldsNeedingReExtraction(result);
+  }
 
-    const { text } = await extractText(pdf, {
-      mergePages: true,
-    });
+  protected mergeResults(
+    primary: InvoiceData,
+    secondary: Partial<InvoiceData>,
+  ): InvoiceData {
+    return mergeInvoiceResults(primary, secondary);
+  }
 
-    // Unsupported Unicode escape sequence
-    const cleanedText = text.replaceAll("\u0000", "");
+  protected validateConsistency(result: InvoiceData): {
+    isValid: boolean;
+    issues: Array<{
+      field: string;
+      issue: string;
+      severity: "error" | "warning";
+    }>;
+    suggestedFixes: Array<{
+      field: string;
+      value: any;
+      reason: string;
+    }>;
+  } {
+    return validateInvoiceConsistency(result);
+  }
 
-    const result = await retryCall(() =>
-      generateObject({
-        model: mistral("mistral-medium-latest"),
-        schema: invoiceSchema,
-        abortSignal: AbortSignal.timeout(30000), // 30s
-        messages: [
-          {
-            role: "system",
-            content: invoicePrompt,
-          },
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: cleanedText,
-              },
-            ],
-          },
-        ],
-      }),
+  protected applyConsistencyFixes(
+    result: InvoiceData,
+    fixes: Array<{ field: string; value: any; reason: string }>,
+  ): InvoiceData {
+    return applyInvoiceFixes(result, fixes);
+  }
+
+  protected detectFormat(result: InvoiceData): DocumentFormat | undefined {
+    return detectInvoiceFormat(result);
+  }
+
+  protected calculateConfidence(
+    result: InvoiceData,
+    qualityScore: {
+      score: number;
+      missingCriticalFields: string[];
+    },
+  ): number {
+    return calculateExtractionConfidence(result, qualityScore);
+  }
+
+  protected mergeResultsWithConfidence(
+    primary: InvoiceData,
+    secondary: Partial<InvoiceData>,
+    primaryConfidence: number,
+    secondaryConfidence: number,
+  ): InvoiceData {
+    return mergeInvoiceResults(
+      primary,
+      secondary,
+      primaryConfidence,
+      secondaryConfidence,
     );
-
-    return result.object;
   }
 
-  #getWebsite({
+  async #getWebsite({
     website,
     email,
-  }: { website: string | null; email: string | null }) {
-    if (website) {
-      return website;
-    }
-
-    return removeProtocolFromDomain(getDomainFromEmail(email));
+    vendorName,
+  }: {
+    website: string | null;
+    email: string | null;
+    vendorName: string | null;
+  }) {
+    return extractWebsite(website, email, vendorName, this.logger);
   }
 
   public async getInvoice(params: GetDocumentRequest) {
-    const result = await this.#processDocument(params);
+    if (!params.documentUrl) {
+      throw new Error("Document URL is required");
+    }
 
-    const website = this.#getWebsite({
-      website: result.website,
-      email: result.email,
+    const result = await this.extract(params.documentUrl, {
+      companyName: params.companyName,
+      logger: this.logger,
+    });
+
+    const website = await this.#getWebsite({
+      website: result.data.website,
+      email: result.data.email,
+      vendorName: result.data.vendor_name,
     });
 
     return {
-      ...result,
+      ...result.data,
       website,
       type: "invoice",
-      description: result.notes,
-      date: result.due_date ?? result.invoice_date,
-      amount: result.total_amount,
-      currency: result.currency,
-      name: result.vendor_name,
-      tax_amount: result.tax_amount,
-      tax_rate: result.tax_rate,
-      tax_type: result.tax_type,
-      language: result.language,
-      invoice_number: result.invoice_number ?? null,
+      description: result.data.notes,
+      date: result.data.due_date ?? result.data.invoice_date,
+      amount: result.data.total_amount,
+      currency: result.data.currency,
+      name: result.data.vendor_name,
+      tax_amount: result.data.tax_amount,
+      tax_rate: result.data.tax_rate,
+      tax_type: result.data.tax_type,
+      language: result.data.language,
+      invoice_number: result.data.invoice_number ?? null,
       metadata: {
-        invoice_date: result.invoice_date ?? null,
-        payment_instructions: result.payment_instructions ?? null,
-        customer_name: result.customer_name ?? null,
-        customer_address: result.customer_address ?? null,
-        vendor_address: result.vendor_address ?? null,
-        vendor_name: result.vendor_name ?? null,
-        email: result.email ?? null,
+        invoice_date: result.data.invoice_date ?? null,
+        payment_instructions: result.data.payment_instructions ?? null,
+        customer_name: result.data.customer_name ?? null,
+        customer_address: result.data.customer_address ?? null,
+        vendor_address: result.data.vendor_address ?? null,
+        vendor_name: result.data.vendor_name ?? null,
+        email: result.data.email ?? null,
       },
     };
   }

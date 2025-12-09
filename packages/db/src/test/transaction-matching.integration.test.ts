@@ -253,7 +253,7 @@ describe("Integration Tests - Real-World Scenarios", () => {
   describe("Perfect Matches", () => {
     for (const scenario of REAL_WORLD_SCENARIOS.perfectMatches) {
       test(`should handle ${scenario.name}`, async () => {
-        console.log(`\n📋 Testing: ${scenario.description}`);
+        console.log(`\nTesting: ${scenario.description}`);
 
         // Mock the database queries that would normally happen
         // In a real integration test, you'd set up test data in the database
@@ -278,7 +278,7 @@ describe("Integration Tests - Real-World Scenarios", () => {
           embeddingScore * 0.3;
 
         console.log(
-          `📊 Scores: Amount=${amountScore.toFixed(3)}, Currency=${currencyScore.toFixed(3)}, Date=${dateScore.toFixed(3)}, Overall=${overallConfidence.toFixed(3)}`,
+          `Scores: Amount=${amountScore.toFixed(3)}, Currency=${currencyScore.toFixed(3)}, Date=${dateScore.toFixed(3)}, Overall=${overallConfidence.toFixed(3)}`,
         );
 
         expect(overallConfidence).toBeGreaterThanOrEqual(
@@ -290,7 +290,7 @@ describe("Integration Tests - Real-World Scenarios", () => {
         }
 
         console.log(
-          `✅ ${scenario.name} passed with confidence ${overallConfidence.toFixed(3)}`,
+          `${scenario.name} passed with confidence ${overallConfidence.toFixed(3)}`,
         );
       });
     }
@@ -299,7 +299,7 @@ describe("Integration Tests - Real-World Scenarios", () => {
   describe("Cross-Currency Matches", () => {
     for (const scenario of REAL_WORLD_SCENARIOS.crossCurrencyMatches) {
       test(`should handle ${scenario.name}`, async () => {
-        console.log(`\n💱 Testing: ${scenario.description}`);
+        console.log(`\nTesting: ${scenario.description}`);
 
         const { inbox, transaction, expected } = scenario;
 
@@ -308,10 +308,10 @@ describe("Integration Tests - Real-World Scenarios", () => {
 
         if (expected.shouldMatch) {
           expect(isCrossMatch).toBe(true);
-          console.log("✅ Cross-currency match detected correctly");
+          console.log("Cross-currency match detected correctly");
         } else {
           expect(isCrossMatch).toBe(false);
-          console.log("✅ Cross-currency match correctly rejected");
+          console.log("Cross-currency match correctly rejected");
         }
 
         // Test scoring
@@ -322,7 +322,7 @@ describe("Integration Tests - Real-World Scenarios", () => {
         );
 
         console.log(
-          `📊 Cross-currency scores: Amount=${amountScore.toFixed(3)}, Currency=${currencyScore.toFixed(3)}`,
+          `Cross-currency scores: Amount=${amountScore.toFixed(3)}, Currency=${currencyScore.toFixed(3)}`,
         );
 
         // Cross-currency should have lower currency scores
@@ -354,13 +354,13 @@ describe("Integration Tests - Real-World Scenarios", () => {
           embeddingScore * 0.3;
 
         console.log(
-          `📊 Low scores: Amount=${amountScore.toFixed(3)}, Currency=${currencyScore.toFixed(3)}, Overall=${overallConfidence.toFixed(3)}`,
+          `Low scores: Amount=${amountScore.toFixed(3)}, Currency=${currencyScore.toFixed(3)}, Overall=${overallConfidence.toFixed(3)}`,
         );
 
         expect(overallConfidence).toBeLessThanOrEqual(expected.maxConfidence);
         expect(overallConfidence).toBeLessThan(0.6); // Below match threshold
 
-        console.log("✅ False positive correctly prevented");
+        console.log("False positive correctly prevented");
       });
     }
   });
@@ -391,7 +391,7 @@ describe("Integration Tests - Real-World Scenarios", () => {
       // In a real integration test, the query would filter by teamId
       // and this match would never be considered
       expect(inboxTeam1.teamId).not.toBe(transactionTeam2.teamId);
-      console.log("✅ Team isolation verified");
+      console.log("Team isolation verified");
     });
   });
 
@@ -410,9 +410,9 @@ describe("Integration Tests - Real-World Scenarios", () => {
         const shouldProcess = status === "pending";
 
         if (shouldProcess) {
-          console.log(`✅ Status '${status}' should be processed`);
+          console.log(`Status '${status}' should be processed`);
         } else {
-          console.log(`⏭️  Status '${status}' should be skipped`);
+          console.log(`Status '${status}' should be skipped`);
         }
 
         // In real integration test, only "pending" items would be returned by query
@@ -437,14 +437,14 @@ describe("Integration Tests - Real-World Scenarios", () => {
       expect(withEmbedding.embedding).not.toBeNull();
       expect(withoutEmbedding.embedding).toBeNull();
 
-      console.log("✅ Embedding requirement enforced");
+      console.log("Embedding requirement enforced");
     });
   });
 });
 
 describe("Performance Integration Tests", () => {
   test("should handle realistic data volumes", async () => {
-    console.log("\n⚡ Testing performance with realistic volumes...");
+    console.log("\nTesting performance with realistic volumes...");
 
     const start = performance.now();
 
@@ -471,6 +471,6 @@ describe("Performance Integration Tests", () => {
     const duration = performance.now() - start;
 
     expect(duration).toBeLessThan(1000); // Should complete in <1 second
-    console.log(`✅ Processed 100 items in ${duration.toFixed(2)}ms`);
+    console.log(`Processed 100 items in ${duration.toFixed(2)}ms`);
   });
 });

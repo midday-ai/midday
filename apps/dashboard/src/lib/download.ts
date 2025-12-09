@@ -25,9 +25,9 @@ export async function downloadFile(url: string, filename: string) {
       url: downloadUrl,
     });
 
-    console.log("✅ Download opened in browser:", downloadUrl);
+    console.log("Download opened in browser:", downloadUrl);
   } catch (error) {
-    console.error("❌ Failed to open download in browser:", error);
+    console.error("Failed to open download in browser:", error);
     throw error;
   }
 }

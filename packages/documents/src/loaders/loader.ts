@@ -1,14 +1,15 @@
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { TextLoader } from "@langchain/classic/document_loaders/fs/text";
 import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
 import { PPTXLoader } from "@langchain/community/document_loaders/fs/pptx";
-import { Mistral } from "@mistralai/mistralai";
+import { generateText } from "ai";
 import { parseOfficeAsync } from "officeparser";
-import { extractText, getDocumentProxy } from "unpdf";
 import { cleanText, extractTextFromRtf } from "../utils";
+import { retryCall } from "../utils/retry";
 
-// Currently, the Vercel AI SDK doesn't support base64-encoded PDF files
-// And here we only have the Blob object
-const mistralClient = new Mistral({ apiKey: process.env.MISTRAL_API_KEY });
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY!,
+});
 
 export async function loadDocument({
   content,
@@ -22,31 +23,61 @@ export async function loadDocument({
   switch (metadata.mimetype) {
     case "application/pdf":
     case "application/x-pdf": {
-      const arrayBuffer = await content.arrayBuffer();
-      const pdf = await getDocumentProxy(arrayBuffer);
-
-      const { text } = await extractText(pdf, {
-        mergePages: true,
-      });
-
-      // Unsupported Unicode escape sequence
-      document = text.replaceAll("\u0000", "");
-
-      // If we still don't have any text, let's use Mistral
-      if (document.length === 0) {
-        const base64Content = Buffer.from(await content.arrayBuffer()).toString(
-          "base64",
+      if (!google) {
+        throw new Error(
+          "GOOGLE_GENERATIVE_AI_API_KEY environment variable is required for PDF extraction",
         );
-        const ocrResponse = await mistralClient.ocr.process({
-          model: "mistral-ocr-latest",
-          document: {
-            type: "document_url",
-            documentUrl: `data:application/pdf;base64,${base64Content}`,
-          },
-          includeImageBase64: true,
-        });
+      }
 
-        document = ocrResponse.pages[0]?.markdown ?? null;
+      try {
+        const arrayBuffer = await content.arrayBuffer();
+        const base64Content = Buffer.from(arrayBuffer).toString("base64");
+        const dataUri = `data:application/pdf;base64,${base64Content}`;
+
+        // Use retry logic to handle transient failures (503 errors, timeouts)
+        const result = await retryCall(
+          () =>
+            generateText({
+              model: google("gemini-2.5-flash"),
+              abortSignal: AbortSignal.timeout(60000), // 60s timeout for PDF extraction
+              messages: [
+                {
+                  role: "user",
+                  content: [
+                    {
+                      type: "text",
+                      text: "Extract all text from this PDF document. Return only the extracted text, preserving the structure and formatting as much as possible.",
+                    },
+                    {
+                      type: "file",
+                      data: dataUri,
+                      mediaType: "application/pdf",
+                    },
+                  ],
+                },
+              ],
+            }),
+          2, // 2 retries (3 total attempts)
+          2000, // Start with 2s delay
+        );
+
+        document = result.text ?? null;
+      } catch (error) {
+        // Log detailed error information for debugging
+        const errorDetails: Record<string, unknown> = {
+          error: error instanceof Error ? error.message : String(error),
+          errorName: error instanceof Error ? error.name : typeof error,
+        };
+        if (error instanceof Error && error.stack) {
+          errorDetails.errorStack = error.stack;
+        }
+        console.error(
+          "Gemini PDF extraction failed after retries:",
+          errorDetails,
+        );
+        // Return null instead of throwing to allow the process to continue
+        // The upstream code will handle null documents appropriately
+        document = null;
       }
 
       break;

@@ -123,7 +123,7 @@
     "cmdk": "1.1.1",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
-    "framer-motion": "^12.23.22",
+    "framer-motion": "^12.23.25",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.542.0",
     "postcss": "^8.5.3",
@@ -141,8 +141,8 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "typescript": "^5.9.2"
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
+    "typescript": "^5.9.3"
   }
 }

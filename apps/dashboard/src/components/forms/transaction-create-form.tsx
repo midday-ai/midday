@@ -5,6 +5,7 @@ import { SelectAccount } from "@/components/select-account";
 import { SelectCategory } from "@/components/select-category";
 import { SelectCurrency } from "@/components/select-currency";
 import { TransactionAttachments } from "@/components/transaction-attachments";
+import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useUserQuery } from "@/hooks/use-user";
@@ -72,6 +73,7 @@ const formSchema = z.object({
 export function TransactionCreateForm() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const invalidateTransactionQueries = useInvalidateTransactionQueries();
   const { setParams } = useTransactionParams();
   const [isOpen, setIsOpen] = useState(false);
   const { data: user } = useUserQuery();
@@ -89,14 +91,8 @@ export function TransactionCreateForm() {
   const createTransactionMutation = useMutation(
     trpc.transactions.create.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: trpc.transactions.get.infiniteQueryKey(),
-        });
-
-        // Invalidate global search
-        queryClient.invalidateQueries({
-          queryKey: trpc.search.global.queryKey(),
-        });
+        // Invalidate reports and widgets since a new transaction affects analytics
+        invalidateTransactionQueries();
 
         setParams(null);
       },
@@ -118,7 +114,6 @@ export function TransactionCreateForm() {
     },
   });
 
-  const category = form.watch("categorySlug");
   const attachments = form.watch("attachments");
   const bankAccountId = form.watch("bankAccountId");
   const transactionType = form.watch("transactionType");

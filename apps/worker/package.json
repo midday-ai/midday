@@ -1,0 +1,48 @@
+{
+  "name": "@midday/worker",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "start": "bun run src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write ."
+  },
+  "dependencies": {
+    "@bull-board/api": "^6.15.0",
+    "@bull-board/hono": "^6.15.0",
+    "@fast-csv/format": "5.0.5",
+    "@hono/node-server": "^1.19.7",
+    "@midday/db": "workspace:*",
+    "@midday/documents": "workspace:*",
+    "@midday/email": "workspace:*",
+    "@midday/engine": "workspace:*",
+    "@midday/engine-client": "workspace:*",
+    "@midday/import": "workspace:*",
+    "@midday/job-client": "workspace:*",
+    "@midday/jobs": "workspace:*",
+    "@midday/logger": "workspace:*",
+    "@midday/notifications": "workspace:*",
+    "@midday/supabase": "workspace:*",
+    "@midday/utils": "workspace:*",
+    "@sentry/bun": "^10.29.0",
+    "@types/archiver": "^7.0.0",
+    "archiver": "^7.0.1",
+    "bullmq": "^5.65.1",
+    "date-fns": "^4.1.0",
+    "heic-convert": "1.2.4",
+    "hono": "4.10.7",
+    "ioredis": "^5.8.2",
+    "node-xlsx": "^0.24.0",
+    "papaparse": "^5.5.3",
+    "sharp": "0.34.5",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/heic-convert": "1.2.3",
+    "@types/papaparse": "^5.5.1",
+    "@types/react": "^19.2.7"
+  }
+}

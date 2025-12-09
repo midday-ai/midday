@@ -5,6 +5,7 @@ import { SelectAccount } from "@/components/select-account";
 import { SelectCategory } from "@/components/select-category";
 import { SelectCurrency } from "@/components/select-currency";
 import { TransactionAttachments } from "@/components/transaction-attachments";
+import { useInvalidateTransactionQueries } from "@/hooks/use-invalidate-transaction-queries";
 import { useUpdateTransactionCategory } from "@/hooks/use-update-transaction-category";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
@@ -40,6 +41,7 @@ type Props = {
 export function TransactionEditForm({ transaction }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const invalidateTransactionQueries = useInvalidateTransactionQueries();
   const [isOpen, setIsOpen] = useState(false);
   const { data: user } = useUserQuery();
   const { data: accounts } = useQuery(
@@ -56,19 +58,27 @@ export function TransactionEditForm({ transaction }: Props) {
 
   const updateTransactionMutation = useMutation(
     trpc.transactions.update.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: trpc.transactions.get.infiniteQueryKey(),
-        });
+      onSuccess: (_, variables) => {
+        // If category or internal (exclude from analytics) changed, invalidate reports and widgets
+        if ("categorySlug" in variables || "internal" in variables) {
+          invalidateTransactionQueries();
+        } else {
+          // Otherwise just invalidate transaction queries
+          queryClient.invalidateQueries({
+            queryKey: trpc.transactions.get.infiniteQueryKey(),
+          });
 
-        queryClient.invalidateQueries({
-          queryKey: trpc.transactions.getById.queryKey({ id: transaction.id }),
-        });
+          queryClient.invalidateQueries({
+            queryKey: trpc.transactions.getById.queryKey({
+              id: transaction.id,
+            }),
+          });
 
-        // Invalidate global search
-        queryClient.invalidateQueries({
-          queryKey: trpc.search.global.queryKey(),
-        });
+          // Invalidate global search
+          queryClient.invalidateQueries({
+            queryKey: trpc.search.global.queryKey(),
+          });
+        }
       },
       onMutate: async (variables) => {
         // Cancel any outgoing refetches

@@ -54,7 +54,11 @@ export const ThemeSwitch = () => {
         <SelectContent>
           <SelectGroup>
             {themes.map((theme) => (
-              <SelectItem key={theme} value={theme} className="capitalize">
+              <SelectItem
+                key={theme}
+                value={theme}
+                className="capitalize text-xs"
+              >
                 {theme}
               </SelectItem>
             ))}

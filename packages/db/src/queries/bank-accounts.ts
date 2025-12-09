@@ -65,6 +65,8 @@ export type UpdateBankAccountParams = {
   balance?: number;
   enabled?: boolean;
   currency?: string;
+  baseBalance?: number;
+  baseCurrency?: string;
 };
 
 export async function updateBankAccount(
@@ -125,6 +127,27 @@ export async function getBankAccountById(
       eq(bankAccounts.teamId, params.teamId),
     ),
   });
+}
+
+export type GetBankAccountTeamIdParams = {
+  id: string;
+};
+
+/**
+ * Get teamId for a bank account by ID
+ * Used by worker processors that don't have teamId in payload
+ */
+export async function getBankAccountTeamId(
+  db: Database,
+  params: GetBankAccountTeamIdParams,
+): Promise<string | null> {
+  const [result] = await db
+    .select({ teamId: bankAccounts.teamId })
+    .from(bankAccounts)
+    .where(eq(bankAccounts.id, params.id))
+    .limit(1);
+
+  return result?.teamId ?? null;
 }
 
 type GetBankAccountBalanceResponse = {

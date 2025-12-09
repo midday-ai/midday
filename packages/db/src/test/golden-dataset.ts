@@ -603,7 +603,7 @@ export function captureAlgorithmBaseline(
 ): any {
   // This would use the actual algorithm functions to capture current behavior
   // Useful when adding new real-world cases to establish regression baselines
-  console.log("📊 To capture baseline for new case:");
+  console.log("To capture baseline for new case:");
   console.log("1. Run the algorithm with this data");
   console.log("2. Copy the actual scores as expectedScores");
   console.log("3. Add comment with algorithm version/date");
@@ -619,7 +619,7 @@ export function captureAlgorithmBaseline(
 
 // Export function to generate test data for database seeding
 export async function exportGoldenDataset(db: Database) {
-  console.log("📊 Exporting golden dataset from real user feedback...");
+  console.log("Exporting golden dataset from real user feedback...");
 
   try {
     // This would query your actual database for confirmed/declined matches
@@ -638,10 +638,10 @@ export async function exportGoldenDataset(db: Database) {
       },
     }));
 
-    console.log(`✅ Exported ${anonymizedData.length} golden test cases`);
+    console.log(`Exported ${anonymizedData.length} golden test cases`);
     return anonymizedData;
   } catch (error) {
-    console.error("❌ Failed to export golden dataset:", error);
+    console.error("Failed to export golden dataset:", error);
     throw error;
   }
 }

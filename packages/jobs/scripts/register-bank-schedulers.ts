@@ -14,7 +14,7 @@ type SchedulerResult = {
 
 async function registerBankSchedulers() {
   try {
-    console.log("🔍 Fetching eligible teams...\n");
+    console.log("Fetching eligible teams...\n");
 
     // Get all eligible teams
     const eligibleTeams = await getEligibleTeamIds();
@@ -27,7 +27,7 @@ async function registerBankSchedulers() {
     console.log(`Found ${eligibleTeams.length} eligible teams\n`);
 
     // Display teams that will get schedulers
-    console.log("📋 Teams that will get bank sync schedulers:");
+    console.log("Teams that will get bank sync schedulers:");
     eligibleTeams.forEach((team, index) => {
       console.log(`${index + 1}. ${team.name || "Unnamed"} (${team.id})`);
       console.log(`   Plan: ${team.plan}`);
@@ -41,7 +41,7 @@ async function registerBankSchedulers() {
 
     // Ask for confirmation
     console.log(
-      "🚨 This will create bank sync schedulers for all eligible teams!",
+      "This will create bank sync schedulers for all eligible teams!",
     );
     console.log("Are you sure you want to proceed? (y/N)");
 
@@ -58,11 +58,11 @@ async function registerBankSchedulers() {
     });
 
     if (response !== "y") {
-      console.log("❌ Registration cancelled.");
+      console.log("Registration cancelled.");
       return;
     }
 
-    console.log("\n📅 Starting scheduler registration process...\n");
+    console.log("\nStarting scheduler registration process...\n");
 
     // Register schedulers for each team
     const results: SchedulerResult[] = [];
@@ -92,7 +92,7 @@ async function registerBankSchedulers() {
           status: "success",
         });
 
-        console.log(`  ✅ Successfully created scheduler: ${schedule.id}`);
+        console.log(`  Successfully created scheduler: ${schedule.id}`);
         console.log(`     Cron: ${generateCronTag(team.id)}`);
         console.log(
           `     Deduplication key: ${team.id}-${bankSyncScheduler.id}`,
@@ -112,7 +112,7 @@ async function registerBankSchedulers() {
             status: "skipped",
             error: "Scheduler already exists",
           });
-          console.log("  ⚠️  Skipped: Scheduler already exists");
+          console.log("  Skipped: Scheduler already exists");
         } else {
           results.push({
             teamId: team.id,
@@ -120,7 +120,7 @@ async function registerBankSchedulers() {
             status: "failed",
             error: errorMessage,
           });
-          console.log(`  ❌ Failed: ${errorMessage}`);
+          console.log(`  Failed: ${errorMessage}`);
         }
       }
 
@@ -132,13 +132,13 @@ async function registerBankSchedulers() {
     const failed = results.filter((r) => r.status === "failed");
     const skipped = results.filter((r) => r.status === "skipped");
 
-    console.log("📊 Registration Summary:");
-    console.log(`✅ Successfully created: ${successful.length}`);
-    console.log(`⚠️  Skipped (already exists): ${skipped.length}`);
-    console.log(`❌ Failed: ${failed.length}`);
+    console.log("Registration Summary:");
+    console.log(`Successfully created: ${successful.length}`);
+    console.log(`Skipped (already exists): ${skipped.length}`);
+    console.log(`Failed: ${failed.length}`);
 
     if (successful.length > 0) {
-      console.log("\n✅ Successfully created schedulers:");
+      console.log("\nSuccessfully created schedulers:");
       for (const result of successful) {
         console.log(
           `  - ${result.teamName || "Unnamed"} (${result.teamId}): ${result.scheduleId}`,
@@ -147,14 +147,14 @@ async function registerBankSchedulers() {
     }
 
     if (skipped.length > 0) {
-      console.log("\n⚠️  Skipped teams (schedulers already exist):");
+      console.log("\nSkipped teams (schedulers already exist):");
       for (const result of skipped) {
         console.log(`  - ${result.teamName || "Unnamed"} (${result.teamId})`);
       }
     }
 
     if (failed.length > 0) {
-      console.log("\n❌ Failed registrations:");
+      console.log("\nFailed registrations:");
       for (const result of failed) {
         console.log(
           `  - ${result.teamName || "Unnamed"} (${result.teamId}): ${result.error}`,
@@ -176,7 +176,7 @@ async function main() {
     if (results) {
       const successful = results.filter((r) => r.status === "success").length;
       console.log(
-        `\n🎉 Script completed successfully. Created ${successful} new schedulers.`,
+        `\nScript completed successfully. Created ${successful} new schedulers.`,
       );
     }
     process.exit(0);

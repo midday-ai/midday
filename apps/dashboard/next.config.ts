@@ -21,13 +21,11 @@ const config = {
     "@midday/invoice",
     "@midday/api",
   ],
-  serverExternalPackages: ["@react-pdf/renderer", "pdfjs-dist"],
+  serverExternalPackages: ["@react-pdf/renderer", "pdfjs-dist", "pino"],
   typescript: {
     ignoreBuildErrors: true,
   },
   devIndicators: false,
-  // Verify invoice editor etc
-  // reactCompiler: true,
   async headers() {
     return [
       {

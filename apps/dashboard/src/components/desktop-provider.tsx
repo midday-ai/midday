@@ -27,11 +27,11 @@ export function DesktopProvider() {
         if (pathname === "/") {
           // Enable search window for dashboard and login pages
           await currentWindow.emit("search-window-enabled", true);
-          console.log("🔍 Search window enabled via event");
+          console.log("Search window enabled via event");
         } else if (pathname === "/login") {
           // Enable search window for login page
           await currentWindow.emit("search-window-enabled", false);
-          console.log("🔍 Search window enabled via event");
+          console.log("Search window enabled via event");
         }
       } catch (error) {
         console.error("Failed to emit search window state:", error);
@@ -61,9 +61,9 @@ export function DesktopProvider() {
           return;
         }
 
-        console.log("📄 Calling show_window command");
+        console.log("Calling show_window command");
         await invoke("show_window");
-        console.log("✅ Window shown successfully");
+        console.log("Window shown successfully");
       } catch (error) {
         console.error("Failed to show window:", error);
       }
@@ -99,7 +99,7 @@ export function DesktopProvider() {
         console.log("🔗 Setting up deep link listener...");
 
         cleanup = await listenForDeepLinks((path) => {
-          console.log("🎯 Deep link navigation received:", path);
+          console.log("Deep link navigation received:", path);
 
           // Handle different paths
           if (path === "" || path === "dashboard") {
@@ -214,7 +214,7 @@ export function DesktopProvider() {
           },
         );
 
-        console.log("✅ Desktop navigation listeners registered");
+        console.log("Desktop navigation listeners registered");
       } catch (error) {
         console.error("Failed to set up desktop navigation listener:", error);
       }

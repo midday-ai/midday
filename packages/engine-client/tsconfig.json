@@ -3,6 +3,13 @@
   "include": ["src"],
   "exclude": ["node_modules"],
   "compilerOptions": {
-    "baseUrl": "."
-  }
+    "baseUrl": ".",
+    "composite": false,
+    "noEmit": true
+  },
+  "references": [
+    {
+      "path": "../../apps/engine"
+    }
+  ]
 }

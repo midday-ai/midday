@@ -3,8 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "dependencies": {
-    "hono": "^4.10.6"
+    "hono": "4.10.7"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

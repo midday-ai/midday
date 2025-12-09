@@ -1,4 +1,5 @@
 import type { Attachments } from "./types";
+import { lookupDomainByCompanyName } from "./utils/domain-lookup";
 
 export const allowedMimeTypes = [
   "image/heic",
@@ -15,26 +16,171 @@ export function getAllowedAttachments(attachments?: Attachments) {
   );
 }
 
+/**
+ * Extract domain from email address
+ * Handles various email formats and extracts root domain
+ */
 export function getDomainFromEmail(email?: string | null): string | null {
+  if (!email) return null;
+
+  // Clean email - remove any whitespace and angle brackets
+  const cleanedEmail = email.trim().replace(/[<>]/g, "");
+
   const emailPattern = /^[^\s@]+@([^\s@]+)$/;
-  const match = email?.match(emailPattern);
+  const match = cleanedEmail.match(emailPattern);
   const domain = match?.at(1);
 
   if (!domain) return null;
 
-  const domainParts = domain.split(".");
+  // Handle common email service domains (keep as-is)
+  const commonEmailServices = [
+    "gmail.com",
+    "yahoo.com",
+    "outlook.com",
+    "hotmail.com",
+    "icloud.com",
+    "protonmail.com",
+  ];
+  if (commonEmailServices.includes(domain.toLowerCase())) {
+    return domain.toLowerCase();
+  }
 
+  // Extract root domain (remove subdomains)
+  const domainParts = domain.toLowerCase().split(".");
+
+  // Handle special cases like .co.uk, .com.au, etc.
+  const twoPartTLDs = [
+    "co.uk",
+    "com.au",
+    "co.nz",
+    "co.za",
+    "com.br",
+    "com.mx",
+    "co.jp",
+    "com.cn",
+  ];
+
+  // Check if it's a two-part TLD
+  if (domainParts.length >= 3) {
+    const lastTwo = domainParts.slice(-2).join(".");
+    if (twoPartTLDs.includes(lastTwo)) {
+      // Return domain with two-part TLD (e.g., example.co.uk)
+      return domainParts.slice(-3).join(".");
+    }
+  }
+
+  // Standard case: return last two parts (e.g., example.com)
   if (domainParts.length > 2) {
     return domainParts.slice(-2).join(".");
   }
 
-  return domain;
+  return domain.toLowerCase();
 }
 
+/**
+ * Remove protocol and clean domain/URL
+ * Handles various URL formats and extracts clean domain
+ */
 export function removeProtocolFromDomain(domain: string | null): string | null {
   if (!domain) return null;
 
-  return domain.replace(/^(https?:\/\/)/, "");
+  // Remove protocol (http://, https://, www.)
+  let cleaned = domain
+    .trim()
+    .replace(/^(https?:\/\/)?(www\.)?/i, "")
+    .toLowerCase();
+
+  // Remove trailing slash
+  cleaned = cleaned.replace(/\/$/, "");
+
+  // Remove path, query params, and fragments
+  cleaned = cleaned.split("/")[0]?.split("?")[0]?.split("#")[0] || cleaned;
+
+  // Extract root domain (remove subdomains)
+  const domainParts = cleaned.split(".");
+
+  // Handle special cases like .co.uk, .com.au, etc.
+  const twoPartTLDs = [
+    "co.uk",
+    "com.au",
+    "co.nz",
+    "co.za",
+    "com.br",
+    "com.mx",
+    "co.jp",
+    "com.cn",
+  ];
+
+  if (domainParts.length >= 3) {
+    const lastTwo = domainParts.slice(-2).join(".");
+    if (twoPartTLDs.includes(lastTwo)) {
+      return domainParts.slice(-3).join(".");
+    }
+  }
+
+  // Standard case: return last two parts
+  if (domainParts.length > 2) {
+    return domainParts.slice(-2).join(".");
+  }
+
+  return cleaned;
+}
+
+/**
+ * Intelligently extract website from invoice/receipt data
+ * Tries multiple sources: explicit website, email domain, vendor name lookup
+ */
+export async function extractWebsite(
+  website: string | null | undefined,
+  email: string | null | undefined,
+  vendorName: string | null | undefined,
+  logger?: ReturnType<typeof import("@midday/logger").createLoggerWithContext>,
+): Promise<string | null> {
+  // First priority: explicit website field
+  if (website) {
+    const cleaned = removeProtocolFromDomain(website);
+    if (cleaned) return cleaned;
+  }
+
+  // Second priority: extract from email
+  if (email) {
+    const domain = getDomainFromEmail(email);
+    if (domain) {
+      // Skip common email service domains
+      const commonEmailServices = [
+        "gmail.com",
+        "yahoo.com",
+        "outlook.com",
+        "hotmail.com",
+        "icloud.com",
+        "protonmail.com",
+      ];
+      if (!commonEmailServices.includes(domain)) {
+        return domain;
+      }
+    }
+  }
+
+  // Third priority: lookup domain by company name using Gemini Grounding
+  if (vendorName) {
+    try {
+      const lookedUpDomain = await lookupDomainByCompanyName(
+        vendorName,
+        logger,
+      );
+      if (lookedUpDomain) {
+        return lookedUpDomain;
+      }
+    } catch (error) {
+      // Log error but don't throw - graceful degradation
+      logger?.warn("Domain lookup failed during website extraction", {
+        vendorName,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+
+  return null;
 }
 
 export function getDocumentTypeFromMimeType(mimetype: string): string {
@@ -179,3 +325,5 @@ export function limitWords(text: string, maxWords: number): string {
 
   return words.slice(0, maxWords).join(" ");
 }
+
+export { mapLanguageCodeToPostgresConfig } from "./utils/language-mapping";

@@ -15,20 +15,23 @@
   "dependencies": {
     "@hono/zod-openapi": "^1.1.5",
     "@hono/zod-validator": "^0.7.5",
-    "hono": "^4.10.6",
-    "jose": "^6.1.2",
+    "hono": "4.10.7",
+    "jose": "^6.1.3",
     "plaid": "^39.1.0",
     "typesense": "^2.1.0",
     "workers-ai-provider": "^2.0.0",
-    "xior": "^0.8.0",
-    "zod": "^4.1.12"
+    "xior": "^0.8.1",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20251121.0",
-    "wrangler": "^4.50.0"
+    "@cloudflare/workers-types": "^4.20251209.0",
+    "wrangler": "^4.53.0"
   },
   "exports": {
-    ".": "./dist/index.js",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
     "./gocardless/utils": "./src/providers/gocardless/utils.ts"
   }
 }

@@ -11,7 +11,7 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
-    "format": "biome format --write .",
+    "lint:fix": "biome check --write .",
     "typecheck": "tsc --noEmit",
     "dev": "email dev -p 3003",
     "build": "email build",
@@ -24,7 +24,7 @@
     "@react-email/render": "2.0.0",
     "@react-email/tailwind": "2.0.1",
     "date-fns": "^4.1.0",
-    "react-email": "5.0.4",
+    "react-email": "5.0.6",
     "responsive-react-email": "^0.0.5"
   },
   "devDependencies": {

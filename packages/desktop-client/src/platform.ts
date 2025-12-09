@@ -15,11 +15,11 @@ export async function listenForDeepLinks(handler: DeepLinkHandler) {
 
   try {
     const unlisten = await listen<string>("deep-link-navigate", (event) => {
-      console.log("🎯 Deep link navigation received:", event.payload);
+      console.log("Deep link navigation received:", event.payload);
       handler(event.payload);
     });
 
-    console.log("✅ Deep link listener registered");
+    console.log("Deep link listener registered");
     return unlisten;
   } catch (error) {
     console.error("Failed to listen for deep links:", error);

@@ -18,7 +18,7 @@ import {
   REVENUE_CATEGORIES,
 } from "@midday/categories";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
-import { logger } from "@midday/logger";
+import { createLoggerWithContext } from "@midday/logger";
 import { resolveTaxValues } from "@midday/utils/tax";
 import {
   and,
@@ -41,6 +41,8 @@ import type { SQL } from "drizzle-orm/sql/sql";
 import { nanoid } from "nanoid";
 import { createActivity } from "./activities";
 import { type Attachment, createAttachments } from "./transaction-attachments";
+
+const logger = createLoggerWithContext("transactions");
 
 export type GetTransactionsParams = {
   teamId: string;
@@ -826,8 +828,7 @@ export async function getSimilarTransactions(
     minSimilarityScore = 0.9,
   } = params;
 
-  logger.info({
-    msg: "Starting hybrid search for similar transactions",
+  logger.info("Starting hybrid search for similar transactions", {
     name,
     teamId,
     minSimilarityScore,
@@ -867,7 +868,7 @@ export async function getSimilarTransactions(
         const sourceText = sourceEmbedding[0]!.sourceText;
         embeddingSourceText = sourceText; // Store for FTS search
 
-        logger.info("✅ Found embedding for transaction", {
+        logger.info("Found embedding for transaction", {
           transactionId,
           sourceText,
           embeddingExists: true,
@@ -925,7 +926,7 @@ export async function getSimilarTransactions(
         });
       } else {
         logger.warn(
-          "❌ No embedding found for transaction - will rely on FTS only",
+          "No embedding found for transaction - will rely on FTS only",
           {
             transactionId,
             teamId,
@@ -964,8 +965,7 @@ export async function getSimilarTransactions(
     sql`to_tsquery('english', ${searchQuery}) @@ ${transactions.ftsVector}`,
   );
 
-  logger.info({
-    msg: "FTS search using term",
+  logger.info("FTS search using term", {
     searchTerm,
     searchQuery,
     usingEmbeddingSourceText: false, // Always false now - we use original name
@@ -998,8 +998,7 @@ export async function getSimilarTransactions(
     (c) => c !== undefined,
   ) as SQL[];
 
-  logger.info({
-    msg: "FTS search conditions",
+  logger.info("FTS search conditions", {
     searchTerm,
     searchQuery,
     conditionsCount: finalFtsConditions.length,
@@ -1023,8 +1022,7 @@ export async function getSimilarTransactions(
     .from(transactions)
     .where(and(...finalFtsConditions)); // No limit - get all FTS matches
 
-  logger.info({
-    msg: "FTS search completed",
+  logger.info("FTS search completed", {
     resultsFound: ftsResults.length,
     searchTerm,
     searchQuery,
@@ -1375,6 +1373,119 @@ export async function updateTransaction(
   return getFullTransactionData(db, result.id, teamId);
 }
 
+export type GetTransactionsByIdsParams = {
+  ids: string[];
+  teamId: string;
+};
+
+export async function getTransactionsByIds(
+  db: Database,
+  params: GetTransactionsByIdsParams,
+) {
+  const { ids, teamId } = params;
+
+  if (ids.length === 0) {
+    return [];
+  }
+
+  // Return snake_case structure to match Supabase REST API response format
+  const results = await db
+    .select({
+      id: transactions.id,
+      date: transactions.date,
+      name: transactions.name,
+      description: transactions.description,
+      amount: transactions.amount,
+      note: transactions.note,
+      balance: transactions.balance,
+      currency: transactions.currency,
+      counterparty_name: transactions.counterpartyName,
+      tax_type: transactions.taxType,
+      tax_rate: transactions.taxRate,
+      tax_amount: transactions.taxAmount,
+      status: transactions.status,
+      attachments: sql<
+        Array<{
+          id: string;
+          name: string | null;
+          path: string[] | null;
+          type: string | null;
+          size: number | null;
+        }>
+      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transactionAttachments.id}, 'name', ${transactionAttachments.name}, 'path', ${transactionAttachments.path}, 'type', ${transactionAttachments.type}, 'size', ${transactionAttachments.size})) FILTER (WHERE ${transactionAttachments.id} IS NOT NULL), '[]'::json)`.as(
+        "attachments",
+      ),
+      category: sql<{
+        id: string;
+        name: string | null;
+        description: string | null;
+        tax_rate: number | null;
+        tax_type: string | null;
+        tax_reporting_code: string | null;
+      } | null>`json_build_object('id', ${transactionCategories.id}, 'name', ${transactionCategories.name}, 'description', ${transactionCategories.description}, 'tax_rate', ${transactionCategories.taxRate}, 'tax_type', ${transactionCategories.taxType}, 'tax_reporting_code', ${transactionCategories.taxReportingCode})`.as(
+        "category",
+      ),
+      bank_account: sql<{
+        id: string;
+        name: string | null;
+      } | null>`json_build_object('id', ${bankAccounts.id}, 'name', ${bankAccounts.name})`.as(
+        "bank_account",
+      ),
+      tags: sql<
+        Array<{ id: string; tag: { id: string; name: string | null } }>
+      >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${transactionTags.id}, 'tag', jsonb_build_object('id', ${tags.id}, 'name', ${tags.name}))) FILTER (WHERE ${transactionTags.id} IS NOT NULL), '[]'::json)`.as(
+        "tags",
+      ),
+    })
+    .from(transactions)
+    .leftJoin(
+      transactionCategories,
+      and(
+        eq(transactions.categorySlug, transactionCategories.slug),
+        eq(transactionCategories.teamId, teamId),
+      ),
+    )
+    .leftJoin(
+      bankAccounts,
+      and(
+        eq(transactions.bankAccountId, bankAccounts.id),
+        eq(bankAccounts.teamId, teamId),
+      ),
+    )
+    .leftJoin(
+      transactionTags,
+      and(
+        eq(transactionTags.transactionId, transactions.id),
+        eq(transactionTags.teamId, teamId),
+      ),
+    )
+    .leftJoin(
+      tags,
+      and(eq(tags.id, transactionTags.tagId), eq(tags.teamId, teamId)),
+    )
+    .leftJoin(
+      transactionAttachments,
+      and(
+        eq(transactionAttachments.transactionId, transactions.id),
+        eq(transactionAttachments.teamId, teamId),
+      ),
+    )
+    .where(and(inArray(transactions.id, ids), eq(transactions.teamId, teamId)))
+    .groupBy(
+      transactions.id,
+      transactionCategories.id,
+      transactionCategories.name,
+      transactionCategories.description,
+      transactionCategories.taxRate,
+      transactionCategories.taxType,
+      transactionCategories.taxReportingCode,
+      bankAccounts.id,
+      bankAccounts.name,
+    );
+
+  return results;
+}
+
 type UpdateTransactionsData = {
   ids: string[];
   teamId: string;
@@ -1577,4 +1688,218 @@ export async function createTransactions(
 
   // Filter out any null results
   return fullTransactions.filter((transaction) => transaction !== null);
+}
+
+export type UpsertTransactionData = {
+  name: string;
+  date: string;
+  method: "other" | "card_purchase" | "transfer";
+  amount: number;
+  currency: string;
+  teamId: string;
+  bankAccountId: string | null;
+  internalId: string;
+  status: "pending" | "completed" | "archived" | "posted" | "excluded";
+  manual: boolean;
+  categorySlug?: string | null;
+  description?: string | null;
+  balance?: number | null;
+  note?: string | null;
+  counterpartyName?: string | null;
+  merchantName?: string | null;
+  assignedId?: string | null;
+  internal?: boolean;
+  notified?: boolean;
+  baseAmount?: number | null;
+  baseCurrency?: string | null;
+  taxAmount?: number | null;
+  taxRate?: number | null;
+  taxType?: string | null;
+  recurring?: boolean;
+  frequency?:
+    | "weekly"
+    | "biweekly"
+    | "monthly"
+    | "semi_monthly"
+    | "annually"
+    | "irregular"
+    | "unknown"
+    | null;
+  enrichmentCompleted?: boolean;
+};
+
+export type UpsertTransactionsParams = {
+  transactions: UpsertTransactionData[];
+  teamId: string;
+};
+
+/**
+ * Bulk upsert transactions with conflict handling on internalId
+ * Used by import-transactions and update-account-base-currency processors
+ */
+export async function upsertTransactions(
+  db: Database,
+  params: UpsertTransactionsParams,
+): Promise<Array<{ id: string }>> {
+  const { transactions: transactionsData, teamId } = params;
+
+  const upserted = await db
+    .insert(transactions)
+    .values(transactionsData)
+    .onConflictDoUpdate({
+      target: [transactions.internalId],
+      set: {
+        // Update all fields except id and createdAt
+        name: sql`excluded.name`,
+        amount: sql`excluded.amount`,
+        currency: sql`excluded.currency`,
+        date: sql`excluded.date`,
+        description: sql`excluded.description`,
+        method: sql`excluded.method`,
+        status: sql`excluded.status`,
+        balance: sql`excluded.balance`,
+        note: sql`excluded.note`,
+        categorySlug: sql`excluded.category_slug`,
+        counterpartyName: sql`excluded.counterparty_name`,
+        merchantName: sql`excluded.merchant_name`,
+        bankAccountId: sql`excluded.bank_account_id`,
+        assignedId: sql`excluded.assigned_id`,
+        internal: sql`excluded.internal`,
+        notified: sql`excluded.notified`,
+        manual: sql`excluded.manual`,
+        baseAmount: sql`excluded.base_amount`,
+        baseCurrency: sql`excluded.base_currency`,
+        taxAmount: sql`excluded.tax_amount`,
+        taxRate: sql`excluded.tax_rate`,
+        taxType: sql`excluded.tax_type`,
+        recurring: sql`excluded.recurring`,
+        frequency: sql`excluded.frequency`,
+        enrichmentCompleted: sql`excluded.enrichment_completed`,
+      },
+    })
+    .returning({
+      id: transactions.id,
+    });
+
+  return upserted;
+}
+
+export type GetTransactionsByAccountIdParams = {
+  accountId: string;
+  teamId: string;
+};
+
+/**
+ * Get all transactions for a specific account
+ * Used by update-account-base-currency processor
+ */
+export async function getTransactionsByAccountId(
+  db: Database,
+  params: GetTransactionsByAccountIdParams,
+) {
+  const { accountId, teamId } = params;
+
+  return db
+    .select()
+    .from(transactions)
+    .where(
+      and(
+        eq(transactions.bankAccountId, accountId),
+        eq(transactions.teamId, teamId),
+      ),
+    );
+}
+
+export type BulkUpdateTransactionsBaseCurrencyParams = {
+  transactions: Array<{
+    id: string;
+    baseAmount: number;
+    baseCurrency: string;
+  }>;
+  teamId: string;
+};
+
+/**
+ * Bulk update transactions with base currency/amount
+ * Uses batch processing internally for large datasets
+ */
+export async function bulkUpdateTransactionsBaseCurrency(
+  db: Database,
+  params: BulkUpdateTransactionsBaseCurrencyParams,
+) {
+  const { transactions: transactionsData, teamId } = params;
+  const BATCH_LIMIT = 500;
+
+  // Process in batches
+  for (let i = 0; i < transactionsData.length; i += BATCH_LIMIT) {
+    const batch = transactionsData.slice(i, i + BATCH_LIMIT);
+
+    // Get existing transactions to preserve all fields
+    const transactionIds = batch.map((tx) => tx.id);
+    const existingTransactions = await db
+      .select()
+      .from(transactions)
+      .where(
+        and(
+          inArray(transactions.id, transactionIds),
+          eq(transactions.teamId, teamId),
+        ),
+      );
+
+    // Create upsert data preserving all existing fields, updating only baseAmount and baseCurrency
+    const upsertData: UpsertTransactionData[] = existingTransactions.map(
+      (tx) => {
+        const update = batch.find((b) => b.id === tx.id);
+        return {
+          name: tx.name,
+          date: tx.date,
+          method: tx.method as "other" | "card_purchase" | "transfer",
+          amount: Number(tx.amount),
+          currency: tx.currency ?? "",
+          teamId: tx.teamId,
+          bankAccountId: tx.bankAccountId ?? null,
+          internalId: tx.internalId ?? "",
+          status: (tx.status ?? "posted") as
+            | "pending"
+            | "completed"
+            | "archived"
+            | "posted"
+            | "excluded",
+          manual: tx.manual ?? false,
+          categorySlug: tx.categorySlug,
+          description: tx.description,
+          balance: tx.balance ? Number(tx.balance) : null,
+          note: tx.note,
+          counterpartyName: tx.counterpartyName,
+          merchantName: tx.merchantName,
+          assignedId: tx.assignedId,
+          internal: tx.internal ?? false,
+          notified: tx.notified ?? false,
+          baseAmount:
+            update?.baseAmount ??
+            (tx.baseAmount ? Number(tx.baseAmount) : null),
+          baseCurrency: update?.baseCurrency ?? tx.baseCurrency ?? null,
+          taxAmount: tx.taxAmount ? Number(tx.taxAmount) : null,
+          taxRate: tx.taxRate ? Number(tx.taxRate) : null,
+          taxType: tx.taxType,
+          recurring: tx.recurring ?? false,
+          frequency: tx.frequency as
+            | "weekly"
+            | "biweekly"
+            | "monthly"
+            | "semi_monthly"
+            | "annually"
+            | "irregular"
+            | "unknown"
+            | null,
+          enrichmentCompleted: tx.enrichmentCompleted ?? false,
+        };
+      },
+    );
+
+    await upsertTransactions(db, {
+      transactions: upsertData,
+      teamId,
+    });
+  }
 }

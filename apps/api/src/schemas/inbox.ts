@@ -172,6 +172,10 @@ export const processAttachmentsSchema = z.array(
     mimetype: z.string(),
     size: z.number(),
     filePath: z.array(z.string()),
+    referenceId: z.string().optional(),
+    website: z.string().optional(),
+    senderEmail: z.string().email().optional(),
+    inboxAccountId: z.string().uuid().optional(),
   }),
 );
 

@@ -50,8 +50,7 @@ export async function getUserContext({
 
     // Cache team context (non-blocking)
     chatCache.setTeamContext(teamId, teamContext).catch((err) => {
-      logger.warn({
-        msg: "Failed to cache team context",
+      logger.warn("Failed to cache team context", {
         teamId,
         error: err.message,
       });
@@ -95,8 +94,7 @@ export async function getUserContext({
 
   // Cache for future requests (non-blocking)
   chatCache.setUserContext(userId, teamId, context).catch((err) => {
-    logger.warn({
-      msg: "Failed to cache user context",
+    logger.warn("Failed to cache user context", {
       userId,
       teamId,
       error: err.message,

@@ -149,7 +149,12 @@ export const receiptSchema = z.object({
 });
 
 export const documentClassifierSchema = z.object({
-  title: z.string().nullable().describe("The title of the document."),
+  title: z
+    .string()
+    .nullable()
+    .describe(
+      "A descriptive, meaningful title for this document that can be used as a filename. Include key identifying information like document number, company names, dates, or order numbers when available. Examples: 'Invoice INV-2024-001 from Acme Corp', 'Receipt from Starbucks Coffee - 2024-03-15', 'Service Agreement with Acme Corp - 2024-03-15'. Do NOT use generic names like 'Invoice', 'Receipt', or 'Document' - make it specific to this document.",
+    ),
   summary: z
     .string()
     .nullable()
@@ -178,7 +183,12 @@ export const documentClassifierSchema = z.object({
 });
 
 export const imageClassifierSchema = z.object({
-  title: z.string().nullable().describe("The title of the document."),
+  title: z
+    .string()
+    .nullable()
+    .describe(
+      "A descriptive, meaningful title for this image that can be used as a filename. Include key identifying information like merchant/store names, dates, invoice numbers, or order numbers when visible. Examples: 'Receipt from Starbucks Coffee - 2024-03-15', 'Invoice INV-2024-001 from Acme Corp', 'Acme Corp Logo'. Do NOT use generic names like 'Receipt', 'Invoice', or 'Image' - make it specific to this document.",
+    ),
   summary: z
     .string()
     .nullable()

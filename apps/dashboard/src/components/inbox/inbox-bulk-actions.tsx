@@ -1,5 +1,8 @@
 "use client";
 
+import { revalidateInbox } from "@/actions/revalidate-action";
+import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
+import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useInboxStore } from "@/store/inbox";
 import { useTRPC } from "@/trpc/client";
 import {
@@ -19,12 +22,16 @@ import NumberFlow from "@number-flow/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export function InboxBulkActions() {
   const { selectedIds, clearSelection } = useInboxStore();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const { setParams } = useInboxParams();
+  const { params: filter } = useInboxFilterParams();
   const [isOpen, setOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -42,16 +49,85 @@ export function InboxBulkActions() {
 
   const deleteInboxMutation = useMutation(
     trpc.inbox.deleteMany.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
+      onMutate: async () => {
+        // Cancel outgoing refetches
+        await queryClient.cancelQueries({
           queryKey: trpc.inbox.get.infiniteQueryKey(),
         });
 
-        queryClient.invalidateQueries({
-          queryKey: trpc.inbox.getById.queryKey(),
+        // Get current data
+        const previousData = queryClient.getQueriesData({
+          queryKey: trpc.inbox.get.infiniteQueryKey(),
         });
 
+        // Flatten the data from all pages
+        const allInboxes = previousData
+          // @ts-expect-error
+          .flatMap(([, data]) => data?.pages ?? [])
+          .flatMap((page: any) => page.data ?? []);
+
+        // Optimistically update infinite query data by filtering out deleted items
+        queryClient.setQueriesData(
+          { queryKey: trpc.inbox.get.infiniteQueryKey() },
+          (old: any) => ({
+            pages: old.pages.map((page: any) => ({
+              ...page,
+              data: page.data.filter(
+                (item: any) => !selectedIdsArray.includes(item.id),
+              ),
+            })),
+            pageParams: old.pageParams,
+          }),
+        );
+
+        return { previousData, allInboxes };
+      },
+      onSuccess: async (_, __, context) => {
+        // Invalidate all related queries
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: trpc.inbox.get.infiniteQueryKey(),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: trpc.inbox.getById.queryKey(),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: trpc.documents.get.infiniteQueryKey(),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: trpc.documents.get.queryKey(),
+          }),
+        ]);
+
+        // Revalidate server-side cache
+        await revalidateInbox();
+
+        // Check if inbox is empty after deletion
+        // Use the optimistically updated data from onMutate
+        const remainingInboxes = (context?.allInboxes ?? []).filter(
+          (item) => !selectedIdsArray.includes(item.id),
+        );
+
+        const hasFilters = Object.values(filter).some(
+          (value) => value !== null,
+        );
+
+        // Navigate to empty state if inbox is empty and no filters
+        if (remainingInboxes.length === 0 && !hasFilters) {
+          setParams({ inboxId: null, connected: null });
+          router.push("/inbox", { scroll: false });
+        }
+
         clearSelection();
+      },
+      onError: (_, __, context) => {
+        // Restore previous data on error
+        if (context?.previousData) {
+          queryClient.setQueriesData(
+            { queryKey: trpc.inbox.get.infiniteQueryKey() },
+            context.previousData,
+          );
+        }
       },
     }),
   );

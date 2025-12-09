@@ -15,6 +15,7 @@
   "exports": {
     "./client": "./src/client.ts",
     "./job-client": "./src/job-client.ts",
+    "./worker-client": "./src/worker-client.ts",
     "./queries": "./src/queries/index.ts",
     "./errors": "./src/errors.ts",
     "./schema": "./src/schema.ts",
@@ -28,18 +29,22 @@
   },
   "dependencies": {
     "@date-fns/utc": "^2.1.1",
+    "@midday/cache": "workspace:*",
     "@midday/categories": "workspace:*",
     "@midday/encryption": "workspace:*",
     "@midday/invoice": "workspace:*",
     "@midday/logger": "workspace:*",
+    "@midday/utils": "workspace:*",
+    "@sindresorhus/slugify": "^3.0.0",
     "@types/pg": "^8.15.6",
-    "drizzle-orm": "^0.44.7",
+    "drizzle-orm": "^0.45.0",
     "camelcase-keys": "^10.0.1",
+    "nanoid": "^5.1.6",
     "pg": "^8.16.3",
     "snakecase-keys": "^9.0.2"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.31.7",
+    "drizzle-kit": "^0.31.8",
     "@types/bun": "latest"
   }
 }

@@ -3,6 +3,7 @@ import { inbox, transactionMatchSuggestions } from "@db/schema";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { createActivity } from "./activities";
 import { matchTransaction, updateInbox } from "./inbox";
+import { checkInboxEmbeddingExists } from "./inbox-embeddings";
 import {
   type MatchResult,
   createMatchSuggestion,
@@ -29,6 +30,16 @@ export async function calculateInboxSuggestions(
   suggestion?: MatchResult;
 }> {
   const { teamId, inboxId } = params;
+
+  // Check if embedding exists before processing
+  // If embedding doesn't exist yet, skip processing and leave status unchanged
+  // This handles race conditions where batch-process-matching runs before embed-inbox completes
+  const embeddingExists = await checkInboxEmbeddingExists(db, { inboxId });
+  if (!embeddingExists) {
+    // Embedding not ready yet - return early without changing status
+    // The scheduler will retry later when embedding is available
+    return { action: "no_match_yet" };
+  }
 
   // Set status to analyzing while we process
   await updateInbox(db, {

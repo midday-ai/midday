@@ -7,7 +7,9 @@ import {
   transactionMatchSuggestions,
   transactions,
 } from "@db/schema";
-import { logger } from "@midday/logger";
+import { createLoggerWithContext } from "@midday/logger";
+
+const logger = createLoggerWithContext("matching");
 import {
   and,
   cosineDistance,
@@ -459,7 +461,7 @@ export async function findMatches(
     .limit(1);
 
   if (!inboxData.length) {
-    logger.warn("❌ INBOX ITEM MISSING", {
+    logger.warn("INBOX ITEM MISSING", {
       inboxId,
       teamId,
       inboxDataLength: inboxData.length,
@@ -471,7 +473,7 @@ export async function findMatches(
 
   // Require inbox embedding for quality matching
   if (!inboxItem.embedding) {
-    logger.warn("❌ INBOX EMBEDDING MISSING - skipping match", {
+    logger.warn("INBOX EMBEDDING MISSING - skipping match", {
       inboxId,
       teamId,
       displayName: inboxItem.displayName,
@@ -481,7 +483,7 @@ export async function findMatches(
 
   // Require actual document date for meaningful matching
   if (!inboxItem.date) {
-    logger.warn("❌ INBOX DATE MISSING - skipping match", {
+    logger.warn("INBOX DATE MISSING - skipping match", {
       inboxId,
       teamId,
       displayName: inboxItem.displayName,
@@ -491,7 +493,7 @@ export async function findMatches(
 
   // Log the matched inbox item details
   logger.info(
-    `📋 INBOX: ${inboxItem.displayName} | ${inboxItem.amount} ${inboxItem.currency} | ${inboxItem.date} | ${inboxItem.type} | embedding: ${!!inboxItem.embedding}`,
+    `INBOX: ${inboxItem.displayName} | ${inboxItem.amount} ${inboxItem.currency} | ${inboxItem.date} | ${inboxItem.type} | embedding: ${!!inboxItem.embedding}`,
     { teamId, inboxId },
   );
 
@@ -627,7 +629,7 @@ export async function findMatches(
       .limit(5);
 
     candidateTransactions.push(...perfectMatches);
-    logger.info("🎯 QUERY 1 - Perfect financial matches", {
+    logger.info("QUERY 1 - Perfect financial matches", {
       inboxId,
       params: {
         inboxAmount,
@@ -653,7 +655,7 @@ export async function findMatches(
       inboxBaseCurrency &&
       inboxBaseCurrency !== "";
 
-    logger.info("🎯 QUERY 2 - Base currency matching check", {
+    logger.info("QUERY 2 - Base currency matching check", {
       inboxId,
       candidateCount: candidateTransactions.length,
       inboxBaseCurrency,
@@ -756,7 +758,7 @@ export async function findMatches(
         .limit(5);
 
       candidateTransactions.push(...baseMatches);
-      logger.info("🎯 QUERY 2 - Base currency matches", {
+      logger.info("QUERY 2 - Base currency matches", {
         inboxId,
         params: {
           inboxBaseAmount,
@@ -874,7 +876,7 @@ export async function findMatches(
         .limit(10);
 
       candidateTransactions.push(...semanticMatches);
-      logger.info("🎯 QUERY 3 - Strong semantic matches", {
+      logger.info("QUERY 3 - Strong semantic matches", {
         inboxId,
         params: {
           embeddingThreshold: EMBEDDING_THRESHOLDS.STRONG_MATCH,
@@ -986,7 +988,7 @@ export async function findMatches(
         .limit(10);
 
       candidateTransactions.push(...goodMatches);
-      logger.info("🎯 QUERY 4 - Good semantic matches", {
+      logger.info("QUERY 4 - Good semantic matches", {
         inboxId,
         params: {
           embeddingThreshold: EMBEDDING_THRESHOLDS.GOOD_MATCH,
@@ -1018,7 +1020,7 @@ export async function findMatches(
   }
 
   logger.info(
-    `📊 CANDIDATE ANALYSIS: Found ${candidateTransactions.length} total candidates before sorting`,
+    `CANDIDATE ANALYSIS: Found ${candidateTransactions.length} total candidates before sorting`,
     {
       inboxId,
       teamId,
@@ -1143,7 +1145,7 @@ export async function findMatches(
       // Debug amount scoring for first candidate
       if (candidate === candidateTransactions[0]) {
         console.log(
-          `💰 AMOUNT DEBUG: inbox=${inboxItem.amount} ${inboxItem.currency}, candidate=${candidate.amount} ${candidate.currency}, score=${amountScore}`,
+          `AMOUNT DEBUG: inbox=${inboxItem.amount} ${inboxItem.currency}, candidate=${candidate.amount} ${candidate.currency}, score=${amountScore}`,
         );
       }
       const currencyScore = calculateCurrencyScore(
@@ -1154,7 +1156,7 @@ export async function findMatches(
       // Debug currency scoring for first candidate
       if (candidate === candidateTransactions[0]) {
         console.log(
-          `💱 CURRENCY DEBUG: inbox="${inboxItem.currency}", candidate="${candidate.currency}", score=${currencyScore}`,
+          `CURRENCY DEBUG: inbox="${inboxItem.currency}", candidate="${candidate.currency}", score=${currencyScore}`,
         );
       }
       const dateScore = calculateDateScore(
@@ -1188,7 +1190,7 @@ export async function findMatches(
 
         // Log when we're using optimized weights for perfect matches
         if (candidate === candidateTransactions[0]) {
-          logger.info("🎯 PERFECT MATCH WEIGHT REBALANCING", {
+          logger.info("PERFECT MATCH WEIGHT REBALANCING", {
             inboxId,
             transactionId: candidate.transactionId,
             originalWeights: {
@@ -1380,7 +1382,7 @@ export async function findMatches(
       // Debug the first candidate
       if (candidate === candidateTransactions[0]) {
         console.log(
-          `🔍 FIRST CANDIDATE: score=${confidenceScore}, debugThreshold=${debugThreshold}, meets=${confidenceScore >= debugThreshold}`,
+          `FIRST CANDIDATE: score=${confidenceScore}, debugThreshold=${debugThreshold}, meets=${confidenceScore >= debugThreshold}`,
         );
       }
 
@@ -1458,7 +1460,7 @@ export async function findMatches(
                     ) {
                       shouldAutoMatch = true;
 
-                      logger.info("🏆 SEMANTIC MERCHANT AUTO-MATCH", {
+                      logger.info("SEMANTIC MERCHANT AUTO-MATCH", {
                         teamId,
                         inboxId,
                         transactionId: candidate.transactionId,
@@ -1508,7 +1510,7 @@ export async function findMatches(
       }
     } catch (error) {
       // ROBUSTNESS: Handle individual candidate processing errors gracefully
-      logger.error("❌ CANDIDATE PROCESSING ERROR", {
+      logger.error("CANDIDATE PROCESSING ERROR", {
         error: error instanceof Error ? error.message : String(error),
         transactionId: candidate?.transactionId,
         inboxId: inboxItem.id,
@@ -1522,7 +1524,7 @@ export async function findMatches(
     }
   }
 
-  logger.info(`📊 ANALYSIS: ${candidateTransactions.length} candidates found`);
+  logger.info(`ANALYSIS: ${candidateTransactions.length} candidates found`);
 
   // Sort scoring details by confidence for proper ranking display
   const sortedScoring = scoringDetails.sort(
@@ -1533,19 +1535,23 @@ export async function findMatches(
   for (let i = 0; i < Math.min(3, sortedScoring.length); i++) {
     const s = sortedScoring[i];
     logger.info(
-      `🏆 #${i + 1}: ${s?.name} | Final: ${s?.finalConfidence.toFixed(3)} | Embedding: ${s?.scores.embedding?.toFixed(3)} | Amount: ${s?.scores.amount?.toFixed(3)} | Currency: ${s?.scores.currency?.toFixed(3)} | Date: ${s?.scores.date?.toFixed(3)}`,
+      `#${i + 1}: ${s?.name} | Final: ${s?.finalConfidence.toFixed(3)} | Embedding: ${s?.scores.embedding?.toFixed(3)} | Amount: ${s?.scores.amount?.toFixed(3)} | Currency: ${s?.scores.currency?.toFixed(3)} | Date: ${s?.scores.date?.toFixed(3)}`,
     );
   }
 
   // Log comprehensive scoring analysis to debug wrong suggestions
-  logger.info("🔍 SCORING ANALYSIS - Why this suggestion?");
-  console.log(
-    `🎯 THRESHOLD DEBUG: bestMatch=${bestMatch?.confidenceScore}, threshold=${teamWeights.suggestedMatchThreshold}, meets=${bestMatch && bestMatch.confidenceScore >= teamWeights.suggestedMatchThreshold}`,
-  );
+  logger.info("SCORING ANALYSIS - Why this suggestion?");
+  logger.debug("THRESHOLD DEBUG", {
+    bestMatch: bestMatch?.confidenceScore,
+    threshold: teamWeights.suggestedMatchThreshold,
+    meets:
+      bestMatch &&
+      bestMatch.confidenceScore >= teamWeights.suggestedMatchThreshold,
+  });
 
   // Log the final match result
   if (bestMatch) {
-    logger.info("✅ FINAL MATCH SELECTED", {
+    logger.info("FINAL MATCH SELECTED", {
       inboxId,
       teamId,
       selectedMatch: {
@@ -1568,7 +1574,7 @@ export async function findMatches(
       },
     });
   } else {
-    logger.info("❌ NO MATCH FOUND", {
+    logger.info("NO MATCH FOUND", {
       inboxId,
       teamId,
       reason: "No candidates met minimum threshold",
@@ -1596,7 +1602,7 @@ export async function findMatches(
     );
 
     if (wasDismissed) {
-      logger.info("🚫 MATCH SKIPPED - Previously dismissed", {
+      logger.info("MATCH SKIPPED - Previously dismissed", {
         teamId,
         inboxId,
         transactionId: bestMatch.transactionId,
@@ -2026,7 +2032,7 @@ export async function findInboxMatches(
                   ) {
                     shouldAutoMatch = true;
 
-                    logger.info("🏆 SEMANTIC MERCHANT AUTO-MATCH (Reverse)", {
+                    logger.info("SEMANTIC MERCHANT AUTO-MATCH (Reverse)", {
                       teamId,
                       transactionId,
                       inboxId: candidate.inboxId,
@@ -2081,7 +2087,7 @@ export async function findInboxMatches(
 
   if (duration > 5000) {
     // Log slow queries
-    logger.warn("⚠️ SLOW MATCHING QUERY", {
+    logger.warn("SLOW MATCHING QUERY", {
       teamId,
       transactionId,
       duration,
@@ -2099,7 +2105,7 @@ export async function findInboxMatches(
     );
 
     if (wasDismissed) {
-      logger.info("🚫 REVERSE MATCH SKIPPED - Previously dismissed", {
+      logger.info("REVERSE MATCH SKIPPED - Previously dismissed", {
         teamId,
         transactionId,
         inboxId: bestMatch.inboxId,

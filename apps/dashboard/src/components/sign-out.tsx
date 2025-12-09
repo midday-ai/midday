@@ -21,7 +21,7 @@ export function SignOut() {
   };
 
   return (
-    <DropdownMenuItem onClick={handleSignOut}>
+    <DropdownMenuItem className="text-xs" onClick={handleSignOut}>
       {isLoading ? "Loading..." : "Sign out"}
     </DropdownMenuItem>
   );
