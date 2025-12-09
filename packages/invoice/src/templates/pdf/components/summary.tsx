@@ -83,7 +83,7 @@ export function Summary({
         </Text>
       </View>
 
-      {includeDiscount && discount && (
+      {includeDiscount && discount != null && discount !== 0 && (
         <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
           <Text style={{ fontSize: 9, flex: 1 }}>{discountLabel}</Text>
           <Text style={{ fontSize: 9, textAlign: "right" }}>
@@ -101,7 +101,7 @@ export function Summary({
       {includeVat && (
         <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
           <Text style={{ fontSize: 9, flex: 1 }}>
-            {vatLabel} ({vatRate}%)
+            {vatLabel} ({String(vatRate ?? 0)}%)
           </Text>
           <Text style={{ fontSize: 9, textAlign: "right" }}>
             {currency &&
@@ -118,7 +118,7 @@ export function Summary({
       {includeTax && (
         <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
           <Text style={{ fontSize: 9, flex: 1 }}>
-            {taxLabel} ({taxRate}%)
+            {taxLabel} ({String(taxRate ?? 0)}%)
           </Text>
           <Text style={{ fontSize: 9, textAlign: "right" }}>
             {currency &&
