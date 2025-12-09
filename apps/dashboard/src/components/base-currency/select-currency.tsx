@@ -9,13 +9,16 @@ import { uniqueCurrencies } from "@midday/location/currencies";
 import { Button } from "@midday/ui/button";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function SelectCurrency() {
   const trpc = useTRPC();
-  const { toast } = useToast();
+  const { toast, update, dismiss } = useToast();
   const [isSyncing, setSyncing] = useState(false);
   const [jobId, setJobId] = useState<string | undefined>();
+  const [toastId, setToastId] = useState<string | null>(null);
+  const toastIdRef = useRef<string | null>(null);
+  const lastProgressRef = useRef<number | undefined>(undefined);
   const updateTeamMutation = useTeamMutation();
   const { data: team } = useTeamQuery();
 
@@ -30,6 +33,11 @@ export function SelectCurrency() {
         }
       },
       onError: () => {
+        if (toastIdRef.current) {
+          dismiss(toastIdRef.current);
+          setToastId(null);
+          toastIdRef.current = null;
+        }
         setJobId(undefined);
         setSyncing(false);
 
@@ -76,8 +84,49 @@ export function SelectCurrency() {
     );
   };
 
+  // Create toast when syncing starts
   useEffect(() => {
-    if (status === "completed") {
+    if (isSyncing && jobId && !toastId) {
+      const { id } = toast({
+        title: "Updating...",
+        description: "We're updating your base currency, please wait.",
+        duration: Number.POSITIVE_INFINITY,
+        variant: "progress",
+        progress: 0,
+      });
+      setToastId(id);
+      toastIdRef.current = id;
+      lastProgressRef.current = 0;
+    }
+  }, [isSyncing, jobId, toastId]);
+
+  // Update toast progress when it changes
+  useEffect(() => {
+    if (!toastId || !isSyncing) return;
+
+    const currentProgress = progress !== undefined ? Number(progress) : 0;
+
+    // Only update if progress actually changed
+    if (currentProgress !== lastProgressRef.current) {
+      lastProgressRef.current = currentProgress;
+
+      update(toastId, {
+        id: toastId,
+        title: "Updating...",
+        description: "We're updating your base currency, please wait.",
+        variant: "progress",
+        progress: currentProgress,
+        duration: Number.POSITIVE_INFINITY,
+      });
+    }
+  }, [progress, toastId, isSyncing]);
+
+  useEffect(() => {
+    if (status === "completed" && toastId) {
+      dismiss(toastId);
+      setToastId(null);
+      toastIdRef.current = null;
+      lastProgressRef.current = undefined;
       setSyncing(false);
       setJobId(undefined);
       toast({
@@ -86,23 +135,14 @@ export function SelectCurrency() {
         title: "Transactions and account balances updated.",
       });
     }
-  }, [status, toast]);
+  }, [status, toastId]);
 
   useEffect(() => {
-    if (isSyncing && jobId) {
-      toast({
-        title: "Updating...",
-        description: progress
-          ? `We're updating your base currency (${progress}%), please wait.`
-          : "We're updating your base currency, please wait.",
-        duration: Number.POSITIVE_INFINITY,
-        variant: "spinner",
-      });
-    }
-  }, [isSyncing, jobId, progress, toast]);
-
-  useEffect(() => {
-    if (status === "failed") {
+    if (status === "failed" && toastId) {
+      dismiss(toastId);
+      setToastId(null);
+      toastIdRef.current = null;
+      lastProgressRef.current = undefined;
       setSyncing(false);
       setJobId(undefined);
 
@@ -112,7 +152,7 @@ export function SelectCurrency() {
         title: "Something went wrong please try again.",
       });
     }
-  }, [status, toast]);
+  }, [status, toastId]);
 
   return (
     <div className="w-[200px]">

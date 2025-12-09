@@ -20,7 +20,7 @@ export class UpdateBaseCurrencyProcessor extends BaseProcessor<UpdateBaseCurrenc
       baseCurrency,
     });
 
-    await this.updateProgress(job, 10);
+    await this.updateProgress(job, 5);
 
     // Get all enabled accounts
     const accounts = await getBankAccounts(db, {
@@ -30,10 +30,11 @@ export class UpdateBaseCurrencyProcessor extends BaseProcessor<UpdateBaseCurrenc
 
     if (!accounts || accounts.length === 0) {
       this.logger.info("No enabled accounts found", { teamId });
+      await this.updateProgress(job, 100);
       return;
     }
 
-    await this.updateProgress(job, 30);
+    await this.updateProgress(job, 15);
 
     this.logger.info("Updating base currency for accounts", {
       teamId,
@@ -56,7 +57,21 @@ export class UpdateBaseCurrencyProcessor extends BaseProcessor<UpdateBaseCurrenc
       ),
     );
 
-    await Promise.allSettled(accountUpdates);
+    await this.updateProgress(job, 25);
+
+    // Wait for all account updates to complete
+    const results = await Promise.allSettled(accountUpdates);
+
+    // Calculate progress based on completed accounts
+    const completedCount = results.filter(
+      (result) => result.status === "fulfilled",
+    ).length;
+    const accountProgress = Math.min(
+      90,
+      25 + Math.round((completedCount / accounts.length) * 65),
+    );
+
+    await this.updateProgress(job, accountProgress);
 
     await this.updateProgress(job, 100);
 
