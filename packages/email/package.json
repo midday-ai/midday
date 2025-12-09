@@ -28,6 +28,7 @@
     "responsive-react-email": "^0.0.5"
   },
   "devDependencies": {
+    "@react-email/preview-server": "5.0.6",
     "typescript": "^5.9.3"
   }
 }

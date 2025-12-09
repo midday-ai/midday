@@ -73,7 +73,9 @@ export function LineItems({
             <Description content={item.name} />
           </View>
 
-          <Text style={{ flex: 1, fontSize: 9 }}>{item.quantity ?? 0}</Text>
+          <Text style={{ flex: 1, fontSize: 9 }}>
+            {String(item.quantity ?? 0)}
+          </Text>
 
           <Text style={{ flex: 1, fontSize: 9 }}>
             {currency &&
