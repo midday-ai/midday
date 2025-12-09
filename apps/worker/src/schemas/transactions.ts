@@ -72,6 +72,7 @@ export const importTransactionsSchema = z.object({
     amount: z.string(),
     date: z.string(),
     description: z.string(),
+    balance: z.string().optional(),
   }),
 });
 
