@@ -31,7 +31,7 @@ export const invoiceConfig: ExtractionConfig<typeof invoiceSchema> = {
   schema: invoiceSchema,
   primaryModel: "gemini-2.5-flash",
   fallbackModel: "gemini-2.5-pro",
-  timeout: 60000, // 60s for PDF processing
+  timeout: 180000, // 3 minutes
   retries: 2, // 2 retries (3 total attempts)
   contentType: "file",
   mediaType: "application/pdf",

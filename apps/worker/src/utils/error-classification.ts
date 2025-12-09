@@ -100,6 +100,23 @@ export function classifyError(error: unknown): ClassifiedError {
       };
     }
 
+    // Expired signed URL errors (retryable - can regenerate URL)
+    // Check for download errors with 400 status on signed URLs
+    if (
+      (message.includes("download") || message.includes("downloaderror")) &&
+      (message.includes("400") || message.includes("bad request")) &&
+      (message.includes("token") ||
+        message.includes("sign") ||
+        message.includes("signed"))
+    ) {
+      return {
+        category: "network",
+        retryable: true,
+        retryDelay: 1000,
+        maxRetries: 3,
+      };
+    }
+
     // Validation errors (non-retryable)
     if (
       message.includes("validation") ||

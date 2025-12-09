@@ -71,9 +71,11 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
 
     const filename = filePath.at(-1);
 
+    // Use 10 minutes expiration to ensure URL doesn't expire during processing
+    // (document processing can take up to 120s, plus buffer for retries)
     const { data: signedUrlData } = await supabase.storage
       .from("vault")
-      .createSignedUrl(filePath.join("/"), 60);
+      .createSignedUrl(filePath.join("/"), 600);
 
     if (!signedUrlData) {
       throw new Error("File not found");
