@@ -194,7 +194,7 @@ export function SuggestedMatch({
             </Button>
           )}
           {filePath ? (
-            <div className="w-full h-full max-w-[248px] mx-auto">
+            <div className="relative w-full h-full max-w-[248px] mx-auto">
               <FilePreview mimeType={mimeType} filePath={filePath} />
             </div>
           ) : (

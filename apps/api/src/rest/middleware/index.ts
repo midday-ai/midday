@@ -39,7 +39,6 @@ export const fileMiddleware: MiddlewareHandler[] = [
   withClientIp,
   withDatabase,
   withAuth,
-  withPrimaryReadAfterWrite,
 ];
 
 export { withRequiredScope } from "./scope";

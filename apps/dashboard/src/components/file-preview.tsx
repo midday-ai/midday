@@ -41,14 +41,6 @@ export function FilePreview({ mimeType, filePath }: Props) {
 
   const { url: src, error, isLoading } = useAuthenticatedUrl(baseUrl);
 
-  if (!endpoint) {
-    return <FilePreviewIcon mimetype={mimeType} />;
-  }
-
-  if (error) {
-    return <ErrorPreview />;
-  }
-
   // Reset image loading state when src changes
   useEffect(() => {
     if (src) {
@@ -56,6 +48,14 @@ export function FilePreview({ mimeType, filePath }: Props) {
       setImageError(false);
     }
   }, [src]);
+
+  if (!endpoint) {
+    return <FilePreviewIcon mimetype={mimeType} />;
+  }
+
+  if (error) {
+    return <ErrorPreview />;
+  }
 
   return (
     <div className="relative w-full h-full flex items-center justify-center">
