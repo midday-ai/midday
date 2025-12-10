@@ -21,12 +21,17 @@ import {
 const app = new OpenAPIHono<Context>();
 
 app.use("*", async (c, next) => {
-  const clientIp = c.req.header("x-forwarded-for") ?? "";
+  const clientIp = c.get("clientIp") ?? "";
 
   if (
     process.env.NODE_ENV !== "development" &&
     (!clientIp || !POSTMARK_IP_RANGE.includes(clientIp as any))
   ) {
+    logger.warn("Invalid IP address for inbox webhook", {
+      clientIp,
+      allowedIps: POSTMARK_IP_RANGE,
+    });
+
     throw new HTTPException(403, { message: "Invalid IP address" });
   }
 

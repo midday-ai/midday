@@ -7,5 +7,6 @@ export type Context = {
     session: Session;
     teamId: string;
     userId?: string;
+    clientIp?: string;
   };
 };

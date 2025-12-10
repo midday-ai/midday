@@ -2,13 +2,17 @@ import type { MiddlewareHandler } from "hono";
 import { rateLimiter } from "hono-rate-limiter";
 import { withAuth } from "./auth";
 import { withDatabase } from "./db";
+import { withClientIp } from "./ip";
 import { withPrimaryReadAfterWrite } from "./primary-read-after-write";
 
 /**
  * Public endpoint middleware - only attaches database with smart routing
  * No authentication required
  */
-export const publicMiddleware: MiddlewareHandler[] = [withDatabase];
+export const publicMiddleware: MiddlewareHandler[] = [
+  withClientIp,
+  withDatabase,
+];
 
 /**
  * Protected endpoint middleware - requires authentication
@@ -16,6 +20,7 @@ export const publicMiddleware: MiddlewareHandler[] = [withDatabase];
  * Note: withAuth must be first to set session in context
  */
 export const protectedMiddleware: MiddlewareHandler[] = [
+  withClientIp,
   withDatabase,
   withAuth,
   rateLimiter({
