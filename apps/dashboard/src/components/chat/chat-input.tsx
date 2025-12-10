@@ -50,6 +50,10 @@ function ChatInputContent() {
   const [isFocused, setIsFocused] = useState(false);
   const [isInteractingWithButtons, setIsInteractingWithButtons] =
     useState(false);
+  const isTypingRef = useRef(false);
+  const prevInputRef = useRef("");
+  const textReveal = useMotionValue(100);
+  const textOpacity = useMotionValue(1);
   const status = useChatStatus();
   const { sendMessage, stop } = useChatActions();
   const chatId = useChatId();
@@ -129,6 +133,40 @@ function ChatInputContent() {
       minimizationFactor.set(targetMinimizationFactor);
     }
   }, [targetMinimizationFactor, shouldPreventMinimization, minimizationFactor]);
+
+  // Transform reveal value to clipPath
+  const textClipPath = useTransform(
+    textReveal,
+    (value) => `inset(0 ${100 - value}% 0 0)`,
+  );
+
+  // Reveal animation when text is added externally (not by typing)
+  useEffect(() => {
+    // Only animate if input changed and it wasn't from typing
+    const wasExternalChange =
+      input !== prevInputRef.current && !isTypingRef.current && input;
+
+    if (wasExternalChange) {
+      // Set initial state - start hidden
+      textReveal.set(0);
+      textOpacity.set(0);
+
+      // Use requestAnimationFrame to ensure the initial state is painted
+      requestAnimationFrame(() => {
+        animate(textReveal, 100, {
+          duration: 0.7,
+          ease: [0.25, 0.1, 0.25, 1], // smooth cubic-bezier
+        });
+        animate(textOpacity, 1, {
+          duration: 0.5,
+          ease: [0.25, 0.1, 0.25, 1],
+        });
+      });
+    }
+
+    prevInputRef.current = input;
+    isTypingRef.current = false;
+  }, [input, textReveal, textOpacity]);
 
   // Transform motion value to actual style values - all smoothly interpolated
   const containerMaxWidth = useTransform(
@@ -293,15 +331,20 @@ function ChatInputContent() {
                   paddingBottom: inputPaddingBottom,
                   overflow: "hidden",
                   boxSizing: "border-box",
+                  clipPath: textClipPath,
+                  opacity: textOpacity,
                 }}
               >
                 <PromptInputTextarea
                   ref={textareaRef}
                   autoFocus
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    isTypingRef.current = true;
+                    handleInputChange(e);
+                  }}
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
-                  className="w-full h-full border-none bg-transparent resize-none outline-none"
+                  className="w-full h-full border-none bg-transparent resize-none outline-none whitespace-nowrap overflow-hidden text-ellipsis"
                   onKeyDown={(e) => {
                     // Handle Enter key for commands
                     if (e.key === "Enter" && showCommands) {
