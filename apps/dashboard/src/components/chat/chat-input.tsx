@@ -139,17 +139,18 @@ function ChatInputContent() {
   // Container padding - keep constant, don't animate
   const containerPadding = 0;
 
-  // Button animations - simple linear fade out
+  // Button animations - fade out early (by factor 0.4)
   const buttonOpacity = useTransform(minimizationFactor, (factor) => {
-    // Linear fade from 1 to 0
-    return 1 - factor;
+    // Fade out completely by factor 0.4
+    if (factor >= 0.4) return 0;
+    return 1 - factor / 0.4;
   });
   const buttonScale = useTransform(minimizationFactor, (factor) => {
     // Subtle scale from 1 to 0.95
     return 1 - factor * 0.05;
   });
   const buttonPointerEvents = useTransform(minimizationFactor, (factor) =>
-    factor > 0.5 ? "none" : "auto",
+    factor > 0.1 ? "none" : "auto",
   );
 
   // Toolbar wrapper - simple linear collapse
@@ -158,8 +159,9 @@ function ChatInputContent() {
     return 56 * (1 - factor);
   });
   const toolbarOpacity = useTransform(minimizationFactor, (factor) => {
-    // Linear fade from 1 to 0
-    return 1 - factor;
+    // Fade out completely by factor 0.4
+    if (factor >= 0.4) return 0;
+    return 1 - factor / 0.4;
   });
 
   // Body layout - smoothly interpolate gap and flex properties
@@ -246,15 +248,20 @@ function ChatInputContent() {
       <CommandMenu />
       <ChatHistoryDropdown />
 
+      {/* Overlay to capture clicks when minimized */}
+      {targetMinimizationFactor > 0.1 && (
+        <div
+          className="absolute inset-0 z-10 cursor-text"
+          onClick={() => textareaRef.current?.focus()}
+        />
+      )}
+
       <motion.div
         style={{
           padding: containerPadding,
           flexDirection: containerFlexDirection,
-          ...(targetMinimizationFactor > 0.15 && { alignItems: "center" }),
         }}
         className="!bg-[rgba(247,247,247,0.85)] dark:!bg-[rgba(19,19,19,0.7)] backdrop-blur-lg flex"
-        layout
-        transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
       >
         <PromptInput
           onSubmit={handleSubmit}
@@ -270,7 +277,6 @@ function ChatInputContent() {
               display: "flex",
               width: "100%",
               flexDirection: bodyFlexDirection,
-              ...(targetMinimizationFactor > 0.15 && { alignItems: "center" }),
             }}
           >
             <PromptInputBody
