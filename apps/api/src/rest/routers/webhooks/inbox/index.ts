@@ -24,15 +24,15 @@ const app = new OpenAPIHono<Context>();
 // HTTP Basic Authentication
 // Postmark supports basic auth by including credentials in the webhook URL:
 // https://username:password@domain.com/webhook/inbox
-if (process.env.INBOX_WEBHOOK_USERNAME && process.env.INBOX_WEBHOOK_PASSWORD) {
-  app.use(
-    "*",
-    basicAuth({
-      username: process.env.INBOX_WEBHOOK_USERNAME,
-      password: process.env.INBOX_WEBHOOK_PASSWORD,
-    }),
-  );
-}
+// if (process.env.INBOX_WEBHOOK_USERNAME && process.env.INBOX_WEBHOOK_PASSWORD) {
+//   app.use(
+//     "*",
+//     basicAuth({
+//       username: process.env.INBOX_WEBHOOK_USERNAME,
+//       password: process.env.INBOX_WEBHOOK_PASSWORD,
+//     }),
+//   );
+// }
 
 // IP address validation
 // Security: Validate the entire x-forwarded-for header value to prevent header injection attacks
