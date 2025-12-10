@@ -35,18 +35,23 @@ if (process.env.INBOX_WEBHOOK_USERNAME && process.env.INBOX_WEBHOOK_PASSWORD) {
 }
 
 // IP address validation
+// Security: Validate the entire x-forwarded-for header value to prevent header injection attacks
 app.use("*", async (c, next) => {
-  const clientIp = c.get("clientIp") ?? "";
+  if (process.env.NODE_ENV === "development") {
+    await next();
+    return;
+  }
+
+  const forwardedForHeader = c.req.header("x-forwarded-for");
+
+  const trimmedHeader = forwardedForHeader?.trim();
 
   if (
-    process.env.NODE_ENV !== "development" &&
-    (!clientIp || !POSTMARK_IP_RANGE.includes(clientIp as any))
+    !trimmedHeader ||
+    !POSTMARK_IP_RANGE.includes(
+      trimmedHeader as (typeof POSTMARK_IP_RANGE)[number],
+    )
   ) {
-    logger.warn("Invalid IP address for inbox webhook", {
-      clientIp,
-      allowedIps: POSTMARK_IP_RANGE,
-    });
-
     throw new HTTPException(403, { message: "Invalid IP address" });
   }
 

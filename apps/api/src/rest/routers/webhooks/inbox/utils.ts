@@ -163,7 +163,9 @@ export async function triggerProcessingJobs(
   });
 
   // Send notification for email attachments
-  await triggerJob(
+  // This is a non-critical side effect - fire-and-forget to prevent webhook failures
+  // if notification job fails to enqueue
+  triggerJob(
     "notification",
     {
       type: "inbox_new",
@@ -172,5 +174,11 @@ export async function triggerProcessingJobs(
       inboxType: "email",
     },
     "notifications",
-  );
+  ).catch((error) => {
+    // Log error but don't propagate - notification failure shouldn't fail the webhook
+    logger.warn("Failed to trigger inbox_new notification", {
+      teamId,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  });
 }
