@@ -94,7 +94,7 @@ function DownloadButton({
   filename,
 }: { href: string; filename?: string }) {
   const [isDownloading, setIsDownloading] = useState(false);
-  
+
   // Add fileKey if it's a file download URL
   const isFileDownload = href.includes("/files/download/file");
   const { url: authenticatedUrl, isLoading: isFileUrlLoading } = useFileUrl(
@@ -130,7 +130,10 @@ function DownloadButton({
     <button
       type="button"
       onClick={handleDownload}
-      disabled={isDownloading || (isFileDownload && (!authenticatedUrl || isFileUrlLoading))}
+      disabled={
+        isDownloading ||
+        (isFileDownload && (!authenticatedUrl || isFileUrlLoading))
+      }
     >
       {isDownloading || (isFileDownload && isFileUrlLoading) ? (
         <Spinner size={16} />
