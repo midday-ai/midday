@@ -17,11 +17,13 @@ import { trackerProjectsRouter } from "./tracker-projects";
 import { transactionsRouter } from "./transactions";
 import { transcriptionRouter } from "./transcription";
 import { usersRouter } from "./users";
+import { webhookRouter } from "./webhooks";
 
 const routers = new OpenAPIHono();
 
-// Mount OAuth routes first (publicly accessible)
+// Mount public routes first (no authentication required)
 routers.route("/oauth", oauthRouter);
+routers.route("/webhook", webhookRouter);
 
 // Apply protected middleware to all subsequent routes
 routers.use(...protectedMiddleware);
