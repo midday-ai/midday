@@ -118,6 +118,11 @@ export const userSchema = z.object({
         "ddDotMMDotyyyy",
       ],
     }),
+  fileKey: z.string().openapi({
+    description:
+      "Team file key for proxy/download access to team files. This deterministic key is derived from the team ID and is shared by all team members. Use this key as the `fk` query parameter when accessing file endpoints (proxy, preview, download). The key is team-scoped and provides access to files belonging to the user's team.",
+    example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
+  }),
   team: z
     .object({
       id: z.string().uuid().openapi({

@@ -4,8 +4,10 @@ import { createAdminClient } from "@api/services/supabase";
 import { getPdfImage } from "@api/utils/pdf-to-img";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
-import { fileMiddleware } from "../../middleware";
-import { normalizeAndValidatePath, validateTeamAccess } from "./utils";
+import { withDatabase } from "../../middleware/db";
+import { withFileAuth } from "../../middleware/file-auth";
+import { withClientIp } from "../../middleware/ip";
+import { normalizeAndValidatePath } from "./utils";
 
 const app = new OpenAPIHono<Context>();
 
@@ -21,7 +23,7 @@ app.openapi(
     operationId: "proxyFile",
     "x-speakeasy-name-override": "proxy",
     description:
-      "Proxies a file from storage. Requires authentication token as query parameter.",
+      "Proxies a file from storage. Requires team file key (fk) query parameter for access.",
     tags: ["Files"],
     request: {
       query: proxyFileSchema,
@@ -63,19 +65,11 @@ app.openapi(
         },
       },
     },
-    middleware: fileMiddleware,
+    middleware: [withClientIp, withDatabase, withFileAuth],
   }),
   async (c) => {
-    const session = c.get("session");
     const { filePath } = c.req.valid("query");
-
-    if (!session || !filePath) {
-      throw new HTTPException(401, { message: "Unauthorized" });
-    }
-
-    const db = c.get("db");
-    const { normalizedPath, pathTeamId } = normalizeAndValidatePath(filePath);
-    await validateTeamAccess(db, session.user.id, pathTeamId);
+    const { normalizedPath } = normalizeAndValidatePath(filePath);
 
     const supabase = await createAdminClient();
 
@@ -111,7 +105,7 @@ app.openapi(
     operationId: "previewFile",
     "x-speakeasy-name-override": "preview",
     description:
-      "Converts the first page of a PDF file to a PNG image for preview purposes. Requires authentication token as query parameter.",
+      "Converts the first page of a PDF file to a PNG image for preview purposes. Requires team file key (fk) query parameter for access.",
     tags: ["Files"],
     request: {
       query: previewFileSchema,
@@ -161,19 +155,11 @@ app.openapi(
         },
       },
     },
-    middleware: fileMiddleware,
+    middleware: [withClientIp, withDatabase, withFileAuth],
   }),
   async (c) => {
-    const session = c.get("session");
     const { filePath } = c.req.valid("query");
-
-    if (!session || !filePath) {
-      throw new HTTPException(401, { message: "Unauthorized" });
-    }
-
-    const db = c.get("db");
-    const { normalizedPath, pathTeamId } = normalizeAndValidatePath(filePath);
-    await validateTeamAccess(db, session.user.id, pathTeamId);
+    const { normalizedPath } = normalizeAndValidatePath(filePath);
 
     const supabase = await createAdminClient();
 

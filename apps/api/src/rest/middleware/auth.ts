@@ -17,7 +17,7 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
   const db = c.get("db");
   let token: string | null = null;
 
-  // Try to get token from Authorization header first
+  // Get token from Authorization header
   const authHeader = c.req.header("Authorization");
   if (authHeader) {
     const [scheme, headerToken] = authHeader.split(" ");
@@ -26,28 +26,10 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
     }
   }
 
-  // If still no token, try query parameter as fallback (for img tags, etc.)
-  if (!token) {
-    // Parse URL directly - c.req.url is a full URL in Hono
-    try {
-      const url = new URL(c.req.url);
-      const urlToken = url.searchParams.get("token");
-      if (urlToken) {
-        token = urlToken;
-      }
-    } catch (error) {
-      // If URL parsing fails, try c.req.query() as fallback
-      const queryToken = c.req.query("token");
-      if (queryToken) {
-        token = queryToken;
-      }
-    }
-  }
-
   if (!token) {
     throw new HTTPException(401, {
       message:
-        "Authorization required. Token must be provided in Authorization header or 'token' query parameter.",
+        "Authorization required. Token must be provided in Authorization header.",
     });
   }
 

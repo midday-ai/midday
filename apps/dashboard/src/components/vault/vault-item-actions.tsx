@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuthenticatedUrl } from "@/hooks/use-authenticated-url";
+import { useFileUrl } from "@/hooks/use-file-url";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
@@ -23,8 +23,11 @@ export function VaultItemActions({ id, filePath, hideDelete }: Props) {
   const trpc = useTRPC();
 
   const fileName = filePath.at(-1);
-  const baseDownloadUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/download/file?path=${filePath.join("/")}&filename=${fileName}`;
-  const { url: downloadUrl } = useAuthenticatedUrl(baseDownloadUrl);
+  const { url: downloadUrl } = useFileUrl({
+    type: "download",
+    filePath: filePath.join("/"),
+    filename: fileName,
+  });
 
   const shortLinkMutation = useMutation(
     trpc.shortLinks.createForDocument.mutationOptions({

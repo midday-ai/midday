@@ -1,7 +1,7 @@
 "use client";
 
 import { FilePreviewIcon } from "@/components/file-preview-icon";
-import { useAuthenticatedUrl } from "@/hooks/use-authenticated-url";
+import { useFileUrl } from "@/hooks/use-file-url";
 import { useImageLoadState } from "@/hooks/use-image-load-state";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -25,19 +25,29 @@ function ErrorPreview() {
 
 export function FilePreview({ mimeType, filePath }: Props) {
   // Determine endpoint based on mime type
-  const endpoint = mimeType.startsWith("image/")
-    ? "proxy"
-    : mimeType.startsWith("application/pdf") ||
-        mimeType.startsWith("application/octet-stream")
-      ? "preview"
-      : null;
+  const endpoint = useMemo(() => {
+    if (mimeType.startsWith("image/")) return "proxy";
+    if (
+      mimeType.startsWith("application/pdf") ||
+      mimeType.startsWith("application/octet-stream")
+    ) {
+      return "preview";
+    }
+    return null;
+  }, [mimeType]);
 
-  const baseUrl = useMemo(() => {
-    if (!endpoint) return null;
-    return `${process.env.NEXT_PUBLIC_API_URL}/files/${endpoint}?filePath=${encodeURIComponent(filePath)}`;
-  }, [endpoint, filePath]);
-
-  const { url: src, error, isLoading } = useAuthenticatedUrl(baseUrl);
+  const {
+    url: src,
+    isLoading,
+    hasFileKey,
+  } = useFileUrl(
+    endpoint
+      ? {
+          type: endpoint,
+          filePath,
+        }
+      : null,
+  );
   const {
     isLoading: imageLoading,
     isError: imageError,
@@ -50,14 +60,14 @@ export function FilePreview({ mimeType, filePath }: Props) {
     return <FilePreviewIcon mimetype={mimeType} />;
   }
 
-  if (error) {
-    return <ErrorPreview />;
+  if (isLoading || !hasFileKey) {
+    return <Skeleton className="w-full h-full" />;
   }
 
   return (
     <div className="relative w-full h-full flex items-center justify-center">
-      {/* Show skeleton while authenticating URL or image is loading */}
-      {(isLoading || !src || imageLoading) && !imageError && (
+      {/* Show skeleton while image is loading */}
+      {(!src || imageLoading) && !imageError && (
         <Skeleton className="absolute inset-0 w-full h-full" />
       )}
 

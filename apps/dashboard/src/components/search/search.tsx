@@ -2,9 +2,9 @@
 
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
-import { useAuthenticatedUrl } from "@/hooks/use-authenticated-url";
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
+import { useFileUrl } from "@/hooks/use-file-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
@@ -94,16 +94,27 @@ function DownloadButton({
   filename,
 }: { href: string; filename?: string }) {
   const [isDownloading, setIsDownloading] = useState(false);
-  const { url: authenticatedUrl, isLoading } = useAuthenticatedUrl(href);
+  
+  // Add fileKey if it's a file download URL
+  const isFileDownload = href.includes("/files/download/file");
+  const { url: authenticatedUrl, isLoading: isFileUrlLoading } = useFileUrl(
+    isFileDownload
+      ? {
+          type: "url",
+          url: href,
+        }
+      : null,
+  );
 
   const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    if (!authenticatedUrl) return;
+    const url = isFileDownload ? authenticatedUrl : href;
+    if (!url) return;
 
     try {
       setIsDownloading(true);
-      await downloadFile(authenticatedUrl, filename || "download");
+      await downloadFile(url, filename || "download");
 
       // Keep spinner for 1 second
       setTimeout(() => {
@@ -119,9 +130,9 @@ function DownloadButton({
     <button
       type="button"
       onClick={handleDownload}
-      disabled={isLoading || !authenticatedUrl || isDownloading}
+      disabled={isDownloading || (isFileDownload && (!authenticatedUrl || isFileUrlLoading))}
     >
-      {isDownloading || isLoading ? (
+      {isDownloading || (isFileDownload && isFileUrlLoading) ? (
         <Spinner size={16} />
       ) : (
         <Icons.ArrowCoolDown className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />

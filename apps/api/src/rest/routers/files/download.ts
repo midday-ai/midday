@@ -7,13 +7,12 @@ import { PdfTemplate, renderToStream } from "@midday/invoice";
 import { verify } from "@midday/invoice/token";
 import { download } from "@midday/supabase/storage";
 import { HTTPException } from "hono/http-exception";
-import { fileMiddleware, publicMiddleware } from "../../middleware";
+import { publicMiddleware } from "../../middleware";
 import { withAuth } from "../../middleware/auth";
-import {
-  getContentTypeFromFilename,
-  normalizeAndValidatePath,
-  validateTeamAccess,
-} from "./utils";
+import { withDatabase } from "../../middleware/db";
+import { withFileAuth } from "../../middleware/file-auth";
+import { withClientIp } from "../../middleware/ip";
+import { getContentTypeFromFilename, normalizeAndValidatePath } from "./utils";
 
 const app = new OpenAPIHono<Context>();
 
@@ -29,7 +28,8 @@ app.openapi(
     summary: "Download file from vault",
     operationId: "downloadFile",
     "x-speakeasy-name-override": "downloadFile",
-    description: "Downloads a file from the vault storage bucket.",
+    description:
+      "Downloads a file from the vault storage bucket. Requires team file key (fk) query parameter for access.",
     tags: ["Files"],
     request: {
       query: downloadFileSchema,
@@ -79,19 +79,11 @@ app.openapi(
         },
       },
     },
-    middleware: fileMiddleware,
+    middleware: [withClientIp, withDatabase, withFileAuth],
   }),
   async (c) => {
-    const session = c.get("session");
     const { path, filename } = c.req.valid("query");
-
-    if (!session || !path) {
-      throw new HTTPException(401, { message: "Unauthorized" });
-    }
-
-    const db = c.get("db");
-    const { normalizedPath, pathTeamId } = normalizeAndValidatePath(path);
-    await validateTeamAccess(db, session.user.id, pathTeamId);
+    const { normalizedPath } = normalizeAndValidatePath(path);
 
     const supabase = await createAdminClient();
 
@@ -127,7 +119,7 @@ app.openapi(
   },
 );
 
-// Download invoice route - public when using token, protected when using id
+// Download invoice route - public when using invoice token, protected when using id
 // Apply public middleware first, then conditionally apply auth if ID is used
 const downloadInvoiceApp = new OpenAPIHono<Context>();
 
@@ -135,15 +127,15 @@ const downloadInvoiceApp = new OpenAPIHono<Context>();
 downloadInvoiceApp.use(...publicMiddleware);
 
 // Conditionally apply auth middleware if ID is provided
-// When ID is used, authentication is required (token can be in header or query param)
-// When only token is provided, it's public access (no auth middleware)
+// When ID is used, authentication is required via Authorization header
+// When only invoice token is provided, it's public access (no auth middleware)
 downloadInvoiceApp.use(async (c, next) => {
   const query = c.req.query();
-  // If ID is provided, require authentication (withAuth supports both header and query token)
+  // If ID is provided, require authentication via Authorization header
   if (query.id) {
     return withAuth(c, next);
   }
-  // Otherwise, continue without auth requirement (public access via token)
+  // Otherwise, continue without auth requirement (public access via invoice token)
   return next();
 });
 
@@ -155,7 +147,7 @@ downloadInvoiceApp.openapi(
     operationId: "downloadInvoice",
     "x-speakeasy-name-override": "downloadInvoice",
     description:
-      "Downloads an invoice as a PDF. Can be accessed with an invoice ID (requires authentication) or token (public access).",
+      "Downloads an invoice as a PDF. Can be accessed with an invoice ID (requires authentication via Authorization header) or invoice token (public access).",
     tags: ["Files"],
     request: {
       query: downloadInvoiceSchema,

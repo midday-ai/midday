@@ -1,7 +1,7 @@
 "use client";
 
-import { useAuthenticatedUrl } from "@/hooks/use-authenticated-url";
 import { useDocumentParams } from "@/hooks/use-document-params";
+import { useFileUrl } from "@/hooks/use-file-url";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
@@ -23,10 +23,15 @@ export function DocumentActions({ showDelete = false, filePath }: Props) {
   const { setParams, params } = useDocumentParams();
 
   const filename = filePath?.at(-1);
-  const baseDownloadUrl = filePath
-    ? `${process.env.NEXT_PUBLIC_API_URL}/files/download/file?path=${filePath.join("/")}&filename=${filename}`
-    : null;
-  const { url: downloadUrl } = useAuthenticatedUrl(baseDownloadUrl);
+  const { url: downloadUrl } = useFileUrl(
+    filePath
+      ? {
+          type: "download",
+          filePath: filePath.join("/"),
+          filename,
+        }
+      : null,
+  );
 
   const shortLinkMutation = useMutation(
     trpc.shortLinks.createForDocument.mutationOptions({

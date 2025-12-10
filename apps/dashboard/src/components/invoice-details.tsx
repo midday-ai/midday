@@ -1,10 +1,10 @@
 "use client";
 
-import { useAuthenticatedUrl } from "@/hooks/use-authenticated-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
+import { getAuthenticatedUrl } from "@/utils/authenticated-url";
 import { getUrl } from "@/utils/environment";
 import { getWebsiteLogo } from "@/utils/logos";
 import {
@@ -71,7 +71,6 @@ export function InvoiceDetails() {
   } = data;
 
   const baseDownloadUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?id=${id}`;
-  const { url: downloadUrl } = useAuthenticatedUrl(baseDownloadUrl);
 
   return (
     <div className="h-full">
@@ -222,12 +221,15 @@ export function InvoiceDetails() {
                 <Button
                   variant="secondary"
                   className="size-[38px] hover:bg-secondary shrink-0"
-                  onClick={() => {
-                    if (downloadUrl) {
-                      downloadFile(downloadUrl, `${invoiceNumber}.pdf`);
+                  onClick={async () => {
+                    try {
+                      const authenticatedUrl =
+                        await getAuthenticatedUrl(baseDownloadUrl);
+                      downloadFile(authenticatedUrl, `${invoiceNumber}.pdf`);
+                    } catch (error) {
+                      console.error("Failed to download invoice:", error);
                     }
                   }}
-                  disabled={!downloadUrl}
                 >
                   <div>
                     <Icons.ArrowCoolDown className="size-4" />

@@ -14,16 +14,16 @@ export const proxyFileSchema = z.object({
         required: true,
       },
     }),
-  token: z
+  fk: z
     .string()
     .min(1)
     .openapi({
       description:
-        "Authentication token (JWT). Required for secure file access.",
-      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        "Team file key for proxy/download access to team files. This key is returned in the user data response (GET /users/me) as the `fileKey` field. It is team-scoped and deterministic - all members of the same team share the same file key. Use this key to authenticate file access requests.",
+      example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
       param: {
         in: "query",
-        name: "token",
+        name: "fk",
         required: true,
       },
     }),
@@ -43,16 +43,16 @@ export const previewFileSchema = z.object({
         required: true,
       },
     }),
-  token: z
+  fk: z
     .string()
     .min(1)
     .openapi({
       description:
-        "Authentication token (JWT). Required for secure file access.",
-      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        "Team file key for proxy/download access to team files. This key is returned in the user data response (GET /users/me) as the `fileKey` field. It is team-scoped and deterministic - all members of the same team share the same file key. Use this key to authenticate file access requests.",
+      example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
       param: {
         in: "query",
-        name: "token",
+        name: "fk",
         required: true,
       },
     }),
@@ -83,16 +83,16 @@ export const downloadFileSchema = z.object({
         name: "filename",
       },
     }),
-  token: z
+  fk: z
     .string()
     .min(1)
     .openapi({
       description:
-        "Authentication token (JWT). Required for secure file access.",
-      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        "Team file key for proxy/download access to team files. This key is returned in the user data response (GET /users/me) as the `fileKey` field. It is team-scoped and deterministic - all members of the same team share the same file key. Use this key to authenticate file access requests.",
+      example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
       param: {
         in: "query",
-        name: "token",
+        name: "fk",
         required: true,
       },
     }),
@@ -105,7 +105,7 @@ export const downloadInvoiceSchema = z.object({
     .optional()
     .openapi({
       description:
-        "Invoice ID (UUID). Requires authentication via Authorization header or token query parameter.",
+        "Invoice ID (UUID). Requires authentication via Authorization header.",
       example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
       param: {
         in: "query",
@@ -117,7 +117,7 @@ export const downloadInvoiceSchema = z.object({
     .optional()
     .openapi({
       description:
-        "Authentication token (when used with id) or invoice access token (for public access). When used with id, provides authentication. When used alone, allows public access.",
+        "Invoice access token for public access. When used alone (without id), allows public access to the invoice.",
       example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
       param: {
         in: "query",

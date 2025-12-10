@@ -1,9 +1,8 @@
 import { FileViewer } from "@/components/file-viewer";
 import { FormatAmount } from "@/components/format-amount";
-import { useAuthenticatedUrl } from "@/hooks/use-authenticated-url";
+import { useFileUrl } from "@/hooks/use-file-url";
 import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { useInboxParams } from "@/hooks/use-inbox-params";
-import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
@@ -236,11 +235,15 @@ export function InboxDetails() {
     });
   };
 
-  const baseDownloadUrl =
+  const { url: downloadUrl } = useFileUrl(
     data?.filePath && data?.fileName
-      ? `${process.env.NEXT_PUBLIC_API_URL}/files/download/file?path=${data.filePath.join("/")}&filename=${data.fileName}`
-      : null;
-  const { url: downloadUrl } = useAuthenticatedUrl(baseDownloadUrl);
+      ? {
+          type: "download",
+          filePath: data.filePath.join("/"),
+          filename: data.fileName,
+        }
+      : null,
+  );
 
   const handleDownload = () => {
     if (downloadUrl && data?.fileName) {

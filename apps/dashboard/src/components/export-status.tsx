@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuthenticatedUrl } from "@/hooks/use-authenticated-url";
+import { useFileUrl } from "@/hooks/use-file-url";
 import { useJobStatus } from "@/hooks/use-job-status";
 import { downloadFile } from "@/lib/download";
 import { useExportStore } from "@/store/export";
@@ -55,8 +55,11 @@ function DownloadButton({
   fileName: string;
   onDownload: () => void;
 }) {
-  const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/download/file?path=${fullPath}&filename=${fileName}`;
-  const { url: authenticatedUrl } = useAuthenticatedUrl(baseUrl);
+  const { url: authenticatedUrl } = useFileUrl({
+    type: "download",
+    filePath: fullPath,
+    filename: fileName,
+  });
 
   return (
     <Button

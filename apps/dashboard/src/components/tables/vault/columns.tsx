@@ -1,6 +1,6 @@
-import { useAuthenticatedUrl } from "@/hooks/use-authenticated-url";
 import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
+import { useFileUrl } from "@/hooks/use-file-url";
 import { downloadFile } from "@/lib/download";
 import { formatSize } from "@/utils/format";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
@@ -23,10 +23,15 @@ function DownloadFileMenuItem({
   pathTokens?: string[] | null;
   filename: string;
 }) {
-  const baseUrl = pathTokens
-    ? `${process.env.NEXT_PUBLIC_API_URL}/files/download/file?path=${pathTokens.join("/")}&filename=${filename}`
-    : null;
-  const { url: downloadUrl } = useAuthenticatedUrl(baseUrl);
+  const { url: downloadUrl } = useFileUrl(
+    pathTokens
+      ? {
+          type: "download",
+          filePath: pathTokens.join("/"),
+          filename,
+        }
+      : null,
+  );
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {

@@ -86,3 +86,21 @@ export function decrypt(encryptedPayload: string): string {
 export function hash(str: string): string {
   return crypto.createHash("sha256").update(str).digest("hex");
 }
+
+/**
+ * Generates a deterministic file key for a team using HMAC.
+ * This key is used for proxy/download access to team files.
+ * @param teamId The team ID to generate the key for
+ * @returns A 32-character hex string file key
+ */
+export function generateFileKey(teamId: string): string {
+  const secret = process.env.FILE_KEY_SECRET;
+  if (!secret) {
+    throw new Error("FILE_KEY_SECRET environment variable is not set.");
+  }
+  return crypto
+    .createHmac("sha256", secret)
+    .update(teamId)
+    .digest("hex")
+    .slice(0, 32);
+}
