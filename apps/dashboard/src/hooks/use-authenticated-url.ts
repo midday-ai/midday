@@ -17,6 +17,8 @@ export function useAuthenticatedUrl(baseUrl: string | null) {
 
   useEffect(() => {
     if (!baseUrl) {
+      setUrl(null);
+      setError(null);
       setIsLoading(false);
       return;
     }
@@ -24,7 +26,7 @@ export function useAuthenticatedUrl(baseUrl: string | null) {
     setIsLoading(true);
     setError(null);
 
-    // Get session immediately - should be fast if already cached
+    // Get session immediately
     supabase.auth
       .getSession()
       .then(({ data: { session } }) => {

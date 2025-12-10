@@ -2,10 +2,11 @@
 
 import { FilePreviewIcon } from "@/components/file-preview-icon";
 import { useAuthenticatedUrl } from "@/hooks/use-authenticated-url";
+import { useImageLoadState } from "@/hooks/use-image-load-state";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 type Props = {
   mimeType: string;
@@ -23,9 +24,6 @@ function ErrorPreview() {
 }
 
 export function FilePreview({ mimeType, filePath }: Props) {
-  const [imageLoading, setImageLoading] = useState(true);
-  const [imageError, setImageError] = useState(false);
-
   // Determine endpoint based on mime type
   const endpoint = mimeType.startsWith("image/")
     ? "proxy"
@@ -40,14 +38,13 @@ export function FilePreview({ mimeType, filePath }: Props) {
   }, [endpoint, filePath]);
 
   const { url: src, error, isLoading } = useAuthenticatedUrl(baseUrl);
-
-  // Reset image loading state when src changes
-  useEffect(() => {
-    if (src) {
-      setImageLoading(true);
-      setImageError(false);
-    }
-  }, [src]);
+  const {
+    isLoading: imageLoading,
+    isError: imageError,
+    imgRef,
+    handleLoad,
+    handleError,
+  } = useImageLoadState(src);
 
   if (!endpoint) {
     return <FilePreviewIcon mimetype={mimeType} />;
@@ -70,17 +67,15 @@ export function FilePreview({ mimeType, filePath }: Props) {
       {/* Image - only render when not in error state */}
       {src && !imageError && (
         <img
+          ref={imgRef}
           src={src}
           alt="File Preview"
           className={cn(
             "w-full h-full object-contain border border-border dark:border-none",
             imageLoading ? "opacity-0" : "opacity-100",
           )}
-          onLoad={() => setImageLoading(false)}
-          onError={() => {
-            setImageError(true);
-            setImageLoading(false);
-          }}
+          onLoad={handleLoad}
+          onError={handleError}
         />
       )}
     </div>
