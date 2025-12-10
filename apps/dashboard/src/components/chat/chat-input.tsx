@@ -121,19 +121,28 @@ function ChatInputContent() {
   // Container padding - keep constant, don't animate
   const containerPadding = 0;
 
-  // Button animations
-  const buttonOpacity = useTransform(
-    minimizationFactor,
-    (factor) => 1 - factor,
+  // Button animations - simple linear fade out
+  const buttonOpacity = useTransform(minimizationFactor, (factor) => {
+    // Linear fade from 1 to 0
+    return 1 - factor;
+  });
+  const buttonScale = useTransform(minimizationFactor, (factor) => {
+    // Subtle scale from 1 to 0.95
+    return 1 - factor * 0.05;
+  });
+  const buttonPointerEvents = useTransform(minimizationFactor, (factor) =>
+    factor > 0.5 ? "none" : "auto",
   );
-  const buttonScale = useTransform(
-    minimizationFactor,
-    (factor) => 1 - factor * 0.05,
-  );
-  const buttonTranslateX = useTransform(
-    minimizationFactor,
-    (factor) => -factor * 2,
-  );
+
+  // Toolbar wrapper - simple linear collapse
+  const toolbarMaxHeight = useTransform(minimizationFactor, (factor) => {
+    // Collapse from 56px (content + padding) to 0
+    return 56 * (1 - factor);
+  });
+  const toolbarOpacity = useTransform(minimizationFactor, (factor) => {
+    // Linear fade from 1 to 0
+    return 1 - factor;
+  });
 
   // Body layout - smoothly interpolate gap and flex properties
   const bodyGap = useTransform(
@@ -152,44 +161,13 @@ function ChatInputContent() {
   const bodyFlexDirection = useTransform(minimizationFactor, (factor) =>
     factor > 0.15 ? "row" : "column",
   );
-  // Alignment - only center when minimized, otherwise don't set (let default behavior)
-  const containerAlignItems = useTransform(minimizationFactor, (factor) =>
-    factor > 0.15 ? "center" : undefined,
-  );
-  const bodyAlignItems = useTransform(minimizationFactor, (factor) =>
-    factor > 0.15 ? "center" : undefined,
-  );
-  // Interpolate textarea values smoothly - all values use continuous interpolation
-  // Height: smoothly interpolate, allowing natural growth when not minimized
-  const textareaMinHeightValue = useTransform(
-    minimizationFactor,
-    (factor) => 32 * factor, // Smoothly interpolate from 0 to 32
-  );
-  const textareaMaxHeightValue = useTransform(minimizationFactor, (factor) => {
-    // When minimized: 32px, when not minimized: use a reasonable max (around 120px)
-    // Smoothly interpolate from 120px to 32px
-    return 120 - factor * (120 - 32);
+  // Simple height animation - expanded (auto) vs minimized (48px)
+  // Use maxHeight for smooth animation since height: auto can't be animated
+  const inputWrapperMaxHeight = useTransform(minimizationFactor, (factor) => {
+    // Expanded: 200px (large enough for natural content)
+    // Minimized: 48px (32px content + 8px top + 8px bottom padding)
+    return 200 - factor * (200 - 48);
   });
-  const textareaHeightValue = useTransform(minimizationFactor, (factor) => {
-    // When minimized: fixed 32px, when not minimized: use a reasonable height that allows growth
-    // Smoothly interpolate from auto (large value) to 32px
-    if (factor < 0.01) {
-      return undefined; // Let it grow naturally when not minimized
-    }
-    // Smoothly interpolate to 32px when minimized
-    return 32;
-  });
-  const textareaPaddingYValue = useTransform(
-    minimizationFactor,
-    (factor) => 8 - factor * 4, // Smooth interpolation from 8px to 4px
-  );
-  const textareaPaddingXValue = useTransform(
-    minimizationFactor,
-    (factor) => 12 - factor * 4, // Smooth interpolation from 12px to 8px
-  );
-
-  // For backward compatibility, also calculate shouldMinimize boolean
-  const shouldMinimize = targetMinimizationFactor > 0;
 
   const handleSubmit = (message: ChatInputMessage) => {
     const hasText = Boolean(message.text);
@@ -254,7 +232,7 @@ function ChatInputContent() {
         }}
         className="!bg-[rgba(247,247,247,0.85)] dark:!bg-[rgba(19,19,19,0.7)] backdrop-blur-lg flex"
         layout
-        transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+        transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
       >
         <PromptInput
           onSubmit={handleSubmit}
@@ -272,8 +250,6 @@ function ChatInputContent() {
               flexDirection: bodyFlexDirection,
               ...(targetMinimizationFactor > 0.15 && { alignItems: "center" }),
             }}
-            layout
-            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
           >
             <PromptInputBody
               className={cn(
@@ -285,25 +261,10 @@ function ChatInputContent() {
               </PromptInputAttachments>
               <motion.div
                 style={{
-                  minHeight: textareaMinHeightValue,
-                  maxHeight: textareaMaxHeightValue,
-                  height: textareaHeightValue,
-                  paddingTop: textareaPaddingYValue,
-                  paddingBottom: textareaPaddingYValue,
-                  // paddingLeft: textareaPaddingXValue,
-                  // paddingRight: textareaPaddingXValue,
-                  overflow: useTransform(minimizationFactor, (factor) =>
-                    factor > 0.5 ? "hidden" : "visible",
-                  ),
-                  textOverflow: useTransform(minimizationFactor, (factor) =>
-                    factor > 0.5 ? "ellipsis" : "clip",
-                  ),
-                  whiteSpace: useTransform(minimizationFactor, (factor) =>
-                    factor > 0.5 ? "nowrap" : "normal",
-                  ),
-                  flex: useTransform(minimizationFactor, (factor) =>
-                    factor > 0.5 ? 1 : undefined,
-                  ),
+                  maxHeight: inputWrapperMaxHeight,
+                  paddingTop: 8,
+                  paddingBottom: 8,
+                  overflow: "hidden",
                 }}
               >
                 <PromptInputTextarea
@@ -311,17 +272,11 @@ function ChatInputContent() {
                   autoFocus
                   onChange={handleInputChange}
                   onFocus={() => setIsFocused(true)}
-                  onBlur={() => {
-                    // Allow normal blur - shouldMinimize already checks for showCommands
-                    setIsFocused(false);
-                  }}
-                  className="w-full h-full border-none bg-transparent resize-none outline-none"
+                  onBlur={() => setIsFocused(false)}
+                  className="w-full border-none bg-transparent resize-none outline-none"
                   style={{
-                    minHeight: "inherit",
-                    maxHeight: "inherit",
-                    height: "inherit",
-                    paddingTop: "inherit",
-                    paddingBottom: "inherit",
+                    minHeight: 32,
+                    maxHeight: 184, // 200 - 16px padding
                   }}
                   onKeyDown={(e) => {
                     // Handle Enter key for commands
@@ -382,22 +337,11 @@ function ChatInputContent() {
             </PromptInputBody>
           </motion.div>
           <motion.div
-            // style={{
-            //   paddingBottom: useTransform(
-            //     minimizationFactor,
-            //     (f) => 8 - f * 8, // Smoothly interpolate from 8px to 0px
-            //   ),
-            //   paddingLeft: useTransform(
-            //     minimizationFactor,
-            //     (f) => 12 - f * 12, // Smoothly interpolate from 12px to 0px
-            //   ),
-            //   paddingRight: useTransform(
-            //     minimizationFactor,
-            //     (f) => 12 - f * 12, // Smoothly interpolate from 12px to 0px
-            //   ),
-            // }}
-            layout
-            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            style={{
+              maxHeight: toolbarMaxHeight,
+              opacity: toolbarOpacity,
+              overflow: "hidden",
+            }}
           >
             <PromptInputToolbar
               className={cn(targetMinimizationFactor > 0.15 && "flex-shrink-0")}
@@ -418,8 +362,7 @@ function ChatInputContent() {
                   style={{
                     opacity: buttonOpacity,
                     scale: buttonScale,
-                    x: buttonTranslateX,
-                    pointerEvents: shouldMinimize ? "none" : "auto",
+                    pointerEvents: buttonPointerEvents,
                   }}
                 >
                   <PromptInputActionAddAttachments />
@@ -434,29 +377,36 @@ function ChatInputContent() {
                   style={{
                     opacity: buttonOpacity,
                     scale: buttonScale,
-                    x: buttonTranslateX,
-                    pointerEvents: shouldMinimize ? "none" : "auto",
+                    pointerEvents: buttonPointerEvents,
                   }}
                 >
                   <RecordButton size={16} />
                 </motion.div>
-                <PromptInputSubmit
-                  disabled={
-                    // Enable button when streaming so user can stop
-                    status === "streaming" || status === "submitted"
-                      ? false
-                      : (!input && !status) ||
-                        isUploading ||
-                        isRecording ||
-                        isProcessing
-                  }
-                  status={status}
-                  onClick={
-                    status === "streaming" || status === "submitted"
-                      ? handleStopClick
-                      : undefined
-                  }
-                />
+                <motion.div
+                  style={{
+                    opacity: buttonOpacity,
+                    scale: buttonScale,
+                    pointerEvents: buttonPointerEvents,
+                  }}
+                >
+                  <PromptInputSubmit
+                    disabled={
+                      // Enable button when streaming so user can stop
+                      status === "streaming" || status === "submitted"
+                        ? false
+                        : (!input && !status) ||
+                          isUploading ||
+                          isRecording ||
+                          isProcessing
+                    }
+                    status={status}
+                    onClick={
+                      status === "streaming" || status === "submitted"
+                        ? handleStopClick
+                        : undefined
+                    }
+                  />
+                </motion.div>
               </PromptInputTools>
             </PromptInputToolbar>
           </motion.div>
