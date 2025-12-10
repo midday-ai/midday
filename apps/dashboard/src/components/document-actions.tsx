@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuthenticatedUrl } from "@/hooks/use-authenticated-url";
 import { useDocumentParams } from "@/hooks/use-document-params";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
@@ -22,6 +23,10 @@ export function DocumentActions({ showDelete = false, filePath }: Props) {
   const { setParams, params } = useDocumentParams();
 
   const filename = filePath?.at(-1);
+  const baseDownloadUrl = filePath
+    ? `${process.env.NEXT_PUBLIC_API_URL}/files/download/file?path=${filePath.join("/")}&filename=${filename}`
+    : null;
+  const { url: downloadUrl } = useAuthenticatedUrl(baseDownloadUrl);
 
   const shortLinkMutation = useMutation(
     trpc.shortLinks.createForDocument.mutationOptions({
@@ -66,13 +71,11 @@ export function DocumentActions({ showDelete = false, filePath }: Props) {
         variant="ghost"
         size="icon"
         onClick={() => {
-          if (filePath && filename) {
-            downloadFile(
-              `/api/download/file?path=${filePath.join("/")}&filename=${filename}`,
-              filename,
-            );
+          if (downloadUrl && filename) {
+            downloadFile(downloadUrl, filename);
           }
         }}
+        disabled={!downloadUrl}
       >
         <Icons.ArrowCoolDown className="size-4" />
       </Button>

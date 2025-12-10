@@ -1,10 +1,11 @@
 "use client";
 
 import { FilePreviewIcon } from "@/components/file-preview-icon";
+import { useAuthenticatedUrl } from "@/hooks/use-authenticated-url";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Props = {
   mimeType: string;
@@ -22,60 +23,66 @@ function ErrorPreview() {
 }
 
 export function FilePreview({ mimeType, filePath }: Props) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
-  let src = null;
+  // Determine endpoint based on mime type
+  const endpoint = mimeType.startsWith("image/")
+    ? "proxy"
+    : mimeType.startsWith("application/pdf") ||
+        mimeType.startsWith("application/octet-stream")
+      ? "preview"
+      : null;
 
-  if (mimeType.startsWith("image/")) {
-    src = `/api/proxy?filePath=${encodeURIComponent(filePath)}`;
-  }
+  const baseUrl = useMemo(() => {
+    if (!endpoint) return null;
+    return `${process.env.NEXT_PUBLIC_API_URL}/files/${endpoint}?filePath=${encodeURIComponent(filePath)}`;
+  }, [endpoint, filePath]);
 
-  if (
-    mimeType.startsWith("application/pdf") ||
-    mimeType.startsWith("application/octet-stream")
-  ) {
-    // NOTE: Make a image from the pdf
-    src = `/api/preview?filePath=${encodeURIComponent(filePath)}`;
-  }
+  const { url: src, error, isLoading } = useAuthenticatedUrl(baseUrl);
 
-  useEffect(() => {
-    if (src) {
-      const img = new Image();
-      img.src = src;
-      img.onload = () => {
-        setIsLoading(false);
-        setIsError(false);
-      };
-      img.onerror = () => {
-        setIsLoading(false);
-        setIsError(true);
-      };
-    }
-  }, [src]);
-
-  if (!src) {
+  if (!endpoint) {
     return <FilePreviewIcon mimetype={mimeType} />;
   }
 
-  if (isError) {
+  if (error) {
     return <ErrorPreview />;
   }
 
-  return (
-    <div className="w-full h-full relative">
-      {isLoading && <Skeleton className="absolute inset-0 w-full h-full" />}
+  // Reset image loading state when src changes
+  useEffect(() => {
+    if (src) {
+      setImageLoading(true);
+      setImageError(false);
+    }
+  }, [src]);
 
-      <img
-        src={src}
-        alt="File Preview"
-        className={cn(
-          "w-full h-full object-contain border border-border dark:border-none",
-          isLoading ? "opacity-0" : "opacity-100",
-          "transition-opacity duration-100",
-        )}
-        onError={() => setIsError(true)}
-      />
+  return (
+    <div className="relative w-full h-full flex items-center justify-center">
+      {/* Show skeleton while authenticating URL or image is loading */}
+      {(isLoading || !src || imageLoading) && !imageError && (
+        <Skeleton className="absolute inset-0 w-full h-full" />
+      )}
+
+      {/* Show error preview if image fails to load */}
+      {imageError && <ErrorPreview />}
+
+      {/* Image - only render when not in error state */}
+      {src && !imageError && (
+        <img
+          src={src}
+          alt="File Preview"
+          className={cn(
+            "w-full h-full object-contain border border-border dark:border-none",
+            imageLoading ? "opacity-0" : "opacity-100",
+          )}
+          onLoad={() => setImageLoading(false)}
+          onError={() => {
+            setImageError(true);
+            setImageLoading(false);
+          }}
+        />
+      )}
     </div>
   );
 }

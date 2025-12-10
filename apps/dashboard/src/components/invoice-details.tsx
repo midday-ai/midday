@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuthenticatedUrl } from "@/hooks/use-authenticated-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
@@ -68,6 +69,9 @@ export function InvoiceDetails() {
     customerName,
     scheduledAt,
   } = data;
+
+  const baseDownloadUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?id=${id}`;
+  const { url: downloadUrl } = useAuthenticatedUrl(baseDownloadUrl);
 
   return (
     <div className="h-full">
@@ -219,11 +223,11 @@ export function InvoiceDetails() {
                   variant="secondary"
                   className="size-[38px] hover:bg-secondary shrink-0"
                   onClick={() => {
-                    downloadFile(
-                      `/api/download/invoice?id=${id}`,
-                      `${invoiceNumber}.pdf`,
-                    );
+                    if (downloadUrl) {
+                      downloadFile(downloadUrl, `${invoiceNumber}.pdf`);
+                    }
                   }}
+                  disabled={!downloadUrl}
                 >
                   <div>
                     <Icons.ArrowCoolDown className="size-4" />

@@ -4,6 +4,7 @@ import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
+import { getAuthenticatedUrl } from "@/utils/authenticated-url";
 import {
   generateStatementPdf,
   generateStatementPdfBlob,
@@ -93,8 +94,14 @@ export function CustomerDetails() {
     setOpenDropdownId(null);
   });
 
-  const handleDownloadInvoice = (invoiceId: string) => {
-    downloadFile(`/api/download/invoice?id=${invoiceId}`, "invoice.pdf");
+  const handleDownloadInvoice = async (invoiceId: string) => {
+    try {
+      const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?id=${invoiceId}`;
+      const authenticatedUrl = await getAuthenticatedUrl(baseUrl);
+      downloadFile(authenticatedUrl, "invoice.pdf");
+    } catch (error) {
+      console.error("Failed to download invoice:", error);
+    }
     setOpenDropdownId(null);
   };
 

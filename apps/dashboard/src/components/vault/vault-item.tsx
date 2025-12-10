@@ -43,7 +43,7 @@ export function VaultItem({ data, small }: Props) {
       <button
         type="button"
         className={cn(
-          "w-[60px] h-[84px] flex items-center justify-center",
+          "w-[60px] h-[84px] flex items-center justify-center relative",
           small && "w-[45px] h-[63px]",
           (data?.metadata as { mimetype?: string })?.mimetype?.startsWith(
             "image/",

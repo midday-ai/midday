@@ -2,6 +2,7 @@
 
 import { downloadFile } from "@/lib/download";
 import { useInvoiceStore } from "@/store/invoice";
+import { getAuthenticatedUrl } from "@/utils/authenticated-url";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
@@ -48,8 +49,10 @@ export function BottomBar({ data }: Props) {
         });
 
         try {
+          const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?id=${invoice.id}`;
+          const authenticatedUrl = await getAuthenticatedUrl(baseUrl);
           await downloadFile(
-            `/api/download/invoice?id=${invoice.id}`,
+            authenticatedUrl,
             `${invoice.invoiceNumber || "invoice"}.pdf`,
           );
         } catch (downloadError) {

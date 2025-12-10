@@ -14,29 +14,42 @@ import type { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 
 export const withAuth: MiddlewareHandler = async (c, next) => {
-  // Skip auth for OPTIONS preflight requests - let CORS handle them
-  // if (c.req.method === "OPTIONS") {
-  //   await next();
-  //   return;
-  // }
+  const db = c.get("db");
+  let token: string | null = null;
 
+  // Try to get token from Authorization header first
   const authHeader = c.req.header("Authorization");
-
-  if (!authHeader) {
-    throw new HTTPException(401, { message: "Authorization header required" });
+  if (authHeader) {
+    const [scheme, headerToken] = authHeader.split(" ");
+    if (scheme === "Bearer" && headerToken) {
+      token = headerToken;
+    }
   }
 
-  const [scheme, token] = authHeader.split(" ");
-
-  if (scheme !== "Bearer") {
-    throw new HTTPException(401, { message: "Invalid authorization scheme" });
+  // If still no token, try query parameter as fallback (for img tags, etc.)
+  if (!token) {
+    // Parse URL directly - c.req.url is a full URL in Hono
+    try {
+      const url = new URL(c.req.url);
+      const urlToken = url.searchParams.get("token");
+      if (urlToken) {
+        token = urlToken;
+      }
+    } catch (error) {
+      // If URL parsing fails, try c.req.query() as fallback
+      const queryToken = c.req.query("token");
+      if (queryToken) {
+        token = queryToken;
+      }
+    }
   }
 
   if (!token) {
-    throw new HTTPException(401, { message: "Token required" });
+    throw new HTTPException(401, {
+      message:
+        "Authorization required. Token must be provided in Authorization header or 'token' query parameter.",
+    });
   }
-
-  const db = c.get("db");
 
   // Handle Supabase JWT tokens (try to verify as JWT first)
   const supabaseSession = await verifyAccessToken(token);

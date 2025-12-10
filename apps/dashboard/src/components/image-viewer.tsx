@@ -29,16 +29,21 @@ export function ImageViewer({ url }: { url: string }) {
 
       {isError && <ErrorImage />}
 
-      <img
-        src={url}
-        alt="Viewer content"
-        className={cn(
-          "max-h-full max-w-full object-contain",
-          isLoading ? "opacity-0" : "opacity-100",
-        )}
-        onLoad={() => setIsLoading(false)}
-        onError={() => setIsError(true)}
-      />
+      {!isError && (
+        <img
+          src={url}
+          alt="Viewer content"
+          className={cn(
+            "max-h-full max-w-full object-contain",
+            isLoading ? "opacity-0" : "opacity-100",
+          )}
+          onLoad={() => setIsLoading(false)}
+          onError={() => {
+            setIsError(true);
+            setIsLoading(false);
+          }}
+        />
+      )}
     </div>
   );
 }

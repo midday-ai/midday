@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuthenticatedUrl } from "@/hooks/use-authenticated-url";
 import { useJobStatus } from "@/hooks/use-job-status";
 import { downloadFile } from "@/lib/download";
 import { useExportStore } from "@/store/export";
@@ -44,6 +45,34 @@ type ExportResult = {
   fileName: string;
   totalItems: number;
 };
+
+function DownloadButton({
+  fullPath,
+  fileName,
+  onDownload,
+}: {
+  fullPath: string;
+  fileName: string;
+  onDownload: () => void;
+}) {
+  const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/download/file?path=${fullPath}&filename=${fileName}`;
+  const { url: authenticatedUrl } = useAuthenticatedUrl(baseUrl);
+
+  return (
+    <Button
+      size="sm"
+      onClick={() => {
+        if (authenticatedUrl && fileName) {
+          downloadFile(authenticatedUrl, fileName);
+        }
+        onDownload();
+      }}
+      disabled={!authenticatedUrl}
+    >
+      Download
+    </Button>
+  );
+}
 
 export function ExportStatus() {
   const trpc = useTRPC();
@@ -213,20 +242,11 @@ export function ExportStatus() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    if (exportResult?.fullPath && exportResult?.fileName) {
-                      downloadFile(
-                        `/api/download/file?path=${exportResult.fullPath}&filename=${exportResult.fileName}`,
-                        exportResult.fileName,
-                      );
-                    }
-                    handleOnDownload();
-                  }}
-                >
-                  Download
-                </Button>
+                <DownloadButton
+                  fullPath={exportResult.fullPath}
+                  fileName={exportResult.fileName}
+                  onDownload={handleOnDownload}
+                />
               </div>
             ),
           });
