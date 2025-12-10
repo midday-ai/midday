@@ -24,36 +24,54 @@ const app = new OpenAPIHono<Context>();
 // HTTP Basic Authentication
 // Postmark supports basic auth by including credentials in the webhook URL:
 // https://username:password@domain.com/webhook/inbox
-// if (process.env.INBOX_WEBHOOK_USERNAME && process.env.INBOX_WEBHOOK_PASSWORD) {
-//   app.use(
-//     "*",
-//     basicAuth({
-//       username: process.env.INBOX_WEBHOOK_USERNAME,
-//       password: process.env.INBOX_WEBHOOK_PASSWORD,
-//     }),
-//   );
-// }
+if (process.env.INBOX_WEBHOOK_USERNAME && process.env.INBOX_WEBHOOK_PASSWORD) {
+  app.use(
+    "*",
+    basicAuth({
+      username: process.env.INBOX_WEBHOOK_USERNAME,
+      password: process.env.INBOX_WEBHOOK_PASSWORD,
+    }),
+  );
+}
 
 // IP address validation
-// Security: Validate the entire x-forwarded-for header value to prevent header injection attacks
 app.use("*", async (c, next) => {
   if (process.env.NODE_ENV === "development") {
     await next();
     return;
   }
 
-  const forwardedForHeader = c.req.header("x-forwarded-for");
+  const clientIp = c.get("clientIp");
 
-  const trimmedHeader = forwardedForHeader?.trim();
+  logger.info("Inbox webhook IP validation", {
+    clientIp,
+    path: c.req.path,
+    method: c.req.method,
+  });
 
-  if (
-    !trimmedHeader ||
-    !POSTMARK_IP_RANGE.includes(
-      trimmedHeader as (typeof POSTMARK_IP_RANGE)[number],
-    )
-  ) {
+  if (!clientIp) {
+    logger.warn("Inbox webhook IP validation failed - no client IP in context");
     throw new HTTPException(403, { message: "Invalid IP address" });
   }
+
+  const isValidIp = POSTMARK_IP_RANGE.includes(
+    clientIp as (typeof POSTMARK_IP_RANGE)[number],
+  );
+
+  if (!isValidIp) {
+    logger.warn(
+      "Inbox webhook IP validation failed - IP not in allowed range",
+      {
+        receivedIp: clientIp,
+        allowedIps: POSTMARK_IP_RANGE,
+      },
+    );
+    throw new HTTPException(403, { message: "Invalid IP address" });
+  }
+
+  logger.info("Inbox webhook IP validation successful", {
+    validatedIp: clientIp,
+  });
 
   await next();
 });
