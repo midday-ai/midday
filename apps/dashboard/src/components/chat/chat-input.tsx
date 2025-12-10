@@ -33,9 +33,9 @@ import {
   PromptInputToolbar,
   PromptInputTools,
 } from "@midday/ui/prompt-input";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { animate, motion, useMotionValue, useTransform } from "framer-motion";
 import { parseAsString, useQueryState } from "nuqs";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export interface ChatInputMessage extends PromptInputMessage {
   metadata?: {
@@ -103,14 +103,32 @@ function ChatInputContent() {
     ? 0
     : baseMinimizationFactor;
 
-  // Use direct motion value for scroll-synced animations (no spring lag)
-  // Spring physics cause lag for scroll-synced animations, so we use direct interpolation
+  // Motion value for minimization factor
   const minimizationFactor = useMotionValue(targetMinimizationFactor);
 
-  // Update motion value immediately when target changes (syncs with scroll)
+  // Track previous focus state to detect focus changes
+  const prevShouldPreventMinimization = useRef(shouldPreventMinimization);
+
+  // Update minimization factor:
+  // - Animate smoothly when focus state changes
+  // - Update immediately when scroll changes
   useEffect(() => {
-    minimizationFactor.set(targetMinimizationFactor);
-  }, [targetMinimizationFactor, minimizationFactor]);
+    const focusStateChanged =
+      prevShouldPreventMinimization.current !== shouldPreventMinimization;
+    prevShouldPreventMinimization.current = shouldPreventMinimization;
+
+    if (focusStateChanged) {
+      // Animate smoothly when focus/blur
+      animate(minimizationFactor, targetMinimizationFactor, {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+      });
+    } else {
+      // Update immediately for scroll
+      minimizationFactor.set(targetMinimizationFactor);
+    }
+  }, [targetMinimizationFactor, shouldPreventMinimization, minimizationFactor]);
 
   // Transform motion value to actual style values - all smoothly interpolated
   const containerMaxWidth = useTransform(
@@ -161,12 +179,16 @@ function ChatInputContent() {
   const bodyFlexDirection = useTransform(minimizationFactor, (factor) =>
     factor > 0.15 ? "row" : "column",
   );
-  // Simple height animation - expanded (auto) vs minimized (48px)
-  // Use maxHeight for smooth animation since height: auto can't be animated
-  const inputWrapperMaxHeight = useTransform(minimizationFactor, (factor) => {
-    // Expanded: 200px (large enough for natural content)
-    // Minimized: 48px (32px content + 8px top + 8px bottom padding)
-    return 200 - factor * (200 - 48);
+  // Height animation - expanded (55px) vs minimized (52px)
+  const inputWrapperHeight = useTransform(minimizationFactor, (factor) => {
+    // Expanded: 55px, Minimized: 52px
+    return 55 - factor * (55 - 52);
+  });
+
+  // Padding bottom - less when expanded, more when minimized
+  const inputPaddingBottom = useTransform(minimizationFactor, (factor) => {
+    // Expanded: 4px, Minimized: 10px
+    return 4 + factor * 6;
   });
 
   const handleSubmit = (message: ChatInputMessage) => {
@@ -261,10 +283,10 @@ function ChatInputContent() {
               </PromptInputAttachments>
               <motion.div
                 style={{
-                  maxHeight: inputWrapperMaxHeight,
-                  paddingTop: 8,
-                  paddingBottom: 8,
+                  height: inputWrapperHeight,
+                  paddingBottom: inputPaddingBottom,
                   overflow: "hidden",
+                  boxSizing: "border-box",
                 }}
               >
                 <PromptInputTextarea
@@ -273,11 +295,7 @@ function ChatInputContent() {
                   onChange={handleInputChange}
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
-                  className="w-full border-none bg-transparent resize-none outline-none"
-                  style={{
-                    minHeight: 32,
-                    maxHeight: 184, // 200 - 16px padding
-                  }}
+                  className="w-full h-full border-none bg-transparent resize-none outline-none"
                   onKeyDown={(e) => {
                     // Handle Enter key for commands
                     if (e.key === "Enter" && showCommands) {
