@@ -60,7 +60,8 @@ function ChatInputContent() {
   const { setChatId } = useChatInterface();
   const { isMetricsTab } = useOverviewTab();
   const { scrollY } = useWindowScroll();
-  const { isOpen: isHistoryOpen } = useChatHistoryContext();
+  const { isOpen: isHistoryOpen, setIsOpen: setHistoryOpen } =
+    useChatHistoryContext();
 
   const [, clearSuggestions] = useDataPart<{ prompts: string[] }>(
     "suggestions",
@@ -78,10 +79,29 @@ function ChatInputContent() {
     selectedCommandIndex,
     filteredCommands,
     setInput,
+    setShowCommands,
     handleInputChange,
     handleKeyDown,
     resetCommandState,
   } = useChatStore();
+
+  // Ensure only one of history or commands is open at a time
+  const prevShowCommands = useRef(showCommands);
+  const prevHistoryOpen = useRef(isHistoryOpen);
+
+  useEffect(() => {
+    // Commands just opened - close history
+    if (showCommands && !prevShowCommands.current && isHistoryOpen) {
+      setHistoryOpen(false);
+    }
+    // History just opened - close commands
+    if (isHistoryOpen && !prevHistoryOpen.current && showCommands) {
+      setShowCommands(false);
+    }
+
+    prevShowCommands.current = showCommands;
+    prevHistoryOpen.current = isHistoryOpen;
+  }, [showCommands, isHistoryOpen, setHistoryOpen, setShowCommands]);
 
   // Calculate minimization factor based on scroll position (0-400px range)
   // Factor is 0 (full size) to 1 (minimized)
