@@ -18,13 +18,14 @@ export const userRouter = createTRPCRouter({
       getUserById(dbInstance, session.user.id),
     );
 
-    // Add fileKey if user has a teamId
-    return result
-      ? {
-          ...result,
-          fileKey: result.teamId ? generateFileKey(result.teamId) : "",
-        }
-      : null;
+    if (!result) {
+      return undefined;
+    }
+
+    return {
+      ...result,
+      fileKey: result.teamId ? generateFileKey(result.teamId) : null,
+    };
   }),
 
   update: protectedProcedure

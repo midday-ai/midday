@@ -3,6 +3,7 @@ import { FormatAmount } from "@/components/format-amount";
 import { useFileUrl } from "@/hooks/use-file-url";
 import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { useInboxParams } from "@/hooks/use-inbox-params";
+import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
