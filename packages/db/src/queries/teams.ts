@@ -49,6 +49,19 @@ export const getTeamById = async (db: Database, id: string) => {
   return result;
 };
 
+export const getTeamByInboxId = async (db: Database, inboxId: string) => {
+  const [result] = await db
+    .select({
+      id: teams.id,
+      email: teams.email,
+    })
+    .from(teams)
+    .where(eq(teams.inboxId, inboxId))
+    .limit(1);
+
+  return result;
+};
+
 type UpdateTeamParams = {
   id: string;
   data: Partial<typeof teams.$inferInsert>;
