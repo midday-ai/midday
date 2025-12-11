@@ -1,5 +1,6 @@
 "use client";
 
+import { useFileUrl } from "@/hooks/use-file-url";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
@@ -21,8 +22,12 @@ export function VaultItemActions({ id, filePath, hideDelete }: Props) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const trpc = useTRPC();
 
-  const downloadUrl = `/api/download/file?path=${filePath.join("/")}`;
   const fileName = filePath.at(-1);
+  const { url: downloadUrl } = useFileUrl({
+    type: "download",
+    filePath: filePath.join("/"),
+    filename: fileName,
+  });
 
   const shortLinkMutation = useMutation(
     trpc.shortLinks.createForDocument.mutationOptions({
@@ -48,11 +53,11 @@ export function VaultItemActions({ id, filePath, hideDelete }: Props) {
         size="icon"
         className="rounded-full size-7 bg-background"
         onClick={() => {
-          downloadFile(
-            `${downloadUrl}&filename=${fileName}`,
-            fileName || "download",
-          );
+          if (downloadUrl && fileName) {
+            downloadFile(downloadUrl, fileName);
+          }
         }}
+        disabled={!downloadUrl}
       >
         <Icons.ArrowCoolDown className="size-3.5" />
       </Button>

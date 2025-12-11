@@ -42,7 +42,7 @@ export default function InvoiceToolbar({ token, invoiceNumber }: Props) {
                 className="rounded-full size-8"
                 onClick={() => {
                   downloadFile(
-                    `/api/download/invoice?token=${token}`,
+                    `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?token=${token}`,
                     `${invoiceNumber}.pdf`,
                   );
                 }}

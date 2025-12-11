@@ -8,14 +8,24 @@ import {
   getUserInvites,
   updateUser,
 } from "@midday/db/queries";
+import { generateFileKey } from "@midday/encryption";
 
 export const userRouter = createTRPCRouter({
   me: protectedProcedure.query(async ({ ctx: { db, session } }) => {
     // Cookie-based approach handles replication lag for new users via x-force-primary header
     // Retry logic still handles connection errors/timeouts
-    return withRetryOnPrimary(db, async (dbInstance) =>
+    const result = await withRetryOnPrimary(db, async (dbInstance) =>
       getUserById(dbInstance, session.user.id),
     );
+
+    if (!result) {
+      return undefined;
+    }
+
+    return {
+      ...result,
+      fileKey: result.teamId ? await generateFileKey(result.teamId) : null,
+    };
   }),
 
   update: protectedProcedure

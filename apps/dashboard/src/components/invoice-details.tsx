@@ -1,5 +1,6 @@
 "use client";
 
+import { useFileUrl } from "@/hooks/use-file-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
@@ -37,6 +38,11 @@ export function InvoiceDetails() {
   const { data, isLoading } = useQuery({
     ...trpc.invoice.getById.queryOptions({ id: invoiceId! }),
     enabled: isOpen,
+  });
+
+  const { url: downloadUrl } = useFileUrl({
+    type: "invoice",
+    invoiceId: invoiceId!,
   });
 
   if (isLoading) {
@@ -219,11 +225,11 @@ export function InvoiceDetails() {
                   variant="secondary"
                   className="size-[38px] hover:bg-secondary shrink-0"
                   onClick={() => {
-                    downloadFile(
-                      `/api/download/invoice?id=${id}`,
-                      `${invoiceNumber}.pdf`,
-                    );
+                    if (downloadUrl) {
+                      downloadFile(downloadUrl, `${invoiceNumber}.pdf`);
+                    }
                   }}
+                  disabled={!downloadUrl}
                 >
                   <div>
                     <Icons.ArrowCoolDown className="size-4" />

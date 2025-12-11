@@ -1,9 +1,9 @@
 "use client";
 
+import { useImageLoadState } from "@/hooks/use-image-load-state";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
-import { useState } from "react";
 
 function ErrorImage() {
   return (
@@ -16,8 +16,8 @@ function ErrorImage() {
 }
 
 export function ImageViewer({ url }: { url: string }) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
+  const { isLoading, isError, imgRef, handleLoad, handleError } =
+    useImageLoadState(url);
 
   if (!url) return <ErrorImage />;
 
@@ -29,16 +29,19 @@ export function ImageViewer({ url }: { url: string }) {
 
       {isError && <ErrorImage />}
 
-      <img
-        src={url}
-        alt="Viewer content"
-        className={cn(
-          "max-h-full max-w-full object-contain",
-          isLoading ? "opacity-0" : "opacity-100",
-        )}
-        onLoad={() => setIsLoading(false)}
-        onError={() => setIsError(true)}
-      />
+      {!isError && (
+        <img
+          ref={imgRef}
+          src={url}
+          alt="Viewer content"
+          className={cn(
+            "max-h-full max-w-full object-contain",
+            isLoading ? "opacity-0" : "opacity-100",
+          )}
+          onLoad={handleLoad}
+          onError={handleError}
+        />
+      )}
     </div>
   );
 }

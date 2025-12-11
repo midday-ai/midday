@@ -40,6 +40,7 @@
         "@midday/logger": "workspace:*",
         "@midday/notifications": "workspace:*",
         "@midday/supabase": "workspace:*",
+        "@midday/utils": "workspace:*",
         "@polar-sh/sdk": "^0.41.5",
         "@scalar/hono-api-reference": "^0.9.26",
         "@sentry/bun": "^10.29.0",
@@ -383,6 +384,9 @@
     "packages/encryption": {
       "name": "@midday/encryption",
       "version": "1.0.0",
+      "dependencies": {
+        "jose": "^6.1.3",
+      },
     },
     "packages/engine-client": {
       "name": "@midday/engine-client",

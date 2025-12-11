@@ -35,4 +35,10 @@ export const protectedMiddleware: MiddlewareHandler[] = [
   withPrimaryReadAfterWrite,
 ];
 
+export const fileMiddleware: MiddlewareHandler[] = [
+  withClientIp,
+  withDatabase,
+  withAuth,
+];
+
 export { withRequiredScope } from "./scope";

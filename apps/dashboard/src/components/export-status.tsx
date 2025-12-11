@@ -1,5 +1,6 @@
 "use client";
 
+import { useFileUrl } from "@/hooks/use-file-url";
 import { useJobStatus } from "@/hooks/use-job-status";
 import { downloadFile } from "@/lib/download";
 import { useExportStore } from "@/store/export";
@@ -44,6 +45,37 @@ type ExportResult = {
   fileName: string;
   totalItems: number;
 };
+
+function DownloadButton({
+  fullPath,
+  fileName,
+  onDownload,
+}: {
+  fullPath: string;
+  fileName: string;
+  onDownload: () => void;
+}) {
+  const { url: authenticatedUrl } = useFileUrl({
+    type: "download",
+    filePath: fullPath,
+    filename: fileName,
+  });
+
+  return (
+    <Button
+      size="sm"
+      onClick={() => {
+        if (authenticatedUrl && fileName) {
+          downloadFile(authenticatedUrl, fileName);
+        }
+        onDownload();
+      }}
+      disabled={!authenticatedUrl}
+    >
+      Download
+    </Button>
+  );
+}
 
 export function ExportStatus() {
   const trpc = useTRPC();
@@ -213,20 +245,11 @@ export function ExportStatus() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    if (exportResult?.fullPath && exportResult?.fileName) {
-                      downloadFile(
-                        `/api/download/file?path=${exportResult.fullPath}&filename=${exportResult.fileName}`,
-                        exportResult.fileName,
-                      );
-                    }
-                    handleOnDownload();
-                  }}
-                >
-                  Download
-                </Button>
+                <DownloadButton
+                  fullPath={exportResult.fullPath}
+                  fileName={exportResult.fileName}
+                  onDownload={handleOnDownload}
+                />
               </div>
             ),
           });

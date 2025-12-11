@@ -21,7 +21,7 @@ const config = {
     "@midday/invoice",
     "@midday/api",
   ],
-  serverExternalPackages: ["@react-pdf/renderer", "pdfjs-dist", "pino"],
+  serverExternalPackages: ["@react-pdf/renderer", "pino"],
   typescript: {
     ignoreBuildErrors: true,
   },

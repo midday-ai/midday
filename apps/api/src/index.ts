@@ -15,7 +15,11 @@ import { httpLogger } from "./utils/logger";
 const app = new OpenAPIHono<Context>();
 
 app.use(httpLogger());
-app.use(secureHeaders());
+app.use(
+  secureHeaders({
+    crossOriginResourcePolicy: "cross-origin",
+  }),
+);
 
 app.use(
   "*",
@@ -33,7 +37,12 @@ app.use(
       "x-user-country",
       "x-force-primary",
     ],
-    exposeHeaders: ["Content-Length"],
+    exposeHeaders: [
+      "Content-Length",
+      "Content-Type",
+      "Cache-Control",
+      "Cross-Origin-Resource-Policy",
+    ],
     maxAge: 86400,
   }),
 );

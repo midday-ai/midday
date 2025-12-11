@@ -121,7 +121,7 @@ export function InboxSheetDetails() {
           <div className="h-full flex items-center justify-center">
             <FileViewer
               mimeType={data.contentType}
-              url={`/api/proxy?filePath=vault/${data.filePath.join("/")}`}
+              url={`${process.env.NEXT_PUBLIC_API_URL}/files/proxy?filePath=vault/${data.filePath.join("/")}`}
               maxWidth={565}
             />
           </div>

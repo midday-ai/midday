@@ -1,5 +1,6 @@
 "use client";
 
+import { useFileUrl } from "@/hooks/use-file-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
@@ -29,6 +30,11 @@ export function InvoiceSuccess() {
       },
     ),
   );
+
+  const { url: downloadUrl } = useFileUrl({
+    type: "invoice",
+    invoiceId: invoiceId!,
+  });
 
   if (!invoice) {
     return null;
@@ -138,11 +144,11 @@ export function InvoiceSuccess() {
                   variant="secondary"
                   className="size-[40px] hover:bg-secondary shrink-0"
                   onClick={() => {
-                    downloadFile(
-                      `/api/download/invoice?id=${invoice.id}`,
-                      `${invoice.invoiceNumber}.pdf`,
-                    );
+                    if (downloadUrl) {
+                      downloadFile(downloadUrl, `${invoice.invoiceNumber}.pdf`);
+                    }
                   }}
+                  disabled={!downloadUrl}
                 >
                   <div>
                     <Icons.ArrowCoolDown className="size-4" />

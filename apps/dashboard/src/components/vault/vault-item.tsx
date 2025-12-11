@@ -28,11 +28,19 @@ export function VaultItem({ data, small }: Props) {
   return (
     <div
       className={cn(
-        "h-72 border relative flex text-muted-foreground p-4 flex-col gap-3 hover:bg-muted dark:hover:bg-[#141414] transition-colors duration-200 group",
+        "h-72 border relative flex text-muted-foreground p-4 flex-col gap-3 hover:bg-muted dark:hover:bg-[#141414] transition-colors duration-200 group cursor-pointer",
         small && "h-48",
       )}
+      onClick={() => {
+        setParams({ documentId: data.id });
+      }}
     >
-      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      <div
+        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
         <VaultItemActions
           id={data.id}
           filePath={data.pathTokens ?? []}
@@ -40,18 +48,14 @@ export function VaultItem({ data, small }: Props) {
         />
       </div>
 
-      <button
-        type="button"
+      <div
         className={cn(
-          "w-[60px] h-[84px] flex items-center justify-center",
+          "w-[60px] h-[84px] flex items-center justify-center relative",
           small && "w-[45px] h-[63px]",
           (data?.metadata as { mimetype?: string })?.mimetype?.startsWith(
             "image/",
           ) && "bg-border",
         )}
-        onClick={() => {
-          setParams({ documentId: data.id });
-        }}
       >
         {data?.metadata?.mimetype === "image/heic" && isLoading ? (
           // NOTE: We convert the heic images to jpeg in the backend, so we need to wait for the image to be processed
@@ -61,17 +65,15 @@ export function VaultItem({ data, small }: Props) {
           <FilePreview
             filePath={data?.pathTokens?.join("/") ?? ""}
             mimeType={(data?.metadata as { mimetype?: string })?.mimetype ?? ""}
+            lazy
+            fixedSize={
+              small ? { width: 45, height: 63 } : { width: 60, height: 84 }
+            }
           />
         )}
-      </button>
+      </div>
 
-      <button
-        type="button"
-        className="flex flex-col text-left"
-        onClick={() => {
-          setParams({ documentId: data.id });
-        }}
-      >
+      <div className="flex flex-col text-left flex-1">
         {
           <h2 className="text-sm text-primary line-clamp-1 mb-2 mt-3">
             {isLoading ? (
@@ -89,13 +91,15 @@ export function VaultItem({ data, small }: Props) {
             {data?.summary}
           </p>
         )}
-      </button>
+      </div>
 
       {!small && (
-        <VaultItemTags
-          tags={data?.documentTagAssignments ?? []}
-          isLoading={isLoading}
-        />
+        <div className="mt-auto" onClick={(e) => e.stopPropagation()}>
+          <VaultItemTags
+            tags={data?.documentTagAssignments ?? []}
+            isLoading={isLoading}
+          />
+        </div>
       )}
     </div>
   );

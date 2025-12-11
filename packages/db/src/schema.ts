@@ -1416,6 +1416,27 @@ export const documents = pgTable(
       table.teamId.asc().nullsLast().op("text_ops"),
       table.parentId.asc().nullsLast().op("text_ops"),
     ),
+    // Composite index for common query pattern: teamId + createdAt DESC
+    // Used by getDocuments and getRecentDocuments
+    index("documents_team_id_created_at_idx").using(
+      "btree",
+      table.teamId.asc().nullsLast().op("uuid_ops"),
+      table.createdAt.desc().nullsLast(),
+    ),
+    // Composite index for date range queries
+    // Used by getDocuments when filtering by date range
+    index("documents_team_id_date_idx").using(
+      "btree",
+      table.teamId.asc().nullsLast().op("uuid_ops"),
+      table.date.asc().nullsLast(),
+    ),
+    // Composite index for teamId + name queries
+    // Used by getDocumentById, updateDocumentByFileName, updateDocuments
+    index("documents_team_id_name_idx").using(
+      "btree",
+      table.teamId.asc().nullsLast().op("uuid_ops"),
+      table.name.asc().nullsLast().op("text_ops"),
+    ),
     index("idx_documents_fts_english").using(
       "gin",
       table.ftsEnglish.asc().nullsLast().op("tsvector_ops"),

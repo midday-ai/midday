@@ -15,7 +15,7 @@ export function VaultItemTags({ tags, isLoading }: Props) {
 
   if (isLoading) {
     return (
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide mt-auto">
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
         {[...Array(3)].map((_, index) => (
           <Skeleton
             key={index.toString()}
@@ -29,12 +29,13 @@ export function VaultItemTags({ tags, isLoading }: Props) {
   }
 
   return (
-    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide mt-auto">
+    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
       {tags?.map((tag) => (
         <button
           key={tag.documentTag.id}
           type="button"
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             setFilter({
               tags: [tag.documentTag.id],
             });

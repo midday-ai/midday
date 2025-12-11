@@ -149,7 +149,7 @@ export function SuggestedMatch({
         <div className="border border-border overflow-hidden">
           {/* Document Preview Skeleton */}
           <div className="relative bg-[#F6F6F3] dark:bg-[#1A1A1A] p-4 h-[300px] flex items-center justify-center">
-            <Skeleton className="w-full h-full max-w-[248px]" />
+            <Skeleton className="w-full h-full max-w-[190px]" />
           </div>
 
           <div className="p-4 border-t border-border">
@@ -194,8 +194,13 @@ export function SuggestedMatch({
             </Button>
           )}
           {filePath ? (
-            <div className="w-full h-full max-w-[248px] mx-auto">
-              <FilePreview mimeType={mimeType} filePath={filePath} />
+            <div className="relative w-full h-full max-w-[190px] mx-auto">
+              <FilePreview
+                mimeType={mimeType}
+                filePath={filePath}
+                lazy
+                fixedSize={{ width: 190, height: 270 }}
+              />
             </div>
           ) : (
             <div className="flex flex-col items-center space-y-2">

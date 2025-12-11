@@ -1,5 +1,6 @@
 import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
+import { useFileUrl } from "@/hooks/use-file-url";
 import { downloadFile } from "@/lib/download";
 import { formatSize } from "@/utils/format";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
@@ -13,6 +14,48 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Skeleton } from "@midday/ui/skeleton";
+import { useState } from "react";
+
+function DownloadFileMenuItem({
+  pathTokens,
+  filename,
+}: {
+  pathTokens?: string[] | null;
+  filename: string;
+}) {
+  const { url: downloadUrl } = useFileUrl(
+    pathTokens
+      ? {
+          type: "download",
+          filePath: pathTokens.join("/"),
+          filename,
+        }
+      : null,
+  );
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (!downloadUrl) return;
+
+    try {
+      setIsDownloading(true);
+      await downloadFile(downloadUrl, filename);
+    } catch (error) {
+      console.error("Download failed:", error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  return (
+    <DropdownMenuItem
+      onClick={handleDownload}
+      disabled={!downloadUrl || isDownloading}
+    >
+      Download
+    </DropdownMenuItem>
+  );
+}
 import type { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 
@@ -138,20 +181,10 @@ export const columns: ColumnDef<Document>[] = [
             >
               View details
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={async () => {
-                try {
-                  await downloadFile(
-                    `/api/download/file?path=${row.original.pathTokens?.join("/")}&filename=${row.original.name?.split("/").at(-1)}`,
-                    row.original.name?.split("/").at(-1) || "download",
-                  );
-                } catch (error) {
-                  console.error("Download failed:", error);
-                }
-              }}
-            >
-              Download
-            </DropdownMenuItem>
+            <DownloadFileMenuItem
+              pathTokens={row.original.pathTokens}
+              filename={row.original.name?.split("/").at(-1) || "download"}
+            />
             <DropdownMenuItem
               onClick={() => {
                 if (row.original.pathTokens) {

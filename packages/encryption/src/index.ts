@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import * as jose from "jose";
 
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 16;
@@ -85,4 +86,43 @@ export function decrypt(encryptedPayload: string): string {
 
 export function hash(str: string): string {
   return crypto.createHash("sha256").update(str).digest("hex");
+}
+
+/**
+ * Generates a compact JWT file key for a team.
+ * This key is used for proxy/download access to team files.
+ * The token expires after 7 days.
+ * @param teamId The team ID to generate the key for
+ * @returns A compact JWT token containing the teamId
+ */
+export async function generateFileKey(teamId: string): Promise<string> {
+  const secret = process.env.FILE_KEY_SECRET;
+  if (!secret) {
+    throw new Error("FILE_KEY_SECRET environment variable is not set.");
+  }
+  const secretKey = new TextEncoder().encode(secret);
+  const token = await new jose.SignJWT({ teamId })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime("7d")
+    .sign(secretKey);
+  return token;
+}
+
+/**
+ * Verifies a file key JWT token and extracts the teamId.
+ * @param token The JWT token to verify
+ * @returns The teamId if valid, null if invalid
+ */
+export async function verifyFileKey(token: string): Promise<string | null> {
+  try {
+    const secret = process.env.FILE_KEY_SECRET;
+    if (!secret) {
+      return null;
+    }
+    const secretKey = new TextEncoder().encode(secret);
+    const { payload } = await jose.jwtVerify(token, secretKey);
+    return (payload.teamId as string) || null;
+  } catch {
+    return null;
+  }
 }

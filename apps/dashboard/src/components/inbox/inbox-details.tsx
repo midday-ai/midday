@@ -1,5 +1,6 @@
 import { FileViewer } from "@/components/file-viewer";
 import { FormatAmount } from "@/components/format-amount";
+import { useFileUrl } from "@/hooks/use-file-url";
 import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useUserQuery } from "@/hooks/use-user";
@@ -235,6 +236,22 @@ export function InboxDetails() {
     });
   };
 
+  const { url: downloadUrl } = useFileUrl(
+    data?.filePath && data?.fileName
+      ? {
+          type: "download",
+          filePath: data.filePath.join("/"),
+          filename: data.fileName,
+        }
+      : null,
+  );
+
+  const handleDownload = () => {
+    if (downloadUrl && data?.fileName) {
+      downloadFile(downloadUrl, data.fileName);
+    }
+  };
+
   const fallback = showFallback || (!data?.website && data?.displayName);
 
   if (isLoading) {
@@ -325,14 +342,8 @@ export function InboxDetails() {
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
-                  onClick={() => {
-                    if (data?.filePath && data?.fileName) {
-                      downloadFile(
-                        `/api/download/file?path=${data.filePath.join("/")}&filename=${data.fileName}`,
-                        data.fileName,
-                      );
-                    }
-                  }}
+                  onClick={handleDownload}
+                  disabled={!downloadUrl}
                 >
                   <Icons.ProjectStatus className="mr-2 size-4" />
                   <span className="text-xs">Download</span>
@@ -510,7 +521,7 @@ export function InboxDetails() {
               <div className="min-h-0 flex-shrink-0">
                 <FileViewer
                   mimeType={data.contentType}
-                  url={`/api/proxy?filePath=vault/${data?.filePath.join("/")}`}
+                  url={`${process.env.NEXT_PUBLIC_API_URL}/files/proxy?filePath=vault/${data?.filePath.join("/")}`}
                   // If the order changes, the file viewer will remount otherwise the PDF worker will crash
                   key={`${params.order}-${JSON.stringify(filterParams)}-primary`}
                 />
@@ -525,7 +536,7 @@ export function InboxDetails() {
                     <div key={relatedItem.id} className="min-h-0 flex-shrink-0">
                       <FileViewer
                         mimeType={relatedItem.contentType}
-                        url={`/api/proxy?filePath=vault/${relatedItem.filePath.join("/")}`}
+                        url={`${process.env.NEXT_PUBLIC_API_URL}/files/proxy?filePath=vault/${relatedItem.filePath.join("/")}`}
                         key={`${relatedItem.id}-${params.order}-${JSON.stringify(filterParams)}`}
                       />
                     </div>

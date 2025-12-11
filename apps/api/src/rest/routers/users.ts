@@ -3,6 +3,7 @@ import { updateUserSchema, userSchema } from "@api/schemas/users";
 import { validateResponse } from "@api/utils/validate-response";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { getUserById, updateUser } from "@midday/db/queries";
+import { generateFileKey } from "@midday/encryption";
 import { withRequiredScope } from "../middleware";
 
 const app = new OpenAPIHono<Context>();
@@ -34,7 +35,15 @@ app.openapi(
 
     const result = await getUserById(db, session.user.id);
 
-    return c.json(validateResponse(result, userSchema));
+    // Add fileKey if user has a teamId
+    const response = result
+      ? {
+          ...result,
+          fileKey: result.teamId ? await generateFileKey(result.teamId) : null,
+        }
+      : null;
+
+    return c.json(validateResponse(response, userSchema));
   },
 );
 

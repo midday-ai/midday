@@ -4,6 +4,7 @@ import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
+import { useFileUrl } from "@/hooks/use-file-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
@@ -94,17 +95,37 @@ function DownloadButton({
 }: { href: string; filename?: string }) {
   const [isDownloading, setIsDownloading] = useState(false);
 
+  const isFileDownload = href.includes("/files/download/file");
+  const isInvoiceDownload = href.includes("/files/download/invoice");
+  const needsAuth = isFileDownload || isInvoiceDownload;
+
+  // Extract invoice ID if it's an invoice download
+  let invoiceId: string | null = null;
+  if (isInvoiceDownload) {
+    try {
+      invoiceId = new URL(href).searchParams.get("id");
+    } catch {
+      // Invalid URL, will fall back to url type
+    }
+  }
+
+  const { url: authenticatedUrl, isLoading } = useFileUrl(
+    needsAuth
+      ? isInvoiceDownload && invoiceId
+        ? { type: "invoice", invoiceId }
+        : { type: "url", url: href }
+      : null,
+  );
+
   const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    const url = authenticatedUrl || href;
+    if (!url) return;
 
     try {
       setIsDownloading(true);
-      await downloadFile(href, filename || "download");
-
-      // Keep spinner for 1 second
-      setTimeout(() => {
-        setIsDownloading(false);
-      }, 1000);
+      await downloadFile(url, filename || "download");
+      setTimeout(() => setIsDownloading(false), 1000);
     } catch (error) {
       console.error("Download failed:", error);
       setIsDownloading(false);
@@ -112,8 +133,14 @@ function DownloadButton({
   };
 
   return (
-    <button type="button" onClick={handleDownload}>
-      {isDownloading ? (
+    <button
+      type="button"
+      onClick={handleDownload}
+      disabled={
+        isDownloading || (needsAuth && (!authenticatedUrl || isLoading))
+      }
+    >
+      {isDownloading || isLoading ? (
         <Spinner size={16} />
       ) : (
         <Icons.ArrowCoolDown className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
@@ -338,7 +365,7 @@ const SearchResultItemDisplay = ({
             <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
               <CopyButton path={`?documentId=${item.id}`} />
               <DownloadButton
-                href={`/api/download/file?path=${item.data?.path_tokens?.join("/")}&filename=${
+                href={`${process.env.NEXT_PUBLIC_API_URL}/files/download/file?path=${item.data?.path_tokens?.join("/")}&filename=${
                   (item.data?.title ||
                     (item.data?.name as string)?.split("/").at(-1) ||
                     "") as string
@@ -395,7 +422,7 @@ const SearchResultItemDisplay = ({
             <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
               <CopyButton path={`?invoiceId=${item.id}&type=details`} />
               <DownloadButton
-                href={`/api/download/invoice?id=${item.id}&size=${item?.data?.template?.size}`}
+                href={`${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?id=${item.id}&size=${item?.data?.template?.size}`}
                 filename={`${item.data.invoice_number || "invoice"}.pdf`}
               />
               <Icons.ArrowOutward className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
@@ -435,7 +462,7 @@ const SearchResultItemDisplay = ({
             <div className="flex items-center gap-2 invisible group-hover/item:visible group-focus/item:visible group-aria-selected/item:visible">
               <CopyButton path={`/inbox?inboxId=${item.id}`} />
               <DownloadButton
-                href={`/api/download/file?path=${item.data?.file_path?.join("/")}&filename=${item.data?.file_name || ""}`}
+                href={`${process.env.NEXT_PUBLIC_API_URL}/files/download/file?path=${item.data?.file_path?.join("/")}&filename=${item.data?.file_name || ""}`}
                 filename={item.data?.file_name || "download"}
               />
               <Icons.ArrowOutward className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
