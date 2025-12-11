@@ -38,8 +38,8 @@ export function FilePreview({
       mimeType.startsWith("application/pdf") ||
       mimeType.startsWith("application/octet-stream")
     ) {
-      // Use legacy endpoint for PDF previews
-      return "legacy-preview";
+      // Use local dashboard serverless function for PDF previews
+      return "preview";
     }
     return null;
   }, [mimeType]);
@@ -52,10 +52,10 @@ export function FilePreview({
     isLoading,
     hasFileKey,
   } = useFileUrl(
-    endpoint === "legacy-preview"
+    endpoint === "preview"
       ? {
           type: "url",
-          url: `${process.env.NEXT_PUBLIC_API_URL}/files/legacy/preview-legacy?filePath=vault/${filePath}`,
+          url: `/api/files/preview?filePath=vault/${filePath}`,
         }
       : endpoint
         ? {

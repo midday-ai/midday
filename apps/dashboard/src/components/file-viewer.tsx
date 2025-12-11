@@ -23,15 +23,22 @@ type Props = {
 
 export function FileViewer({ mimeType, url, maxWidth }: Props) {
   // Automatically add fileKey if it's a file proxy/preview URL
+  // Local dashboard preview endpoint doesn't need fileKey (uses session)
   const needsAuth =
-    url.includes("/files/proxy") || url.includes("/files/preview");
+    url.includes("/files/proxy") ||
+    (url.includes("/files/preview") &&
+      url.includes(process.env.NEXT_PUBLIC_API_URL || "")) ||
+    url.includes("/files/legacy/preview-legacy");
+
+  // Check if it's the local dashboard preview endpoint (returns PNG images)
+  const isLocalPreview = url.includes("/api/files/preview");
 
   const {
     url: finalUrl,
     isLoading,
     hasFileKey,
   } = useFileUrl(
-    needsAuth
+    needsAuth && !isLocalPreview
       ? {
           type: "url",
           url,
@@ -40,22 +47,27 @@ export function FileViewer({ mimeType, url, maxWidth }: Props) {
   );
 
   // Show loading state if we need auth but don't have fileKey yet
-  if (needsAuth && (isLoading || !hasFileKey)) {
+  if (needsAuth && !isLocalPreview && (isLoading || !hasFileKey)) {
     return <Skeleton className="h-full w-full" />;
   }
 
   const displayUrl = finalUrl || url;
 
+  // Local preview endpoint and legacy preview endpoint return PNG images, not PDFs
+  const isPreviewImage =
+    isLocalPreview || url.includes("/files/legacy/preview-legacy");
+
   if (
-    mimeType === "application/pdf" ||
-    mimeType === "application/octet-stream"
+    (mimeType === "application/pdf" ||
+      mimeType === "application/octet-stream") &&
+    !isPreviewImage
   ) {
     return (
       <DynamicPdfViewer url={displayUrl} key={displayUrl} maxWidth={maxWidth} />
     );
   }
 
-  if (mimeType?.startsWith("image/")) {
+  if (mimeType?.startsWith("image/") || isPreviewImage) {
     return <DynamicImageViewer url={displayUrl} key={displayUrl} />;
   }
 

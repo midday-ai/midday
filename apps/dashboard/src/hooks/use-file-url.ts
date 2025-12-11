@@ -27,7 +27,7 @@ export function useFileUrl(options: FileUrlOptions | null) {
   const { data: user, isLoading } = useUserQuery();
 
   const result = useMemo(() => {
-    if (!options || !user?.fileKey) {
+    if (!options) {
       return {
         url: null as string | null,
         isLoading,
@@ -36,13 +36,41 @@ export function useFileUrl(options: FileUrlOptions | null) {
     }
 
     if (options.type === "url") {
-      // Add fileKey to existing URL
+      // Handle relative URLs (starting with /) differently from absolute URLs
+      if (options.url.startsWith("/")) {
+        // Relative URL - parse query params manually
+        const [pathname, search] = options.url.split("?");
+        const params = new URLSearchParams(search);
+        if (user?.fileKey) {
+          params.set("fk", user.fileKey);
+        }
+        const queryString = params.toString();
+        return {
+          url: queryString ? `${pathname}?${queryString}` : pathname,
+          isLoading: false,
+          hasFileKey: !!user?.fileKey,
+        };
+      }
+
+      // Absolute URL - use full URL construction
       const url = new URL(options.url);
-      url.searchParams.set("fk", user.fileKey);
+      // Add fileKey to all URLs that need authentication
+      if (user?.fileKey) {
+        url.searchParams.set("fk", user.fileKey);
+      }
       return {
         url: url.toString(),
         isLoading: false,
-        hasFileKey: true,
+        hasFileKey: !!user?.fileKey,
+      };
+    }
+
+    // For other types, we need fileKey
+    if (!user?.fileKey) {
+      return {
+        url: null as string | null,
+        isLoading,
+        hasFileKey: false,
       };
     }
 

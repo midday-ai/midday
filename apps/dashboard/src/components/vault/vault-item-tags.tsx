@@ -34,7 +34,8 @@ export function VaultItemTags({ tags, isLoading }: Props) {
         <button
           key={tag.documentTag.id}
           type="button"
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             setFilter({
               tags: [tag.documentTag.id],
             });
