@@ -41,7 +41,12 @@ export class NodeCanvasFactory {
     if (canvasAndContext.canvas) {
       canvasAndContext.canvas.width = width;
       canvasAndContext.canvas.height = height;
+    } else {
+      // Handle case where canvas might not exist (though create should always provide one)
     }
+    // Additional reset logic like clearing transforms might be needed depending on usage
+    // canvasAndContext.context.setTransform(1, 0, 0, 1, 0, 0);
+    // canvasAndContext.context.clearRect(0, 0, width, height);
   }
 
   /**
@@ -58,6 +63,8 @@ export class NodeCanvasFactory {
       // associated with the canvas in the C++ backend of node-canvas.
       canvasAndContext.canvas.width = 0;
       canvasAndContext.canvas.height = 0;
+      // canvasAndContext.canvas = null; // Not needed as per node-canvas recommendations
+      // canvasAndContext.context = null;
     }
   }
 }

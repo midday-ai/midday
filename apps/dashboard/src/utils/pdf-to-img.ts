@@ -20,7 +20,9 @@ export async function getPdfImage(data: ArrayBuffer) {
 
     // Use page 1 for the image
     const page = await pdfDocument.getPage(1);
+
     const viewport = page.getViewport({ scale: 2.0 });
+
     const canvasAndContext = canvasFactory.create(
       viewport.width,
       viewport.height,
