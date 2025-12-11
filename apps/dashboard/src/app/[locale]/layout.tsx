@@ -106,8 +106,10 @@ export default async function Layout({
         <DesktopHeader />
 
         <NuqsAdapter>
-          <Providers locale={locale}>{children}</Providers>
-          <Toaster />
+          <Providers locale={locale}>
+            {children}
+            <Toaster />
+          </Providers>
           <Analytics />
         </NuqsAdapter>
       </body>
