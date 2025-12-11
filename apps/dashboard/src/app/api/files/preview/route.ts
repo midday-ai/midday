@@ -1,23 +1,15 @@
 import { getPdfImage } from "@/utils/pdf-to-img";
-import { verifyFileKey } from "@midday/encryption";
+import { getSession } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
 
 export const GET = async (req: NextRequest) => {
   const filePath = req.nextUrl.searchParams.get("filePath");
-  const fk = req.nextUrl.searchParams.get("fk");
 
   if (!filePath) {
     return NextResponse.json(
       { error: "No file path provided" },
       { status: 400 },
-    );
-  }
-
-  if (!fk) {
-    return NextResponse.json(
-      { error: "File key (fk) query parameter is required for file access." },
-      { status: 401 },
     );
   }
 
@@ -43,12 +35,13 @@ export const GET = async (req: NextRequest) => {
     );
   }
 
-  // Verify fileKey and extract teamId
-  const tokenTeamId = await verifyFileKey(fk);
+  // Authenticate using session
+  const {
+    data: { session },
+  } = await getSession();
 
-  // Validate the token's teamId matches the path teamId
-  if (!tokenTeamId || tokenTeamId !== pathTeamId) {
-    return NextResponse.json({ error: "Invalid file key." }, { status: 401 });
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const supabase = await createClient();

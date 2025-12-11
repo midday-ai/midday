@@ -29,35 +29,6 @@ export const proxyFileSchema = z.object({
     }),
 });
 
-export const previewFileSchema = z.object({
-  filePath: z
-    .string()
-    .min(1)
-    .openapi({
-      description:
-        "Path to the PDF file in storage. Can include or exclude 'vault/' prefix.",
-      example: "vault/documents/2024/invoice.pdf",
-      param: {
-        in: "query",
-        name: "filePath",
-        required: true,
-      },
-    }),
-  fk: z
-    .string()
-    .min(1)
-    .openapi({
-      description:
-        "Team file key for proxy/download access to team files. This key is returned in the user data response (GET /users/me) as the `fileKey` field. It is team-scoped and deterministic - all members of the same team share the same file key. Use this key to authenticate file access requests.",
-      example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
-      param: {
-        in: "query",
-        name: "fk",
-        required: true,
-      },
-    }),
-});
-
 export const downloadFileSchema = z.object({
   path: z
     .string()

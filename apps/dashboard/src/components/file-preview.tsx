@@ -69,7 +69,12 @@ export function FilePreview({
     return <FilePreviewIcon mimetype={mimeType} />;
   }
 
-  if (isLoading || !hasFileKey || !src) {
+  // For local preview routes, hasFileKey is false (uses session auth)
+  // For external API routes, we need hasFileKey to be true
+  const isLocalPreview = endpoint === "preview";
+  const needsFileKey = !isLocalPreview;
+
+  if (isLoading || (needsFileKey && !hasFileKey) || !src) {
     return <Skeleton className="w-full h-full" />;
   }
 
