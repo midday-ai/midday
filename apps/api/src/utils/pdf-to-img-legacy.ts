@@ -32,7 +32,7 @@ export async function getPdfImage(data: ArrayBuffer) {
       canvasFactory,
     };
 
-    // @ts-expect-error - pdfjs-dist types
+    // @ts-ignore
     const renderTask = page.render(renderContext);
     await renderTask.promise;
 
