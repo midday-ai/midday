@@ -146,16 +146,72 @@ export async function getTransactions(
     );
   }
 
-  // Categories filter
+  // Categories filter with child category expansion
   if (filterCategories && filterCategories.length > 0) {
-    const categoryConditions: (SQL | undefined)[] = [];
-    for (const categorySlug of filterCategories) {
-      if (categorySlug === "uncategorized") {
-        categoryConditions.push(isNull(transactions.categorySlug));
-      } else {
-        categoryConditions.push(eq(transactions.categorySlug, categorySlug));
+    const categorySlugs = filterCategories.filter(
+      (slug) => slug !== "uncategorized",
+    );
+
+    const expandedSlugs = new Set<string>(categorySlugs);
+
+    // Only query if we have category slugs (not just "uncategorized")
+    if (categorySlugs.length > 0) {
+      // Query categories to identify parents and get their IDs
+      const categories = await db
+        .select({
+          slug: transactionCategories.slug,
+          id: transactionCategories.id,
+          parentId: transactionCategories.parentId,
+        })
+        .from(transactionCategories)
+        .where(
+          and(
+            eq(transactionCategories.teamId, teamId),
+            inArray(transactionCategories.slug, categorySlugs),
+          ),
+        );
+
+      // Find parent category IDs (categories with no parentId)
+      const parentCategoryIds = categories
+        .filter((cat) => !cat.parentId)
+        .map((cat) => cat.id);
+
+      // Get all child category slugs for parent categories
+      if (parentCategoryIds.length > 0) {
+        const childCategories = await db
+          .select({ slug: transactionCategories.slug })
+          .from(transactionCategories)
+          .where(
+            and(
+              eq(transactionCategories.teamId, teamId),
+              inArray(transactionCategories.parentId, parentCategoryIds),
+            ),
+          );
+
+        // Add child slugs to the set (automatic deduplication)
+        for (const child of childCategories) {
+          if (child.slug) {
+            expandedSlugs.add(child.slug);
+          }
+        }
       }
     }
+
+    // Build filter conditions
+    const categoryConditions: (SQL | undefined)[] = [];
+
+    // Handle uncategorized separately
+    if (filterCategories.includes("uncategorized")) {
+      categoryConditions.push(isNull(transactions.categorySlug));
+    }
+
+    // Handle category slugs (now includes children, deduplicated)
+    if (expandedSlugs.size > 0) {
+      categoryConditions.push(
+        inArray(transactions.categorySlug, Array.from(expandedSlugs)),
+      );
+    }
+
     const definedCategoryConditions = categoryConditions.filter(
       (c) => c !== undefined,
     ) as SQL[];
