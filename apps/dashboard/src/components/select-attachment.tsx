@@ -130,6 +130,7 @@ export function SelectAttachment({
                             : item.contentType || "application/pdf"
                         }
                         filePath={filePath!}
+                        lazy
                       />
                     </button>
                   ) : (

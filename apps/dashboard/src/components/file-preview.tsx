@@ -2,12 +2,11 @@
 
 import { FilePreviewIcon } from "@/components/file-preview-icon";
 import { useFileUrl } from "@/hooks/use-file-url";
-import { useImageLoadState } from "@/hooks/use-image-load-state";
-import { useInViewport } from "@/hooks/use-in-viewport";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
-import { useMemo } from "react";
+import Image from "next/image";
+import { useMemo, useState } from "react";
 
 type Props = {
   mimeType: string;
@@ -38,11 +37,8 @@ export function FilePreview({ mimeType, filePath, lazy = false }: Props) {
     return null;
   }, [mimeType]);
 
-  // Use intersection observer for lazy loading
-  const { ref: viewportRef, isInView } = useInViewport();
-
-  // Only load URL when in viewport (or when not lazy)
-  const shouldLoad = !lazy || isInView;
+  const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
 
   const {
     url: src,
@@ -53,60 +49,47 @@ export function FilePreview({ mimeType, filePath, lazy = false }: Props) {
       ? {
           type: endpoint,
           filePath,
-          enabled: shouldLoad,
+          enabled: true, // Always enabled, Next.js Image handles lazy loading
         }
       : null,
   );
-  const {
-    isLoading: imageLoading,
-    isError: imageError,
-    imgRef,
-    handleLoad,
-    handleError,
-  } = useImageLoadState(src);
 
   if (!endpoint) {
     return <FilePreviewIcon mimetype={mimeType} />;
   }
 
-  // Show skeleton while waiting for viewport or loading
-  if (lazy && !isInView) {
-    return (
-      <div ref={viewportRef} className="w-full h-full">
-        <Skeleton className="w-full h-full" />
-      </div>
-    );
-  }
-
-  if (isLoading || !hasFileKey) {
+  if (isLoading || !hasFileKey || !src) {
     return <Skeleton className="w-full h-full" />;
   }
 
   return (
-    <div
-      ref={lazy ? viewportRef : undefined}
-      className="relative w-full h-full flex items-center justify-center"
-    >
+    <div className="relative w-full h-full flex items-center justify-center">
       {/* Show skeleton while image is loading */}
-      {(!src || imageLoading) && !imageError && (
+      {imageLoading && !imageError && (
         <Skeleton className="absolute inset-0 w-full h-full" />
       )}
 
       {/* Show error preview if image fails to load */}
       {imageError && <ErrorPreview />}
 
-      {/* Image - only render when not in error state */}
-      {src && !imageError && (
-        <img
-          ref={imgRef}
+      {/* Next.js Image - only render when not in error state */}
+      {!imageError && (
+        <Image
           src={src}
           alt="File Preview"
+          fill
           className={cn(
-            "w-full h-full object-contain border border-border dark:border-none",
+            "object-contain border border-border dark:border-none",
             imageLoading ? "opacity-0" : "opacity-100",
           )}
-          onLoad={handleLoad}
-          onError={handleError}
+          loading={lazy ? "lazy" : "eager"}
+          priority={!lazy}
+          fetchPriority={lazy ? "low" : "high"}
+          onLoadingComplete={() => setImageLoading(false)}
+          onError={() => {
+            setImageError(true);
+            setImageLoading(false);
+          }}
         />
       )}
     </div>

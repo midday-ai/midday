@@ -50,6 +50,7 @@ export function AttachmentItem({ file, onDelete }: Props) {
             <FilePreview
               mimeType={file.type}
               filePath={`${file?.path?.join("/")}`}
+              lazy
             />
           )}
         </div>

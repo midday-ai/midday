@@ -61,7 +61,7 @@ export function VaultItem({ data, small }: Props) {
           <FilePreview
             filePath={data?.pathTokens?.join("/") ?? ""}
             mimeType={(data?.metadata as { mimetype?: string })?.mimetype ?? ""}
-            lazy={true}
+            lazy
           />
         )}
       </button>

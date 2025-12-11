@@ -195,7 +195,7 @@ export function SuggestedMatch({
           )}
           {filePath ? (
             <div className="relative w-full h-full max-w-[248px] mx-auto">
-              <FilePreview mimeType={mimeType} filePath={filePath} />
+              <FilePreview mimeType={mimeType} filePath={filePath} lazy />
             </div>
           ) : (
             <div className="flex flex-col items-center space-y-2">
