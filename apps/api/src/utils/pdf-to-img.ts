@@ -32,6 +32,7 @@ type WorkerResponse = WorkerSuccessResponse | WorkerErrorResponse;
 
 /**
  * Bun Worker interface - matches Bun's Worker API
+ * Includes Bun-specific events like "open"
  */
 interface BunWorker {
   postMessage(message: WorkerRequest): void;
@@ -40,7 +41,8 @@ interface BunWorker {
     listener: (event: MessageEvent<WorkerResponse>) => void,
   ): void;
   addEventListener(type: "error", listener: (event: ErrorEvent) => void): void;
-  addEventListener(type: "close", listener: () => void): void;
+  addEventListener(type: "close", listener: (event: CloseEvent) => void): void;
+  addEventListener(type: "open", listener: () => void): void; // Bun-specific event
   removeEventListener(
     type: "message",
     listener: (event: MessageEvent<WorkerResponse>) => void,
@@ -49,16 +51,25 @@ interface BunWorker {
     type: "error",
     listener: (event: ErrorEvent) => void,
   ): void;
-  removeEventListener(type: "close", listener: () => void): void;
+  removeEventListener(
+    type: "close",
+    listener: (event: CloseEvent) => void,
+  ): void;
+  removeEventListener(type: "open", listener: () => void): void;
   terminate(): void;
 }
 
 /**
  * Worker constructor type
+ * Includes Bun-specific options like smol and preload
  */
 type WorkerConstructor = new (
   path: string,
-  options?: { preload?: string[] },
+  options?: {
+    preload?: string | string[];
+    smol?: boolean;
+    ref?: boolean;
+  },
 ) => BunWorker;
 
 /**
@@ -348,14 +359,23 @@ class WorkerPool {
   }
 
   private createWorker(): BunWorker {
-    // Use import.meta.path to get current file path, then resolve worker path
-    const currentFile = import.meta.path;
-    const workerPath = currentFile.replace(
-      "pdf-to-img.ts",
-      "pdf-to-img-worker.ts",
-    );
+    // Use new URL() pattern for better path resolution (Bun best practice)
+    // This ensures the worker path is resolved correctly relative to the current file
+    const workerUrl = new URL("pdf-to-img-worker.ts", import.meta.url).href;
 
-    const worker = new WorkerClass(workerPath);
+    // Create worker with optimized options
+    // Consider smol: true for memory-constrained environments (disabled by default for performance)
+    const worker = new WorkerClass(workerUrl, {
+      // smol: true, // Uncomment for memory-constrained environments (reduces memory usage at cost of performance)
+    });
+
+    // Listen for "open" event (Bun-specific) to know when worker is ready
+    // Messages are automatically enqueued until ready, so this is optional but useful for monitoring
+    worker.addEventListener("open", () => {
+      logger.debug("Worker opened and ready", {
+        workerCount: this.workers.length,
+      });
+    });
 
     worker.addEventListener(
       "message",
@@ -451,8 +471,19 @@ class WorkerPool {
     });
 
     // Handle worker exit/unexpected termination
-    worker.addEventListener("close", () => {
-      logger.warn("Worker closed unexpectedly");
+    // Bun's "close" event includes exit code (0 if normal, non-zero if error)
+    worker.addEventListener("close", (event: CloseEvent) => {
+      const exitCode = (event as unknown as { code?: number }).code ?? 0;
+      if (exitCode !== 0) {
+        logger.warn("Worker closed with non-zero exit code", {
+          exitCode,
+          workerCount: this.workers.length,
+        });
+      } else {
+        logger.debug("Worker closed normally", {
+          workerCount: this.workers.length,
+        });
+      }
       const health = this.workerHealth.get(worker);
       if (health) {
         health.failureCount++;
@@ -694,6 +725,9 @@ class WorkerPool {
 
         try {
           // Send conversion request to worker
+          // Bun's postMessage has optimized fast paths for simple objects (2-241x faster)
+          // Our message structure (id, type, data, options) qualifies for the simple object fast path
+          // when options only contains primitives, which it does (quality is a number)
           worker.postMessage({
             id,
             type: "convert",

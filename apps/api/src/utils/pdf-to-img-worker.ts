@@ -1,3 +1,8 @@
+// Prevent TypeScript errors when using self in worker thread
+// Required TypeScript declaration syntax for Bun worker thread global
+// biome-ignore lint/style/noVar: declare var is required TypeScript syntax for worker globals
+declare var self: Worker;
+
 import { createLoggerWithContext } from "@midday/logger";
 import { pdf } from "pdf-to-img";
 import sharp from "sharp";
@@ -265,8 +270,9 @@ async function convertPdfToImage(
 /**
  * Worker thread message handler
  * Handles messages from the main thread and processes PDF conversions
+ * Uses self.onmessage for Bun worker compatibility
  */
-addEventListener("message", async (event: MessageEvent<WorkerRequest>) => {
+self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
   const request = event.data;
 
   if (request.type === "convert") {
@@ -290,6 +296,7 @@ addEventListener("message", async (event: MessageEvent<WorkerRequest>) => {
         });
       }
 
+      // Use postMessage directly (automatically routed to parent in Bun workers)
       postMessage(response);
     } catch (error) {
       const errorMessage =
@@ -311,4 +318,4 @@ addEventListener("message", async (event: MessageEvent<WorkerRequest>) => {
       } satisfies WorkerResponse);
     }
   }
-});
+};
