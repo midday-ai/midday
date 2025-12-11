@@ -73,7 +73,7 @@ export function VaultItem({ data, small }: Props) {
         )}
       </div>
 
-      <div className="flex flex-col text-left">
+      <div className="flex flex-col text-left flex-1">
         {
           <h2 className="text-sm text-primary line-clamp-1 mb-2 mt-3">
             {isLoading ? (
@@ -94,7 +94,7 @@ export function VaultItem({ data, small }: Props) {
       </div>
 
       {!small && (
-        <div onClick={(e) => e.stopPropagation()}>
+        <div className="mt-auto" onClick={(e) => e.stopPropagation()}>
           <VaultItemTags
             tags={data?.documentTagAssignments ?? []}
             isLoading={isLoading}
