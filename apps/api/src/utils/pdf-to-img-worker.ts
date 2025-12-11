@@ -1,5 +1,8 @@
+import { createLoggerWithContext } from "@midday/logger";
 import { pdf } from "pdf-to-img";
 import sharp from "sharp";
+
+const logger = createLoggerWithContext("pdf-to-img-worker");
 
 // Worker thread configuration constants
 // These should match or be slightly more restrictive than main thread config
@@ -51,6 +54,11 @@ async function convertPdfToImage(
   try {
     // Check file size before processing
     if (data.byteLength > MAX_PDF_SIZE) {
+      logger.error("PDF too large for conversion", {
+        id,
+        size: data.byteLength,
+        maxSize: MAX_PDF_SIZE,
+      });
       return {
         id,
         type: "error",
@@ -72,8 +80,11 @@ async function convertPdfToImage(
       }, CONVERSION_TIMEOUT_MS);
 
       // Convert PDF to image with timeout protection
+      let document: Awaited<ReturnType<typeof pdf>> | null = null;
+      let iterator: any = null;
+
       const conversionPromise = (async () => {
-        const document = await pdf(pdfBuffer, {
+        document = await pdf(pdfBuffer, {
           scale: PREVIEW_SCALE,
         });
 
@@ -83,10 +94,14 @@ async function convertPdfToImage(
         }
 
         // Get ONLY the first page
-        const iterator = document[Symbol.asyncIterator]();
+        iterator = document[Symbol.asyncIterator]();
         const firstPage = await iterator.next();
 
         if (firstPage.done || !firstPage.value) {
+          logger.warn("PDF has no pages or failed to render first page", {
+            id,
+            size: data.byteLength,
+          });
           return null;
         }
 
@@ -95,7 +110,22 @@ async function convertPdfToImage(
           return null;
         }
 
-        return firstPage.value;
+        const result = firstPage.value;
+
+        // Explicitly close iterator and cleanup
+        try {
+          if (iterator && typeof iterator.return === "function") {
+            await iterator.return(undefined);
+          }
+        } catch (cleanupError) {
+          // Ignore cleanup errors
+        }
+
+        // Clear references to help GC
+        iterator = null;
+        document = null;
+
+        return result;
       })();
 
       // Race against timeout
@@ -113,7 +143,25 @@ async function convertPdfToImage(
         timeoutId = null;
       }
 
+      // Ensure cleanup even if conversion failed
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const iter: any = iterator;
+        if (iter && typeof iter.return === "function") {
+          await iter.return(undefined);
+        }
+      } catch (cleanupError) {
+        // Ignore cleanup errors
+      }
+      iterator = null;
+      document = null;
+
       if (!pngBuffer || abortController.signal.aborted) {
+        logger.warn("PDF conversion timed out or was aborted", {
+          id,
+          size: data.byteLength,
+          timeout: CONVERSION_TIMEOUT_MS,
+        });
         return {
           id,
           type: "error",
@@ -121,9 +169,9 @@ async function convertPdfToImage(
         };
       }
 
-      // Optimize image with Sharp using streaming for better memory management
+      // Optimize image with Sharp using enhanced compression options
       // Use progressive JPEG for better performance and smaller initial file size
-      const jpegBuffer = await sharp(pngBuffer)
+      const sharpInstance = sharp(pngBuffer)
         .resize(MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, {
           fit: "inside",
           withoutEnlargement: true,
@@ -132,11 +180,17 @@ async function convertPdfToImage(
           quality,
           mozjpeg: true,
           progressive: true, // Enable progressive for better perceived performance
-        })
-        .toBuffer();
+          optimizeScans: true, // Optimize progressive scans for better compression
+          overshootDeringing: true, // Reduce ringing artifacts
+          optimizeCoding: true, // Optimize Huffman coding
+        });
 
-      // Explicitly clean up Sharp instance
-      // Note: Sharp instances are automatically cleaned up, but being explicit helps
+      const jpegBuffer = await sharpInstance.toBuffer();
+
+      // Explicitly clean up Sharp instance and clear PNG buffer
+      sharpInstance.destroy();
+      // Clear PNG buffer reference to help GC
+      pngBuffer.fill(0);
 
       // Convert Buffer to ArrayBuffer for transfer
       // Create a new ArrayBuffer to ensure proper type (not SharedArrayBuffer)
@@ -168,12 +222,23 @@ async function convertPdfToImage(
         errorMessage.includes("Cannot allocate memory");
 
       if (isMemoryError) {
+        logger.error("Memory allocation failed during PDF conversion", {
+          id,
+          size: data.byteLength,
+        });
         return {
           id,
           type: "error",
           error: "Memory allocation failed during PDF conversion",
         };
       }
+
+      logger.error("PDF conversion error in worker", {
+        id,
+        error: errorMessage,
+        size: data.byteLength,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
 
       return {
         id,
@@ -183,6 +248,12 @@ async function convertPdfToImage(
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error("Unexpected error in PDF conversion worker", {
+      id,
+      error: errorMessage,
+      size: data.byteLength,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return {
       id,
       type: "error",
@@ -199,12 +270,40 @@ addEventListener("message", async (event: MessageEvent<WorkerRequest>) => {
   const request = event.data;
 
   if (request.type === "convert") {
+    const startTime = Date.now();
     try {
       const response = await convertPdfToImage(request);
+      const duration = Date.now() - startTime;
+
+      if (response.type === "success") {
+        logger.info("PDF conversion completed successfully", {
+          id: request.id,
+          size: request.data.byteLength,
+          duration,
+        });
+      } else {
+        logger.warn("PDF conversion failed", {
+          id: request.id,
+          error: response.error,
+          size: request.data.byteLength,
+          duration,
+        });
+      }
+
       postMessage(response);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
+      const duration = Date.now() - startTime;
+
+      logger.error("Unexpected error in worker message handler", {
+        id: request.id,
+        error: errorMessage,
+        size: request.data.byteLength,
+        duration,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+
       postMessage({
         id: request.id,
         type: "error",

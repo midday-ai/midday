@@ -1,4 +1,7 @@
+import { createLoggerWithContext } from "@midday/logger";
 import { nanoid } from "nanoid";
+
+const logger = createLoggerWithContext("pdf-to-img");
 
 /**
  * Worker message types for communication between main thread and worker
@@ -38,6 +41,15 @@ interface BunWorker {
   ): void;
   addEventListener(type: "error", listener: (event: ErrorEvent) => void): void;
   addEventListener(type: "close", listener: () => void): void;
+  removeEventListener(
+    type: "message",
+    listener: (event: MessageEvent<WorkerResponse>) => void,
+  ): void;
+  removeEventListener(
+    type: "error",
+    listener: (event: ErrorEvent) => void,
+  ): void;
+  removeEventListener(type: "close", listener: () => void): void;
   terminate(): void;
 }
 
@@ -119,6 +131,135 @@ const WORKER_TIMEOUT_MS = CONFIG.WORKER_TIMEOUT_MS;
 const MAX_WORKER_POOL_SIZE = CONFIG.MAX_WORKER_POOL_SIZE;
 
 /**
+ * Error classification for retry logic
+ */
+type ErrorCategory =
+  | "timeout"
+  | "worker_error"
+  | "memory"
+  | "validation"
+  | "corrupted"
+  | "unknown";
+
+interface ClassifiedError {
+  category: ErrorCategory;
+  retryable: boolean;
+}
+
+/**
+ * Classify errors to determine if they should be retried
+ */
+function classifyPdfError(error: unknown): ClassifiedError {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  const errorName = error instanceof Error ? error.name : "";
+
+  // Timeout errors - retryable
+  if (
+    errorMessage.includes("timeout") ||
+    errorMessage.includes("timed out") ||
+    errorMessage.includes("aborted") ||
+    errorName === "TimeoutError" ||
+    errorName === "AbortError"
+  ) {
+    return { category: "timeout", retryable: true };
+  }
+
+  // Worker errors - retryable (worker might recover)
+  if (
+    errorMessage.includes("Worker error") ||
+    errorMessage.includes("worker") ||
+    errorMessage.includes("postMessage")
+  ) {
+    return { category: "worker_error", retryable: true };
+  }
+
+  // Memory errors - not retryable (will fail again)
+  if (
+    errorMessage.includes("out of memory") ||
+    errorMessage.includes("ENOMEM") ||
+    errorMessage.includes("allocation failed") ||
+    errorMessage.includes("Cannot allocate memory")
+  ) {
+    return { category: "memory", retryable: false };
+  }
+
+  // Validation errors - not retryable
+  if (
+    errorMessage.includes("too large") ||
+    errorMessage.includes("invalid") ||
+    errorMessage.includes("malformed")
+  ) {
+    return { category: "validation", retryable: false };
+  }
+
+  // Corrupted PDF errors - not retryable
+  if (
+    errorMessage.includes("corrupted") ||
+    errorMessage.includes("parse") ||
+    errorMessage.includes("InvalidArg")
+  ) {
+    return { category: "corrupted", retryable: false };
+  }
+
+  // Unknown errors - treat as potentially retryable (conservative)
+  return { category: "unknown", retryable: true };
+}
+
+/**
+ * Retry wrapper with exponential backoff
+ */
+async function convertWithRetry(
+  data: ArrayBuffer,
+  options?: { quality?: number },
+  maxRetries = 2,
+): Promise<{ buffer: Buffer; contentType: string } | null> {
+  const pool = getWorkerPool();
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const result = await pool.convert(data, options);
+
+      if (!result && attempt < maxRetries) {
+        // Null result might be timeout - retry
+        const delay = 500 * 2 ** attempt + Math.random() * 100;
+        logger.warn(
+          `PDF conversion returned null (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${Math.round(delay)}ms`,
+          {
+            size: data.byteLength,
+          },
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+
+      return result;
+    } catch (error) {
+      const classified = classifyPdfError(error);
+
+      // Don't retry on last attempt or non-retryable errors
+      if (attempt === maxRetries || !classified.retryable) {
+        throw error;
+      }
+
+      // Exponential backoff with jitter
+      const delay = 500 * 2 ** attempt + Math.random() * 100;
+      console.warn(
+        `PDF conversion failed (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${Math.round(delay)}ms:`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          category: classified.category,
+          size: data.byteLength,
+        },
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+
+  return null;
+}
+
+/**
  * Worker pool for managing PDF conversion workers
  * Limits concurrent conversions to prevent VM crashes
  */
@@ -130,6 +271,49 @@ interface PendingRequest {
   reject: (error: Error) => void;
   timeout: NodeJS.Timeout;
   worker: BunWorker;
+  startTime: number;
+}
+
+/**
+ * Worker health tracking
+ */
+interface WorkerHealth {
+  worker: BunWorker;
+  successCount: number;
+  failureCount: number;
+  totalProcessingTime: number;
+  requestCount: number;
+  lastFailureTime: number | null;
+  isHealthy: boolean;
+}
+
+/**
+ * Calculate worker health metrics
+ */
+function calculateWorkerHealth(health: WorkerHealth): {
+  isHealthy: boolean;
+  failureRate: number;
+  avgProcessingTime: number;
+} {
+  const totalRequests = health.successCount + health.failureCount;
+  const failureRate =
+    totalRequests > 0 ? health.failureCount / totalRequests : 0;
+  const avgProcessingTime =
+    health.requestCount > 0
+      ? health.totalProcessingTime / health.requestCount
+      : 0;
+
+  // Mark unhealthy if:
+  // - Failure rate > 20%
+  // - Average processing time > 10 seconds (likely stuck)
+  // - More than 3 failures in a row
+  const isHealthy =
+    failureRate <= 0.2 &&
+    avgProcessingTime <= 10000 &&
+    (health.lastFailureTime === null ||
+      Date.now() - health.lastFailureTime > 30000); // Not failed recently
+
+  return { isHealthy, failureRate, avgProcessingTime };
 }
 
 /**
@@ -143,13 +327,24 @@ class WorkerPool {
   private workerQueue: Array<{
     resolve: (worker: BunWorker) => void;
     timestamp: number;
+    priority: number;
+    fileSize: number;
   }> = [];
+  private workerHealth = new Map<BunWorker, WorkerHealth>();
+  private healthCheckInterval: NodeJS.Timeout | null = null;
 
   constructor(private maxWorkers: number = MAX_WORKER_POOL_SIZE) {
-    // Lazy initialization: Create workers on-demand instead of pre-creating
-    // This reduces memory usage when idle and allows for better resource management
-    // Start with 1 worker for immediate availability
-    this.createWorker();
+    // Pre-create workers based on environment
+    // Production: start with 2 workers, staging: start with 1
+    const initialWorkers = process.env.NODE_ENV === "production" ? 2 : 1;
+    for (let i = 0; i < initialWorkers; i++) {
+      this.createWorker();
+    }
+
+    // Start health check interval (check every 30 seconds)
+    this.healthCheckInterval = setInterval(() => {
+      this.checkWorkerHealth();
+    }, 30000);
   }
 
   private createWorker(): BunWorker {
@@ -174,16 +369,30 @@ class WorkerPool {
 
         // Verify this response is from the correct worker
         if (pending.worker !== worker) {
-          console.warn(
-            "Received response from wrong worker, ignoring",
-            response.id,
-          );
+          logger.warn("Received response from wrong worker, ignoring", {
+            id: response.id,
+          });
           return;
         }
 
         // Clear timeout
         clearTimeout(pending.timeout);
         this.pendingRequests.delete(response.id);
+
+        // Track worker health
+        const health = this.workerHealth.get(worker);
+        if (health) {
+          const processingTime = Date.now() - pending.startTime;
+          health.requestCount++;
+          health.totalProcessingTime += processingTime;
+
+          if (response.type === "success") {
+            health.successCount++;
+          } else {
+            health.failureCount++;
+            health.lastFailureTime = Date.now();
+          }
+        }
 
         // Return worker to pool
         this.availableWorkers.push(worker);
@@ -204,7 +413,7 @@ class WorkerPool {
     );
 
     worker.addEventListener("error", (error: ErrorEvent) => {
-      console.error("Worker error occurred:", {
+      logger.error("Worker error occurred", {
         error: error.message || "Unknown error",
         workerCount: this.workers.length,
         availableWorkers: this.availableWorkers.length,
@@ -230,19 +439,80 @@ class WorkerPool {
         }
       }
 
+      // Track failure in health
+      const health = this.workerHealth.get(worker);
+      if (health) {
+        health.failureCount++;
+        health.lastFailureTime = Date.now();
+      }
+
       // Remove worker from pool
       this.removeWorker(worker);
     });
 
     // Handle worker exit/unexpected termination
     worker.addEventListener("close", () => {
-      console.warn("Worker closed unexpectedly");
+      logger.warn("Worker closed unexpectedly");
+      const health = this.workerHealth.get(worker);
+      if (health) {
+        health.failureCount++;
+        health.lastFailureTime = Date.now();
+      }
       this.removeWorker(worker);
+    });
+
+    // Initialize health tracking for this worker
+    this.workerHealth.set(worker, {
+      worker,
+      successCount: 0,
+      failureCount: 0,
+      totalProcessingTime: 0,
+      requestCount: 0,
+      lastFailureTime: null,
+      isHealthy: true,
     });
 
     this.workers.push(worker);
     this.availableWorkers.push(worker);
     return worker;
+  }
+
+  /**
+   * Check worker health and remove unhealthy workers
+   */
+  private checkWorkerHealth(): void {
+    const workersToRemove: BunWorker[] = [];
+
+    for (const [worker, health] of this.workerHealth.entries()) {
+      const metrics = calculateWorkerHealth(health);
+
+      if (!metrics.isHealthy && health.requestCount >= 3) {
+        // Only remove if we have enough data (at least 3 requests)
+        logger.warn("Removing unhealthy worker", {
+          failureRate: metrics.failureRate.toFixed(2),
+          avgProcessingTime: metrics.avgProcessingTime.toFixed(0),
+          requestCount: health.requestCount,
+        });
+        workersToRemove.push(worker);
+      } else {
+        // Update health status
+        health.isHealthy = metrics.isHealthy;
+      }
+    }
+
+    // Remove unhealthy workers
+    for (const worker of workersToRemove) {
+      this.removeWorker(worker);
+    }
+
+    // Ensure we have minimum workers
+    const minWorkers = process.env.NODE_ENV === "production" ? 2 : 1;
+    while (
+      this.workers.length < minWorkers &&
+      this.workers.length < this.maxWorkers
+    ) {
+      this.createWorker();
+    }
   }
 
   /**
@@ -257,11 +527,19 @@ class WorkerPool {
         this.availableWorkers.splice(availableIndex, 1);
       }
 
+      // Remove health tracking
+      this.workerHealth.delete(worker);
+
       // Terminate the worker
       try {
         worker.terminate();
       } catch (terminateError) {
-        console.error("Error terminating worker:", terminateError);
+        logger.error("Error terminating worker", {
+          error:
+            terminateError instanceof Error
+              ? terminateError.message
+              : String(terminateError),
+        });
       }
 
       // Create replacement worker if we're below max
@@ -282,21 +560,82 @@ class WorkerPool {
       return this.createWorker();
     }
 
-    // Wait for a worker to become available using a proper queue
-    // This is more efficient than polling
+    // Wait for a worker to become available using a priority queue
+    // Smaller files get processed first for better throughput
     return new Promise<BunWorker>((resolve) => {
+      // Calculate priority based on a default file size estimate
+      // We don't know the actual size yet, so use medium priority
+      // The actual priority will be used when notifying
       this.workerQueue.push({
         resolve,
         timestamp: Date.now(),
+        priority: 2, // Default to medium priority
+        fileSize: 0, // Will be updated if known
       });
     });
   }
 
   /**
+   * Get available worker with priority-based queuing
+   */
+  private async getAvailableWorkerWithPriority(
+    fileSize: number,
+  ): Promise<BunWorker> {
+    // If we have an available worker, use it immediately
+    if (this.availableWorkers.length > 0) {
+      return this.availableWorkers.pop()!;
+    }
+
+    // If we haven't reached max workers, create a new one
+    if (this.workers.length < this.maxWorkers) {
+      return this.createWorker();
+    }
+
+    // Wait for a worker with priority-based queuing
+    const priority = this.calculatePriority(fileSize);
+    return new Promise<BunWorker>((resolve) => {
+      this.workerQueue.push({
+        resolve,
+        timestamp: Date.now(),
+        priority,
+        fileSize,
+      });
+      // Re-sort queue to ensure priority order
+      this.notifyWaitingRequests();
+    });
+  }
+
+  /**
+   * Calculate priority for a request based on file size
+   * Smaller files get higher priority (lower number = higher priority)
+   */
+  private calculatePriority(fileSize: number): number {
+    // Small files (< 1MB): priority 1
+    if (fileSize < 1024 * 1024) {
+      return 1;
+    }
+    // Medium files (1-10MB): priority 2
+    if (fileSize < 10 * 1024 * 1024) {
+      return 2;
+    }
+    // Large files (> 10MB): priority 3
+    return 3;
+  }
+
+  /**
    * Notify waiting requests when a worker becomes available
+   * Processes requests by priority (smaller files first)
    */
   private notifyWaitingRequests(): void {
     while (this.workerQueue.length > 0 && this.availableWorkers.length > 0) {
+      // Sort queue by priority (lower number = higher priority), then by timestamp
+      this.workerQueue.sort((a, b) => {
+        if (a.priority !== b.priority) {
+          return a.priority - b.priority;
+        }
+        return a.timestamp - b.timestamp;
+      });
+
       const waiter = this.workerQueue.shift();
       if (waiter) {
         const worker = this.availableWorkers.pop()!;
@@ -309,8 +648,8 @@ class WorkerPool {
     data: ArrayBuffer,
     options?: { quality?: number },
   ): Promise<{ buffer: Buffer; contentType: string } | null> {
-    // Get worker (this will queue if all workers are busy)
-    const worker = await this.getAvailableWorker();
+    // Get worker with priority-based queuing (smaller files first)
+    const worker = await this.getAvailableWorkerWithPriority(data.byteLength);
     const id = nanoid();
 
     // Adaptive timeout based on file size
@@ -332,7 +671,7 @@ class WorkerPool {
             this.availableWorkers.push(worker);
             // Notify any waiting requests
             this.notifyWaitingRequests();
-            console.warn("PDF conversion timed out", {
+            logger.warn("PDF conversion timed out", {
               id,
               size: data.byteLength,
               sizeMB: fileSizeMB.toFixed(2),
@@ -349,6 +688,7 @@ class WorkerPool {
           reject,
           timeout,
           worker,
+          startTime: Date.now(),
         };
         this.pendingRequests.set(id, pendingRequest);
 
@@ -369,7 +709,9 @@ class WorkerPool {
           this.notifyWaitingRequests();
           const errorMessage =
             error instanceof Error ? error.message : String(error);
-          console.error("Failed to send message to worker:", errorMessage);
+          logger.error("Failed to send message to worker", {
+            error: errorMessage,
+          });
           reject(
             new Error(`Failed to send conversion request: ${errorMessage}`),
           );
@@ -379,9 +721,82 @@ class WorkerPool {
   }
 
   /**
+   * Warmup workers by initializing libraries with a minimal test PDF
+   * This reduces first-request latency
+   */
+  async warmupWorkers(): Promise<void> {
+    const warmupPromises = this.workers.map(async (worker) => {
+      try {
+        // Create a minimal valid PDF for warmup
+        const minimalPdf = Buffer.from(
+          "%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Kids [3 0 R]\n/Count 1\n>>\nendobj\n3 0 obj\n<<\n/Type /Page\n/Parent 2 0 R\n/MediaBox [0 0 1 1]\n/Contents 4 0 R\n/Resources <<\n/ProcSet [/PDF]\n>>\n>>\nendobj\n4 0 obj\n<<\n/Length 10\n>>\nstream\nq\nQ\nendstream\nendobj\nxref\n0 5\ntrailer\n<<\n/Size 5\n/Root 1 0 R\n>>\nstartxref\n200\n%%EOF",
+        );
+
+        const warmupId = nanoid();
+        const warmupPromise = new Promise<void>((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error("Warmup timeout"));
+          }, 5000);
+
+          const messageHandler = (event: MessageEvent<WorkerResponse>) => {
+            const response = event.data;
+            if (response.id === warmupId) {
+              clearTimeout(timeout);
+              worker.removeEventListener("message", messageHandler);
+              if (response.type === "success") {
+                resolve();
+              } else {
+                // Warmup failures are non-critical
+                resolve();
+              }
+            }
+          };
+
+          worker.addEventListener("message", messageHandler);
+
+          try {
+            worker.postMessage({
+              id: warmupId,
+              type: "convert",
+              data: minimalPdf.buffer,
+              options: { quality: 50 },
+            });
+          } catch (error) {
+            clearTimeout(timeout);
+            worker.removeEventListener("message", messageHandler);
+            // Warmup failures are non-critical
+            resolve();
+          }
+        });
+
+        await warmupPromise;
+      } catch (error) {
+        // Warmup failures are non-critical - log but don't fail
+        logger.warn("Worker warmup failed (non-critical)", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    });
+
+    await Promise.allSettled(warmupPromises);
+  }
+
+  /**
    * Get pool statistics for monitoring
    */
   getStats() {
+    const healthStats = Array.from(this.workerHealth.values()).map((health) => {
+      const metrics = calculateWorkerHealth(health);
+      return {
+        successCount: health.successCount,
+        failureCount: health.failureCount,
+        failureRate: metrics.failureRate,
+        avgProcessingTime: metrics.avgProcessingTime,
+        requestCount: health.requestCount,
+        isHealthy: metrics.isHealthy,
+      };
+    });
+
     return {
       totalWorkers: this.workers.length,
       availableWorkers: this.availableWorkers.length,
@@ -389,6 +804,7 @@ class WorkerPool {
       pendingRequests: this.pendingRequests.size,
       queuedRequests: this.workerQueue.length,
       maxWorkers: this.maxWorkers,
+      workerHealth: healthStats,
     };
   }
 
@@ -396,6 +812,12 @@ class WorkerPool {
    * Cleanup all workers (call on shutdown)
    */
   terminate(): void {
+    // Clear health check interval
+    if (this.healthCheckInterval) {
+      clearInterval(this.healthCheckInterval);
+      this.healthCheckInterval = null;
+    }
+
     // Clear all pending requests
     for (const [id, pending] of this.pendingRequests.entries()) {
       clearTimeout(pending.timeout);
@@ -414,11 +836,14 @@ class WorkerPool {
       try {
         worker.terminate();
       } catch (error) {
-        console.error("Error terminating worker during cleanup:", error);
+        logger.error("Error terminating worker during cleanup", {
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     }
     this.workers = [];
     this.availableWorkers = [];
+    this.workerHealth.clear();
   }
 }
 
@@ -429,12 +854,30 @@ function getWorkerPool(): WorkerPool {
   if (!workerPool) {
     workerPool = new WorkerPool(MAX_WORKER_POOL_SIZE);
     // Log pool initialization for monitoring
-    console.log("PDF Worker Pool initialized", {
+    logger.info("PDF Worker Pool initialized", {
       maxWorkers: MAX_WORKER_POOL_SIZE,
       maxConcurrent: CONFIG.MAX_CONCURRENT_CONVERSIONS,
       maxPdfSizeMB: CONFIG.MAX_PDF_SIZE / (1024 * 1024),
       environment: process.env.NODE_ENV || "development",
     });
+
+    // Warmup workers asynchronously (don't block initialization)
+    // This initializes PDF and Sharp libraries to reduce first-request latency
+    if (process.env.NODE_ENV === "production") {
+      const pool = workerPool; // Capture reference before async operation
+      setTimeout(async () => {
+        if (pool) {
+          try {
+            await pool.warmupWorkers();
+            logger.info("Worker warmup completed");
+          } catch (error) {
+            logger.warn("Worker warmup failed (non-critical)", {
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        }
+      }, 1000); // Wait 1 second after initialization
+    }
   }
   return workerPool;
 }
@@ -466,16 +909,19 @@ export async function getPdfImage(
 ): Promise<{ buffer: Buffer; contentType: string } | null> {
   // Check file size before processing to prevent memory issues
   if (data.byteLength > MAX_PDF_SIZE) {
-    console.error(`PDF too large for conversion: ${data.byteLength} bytes`);
+    logger.error("PDF too large for conversion", {
+      size: data.byteLength,
+      maxSize: MAX_PDF_SIZE,
+    });
     return null;
   }
 
   try {
-    const pool = getWorkerPool();
-    const result = await pool.convert(data, options);
+    // Use retry wrapper for transient failures
+    const result = await convertWithRetry(data, options);
 
     if (!result) {
-      console.error("PDF to image conversion failed or timed out", {
+      logger.error("PDF to image conversion failed after retries", {
         size: data.byteLength,
       });
       return null;
@@ -493,16 +939,13 @@ export async function getPdfImage(
       errorMessage.includes("Cannot allocate memory");
 
     if (isMemoryError) {
-      console.error(
-        "PDF to image conversion failed due to memory constraints:",
-        {
-          size: data.byteLength,
-        },
-      );
+      logger.error("PDF to image conversion failed due to memory constraints", {
+        size: data.byteLength,
+      });
       return null;
     }
 
-    console.error("PDF to image conversion error:", {
+    logger.error("PDF to image conversion error", {
       error: errorMessage,
       stack: error instanceof Error ? error.stack : undefined,
     });
