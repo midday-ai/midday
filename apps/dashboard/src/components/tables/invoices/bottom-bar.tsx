@@ -1,14 +1,12 @@
 "use client";
 
-import { useUserQuery } from "@/hooks/use-user";
-import { downloadFile } from "@/lib/download";
+import { useDownloadInvoicesZip } from "@/hooks/use-download-invoices-zip";
 import { useInvoiceStore } from "@/store/invoice";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
 import NumberFlow from "@number-flow/react";
 import { motion } from "framer-motion";
-import { useState } from "react";
 import type { Invoice } from "./columns";
 
 type Props = {
@@ -16,13 +14,8 @@ type Props = {
 };
 
 export function BottomBar({ data }: Props) {
-  const { data: user } = useUserQuery();
   const { rowSelection, setRowSelection } = useInvoiceStore();
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [downloadProgress, setDownloadProgress] = useState({
-    current: 0,
-    total: 0,
-  });
+  const { handleDownloadZip, isPending, progress } = useDownloadInvoicesZip();
 
   // Filter the data array based on the selected row IDs (keys in rowSelection)
   const selectedInvoices = data.filter((invoice) => rowSelection[invoice.id]);
@@ -33,50 +26,7 @@ export function BottomBar({ data }: Props) {
       return;
     }
 
-    setIsDownloading(true);
-    setDownloadProgress({ current: 0, total: downloadableInvoices.length });
-
-    // Add a small delay to ensure the spinner shows up
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    try {
-      // Download each selected invoice
-      let currentIndex = 0;
-      for (const invoice of downloadableInvoices) {
-        currentIndex++;
-        setDownloadProgress({
-          current: currentIndex,
-          total: downloadableInvoices.length,
-        });
-
-        try {
-          if (!user?.fileKey) {
-            console.error("File key not available");
-            continue;
-          }
-          const url = new URL(
-            `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice`,
-          );
-          url.searchParams.set("id", invoice.id);
-          url.searchParams.set("fk", user.fileKey);
-          await downloadFile(
-            url.toString(),
-            `${invoice.invoiceNumber || "invoice"}.pdf`,
-          );
-        } catch (downloadError) {
-          // Continue with next invoice instead of stopping
-        }
-
-        // Add a delay between downloads to avoid overwhelming the browser
-        // and to show the spinner for a better user experience
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
-    } catch (error) {
-      // Handle any unexpected errors silently
-    } finally {
-      setIsDownloading(false);
-      setDownloadProgress({ current: 0, total: 0 });
-    }
+    await handleDownloadZip(downloadableInvoices);
   };
 
   return (
@@ -87,7 +37,7 @@ export function BottomBar({ data }: Props) {
       exit={{ y: 100, opacity: 0 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
     >
-      <div className="pointer-events-auto backdrop-filter min-w-[400px] backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-12 justify-between items-center flex px-4 border dark:border-[#2C2C2C] border-[#DCDAD2]">
+      <div className="pointer-events-auto backdrop-filter min-w-[400px] backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-12 justify-between items-center flex pl-2 pr-1 border dark:border-[#2C2C2C] border-[#DCDAD2]">
         <span className="text-sm text-[#878787]">
           <NumberFlow value={Object.keys(rowSelection).length} /> selected
         </span>
@@ -98,7 +48,7 @@ export function BottomBar({ data }: Props) {
           </Button>
 
           <SubmitButton
-            isSubmitting={isDownloading || downloadProgress.current > 0}
+            isSubmitting={isPending || progress.current > 0}
             onClick={handleBulkDownload}
             disabled={downloadableInvoices.length === 0}
           >
