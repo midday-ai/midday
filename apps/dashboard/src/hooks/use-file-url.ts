@@ -3,7 +3,7 @@ import { useMemo } from "react";
 
 type FileUrlOptions =
   | {
-      type: "proxy" | "preview" | "download";
+      type: "proxy" | "download";
       filePath: string;
       filename?: string;
     }
