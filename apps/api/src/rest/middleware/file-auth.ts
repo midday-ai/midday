@@ -1,4 +1,4 @@
-import { generateFileKey } from "@midday/encryption";
+import { verifyFileKey } from "@midday/encryption";
 import type { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { normalizeAndValidatePath } from "../routers/files/utils";
@@ -24,11 +24,11 @@ export const withFileAuth: MiddlewareHandler = async (c, next) => {
   // Extract teamId from path
   const { pathTeamId } = normalizeAndValidatePath(filePath);
 
-  // Generate expected key for this team
-  const expectedKey = generateFileKey(pathTeamId);
+  // Verify JWT token and extract teamId
+  const tokenTeamId = await verifyFileKey(fk);
 
-  // Validate the provided key matches
-  if (fk !== expectedKey) {
+  // Validate the token's teamId matches the path teamId
+  if (!tokenTeamId || tokenTeamId !== pathTeamId) {
     throw new HTTPException(401, {
       message: "Invalid file key.",
     });

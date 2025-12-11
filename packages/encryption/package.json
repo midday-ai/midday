@@ -9,5 +9,8 @@
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
     "test": "bun test src"
+  },
+  "dependencies": {
+    "jose": "^6.1.3"
   }
 }

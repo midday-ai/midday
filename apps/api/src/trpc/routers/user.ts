@@ -24,7 +24,7 @@ export const userRouter = createTRPCRouter({
 
     return {
       ...result,
-      fileKey: result.teamId ? generateFileKey(result.teamId) : null,
+      fileKey: result.teamId ? await generateFileKey(result.teamId) : null,
     };
   }),
 

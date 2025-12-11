@@ -39,7 +39,7 @@ app.openapi(
     const response = result
       ? {
           ...result,
-          fileKey: result.teamId ? generateFileKey(result.teamId) : "",
+          fileKey: result.teamId ? await generateFileKey(result.teamId) : null,
         }
       : null;
 

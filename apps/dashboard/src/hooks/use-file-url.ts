@@ -6,10 +6,12 @@ type FileUrlOptions =
       type: "proxy" | "preview" | "download";
       filePath: string;
       filename?: string;
+      enabled?: boolean;
     }
   | {
       type: "url";
       url: string;
+      enabled?: boolean;
     };
 
 /**
@@ -17,13 +19,16 @@ type FileUrlOptions =
  * Handles both constructing URLs from file paths and adding fileKey to existing URLs.
  *
  * @param options - Either file path options or an existing URL
+ * @param options.enabled - Whether to construct the URL (default: true)
  * @returns Object with `url` (authenticated URL), `isLoading`, and `hasFileKey` state
  */
 export function useFileUrl(options: FileUrlOptions | null) {
   const { data: user, isLoading } = useUserQuery();
 
   const result = useMemo(() => {
-    if (!options || !user?.fileKey) {
+    const isEnabled = options?.enabled !== false; // Default to true if not specified
+
+    if (!options || !isEnabled || !user?.fileKey) {
       return {
         url: null as string | null,
         isLoading,
