@@ -1,9 +1,9 @@
 "use client";
 
+import { useFileUrl } from "@/hooks/use-file-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
-import { getAuthenticatedUrl } from "@/utils/authenticated-url";
 import { getUrl } from "@/utils/environment";
 import { formatEditorContent } from "@midday/invoice/format-to-html";
 import { Button } from "@midday/ui/button";
@@ -34,6 +34,11 @@ export function InvoiceSuccess() {
   if (!invoice) {
     return null;
   }
+
+  const { url: downloadUrl } = useFileUrl({
+    type: "invoice",
+    invoiceId: invoice.id,
+  });
 
   return (
     <>
@@ -138,19 +143,12 @@ export function InvoiceSuccess() {
                 <Button
                   variant="secondary"
                   className="size-[40px] hover:bg-secondary shrink-0"
-                  onClick={async () => {
-                    try {
-                      const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?id=${invoice.id}`;
-                      const authenticatedUrl =
-                        await getAuthenticatedUrl(baseUrl);
-                      downloadFile(
-                        authenticatedUrl,
-                        `${invoice.invoiceNumber}.pdf`,
-                      );
-                    } catch (error) {
-                      console.error("Failed to download invoice:", error);
+                  onClick={() => {
+                    if (downloadUrl) {
+                      downloadFile(downloadUrl, `${invoice.invoiceNumber}.pdf`);
                     }
                   }}
+                  disabled={!downloadUrl}
                 >
                   <div>
                     <Icons.ArrowCoolDown className="size-4" />

@@ -15,6 +15,11 @@ const errorResponseSchema = z.object({
   error: z.string(),
 });
 
+// Track active conversions for monitoring/debugging
+// Note: We don't reject requests here - the worker pool handles queuing internally
+// This counter is just for observability
+let activeConversions = 0;
+
 app.openapi(
   createRoute({
     method: "get",
@@ -162,6 +167,14 @@ app.openapi(
           },
         },
       },
+      503: {
+        description: "Service unavailable - too many concurrent conversions",
+        content: {
+          "application/json": {
+            schema: errorResponseSchema,
+          },
+        },
+      },
     },
     middleware: [withClientIp, withDatabase, withFileAuth],
   }),
@@ -170,6 +183,23 @@ app.openapi(
     const { normalizedPath } = normalizeAndValidatePath(filePath);
 
     const supabase = await createAdminClient();
+
+    // Maximum file size for preview - matches worker pool configuration
+    // This is checked here before downloading to save bandwidth
+    const MAX_PREVIEW_SIZE = (() => {
+      const envLimit = process.env.PDF_MAX_SIZE_MB
+        ? Number.parseInt(process.env.PDF_MAX_SIZE_MB, 10) * 1024 * 1024
+        : undefined;
+
+      if (envLimit) {
+        return envLimit;
+      }
+
+      // Match worker pool config: 30MB in production, 20MB in staging/dev
+      return process.env.NODE_ENV === "production"
+        ? 30 * 1024 * 1024
+        : 20 * 1024 * 1024;
+    })();
 
     const { data: pdfBlob, error: downloadError } = await supabase.storage
       .from("vault")
@@ -183,9 +213,24 @@ app.openapi(
       throw new HTTPException(400, { message: "File is not a PDF" });
     }
 
+    // Check file size before processing to prevent memory issues and VM crashes
+    const blobSize = pdfBlob.size;
+    if (blobSize > MAX_PREVIEW_SIZE) {
+      throw new HTTPException(413, {
+        message: `File too large for preview. Maximum size is ${MAX_PREVIEW_SIZE / 1024 / 1024}MB. File size: ${(blobSize / 1024 / 1024).toFixed(2)}MB`,
+      });
+    }
+
+    // Track active conversions for monitoring, but don't reject requests
+    // The worker pool will handle queuing internally
+    activeConversions++;
+
     try {
       const pdfBuffer = await pdfBlob.arrayBuffer();
       const result = await getPdfImage(pdfBuffer);
+
+      // Decrement counter when done (success or failure)
+      activeConversions--;
 
       if (!result) {
         throw new HTTPException(500, {
@@ -193,6 +238,8 @@ app.openapi(
         });
       }
 
+      // Return preview with aggressive HTTP caching headers
+      // CDN and browsers will cache this, no need to store in storage
       return new Response(new Uint8Array(result.buffer), {
         headers: {
           "Content-Type": result.contentType,
@@ -201,10 +248,31 @@ app.openapi(
         },
       });
     } catch (error: unknown) {
+      // Always decrement counter on error
+      activeConversions--;
+
+      // Don't crash the VM - return a proper error response
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
+      // Re-throw HTTPExceptions (they're already properly formatted)
+      if (error instanceof HTTPException) {
+        throw error;
+      }
+
+      // Check for memory-related errors
+      if (
+        errorMessage.includes("out of memory") ||
+        errorMessage.includes("ENOMEM") ||
+        errorMessage.includes("allocation failed")
+      ) {
+        throw new HTTPException(507, {
+          message: "File too large to process. Please try a smaller file.",
+        });
+      }
+
       throw new HTTPException(500, {
-        message: `PDF to image conversion failed: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
+        message: `PDF to image conversion failed: ${errorMessage}`,
       });
     }
   },

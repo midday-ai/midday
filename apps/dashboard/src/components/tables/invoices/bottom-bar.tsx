@@ -1,8 +1,8 @@
 "use client";
 
+import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
 import { useInvoiceStore } from "@/store/invoice";
-import { getAuthenticatedUrl } from "@/utils/authenticated-url";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
@@ -16,6 +16,7 @@ type Props = {
 };
 
 export function BottomBar({ data }: Props) {
+  const { data: user } = useUserQuery();
   const { rowSelection, setRowSelection } = useInvoiceStore();
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState({
@@ -49,10 +50,17 @@ export function BottomBar({ data }: Props) {
         });
 
         try {
-          const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?id=${invoice.id}`;
-          const authenticatedUrl = await getAuthenticatedUrl(baseUrl);
+          if (!user?.fileKey) {
+            console.error("File key not available");
+            continue;
+          }
+          const url = new URL(
+            `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice`,
+          );
+          url.searchParams.set("id", invoice.id);
+          url.searchParams.set("fk", user.fileKey);
           await downloadFile(
-            authenticatedUrl,
+            url.toString(),
             `${invoice.invoiceNumber || "invoice"}.pdf`,
           );
         } catch (downloadError) {

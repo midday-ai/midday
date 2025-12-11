@@ -105,11 +105,24 @@ export const downloadInvoiceSchema = z.object({
     .optional()
     .openapi({
       description:
-        "Invoice ID (UUID). Requires authentication via Authorization header.",
+        "Invoice ID (UUID). Requires team file key (fk) query parameter for authentication.",
       example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
       param: {
         in: "query",
         name: "id",
+      },
+    }),
+  fk: z
+    .string()
+    .min(1)
+    .optional()
+    .openapi({
+      description:
+        "Team file key for authenticated invoice access. Required when using invoice ID. This key is returned in the user data response (GET /users/me) as the `fileKey` field.",
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      param: {
+        in: "query",
+        name: "fk",
       },
     }),
   token: z

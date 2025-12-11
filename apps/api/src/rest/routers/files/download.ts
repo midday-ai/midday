@@ -3,12 +3,12 @@ import { downloadFileSchema, downloadInvoiceSchema } from "@api/schemas/files";
 import { createAdminClient } from "@api/services/supabase";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { getInvoiceById } from "@midday/db/queries";
+import { verifyFileKey } from "@midday/encryption";
 import { PdfTemplate, renderToStream } from "@midday/invoice";
 import { verify } from "@midday/invoice/token";
 import { download } from "@midday/supabase/storage";
 import { HTTPException } from "hono/http-exception";
 import { publicMiddleware } from "../../middleware";
-import { withAuth } from "../../middleware/auth";
 import { withDatabase } from "../../middleware/db";
 import { withFileAuth } from "../../middleware/file-auth";
 import { withClientIp } from "../../middleware/ip";
@@ -126,14 +126,33 @@ const downloadInvoiceApp = new OpenAPIHono<Context>();
 // Apply public middleware (database access)
 downloadInvoiceApp.use(...publicMiddleware);
 
-// Conditionally apply auth middleware if ID is provided
-// When ID is used, authentication is required via Authorization header
+// Conditionally apply file key auth middleware if ID is provided
+// When ID is used, authentication is required via fk (fileKey) query parameter
 // When only invoice token is provided, it's public access (no auth middleware)
 downloadInvoiceApp.use(async (c, next) => {
   const query = c.req.query();
-  // If ID is provided, require authentication via Authorization header
+  // If ID is provided, require file key authentication
   if (query.id) {
-    return withAuth(c, next);
+    const fk = query.fk;
+
+    if (!fk) {
+      throw new HTTPException(401, {
+        message:
+          "File key (fk) query parameter is required when using invoice ID.",
+      });
+    }
+
+    // Verify file key and extract teamId
+    const tokenTeamId = await verifyFileKey(fk);
+
+    if (!tokenTeamId) {
+      throw new HTTPException(401, {
+        message: "Invalid file key.",
+      });
+    }
+
+    // Set teamId in context for downstream handlers
+    c.set("teamId", tokenTeamId);
   }
   // Otherwise, continue without auth requirement (public access via invoice token)
   return next();
@@ -147,7 +166,7 @@ downloadInvoiceApp.openapi(
     operationId: "downloadInvoice",
     "x-speakeasy-name-override": "downloadInvoice",
     description:
-      "Downloads an invoice as a PDF. Can be accessed with an invoice ID (requires authentication via Authorization header) or invoice token (public access).",
+      "Downloads an invoice as a PDF. Can be accessed with an invoice ID (requires team file key via fk query parameter) or invoice token (public access).",
     tags: ["Files"],
     request: {
       query: downloadInvoiceSchema,

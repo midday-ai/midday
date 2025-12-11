@@ -2,9 +2,9 @@
 
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
-import { getAuthenticatedUrl } from "@/utils/authenticated-url";
 import {
   generateStatementPdf,
   generateStatementPdfBlob,
@@ -46,6 +46,7 @@ import { InvoiceStatus } from "./invoice-status";
 
 export function CustomerDetails() {
   const trpc = useTRPC();
+  const { data: user } = useUserQuery();
   const { customerId, setParams } = useCustomerParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
   const { resolvedTheme } = useTheme();
@@ -94,14 +95,17 @@ export function CustomerDetails() {
     setOpenDropdownId(null);
   });
 
-  const handleDownloadInvoice = async (invoiceId: string) => {
-    try {
-      const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?id=${invoiceId}`;
-      const authenticatedUrl = await getAuthenticatedUrl(baseUrl);
-      downloadFile(authenticatedUrl, "invoice.pdf");
-    } catch (error) {
-      console.error("Failed to download invoice:", error);
+  const handleDownloadInvoice = (invoiceId: string) => {
+    if (!user?.fileKey) {
+      console.error("File key not available");
+      return;
     }
+    const url = new URL(
+      `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice`,
+    );
+    url.searchParams.set("id", invoiceId);
+    url.searchParams.set("fk", user.fileKey);
+    downloadFile(url.toString(), "invoice.pdf");
     setOpenDropdownId(null);
   };
 

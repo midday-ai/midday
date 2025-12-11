@@ -8,6 +8,10 @@ type FileUrlOptions =
       filename?: string;
     }
   | {
+      type: "invoice";
+      invoiceId: string;
+    }
+  | {
       type: "url";
       url: string;
     };
@@ -42,9 +46,23 @@ export function useFileUrl(options: FileUrlOptions | null) {
       };
     }
 
+    if (options.type === "invoice") {
+      // Build invoice download URL
+      const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice`;
+      const url = new URL(baseUrl);
+      url.searchParams.set("id", options.invoiceId);
+      url.searchParams.set("fk", user.fileKey);
+      return {
+        url: url.toString(),
+        isLoading: false,
+        hasFileKey: true,
+      };
+    }
+
     // Build URL from file path
     const { type, filePath, filename } = options;
-    const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/${type}`;
+    const endpointPath = type === "download" ? `${type}/file` : type;
+    const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/${endpointPath}`;
     const url = new URL(baseUrl);
 
     if (type === "download") {
