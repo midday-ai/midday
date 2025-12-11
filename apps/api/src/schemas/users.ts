@@ -120,7 +120,7 @@ export const userSchema = z.object({
     }),
   fileKey: z.string().nullable().openapi({
     description:
-      "Team file key (JWT token) for proxy/download access to team files. This compact JWT token contains the team ID and is shared by all team members. Use this token as the `fk` query parameter when accessing file endpoints (proxy, preview, download). The token is team-scoped and provides access to files belonging to the user's team. Returns null if the user has no team.",
+      "Team file key (JWT token) for proxy/download access to team files. This compact JWT token contains the team ID and is shared by all team members. Use this token as the `fk` query parameter when accessing file endpoints (proxy, download). The token is team-scoped and provides access to files belonging to the user's team. Returns null if the user has no team.",
     example:
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZWFtSWQiOiIxMjM0NTY3OC05YWJjLWRlZmctMTIzNC01Njc4OTBhYmNkZWYifQ.signature",
   }),

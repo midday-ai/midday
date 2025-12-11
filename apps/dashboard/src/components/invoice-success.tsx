@@ -31,14 +31,14 @@ export function InvoiceSuccess() {
     ),
   );
 
+  const { url: downloadUrl } = useFileUrl({
+    type: "invoice",
+    invoiceId: invoiceId!,
+  });
+
   if (!invoice) {
     return null;
   }
-
-  const { url: downloadUrl } = useFileUrl({
-    type: "invoice",
-    invoiceId: invoice.id,
-  });
 
   return (
     <>

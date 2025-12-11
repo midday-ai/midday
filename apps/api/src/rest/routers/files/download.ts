@@ -257,6 +257,11 @@ downloadInvoiceApp.openapi(
           id: invoiceId,
         });
       } catch (error) {
+        // Re-throw HTTPException as-is (e.g., "Invoice not found" from line 253)
+        if (error instanceof HTTPException) {
+          throw error;
+        }
+        // Only replace error message for actual verification failures
         throw new HTTPException(404, { message: "Invalid token" });
       }
     }

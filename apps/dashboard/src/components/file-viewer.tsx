@@ -22,13 +22,9 @@ type Props = {
 };
 
 export function FileViewer({ mimeType, url, maxWidth }: Props) {
-  // Automatically add fileKey if it's a file proxy/preview URL
+  // Automatically add fileKey if it's a file proxy URL
   // Local dashboard preview endpoint doesn't need fileKey (uses session)
-  const needsAuth =
-    url.includes("/files/proxy") ||
-    (url.includes("/files/preview") &&
-      url.includes(process.env.NEXT_PUBLIC_API_URL || "")) ||
-    url.includes("/files/legacy/preview-legacy");
+  const needsAuth = url.includes("/files/proxy");
 
   // Check if it's the local dashboard preview endpoint (returns PNG images)
   const isLocalPreview = url.includes("/api/files/preview");
@@ -53,9 +49,8 @@ export function FileViewer({ mimeType, url, maxWidth }: Props) {
 
   const displayUrl = finalUrl || url;
 
-  // Local preview endpoint and legacy preview endpoint return PNG images, not PDFs
-  const isPreviewImage =
-    isLocalPreview || url.includes("/files/legacy/preview-legacy");
+  // Local preview endpoint returns PNG images, not PDFs
+  const isPreviewImage = isLocalPreview;
 
   if (
     (mimeType === "application/pdf" ||

@@ -38,7 +38,6 @@ export function FilePreview({
       mimeType.startsWith("application/pdf") ||
       mimeType.startsWith("application/octet-stream")
     ) {
-      // Use local dashboard serverless function for PDF previews
       return "preview";
     }
     return null;

@@ -12,7 +12,7 @@ export default function imageLoader({
   quality = 80,
 }: ImageLoaderParams): string {
   // Handle authenticated API URLs (preserve query parameters like fk token)
-  if (src.includes("/files/proxy") || src.includes("/files/preview")) {
+  if (src.includes("/files/proxy")) {
     // Parse URL to preserve query parameters
     try {
       const url = new URL(src);

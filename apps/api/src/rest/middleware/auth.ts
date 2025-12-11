@@ -14,24 +14,23 @@ import type { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 
 export const withAuth: MiddlewareHandler = async (c, next) => {
-  const db = c.get("db");
-  let token: string | null = null;
-
-  // Get token from Authorization header
   const authHeader = c.req.header("Authorization");
-  if (authHeader) {
-    const [scheme, headerToken] = authHeader.split(" ");
-    if (scheme === "Bearer" && headerToken) {
-      token = headerToken;
-    }
+
+  if (!authHeader) {
+    throw new HTTPException(401, { message: "Authorization header required" });
+  }
+
+  const [scheme, token] = authHeader.split(" ");
+
+  if (scheme !== "Bearer") {
+    throw new HTTPException(401, { message: "Invalid authorization scheme" });
   }
 
   if (!token) {
-    throw new HTTPException(401, {
-      message:
-        "Authorization required. Token must be provided in Authorization header.",
-    });
+    throw new HTTPException(401, { message: "Token required" });
   }
+
+  const db = c.get("db");
 
   // Handle Supabase JWT tokens (try to verify as JWT first)
   const supabaseSession = await verifyAccessToken(token);

@@ -40,6 +40,11 @@ export function InvoiceDetails() {
     enabled: isOpen,
   });
 
+  const { url: downloadUrl } = useFileUrl({
+    type: "invoice",
+    invoiceId: invoiceId!,
+  });
+
   if (isLoading) {
     return <InvoiceDetailsSkeleton />;
   }
@@ -69,11 +74,6 @@ export function InvoiceDetails() {
     customerName,
     scheduledAt,
   } = data;
-
-  const { url: downloadUrl } = useFileUrl({
-    type: "invoice",
-    invoiceId: id,
-  });
 
   return (
     <div className="h-full">

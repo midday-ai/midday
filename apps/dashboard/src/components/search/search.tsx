@@ -95,31 +95,37 @@ function DownloadButton({
 }: { href: string; filename?: string }) {
   const [isDownloading, setIsDownloading] = useState(false);
 
-  // Add fileKey if it's a file download URL
   const isFileDownload = href.includes("/files/download/file");
-  const { url: authenticatedUrl, isLoading: isFileUrlLoading } = useFileUrl(
-    isFileDownload
-      ? {
-          type: "url",
-          url: href,
-        }
+  const isInvoiceDownload = href.includes("/files/download/invoice");
+  const needsAuth = isFileDownload || isInvoiceDownload;
+
+  // Extract invoice ID if it's an invoice download
+  let invoiceId: string | null = null;
+  if (isInvoiceDownload) {
+    try {
+      invoiceId = new URL(href).searchParams.get("id");
+    } catch {
+      // Invalid URL, will fall back to url type
+    }
+  }
+
+  const { url: authenticatedUrl, isLoading } = useFileUrl(
+    needsAuth
+      ? isInvoiceDownload && invoiceId
+        ? { type: "invoice", invoiceId }
+        : { type: "url", url: href }
       : null,
   );
 
   const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
-
-    const url = isFileDownload ? authenticatedUrl : href;
+    const url = authenticatedUrl || href;
     if (!url) return;
 
     try {
       setIsDownloading(true);
       await downloadFile(url, filename || "download");
-
-      // Keep spinner for 1 second
-      setTimeout(() => {
-        setIsDownloading(false);
-      }, 1000);
+      setTimeout(() => setIsDownloading(false), 1000);
     } catch (error) {
       console.error("Download failed:", error);
       setIsDownloading(false);
@@ -131,11 +137,10 @@ function DownloadButton({
       type="button"
       onClick={handleDownload}
       disabled={
-        isDownloading ||
-        (isFileDownload && (!authenticatedUrl || isFileUrlLoading))
+        isDownloading || (needsAuth && (!authenticatedUrl || isLoading))
       }
     >
-      {isDownloading || (isFileDownload && isFileUrlLoading) ? (
+      {isDownloading || isLoading ? (
         <Spinner size={16} />
       ) : (
         <Icons.ArrowCoolDown className="size-4 dark:text-[#666] text-primary hover:!text-primary cursor-pointer" />
