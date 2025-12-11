@@ -58,7 +58,7 @@
     "nanoid": "^5.1.6",
     "parse-duration": "^2.1.4",
     "pdf-to-img": "^5.0.0",
-    "pdfjs-dist": "^5.4.449",
+    "pdfjs-dist": "4.8.69",
     "pino": "^10.1.0",
     "resend": "^6.5.2",
     "sharp": "0.34.5",

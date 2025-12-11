@@ -38,7 +38,8 @@ export function FilePreview({
       mimeType.startsWith("application/pdf") ||
       mimeType.startsWith("application/octet-stream")
     ) {
-      return "preview";
+      // Use legacy endpoint for PDF previews
+      return "legacy-preview";
     }
     return null;
   }, [mimeType]);
@@ -51,12 +52,17 @@ export function FilePreview({
     isLoading,
     hasFileKey,
   } = useFileUrl(
-    endpoint
+    endpoint === "legacy-preview"
       ? {
-          type: endpoint,
-          filePath,
+          type: "url",
+          url: `${process.env.NEXT_PUBLIC_API_URL}/files/legacy/preview-legacy?filePath=vault/${filePath}`,
         }
-      : null,
+      : endpoint
+        ? {
+            type: endpoint,
+            filePath,
+          }
+        : null,
   );
 
   if (!endpoint) {
