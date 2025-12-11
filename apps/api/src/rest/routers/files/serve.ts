@@ -109,20 +109,20 @@ app.openapi(
   createRoute({
     method: "get",
     path: "/preview",
-    summary: "Preview PDF as PNG image",
+    summary: "Preview PDF as JPEG image",
     operationId: "previewFile",
     "x-speakeasy-name-override": "preview",
     description:
-      "Converts the first page of a PDF file to a PNG image for preview purposes. Requires team file key (fk) query parameter for access.",
+      "Converts the first page of a PDF file to a JPEG image for preview purposes. Requires team file key (fk) query parameter for access. Cloudflare CDN handles image resizing.",
     tags: ["Files"],
     request: {
       query: previewFileSchema,
     },
     responses: {
       200: {
-        description: "PNG image of the first page",
+        description: "JPEG image of the first page",
         content: {
-          "image/png": {
+          "image/jpeg": {
             schema: {
               type: "string",
               format: "binary",
@@ -185,17 +185,17 @@ app.openapi(
 
     try {
       const pdfBuffer = await pdfBlob.arrayBuffer();
-      const imageBuffer = await getPdfImage(pdfBuffer);
+      const result = await getPdfImage(pdfBuffer);
 
-      if (!imageBuffer) {
+      if (!result) {
         throw new HTTPException(500, {
           message: "Failed to convert PDF to image",
         });
       }
 
-      return new Response(new Uint8Array(imageBuffer), {
+      return new Response(new Uint8Array(result.buffer), {
         headers: {
-          "Content-Type": "image/png",
+          "Content-Type": result.contentType,
           "Cache-Control": "public, max-age=31536000, immutable",
           "Cross-Origin-Resource-Policy": "cross-origin",
         },

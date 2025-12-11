@@ -55,7 +55,6 @@ export function FilePreview({
       ? {
           type: endpoint,
           filePath,
-          enabled: true, // Always enabled, Next.js Image handles lazy loading
         }
       : null,
   );

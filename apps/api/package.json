@@ -61,6 +61,7 @@
     "pdfjs-dist": "^5.4.449",
     "pino": "^10.1.0",
     "resend": "^6.5.2",
+    "sharp": "0.34.5",
     "snakecase-keys": "^9.0.2",
     "superjson": "^2.2.6",
     "uuid": "^13.0.0",
