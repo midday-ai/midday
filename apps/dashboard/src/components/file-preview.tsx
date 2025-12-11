@@ -12,6 +12,7 @@ type Props = {
   mimeType: string;
   filePath: string;
   lazy?: boolean;
+  fixedSize?: { width: number; height: number };
 };
 
 function ErrorPreview() {
@@ -24,7 +25,12 @@ function ErrorPreview() {
   );
 }
 
-export function FilePreview({ mimeType, filePath, lazy = false }: Props) {
+export function FilePreview({
+  mimeType,
+  filePath,
+  lazy = false,
+  fixedSize,
+}: Props) {
   // Determine endpoint based on mime type
   const endpoint = useMemo(() => {
     if (mimeType.startsWith("image/")) return "proxy";
@@ -77,7 +83,16 @@ export function FilePreview({ mimeType, filePath, lazy = false }: Props) {
         <Image
           src={src}
           alt="File Preview"
-          fill
+          {...(fixedSize
+            ? {
+                width: fixedSize.width,
+                height: fixedSize.height,
+                sizes: `${fixedSize.width}px`,
+                unoptimized: true, // Disable optimization for fixed-size thumbnails to avoid multiple variants
+              }
+            : {
+                fill: true,
+              })}
           className={cn(
             "object-contain border border-border dark:border-none",
             imageLoading ? "opacity-0" : "opacity-100",

@@ -62,6 +62,9 @@ export function VaultItem({ data, small }: Props) {
             filePath={data?.pathTokens?.join("/") ?? ""}
             mimeType={(data?.metadata as { mimetype?: string })?.mimetype ?? ""}
             lazy
+            fixedSize={
+              small ? { width: 45, height: 63 } : { width: 60, height: 84 }
+            }
           />
         )}
       </button>

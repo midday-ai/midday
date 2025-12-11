@@ -88,11 +88,19 @@ app.openapi(
     const blob = await data.arrayBuffer();
     const contentType = data.type || "application/octet-stream";
 
+    // Set cache headers for images (long cache for immutable content)
+    const headers: Record<string, string> = {
+      "Content-Type": contentType,
+      "Cross-Origin-Resource-Policy": "cross-origin",
+    };
+
+    // Add cache headers for images
+    if (contentType.startsWith("image/")) {
+      headers["Cache-Control"] = "public, max-age=31536000, immutable";
+    }
+
     return new Response(blob, {
-      headers: {
-        "Content-Type": contentType,
-        "Cross-Origin-Resource-Policy": "cross-origin",
-      },
+      headers,
     });
   },
 );

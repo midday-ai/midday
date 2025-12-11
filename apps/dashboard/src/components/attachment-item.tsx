@@ -51,6 +51,7 @@ export function AttachmentItem({ file, onDelete }: Props) {
               mimeType={file.type}
               filePath={`${file?.path?.join("/")}`}
               lazy
+              fixedSize={{ width: 30, height: 40 }}
             />
           )}
         </div>
