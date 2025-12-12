@@ -178,7 +178,7 @@ export async function confirmSuggestedMatch(
 
   createActivity(db, {
     teamId,
-    userId,
+    userId: userId ?? undefined,
     type: "inbox_match_confirmed",
     source: "user",
     priority: 7,

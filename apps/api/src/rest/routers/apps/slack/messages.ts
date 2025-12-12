@@ -8,41 +8,55 @@ import { logger } from "@midday/logger";
 /**
  * Returns the welcome message content for Slack
  */
-export function getWelcomeMessage() {
+export function getWelcomeMessage(isPrivateChannel = false) {
+  const blocks: any[] = [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "Hello there! 👋 I'm your new *Midday* bot. I'll send notifications about new transactions and receipt matches in this channel.",
+      },
+    },
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "*Share receipts, invoices, or any documents* in this channel by uploading files. I'll automatically extract the data and match them to your transactions.",
+      },
+    },
+  ];
+
+  // Add note for private channels
+  if (isPrivateChannel) {
+    blocks.push({
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "⚠️ *Important:* This is a private channel. To enable full functionality, please invite the Midday bot to this channel by typing `/invite @Midday` or adding it through the channel settings.",
+      },
+    });
+  }
+
+  blocks.push({
+    type: "actions",
+    elements: [
+      {
+        type: "button",
+        text: {
+          type: "plain_text",
+          text: "⚙️ Notification Settings",
+          emoji: true,
+        },
+        url: "https://app.midday.ai/apps?app=slack&settings=true",
+        action_id: "view_settings",
+      },
+    ],
+  });
+
   return {
     unfurl_links: false,
     unfurl_media: false,
-    blocks: [
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: "Hello there! 👋 I'm your new *Midday* bot. I'll send notifications about new transactions and receipt matches in this channel.",
-        },
-      },
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: "*Share receipts, invoices, or any documents* in this channel by uploading files. I'll automatically extract the data and match them to your transactions.",
-        },
-      },
-      {
-        type: "actions",
-        elements: [
-          {
-            type: "button",
-            text: {
-              type: "plain_text",
-              text: "⚙️ Notification Settings",
-              emoji: true,
-            },
-            url: "https://app.midday.ai/apps?app=slack&settings=true",
-            action_id: "view_settings",
-          },
-        ],
-      },
-    ],
+    blocks,
   };
 }
 
@@ -60,7 +74,9 @@ export async function sendWelcomeMessage({
   botUserId: string;
   webhookUrl: string;
 }): Promise<void> {
-  const welcomeMessage = getWelcomeMessage();
+  // Check if channel is private (private channels start with "G", public with "C")
+  const isPrivateChannel = channelId.startsWith("G");
+  const welcomeMessage = getWelcomeMessage(isPrivateChannel);
 
   try {
     // Ensure bot is in channel before sending message (auto-joins public channels)
