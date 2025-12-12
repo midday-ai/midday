@@ -1,6 +1,36 @@
 import type { Database } from "@db/client";
 import { apps } from "@db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
+
+export type CreateAppParams = {
+  teamId: string;
+  createdBy: string;
+  appId: string;
+  settings?: unknown;
+  config?: unknown;
+};
+
+export const createApp = async (db: Database, params: CreateAppParams) => {
+  const [result] = await db
+    .insert(apps)
+    .values({
+      teamId: params.teamId,
+      createdBy: params.createdBy,
+      appId: params.appId,
+      settings: params.settings,
+      config: params.config,
+    })
+    .onConflictDoUpdate({
+      target: [apps.teamId, apps.appId],
+      set: {
+        config: params.config,
+        settings: params.settings,
+      },
+    })
+    .returning();
+
+  return result;
+};
 
 type AppSetting = {
   id: string;
@@ -16,6 +46,106 @@ export const getApps = async (db: Database, teamId: string) => {
     })
     .from(apps)
     .where(eq(apps.teamId, teamId));
+
+  return result;
+};
+
+export type GetAppByAppIdParams = {
+  appId: string;
+  teamId: string;
+};
+
+export const getAppByAppId = async (
+  db: Database,
+  params: GetAppByAppIdParams,
+) => {
+  const [result] = await db
+    .select()
+    .from(apps)
+    .where(and(eq(apps.appId, params.appId), eq(apps.teamId, params.teamId)))
+    .limit(1);
+
+  return result || null;
+};
+
+export type GetAppBySlackTeamIdParams = {
+  slackTeamId: string;
+  channelId?: string; // Optional channel ID to help disambiguate if same Slack workspace connected to multiple Midday teams
+};
+
+export const getAppBySlackTeamId = async (
+  db: Database,
+  params: GetAppBySlackTeamIdParams,
+) => {
+  const { slackTeamId, channelId } = params;
+
+  // Build query conditions
+  const conditions = [
+    eq(apps.appId, "slack"),
+    sql`${apps.config}->>'team_id' = ${slackTeamId}`,
+  ];
+
+  // If channel ID is provided, use it to find the exact integration
+  // Each Slack integration stores a channel_id during OAuth setup
+  if (channelId) {
+    conditions.push(sql`${apps.config}->>'channel_id' = ${channelId}`);
+  }
+
+  const results = await db
+    .select()
+    .from(apps)
+    .where(and(...conditions))
+    .orderBy(desc(apps.createdAt))
+    .limit(1);
+
+  const result = results[0] || null;
+
+  // If no result with channel ID, fall back to just Slack team ID
+  // (in case channel_id wasn't stored or channel changed)
+  if (!result && channelId) {
+    const fallbackResults = await db
+      .select()
+      .from(apps)
+      .where(
+        and(
+          eq(apps.appId, "slack"),
+          sql`${apps.config}->>'team_id' = ${slackTeamId}`,
+        ),
+      )
+      .orderBy(desc(apps.createdAt))
+      .limit(1);
+
+    const fallbackResult = fallbackResults[0] || null;
+
+    if (fallbackResult) {
+      console.warn(
+        `Slack integration found by team_id only (channel_id ${channelId} didn't match). This may indicate the channel was changed or multiple teams share the same Slack workspace.`,
+        {
+          slackTeamId,
+          channelId,
+          middayTeamId: fallbackResult.teamId,
+        },
+      );
+      return fallbackResult;
+    }
+  }
+
+  // Log warning if multiple integrations exist for the same Slack team
+  if (!channelId && results.length > 1) {
+    console.warn(
+      `Multiple Slack integrations found for Slack team ${slackTeamId}. Consider using channel_id to disambiguate.`,
+      {
+        slackTeamId,
+        count: results.length,
+        teamIds: results.map((r) => r.teamId),
+        channelIds: results.map(
+          (r) =>
+            // @ts-expect-error - config is JSONB
+            r.config?.channel_id,
+        ),
+      },
+    );
+  }
 
   return result;
 };

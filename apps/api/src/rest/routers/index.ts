@@ -1,5 +1,6 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { protectedMiddleware } from "../middleware";
+import { appsRouter } from "./apps";
 import { bankAccountsRouter } from "./bank-accounts";
 import { chatRouter } from "./chat";
 import { customersRouter } from "./customers";
@@ -22,10 +23,11 @@ import { webhookRouter } from "./webhooks";
 
 const routers = new OpenAPIHono();
 
-// Mount public routes first (no authentication required and no rate limiting)
+// Mount public routes first
 routers.route("/oauth", oauthRouter);
 routers.route("/webhook", webhookRouter);
 routers.route("/files", filesRouter);
+routers.route("/apps", appsRouter);
 
 // Apply protected middleware to all subsequent routes
 routers.use(...protectedMiddleware);

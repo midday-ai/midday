@@ -1,3 +1,4 @@
+import { sendSlackMatchNotification } from "@midday/app-store/slack/server";
 import type { Database } from "@midday/db/client";
 import {
   getInboxById,
@@ -5,7 +6,10 @@ import {
   hasSuggestion,
 } from "@midday/db/queries";
 import type { MatchResult } from "@midday/db/queries";
+import { createLoggerWithContext } from "@midday/logger";
 import { Notifications } from "@midday/notifications";
+
+const logger = createLoggerWithContext("slack:matching-notifications");
 
 export async function triggerMatchingNotification(params: {
   db: Database;
@@ -39,7 +43,7 @@ export async function triggerMatchingNotification(params: {
     ]);
 
     if (!inboxItem || !transactionItem) {
-      console.warn("Missing data for notification", {
+      logger.warn("Missing data for notification", {
         hasInbox: !!inboxItem,
         hasTransaction: !!transactionItem,
       });
@@ -56,6 +60,64 @@ export async function triggerMatchingNotification(params: {
         transactionItem.currency &&
         inboxItem.currency !== transactionItem.currency,
     );
+
+    // Check if this inbox item came from Slack
+    const slackMeta =
+      inboxItem.meta &&
+      typeof inboxItem.meta === "object" &&
+      "source" in inboxItem.meta &&
+      inboxItem.meta.source === "slack" &&
+      "sourceMetadata" in inboxItem.meta &&
+      inboxItem.meta.sourceMetadata &&
+      typeof inboxItem.meta.sourceMetadata === "object" &&
+      "channelId" in inboxItem.meta.sourceMetadata
+        ? (inboxItem.meta.sourceMetadata as {
+            channelId: string;
+            threadTs?: string;
+          })
+        : null;
+
+    // Send Slack notification if this is a Slack-sourced inbox item
+    if (slackMeta) {
+      try {
+        const matchType =
+          result.action === "auto_matched"
+            ? "auto_matched"
+            : result.suggestion.matchType === "high_confidence"
+              ? "high_confidence"
+              : "suggested";
+
+        await sendSlackMatchNotification({
+          teamId,
+          inboxId,
+          transactionId: result.suggestion.transactionId,
+          documentName,
+          documentAmount: inboxItem.amount || 0,
+          documentCurrency: inboxItem.currency || "USD",
+          documentDate: inboxItem.date || undefined,
+          transactionName,
+          transactionAmount: transactionItem.amount || 0,
+          transactionCurrency: transactionItem.currency || "USD",
+          transactionDate: transactionItem.date || undefined,
+          confidenceScore: result.suggestion.confidenceScore,
+          matchType,
+          slackChannelId: slackMeta.channelId,
+          slackThreadTs: slackMeta.threadTs,
+          db,
+          amountScore: result.suggestion.amountScore,
+          currencyScore: result.suggestion.currencyScore,
+          dateScore: result.suggestion.dateScore,
+          embeddingScore: result.suggestion.embeddingScore,
+        });
+      } catch (error) {
+        logger.error("Failed to send Slack match notification", {
+          teamId,
+          inboxId,
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+        // Don't throw - Slack notifications shouldn't break the matching process
+      }
+    }
 
     const notifications = new Notifications(db);
 
@@ -94,7 +156,7 @@ export async function triggerMatchingNotification(params: {
       });
     }
   } catch (error) {
-    console.error("Failed to trigger matching notification", {
+    logger.error("Failed to trigger matching notification", {
       teamId,
       inboxId,
       error: error instanceof Error ? error.message : "Unknown error",

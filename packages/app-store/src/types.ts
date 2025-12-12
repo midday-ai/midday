@@ -11,7 +11,10 @@ export interface UnifiedApp {
   type: "official" | "external";
 
   // Official app specific
-  onInitialize?: () => Promise<void>;
+  onInitialize?: (params: {
+    accessToken: string;
+    onComplete?: () => void;
+  }) => Promise<void>;
   settings?: Array<{
     id: string;
     label: string;

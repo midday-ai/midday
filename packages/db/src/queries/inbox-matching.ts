@@ -148,7 +148,7 @@ export async function confirmSuggestedMatch(
     suggestionId: string;
     inboxId: string;
     transactionId: string;
-    userId: string;
+    userId?: string | null;
   },
 ) {
   const { teamId, suggestionId, inboxId, transactionId, userId } = params;
@@ -201,7 +201,7 @@ export async function declineSuggestedMatch(
   params: {
     suggestionId: string;
     inboxId: string;
-    userId: string;
+    userId?: string | null;
     teamId: string;
   },
 ) {
@@ -311,4 +311,38 @@ export async function getPendingInboxForMatching(
     )
     .orderBy(desc(inbox.createdAt)) // Newest first - prioritize recent items
     .limit(limit);
+}
+
+// Get a suggestion by inbox and transaction IDs
+export async function getSuggestionByInboxAndTransaction(
+  db: Database,
+  params: {
+    inboxId: string;
+    transactionId: string;
+    teamId: string;
+  },
+) {
+  const { inboxId, transactionId, teamId } = params;
+
+  const [result] = await db
+    .select({
+      id: transactionMatchSuggestions.id,
+      inboxId: transactionMatchSuggestions.inboxId,
+      transactionId: transactionMatchSuggestions.transactionId,
+      status: transactionMatchSuggestions.status,
+      confidenceScore: transactionMatchSuggestions.confidenceScore,
+      matchType: transactionMatchSuggestions.matchType,
+    })
+    .from(transactionMatchSuggestions)
+    .where(
+      and(
+        eq(transactionMatchSuggestions.inboxId, inboxId),
+        eq(transactionMatchSuggestions.transactionId, transactionId),
+        eq(transactionMatchSuggestions.teamId, teamId),
+        eq(transactionMatchSuggestions.status, "pending"),
+      ),
+    )
+    .limit(1);
+
+  return result || null;
 }

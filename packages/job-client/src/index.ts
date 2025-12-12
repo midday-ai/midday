@@ -57,6 +57,130 @@ export async function triggerJob(
 }
 
 /**
+ * Trigger a job and wait for it to complete
+ * @param jobName - Name of the job (e.g., "embed-inbox")
+ * @param payload - Job payload data
+ * @param queueName - Name of the queue (e.g., "inbox")
+ * @param options - Optional parameters
+ * @param options.timeout - Maximum time to wait in milliseconds (default: 60000)
+ * @returns Job information including the job ID and result
+ */
+export async function triggerJobAndWait(
+  jobName: string,
+  payload: unknown,
+  queueName: string,
+  options?: { timeout?: number },
+): Promise<JobTriggerResponse & { result?: unknown }> {
+  const queue = getQueue(queueName);
+  const enqueueStartTime = Date.now();
+  const timeout = options?.timeout ?? 60000; // Default 60 seconds
+
+  try {
+    const job = await queue.add(jobName, payload);
+
+    if (!job?.id) {
+      throw new Error(
+        `Failed to create job: ${jobName} in queue: ${queueName}`,
+      );
+    }
+
+    const enqueueDuration = Date.now() - enqueueStartTime;
+    logger.info("Enqueued job (waiting for completion)", {
+      jobName,
+      jobId: job.id,
+      queueName,
+      enqueueDuration: `${enqueueDuration}ms`,
+    });
+
+    // Wait for job to complete by polling its state
+    // Note: waitUntilFinished() is NOT recommended when called from within a worker
+    // as it can cause stalled jobs and block the event loop. Polling is the safer approach.
+    const waitStartTime = Date.now();
+    const initialPollInterval = 50; // Start with 50ms for fast jobs
+    const maxPollInterval = 200; // Cap at 200ms for longer waits
+    let pollInterval = initialPollInterval;
+    let pollCount = 0;
+    let jobState: string | null = null;
+    const startTime = Date.now();
+
+    while (Date.now() - startTime < timeout) {
+      jobState = await job.getState();
+
+      if (jobState === "completed") {
+        const waitDuration = Date.now() - waitStartTime;
+        const totalDuration = Date.now() - enqueueStartTime;
+        logger.info("Job completed (via polling)", {
+          jobName,
+          jobId: job.id,
+          queueName,
+          waitDuration: `${waitDuration}ms`,
+          totalDuration: `${totalDuration}ms`,
+          pollCount,
+        });
+        break;
+      }
+
+      if (jobState === "failed") {
+        const failedReason = job.failedReason || "Unknown error";
+        throw new Error(`Job failed: ${failedReason}`);
+      }
+
+      // Exponential backoff: poll more frequently at first, then slow down
+      // This reduces Redis load for longer-running jobs while keeping fast jobs responsive
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
+      pollCount++;
+
+      // Increase poll interval gradually (exponential backoff)
+      // After 5 polls (250ms), increase to 100ms
+      // After 10 polls (1.25s), increase to 200ms max
+      if (pollCount === 5) {
+        pollInterval = 100;
+      } else if (pollCount === 10) {
+        pollInterval = maxPollInterval;
+      }
+    }
+
+    // Check final state if we timed out
+    if (Date.now() - startTime >= timeout) {
+      const finalState = await job.getState();
+      if (finalState !== "completed") {
+        throw new Error(
+          `Job did not complete within ${timeout}ms timeout. Final state: ${finalState}`,
+        );
+      }
+    }
+
+    const waitDuration = Date.now() - waitStartTime;
+    const totalDuration = Date.now() - enqueueStartTime;
+    const result = job.returnvalue;
+
+    logger.info("Job completed successfully", {
+      jobName,
+      jobId: job.id,
+      queueName,
+      waitDuration: `${waitDuration}ms`,
+      totalDuration: `${totalDuration}ms`,
+      pollCount,
+    });
+
+    return {
+      id: job.id,
+      result,
+    };
+  } catch (error) {
+    const totalDuration = Date.now() - enqueueStartTime;
+    logger.error("Error triggering job or waiting for completion", {
+      jobName,
+      queueName,
+      duration: `${totalDuration}ms`,
+      error: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    throw error;
+  }
+}
+
+/**
  * Known queue names in the worker system
  * Must match the queues defined in apps/worker/src/queues/index.ts
  */
