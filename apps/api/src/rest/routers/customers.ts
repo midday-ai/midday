@@ -97,7 +97,7 @@ app.openapi(
       teamId,
     });
 
-    return c.json(validateResponse(result, customerResponseSchema));
+    return c.json(validateResponse(result, customerResponseSchema), 201);
   },
 );
 
