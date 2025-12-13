@@ -1,4 +1,4 @@
-import { createHmac } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { publicMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import { validateResponse } from "@api/utils/validate-response";
@@ -151,7 +151,15 @@ async function verifySlackInteraction(req: Request): Promise<unknown> {
     .update(sigBasestring)
     .digest("hex");
 
-  if (`${slackSignatureVersion}=${mySignature}` !== slackSignature) {
+  const expectedSignature = `${slackSignatureVersion}=${mySignature}`;
+  const expectedBuffer = Buffer.from(expectedSignature);
+  const receivedBuffer = Buffer.from(slackSignature);
+
+  // timingSafeEqual requires buffers of equal length
+  if (
+    expectedBuffer.length !== receivedBuffer.length ||
+    !timingSafeEqual(expectedBuffer, receivedBuffer)
+  ) {
     throw new Error("Invalid Slack signature");
   }
 

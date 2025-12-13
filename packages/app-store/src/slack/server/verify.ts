@@ -1,4 +1,4 @@
-import { createHmac } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
 export async function verifySlackWebhook(req: Request) {
   const SLACK_SIGNING_SECRET = process.env.SLACK_SIGNING_SECRET;
@@ -30,7 +30,15 @@ export async function verifySlackWebhook(req: Request) {
     .update(sigBasestring)
     .digest("hex");
 
-  if (`${slackSignatureVersion}=${mySignature}` !== slackSignature) {
+  const expectedSignature = `${slackSignatureVersion}=${mySignature}`;
+  const expectedBuffer = Buffer.from(expectedSignature);
+  const receivedBuffer = Buffer.from(slackSignature);
+
+  // timingSafeEqual requires buffers of equal length
+  if (
+    expectedBuffer.length !== receivedBuffer.length ||
+    !timingSafeEqual(expectedBuffer, receivedBuffer)
+  ) {
     throw new Error("Invalid Slack signature");
   }
 

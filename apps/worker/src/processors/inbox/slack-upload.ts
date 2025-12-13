@@ -452,7 +452,7 @@ Focus on what was purchased (e.g., "office supplies", "software subscription", "
           filePath,
           teamId,
         },
-        "inbox",
+        "documents",
       );
 
       // Trigger embedding and wait for completion before matching

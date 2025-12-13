@@ -112,6 +112,18 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
     // Dispatch to provider-specific handler
     switch (meta.source) {
       case "slack":
+        // channelId is required for Slack notifications
+        if (!meta.sourceMetadata.channelId) {
+          this.logger.warn(
+            "Inbox item has Slack source but missing channelId, skipping Slack notification",
+            {
+              inboxId,
+              teamId,
+            },
+          );
+          return;
+        }
+
         await this.sendSlackNotification({
           teamId,
           inboxId,
@@ -125,7 +137,7 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
           transactionDate: transaction?.date ?? undefined,
           confidenceScore,
           matchType,
-          channelId: meta.sourceMetadata.channelId!,
+          channelId: meta.sourceMetadata.channelId,
           threadTs: meta.sourceMetadata.threadTs,
         });
         break;
