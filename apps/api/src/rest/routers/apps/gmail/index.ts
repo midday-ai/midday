@@ -9,4 +9,3 @@ app.route("/install-url", installUrlRouter);
 app.route("/oauth-callback", oauthCallbackRouter);
 
 export { app as gmailRouter };
-
