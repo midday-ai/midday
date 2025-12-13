@@ -60,6 +60,13 @@ export const downloadFile = async ({
     },
   });
 
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => "Unknown error");
+    throw new Error(
+      `Failed to download file from Slack: ${response.status} ${response.statusText}. ${errorText}`,
+    );
+  }
+
   return response.arrayBuffer();
 };
 

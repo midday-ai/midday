@@ -69,10 +69,11 @@ export const onInitialize = async ({
     }
   }, 500);
 
-  // Cleanup interval after 5 minutes
+  // Cleanup interval and listener after 5 minutes
   setTimeout(
     () => {
       clearInterval(checkInterval);
+      window.removeEventListener("message", listener);
     },
     5 * 60 * 1000,
   );
