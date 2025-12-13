@@ -189,7 +189,6 @@ const KNOWN_QUEUES = [
   "inbox",
   "inbox-provider",
   "documents",
-  "notifications",
   "rates",
 ];
 

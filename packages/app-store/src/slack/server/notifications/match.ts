@@ -18,7 +18,6 @@ export type MatchNotificationParams = {
   transactionAmount: number;
   transactionCurrency: string;
   transactionDate?: string;
-  confidenceScore: number;
   matchType: "auto_matched" | "high_confidence" | "suggested";
   slackChannelId: string;
   slackThreadTs?: string;
@@ -36,14 +35,12 @@ export async function sendSlackMatchNotification({
   transactionAmount,
   transactionCurrency,
   transactionDate,
-  confidenceScore,
   matchType,
   slackChannelId,
   slackThreadTs,
 }: MatchNotificationParams) {
   const db = getWorkerDb();
 
-  // Get Slack app config using Drizzle
   const slackApp = await getAppByAppId(db, {
     appId: "slack",
     teamId,
@@ -86,7 +83,6 @@ export async function sendSlackMatchNotification({
   }).format(documentAmount);
 
   const isAutoMatched = matchType === "auto_matched";
-  const confidencePercentage = Math.round(confidenceScore * 100);
 
   // Format dates
   const formattedDocumentDate = documentDate
@@ -95,31 +91,6 @@ export async function sendSlackMatchNotification({
   const formattedTransactionDate = transactionDate
     ? format(new Date(transactionDate), "MMM d, yyyy")
     : "N/A";
-
-  // Calculate amount difference for highlighting
-  const amountDiff = Math.abs(
-    Math.abs(documentAmount) - Math.abs(transactionAmount),
-  );
-  const amountDiffPercent =
-    documentAmount !== 0
-      ? Math.round((amountDiff / Math.abs(documentAmount)) * 100)
-      : 0;
-  const hasAmountDifference = amountDiff > 0.01; // More than 1 cent difference
-
-  // Check date difference
-  let dateDiffText = "";
-  if (documentDate && transactionDate) {
-    const docDate = new Date(documentDate);
-    const transDate = new Date(transactionDate);
-    const daysDiff = Math.abs(
-      Math.floor(
-        (transDate.getTime() - docDate.getTime()) / (1000 * 60 * 60 * 24),
-      ),
-    );
-    if (daysDiff > 0) {
-      dateDiffText = ` (${daysDiff} day${daysDiff > 1 ? "s" : ""} difference)`;
-    }
-  }
 
   try {
     if (isAutoMatched) {
@@ -173,32 +144,10 @@ export async function sendSlackMatchNotification({
       });
     } else {
       // Suggestion: Show approve/decline buttons
-      const matchLabel =
-        matchType === "high_confidence"
-          ? "High confidence match"
-          : "Potential match";
-
-      // Build comparison text highlighting differences
-      let comparisonNote = "";
-      if (hasAmountDifference || dateDiffText) {
-        const differences: string[] = [];
-        if (hasAmountDifference) {
-          differences.push(
-            `Amount differs by ${amountDiffPercent}% (${formattedDocumentAmount} vs ${formattedTransactionAmount})`,
-          );
-        }
-        if (dateDiffText) {
-          differences.push(`Date${dateDiffText}`);
-        }
-        if (differences.length > 0) {
-          comparisonNote = `\n\n_Note: ${differences.join("; ")}_`;
-        }
-      }
-
       await client.chat.postMessage({
         channel: slackChannelId,
         thread_ts: slackThreadTs,
-        text: `Found a ${matchLabel.toLowerCase()} for your receipt`,
+        text: "Found a match for your receipt",
         unfurl_links: false,
         unfurl_media: false,
         blocks: [
@@ -206,7 +155,7 @@ export async function sendSlackMatchNotification({
             type: "section",
             text: {
               type: "mrkdwn",
-              text: `*${matchLabel}*\n\nWe found a potential match for your document.${comparisonNote}`,
+              text: "*Match found*\n\nWe found a potential match for your document.",
             },
           },
           {
@@ -224,13 +173,6 @@ export async function sendSlackMatchNotification({
                 text: `*Transaction*\n${transactionName}\n${formattedTransactionAmount}\n${formattedTransactionDate}`,
               },
             ],
-          },
-          {
-            type: "section",
-            text: {
-              type: "mrkdwn",
-              text: `*Match confidence:* ${confidencePercentage}%`,
-            },
           },
           {
             type: "actions",
