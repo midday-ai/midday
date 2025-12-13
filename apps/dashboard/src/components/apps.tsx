@@ -38,6 +38,10 @@ export function Apps() {
     trpc.apps.get.queryOptions(),
   );
 
+  const { data: inboxAccounts } = useSuspenseQuery(
+    trpc.inboxAccounts.get.queryOptions(),
+  );
+
   const { data: externalAppsData } = useSuspenseQuery(
     trpc.oauthApplications.list.queryOptions(),
   );
@@ -51,18 +55,28 @@ export function Apps() {
   const search = searchParams.get("q");
 
   // Transform official apps
-  const transformedOfficialApps: UnifiedApp[] = appStoreApps.map((app) => ({
-    id: app.id,
-    name: app.name,
-    category: "category" in app ? app.category : "Integration",
-    active: app.active,
-    logo: app.logo,
-    short_description: app.short_description,
-    description: app.description || undefined,
-    images: app.images || [],
-    installed:
+  const transformedOfficialApps: UnifiedApp[] = appStoreApps.map((app) => {
+    // Check if app is installed in apps table
+    const isInstalledInApps =
       installedOfficialApps?.some((installed) => installed.app_id === app.id) ??
-      false,
+      false;
+
+    // For Gmail, also check inbox accounts
+    const isInstalledInInbox =
+      app.id === "gmail"
+        ? inboxAccounts?.some((account) => account.provider === "gmail") ?? false
+        : false;
+
+    return {
+      id: app.id,
+      name: app.name,
+      category: "category" in app ? app.category : "Integration",
+      active: app.active,
+      logo: app.logo,
+      short_description: app.short_description,
+      description: app.description || undefined,
+      images: app.images || [],
+      installed: isInstalledInApps || isInstalledInInbox,
     type: "official" as const,
     onInitialize:
       "onInitialize" in app && typeof app.onInitialize === "function"
@@ -77,14 +91,15 @@ export function Apps() {
             return result instanceof Promise ? result : Promise.resolve(result);
           }
         : undefined,
-    settings:
-      "settings" in app && Array.isArray(app.settings)
-        ? app.settings
-        : undefined,
-    userSettings:
-      (installedOfficialApps?.find((installed) => installed.app_id === app.id)
-        ?.settings as Record<string, any>) || undefined,
-  }));
+      settings:
+        "settings" in app && Array.isArray(app.settings)
+          ? app.settings
+          : undefined,
+      userSettings:
+        (installedOfficialApps?.find((installed) => installed.app_id === app.id)
+          ?.settings as Record<string, any>) || undefined,
+    };
+  });
 
   // Transform external apps (only approved ones)
   const approvedExternalApps =

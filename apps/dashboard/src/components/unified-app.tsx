@@ -22,7 +22,11 @@ import {
 } from "@midday/ui/carousel";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import Image from "next/image";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
@@ -100,12 +104,34 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
     settings: parseAsBoolean,
   });
 
+  // Fetch inbox accounts for Gmail disconnect
+  const { data: inboxAccounts } = useSuspenseQuery(
+    trpc.inboxAccounts.get.queryOptions(),
+  );
+
   // Use hook for Slack OAuth
   const slackOAuth = useAppOAuth({
     installUrlEndpoint: "/apps/slack/install-url",
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: trpc.apps.get.queryKey(),
+      });
+      setLoading(false);
+    },
+    onError: () => {
+      setLoading(false);
+    },
+  });
+
+  // Use hook for Gmail OAuth
+  const gmailOAuth = useAppOAuth({
+    installUrlEndpoint: "/apps/gmail/install-url",
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: trpc.apps.get.queryKey(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: trpc.inboxAccounts.get.queryKey(),
       });
       setLoading(false);
     },
@@ -134,9 +160,32 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
     }),
   );
 
+  const deleteInboxAccountMutation = useMutation(
+    trpc.inboxAccounts.delete.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.inboxAccounts.get.queryKey(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: trpc.apps.get.queryKey(),
+        });
+      },
+    }),
+  );
+
   const handleDisconnect = () => {
     if (app.type === "official") {
-      disconnectOfficialAppMutation.mutate({ appId: app.id });
+      // For Gmail, use inbox accounts delete instead of apps disconnect
+      if (app.id === "gmail") {
+        const gmailAccount = inboxAccounts?.find(
+          (account) => account.provider === "gmail",
+        );
+        if (gmailAccount) {
+          deleteInboxAccountMutation.mutate({ id: gmailAccount.id });
+        }
+      } else {
+        disconnectOfficialAppMutation.mutate({ appId: app.id });
+      }
     } else {
       revokeExternalAppMutation.mutate({ applicationId: app.id });
     }
@@ -149,6 +198,12 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
       // Use hook for Slack OAuth
       if (app.id === "slack") {
         await slackOAuth.connect();
+        return;
+      }
+
+      // Use hook for Gmail OAuth
+      if (app.id === "gmail") {
+        await gmailOAuth.connect();
         return;
       }
 
