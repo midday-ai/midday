@@ -242,6 +242,7 @@
       "name": "@midday/worker",
       "version": "0.0.1",
       "dependencies": {
+        "@ai-sdk/openai": "2.0.62",
         "@bull-board/api": "^6.15.0",
         "@bull-board/hono": "^6.15.0",
         "@fast-csv/format": "5.0.5",

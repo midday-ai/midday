@@ -27,6 +27,7 @@
     "@midday/notifications": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/utils": "workspace:*",
+    "@ai-sdk/openai": "2.0.62",
     "@sentry/bun": "^10.29.0",
     "@types/archiver": "^7.0.0",
     "archiver": "^7.0.1",
