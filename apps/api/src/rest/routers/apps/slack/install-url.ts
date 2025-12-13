@@ -50,12 +50,6 @@ app.openapi(
       });
     }
 
-    if (!session.teamId) {
-      throw new HTTPException(401, {
-        message: "Team not found",
-      });
-    }
-
     const url = await getInstallUrl({
       teamId: session.teamId,
       userId: session.user.id,
