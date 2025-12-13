@@ -264,6 +264,19 @@ app.openapi(
           });
         }
 
+        // Security check: Verify that the teamId from the action payload matches
+        if (teamId !== slackApp.teamId) {
+          logger.warn("Team ID mismatch in Slack interaction", {
+            payloadTeamId: teamId,
+            slackAppTeamId: slackApp.teamId,
+            slackTeamId: team.id,
+            actionId,
+          });
+          throw new HTTPException(403, {
+            message: "Unauthorized: Team ID mismatch",
+          });
+        }
+
         const slackClient = createSlackWebClient({
           // @ts-expect-error - config is JSONB
           token: slackApp.config.access_token,

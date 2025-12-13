@@ -165,6 +165,7 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
         sourceMetadata: {
           channelId,
           threadTs: threadId,
+          messageTs: messageTs || messageTimestamp || undefined,
         },
       },
       status: "processing",

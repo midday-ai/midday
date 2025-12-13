@@ -91,6 +91,37 @@ export const getAppBySlackTeamId = async (
     conditions.push(sql`${apps.config}->>'channel_id' = ${channelId}`);
   }
 
+  // When channelId is not provided, check for multiple results first
+  // to warn about potential conflicts
+  if (!channelId) {
+    const allResults = await db
+      .select()
+      .from(apps)
+      .where(and(...conditions))
+      .orderBy(desc(apps.createdAt));
+
+    // Log warning if multiple integrations exist for the same Slack team
+    if (allResults.length > 1) {
+      console.warn(
+        `Multiple Slack integrations found for Slack team ${slackTeamId}. Consider using channel_id to disambiguate.`,
+        {
+          slackTeamId,
+          count: allResults.length,
+          teamIds: allResults.map((r) => r.teamId),
+          channelIds: allResults.map(
+            (r) =>
+              // @ts-expect-error - config is JSONB
+              r.config?.channel_id,
+          ),
+        },
+      );
+    }
+
+    // Return the most recent one
+    return allResults[0] || null;
+  }
+
+  // When channelId is provided, query with limit since we want exact match
   const results = await db
     .select()
     .from(apps)
@@ -128,23 +159,6 @@ export const getAppBySlackTeamId = async (
       );
       return fallbackResult;
     }
-  }
-
-  // Log warning if multiple integrations exist for the same Slack team
-  if (!channelId && results.length > 1) {
-    console.warn(
-      `Multiple Slack integrations found for Slack team ${slackTeamId}. Consider using channel_id to disambiguate.`,
-      {
-        slackTeamId,
-        count: results.length,
-        teamIds: results.map((r) => r.teamId),
-        channelIds: results.map(
-          (r) =>
-            // @ts-expect-error - config is JSONB
-            r.config?.channel_id,
-        ),
-      },
-    );
   }
 
   return result;
