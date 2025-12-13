@@ -299,7 +299,6 @@ async function sendSlackNotification<T extends ProviderNotificationType>(
         transactionAmount: matchPayload.transactionAmount,
         transactionCurrency: matchPayload.transactionCurrency,
         transactionDate: matchPayload.transactionDate,
-        confidenceScore: matchPayload.confidenceScore,
         matchType: matchPayload.matchType,
         slackChannelId: matchChannelId,
         slackThreadTs: options?.inboxMeta?.sourceMetadata?.threadTs,
