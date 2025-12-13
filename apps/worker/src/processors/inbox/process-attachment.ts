@@ -7,7 +7,7 @@ import {
   updateInboxWithProcessedData,
 } from "@midday/db/queries";
 import { DocumentClient } from "@midday/documents";
-import { triggerJob } from "@midday/job-client";
+import { triggerJob, triggerJobAndWait } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
 import convert from "heic-convert";
@@ -390,90 +390,70 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         },
       );
 
-      const [documentJobResult, embedJobResult] = await Promise.allSettled([
-        // Process documents and images for classification
-        triggerJob(
-          "process-document",
-          {
-            mimetype: processedMimetype,
-            filePath,
-            teamId,
-          },
-          "documents",
-        )
-          .then((result) => {
-            this.logger.info("Triggered process-document job", {
+      // Trigger document processing (non-blocking, can run in parallel)
+      const documentJobPromise = triggerJob(
+        "process-document",
+        {
+          mimetype: processedMimetype,
+          filePath,
+          teamId,
+        },
+        "documents",
+      )
+        .then((result) => {
+          this.logger.info("Triggered process-document job", {
+            jobId: job.id,
+            inboxId: inboxData.id,
+            triggeredJobId: result.id,
+            triggeredJobName: "process-document",
+          });
+          return result;
+        })
+        .catch((error) => {
+          this.logger.warn(
+            "Failed to trigger document processing (non-critical)",
+            {
               jobId: job.id,
               inboxId: inboxData.id,
-              triggeredJobId: result.id,
-              triggeredJobName: "process-document",
-            });
-            return result;
-          })
-          .catch((error) => {
-            this.logger.warn(
-              "Failed to trigger document processing (non-critical)",
-              {
-                jobId: job.id,
-                inboxId: inboxData.id,
-                error: error instanceof Error ? error.message : "Unknown error",
-              },
-            );
-            // Don't fail the entire process if document processing fails
-            return null;
-          }),
-        // Create embedding (non-blocking - allows parallel processing)
-        triggerJob(
+              error: error instanceof Error ? error.message : "Unknown error",
+            },
+          );
+          // Don't fail the entire process if document processing fails
+          return null;
+        });
+
+      // Wait for embed-inbox to complete before triggering matching
+      // This ensures the embedding exists when batch-process-matching runs
+      const embedStartTime = Date.now();
+      let embedJobResult: Awaited<ReturnType<typeof triggerJobAndWait>> | null =
+        null;
+
+      this.logger.info("Starting embed-inbox with wait", {
+        jobId: job.id,
+        inboxId: inboxData.id,
+        teamId,
+      });
+
+      try {
+        embedJobResult = await triggerJobAndWait(
           "embed-inbox",
           {
             inboxId: inboxData.id,
             teamId,
           },
           "inbox",
-        )
-          .then((result) => {
-            this.logger.info("Triggered embed-inbox job", {
-              jobId: job.id,
-              inboxId: inboxData.id,
-              triggeredJobId: result.id,
-              triggeredJobName: "embed-inbox",
-            });
-            return result;
-          })
-          .catch((error) => {
-            this.logger.error("Failed to trigger embed-inbox job", {
-              jobId: job.id,
-              inboxId: inboxData.id,
-              error: error instanceof Error ? error.message : "Unknown error",
-            });
-            throw error;
-          }),
-      ]);
+          { timeout: 60000 }, // 60 second timeout
+        );
 
-      const parallelJobsDuration = Date.now() - parallelJobsStartTime;
-      this.logger.info("Parallel jobs triggered", {
-        jobId: job.id,
-        inboxId: inboxData.id,
-        documentJobStatus: documentJobResult.status,
-        embedJobStatus: embedJobResult.status,
-        duration: `${parallelJobsDuration}ms`,
-      });
+        const embedDuration = Date.now() - embedStartTime;
+        this.logger.info("Embed-inbox job completed", {
+          jobId: job.id,
+          inboxId: inboxData.id,
+          embedJobId: embedJobResult.id,
+          duration: `${embedDuration}ms`,
+        });
 
-      // Add batch-process-matching as a child job of embed-inbox
-      // This follows BullMQ's parent-child pattern where the child job automatically
-      // waits for the parent to complete before processing.
-      //
-      // How it works:
-      // 1. embed-inbox is the parent job (runs first)
-      // 2. batch-process-matching is added as a child with parent: { id: embedJobId, queue: "inbox" }
-      // 3. BullMQ automatically keeps the child in "waiting-children" state until parent completes
-      // 4. Once embed-inbox completes successfully, batch-process-matching becomes available for processing
-      // 5. This ensures the embedding exists when findMatches() runs, preventing silent failures
-      // Trigger batch-process-matching directly (not as child job)
-      // This is simpler and more reliable than parent-child relationships which can fail
-      // when parent jobs complete quickly. The batch-process-matching job will check
-      // if the embedding exists before processing, so it's safe to trigger immediately.
-      if (embedJobResult.status === "fulfilled" && embedJobResult.value) {
+        // Now that embedding is complete, trigger matching
         const matchingStartTime = Date.now();
 
         try {
@@ -490,7 +470,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           this.logger.info("Triggered batch-process-matching", {
             jobId: job.id,
             inboxId: inboxData.id,
-            embedJobId: embedJobResult.value.id,
+            embedJobId: embedJobResult.id,
             matchingJobId: matchingJobResult.id,
             triggeredJobName: "batch-process-matching",
             duration: `${matchingDuration}ms`,
@@ -504,8 +484,6 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           });
           // Don't fail the entire process if matching job fails to enqueue
           // The matching can be retried later via scheduler or manual trigger
-          // Note: If embed-inbox completes but matching wasn't enqueued, the scheduler
-          // will eventually pick it up via the no-match-scheduler
           // However, we should update status to pending to prevent getting stuck in "analyzing"
           try {
             await updateInboxWithProcessedData(db, {
@@ -533,33 +511,21 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
             );
           }
         }
-      } else {
-        // embed-inbox job failed to trigger - cannot create child relationship
-        // Log warning but don't fail - the attachment processing succeeded
-        // Matching will be handled by the scheduler when embedding eventually completes
-        this.logger.warn(
-          "Embed-inbox job failed to trigger, skipping batch-process-matching child job",
-          {
-            jobId: job.id,
-            inboxId: inboxData.id,
-            embedJobStatus: embedJobResult.status,
-            embedJobError:
-              embedJobResult.status === "rejected" && embedJobResult.reason
-                ? embedJobResult.reason instanceof Error
-                  ? embedJobResult.reason.message
-                  : String(embedJobResult.reason)
-                : undefined,
-            note: "Matching will be handled by scheduler when embedding completes",
-          },
-        );
-        // Update status to pending since we can't proceed with matching without embedding
+      } catch (error) {
+        this.logger.error("Failed to complete embed-inbox job", {
+          jobId: job.id,
+          inboxId: inboxData.id,
+          error: error instanceof Error ? error.message : "Unknown error",
+          errorStack: error instanceof Error ? error.stack : undefined,
+        });
+        // If embedding fails, update status to pending so it can be retried
         try {
           await updateInboxWithProcessedData(db, {
             id: inboxData.id,
             status: "pending",
           });
           this.logger.info(
-            "Updated inbox status to pending after embed-inbox job failed to trigger",
+            "Updated inbox status to pending after embed-inbox job failed",
             {
               jobId: job.id,
               inboxId: inboxData.id,
@@ -567,7 +533,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           );
         } catch (updateError) {
           this.logger.error(
-            "Failed to update inbox status after embed-inbox job failure",
+            "Failed to update inbox status after embed-inbox failure",
             {
               jobId: job.id,
               inboxId: inboxData.id,
@@ -578,7 +544,21 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
             },
           );
         }
+        // Don't throw - allow document processing to continue
       }
+
+      // Wait for document processing to complete (non-blocking, but log completion)
+      const documentJobResult = await Promise.allSettled([documentJobPromise]);
+      const parallelJobsDuration = Date.now() - parallelJobsStartTime;
+      this.logger.info("Parallel jobs completed", {
+        jobId: job.id,
+        inboxId: inboxData.id,
+        documentJobStatus: documentJobResult[0]?.status,
+        embedJobCompleted: embedJobResult !== null,
+        duration: `${parallelJobsDuration}ms`,
+      });
+
+      // If embed-inbox failed, matching will be handled by the scheduler when embedding eventually completes
 
       const totalDuration = Date.now() - processStartTime;
       this.logger.info("process-attachment job completed successfully", {

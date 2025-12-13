@@ -10,10 +10,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@midday/jobs": "workspace:*",
     "@slack/bolt": "^4.6.0",
     "@slack/web-api": "^7.13.0",
-    "zod": "^4.1.13",
-    "@midday/jobs": "workspace:*"
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
@@ -23,8 +23,8 @@
     ".": "./src/index.ts",
     "./types": "./src/types.ts",
     "./slack": "./src/slack/index.ts",
-    "./slack-notifications": "./src/slack/lib/notifications/transactions.ts",
-    "./slack-client": "./src/slack/lib/client.ts",
-    "./db": "./src/db/index.ts"
+    "./slack/server": "./src/slack/server/index.ts",
+    "./slack-notifications": "./src/slack/server/notifications/transactions.ts",
+    "./slack-client": "./src/slack/server/client.ts"
   }
 }

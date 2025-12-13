@@ -4,8 +4,6 @@ import { documentsQueue } from "./documents";
 import { documentsQueueConfig } from "./documents.config";
 import { inboxProviderQueue, inboxQueue } from "./inbox";
 import { inboxProviderQueueConfig, inboxQueueConfig } from "./inbox.config";
-import { notificationsQueue } from "./notifications";
-import { notificationsQueueConfig } from "./notifications.config";
 import { ratesQueue } from "./rates";
 import { ratesQueueConfig } from "./rates.config";
 import { transactionsQueue } from "./transactions";
@@ -20,7 +18,6 @@ export const queueConfigs: QueueConfig[] = [
   inboxProviderQueueConfig,
   transactionsQueueConfig,
   documentsQueueConfig,
-  notificationsQueueConfig,
   ratesQueueConfig,
 ];
 
@@ -34,7 +31,6 @@ export function getAllQueues(): Queue[] {
     inboxProviderQueue,
     transactionsQueue,
     documentsQueue,
-    notificationsQueue,
     ratesQueue,
   ];
 }

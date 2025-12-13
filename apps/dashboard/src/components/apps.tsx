@@ -5,14 +5,33 @@ import { useTRPC } from "@/trpc/client";
 import { apps as appStoreApps } from "@midday/app-store";
 import type { UnifiedApp } from "@midday/app-store/types";
 import { Button } from "@midday/ui/button";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { UnifiedAppComponent } from "./unified-app";
 
 export function Apps() {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { data: user } = useUserQuery();
   const router = useRouter();
+
+  // Global listener for OAuth completion messages
+  useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      if (e.data === "app_oauth_completed") {
+        // Invalidate queries to refresh app status
+        queryClient.invalidateQueries({
+          queryKey: trpc.apps.get.queryKey(),
+        });
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, [queryClient, trpc]);
 
   // Fetch from both endpoints
   const { data: installedOfficialApps } = useSuspenseQuery(
@@ -47,8 +66,14 @@ export function Apps() {
     type: "official" as const,
     onInitialize:
       "onInitialize" in app && typeof app.onInitialize === "function"
-        ? async () => {
-            const result = app.onInitialize();
+        ? async ({
+            accessToken,
+            onComplete,
+          }: {
+            accessToken: string;
+            onComplete?: () => void;
+          }) => {
+            const result = app.onInitialize({ accessToken, onComplete });
             return result instanceof Promise ? result : Promise.resolve(result);
           }
         : undefined,

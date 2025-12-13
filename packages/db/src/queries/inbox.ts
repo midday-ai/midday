@@ -297,6 +297,7 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
       taxAmount: inbox.taxAmount,
       taxRate: inbox.taxRate,
       taxType: inbox.taxType,
+      meta: inbox.meta,
       inboxAccount: {
         id: inboxAccounts.id,
         email: inboxAccounts.email,
@@ -361,6 +362,7 @@ export async function getInboxById(db: Database, params: GetInboxByIdParams) {
         taxAmount: inbox.taxAmount,
         taxRate: inbox.taxRate,
         taxType: inbox.taxType,
+        meta: inbox.meta,
         inboxAccount: {
           id: inboxAccounts.id,
           email: inboxAccounts.email,
@@ -1670,6 +1672,7 @@ export type CreateInboxParams = {
   website?: string;
   senderEmail?: string;
   inboxAccountId?: string;
+  meta?: Record<string, unknown>;
   status?:
     | "new"
     | "analyzing"
@@ -1692,6 +1695,7 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
     website,
     senderEmail,
     inboxAccountId,
+    meta,
     status = "new",
   } = params;
 
@@ -1717,6 +1721,7 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
         website,
         senderEmail,
         inboxAccountId,
+        meta,
         status,
       })
       .onConflictDoNothing({
@@ -1811,6 +1816,7 @@ export async function createInbox(db: Database, params: CreateInboxParams) {
       website,
       senderEmail,
       inboxAccountId,
+      meta,
       status,
     })
     .returning({
@@ -1888,6 +1894,7 @@ export async function updateInboxWithProcessedData(
       taxRate: inbox.taxRate,
       taxType: inbox.taxType,
       type: inbox.type,
+      invoiceNumber: inbox.invoiceNumber,
     });
 
   return result;

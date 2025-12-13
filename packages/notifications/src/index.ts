@@ -54,8 +54,10 @@ const handlers = {
 
 export class Notifications {
   #emailService: EmailService;
+  #db: Database;
 
-  constructor(private db: Database) {
+  constructor(db: Database) {
+    this.#db = db;
     this.#emailService = new EmailService(db);
   }
 
@@ -97,7 +99,7 @@ export class Notifications {
         if (handler.combine) {
           try {
             const existingActivity = await handler.combine.findExisting(
-              this.db,
+              this.#db,
               validatedData,
               user,
             );
@@ -115,7 +117,7 @@ export class Notifications {
                   activityInput.metadata as Record<string, any>,
                 );
 
-                const updated = await updateActivityMetadata(this.db, {
+                const updated = await updateActivityMetadata(this.#db, {
                   activityId: existingActivity.id,
                   teamId: user.team_id,
                   metadata: mergedMetadata,
@@ -136,7 +138,7 @@ export class Notifications {
 
         // Check if user wants in-app notifications for this type
         const inAppEnabled = await shouldSendNotification(
-          this.db,
+          this.#db,
           user.id,
           user.team_id,
           notificationType,
@@ -163,7 +165,7 @@ export class Notifications {
         const validatedActivity = createActivitySchema.parse(activityInput);
 
         // Create activity directly using DB query
-        return createActivity(this.db, validatedActivity);
+        return createActivity(this.#db, validatedActivity);
       }),
     );
 
@@ -202,8 +204,8 @@ export class Notifications {
     options?: NotificationOptions,
   ): Promise<NotificationResult> {
     const [teamMembers, teamInfo] = await Promise.all([
-      getTeamMembers(this.db, teamId),
-      getTeamById(this.db, teamId),
+      getTeamMembers(this.#db, teamId),
+      getTeamById(this.#db, teamId),
     ]);
 
     if (!teamInfo) {

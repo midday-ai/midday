@@ -1,5 +1,4 @@
 import { getDb } from "@jobs/init";
-import { handleTransactionSlackNotifications } from "@jobs/utils/transaction-notifications";
 import { Notifications } from "@midday/notifications";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk";
@@ -32,6 +31,8 @@ export const transactionNotifications = schemaTask({
       });
 
       if (sortedTransactions && sortedTransactions.length > 0) {
+        // Create notification - ProviderNotificationService will handle provider-specific
+        // notifications (e.g., Slack) based on app settings
         await notifications.create(
           "transactions_created",
           teamId,
@@ -48,15 +49,9 @@ export const transactionNotifications = schemaTask({
             sendEmail: true,
           },
         );
-
-        // Keep Slack notifications for now (can be migrated later)
-        // @ts-expect-error
-        await handleTransactionSlackNotifications(teamId, sortedTransactions);
       }
     } catch (error) {
       await logger.error("Transactions notification", { error });
-
-      throw error;
     }
   },
 });

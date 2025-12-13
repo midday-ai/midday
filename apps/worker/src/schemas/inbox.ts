@@ -49,10 +49,18 @@ export const noMatchSchedulerSchema = z.object({
 export type NoMatchSchedulerPayload = z.infer<typeof noMatchSchedulerSchema>;
 
 export const slackUploadSchema = z.object({
-  teamId: z.string().uuid(),
-  filePath: z.array(z.string()),
-  mimetype: z.string(),
-  size: z.number(),
+  teamId: z.string(),
+  token: z.string(),
+  channelId: z.string(),
+  threadId: z.string().optional(),
+  messageTs: z.string().optional(), // Message timestamp for reactions
+  file: z.object({
+    id: z.string(),
+    name: z.string(),
+    mimetype: z.string(),
+    size: z.number(),
+    url: z.string(),
+  }),
 });
 
 export type SlackUploadPayload = z.infer<typeof slackUploadSchema>;

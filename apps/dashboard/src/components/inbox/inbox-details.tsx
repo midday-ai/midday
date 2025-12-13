@@ -41,6 +41,7 @@ import { EditInboxModal } from "../modals/edit-inbox-modal";
 import { DeleteInboxDialog } from "./delete-inbox-dialog";
 import { InboxActions } from "./inbox-actions";
 import { InboxDetailsSkeleton } from "./inbox-details-skeleton";
+import { InboxSourceIcon } from "./inbox-source-icon";
 
 export function InboxDetails() {
   const { setParams, params } = useInboxParams();
@@ -160,26 +161,6 @@ export function InboxDetails() {
     }),
   );
 
-  const handleBlockSender = () => {
-    // Prefer blocking by email if available, otherwise use domain
-    if (data?.senderEmail) {
-      blockSenderMutation.mutate({
-        type: "email",
-        value: data.senderEmail,
-      });
-    } else if (data?.website) {
-      blockSenderMutation.mutate({
-        type: "domain",
-        value: data.website,
-      });
-    } else {
-      toast({
-        title: "Cannot block sender",
-        description: "No sender information available for this item.",
-      });
-    }
-  };
-
   const handleBlockEmail = () => {
     if (data?.senderEmail) {
       blockSenderMutation.mutate({
@@ -273,20 +254,7 @@ export function InboxDetails() {
         </div>
 
         <div className="ml-auto flex items-center">
-          {data?.inboxAccount?.provider === "gmail" && (
-            <div className="border-r border-border pr-4">
-              <TooltipProvider delayDuration={100}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Icons.Gmail className="w-4 h-4" />
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs px-3 py-1.5">
-                    {data.inboxAccount.email}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-          )}
+          {data && <InboxSourceIcon data={data} />}
           <EditInboxModal>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

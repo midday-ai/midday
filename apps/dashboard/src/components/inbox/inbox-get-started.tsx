@@ -2,6 +2,7 @@
 
 import { revalidateInbox } from "@/actions/revalidate-action";
 import { ConnectGmail } from "@/components/inbox/connect-gmail";
+import { ConnectSlack } from "@/components/inbox/connect-slack";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useRealtime } from "@/hooks/use-realtime";
 import { useUserQuery } from "@/hooks/use-user";
@@ -76,16 +77,17 @@ export function InboxGetStarted() {
         <div className="relative z-20 m-auto flex w-full max-w-[380px] flex-col">
           <div className="flex w-full flex-col relative">
             <div className="pb-4 text-center">
-              <h2 className="font-medium text-lg">Connect Your Gmail</h2>
+              <h2 className="font-medium text-lg">Connect Your Inbox</h2>
               <p className="pb-6 text-sm text-[#878787]">
-                Connect your Gmail to automatically import receipts and
-                invoices. We'll extract the data and match it to your
-                transactions seamlessly.
+                Connect your email or messaging apps to automatically import
+                receipts and invoices. We'll extract the data and match it to
+                your transactions seamlessly.
               </p>
             </div>
 
             <div className="pointer-events-auto flex flex-col space-y-4">
               <ConnectGmail />
+              <ConnectSlack />
 
               {user?.team?.inboxId && (
                 <Accordion

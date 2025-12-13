@@ -1,8 +1,10 @@
+import { useAppOAuth } from "@/hooks/use-app-oauth";
 import { useTRPC } from "@/trpc/client";
 import { getScopeDescription } from "@/utils/scopes";
 import type { UnifiedApp } from "@midday/app-store/types";
 import { openUrl } from "@midday/desktop-client/core";
 import { isDesktopApp } from "@midday/desktop-client/platform";
+import { createClient } from "@midday/supabase/client";
 import {
   Accordion,
   AccordionContent,
@@ -25,6 +27,7 @@ import Image from "next/image";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { AppSettings } from "./app-settings";
+import { MemoizedReactMarkdown } from "./markdown";
 
 interface UnifiedAppProps {
   app: UnifiedApp;
@@ -97,6 +100,20 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
     settings: parseAsBoolean,
   });
 
+  // Use hook for Slack OAuth
+  const slackOAuth = useAppOAuth({
+    installUrlEndpoint: "/apps/slack/install-url",
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: trpc.apps.get.queryKey(),
+      });
+      setLoading(false);
+    },
+    onError: () => {
+      setLoading(false);
+    },
+  });
+
   const disconnectOfficialAppMutation = useMutation(
     trpc.apps.disconnect.mutationOptions({
       onSuccess: () => {
@@ -129,8 +146,39 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
     setLoading(true);
 
     try {
-      if (app.type === "official" && app.onInitialize) {
-        await app.onInitialize();
+      // Use hook for Slack OAuth
+      if (app.id === "slack") {
+        await slackOAuth.connect();
+        return;
+      }
+
+      if (app.onInitialize) {
+        const supabase = createClient();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session?.access_token) {
+          throw new Error("Not authenticated");
+        }
+
+        // Set up a timeout to clear loading state if callback doesn't fire
+        const timeoutId = setTimeout(() => {
+          setLoading(false);
+        }, 30000); // 30 second timeout as fallback
+
+        await app.onInitialize({
+          accessToken: session.access_token,
+          onComplete: () => {
+            clearTimeout(timeoutId);
+            // Invalidate queries to refresh the app status
+            // Note: The global listener in Apps component also handles this as a fallback
+            queryClient.invalidateQueries({
+              queryKey: trpc.apps.get.queryKey(),
+            });
+            setLoading(false);
+          },
+        });
       } else if (app.type === "external" && app.installUrl) {
         // Open the install URL for the OAuth application
         if (isDesktopApp()) {
@@ -138,8 +186,11 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
         } else {
           window.open(app.installUrl, "_blank");
         }
+        // Reset loading state after opening URL
+        // External apps handle their own OAuth flow, so we can't track completion
+        setLoading(false);
       }
-    } finally {
+    } catch (error) {
       setLoading(false);
     }
   };
@@ -211,9 +262,9 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
               variant="outline"
               className="w-full"
               onClick={handleOnInitialize}
-              disabled={!app.active || isLoading}
+              disabled={!app.active || isLoading || slackOAuth.isLoading}
             >
-              {isLoading ? "Installing..." : "Install"}
+              {isLoading || slackOAuth.isLoading ? "Installing..." : "Install"}
             </Button>
           )}
         </div>
@@ -229,7 +280,6 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
                     width={465}
                     height={290}
                     quality={100}
-                    className="rounded-lg"
                   />
                 ) : (
                   <CarouselWithDots images={app.images} appName={app.name} />
@@ -288,9 +338,11 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
                     variant="outline"
                     className="w-full border-primary"
                     onClick={handleOnInitialize}
-                    disabled={!app.active || isLoading}
+                    disabled={!app.active || isLoading || slackOAuth.isLoading}
                   >
-                    {isLoading ? "Installing..." : "Install"}
+                    {isLoading || slackOAuth.isLoading
+                      ? "Installing..."
+                      : "Install"}
                   </Button>
                 )}
               </div>
@@ -308,8 +360,10 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
                 >
                   <AccordionItem value="description" className="border-none">
                     <AccordionTrigger>How it works</AccordionTrigger>
-                    <AccordionContent className="text-[#878787] text-sm">
-                      {app.description || app.overview}
+                    <AccordionContent className="text-[#878787] text-sm prose prose-sm prose-invert prose-p:text-[#878787] prose-p:my-3 [&_strong]:text-primary [&_strong]:font-normal max-w-none">
+                      <MemoizedReactMarkdown>
+                        {app.description || app.overview || ""}
+                      </MemoizedReactMarkdown>
                     </AccordionContent>
                   </AccordionItem>
 
