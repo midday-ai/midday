@@ -1,5 +1,4 @@
 import { Logo } from "./assets/logo";
-import { onInitialize } from "./initialize";
 
 // Shared base config - used by both server and client configs
 export const baseConfig = {
@@ -12,7 +11,6 @@ export const baseConfig = {
     "Get transaction notifications and upload receipts directly from Slack. Midday automatically extracts data and matches them to transactions.",
   description:
     "Connect Midday with Slack to streamline your financial workflow without leaving your workspace.\n\n**Transaction Notifications**\nGet notified in your chosen Slack channel whenever new transactions are added, keeping your team informed in real-time.\n\n**Receipt & Invoice Upload**\nUpload receipts, invoices, or any documents directly from Slack. Simply share a file in a channel where Midday is added, and it will automatically be processed.\n\n**Smart Matching**\nMidday extracts key information (amount, date, vendor) from your documents and automatically matches them to the right transactions. You'll receive a notification in the same thread with the match result.\n\n**Approve or Decline**\nReview suggested matches and approve or decline them directly from Slack with one click—no need to switch to the Midday app.",
-  onInitialize,
   settings: [
     {
       id: "transactions",

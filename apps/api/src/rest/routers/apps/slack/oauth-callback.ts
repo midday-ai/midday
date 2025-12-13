@@ -1,9 +1,9 @@
 import { publicMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { createApp } from "@midday/app-store/db";
 import { config } from "@midday/app-store/slack";
 import { getSlackInstaller } from "@midday/app-store/slack/server";
+import { createApp } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import { HTTPException } from "hono/http-exception";
 import { sendWelcomeMessage } from "./messages";
@@ -161,26 +161,23 @@ app.openapi(
       }
 
       // Create app integration in database
-      const createdSlackIntegration = await createApp(
-        {
-          team_id: parsedMetadata.data.teamId,
-          created_by: parsedMetadata.data.userId,
-          app_id: config.id,
-          settings: config.settings,
-          config: {
-            access_token: parsedJson.data.access_token,
-            team_id: parsedJson.data.team.id,
-            team_name: parsedJson.data.team.name,
-            channel: parsedJson.data.incoming_webhook.channel,
-            channel_id: parsedJson.data.incoming_webhook.channel_id,
-            slack_configuration_url:
-              parsedJson.data.incoming_webhook.configuration_url,
-            url: parsedJson.data.incoming_webhook.url,
-            bot_user_id: parsedJson.data.bot_user_id,
-          },
+      const createdSlackIntegration = await createApp(db, {
+        teamId: parsedMetadata.data.teamId,
+        createdBy: parsedMetadata.data.userId,
+        appId: config.id,
+        settings: config.settings,
+        config: {
+          access_token: parsedJson.data.access_token,
+          team_id: parsedJson.data.team.id,
+          team_name: parsedJson.data.team.name,
+          channel: parsedJson.data.incoming_webhook.channel,
+          channel_id: parsedJson.data.incoming_webhook.channel_id,
+          slack_configuration_url:
+            parsedJson.data.incoming_webhook.configuration_url,
+          url: parsedJson.data.incoming_webhook.url,
+          bot_user_id: parsedJson.data.bot_user_id,
         },
-        db,
-      );
+      });
 
       if (createdSlackIntegration?.config) {
         // Send welcome message to Slack channel
