@@ -21,5 +21,23 @@ export const baseConfig = {
       required: false,
       value: true,
     },
+    {
+      id: "invoices",
+      label: "Invoices",
+      description:
+        "Get notified when invoices are paid or become overdue. This will notify you in the channel you have selected.",
+      type: "switch",
+      required: false,
+      value: true,
+    },
+    {
+      id: "matches",
+      label: "Match Suggestions",
+      description:
+        "Get notified when receipts are matched or need review. This will notify you in the same thread where you uploaded the file.",
+      type: "switch",
+      required: false,
+      value: true,
+    },
   ],
 };

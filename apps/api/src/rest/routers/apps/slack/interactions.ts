@@ -386,14 +386,16 @@ app.openapi(
               teamId,
             });
 
-            if (suggestion) {
-              await declineSuggestedMatch(db, {
-                suggestionId: suggestion.id,
-                inboxId,
-                userId: undefined, // Slack interactions don't have Midday user ID mapping
-                teamId,
-              });
+            if (!suggestion) {
+              throw new Error("Match suggestion not found");
             }
+
+            await declineSuggestedMatch(db, {
+              suggestionId: suggestion.id,
+              inboxId,
+              userId: undefined, // Slack interactions don't have Midday user ID mapping
+              teamId,
+            });
 
             // Add cross emoji reaction to original processed message
             if (channel?.id) {
