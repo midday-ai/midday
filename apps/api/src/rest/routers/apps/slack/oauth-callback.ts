@@ -2,7 +2,11 @@ import { publicMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { config } from "@midday/app-store/slack";
-import { getSlackInstaller } from "@midday/app-store/slack/server";
+import {
+  createSlackWebClient,
+  getSlackInstaller,
+  publishAppHome,
+} from "@midday/app-store/slack/server";
 import { createApp } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import { HTTPException } from "hono/http-exception";
@@ -180,19 +184,52 @@ app.openapi(
       });
 
       if (createdSlackIntegration?.config) {
+        // @ts-expect-error - config is JSONB
+        const accessToken = createdSlackIntegration.config.access_token;
+        // @ts-expect-error - config is JSONB
+        const channelId = createdSlackIntegration.config.channel_id;
+
         // Send welcome message to Slack channel
         // This is non-blocking - OAuth flow continues even if it fails
-        await sendWelcomeMessage({
-          // @ts-expect-error - config is JSONB
-          channelId: createdSlackIntegration.config.channel_id,
-          // @ts-expect-error - config is JSONB
-          accessToken: createdSlackIntegration.config.access_token,
+        sendWelcomeMessage({
+          channelId,
+          accessToken,
           // @ts-expect-error - config is JSONB
           botUserId: createdSlackIntegration.config.bot_user_id,
           // @ts-expect-error - config is JSONB
           webhookUrl: createdSlackIntegration.config.url,
         }).catch(() => {
           // Silently handle errors - welcome message is non-critical
+        });
+
+        // Publish App Home for the installing user
+        // This is non-blocking - OAuth flow continues even if it fails
+        // Use Slack user ID (not Midday user ID) for views.publish
+        const slackUserId = parsedJson.data.authed_user.id;
+        const client = createSlackWebClient({ token: accessToken });
+        publishAppHome({
+          client,
+          userId: slackUserId,
+          db,
+          teamId: parsedMetadata.data.teamId,
+          slackApp: {
+            config: createdSlackIntegration.config,
+            settings: createdSlackIntegration.settings,
+          },
+        }).catch((error) => {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          // Only log if it's not the "not_enabled" error (which is handled gracefully in publishAppHome)
+          if (!errorMessage.includes("not_enabled")) {
+            logger.error("Failed to publish App Home on install", {
+              error: errorMessage,
+              stack: error instanceof Error ? error.stack : undefined,
+              slackUserId,
+              middayUserId: parsedMetadata.data.userId,
+              teamId: parsedMetadata.data.teamId,
+            });
+          }
+          // Silently handle errors - App Home is non-critical
         });
 
         // Build redirect URL to dashboard

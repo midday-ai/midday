@@ -20,6 +20,7 @@ export const getInstallUrl = ({
       "channels:join", // Required to auto-join public channels to receive message events
       "files:read", // Required to download files via url_private_download URLs
       "reactions:write", // Required to add/remove emoji reactions to messages
+      "users:read", // Required for views.publish to publish App Home views
     ],
     redirectUri: SLACK_OAUTH_REDIRECT_URL,
     metadata: JSON.stringify({ teamId, userId }),

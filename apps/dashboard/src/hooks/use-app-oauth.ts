@@ -69,9 +69,12 @@ export function useAppOAuth({
         return;
       }
 
+      let oauthCompleted = false;
+
       const listener = (e: MessageEvent) => {
         // Check if message is from our popup
         if (e.data === "app_oauth_completed") {
+          oauthCompleted = true;
           window.removeEventListener("message", listener);
           clearInterval(checkInterval);
 
@@ -87,6 +90,13 @@ export function useAppOAuth({
         if (popup?.closed) {
           clearInterval(checkInterval);
           window.removeEventListener("message", listener);
+
+          // If popup was closed without completing OAuth, call onError
+          // to reset the component's loading state
+          if (!oauthCompleted) {
+            onError?.(new Error("OAuth popup was closed without completing"));
+          }
+
           setIsLoading(false);
         }
       }, 500);
@@ -95,6 +105,13 @@ export function useAppOAuth({
       setTimeout(
         () => {
           clearInterval(checkInterval);
+          window.removeEventListener("message", listener);
+
+          // Reset loading state if OAuth wasn't completed
+          if (!oauthCompleted) {
+            setIsLoading(false);
+            onError?.(new Error("OAuth flow timed out after 5 minutes"));
+          }
         },
         5 * 60 * 1000,
       );

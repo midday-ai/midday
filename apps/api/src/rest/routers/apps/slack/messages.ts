@@ -21,7 +21,7 @@ export function getWelcomeMessage(isPrivateChannel = false) {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: "*Share receipts, invoices, or any documents* in this channel by uploading files. I'll automatically extract the data and match them to your transactions.",
+        text: "*Share receipts or invoices* in this channel by uploading files. I'll automatically extract the data and match them to your transactions.",
       },
     },
   ];
