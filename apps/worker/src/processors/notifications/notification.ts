@@ -131,6 +131,7 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
           documentName,
           documentAmount,
           documentCurrency,
+          documentDate: inboxItem?.date ?? undefined,
           transactionName,
           transactionAmount,
           transactionCurrency,
@@ -162,6 +163,7 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
     documentName: string;
     documentAmount: number;
     documentCurrency: string;
+    documentDate?: string;
     transactionName: string;
     transactionAmount: number;
     transactionCurrency: string;
@@ -187,6 +189,7 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
         documentName: params.documentName,
         documentAmount: params.documentAmount,
         documentCurrency: params.documentCurrency,
+        documentDate: params.documentDate,
         transactionName: params.transactionName,
         transactionAmount: params.transactionAmount,
         transactionCurrency: params.transactionCurrency,
