@@ -28,8 +28,8 @@ export async function fileShare(
             file: {
               id: file.id,
               name: file.name!,
-              mimetype: file.mimetype,
-              size: file.size,
+              mimetype: file.mimetype ?? "application/octet-stream",
+              size: file.size ?? 0,
               url: file.url!,
             },
           },

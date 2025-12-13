@@ -20,6 +20,7 @@
     "@midday/engine": "workspace:*",
     "@midday/engine-client": "workspace:*",
     "@midday/import": "workspace:*",
+    "@midday/app-store": "workspace:*",
     "@midday/job-client": "workspace:*",
     "@midday/jobs": "workspace:*",
     "@midday/logger": "workspace:*",
