@@ -186,6 +186,9 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
         } else {
           window.open(app.installUrl, "_blank");
         }
+        // Reset loading state after opening URL
+        // External apps handle their own OAuth flow, so we can't track completion
+        setLoading(false);
       }
     } catch (error) {
       setLoading(false);
