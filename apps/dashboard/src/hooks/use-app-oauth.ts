@@ -1,23 +1,18 @@
 "use client";
 
 import { createClient } from "@midday/supabase/client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface UseAppOAuthOptions {
-  /**
-   * API endpoint to fetch the OAuth install URL
-   * e.g., "/apps/slack/install-url"
-   */
   installUrlEndpoint: string;
-  /**
-   * Callback to run on successful OAuth completion
-   */
   onSuccess?: () => void;
-  /**
-   * Callback to run on error
-   */
   onError?: (error: Error) => void;
 }
+
+const CHANNEL_NAME = "midday_oauth_complete";
+const POPUP_WIDTH = 600;
+const POPUP_HEIGHT = 800;
+const TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
 export function useAppOAuth({
   installUrlEndpoint,
@@ -25,6 +20,11 @@ export function useAppOAuth({
   onError,
 }: UseAppOAuthOptions) {
   const [isLoading, setIsLoading] = useState(false);
+  const cleanupRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    return () => cleanupRef.current?.();
+  }, []);
 
   const connect = async () => {
     setIsLoading(true);
@@ -51,80 +51,90 @@ export function useAppOAuth({
       }
 
       const { url } = await response.json();
+      cleanupRef.current?.();
 
-      const width = 600;
-      const height = 800;
-      const left = window.screenX + (window.outerWidth - width) / 2;
-      const top = window.screenY + (window.outerHeight - height) / 2.5;
+      let oauthCompleted = false;
+      let checkInterval: ReturnType<typeof setInterval> | null = null;
+      let popupClosedTimeout: ReturnType<typeof setTimeout> | null = null;
+      let broadcastChannel: BroadcastChannel | null = null;
+      let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
-      const popup = window.open(
-        url,
-        "",
-        `toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=${width}, height=${height}, top=${top}, left=${left}`,
-      );
+      const handleOAuthComplete = () => {
+        if (oauthCompleted) return;
+        oauthCompleted = true;
+        cleanup();
+        onSuccess?.();
+        setIsLoading(false);
+      };
 
-      // The popup might have been blocked, so we redirect the user to the URL instead
+      const cleanup = () => {
+        checkInterval && clearInterval(checkInterval);
+        popupClosedTimeout && clearTimeout(popupClosedTimeout);
+        timeoutId && clearTimeout(timeoutId);
+        broadcastChannel?.close();
+        window.removeEventListener("message", messageListener);
+        cleanupRef.current = null;
+      };
+
+      cleanupRef.current = cleanup;
+
+      // Set up message listeners
+      const messageListener = (e: MessageEvent) => {
+        if (e.data === "app_oauth_completed") {
+          handleOAuthComplete();
+        }
+      };
+
+      window.addEventListener("message", messageListener);
+
+      try {
+        broadcastChannel = new BroadcastChannel(CHANNEL_NAME);
+        broadcastChannel.onmessage = messageListener;
+      } catch {
+        // BroadcastChannel not supported
+      }
+
+      // Open popup
+      const left = window.screenX + (window.outerWidth - POPUP_WIDTH) / 2;
+      const top = window.screenY + (window.outerHeight - POPUP_HEIGHT) / 2.5;
+      const popupFeatures = `width=${POPUP_WIDTH},height=${POPUP_HEIGHT},top=${top},left=${left},toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no,copyhistory=no`;
+
+      const popup = window.open(url, "", popupFeatures);
+
       if (!popup) {
+        cleanup();
         window.location.href = url;
         return;
       }
 
-      let oauthCompleted = false;
-
-      const listener = (e: MessageEvent) => {
-        // Check if message is from our popup
-        if (e.data === "app_oauth_completed") {
-          oauthCompleted = true;
-          window.removeEventListener("message", listener);
-          clearInterval(checkInterval);
-
-          onSuccess?.();
-          setIsLoading(false);
-        }
-      };
-
-      window.addEventListener("message", listener);
-
-      // Also check periodically if popup was closed manually
-      const checkInterval = setInterval(() => {
-        if (popup?.closed) {
-          clearInterval(checkInterval);
-          window.removeEventListener("message", listener);
-
-          // If popup was closed without completing OAuth, call onError
-          // to reset the component's loading state
-          if (!oauthCompleted) {
-            onError?.(new Error("OAuth popup was closed without completing"));
-          }
-
-          setIsLoading(false);
+      // Check if popup was closed manually
+      checkInterval = setInterval(() => {
+        if (popup.closed && !oauthCompleted) {
+          clearInterval(checkInterval!);
+          popupClosedTimeout = setTimeout(() => {
+            if (!oauthCompleted) {
+              cleanup();
+              onError?.(new Error("OAuth popup was closed without completing"));
+              setIsLoading(false);
+            }
+          }, 1500);
         }
       }, 500);
 
-      // Cleanup interval after 5 minutes
-      setTimeout(
-        () => {
-          clearInterval(checkInterval);
-          window.removeEventListener("message", listener);
-
-          // Reset loading state if OAuth wasn't completed
-          if (!oauthCompleted) {
-            setIsLoading(false);
-            onError?.(new Error("OAuth flow timed out after 5 minutes"));
-          }
-        },
-        5 * 60 * 1000,
-      );
+      // Timeout after 5 minutes
+      timeoutId = setTimeout(() => {
+        if (!oauthCompleted) {
+          cleanup();
+          onError?.(new Error("OAuth flow timed out after 5 minutes"));
+          setIsLoading(false);
+        }
+      }, TIMEOUT_MS);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       onError?.(err);
-      console.error("Failed to connect app:", err);
       setIsLoading(false);
     }
   };
 
-  return {
-    connect,
-    isLoading,
-  };
+  return { connect, isLoading };
 }

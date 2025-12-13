@@ -7,26 +7,44 @@ type Props = {
   event: WindowEvent;
 };
 
+const CHANNEL_NAME = "midday_oauth_complete";
+
 export const EventEmitter = ({ event }: Props) => {
   useEffect(() => {
-    if (!window?.opener) {
+    if (!event) {
       return;
     }
 
-    if (event) {
-      // Send message to parent window multiple times to ensure it's received
-      // Some browsers may miss the first message
-      window.opener.postMessage(event, "*");
+    let channel: BroadcastChannel | null = null;
 
-      // Send again after a short delay as backup
-      const timeout = setTimeout(() => {
-        window.opener?.postMessage(event, "*");
-      }, 100);
-
-      return () => {
-        clearTimeout(timeout);
-      };
+    try {
+      channel = new BroadcastChannel(CHANNEL_NAME);
+      channel.postMessage(event);
+    } catch {
+      // BroadcastChannel not supported, fallback to window.opener
     }
+
+    // Fallback to window.opener if available
+    if (window?.opener && !window.opener.closed) {
+      try {
+        window.opener.postMessage(event, "*");
+      } catch {
+        // Ignore errors
+      }
+    }
+
+    // Retry once after a short delay to ensure message is received
+    const timeout = setTimeout(() => {
+      channel?.postMessage(event);
+      if (window?.opener && !window.opener.closed) {
+        window.opener.postMessage(event, "*");
+      }
+    }, 100);
+
+    return () => {
+      clearTimeout(timeout);
+      channel?.close();
+    };
   }, [event]);
 
   return null;
