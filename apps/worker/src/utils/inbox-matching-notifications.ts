@@ -103,11 +103,6 @@ export async function triggerMatchingNotification(params: {
           matchType,
           slackChannelId: slackMeta.channelId,
           slackThreadTs: slackMeta.threadTs,
-          db,
-          amountScore: result.suggestion.amountScore,
-          currencyScore: result.suggestion.currencyScore,
-          dateScore: result.suggestion.dateScore,
-          embeddingScore: result.suggestion.embeddingScore,
         });
       } catch (error) {
         logger.error("Failed to send Slack match notification", {

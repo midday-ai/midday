@@ -1,5 +1,5 @@
-import type { Database } from "@midday/db/client";
 import { getAppByAppId } from "@midday/db/queries";
+import { getWorkerDb } from "@midday/db/worker-client";
 import { createLoggerWithContext } from "@midday/logger";
 import { format } from "date-fns";
 import { createSlackWebClient, ensureBotInChannel } from "../client";
@@ -22,7 +22,6 @@ export type MatchNotificationParams = {
   matchType: "auto_matched" | "high_confidence" | "suggested";
   slackChannelId: string;
   slackThreadTs?: string;
-  db: Database;
 };
 
 export async function sendSlackMatchNotification({
@@ -41,8 +40,9 @@ export async function sendSlackMatchNotification({
   matchType,
   slackChannelId,
   slackThreadTs,
-  db,
 }: MatchNotificationParams) {
+  const db = getWorkerDb();
+
   // Get Slack app config using Drizzle
   const slackApp = await getAppByAppId(db, {
     appId: "slack",
@@ -54,7 +54,14 @@ export async function sendSlackMatchNotification({
     return;
   }
 
-  const accessToken = slackApp.config.access_token;
+  const config = slackApp.config as {
+    access_token?: string;
+    channel_id?: string;
+    team_id?: string;
+    team_name?: string;
+  };
+
+  const accessToken = config.access_token;
 
   if (!accessToken) {
     logger.debug("Slack access token not found", { teamId });

@@ -1,7 +1,6 @@
 import { sendSlackMatchNotification } from "@midday/app-store/slack/server";
 import { getInboxById, getTransactionById } from "@midday/db/queries";
 import { Notifications } from "@midday/notifications";
-import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
 import type { NotificationPayload } from "../../schemas/notifications";
 import { getDb } from "../../utils/db";
@@ -160,8 +159,6 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
     channelId: string;
     threadTs?: string;
   }): Promise<void> {
-    const supabase = createClient();
-
     this.logger.info("Sending Slack match notification", {
       inboxId: params.inboxId,
       transactionId: params.transactionId,
@@ -186,7 +183,6 @@ export class NotificationProcessor extends BaseProcessor<NotificationPayload> {
         matchType: params.matchType,
         slackChannelId: params.channelId,
         slackThreadTs: params.threadTs,
-        supabase,
       });
 
       this.logger.info("Slack match notification sent successfully", {
