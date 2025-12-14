@@ -145,16 +145,18 @@ app.openapi(
         });
       }
 
-      const params = new URLSearchParams({
-        client_id: slackClientId,
-        client_secret: slackClientSecret,
-        code: code,
-        redirect_uri: slackRedirectUri,
+      const response = await fetch("https://slack.com/api/oauth.v2.access", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          client_id: slackClientId,
+          client_secret: slackClientSecret,
+          code: code,
+          redirect_uri: slackRedirectUri,
+        }),
       });
-
-      const slackOauthAccessUrl = `https://slack.com/api/oauth.v2.access?${params.toString()}`;
-
-      const response = await fetch(slackOauthAccessUrl);
       const json = await response.json();
 
       const parsedJson = slackAuthResponseSchema.safeParse(json);

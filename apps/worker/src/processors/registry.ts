@@ -1,6 +1,7 @@
 import type { Job } from "bullmq";
 import { isDevelopment } from "../utils/env";
 import { documentProcessors } from "./documents";
+import { embeddingsProcessors } from "./embeddings";
 import { inboxProcessors } from "./inbox";
 import { ratesProcessors } from "./rates";
 import { transactionProcessors } from "./transactions";
@@ -16,6 +17,11 @@ const processors = new Map<
 
 // Register inbox processors
 for (const [jobName, processor] of Object.entries(inboxProcessors)) {
+  processors.set(jobName, processor);
+}
+
+// Register embeddings processors (separate queue to prevent worker starvation)
+for (const [jobName, processor] of Object.entries(embeddingsProcessors)) {
   processors.set(jobName, processor);
 }
 

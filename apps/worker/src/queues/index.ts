@@ -2,6 +2,8 @@ import type { Queue } from "bullmq";
 import type { QueueConfig } from "../types/queue-config";
 import { documentsQueue } from "./documents";
 import { documentsQueueConfig } from "./documents.config";
+import { embeddingsQueue } from "./embeddings";
+import { embeddingsQueueConfig } from "./embeddings.config";
 import { inboxProviderQueue, inboxQueue } from "./inbox";
 import { inboxProviderQueueConfig, inboxQueueConfig } from "./inbox.config";
 import { ratesQueue } from "./rates";
@@ -18,6 +20,7 @@ export const queueConfigs: QueueConfig[] = [
   inboxProviderQueueConfig,
   transactionsQueueConfig,
   documentsQueueConfig,
+  embeddingsQueueConfig,
   ratesQueueConfig,
 ];
 
@@ -31,6 +34,7 @@ export function getAllQueues(): Queue[] {
     inboxProviderQueue,
     transactionsQueue,
     documentsQueue,
+    embeddingsQueue,
     ratesQueue,
   ];
 }

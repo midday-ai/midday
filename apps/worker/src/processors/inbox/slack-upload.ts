@@ -115,7 +115,9 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
       ? file.name
       : `${file.name}${getExtensionFromMimeType(file.mimetype)}`;
 
-    const filePath = [teamId, "inbox", fileName];
+    // Include Slack file ID in path to prevent collisions when files have the same name
+    // Path: teamId/inbox/slackFileId/fileName
+    const filePath = [teamId, "inbox", file.id, fileName];
     const filePathStr = filePath.join("/");
 
     // Upload file to vault
@@ -470,7 +472,7 @@ Focus on what was purchased (e.g., "office supplies", "software subscription", "
           inboxId: inboxData.id,
           teamId,
         },
-        "inbox",
+        "embeddings",
         { timeout: 60000 }, // 60 second timeout
       );
 

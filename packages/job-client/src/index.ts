@@ -152,7 +152,11 @@ export async function triggerJobAndWait(
 
     const waitDuration = Date.now() - waitStartTime;
     const totalDuration = Date.now() - enqueueStartTime;
-    const result = job.returnvalue;
+
+    // Refetch the job to get the return value from Redis
+    // The original job object doesn't automatically sync after completion
+    const completedJob = await queue.getJob(job.id);
+    const result = completedJob?.returnvalue;
 
     logger.info("Job completed successfully", {
       jobName,
@@ -189,6 +193,7 @@ const KNOWN_QUEUES = [
   "inbox",
   "inbox-provider",
   "documents",
+  "embeddings",
   "rates",
 ];
 

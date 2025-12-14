@@ -25,7 +25,7 @@ export async function enqueueSlackUpload(payload: SlackUploadPayload) {
 }
 
 export async function enqueueEmbedInbox(payload: EmbedInboxPayload) {
-  return triggerJob("embed-inbox", payload, "inbox");
+  return triggerJob("embed-inbox", payload, "embeddings");
 }
 
 export async function enqueueBatchProcessMatching(

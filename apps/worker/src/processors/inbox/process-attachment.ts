@@ -441,7 +441,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
             inboxId: inboxData.id,
             teamId,
           },
-          "inbox",
+          "embeddings",
           { timeout: 60000 }, // 60 second timeout
         );
 
