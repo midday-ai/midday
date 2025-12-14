@@ -19,18 +19,19 @@ export const inboxAccountsRouter = createTRPCRouter({
   connect: protectedProcedure
     .input(connectInboxAccountSchema)
     .mutation(async ({ ctx: { db, teamId }, input }) => {
+      if (!teamId) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Team not found",
+        });
+      }
+
       try {
         const connector = new InboxConnector(input.provider, db);
 
-        // Build state with teamId for the callback
+        // Simple state - teamId comes from session in callback
         // source: "inbox" indicates this came from inbox settings (redirect to /inbox)
-        const state = JSON.stringify({
-          teamId,
-          provider: input.provider,
-          source: "inbox",
-        });
-
-        return connector.connect(state);
+        return connector.connect(`${input.provider}:inbox`);
       } catch (error) {
         console.error(error);
         throw new TRPCError({

@@ -51,14 +51,9 @@ app.openapi(
       });
     }
 
-    // Build state with teamId for the callback
-    const state = JSON.stringify({
-      teamId: session.teamId,
-      provider: "gmail",
-    });
-
+    // Simple state - teamId comes from session in callback
     const connector = new InboxConnector("gmail", db);
-    const url = await connector.connect(state);
+    const url = await connector.connect("gmail:apps");
 
     return c.json({ url });
   },

@@ -1,8 +1,7 @@
-import { publicMiddleware } from "@api/rest/middleware";
+import { protectedMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { InboxConnector } from "@midday/inbox/connector";
-import { parseOAuthState } from "@midday/inbox/utils";
 import { logger } from "@midday/logger";
 import { tasks } from "@trigger.dev/sdk";
 import { HTTPException } from "hono/http-exception";
@@ -14,17 +13,20 @@ const paramsSchema = z.object({
     param: { in: "query", name: "code", required: true },
     description: "OAuth authorization code from Microsoft",
   }),
-  state: z.string().openapi({
-    param: { in: "query", name: "state", required: true },
-    description: "OAuth state parameter containing team info",
-  }),
+  state: z
+    .string()
+    .optional()
+    .openapi({
+      param: { in: "query", name: "state", required: false },
+      description: "OAuth state parameter (e.g., 'outlook')",
+    }),
 });
 
 const errorResponseSchema = z.object({
   error: z.string(),
 });
 
-app.use("*", ...publicMiddleware);
+app.use("*", ...protectedMiddleware);
 
 app.openapi(
   createRoute({
@@ -70,17 +72,15 @@ app.openapi(
   }),
   async (c) => {
     const db = c.get("db");
+    const session = c.get("session");
     const query = c.req.valid("query");
     const { code, state } = query;
     const dashboardUrl =
       process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";
 
-    // Parse state
-    const parsedState = parseOAuthState(state);
-
-    if (!parsedState || parsedState.provider !== "outlook") {
-      throw new HTTPException(400, {
-        message: "Invalid state parameter. Please try connecting again.",
+    if (!session?.teamId) {
+      throw new HTTPException(401, {
+        message: "Team not found. Please log in and try again.",
       });
     }
 
@@ -89,7 +89,7 @@ app.openapi(
 
       const account = await connector.exchangeCodeForAccount({
         code,
-        teamId: parsedState.teamId,
+        teamId: session.teamId,
       });
 
       if (!account) {
@@ -101,8 +101,9 @@ app.openapi(
         id: account.id,
       });
 
-      // Redirect based on source
-      if (parsedState.source === "apps") {
+      // Redirect based on source in state (e.g., "outlook:apps" or just "outlook")
+      const source = state?.split(":")[1];
+      if (source === "apps") {
         return c.redirect(
           `${dashboardUrl}/all-done?event=app_oauth_completed`,
           302,

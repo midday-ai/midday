@@ -1,38 +1,5 @@
-import { z } from "zod";
-
 export function getInboxIdFromEmail(email: string) {
   return email.split("@").at(0);
-}
-
-// OAuth state schema for inbox provider callbacks
-const oauthStateSchema = z.object({
-  teamId: z.string(),
-  provider: z.enum(["gmail", "outlook"]),
-  source: z.enum(["inbox", "apps"]).optional(),
-});
-
-export interface ParsedOAuthState {
-  teamId: string;
-  provider: "gmail" | "outlook";
-  source: "inbox" | "apps";
-}
-
-/**
- * Parses the OAuth state parameter from the callback URL.
- * State contains teamId, provider, and optional source.
- */
-export function parseOAuthState(state: string): ParsedOAuthState | null {
-  try {
-    const parsed = oauthStateSchema.parse(JSON.parse(state));
-    return {
-      teamId: parsed.teamId,
-      provider: parsed.provider,
-      // Default to "apps" if no source specified (from install-url endpoints)
-      source: parsed.source ?? "apps",
-    };
-  } catch {
-    return null;
-  }
 }
 
 export function getInboxEmail(inboxId: string) {
