@@ -34,11 +34,11 @@ const embeddingsQueueOptions: QueueOptions = {
  */
 const embeddingsWorkerOptions: WorkerOptions = {
   connection: getRedisConnection(),
-  concurrency: 50, // Embeddings are fast, high concurrency is safe
+  concurrency: 20, // Embeddings are fast, high concurrency is safe
   lockDuration: 60000, // 1 minute - embeddings should be quick
   stalledInterval: 90000, // 1.5 minutes
   limiter: {
-    max: 100, // 100 jobs per second max
+    max: 10, // 10 jobs per second max
     duration: 1000,
   },
 };

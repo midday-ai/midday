@@ -79,89 +79,66 @@ export const getAppBySlackTeamId = async (
 ) => {
   const { slackTeamId, channelId } = params;
 
-  // Build query conditions
-  const conditions = [
+  // Base conditions for Slack app with matching team_id
+  const baseConditions = [
     eq(apps.appId, "slack"),
     sql`${apps.config}->>'team_id' = ${slackTeamId}`,
   ];
 
-  // If channel ID is provided, use it to find the exact integration
-  // Each Slack integration stores a channel_id during OAuth setup
+  // When channelId is provided, look for exact match only (no fallback)
   if (channelId) {
-    conditions.push(sql`${apps.config}->>'channel_id' = ${channelId}`);
-  }
-
-  // When channelId is not provided, check for multiple results first
-  // to warn about potential conflicts
-  if (!channelId) {
-    const allResults = await db
-      .select()
-      .from(apps)
-      .where(and(...conditions))
-      .orderBy(desc(apps.createdAt));
-
-    // Log warning if multiple integrations exist for the same Slack team
-    if (allResults.length > 1) {
-      console.warn(
-        `Multiple Slack integrations found for Slack team ${slackTeamId}. Consider using channel_id to disambiguate.`,
-        {
-          slackTeamId,
-          count: allResults.length,
-          teamIds: allResults.map((r) => r.teamId),
-          channelIds: allResults.map(
-            (r) =>
-              // @ts-expect-error - config is JSONB
-              r.config?.channel_id,
-          ),
-        },
-      );
-    }
-
-    // Return the most recent one
-    return allResults[0] || null;
-  }
-
-  // When channelId is provided, query with limit since we want exact match
-  const results = await db
-    .select()
-    .from(apps)
-    .where(and(...conditions))
-    .orderBy(desc(apps.createdAt))
-    .limit(1);
-
-  const result = results[0] || null;
-
-  // If no result with channel ID, fall back to just Slack team ID
-  // (in case channel_id wasn't stored or channel changed)
-  if (!result && channelId) {
-    const fallbackResults = await db
+    const results = await db
       .select()
       .from(apps)
       .where(
         and(
-          eq(apps.appId, "slack"),
-          sql`${apps.config}->>'team_id' = ${slackTeamId}`,
+          ...baseConditions,
+          sql`${apps.config}->>'channel_id' = ${channelId}`,
         ),
       )
-      .orderBy(desc(apps.createdAt))
       .limit(1);
 
-    const fallbackResult = fallbackResults[0] || null;
+    const result = results[0] || null;
 
-    if (fallbackResult) {
-      console.warn(
-        `Slack integration found by team_id only (channel_id ${channelId} didn't match). This may indicate the channel was changed or multiple teams share the same Slack workspace.`,
-        {
-          slackTeamId,
-          channelId,
-          middayTeamId: fallbackResult.teamId,
-        },
+    if (!result) {
+      // Log for debugging - but do NOT fall back to prevent cross-tenant issues
+      console.info(
+        `No Slack integration found for team_id=${slackTeamId} with channel_id=${channelId}`,
       );
-      return fallbackResult;
     }
+
+    return result;
   }
 
-  return result;
+  // When channelId is NOT provided, we must ensure there's no ambiguity
+  // Query all integrations for this Slack workspace
+  const allResults = await db
+    .select()
+    .from(apps)
+    .where(and(...baseConditions))
+    .orderBy(desc(apps.createdAt));
+
+  // SECURITY: If multiple integrations exist, we cannot safely determine which one
+  // to use without a channelId. Return null to fail safely.
+  if (allResults.length > 1) {
+    console.error(
+      "SECURITY: Multiple Slack integrations found for Slack team. Cannot determine correct Midday team without channel_id. Returning null to prevent cross-tenant issues.",
+      {
+        slackTeamId,
+        count: allResults.length,
+        middayTeamIds: allResults.map((r) => r.teamId),
+        channelIds: allResults.map(
+          (r) =>
+            // @ts-expect-error - config is JSONB
+            r.config?.channel_id,
+        ),
+      },
+    );
+    return null;
+  }
+
+  // Only one integration exists - safe to return
+  return allResults[0] || null;
 };
 
 export type DisconnectAppParams = {
