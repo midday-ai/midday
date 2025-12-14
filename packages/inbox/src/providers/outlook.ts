@@ -103,7 +103,7 @@ export class OutlookProvider implements OAuthProviderInterface {
         );
       }
 
-      const tokenResponse: MicrosoftTokenResponse = await response.json();
+      const tokenResponse = (await response.json()) as MicrosoftTokenResponse;
 
       if (!tokenResponse.access_token) {
         throw new Error("Failed to obtain access token.");
@@ -197,7 +197,7 @@ export class OutlookProvider implements OAuthProviderInterface {
         );
       }
 
-      const tokenResponse: MicrosoftTokenResponse = await response.json();
+      const tokenResponse = (await response.json()) as MicrosoftTokenResponse;
 
       if (!tokenResponse.access_token) {
         throw new Error("Failed to refresh access token");
