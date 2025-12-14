@@ -43,6 +43,7 @@ export const getApps = async (db: Database, teamId: string) => {
     .select({
       app_id: apps.appId,
       settings: apps.settings,
+      config: apps.config,
     })
     .from(apps)
     .where(eq(apps.teamId, teamId));

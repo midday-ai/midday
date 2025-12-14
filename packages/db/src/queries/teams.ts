@@ -53,6 +53,7 @@ export const getTeamByInboxId = async (db: Database, inboxId: string) => {
   const [result] = await db
     .select({
       id: teams.id,
+      name: teams.name,
       email: teams.email,
     })
     .from(teams)

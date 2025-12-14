@@ -120,7 +120,7 @@ export class WhatsAppClient {
       throw new Error(`Failed to get media URL: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as { url: string };
     return data.url;
   }
 

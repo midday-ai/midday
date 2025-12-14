@@ -102,25 +102,32 @@ export function ConnectWhatsApp({ showTrigger = true }: ConnectWhatsAppProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {showTrigger && (
-        <DialogTrigger asChild>
+      {showTrigger &&
+        (isInstalled ? (
           <SubmitButton
             className="px-6 py-4 w-full font-medium h-[40px]"
             variant="outline"
-            onClick={isInstalled ? handleDisconnect : undefined}
+            onClick={handleDisconnect}
             isSubmitting={disconnectMutation.isPending}
           >
             <div className="flex items-center space-x-2">
               <Icons.WhatsApp className="size-5 text-[#25D366]" />
-              <span>
-                {isInstalled
-                  ? `WhatsApp (${connections.length} connected)`
-                  : "Connect WhatsApp"}
-              </span>
+              <span>WhatsApp ({connections.length} connected)</span>
             </div>
           </SubmitButton>
-        </DialogTrigger>
-      )}
+        ) : (
+          <DialogTrigger asChild>
+            <Button
+              className="px-6 py-4 w-full font-medium h-[40px]"
+              variant="outline"
+            >
+              <div className="flex items-center space-x-2">
+                <Icons.WhatsApp className="size-5 text-[#25D366]" />
+                <span>Connect WhatsApp</span>
+              </div>
+            </Button>
+          </DialogTrigger>
+        ))}
 
       <DialogContent className="sm:max-w-[400px] p-0" hideClose>
         <div className="p-6 pb-0">

@@ -57,7 +57,7 @@ export function parseMatchButtonId(buttonId: string): {
   transactionId: string;
 } | null {
   const match = buttonId.match(/^(confirm|decline)_([^_]+)_(.+)$/);
-  if (!match) {
+  if (!match?.[1] || !match[2] || !match[3]) {
     return null;
   }
 

@@ -289,7 +289,7 @@ async function handleTextMessage(
     const client = createWhatsAppClient();
     await client.sendMessage(
       phoneNumber,
-      `Connected to ${team.name || "your team"} on Midday! You can now forward receipts and invoices by sending photos or PDFs.`,
+      `Connected to ${team?.name || "your team"} on Midday! You can now forward receipts and invoices by sending photos or PDFs.`,
     );
   } catch (error) {
     if (error instanceof Error && error.message.includes("already connected")) {
