@@ -2,6 +2,7 @@ import { protectedMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { InboxConnector } from "@midday/inbox/connector";
+import { encryptOAuthState } from "@midday/inbox/utils";
 import { HTTPException } from "hono/http-exception";
 
 const app = new OpenAPIHono<Context>();
@@ -51,9 +52,15 @@ app.openapi(
       });
     }
 
-    // Simple state - teamId comes from session in callback
+    // Encrypt state to prevent tampering with teamId
+    const state = encryptOAuthState({
+      teamId: session.teamId,
+      provider: "outlook",
+      source: "apps",
+    });
+
     const connector = new InboxConnector("outlook", db);
-    const url = await connector.connect("outlook:apps");
+    const url = await connector.connect(state);
 
     return c.json({ url });
   },

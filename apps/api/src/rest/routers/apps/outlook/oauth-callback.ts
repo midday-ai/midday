@@ -1,7 +1,8 @@
-import { protectedMiddleware } from "@api/rest/middleware";
+import { publicMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { InboxConnector } from "@midday/inbox/connector";
+import { decryptOAuthState } from "@midday/inbox/utils";
 import { logger } from "@midday/logger";
 import { tasks } from "@trigger.dev/sdk";
 import { HTTPException } from "hono/http-exception";
@@ -9,16 +10,23 @@ import { HTTPException } from "hono/http-exception";
 const app = new OpenAPIHono<Context>();
 
 const paramsSchema = z.object({
-  code: z.string().openapi({
-    param: { in: "query", name: "code", required: true },
-    description: "OAuth authorization code from Microsoft",
-  }),
-  state: z
+  code: z
     .string()
     .optional()
     .openapi({
-      param: { in: "query", name: "state", required: false },
-      description: "OAuth state parameter (e.g., 'outlook')",
+      param: { in: "query", name: "code", required: false },
+      description: "OAuth authorization code from Microsoft",
+    }),
+  state: z.string().openapi({
+    param: { in: "query", name: "state", required: true },
+    description: "Encrypted OAuth state parameter",
+  }),
+  error: z
+    .string()
+    .optional()
+    .openapi({
+      param: { in: "query", name: "error", required: false },
+      description: "OAuth error code if authorization failed",
     }),
 });
 
@@ -26,7 +34,7 @@ const errorResponseSchema = z.object({
   error: z.string(),
 });
 
-app.use("*", ...protectedMiddleware);
+app.use("*", ...publicMiddleware);
 
 app.openapi(
   createRoute({
@@ -72,15 +80,23 @@ app.openapi(
   }),
   async (c) => {
     const db = c.get("db");
-    const session = c.get("session");
     const query = c.req.valid("query");
-    const { code, state } = query;
+    const { code, state, error } = query;
     const dashboardUrl =
       process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";
 
-    if (!session?.teamId) {
-      throw new HTTPException(401, {
-        message: "Team not found. Please log in and try again.",
+    // Handle OAuth errors (user denied access, etc.)
+    if (error || !code) {
+      logger.info("Outlook OAuth error or cancelled", { error });
+      return c.redirect(`${dashboardUrl}/inbox?connected=false`, 302);
+    }
+
+    // Decrypt and validate state - this ensures teamId hasn't been tampered with
+    const parsedState = decryptOAuthState(state);
+
+    if (!parsedState || parsedState.provider !== "outlook") {
+      throw new HTTPException(400, {
+        message: "Invalid or expired state. Please try connecting again.",
       });
     }
 
@@ -89,7 +105,7 @@ app.openapi(
 
       const account = await connector.exchangeCodeForAccount({
         code,
-        teamId: session.teamId,
+        teamId: parsedState.teamId,
       });
 
       if (!account) {
@@ -101,9 +117,8 @@ app.openapi(
         id: account.id,
       });
 
-      // Redirect based on source in state (e.g., "outlook:apps" or just "outlook")
-      const source = state?.split(":")[1];
-      if (source === "apps") {
+      // Redirect based on source
+      if (parsedState.source === "apps") {
         return c.redirect(
           `${dashboardUrl}/all-done?event=app_oauth_completed`,
           302,

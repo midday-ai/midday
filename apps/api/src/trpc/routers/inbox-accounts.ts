@@ -8,6 +8,7 @@ import {
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { deleteInboxAccount, getInboxAccounts } from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
+import { encryptOAuthState } from "@midday/inbox/utils";
 import { schedules, tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
@@ -27,11 +28,15 @@ export const inboxAccountsRouter = createTRPCRouter({
       }
 
       try {
-        const connector = new InboxConnector(input.provider, db);
+        // Encrypt state to prevent tampering with teamId
+        const state = encryptOAuthState({
+          teamId,
+          provider: input.provider,
+          source: "inbox",
+        });
 
-        // Simple state - teamId comes from session in callback
-        // source: "inbox" indicates this came from inbox settings (redirect to /inbox)
-        return connector.connect(`${input.provider}:inbox`);
+        const connector = new InboxConnector(input.provider, db);
+        return connector.connect(state);
       } catch (error) {
         console.error(error);
         throw new TRPCError({
