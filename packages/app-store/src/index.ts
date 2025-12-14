@@ -7,6 +7,7 @@ import raycastApp from "./raycast/config";
 // Import client config for dashboard (includes images)
 import slackApp from "./slack/config-client";
 import vismaApp from "./visma/config";
+import whatsappApp from "./whatsapp/config-client";
 import xeroApp from "./xero/config";
 import zapierApp from "./zapier/config";
 
@@ -14,6 +15,7 @@ export const apps = [
   gmailApp,
   outlookApp,
   slackApp,
+  whatsappApp,
   raycastApp,
   quickBooksApp,
   xeroApp,

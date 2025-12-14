@@ -210,3 +210,173 @@ export const updateAppSettings = async (
 
   return result;
 };
+
+// WhatsApp connection types
+export type WhatsAppConnection = {
+  phoneNumber: string;
+  displayName?: string;
+  connectedAt: string;
+};
+
+type WhatsAppConfig = {
+  connections?: WhatsAppConnection[];
+};
+
+/**
+ * Find team by WhatsApp phone number
+ * Searches all WhatsApp app installations for a matching phone number in connections
+ */
+export const getAppByWhatsAppNumber = async (
+  db: Database,
+  phoneNumber: string,
+) => {
+  const results = await db
+    .select()
+    .from(apps)
+    .where(
+      and(
+        eq(apps.appId, "whatsapp"),
+        sql`${apps.config}->'connections' @> ${JSON.stringify([{ phoneNumber }])}::jsonb`,
+      ),
+    );
+
+  return results[0] || null;
+};
+
+export type AddWhatsAppConnectionParams = {
+  teamId: string;
+  phoneNumber: string;
+  displayName?: string;
+};
+
+/**
+ * Add a WhatsApp connection to a team
+ * Creates the WhatsApp app if it doesn't exist, or adds to existing connections
+ */
+export const addWhatsAppConnection = async (
+  db: Database,
+  params: AddWhatsAppConnectionParams,
+) => {
+  const { teamId, phoneNumber, displayName } = params;
+
+  // Check if this phone number is already connected to any team
+  const existingConnection = await getAppByWhatsAppNumber(db, phoneNumber);
+  if (existingConnection) {
+    // If already connected to this team, just return success
+    if (existingConnection.teamId === teamId) {
+      return existingConnection;
+    }
+    // If connected to a different team, throw error
+    throw new Error("Phone number already connected to another team");
+  }
+
+  // Get existing WhatsApp app for this team
+  const existingApp = await getAppByAppId(db, { appId: "whatsapp", teamId });
+
+  const newConnection: WhatsAppConnection = {
+    phoneNumber,
+    displayName,
+    connectedAt: new Date().toISOString(),
+  };
+
+  if (existingApp) {
+    // Add to existing connections
+    const config = (existingApp.config as WhatsAppConfig) || {};
+    const connections = config.connections || [];
+
+    const [result] = await db
+      .update(apps)
+      .set({
+        config: {
+          ...config,
+          connections: [...connections, newConnection],
+        },
+      })
+      .where(and(eq(apps.appId, "whatsapp"), eq(apps.teamId, teamId)))
+      .returning();
+
+    return result;
+  }
+
+  // Create new WhatsApp app with this connection
+  const [result] = await db
+    .insert(apps)
+    .values({
+      teamId,
+      appId: "whatsapp",
+      config: {
+        connections: [newConnection],
+      },
+      settings: [
+        { id: "receipts", label: "Receipt Processing", value: true },
+        { id: "matches", label: "Match Notifications", value: true },
+      ],
+    })
+    .returning();
+
+  return result;
+};
+
+export type RemoveWhatsAppConnectionParams = {
+  teamId: string;
+  phoneNumber: string;
+};
+
+/**
+ * Remove a WhatsApp connection from a team
+ */
+export const removeWhatsAppConnection = async (
+  db: Database,
+  params: RemoveWhatsAppConnectionParams,
+) => {
+  const { teamId, phoneNumber } = params;
+
+  const existingApp = await getAppByAppId(db, { appId: "whatsapp", teamId });
+
+  if (!existingApp) {
+    throw new Error("WhatsApp app not found for this team");
+  }
+
+  const config = (existingApp.config as WhatsAppConfig) || {};
+  const connections = config.connections || [];
+
+  const updatedConnections = connections.filter(
+    (c) => c.phoneNumber !== phoneNumber,
+  );
+
+  // If no connections left, delete the app entirely
+  if (updatedConnections.length === 0) {
+    await db
+      .delete(apps)
+      .where(and(eq(apps.appId, "whatsapp"), eq(apps.teamId, teamId)));
+    return null;
+  }
+
+  // Update with remaining connections
+  const [result] = await db
+    .update(apps)
+    .set({
+      config: {
+        ...config,
+        connections: updatedConnections,
+      },
+    })
+    .where(and(eq(apps.appId, "whatsapp"), eq(apps.teamId, teamId)))
+    .returning();
+
+  return result;
+};
+
+/**
+ * Get all WhatsApp connections for a team
+ */
+export const getWhatsAppConnections = async (db: Database, teamId: string) => {
+  const app = await getAppByAppId(db, { appId: "whatsapp", teamId });
+
+  if (!app) {
+    return [];
+  }
+
+  const config = (app.config as WhatsAppConfig) || {};
+  return config.connections || [];
+};

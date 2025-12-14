@@ -1,9 +1,15 @@
 import {
   disconnectAppSchema,
+  removeWhatsAppConnectionSchema,
   updateAppSettingsSchema,
 } from "@api/schemas/apps";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import { disconnectApp, getApps, updateAppSettings } from "@midday/db/queries";
+import {
+  disconnectApp,
+  getApps,
+  removeWhatsAppConnection,
+  updateAppSettings,
+} from "@midday/db/queries";
 
 export const appsRouter = createTRPCRouter({
   get: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
@@ -27,6 +33,17 @@ export const appsRouter = createTRPCRouter({
         appId,
         teamId: teamId!,
         option,
+      });
+    }),
+
+  removeWhatsAppConnection: protectedProcedure
+    .input(removeWhatsAppConnectionSchema)
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      const { phoneNumber } = input;
+
+      return removeWhatsAppConnection(db, {
+        teamId: teamId!,
+        phoneNumber,
       });
     }),
 });

@@ -45,7 +45,7 @@ const inboxWorkerOptions: WorkerOptions = {
 /**
  * Inbox queue configuration
  * Main queue for inbox processing jobs
- * Jobs: batch-process-matching, match-transactions-bidirectional, process-attachment, slack-upload
+ * Jobs: batch-process-matching, match-transactions-bidirectional, process-attachment, slack-upload, whatsapp-upload
  */
 export const inboxQueueConfig: QueueConfig = {
   name: "inbox",
