@@ -38,8 +38,8 @@ export class InboxConnector extends Connector {
     }
   }
 
-  async connect(): Promise<string> {
-    return this.#provider.getAuthUrl();
+  async connect(state?: string): Promise<string> {
+    return this.#provider.getAuthUrl(state);
   }
 
   async exchangeCodeForAccount(
@@ -165,7 +165,7 @@ export class InboxConnector extends Connector {
       // Check for invalid_grant which indicates refresh token is invalid
       if (errorMessage.includes("invalid_grant")) {
         throw new Error(
-          "Refresh token is invalid or expired. The user needs to re-authenticate their Gmail account.",
+          `Refresh token is invalid or expired. The user needs to re-authenticate their ${this.#providerName} account.`,
         );
       }
 

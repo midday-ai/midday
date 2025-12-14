@@ -63,13 +63,13 @@ export class OutlookProvider implements OAuthProviderInterface {
     this.#accountId = accountId;
   }
 
-  async getAuthUrl(): Promise<string> {
+  async getAuthUrl(state?: string): Promise<string> {
     const params = new URLSearchParams({
       client_id: this.#clientId,
       response_type: "code",
       redirect_uri: this.#redirectUri,
       scope: this.#scopes.join(" "),
-      state: "outlook",
+      state: state ?? "outlook",
       prompt: "consent",
       response_mode: "query",
     });
@@ -453,7 +453,7 @@ export class OutlookProvider implements OAuthProviderInterface {
         const isFileAttachment =
           att["@odata.type"] === "#microsoft.graph.fileAttachment";
 
-        if (isPdf && isFileAttachment) {
+        if (att.name && isPdf && isFileAttachment) {
           // Fetch the individual attachment to get contentBytes
           const fullAttachment = await this.#graphClient!.api(
             `/me/messages/${message.id}/attachments/${att.id}`,

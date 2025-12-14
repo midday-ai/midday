@@ -78,12 +78,12 @@ export class GmailProvider implements OAuthProviderInterface {
     this.#accountId = accountId;
   }
 
-  async getAuthUrl(): Promise<string> {
+  async getAuthUrl(state?: string): Promise<string> {
     return this.#oauth2Client.generateAuthUrl({
       access_type: "offline",
       prompt: "consent",
       scope: this.#scopes,
-      state: "gmail",
+      state: state ?? "gmail",
     });
   }
 

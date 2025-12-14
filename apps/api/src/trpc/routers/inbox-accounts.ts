@@ -18,11 +18,19 @@ export const inboxAccountsRouter = createTRPCRouter({
 
   connect: protectedProcedure
     .input(connectInboxAccountSchema)
-    .mutation(async ({ ctx: { db }, input }) => {
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
       try {
         const connector = new InboxConnector(input.provider, db);
 
-        return connector.connect();
+        // Build state with teamId for the callback
+        // source: "inbox" indicates this came from inbox settings (redirect to /inbox)
+        const state = JSON.stringify({
+          teamId,
+          provider: input.provider,
+          source: "inbox",
+        });
+
+        return connector.connect(state);
       } catch (error) {
         console.error(error);
         throw new TRPCError({

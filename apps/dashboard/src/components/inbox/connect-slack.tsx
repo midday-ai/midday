@@ -42,7 +42,7 @@ export function ConnectSlack() {
       isSubmitting={isLoading || disconnectMutation.isPending}
     >
       <div className="flex items-center space-x-2">
-        <Icons.Slack />
+        <Icons.Slack className="size-5" />
         <span>{isInstalled ? "Disconnect Slack" : "Connect Slack"}</span>
       </div>
     </SubmitButton>
