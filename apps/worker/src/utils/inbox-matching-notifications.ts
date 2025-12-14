@@ -5,7 +5,11 @@ import {
   hasSuggestion,
 } from "@midday/db/queries";
 import type { MatchResult } from "@midday/db/queries";
+import { createLoggerWithContext } from "@midday/logger";
 import { Notifications } from "@midday/notifications";
+import { sendToProviders } from "./provider-notifications";
+
+const logger = createLoggerWithContext("inbox-matching-notifications");
 
 export async function triggerMatchingNotification(params: {
   db: Database;
@@ -39,7 +43,7 @@ export async function triggerMatchingNotification(params: {
     ]);
 
     if (!inboxItem || !transactionItem) {
-      console.warn("Missing data for notification", {
+      logger.warn("Missing data for notification", {
         hasInbox: !!inboxItem,
         hasTransaction: !!transactionItem,
       });
@@ -59,42 +63,76 @@ export async function triggerMatchingNotification(params: {
 
     const notifications = new Notifications(db);
 
+    // Build common payload for both notification types
+    const matchPayload = {
+      inboxId,
+      transactionId: result.suggestion.transactionId,
+      documentName,
+      documentAmount: inboxItem.amount || 0,
+      documentCurrency: inboxItem.currency || "USD",
+      transactionAmount: transactionItem.amount || 0,
+      transactionCurrency: transactionItem.currency || "USD",
+      transactionName,
+      confidenceScore: result.suggestion.confidenceScore,
+      isCrossCurrency,
+    };
+
+    // Get inbox metadata for provider-specific channel info
+    const inboxMeta = inboxItem.meta as
+      | {
+          source?: string;
+          sourceMetadata?: {
+            channelId?: string;
+            threadTs?: string;
+            messageTs?: string;
+          };
+        }
+      | undefined;
+
     if (result.action === "auto_matched") {
       // Trigger auto-matched notification
       await notifications.create("inbox_auto_matched", teamId, {
-        inboxId,
-        transactionId: result.suggestion.transactionId,
-        documentName,
-        documentAmount: inboxItem.amount || 0,
-        documentCurrency: inboxItem.currency || "USD",
-        transactionAmount: transactionItem.amount || 0,
-        transactionCurrency: transactionItem.currency || "USD",
-        transactionName,
-        confidenceScore: result.suggestion.confidenceScore,
+        ...matchPayload,
         matchType: "auto_matched",
-        isCrossCurrency,
       });
+
+      // Send to external providers (Slack)
+      await sendToProviders(
+        db,
+        teamId,
+        "match",
+        {
+          ...matchPayload,
+          matchType: "auto_matched" as const,
+        },
+        { inboxMeta },
+      );
     } else if (result.action === "suggestion_created") {
+      const matchType =
+        result.suggestion.matchType === "high_confidence"
+          ? "high_confidence"
+          : "suggested";
+
       // All suggestions use inbox_needs_review, but with different matchType
       await notifications.create("inbox_needs_review", teamId, {
-        inboxId,
-        transactionId: result.suggestion.transactionId,
-        documentName,
-        documentAmount: inboxItem.amount || 0,
-        documentCurrency: inboxItem.currency || "USD",
-        transactionAmount: transactionItem.amount || 0,
-        transactionCurrency: transactionItem.currency || "USD",
-        transactionName,
-        confidenceScore: result.suggestion.confidenceScore,
-        matchType:
-          result.suggestion.matchType === "high_confidence"
-            ? "high_confidence"
-            : "suggested",
-        isCrossCurrency,
+        ...matchPayload,
+        matchType,
       });
+
+      // Send to external providers (Slack)
+      await sendToProviders(
+        db,
+        teamId,
+        "match",
+        {
+          ...matchPayload,
+          matchType: matchType as "high_confidence" | "suggested",
+        },
+        { inboxMeta },
+      );
     }
   } catch (error) {
-    console.error("Failed to trigger matching notification", {
+    logger.error("Failed to trigger matching notification", {
       teamId,
       inboxId,
       error: error instanceof Error ? error.message : "Unknown error",

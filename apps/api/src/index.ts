@@ -36,6 +36,9 @@ app.use(
       "x-user-timezone",
       "x-user-country",
       "x-force-primary",
+      // Slack webhook headers
+      "x-slack-signature",
+      "x-slack-request-timestamp",
     ],
     exposeHeaders: [
       "Content-Length",

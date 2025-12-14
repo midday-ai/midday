@@ -25,7 +25,6 @@ import {
 } from "@midday/db/queries";
 import { formatAmountValue } from "@midday/import";
 import { triggerJob } from "@midday/job-client";
-import type { EmbedTransactionPayload } from "@midday/jobs/schema";
 
 export const transactionsRouter = createTRPCRouter({
   get: protectedProcedure

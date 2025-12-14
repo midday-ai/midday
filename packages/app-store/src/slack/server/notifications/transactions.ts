@@ -1,6 +1,7 @@
+import { logger } from "@midday/logger";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
-import { createSlackWebClient } from "../client";
+import { createSlackWebClient, ensureBotInChannel } from "../client";
 
 const transactionSchema = z.object({
   amount: z.string(),
@@ -36,9 +37,12 @@ export async function sendSlackTransactionNotifications({
   });
 
   try {
+    // Ensure bot is in channel before sending message (auto-joins public channels)
+    await ensureBotInChannel({ client, channelId: data.config.channel_id });
+
     await client.chat.postMessage({
       channel: data.config.channel_id,
-
+      text: `You got ${transactions.length} new transaction${transactions.length === 1 ? "" : "s"}`,
       blocks: [
         {
           type: "section",
@@ -83,6 +87,10 @@ export async function sendSlackTransactionNotifications({
       ],
     });
   } catch (error) {
-    console.error(error);
+    logger.error("Failed to send Slack transaction notifications", {
+      error: error instanceof Error ? error.message : String(error),
+      teamId,
+      transactionCount: transactions.length,
+    });
   }
 }
