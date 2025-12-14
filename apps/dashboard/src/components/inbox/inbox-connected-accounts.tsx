@@ -151,7 +151,11 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
       <div className="flex items-center space-x-4">
         <Avatar className="size-[34px]">
           <AvatarFallback className="bg-white border border-border">
-            <Icons.Gmail className="size-5" />
+            {account.provider === "outlook" ? (
+              <Icons.Outlook className="size-5" />
+            ) : (
+              <Icons.Gmail className="size-5" />
+            )}
           </AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
@@ -166,9 +170,9 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
                 </TooltipTrigger>
                 <TooltipContent className="max-w-[300px] text-xs">
                   <p>
-                    Account access has expired. Google typically expires access
-                    tokens after 6 months as part of their security practices.
-                    Simply reconnect to restore functionality.
+                    Account access has expired. Email providers typically expire
+                    access tokens periodically as part of their security
+                    practices. Simply reconnect to restore functionality.
                   </p>
                 </TooltipContent>
               </Tooltip>
@@ -192,7 +196,11 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => connectMutation.mutate({ provider: "gmail" })}
+            onClick={() =>
+              connectMutation.mutate({
+                provider: account.provider as "gmail" | "outlook",
+              })
+            }
             className="text-xs"
           >
             Reconnect

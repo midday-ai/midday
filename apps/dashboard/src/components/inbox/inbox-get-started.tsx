@@ -2,6 +2,7 @@
 
 import { revalidateInbox } from "@/actions/revalidate-action";
 import { ConnectGmail } from "@/components/inbox/connect-gmail";
+import { ConnectOutlook } from "@/components/inbox/connect-outlook";
 import { ConnectSlack } from "@/components/inbox/connect-slack";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useRealtime } from "@/hooks/use-realtime";
@@ -81,32 +82,33 @@ export function InboxGetStarted() {
               <p className="pb-6 text-sm text-[#878787]">
                 Connect your email or messaging apps to automatically import
                 receipts and invoices. We'll extract the data and match it to
-                your transactions seamlessly.
+                your transactions.
               </p>
             </div>
 
             <div className="pointer-events-auto flex flex-col space-y-4">
               <ConnectGmail />
-              <ConnectSlack />
+              <ConnectOutlook />
 
-              {user?.team?.inboxId && (
-                <Accordion
-                  type="single"
-                  collapsible
-                  className="border-t-[1px] pt-2 mt-6"
-                >
-                  <AccordionItem value="item-1" className="border-0">
-                    <AccordionTrigger className="justify-center space-x-2 flex text-sm">
-                      <span>More options</span>
-                    </AccordionTrigger>
-                    <AccordionContent className="mt-4">
-                      <div className="flex flex-col space-y-4">
+              <Accordion
+                type="single"
+                collapsible
+                className="border-t-[1px] pt-2 mt-6"
+              >
+                <AccordionItem value="item-1" className="border-0">
+                  <AccordionTrigger className="justify-center space-x-2 flex text-sm">
+                    <span>More options</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="mt-4">
+                    <div className="flex flex-col space-y-4">
+                      <ConnectSlack />
+                      {user?.team?.inboxId && (
                         <CopyInput value={getInboxEmail(user.team.inboxId)} />
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              )}
+                      )}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </div>
 
             <div className="text-center mt-8">

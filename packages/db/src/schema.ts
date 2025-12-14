@@ -79,6 +79,7 @@ export const documentProcessingStatusEnum = pgEnum(
 
 export const inboxAccountProvidersEnum = pgEnum("inbox_account_providers", [
   "gmail",
+  "outlook",
 ]);
 
 export const inboxAccountStatusEnum = pgEnum("inbox_account_status", [

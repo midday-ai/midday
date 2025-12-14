@@ -16,9 +16,13 @@
     "test": "bun test src"
   },
   "dependencies": {
+    "@azure/msal-node": "^3.8.4",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
+    "@midday/db": "workspace:*",
     "@midday/encryption": "workspace:*",
     "@midday/supabase": "workspace:*",
-    "googleapis": "^166.0.0",
+    "@midday/utils": "workspace:*",
+    "googleapis": "^168.0.0",
     "zod": "^4.1.13"
   }
 }

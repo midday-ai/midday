@@ -2,6 +2,7 @@ import type { Database } from "@midday/db/client";
 import { getInboxAccountById, upsertInboxAccount } from "@midday/db/queries";
 import { decrypt, encrypt } from "@midday/encryption";
 import { GmailProvider } from "./providers/gmail";
+import { OutlookProvider } from "./providers/outlook";
 import {
   type Account,
   type Attachment,
@@ -27,6 +28,10 @@ export class InboxConnector extends Connector {
       case "gmail":
         this.#provider = new GmailProvider(this.#db);
         this.#providerName = "gmail";
+        break;
+      case "outlook":
+        this.#provider = new OutlookProvider(this.#db);
+        this.#providerName = "outlook";
         break;
       default:
         throw new Error(`Unsupported provider: ${provider}`);
