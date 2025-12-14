@@ -1,9 +1,3 @@
-import {
-  type AuthorizationCodeRequest,
-  type AuthorizationUrlRequest,
-  ConfidentialClientApplication,
-  type Configuration,
-} from "@azure/msal-node";
 import { Client } from "@microsoft/microsoft-graph-client";
 import type { Database } from "@midday/db/client";
 import { updateInboxAccount } from "@midday/db/queries";
@@ -14,44 +8,34 @@ import type {
   Attachment,
   EmailAttachment,
   GetAttachmentsOptions,
+  MicrosoftTokenResponse,
   OAuthProviderInterface,
+  OutlookAttachment,
+  OutlookMessage,
   Tokens,
   UserInfo,
 } from "./types";
 
-interface OutlookMessage {
-  id: string;
-  from?: {
-    emailAddress?: {
-      address?: string;
-    };
-  };
-  hasAttachments?: boolean;
-}
-
-interface OutlookAttachment {
-  id: string;
-  name: string;
-  contentType: string;
-  size: number;
-  contentBytes?: string;
-  "@odata.type"?: string;
-}
-
 export class OutlookProvider implements OAuthProviderInterface {
-  #msalClient: ConfidentialClientApplication;
   #graphClient: Client | null = null;
   #accountId: string | null = null;
   #db: Database;
   #accessToken: string | null = null;
   #refreshToken: string | null = null;
-  #expiryDate: number | null = null;
+
+  #clientId: string;
+  #clientSecret: string;
+  #redirectUri: string;
 
   #scopes = [
     "https://graph.microsoft.com/Mail.Read",
     "https://graph.microsoft.com/User.Read",
     "offline_access",
   ];
+
+  #tokenEndpoint = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
+  #authorizeEndpoint =
+    "https://login.microsoftonline.com/common/oauth2/v2.0/authorize";
 
   constructor(db: Database) {
     this.#db = db;
@@ -66,15 +50,13 @@ export class OutlookProvider implements OAuthProviderInterface {
       );
     }
 
-    const msalConfig: Configuration = {
-      auth: {
-        clientId,
-        clientSecret,
-        authority: "https://login.microsoftonline.com/common",
-      },
-    };
+    if (!redirectUri) {
+      throw new Error("OUTLOOK_REDIRECT_URI must be set");
+    }
 
-    this.#msalClient = new ConfidentialClientApplication(msalConfig);
+    this.#clientId = clientId;
+    this.#clientSecret = clientSecret;
+    this.#redirectUri = redirectUri;
   }
 
   setAccountId(accountId: string): void {
@@ -82,56 +64,60 @@ export class OutlookProvider implements OAuthProviderInterface {
   }
 
   async getAuthUrl(): Promise<string> {
-    const redirectUri = process.env.OUTLOOK_REDIRECT_URI;
-
-    if (!redirectUri) {
-      throw new Error("OUTLOOK_REDIRECT_URI must be set");
-    }
-
-    const authCodeUrlParameters: AuthorizationUrlRequest = {
-      scopes: this.#scopes,
-      redirectUri,
+    const params = new URLSearchParams({
+      client_id: this.#clientId,
+      response_type: "code",
+      redirect_uri: this.#redirectUri,
+      scope: this.#scopes.join(" "),
       state: "outlook",
       prompt: "consent",
-    };
+      response_mode: "query",
+    });
 
-    return this.#msalClient.getAuthCodeUrl(authCodeUrlParameters);
+    return `${this.#authorizeEndpoint}?${params.toString()}`;
   }
 
   async exchangeCodeForTokens(code: string): Promise<Tokens> {
-    const redirectUri = process.env.OUTLOOK_REDIRECT_URI;
-
-    if (!redirectUri) {
-      throw new Error("OUTLOOK_REDIRECT_URI must be set");
-    }
-
     try {
-      const tokenRequest: AuthorizationCodeRequest = {
+      const params = new URLSearchParams({
+        client_id: this.#clientId,
+        client_secret: this.#clientSecret,
         code,
-        scopes: this.#scopes,
-        redirectUri,
-      };
+        redirect_uri: this.#redirectUri,
+        grant_type: "authorization_code",
+        scope: this.#scopes.join(" "),
+      });
 
-      const response = await this.#msalClient.acquireTokenByCode(tokenRequest);
+      const response = await fetch(this.#tokenEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: params.toString(),
+      });
 
-      if (!response?.accessToken) {
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(
+          `Token exchange failed: ${response.status} ${errorData}`,
+        );
+      }
+
+      const tokenResponse: MicrosoftTokenResponse = await response.json();
+
+      if (!tokenResponse.access_token) {
         throw new Error("Failed to obtain access token.");
       }
 
-      // Calculate expiry date from expiresOn
-      const expiryDate = response.expiresOn
-        ? new Date(response.expiresOn).getTime()
-        : Date.now() + 3600 * 1000;
+      // Calculate expiry date from expires_in (seconds from now)
+      const expiryDate = Date.now() + tokenResponse.expires_in * 1000;
 
       const validTokens: Tokens = {
-        access_token: response.accessToken,
-        // MSAL doesn't directly expose refresh_token in the response for security reasons
-        // but it handles refresh internally. We store what we have for our token management
-        refresh_token: (response as unknown as { refreshToken?: string })
-          .refreshToken,
+        access_token: tokenResponse.access_token,
+        refresh_token: tokenResponse.refresh_token,
         expiry_date: expiryDate,
-        scope: response.scopes?.join(" "),
-        token_type: "Bearer",
+        scope: tokenResponse.scope,
+        token_type: tokenResponse.token_type,
       };
 
       this.setTokens(validTokens);
@@ -150,7 +136,6 @@ export class OutlookProvider implements OAuthProviderInterface {
 
     this.#accessToken = tokens.access_token;
     this.#refreshToken = tokens.refresh_token ?? null;
-    this.#expiryDate = tokens.expiry_date ?? null;
 
     // Initialize Microsoft Graph client with the access token
     this.#graphClient = Client.init({
@@ -172,38 +157,60 @@ export class OutlookProvider implements OAuthProviderInterface {
     }
 
     try {
-      // MSAL handles token refresh through the silent flow
-      // We need to use acquireTokenByRefreshToken for confidential clients
-      const response = await (
-        this.#msalClient as unknown as {
-          acquireTokenByRefreshToken: (params: {
-            refreshToken: string;
-            scopes: string[];
-          }) => Promise<{
-            accessToken: string;
-            expiresOn?: Date;
-            refreshToken?: string;
-          }>;
-        }
-      ).acquireTokenByRefreshToken({
-        refreshToken: this.#refreshToken,
-        scopes: this.#scopes,
+      const params = new URLSearchParams({
+        client_id: this.#clientId,
+        client_secret: this.#clientSecret,
+        refresh_token: this.#refreshToken,
+        grant_type: "refresh_token",
+        scope: this.#scopes.join(" "),
       });
 
-      if (!response?.accessToken) {
+      const response = await fetch(this.#tokenEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: params.toString(),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+
+        // Check for specific Microsoft identity platform errors
+        if (
+          errorData.includes("invalid_grant") ||
+          errorData.includes("AADSTS700082") ||
+          errorData.includes("AADSTS50076")
+        ) {
+          throw new Error(
+            "Refresh token is invalid or expired. Re-authentication required.",
+          );
+        }
+        if (errorData.includes("invalid_request")) {
+          throw new Error(
+            "Invalid refresh token request. Check OAuth2 client configuration.",
+          );
+        }
+
+        throw new Error(
+          `Token refresh failed: ${response.status} ${errorData}`,
+        );
+      }
+
+      const tokenResponse: MicrosoftTokenResponse = await response.json();
+
+      if (!tokenResponse.access_token) {
         throw new Error("Failed to refresh access token");
       }
 
-      const expiryDate = response.expiresOn
-        ? new Date(response.expiresOn).getTime()
-        : Date.now() + 3600 * 1000;
+      // Calculate expiry date from expires_in (seconds from now)
+      const expiryDate = Date.now() + tokenResponse.expires_in * 1000;
 
       // Update tokens in memory
-      this.#accessToken = response.accessToken;
-      if (response.refreshToken) {
-        this.#refreshToken = response.refreshToken;
+      this.#accessToken = tokenResponse.access_token;
+      if (tokenResponse.refresh_token) {
+        this.#refreshToken = tokenResponse.refresh_token;
       }
-      this.#expiryDate = expiryDate;
 
       // Re-initialize Graph client with new token
       this.#graphClient = Client.init({
@@ -213,33 +220,27 @@ export class OutlookProvider implements OAuthProviderInterface {
       });
 
       // Update tokens in database
-      if (response.refreshToken) {
+      if (tokenResponse.refresh_token) {
         await updateInboxAccount(this.#db, {
           id: this.#accountId,
-          refreshToken: encrypt(response.refreshToken),
+          refreshToken: encrypt(tokenResponse.refresh_token),
         });
       }
 
       await updateInboxAccount(this.#db, {
         id: this.#accountId,
-        accessToken: encrypt(response.accessToken),
+        accessToken: encrypt(tokenResponse.access_token),
         expiryDate: new Date(expiryDate).toISOString(),
       });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Unknown error";
 
+      // Re-throw if it's already a formatted error
       if (
-        message.includes("invalid_grant") ||
-        message.includes("AADSTS700082")
+        message.includes("Re-authentication required") ||
+        message.includes("Check OAuth2 client configuration")
       ) {
-        throw new Error(
-          "Refresh token is invalid or expired. Re-authentication required.",
-        );
-      }
-      if (message.includes("invalid_request")) {
-        throw new Error(
-          "Invalid refresh token request. Check OAuth2 client configuration.",
-        );
+        throw error;
       }
 
       throw new Error(`Token refresh failed: ${message}`);
@@ -272,6 +273,10 @@ export class OutlookProvider implements OAuthProviderInterface {
 
     const { maxResults = 50, lastAccessed, fullSync = false } = options;
 
+    // Get the current user's email to exclude self-sent messages
+    const userInfo = await this.getUserInfo();
+    const userEmail = userInfo?.email?.toLowerCase();
+
     // Build date filter based on sync type and lastAccessed
     let dateFilter: string;
     if (fullSync || !lastAccessed) {
@@ -287,17 +292,24 @@ export class OutlookProvider implements OAuthProviderInterface {
     }
 
     try {
-      // Query for messages with attachments, not from self
+      // Query for messages with attachments
       // Microsoft Graph uses OData query syntax
+      // Note: We filter out self-sent messages in JavaScript because Microsoft Graph
+      // doesn't support complex OData filters with nested properties like from/emailAddress/address
+      // IMPORTANT: Properties in $orderby must appear FIRST in $filter to avoid
+      // "The restriction or sort order is too complex" error
       const allMessages: OutlookMessage[] = [];
       let nextLink: string | undefined;
       const maxPagesToFetch = 3;
       let pagesFetched = 0;
 
+      // receivedDateTime must come first since we order by it
+      const filter = `${dateFilter} and hasAttachments eq true`;
+
       // Initial request
       let response = await this.#graphClient
         .api("/me/messages")
-        .filter(`hasAttachments eq true and ${dateFilter}`)
+        .filter(filter)
         .select("id,from,hasAttachments")
         .top(Math.min(maxResults, 50))
         .orderby("receivedDateTime desc")
@@ -324,8 +336,14 @@ export class OutlookProvider implements OAuthProviderInterface {
         pagesFetched++;
       }
 
-      // Limit to maxResults
-      const messages = allMessages.slice(0, maxResults);
+      // Filter out self-sent messages and limit to maxResults
+      const messages = allMessages
+        .filter((msg) => {
+          if (!userEmail) return true;
+          const senderEmail = msg.from?.emailAddress?.address?.toLowerCase();
+          return senderEmail !== userEmail;
+        })
+        .slice(0, maxResults);
 
       if (!messages || messages.length === 0) {
         console.log(
@@ -400,10 +418,10 @@ export class OutlookProvider implements OAuthProviderInterface {
     }
 
     try {
-      // Fetch attachments for this message
+      // List attachments without $select - Microsoft Graph returns all base properties
+      // including @odata.type automatically. contentBytes requires fetching individually.
       const attachmentsResponse = await this.#graphClient
         .api(`/me/messages/${message.id}/attachments`)
-        .select("id,name,contentType,size,contentBytes")
         .get();
 
       const rawAttachments: OutlookAttachment[] =
@@ -430,16 +448,23 @@ export class OutlookProvider implements OAuthProviderInterface {
         const isFileAttachment =
           att["@odata.type"] === "#microsoft.graph.fileAttachment";
 
-        if (isPdf && isFileAttachment && att.contentBytes) {
-          pdfAttachments.push({
-            filename: att.name,
-            mimeType:
-              mimeType === "application/octet-stream"
-                ? "application/pdf"
-                : mimeType,
-            size: att.size,
-            data: att.contentBytes,
-          });
+        if (isPdf && isFileAttachment) {
+          // Fetch the individual attachment to get contentBytes
+          const fullAttachment = await this.#graphClient!.api(
+            `/me/messages/${message.id}/attachments/${att.id}`,
+          ).get();
+
+          if (fullAttachment.contentBytes) {
+            pdfAttachments.push({
+              filename: att.name,
+              mimeType:
+                mimeType === "application/octet-stream"
+                  ? "application/pdf"
+                  : mimeType,
+              size: att.size,
+              data: fullAttachment.contentBytes,
+            });
+          }
         }
       }
 

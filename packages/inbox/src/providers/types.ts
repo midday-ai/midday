@@ -67,6 +67,34 @@ export interface UserInfo {
 
 export type OAuthProvider = "gmail" | "outlook";
 
+// Outlook-specific types
+export interface MicrosoftTokenResponse {
+  access_token: string;
+  refresh_token?: string;
+  expires_in: number;
+  scope?: string;
+  token_type: string;
+}
+
+export interface OutlookMessage {
+  id: string;
+  from?: {
+    emailAddress?: {
+      address?: string;
+    };
+  };
+  hasAttachments?: boolean;
+}
+
+export interface OutlookAttachment {
+  id: string;
+  name: string;
+  contentType: string;
+  size: number;
+  contentBytes?: string;
+  "@odata.type"?: string;
+}
+
 export interface OAuthProviderInterface {
   /**
    * Generates the authorization URL for the user to grant permission.

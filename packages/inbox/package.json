@@ -16,7 +16,6 @@
     "test": "bun test src"
   },
   "dependencies": {
-    "@azure/msal-node": "^3.8.4",
     "@microsoft/microsoft-graph-client": "^3.0.7",
     "@midday/db": "workspace:*",
     "@midday/encryption": "workspace:*",

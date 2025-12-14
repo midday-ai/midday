@@ -29,7 +29,7 @@ export function ConnectOutlook() {
     >
       <div className="flex items-center space-x-2">
         <Icons.Outlook />
-        <span>Connect your Outlook</span>
+        <span>Connect Outlook</span>
       </div>
     </SubmitButton>
   );

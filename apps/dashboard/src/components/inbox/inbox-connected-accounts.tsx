@@ -25,7 +25,9 @@ import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Suspense } from "react";
+import { ConnectEmailModal } from "./connect-email-modal";
 import { ConnectGmail } from "./connect-gmail";
+import { ConnectOutlook } from "./connect-outlook";
 import { DeleteInboxAccount } from "./delete-inbox-account";
 import { InboxAccountsListSkeleton } from "./inbox-connected-accounts-skeleton";
 import { SyncInboxAccount } from "./sync-inbox-account";
@@ -224,8 +226,9 @@ function InboxAccountsList() {
   if (!data?.length) {
     return (
       <div className="px-6 py-8 pb-12 text-center flex flex-col items-center">
-        <div className="w-full max-w-[300px]">
+        <div className="w-full max-w-[300px] flex flex-col space-y-3">
           <ConnectGmail />
+          <ConnectOutlook />
         </div>
       </div>
     );
@@ -242,18 +245,7 @@ function InboxAccountsList() {
 
 export function InboxConnectedAccounts() {
   const trpc = useTRPC();
-  const router = useRouter();
   const { data } = useSuspenseQuery(trpc.inboxAccounts.get.queryOptions());
-
-  const connectMutation = useMutation(
-    trpc.inboxAccounts.connect.mutationOptions({
-      onSuccess: (authUrl: string | null) => {
-        if (authUrl) {
-          router.push(authUrl);
-        }
-      },
-    }),
-  );
 
   return (
     <Card>
@@ -274,14 +266,13 @@ export function InboxConnectedAccounts() {
         <CardFooter className="flex justify-between">
           <div />
 
-          <Button
-            onClick={() => connectMutation.mutate({ provider: "gmail" })}
-            disabled={connectMutation.isPending}
-            data-event="Connect email"
-            data-channel="email"
-          >
-            Connect email
-          </Button>
+          <ConnectEmailModal
+            trigger={
+              <Button data-event="Connect email" data-channel="email">
+                Connect email
+              </Button>
+            }
+          />
         </CardFooter>
       )}
     </Card>

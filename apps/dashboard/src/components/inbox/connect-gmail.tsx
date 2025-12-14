@@ -29,7 +29,7 @@ export function ConnectGmail() {
     >
       <div className="flex items-center space-x-2">
         <Icons.Gmail />
-        <span>Connect your Gmail</span>
+        <span>Connect Gmail</span>
       </div>
     </SubmitButton>
   );
