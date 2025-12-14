@@ -266,13 +266,11 @@ export function InboxConnectedAccounts() {
         <CardFooter className="flex justify-between">
           <div />
 
-          <ConnectEmailModal
-            trigger={
-              <Button data-event="Connect email" data-channel="email">
-                Connect email
-              </Button>
-            }
-          />
+          <ConnectEmailModal>
+            <Button data-event="Connect email" data-channel="email">
+              Connect email
+            </Button>
+          </ConnectEmailModal>
         </CardFooter>
       )}
     </Card>

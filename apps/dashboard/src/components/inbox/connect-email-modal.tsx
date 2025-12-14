@@ -8,31 +8,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@midday/ui/dialog";
-import { useState } from "react";
 import { ConnectGmail } from "./connect-gmail";
 import { ConnectOutlook } from "./connect-outlook";
 
 type ConnectEmailModalProps = {
-  trigger?: React.ReactNode;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  children: React.ReactNode;
 };
 
-export function ConnectEmailModal({
-  trigger,
-  open: controlledOpen,
-  onOpenChange: controlledOnOpenChange,
-}: ConnectEmailModalProps) {
-  const [internalOpen, setInternalOpen] = useState(false);
-
-  const isControlled = controlledOpen !== undefined;
-  const open = isControlled ? controlledOpen : internalOpen;
-  const onOpenChange = isControlled ? controlledOnOpenChange : setInternalOpen;
-
+export function ConnectEmailModal({ children }: ConnectEmailModalProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="sm:max-w-[400px]" hideClose>
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="sm:max-w-[400px]">
         <div className="p-4">
           <DialogHeader>
             <DialogTitle>Connect email</DialogTitle>

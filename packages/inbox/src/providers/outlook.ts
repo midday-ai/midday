@@ -438,11 +438,16 @@ export class OutlookProvider implements OAuthProviderInterface {
         }
 
         // Only process PDF attachments
+        // Note: Unlike Gmail which pre-filters with `filename:pdf` in the API query,
+        // Outlook only filters for `hasAttachments eq true`, so we must filter locally.
+        // We check for application/octet-stream + .pdf extension to avoid false positives
+        // (e.g., .docx, .xlsx files that also use application/octet-stream).
         const mimeType = att.contentType ?? "application/octet-stream";
+        const hasPdfExtension =
+          att.name?.toLowerCase().endsWith(".pdf") ?? false;
         const isPdf =
           mimeType === "application/pdf" ||
-          mimeType === "application/octet-stream" ||
-          att.name?.toLowerCase().endsWith(".pdf");
+          (mimeType === "application/octet-stream" && hasPdfExtension);
 
         // Skip inline attachments (they have @odata.type of #microsoft.graph.itemAttachment)
         const isFileAttachment =
