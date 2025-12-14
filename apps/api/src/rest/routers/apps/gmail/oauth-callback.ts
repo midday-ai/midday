@@ -1,0 +1,144 @@
+import { publicMiddleware } from "@api/rest/middleware";
+import type { Context } from "@api/rest/types";
+import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { InboxConnector } from "@midday/inbox/connector";
+import { decryptOAuthState } from "@midday/inbox/utils";
+import { logger } from "@midday/logger";
+import { tasks } from "@trigger.dev/sdk";
+import { HTTPException } from "hono/http-exception";
+
+const app = new OpenAPIHono<Context>();
+
+const paramsSchema = z.object({
+  code: z
+    .string()
+    .optional()
+    .openapi({
+      param: { in: "query", name: "code", required: false },
+      description: "OAuth authorization code from Google",
+    }),
+  state: z.string().openapi({
+    param: { in: "query", name: "state", required: true },
+    description: "Encrypted OAuth state parameter",
+  }),
+  error: z
+    .string()
+    .optional()
+    .openapi({
+      param: { in: "query", name: "error", required: false },
+      description: "OAuth error code if authorization failed",
+    }),
+});
+
+const errorResponseSchema = z.object({
+  error: z.string(),
+});
+
+app.use("*", ...publicMiddleware);
+
+app.openapi(
+  createRoute({
+    method: "get",
+    path: "/",
+    summary: "Gmail OAuth callback",
+    operationId: "gmailOAuthCallback",
+    description:
+      "Handles OAuth callback from Google after user authorization. Exchanges authorization code for access token and creates inbox account.",
+    tags: ["Integrations"],
+    request: {
+      query: paramsSchema,
+    },
+    responses: {
+      302: {
+        description: "Redirect to dashboard",
+        headers: {
+          Location: {
+            schema: {
+              type: "string",
+            },
+            description: "Redirect URL to dashboard",
+          },
+        },
+      },
+      400: {
+        description: "Invalid request parameters",
+        content: {
+          "application/json": {
+            schema: errorResponseSchema,
+          },
+        },
+      },
+      500: {
+        description: "Failed to process OAuth callback",
+        content: {
+          "application/json": {
+            schema: errorResponseSchema,
+          },
+        },
+      },
+    },
+  }),
+  async (c) => {
+    const db = c.get("db");
+    const query = c.req.valid("query");
+    const { code, state, error } = query;
+    const dashboardUrl =
+      process.env.MIDDAY_DASHBOARD_URL || "https://app.midday.ai";
+
+    // Handle OAuth errors (user denied access, etc.)
+    if (error || !code) {
+      logger.info("Gmail OAuth error or cancelled", { error });
+      return c.redirect(`${dashboardUrl}/inbox?connected=false`, 302);
+    }
+
+    // Decrypt and validate state - this ensures teamId hasn't been tampered with
+    const parsedState = decryptOAuthState(state);
+
+    if (!parsedState || parsedState.provider !== "gmail") {
+      throw new HTTPException(400, {
+        message: "Invalid or expired state. Please try connecting again.",
+      });
+    }
+
+    try {
+      const connector = new InboxConnector("gmail", db);
+
+      const account = await connector.exchangeCodeForAccount({
+        code,
+        teamId: parsedState.teamId,
+      });
+
+      if (!account) {
+        return c.redirect(`${dashboardUrl}/inbox?connected=failed`, 302);
+      }
+
+      // Trigger initial inbox setup job
+      await tasks.trigger("initial-inbox-setup", {
+        id: account.id,
+      });
+
+      // Redirect based on source
+      if (parsedState.source === "apps") {
+        return c.redirect(
+          `${dashboardUrl}/all-done?event=app_oauth_completed`,
+          302,
+        );
+      }
+
+      // Inbox settings flow
+      return c.redirect(
+        `${dashboardUrl}/inbox?connected=true&provider=gmail`,
+        302,
+      );
+    } catch (err) {
+      logger.error("Gmail OAuth callback error", {
+        error: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+      });
+
+      return c.redirect(`${dashboardUrl}/inbox?connected=false`, 302);
+    }
+  },
+);
+
+export { app as oauthCallbackRouter };

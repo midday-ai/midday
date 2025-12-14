@@ -25,7 +25,9 @@ import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Suspense } from "react";
+import { ConnectEmailModal } from "./connect-email-modal";
 import { ConnectGmail } from "./connect-gmail";
+import { ConnectOutlook } from "./connect-outlook";
 import { DeleteInboxAccount } from "./delete-inbox-account";
 import { InboxAccountsListSkeleton } from "./inbox-connected-accounts-skeleton";
 import { SyncInboxAccount } from "./sync-inbox-account";
@@ -151,7 +153,11 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
       <div className="flex items-center space-x-4">
         <Avatar className="size-[34px]">
           <AvatarFallback className="bg-white border border-border">
-            <Icons.Gmail className="size-5" />
+            {account.provider === "outlook" ? (
+              <Icons.Outlook className="size-5" />
+            ) : (
+              <Icons.Gmail className="size-5" />
+            )}
           </AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
@@ -166,9 +172,9 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
                 </TooltipTrigger>
                 <TooltipContent className="max-w-[300px] text-xs">
                   <p>
-                    Account access has expired. Google typically expires access
-                    tokens after 6 months as part of their security practices.
-                    Simply reconnect to restore functionality.
+                    Account access has expired. Email providers typically expire
+                    access tokens periodically as part of their security
+                    practices. Simply reconnect to restore functionality.
                   </p>
                 </TooltipContent>
               </Tooltip>
@@ -192,7 +198,11 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => connectMutation.mutate({ provider: "gmail" })}
+            onClick={() =>
+              connectMutation.mutate({
+                provider: account.provider as "gmail" | "outlook",
+              })
+            }
             className="text-xs"
           >
             Reconnect
@@ -216,8 +226,9 @@ function InboxAccountsList() {
   if (!data?.length) {
     return (
       <div className="px-6 py-8 pb-12 text-center flex flex-col items-center">
-        <div className="w-full max-w-[300px]">
+        <div className="w-full max-w-[300px] flex flex-col space-y-3">
           <ConnectGmail />
+          <ConnectOutlook />
         </div>
       </div>
     );
@@ -234,18 +245,7 @@ function InboxAccountsList() {
 
 export function InboxConnectedAccounts() {
   const trpc = useTRPC();
-  const router = useRouter();
   const { data } = useSuspenseQuery(trpc.inboxAccounts.get.queryOptions());
-
-  const connectMutation = useMutation(
-    trpc.inboxAccounts.connect.mutationOptions({
-      onSuccess: (authUrl: string | null) => {
-        if (authUrl) {
-          router.push(authUrl);
-        }
-      },
-    }),
-  );
 
   return (
     <Card>
@@ -266,14 +266,11 @@ export function InboxConnectedAccounts() {
         <CardFooter className="flex justify-between">
           <div />
 
-          <Button
-            onClick={() => connectMutation.mutate({ provider: "gmail" })}
-            disabled={connectMutation.isPending}
-            data-event="Connect email"
-            data-channel="email"
-          >
-            Connect email
-          </Button>
+          <ConnectEmailModal>
+            <Button data-event="Connect email" data-channel="email">
+              Connect email
+            </Button>
+          </ConnectEmailModal>
         </CardFooter>
       )}
     </Card>

@@ -8,6 +8,7 @@ import {
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { deleteInboxAccount, getInboxAccounts } from "@midday/db/queries";
 import { InboxConnector } from "@midday/inbox/connector";
+import { encryptOAuthState } from "@midday/inbox/utils";
 import { schedules, tasks } from "@trigger.dev/sdk";
 import { TRPCError } from "@trpc/server";
 
@@ -18,11 +19,24 @@ export const inboxAccountsRouter = createTRPCRouter({
 
   connect: protectedProcedure
     .input(connectInboxAccountSchema)
-    .mutation(async ({ ctx: { db }, input }) => {
-      try {
-        const connector = new InboxConnector(input.provider, db);
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      if (!teamId) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Team not found",
+        });
+      }
 
-        return connector.connect();
+      try {
+        // Encrypt state to prevent tampering with teamId
+        const state = encryptOAuthState({
+          teamId,
+          provider: input.provider,
+          source: "inbox",
+        });
+
+        const connector = new InboxConnector(input.provider, db);
+        return connector.connect(state);
       } catch (error) {
         console.error(error);
         throw new TRPCError({

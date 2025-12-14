@@ -22,12 +22,23 @@ import {
 } from "@midday/ui/carousel";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
+import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AppSettings } from "./app-settings";
 import { MemoizedReactMarkdown } from "./markdown";
+
+// OAuth app configuration
+const oauthAppConfig: Record<
+  string,
+  { endpoint: string; queryKey: "apps" | "inboxAccounts" }
+> = {
+  slack: { endpoint: "/apps/slack/install-url", queryKey: "apps" },
+  gmail: { endpoint: "/apps/gmail/install-url", queryKey: "inboxAccounts" },
+  outlook: { endpoint: "/apps/outlook/install-url", queryKey: "inboxAccounts" },
+};
 
 interface UnifiedAppProps {
   app: UnifiedApp;
@@ -100,13 +111,18 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
     settings: parseAsBoolean,
   });
 
-  // Use hook for Slack OAuth
-  const slackOAuth = useAppOAuth({
-    installUrlEndpoint: "/apps/slack/install-url",
+  // Get OAuth config for this app (if it's an OAuth app)
+  const oauthConfig = oauthAppConfig[app.id];
+
+  // Use hook for OAuth apps
+  const appOAuth = useAppOAuth({
+    installUrlEndpoint: oauthConfig?.endpoint ?? "",
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: trpc.apps.get.queryKey(),
-      });
+      const queryKey =
+        oauthConfig?.queryKey === "inboxAccounts"
+          ? trpc.inboxAccounts.get.queryKey()
+          : trpc.apps.get.queryKey();
+      queryClient.invalidateQueries({ queryKey });
       setLoading(false);
     },
     onError: () => {
@@ -134,7 +150,31 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
     }),
   );
 
+  // Mutation to disconnect inbox accounts (Gmail/Outlook)
+  const disconnectInboxAccountMutation = useMutation(
+    trpc.inboxAccounts.delete.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.inboxAccounts.get.queryKey(),
+        });
+      },
+    }),
+  );
+
+  // Computed loading states
+  const isInstalling = isLoading || appOAuth.isLoading;
+  const isDisconnecting =
+    disconnectOfficialAppMutation.isPending ||
+    revokeExternalAppMutation.isPending ||
+    disconnectInboxAccountMutation.isPending;
+
   const handleDisconnect = () => {
+    // Gmail and Outlook use inbox_accounts table
+    if ((app.id === "gmail" || app.id === "outlook") && app.inboxAccountId) {
+      disconnectInboxAccountMutation.mutate({ id: app.inboxAccountId });
+      return;
+    }
+
     if (app.type === "official") {
       disconnectOfficialAppMutation.mutate({ appId: app.id });
     } else {
@@ -146,9 +186,9 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
     setLoading(true);
 
     try {
-      // Use hook for Slack OAuth
-      if (app.id === "slack") {
-        await slackOAuth.connect();
+      // Use OAuth hook for configured apps
+      if (oauthConfig) {
+        await appOAuth.connect();
         return;
       }
 
@@ -243,29 +283,24 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
           </Button>
 
           {app.installed ? (
-            <Button
+            <SubmitButton
               variant="outline"
               className="w-full"
               onClick={handleDisconnect}
-              disabled={
-                disconnectOfficialAppMutation.isPending ||
-                revokeExternalAppMutation.isPending
-              }
+              isSubmitting={isDisconnecting}
             >
-              {disconnectOfficialAppMutation.isPending ||
-              revokeExternalAppMutation.isPending
-                ? "Disconnecting..."
-                : "Disconnect"}
-            </Button>
+              Disconnect
+            </SubmitButton>
           ) : (
-            <Button
+            <SubmitButton
               variant="outline"
               className="w-full"
               onClick={handleOnInitialize}
-              disabled={!app.active || isLoading || slackOAuth.isLoading}
+              disabled={!app.active}
+              isSubmitting={isInstalling}
             >
-              {isLoading || slackOAuth.isLoading ? "Installing..." : "Install"}
-            </Button>
+              Install
+            </SubmitButton>
           )}
         </div>
 
@@ -319,31 +354,24 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
 
               <div>
                 {app.installed ? (
-                  <Button
+                  <SubmitButton
                     variant="outline"
                     className="w-full"
                     onClick={handleDisconnect}
-                    disabled={
-                      disconnectOfficialAppMutation.isPending ||
-                      revokeExternalAppMutation.isPending
-                    }
+                    isSubmitting={isDisconnecting}
                   >
-                    {disconnectOfficialAppMutation.isPending ||
-                    revokeExternalAppMutation.isPending
-                      ? "Disconnecting..."
-                      : "Disconnect"}
-                  </Button>
+                    Disconnect
+                  </SubmitButton>
                 ) : (
-                  <Button
+                  <SubmitButton
                     variant="outline"
                     className="w-full border-primary"
                     onClick={handleOnInitialize}
-                    disabled={!app.active || isLoading || slackOAuth.isLoading}
+                    disabled={!app.active}
+                    isSubmitting={isInstalling}
                   >
-                    {isLoading || slackOAuth.isLoading
-                      ? "Installing..."
-                      : "Install"}
-                  </Button>
+                    Install
+                  </SubmitButton>
                 )}
               </div>
             </div>

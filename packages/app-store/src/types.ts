@@ -25,6 +25,9 @@ export interface UnifiedApp {
   }>;
   userSettings?: Record<string, any>;
 
+  // Inbox app specific (Gmail/Outlook)
+  inboxAccountId?: string;
+
   // External app specific
   clientId?: string;
   scopes?: string[];

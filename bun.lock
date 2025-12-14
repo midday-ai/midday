@@ -426,9 +426,12 @@
       "name": "@midday/inbox",
       "version": "1.0.0",
       "dependencies": {
+        "@microsoft/microsoft-graph-client": "^3.0.7",
+        "@midday/db": "workspace:*",
         "@midday/encryption": "workspace:*",
         "@midday/supabase": "workspace:*",
-        "googleapis": "^166.0.0",
+        "@midday/utils": "workspace:*",
+        "googleapis": "^168.0.0",
         "zod": "^4.1.13",
       },
     },
@@ -1075,6 +1078,8 @@
     "@mermaid-js/parser": ["@mermaid-js/parser@0.6.3", "", { "dependencies": { "langium": "3.3.1" } }, "sha512-lnjOhe7zyHjc+If7yT4zoedx2vo4sHaTmtkl1+or8BRTnCtDmcTpAjpzDSfCZrshM5bCoz0GyidzadJAH1xobA=="],
 
     "@microsoft/fetch-event-source": ["@microsoft/fetch-event-source@2.0.1", "", {}, "sha512-W6CLUJ2eBMw3Rec70qrsEW0jOm/3twwJv21mrmj2yORiaVmVYGS4sSS5yUwvQc1ZlDLYGPnClVWmUUMagKNsfA=="],
+
+    "@microsoft/microsoft-graph-client": ["@microsoft/microsoft-graph-client@3.0.7", "", { "dependencies": { "@babel/runtime": "^7.12.5", "tslib": "^2.2.0" } }, "sha512-/AazAV/F+HK4LIywF9C+NYHcJo038zEnWkteilcxC1FM/uK/4NVGDKGrxx7nNq1ybspAroRKT4I1FHfxQzxkUw=="],
 
     "@midday/api": ["@midday/api@workspace:apps/api"],
 
@@ -3018,7 +3023,7 @@
 
     "google-logging-utils": ["google-logging-utils@1.1.3", "", {}, "sha512-eAmLkjDjAFCVXg7A1unxHsLf961m6y17QFqXqAXGj/gVkKFrEICfStRfwUlGNfeCEjNRa32JEWOUTlYXPyyKvA=="],
 
-    "googleapis": ["googleapis@166.0.0", "", { "dependencies": { "google-auth-library": "^10.2.0", "googleapis-common": "^8.0.0" } }, "sha512-Xz7yG+ihVvYMwSULKIMeTp6vDX95rrSbsaR3xUmgYjwQdAkchMQ5ndFeG5QZwcBOIyvJFvG7ZLIZE7mKW2X/hw=="],
+    "googleapis": ["googleapis@168.0.0", "", { "dependencies": { "google-auth-library": "^10.2.0", "googleapis-common": "^8.0.0" } }, "sha512-A1gQtli8/UXjuGnBAwvObwcsIs2xheV82OnmnrrqSOzgzU0gsu18VbOBLh6G8DiMsZze5hJmOJJM7qsVuqAe6g=="],
 
     "googleapis-common": ["googleapis-common@8.0.1", "", { "dependencies": { "extend": "^3.0.2", "gaxios": "^7.0.0-rc.4", "google-auth-library": "^10.1.0", "qs": "^6.7.0", "url-template": "^2.0.8" } }, "sha512-eCzNACUXPb1PW5l0ULTzMHaL/ltPRADoPgjBlT8jWsTbxkCp6siv+qKJ/1ldaybCthGwsYFYallF7u9AkU4L+A=="],
 

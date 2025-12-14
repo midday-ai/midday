@@ -17,6 +17,7 @@ export default async function Page() {
     queryClient.fetchQuery(trpc.apps.get.queryOptions()),
     queryClient.fetchQuery(trpc.oauthApplications.list.queryOptions()),
     queryClient.fetchQuery(trpc.oauthApplications.authorized.queryOptions()),
+    queryClient.fetchQuery(trpc.inboxAccounts.get.queryOptions()),
   ]);
 
   return (

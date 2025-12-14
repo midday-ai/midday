@@ -2,6 +2,7 @@ import type { Database } from "@midday/db/client";
 import { getInboxAccountById, upsertInboxAccount } from "@midday/db/queries";
 import { decrypt, encrypt } from "@midday/encryption";
 import { GmailProvider } from "./providers/gmail";
+import { OutlookProvider } from "./providers/outlook";
 import {
   type Account,
   type Attachment,
@@ -28,13 +29,17 @@ export class InboxConnector extends Connector {
         this.#provider = new GmailProvider(this.#db);
         this.#providerName = "gmail";
         break;
+      case "outlook":
+        this.#provider = new OutlookProvider(this.#db);
+        this.#providerName = "outlook";
+        break;
       default:
         throw new Error(`Unsupported provider: ${provider}`);
     }
   }
 
-  async connect(): Promise<string> {
-    return this.#provider.getAuthUrl();
+  async connect(state?: string): Promise<string> {
+    return this.#provider.getAuthUrl(state);
   }
 
   async exchangeCodeForAccount(
@@ -160,7 +165,7 @@ export class InboxConnector extends Connector {
       // Check for invalid_grant which indicates refresh token is invalid
       if (errorMessage.includes("invalid_grant")) {
         throw new Error(
-          "Refresh token is invalid or expired. The user needs to re-authenticate their Gmail account.",
+          `Refresh token is invalid or expired. The user needs to re-authenticate their ${this.#providerName} account.`,
         );
       }
 
