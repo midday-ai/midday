@@ -28,6 +28,57 @@ export function useAppOAuth({
 
   const connect = async () => {
     setIsLoading(true);
+    cleanupRef.current?.();
+
+    let oauthCompleted = false;
+    let checkInterval: ReturnType<typeof setInterval> | null = null;
+    let popupClosedTimeout: ReturnType<typeof setTimeout> | null = null;
+    let broadcastChannel: BroadcastChannel | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let popup: Window | null = null;
+
+    const handleOAuthComplete = () => {
+      if (oauthCompleted) return;
+      oauthCompleted = true;
+      cleanup();
+      onSuccess?.();
+      setIsLoading(false);
+    };
+
+    const cleanup = () => {
+      checkInterval && clearInterval(checkInterval);
+      popupClosedTimeout && clearTimeout(popupClosedTimeout);
+      timeoutId && clearTimeout(timeoutId);
+      broadcastChannel?.close();
+      window.removeEventListener("message", messageListener);
+      cleanupRef.current = null;
+    };
+
+    cleanupRef.current = cleanup;
+
+    // Set up message listeners
+    const messageListener = (e: MessageEvent) => {
+      if (e.data === "app_oauth_completed") {
+        handleOAuthComplete();
+      }
+    };
+
+    window.addEventListener("message", messageListener);
+
+    try {
+      broadcastChannel = new BroadcastChannel(CHANNEL_NAME);
+      broadcastChannel.onmessage = messageListener;
+    } catch {
+      // BroadcastChannel not supported
+    }
+
+    // Open popup IMMEDIATELY (synchronously) to avoid popup blockers
+    // Must be within user gesture context before any async operations
+    const left = window.screenX + (window.outerWidth - POPUP_WIDTH) / 2;
+    const top = window.screenY + (window.outerHeight - POPUP_HEIGHT) / 2.5;
+    const popupFeatures = `width=${POPUP_WIDTH},height=${POPUP_HEIGHT},top=${top},left=${left},toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no,copyhistory=no`;
+
+    popup = window.open("about:blank", "", popupFeatures);
 
     try {
       const supabase = createClient();
@@ -36,6 +87,7 @@ export function useAppOAuth({
       } = await supabase.auth.getSession();
 
       if (!session?.access_token) {
+        popup?.close();
         throw new Error("Not authenticated");
       }
 
@@ -47,69 +99,25 @@ export function useAppOAuth({
       });
 
       if (!response.ok) {
+        popup?.close();
         throw new Error(`Failed to get install URL: ${response.statusText}`);
       }
 
       const { url } = await response.json();
-      cleanupRef.current?.();
 
-      let oauthCompleted = false;
-      let checkInterval: ReturnType<typeof setInterval> | null = null;
-      let popupClosedTimeout: ReturnType<typeof setTimeout> | null = null;
-      let broadcastChannel: BroadcastChannel | null = null;
-      let timeoutId: ReturnType<typeof setTimeout> | null = null;
-
-      const handleOAuthComplete = () => {
-        if (oauthCompleted) return;
-        oauthCompleted = true;
-        cleanup();
-        onSuccess?.();
-        setIsLoading(false);
-      };
-
-      const cleanup = () => {
-        checkInterval && clearInterval(checkInterval);
-        popupClosedTimeout && clearTimeout(popupClosedTimeout);
-        timeoutId && clearTimeout(timeoutId);
-        broadcastChannel?.close();
-        window.removeEventListener("message", messageListener);
-        cleanupRef.current = null;
-      };
-
-      cleanupRef.current = cleanup;
-
-      // Set up message listeners
-      const messageListener = (e: MessageEvent) => {
-        if (e.data === "app_oauth_completed") {
-          handleOAuthComplete();
-        }
-      };
-
-      window.addEventListener("message", messageListener);
-
-      try {
-        broadcastChannel = new BroadcastChannel(CHANNEL_NAME);
-        broadcastChannel.onmessage = messageListener;
-      } catch {
-        // BroadcastChannel not supported
-      }
-
-      // Open popup
-      const left = window.screenX + (window.outerWidth - POPUP_WIDTH) / 2;
-      const top = window.screenY + (window.outerHeight - POPUP_HEIGHT) / 2.5;
-      const popupFeatures = `width=${POPUP_WIDTH},height=${POPUP_HEIGHT},top=${top},left=${left},toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no,copyhistory=no`;
-
-      const popup = window.open(url, "", popupFeatures);
-
-      if (!popup) {
+      // If popup was blocked or closed, fall back to same-window navigation
+      if (!popup || popup.closed) {
         cleanup();
         window.location.href = url;
         return;
       }
 
+      // Navigate the popup to the OAuth URL
+      popup.location.href = url;
+
       // Check if popup was closed manually
       checkInterval = setInterval(() => {
-        if (popup.closed && !oauthCompleted) {
+        if (popup?.closed && !oauthCompleted) {
           clearInterval(checkInterval!);
           popupClosedTimeout = setTimeout(() => {
             if (!oauthCompleted) {
@@ -130,6 +138,8 @@ export function useAppOAuth({
         }
       }, TIMEOUT_MS);
     } catch (error) {
+      popup?.close();
+      cleanup();
       const err = error instanceof Error ? error : new Error(String(error));
       onError?.(err);
       setIsLoading(false);
