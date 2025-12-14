@@ -115,9 +115,7 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
       ? file.name
       : `${file.name}${getExtensionFromMimeType(file.mimetype)}`;
 
-    // Include Slack file ID in path to prevent collisions when files have the same name
-    // Path: teamId/inbox/slackFileId/fileName
-    const filePath = [teamId, "inbox", file.id, fileName];
+    const filePath = [teamId, "inbox", fileName];
     const filePathStr = filePath.join("/");
 
     // Upload file to vault
@@ -405,7 +403,7 @@ Focus on what was purchased (e.g., "office supplies", "software subscription", "
                   text: "View in Midday",
                   emoji: true,
                 },
-                url: `https://app.midday.ai/inbox?id=${encodeURIComponent(updatedInbox.id)}`,
+                url: `https://app.midday.ai/inbox?inboxId=${encodeURIComponent(updatedInbox.id)}`,
                 action_id: "view_receipt",
               },
             ],

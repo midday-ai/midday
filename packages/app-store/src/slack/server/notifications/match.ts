@@ -206,7 +206,7 @@ export async function sendSlackMatchNotification({
                   text: "View in Midday",
                   emoji: false,
                 },
-                url: `https://app.midday.ai/inbox?id=${encodeURIComponent(inboxId)}`,
+                url: `https://app.midday.ai/inbox?inboxId=${encodeURIComponent(inboxId)}`,
                 action_id: "view_inbox",
               },
             ],

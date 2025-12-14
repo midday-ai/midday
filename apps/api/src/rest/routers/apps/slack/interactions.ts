@@ -434,7 +434,7 @@ app.openapi(
                           text: "View in Midday",
                           emoji: true,
                         },
-                        url: `https://app.midday.ai/inbox?id=${encodeURIComponent(inboxId)}`,
+                        url: `https://app.midday.ai/inbox?inboxId=${encodeURIComponent(inboxId)}`,
                         action_id: "view_inbox_after_decline",
                       },
                     ],
