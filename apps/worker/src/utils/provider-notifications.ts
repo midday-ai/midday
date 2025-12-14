@@ -84,6 +84,7 @@ export type SendToProvidersOptions = {
     sourceMetadata?: {
       channelId?: string;
       threadTs?: string;
+      messageTs?: string;
     };
   };
 };
@@ -287,6 +288,12 @@ async function sendSlackNotification<T extends ProviderNotificationType>(
         return;
       }
 
+      // Use threadTs if available (file was uploaded in a thread), otherwise use messageTs
+      // (the original message timestamp) to reply in the same thread as the upload
+      const slackThreadTs =
+        options?.inboxMeta?.sourceMetadata?.threadTs ||
+        options?.inboxMeta?.sourceMetadata?.messageTs;
+
       await sendSlackMatchNotification({
         teamId: app.teamId,
         inboxId: matchPayload.inboxId,
@@ -301,7 +308,7 @@ async function sendSlackNotification<T extends ProviderNotificationType>(
         transactionDate: matchPayload.transactionDate,
         matchType: matchPayload.matchType,
         slackChannelId: matchChannelId,
-        slackThreadTs: options?.inboxMeta?.sourceMetadata?.threadTs,
+        slackThreadTs,
       });
       break;
     }

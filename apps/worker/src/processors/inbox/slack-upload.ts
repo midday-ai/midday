@@ -59,6 +59,7 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
     }
 
     // Add processing emoji reaction
+    let reactionAdded = false;
     if (messageTimestamp) {
       try {
         await ensureBotInChannel({ client: slackClient, channelId });
@@ -67,6 +68,7 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
           timestamp: String(messageTimestamp),
           name: "hourglass_flowing_sand",
         });
+        reactionAdded = true;
       } catch (error) {
         this.logger.warn("Error adding emoji reaction", {
           error: error instanceof Error ? error.message : "Unknown error",
@@ -81,106 +83,124 @@ export class SlackUploadProcessor extends BaseProcessor<SlackUploadPayload> {
       });
     }
 
-    // Download file from Slack
-    this.logger.info("Downloading file from Slack", {
-      fileId: file.id,
-      fileName: file.name,
-    });
+    // Helper to remove the hourglass reaction
+    const removeProcessingReaction = async () => {
+      if (reactionAdded && messageTimestamp) {
+        try {
+          await slackClient.reactions.remove({
+            channel: channelId,
+            timestamp: messageTimestamp,
+            name: "hourglass_flowing_sand",
+          });
+        } catch {
+          // Ignore errors when removing reaction
+        }
+      }
+    };
 
-    const fileData = await downloadFile({
-      privateDownloadUrl: file.url,
-      token,
-    });
-
-    if (!fileData) {
-      throw new Error("Failed to download file from Slack");
-    }
-
-    // Validate file data is not empty
-    if (fileData.byteLength === 0) {
-      throw new Error("Downloaded file from Slack is empty");
-    }
-
-    // Validate file size (max 20MB for images/documents)
-    const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
-    if (fileData.byteLength > MAX_FILE_SIZE) {
-      throw new Error(
-        `File size (${(fileData.byteLength / 1024 / 1024).toFixed(2)}MB) exceeds maximum allowed size (20MB)`,
-      );
-    }
-
-    // Ensure file has proper extension based on mimetype
-    const hasExtension = /\.[^.]+$/.test(file.name);
-    const fileName = hasExtension
-      ? file.name
-      : `${file.name}${getExtensionFromMimeType(file.mimetype)}`;
-
-    const filePath = [teamId, "inbox", fileName];
-    const filePathStr = filePath.join("/");
-
-    // Upload file to vault
-    this.logger.info("Uploading file to vault", {
-      filePath: filePathStr,
-      fileSize: fileData.byteLength,
-    });
-
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from("vault")
-      .upload(filePathStr, new Uint8Array(fileData), {
-        contentType: file.mimetype,
-        upsert: true,
-      });
-
-    if (uploadError) {
-      this.logger.error("Failed to upload file to vault", {
-        error: uploadError.message,
-        filePath: filePathStr,
-      });
-      throw new Error(`Failed to upload file: ${uploadError.message}`);
-    }
-
-    if (!uploadData) {
-      this.logger.error("Upload succeeded but no data returned", {
-        filePath: filePathStr,
-      });
-      throw new Error("File upload succeeded but no data returned");
-    }
-
-    this.logger.info("File uploaded successfully", {
-      filePath: filePathStr,
-      uploadPath: uploadData.path,
-    });
-
-    // Create inbox entry with source metadata
-    const inboxData = await createInbox(db, {
-      displayName: fileName,
-      teamId,
-      filePath,
-      fileName,
-      contentType: file.mimetype,
-      size: file.size,
-      referenceId: `slack_${file.id}_${fileName}`,
-      meta: {
-        source: "slack",
-        sourceMetadata: {
-          channelId,
-          threadTs: threadId,
-          messageTs: messageTs || messageTimestamp || undefined,
-        },
-      },
-      status: "processing",
-    });
-
-    if (!inboxData) {
-      throw new Error("Failed to create inbox entry");
-    }
-
-    this.logger.info("Created inbox entry", {
-      inboxId: inboxData.id,
-      teamId,
-    });
+    // Wrap all processing in try-catch to ensure reaction cleanup on any error
+    let inboxData: { id: string } | null | undefined = null;
 
     try {
+      // Download file from Slack
+      this.logger.info("Downloading file from Slack", {
+        fileId: file.id,
+        fileName: file.name,
+      });
+
+      const fileData = await downloadFile({
+        privateDownloadUrl: file.url,
+        token,
+      });
+
+      if (!fileData) {
+        throw new Error("Failed to download file from Slack");
+      }
+
+      // Validate file data is not empty
+      if (fileData.byteLength === 0) {
+        throw new Error("Downloaded file from Slack is empty");
+      }
+
+      // Validate file size (max 20MB for images/documents)
+      const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+      if (fileData.byteLength > MAX_FILE_SIZE) {
+        throw new Error(
+          `File size (${(fileData.byteLength / 1024 / 1024).toFixed(2)}MB) exceeds maximum allowed size (20MB)`,
+        );
+      }
+
+      // Ensure file has proper extension based on mimetype
+      const hasExtension = /\.[^.]+$/.test(file.name);
+      const fileName = hasExtension
+        ? file.name
+        : `${file.name}${getExtensionFromMimeType(file.mimetype)}`;
+
+      const filePath = [teamId, "inbox", fileName];
+      const filePathStr = filePath.join("/");
+
+      // Upload file to vault
+      this.logger.info("Uploading file to vault", {
+        filePath: filePathStr,
+        fileSize: fileData.byteLength,
+      });
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("vault")
+        .upload(filePathStr, new Uint8Array(fileData), {
+          contentType: file.mimetype,
+          upsert: true,
+        });
+
+      if (uploadError) {
+        this.logger.error("Failed to upload file to vault", {
+          error: uploadError.message,
+          filePath: filePathStr,
+        });
+        throw new Error(`Failed to upload file: ${uploadError.message}`);
+      }
+
+      if (!uploadData) {
+        this.logger.error("Upload succeeded but no data returned", {
+          filePath: filePathStr,
+        });
+        throw new Error("File upload succeeded but no data returned");
+      }
+
+      this.logger.info("File uploaded successfully", {
+        filePath: filePathStr,
+        uploadPath: uploadData.path,
+      });
+
+      // Create inbox entry with source metadata
+      inboxData = await createInbox(db, {
+        displayName: fileName,
+        teamId,
+        filePath,
+        fileName,
+        contentType: file.mimetype,
+        size: file.size,
+        referenceId: `slack_${file.id}_${fileName}`,
+        meta: {
+          source: "slack",
+          sourceMetadata: {
+            channelId,
+            threadTs: threadId,
+            messageTs: messageTs || messageTimestamp || undefined,
+          },
+        },
+        status: "processing",
+      });
+
+      if (!inboxData) {
+        throw new Error("Failed to create inbox entry");
+      }
+
+      this.logger.info("Created inbox entry", {
+        inboxId: inboxData.id,
+        teamId,
+      });
+
       // Get signed URL for document processing (30 minutes expiration)
       const pathForSignedUrl = uploadData.path || filePathStr;
       const { data: signedUrlData, error: signedUrlError } =
@@ -428,20 +448,16 @@ Focus on what was purchased (e.g., "office supplies", "software subscription", "
       }
 
       // Replace hourglass with checkmark emoji (regardless of whether message was sent)
-      if (messageTimestamp) {
+      await removeProcessingReaction();
+      if (reactionAdded && messageTimestamp) {
         try {
-          await slackClient.reactions.remove({
-            channel: channelId,
-            timestamp: messageTimestamp,
-            name: "hourglass_flowing_sand",
-          });
           await slackClient.reactions.add({
             channel: channelId,
             timestamp: messageTimestamp,
             name: "white_check_mark",
           });
         } catch {
-          // Ignore - reactions might already be changed
+          // Ignore - reaction might already exist
         }
       }
 
@@ -509,16 +525,19 @@ Focus on what was purchased (e.g., "office supplies", "software subscription", "
         errorMessage.includes("INVALID_ARGUMENT");
 
       this.logger.error("Failed to process Slack upload", {
-        inboxId: inboxData.id,
+        inboxId: inboxData?.id ?? "not-created",
         error: errorMessage,
         isGeminiImageError,
         mimetype: file.mimetype,
         fileName: file.name,
       });
 
+      // Always remove processing reaction on any error
+      await removeProcessingReaction();
+
       // For Gemini image processing errors, mark as pending with fallback name
       // This allows the file to be manually reviewed later
-      if (isGeminiImageError) {
+      if (isGeminiImageError && inboxData) {
         this.logger.info(
           "Gemini failed to process image, marking as pending for manual review",
           {
@@ -545,19 +564,6 @@ Focus on what was purchased (e.g., "office supplies", "software subscription", "
           });
         }
 
-        // Remove processing emoji reaction even on error
-        if (messageTimestamp) {
-          try {
-            await slackClient.reactions.remove({
-              channel: channelId,
-              timestamp: messageTimestamp,
-              name: "hourglass_flowing_sand",
-            });
-          } catch {
-            // Ignore errors when removing reaction
-          }
-        }
-
         // Don't re-throw - we've handled the error gracefully
         return;
       }
@@ -565,30 +571,19 @@ Focus on what was purchased (e.g., "office supplies", "software subscription", "
       // Re-throw timeout errors to trigger retry
       if (error instanceof Error && error.name === "AbortError") {
         this.logger.warn("Document processing timed out, will retry", {
-          inboxId: inboxData.id,
+          inboxId: inboxData?.id ?? "not-created",
           errorType: error.name,
           errorMessage: error.message,
         });
         throw error;
       }
 
-      // Update status to pending even if processing failed
-      await updateInboxWithProcessedData(db, {
-        id: inboxData.id,
-        status: "pending",
-      });
-
-      // Remove processing emoji reaction on error
-      if (messageTimestamp) {
-        try {
-          await slackClient.reactions.remove({
-            channel: channelId,
-            timestamp: messageTimestamp,
-            name: "hourglass_flowing_sand",
-          });
-        } catch {
-          // Ignore errors when removing reaction
-        }
+      // Update status to pending even if processing failed (only if inbox was created)
+      if (inboxData) {
+        await updateInboxWithProcessedData(db, {
+          id: inboxData.id,
+          status: "pending",
+        });
       }
 
       throw error;

@@ -84,6 +84,7 @@ export async function triggerMatchingNotification(params: {
           sourceMetadata?: {
             channelId?: string;
             threadTs?: string;
+            messageTs?: string;
           };
         }
       | undefined;
