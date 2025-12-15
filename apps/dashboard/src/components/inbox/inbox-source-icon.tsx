@@ -6,7 +6,7 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 
-type InboxSource = "gmail" | "outlook" | "slack" | null;
+type InboxSource = "gmail" | "outlook" | "slack" | "whatsapp" | null;
 
 function getInboxSource(data: {
   inboxAccount?: { provider?: string } | null;
@@ -24,6 +24,7 @@ function getInboxSource(data: {
   if (data.meta && typeof data.meta === "object" && "source" in data.meta) {
     const source = (data.meta as Record<string, unknown>).source;
     if (source === "slack") return "slack";
+    if (source === "whatsapp") return "whatsapp";
   }
 
   return null;
@@ -46,6 +47,10 @@ const sourceConfigs: Record<Exclude<InboxSource, null>, SourceIconConfig> = {
   slack: {
     icon: Icons.Slack,
     tooltip: "Shared via Slack",
+  },
+  whatsapp: {
+    icon: Icons.WhatsApp,
+    tooltip: "Shared via WhatsApp",
   },
 };
 
@@ -76,7 +81,11 @@ export function InboxSourceIcon({
         <Tooltip>
           <TooltipTrigger asChild>
             <span className="inline-flex cursor-default">
-              <Icon className="w-4 h-4" />
+              {source === "whatsapp" ? (
+                <Icon className="w-3.5 h-3.5 text-[#25D366]" />
+              ) : (
+                <Icon className="w-4 h-4" />
+              )}
             </span>
           </TooltipTrigger>
           <TooltipContent className="text-xs px-3 py-1.5">

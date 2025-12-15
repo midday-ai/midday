@@ -2,24 +2,25 @@ import type { Context } from "@api/rest/types";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import {
   REACTION_EMOJIS,
+  type WhatsAppWebhookPayload,
   createWhatsAppClient,
+  extractInboxIdFromMessage,
+  isAllowedMimeType,
+  isSupportedMediaType,
   parseMatchButtonId,
+  triggerWhatsAppUploadJob,
+  verifyWebhookSignature,
 } from "@midday/app-store/whatsapp/server";
 import {
   addWhatsAppConnection,
+  confirmSuggestedMatch,
+  declineSuggestedMatch,
   getAppByWhatsAppNumber,
+  getSuggestionByInboxAndTransaction,
 } from "@midday/db/queries";
 import { getTeamByInboxId } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import { HTTPException } from "hono/http-exception";
-import {
-  type WhatsAppWebhookPayload,
-  extractInboxIdFromMessage,
-  isAllowedMimeType,
-  isSupportedMediaType,
-  triggerWhatsAppUploadJob,
-  verifyWebhookSignature,
-} from "./utils";
 
 const app = new OpenAPIHono<Context>();
 
@@ -249,11 +250,18 @@ async function handleTextMessage(
     // Not a connection request, check if already connected
     const existingConnection = await getAppByWhatsAppNumber(db, phoneNumber);
     if (!existingConnection) {
-      // Send instructions
+      // Send instructions for unconnected users
       const client = createWhatsAppClient();
       await client.sendMessage(
         phoneNumber,
-        "Welcome to Midday! To connect your WhatsApp, please scan the QR code in your Midday dashboard or send your inbox ID.",
+        "Welcome to Midday! 👋\n\nTo connect your WhatsApp, please scan the QR code in your Midday dashboard or send your inbox ID.",
+      );
+    } else {
+      // User is already connected - send helpful message about uploading receipts
+      const client = createWhatsAppClient();
+      await client.sendMessage(
+        phoneNumber,
+        "Hello! 👋\n\nYou're already connected to Midday. Simply send photos or PDFs of receipts and invoices here, and I'll automatically extract the data and match them to your transactions.\n\nWe handle the rest!",
       );
     }
     return;
@@ -289,14 +297,14 @@ async function handleTextMessage(
     const client = createWhatsAppClient();
     await client.sendMessage(
       phoneNumber,
-      `Connected to ${team?.name || "your team"} on Midday! You can now forward receipts and invoices by sending photos or PDFs.`,
+      `✅ Connected to ${team?.name || "your team"} on Midday!\n\n📸 *What you can do:*\n• Send photos or PDFs of receipts and invoices\n• I'll automatically extract the data\n• Match them to your transactions\n\nWe handle the rest! ✨`,
     );
   } catch (error) {
     if (error instanceof Error && error.message.includes("already connected")) {
       const client = createWhatsAppClient();
       await client.sendMessage(
         phoneNumber,
-        "This phone number is already connected to a Midday team. You can send receipts and invoices directly.",
+        "✅ You're already connected to Midday!\n\n📸 Just send photos or PDFs of receipts and invoices here, and I'll automatically extract the data and match them to your transactions.\n\nWe handle the rest! ✨",
       );
     } else {
       throw error;
@@ -404,19 +412,100 @@ async function handleButtonReply(
     transactionId,
   });
 
-  // TODO: Update transaction_match_suggestions table with the action
-  // This would call a function similar to what Slack does for match confirmation
+  // Get WhatsApp app to retrieve teamId
+  const app = await getAppByWhatsAppNumber(db, phoneNumber);
+
+  if (!app || !app.teamId) {
+    logger.warn("WhatsApp number not connected", { phoneNumber });
+    const client = createWhatsAppClient();
+    await client.sendMessage(
+      phoneNumber,
+      "Your WhatsApp is not connected to Midday. Please connect it first.",
+    );
+    return;
+  }
+
+  const teamId = app.teamId;
+
+  // Get the suggestion to confirm/decline
+  const suggestion = await getSuggestionByInboxAndTransaction(db, {
+    inboxId,
+    transactionId,
+    teamId,
+  });
+
+  if (!suggestion) {
+    logger.warn("Match suggestion not found", {
+      phoneNumber,
+      inboxId,
+      transactionId,
+      teamId,
+    });
+    const client = createWhatsAppClient();
+    await client.sendMessage(
+      phoneNumber,
+      "Sorry, we couldn't find this match suggestion. It may have already been processed or expired.",
+    );
+    return;
+  }
 
   const client = createWhatsAppClient();
-  if (action === "confirm") {
+
+  try {
+    if (action === "confirm") {
+      // Confirm the match
+      await confirmSuggestedMatch(db, {
+        suggestionId: suggestion.id,
+        inboxId,
+        transactionId,
+        userId: undefined, // WhatsApp interactions don't have Midday user ID mapping
+        teamId,
+      });
+
+      logger.info("Match confirmed via WhatsApp", {
+        phoneNumber,
+        inboxId,
+        transactionId,
+        suggestionId: suggestion.id,
+      });
+
+      await client.sendMessage(
+        phoneNumber,
+        "✅ Match confirmed! The receipt has been linked to the transaction.",
+      );
+    } else {
+      // Decline the match
+      await declineSuggestedMatch(db, {
+        suggestionId: suggestion.id,
+        inboxId,
+        userId: undefined, // WhatsApp interactions don't have Midday user ID mapping
+        teamId,
+      });
+
+      logger.info("Match declined via WhatsApp", {
+        phoneNumber,
+        inboxId,
+        transactionId,
+        suggestionId: suggestion.id,
+      });
+
+      await client.sendMessage(
+        phoneNumber,
+        "❌ Match declined. You can review and match this receipt manually in Midday.",
+      );
+    }
+  } catch (error) {
+    logger.error("Failed to process match action via WhatsApp", {
+      phoneNumber,
+      inboxId,
+      transactionId,
+      action,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+
     await client.sendMessage(
       phoneNumber,
-      "Match confirmed! The receipt has been linked to the transaction.",
-    );
-  } else {
-    await client.sendMessage(
-      phoneNumber,
-      "Match declined. You can review and match this receipt manually in Midday.",
+      `Sorry, we encountered an error processing your ${action === "confirm" ? "confirmation" : "decline"}. Please try again or handle this in Midday.`,
     );
   }
 }

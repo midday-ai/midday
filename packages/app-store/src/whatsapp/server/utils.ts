@@ -1,7 +1,6 @@
 import crypto from "node:crypto";
 import { triggerJob } from "@midday/job-client";
 import { logger } from "@midday/logger";
-import type { SupabaseClient } from "@supabase/supabase-js";
 
 // WhatsApp webhook payload types
 export interface WhatsAppWebhookPayload {
@@ -102,20 +101,35 @@ export function verifyWebhookSignature(
 
 /**
  * Extract inbox ID from WhatsApp message text
- * Looks for patterns like "inbox ID is: xxx" or just the inbox ID
+ * Looks for patterns like "inbox ID is: xxx", "Connect to Midday: xxx", or just the inbox ID
  */
 export function extractInboxIdFromMessage(text: string): string | null {
-  // Pattern 1: "inbox ID is: xxx" or "My inbox ID is: xxx"
-  const pattern1 = /inbox\s*(?:ID|id)\s*(?:is)?:?\s*([a-zA-Z0-9]+)/i;
-  const match1 = text.match(pattern1);
-  if (match1?.[1]) {
-    return match1[1];
+  if (!text || typeof text !== "string") {
+    return null;
   }
 
-  // Pattern 2: Just a short alphanumeric string (typical inbox ID format)
+  // Normalize text: trim whitespace and handle potential encoding issues
+  const normalizedText = text.trim();
+
+  // Pattern 1: "Connect to Midday: xxx" (case-insensitive, flexible spacing)
+  // Matches: "Connect to Midday: abc123", "connect to midday:abc123", etc.
+  const patternConnect = /connect\s+to\s+midday\s*:?\s*([a-zA-Z0-9]+)/i;
+  const matchConnect = normalizedText.match(patternConnect);
+  if (matchConnect?.[1]) {
+    return matchConnect[1].trim();
+  }
+
+  // Pattern 2: "inbox ID is: xxx" or "My inbox ID is: xxx" (case-insensitive)
+  const patternInbox = /inbox\s*(?:ID|id)\s*(?:is)?\s*:?\s*([a-zA-Z0-9]+)/i;
+  const matchInbox = normalizedText.match(patternInbox);
+  if (matchInbox?.[1]) {
+    return matchInbox[1].trim();
+  }
+
+  // Pattern 3: Just a short alphanumeric string (typical inbox ID format)
   // Only use this if the message is very short (likely just the ID)
-  if (text.trim().length <= 20 && /^[a-zA-Z0-9]+$/.test(text.trim())) {
-    return text.trim();
+  if (normalizedText.length <= 20 && /^[a-zA-Z0-9]+$/.test(normalizedText)) {
+    return normalizedText;
   }
 
   return null;

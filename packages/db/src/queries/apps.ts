@@ -1,5 +1,5 @@
 import type { Database } from "@db/client";
-import { apps } from "@db/schema";
+import { apps, usersOnTeam } from "@db/schema";
 import { and, desc, eq, sql } from "drizzle-orm";
 
 export type CreateAppParams = {
@@ -299,12 +299,22 @@ export const addWhatsAppConnection = async (
     return result;
   }
 
+  // Get first team member to use as createdBy
+  const firstMember = await db
+    .select({ userId: usersOnTeam.userId })
+    .from(usersOnTeam)
+    .where(eq(usersOnTeam.teamId, teamId))
+    .limit(1);
+
+  const createdBy = firstMember[0]?.userId || teamId; // Fallback to teamId if no members
+
   // Create new WhatsApp app with this connection
   const [result] = await db
     .insert(apps)
     .values({
       teamId,
       appId: "whatsapp",
+      createdBy,
       config: {
         connections: [newConnection],
       },

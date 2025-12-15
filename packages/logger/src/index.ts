@@ -24,7 +24,7 @@ const baseLogger = pino({
         translateTime: "HH:MM:ss",
         ignore: "pid,hostname",
         messageFormat: "{msg}",
-        hideObject: true,
+        hideObject: false,
         singleLine: false,
         useLevelLabels: true,
         levelFirst: true,
