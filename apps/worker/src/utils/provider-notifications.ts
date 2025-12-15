@@ -402,7 +402,8 @@ async function sendWhatsAppNotification<T extends ProviderNotificationType>(
 
   // Find the connection that matches the source, or use the first one
   const connection = sourcePhoneNumber
-    ? connections.find((c) => c.phoneNumber === sourcePhoneNumber)
+    ? connections.find((c) => c.phoneNumber === sourcePhoneNumber) ||
+      connections[0]
     : connections[0];
 
   if (!connection) {
