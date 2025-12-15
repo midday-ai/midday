@@ -38,6 +38,7 @@ const oauthAppConfig: Record<
   slack: { endpoint: "/apps/slack/install-url", queryKey: "apps" },
   gmail: { endpoint: "/apps/gmail/install-url", queryKey: "inboxAccounts" },
   outlook: { endpoint: "/apps/outlook/install-url", queryKey: "inboxAccounts" },
+  xero: { endpoint: "/apps/xero/install-url", queryKey: "apps" },
 };
 
 interface UnifiedAppProps {

@@ -2,6 +2,7 @@ import type {
   DynamicSchedulerTemplate,
   StaticSchedulerConfig,
 } from "../types/scheduler-config";
+import { accountingDynamicSchedulerTemplates } from "./accounting.config";
 import {
   inboxDynamicSchedulerTemplates,
   inboxStaticSchedulers,
@@ -23,4 +24,5 @@ export const staticSchedulerConfigs: StaticSchedulerConfig[] = [
  */
 export const dynamicSchedulerTemplates: DynamicSchedulerTemplate[] = [
   ...inboxDynamicSchedulerTemplates,
+  ...accountingDynamicSchedulerTemplates,
 ];

@@ -87,6 +87,24 @@ export const inboxAccountStatusEnum = pgEnum("inbox_account_status", [
   "disconnected",
 ]);
 
+export const accountingProviderEnum = pgEnum("accounting_provider", [
+  "xero",
+  "quickbooks",
+  "fortnox",
+  "visma",
+]);
+
+export const accountingSyncStatusEnum = pgEnum("accounting_sync_status", [
+  "synced",
+  "failed",
+  "pending",
+]);
+
+export const accountingSyncTypeEnum = pgEnum("accounting_sync_type", [
+  "auto",
+  "manual",
+]);
+
 export const inboxStatusEnum = pgEnum("inbox_status", [
   "processing",
   "pending",
@@ -3358,4 +3376,81 @@ export const notificationSettings = pgTable(
       using: sql`(user_id = auth.uid())`,
     }),
   ],
+);
+
+/**
+ * Accounting Sync Records
+ * Tracks which transactions have been synced to which accounting providers
+ * Supports multiple providers per transaction (Xero AND QuickBooks, etc.)
+ */
+export const accountingSyncRecords = pgTable(
+  "accounting_sync_records",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    transactionId: uuid("transaction_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+    provider: accountingProviderEnum().notNull(),
+    providerTenantId: text("provider_tenant_id").notNull(),
+    providerTransactionId: text("provider_transaction_id"),
+    providerAttachmentId: text("provider_attachment_id"),
+    syncedAt: timestamp("synced_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    syncType: accountingSyncTypeEnum("sync_type"),
+    status: accountingSyncStatusEnum().default("synced").notNull(),
+    errorMessage: text("error_message"),
+  },
+  (table) => [
+    // Primary lookup: find syncs for a transaction
+    index("idx_accounting_sync_transaction").on(table.transactionId),
+    // Query syncs by team and provider
+    index("idx_accounting_sync_team_provider").on(table.teamId, table.provider),
+    // Query by status for retry logic
+    index("idx_accounting_sync_status").on(table.teamId, table.status),
+    // Unique constraint: one sync record per transaction per provider
+    unique("accounting_sync_records_transaction_provider_key").on(
+      table.transactionId,
+      table.provider
+    ),
+    foreignKey({
+      columns: [table.transactionId],
+      foreignColumns: [transactions.id],
+      name: "accounting_sync_records_transaction_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "accounting_sync_records_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can view their sync records", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+    }),
+    pgPolicy("Team members can insert sync records", {
+      as: "permissive",
+      for: "insert",
+      to: ["public"],
+      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Team members can update sync records", {
+      as: "permissive",
+      for: "update",
+      to: ["public"],
+    }),
+  ]
+);
+
+export const accountingSyncRecordsRelations = relations(
+  accountingSyncRecords,
+  ({ one }) => ({
+    transaction: one(transactions, {
+      fields: [accountingSyncRecords.transactionId],
+      references: [transactions.id],
+    }),
+    team: one(teams, {
+      fields: [accountingSyncRecords.teamId],
+      references: [teams.id],
+    }),
+  })
 );

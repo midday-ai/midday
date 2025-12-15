@@ -195,6 +195,7 @@ const KNOWN_QUEUES = [
   "documents",
   "embeddings",
   "rates",
+  "accounting",
 ];
 
 /**

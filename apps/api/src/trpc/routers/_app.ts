@@ -1,5 +1,6 @@
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { createTRPCRouter } from "../init";
+import { accountingRouter } from "./accounting";
 import { apiKeysRouter } from "./api-keys";
 import { appsRouter } from "./apps";
 import { bankAccountsRouter } from "./bank-accounts";
@@ -37,6 +38,7 @@ import { userRouter } from "./user";
 import { widgetsRouter } from "./widgets";
 
 export const appRouter = createTRPCRouter({
+  accounting: accountingRouter,
   notifications: notificationsRouter,
   notificationSettings: notificationSettingsRouter,
   apps: appsRouter,

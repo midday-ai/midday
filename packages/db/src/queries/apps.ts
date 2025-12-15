@@ -213,6 +213,51 @@ export const updateAppSettings = async (
   return result;
 };
 
+export type UpdateAppSettingsBulkParams = {
+  appId: string;
+  teamId: string;
+  settings: Array<{
+    id: string;
+    value: unknown;
+    [key: string]: unknown;
+  }>;
+};
+
+/**
+ * Update all settings for an app at once
+ */
+export const updateAppSettingsBulk = async (
+  db: Database,
+  params: UpdateAppSettingsBulkParams,
+) => {
+  const { appId, teamId, settings } = params;
+
+  // Update the record directly with new settings
+  const [result] = await db
+    .update(apps)
+    .set({ settings })
+    .where(and(eq(apps.appId, appId), eq(apps.teamId, teamId)))
+    .returning();
+
+  if (!result) {
+    throw new Error("Failed to update app settings");
+  }
+
+  return result;
+};
+
+export type DeleteAppParams = {
+  appId: string;
+  teamId: string;
+};
+
+/**
+ * Delete an app (alias for disconnectApp for semantic clarity)
+ */
+export const deleteApp = async (db: Database, params: DeleteAppParams) => {
+  return disconnectApp(db, params);
+};
+
 // WhatsApp connection types
 export type WhatsAppConnection = {
   phoneNumber: string;
