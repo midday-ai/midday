@@ -87,10 +87,19 @@ export type InboxProviderInitialSetupPayload = z.infer<
 >;
 
 export const inboxProviderSyncAccountSchema = z.object({
-  id: z.string().uuid(), // Inbox account ID
+  id: z.string().uuid(), // Inbox account ID (for backward compatibility with manual syncs)
   manualSync: z.boolean().optional(),
 });
 
 export type InboxProviderSyncAccountPayload = z.infer<
   typeof inboxProviderSyncAccountSchema
+>;
+
+export const inboxProviderSyncTeamSchema = z.object({
+  teamId: z.string().uuid(), // Team ID for team-based sync
+  manualSync: z.boolean().optional(),
+});
+
+export type InboxProviderSyncTeamPayload = z.infer<
+  typeof inboxProviderSyncTeamSchema
 >;

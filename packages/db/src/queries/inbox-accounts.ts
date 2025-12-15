@@ -168,3 +168,27 @@ export async function getInboxAccountInfo(
 
   return result;
 }
+
+/**
+ * Get all inbox accounts for a team
+ * Used by team-based sync scheduler
+ */
+export async function getInboxAccountsByTeamId(
+  db: Database,
+  teamId: string,
+) {
+  return db
+    .select({
+      id: inboxAccounts.id,
+      provider: inboxAccounts.provider,
+      teamId: inboxAccounts.teamId,
+      lastAccessed: inboxAccounts.lastAccessed,
+      status: inboxAccounts.status,
+      email: inboxAccounts.email,
+      accessToken: inboxAccounts.accessToken,
+      refreshToken: inboxAccounts.refreshToken,
+      expiryDate: inboxAccounts.expiryDate,
+    })
+    .from(inboxAccounts)
+    .where(eq(inboxAccounts.teamId, teamId));
+}

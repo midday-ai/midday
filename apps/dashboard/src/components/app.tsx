@@ -185,7 +185,7 @@ export function App({
             </div>
           </SheetHeader>
 
-          <ScrollArea className="h-[calc(100vh-530px)] pt-2" hideScrollbar>
+          <ScrollArea className="max-h-[calc(100vh-530px)] pt-2" hideScrollbar>
             <Accordion
               type="multiple"
               defaultValue={[

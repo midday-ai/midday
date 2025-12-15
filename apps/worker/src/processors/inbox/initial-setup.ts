@@ -1,4 +1,4 @@
-import { updateInboxAccount } from "@midday/db/queries";
+import { getInboxAccountInfo, updateInboxAccount } from "@midday/db/queries";
 import { triggerJob } from "@midday/job-client";
 import type { Job } from "bullmq";
 import { registerDynamicScheduler } from "../../schedulers/registry";
@@ -9,7 +9,7 @@ import { BaseProcessor } from "../base";
 
 /**
  * Initial inbox setup processor
- * Registers a dynamic scheduler for the inbox account and triggers initial sync
+ * Registers a dynamic scheduler for the team (if not already registered) and triggers initial sync
  */
 export class InitialSetupProcessor extends BaseProcessor<InboxProviderInitialSetupPayload> {
   async process(job: Job<InboxProviderInitialSetupPayload>): Promise<{
@@ -21,32 +21,43 @@ export class InitialSetupProcessor extends BaseProcessor<InboxProviderInitialSet
 
     this.logger.info("Starting initial inbox setup", { inboxAccountId });
 
-    // Register dynamic scheduler for this inbox account
-    // The scheduler will run every 6 hours with a random minute based on account ID
-    const cronPattern = generateQuarterDailyCronTag(inboxAccountId);
+    // Get account info to access teamId
+    const accountInfo = await getInboxAccountInfo(db, { id: inboxAccountId });
+
+    if (!accountInfo) {
+      throw new Error("Account not found");
+    }
+
+    const { teamId } = accountInfo;
+
+    // Register dynamic scheduler for this team (if not already registered)
+    // The scheduler will run every 6 hours with a random minute based on teamId
+    const cronPattern = generateQuarterDailyCronTag(teamId);
+    const schedulerJobKey = `inbox-sync-${teamId}`;
 
     try {
+      // Check if scheduler already exists by trying to register (registry will skip if exists)
       await registerDynamicScheduler({
         template: "inbox-sync-scheduler",
-        accountId: inboxAccountId,
+        accountId: teamId, // Reusing generic parameter name, but semantically it's teamId
         cronPattern,
       });
 
-      this.logger.info("Dynamic scheduler registered for inbox account", {
+      this.logger.info("Dynamic scheduler registered for team", {
+        teamId,
         inboxAccountId,
         cronPattern,
+        schedulerJobKey,
       });
 
-      // Store the scheduler job key in the database (similar to scheduleId in Trigger.dev)
-      // The job key is: `inbox-sync-${inboxAccountId}`
-      const schedulerJobKey = `inbox-sync-${inboxAccountId}`;
-
+      // No need to store scheduleId in inbox_accounts (scheduler is team-level)
+      // Still update lastAccessed for the account
       await updateInboxAccount(db, {
         id: inboxAccountId,
-        scheduleId: schedulerJobKey, // Store the BullMQ repeatable job key
+        lastAccessed: new Date().toISOString(),
       });
 
-      // Trigger initial sync
+      // Trigger initial sync for this specific account (manual sync)
       await triggerJob(
         "sync-scheduler",
         {
@@ -56,7 +67,10 @@ export class InitialSetupProcessor extends BaseProcessor<InboxProviderInitialSet
         "inbox-provider",
       );
 
-      this.logger.info("Initial inbox setup completed", { inboxAccountId });
+      this.logger.info("Initial inbox setup completed", {
+        inboxAccountId,
+        teamId,
+      });
 
       return {
         inboxAccountId,
@@ -65,6 +79,7 @@ export class InitialSetupProcessor extends BaseProcessor<InboxProviderInitialSet
     } catch (error) {
       this.logger.error("Failed to register inbox scheduler", {
         inboxAccountId,
+        teamId,
         error: error instanceof Error ? error.message : "Unknown error",
       });
 

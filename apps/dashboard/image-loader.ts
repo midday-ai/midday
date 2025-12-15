@@ -5,6 +5,7 @@ interface ImageLoaderParams {
 }
 
 const CDN_URL = "https://midday.ai";
+const isDevelopment = process.env.NODE_ENV === "development";
 
 export default function imageLoader({
   src,
@@ -34,9 +35,23 @@ export default function imageLoader({
     }
   }
 
-  // Existing logic for other URLs
+  // For local static assets (/_next), return as-is in development
   if (src.startsWith("/_next")) {
+    if (isDevelopment) {
+      return src; // Return local path in development
+    }
     return `${CDN_URL}/cdn-cgi/image/width=${width},quality=${quality}/https://app.midday.ai${src}`;
   }
+
+  // For other URLs, skip CDN in development if they're local paths
+  if (
+    isDevelopment &&
+    (src.startsWith("/") ||
+      src.includes("localhost") ||
+      src.includes("127.0.0.1"))
+  ) {
+    return src;
+  }
+
   return `${CDN_URL}/cdn-cgi/image/width=${width},quality=${quality}/${src}`;
 }

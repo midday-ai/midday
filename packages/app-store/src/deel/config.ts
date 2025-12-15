@@ -1,12 +1,13 @@
 import { Logo } from "./assets/logo";
 
 export default {
-  name: "Cal.com",
-  id: "cal",
+  name: "Deel",
+  id: "deel",
+  category: "Payroll",
   active: false,
   logo: Logo,
   short_description:
-    "Integrating with Cal.com automatically synchronizes your tracked hours with your calendar, allowing you to easily monitor your progress on your projects.",
+    "Integrate with Deel to automatically sync payroll data, contractor payments, and compliance information with your financial records.",
   description: null,
   images: [],
   onInitialize: () => {},

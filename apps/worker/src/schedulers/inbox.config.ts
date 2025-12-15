@@ -23,20 +23,20 @@ export const inboxStaticSchedulers: StaticSchedulerConfig[] = [
 
 /**
  * Dynamic scheduler templates for inbox
- * These are registered per-account when accounts are connected
+ * These are registered per-team when accounts/apps are connected
  */
 export const inboxDynamicSchedulerTemplates: DynamicSchedulerTemplate[] = [
   {
     template: "inbox-sync-scheduler",
     queue: "inbox-provider",
-    cronGenerator: (accountId: string) =>
-      generateQuarterDailyCronTag(accountId),
+    cronGenerator: (teamId: string) =>
+      generateQuarterDailyCronTag(teamId),
     jobName: "sync-scheduler",
-    payloadGenerator: (accountId: string) => ({
-      id: accountId,
+    payloadGenerator: (teamId: string) => ({
+      teamId,
       manualSync: false,
     }),
-    jobKey: (accountId: string) => `inbox-sync-${accountId}`,
+    jobKey: (teamId: string) => `inbox-sync-${teamId}`,
     options: {
       tz: "UTC",
     },

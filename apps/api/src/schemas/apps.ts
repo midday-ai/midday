@@ -15,3 +15,16 @@ export const updateAppSettingsSchema = z.object({
 export const removeWhatsAppConnectionSchema = z.object({
   phoneNumber: z.string(),
 });
+
+export const connectDropboxSchema = z.object({
+  code: z.string(),
+});
+
+export const getDropboxFoldersSchema = z.object({
+  connectionId: z.string().uuid(),
+});
+
+export const saveDropboxFoldersSchema = z.object({
+  connectionId: z.string().uuid(),
+  folders: z.array(z.string()),
+});

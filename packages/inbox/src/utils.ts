@@ -7,7 +7,7 @@ export function getInboxIdFromEmail(email: string) {
 // OAuth state types
 export interface OAuthStatePayload {
   teamId: string;
-  provider: "gmail" | "outlook";
+  provider: "gmail" | "outlook" | "dropbox";
   source: "inbox" | "apps";
 }
 
@@ -33,7 +33,7 @@ export function decryptOAuthState(
     // Validate required fields
     if (
       typeof parsed.teamId !== "string" ||
-      !["gmail", "outlook"].includes(parsed.provider) ||
+      !["gmail", "outlook", "dropbox"].includes(parsed.provider) ||
       !["inbox", "apps"].includes(parsed.source)
     ) {
       return null;

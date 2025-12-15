@@ -38,6 +38,7 @@ const oauthAppConfig: Record<
   slack: { endpoint: "/apps/slack/install-url", queryKey: "apps" },
   gmail: { endpoint: "/apps/gmail/install-url", queryKey: "inboxAccounts" },
   outlook: { endpoint: "/apps/outlook/install-url", queryKey: "inboxAccounts" },
+  dropbox: { endpoint: "/apps/dropbox/install-url", queryKey: "apps" },
 };
 
 interface UnifiedAppProps {
@@ -377,7 +378,10 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
             </div>
 
             <div className="mt-4">
-              <ScrollArea className="h-[calc(100vh-530px)] pt-2" hideScrollbar>
+              <ScrollArea
+                className="max-h-[calc(100vh-530px)] pt-2"
+                hideScrollbar
+              >
                 <Accordion
                   type="multiple"
                   defaultValue={[
