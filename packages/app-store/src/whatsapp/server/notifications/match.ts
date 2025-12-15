@@ -56,7 +56,6 @@ export async function sendMatchNotification(params: MatchNotificationParams) {
     transactionName: params.transactionName,
     amount: amountValue,
     currency: params.currency,
-    confidence: params.confidence,
     transactionDate: formattedDate,
   });
 
