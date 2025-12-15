@@ -85,6 +85,7 @@ export async function triggerMatchingNotification(params: {
             channelId?: string;
             threadTs?: string;
             messageTs?: string;
+            phoneNumber?: string;
           };
         }
       | undefined;

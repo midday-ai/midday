@@ -24,3 +24,12 @@ export class InvalidReportTypeError extends Error {
     this.name = "InvalidReportTypeError";
   }
 }
+
+export class WhatsAppAlreadyConnectedToAnotherTeamError extends Error {
+  code = "WHATSAPP_ALREADY_CONNECTED_TO_ANOTHER_TEAM" as const;
+
+  constructor() {
+    super("Phone number already connected to another team");
+    this.name = "WhatsAppAlreadyConnectedToAnotherTeamError";
+  }
+}

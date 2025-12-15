@@ -103,7 +103,7 @@ export function InboxGetStarted() {
                   <AccordionContent className="mt-4">
                     <div className="flex flex-col space-y-4">
                       <ConnectSlack />
-                      <ConnectWhatsApp />
+                      {/* <ConnectWhatsApp /> */}
                       {user?.team?.inboxId && (
                         <CopyInput value={getInboxEmail(user.team.inboxId)} />
                       )}

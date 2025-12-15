@@ -1,4 +1,5 @@
 import type { Database } from "@db/client";
+import { WhatsAppAlreadyConnectedToAnotherTeamError } from "@db/errors";
 import { apps, usersOnTeam } from "@db/schema";
 import { and, desc, eq, sql } from "drizzle-orm";
 
@@ -268,7 +269,7 @@ export const addWhatsAppConnection = async (
       return existingConnection;
     }
     // If connected to a different team, throw error
-    throw new Error("Phone number already connected to another team");
+    throw new WhatsAppAlreadyConnectedToAnotherTeamError();
   }
 
   // Get existing WhatsApp app for this team

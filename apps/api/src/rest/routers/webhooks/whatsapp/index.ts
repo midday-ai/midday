@@ -5,12 +5,24 @@ import {
   type WhatsAppWebhookPayload,
   createWhatsAppClient,
   extractInboxIdFromMessage,
+  formatAlreadyConnectedMessage,
+  formatAlreadyConnectedToAnotherTeamError,
+  formatConnectionSuccess,
+  formatMatchActionErrorMessage,
+  formatMatchConfirmedMessage,
+  formatMatchDeclinedMessage,
+  formatMatchSuggestionNotFoundMessage,
+  formatNotConnectedMessage,
+  formatTeamNotFoundError,
+  formatUnsupportedFileTypeMessage,
+  formatWelcomeMessage,
   isAllowedMimeType,
   isSupportedMediaType,
   parseMatchButtonId,
   triggerWhatsAppUploadJob,
   verifyWebhookSignature,
 } from "@midday/app-store/whatsapp/server";
+import { WhatsAppAlreadyConnectedToAnotherTeamError } from "@midday/db/errors";
 import {
   addWhatsAppConnection,
   confirmSuggestedMatch,
@@ -18,7 +30,7 @@ import {
   getAppByWhatsAppNumber,
   getSuggestionByInboxAndTransaction,
 } from "@midday/db/queries";
-import { getTeamByInboxId } from "@midday/db/queries";
+import { getTeamById, getTeamByInboxId } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import { HTTPException } from "hono/http-exception";
 
@@ -249,20 +261,14 @@ async function handleTextMessage(
   if (!inboxId) {
     // Not a connection request, check if already connected
     const existingConnection = await getAppByWhatsAppNumber(db, phoneNumber);
+    const client = createWhatsAppClient();
     if (!existingConnection) {
       // Send instructions for unconnected users
-      const client = createWhatsAppClient();
-      await client.sendMessage(
-        phoneNumber,
-        "Welcome to Midday! 👋\n\nTo connect your WhatsApp, please scan the QR code in your Midday dashboard or send your inbox ID.",
-      );
+      const welcome = formatWelcomeMessage();
+      await client.sendMessage(phoneNumber, welcome.text);
     } else {
       // User is already connected - send helpful message about uploading receipts
-      const client = createWhatsAppClient();
-      await client.sendMessage(
-        phoneNumber,
-        "Hello! 👋\n\nYou're already connected to Midday. Simply send photos or PDFs of receipts and invoices here, and I'll automatically extract the data and match them to your transactions.\n\nWe handle the rest!",
-      );
+      await client.sendMessage(phoneNumber, formatAlreadyConnectedMessage());
     }
     return;
   }
@@ -273,10 +279,7 @@ async function handleTextMessage(
   if (!team) {
     logger.warn("Team not found for inbox ID", { inboxId, phoneNumber });
     const client = createWhatsAppClient();
-    await client.sendMessage(
-      phoneNumber,
-      "Sorry, we couldn't find a team with that inbox ID. Please check the ID and try again.",
-    );
+    await client.sendMessage(phoneNumber, formatTeamNotFoundError());
     return;
   }
 
@@ -295,17 +298,45 @@ async function handleTextMessage(
     });
 
     const client = createWhatsAppClient();
-    await client.sendMessage(
-      phoneNumber,
-      `✅ Connected to ${team?.name || "your team"} on Midday!\n\n📸 *What you can do:*\n• Send photos or PDFs of receipts and invoices\n• I'll automatically extract the data\n• Match them to your transactions\n\nWe handle the rest! ✨`,
+    const inboxUrl = "https://app.midday.ai/inbox";
+    const connectionMessage = formatConnectionSuccess(
+      team?.name || "your team",
+      inboxUrl,
     );
-  } catch (error) {
-    if (error instanceof Error && error.message.includes("already connected")) {
-      const client = createWhatsAppClient();
-      await client.sendMessage(
+
+    if (connectionMessage.buttons && connectionMessage.buttons.length > 0) {
+      await client.sendInteractiveButtons(
         phoneNumber,
-        "✅ You're already connected to Midday!\n\n📸 Just send photos or PDFs of receipts and invoices here, and I'll automatically extract the data and match them to your transactions.\n\nWe handle the rest! ✨",
+        connectionMessage.text,
+        connectionMessage.buttons,
       );
+    } else {
+      await client.sendMessage(phoneNumber, connectionMessage.text);
+    }
+  } catch (error) {
+    if (error instanceof WhatsAppAlreadyConnectedToAnotherTeamError) {
+      // User is trying to connect to Team A but already connected to Team B
+      const existingConnection = await getAppByWhatsAppNumber(db, phoneNumber);
+      const client = createWhatsAppClient();
+      if (existingConnection?.teamId) {
+        const existingTeam = await getTeamById(db, existingConnection.teamId);
+        await client.sendMessage(
+          phoneNumber,
+          formatAlreadyConnectedToAnotherTeamError(
+            existingTeam?.name || "another team",
+            team?.name || "this team",
+          ),
+        );
+      } else {
+        // Fallback if we can't get team info
+        await client.sendMessage(
+          phoneNumber,
+          formatAlreadyConnectedToAnotherTeamError(
+            "another team",
+            team?.name || "this team",
+          ),
+        );
+      }
     } else {
       throw error;
     }
@@ -324,13 +355,10 @@ async function handleMediaMessage(
   // Check if phone number is connected
   const app = await getAppByWhatsAppNumber(db, phoneNumber);
 
-  if (!app) {
+  if (!app || !app.teamId) {
     logger.warn("WhatsApp number not connected", { phoneNumber, messageId });
     const client = createWhatsAppClient();
-    await client.sendMessage(
-      phoneNumber,
-      "Your WhatsApp is not connected to Midday yet. Please scan the QR code in your Midday dashboard to connect.",
-    );
+    await client.sendMessage(phoneNumber, formatNotConnectedMessage());
     return;
   }
 
@@ -352,10 +380,18 @@ async function handleMediaMessage(
       mimeType,
     });
     const client = createWhatsAppClient();
-    await client.sendMessage(
-      phoneNumber,
-      "Sorry, this file type is not supported. Please send images (JPEG, PNG, WebP, HEIC) or PDF documents.",
-    );
+    const errorMessage = formatUnsupportedFileTypeMessage();
+    // Use list message for better UX showing supported formats
+    if (errorMessage.useList && errorMessage.listSections) {
+      await client.sendListMessage(
+        phoneNumber,
+        errorMessage.text,
+        "Supported Formats",
+        errorMessage.listSections,
+      );
+    } else {
+      await client.sendMessage(phoneNumber, errorMessage.text);
+    }
     return;
   }
 
@@ -377,7 +413,7 @@ async function handleMediaMessage(
 
   // Trigger the upload job
   await triggerWhatsAppUploadJob({
-    teamId: teamId!,
+    teamId,
     phoneNumber,
     messageId,
     mediaId: mediaData.id,
@@ -418,10 +454,7 @@ async function handleButtonReply(
   if (!app || !app.teamId) {
     logger.warn("WhatsApp number not connected", { phoneNumber });
     const client = createWhatsAppClient();
-    await client.sendMessage(
-      phoneNumber,
-      "Your WhatsApp is not connected to Midday. Please connect it first.",
-    );
+    await client.sendMessage(phoneNumber, formatNotConnectedMessage());
     return;
   }
 
@@ -444,7 +477,7 @@ async function handleButtonReply(
     const client = createWhatsAppClient();
     await client.sendMessage(
       phoneNumber,
-      "Sorry, we couldn't find this match suggestion. It may have already been processed or expired.",
+      formatMatchSuggestionNotFoundMessage(),
     );
     return;
   }
@@ -469,10 +502,7 @@ async function handleButtonReply(
         suggestionId: suggestion.id,
       });
 
-      await client.sendMessage(
-        phoneNumber,
-        "✅ Match confirmed! The receipt has been linked to the transaction.",
-      );
+      await client.sendMessage(phoneNumber, formatMatchConfirmedMessage());
     } else {
       // Decline the match
       await declineSuggestedMatch(db, {
@@ -489,10 +519,7 @@ async function handleButtonReply(
         suggestionId: suggestion.id,
       });
 
-      await client.sendMessage(
-        phoneNumber,
-        "❌ Match declined. You can review and match this receipt manually in Midday.",
-      );
+      await client.sendMessage(phoneNumber, formatMatchDeclinedMessage());
     }
   } catch (error) {
     logger.error("Failed to process match action via WhatsApp", {
@@ -505,7 +532,7 @@ async function handleButtonReply(
 
     await client.sendMessage(
       phoneNumber,
-      `Sorry, we encountered an error processing your ${action === "confirm" ? "confirmation" : "decline"}. Please try again or handle this in Midday.`,
+      formatMatchActionErrorMessage(action),
     );
   }
 }

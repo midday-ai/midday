@@ -1,4 +1,5 @@
 import { createWhatsAppClient } from "../client";
+import { formatMatchNotification } from "../messages";
 
 export type MatchNotificationParams = {
   phoneNumber: string;
@@ -9,6 +10,7 @@ export type MatchNotificationParams = {
   amount: number;
   currency: string;
   confidence: number;
+  transactionDate?: string;
 };
 
 /**
@@ -22,28 +24,50 @@ function formatCurrency(amount: number, currency: string): string {
 }
 
 /**
+ * Format date for display
+ */
+function formatDate(dateString?: string): string | undefined {
+  if (!dateString) return undefined;
+  try {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(new Date(dateString));
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * Send a match notification via WhatsApp with Confirm/Decline buttons
  */
 export async function sendMatchNotification(params: MatchNotificationParams) {
   const client = createWhatsAppClient();
 
-  const body = [
-    "Match found!",
-    "",
-    `Receipt: ${params.inboxName}`,
-    `Transaction: ${params.transactionName}`,
-    `Amount: ${formatCurrency(params.amount, params.currency)}`,
-    `Confidence: ${Math.round(params.confidence * 100)}%`,
-  ].join("\n");
+  const formattedAmount = formatCurrency(params.amount, params.currency);
+  const formattedDate = formatDate(params.transactionDate);
+
+  // Extract numeric amount for display
+  const amountValue = formattedAmount.replace(/[^\d.,]/g, "");
+
+  const body = formatMatchNotification({
+    receiptName: params.inboxName,
+    transactionName: params.transactionName,
+    amount: amountValue,
+    currency: params.currency,
+    confidence: params.confidence,
+    transactionDate: formattedDate,
+  });
 
   await client.sendInteractiveButtons(params.phoneNumber, body, [
     {
       id: `confirm_${params.inboxId}_${params.transactionId}`,
-      title: "Confirm",
+      title: "Confirm Match",
     },
     {
       id: `decline_${params.inboxId}_${params.transactionId}`,
-      title: "Decline",
+      title: "Decline Match",
     },
   ]);
 }

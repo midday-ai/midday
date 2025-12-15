@@ -1,6 +1,9 @@
 import {
   REACTION_EMOJIS,
   createWhatsAppClient,
+  formatDocumentProcessedSuccess,
+  formatExtractionFailedMessage,
+  formatProcessingErrorMessage,
 } from "@midday/app-store/whatsapp/server";
 import {
   createInbox,
@@ -214,7 +217,7 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
       if (updatedInbox?.amount) {
         try {
           const formatCurrency = (amount: number | null | undefined) => {
-            if (!amount || !updatedInbox.currency) return "N/A";
+            if (!amount || !updatedInbox.currency) return undefined;
             return new Intl.NumberFormat("en-US", {
               style: "currency",
               currency: updatedInbox.currency,
@@ -224,44 +227,49 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
           const documentType =
             updatedInbox.type === "invoice" ? "Invoice" : "Receipt";
 
-          const messageLines = [
-            `${documentType} processed`,
-            "",
-            `Vendor: ${updatedInbox.displayName || "N/A"}`,
-          ];
+          const formattedDate = updatedInbox.date
+            ? format(new Date(updatedInbox.date), "MMM d, yyyy")
+            : undefined;
 
-          if (updatedInbox.date) {
-            messageLines.push(
-              `Date: ${format(new Date(updatedInbox.date), "MMM d, yyyy")}`,
+          const formattedAmount = formatCurrency(updatedInbox.amount);
+          const formattedTaxAmount = updatedInbox.taxAmount
+            ? formatCurrency(updatedInbox.taxAmount)
+            : undefined;
+
+          const inboxUrl = `https://app.midday.ai/inbox?inboxId=${updatedInbox.id}`;
+
+          // Extract numeric amount and currency separately for the formatter
+          const amountValue =
+            formattedAmount?.replace(/[^\d.,]/g, "") || undefined;
+          const taxAmountValue =
+            formattedTaxAmount?.replace(/[^\d.,]/g, "") || undefined;
+
+          const successMessage = formatDocumentProcessedSuccess({
+            documentType,
+            vendor: updatedInbox.displayName || undefined,
+            date: formattedDate,
+            amount: amountValue,
+            currency: updatedInbox.currency || undefined,
+            invoiceNumber:
+              updatedInbox.type === "invoice" &&
+              "invoiceNumber" in updatedInbox &&
+              updatedInbox.invoiceNumber
+                ? updatedInbox.invoiceNumber
+                : undefined,
+            taxAmount: taxAmountValue,
+            taxType: updatedInbox.taxType || undefined,
+            inboxUrl,
+          });
+
+          if (successMessage.buttons && successMessage.buttons.length > 0) {
+            await whatsappClient.sendInteractiveButtons(
+              phoneNumber,
+              successMessage.text,
+              successMessage.buttons,
             );
+          } else {
+            await whatsappClient.sendMessage(phoneNumber, successMessage.text);
           }
-
-          if (
-            updatedInbox.type === "invoice" &&
-            "invoiceNumber" in updatedInbox &&
-            updatedInbox.invoiceNumber
-          ) {
-            messageLines.push(`Invoice #: ${updatedInbox.invoiceNumber}`);
-          }
-
-          messageLines.push(`Amount: ${formatCurrency(updatedInbox.amount)}`);
-
-          if (updatedInbox.taxAmount && updatedInbox.taxAmount > 0) {
-            const taxLabel = updatedInbox.taxType?.toUpperCase() || "Tax";
-            messageLines.push(
-              `${taxLabel}: ${formatCurrency(updatedInbox.taxAmount)}`,
-            );
-          }
-
-          messageLines.push("");
-          messageLines.push(
-            `View in Midday: https://app.midday.ai/inbox?inboxId=${updatedInbox.id}`,
-          );
-
-          await whatsappClient.sendMessage(
-            phoneNumber,
-            messageLines.join("\n"),
-          );
         } catch (error) {
           this.logger.warn("Failed to send WhatsApp message", {
             error: error instanceof Error ? error.message : "Unknown error",
@@ -354,10 +362,16 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
             status: "pending",
           });
 
-          await whatsappClient.sendMessage(
-            phoneNumber,
-            "We couldn't automatically extract data from this document. It has been added to your inbox for manual review.",
-          );
+          const failedMessage = formatExtractionFailedMessage();
+          if (failedMessage.buttons && failedMessage.buttons.length > 0) {
+            await whatsappClient.sendInteractiveButtons(
+              phoneNumber,
+              failedMessage.text,
+              failedMessage.buttons,
+            );
+          } else {
+            await whatsappClient.sendMessage(phoneNumber, failedMessage.text);
+          }
         } catch (updateError) {
           this.logger.error("Failed to update inbox status to pending", {
             inboxId: inboxData.id,
@@ -393,7 +407,7 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
       try {
         await whatsappClient.sendMessage(
           phoneNumber,
-          "Sorry, we encountered an error processing your document. Please try again or upload it directly in Midday.",
+          formatProcessingErrorMessage(),
         );
       } catch {
         // Ignore notification error

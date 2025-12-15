@@ -1,6 +1,6 @@
 "use client";
 
-import { ConnectWhatsApp } from "@/components/inbox/connect-whatsapp";
+// import { ConnectWhatsApp } from "@/components/inbox/connect-whatsapp";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { apps as appStoreApps } from "@midday/app-store";
@@ -203,7 +203,7 @@ export function Apps() {
       </div>
 
       {/* WhatsApp connect dialog - listens for openWhatsAppConnect event */}
-      <ConnectWhatsApp showTrigger={false} />
+      {/* <ConnectWhatsApp showTrigger={false} /> */}
     </>
   );
 }

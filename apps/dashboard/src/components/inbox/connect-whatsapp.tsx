@@ -69,7 +69,7 @@ export function ConnectWhatsApp({ showTrigger = true }: ConnectWhatsAppProps) {
     try {
       const url = await QRCode.toDataURL(whatsappUrl, {
         width: 200,
-        margin: 2,
+        margin: 0,
         color: {
           dark: "#000000",
           light: "#FFFFFF",
@@ -140,19 +140,21 @@ export function ConnectWhatsApp({ showTrigger = true }: ConnectWhatsAppProps) {
         </div>
 
         <div className="flex flex-col items-center space-y-4 p-6">
-          {qrCodeUrl ? (
-            <div className="bg-white p-3 border">
-              <img
-                src={qrCodeUrl}
-                alt="WhatsApp QR Code"
-                className="w-[180px] h-[180px]"
-              />
-            </div>
-          ) : (
-            <div className="flex items-center justify-center w-[180px] h-[180px] border border-dashed border-border">
-              <Icons.QrCode className="h-10 w-10 text-muted-foreground" />
-            </div>
-          )}
+          <div className="size-[206px]">
+            {qrCodeUrl ? (
+              <div className="bg-white p-3 border">
+                <img
+                  src={qrCodeUrl}
+                  alt="WhatsApp QR Code"
+                  className="w-[180px] h-[180px]"
+                />
+              </div>
+            ) : (
+              <div className="flex items-center justify-center w-[180px] h-[180px] border border-dashed border-border">
+                <Icons.QrCode className="h-10 w-10 text-muted-foreground" />
+              </div>
+            )}
+          </div>
 
           <div className="w-full border-t" />
 

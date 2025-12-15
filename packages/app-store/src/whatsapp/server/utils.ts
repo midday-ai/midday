@@ -111,16 +111,20 @@ export function extractInboxIdFromMessage(text: string): string | null {
   // Normalize text: trim whitespace and handle potential encoding issues
   const normalizedText = text.trim();
 
-  // Pattern 1: "Connect to Midday: xxx" (case-insensitive, flexible spacing)
+  // Pattern 1: "Connect to Midday: xxx" (case-insensitive, fixed spacing to avoid ReDoS)
   // Matches: "Connect to Midday: abc123", "connect to midday:abc123", etc.
-  const patternConnect = /connect\s+to\s+midday\s*:?\s*([a-zA-Z0-9]+)/i;
+  // Using [ \t]+ instead of \s+ and avoiding ambiguous quantifiers to prevent backtracking
+  const patternConnect =
+    /connect[ \t]+to[ \t]+midday[ \t]*:?[ \t]*([a-zA-Z0-9]+)/i;
   const matchConnect = normalizedText.match(patternConnect);
   if (matchConnect?.[1]) {
     return matchConnect[1].trim();
   }
 
   // Pattern 2: "inbox ID is: xxx" or "My inbox ID is: xxx" (case-insensitive)
-  const patternInbox = /inbox\s*(?:ID|id)\s*(?:is)?\s*:?\s*([a-zA-Z0-9]+)/i;
+  // Using [ \t]+ instead of \s+ to avoid ReDoS
+  const patternInbox =
+    /inbox[ \t]*(?:ID|id)[ \t]*(?:is)?[ \t]*:?[ \t]*([a-zA-Z0-9]+)/i;
   const matchInbox = normalizedText.match(patternInbox);
   if (matchInbox?.[1]) {
     return matchInbox[1].trim();

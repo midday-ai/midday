@@ -107,6 +107,56 @@ export class WhatsAppClient {
   }
 
   /**
+   * Send a list message (for multi-option scenarios)
+   * @param to - Recipient phone number
+   * @param body - Message body text
+   * @param buttonText - Text for the button that opens the list (max 20 chars)
+   * @param sections - Array of sections, each containing rows
+   */
+  async sendListMessage(
+    to: string,
+    body: string,
+    buttonText: string,
+    sections: Array<{
+      title: string;
+      rows: Array<{ id: string; title: string; description?: string }>;
+    }>,
+  ) {
+    // WhatsApp limits: max 10 sections, max 10 rows per section
+    if (sections.length > 10) {
+      throw new Error("Maximum 10 sections allowed in list message");
+    }
+
+    for (const section of sections) {
+      if (section.rows.length > 10) {
+        throw new Error("Maximum 10 rows allowed per section");
+      }
+    }
+
+    return this.request("/messages", {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to,
+      type: "interactive",
+      interactive: {
+        type: "list",
+        body: { text: body },
+        action: {
+          button: buttonText,
+          sections: sections.map((section) => ({
+            title: section.title,
+            rows: section.rows.map((row) => ({
+              id: row.id,
+              title: row.title,
+              description: row.description,
+            })),
+          })),
+        },
+      },
+    });
+  }
+
+  /**
    * Get media URL from media ID
    */
   async getMediaUrl(mediaId: string): Promise<string> {
