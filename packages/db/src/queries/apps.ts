@@ -656,3 +656,248 @@ export const updateDropboxConnection = async (
 
   return result;
 };
+
+// Google Drive types and functions
+
+type GoogleDriveConnection = {
+  accountId: string;
+  email: string; // Google account email
+  accessToken: string; // Encrypted OAuth access token
+  refreshToken: string; // Encrypted OAuth refresh token
+  expiryDate: string; // Token expiry date
+  externalId: string; // Google user ID
+  folders: string[]; // Selected folder IDs
+  lastAccessed: string; // Last sync timestamp
+  connectedAt: string; // Connection timestamp
+  watchChannels?: Record<string, { id: string; resourceId: string; expiration: string }>; // Folder ID -> watch channel mapping
+};
+
+type GoogleDriveConfig = {
+  connections?: GoogleDriveConnection[];
+};
+
+export type AddGoogleDriveConnectionParams = {
+  teamId: string;
+  email: string;
+  accessToken: string; // Should be encrypted before calling
+  refreshToken: string; // Should be encrypted before calling
+  expiryDate: string;
+  externalId: string;
+  folders?: string[];
+};
+
+/**
+ * Add a Google Drive connection to a team
+ * Creates the Google Drive app if it doesn't exist, or adds to existing connections
+ */
+export const addGoogleDriveConnection = async (
+  db: Database,
+  params: AddGoogleDriveConnectionParams,
+) => {
+  const { teamId, email, accessToken, refreshToken, expiryDate, externalId, folders = [] } = params;
+
+  // Check if this external ID is already connected to any team
+  const existingConnection = await db
+    .select()
+    .from(apps)
+    .where(
+      and(
+        eq(apps.appId, "googledrive"),
+        sql`${apps.config}->'connections' @> ${JSON.stringify([{ externalId }])}::jsonb`,
+      ),
+    );
+
+  if (existingConnection.length > 0) {
+    const existing = existingConnection[0];
+    // If already connected to this team, just return success
+    if (existing.teamId === teamId) {
+      return existing;
+    }
+    // If connected to a different team, throw error
+    throw new Error("Google Drive account already connected to another team");
+  }
+
+  // Get existing Google Drive app for this team
+  const existingApp = await getAppByAppId(db, { appId: "googledrive", teamId });
+
+  const newConnection: GoogleDriveConnection = {
+    accountId: randomUUID(),
+    email,
+    accessToken, // Already encrypted
+    refreshToken, // Already encrypted
+    expiryDate,
+    externalId,
+    folders,
+    lastAccessed: new Date().toISOString(),
+    connectedAt: new Date().toISOString(),
+  };
+
+  if (existingApp) {
+    // Add to existing connections
+    const config = (existingApp.config as GoogleDriveConfig) || {};
+    const connections = config.connections || [];
+
+    const [result] = await db
+      .update(apps)
+      .set({
+        config: {
+          ...config,
+          connections: [...connections, newConnection],
+        },
+      })
+      .where(and(eq(apps.appId, "googledrive"), eq(apps.teamId, teamId)))
+      .returning();
+
+    return result;
+  }
+
+  // Get first team member to use as createdBy
+  const firstMember = await db
+    .select({ userId: usersOnTeam.userId })
+    .from(usersOnTeam)
+    .where(eq(usersOnTeam.teamId, teamId))
+    .limit(1);
+
+  const createdBy = firstMember[0]?.userId || teamId; // Fallback to teamId if no members
+
+  // Create new Google Drive app with this connection
+  const [result] = await db
+    .insert(apps)
+    .values({
+      teamId,
+      appId: "googledrive",
+      createdBy,
+      config: {
+        connections: [newConnection],
+      },
+      settings: [
+        { id: "receipts", label: "Receipt Processing", value: true },
+        { id: "matches", label: "Match Notifications", value: true },
+      ],
+    })
+    .returning();
+
+  return result;
+};
+
+export type UpdateGoogleDriveConnectionFoldersParams = {
+  teamId: string;
+  connectionId: string;
+  folders: string[];
+};
+
+/**
+ * Update folders for a Google Drive connection
+ */
+export const updateGoogleDriveConnectionFolders = async (
+  db: Database,
+  params: UpdateGoogleDriveConnectionFoldersParams,
+) => {
+  const { teamId, connectionId, folders } = params;
+
+  const app = await getAppByAppId(db, { appId: "googledrive", teamId });
+
+  if (!app) {
+    throw new Error("Google Drive app not found for this team");
+  }
+
+  const config = (app.config as GoogleDriveConfig) || {};
+  const connections = config.connections || [];
+
+  const connectionIndex = connections.findIndex(
+    (c) => c.accountId === connectionId,
+  );
+
+  if (connectionIndex === -1) {
+    throw new Error("Google Drive connection not found");
+  }
+
+  const updatedConnections = [...connections];
+  updatedConnections[connectionIndex] = {
+    ...updatedConnections[connectionIndex],
+    folders,
+  };
+
+  const [result] = await db
+    .update(apps)
+    .set({
+      config: {
+        ...config,
+        connections: updatedConnections,
+      },
+    })
+    .where(and(eq(apps.appId, "googledrive"), eq(apps.teamId, teamId)))
+    .returning();
+
+  return result;
+};
+
+/**
+ * Get all Google Drive connections for a team
+ */
+export const getGoogleDriveConnections = async (db: Database, teamId: string) => {
+  const app = await getAppByAppId(db, { appId: "googledrive", teamId });
+
+  if (!app) {
+    return [];
+  }
+
+  const config = (app.config as GoogleDriveConfig) || {};
+  return config.connections || [];
+};
+
+export type UpdateGoogleDriveConnectionParams = {
+  teamId: string;
+  connectionId: string;
+  lastAccessed?: string;
+  watchChannels?: Record<string, { id: string; resourceId: string; expiration: string }>;
+  accessToken?: string; // Encrypted
+  refreshToken?: string; // Encrypted
+  expiryDate?: string;
+};
+
+/**
+ * Update a Google Drive connection (e.g., update lastAccessed, watchChannels, tokens)
+ */
+export const updateGoogleDriveConnection = async (
+  db: Database,
+  params: UpdateGoogleDriveConnectionParams,
+) => {
+  const { teamId, connectionId, ...updates } = params;
+
+  const app = await getAppByAppId(db, { appId: "googledrive", teamId });
+
+  if (!app) {
+    throw new Error("Google Drive app not found for this team");
+  }
+
+  const config = (app.config as GoogleDriveConfig) || {};
+  const connections = config.connections || [];
+
+  const connectionIndex = connections.findIndex(
+    (c) => c.accountId === connectionId,
+  );
+
+  if (connectionIndex === -1) {
+    throw new Error("Google Drive connection not found");
+  }
+
+  const updatedConnections = [...connections];
+  updatedConnections[connectionIndex] = {
+    ...updatedConnections[connectionIndex],
+    ...updates,
+  };
+
+  const [result] = await db
+    .update(apps)
+    .set({
+      config: {
+        ...config,
+        connections: updatedConnections,
+      },
+    })
+    .where(and(eq(apps.appId, "googledrive"), eq(apps.teamId, teamId)))
+    .returning();
+
+  return result;
+};

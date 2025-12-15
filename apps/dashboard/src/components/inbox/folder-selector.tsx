@@ -94,19 +94,29 @@ export function FolderSelector({
   const trpc = useTRPC();
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set());
 
-  const { data: folders, isLoading } = useQuery(
-    trpc.apps.getDropboxFolders.queryOptions({
-      connectionId,
-    }),
-  );
+  // Use provider-specific query
+  const foldersQuery =
+    provider === "googledrive"
+      ? trpc.apps.getGoogleDriveFolders.queryOptions({ connectionId })
+      : trpc.apps.getDropboxFolders.queryOptions({ connectionId });
 
-  const saveMutation = useMutation(
-    trpc.apps.saveDropboxFolders.mutationOptions({
-      onSuccess: () => {
-        onSave(Array.from(selectedPaths));
-      },
-    }),
-  );
+  const { data: folders, isLoading } = useQuery(foldersQuery);
+
+  // Use provider-specific mutation
+  const saveMutationOptions =
+    provider === "googledrive"
+      ? trpc.apps.saveGoogleDriveFolders.mutationOptions({
+          onSuccess: () => {
+            onSave(Array.from(selectedPaths));
+          },
+        })
+      : trpc.apps.saveDropboxFolders.mutationOptions({
+          onSuccess: () => {
+            onSave(Array.from(selectedPaths));
+          },
+        });
+
+  const saveMutation = useMutation(saveMutationOptions);
 
   const handleToggle = (path: string) => {
     setSelectedPaths((prev) => {
@@ -169,7 +179,7 @@ export function FolderSelector({
   if (!folders || folders.length === 0) {
     return (
       <div className="text-center py-8 text-sm text-[#878787]">
-        No folders found in your Dropbox account.
+        No folders found in your {provider === "dropbox" ? "Dropbox" : "Google Drive"} account.
       </div>
     );
   }
@@ -181,7 +191,7 @@ export function FolderSelector({
       <div>
         <h3 className="text-sm font-medium mb-2">Select folders to watch</h3>
         <p className="text-xs text-[#878787] mb-4">
-          Choose which Dropbox folders should be monitored for receipts and
+          Choose which {provider === "dropbox" ? "Dropbox" : "Google Drive"} folders should be monitored for receipts and
           invoices.
         </p>
       </div>

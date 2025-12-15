@@ -28,3 +28,12 @@ export const saveDropboxFoldersSchema = z.object({
   connectionId: z.string().uuid(),
   folders: z.array(z.string()),
 });
+
+export const getGoogleDriveFoldersSchema = z.object({
+  connectionId: z.string().uuid(),
+});
+
+export const saveGoogleDriveFoldersSchema = z.object({
+  connectionId: z.string().uuid(),
+  folders: z.array(z.string()),
+});

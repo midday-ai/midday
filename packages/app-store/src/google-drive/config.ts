@@ -4,11 +4,12 @@ export default {
   name: "Google Drive",
   id: "googledrive",
   category: "Productivity",
-  active: false,
+  active: true,
   logo: Logo,
   short_description:
     "Automatically import receipts and invoices from your Google Drive folders. Midday extracts data and matches them to transactions.",
-  description: null,
+  description:
+    "Connect your Google Drive account to automatically sync receipts and invoices from selected folders. We support PDF files and images (JPEG, PNG, WebP, HEIC, HEIF) up to 10MB. Initially, we'll sync the first 50 items from your selected folders. Files are processed using OCR and matched to your transactions.",
   images: [],
   onInitialize: () => {},
   settings: {},

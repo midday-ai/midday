@@ -4,6 +4,7 @@ import { MatchTransactionsBidirectionalProcessor } from "./match-transactions-bi
 import { NoMatchSchedulerProcessor } from "./no-match-scheduler";
 import { ProcessAttachmentProcessor } from "./process-attachment";
 import { SlackUploadProcessor } from "./slack-upload";
+import { SyncInboxAppsProcessor } from "./sync-inbox-apps";
 import { SyncSchedulerProcessor } from "./sync-scheduler";
 import { WhatsAppUploadProcessor } from "./whatsapp-upload";
 
@@ -17,6 +18,7 @@ export { SlackUploadProcessor } from "./slack-upload";
 export { WhatsAppUploadProcessor } from "./whatsapp-upload";
 export { NoMatchSchedulerProcessor } from "./no-match-scheduler";
 export { SyncSchedulerProcessor } from "./sync-scheduler";
+export { SyncInboxAppsProcessor } from "./sync-inbox-apps";
 export { InitialSetupProcessor } from "./initial-setup";
 
 /**
@@ -33,5 +35,6 @@ export const inboxProcessors = {
   "whatsapp-upload": new WhatsAppUploadProcessor(),
   "no-match-scheduler": new NoMatchSchedulerProcessor(),
   "sync-scheduler": new SyncSchedulerProcessor(),
+  "sync-inbox-apps": new SyncInboxAppsProcessor(),
   "initial-setup": new InitialSetupProcessor(),
 };

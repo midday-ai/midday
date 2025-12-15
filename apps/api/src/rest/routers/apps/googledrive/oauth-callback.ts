@@ -1,8 +1,8 @@
 import { publicMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { DropboxProvider } from "@midday/app-store/dropbox/server";
-import { addDropboxConnection } from "@midday/db/queries";
+import { GoogleDriveProvider } from "@midday/app-store/google-drive/server";
+import { addGoogleDriveConnection } from "@midday/db/queries";
 import { encrypt } from "@midday/encryption";
 import { decryptOAuthState } from "@midday/inbox/utils";
 import { logger } from "@midday/logger";
@@ -16,7 +16,7 @@ const paramsSchema = z.object({
     .optional()
     .openapi({
       param: { in: "query", name: "code", required: false },
-      description: "OAuth authorization code from Dropbox",
+      description: "OAuth authorization code from Google",
     }),
   state: z.string().openapi({
     param: { in: "query", name: "state", required: true },
@@ -41,10 +41,10 @@ app.openapi(
   createRoute({
     method: "get",
     path: "/",
-    summary: "Dropbox OAuth callback",
-    operationId: "dropboxOAuthCallback",
+    summary: "Google Drive OAuth callback",
+    operationId: "googleDriveOAuthCallback",
     description:
-      "Handles OAuth callback from Dropbox after user authorization. Exchanges authorization code for access token and creates Dropbox connection.",
+      "Handles OAuth callback from Google after user authorization. Exchanges authorization code for access token and creates Google Drive connection.",
     tags: ["Integrations"],
     request: {
       query: paramsSchema,
@@ -88,21 +88,21 @@ app.openapi(
 
     // Handle OAuth errors (user denied access, etc.)
     if (error || !code) {
-      logger.info("Dropbox OAuth error or cancelled", { error });
+      logger.info("Google Drive OAuth error or cancelled", { error });
       return c.redirect(`${dashboardUrl}/apps?connected=false`, 302);
     }
 
     // Decrypt and validate state - this ensures teamId hasn't been tampered with
     const parsedState = decryptOAuthState(state);
 
-    if (!parsedState || parsedState.provider !== "dropbox") {
+    if (!parsedState || parsedState.provider !== "googledrive") {
       throw new HTTPException(400, {
         message: "Invalid or expired state. Please try connecting again.",
       });
     }
 
     try {
-      const provider = new DropboxProvider(db);
+      const provider = new GoogleDriveProvider(db);
       const tokens = await provider.exchangeCodeForTokens(code);
 
       // Get user info
@@ -115,11 +115,11 @@ app.openapi(
       const userInfo = await provider.getUserInfo();
 
       if (!userInfo?.email || !userInfo.id) {
-        throw new Error("Failed to get Dropbox user info");
+        throw new Error("Failed to get Google Drive user info");
       }
 
-      // Create/update Dropbox app with connection
-      await addDropboxConnection(db, {
+      // Create/update Google Drive app with connection
+      await addGoogleDriveConnection(db, {
         teamId: parsedState.teamId,
         email: userInfo.email,
         accessToken: encrypt(tokens.access_token),
@@ -139,11 +139,11 @@ app.openapi(
 
       // Inbox settings flow (if used from inbox)
       return c.redirect(
-        `${dashboardUrl}/inbox?connected=true&provider=dropbox`,
+        `${dashboardUrl}/inbox?connected=true&provider=googledrive`,
         302,
       );
     } catch (err) {
-      logger.error("Dropbox OAuth callback error", {
+      logger.error("Google Drive OAuth callback error", {
         error: err instanceof Error ? err.message : String(err),
         stack: err instanceof Error ? err.stack : undefined,
       });

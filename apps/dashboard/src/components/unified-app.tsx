@@ -39,6 +39,7 @@ const oauthAppConfig: Record<
   gmail: { endpoint: "/apps/gmail/install-url", queryKey: "inboxAccounts" },
   outlook: { endpoint: "/apps/outlook/install-url", queryKey: "inboxAccounts" },
   dropbox: { endpoint: "/apps/dropbox/install-url", queryKey: "apps" },
+  googledrive: { endpoint: "/apps/googledrive/install-url", queryKey: "apps" },
 };
 
 interface UnifiedAppProps {

@@ -1,7 +1,7 @@
 import { protectedMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { DropboxProvider } from "@midday/app-store/dropbox/server";
+import { GoogleDriveProvider } from "@midday/app-store/google-drive/server";
 import { encryptOAuthState } from "@midday/inbox/utils";
 import { HTTPException } from "hono/http-exception";
 
@@ -17,14 +17,14 @@ app.openapi(
   createRoute({
     method: "get",
     path: "/",
-    summary: "Get Dropbox install URL",
-    operationId: "getDropboxInstallUrl",
+    summary: "Get Google Drive install URL",
+    operationId: "getGoogleDriveInstallUrl",
     description:
-      "Generates OAuth install URL for Dropbox integration. Requires authentication.",
+      "Generates OAuth install URL for Google Drive integration. Requires authentication.",
     tags: ["Integrations"],
     responses: {
       200: {
-        description: "Dropbox install URL",
+        description: "Google Drive install URL",
         content: {
           "application/json": {
             schema: installUrlResponseSchema,
@@ -55,11 +55,11 @@ app.openapi(
     // Encrypt state to prevent tampering with teamId
     const state = encryptOAuthState({
       teamId: session.teamId,
-      provider: "dropbox",
+      provider: "googledrive",
       source: "apps",
     });
 
-    const provider = new DropboxProvider(db);
+    const provider = new GoogleDriveProvider(db);
     const url = await provider.getAuthUrl(state);
 
     return c.json({ url });
