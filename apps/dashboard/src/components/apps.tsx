@@ -1,5 +1,6 @@
 "use client";
 
+// import { ConnectWhatsApp } from "@/components/inbox/connect-whatsapp";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { apps as appStoreApps } from "@midday/app-store";
@@ -158,46 +159,51 @@ export function Apps() {
     );
 
   return (
-    <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 mx-auto mt-8">
-      {filteredApps.map((app) => (
-        <UnifiedAppComponent
-          key={app.id}
-          app={app}
-          userEmail={user?.email || undefined}
-        />
-      ))}
+    <>
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 mx-auto mt-8">
+        {filteredApps.map((app) => (
+          <UnifiedAppComponent
+            key={app.id}
+            app={app}
+            userEmail={user?.email || undefined}
+          />
+        ))}
 
-      {!search && !filteredApps.length && (
-        <div className="col-span-full flex flex-col items-center justify-center h-[calc(100vh-400px)]">
-          <h3 className="text-lg font-semibold text-[#1D1D1D] dark:text-[#F2F1EF]">
-            No apps installed
-          </h3>
-          <p className="mt-2 text-sm text-[#878787] text-center max-w-md">
-            You haven't installed any apps yet. Go to the 'All Apps' tab to
-            browse available apps.
-          </p>
-        </div>
-      )}
+        {!search && !filteredApps.length && (
+          <div className="col-span-full flex flex-col items-center justify-center h-[calc(100vh-400px)]">
+            <h3 className="text-lg font-semibold text-[#1D1D1D] dark:text-[#F2F1EF]">
+              No apps installed
+            </h3>
+            <p className="mt-2 text-sm text-[#878787] text-center max-w-md">
+              You haven't installed any apps yet. Go to the 'All Apps' tab to
+              browse available apps.
+            </p>
+          </div>
+        )}
 
-      {search && !filteredApps.length && (
-        <div className="col-span-full flex flex-col items-center justify-center h-[calc(100vh-400px)]">
-          <h3 className="text-lg font-semibold text-[#1D1D1D] dark:text-[#F2F1EF]">
-            No apps found
-          </h3>
-          <p className="mt-2 text-sm text-[#878787] text-center max-w-md">
-            No apps found for your search, let us know if you want to see a
-            specific app in the app store.
-          </p>
+        {search && !filteredApps.length && (
+          <div className="col-span-full flex flex-col items-center justify-center h-[calc(100vh-400px)]">
+            <h3 className="text-lg font-semibold text-[#1D1D1D] dark:text-[#F2F1EF]">
+              No apps found
+            </h3>
+            <p className="mt-2 text-sm text-[#878787] text-center max-w-md">
+              No apps found for your search, let us know if you want to see a
+              specific app in the app store.
+            </p>
 
-          <Button
-            onClick={() => router.push("/apps")}
-            className="mt-4"
-            variant="outline"
-          >
-            Clear search
-          </Button>
-        </div>
-      )}
-    </div>
+            <Button
+              onClick={() => router.push("/apps")}
+              className="mt-4"
+              variant="outline"
+            >
+              Clear search
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* WhatsApp connect dialog - listens for openWhatsAppConnect event */}
+      {/* <ConnectWhatsApp showTrigger={false} /> */}
+    </>
   );
 }

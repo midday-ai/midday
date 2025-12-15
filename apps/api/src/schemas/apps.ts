@@ -11,3 +11,7 @@ export const updateAppSettingsSchema = z.object({
     value: z.union([z.string(), z.number(), z.boolean()]),
   }),
 });
+
+export const removeWhatsAppConnectionSchema = z.object({
+  phoneNumber: z.string(),
+});

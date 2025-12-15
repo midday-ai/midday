@@ -65,6 +65,18 @@ export const slackUploadSchema = z.object({
 
 export type SlackUploadPayload = z.infer<typeof slackUploadSchema>;
 
+export const whatsappUploadSchema = z.object({
+  teamId: z.string().uuid(),
+  phoneNumber: z.string(), // User's WhatsApp phone number
+  messageId: z.string(), // WhatsApp message ID for reactions
+  mediaId: z.string(), // Media ID from WhatsApp
+  mimeType: z.string(),
+  filename: z.string().optional(),
+  caption: z.string().optional(),
+});
+
+export type WhatsAppUploadPayload = z.infer<typeof whatsappUploadSchema>;
+
 // Provider schemas
 export const inboxProviderInitialSetupSchema = z.object({
   inboxAccountId: z.string().uuid(),

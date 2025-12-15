@@ -5,7 +5,9 @@ import {
   sendSlackInvoicePaidNotification,
   sendSlackMatchNotification,
 } from "@midday/app-store/slack/server";
+import { sendMatchNotification } from "@midday/app-store/whatsapp/server";
 import type { Database } from "@midday/db/client";
+import { getWhatsAppConnections } from "@midday/db/queries";
 import { getAppByAppId, getApps } from "@midday/db/queries";
 import { createLoggerWithContext } from "@midday/logger";
 
@@ -85,6 +87,7 @@ export type SendToProvidersOptions = {
       channelId?: string;
       threadTs?: string;
       messageTs?: string;
+      phoneNumber?: string;
     };
   };
 };
@@ -150,6 +153,15 @@ export async function sendToProviders<T extends ProviderNotificationType>(
         switch (app.app_id) {
           case "slack":
             await sendSlackNotification(appConfig, type, payload, options);
+            break;
+          case "whatsapp":
+            await sendWhatsAppNotification(
+              db,
+              appConfig,
+              type,
+              payload,
+              options,
+            );
             break;
           // Future providers:
           // case "expo-push":
@@ -351,5 +363,90 @@ async function sendSlackNotification<T extends ProviderNotificationType>(
       });
       break;
     }
+  }
+}
+
+/**
+ * Send notification to WhatsApp
+ */
+async function sendWhatsAppNotification<T extends ProviderNotificationType>(
+  db: Database,
+  app: AppConfig,
+  type: T,
+  payload: ProviderPayload[T],
+  options?: SendToProvidersOptions,
+): Promise<void> {
+  // Only send match notifications for now
+  if (type !== "match") {
+    logger.debug("WhatsApp notification type not supported", {
+      type,
+      teamId: app.teamId,
+    });
+    return;
+  }
+
+  const matchPayload = payload as MatchPayload;
+
+  // Get WhatsApp connections for this team
+  const connections = await getWhatsAppConnections(db, app.teamId);
+
+  if (connections.length === 0) {
+    logger.debug("No WhatsApp connections found for team", {
+      teamId: app.teamId,
+    });
+    return;
+  }
+
+  // Get phone number from inbox metadata if available (source was WhatsApp)
+  const sourcePhoneNumber = options?.inboxMeta?.sourceMetadata?.phoneNumber;
+
+  // Find the connection that matches the source, or use the first one
+  const connection = sourcePhoneNumber
+    ? connections.find((c) => c.phoneNumber === sourcePhoneNumber) ||
+      connections[0]
+    : connections[0];
+
+  if (!connection) {
+    logger.debug("No matching WhatsApp connection found", {
+      teamId: app.teamId,
+      sourcePhoneNumber,
+    });
+    return;
+  }
+
+  try {
+    // Only send for suggestions (not auto-matched)
+    if (matchPayload.matchType === "auto_matched") {
+      logger.debug("Skipping WhatsApp notification for auto-matched", {
+        teamId: app.teamId,
+        inboxId: matchPayload.inboxId,
+      });
+      return;
+    }
+
+    await sendMatchNotification({
+      phoneNumber: connection.phoneNumber,
+      inboxId: matchPayload.inboxId,
+      transactionId: matchPayload.transactionId,
+      inboxName: matchPayload.documentName,
+      transactionName: matchPayload.transactionName,
+      amount: matchPayload.documentAmount,
+      currency: matchPayload.documentCurrency,
+      confidence: matchPayload.confidenceScore,
+      transactionDate: matchPayload.transactionDate,
+    });
+
+    logger.info("WhatsApp match notification sent", {
+      teamId: app.teamId,
+      phoneNumber: connection.phoneNumber,
+      inboxId: matchPayload.inboxId,
+      transactionId: matchPayload.transactionId,
+    });
+  } catch (error) {
+    logger.warn("Failed to send WhatsApp notification", {
+      teamId: app.teamId,
+      phoneNumber: connection.phoneNumber,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 }

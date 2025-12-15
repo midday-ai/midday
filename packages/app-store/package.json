@@ -25,6 +25,9 @@
     "./slack": "./src/slack/index.ts",
     "./slack/server": "./src/slack/server/index.ts",
     "./slack-notifications": "./src/slack/server/notifications/transactions.ts",
-    "./slack-client": "./src/slack/server/client.ts"
+    "./slack-client": "./src/slack/server/client.ts",
+    "./whatsapp": "./src/whatsapp/index.ts",
+    "./whatsapp/server": "./src/whatsapp/server/index.ts",
+    "./whatsapp-client": "./src/whatsapp/server/client.ts"
   }
 }
