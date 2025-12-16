@@ -10,19 +10,6 @@ export const accountingProviderIdSchema = z.enum([
 ]);
 
 /**
- * Schema for sync-accounting-transactions job
- */
-export const accountingSyncSchema = z.object({
-  teamId: z.string().uuid(),
-  providerId: accountingProviderIdSchema,
-  transactionIds: z.array(z.string().uuid()).optional(), // All unsynced if not provided
-  includeAttachments: z.boolean().default(true),
-  manualSync: z.boolean().default(false),
-});
-
-export type AccountingSyncPayload = z.infer<typeof accountingSyncSchema>;
-
-/**
  * Provider entity types
  * Used to link attachments to the correct entity without an extra API call
  */
@@ -63,19 +50,6 @@ export const accountingExportSchema = z.object({
   userId: z.string().uuid(),
   providerId: accountingProviderIdSchema,
   transactionIds: z.array(z.string().uuid()),
-  includeAttachments: z.boolean().default(true),
 });
 
 export type AccountingExportPayload = z.infer<typeof accountingExportSchema>;
-
-/**
- * Schema for accounting-sync-scheduler job
- */
-export const accountingSyncSchedulerSchema = z.object({
-  teamId: z.string().uuid(),
-  manualSync: z.boolean().default(false),
-});
-
-export type AccountingSyncSchedulerPayload = z.infer<
-  typeof accountingSyncSchedulerSchema
->;

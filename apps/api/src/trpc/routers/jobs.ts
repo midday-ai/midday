@@ -15,9 +15,7 @@ export const jobsRouter = createTRPCRouter({
       }
 
       try {
-        const status = await getJobStatus(input.jobId, {
-          teamId,
-        });
+        const status = await getJobStatus(input.jobId, { teamId });
 
         return status;
       } catch (error) {

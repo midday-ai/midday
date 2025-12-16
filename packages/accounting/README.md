@@ -1,6 +1,6 @@
 # Accounting Integration Package
 
-Technical documentation for Midday's accounting software integrations (Xero, QuickBooks, Fortnox, Visma).
+Technical documentation for Midday's accounting software integrations (Xero, QuickBooks, Fortnox).
 
 ## Table of Contents
 
@@ -8,7 +8,7 @@ Technical documentation for Midday's accounting software integrations (Xero, Qui
 2. [Architecture](#architecture)
 3. [Data Flow](#data-flow)
 4. [Database Schema](#database-schema)
-5. [Sync Logic](#sync-logic)
+5. [Export Logic](#export-logic)
 6. [Authentication](#authentication)
 7. [Worker Jobs](#worker-jobs)
 8. [API Reference](#api-reference)
@@ -19,26 +19,25 @@ Technical documentation for Midday's accounting software integrations (Xero, Qui
 
 ## Overview
 
-The accounting integration enables Midday users to automatically synchronize their financial transactions and attachments (receipts, invoices) to external accounting software. The system supports both automatic scheduled sync and manual export workflows.
+The accounting integration enables Midday users to export their enriched financial transactions and attachments (receipts, invoices) to external accounting software. The system uses manual export only, giving users full control over when data is sent to their accounting provider.
 
 ### Supported Providers
 
-| Provider | Status | OAuth | Sync | Attachments |
-|----------|--------|-------|------|-------------|
+| Provider | Status | OAuth | Export | Attachments |
+|----------|--------|-------|--------|-------------|
 | Xero | Active | OAuth 2.0 | Yes | Yes |
-| QuickBooks | Planned | OAuth 2.0 | Yes | Yes |
-| Fortnox | Planned | OAuth 2.0 | Yes | Yes |
-| Visma | Planned | OAuth 2.0 | Yes | Yes |
+| QuickBooks | Active | OAuth 2.0 | Yes | Yes |
+| Fortnox | Active | OAuth 2.0 | Yes (Draft Vouchers) | Yes |
 
 ### Key Features
 
 - OAuth 2.0 authentication with automatic token refresh
-- Automatic sync of "fulfilled" transactions (with attachments or marked complete)
 - Manual export of selected transactions
-- Attachment sync with deduplication
+- Attachment upload with deduplication
 - Multi-provider support per team
 - Batch processing with progress tracking
 - Retry handling with exponential backoff
+- Re-export support (creates new entries in accounting provider)
 
 ---
 
@@ -63,21 +62,21 @@ flowchart TB
     end
 
     subgraph Worker["@midday/worker - BullMQ"]
-        PROC1[SyncTransactionsProcessor]
         PROC2[SyncAttachmentsProcessor]
         PROC3[ExportTransactionsProcessor]
-        SCHED[SyncSchedulerProcessor]
     end
 
     subgraph Accounting["@midday/accounting"]
         IFACE[AccountingProvider Interface]
         XERO[XeroProvider]
         QB[QuickBooksProvider]
+        FNX[FortnoxProvider]
     end
 
     subgraph External["External APIs"]
         XERO_API[Xero API]
         QB_API[QuickBooks API]
+        FNX_API[Fortnox API]
     end
 
     UI --> TRPC
@@ -85,20 +84,19 @@ flowchart TB
     TRPC --> DB
     REST --> DB
     
-    SCHED --> PROC1
-    PROC1 --> PROC2
+    PROC3 --> PROC2
     
-    PROC1 --> IFACE
     PROC2 --> IFACE
     PROC3 --> IFACE
     
     IFACE --> XERO
     IFACE --> QB
+    IFACE --> FNX
     
     XERO --> XERO_API
     QB --> QB_API
+    FNX --> FNX_API
     
-    PROC1 --> DB
     PROC2 --> DB
     PROC3 --> DB
 ```
@@ -111,18 +109,19 @@ packages/accounting/
 │   ├── index.ts              # Factory and exports
 │   ├── provider.ts           # AccountingProvider interface
 │   ├── types.ts              # Shared types
-│   ├── utils.ts              # OAuth state encryption
+│   ├── utils.ts              # OAuth state encryption, utilities
 │   └── providers/
-│       └── xero.ts           # Xero implementation
+│       ├── xero.ts           # Xero implementation
+│       ├── quickbooks.ts     # QuickBooks implementation
+│       └── fortnox.ts        # Fortnox implementation
 ├── package.json
 └── tsconfig.json
 
 apps/worker/src/
 ├── processors/accounting/
 │   ├── index.ts              # Processor exports
-│   ├── sync-transactions.ts  # Main sync processor
+│   ├── base.ts               # Shared processor logic
 │   ├── sync-attachments.ts   # Attachment upload processor
-│   ├── sync-scheduler.ts     # Per-team scheduler
 │   └── export-transactions.ts# Manual export processor
 ├── queues/
 │   └── accounting.config.ts  # BullMQ queue configuration
@@ -136,36 +135,36 @@ apps/worker/src/
 
 ## Data Flow
 
-### Automatic Sync Flow
+### Manual Export Flow
 
 ```mermaid
 sequenceDiagram
-    participant Scheduler
-    participant SyncProcessor
+    participant User
+    participant Dashboard
+    participant API
+    participant ExportProcessor
     participant Database
     participant Provider
     participant AttachmentProcessor
 
-    Scheduler->>SyncProcessor: Trigger sync job
-    SyncProcessor->>Database: Query fulfilled transactions
-    Database-->>SyncProcessor: Transactions with attachments
+    User->>Dashboard: Select transactions
+    User->>Dashboard: Click "Export to Accounting"
+    Dashboard->>API: POST /accounting/export
+    API->>ExportProcessor: Trigger export job
+    ExportProcessor->>Database: Load transactions
+    Database-->>ExportProcessor: Transaction data
     
     loop For each batch (50)
-        SyncProcessor->>Provider: syncTransactions()
-        Provider-->>SyncProcessor: Sync results
-        SyncProcessor->>Database: Upsert sync records
+        ExportProcessor->>Provider: syncTransactions()
+        Provider-->>ExportProcessor: Results with IDs
+        ExportProcessor->>Database: Upsert sync records
         
         alt Has attachments
-            SyncProcessor->>AttachmentProcessor: Trigger attachment job
+            ExportProcessor->>AttachmentProcessor: Trigger attachment job
         end
     end
     
-    SyncProcessor->>Database: Query attachment changes
-    Database-->>SyncProcessor: Transactions with new attachments
-    
-    loop For each transaction
-        SyncProcessor->>AttachmentProcessor: Trigger attachment update job
-    end
+    ExportProcessor-->>Dashboard: Export complete
 ```
 
 ### OAuth Authentication Flow
@@ -175,19 +174,19 @@ sequenceDiagram
     participant User
     participant Dashboard
     participant API
-    participant Xero
+    participant Provider
     participant Database
 
-    User->>Dashboard: Click "Connect Xero"
-    Dashboard->>API: GET /apps/xero/install-url
+    User->>Dashboard: Click "Connect Provider"
+    Dashboard->>API: GET /apps/{provider}/install-url
     API->>API: Generate encrypted state (teamId)
     API-->>Dashboard: Consent URL
-    Dashboard->>Xero: Redirect to consent
-    User->>Xero: Authorize access
-    Xero->>API: Callback with code + state
+    Dashboard->>Provider: Redirect to consent
+    User->>Provider: Authorize access
+    Provider->>API: Callback with code + state
     API->>API: Decrypt state, validate
-    API->>Xero: Exchange code for tokens
-    Xero-->>API: Access + refresh tokens
+    API->>Provider: Exchange code for tokens
+    Provider-->>API: Access + refresh tokens
     API->>Database: Store tokens in apps.config
     API-->>Dashboard: Redirect to success
 ```
@@ -198,7 +197,7 @@ sequenceDiagram
 
 ### accounting_sync_records
 
-Tracks synchronization status for each transaction per provider.
+Tracks export status for each transaction per provider.
 
 ```mermaid
 erDiagram
@@ -224,8 +223,10 @@ erDiagram
         enum provider
         text provider_tenant_id
         text provider_transaction_id
+        text provider_entity_type
         text[] synced_attachment_ids
         timestamp synced_at
+        timestamp created_at
         enum sync_type
         enum status
         text error_message
@@ -259,52 +260,40 @@ interface AccountingProviderConfig {
   accessToken: string;
   refreshToken: string;
   expiresAt: string;      // ISO timestamp
-  tenantId: string;       // Xero organization ID
+  tenantId: string;       // Organization ID (realmId for QB)
   tenantName?: string;    // Organization name
 }
 ```
 
 ---
 
-## Sync Logic
+## Export Logic
 
-### Transaction Selection Criteria
+### Transaction Selection
 
-A transaction is eligible for accounting sync if it meets the "fulfilled" criteria:
+Users manually select which transactions to export. The system validates that transactions are eligible:
 
-```mermaid
-flowchart TD
-    A[Transaction] --> B{Has attachments?}
-    B -->|Yes| C{Status excluded or archived?}
-    B -->|No| D{Status = completed?}
-    D -->|Yes| C
-    D -->|No| E[Not Synced]
-    C -->|Yes| E
-    C -->|No| F[Sync to Provider]
-```
-
-| Condition | Syncs | Reason |
-|-----------|-------|--------|
-| Has attachments | Yes | Receipt/invoice attached |
+| Condition | Exports | Reason |
+|-----------|---------|--------|
+| Status = pending | Yes | User can export anytime |
 | Status = completed | Yes | User marked as done |
-| Status = pending | No | Not yet reviewed |
-| Status = posted | No | Awaiting action |
 | Status = excluded | No | User excluded from books |
 | Status = archived | No | Old transaction |
 
-### Attachment Change Detection
+### Re-export Behavior
 
-Detects transactions where new attachments were added after initial sync:
+- **Always creates new entries**: Re-exporting creates new transactions/vouchers in the accounting provider
+- **No updates**: Accounting providers have limited or no update support (Fortnox vouchers are immutable)
+- **Sync records updated**: The latest provider transaction ID is stored
+- **User responsibility**: Users should delete old drafts in accounting software if needed
 
-```typescript
-// Compare current attachment IDs vs synced attachment IDs
-const newAttachmentIds = currentIds.filter(id => !syncedSet.has(id));
-```
+### Provider-Specific Behavior
 
-Key behaviors:
-- New attachments are pushed to the provider
-- Removed attachments are NOT deleted from the provider (audit trail preservation)
-- Replaced attachments result in the new version being uploaded
+| Provider | Entity Type | Draft Support | Notes |
+|----------|-------------|---------------|-------|
+| Xero | BankTransaction | No | Creates SPEND/RECEIVE transactions |
+| QuickBooks | Purchase/SalesReceipt | No | Creates based on amount sign |
+| Fortnox | Voucher | Yes (ApprovalState=0) | Creates draft vouchers for review |
 
 ---
 
@@ -387,10 +376,8 @@ flowchart LR
 
 | Job Name | Processor | Trigger | Purpose |
 |----------|-----------|---------|---------|
-| `sync-accounting-transactions` | SyncTransactionsProcessor | Scheduler | Sync new fulfilled transactions |
-| `sync-accounting-attachments` | SyncAttachmentsProcessor | Transaction sync | Upload attachments to provider |
-| `export-to-accounting` | ExportTransactionsProcessor | User action | Manual export of selected transactions |
-| `accounting-sync-scheduler` | SyncSchedulerProcessor | Cron | Trigger sync for teams with auto-sync |
+| `export-to-accounting` | ExportTransactionsProcessor | User action | Export selected transactions |
+| `sync-accounting-attachments` | SyncAttachmentsProcessor | Export job | Upload attachments to provider |
 
 ---
 
@@ -406,6 +393,9 @@ interface AccountingProvider {
   refreshTokens(refreshToken: string): Promise<TokenResponse>;
   isTokenExpired(expiresAt: Date): boolean;
 
+  // Tenant Info
+  getTenantInfo(): Promise<TenantInfo>;
+
   // Accounts
   getAccounts(tenantId: string): Promise<AccountingAccount[]>;
 
@@ -414,18 +404,20 @@ interface AccountingProvider {
 
   // Attachments
   uploadAttachment(params: UploadAttachmentParams): Promise<AttachmentResult>;
+
+  // Cleanup (optional)
+  disconnect?(): Promise<void>;
 }
 ```
 
 ### Database Queries
 
 ```typescript
-// Get transactions for sync
+// Get transactions for export
 getTransactionsForAccountingSync(db, {
   teamId: string,
   provider: ProviderType,
-  transactionIds?: string[],
-  sinceDaysAgo?: number,
+  transactionIds: string[],  // Required for manual export
   limit?: number,
 }): Promise<TransactionForSync[]>
 
@@ -436,19 +428,12 @@ upsertAccountingSyncRecord(db, {
   provider: ProviderType,
   providerTenantId: string,
   providerTransactionId?: string,
+  providerEntityType?: string,
   syncedAttachmentIds?: string[],
-  syncType?: 'auto' | 'manual',
-  status?: 'synced' | 'failed' | 'pending',
+  syncType: 'manual',
+  status: 'synced' | 'failed' | 'pending',
   errorMessage?: string,
 }): Promise<AccountingSyncRecord>
-
-// Get synced transactions with attachment changes
-getSyncedTransactionsWithAttachmentChanges(db, {
-  teamId: string,
-  provider: ProviderType,
-  sinceDaysAgo?: number,
-  limit?: number,
-}): Promise<TransactionWithNewAttachments[]>
 ```
 
 ---
@@ -463,10 +448,15 @@ XERO_CLIENT_ID=your_client_id
 XERO_CLIENT_SECRET=your_client_secret
 XERO_OAUTH_REDIRECT_URL=https://api.midday.ai/v1/apps/xero/oauth-callback
 
-# QuickBooks (planned)
+# QuickBooks
 QUICKBOOKS_CLIENT_ID=your_client_id
 QUICKBOOKS_CLIENT_SECRET=your_client_secret
 QUICKBOOKS_OAUTH_REDIRECT_URL=https://api.midday.ai/v1/apps/quickbooks/oauth-callback
+
+# Fortnox
+FORTNOX_CLIENT_ID=your_client_id
+FORTNOX_CLIENT_SECRET=your_client_secret
+FORTNOX_OAUTH_REDIRECT_URL=https://api.midday.ai/v1/apps/fortnox/oauth-callback
 
 # OAuth state encryption
 ACCOUNTING_OAUTH_SECRET=32_byte_encryption_key
@@ -477,20 +467,10 @@ ACCOUNTING_OAUTH_SECRET=32_byte_encryption_key
 ```typescript
 const settingsSchema = [
   {
-    id: "syncMode",
-    type: "select",
-    options: ["auto", "manual"],
-    default: "manual",
-  },
-  {
-    id: "syncFrequency",
-    type: "select",
-    options: ["daily", "weekly"],
-    default: "daily",
-  },
-  {
-    id: "includeAttachments",
-    type: "boolean",
+    id: "syncAttachments",
+    label: "Include Attachments",
+    description: "Upload receipts and invoices when exporting",
+    type: "switch",
     default: true,
   },
 ];
@@ -512,7 +492,7 @@ const settingsSchema = [
 
 ### Error Recording
 
-Failed syncs are recorded with error details:
+Failed exports are recorded with error details:
 
 ```typescript
 await upsertAccountingSyncRecord(db, {
@@ -532,13 +512,14 @@ await upsertAccountingSyncRecord(db, {
 2. **State Parameter**: OAuth state encrypted with HMAC to prevent CSRF
 3. **RLS Policies**: Database enforces team-level access control
 4. **API Keys**: Provider credentials stored in environment variables
-5. **Audit Trail**: Sync records provide full audit history
+5. **Audit Trail**: Sync records provide full export history
 
 ---
 
 ## Limitations
 
-1. **Attachment Deletion**: Removing attachments in Midday does not delete them from the accounting provider
-2. **Bank Account Mapping**: Currently uses first active account; multi-account mapping planned
-3. **Historical Sync**: Auto-sync limited to 30 days; manual export supports 365 days
+1. **No Updates**: Re-exporting creates new entries; existing entries cannot be updated
+2. **Attachment Deletion**: Removing attachments in Midday does not delete them from the accounting provider
+3. **Bank Account Mapping**: Currently uses first active account; multi-account mapping planned
 4. **Rate Limits**: Subject to provider API rate limits (Xero: 60 calls/minute)
+5. **Fortnox Vouchers**: Created as drafts; must be manually approved/posted in Fortnox

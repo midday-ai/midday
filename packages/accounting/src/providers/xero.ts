@@ -320,6 +320,7 @@ export class XeroProvider extends BaseAccountingProvider {
 
   /**
    * Sync transactions to Xero as bank transactions
+   * Always creates new transactions - user can re-export to create updated versions
    */
   async syncTransactions(params: SyncTransactionsParams): Promise<SyncResult> {
     const { transactions, targetAccountId, tenantId } = params;

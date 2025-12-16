@@ -14,7 +14,6 @@ import {
   AccordionTrigger,
 } from "@midday/ui/accordion";
 import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
 import {
   Dialog,
   DialogContent,
@@ -78,11 +77,6 @@ const exportSettingsSchema = z
     message: "Please select at least one export format",
   });
 
-const accountingExportSchema = z.object({
-  providerId: z.string(),
-  includeAttachments: z.boolean(),
-});
-
 // Accounting provider display info
 const ACCOUNTING_PROVIDERS = {
   xero: {
@@ -124,21 +118,19 @@ export function ExportTransactionsModal({
   const trpc = useTRPC();
   const [activeTab, setActiveTab] = useState<"file" | "accounting">("file");
   const [selectedProvider, setSelectedProvider] = useState<string>("");
-  const [includeAccountingAttachments, setIncludeAccountingAttachments] =
-    useState(true);
 
   // Fetch connected accounting providers
   const { data: connectedApps } = useQuery(
     trpc.apps.getApps.queryOptions(undefined, {
       enabled: isOpen,
-    })
+    }),
   );
 
   // Filter to only accounting providers
   const accountingProviderIds = ["xero", "quickbooks", "fortnox", "visma"];
   const connectedAccountingProviders =
     connectedApps?.filter((app) =>
-      accountingProviderIds.includes(app.app_id)
+      accountingProviderIds.includes(app.app_id),
     ) ?? [];
 
   // Set default selected provider when providers load
@@ -148,7 +140,6 @@ export function ExportTransactionsModal({
     }
   }, [connectedAccountingProviders, selectedProvider]);
 
-  // Poll job status if we have a job ID
   const {
     status: jobStatus,
     progress,
@@ -203,10 +194,7 @@ export function ExportTransactionsModal({
     trpc.transactions.export.mutationOptions({
       onSuccess: (data) => {
         if (data?.id) {
-          setExportData({
-            runId: data.id,
-          });
-
+          setExportData({ runId: data.id });
           setRowSelection(() => ({}));
           // Don't set isExporting to false here - let job status handle it
           // Don't close modal immediately - wait for job to complete
@@ -215,7 +203,7 @@ export function ExportTransactionsModal({
       onError: () => {
         setIsExporting(false);
       },
-    })
+    }),
   );
 
   // Accounting export mutation
@@ -223,17 +211,14 @@ export function ExportTransactionsModal({
     trpc.accounting.export.mutationOptions({
       onSuccess: (data) => {
         if (data?.id) {
-          setExportData({
-            runId: data.id,
-          });
-
+          setExportData({ runId: data.id });
           setRowSelection(() => ({}));
         }
       },
       onError: () => {
         setIsExporting(false);
       },
-    })
+    }),
   );
 
   const onSubmit = async (values: z.infer<typeof exportSettingsSchema>) => {
@@ -258,8 +243,11 @@ export function ExportTransactionsModal({
 
     accountingExportMutation.mutate({
       transactionIds: ids,
-      providerId: selectedProvider,
-      includeAttachments: includeAccountingAttachments,
+      providerId: selectedProvider as
+        | "xero"
+        | "quickbooks"
+        | "fortnox"
+        | "visma",
     });
   };
 
@@ -285,7 +273,9 @@ export function ExportTransactionsModal({
 
           <Tabs
             value={activeTab}
-            onValueChange={(value) => setActiveTab(value as "file" | "accounting")}
+            onValueChange={(value) =>
+              setActiveTab(value as "file" | "accounting")
+            }
           >
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="file">File Export</TabsTrigger>
@@ -329,7 +319,11 @@ export function ExportTransactionsModal({
                         control={form.control}
                         name="csvDelimiter"
                         render={({ field }) => (
-                          <Accordion type="single" collapsible className="-mx-4">
+                          <Accordion
+                            type="single"
+                            collapsible
+                            className="-mx-4"
+                          >
                             <AccordionItem
                               value="csv-settings"
                               className="border-0"
@@ -355,7 +349,10 @@ export function ExportTransactionsModal({
                                         className="flex gap-4"
                                       >
                                         <div className="flex items-center space-x-2">
-                                          <RadioGroupItem value="," id="comma" />
+                                          <RadioGroupItem
+                                            value=","
+                                            id="comma"
+                                          />
                                           <Label
                                             htmlFor="comma"
                                             className="text-sm font-normal"
@@ -514,7 +511,9 @@ export function ExportTransactionsModal({
                     </p>
                   </div>
                   <Button asChild variant="outline">
-                    <Link href="/settings/apps">Connect Accounting Software</Link>
+                    <Link href="/settings/apps">
+                      Connect Accounting Software
+                    </Link>
                   </Button>
                 </div>
               ) : (
@@ -577,20 +576,10 @@ export function ExportTransactionsModal({
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <Label className="text-sm font-normal">
-                            Include Attachments
-                          </Label>
-                          <p className="text-xs text-[#878787]">
-                            Upload receipts and invoices with transactions
-                          </p>
-                        </div>
-                        <Switch
-                          checked={includeAccountingAttachments}
-                          onCheckedChange={setIncludeAccountingAttachments}
-                        />
-                      </div>
+                      <p className="text-xs text-[#878787]">
+                        Transactions will be exported with their matched
+                        receipts and invoices.
+                      </p>
                     </div>
                   )}
 

@@ -83,7 +83,7 @@ export function ExportStatus() {
   const { toast, dismiss, update } = useToast();
   const [toastId, setToastId] = useState<string | null>(null);
   const { exportData, setExportData } = useExportStore();
-  const { status, progress, result, isLoading } = useJobStatus({
+  const { status, progress, result, isLoading, queryError } = useJobStatus({
     jobId: exportData?.runId,
     enabled: !!exportData?.runId,
   });
@@ -138,7 +138,12 @@ export function ExportStatus() {
   const lastProgressRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
-    if (status === "failed") {
+    if (status === "failed" || queryError) {
+      // Dismiss the progress toast if it exists
+      if (toastId) {
+        dismiss(toastId);
+      }
+
       toast({
         duration: 2500,
         variant: "error",
@@ -148,7 +153,7 @@ export function ExportStatus() {
       setToastId(null);
       setExportData(undefined);
     }
-  }, [status, toast, setExportData]);
+  }, [status, queryError, toast, setExportData, toastId, dismiss]);
 
   // Create toast when export starts
   useEffect(() => {

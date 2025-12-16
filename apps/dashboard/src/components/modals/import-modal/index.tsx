@@ -71,7 +71,6 @@ export function ImportModal() {
         if (data?.id) {
           setJobId(data.id);
         } else {
-          // If no data returned, something went wrong
           setIsImporting(false);
           toast({
             duration: 3500,

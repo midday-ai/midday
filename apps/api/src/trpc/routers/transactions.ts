@@ -130,7 +130,7 @@ export const transactionsRouter = createTRPCRouter({
         throw new Error("Team not found");
       }
 
-      const result = await triggerJob(
+      return triggerJob(
         "export-transactions",
         {
           teamId,
@@ -142,8 +142,6 @@ export const transactionsRouter = createTRPCRouter({
         },
         "transactions",
       );
-
-      return result;
     }),
 
   import: protectedProcedure
@@ -165,7 +163,7 @@ export const transactionsRouter = createTRPCRouter({
         balance: balance ?? undefined,
       });
 
-      const result = await triggerJob(
+      return triggerJob(
         "import-transactions",
         {
           filePath: input.filePath,
@@ -177,7 +175,5 @@ export const transactionsRouter = createTRPCRouter({
         },
         "transactions",
       );
-
-      return result;
     }),
 });

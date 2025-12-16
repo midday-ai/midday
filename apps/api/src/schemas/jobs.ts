@@ -1,10 +1,11 @@
 import { z } from "zod";
 
 /**
- * Schema for getting job status by ID
+ * Schema for getting job status by composite ID
+ * The jobId contains both queue name and job ID (e.g., "accounting:21")
  */
 export const getJobStatusSchema = z.object({
-  jobId: z.string(),
+  jobId: z.string(), // Composite ID: "queueName:jobId"
 });
 
 /**

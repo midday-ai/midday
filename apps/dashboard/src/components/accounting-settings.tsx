@@ -9,9 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
-import { Label } from "@midday/ui/label";
 import { Skeleton } from "@midday/ui/skeleton";
-import { Switch } from "@midday/ui/switch";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import Link from "next/link";
@@ -46,7 +44,7 @@ export function AccountingSettings() {
 
   // Fetch connected accounting providers
   const { data: connections, isLoading } = useQuery(
-    trpc.accounting.getConnections.queryOptions()
+    trpc.accounting.getConnections.queryOptions(),
   );
 
   // Disconnect mutation
@@ -60,42 +58,8 @@ export function AccountingSettings() {
           queryKey: trpc.apps.getApps.queryKey(),
         });
       },
-    })
+    }),
   );
-
-  // Update settings mutation
-  const updateSettingsMutation = useMutation(
-    trpc.apps.updateSettings.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: trpc.accounting.getConnections.queryKey(),
-        });
-      },
-    })
-  );
-
-  const handleSettingChange = (
-    providerId: string,
-    settingId: string,
-    value: boolean
-  ) => {
-    const connection = connections?.find((c) => c.providerId === providerId);
-    if (!connection?.settings) return;
-
-    const currentSettings = Array.isArray(connection.settings)
-      ? connection.settings
-      : [];
-
-    const updatedSettings = currentSettings.map(
-      (setting: { id: string; value: unknown }) =>
-        setting.id === settingId ? { ...setting, value } : setting
-    );
-
-    updateSettingsMutation.mutate({
-      appId: providerId,
-      settings: updatedSettings,
-    });
-  };
 
   if (isLoading) {
     return (
@@ -112,8 +76,8 @@ export function AccountingSettings() {
         <CardHeader>
           <CardTitle className="text-lg">Accounting Integrations</CardTitle>
           <CardDescription>
-            Connect your accounting software to automatically sync transactions
-            and receipts.
+            Connect your accounting software to export transactions and
+            receipts.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -135,23 +99,14 @@ export function AccountingSettings() {
       <div className="mb-6">
         <h3 className="text-lg font-medium">Accounting Integrations</h3>
         <p className="text-sm text-[#878787]">
-          Manage your connected accounting software and sync settings.
+          Manage your connected accounting software. Export transactions from
+          the Transactions page.
         </p>
       </div>
 
       {connections.map((connection) => {
         const providerInfo =
           PROVIDER_INFO[connection.providerId as keyof typeof PROVIDER_INFO];
-        const settings = Array.isArray(connection.settings)
-          ? connection.settings
-          : [];
-
-        const autoSyncSetting = settings.find(
-          (s: { id: string }) => s.id === "autoSync"
-        );
-        const attachmentSetting = settings.find(
-          (s: { id: string }) => s.id === "syncAttachments"
-        );
 
         return (
           <Card key={connection.providerId}>
@@ -183,55 +138,7 @@ export function AccountingSettings() {
                   : ""}
               </div>
 
-              <div className="space-y-3 pt-2 border-t">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm font-normal">Automatic Sync</Label>
-                    <p className="text-xs text-[#878787]">
-                      Automatically sync transactions daily
-                    </p>
-                  </div>
-                  <Switch
-                    checked={
-                      (autoSyncSetting as { value?: boolean })?.value !== false
-                    }
-                    onCheckedChange={(checked) =>
-                      handleSettingChange(
-                        connection.providerId,
-                        "autoSync",
-                        checked
-                      )
-                    }
-                    disabled={updateSettingsMutation.isPending}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm font-normal">
-                      Include Attachments
-                    </Label>
-                    <p className="text-xs text-[#878787]">
-                      Upload receipts and invoices with transactions
-                    </p>
-                  </div>
-                  <Switch
-                    checked={
-                      (attachmentSetting as { value?: boolean })?.value !== false
-                    }
-                    onCheckedChange={(checked) =>
-                      handleSettingChange(
-                        connection.providerId,
-                        "syncAttachments",
-                        checked
-                      )
-                    }
-                    disabled={updateSettingsMutation.isPending}
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end pt-2">
+              <div className="flex justify-end pt-2 border-t">
                 <Button
                   variant="outline"
                   size="sm"
@@ -246,7 +153,9 @@ export function AccountingSettings() {
                   }
                   disabled={disconnectMutation.isPending}
                 >
-                  {disconnectMutation.isPending ? "Disconnecting..." : "Disconnect"}
+                  {disconnectMutation.isPending
+                    ? "Disconnecting..."
+                    : "Disconnect"}
                 </Button>
               </div>
             </CardContent>
@@ -256,4 +165,3 @@ export function AccountingSettings() {
     </div>
   );
 }
-

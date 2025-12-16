@@ -517,6 +517,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
   /**
    * Sync transactions to QuickBooks
    * Uses Purchase for expenses and SalesReceipt for income
+   * Always creates new transactions - user can re-export to create updated versions
    */
   async syncTransactions(params: SyncTransactionsParams): Promise<SyncResult> {
     const { transactions, targetAccountId, tenantId } = params;

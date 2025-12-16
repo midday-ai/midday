@@ -24,7 +24,8 @@ type FortnoxScope =
   | "bookkeeping"
   | "companyinformation"
   | "archive"
-  | "connectfile";
+  | "connectfile"
+  | "inbox";
 
 /** Fortnox API base URLs */
 const FORTNOX_AUTH_URL = "https://apps.fortnox.se/oauth-v1";
@@ -39,6 +40,7 @@ export const FORTNOX_SCOPES: FortnoxScope[] = [
   "companyinformation", // Read company info
   "archive", // Upload files
   "connectfile", // Connect files to vouchers
+  "inbox", // Upload files to inbox
 ];
 
 /** Default expense account code for Swedish BAS chart */
@@ -95,6 +97,8 @@ interface FortnoxVoucherResponse {
 interface FortnoxFileResponse {
   File?: {
     Id?: string;
+    Name?: string;
+    Path?: string;
   };
 }
 
@@ -582,6 +586,7 @@ export class FortnoxProvider extends BaseAccountingProvider {
 
   /**
    * Sync transactions to Fortnox as vouchers
+   * Always creates new vouchers - user can re-export to create updated versions
    */
   async syncTransactions(params: SyncTransactionsParams): Promise<SyncResult> {
     const { transactions, targetAccountId, tenantId } = params;
@@ -695,9 +700,8 @@ export class FortnoxProvider extends BaseAccountingProvider {
         tx.description || tx.counterpartyName || "Transaction";
       const voucherDescription = `${description} (midday:${tx.id.substring(0, 8)})`;
 
-      // Create the voucher
-      // Note: ReferenceNumber and Year are read-only in Fortnox API
-      // Year is determined by TransactionDate, reference included in description
+      // Note: ReferenceNumber, Year, and ApprovalState are read-only in Fortnox API
+      // Vouchers are created as drafts by default
       const response = await this.apiCall<FortnoxVoucherResponse>("/vouchers", {
         method: "POST",
         body: JSON.stringify({
@@ -710,6 +714,12 @@ export class FortnoxProvider extends BaseAccountingProvider {
               Debit: row.Debit,
               Credit: row.Credit,
               Description: tx.description || undefined,
+              // Additional Fortnox-specific fields
+              CostCenter: tx.costCenter || undefined,
+              Project: tx.project || undefined,
+              // TransactionInformation: Additional text (max 100 chars)
+              TransactionInformation:
+                tx.reference?.substring(0, 100) || undefined,
             })),
           },
         }),
@@ -752,29 +762,33 @@ export class FortnoxProvider extends BaseAccountingProvider {
 
     try {
       // Parse voucher ID (format: Series-Number-Year)
-      const [voucherSeries, voucherNumber] = transactionId.split("-");
-      if (!voucherSeries || !voucherNumber) {
+      const [voucherSeries, voucherNumber, voucherYear] =
+        transactionId.split("-");
+      if (!voucherSeries || !voucherNumber || !voucherYear) {
         logger.warn("Invalid Fortnox voucher ID format", {
           provider: "fortnox",
           transactionId,
+          parsed: { voucherSeries, voucherNumber, voucherYear },
         });
         return {
           success: false,
-          error: `Invalid voucher ID format: ${transactionId}`,
+          error: `Invalid voucher ID format: ${transactionId}. Expected: Series-Number-Year`,
         };
       }
 
       // Convert content to buffer
       const buffer = await streamToBuffer(content);
 
-      // Step 1: Upload file to archive
-      const fileId = await this.uploadFileToArchive(fileName, buffer);
+      // Step 1: Upload file to Inbox (vouchers folder)
+      const fileId = await this.uploadFileToInbox(fileName, buffer);
 
-      // Step 2: Create voucher file connection (year is derived by Fortnox)
+      // Step 2: Create voucher file connection
+      // VoucherYear is required to uniquely identify the voucher
       await this.createVoucherFileConnection(
         fileId,
         voucherSeries,
         voucherNumber,
+        voucherYear,
       );
 
       logger.info("Fortnox attachment uploaded successfully", {
@@ -803,45 +817,71 @@ export class FortnoxProvider extends BaseAccountingProvider {
   }
 
   /**
-   * Upload file to Fortnox archive
+   * Upload file to Fortnox Inbox
+   * Upload to root inbox - Fortnox will handle the file location
    */
-  private async uploadFileToArchive(
+  private async uploadFileToInbox(
     fileName: string,
     content: Buffer,
   ): Promise<string> {
     return this.withRetry(async () => {
-      // Upload to root directory (no folder path)
-      // Fortnox archive folders must be created manually by the user
-      const response = await this.uploadFile("/archive", fileName, content);
+      // Upload to inbox root (no path parameter)
+      const response = await this.uploadFile("/inbox", fileName, content);
 
       if (!response.File?.Id) {
         throw new Error("Failed to upload file - no file ID returned");
       }
 
+      logger.info("File uploaded to inbox", {
+        provider: "fortnox",
+        fileId: response.File.Id,
+        fileName: response.File.Name,
+        path: response.File.Path,
+      });
+
       return response.File.Id;
-    }, "uploadFileToArchive");
+    }, "uploadFileToInbox");
   }
 
   /**
    * Create connection between file and voucher
-   * Note: VoucherYear is read-only in the Fortnox API despite docs saying it's required
+   *
+   * Per Fortnox API (discovered through testing):
+   * - FileId: string (from inbox upload)
+   * - VoucherSeries: string
+   * - VoucherNumber: STRING (not integer!)
+   * - VoucherYear: INTEGER (required, identifies fiscal year)
    */
   private async createVoucherFileConnection(
     fileId: string,
     voucherSeries: string,
     voucherNumber: string,
+    voucherYear: string,
   ): Promise<void> {
     return this.withRetry(async () => {
-      await this.apiCall("/voucherfileconnections", {
-        method: "POST",
-        body: JSON.stringify({
-          VoucherFileConnection: {
-            FileId: fileId,
-            VoucherSeries: voucherSeries,
-            VoucherNumber: voucherNumber,
-          },
-        }),
+      logger.info("Creating voucher file connection", {
+        provider: "fortnox",
+        fileId,
+        voucherSeries,
+        voucherNumber,
+        voucherYear,
       });
+
+      // Try without VoucherYear - Fortnox may derive it from voucher lookup
+      // VoucherNumber as string per API examples
+      await this.apiCall(
+        `/voucherfileconnections?financialyear=${voucherYear}`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            VoucherFileConnection: {
+              FileId: fileId,
+              VoucherSeries: voucherSeries,
+              VoucherNumber: voucherNumber, // String
+            },
+          }),
+        },
+      );
     }, "createVoucherFileConnection");
   }
 }

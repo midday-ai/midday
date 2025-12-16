@@ -6,10 +6,10 @@ import {
 } from "@api/schemas/accounting";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
+  type AccountingProviderConfig,
   getAccountingProvider,
   getOrgId,
   getOrgName,
-  type AccountingProviderConfig,
 } from "@midday/accounting";
 import {
   deleteApp,
@@ -27,7 +27,7 @@ export const accountingRouter = createTRPCRouter({
   export: protectedProcedure
     .input(exportToAccountingSchema)
     .mutation(async ({ input, ctx: { db, teamId, session } }) => {
-      const { transactionIds, providerId, includeAttachments } = input;
+      const { transactionIds, providerId } = input;
 
       if (!teamId) {
         throw new TRPCError({
@@ -46,7 +46,6 @@ export const accountingRouter = createTRPCRouter({
         });
       }
 
-      // Trigger the export job
       const result = await triggerJob(
         "export-to-accounting",
         {
@@ -54,14 +53,11 @@ export const accountingRouter = createTRPCRouter({
           userId: session.user.id,
           providerId,
           transactionIds,
-          includeAttachments,
         },
         "accounting",
       );
 
-      return {
-        id: result.id,
-      };
+      return result;
     }),
 
   /**
@@ -108,7 +104,9 @@ export const accountingRouter = createTRPCRouter({
         const config = app.config as AccountingProviderConfig | null;
         return {
           providerId: app.app_id,
-          tenantName: config ? getOrgName(config) ?? "Connected" : "Connected",
+          tenantName: config
+            ? (getOrgName(config) ?? "Connected")
+            : "Connected",
           settings: app.settings,
           connectedAt: null, // apps table doesn't have created_at in the select
         };
@@ -172,12 +170,15 @@ export const accountingRouter = createTRPCRouter({
         });
       }
 
-      const provider = getAccountingProvider(providerId as "xero" | "quickbooks", {
-        clientId,
-        clientSecret,
-        redirectUri,
-        config,
-      });
+      const provider = getAccountingProvider(
+        providerId as "xero" | "quickbooks",
+        {
+          clientId,
+          clientSecret,
+          redirectUri,
+          config,
+        },
+      );
 
       try {
         // Use getOrgId to get the tenant/realm ID in a provider-agnostic way

@@ -12,11 +12,11 @@ export const accountingProviderIdSchema = z.enum([
 
 /**
  * Schema for exporting transactions to accounting
+ * Always includes attachments - receipts are a core part of the export
  */
 export const exportToAccountingSchema = z.object({
   transactionIds: z.array(z.string().uuid()),
   providerId: accountingProviderIdSchema,
-  includeAttachments: z.boolean().default(true),
 });
 
 /**
@@ -40,4 +40,3 @@ export const disconnectProviderSchema = z.object({
 export const getAccountsSchema = z.object({
   providerId: accountingProviderIdSchema,
 });
-

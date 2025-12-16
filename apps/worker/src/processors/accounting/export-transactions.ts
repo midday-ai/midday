@@ -22,15 +22,13 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
     failedCount: number;
     exportedAt: string;
   }> {
-    const { teamId, userId, providerId, transactionIds, includeAttachments } =
-      job.data;
+    const { teamId, userId, providerId, transactionIds } = job.data;
 
     this.logger.info("Starting manual accounting export", {
       teamId,
       userId,
       providerId,
       transactionCount: transactionIds.length,
-      includeAttachments,
     });
 
     if (transactionIds.length === 0) {
@@ -97,7 +95,7 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
         totalExported += result.syncedCount;
         totalFailed += result.failedCount;
 
-        // Create sync records for each transaction
+        // Create/update sync records for each transaction
         for (const txResult of result.results) {
           await upsertAccountingSyncRecord(db, {
             transactionId: txResult.transactionId,
@@ -111,12 +109,8 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
             providerEntityType: txResult.providerEntityType,
           });
 
-          // Trigger attachment sync if enabled and transaction has attachments
-          if (
-            txResult.success &&
-            txResult.providerTransactionId &&
-            includeAttachments
-          ) {
+          // Always trigger attachment sync for successful transactions
+          if (txResult.success && txResult.providerTransactionId) {
             const originalTx = transactions.find(
               (t) => t.id === txResult.transactionId,
             );

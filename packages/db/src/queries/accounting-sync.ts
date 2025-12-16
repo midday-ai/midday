@@ -44,6 +44,11 @@ export const upsertAccountingSyncRecord = async (
   db: Database,
   params: CreateAccountingSyncRecordParams,
 ) => {
+  const status = params.status ?? "synced";
+  // Clear error message when status is synced (successful re-export should clear previous errors)
+  const errorMessage =
+    status === "synced" ? null : (params.errorMessage ?? null);
+
   const [result] = await db
     .insert(accountingSyncRecords)
     .values({
@@ -54,8 +59,8 @@ export const upsertAccountingSyncRecord = async (
       providerTransactionId: params.providerTransactionId,
       syncedAttachmentIds: params.syncedAttachmentIds ?? [],
       syncType: params.syncType,
-      status: params.status ?? "synced",
-      errorMessage: params.errorMessage,
+      status,
+      errorMessage,
       providerEntityType: params.providerEntityType,
     })
     .onConflictDoUpdate({
@@ -68,8 +73,8 @@ export const upsertAccountingSyncRecord = async (
         syncedAttachmentIds: params.syncedAttachmentIds ?? [],
         syncedAt: new Date().toISOString(),
         syncType: params.syncType,
-        status: params.status ?? "synced",
-        errorMessage: params.errorMessage,
+        status,
+        errorMessage,
         providerEntityType: params.providerEntityType,
       },
     })

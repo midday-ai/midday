@@ -317,6 +317,16 @@ export interface MappedTransaction {
    * Used as one side of the journal entry (debit for income, credit for expense)
    */
   bankAccountCode?: string;
+  /**
+   * Cost center code for cost allocation
+   * - Fortnox: Maps to CostCenter in VoucherRow
+   */
+  costCenter?: string;
+  /**
+   * Project code for project tracking
+   * - Fortnox: Maps to Project in VoucherRow
+   */
+  project?: string;
   attachments?: AttachmentRef[];
 }
 
