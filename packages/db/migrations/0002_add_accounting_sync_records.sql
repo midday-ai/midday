@@ -2,8 +2,7 @@
 CREATE TYPE accounting_provider AS ENUM (
   'xero',
   'quickbooks',
-  'fortnox',
-  'visma'
+  'fortnox'
 );
 
 -- Add accounting sync status enum
@@ -32,6 +31,8 @@ CREATE TABLE accounting_sync_records (
   sync_type accounting_sync_type,
   status accounting_sync_status DEFAULT 'synced' NOT NULL,
   error_message TEXT,
+  provider_entity_type TEXT,           -- Provider-specific entity type (e.g., "Purchase", "SalesReceipt", "Voucher", "BankTransaction")
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,  -- When the record was first created (synced_at gets updated on every sync)
   UNIQUE(transaction_id, provider)    -- One sync record per transaction per provider
 );
 

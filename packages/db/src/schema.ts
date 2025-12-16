@@ -3403,6 +3403,12 @@ export const accountingSyncRecords = pgTable(
     syncType: accountingSyncTypeEnum("sync_type"),
     status: accountingSyncStatusEnum().default("synced").notNull(),
     errorMessage: text("error_message"),
+    // Provider-specific entity type (e.g., "Purchase", "SalesReceipt", "Voucher", "BankTransaction")
+    providerEntityType: text("provider_entity_type"),
+    // When the record was first created (synced_at gets updated on every sync)
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     // Primary lookup: find syncs for a transaction

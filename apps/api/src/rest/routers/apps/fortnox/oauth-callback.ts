@@ -116,25 +116,12 @@ app.openapi(
         redirectUri,
       });
 
-      // Exchange code for tokens
+      // Exchange code for tokens (this also stores tokens in the provider instance)
       const tokenSet = await provider.exchangeCodeForTokens(code);
 
-      // Get company information
-      // Initialize provider with tokens to get company info
-      const providerWithTokens = getAccountingProvider("fortnox", {
-        clientId,
-        clientSecret,
-        redirectUri,
-        config: {
-          provider: "fortnox",
-          accessToken: tokenSet.accessToken,
-          refreshToken: tokenSet.refreshToken,
-          expiresAt: tokenSet.expiresAt.toISOString(),
-        },
-      });
-
       // Fortnox is single-tenant, get the company info
-      const companyInfo = await providerWithTokens.getTenantInfo("default");
+      // The provider already has the tokens from exchangeCodeForTokens
+      const companyInfo = await provider.getTenantInfo("default");
 
       // Create app integration in database
       await createApp(db, {
@@ -184,4 +171,3 @@ app.openapi(
 );
 
 export { app as oauthCallbackRouter };
-

@@ -41,6 +41,7 @@ export function useAppOAuth({
       if (oauthCompleted) return;
       oauthCompleted = true;
       cleanup();
+      popup?.close();
       onSuccess?.();
       setIsLoading(false);
     };

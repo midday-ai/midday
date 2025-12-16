@@ -2,9 +2,9 @@ import { publicMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import {
+  XERO_SCOPES,
   decryptAccountingOAuthState,
   getAccountingProvider,
-  XERO_SCOPES,
 } from "@midday/accounting";
 import config from "@midday/app-store/xero";
 import { createApp } from "@midday/db/queries";
@@ -121,7 +121,7 @@ app.openapi(
 
       // Exchange code for tokens
       const tokenSet = await provider.exchangeCodeForTokens(
-        callbackUrl.toString()
+        callbackUrl.toString(),
       );
 
       // Get tenant information
@@ -159,14 +159,14 @@ app.openapi(
       if (parsedState.source === "apps") {
         return c.redirect(
           `${dashboardUrl}/all-done?event=app_oauth_completed`,
-          302
+          302,
         );
       }
 
       // Settings flow
       return c.redirect(
         `${dashboardUrl}/settings/apps?connected=true&provider=xero`,
-        302
+        302,
       );
     } catch (err) {
       logger.error("Xero OAuth callback error", {
@@ -176,8 +176,7 @@ app.openapi(
 
       return c.redirect(`${dashboardUrl}/settings/apps?connected=false`, 302);
     }
-  }
+  },
 );
 
 export { app as oauthCallbackRouter };
-

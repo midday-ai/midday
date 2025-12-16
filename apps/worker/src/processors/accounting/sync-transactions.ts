@@ -116,6 +116,7 @@ export class SyncTransactionsProcessor extends AccountingProcessorBase<Accountin
             syncType: manualSync ? "manual" : "auto",
             status: txResult.success ? "synced" : "failed",
             errorMessage: txResult.error,
+            providerEntityType: txResult.providerEntityType,
           });
 
           // Trigger attachment sync if enabled and transaction has attachments

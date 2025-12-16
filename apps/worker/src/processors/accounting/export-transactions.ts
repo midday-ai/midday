@@ -108,6 +108,7 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
             syncType: "manual",
             status: txResult.success ? "synced" : "failed",
             errorMessage: txResult.error,
+            providerEntityType: txResult.providerEntityType,
           });
 
           // Trigger attachment sync if enabled and transaction has attachments
@@ -131,6 +132,8 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
                   transactionId: txResult.transactionId,
                   providerTransactionId: txResult.providerTransactionId,
                   attachmentIds: attachments.map((a) => a.id),
+                  // Pass entity type to avoid extra API lookup for QuickBooks
+                  providerEntityType: txResult.providerEntityType,
                 },
                 "accounting",
               );

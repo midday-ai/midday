@@ -16,7 +16,6 @@
   "dependencies": {
     "@midday/encryption": "workspace:*",
     "@midday/logger": "workspace:*",
-    "@rantalainen/fortnox-api-client": "^1.1.1",
     "intuit-oauth": "^4.2.2",
     "xero-node": "^13.3.0",
     "zod": "^4.2.1"

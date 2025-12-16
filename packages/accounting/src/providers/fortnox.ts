@@ -1,8 +1,4 @@
 import { logger } from "@midday/logger";
-import {
-  FortnoxApiClient,
-  type FortnoxScope,
-} from "@rantalainen/fortnox-api-client";
 import { BaseAccountingProvider } from "../provider";
 import {
   type AccountingAccount,
@@ -20,6 +16,20 @@ import {
 } from "../types";
 import { streamToBuffer } from "../utils";
 
+// ============================================================================
+// Fortnox Types
+// ============================================================================
+
+type FortnoxScope =
+  | "bookkeeping"
+  | "companyinformation"
+  | "archive"
+  | "connectfile";
+
+/** Fortnox API base URLs */
+const FORTNOX_AUTH_URL = "https://apps.fortnox.se/oauth-v1";
+const FORTNOX_API_URL = "https://api.fortnox.se/3";
+
 /**
  * Fortnox OAuth scopes required for the integration
  * See: https://www.fortnox.se/developer/guides-and-good-to-know/scopes
@@ -35,8 +45,62 @@ export const FORTNOX_SCOPES: FortnoxScope[] = [
 const DEFAULT_EXPENSE_ACCOUNT = "4000";
 /** Default income account code for Swedish BAS chart */
 const DEFAULT_INCOME_ACCOUNT = "3000";
-/** Default bank account code for Swedish BAS chart */
-const DEFAULT_BANK_ACCOUNT = "1930";
+
+// ============================================================================
+// Fortnox API Response Types
+// ============================================================================
+
+interface FortnoxTokenResponse {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  expires_in: number;
+  scope: string;
+}
+
+interface FortnoxCompanyInfo {
+  CompanyInformation?: {
+    DatabaseNumber?: number;
+    CompanyName?: string;
+  };
+}
+
+interface FortnoxAccount {
+  Number?: number;
+  Description?: string;
+  Active?: boolean;
+}
+
+interface FortnoxAccountsResponse {
+  Accounts?: FortnoxAccount[];
+}
+
+interface FortnoxVoucherRow {
+  Account: number;
+  Debit: number;
+  Credit: number;
+  Description?: string;
+}
+
+interface FortnoxVoucher {
+  VoucherSeries?: string;
+  VoucherNumber?: number;
+  Year?: number;
+}
+
+interface FortnoxVoucherResponse {
+  Voucher?: FortnoxVoucher;
+}
+
+interface FortnoxFileResponse {
+  File?: {
+    Id?: string;
+  };
+}
+
+// ============================================================================
+// Fortnox Provider Implementation
+// ============================================================================
 
 /**
  * Fortnox accounting provider implementation
@@ -59,7 +123,6 @@ export class FortnoxProvider extends BaseAccountingProvider {
   protected override readonly rateLimitConfig: RateLimitConfig =
     RATE_LIMITS.fortnox;
 
-  private client: FortnoxApiClient | null = null;
   private accessToken: string | null = null;
   private refreshTokenValue: string | null = null;
   private tokenExpiresAt: Date | null = null;
@@ -75,29 +138,86 @@ export class FortnoxProvider extends BaseAccountingProvider {
     }
   }
 
+  // ============================================================================
+  // HTTP Helper Methods
+  // ============================================================================
+
   /**
-   * Initialize the Fortnox client with current tokens
+   * Make an authenticated API call to Fortnox
    */
-  private getClient(): FortnoxApiClient {
-    if (!this.client) {
-      if (!this.accessToken) {
-        throw new Error("Fortnox client not initialized - no access token");
-      }
-      this.client = new FortnoxApiClient({
-        clientId: this.config.clientId,
-        clientSecret: this.config.clientSecret,
-        accessToken: this.accessToken,
-        refreshToken: this.refreshTokenValue ?? undefined,
-      });
+  private async apiCall<T>(
+    endpoint: string,
+    options: RequestInit = {},
+  ): Promise<T> {
+    if (!this.accessToken) {
+      throw new Error("Fortnox client not initialized - no access token");
     }
-    return this.client;
+
+    const url = `${FORTNOX_API_URL}${endpoint}`;
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...options.headers,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `Fortnox API error ${response.status}: ${errorText || response.statusText}`,
+      );
+    }
+
+    return response.json() as Promise<T>;
   }
 
   /**
-   * Reset client to force re-initialization with new tokens
+   * Upload a file to Fortnox (multipart/form-data)
    */
-  private resetClient(): void {
-    this.client = null;
+  private async uploadFile(
+    endpoint: string,
+    fileName: string,
+    content: Buffer,
+    folder?: string,
+  ): Promise<FortnoxFileResponse> {
+    if (!this.accessToken) {
+      throw new Error("Fortnox client not initialized - no access token");
+    }
+
+    const formData = new FormData();
+    // Convert Buffer to Uint8Array for Blob compatibility
+    const uint8Array = new Uint8Array(content);
+    formData.append(
+      "file",
+      new Blob([uint8Array], { type: "application/octet-stream" }),
+      fileName,
+    );
+
+    const url = new URL(`${FORTNOX_API_URL}${endpoint}`);
+    if (folder) {
+      url.searchParams.set("path", folder);
+    }
+
+    const response = await fetch(url.toString(), {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`,
+        Accept: "application/json",
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `Fortnox file upload error ${response.status}: ${errorText || response.statusText}`,
+      );
+    }
+
+    return response.json() as Promise<FortnoxFileResponse>;
   }
 
   /**
@@ -181,43 +301,64 @@ export class FortnoxProvider extends BaseAccountingProvider {
    * Build the consent URL for Fortnox OAuth flow
    */
   async buildConsentUrl(state: string): Promise<string> {
-    const authUrl = FortnoxApiClient.createAuthorizationUri(
-      this.config.clientId,
-      this.config.redirectUri,
-      FORTNOX_SCOPES,
-      state,
-      "service", // Service integration type
-    );
-    return authUrl;
+    const url = new URL(`${FORTNOX_AUTH_URL}/auth`);
+    url.searchParams.set("client_id", this.config.clientId);
+    url.searchParams.set("redirect_uri", this.config.redirectUri);
+    url.searchParams.set("scope", FORTNOX_SCOPES.join(" "));
+    url.searchParams.set("state", state);
+    url.searchParams.set("access_type", "offline");
+    url.searchParams.set("response_type", "code");
+    url.searchParams.set("account_type", "service");
+    return url.toString();
   }
 
   /**
    * Exchange authorization code for tokens
    */
   async exchangeCodeForTokens(code: string): Promise<TokenSet> {
-    const tokens = await FortnoxApiClient.getTokensByAuthorizationCode(
-      this.config.clientId,
-      this.config.clientSecret,
-      this.config.redirectUri,
-      code,
-    );
+    const credentials = Buffer.from(
+      `${this.config.clientId}:${this.config.clientSecret}`,
+    ).toString("base64");
 
-    if (!tokens.accessToken || !tokens.refreshToken) {
+    const response = await fetch(`${FORTNOX_AUTH_URL}/token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Basic ${credentials}`,
+      },
+      body: new URLSearchParams({
+        grant_type: "authorization_code",
+        code,
+        redirect_uri: this.config.redirectUri,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `Fortnox token exchange failed: ${response.status} ${errorText}`,
+      );
+    }
+
+    const tokens = (await response.json()) as FortnoxTokenResponse;
+
+    if (!tokens.access_token || !tokens.refresh_token) {
       throw new Error("Failed to get tokens from Fortnox");
     }
 
     // Store tokens locally
-    this.accessToken = tokens.accessToken;
-    this.refreshTokenValue = tokens.refreshToken;
-    // Fortnox access tokens expire in 1 hour
-    this.tokenExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
-    this.resetClient();
+    this.accessToken = tokens.access_token;
+    this.refreshTokenValue = tokens.refresh_token;
+    // Fortnox access tokens expire in 1 hour (expires_in is in seconds)
+    this.tokenExpiresAt = new Date(
+      Date.now() + (tokens.expires_in || 3600) * 1000,
+    );
 
     return {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
+      accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token,
       expiresAt: this.tokenExpiresAt,
-      tokenType: "Bearer",
+      tokenType: tokens.token_type || "Bearer",
       scope: FORTNOX_SCOPES as string[],
     };
   }
@@ -228,47 +369,58 @@ export class FortnoxProvider extends BaseAccountingProvider {
   async refreshTokens(refreshToken: string): Promise<TokenSet> {
     logger.info("Refreshing Fortnox tokens", { provider: "fortnox" });
 
-    try {
-      // The FortnoxApiClient handles token refresh internally
-      // We need to create a new client with the refresh token and call refreshTokens
-      const tempClient = new FortnoxApiClient({
-        clientId: this.config.clientId,
-        clientSecret: this.config.clientSecret,
-        refreshToken: refreshToken,
-      });
+    const credentials = Buffer.from(
+      `${this.config.clientId}:${this.config.clientSecret}`,
+    ).toString("base64");
 
-      // The client has a refreshTokens method
-      const newTokens = await tempClient.refreshTokens();
+    const response = await fetch(`${FORTNOX_AUTH_URL}/token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Basic ${credentials}`,
+      },
+      body: new URLSearchParams({
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+      }),
+    });
 
-      if (!newTokens.accessToken) {
-        throw new Error("Failed to refresh Fortnox tokens");
-      }
-
-      // Update local state
-      this.accessToken = newTokens.accessToken;
-      this.refreshTokenValue = newTokens.refreshToken ?? refreshToken;
-      // Fortnox access tokens expire in 1 hour
-      this.tokenExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
-      this.resetClient();
-
-      logger.info("Fortnox tokens refreshed successfully", {
-        provider: "fortnox",
-      });
-
-      return {
-        accessToken: this.accessToken,
-        refreshToken: this.refreshTokenValue,
-        expiresAt: this.tokenExpiresAt,
-        tokenType: "Bearer",
-        scope: FORTNOX_SCOPES as string[],
-      };
-    } catch (error) {
+    if (!response.ok) {
+      const errorText = await response.text();
       logger.error("Failed to refresh Fortnox tokens", {
         provider: "fortnox",
-        error: error instanceof Error ? error.message : String(error),
+        status: response.status,
+        error: errorText,
       });
-      throw error;
+      throw new Error(
+        `Fortnox token refresh failed: ${response.status} ${errorText}`,
+      );
     }
+
+    const tokens = (await response.json()) as FortnoxTokenResponse;
+
+    if (!tokens.access_token) {
+      throw new Error("Failed to refresh Fortnox tokens - no access token");
+    }
+
+    // Update local state
+    this.accessToken = tokens.access_token;
+    this.refreshTokenValue = tokens.refresh_token ?? refreshToken;
+    this.tokenExpiresAt = new Date(
+      Date.now() + (tokens.expires_in || 3600) * 1000,
+    );
+
+    logger.info("Fortnox tokens refreshed successfully", {
+      provider: "fortnox",
+    });
+
+    return {
+      accessToken: this.accessToken,
+      refreshToken: this.refreshTokenValue,
+      expiresAt: this.tokenExpiresAt,
+      tokenType: tokens.token_type || "Bearer",
+      scope: FORTNOX_SCOPES as string[],
+    };
   }
 
   /**
@@ -287,7 +439,6 @@ export class FortnoxProvider extends BaseAccountingProvider {
     this.accessToken = null;
     this.refreshTokenValue = null;
     this.tokenExpiresAt = null;
-    this.resetClient();
   }
 
   // ============================================================================
@@ -301,15 +452,13 @@ export class FortnoxProvider extends BaseAccountingProvider {
   async getTenantInfo(
     _tenantId: string,
   ): Promise<{ id: string; name: string; currency?: string }> {
-    const client = this.getClient();
-    const response =
-      await client.api.companyinformation.getCompanyInformationResource();
-    const companyInfo = response.data;
+    const response = await this.apiCall<FortnoxCompanyInfo>(
+      "/companyinformation",
+    );
 
     return {
-      id:
-        companyInfo.CompanyInformation?.DatabaseNumber?.toString() ?? "default",
-      name: companyInfo.CompanyInformation?.CompanyName ?? "Unknown",
+      id: response.CompanyInformation?.DatabaseNumber?.toString() ?? "default",
+      name: response.CompanyInformation?.CompanyName ?? "Unknown",
       currency: "SEK", // Fortnox is primarily Swedish
     };
   }
@@ -353,21 +502,23 @@ export class FortnoxProvider extends BaseAccountingProvider {
   /**
    * Get accounts from Fortnox
    * Returns bank/cash accounts suitable for transaction sync
+   * Falls back to default 1930 (Swedish standard bank account) if none found
    */
   async getAccounts(_tenantId: string): Promise<AccountingAccount[]> {
     return this.withRetry(async () => {
-      const client = this.getClient();
-      const response = await client.api.accounts.listAccountsResource();
-      const accountsData = response.data;
+      const response = await this.apiCall<FortnoxAccountsResponse>("/accounts");
 
-      if (!accountsData.Accounts) {
-        return [];
+      if (!response.Accounts) {
+        // Return default account if API returns no accounts
+        logger.info("No accounts from Fortnox API, using default 1930", {
+          provider: "fortnox",
+        });
+        return [this.getDefaultBankAccount()];
       }
 
       // Filter for bank/cash accounts (typically 19xx in Swedish BAS chart)
       // Also include other liquid accounts the user might want to use
-      type FortnoxAccount = NonNullable<typeof accountsData.Accounts>[number];
-      return accountsData.Accounts.filter((account: FortnoxAccount) => {
+      const accounts = response.Accounts.filter((account) => {
         // Active accounts only
         if (!account.Active) return false;
 
@@ -377,7 +528,7 @@ export class FortnoxProvider extends BaseAccountingProvider {
           (accountNum >= 1900 && accountNum <= 1999) || // Bank accounts
           (accountNum >= 1600 && accountNum <= 1699)
         ); // Other receivables/cash
-      }).map((account: FortnoxAccount) => ({
+      }).map((account) => ({
         id: account.Number?.toString() ?? "",
         name: account.Description ?? `Account ${account.Number}`,
         code: account.Number?.toString(),
@@ -385,7 +536,31 @@ export class FortnoxProvider extends BaseAccountingProvider {
         currency: "SEK", // Fortnox is primarily Swedish
         status: account.Active ? ("active" as const) : ("archived" as const),
       }));
+
+      // If no matching accounts found, return default
+      if (accounts.length === 0) {
+        logger.info("No bank accounts in expected range, using default 1930", {
+          provider: "fortnox",
+        });
+        return [this.getDefaultBankAccount()];
+      }
+
+      return accounts;
     }, "getAccounts");
+  }
+
+  /**
+   * Get default Swedish bank account (1930 - Företagskonto/checkkonto)
+   */
+  private getDefaultBankAccount(): AccountingAccount {
+    return {
+      id: "1930",
+      name: "Företagskonto (default)",
+      code: "1930",
+      type: "BANK",
+      currency: "SEK",
+      status: "active" as const,
+    };
   }
 
   /**
@@ -475,7 +650,6 @@ export class FortnoxProvider extends BaseAccountingProvider {
     bankAccountCode: string,
   ): Promise<{ voucherId: string }> {
     return this.withRetry(async () => {
-      const client = this.getClient();
       const isExpense = tx.amount < 0;
       const amount = Math.abs(tx.amount);
 
@@ -488,48 +662,67 @@ export class FortnoxProvider extends BaseAccountingProvider {
       const transactionYear = new Date(tx.date).getFullYear();
 
       // Build voucher rows for double-entry
-      const voucherRows = isExpense
+      const voucherRows: FortnoxVoucherRow[] = isExpense
         ? [
             // Expense: Debit expense account, Credit bank account
-            { Account: Number.parseInt(contraAccount), Debit: amount },
-            { Account: Number.parseInt(bankAccountCode), Credit: amount },
+            {
+              Account: Number.parseInt(contraAccount),
+              Debit: amount,
+              Credit: 0,
+            },
+            {
+              Account: Number.parseInt(bankAccountCode),
+              Debit: 0,
+              Credit: amount,
+            },
           ]
         : [
             // Income: Debit bank account, Credit income account
-            { Account: Number.parseInt(bankAccountCode), Debit: amount },
-            { Account: Number.parseInt(contraAccount), Credit: amount },
+            {
+              Account: Number.parseInt(bankAccountCode),
+              Debit: amount,
+              Credit: 0,
+            },
+            {
+              Account: Number.parseInt(contraAccount),
+              Debit: 0,
+              Credit: amount,
+            },
           ];
 
-      // Generate idempotency reference (max 100 chars in Fortnox)
-      const referenceNumber = `midday-${tx.id}`.substring(0, 100);
+      // Build description with Midday reference for tracking
+      const description =
+        tx.description || tx.counterpartyName || "Transaction";
+      const voucherDescription = `${description} (midday:${tx.id.substring(0, 8)})`;
 
       // Create the voucher
-      const response = await client.api.vouchers.createVouchersResource({
-        Voucher: {
-          Description:
-            tx.description || tx.counterpartyName || "Transaction from Midday",
-          TransactionDate: tx.date,
-          VoucherSeries: "A", // Standard voucher series
-          Year: transactionYear,
-          ReferenceNumber: referenceNumber, // Idempotency key
-          VoucherRows: voucherRows.map((row) => ({
-            Account: row.Account,
-            Debit: row.Debit ?? 0,
-            Credit: row.Credit ?? 0,
-            Description: tx.description || undefined,
-          })),
-        },
+      // Note: ReferenceNumber and Year are read-only in Fortnox API
+      // Year is determined by TransactionDate, reference included in description
+      const response = await this.apiCall<FortnoxVoucherResponse>("/vouchers", {
+        method: "POST",
+        body: JSON.stringify({
+          Voucher: {
+            Description: voucherDescription.substring(0, 200), // Fortnox limit
+            TransactionDate: tx.date,
+            VoucherSeries: "A", // Standard voucher series
+            VoucherRows: voucherRows.map((row) => ({
+              Account: row.Account,
+              Debit: row.Debit,
+              Credit: row.Credit,
+              Description: tx.description || undefined,
+            })),
+          },
+        }),
       });
 
-      const voucherData = response.data;
-      if (!voucherData.Voucher?.VoucherNumber) {
+      if (!response.Voucher?.VoucherNumber) {
         throw new Error(
           "Failed to create voucher - no voucher number returned",
         );
       }
 
       // Voucher ID in Fortnox is: Series + Number + Year
-      const voucherId = `${voucherData.Voucher.VoucherSeries}-${voucherData.Voucher.VoucherNumber}-${voucherData.Voucher.Year}`;
+      const voucherId = `${response.Voucher.VoucherSeries}-${response.Voucher.VoucherNumber}-${response.Voucher.Year}`;
 
       return { voucherId };
     }, "createVoucher");
@@ -549,20 +742,18 @@ export class FortnoxProvider extends BaseAccountingProvider {
   async uploadAttachment(
     params: UploadAttachmentParams,
   ): Promise<AttachmentResult> {
-    const { transactionId, fileName, mimeType, content } = params;
+    const { transactionId, fileName, content } = params;
 
     logger.info("Starting Fortnox attachment upload", {
       provider: "fortnox",
       transactionId,
       fileName,
-      mimeType,
     });
 
     try {
       // Parse voucher ID (format: Series-Number-Year)
-      const [voucherSeries, voucherNumber, voucherYear] =
-        transactionId.split("-");
-      if (!voucherSeries || !voucherNumber || !voucherYear) {
+      const [voucherSeries, voucherNumber] = transactionId.split("-");
+      if (!voucherSeries || !voucherNumber) {
         logger.warn("Invalid Fortnox voucher ID format", {
           provider: "fortnox",
           transactionId,
@@ -579,12 +770,11 @@ export class FortnoxProvider extends BaseAccountingProvider {
       // Step 1: Upload file to archive
       const fileId = await this.uploadFileToArchive(fileName, buffer);
 
-      // Step 2: Create voucher file connection
+      // Step 2: Create voucher file connection (year is derived by Fortnox)
       await this.createVoucherFileConnection(
         fileId,
         voucherSeries,
         voucherNumber,
-        Number.parseInt(voucherYear),
       );
 
       logger.info("Fortnox attachment uploaded successfully", {
@@ -616,50 +806,42 @@ export class FortnoxProvider extends BaseAccountingProvider {
    * Upload file to Fortnox archive
    */
   private async uploadFileToArchive(
-    _fileName: string,
+    fileName: string,
     content: Buffer,
   ): Promise<string> {
     return this.withRetry(async () => {
-      const client = this.getClient();
+      // Upload to root directory (no folder path)
+      // Fortnox archive folders must be created manually by the user
+      const response = await this.uploadFile("/archive", fileName, content);
 
-      // Fortnox API expects the file as an object
-      // The client library handles multipart form data
-      const response = await client.api.archive.uploadFile(
-        { file: content as unknown as object },
-        { path: "Midday" }, // Upload to Midday folder
-      );
-
-      const fileData = response.data;
-      if (!fileData.File?.Id) {
+      if (!response.File?.Id) {
         throw new Error("Failed to upload file - no file ID returned");
       }
 
-      return fileData.File.Id;
+      return response.File.Id;
     }, "uploadFileToArchive");
   }
 
   /**
    * Create connection between file and voucher
+   * Note: VoucherYear is read-only in the Fortnox API despite docs saying it's required
    */
   private async createVoucherFileConnection(
     fileId: string,
     voucherSeries: string,
     voucherNumber: string,
-    voucherYear: number,
   ): Promise<void> {
     return this.withRetry(async () => {
-      const client = this.getClient();
-
-      await client.api.voucherfileconnections.createVoucherFileConnectionsResource(
-        {
+      await this.apiCall("/voucherfileconnections", {
+        method: "POST",
+        body: JSON.stringify({
           VoucherFileConnection: {
             FileId: fileId,
             VoucherSeries: voucherSeries,
             VoucherNumber: voucherNumber,
-            VoucherYear: voucherYear,
           },
-        },
-      );
+        }),
+      });
     }, "createVoucherFileConnection");
   }
 }

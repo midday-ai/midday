@@ -19,6 +19,8 @@ export type AccountingSyncRecord = {
   syncType: "auto" | "manual" | null;
   status: "synced" | "failed" | "pending";
   errorMessage: string | null;
+  providerEntityType: string | null;
+  createdAt: string;
 };
 
 export type CreateAccountingSyncRecordParams = {
@@ -31,6 +33,8 @@ export type CreateAccountingSyncRecordParams = {
   syncType?: "auto" | "manual";
   status?: "synced" | "failed" | "pending";
   errorMessage?: string;
+  /** Provider-specific entity type (e.g., "Purchase", "SalesReceipt", "Voucher", "BankTransaction") */
+  providerEntityType?: string;
 };
 
 /**
@@ -52,6 +56,7 @@ export const upsertAccountingSyncRecord = async (
       syncType: params.syncType,
       status: params.status ?? "synced",
       errorMessage: params.errorMessage,
+      providerEntityType: params.providerEntityType,
     })
     .onConflictDoUpdate({
       target: [
@@ -65,6 +70,7 @@ export const upsertAccountingSyncRecord = async (
         syncType: params.syncType,
         status: params.status ?? "synced",
         errorMessage: params.errorMessage,
+        providerEntityType: params.providerEntityType,
       },
     })
     .returning();
