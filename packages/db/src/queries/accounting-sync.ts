@@ -1,7 +1,6 @@
 import type { Database } from "@db/client";
 import {
   accountingSyncRecords,
-  bankAccounts,
   transactionAttachments,
   transactionCategories,
   transactions,
@@ -15,7 +14,7 @@ export type AccountingSyncRecord = {
   provider: "xero" | "quickbooks" | "fortnox" | "visma";
   providerTenantId: string;
   providerTransactionId: string | null;
-  providerAttachmentId: string | null;
+  syncedAttachmentIds: string[];
   syncedAt: string;
   syncType: "auto" | "manual" | null;
   status: "synced" | "failed" | "pending";
@@ -28,7 +27,7 @@ export type CreateAccountingSyncRecordParams = {
   provider: "xero" | "quickbooks" | "fortnox" | "visma";
   providerTenantId: string;
   providerTransactionId?: string;
-  providerAttachmentId?: string;
+  syncedAttachmentIds?: string[];
   syncType?: "auto" | "manual";
   status?: "synced" | "failed" | "pending";
   errorMessage?: string;
@@ -49,7 +48,7 @@ export const upsertAccountingSyncRecord = async (
       provider: params.provider,
       providerTenantId: params.providerTenantId,
       providerTransactionId: params.providerTransactionId,
-      providerAttachmentId: params.providerAttachmentId,
+      syncedAttachmentIds: params.syncedAttachmentIds ?? [],
       syncType: params.syncType,
       status: params.status ?? "synced",
       errorMessage: params.errorMessage,
@@ -61,7 +60,7 @@ export const upsertAccountingSyncRecord = async (
       ],
       set: {
         providerTransactionId: params.providerTransactionId,
-        providerAttachmentId: params.providerAttachmentId,
+        syncedAttachmentIds: params.syncedAttachmentIds ?? [],
         syncedAt: new Date().toISOString(),
         syncType: params.syncType,
         status: params.status ?? "synced",
@@ -132,37 +131,6 @@ export const getAccountingSyncStatus = async (
   return results;
 };
 
-export type UpdateSyncRecordAttachmentParams = {
-  transactionId: string;
-  teamId: string;
-  provider: "xero" | "quickbooks" | "fortnox" | "visma";
-  providerAttachmentId: string;
-};
-
-/**
- * Update attachment ID on a sync record
- */
-export const updateAccountingSyncAttachment = async (
-  db: Database,
-  params: UpdateSyncRecordAttachmentParams,
-) => {
-  const [result] = await db
-    .update(accountingSyncRecords)
-    .set({
-      providerAttachmentId: params.providerAttachmentId,
-    })
-    .where(
-      and(
-        eq(accountingSyncRecords.transactionId, params.transactionId),
-        eq(accountingSyncRecords.teamId, params.teamId),
-        eq(accountingSyncRecords.provider, params.provider),
-      ),
-    )
-    .returning();
-
-  return result;
-};
-
 export type GetUnsyncedTransactionsParams = {
   teamId: string;
   provider: "xero" | "quickbooks" | "fortnox" | "visma";
@@ -198,6 +166,10 @@ export type TransactionForSync = {
   amount: number;
   currency: string;
   categorySlug: string | null;
+  /** Category's tax reporting code - used for Xero account code mapping */
+  categoryReportingCode: string | null;
+  counterpartyName: string | null;
+  status: string | null;
   attachments: Array<{
     id: string;
     name: string | null;
@@ -217,7 +189,14 @@ export type GetTransactionsForAccountingSyncParams = {
 
 /**
  * Get transactions for accounting sync with attachments
- * Excludes transactions already synced to the provider
+ *
+ * Only returns "fulfilled" transactions:
+ * - Has attachments (from matching or manual upload) OR
+ * - Status = 'completed' (user marked as done without attachment)
+ *
+ * Never syncs:
+ * - Status = 'excluded' (user excluded from books)
+ * - Status = 'archived' (old transactions)
  */
 export const getTransactionsForAccountingSync = async (
   db: Database,
@@ -231,20 +210,20 @@ export const getTransactionsForAccountingSync = async (
     limit = 500,
   } = params;
 
-  // Build conditions
+  // Build base conditions
   const conditions = [
     eq(transactions.teamId, teamId),
-    sql`${transactions.status} != 'excluded'`,
+    // Exclude 'excluded' and 'archived' transactions
+    sql`${transactions.status} NOT IN ('excluded', 'archived')`,
   ];
 
-  // If specific IDs provided, use those
+  // If specific IDs provided, use those (for manual export)
   if (transactionIds && transactionIds.length > 0) {
     conditions.push(inArray(transactions.id, transactionIds));
   } else {
-    // Get synced transaction IDs for this provider
+    // For auto-sync: exclude already synced transactions
     const syncedIds = await getSyncedTransactionIds(db, { teamId, provider });
 
-    // Exclude already synced transactions
     if (syncedIds.length > 0) {
       conditions.push(notInArray(transactions.id, syncedIds));
     }
@@ -257,6 +236,8 @@ export const getTransactionsForAccountingSync = async (
     );
   }
 
+  // Query with isFulfilled filter:
+  // Transaction is fulfilled if it has attachments OR status = 'completed'
   const results = await db
     .select({
       id: transactions.id,
@@ -266,6 +247,9 @@ export const getTransactionsForAccountingSync = async (
       amount: transactions.amount,
       currency: transactions.currency,
       categorySlug: transactions.categorySlug,
+      categoryReportingCode: transactionCategories.taxReportingCode,
+      counterpartyName: transactions.counterpartyName,
+      status: transactions.status,
       attachments: sql<
         Array<{
           id: string;
@@ -280,6 +264,13 @@ export const getTransactionsForAccountingSync = async (
     })
     .from(transactions)
     .leftJoin(
+      transactionCategories,
+      and(
+        eq(transactions.categorySlug, transactionCategories.slug),
+        eq(transactionCategories.teamId, teamId),
+      ),
+    )
+    .leftJoin(
       transactionAttachments,
       and(
         eq(transactionAttachments.transactionId, transactions.id),
@@ -287,7 +278,15 @@ export const getTransactionsForAccountingSync = async (
       ),
     )
     .where(and(...conditions))
-    .groupBy(transactions.id)
+    .groupBy(transactions.id, transactionCategories.taxReportingCode)
+    // Filter to only fulfilled transactions:
+    // Has at least one attachment OR status = 'completed'
+    .having(
+      sql`(
+        COUNT(${transactionAttachments.id}) > 0
+        OR ${transactions.status} = 'completed'
+      )`,
+    )
     .orderBy(sql`${transactions.date} DESC`)
     .limit(limit);
 
@@ -327,4 +326,156 @@ export const getTransactionAttachmentsForSync = async (
     );
 
   return results;
+};
+
+export type TransactionWithNewAttachments = {
+  transactionId: string;
+  providerTransactionId: string;
+  syncRecordId: string;
+  syncedAttachmentIds: string[];
+  currentAttachments: Array<{
+    id: string;
+    name: string | null;
+    path: string[] | null;
+    type: string | null;
+    size: number | null;
+  }>;
+  newAttachmentIds: string[];
+};
+
+export type GetSyncedTransactionsWithAttachmentChangesParams = {
+  teamId: string;
+  provider: "xero" | "quickbooks" | "fortnox" | "visma";
+  sinceDaysAgo?: number;
+  limit?: number;
+};
+
+/**
+ * Get synced transactions that have new attachments (not previously synced)
+ *
+ * This finds transactions where:
+ * - Already synced to the provider (status = 'synced')
+ * - Have new attachments that weren't in the original sync
+ *
+ * Used to push attachment updates to already-synced transactions.
+ * Note: We only push NEW attachments, we don't delete if attachments were removed.
+ *
+ * Optimized: Single JOIN query instead of 2 separate queries
+ */
+export const getSyncedTransactionsWithAttachmentChanges = async (
+  db: Database,
+  params: GetSyncedTransactionsWithAttachmentChangesParams,
+): Promise<TransactionWithNewAttachments[]> => {
+  const { teamId, provider, sinceDaysAgo = 30, limit = 100 } = params;
+
+  // Calculate the date threshold
+  const sinceDate = new Date();
+  sinceDate.setDate(sinceDate.getDate() - sinceDaysAgo);
+  const sinceDateStr = sinceDate.toISOString().split("T")[0]!;
+
+  // Single JOIN query: sync_records + transactions + attachments
+  const results = await db
+    .select({
+      syncRecordId: accountingSyncRecords.id,
+      transactionId: accountingSyncRecords.transactionId,
+      providerTransactionId: accountingSyncRecords.providerTransactionId,
+      syncedAttachmentIds: accountingSyncRecords.syncedAttachmentIds,
+      currentAttachments: sql<
+        Array<{
+          id: string;
+          name: string | null;
+          path: string[] | null;
+          type: string | null;
+          size: number | null;
+        }>
+      >`COALESCE(json_agg(DISTINCT jsonb_build_object(
+        'id', ${transactionAttachments.id},
+        'name', ${transactionAttachments.name},
+        'path', ${transactionAttachments.path},
+        'type', ${transactionAttachments.type},
+        'size', ${transactionAttachments.size}
+      )) FILTER (WHERE ${transactionAttachments.id} IS NOT NULL), '[]'::json)`.as(
+        "currentAttachments",
+      ),
+    })
+    .from(accountingSyncRecords)
+    .innerJoin(
+      transactions,
+      and(
+        eq(transactions.id, accountingSyncRecords.transactionId),
+        eq(transactions.teamId, teamId),
+        gte(transactions.date, sinceDateStr),
+        sql`${transactions.status} NOT IN ('excluded', 'archived')`,
+      ),
+    )
+    .leftJoin(
+      transactionAttachments,
+      and(
+        eq(transactionAttachments.transactionId, transactions.id),
+        eq(transactionAttachments.teamId, teamId),
+      ),
+    )
+    .where(
+      and(
+        eq(accountingSyncRecords.teamId, teamId),
+        eq(accountingSyncRecords.provider, provider),
+        eq(accountingSyncRecords.status, "synced"),
+        // Only include records that have a provider transaction ID
+        sql`${accountingSyncRecords.providerTransactionId} IS NOT NULL`,
+      ),
+    )
+    .groupBy(accountingSyncRecords.id)
+    .limit(limit);
+
+  // Filter and map to find transactions with new attachments
+  const result: TransactionWithNewAttachments[] = [];
+
+  for (const row of results) {
+    if (!row.currentAttachments || row.currentAttachments.length === 0)
+      continue;
+    if (!row.providerTransactionId) continue;
+
+    const syncedSet = new Set(row.syncedAttachmentIds);
+    const currentIds = row.currentAttachments.map((a) => a.id);
+
+    // Find attachments that exist now but weren't synced before
+    const newAttachmentIds = currentIds.filter((id) => !syncedSet.has(id));
+
+    if (newAttachmentIds.length > 0) {
+      result.push({
+        transactionId: row.transactionId,
+        providerTransactionId: row.providerTransactionId,
+        syncRecordId: row.syncRecordId,
+        syncedAttachmentIds: row.syncedAttachmentIds,
+        currentAttachments: row.currentAttachments,
+        newAttachmentIds,
+      });
+    }
+  }
+
+  return result;
+};
+
+export type UpdateSyncedAttachmentIdsParams = {
+  syncRecordId: string;
+  syncedAttachmentIds: string[];
+};
+
+/**
+ * Update the synced attachment IDs on a sync record
+ */
+export const updateSyncedAttachmentIds = async (
+  db: Database,
+  params: UpdateSyncedAttachmentIdsParams,
+) => {
+  const [result] = await db
+    .update(accountingSyncRecords)
+    .set({
+      syncedAttachmentIds: params.syncedAttachmentIds,
+      syncedAt: new Date().toISOString(),
+    })
+    .where(eq(accountingSyncRecords.id, params.syncRecordId))
+    .returning();
+
+  return result;
 };

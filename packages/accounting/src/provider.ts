@@ -1,8 +1,11 @@
 import type {
   AccountingAccount,
+  AccountingError,
+  AccountingErrorType,
   AccountingProviderId,
   AttachmentResult,
   ProviderInitConfig,
+  RateLimitConfig,
   SyncResult,
   SyncTransactionsParams,
   TokenSet,
@@ -84,6 +87,35 @@ export interface AccountingProvider {
     name: string;
     currency?: string;
   }>;
+
+  /**
+   * Get tenants (organizations) connected to this provider
+   * @returns List of tenants with their IDs and names
+   */
+  getTenants(): Promise<
+    Array<{ tenantId: string; tenantName: string; tenantType: string }>
+  >;
+
+  /**
+   * Check if the connection to the provider is valid
+   * Useful for health checks without making data calls
+   * @returns Connection status
+   */
+  checkConnection(): Promise<{ connected: boolean; error?: string }>;
+
+  /**
+   * Revoke tokens and disconnect from the provider
+   * Optional - not all providers support programmatic token revocation
+   * @returns void on success, throws on error
+   */
+  disconnect?(): Promise<void>;
+}
+
+/**
+ * Sleep for a specified duration
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -95,6 +127,16 @@ export abstract class BaseAccountingProvider implements AccountingProvider {
 
   protected config: ProviderInitConfig;
 
+  /**
+   * Rate limiting configuration - override in subclasses
+   * Default values are conservative (10 calls/min)
+   */
+  protected readonly rateLimitConfig: RateLimitConfig = {
+    callsPerMinute: 10,
+    retryDelayMs: 60_000,
+    maxRetries: 3,
+  };
+
   constructor(config: ProviderInitConfig) {
     this.config = config;
   }
@@ -103,13 +145,138 @@ export abstract class BaseAccountingProvider implements AccountingProvider {
   abstract exchangeCodeForTokens(code: string): Promise<TokenSet>;
   abstract refreshTokens(refreshToken: string): Promise<TokenSet>;
   abstract getAccounts(tenantId: string): Promise<AccountingAccount[]>;
-  abstract syncTransactions(params: SyncTransactionsParams): Promise<SyncResult>;
+  abstract syncTransactions(
+    params: SyncTransactionsParams,
+  ): Promise<SyncResult>;
   abstract uploadAttachment(
-    params: UploadAttachmentParams
+    params: UploadAttachmentParams,
   ): Promise<AttachmentResult>;
   abstract getTenantInfo(
-    tenantId: string
+    tenantId: string,
   ): Promise<{ id: string; name: string; currency?: string }>;
+
+  abstract getTenants(): Promise<
+    Array<{ tenantId: string; tenantName: string; tenantType: string }>
+  >;
+
+  abstract checkConnection(): Promise<{ connected: boolean; error?: string }>;
+
+  /**
+   * Parse provider-specific errors into standardized format
+   * Override in subclasses for provider-specific error handling
+   */
+  protected parseError(error: unknown): AccountingError {
+    if (error instanceof Error) {
+      // Check for common HTTP error patterns
+      const message = error.message.toLowerCase();
+
+      if (message.includes("429") || message.includes("rate limit")) {
+        return {
+          type: "rate_limit",
+          message: "Rate limit exceeded. Please try again later.",
+          retryable: true,
+        };
+      }
+
+      if (message.includes("401") || message.includes("unauthorized")) {
+        return {
+          type: "auth_expired",
+          message: "Authentication failed. Please reconnect your account.",
+          retryable: false,
+        };
+      }
+
+      if (message.includes("400") || message.includes("validation")) {
+        return {
+          type: "validation",
+          message: error.message,
+          retryable: false,
+        };
+      }
+
+      if (message.includes("404") || message.includes("not found")) {
+        return {
+          type: "not_found",
+          message: error.message,
+          retryable: false,
+        };
+      }
+
+      if (message.includes("5")) {
+        // 5xx errors
+        return {
+          type: "server_error",
+          message: "Server error. Please try again later.",
+          retryable: true,
+        };
+      }
+
+      return {
+        type: "unknown",
+        message: error.message,
+        retryable: false,
+      };
+    }
+
+    return {
+      type: "unknown",
+      message: "An unknown error occurred",
+      retryable: false,
+    };
+  }
+
+  /**
+   * Check if an error is a rate limit error
+   */
+  protected isRateLimitError(error: unknown): boolean {
+    const parsed = this.parseError(error);
+    return parsed.type === "rate_limit";
+  }
+
+  /**
+   * Execute an API call with retry logic for rate limits and transient errors
+   * Uses the provider's rateLimitConfig for retry behavior
+   */
+  protected async withRetry<T>(
+    operation: () => Promise<T>,
+    context: string,
+  ): Promise<T> {
+    let lastError: AccountingError | null = null;
+
+    for (
+      let attempt = 1;
+      attempt <= this.rateLimitConfig.maxRetries;
+      attempt++
+    ) {
+      try {
+        return await operation();
+      } catch (error) {
+        lastError = this.parseError(error);
+
+        // Only retry on rate limit or server errors
+        if (lastError.retryable && attempt < this.rateLimitConfig.maxRetries) {
+          // Calculate delay with exponential backoff for server errors
+          const delay =
+            lastError.type === "rate_limit"
+              ? this.rateLimitConfig.retryDelayMs
+              : Math.min(
+                  this.rateLimitConfig.retryDelayMs * 2 ** (attempt - 1),
+                  300_000, // Max 5 minutes
+                );
+
+          await sleep(delay);
+          continue;
+        }
+
+        // Don't retry on non-retryable errors
+        throw new Error(`${context}: ${lastError.message}`);
+      }
+    }
+
+    throw new Error(
+      `${context}: ${lastError?.message || "Max retries exceeded"}`,
+    );
+  }
 
   /**
    * Check if token is expired with optional buffer
@@ -131,7 +298,7 @@ export abstract class BaseAccountingProvider implements AccountingProvider {
 
     if (this.isTokenExpired(expiresAt)) {
       const newTokens = await this.refreshTokens(
-        this.config.config.refreshToken
+        this.config.config.refreshToken,
       );
       // Update config with new tokens
       this.config.config = {
@@ -146,4 +313,3 @@ export abstract class BaseAccountingProvider implements AccountingProvider {
     return this.config.config.accessToken;
   }
 }
-

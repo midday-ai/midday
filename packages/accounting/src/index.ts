@@ -1,4 +1,6 @@
 import type { AccountingProvider } from "./provider";
+import { FortnoxProvider } from "./providers/fortnox";
+import { QuickBooksProvider } from "./providers/quickbooks";
 import { XeroProvider } from "./providers/xero";
 import type { AccountingProviderId, ProviderInitConfig } from "./types";
 
@@ -7,6 +9,8 @@ export * from "./types";
 export * from "./provider";
 export * from "./utils";
 export { XeroProvider, XERO_SCOPES } from "./providers/xero";
+export { QuickBooksProvider, QUICKBOOKS_SCOPES } from "./providers/quickbooks";
+export { FortnoxProvider, FORTNOX_SCOPES } from "./providers/fortnox";
 
 /**
  * Get an accounting provider instance by ID
@@ -29,26 +33,29 @@ export { XeroProvider, XERO_SCOPES } from "./providers/xero";
  */
 export function getAccountingProvider(
   providerId: AccountingProviderId,
-  config: ProviderInitConfig
+  config: ProviderInitConfig,
 ): AccountingProvider {
   switch (providerId) {
     case "xero":
       return new XeroProvider(config);
 
     case "quickbooks":
-      // TODO: Implement QuickBooks provider
-      throw new Error("QuickBooks provider not yet implemented");
+      return new QuickBooksProvider(config);
 
     case "fortnox":
-      // TODO: Implement Fortnox provider
-      throw new Error("Fortnox provider not yet implemented");
+      return new FortnoxProvider(config);
 
     case "visma":
-      // TODO: Implement Visma provider
-      throw new Error("Visma provider not yet implemented");
+      throw new Error(
+        `Accounting provider "${providerId}" is not yet implemented. ` +
+          `Currently supported: xero, quickbooks, fortnox`,
+      );
 
-    default:
-      throw new Error(`Unknown accounting provider: ${providerId}`);
+    default: {
+      // TypeScript exhaustive check
+      const _exhaustive: never = providerId;
+      throw new Error(`Unknown accounting provider: ${_exhaustive}`);
+    }
   }
 }
 
@@ -56,13 +63,16 @@ export function getAccountingProvider(
  * Check if a provider is currently supported
  */
 export function isProviderSupported(providerId: string): boolean {
-  return providerId === "xero";
+  return (
+    providerId === "xero" ||
+    providerId === "quickbooks" ||
+    providerId === "fortnox"
+  );
 }
 
 /**
  * Get list of all supported provider IDs
  */
 export function getSupportedProviders(): AccountingProviderId[] {
-  return ["xero"]; // Add more as they're implemented
+  return ["xero", "quickbooks", "fortnox"];
 }
-

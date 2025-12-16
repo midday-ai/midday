@@ -1,19 +1,11 @@
 import {
-  type AccountingProviderConfig,
-  type MappedTransaction,
-  getAccountingProvider,
-} from "@midday/accounting";
-import {
-  getAppByAppId,
   getTransactionsForAccountingSync,
   upsertAccountingSyncRecord,
 } from "@midday/db/queries";
 import { triggerJob } from "@midday/job-client";
-import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
 import type { AccountingExportPayload } from "../../schemas/accounting";
-import { getDb } from "../../utils/db";
-import { BaseProcessor } from "../base";
+import { AccountingProcessorBase, type AccountingProviderId } from "./base";
 
 // Process transactions in batches
 const BATCH_SIZE = 50;
@@ -22,7 +14,7 @@ const BATCH_SIZE = 50;
  * Export transactions to accounting provider processor
  * Manual export of selected transactions to the accounting provider
  */
-export class ExportTransactionsProcessor extends BaseProcessor<AccountingExportPayload> {
+export class ExportTransactionsProcessor extends AccountingProcessorBase<AccountingExportPayload> {
   async process(job: Job<AccountingExportPayload>): Promise<{
     teamId: string;
     providerId: string;
@@ -32,9 +24,6 @@ export class ExportTransactionsProcessor extends BaseProcessor<AccountingExportP
   }> {
     const { teamId, userId, providerId, transactionIds, includeAttachments } =
       job.data;
-
-    const db = getDb();
-    const supabase = createClient(); // Only for updating app config (tokens)
 
     this.logger.info("Starting manual accounting export", {
       teamId,
@@ -54,87 +43,21 @@ export class ExportTransactionsProcessor extends BaseProcessor<AccountingExportP
       };
     }
 
-    // Get the app configuration for this provider
-    const app = await getAppByAppId(db, { appId: providerId, teamId });
-
-    if (!app || !app.config) {
-      throw new Error(`${providerId} is not connected for this team`);
-    }
-
-    const config = app.config as AccountingProviderConfig;
-
-    // Validate required config fields
-    if (!config.accessToken || !config.refreshToken || !config.tenantId) {
-      throw new Error(`Invalid ${providerId} configuration - missing tokens`);
-    }
-
-    // Initialize the accounting provider
-    const clientId = this.getClientId(providerId);
-    const clientSecret = this.getClientSecret(providerId);
-    const redirectUri = this.getRedirectUri(providerId);
-
-    if (!clientId || !clientSecret || !redirectUri) {
-      throw new Error(`Missing OAuth configuration for ${providerId}`);
-    }
-
-    const provider = getAccountingProvider(providerId as "xero", {
-      clientId,
-      clientSecret,
-      redirectUri,
-      config,
-    });
-
-    // Check if token needs refresh
-    const expiresAt = new Date(config.expiresAt);
-    if (provider.isTokenExpired(expiresAt)) {
-      this.logger.info("Refreshing expired token", { teamId, providerId });
-
-      try {
-        const newTokens = await provider.refreshTokens(config.refreshToken);
-
-        // Update tokens in database
-        await supabase
-          .from("apps")
-          .update({
-            config: {
-              ...config,
-              accessToken: newTokens.accessToken,
-              refreshToken: newTokens.refreshToken,
-              expiresAt: newTokens.expiresAt.toISOString(),
-            },
-          })
-          .eq("team_id", teamId)
-          .eq("app_id", providerId);
-
-        this.logger.info("Token refreshed successfully", {
-          teamId,
-          providerId,
-        });
-      } catch (error) {
-        this.logger.error("Failed to refresh token", {
-          teamId,
-          providerId,
-          error: error instanceof Error ? error.message : "Unknown error",
-        });
-        throw new Error("Failed to refresh authentication token");
-      }
-    }
-
-    // Get target account (first bank account from provider)
-    const accounts = await provider.getAccounts(config.tenantId);
-    const targetAccount = accounts.find(
-      (a: { status: string }) => a.status === "active",
+    // Initialize provider with valid tokens
+    const { provider, config, db } = await this.initializeProvider(
+      teamId,
+      providerId,
     );
 
-    if (!targetAccount) {
-      throw new Error("No active bank account found in accounting provider");
-    }
+    // Get target bank account (use provider-agnostic org ID)
+    const orgId = this.getOrgIdFromConfig(config);
+    const targetAccount = await this.getTargetAccount(provider, orgId, config);
 
     // Fetch transactions using db package
     // Note: For export, we include the specific transaction IDs regardless of sync status
     const transactions = await getTransactionsForAccountingSync(db, {
       teamId,
-      provider: providerId as "xero" | "quickbooks" | "fortnox" | "visma",
+      provider: providerId as AccountingProviderId,
       transactionIds,
       sinceDaysAgo: 365, // Look back a full year for manual exports
       limit: transactionIds.length,
@@ -155,39 +78,7 @@ export class ExportTransactionsProcessor extends BaseProcessor<AccountingExportP
     }
 
     // Map transactions to provider format
-    const mappedTransactions: MappedTransaction[] = transactions.map((tx) => ({
-      id: tx.id,
-      date: tx.date,
-      amount: tx.amount,
-      currency: tx.currency,
-      description: tx.name || tx.description || "Transaction",
-      reference: tx.id.slice(0, 8),
-      counterpartyName: tx.name,
-      category: tx.categorySlug ?? undefined,
-      attachments:
-        tx.attachments
-          ?.filter(
-            (
-              att,
-            ): att is typeof att & {
-              name: string;
-              path: string[];
-              type: string;
-              size: number;
-            } =>
-              att.name !== null &&
-              att.path !== null &&
-              att.type !== null &&
-              att.size !== null,
-          )
-          .map((att) => ({
-            id: att.id,
-            name: att.name,
-            path: att.path,
-            mimeType: att.type,
-            size: att.size,
-          })) ?? [],
-    }));
+    const mappedTransactions = this.mapTransactionsToProvider(transactions);
 
     // Export transactions in batches
     let totalExported = 0;
@@ -200,7 +91,7 @@ export class ExportTransactionsProcessor extends BaseProcessor<AccountingExportP
         const result = await provider.syncTransactions({
           transactions: batch,
           targetAccountId: targetAccount.id,
-          tenantId: config.tenantId,
+          tenantId: orgId,
         });
 
         totalExported += result.syncedCount;
@@ -211,8 +102,8 @@ export class ExportTransactionsProcessor extends BaseProcessor<AccountingExportP
           await upsertAccountingSyncRecord(db, {
             transactionId: txResult.transactionId,
             teamId,
-            provider: providerId as "xero" | "quickbooks" | "fortnox" | "visma",
-            providerTenantId: config.tenantId,
+            provider: providerId as AccountingProviderId,
+            providerTenantId: orgId,
             providerTransactionId: txResult.providerTransactionId,
             syncType: "manual",
             status: txResult.success ? "synced" : "failed",
@@ -268,8 +159,8 @@ export class ExportTransactionsProcessor extends BaseProcessor<AccountingExportP
           await upsertAccountingSyncRecord(db, {
             transactionId: tx.id,
             teamId,
-            provider: providerId as "xero" | "quickbooks" | "fortnox" | "visma",
-            providerTenantId: config.tenantId,
+            provider: providerId as AccountingProviderId,
+            providerTenantId: orgId,
             syncType: "manual",
             status: "failed",
             errorMessage:
@@ -301,38 +192,5 @@ export class ExportTransactionsProcessor extends BaseProcessor<AccountingExportP
       failedCount: totalFailed,
       exportedAt: new Date().toISOString(),
     };
-  }
-
-  private getClientId(providerId: string): string | undefined {
-    switch (providerId) {
-      case "xero":
-        return process.env.XERO_CLIENT_ID;
-      case "quickbooks":
-        return process.env.QUICKBOOKS_CLIENT_ID;
-      default:
-        return undefined;
-    }
-  }
-
-  private getClientSecret(providerId: string): string | undefined {
-    switch (providerId) {
-      case "xero":
-        return process.env.XERO_CLIENT_SECRET;
-      case "quickbooks":
-        return process.env.QUICKBOOKS_CLIENT_SECRET;
-      default:
-        return undefined;
-    }
-  }
-
-  private getRedirectUri(providerId: string): string | undefined {
-    switch (providerId) {
-      case "xero":
-        return process.env.XERO_OAUTH_REDIRECT_URL;
-      case "quickbooks":
-        return process.env.QUICKBOOKS_OAUTH_REDIRECT_URL;
-      default:
-        return undefined;
-    }
   }
 }

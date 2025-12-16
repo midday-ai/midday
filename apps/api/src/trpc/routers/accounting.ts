@@ -7,6 +7,8 @@ import {
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
   getAccountingProvider,
+  getOrgId,
+  getOrgName,
   type AccountingProviderConfig,
 } from "@midday/accounting";
 import {
@@ -54,7 +56,7 @@ export const accountingRouter = createTRPCRouter({
           transactionIds,
           includeAttachments,
         },
-        "accounting"
+        "accounting",
       );
 
       return {
@@ -106,7 +108,7 @@ export const accountingRouter = createTRPCRouter({
         const config = app.config as AccountingProviderConfig | null;
         return {
           providerId: app.app_id,
-          tenantName: config?.tenantName ?? "Connected",
+          tenantName: config ? getOrgName(config) ?? "Connected" : "Connected",
           settings: app.settings,
           connectedAt: null, // apps table doesn't have created_at in the select
         };
@@ -170,7 +172,7 @@ export const accountingRouter = createTRPCRouter({
         });
       }
 
-      const provider = getAccountingProvider(providerId as "xero", {
+      const provider = getAccountingProvider(providerId as "xero" | "quickbooks", {
         clientId,
         clientSecret,
         redirectUri,
@@ -178,7 +180,9 @@ export const accountingRouter = createTRPCRouter({
       });
 
       try {
-        const accounts = await provider.getAccounts(config.tenantId);
+        // Use getOrgId to get the tenant/realm ID in a provider-agnostic way
+        const orgId = getOrgId(config);
+        const accounts = await provider.getAccounts(orgId);
         return accounts;
       } catch (error) {
         throw new TRPCError({

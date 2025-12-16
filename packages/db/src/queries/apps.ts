@@ -437,3 +437,42 @@ export const getWhatsAppConnections = async (db: Database, teamId: string) => {
   const config = (app.config as WhatsAppConfig) || {};
   return config.connections || [];
 };
+
+export type UpdateAppTokensParams = {
+  teamId: string;
+  appId: string;
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string;
+};
+
+/**
+ * Update OAuth tokens for an app (atomic operation)
+ * Used for token refresh in accounting integrations (Xero, QuickBooks, etc.)
+ * Uses JSONB merge to preserve other config fields
+ */
+export const updateAppTokens = async (
+  db: Database,
+  params: UpdateAppTokensParams,
+) => {
+  const { teamId, appId, accessToken, refreshToken, expiresAt } = params;
+
+  // Use SQL JSONB concatenation for atomic merge
+  const [result] = await db
+    .update(apps)
+    .set({
+      config: sql`COALESCE(${apps.config}, '{}'::jsonb) || ${JSON.stringify({
+        accessToken,
+        refreshToken,
+        expiresAt,
+      })}::jsonb`,
+    })
+    .where(and(eq(apps.appId, appId), eq(apps.teamId, teamId)))
+    .returning();
+
+  if (!result) {
+    throw new Error(`Failed to update tokens for app ${appId}`);
+  }
+
+  return result;
+};

@@ -3392,7 +3392,11 @@ export const accountingSyncRecords = pgTable(
     provider: accountingProviderEnum().notNull(),
     providerTenantId: text("provider_tenant_id").notNull(),
     providerTransactionId: text("provider_transaction_id"),
-    providerAttachmentId: text("provider_attachment_id"),
+    // Tracks which Midday attachment IDs have been synced to detect changes
+    syncedAttachmentIds: text("synced_attachment_ids")
+      .array()
+      .default(sql`'{}'::text[]`)
+      .notNull(),
     syncedAt: timestamp("synced_at", { withTimezone: true, mode: "string" })
       .defaultNow()
       .notNull(),

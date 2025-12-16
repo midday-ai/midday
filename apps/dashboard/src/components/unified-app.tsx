@@ -39,6 +39,8 @@ const oauthAppConfig: Record<
   gmail: { endpoint: "/apps/gmail/install-url", queryKey: "inboxAccounts" },
   outlook: { endpoint: "/apps/outlook/install-url", queryKey: "inboxAccounts" },
   xero: { endpoint: "/apps/xero/install-url", queryKey: "apps" },
+  quickbooks: { endpoint: "/apps/quickbooks/install-url", queryKey: "apps" },
+  fortnox: { endpoint: "/apps/fortnox/install-url", queryKey: "apps" },
 };
 
 interface UnifiedAppProps {

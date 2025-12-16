@@ -28,6 +28,9 @@
     "./slack-client": "./src/slack/server/client.ts",
     "./whatsapp": "./src/whatsapp/index.ts",
     "./whatsapp/server": "./src/whatsapp/server/index.ts",
-    "./whatsapp-client": "./src/whatsapp/server/client.ts"
+    "./whatsapp-client": "./src/whatsapp/server/client.ts",
+    "./xero": "./src/xero/config.ts",
+    "./quickbooks": "./src/quick-books/config.ts",
+    "./fortnox": "./src/fortnox/config.ts"
   }
 }

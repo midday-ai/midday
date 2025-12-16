@@ -27,7 +27,7 @@ CREATE TABLE accounting_sync_records (
   provider accounting_provider NOT NULL,
   provider_tenant_id TEXT NOT NULL,  -- Xero tenant ID, QuickBooks realm ID, etc.
   provider_transaction_id TEXT,       -- External transaction ID
-  provider_attachment_id TEXT,        -- External attachment ID (if applicable)
+  synced_attachment_ids TEXT[] DEFAULT '{}'::TEXT[] NOT NULL, -- Tracks Midday attachment IDs that have been synced
   synced_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   sync_type accounting_sync_type,
   status accounting_sync_status DEFAULT 'synced' NOT NULL,

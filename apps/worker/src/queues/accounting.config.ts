@@ -4,21 +4,27 @@ import type { QueueConfig } from "../types/queue-config";
 
 /**
  * Queue options for accounting queue
+ * Uses BullMQ native retries with exponential backoff:
+ *   Attempt 1: immediate
+ *   Attempt 2: 5 min delay
+ *   Attempt 3: 10 min delay
+ *   Attempt 4: 20 min delay
  */
 const accountingQueueOptions: QueueOptions = {
   connection: getRedisConnection(),
   defaultJobOptions: {
-    attempts: 3,
+    attempts: 4,
     backoff: {
       type: "exponential",
-      delay: 5000, // Start with 5 seconds due to API rate limits
+      delay: 5 * 60 * 1000, // 5 minutes initial delay for API recovery
     },
     removeOnComplete: {
       age: 24 * 3600, // Keep completed jobs for 24 hours
-      count: 500, // Keep max 500 completed jobs
+      count: 100, // Keep max 100 completed jobs
     },
     removeOnFail: {
-      age: 7 * 24 * 3600, // Keep failed jobs for 7 days
+      age: 7 * 24 * 3600, // Keep failed jobs for 7 days for debugging
+      count: 500, // Keep max 500 failed jobs
     },
   },
 };
@@ -58,4 +64,3 @@ export const accountingQueueConfig: QueueConfig = {
     },
   },
 };
-

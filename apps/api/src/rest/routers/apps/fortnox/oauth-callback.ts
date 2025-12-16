@@ -2,11 +2,11 @@ import { publicMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import {
+  FORTNOX_SCOPES,
   decryptAccountingOAuthState,
   getAccountingProvider,
-  XERO_SCOPES,
 } from "@midday/accounting";
-import config from "@midday/app-store/xero";
+import config from "@midday/app-store/fortnox";
 import { createApp } from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import { HTTPException } from "hono/http-exception";
@@ -23,7 +23,7 @@ const paramsSchema = z.object({
         name: "code",
         required: false,
       },
-      description: "OAuth authorization code from Xero",
+      description: "OAuth authorization code from Fortnox",
     }),
   state: z.string().openapi({
     param: {
@@ -52,10 +52,10 @@ app.openapi(
   createRoute({
     method: "get",
     path: "/",
-    summary: "Xero OAuth callback",
-    operationId: "xeroOAuthCallback",
+    summary: "Fortnox OAuth callback",
+    operationId: "fortnoxOAuthCallback",
     description:
-      "Handles OAuth callback from Xero after user authorization. Exchanges authorization code for access token and creates app integration.",
+      "Handles OAuth callback from Fortnox after user authorization. Exchanges authorization code for access token and creates app integration.",
     tags: ["Integrations"],
     request: {
       query: paramsSchema,
@@ -86,51 +86,55 @@ app.openapi(
 
     // Handle OAuth errors (user denied access, etc.)
     if (error || !code) {
-      logger.info("Xero OAuth error or cancelled", { error });
+      logger.info("Fortnox OAuth error or cancelled", { error });
       return c.redirect(`${dashboardUrl}/settings/apps?connected=false`, 302);
     }
 
     // Decrypt and validate state - this ensures teamId hasn't been tampered with
     const parsedState = decryptAccountingOAuthState(state);
 
-    if (!parsedState || parsedState.provider !== "xero") {
+    if (!parsedState || parsedState.provider !== "fortnox") {
       throw new HTTPException(400, {
         message: "Invalid or expired state. Please try connecting again.",
       });
     }
 
-    const clientId = process.env.XERO_CLIENT_ID;
-    const clientSecret = process.env.XERO_CLIENT_SECRET;
-    const redirectUri = process.env.XERO_OAUTH_REDIRECT_URL;
+    const clientId = process.env.FORTNOX_CLIENT_ID;
+    const clientSecret = process.env.FORTNOX_CLIENT_SECRET;
+    const redirectUri = process.env.FORTNOX_OAUTH_REDIRECT_URL;
 
     if (!clientId || !clientSecret || !redirectUri) {
       throw new HTTPException(500, {
-        message: "Xero OAuth configuration missing",
+        message: "Fortnox OAuth configuration missing",
       });
     }
 
     try {
-      const provider = getAccountingProvider("xero", {
+      const provider = getAccountingProvider("fortnox", {
         clientId,
         clientSecret,
         redirectUri,
       });
 
-      // Build the full callback URL that includes the code
-      const callbackUrl = new URL(c.req.url);
-
       // Exchange code for tokens
-      const tokenSet = await provider.exchangeCodeForTokens(
-        callbackUrl.toString()
-      );
+      const tokenSet = await provider.exchangeCodeForTokens(code);
 
-      // Get tenant information
-      const tenants = await provider.getTenants();
-      const tenant = tenants[0];
+      // Get company information
+      // Initialize provider with tokens to get company info
+      const providerWithTokens = getAccountingProvider("fortnox", {
+        clientId,
+        clientSecret,
+        redirectUri,
+        config: {
+          provider: "fortnox",
+          accessToken: tokenSet.accessToken,
+          refreshToken: tokenSet.refreshToken,
+          expiresAt: tokenSet.expiresAt.toISOString(),
+        },
+      });
 
-      if (!tenant) {
-        throw new Error("No Xero organization found");
-      }
+      // Fortnox is single-tenant, get the company info
+      const companyInfo = await providerWithTokens.getTenantInfo("default");
 
       // Create app integration in database
       await createApp(db, {
@@ -139,44 +143,44 @@ app.openapi(
         appId: config.id,
         settings: config.settings,
         config: {
-          provider: "xero", // Discriminator field
+          provider: "fortnox",
           accessToken: tokenSet.accessToken,
           refreshToken: tokenSet.refreshToken,
           expiresAt: tokenSet.expiresAt.toISOString(),
-          tenantId: tenant.tenantId,
-          tenantName: tenant.tenantName,
-          scope: XERO_SCOPES,
+          companyId: companyInfo.id,
+          companyName: companyInfo.name,
+          scope: FORTNOX_SCOPES as string[],
         },
       });
 
-      logger.info("Xero integration created successfully", {
+      logger.info("Fortnox integration created successfully", {
         teamId: parsedState.teamId,
-        tenantId: tenant.tenantId,
-        tenantName: tenant.tenantName,
+        companyId: companyInfo.id,
+        companyName: companyInfo.name,
       });
 
       // Redirect based on source
       if (parsedState.source === "apps") {
         return c.redirect(
           `${dashboardUrl}/all-done?event=app_oauth_completed`,
-          302
+          302,
         );
       }
 
       // Settings flow
       return c.redirect(
-        `${dashboardUrl}/settings/apps?connected=true&provider=xero`,
-        302
+        `${dashboardUrl}/settings/apps?connected=true&provider=fortnox`,
+        302,
       );
     } catch (err) {
-      logger.error("Xero OAuth callback error", {
+      logger.error("Fortnox OAuth callback error", {
         error: err instanceof Error ? err.message : String(err),
         stack: err instanceof Error ? err.stack : undefined,
       });
 
       return c.redirect(`${dashboardUrl}/settings/apps?connected=false`, 302);
     }
-  }
+  },
 );
 
 export { app as oauthCallbackRouter };

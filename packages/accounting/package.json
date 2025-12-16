@@ -7,19 +7,22 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./providers/*": "./src/providers/*.ts"
+    "./providers/*": "./src/providers/*.ts",
+    "./utils": "./src/utils.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@midday/encryption": "workspace:*",
-    "xero-node": "^9.0.0",
-    "zod": "^3.24.0"
+    "@midday/logger": "workspace:*",
+    "@rantalainen/fortnox-api-client": "^1.1.1",
+    "intuit-oauth": "^4.2.2",
+    "xero-node": "^13.3.0",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "typescript": "^5.7.3"
+    "typescript": "^5.9.3"
   }
 }
-

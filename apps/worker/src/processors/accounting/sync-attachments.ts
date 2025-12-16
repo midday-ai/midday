@@ -1,23 +1,18 @@
 import {
-  getAccountingProvider,
-  type AccountingProviderConfig,
-} from "@midday/accounting";
-import {
-  getAppByAppId,
+  getAccountingSyncStatus,
   getTransactionAttachmentsForSync,
-  updateAccountingSyncAttachment,
+  updateSyncedAttachmentIds,
 } from "@midday/db/queries";
-import { createClient } from "@midday/supabase/job";
+import { createClient } from "@midday/supabase/job"; // Only for storage access
 import type { Job } from "bullmq";
 import type { AccountingAttachmentSyncPayload } from "../../schemas/accounting";
-import { getDb } from "../../utils/db";
-import { BaseProcessor } from "../base";
+import { AccountingProcessorBase, type AccountingProviderId } from "./base";
 
 /**
  * Sync attachments to accounting provider processor
  * Uploads transaction attachments (receipts, invoices) to the accounting provider
  */
-export class SyncAttachmentsProcessor extends BaseProcessor<AccountingAttachmentSyncPayload> {
+export class SyncAttachmentsProcessor extends AccountingProcessorBase<AccountingAttachmentSyncPayload> {
   async process(job: Job<AccountingAttachmentSyncPayload>): Promise<{
     teamId: string;
     providerId: string;
@@ -31,10 +26,12 @@ export class SyncAttachmentsProcessor extends BaseProcessor<AccountingAttachment
       transactionId,
       providerTransactionId,
       attachmentIds,
+      existingSyncedAttachmentIds,
+      syncRecordId,
+      providerEntityType,
     } = job.data;
 
-    const db = getDb();
-    const supabase = createClient(); // Used for file storage access
+    const supabase = createClient(); // Only for storage access (unavoidable)
 
     this.logger.info("Starting attachment sync", {
       teamId,
@@ -44,35 +41,40 @@ export class SyncAttachmentsProcessor extends BaseProcessor<AccountingAttachment
       attachmentCount: attachmentIds.length,
     });
 
-    // Get the app configuration for this provider
-    const app = await getAppByAppId(db, { appId: providerId, teamId });
+    // Initialize provider with valid tokens
+    const { provider, config, db } = await this.initializeProvider(
+      teamId,
+      providerId,
+    );
 
-    if (!app || !app.config) {
-      throw new Error(`${providerId} is not connected for this team`);
+    // Get provider-agnostic org ID
+    const orgId = this.getOrgIdFromConfig(config);
+
+    // Filter out attachments that have already been synced (duplicate check)
+    const alreadySyncedSet = new Set(existingSyncedAttachmentIds ?? []);
+    const newAttachmentIds = attachmentIds.filter(
+      (id) => !alreadySyncedSet.has(id),
+    );
+
+    if (newAttachmentIds.length === 0) {
+      this.logger.info("All attachments already synced, skipping", {
+        teamId,
+        transactionId,
+        attachmentIds,
+      });
+      return {
+        teamId,
+        providerId,
+        transactionId,
+        uploadedCount: 0,
+        failedCount: 0,
+      };
     }
-
-    const config = app.config as AccountingProviderConfig;
-
-    // Initialize the accounting provider
-    const clientId = this.getClientId(providerId);
-    const clientSecret = this.getClientSecret(providerId);
-    const redirectUri = this.getRedirectUri(providerId);
-
-    if (!clientId || !clientSecret || !redirectUri) {
-      throw new Error(`Missing OAuth configuration for ${providerId}`);
-    }
-
-    const provider = getAccountingProvider(providerId as "xero", {
-      clientId,
-      clientSecret,
-      redirectUri,
-      config,
-    });
 
     // Get attachment details from database using db package
     const attachments = await getTransactionAttachmentsForSync(db, {
       teamId,
-      attachmentIds,
+      attachmentIds: newAttachmentIds,
     });
 
     if (attachments.length === 0) {
@@ -129,11 +131,12 @@ export class SyncAttachmentsProcessor extends BaseProcessor<AccountingAttachment
 
         // Upload to accounting provider
         const result = await provider.uploadAttachment({
-          tenantId: config.tenantId,
+          tenantId: orgId,
           transactionId: providerTransactionId,
           fileName: attachment.name,
           mimeType: attachment.type,
           content: buffer,
+          entityType: providerEntityType,
         });
 
         if (result.success) {
@@ -161,19 +164,40 @@ export class SyncAttachmentsProcessor extends BaseProcessor<AccountingAttachment
 
       // Update progress
       const progress = Math.round(
-        ((uploadedCount + failedCount) / attachments.length) * 100
+        ((uploadedCount + failedCount) / attachments.length) * 100,
       );
       await this.updateProgress(job, progress);
     }
 
     // Update sync record with attachment info using db package
     if (uploadedAttachmentIds.length > 0) {
-      await updateAccountingSyncAttachment(db, {
-        transactionId,
-        teamId,
-        provider: providerId as "xero" | "quickbooks" | "fortnox" | "visma",
-        providerAttachmentId: uploadedAttachmentIds.join(","),
-      });
+      // Combine existing synced IDs with newly uploaded ones
+      const allSyncedIds = [
+        ...(existingSyncedAttachmentIds ?? []),
+        ...uploadedAttachmentIds,
+      ];
+
+      // If we have a sync record ID (update flow), use it directly
+      if (syncRecordId) {
+        await updateSyncedAttachmentIds(db, {
+          syncRecordId,
+          syncedAttachmentIds: allSyncedIds,
+        });
+      } else {
+        // For new syncs, find the sync record and update it
+        const syncRecords = await getAccountingSyncStatus(db, {
+          teamId,
+          transactionIds: [transactionId],
+          provider: providerId as AccountingProviderId,
+        });
+
+        if (syncRecords.length > 0 && syncRecords[0]) {
+          await updateSyncedAttachmentIds(db, {
+            syncRecordId: syncRecords[0].id,
+            syncedAttachmentIds: allSyncedIds,
+          });
+        }
+      }
     }
 
     this.logger.info("Attachment sync completed", {
@@ -183,6 +207,9 @@ export class SyncAttachmentsProcessor extends BaseProcessor<AccountingAttachment
       uploadedCount,
       failedCount,
       total: attachments.length,
+      totalSyncedAttachments:
+        (existingSyncedAttachmentIds?.length ?? 0) +
+        uploadedAttachmentIds.length,
     });
 
     return {
@@ -192,38 +219,5 @@ export class SyncAttachmentsProcessor extends BaseProcessor<AccountingAttachment
       uploadedCount,
       failedCount,
     };
-  }
-
-  private getClientId(providerId: string): string | undefined {
-    switch (providerId) {
-      case "xero":
-        return process.env.XERO_CLIENT_ID;
-      case "quickbooks":
-        return process.env.QUICKBOOKS_CLIENT_ID;
-      default:
-        return undefined;
-    }
-  }
-
-  private getClientSecret(providerId: string): string | undefined {
-    switch (providerId) {
-      case "xero":
-        return process.env.XERO_CLIENT_SECRET;
-      case "quickbooks":
-        return process.env.QUICKBOOKS_CLIENT_SECRET;
-      default:
-        return undefined;
-    }
-  }
-
-  private getRedirectUri(providerId: string): string | undefined {
-    switch (providerId) {
-      case "xero":
-        return process.env.XERO_OAUTH_REDIRECT_URL;
-      case "quickbooks":
-        return process.env.QUICKBOOKS_OAUTH_REDIRECT_URL;
-      default:
-        return undefined;
-    }
   }
 }
