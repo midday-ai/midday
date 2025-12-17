@@ -83,8 +83,7 @@ app.openapi(
     const url = await provider.buildConsentUrl(state);
 
     return c.json({ url });
-  }
+  },
 );
 
 export { app as installUrlRouter };
-

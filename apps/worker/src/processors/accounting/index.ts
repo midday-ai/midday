@@ -3,7 +3,11 @@ import { SyncAttachmentsProcessor } from "./sync-attachments";
 
 // Re-export base class for extension
 export { AccountingProcessorBase } from "./base";
-export type { AccountingProviderId, InitializedProvider, TransactionForMapping } from "./base";
+export type {
+  AccountingProviderId,
+  InitializedProvider,
+  TransactionForMapping,
+} from "./base";
 
 /**
  * Accounting processors - maps job names to processor instances
@@ -13,4 +17,3 @@ export const accountingProcessors = {
   "sync-accounting-attachments": new SyncAttachmentsProcessor(),
   "export-to-accounting": new ExportTransactionsProcessor(),
 };
-

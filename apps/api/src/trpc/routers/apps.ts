@@ -54,9 +54,9 @@ export const appsRouter = createTRPCRouter({
             type: z.string().optional(),
             required: z.boolean().optional(),
             value: z.unknown(),
-          })
+          }),
         ),
-      })
+      }),
     )
     .mutation(async ({ ctx: { db, teamId }, input }) => {
       const { appId, settings } = input;

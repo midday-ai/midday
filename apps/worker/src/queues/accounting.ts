@@ -8,6 +8,5 @@ import { accountingQueueConfig } from "./accounting.config";
  */
 export const accountingQueue = new Queue(
   "accounting",
-  accountingQueueConfig.queueOptions
+  accountingQueueConfig.queueOptions,
 );
-

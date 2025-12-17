@@ -87,4 +87,3 @@ app.openapi(
 );
 
 export { app as installUrlRouter };
-

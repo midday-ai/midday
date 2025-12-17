@@ -9,4 +9,3 @@ app.route("/oauth-callback", oauthCallbackRouter);
 app.route("/install-url", installUrlRouter);
 
 export { app as fortnoxRouter };
-
