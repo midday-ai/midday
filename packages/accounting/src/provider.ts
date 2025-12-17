@@ -120,6 +120,20 @@ export interface AccountingProvider {
    * @returns void on success, throws on error
    */
   disconnect?(): Promise<void>;
+
+  /**
+   * Add a history/notes entry to a transaction (Xero only)
+   * Optional - only implemented by Xero provider
+   * @param params - Transaction ID, tax info, and note
+   */
+  addTransactionHistoryNote?(params: {
+    tenantId: string;
+    transactionId: string;
+    taxAmount?: number;
+    taxRate?: number;
+    taxType?: string;
+    note?: string;
+  }): Promise<void>;
 }
 
 /**

@@ -98,6 +98,7 @@ export const accountingSyncStatusEnum = pgEnum("accounting_sync_status", [
   "synced",
   "failed",
   "pending",
+  "partial",
 ]);
 
 export const accountingSyncTypeEnum = pgEnum("accounting_sync_type", [

@@ -187,6 +187,18 @@ export type TransactionForSync = {
   categoryReportingCode: string | null;
   counterpartyName: string | null;
   status: string | null;
+  /** Tax amount from OCR or manual entry */
+  taxAmount: number | null;
+  /** Tax rate percentage (e.g., 25 for 25%) */
+  taxRate: number | null;
+  /** Tax type (e.g., "VAT", "moms", "GST") */
+  taxType: string | null;
+  /** Category's tax rate (fallback if transaction doesn't have one) */
+  categoryTaxRate: number | null;
+  /** Category's tax type (fallback if transaction doesn't have one) */
+  categoryTaxType: string | null;
+  /** User's personal notes about the transaction */
+  note: string | null;
   attachments: Array<{
     id: string;
     name: string | null;
@@ -267,6 +279,12 @@ export const getTransactionsForAccountingSync = async (
       categoryReportingCode: transactionCategories.taxReportingCode,
       counterpartyName: transactions.counterpartyName,
       status: transactions.status,
+      taxAmount: transactions.taxAmount,
+      taxRate: transactions.taxRate,
+      taxType: transactions.taxType,
+      categoryTaxRate: transactionCategories.taxRate,
+      categoryTaxType: transactionCategories.taxType,
+      note: transactions.note,
       attachments: sql<
         Array<{
           id: string;
@@ -295,7 +313,16 @@ export const getTransactionsForAccountingSync = async (
       ),
     )
     .where(and(...conditions))
-    .groupBy(transactions.id, transactionCategories.taxReportingCode)
+    .groupBy(
+      transactions.id,
+      transactionCategories.taxReportingCode,
+      transactions.taxAmount,
+      transactions.taxRate,
+      transactions.taxType,
+      transactionCategories.taxRate,
+      transactionCategories.taxType,
+      transactions.note,
+    )
     // Filter to only fulfilled transactions:
     // Has at least one attachment OR status = 'completed'
     .having(
@@ -459,9 +486,7 @@ export const getSyncedTransactionsWithAttachmentChanges = async (
       string | null
     >;
     const syncedIds = new Set(Object.keys(syncedMapping));
-    const currentIds = new Set(
-      row.currentAttachments?.map((a) => a.id) ?? [],
-    );
+    const currentIds = new Set(row.currentAttachments?.map((a) => a.id) ?? []);
 
     // Find attachments that exist now but weren't synced before (NEW)
     const newAttachmentIds = [...currentIds].filter((id) => !syncedIds.has(id));
@@ -515,7 +540,9 @@ export const updateSyncedAttachmentMapping = async (
       syncedAttachmentMapping: params.syncedAttachmentMapping,
       syncedAt: new Date().toISOString(),
       ...(params.status && { status: params.status }),
-      ...(params.errorMessage !== undefined && { errorMessage: params.errorMessage }),
+      ...(params.errorMessage !== undefined && {
+        errorMessage: params.errorMessage,
+      }),
     })
     .where(eq(accountingSyncRecords.id, params.syncRecordId))
     .returning();

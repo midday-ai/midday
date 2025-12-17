@@ -225,6 +225,9 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
               const originalTx = toExportTransactions.find(
                 (t) => t.id === txResult.transactionId,
               );
+              const mappedTx = batch.find(
+                (t) => t.id === txResult.transactionId,
+              );
               const attachments =
                 originalTx?.attachments?.filter((a) => a.name !== null) ?? [];
 
@@ -242,11 +245,41 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
                     providerTransactionId: txResult.providerTransactionId,
                     attachmentIds: attachments.map((a) => a.id),
                     providerEntityType: txResult.providerEntityType,
+                    // Tax info for history note (Xero) - only for new exports
+                    taxAmount: mappedTx?.taxAmount,
+                    taxRate: mappedTx?.taxRate,
+                    taxType: mappedTx?.taxType,
+                    note: mappedTx?.note,
+                    addHistoryNote: true, // New export - add summary note after attachments
                   },
                   "accounting",
                   { delay },
                 );
                 attachmentJobIndex++;
+              } else if (providerId === "xero" && mappedTx) {
+                // For Xero transactions without attachments, still add history note directly
+                try {
+                  await provider.addTransactionHistoryNote?.({
+                    tenantId: orgId,
+                    transactionId: txResult.providerTransactionId,
+                    taxAmount: mappedTx.taxAmount,
+                    taxRate: mappedTx.taxRate,
+                    taxType: mappedTx.taxType,
+                    note: mappedTx.note,
+                  });
+                } catch (error) {
+                  // Non-fatal - just log
+                  this.logger.warn(
+                    "Failed to add history note for transaction without attachments",
+                    {
+                      transactionId: txResult.transactionId,
+                      error:
+                        error instanceof Error
+                          ? error.message
+                          : "Unknown error",
+                    },
+                  );
+                }
               }
             }
           }

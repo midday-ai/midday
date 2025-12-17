@@ -16,7 +16,12 @@ import {
   type TokenSet,
   type UploadAttachmentParams,
 } from "../types";
-import { ensureFileExtension, streamToBuffer } from "../utils";
+import {
+  appendTaxInfoToDescription,
+  buildPrivateNote,
+  ensureFileExtension,
+  streamToBuffer,
+} from "../utils";
 
 // ============================================================================
 // Fortnox Types
@@ -796,8 +801,19 @@ export class FortnoxProvider extends BaseAccountingProvider {
           ];
 
       // Use the same description as shown in Midday
-      const voucherDescription =
+      const baseDescription =
         tx.description || tx.counterpartyName || "Transaction";
+
+      // Append tax info to VoucherRow description (use compact format for Fortnox)
+      // Fortnox description field has ~200 char limit
+      const rowDescription = appendTaxInfoToDescription(
+        tx.description || "",
+        tx,
+        { compact: true, maxLength: 200 },
+      );
+
+      // Build comments with tax info and user notes (visible in Fortnox UI comment box)
+      const voucherComments = buildPrivateNote(tx);
 
       // Note: ReferenceNumber, Year, and ApprovalState are read-only in Fortnox API
       // Vouchers are created as posted/finalized entries (standard for accounting integrations)
@@ -805,14 +821,16 @@ export class FortnoxProvider extends BaseAccountingProvider {
         method: "POST",
         body: JSON.stringify({
           Voucher: {
-            Description: voucherDescription.substring(0, 200), // Fortnox limit
+            Description: baseDescription.substring(0, 200), // Fortnox limit
+            // Comments field shows in Fortnox UI comment box - use for tax info and notes
+            Comments: voucherComments || undefined,
             TransactionDate: tx.date,
             VoucherSeries: "A", // Standard voucher series
             VoucherRows: voucherRows.map((row) => ({
               Account: row.Account,
               Debit: row.Debit,
               Credit: row.Credit,
-              Description: tx.description || undefined,
+              Description: rowDescription || undefined,
               // Additional Fortnox-specific fields
               CostCenter: tx.costCenter || undefined,
               Project: tx.project || undefined,

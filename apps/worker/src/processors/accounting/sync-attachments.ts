@@ -63,6 +63,12 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
       existingSyncedAttachmentMapping,
       syncRecordId,
       providerEntityType,
+      // Tax info for history note (Xero only)
+      taxAmount,
+      taxRate,
+      taxType,
+      note,
+      addHistoryNote,
     } = job.data;
 
     const supabase = createClient(); // Only for storage access (unavoidable)
@@ -265,6 +271,29 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
             ...updateParams,
           });
         }
+      }
+    }
+
+    // Step 4: Add history note after all attachments (Xero only, new exports only)
+    if (addHistoryNote && providerId === "xero") {
+      try {
+        await provider.addTransactionHistoryNote?.({
+          tenantId: orgId,
+          transactionId: providerTransactionId,
+          taxAmount,
+          taxRate,
+          taxType,
+          note,
+        });
+        this.logger.debug("Added history note to Xero transaction", {
+          transactionId: providerTransactionId,
+        });
+      } catch (error) {
+        // Non-fatal - just log warning
+        this.logger.warn("Failed to add history note to Xero transaction", {
+          transactionId: providerTransactionId,
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
       }
     }
 

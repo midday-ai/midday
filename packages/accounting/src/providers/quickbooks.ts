@@ -19,6 +19,7 @@ import type {
   UploadAttachmentParams,
 } from "../types";
 import {
+  buildPrivateNote,
   ensureFileExtension,
   generateTransactionIdempotencyKey,
   streamToBuffer,
@@ -365,7 +366,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
    * This uses native fetch since the OAuth SDK doesn't support multipart uploads
    */
   private async uploadFile(
-    entityType: "Purchase" | "SalesReceipt" | "Bill" | "Invoice",
+    entityType: "Purchase" | "Deposit" | "Bill" | "Invoice",
     entityId: string,
     fileName: string,
     mimeType: string,
@@ -389,6 +390,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
     formData.append("file_content_0", blob, fileName);
 
     // Add metadata to link the attachment to the transaction
+    // Must be sent as application/json, not text/plain
     const metadata = {
       AttachableRef: [
         {
@@ -401,7 +403,10 @@ export class QuickBooksProvider extends BaseAccountingProvider {
       FileName: fileName,
       ContentType: mimeType,
     };
-    formData.append("file_metadata_0", JSON.stringify(metadata));
+    const metadataBlob = new Blob([JSON.stringify(metadata)], {
+      type: "application/json",
+    });
+    formData.append("file_metadata_0", metadataBlob);
 
     const response = await fetch(url, {
       method: "POST",
@@ -423,15 +428,31 @@ export class QuickBooksProvider extends BaseAccountingProvider {
     const result = (await response.json()) as {
       AttachableResponse?: Array<{
         Attachable?: { Id: string };
-        Fault?: { Error?: Array<{ Message?: string }> };
+        Fault?: {
+          Error?: Array<{ Message?: string; Detail?: string; code?: string }>;
+          type?: string;
+        };
       }>;
+      Fault?: {
+        Error?: Array<{ Message?: string; Detail?: string; code?: string }>;
+        type?: string;
+      };
     };
+
+    // Check for top-level fault
+    if (result.Fault?.Error?.length) {
+      const firstError = result.Fault.Error[0];
+      const errorMsg =
+        firstError?.Detail || firstError?.Message || "Unknown upload error";
+      throw new Error(`QuickBooks upload error: ${errorMsg}`);
+    }
 
     // Check for errors in the response
     const attachableResponse = result.AttachableResponse?.[0];
     if (attachableResponse?.Fault?.Error?.length) {
+      const firstError = attachableResponse.Fault.Error[0];
       const errorMsg =
-        attachableResponse.Fault.Error[0]?.Message || "Unknown upload error";
+        firstError?.Detail || firstError?.Message || "Unknown upload error";
       throw new Error(`QuickBooks upload error: ${errorMsg}`);
     }
 
@@ -444,7 +465,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
    */
   private async getEntityTypeForTransaction(
     transactionId: string,
-  ): Promise<"Purchase" | "SalesReceipt" | null> {
+  ): Promise<"Purchase" | "Deposit" | null> {
     // Try to find as Purchase first (expenses)
     try {
       const purchase = await this.apiCall<{ Purchase?: { Id: string } }>(
@@ -455,16 +476,16 @@ export class QuickBooksProvider extends BaseAccountingProvider {
         return "Purchase";
       }
     } catch {
-      // Not a Purchase, try SalesReceipt
+      // Not a Purchase, try Deposit
     }
 
-    // Try SalesReceipt (income)
+    // Try Deposit (income)
     try {
-      const salesReceipt = await this.apiCall<{
-        SalesReceipt?: { Id: string };
-      }>("GET", `/salesreceipt/${transactionId}`);
-      if (salesReceipt.SalesReceipt?.Id) {
-        return "SalesReceipt";
+      const deposit = await this.apiCall<{
+        Deposit?: { Id: string };
+      }>("GET", `/deposit/${transactionId}`);
+      if (deposit.Deposit?.Id) {
+        return "Deposit";
       }
     } catch {
       // Not found
@@ -604,8 +625,203 @@ export class QuickBooksProvider extends BaseAccountingProvider {
   }
 
   /**
+   * Get expense accounts from QuickBooks
+   */
+  private async getExpenseAccounts(): Promise<AccountingAccount[]> {
+    return this.withRetry(async () => {
+      const response = await this.apiCall<{
+        QueryResponse: {
+          Account?: Array<{
+            Id: string;
+            Name: string;
+            AcctNum?: string;
+            AccountType: string;
+            CurrencyRef?: { value: string };
+            Active: boolean;
+          }>;
+        };
+      }>(
+        "GET",
+        `/query?query=${encodeURIComponent(
+          "SELECT * FROM Account WHERE AccountType = 'Expense' AND Active = true",
+        )}`,
+      );
+
+      const accounts = response.QueryResponse?.Account || [];
+
+      return accounts.map((account) => ({
+        id: account.Id,
+        name: account.Name,
+        code: account.AcctNum,
+        type: "expense" as const,
+        currency: account.CurrencyRef?.value,
+        status: account.Active ? ("active" as const) : ("archived" as const),
+      }));
+    }, "Failed to get expense accounts from QuickBooks");
+  }
+
+  /**
+   * Get income accounts from QuickBooks
+   */
+  private async getIncomeAccounts(): Promise<AccountingAccount[]> {
+    return this.withRetry(async () => {
+      // Query for Income account types using IN operator
+      const response = await this.apiCall<{
+        QueryResponse: {
+          Account?: Array<{
+            Id: string;
+            Name: string;
+            AcctNum?: string;
+            AccountType: string;
+            CurrencyRef?: { value: string };
+            Active: boolean;
+          }>;
+        };
+      }>(
+        "GET",
+        `/query?query=${encodeURIComponent(
+          "SELECT * FROM Account WHERE AccountType IN ('Income', 'Other Income') AND Active = true",
+        )}`,
+      );
+
+      const accounts = response.QueryResponse?.Account || [];
+
+      return accounts.map((account) => ({
+        id: account.Id,
+        name: account.Name,
+        code: account.AcctNum,
+        type: "income" as const,
+        currency: account.CurrencyRef?.value,
+        status: account.Active ? ("active" as const) : ("archived" as const),
+      }));
+    }, "Failed to get income accounts from QuickBooks");
+  }
+
+  /**
+   * Get or create a default expense account
+   * Tries to find "Uncategorized Expense" or similar, creates one if none exist
+   */
+  private async getOrCreateDefaultExpenseAccount(): Promise<{
+    id: string;
+    name: string;
+  }> {
+    const expenseAccounts = await this.getExpenseAccounts();
+
+    // Try to find common default expense accounts
+    const uncategorized = expenseAccounts.find(
+      (a) =>
+        a.name.toLowerCase().includes("uncategorized") ||
+        a.name.toLowerCase().includes("miscellaneous") ||
+        a.name.toLowerCase() === "other expenses",
+    );
+    if (uncategorized) {
+      return { id: uncategorized.id, name: uncategorized.name };
+    }
+
+    // Return first expense account if any exist
+    const first = expenseAccounts[0];
+    if (first) {
+      return { id: first.id, name: first.name };
+    }
+
+    // No expense accounts exist - create a default one
+    logger.info("No expense accounts found in QuickBooks, creating default", {
+      provider: "quickbooks",
+    });
+
+    return this.createDefaultExpenseAccount();
+  }
+
+  /**
+   * Create a default expense account in QuickBooks
+   */
+  private async createDefaultExpenseAccount(): Promise<{
+    id: string;
+    name: string;
+  }> {
+    const accountName = "Midday Expenses";
+
+    const response = await this.apiCall<{
+      Account: { Id: string; Name: string };
+    }>("POST", "/account", {
+      Name: accountName,
+      AccountType: "Expense",
+      AccountSubType: "OtherMiscellaneousServiceCost",
+    });
+
+    logger.info("Created default expense account in QuickBooks", {
+      provider: "quickbooks",
+      accountId: response.Account.Id,
+      accountName: response.Account.Name,
+    });
+
+    return { id: response.Account.Id, name: response.Account.Name };
+  }
+
+  /**
+   * Get or create a default income account
+   * Tries to find "Uncategorized Income" or similar, creates one if none exist
+   */
+  private async getOrCreateDefaultIncomeAccount(): Promise<{
+    id: string;
+    name: string;
+  }> {
+    const incomeAccounts = await this.getIncomeAccounts();
+
+    // Try to find common default income accounts
+    const uncategorized = incomeAccounts.find(
+      (a) =>
+        a.name.toLowerCase().includes("uncategorized") ||
+        a.name.toLowerCase().includes("other income") ||
+        a.name.toLowerCase() === "sales",
+    );
+    if (uncategorized) {
+      return { id: uncategorized.id, name: uncategorized.name };
+    }
+
+    // Return first income account if any exist
+    const first = incomeAccounts[0];
+    if (first) {
+      return { id: first.id, name: first.name };
+    }
+
+    // No income accounts exist - create a default one
+    logger.info("No income accounts found in QuickBooks, creating default", {
+      provider: "quickbooks",
+    });
+
+    return this.createDefaultIncomeAccount();
+  }
+
+  /**
+   * Create a default income account in QuickBooks
+   */
+  private async createDefaultIncomeAccount(): Promise<{
+    id: string;
+    name: string;
+  }> {
+    const accountName = "Midday Income";
+
+    const response = await this.apiCall<{
+      Account: { Id: string; Name: string };
+    }>("POST", "/account", {
+      Name: accountName,
+      AccountType: "Income",
+      AccountSubType: "ServiceFeeIncome",
+    });
+
+    logger.info("Created default income account in QuickBooks", {
+      provider: "quickbooks",
+      accountId: response.Account.Id,
+      accountName: response.Account.Name,
+    });
+
+    return { id: response.Account.Id, name: response.Account.Name };
+  }
+
+  /**
    * Sync transactions to QuickBooks
-   * Uses Purchase for expenses and SalesReceipt for income
+   * Uses Purchase for expenses and Deposit for income
    * Always creates new transactions - user can re-export to create updated versions
    */
   async syncTransactions(params: SyncTransactionsParams): Promise<SyncResult> {
@@ -621,9 +837,21 @@ export class QuickBooksProvider extends BaseAccountingProvider {
       provider: "quickbooks",
       transactionCount: sortedTransactions.length,
       targetAccountId,
-      tenantId,
-      jobId,
     });
+
+    // Get or create default accounts for categorization
+    const [defaultExpenseAccount, defaultIncomeAccount, expenseAccounts] =
+      await Promise.all([
+        this.getOrCreateDefaultExpenseAccount(),
+        this.getOrCreateDefaultIncomeAccount(),
+        this.getExpenseAccounts(),
+      ]);
+
+    // Build a map of expense account names to IDs for category matching
+    const expenseAccountNameToId = new Map<string, string>();
+    for (const account of expenseAccounts) {
+      expenseAccountNameToId.set(account.name.toLowerCase(), account.id);
+    }
 
     const results: SyncResult["results"] = [];
     let syncedCount = 0;
@@ -641,6 +869,15 @@ export class QuickBooksProvider extends BaseAccountingProvider {
         const description =
           tx.description || tx.counterpartyName || "Transaction";
 
+        // Resolve expense account: try to match by category name, fall back to default
+        const categoryName = this.getValidAccountName(
+          tx.categoryReportingCode,
+          tx.id,
+        );
+        const expenseAccountId =
+          expenseAccountNameToId.get(categoryName.toLowerCase()) ||
+          defaultExpenseAccount.id;
+
         if (tx.amount < 0) {
           // Expense transaction - create a Purchase
           const purchase: Record<string, unknown> = {
@@ -655,19 +892,17 @@ export class QuickBooksProvider extends BaseAccountingProvider {
                 DetailType: "AccountBasedExpenseLineDetail",
                 AccountBasedExpenseLineDetail: {
                   AccountRef: {
-                    name: this.getValidAccountName(
-                      tx.categoryReportingCode,
-                      tx.id,
-                    ),
+                    value: expenseAccountId,
                   },
                 },
                 Description: description,
               },
             ],
           };
-          // Only add PrivateNote if there's a meaningful reference
-          if (tx.reference) {
-            purchase.PrivateNote = tx.reference;
+          // Build PrivateNote with tax info and user notes
+          const privateNote = buildPrivateNote(tx);
+          if (privateNote) {
+            purchase.PrivateNote = privateNote;
           }
 
           const result = await this.withRetry(
@@ -682,46 +917,48 @@ export class QuickBooksProvider extends BaseAccountingProvider {
           );
           providerTransactionId = result.Purchase?.Id;
         } else {
-          // Income transaction - create a SalesReceipt
-          const salesReceipt: Record<string, unknown> = {
+          // Income transaction - create a Deposit (simpler than SalesReceipt, no Item required)
+          const deposit: Record<string, unknown> = {
             DepositToAccountRef: { value: targetAccountId },
-            TotalAmt: tx.amount,
             TxnDate: tx.date,
             CurrencyRef: { value: tx.currency },
             Line: [
               {
                 Amount: tx.amount,
-                DetailType: "SalesItemLineDetail",
-                SalesItemLineDetail: {
-                  ItemRef: { name: "Services" }, // Default income item
+                DetailType: "DepositLineDetail",
+                DepositLineDetail: {
+                  AccountRef: {
+                    value: defaultIncomeAccount.id,
+                  },
                 },
                 Description: description,
               },
             ],
           };
-          // Only add PrivateNote if there's a meaningful reference
-          if (tx.reference) {
-            salesReceipt.PrivateNote = tx.reference;
+          // Build PrivateNote with tax info and user notes
+          const privateNote = buildPrivateNote(tx);
+          if (privateNote) {
+            deposit.PrivateNote = privateNote;
           }
 
           const result = await this.withRetry(
             () =>
-              this.apiCall<{ SalesReceipt: { Id: string } }>(
+              this.apiCall<{ Deposit: { Id: string } }>(
                 "POST",
-                "/salesreceipt",
-                salesReceipt,
+                "/deposit",
+                deposit,
                 idempotencyKey,
               ),
-            `Failed to create sales receipt for transaction ${tx.id}`,
+            `Failed to create deposit for transaction ${tx.id}`,
           );
-          providerTransactionId = result.SalesReceipt?.Id;
+          providerTransactionId = result.Deposit?.Id;
         }
 
         if (providerTransactionId) {
           results.push({
             transactionId: tx.id,
             providerTransactionId,
-            providerEntityType: tx.amount < 0 ? "Purchase" : "SalesReceipt",
+            providerEntityType: tx.amount < 0 ? "Purchase" : "Deposit",
             success: true,
           });
           syncedCount++;
@@ -765,7 +1002,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
 
   /**
    * Upload attachment to a QuickBooks transaction
-   * Supports both Purchase (expenses) and SalesReceipt (income) transactions
+   * Supports both Purchase (expenses) and Deposit (income) transactions
    */
   async uploadAttachment(
     params: UploadAttachmentParams,
@@ -785,8 +1022,6 @@ export class QuickBooksProvider extends BaseAccountingProvider {
       provider: "quickbooks",
       transactionId,
       fileName: sanitizedFileName,
-      originalFileName: fileName !== sanitizedFileName ? fileName : undefined,
-      mimeType,
     });
 
     try {
@@ -794,10 +1029,10 @@ export class QuickBooksProvider extends BaseAccountingProvider {
       const buffer = await streamToBuffer(content);
 
       // Use provided entity type if available, otherwise look it up
-      let entityType: "Purchase" | "SalesReceipt" | null = null;
+      let entityType: "Purchase" | "Deposit" | null = null;
       if (
         providedEntityType === "Purchase" ||
-        providedEntityType === "SalesReceipt"
+        providedEntityType === "Deposit"
       ) {
         entityType = providedEntityType;
       } else {
@@ -853,7 +1088,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
       logger.error("QuickBooks attachment upload failed", {
         provider: "quickbooks",
         transactionId,
-        fileName,
+        fileName: sanitizedFileName,
         error: this.getErrorMessage(error),
       });
       return {

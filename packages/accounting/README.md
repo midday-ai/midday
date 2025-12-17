@@ -295,7 +295,7 @@ Users manually select which transactions to export. The system validates that tr
 | Provider | Entity Type | Idempotency | Notes |
 |----------|-------------|-------------|-------|
 | Xero | BankTransaction | `updateOrCreate` | SPEND/RECEIVE, deterministic keys |
-| QuickBooks | Purchase/SalesReceipt | `Request-Id` header | Based on amount sign |
+| QuickBooks | Purchase/Deposit | `Request-Id` header | Based on amount sign |
 | Fortnox | Voucher | None (immutable) | Posted vouchers, double-entry |
 
 ### Important: Re-Export Behavior

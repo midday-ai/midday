@@ -4,6 +4,8 @@ import {
   AccountType,
   BankTransaction,
   type CurrencyCode,
+  type HistoryRecords,
+  LineAmountTypes,
   XeroClient,
 } from "xero-node";
 import { BaseAccountingProvider } from "../provider";
@@ -23,6 +25,7 @@ import type {
   UploadAttachmentParams,
 } from "../types";
 import {
+  buildPrivateNote,
   ensureFileExtension,
   generateAttachmentIdempotencyKey,
   generateTransactionIdempotencyKey,
@@ -43,8 +46,10 @@ export const XERO_SCOPES = [
   "offline_access",
 ];
 
-/** Default account code when category doesn't have a reporting code */
-const DEFAULT_ACCOUNT_CODE = "400";
+/** Default expense account code when category doesn't have a reporting code */
+const DEFAULT_EXPENSE_CODE = "429"; // General Expenses (common in Xero)
+/** Default income account code when category doesn't have a reporting code */
+const DEFAULT_INCOME_CODE = "200"; // Sales (common in Xero)
 
 /** Xero rate limits per tenant */
 const XERO_MINUTE_LIMIT = 60;
@@ -326,25 +331,29 @@ export class XeroProvider extends BaseAccountingProvider {
 
   /**
    * Validate and return account code, falling back to default if invalid
+   * Uses different defaults for expenses vs income
    */
   private getValidAccountCode(
     categoryReportingCode: string | undefined,
     transactionId: string,
+    isExpense: boolean,
   ): string {
     // Valid Xero account codes are non-empty alphanumeric strings
     const isValid =
       categoryReportingCode && /^[a-zA-Z0-9]+$/.test(categoryReportingCode);
+
+    const defaultCode = isExpense ? DEFAULT_EXPENSE_CODE : DEFAULT_INCOME_CODE;
 
     if (categoryReportingCode && !isValid) {
       logger.warn("Invalid Xero account code, using default", {
         provider: "xero",
         transactionId,
         invalidCode: categoryReportingCode,
-        defaultAccount: DEFAULT_ACCOUNT_CODE,
+        defaultAccount: defaultCode,
       });
     }
 
-    return isValid ? categoryReportingCode : DEFAULT_ACCOUNT_CODE;
+    return isValid ? categoryReportingCode : defaultCode;
   }
 
   /**
@@ -632,35 +641,43 @@ export class XeroProvider extends BaseAccountingProvider {
     for (let i = 0; i < sortedTransactions.length; i += BATCH_SIZE) {
       const batch = sortedTransactions.slice(i, i + BATCH_SIZE);
 
-      const bankTransactions = batch.map((tx: MappedTransaction) => ({
-        type:
-          tx.amount < 0
+      const bankTransactions = batch.map((tx: MappedTransaction) => {
+        const isExpense = tx.amount < 0;
+
+        return {
+          type: isExpense
             ? BankTransaction.TypeEnum.SPEND
             : BankTransaction.TypeEnum.RECEIVE,
-        contact: tx.counterpartyName
-          ? {
-              name: tx.counterpartyName,
-            }
-          : undefined,
-        lineItems: [
-          {
-            description: tx.description,
-            quantity: 1,
-            unitAmount: Math.abs(tx.amount),
-            // Use category's reporting code if valid, otherwise default
-            accountCode: this.getValidAccountCode(
-              tx.categoryReportingCode,
-              tx.id,
-            ),
+          // Bank transactions are gross amounts (tax-inclusive)
+          // Let Xero calculate tax using the account's default tax rate
+          lineAmountTypes: LineAmountTypes.Inclusive,
+          contact: tx.counterpartyName
+            ? {
+                name: tx.counterpartyName,
+              }
+            : undefined,
+          lineItems: [
+            {
+              // Clean description - tax info goes in History & Notes
+              description: tx.description,
+              quantity: 1,
+              unitAmount: Math.abs(tx.amount),
+              // Use category's reporting code if valid, otherwise default based on type
+              accountCode: this.getValidAccountCode(
+                tx.categoryReportingCode,
+                tx.id,
+                isExpense,
+              ),
+            },
+          ],
+          bankAccount: {
+            accountID: targetAccountId,
           },
-        ],
-        bankAccount: {
-          accountID: targetAccountId,
-        },
-        date: tx.date,
-        reference: tx.reference || tx.id,
-        currencyCode: tx.currency as unknown as CurrencyCode,
-      }));
+          date: tx.date,
+          reference: tx.reference || tx.id,
+          currencyCode: tx.currency as unknown as CurrencyCode,
+        };
+      });
 
       try {
         // Use job-based idempotency key:
@@ -753,6 +770,71 @@ export class XeroProvider extends BaseAccountingProvider {
       failedCount,
       results,
     };
+  }
+
+  /**
+   * Add a history note to a bank transaction with tax info, user notes, and attachment summary
+   * Called after attachments are uploaded for a clean timeline
+   */
+  async addTransactionHistoryNote(params: {
+    tenantId: string;
+    transactionId: string;
+    taxAmount?: number;
+    taxRate?: number;
+    taxType?: string;
+    note?: string;
+  }): Promise<void> {
+    const { tenantId, transactionId, taxAmount, taxRate, taxType, note } =
+      params;
+
+    await this.ensureClientReady();
+
+    // Build note content
+    const noteContent = buildPrivateNote(
+      { taxAmount, taxRate, taxType, note },
+      { maxLength: 4000 },
+    );
+
+    // Build parts for the history note
+    const parts: string[] = ["Synced from Midday"];
+
+    if (noteContent) {
+      parts.push(noteContent);
+    }
+
+    // Only add history if there's meaningful content beyond "Synced from Midday"
+    if (parts.length === 1 && !noteContent) {
+      return;
+    }
+
+    try {
+      const historyRecords: HistoryRecords = {
+        historyRecords: [
+          {
+            details: parts.join("\n"),
+          },
+        ],
+      };
+
+      await this.client.accountingApi.createBankTransactionHistoryRecord(
+        tenantId,
+        transactionId,
+        historyRecords,
+      );
+
+      logger.debug("Added history note to Xero transaction", {
+        provider: "xero",
+        transactionId,
+      });
+    } catch (error) {
+      // Log but don't fail - history note is non-critical
+      logger.warn("Failed to add history note to Xero transaction", {
+        provider: "xero",
+        transactionId,
+        error: this.getErrorMessage(error),
+      });
+      throw error; // Re-throw for the caller to handle
+    }
   }
 
   /**

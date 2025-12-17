@@ -357,6 +357,25 @@ export interface MappedTransaction {
    * - Fortnox: Maps to Project in VoucherRow
    */
   project?: string;
+  /**
+   * Tax amount from OCR or manual entry
+   * - QuickBooks: Included in PrivateNote
+   * - Xero: Appended to LineItem description
+   * - Fortnox: Appended to VoucherRow description
+   */
+  taxAmount?: number;
+  /**
+   * Tax rate percentage (e.g., 25 for 25%)
+   */
+  taxRate?: number;
+  /**
+   * Tax type (e.g., "VAT", "moms", "GST")
+   */
+  taxType?: string;
+  /**
+   * User's personal notes about the transaction
+   */
+  note?: string;
   attachments?: AttachmentRef[];
 }
 
@@ -388,7 +407,7 @@ export interface SyncTransactionsParams {
  */
 export type ProviderEntityType =
   | "Purchase" // QuickBooks expense
-  | "SalesReceipt" // QuickBooks income
+  | "Deposit" // QuickBooks income
   | "BankTransaction" // Xero bank transaction
   | "Voucher"; // Fortnox voucher (verifikation)
 
