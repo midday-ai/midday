@@ -678,6 +678,8 @@ export class FortnoxProvider extends BaseAccountingProvider {
    * Always creates new vouchers - user can re-export to create updated versions
    */
   async syncTransactions(params: SyncTransactionsParams): Promise<SyncResult> {
+    // Note: Fortnox API doesn't support idempotency keys, so jobId is not used here.
+    // Duplicate prevention relies entirely on our sync records table.
     const { transactions, targetAccountId, tenantId } = params;
 
     // Sort by date ascending for clean voucher number sequence

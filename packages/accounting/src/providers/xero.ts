@@ -22,7 +22,12 @@ import type {
   TokenSet,
   UploadAttachmentParams,
 } from "../types";
-import { ensureFileExtension, streamToBuffer } from "../utils";
+import {
+  ensureFileExtension,
+  generateAttachmentIdempotencyKey,
+  generateTransactionIdempotencyKey,
+  streamToBuffer,
+} from "../utils";
 
 /**
  * Xero OAuth scopes required for the integration
@@ -48,16 +53,8 @@ const XERO_MINUTE_LIMIT = 60;
 const XERO_CONCURRENT_LIMIT = 3;
 const XERO_SAFE_THRESHOLD = 10; // Start slowing down when 10 calls remain
 
-/**
- * Generate deterministic idempotency key for Xero API calls
- * Same transaction always gets the same key - this is the correct behavior.
- *
- * Note: If you delete a transaction from Xero and want to re-create it,
- * you may need to wait for Xero's idempotency cache to expire (~24-48 hours).
- */
-function generateIdempotencyKey(transactionId: string, date: string): string {
-  return `midday-${transactionId}-${date}`;
-}
+// Note: Transaction idempotency is handled by our sync records table.
+// Attachment uploads use generateAttachmentIdempotencyKey() from utils.
 
 /**
  * Xero accounting provider implementation
@@ -607,7 +604,7 @@ export class XeroProvider extends BaseAccountingProvider {
    * Always creates new transactions - user can re-export to create updated versions
    */
   async syncTransactions(params: SyncTransactionsParams): Promise<SyncResult> {
-    const { transactions, targetAccountId, tenantId } = params;
+    const { transactions, targetAccountId, tenantId, jobId } = params;
 
     // Sort by date ascending for clean transaction ordering in Xero
     // This ensures transactions appear in chronological order (better for auditing)
@@ -620,6 +617,7 @@ export class XeroProvider extends BaseAccountingProvider {
       transactionCount: sortedTransactions.length,
       targetAccountId,
       tenantId,
+      jobId,
     });
 
     await this.ensureClientReady();
@@ -664,15 +662,15 @@ export class XeroProvider extends BaseAccountingProvider {
         currencyCode: tx.currency as unknown as CurrencyCode,
       }));
 
-      // Generate idempotency key for the batch based on first transaction
-      const firstTx = batch[0];
-      const idempotencyKey = firstTx
-        ? generateIdempotencyKey(firstTx.id, firstTx.date)
-        : undefined;
-
       try {
-        // Call API directly without withRetry to get raw error details
-        // The export processor handles retries at the job level
+        // Use job-based idempotency key:
+        // - Same job retrying = same key = no duplicate (retry safe)
+        // - New export job = new key = allows re-export after deletion
+        const firstTx = batch[0];
+        const idempotencyKey = firstTx
+          ? generateTransactionIdempotencyKey(firstTx.id, jobId)
+          : undefined;
+
         const response =
           await this.client.accountingApi.updateOrCreateBankTransactions(
             tenantId,
@@ -782,8 +780,10 @@ export class XeroProvider extends BaseAccountingProvider {
       // Convert content to Buffer if it's a stream
       const buffer = await streamToBuffer(content);
 
-      // Deterministic idempotency key for attachment
-      const idempotencyKey = `midday-attachment-${transactionId}-${sanitizedFileName}`;
+      const idempotencyKey = generateAttachmentIdempotencyKey(
+        transactionId,
+        sanitizedFileName,
+      );
 
       // Call API directly without withRetry - processor handles retries
       // This gives us raw error details instead of wrapped "Unknown error"

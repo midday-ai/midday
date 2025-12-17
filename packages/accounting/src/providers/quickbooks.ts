@@ -18,7 +18,11 @@ import type {
   TokenSet,
   UploadAttachmentParams,
 } from "../types";
-import { ensureFileExtension, streamToBuffer } from "../utils";
+import {
+  ensureFileExtension,
+  generateTransactionIdempotencyKey,
+  streamToBuffer,
+} from "../utils";
 
 /**
  * QuickBooks OAuth scopes required for the integration
@@ -605,7 +609,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
    * Always creates new transactions - user can re-export to create updated versions
    */
   async syncTransactions(params: SyncTransactionsParams): Promise<SyncResult> {
-    const { transactions, targetAccountId, tenantId } = params;
+    const { transactions, targetAccountId, tenantId, jobId } = params;
 
     // Sort by date ascending for consistent ordering
     // This ensures transactions appear in chronological order in QuickBooks
@@ -618,6 +622,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
       transactionCount: sortedTransactions.length,
       targetAccountId,
       tenantId,
+      jobId,
     });
 
     const results: SyncResult["results"] = [];
@@ -629,8 +634,8 @@ export class QuickBooksProvider extends BaseAccountingProvider {
       try {
         let providerTransactionId: string | undefined;
 
-        // Generate deterministic idempotency key for this transaction
-        const idempotencyKey = `midday-${tx.id}-${tx.date}`;
+        // Job-based idempotency key: same job = same key (retry safe), new job = new key (re-export works)
+        const idempotencyKey = generateTransactionIdempotencyKey(tx.id, jobId);
 
         // Use the same description as shown in Midday
         const description =

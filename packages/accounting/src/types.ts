@@ -74,8 +74,8 @@ export const RATE_LIMITS = {
   /** Xero: 60 calls/min, 5 concurrent, 5000/day per tenant */
   xero: {
     callsPerMinute: 60,
-    maxConcurrent: 5,
-    callDelayMs: 1000, // 1 sec between batches of 5 = 60/min
+    maxConcurrent: 2, // Reduced from 5 to prevent overlap between jobs
+    callDelayMs: 1000,
     retryDelayMs: 60000,
     maxRetries: 3,
   },
@@ -378,6 +378,8 @@ export interface SyncTransactionsParams {
   transactions: MappedTransaction[];
   targetAccountId: string;
   tenantId: string;
+  /** Job ID for idempotency - ensures retries don't create duplicates */
+  jobId: string;
 }
 
 /**

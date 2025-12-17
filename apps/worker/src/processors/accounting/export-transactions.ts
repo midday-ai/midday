@@ -15,13 +15,13 @@ const BATCH_SIZE = 50;
 
 /**
  * Calculate delay for attachment jobs based on provider rate limits
- * Groups jobs into batches based on maxConcurrent to maximize throughput
- * while staying under rate limits.
+ * Spaces jobs with extra buffer to prevent concurrent upload overlap.
  *
- * Example for Xero (60 calls/min, 5 concurrent):
- * - Jobs 0-4 start at 0ms (batch 0)
- * - Jobs 5-9 start at 5000ms (batch 1)
- * - Jobs 10-14 start at 10000ms (batch 2)
+ * Each job may upload multiple attachments, and uploads can take time.
+ * We add buffer to ensure previous job's uploads complete before next starts.
+ *
+ * Example for Xero (60 calls/min, 2x buffer):
+ * - Job 0 at 0ms, Job 1 at 2000ms, Job 2 at 4000ms, etc.
  */
 function calculateAttachmentJobDelay(
   providerId: string,
@@ -29,16 +29,12 @@ function calculateAttachmentJobDelay(
 ): number {
   const config = RATE_LIMITS[providerId as keyof typeof RATE_LIMITS];
   const callsPerMinute = config?.callsPerMinute ?? 60;
-  const maxConcurrent = config?.maxConcurrent ?? 1;
 
-  // Calculate which batch this job belongs to
-  const batchIndex = Math.floor(jobIndex / maxConcurrent);
+  // Base delay: 60000ms / callsPerMinute
+  // Add 2x buffer to account for upload duration and prevent overlap
+  const msPerJob = Math.ceil((60000 / callsPerMinute) * 2);
 
-  // Time between batches: enough time for maxConcurrent calls to complete
-  // e.g., Xero: 5 concurrent * 60000ms / 60 calls = 5000ms between batches
-  const msBetweenBatches = Math.ceil((maxConcurrent * 60000) / callsPerMinute);
-
-  return batchIndex * msBetweenBatches;
+  return jobIndex * msPerJob;
 }
 
 /**
@@ -204,6 +200,7 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
             transactions: batch,
             targetAccountId: targetAccount.id,
             tenantId: orgId,
+            jobId: job.id ?? `fallback-${Date.now()}`,
           });
 
           totalExported += result.syncedCount;

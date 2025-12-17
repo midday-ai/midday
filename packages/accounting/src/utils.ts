@@ -95,6 +95,50 @@ export function decryptAccountingOAuthState(
 }
 
 // ============================================================================
+// Idempotency Utilities
+// ============================================================================
+
+/**
+ * Generate idempotency key for transaction sync.
+ * Uses jobId to ensure:
+ * - Same job retrying = same key = no duplicate (retry safe)
+ * - New export job = new key = allows re-export after deletion
+ *
+ * @param transactionId - The Midday transaction ID
+ * @param jobId - The BullMQ job ID (unique per export session)
+ * @returns Idempotency key for the transaction
+ *
+ * @example
+ * generateTransactionIdempotencyKey("tx-123", "job-456")
+ * // Returns: "midday-tx-tx-123-job-456"
+ */
+export function generateTransactionIdempotencyKey(
+  transactionId: string,
+  jobId: string,
+): string {
+  return `midday-tx-${transactionId}-${jobId}`;
+}
+
+/**
+ * Generate idempotency key for attachment uploads.
+ * This prevents duplicate attachment uploads during retries.
+ *
+ * @param providerTransactionId - The provider's transaction ID
+ * @param fileName - The sanitized filename being uploaded
+ * @returns Deterministic idempotency key
+ *
+ * @example
+ * generateAttachmentIdempotencyKey("abc-123", "receipt.pdf")
+ * // Returns: "midday-attachment-abc-123-receipt.pdf"
+ */
+export function generateAttachmentIdempotencyKey(
+  providerTransactionId: string,
+  fileName: string,
+): string {
+  return `midday-attachment-${providerTransactionId}-${fileName}`;
+}
+
+// ============================================================================
 // Stream/Buffer Utilities
 // ============================================================================
 
