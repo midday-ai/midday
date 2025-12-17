@@ -16,7 +16,7 @@ import {
   type TokenSet,
   type UploadAttachmentParams,
 } from "../types";
-import { streamToBuffer } from "../utils";
+import { ensureFileExtension, streamToBuffer } from "../utils";
 
 // ============================================================================
 // Fortnox Types
@@ -254,6 +254,61 @@ export class FortnoxProvider extends BaseAccountingProvider {
     }
 
     return response.json() as Promise<FortnoxFileResponse>;
+  }
+
+  /**
+   * Extract error message from Fortnox API errors
+   * Fortnox returns: { ErrorInformation: { error: 1, message: "...", code: 123 } }
+   */
+  protected override extractErrorMessage(error: unknown): string {
+    // Handle stringified JSON
+    if (typeof error === "string") {
+      try {
+        const parsed = JSON.parse(error);
+        return this.extractErrorMessage(parsed);
+      } catch {
+        return error.length < 500 ? error : "Error response too long";
+      }
+    }
+
+    // Handle Error objects
+    if (error instanceof Error) {
+      // Check if message contains Fortnox error JSON
+      const match = error.message.match(/\{.*ErrorInformation.*\}/);
+      if (match) {
+        try {
+          const parsed = JSON.parse(match[0]);
+          if (parsed.ErrorInformation?.message) {
+            return String(parsed.ErrorInformation.message);
+          }
+          if (parsed.ErrorInformation?.Message) {
+            return String(parsed.ErrorInformation.Message);
+          }
+        } catch {
+          // Not valid JSON, continue
+        }
+      }
+      return error.message;
+    }
+
+    // Handle Fortnox response objects
+    if (error && typeof error === "object") {
+      const err = error as Record<string, unknown>;
+
+      // Fortnox ErrorInformation structure
+      const errorInfo = err.ErrorInformation as
+        | Record<string, unknown>
+        | undefined;
+      if (errorInfo) {
+        if (errorInfo.message) return String(errorInfo.message);
+        if (errorInfo.Message) return String(errorInfo.Message);
+      }
+
+      // Direct message
+      if (err.message) return String(err.message);
+    }
+
+    return "Unknown Fortnox error";
   }
 
   /**
@@ -794,12 +849,16 @@ export class FortnoxProvider extends BaseAccountingProvider {
   async uploadAttachment(
     params: UploadAttachmentParams,
   ): Promise<AttachmentResult> {
-    const { transactionId, fileName, content } = params;
+    const { transactionId, fileName, mimeType, content } = params;
+
+    // Ensure filename has proper extension based on mimeType
+    const sanitizedFileName = ensureFileExtension(fileName, mimeType);
 
     logger.info("Starting Fortnox attachment upload", {
       provider: "fortnox",
       transactionId,
-      fileName,
+      fileName: sanitizedFileName,
+      originalFileName: fileName !== sanitizedFileName ? fileName : undefined,
     });
 
     try {
@@ -822,7 +881,7 @@ export class FortnoxProvider extends BaseAccountingProvider {
       const buffer = await streamToBuffer(content);
 
       // Step 1: Upload file to Inbox (vouchers folder)
-      const fileId = await this.uploadFileToInbox(fileName, buffer);
+      const fileId = await this.uploadFileToInbox(sanitizedFileName, buffer);
 
       // Step 2: Create voucher file connection
       // VoucherYear is required to uniquely identify the voucher
@@ -848,7 +907,7 @@ export class FortnoxProvider extends BaseAccountingProvider {
       logger.error("Fortnox attachment upload failed", {
         provider: "fortnox",
         transactionId,
-        fileName,
+        fileName: sanitizedFileName,
         error: parsed.message,
       });
       return {

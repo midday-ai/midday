@@ -53,22 +53,48 @@ export interface AccountingError {
 export interface RateLimitConfig {
   /** Maximum calls allowed per minute */
   callsPerMinute: number;
-  /** Delay in milliseconds before retrying after rate limit */
+  /** Maximum concurrent/parallel API calls */
+  maxConcurrent: number;
+  /** Minimum delay between batches (ms) to stay under rate limit */
+  callDelayMs: number;
+  /** Delay in milliseconds before retrying after rate limit error */
   retryDelayMs: number;
   /** Maximum number of retry attempts */
   maxRetries: number;
 }
 
 /**
- * Pre-defined rate limit configurations for providers
+ * Pre-defined rate limit configurations for providers (verified 2025)
+ *
+ * Xero: 60/min, 5 concurrent, 5000/day per tenant
+ * QuickBooks: 500/min, 10/sec per realm+app
+ * Fortnox: ~25/5sec (conservative, no official docs)
  */
 export const RATE_LIMITS = {
-  /** Xero: 60 calls per minute */
-  xero: { callsPerMinute: 60, retryDelayMs: 60000, maxRetries: 3 },
-  /** QuickBooks: 500 calls per minute */
-  quickbooks: { callsPerMinute: 500, retryDelayMs: 60000, maxRetries: 3 },
-  /** Fortnox: 25 calls per 5 seconds = 300 per minute */
-  fortnox: { callsPerMinute: 300, retryDelayMs: 5000, maxRetries: 3 },
+  /** Xero: 60 calls/min, 5 concurrent, 5000/day per tenant */
+  xero: {
+    callsPerMinute: 60,
+    maxConcurrent: 5,
+    callDelayMs: 1000, // 1 sec between batches of 5 = 60/min
+    retryDelayMs: 60000,
+    maxRetries: 3,
+  },
+  /** QuickBooks: 500 calls/min, 10/sec per realm */
+  quickbooks: {
+    callsPerMinute: 500,
+    maxConcurrent: 10,
+    callDelayMs: 200, // 200ms between batches = ~50 batches/10sec
+    retryDelayMs: 60000,
+    maxRetries: 3,
+  },
+  /** Fortnox: ~25/5sec conservative estimate */
+  fortnox: {
+    callsPerMinute: 300,
+    maxConcurrent: 3,
+    callDelayMs: 600, // 600ms * 3 concurrent ~= 5 per second
+    retryDelayMs: 5000,
+    maxRetries: 3,
+  },
 } as const satisfies Record<string, RateLimitConfig>;
 
 // ============================================================================
@@ -84,6 +110,10 @@ export interface TokenSet {
   expiresAt: Date;
   tokenType: string;
   scope?: string[];
+  /** Tenant/organization ID (populated by Xero during initial auth) */
+  tenantId?: string;
+  /** Tenant/organization name (populated by Xero during initial auth) */
+  tenantName?: string;
 }
 
 /**
@@ -444,8 +474,17 @@ export interface DeleteAttachmentResult {
 
 /**
  * Sync record status
+ * - synced: Transaction and all attachments synced successfully
+ * - partial: Transaction synced, but some attachments failed
+ * - failed: Transaction sync failed
+ * - pending: Sync in progress
  */
-export const SyncStatusSchema = z.enum(["synced", "failed", "pending"]);
+export const SyncStatusSchema = z.enum([
+  "synced",
+  "partial",
+  "failed",
+  "pending",
+]);
 export type SyncStatus = z.infer<typeof SyncStatusSchema>;
 
 /**

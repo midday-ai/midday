@@ -119,16 +119,13 @@ app.openapi(
       // Build the full callback URL that includes the code
       const callbackUrl = new URL(c.req.url);
 
-      // Exchange code for tokens
+      // Exchange code for tokens (also returns tenant info for Xero)
       const tokenSet = await provider.exchangeCodeForTokens(
         callbackUrl.toString(),
       );
 
-      // Get tenant information
-      const tenants = await provider.getTenants();
-      const tenant = tenants[0];
-
-      if (!tenant) {
+      // Xero returns tenant info with the token set
+      if (!tokenSet.tenantId) {
         throw new Error("No Xero organization found");
       }
 
@@ -143,16 +140,16 @@ app.openapi(
           accessToken: tokenSet.accessToken,
           refreshToken: tokenSet.refreshToken,
           expiresAt: tokenSet.expiresAt.toISOString(),
-          tenantId: tenant.tenantId,
-          tenantName: tenant.tenantName,
+          tenantId: tokenSet.tenantId,
+          tenantName: tokenSet.tenantName,
           scope: XERO_SCOPES,
         },
       });
 
       logger.info("Xero integration created successfully", {
         teamId: parsedState.teamId,
-        tenantId: tenant.tenantId,
-        tenantName: tenant.tenantName,
+        tenantId: tokenSet.tenantId,
+        tenantName: tokenSet.tenantName,
       });
 
       // Redirect based on source

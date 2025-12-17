@@ -18,7 +18,7 @@ import type {
   TokenSet,
   UploadAttachmentParams,
 } from "../types";
-import { streamToBuffer } from "../utils";
+import { ensureFileExtension, streamToBuffer } from "../utils";
 
 /**
  * QuickBooks OAuth scopes required for the integration
@@ -52,6 +52,8 @@ export class QuickBooksProvider extends BaseAccountingProvider {
    * https://developer.intuit.com/app/developer/qbo/docs/learn/rest-api-features#rate-limits
    */
   protected override readonly rateLimitConfig: RateLimitConfig = {
+    maxConcurrent: 10,
+    callDelayMs: 1000,
     callsPerMinute: 500,
     retryDelayMs: 5_000, // Wait 5 seconds on rate limit (shorter than Xero)
     maxRetries: 3,
@@ -107,6 +109,60 @@ export class QuickBooksProvider extends BaseAccountingProvider {
    */
   private getApiBaseUrl(): string {
     return QB_API_BASE[this.environment];
+  }
+
+  /**
+   * Extract error message from QuickBooks API errors
+   * QuickBooks returns: { Fault: { Error: [{ Message: "...", Detail: "..." }] } }
+   */
+  protected override extractErrorMessage(error: unknown): string {
+    // Handle stringified JSON
+    if (typeof error === "string") {
+      try {
+        const parsed = JSON.parse(error);
+        return this.extractErrorMessage(parsed);
+      } catch {
+        return error.length < 500 ? error : "Error response too long";
+      }
+    }
+
+    // Handle Error objects
+    if (error instanceof Error) {
+      // Check if message contains QuickBooks Fault JSON
+      try {
+        const parsed = JSON.parse(error.message);
+        if (parsed?.Fault?.Error?.length) {
+          const firstError = parsed.Fault.Error[0];
+          const detail = firstError?.Detail ? ` - ${firstError.Detail}` : "";
+          return `${firstError?.Message || "QuickBooks error"}${detail}`;
+        }
+      } catch {
+        // Not JSON, return message
+      }
+      return error.message;
+    }
+
+    // Handle QuickBooks response objects
+    if (error && typeof error === "object") {
+      const err = error as Record<string, unknown>;
+
+      // QuickBooks Fault structure
+      const fault = err.Fault as Record<string, unknown> | undefined;
+      if (fault?.Error && Array.isArray(fault.Error)) {
+        const firstError = fault.Error[0] as
+          | Record<string, unknown>
+          | undefined;
+        if (firstError) {
+          const detail = firstError.Detail ? ` - ${firstError.Detail}` : "";
+          return `${firstError.Message || "QuickBooks error"}${detail}`;
+        }
+      }
+
+      // Direct message
+      if (err.message) return String(err.message);
+    }
+
+    return "Unknown QuickBooks error";
   }
 
   /**
@@ -204,7 +260,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
    * Get user-friendly error message from error
    */
   private getErrorMessage(error: unknown): string {
-    return this.parseError(error).message;
+    return this.extractErrorMessage(error);
   }
 
   /**
@@ -551,9 +607,15 @@ export class QuickBooksProvider extends BaseAccountingProvider {
   async syncTransactions(params: SyncTransactionsParams): Promise<SyncResult> {
     const { transactions, targetAccountId, tenantId } = params;
 
+    // Sort by date ascending for consistent ordering
+    // This ensures transactions appear in chronological order in QuickBooks
+    const sortedTransactions = [...transactions].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
+
     logger.info("Starting QuickBooks transaction sync", {
       provider: "quickbooks",
-      transactionCount: transactions.length,
+      transactionCount: sortedTransactions.length,
       targetAccountId,
       tenantId,
     });
@@ -563,7 +625,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
     let failedCount = 0;
 
     // Process transactions individually (QuickBooks doesn't support batch creates for mixed types)
-    for (const tx of transactions) {
+    for (const tx of sortedTransactions) {
       try {
         let providerTransactionId: string | undefined;
 
@@ -685,7 +747,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
       provider: "quickbooks",
       syncedCount,
       failedCount,
-      totalTransactions: transactions.length,
+      totalTransactions: sortedTransactions.length,
     });
 
     return {
@@ -711,10 +773,14 @@ export class QuickBooksProvider extends BaseAccountingProvider {
       entityType: providedEntityType,
     } = params;
 
+    // Ensure filename has proper extension based on mimeType
+    const sanitizedFileName = ensureFileExtension(fileName, mimeType);
+
     logger.info("Starting QuickBooks attachment upload", {
       provider: "quickbooks",
       transactionId,
-      fileName,
+      fileName: sanitizedFileName,
+      originalFileName: fileName !== sanitizedFileName ? fileName : undefined,
       mimeType,
     });
 
@@ -750,11 +816,11 @@ export class QuickBooksProvider extends BaseAccountingProvider {
           this.uploadFile(
             entityType,
             transactionId,
-            fileName,
+            sanitizedFileName,
             mimeType,
             buffer,
           ),
-        `Failed to upload attachment "${fileName}"`,
+        `Failed to upload attachment "${sanitizedFileName}"`,
       );
 
       if (result?.Id) {
@@ -772,7 +838,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
       logger.warn("QuickBooks attachment upload returned no ID", {
         provider: "quickbooks",
         transactionId,
-        fileName,
+        fileName: sanitizedFileName,
       });
       return {
         success: false,

@@ -31,19 +31,20 @@ const accountingQueueOptions: QueueOptions = {
 
 /**
  * Worker options for accounting queue
- * Concurrency: 10 (conservative to avoid API rate limits)
- * Lock duration: 5 minutes - API calls can be slow, especially with attachments
+ *
+ * Rate limiting strategy:
+ * - concurrency: 10 - High parallelism
+ * - Jobs have calculated delays at creation time (see export-transactions.ts)
+ * - Delayed jobs don't compete - they start at their scheduled time
+ *
+ * Different teams can run in parallel without blocking each other.
  */
 const accountingWorkerOptions: WorkerOptions = {
   connection: getRedisConnection(),
-  concurrency: 10,
+  concurrency: 10, // High parallelism - delays prevent rate limit issues
   lockDuration: 300000, // 5 minutes
   stalledInterval: 5 * 60 * 1000, // 5 minutes
   maxStalledCount: 1,
-  limiter: {
-    max: 20, // Max 20 jobs per second to avoid API rate limits
-    duration: 1000,
-  },
 };
 
 /**

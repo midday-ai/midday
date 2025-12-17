@@ -38,6 +38,9 @@ The accounting integration enables Midday users to export their enriched financi
 - Batch processing with progress tracking
 - Retry handling with exponential backoff
 - Re-export support (creates new entries in accounting provider)
+- **Concurrent uploads** with provider-specific rate limiting
+- **Adaptive rate limiting** (Xero) based on API quota tracking
+- **Date-sorted exports** for chronological ordering in accounting software
 
 ---
 
@@ -289,11 +292,17 @@ Users manually select which transactions to export. The system validates that tr
 
 ### Provider-Specific Behavior
 
-| Provider | Entity Type | Notes |
-|----------|-------------|-------|
-| Xero | BankTransaction | Creates SPEND/RECEIVE transactions |
-| QuickBooks | Purchase/SalesReceipt | Creates based on amount sign |
-| Fortnox | Voucher | Creates posted vouchers (standard behavior) |
+| Provider | Entity Type | Idempotency | Notes |
+|----------|-------------|-------------|-------|
+| Xero | BankTransaction | `updateOrCreate` | SPEND/RECEIVE, deterministic keys |
+| QuickBooks | Purchase/SalesReceipt | `Request-Id` header | Based on amount sign |
+| Fortnox | Voucher | None (immutable) | Posted vouchers, double-entry |
+
+### Important: Re-Export Behavior
+
+- **Xero**: Uses `updateOrCreateBankTransactions` - re-exporting the same transaction **updates** it rather than creating duplicates
+- **QuickBooks**: Uses idempotency headers but creates new entities on re-export
+- **Fortnox**: Vouchers are **immutable** via API - re-exporting always creates a new voucher. Users must manually delete old vouchers in Fortnox if needed
 
 ---
 
@@ -514,10 +523,72 @@ await upsertAccountingSyncRecord(db, {
 
 ---
 
+## Rate Limiting & Reliability
+
+### Provider Rate Limits (2025)
+
+| Provider | Calls/Min | Concurrent | Daily | Notes |
+|----------|-----------|------------|-------|-------|
+| Xero | 60 | 5 | 5,000 | Per tenant |
+| QuickBooks | 500 | 10 | None | Per realm |
+| Fortnox | ~300 | 3 | None | ~25/5 seconds |
+
+### Job-Level Rate Limiting
+
+Attachment jobs are created with **calculated delays** to stay under rate limits:
+
+```typescript
+// export-transactions.ts
+function calculateAttachmentJobDelay(providerId: string, jobIndex: number): number {
+  const rateLimit = RATE_LIMITS[providerId]?.callsPerMinute ?? 60;
+  const msPerJob = Math.ceil((60000 / rateLimit) * 1.1); // 1.1x buffer
+  return jobIndex * msPerJob;
+}
+// Xero: Job 0 = 0ms, Job 1 = 1100ms, Job 2 = 2200ms, ...
+```
+
+**Benefits:**
+- Jobs are in "delayed" state, not blocking workers
+- Different teams process in parallel (no blocking)
+- Zero rate limit errors (jobs are pre-spaced)
+- No runtime rate limit checking needed
+
+### Within-Job Concurrency
+
+For transactions with multiple attachments, uploads are batched:
+
+```typescript
+const RATE_LIMITS = {
+  xero: { maxConcurrent: 3, callDelayMs: 1500 },
+  quickbooks: { maxConcurrent: 10, callDelayMs: 200 },
+  fortnox: { maxConcurrent: 3, callDelayMs: 600 },
+};
+```
+
+### Transaction Sorting
+
+All providers sort transactions by date before export:
+
+- Ensures chronological order in accounting software
+- Fortnox: Voucher numbers assigned in creation order
+- Xero/QuickBooks: Cleaner transaction lists
+
+### Estimated Export Times
+
+| Transactions + Attachments | Xero | QuickBooks | Fortnox |
+|---------------------------|------|------------|---------|
+| 200 | ~4 min | ~30 sec | ~1 min |
+| 1000 | ~18 min | ~2 min | ~4 min |
+| 2000 | ~37 min | ~4 min | ~8 min |
+
+**Note:** Xero has a daily limit of 5,000 calls. Exports larger than ~4,500 attachments may span multiple days.
+
+---
+
 ## Limitations
 
 1. **No Updates**: Re-exporting creates new entries; existing entries cannot be updated
 2. **Attachment Deletion**: Partial support - QuickBooks and Fortnox support deletion, Xero does not (attachments remain in Xero)
 3. **Bank Account Mapping**: Currently uses first active account; multi-account mapping planned
-4. **Rate Limits**: Subject to provider API rate limits (Xero: 60 calls/minute)
-5. **Fortnox Vouchers**: Created as posted entries (Fortnox API doesn't support draft vouchers)
+4. **Rate Limits**: Subject to provider API rate limits (handled automatically with throttling)
+5. **Fortnox Vouchers**: Created as posted entries (Fortnox API doesn't support draft vouchers via API)

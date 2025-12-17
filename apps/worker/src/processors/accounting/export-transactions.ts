@@ -1,3 +1,4 @@
+import { RATE_LIMITS } from "@midday/accounting";
 import {
   type AccountingSyncRecord,
   getAccountingSyncStatus,
@@ -11,6 +12,22 @@ import { AccountingProcessorBase, type AccountingProviderId } from "./base";
 
 // Process transactions in batches
 const BATCH_SIZE = 50;
+
+/**
+ * Calculate delay for attachment jobs based on provider rate limits
+ * Spreads jobs to stay under rate limit (e.g., 60/min for Xero = 1 job per second)
+ */
+function calculateAttachmentJobDelay(
+  providerId: string,
+  jobIndex: number,
+): number {
+  const rateLimit =
+    RATE_LIMITS[providerId as keyof typeof RATE_LIMITS]?.callsPerMinute ?? 60;
+  // Calculate ms between jobs: 60000ms / callsPerMinute
+  // Add small buffer (1.1x) to stay safely under limit
+  const msPerJob = Math.ceil((60000 / rateLimit) * 1.1);
+  return jobIndex * msPerJob;
+}
 
 /**
  * Categorized transaction for processing
@@ -70,15 +87,24 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
       };
     }
 
+    // Progress: 0% - Starting
+    await this.updateProgress(job, 2);
+
     // Initialize provider with valid tokens
     const { provider, config, db } = await this.initializeProvider(
       teamId,
       providerId,
     );
 
+    // Progress: 5% - Provider initialized
+    await this.updateProgress(job, 5);
+
     // Get target bank account (use provider-agnostic org ID)
     const orgId = this.getOrgIdFromConfig(config);
     const targetAccount = await this.getTargetAccount(provider, orgId, config);
+
+    // Progress: 8% - Account fetched
+    await this.updateProgress(job, 8);
 
     // Fetch transactions using db package
     const transactions = await getTransactionsForAccountingSync(db, {
@@ -132,9 +158,23 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
       alreadyComplete: categorized.alreadyComplete.length,
     });
 
+    // Progress tracking
+    await this.updateProgress(job, 10); // Data loaded and categorized
+
     let totalExported = 0;
     let totalFailed = 0;
     let totalAttachmentsSynced = 0;
+    let attachmentJobIndex = 0; // Track job index for delay calculation
+
+    // Calculate progress ranges
+    const hasExports = categorized.toExport.length > 0;
+    const hasAttachmentSyncs = categorized.toSyncAttachments.length > 0;
+
+    // Progress: 10-70% for exports, 70-90% for attachment job triggers, 90-100% final
+    const exportProgressStart = 10;
+    const exportProgressEnd = hasExports ? 70 : 10;
+    const attachmentProgressStart = exportProgressEnd;
+    const attachmentProgressEnd = hasAttachmentSyncs ? 90 : exportProgressEnd;
 
     // Step 1: Export new transactions
     if (categorized.toExport.length > 0) {
@@ -180,6 +220,10 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
                 originalTx?.attachments?.filter((a) => a.name !== null) ?? [];
 
               if (attachments.length > 0) {
+                const delay = calculateAttachmentJobDelay(
+                  providerId,
+                  attachmentJobIndex,
+                );
                 await triggerJob(
                   "sync-accounting-attachments",
                   {
@@ -191,7 +235,9 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
                     providerEntityType: txResult.providerEntityType,
                   },
                   "accounting",
+                  { delay },
                 );
+                attachmentJobIndex++;
               }
             }
           }
@@ -227,36 +273,56 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
           }
         }
 
-        // Update progress (first half for exports)
+        // Update progress within export range (10-70%)
+        const batchProgress = (i + batch.length) / mappedTransactions.length;
         const exportProgress = Math.round(
-          ((i + batch.length) / mappedTransactions.length) * 50,
+          exportProgressStart +
+            batchProgress * (exportProgressEnd - exportProgressStart),
         );
         await this.updateProgress(job, exportProgress);
       }
     }
 
     // Step 2: Trigger attachment sync for already-synced transactions with changes
-    for (const item of categorized.toSyncAttachments) {
-      await triggerJob(
-        "sync-accounting-attachments",
-        {
-          teamId,
+    if (categorized.toSyncAttachments.length > 0) {
+      await this.updateProgress(job, attachmentProgressStart);
+
+      for (const [i, item] of categorized.toSyncAttachments.entries()) {
+        const delay = calculateAttachmentJobDelay(
           providerId,
-          transactionId: item.transactionId,
-          providerTransactionId: item.providerTransactionId,
-          attachmentIds: item.newAttachmentIds,
-          removedAttachments: item.removedAttachments,
-          existingSyncedAttachmentMapping:
-            item.syncRecord.syncedAttachmentMapping,
-          syncRecordId: item.syncRecord.id,
-          providerEntityType: item.syncRecord.providerEntityType ?? undefined,
-        },
-        "accounting",
-      );
-      totalAttachmentsSynced++;
+          attachmentJobIndex,
+        );
+        await triggerJob(
+          "sync-accounting-attachments",
+          {
+            teamId,
+            providerId,
+            transactionId: item.transactionId,
+            providerTransactionId: item.providerTransactionId,
+            attachmentIds: item.newAttachmentIds,
+            removedAttachments: item.removedAttachments,
+            existingSyncedAttachmentMapping:
+              item.syncRecord.syncedAttachmentMapping,
+            syncRecordId: item.syncRecord.id,
+            providerEntityType: item.syncRecord.providerEntityType ?? undefined,
+          },
+          "accounting",
+          { delay },
+        );
+        attachmentJobIndex++;
+        totalAttachmentsSynced++;
+
+        // Update progress within attachment range (70-90%)
+        const attachmentProgress = Math.round(
+          attachmentProgressStart +
+            ((i + 1) / categorized.toSyncAttachments.length) *
+              (attachmentProgressEnd - attachmentProgressStart),
+        );
+        await this.updateProgress(job, attachmentProgress);
+      }
     }
 
-    // Update progress to 100%
+    // Final progress - 100%
     await this.updateProgress(job, 100);
 
     this.logger.info("Manual accounting export completed", {
@@ -325,8 +391,13 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
           providerId: syncedMapping[middayId] ?? null,
         }));
 
-      // Has attachment changes?
-      if (newAttachmentIds.length > 0 || removedAttachments.length > 0) {
+      // Has attachment changes OR status is "partial" (needs retry)?
+      const needsAttachmentSync =
+        newAttachmentIds.length > 0 ||
+        removedAttachments.length > 0 ||
+        syncRecord.status === "partial";
+
+      if (needsAttachmentSync) {
         if (syncRecord.providerTransactionId) {
           result.toSyncAttachments.push({
             transactionId: tx.id,

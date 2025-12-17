@@ -194,7 +194,7 @@ export function ExportTransactionsModal({
     trpc.transactions.export.mutationOptions({
       onSuccess: (data) => {
         if (data?.id) {
-          setExportData({ runId: data.id });
+          setExportData({ runId: data.id, exportType: "file" });
           setRowSelection(() => ({}));
           // Don't set isExporting to false here - let job status handle it
           // Don't close modal immediately - wait for job to complete
@@ -206,12 +206,24 @@ export function ExportTransactionsModal({
     }),
   );
 
+  // Get provider display name for toast
+  const getProviderDisplayName = (providerId: string): string => {
+    return (
+      ACCOUNTING_PROVIDERS[providerId as keyof typeof ACCOUNTING_PROVIDERS]
+        ?.name ?? providerId
+    );
+  };
+
   // Accounting export mutation
   const accountingExportMutation = useMutation(
     trpc.accounting.export.mutationOptions({
       onSuccess: (data) => {
         if (data?.id) {
-          setExportData({ runId: data.id });
+          setExportData({
+            runId: data.id,
+            exportType: "accounting",
+            providerName: getProviderDisplayName(selectedProvider),
+          });
           setRowSelection(() => ({}));
         }
       },

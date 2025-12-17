@@ -1,6 +1,7 @@
 import { logger } from "@midday/logger";
 import {
   Account,
+  AccountType,
   BankTransaction,
   type CurrencyCode,
   XeroClient,
@@ -21,7 +22,7 @@ import type {
   TokenSet,
   UploadAttachmentParams,
 } from "../types";
-import { streamToBuffer } from "../utils";
+import { ensureFileExtension, streamToBuffer } from "../utils";
 
 /**
  * Xero OAuth scopes required for the integration
@@ -40,8 +41,19 @@ export const XERO_SCOPES = [
 /** Default account code when category doesn't have a reporting code */
 const DEFAULT_ACCOUNT_CODE = "400";
 
+/** Xero rate limits per tenant */
+const XERO_MINUTE_LIMIT = 60;
+// Jobs are spread via delays (see export-transactions.ts calculateAttachmentJobDelay)
+// This concurrent limit is for multiple attachments within a single job
+const XERO_CONCURRENT_LIMIT = 3;
+const XERO_SAFE_THRESHOLD = 10; // Start slowing down when 10 calls remain
+
 /**
- * Generate deterministic idempotency key for a transaction
+ * Generate deterministic idempotency key for Xero API calls
+ * Same transaction always gets the same key - this is the correct behavior.
+ *
+ * Note: If you delete a transaction from Xero and want to re-create it,
+ * you may need to wait for Xero's idempotency cache to expire (~24-48 hours).
  */
 function generateIdempotencyKey(transactionId: string, date: string): string {
   return `midday-${transactionId}-${date}`;
@@ -49,22 +61,31 @@ function generateIdempotencyKey(transactionId: string, date: string): string {
 
 /**
  * Xero accounting provider implementation
+ * Includes adaptive rate limiting based on call tracking
  */
 export class XeroProvider extends BaseAccountingProvider {
   readonly id: AccountingProviderId = "xero";
   readonly name = "Xero";
 
   /**
-   * Xero rate limit: 60 calls per minute
+   * Xero rate limit: 60 calls per minute, 5 concurrent
    * https://developer.xero.com/documentation/guides/oauth2/limits
    */
   protected override readonly rateLimitConfig: RateLimitConfig = {
-    callsPerMinute: 60,
+    callsPerMinute: XERO_MINUTE_LIMIT,
+    maxConcurrent: XERO_CONCURRENT_LIMIT,
+    callDelayMs: 1500, // 1.5s between batches of 3 = ~40 calls/min (safe margin)
     retryDelayMs: 60_000, // Wait 1 minute on rate limit
     maxRetries: 3,
   };
 
   private client: XeroClient;
+
+  /**
+   * Track API calls for adaptive rate limiting
+   * Stores timestamps of recent calls to calculate remaining quota
+   */
+  private callTimestamps: number[] = [];
 
   constructor(config: ProviderInitConfig) {
     super(config);
@@ -76,6 +97,84 @@ export class XeroProvider extends BaseAccountingProvider {
       scopes: XERO_SCOPES,
       httpTimeout: 30000, // 30 seconds
     });
+  }
+
+  /**
+   * Record an API call timestamp for rate limiting
+   */
+  private recordApiCall(): void {
+    const now = Date.now();
+    this.callTimestamps.push(now);
+
+    // Clean up timestamps older than 1 minute
+    const oneMinuteAgo = now - 60_000;
+    this.callTimestamps = this.callTimestamps.filter((t) => t > oneMinuteAgo);
+  }
+
+  /**
+   * Get remaining API calls in the current minute window
+   */
+  private getRemainingCalls(): number {
+    const now = Date.now();
+    const oneMinuteAgo = now - 60_000;
+
+    // Count calls in the last minute
+    const recentCalls = this.callTimestamps.filter((t) => t > oneMinuteAgo);
+    return Math.max(0, XERO_MINUTE_LIMIT - recentCalls.length);
+  }
+
+  /**
+   * Apply adaptive delay based on remaining quota
+   * Slows down when approaching rate limit
+   */
+  private async applyAdaptiveDelay(): Promise<void> {
+    const remaining = this.getRemainingCalls();
+
+    if (remaining <= 0) {
+      // At limit - wait for oldest call to expire
+      const oldestCall = this.callTimestamps[0];
+      if (oldestCall) {
+        const waitTime = 60_000 - (Date.now() - oldestCall) + 100; // +100ms buffer
+        if (waitTime > 0) {
+          logger.info("Xero rate limit reached, waiting", {
+            provider: "xero",
+            waitMs: waitTime,
+          });
+          await new Promise((resolve) => setTimeout(resolve, waitTime));
+        }
+      }
+    } else if (remaining <= XERO_SAFE_THRESHOLD) {
+      // Approaching limit - add increasing delay
+      const delayMs = Math.round(
+        (1000 * (XERO_SAFE_THRESHOLD - remaining)) / XERO_SAFE_THRESHOLD,
+      );
+      if (delayMs > 0) {
+        logger.debug("Xero adaptive delay applied", {
+          provider: "xero",
+          remaining,
+          delayMs,
+        });
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+    }
+    // Plenty of quota - no delay needed
+  }
+
+  /**
+   * Override withRetry to include adaptive rate limiting
+   */
+  protected override async withRetry<T>(
+    operation: () => Promise<T>,
+    context: string,
+  ): Promise<T> {
+    // Apply adaptive delay before the call
+    await this.applyAdaptiveDelay();
+
+    // Record the call
+    this.recordApiCall();
+
+    // Delegate to base implementation
+    return super.withRetry(operation, context);
   }
 
   /**
@@ -155,10 +254,77 @@ export class XeroProvider extends BaseAccountingProvider {
   }
 
   /**
-   * Get user-friendly error message from error
+   * Extract error message from Xero SDK errors
+   * Xero SDK throws various formats: stringified JSON, Error objects, response objects
    */
+  protected override extractErrorMessage(error: unknown): string {
+    // Handle stringified JSON (Xero SDK often throws these)
+    if (typeof error === "string") {
+      try {
+        const parsed = JSON.parse(error);
+        return this.extractErrorMessage(parsed);
+      } catch {
+        // Not JSON, return string if reasonable length
+        return error.length < 500 ? error : "Error response too long";
+      }
+    }
+
+    // Handle Error objects
+    if (error instanceof Error) {
+      // Check if message itself is JSON
+      try {
+        const parsed = JSON.parse(error.message);
+        return this.extractErrorMessage(parsed);
+      } catch {
+        return error.message;
+      }
+    }
+
+    // Handle Xero response objects
+    if (error && typeof error === "object") {
+      const err = error as Record<string, unknown>;
+
+      // Extract from response.body (Xero SDK pattern)
+      const response = err.response as Record<string, unknown> | undefined;
+      const body = (response?.body ?? err.body) as
+        | Record<string, unknown>
+        | undefined;
+
+      if (body) {
+        // Xero validation errors: Elements[0].ValidationErrors[0].Message
+        if (body.Elements && Array.isArray(body.Elements)) {
+          const elem = body.Elements[0] as Record<string, unknown> | undefined;
+          const validationErrors = elem?.ValidationErrors as
+            | Array<Record<string, unknown>>
+            | undefined;
+          if (validationErrors?.[0]?.Message) {
+            return String(validationErrors[0].Message);
+          }
+        }
+
+        // Standard Xero error fields
+        if (body.Detail) return String(body.Detail);
+        if (body.Title) return String(body.Title);
+        if (body.Message) return String(body.Message);
+        if (body.message) return String(body.message);
+      }
+
+      // HTTP status code
+      const statusCode = response?.statusCode ?? err.statusCode;
+      if (statusCode) {
+        return `API error (HTTP ${statusCode})`;
+      }
+
+      // Direct message property
+      if (err.message) return String(err.message);
+    }
+
+    return "Unknown Xero error";
+  }
+
+  /** Convenience method for error extraction */
   private getErrorMessage(error: unknown): string {
-    return this.parseError(error).message;
+    return this.extractErrorMessage(error);
   }
 
   /**
@@ -219,12 +385,27 @@ export class XeroProvider extends BaseAccountingProvider {
    * Exchange authorization code for tokens
    */
   async exchangeCodeForTokens(callbackUrl: string): Promise<TokenSet> {
-    await this.client.initialize();
-    const tokenSet = await this.client.apiCallback(callbackUrl);
+    // Extract state from callback URL - needed for XeroClient verification
+    const url = new URL(callbackUrl);
+    const state = url.searchParams.get("state");
+
+    // Create a new client with the state set for verification
+    // XeroClient stores state in config and verifies it during apiCallback
+    const callbackClient = new XeroClient({
+      clientId: this.config.clientId,
+      clientSecret: this.config.clientSecret,
+      redirectUris: [this.config.redirectUri],
+      scopes: XERO_SCOPES,
+      httpTimeout: 30000,
+      state: state || undefined,
+    });
+
+    await callbackClient.initialize();
+    const tokenSet = await callbackClient.apiCallback(callbackUrl);
 
     // Get tenant information
-    await this.client.updateTenants();
-    const tenant = this.client.tenants[0];
+    await callbackClient.updateTenants();
+    const tenant = callbackClient.tenants[0];
 
     if (!tenant) {
       throw new Error(
@@ -248,6 +429,9 @@ export class XeroProvider extends BaseAccountingProvider {
       expiresAt: new Date(tokenSet.expires_at * 1000),
       tokenType: tokenSet.token_type || "Bearer",
       scope: tokenSet.scope?.split(" "),
+      // Include tenant info so callback doesn't need to call getTenants separately
+      tenantId: tenant.tenantId,
+      tenantName: tenant.tenantName,
     };
   }
 
@@ -318,6 +502,7 @@ export class XeroProvider extends BaseAccountingProvider {
 
   /**
    * Get bank accounts from Xero
+   * Creates a default bank account if none exist
    */
   async getAccounts(tenantId: string): Promise<AccountingAccount[]> {
     await this.ensureClientReady();
@@ -330,6 +515,30 @@ export class XeroProvider extends BaseAccountingProvider {
       );
 
       const accounts = response.body.accounts || [];
+
+      // Filter for active accounts
+      const activeAccounts = accounts.filter(
+        (account) => account.status === Account.StatusEnum.ACTIVE,
+      );
+
+      // If no active bank accounts, create a default one
+      if (activeAccounts.length === 0) {
+        logger.info("No active bank accounts found in Xero, creating default", {
+          provider: "xero",
+          tenantId,
+        });
+
+        const defaultAccount = await this.createDefaultBankAccount(tenantId);
+        if (defaultAccount) {
+          return [defaultAccount];
+        }
+
+        // If creation failed, return all accounts (including inactive)
+        logger.warn(
+          "Failed to create default bank account, returning all accounts",
+          { provider: "xero" },
+        );
+      }
 
       return accounts.map((account) => ({
         id: account.accountID!,
@@ -344,15 +553,71 @@ export class XeroProvider extends BaseAccountingProvider {
   }
 
   /**
+   * Create a default bank account in Xero
+   * Used when no bank accounts exist
+   */
+  private async createDefaultBankAccount(
+    tenantId: string,
+  ): Promise<AccountingAccount | null> {
+    try {
+      const account: Account = {
+        name: "Business Account",
+        code: "090",
+        type: AccountType.BANK,
+        bankAccountType: Account.BankAccountTypeEnum.BANK,
+        bankAccountNumber: "000000000", // Placeholder - user can update in Xero
+      };
+
+      const response = await this.client.accountingApi.createAccount(
+        tenantId,
+        account,
+      );
+
+      const createdAccount = response.body.accounts?.[0];
+
+      if (createdAccount) {
+        logger.info("Created default bank account in Xero", {
+          provider: "xero",
+          accountId: createdAccount.accountID,
+          accountName: createdAccount.name,
+        });
+
+        return {
+          id: createdAccount.accountID!,
+          name: createdAccount.name!,
+          code: createdAccount.code,
+          type: "BANK",
+          currency: createdAccount.currencyCode?.toString(),
+          status: "active",
+        };
+      }
+
+      return null;
+    } catch (error) {
+      logger.error("Failed to create default bank account in Xero", {
+        provider: "xero",
+        error: this.getErrorMessage(error),
+      });
+      return null;
+    }
+  }
+
+  /**
    * Sync transactions to Xero as bank transactions
    * Always creates new transactions - user can re-export to create updated versions
    */
   async syncTransactions(params: SyncTransactionsParams): Promise<SyncResult> {
     const { transactions, targetAccountId, tenantId } = params;
 
+    // Sort by date ascending for clean transaction ordering in Xero
+    // This ensures transactions appear in chronological order (better for auditing)
+    const sortedTransactions = [...transactions].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
+
     logger.info("Starting Xero transaction sync", {
       provider: "xero",
-      transactionCount: transactions.length,
+      transactionCount: sortedTransactions.length,
       targetAccountId,
       tenantId,
     });
@@ -365,8 +630,9 @@ export class XeroProvider extends BaseAccountingProvider {
 
     // Process transactions in batches (Xero recommends max 50 per request)
     const BATCH_SIZE = 50;
-    for (let i = 0; i < transactions.length; i += BATCH_SIZE) {
-      const batch = transactions.slice(i, i + BATCH_SIZE);
+
+    for (let i = 0; i < sortedTransactions.length; i += BATCH_SIZE) {
+      const batch = sortedTransactions.slice(i, i + BATCH_SIZE);
 
       const bankTransactions = batch.map((tx: MappedTransaction) => ({
         type:
@@ -405,17 +671,16 @@ export class XeroProvider extends BaseAccountingProvider {
         : undefined;
 
       try {
-        const response = await this.withRetry(
-          () =>
-            this.client.accountingApi.createBankTransactions(
-              tenantId,
-              { bankTransactions },
-              undefined, // summarizeErrors
-              undefined, // unitdp
-              idempotencyKey,
-            ),
-          `Failed to sync batch starting at transaction ${i}`,
-        );
+        // Call API directly without withRetry to get raw error details
+        // The export processor handles retries at the job level
+        const response =
+          await this.client.accountingApi.updateOrCreateBankTransactions(
+            tenantId,
+            { bankTransactions },
+            undefined, // summarizeErrors
+            undefined, // unitdp
+            idempotencyKey,
+          );
 
         const createdTransactions = response.body.bankTransactions || [];
 
@@ -448,18 +713,29 @@ export class XeroProvider extends BaseAccountingProvider {
         }
       } catch (error) {
         const errorMessage = this.getErrorMessage(error);
+
+        // Log detailed error info
         logger.error("Xero batch sync failed", {
           provider: "xero",
           batchIndex: i,
           batchSize: batch.length,
           error: errorMessage,
+          errorType: typeof error,
+          errorName: error?.constructor?.name,
+          rawMessage: error instanceof Error ? error.message : undefined,
+          rawJson:
+            error && typeof error === "object"
+              ? JSON.stringify(error, null, 2).slice(0, 500)
+              : undefined,
         });
-        // Mark all transactions in batch as failed
+
+        // Mark all transactions in batch as failed with descriptive error
+        const batchError = `Batch ${Math.floor(i / 50) + 1} failed: ${errorMessage}`;
         for (const tx of batch) {
           results.push({
             transactionId: tx.id,
             success: false,
-            error: errorMessage,
+            error: batchError,
           });
           failedCount++;
         }
@@ -470,7 +746,7 @@ export class XeroProvider extends BaseAccountingProvider {
       provider: "xero",
       syncedCount,
       failedCount,
-      totalTransactions: transactions.length,
+      totalTransactions: sortedTransactions.length,
     });
 
     return {
@@ -489,10 +765,14 @@ export class XeroProvider extends BaseAccountingProvider {
   ): Promise<AttachmentResult> {
     const { tenantId, transactionId, fileName, mimeType, content } = params;
 
+    // Ensure filename has proper extension based on mimeType
+    const sanitizedFileName = ensureFileExtension(fileName, mimeType);
+
     logger.info("Starting Xero attachment upload", {
       provider: "xero",
       transactionId,
-      fileName,
+      fileName: sanitizedFileName,
+      originalFileName: fileName,
       mimeType,
     });
 
@@ -502,25 +782,24 @@ export class XeroProvider extends BaseAccountingProvider {
       // Convert content to Buffer if it's a stream
       const buffer = await streamToBuffer(content);
 
-      // Generate idempotency key for attachment
-      const idempotencyKey = `midday-attachment-${transactionId}-${fileName}`;
+      // Deterministic idempotency key for attachment
+      const idempotencyKey = `midday-attachment-${transactionId}-${sanitizedFileName}`;
 
-      const response = await this.withRetry(
-        () =>
-          this.client.accountingApi.createBankTransactionAttachmentByFileName(
-            tenantId,
-            transactionId,
-            fileName,
-            buffer,
-            idempotencyKey,
-            {
-              headers: {
-                "Content-Type": mimeType,
-              },
+      // Call API directly without withRetry - processor handles retries
+      // This gives us raw error details instead of wrapped "Unknown error"
+      const response =
+        await this.client.accountingApi.createBankTransactionAttachmentByFileName(
+          tenantId,
+          transactionId,
+          sanitizedFileName,
+          buffer,
+          idempotencyKey,
+          {
+            headers: {
+              "Content-Type": mimeType,
             },
-          ),
-        `Failed to upload attachment "${fileName}"`,
-      );
+          },
+        );
 
       const attachments = response.body.attachments || [];
       const attachment = attachments[0];
@@ -547,16 +826,25 @@ export class XeroProvider extends BaseAccountingProvider {
         error: "Attachment upload succeeded but no ID was returned",
       };
     } catch (error) {
+      const errorMessage = this.getErrorMessage(error);
+
+      // Log detailed error info to diagnose issues
       logger.error("Xero attachment upload failed", {
         provider: "xero",
         transactionId,
-        fileName,
-        error: this.getErrorMessage(error),
+        fileName: sanitizedFileName,
+        error: errorMessage,
+        // Raw error details for debugging
+        errorType: typeof error,
+        errorName: error?.constructor?.name,
+        rawMessage: error instanceof Error ? error.message : undefined,
+        rawJson:
+          error && typeof error === "object"
+            ? JSON.stringify(error, null, 2).slice(0, 500)
+            : undefined,
       });
-      return {
-        success: false,
-        error: this.getErrorMessage(error),
-      };
+
+      return { success: false, error: errorMessage };
     }
   }
 

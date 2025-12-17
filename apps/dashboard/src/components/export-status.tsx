@@ -158,10 +158,17 @@ export function ExportStatus() {
   // Create toast when export starts
   useEffect(() => {
     if (exportData?.runId && !toastId) {
+      const isAccountingExport = exportData.exportType === "accounting";
+      const providerName = exportData.providerName ?? "accounting software";
+
       const { id } = toast({
-        title: "Exporting transactions.",
+        title: isAccountingExport
+          ? `Exporting to ${providerName}`
+          : "Exporting transactions.",
         variant: "progress",
-        description: "Please do not close browser until completed",
+        description: isAccountingExport
+          ? "Syncing transactions with your accounting software"
+          : "Please do not close browser until completed",
         duration: Number.POSITIVE_INFINITY,
         progress: 0,
       });
@@ -170,7 +177,13 @@ export function ExportStatus() {
       lastProgressRef.current = 0;
       completionHandledRef.current = false; // Reset completion flag for new export
     }
-  }, [exportData?.runId, toastId, toast]);
+  }, [
+    exportData?.runId,
+    exportData?.exportType,
+    exportData?.providerName,
+    toastId,
+    toast,
+  ]);
 
   // Update progress only when it changes
   useEffect(() => {
@@ -203,18 +216,31 @@ export function ExportStatus() {
     if (status === "completed" && toastId && !completionHandledRef.current) {
       completionHandledRef.current = true;
 
-      // Invalidate queries
-      queryClient.invalidateQueries({
-        queryKey: trpc.documents.get.infiniteQueryKey(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: trpc.search.global.queryKey(),
-      });
+      const isAccountingExport = exportData?.exportType === "accounting";
+      const providerName = exportData?.providerName ?? "accounting software";
+
+      // Invalidate queries (only for file exports - accounting doesn't create vault files)
+      if (!isAccountingExport) {
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.get.infiniteQueryKey(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: trpc.search.global.queryKey(),
+        });
+      }
 
       // Wait a bit for result to be available, then update toast
       setTimeout(() => {
-        if (exportResult) {
-          // Show full completion toast with download/share options
+        if (isAccountingExport) {
+          // Accounting export completion - different message, no download buttons
+          update(toastId, {
+            id: toastId,
+            title: `Transactions synced to ${providerName}`,
+            description: "Receipts uploading in the background.",
+            variant: "success",
+          });
+        } else if (exportResult) {
+          // File export completion with download/share options
           update(toastId, {
             id: toastId,
             title: "Export completed",
@@ -259,7 +285,7 @@ export function ExportStatus() {
             ),
           });
         } else {
-          // Show simple completion toast if result isn't available
+          // Simple completion toast if result isn't available
           update(toastId, {
             id: toastId,
             title: "Export completed",
@@ -279,6 +305,8 @@ export function ExportStatus() {
   }, [
     status,
     exportResult,
+    exportData?.exportType,
+    exportData?.providerName,
     toastId,
     update,
     queryClient,

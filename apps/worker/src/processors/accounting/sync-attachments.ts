@@ -1,15 +1,39 @@
 import {
+  type AccountingProvider,
+  type ProviderEntityType,
+  RATE_LIMITS,
+} from "@midday/accounting";
+import { sleep, throttledConcurrent } from "@midday/accounting/utils";
+import {
   getAccountingSyncStatus,
   getTransactionAttachmentsForSync,
   updateSyncedAttachmentMapping,
 } from "@midday/db/queries";
-import { createClient } from "@midday/supabase/job"; // Only for storage access
+import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
 import type { AccountingAttachmentSyncPayload } from "../../schemas/accounting";
 import { AccountingProcessorBase, type AccountingProviderId } from "./base";
 
+/**
+ * Note: Job-level rate limiting is handled at creation time via delays
+ * (see export-transactions.ts calculateAttachmentJobDelay)
+ *
+ * This processor handles uploading attachments within a single job.
+ * RATE_LIMITS is still used for throttledConcurrent when a transaction
+ * has multiple attachments.
+ */
+
 /** Maximum attachment size allowed for upload (10MB) */
 const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024;
+
+/** Number of retries for individual attachment uploads */
+const ATTACHMENT_UPLOAD_RETRIES = 3;
+
+/** Base delay for normal errors (ms) - increases exponentially */
+const ATTACHMENT_RETRY_BASE_DELAY_MS = 2000;
+
+/** Base delay for rate limit (429) errors (ms) - much longer */
+const RATE_LIMIT_RETRY_BASE_DELAY_MS = 30000; // 30 seconds
 
 /**
  * Sync attachments to accounting provider processor
@@ -136,7 +160,7 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
       };
     }
 
-    // Step 3: Upload new attachments
+    // Step 3: Upload new attachments concurrently with rate limiting
     if (newAttachmentIds.length > 0) {
       // Get attachment details from database
       const attachments = await getTransactionAttachmentsForSync(db, {
@@ -144,98 +168,88 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
         attachmentIds: newAttachmentIds,
       });
 
-      for (const attachment of attachments) {
-        try {
-          if (!attachment.path || !attachment.name || !attachment.type) {
-            this.logger.warn("Skipping attachment with missing data", {
-              attachmentId: attachment.id,
-            });
-            failedCount++;
-            continue;
-          }
+      // Get rate limits for this provider
+      const rateLimit =
+        RATE_LIMITS[providerId as keyof typeof RATE_LIMITS] ?? RATE_LIMITS.xero;
 
-          // Download file from storage
-          const filePath = Array.isArray(attachment.path)
-            ? attachment.path.join("/")
-            : attachment.path;
+      this.logger.info("Starting concurrent attachment uploads", {
+        attachmentCount: attachments.length,
+        maxConcurrent: rateLimit.maxConcurrent,
+        callDelayMs: rateLimit.callDelayMs,
+      });
 
-          const { data: fileData, error: downloadError } =
-            await supabase.storage.from("vault").download(filePath);
+      // Bind method references to preserve 'this' context in callbacks
+      const uploadAttachment = this.uploadSingleAttachment.bind(this);
+      const updateProgress = this.updateProgress.bind(this);
 
-          if (downloadError || !fileData) {
-            this.logger.error("Failed to download attachment", {
-              attachmentId: attachment.id,
-              path: filePath,
-              error: downloadError?.message,
-            });
-            failedCount++;
-            continue;
-          }
+      // Upload attachments concurrently
+      const uploadResults = await throttledConcurrent(
+        attachments,
+        async (attachment) => {
+          return uploadAttachment(
+            attachment,
+            supabase,
+            provider,
+            orgId,
+            providerTransactionId,
+            providerEntityType,
+          );
+        },
+        rateLimit.maxConcurrent,
+        rateLimit.callDelayMs,
+        async (completed, total) => {
+          // Update progress (50-100% for uploads, assuming 0-50% was deletions)
+          const deletionProgress = removedAttachments?.length ?? 0;
+          const totalOps = total + deletionProgress;
+          const progress = Math.round(
+            ((deletionProgress + completed) / Math.max(totalOps, 1)) * 100,
+          );
+          await updateProgress(job, progress);
+        },
+      );
 
-          // Convert Blob to Buffer
-          const buffer = Buffer.from(await fileData.arrayBuffer());
-
-          // Check file size limit
-          if (buffer.length > MAX_ATTACHMENT_SIZE_BYTES) {
-            this.logger.warn("Attachment exceeds size limit, skipping", {
-              attachmentId: attachment.id,
-              fileName: attachment.name,
-              size: buffer.length,
-              maxSize: MAX_ATTACHMENT_SIZE_BYTES,
-            });
-            failedCount++;
-            continue;
-          }
-
-          // Upload to accounting provider
-          const result = await provider.uploadAttachment({
-            tenantId: orgId,
-            transactionId: providerTransactionId,
-            fileName: attachment.name,
-            mimeType: attachment.type,
-            content: buffer,
-            entityType: providerEntityType,
-          });
-
-          if (result.success) {
-            uploadedCount++;
-            // Store mapping: Midday ID -> Provider ID
-            currentMapping[attachment.id] = result.attachmentId ?? null;
-
-            this.logger.info("Attachment uploaded successfully", {
-              attachmentId: attachment.id,
-              providerAttachmentId: result.attachmentId,
-            });
-          } else {
-            failedCount++;
-            this.logger.error("Failed to upload attachment", {
-              attachmentId: attachment.id,
-              error: result.error,
-            });
-          }
-        } catch (error) {
+      // Process results
+      for (const result of uploadResults.results) {
+        if (result.success) {
+          uploadedCount++;
+          currentMapping[result.attachmentId] = result.providerAttachmentId;
+        } else {
           failedCount++;
-          this.logger.error("Error uploading attachment", {
-            attachmentId: attachment.id,
-            error: error instanceof Error ? error.message : "Unknown error",
-          });
         }
+      }
 
-        // Update progress
-        const processed = uploadedCount + failedCount + deletedCount;
-        const total =
-          newAttachmentIds.length + (removedAttachments?.length ?? 0);
-        const progress = Math.round((processed / Math.max(total, 1)) * 100);
-        await this.updateProgress(job, progress);
+      // Count errors
+      failedCount += uploadResults.errors.length;
+
+      // Log any errors
+      for (const error of uploadResults.errors) {
+        this.logger.error("Attachment upload failed", {
+          index: error.index,
+          error: error.error.message,
+        });
       }
     }
 
-    // Step 4: Update sync record with new mapping
-    if (uploadedCount > 0 || deletedCount > 0) {
+    // Step 4: Update sync record with new mapping and status
+    const hasChanges = uploadedCount > 0 || deletedCount > 0 || failedCount > 0;
+    if (hasChanges) {
+      // Determine status: 'partial' if any failures, 'synced' if all succeeded
+      const status = failedCount > 0 ? "partial" : "synced";
+      const errorMessage =
+        failedCount > 0
+          ? `${failedCount} attachment(s) failed to upload`
+          : null;
+
+      const updateParams = {
+        syncedAttachmentMapping: currentMapping,
+        status: status as "synced" | "partial",
+        errorMessage,
+      };
+
       if (syncRecordId) {
         await updateSyncedAttachmentMapping(db, {
           syncRecordId,
-          syncedAttachmentMapping: currentMapping,
+          ...updateParams,
         });
       } else {
         // For new syncs, find the sync record and update it
@@ -248,7 +262,7 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
         if (syncRecords.length > 0 && syncRecords[0]) {
           await updateSyncedAttachmentMapping(db, {
             syncRecordId: syncRecords[0].id,
-            syncedAttachmentMapping: currentMapping,
+            ...updateParams,
           });
         }
       }
@@ -272,5 +286,166 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
       deletedCount,
       failedCount,
     };
+  }
+
+  /**
+   * Upload a single attachment with retries
+   * Note: Rate limiting is handled at job creation time via delays
+   */
+  private async uploadSingleAttachment(
+    attachment: {
+      id: string;
+      name: string | null;
+      path: string[] | null;
+      type: string | null;
+    },
+    supabase: ReturnType<typeof createClient>,
+    provider: AccountingProvider,
+    orgId: string,
+    providerTransactionId: string,
+    providerEntityType?: ProviderEntityType,
+  ): Promise<{
+    success: boolean;
+    attachmentId: string;
+    providerAttachmentId: string | null;
+    error?: string;
+  }> {
+    // Validate attachment data
+    if (!attachment.path || !attachment.name || !attachment.type) {
+      this.logger.warn("Skipping attachment with missing data", {
+        attachmentId: attachment.id,
+      });
+      return {
+        success: false,
+        attachmentId: attachment.id,
+        providerAttachmentId: null,
+        error: "Missing attachment data",
+      };
+    }
+
+    // Download file from storage
+    const filePath = Array.isArray(attachment.path)
+      ? attachment.path.join("/")
+      : attachment.path;
+
+    const { data: fileData, error: downloadError } = await supabase.storage
+      .from("vault")
+      .download(filePath);
+
+    if (downloadError || !fileData) {
+      this.logger.error("Failed to download attachment", {
+        attachmentId: attachment.id,
+        path: filePath,
+        error: downloadError?.message,
+      });
+      return {
+        success: false,
+        attachmentId: attachment.id,
+        providerAttachmentId: null,
+        error: `Download failed: ${downloadError?.message}`,
+      };
+    }
+
+    // Convert Blob to Buffer
+    const buffer = Buffer.from(await fileData.arrayBuffer());
+
+    // Check file size limit
+    if (buffer.length > MAX_ATTACHMENT_SIZE_BYTES) {
+      this.logger.warn("Attachment exceeds size limit, skipping", {
+        attachmentId: attachment.id,
+        fileName: attachment.name,
+        size: buffer.length,
+        maxSize: MAX_ATTACHMENT_SIZE_BYTES,
+      });
+      return {
+        success: false,
+        attachmentId: attachment.id,
+        providerAttachmentId: null,
+        error: `File too large: ${buffer.length} bytes (max: ${MAX_ATTACHMENT_SIZE_BYTES})`,
+      };
+    }
+
+    // Upload with retries (rate limiting handled via job delays)
+    let lastError: string | undefined;
+    let isRateLimited = false;
+
+    for (let attempt = 0; attempt <= ATTACHMENT_UPLOAD_RETRIES; attempt++) {
+      if (attempt > 0) {
+        // Use longer delay for rate limit errors (429)
+        const baseDelay = isRateLimited
+          ? RATE_LIMIT_RETRY_BASE_DELAY_MS
+          : ATTACHMENT_RETRY_BASE_DELAY_MS;
+        const delay = baseDelay * 2 ** (attempt - 1);
+
+        this.logger.warn("Retrying attachment upload", {
+          attachmentId: attachment.id,
+          attempt: attempt + 1,
+          maxAttempts: ATTACHMENT_UPLOAD_RETRIES + 1,
+          delayMs: delay,
+          isRateLimited,
+          previousError: lastError,
+        });
+        await sleep(delay);
+      }
+
+      try {
+        const result = await provider.uploadAttachment({
+          tenantId: orgId,
+          transactionId: providerTransactionId,
+          fileName: attachment.name,
+          mimeType: attachment.type,
+          content: buffer,
+          entityType: providerEntityType,
+        });
+
+        if (result.success) {
+          this.logger.info("Attachment uploaded successfully", {
+            attachmentId: attachment.id,
+            providerAttachmentId: result.attachmentId,
+            attempt: attempt + 1,
+          });
+          return {
+            success: true,
+            attachmentId: attachment.id,
+            providerAttachmentId: result.attachmentId ?? null,
+          };
+        }
+
+        lastError = result.error;
+        // Check if this is a rate limit error
+        isRateLimited = this.isRateLimitError(lastError);
+      } catch (error) {
+        lastError = error instanceof Error ? error.message : "Unknown error";
+        isRateLimited = this.isRateLimitError(lastError);
+      }
+    }
+
+    // All retries exhausted
+    this.logger.error("Failed to upload attachment after retries", {
+      attachmentId: attachment.id,
+      attempts: ATTACHMENT_UPLOAD_RETRIES + 1,
+      error: lastError,
+    });
+
+    return {
+      success: false,
+      attachmentId: attachment.id,
+      providerAttachmentId: null,
+      error: lastError,
+    };
+  }
+
+  /**
+   * Check if an error message indicates a rate limit (429) error
+   */
+  private isRateLimitError(error: string | undefined): boolean {
+    if (!error) return false;
+    const lowerError = error.toLowerCase();
+    return (
+      lowerError.includes("429") ||
+      lowerError.includes("rate limit") ||
+      lowerError.includes("too many requests") ||
+      lowerError.includes("throttl")
+    );
   }
 }

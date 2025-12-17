@@ -19,7 +19,8 @@ export type AccountingSyncRecord = {
   syncedAt: string;
   /** Sync type (always "manual" - auto-sync was removed) */
   syncType: "manual" | null;
-  status: "synced" | "failed" | "pending";
+  /** Status: synced (all done), partial (attachments failed), failed (transaction failed), pending */
+  status: "synced" | "partial" | "failed" | "pending";
   errorMessage: string | null;
   providerEntityType: string | null;
   createdAt: string;
@@ -35,7 +36,8 @@ export type CreateAccountingSyncRecordParams = {
   syncedAttachmentMapping?: Record<string, string | null>;
   /** Sync type (always "manual" - auto-sync was removed) */
   syncType?: "manual";
-  status?: "synced" | "failed" | "pending";
+  /** Status: synced (all done), partial (attachments failed), failed (transaction failed), pending */
+  status?: "synced" | "partial" | "failed" | "pending";
   errorMessage?: string;
   /** Provider-specific entity type (e.g., "Purchase", "SalesReceipt", "Voucher", "BankTransaction") */
   providerEntityType?: string;
@@ -493,10 +495,15 @@ export type UpdateSyncedAttachmentMappingParams = {
   syncRecordId: string;
   /** Maps Midday attachment IDs to provider attachment IDs */
   syncedAttachmentMapping: Record<string, string | null>;
+  /** Optional status update (e.g., 'partial' if some attachments failed) */
+  status?: "synced" | "partial" | "failed";
+  /** Optional error message for failed attachments */
+  errorMessage?: string | null;
 };
 
 /**
  * Update the synced attachment mapping on a sync record
+ * Can also update status to 'partial' if some attachments failed
  */
 export const updateSyncedAttachmentMapping = async (
   db: Database,
@@ -507,6 +514,8 @@ export const updateSyncedAttachmentMapping = async (
     .set({
       syncedAttachmentMapping: params.syncedAttachmentMapping,
       syncedAt: new Date().toISOString(),
+      ...(params.status && { status: params.status }),
+      ...(params.errorMessage !== undefined && { errorMessage: params.errorMessage }),
     })
     .where(eq(accountingSyncRecords.id, params.syncRecordId))
     .returning();

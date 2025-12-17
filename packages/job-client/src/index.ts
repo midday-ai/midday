@@ -11,22 +11,34 @@ export { decodeJobId, encodeJobId } from "./utils";
 export const logger = createLoggerWithContext("job-client");
 
 /**
+ * Options for triggering a job
+ */
+export interface TriggerJobOptions {
+  /** Delay in milliseconds before the job starts processing */
+  delay?: number;
+}
+
+/**
  * Trigger a job in the specified queue
  * @param jobName - Name of the job (e.g., "export-transactions")
  * @param payload - Job payload data
  * @param queueName - Name of the queue (e.g., "transactions", "inbox", "inbox-provider")
+ * @param options - Optional job options (delay, etc.)
  * @returns Job information including the job ID
  */
 export async function triggerJob(
   jobName: string,
   payload: unknown,
   queueName: string,
+  options?: TriggerJobOptions,
 ): Promise<JobTriggerResponse> {
   const queue = getQueue(queueName);
   const enqueueStartTime = Date.now();
 
   try {
-    const job = await queue.add(jobName, payload);
+    const job = await queue.add(jobName, payload, {
+      delay: options?.delay,
+    });
 
     if (!job?.id) {
       throw new Error(

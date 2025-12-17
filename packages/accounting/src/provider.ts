@@ -144,6 +144,8 @@ export abstract class BaseAccountingProvider implements AccountingProvider {
    */
   protected readonly rateLimitConfig: RateLimitConfig = {
     callsPerMinute: 10,
+    maxConcurrent: 1,
+    callDelayMs: 6000, // 10 calls/min = 1 every 6 seconds
     retryDelayMs: 60_000,
     maxRetries: 3,
   };
@@ -180,63 +182,144 @@ export abstract class BaseAccountingProvider implements AccountingProvider {
    * Override in subclasses for provider-specific error handling
    */
   protected parseError(error: unknown): AccountingError {
-    if (error instanceof Error) {
-      // Check for common HTTP error patterns
-      const message = error.message.toLowerCase();
+    // First, extract the message using provider-specific logic
+    const message = this.extractErrorMessage(error);
+    const messageLower = message.toLowerCase();
 
-      if (message.includes("429") || message.includes("rate limit")) {
-        return {
-          type: "rate_limit",
-          message: "Rate limit exceeded. Please try again later.",
-          retryable: true,
-        };
-      }
-
-      if (message.includes("401") || message.includes("unauthorized")) {
-        return {
-          type: "auth_expired",
-          message: "Authentication failed. Please reconnect your account.",
-          retryable: false,
-        };
-      }
-
-      if (message.includes("400") || message.includes("validation")) {
-        return {
-          type: "validation",
-          message: error.message,
-          retryable: false,
-        };
-      }
-
-      if (message.includes("404") || message.includes("not found")) {
-        return {
-          type: "not_found",
-          message: error.message,
-          retryable: false,
-        };
-      }
-
-      if (message.includes("5")) {
-        // 5xx errors
-        return {
-          type: "server_error",
-          message: "Server error. Please try again later.",
-          retryable: true,
-        };
-      }
-
+    // Check for common HTTP error patterns
+    if (messageLower.includes("429") || messageLower.includes("rate limit")) {
       return {
-        type: "unknown",
-        message: error.message,
+        type: "rate_limit",
+        message: "Rate limit exceeded. Please try again later.",
+        retryable: true,
+      };
+    }
+
+    if (messageLower.includes("401") || messageLower.includes("unauthorized")) {
+      return {
+        type: "auth_expired",
+        message: "Authentication failed. Please reconnect your account.",
         retryable: false,
+      };
+    }
+
+    if (messageLower.includes("400") || messageLower.includes("validation")) {
+      return {
+        type: "validation",
+        message,
+        retryable: false,
+      };
+    }
+
+    if (messageLower.includes("404") || messageLower.includes("not found")) {
+      return {
+        type: "not_found",
+        message,
+        retryable: false,
+      };
+    }
+
+    if (/\b5\d{2}\b/.test(messageLower)) {
+      // 5xx errors
+      return {
+        type: "server_error",
+        message: message || "Server error. Please try again later.",
+        retryable: true,
       };
     }
 
     return {
       type: "unknown",
-      message: "An unknown error occurred",
+      message,
       retryable: false,
     };
+  }
+
+  /**
+   * Extract error message from various error formats
+   * Handles: stringified JSON, Error objects, API response structures
+   */
+  protected extractErrorMessage(error: unknown): string {
+    // Handle stringified JSON (some SDKs throw strings)
+    if (typeof error === "string") {
+      try {
+        return this.extractErrorMessage(JSON.parse(error));
+      } catch {
+        return error.length < 500 ? error : "Error response too long";
+      }
+    }
+
+    // Handle standard Error
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    // Handle object structures
+    if (error && typeof error === "object") {
+      const err = error as Record<string, unknown>;
+
+      // Extract from response.body (common API SDK pattern)
+      const body = this.extractBody(err);
+      if (body) {
+        const msg = this.extractFromBody(body);
+        if (msg) return msg;
+      }
+
+      // Status code fallback
+      const status =
+        (err.response as Record<string, unknown>)?.statusCode ?? err.statusCode;
+      if (status) return `API error (HTTP ${status})`;
+
+      // Direct message property
+      if (err.message) return String(err.message);
+    }
+
+    return "An unknown error occurred";
+  }
+
+  /** Extract body from error object */
+  private extractBody(
+    err: Record<string, unknown>,
+  ): Record<string, unknown> | null {
+    const response = err.response as Record<string, unknown> | undefined;
+    if (response?.body && typeof response.body === "object") {
+      return response.body as Record<string, unknown>;
+    }
+    if (err.body && typeof err.body === "object") {
+      return err.body as Record<string, unknown>;
+    }
+    return null;
+  }
+
+  /** Extract message from body object */
+  private extractFromBody(body: Record<string, unknown>): string | null {
+    // Xero validation errors: Elements[0].ValidationErrors[0].Message
+    if (body.Elements && Array.isArray(body.Elements)) {
+      const elem = body.Elements[0] as Record<string, unknown> | undefined;
+      const validationErrors = elem?.ValidationErrors as
+        | Array<Record<string, unknown>>
+        | undefined;
+      if (validationErrors?.[0]?.Message) {
+        return String(validationErrors[0].Message);
+      }
+    }
+
+    // Common error fields (priority order)
+    for (const key of [
+      "Detail",
+      "detail",
+      "Message",
+      "message",
+      "Title",
+      "error",
+      "error_description",
+    ]) {
+      if (body[key] && typeof body[key] === "string") {
+        return body[key] as string;
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -267,22 +350,20 @@ export abstract class BaseAccountingProvider implements AccountingProvider {
       } catch (error) {
         lastError = this.parseError(error);
 
-        // Only retry on rate limit or server errors
+        // Retry on rate limit or server errors
         if (lastError.retryable && attempt < this.rateLimitConfig.maxRetries) {
-          // Calculate delay with exponential backoff for server errors
           const delay =
             lastError.type === "rate_limit"
               ? this.rateLimitConfig.retryDelayMs
               : Math.min(
                   this.rateLimitConfig.retryDelayMs * 2 ** (attempt - 1),
-                  300_000, // Max 5 minutes
+                  300_000,
                 );
 
           await sleep(delay);
           continue;
         }
 
-        // Don't retry on non-retryable errors
         throw new Error(`${context}: ${lastError.message}`);
       }
     }
