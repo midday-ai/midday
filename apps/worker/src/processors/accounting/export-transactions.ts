@@ -15,18 +15,30 @@ const BATCH_SIZE = 50;
 
 /**
  * Calculate delay for attachment jobs based on provider rate limits
- * Spreads jobs to stay under rate limit (e.g., 60/min for Xero = 1 job per second)
+ * Groups jobs into batches based on maxConcurrent to maximize throughput
+ * while staying under rate limits.
+ *
+ * Example for Xero (60 calls/min, 5 concurrent):
+ * - Jobs 0-4 start at 0ms (batch 0)
+ * - Jobs 5-9 start at 5000ms (batch 1)
+ * - Jobs 10-14 start at 10000ms (batch 2)
  */
 function calculateAttachmentJobDelay(
   providerId: string,
   jobIndex: number,
 ): number {
-  const rateLimit =
-    RATE_LIMITS[providerId as keyof typeof RATE_LIMITS]?.callsPerMinute ?? 60;
-  // Calculate ms between jobs: 60000ms / callsPerMinute
-  // Add small buffer (1.1x) to stay safely under limit
-  const msPerJob = Math.ceil((60000 / rateLimit) * 1.1);
-  return jobIndex * msPerJob;
+  const config = RATE_LIMITS[providerId as keyof typeof RATE_LIMITS];
+  const callsPerMinute = config?.callsPerMinute ?? 60;
+  const maxConcurrent = config?.maxConcurrent ?? 1;
+
+  // Calculate which batch this job belongs to
+  const batchIndex = Math.floor(jobIndex / maxConcurrent);
+
+  // Time between batches: enough time for maxConcurrent calls to complete
+  // e.g., Xero: 5 concurrent * 60000ms / 60 calls = 5000ms between batches
+  const msBetweenBatches = Math.ceil((maxConcurrent * 60000) / callsPerMinute);
+
+  return batchIndex * msBetweenBatches;
 }
 
 /**
