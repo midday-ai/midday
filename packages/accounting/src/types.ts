@@ -87,11 +87,11 @@ export const RATE_LIMITS = {
     retryDelayMs: 60000,
     maxRetries: 3,
   },
-  /** Fortnox: ~25/5sec conservative estimate */
+  /** Fortnox: 25 requests per 5 seconds (sliding window) = 300/min */
   fortnox: {
     callsPerMinute: 300,
-    maxConcurrent: 3,
-    callDelayMs: 600, // 600ms * 3 concurrent ~= 5 per second
+    maxConcurrent: 2, // Reduced for safety
+    callDelayMs: 1000, // 2 concurrent * 5 batches/5sec = 10 calls/5sec (safe margin)
     retryDelayMs: 5000,
     maxRetries: 3,
   },
