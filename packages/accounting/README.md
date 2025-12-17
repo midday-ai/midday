@@ -27,7 +27,7 @@ The accounting integration enables Midday users to export their enriched financi
 |----------|--------|-------|--------|-------------|
 | Xero | Active | OAuth 2.0 | Yes | Yes |
 | QuickBooks | Active | OAuth 2.0 | Yes | Yes |
-| Fortnox | Active | OAuth 2.0 | Yes (Draft Vouchers) | Yes |
+| Fortnox | Active | OAuth 2.0 | Yes (Vouchers) | Yes |
 
 ### Key Features
 
@@ -224,7 +224,7 @@ erDiagram
         text provider_tenant_id
         text provider_transaction_id
         text provider_entity_type
-        text[] synced_attachment_ids
+        jsonb synced_attachment_mapping
         timestamp synced_at
         timestamp created_at
         enum sync_type
@@ -285,15 +285,15 @@ Users manually select which transactions to export. The system validates that tr
 - **Always creates new entries**: Re-exporting creates new transactions/vouchers in the accounting provider
 - **No updates**: Accounting providers have limited or no update support (Fortnox vouchers are immutable)
 - **Sync records updated**: The latest provider transaction ID is stored
-- **User responsibility**: Users should delete old drafts in accounting software if needed
+- **User responsibility**: Users should delete old entries in accounting software if needed
 
 ### Provider-Specific Behavior
 
-| Provider | Entity Type | Draft Support | Notes |
-|----------|-------------|---------------|-------|
-| Xero | BankTransaction | No | Creates SPEND/RECEIVE transactions |
-| QuickBooks | Purchase/SalesReceipt | No | Creates based on amount sign |
-| Fortnox | Voucher | Yes (ApprovalState=0) | Creates draft vouchers for review |
+| Provider | Entity Type | Notes |
+|----------|-------------|-------|
+| Xero | BankTransaction | Creates SPEND/RECEIVE transactions |
+| QuickBooks | Purchase/SalesReceipt | Creates based on amount sign |
+| Fortnox | Voucher | Creates posted vouchers (standard behavior) |
 
 ---
 
@@ -388,13 +388,14 @@ flowchart LR
 ```typescript
 interface AccountingProvider {
   // OAuth
-  getConsentUrl(state: string): string;
-  exchangeCodeForTokens(code: string): Promise<TokenResponse>;
-  refreshTokens(refreshToken: string): Promise<TokenResponse>;
-  isTokenExpired(expiresAt: Date): boolean;
+  buildConsentUrl(state: string): Promise<string>;
+  exchangeCodeForTokens(code: string): Promise<TokenSet>;
+  refreshTokens(refreshToken: string): Promise<TokenSet>;
+  isTokenExpired(expiresAt: Date, bufferSeconds?: number): boolean;
 
   // Tenant Info
-  getTenantInfo(): Promise<TenantInfo>;
+  getTenantInfo(tenantId: string): Promise<TenantInfo>;
+  getTenants(): Promise<TenantInfo[]>;
 
   // Accounts
   getAccounts(tenantId: string): Promise<AccountingAccount[]>;
@@ -404,6 +405,10 @@ interface AccountingProvider {
 
   // Attachments
   uploadAttachment(params: UploadAttachmentParams): Promise<AttachmentResult>;
+  deleteAttachment(params: DeleteAttachmentParams): Promise<DeleteAttachmentResult>;
+
+  // Health Check
+  checkConnection(): Promise<{ connected: boolean; error?: string }>;
 
   // Cleanup (optional)
   disconnect?(): Promise<void>;
@@ -429,10 +434,17 @@ upsertAccountingSyncRecord(db, {
   providerTenantId: string,
   providerTransactionId?: string,
   providerEntityType?: string,
-  syncedAttachmentIds?: string[],
+  // Maps Midday attachment IDs to provider attachment IDs
+  syncedAttachmentMapping?: Record<string, string | null>,
   syncType: 'manual',
   status: 'synced' | 'failed' | 'pending',
   errorMessage?: string,
+}): Promise<AccountingSyncRecord>
+
+// Update attachment mapping after sync
+updateSyncedAttachmentMapping(db, {
+  syncRecordId: string,
+  syncedAttachmentMapping: Record<string, string | null>,
 }): Promise<AccountingSyncRecord>
 ```
 
@@ -460,20 +472,6 @@ FORTNOX_OAUTH_REDIRECT_URL=https://api.midday.ai/v1/apps/fortnox/oauth-callback
 
 # OAuth state encryption
 ACCOUNTING_OAUTH_SECRET=32_byte_encryption_key
-```
-
-### App Store Settings Schema
-
-```typescript
-const settingsSchema = [
-  {
-    id: "syncAttachments",
-    label: "Include Attachments",
-    description: "Upload receipts and invoices when exporting",
-    type: "switch",
-    default: true,
-  },
-];
 ```
 
 ---
@@ -519,7 +517,7 @@ await upsertAccountingSyncRecord(db, {
 ## Limitations
 
 1. **No Updates**: Re-exporting creates new entries; existing entries cannot be updated
-2. **Attachment Deletion**: Removing attachments in Midday does not delete them from the accounting provider
+2. **Attachment Deletion**: Partial support - QuickBooks and Fortnox support deletion, Xero does not (attachments remain in Xero)
 3. **Bank Account Mapping**: Currently uses first active account; multi-account mapping planned
 4. **Rate Limits**: Subject to provider API rate limits (Xero: 60 calls/minute)
-5. **Fortnox Vouchers**: Created as drafts; must be manually approved/posted in Fortnox
+5. **Fortnox Vouchers**: Created as posted entries (Fortnox API doesn't support draft vouchers)

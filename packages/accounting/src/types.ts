@@ -419,6 +419,25 @@ export interface AttachmentResult {
   error?: string;
 }
 
+/**
+ * Parameters for deleting/unlinking an attachment
+ */
+export interface DeleteAttachmentParams {
+  tenantId: string;
+  /** Provider's transaction/voucher ID */
+  transactionId: string;
+  /** Provider's attachment/file ID */
+  attachmentId: string;
+}
+
+/**
+ * Result of attachment deletion
+ */
+export interface DeleteAttachmentResult {
+  success: boolean;
+  error?: string;
+}
+
 // ============================================================================
 // Sync Record Types
 // ============================================================================
@@ -430,7 +449,7 @@ export const SyncStatusSchema = z.enum(["synced", "failed", "pending"]);
 export type SyncStatus = z.infer<typeof SyncStatusSchema>;
 
 /**
- * Sync type
+ * Sync type (manual export only - auto-sync was removed)
  */
-export const SyncTypeSchema = z.enum(["auto", "manual"]);
+export const SyncTypeSchema = z.enum(["manual"]);
 export type SyncType = z.infer<typeof SyncTypeSchema>;

@@ -11,6 +11,8 @@ import type {
   AccountingError,
   AccountingProviderId,
   AttachmentResult,
+  DeleteAttachmentParams,
+  DeleteAttachmentResult,
   MappedTransaction,
   ProviderInitConfig,
   RateLimitConfig,
@@ -157,6 +159,29 @@ export class XeroProvider extends BaseAccountingProvider {
    */
   private getErrorMessage(error: unknown): string {
     return this.parseError(error).message;
+  }
+
+  /**
+   * Validate and return account code, falling back to default if invalid
+   */
+  private getValidAccountCode(
+    categoryReportingCode: string | undefined,
+    transactionId: string,
+  ): string {
+    // Valid Xero account codes are non-empty alphanumeric strings
+    const isValid =
+      categoryReportingCode && /^[a-zA-Z0-9]+$/.test(categoryReportingCode);
+
+    if (categoryReportingCode && !isValid) {
+      logger.warn("Invalid Xero account code, using default", {
+        provider: "xero",
+        transactionId,
+        invalidCode: categoryReportingCode,
+        defaultAccount: DEFAULT_ACCOUNT_CODE,
+      });
+    }
+
+    return isValid ? categoryReportingCode : DEFAULT_ACCOUNT_CODE;
   }
 
   /**
@@ -358,8 +383,11 @@ export class XeroProvider extends BaseAccountingProvider {
             description: tx.description,
             quantity: 1,
             unitAmount: Math.abs(tx.amount),
-            // Use category's reporting code if available, otherwise default
-            accountCode: tx.categoryReportingCode || DEFAULT_ACCOUNT_CODE,
+            // Use category's reporting code if valid, otherwise default
+            accountCode: this.getValidAccountCode(
+              tx.categoryReportingCode,
+              tx.id,
+            ),
           },
         ],
         bankAccount: {
@@ -530,6 +558,31 @@ export class XeroProvider extends BaseAccountingProvider {
         error: this.getErrorMessage(error),
       };
     }
+  }
+
+  /**
+   * Delete/unlink an attachment from a Xero bank transaction
+   *
+   * Note: Xero doesn't have a direct delete endpoint for attachments.
+   * This is a no-op that returns success, as Xero attachments cannot be deleted via API.
+   * The attachment remains in Xero but we update our tracking to reflect the removal.
+   */
+  async deleteAttachment(
+    params: DeleteAttachmentParams,
+  ): Promise<DeleteAttachmentResult> {
+    const { transactionId, attachmentId } = params;
+
+    logger.warn("Xero attachment deletion not supported via API", {
+      provider: "xero",
+      transactionId,
+      attachmentId,
+      message:
+        "Xero does not support attachment deletion via API. Attachment remains in Xero.",
+    });
+
+    // Return success as we'll update our tracking, even though Xero keeps the file
+    // This is the best we can do with Xero's API limitations
+    return { success: true };
   }
 
   /**

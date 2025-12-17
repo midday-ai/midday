@@ -4,6 +4,8 @@ import type {
   AccountingErrorType,
   AccountingProviderId,
   AttachmentResult,
+  DeleteAttachmentParams,
+  DeleteAttachmentResult,
   ProviderInitConfig,
   RateLimitConfig,
   SyncResult,
@@ -79,6 +81,15 @@ export interface AccountingProvider {
   uploadAttachment(params: UploadAttachmentParams): Promise<AttachmentResult>;
 
   /**
+   * Delete/unlink an attachment from a transaction
+   * @param params - Delete parameters
+   * @returns Delete result
+   */
+  deleteAttachment(
+    params: DeleteAttachmentParams,
+  ): Promise<DeleteAttachmentResult>;
+
+  /**
    * Get organization/tenant details
    * @param tenantId - The tenant ID
    */
@@ -151,6 +162,9 @@ export abstract class BaseAccountingProvider implements AccountingProvider {
   abstract uploadAttachment(
     params: UploadAttachmentParams,
   ): Promise<AttachmentResult>;
+  abstract deleteAttachment(
+    params: DeleteAttachmentParams,
+  ): Promise<DeleteAttachmentResult>;
   abstract getTenantInfo(
     tenantId: string,
   ): Promise<{ id: string; name: string; currency?: string }>;

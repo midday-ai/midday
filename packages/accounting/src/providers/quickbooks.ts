@@ -7,6 +7,8 @@ import type {
   AccountingError,
   AccountingProviderId,
   AttachmentResult,
+  DeleteAttachmentParams,
+  DeleteAttachmentResult,
   MappedTransaction,
   ProviderInitConfig,
   QuickBooksProviderConfig,
@@ -34,6 +36,9 @@ const QB_API_BASE = {
   sandbox: "https://sandbox-quickbooks.api.intuit.com",
   production: "https://quickbooks.api.intuit.com",
 };
+
+/** Request timeout in milliseconds (30 seconds) */
+const REQUEST_TIMEOUT_MS = 30_000;
 
 /**
  * QuickBooks accounting provider implementation using official Intuit OAuth SDK
@@ -203,6 +208,29 @@ export class QuickBooksProvider extends BaseAccountingProvider {
   }
 
   /**
+   * Validate and return account name, falling back to default if invalid
+   */
+  private getValidAccountName(
+    categoryReportingCode: string | undefined,
+    transactionId: string,
+  ): string {
+    // Valid account name is non-empty string after trimming
+    const isValid =
+      categoryReportingCode && categoryReportingCode.trim().length > 0;
+
+    if (categoryReportingCode && !isValid) {
+      logger.warn("Invalid QuickBooks account name, using default", {
+        provider: "quickbooks",
+        transactionId,
+        invalidCode: categoryReportingCode,
+        defaultAccount: DEFAULT_EXPENSE_ACCOUNT,
+      });
+    }
+
+    return isValid ? categoryReportingCode.trim() : DEFAULT_EXPENSE_ACCOUNT;
+  }
+
+  /**
    * Ensure the client has valid tokens, refresh if needed
    * Returns the current access token
    */
@@ -317,6 +345,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
 
     const response = await fetch(url, {
       method: "POST",
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       headers: {
         Authorization: `Bearer ${accessToken}`,
         Accept: "application/json",
@@ -541,14 +570,17 @@ export class QuickBooksProvider extends BaseAccountingProvider {
         // Generate deterministic idempotency key for this transaction
         const idempotencyKey = `midday-${tx.id}-${tx.date}`;
 
+        // Use the same description as shown in Midday
+        const description =
+          tx.description || tx.counterpartyName || "Transaction";
+
         if (tx.amount < 0) {
           // Expense transaction - create a Purchase
-          const purchase = {
+          const purchase: Record<string, unknown> = {
             PaymentType: "Cash",
             AccountRef: { value: targetAccountId },
             TotalAmt: Math.abs(tx.amount),
             TxnDate: tx.date,
-            PrivateNote: tx.reference || tx.id,
             CurrencyRef: { value: tx.currency },
             Line: [
               {
@@ -556,13 +588,20 @@ export class QuickBooksProvider extends BaseAccountingProvider {
                 DetailType: "AccountBasedExpenseLineDetail",
                 AccountBasedExpenseLineDetail: {
                   AccountRef: {
-                    name: tx.categoryReportingCode || DEFAULT_EXPENSE_ACCOUNT,
+                    name: this.getValidAccountName(
+                      tx.categoryReportingCode,
+                      tx.id,
+                    ),
                   },
                 },
-                Description: tx.description,
+                Description: description,
               },
             ],
           };
+          // Only add PrivateNote if there's a meaningful reference
+          if (tx.reference) {
+            purchase.PrivateNote = tx.reference;
+          }
 
           const result = await this.withRetry(
             () =>
@@ -577,11 +616,10 @@ export class QuickBooksProvider extends BaseAccountingProvider {
           providerTransactionId = result.Purchase?.Id;
         } else {
           // Income transaction - create a SalesReceipt
-          const salesReceipt = {
+          const salesReceipt: Record<string, unknown> = {
             DepositToAccountRef: { value: targetAccountId },
             TotalAmt: tx.amount,
             TxnDate: tx.date,
-            PrivateNote: tx.reference || tx.id,
             CurrencyRef: { value: tx.currency },
             Line: [
               {
@@ -590,10 +628,14 @@ export class QuickBooksProvider extends BaseAccountingProvider {
                 SalesItemLineDetail: {
                   ItemRef: { name: "Services" }, // Default income item
                 },
-                Description: tx.description,
+                Description: description,
               },
             ],
           };
+          // Only add PrivateNote if there's a meaningful reference
+          if (tx.reference) {
+            salesReceipt.PrivateNote = tx.reference;
+          }
 
           const result = await this.withRetry(
             () =>
@@ -741,6 +783,72 @@ export class QuickBooksProvider extends BaseAccountingProvider {
         provider: "quickbooks",
         transactionId,
         fileName,
+        error: this.getErrorMessage(error),
+      });
+      return {
+        success: false,
+        error: this.getErrorMessage(error),
+      };
+    }
+  }
+
+  /**
+   * Delete an attachment from QuickBooks
+   *
+   * QuickBooks supports deleting attachables via the API.
+   * DELETE /v3/company/{realmId}/attachable?operation=delete
+   */
+  async deleteAttachment(
+    params: DeleteAttachmentParams,
+  ): Promise<DeleteAttachmentResult> {
+    const { transactionId, attachmentId } = params;
+
+    logger.info("Deleting QuickBooks attachment", {
+      provider: "quickbooks",
+      transactionId,
+      attachmentId,
+    });
+
+    try {
+      // First, get the attachable to retrieve SyncToken
+      const getResponse = await this.withRetry(
+        () =>
+          this.apiCall<{ Attachable: { SyncToken: string } }>(
+            "GET",
+            `/attachable/${attachmentId}`,
+          ),
+        "getAttachableForDelete",
+      );
+
+      const syncToken = getResponse?.Attachable?.SyncToken;
+      if (!syncToken) {
+        throw new Error(
+          `Attachable ${attachmentId} not found or missing SyncToken`,
+        );
+      }
+
+      // Delete the attachable
+      await this.withRetry(
+        () =>
+          this.apiCall<unknown>("POST", "/attachable?operation=delete", {
+            Id: attachmentId,
+            SyncToken: syncToken,
+          }),
+        "deleteAttachable",
+      );
+
+      logger.info("QuickBooks attachment deleted successfully", {
+        provider: "quickbooks",
+        transactionId,
+        attachmentId,
+      });
+
+      return { success: true };
+    } catch (error) {
+      logger.error("QuickBooks attachment deletion failed", {
+        provider: "quickbooks",
+        transactionId,
+        attachmentId,
         error: this.getErrorMessage(error),
       });
       return {

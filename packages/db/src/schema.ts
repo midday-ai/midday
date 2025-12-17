@@ -3392,11 +3392,12 @@ export const accountingSyncRecords = pgTable(
     provider: accountingProviderEnum().notNull(),
     providerTenantId: text("provider_tenant_id").notNull(),
     providerTransactionId: text("provider_transaction_id"),
-    // Tracks which Midday attachment IDs have been synced to detect changes
-    syncedAttachmentIds: text("synced_attachment_ids")
-      .array()
-      .default(sql`'{}'::text[]`)
-      .notNull(),
+    // Maps Midday attachment IDs to provider attachment IDs for sync tracking
+    // Format: { "midday-attachment-id": "provider-attachment-id" }
+    syncedAttachmentMapping: jsonb("synced_attachment_mapping")
+      .default(sql`'{}'::jsonb`)
+      .notNull()
+      .$type<Record<string, string | null>>(),
     syncedAt: timestamp("synced_at", { withTimezone: true, mode: "string" })
       .defaultNow()
       .notNull(),
@@ -3420,7 +3421,7 @@ export const accountingSyncRecords = pgTable(
     // Unique constraint: one sync record per transaction per provider
     unique("accounting_sync_records_transaction_provider_key").on(
       table.transactionId,
-      table.provider
+      table.provider,
     ),
     foreignKey({
       columns: [table.transactionId],
@@ -3448,7 +3449,7 @@ export const accountingSyncRecords = pgTable(
       for: "update",
       to: ["public"],
     }),
-  ]
+  ],
 );
 
 export const accountingSyncRecordsRelations = relations(
@@ -3462,5 +3463,5 @@ export const accountingSyncRecordsRelations = relations(
       fields: [accountingSyncRecords.teamId],
       references: [teams.id],
     }),
-  })
+  }),
 );

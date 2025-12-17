@@ -23,6 +23,14 @@ export const providerEntityTypeSchema = z.enum([
 export type ProviderEntityType = z.infer<typeof providerEntityTypeSchema>;
 
 /**
+ * Schema for removed attachment info
+ */
+const removedAttachmentSchema = z.object({
+  middayId: z.string().uuid(),
+  providerId: z.string().nullable(),
+});
+
+/**
  * Schema for sync-accounting-attachments job
  */
 export const accountingAttachmentSyncSchema = z.object({
@@ -31,9 +39,13 @@ export const accountingAttachmentSyncSchema = z.object({
   syncRecordId: z.string().uuid().optional(), // The accounting_sync_record ID (for updates)
   transactionId: z.string().uuid(), // Midday transaction ID
   providerTransactionId: z.string(), // External provider transaction ID
-  attachmentIds: z.array(z.string().uuid()), // Midday attachment IDs to upload
-  // For attachment updates: IDs already synced, so we can build the full list
-  existingSyncedAttachmentIds: z.array(z.string().uuid()).optional(),
+  attachmentIds: z.array(z.string().uuid()), // Midday attachment IDs to upload (new)
+  // Attachments to remove/unlink from the provider
+  removedAttachments: z.array(removedAttachmentSchema).optional(),
+  // Current mapping from DB (Midday ID -> Provider ID)
+  existingSyncedAttachmentMapping: z
+    .record(z.string(), z.string().nullable())
+    .optional(),
   // Entity type for QuickBooks - avoids extra API call to determine Purchase vs SalesReceipt
   providerEntityType: providerEntityTypeSchema.optional(),
 });

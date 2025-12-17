@@ -5,6 +5,8 @@ import {
   type AccountingError,
   type AccountingProviderId,
   type AttachmentResult,
+  type DeleteAttachmentParams,
+  type DeleteAttachmentResult,
   type MappedTransaction,
   type ProviderInitConfig,
   RATE_LIMITS,
@@ -47,6 +49,9 @@ export const FORTNOX_SCOPES: FortnoxScope[] = [
 const DEFAULT_EXPENSE_ACCOUNT = "4000";
 /** Default income account code for Swedish BAS chart */
 const DEFAULT_INCOME_ACCOUNT = "3000";
+
+/** Request timeout in milliseconds (30 seconds) */
+const REQUEST_TIMEOUT_MS = 30_000;
 
 // ============================================================================
 // Fortnox API Response Types
@@ -147,6 +152,31 @@ export class FortnoxProvider extends BaseAccountingProvider {
   // ============================================================================
 
   /**
+   * Validate and return account code, falling back to default if invalid
+   * Fortnox uses 4-digit Swedish BAS account codes
+   */
+  private getValidAccountCode(
+    categoryReportingCode: string | undefined,
+    transactionId: string,
+    defaultAccount: string,
+  ): string {
+    // Valid Fortnox account codes are 4-digit numbers (Swedish BAS)
+    const isValid =
+      categoryReportingCode && /^\d{4}$/.test(categoryReportingCode);
+
+    if (categoryReportingCode && !isValid) {
+      logger.warn("Invalid Fortnox account code, using default", {
+        provider: "fortnox",
+        transactionId,
+        invalidCode: categoryReportingCode,
+        defaultAccount,
+      });
+    }
+
+    return isValid ? categoryReportingCode : defaultAccount;
+  }
+
+  /**
    * Make an authenticated API call to Fortnox
    */
   private async apiCall<T>(
@@ -160,6 +190,7 @@ export class FortnoxProvider extends BaseAccountingProvider {
     const url = `${FORTNOX_API_URL}${endpoint}`;
     const response = await fetch(url, {
       ...options,
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       headers: {
         Authorization: `Bearer ${this.accessToken}`,
         "Content-Type": "application/json",
@@ -207,6 +238,7 @@ export class FortnoxProvider extends BaseAccountingProvider {
 
     const response = await fetch(url.toString(), {
       method: "POST",
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       headers: {
         Authorization: `Bearer ${this.accessToken}`,
         Accept: "application/json",
@@ -326,6 +358,7 @@ export class FortnoxProvider extends BaseAccountingProvider {
 
     const response = await fetch(`${FORTNOX_AUTH_URL}/token`, {
       method: "POST",
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Authorization: `Basic ${credentials}`,
@@ -379,6 +412,7 @@ export class FortnoxProvider extends BaseAccountingProvider {
 
     const response = await fetch(`${FORTNOX_AUTH_URL}/token`, {
       method: "POST",
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Authorization: `Basic ${credentials}`,
@@ -559,7 +593,7 @@ export class FortnoxProvider extends BaseAccountingProvider {
   private getDefaultBankAccount(): AccountingAccount {
     return {
       id: "1930",
-      name: "Företagskonto (default)",
+      name: "Företagskonto",
       code: "1930",
       type: "BANK",
       currency: "SEK",
@@ -591,9 +625,16 @@ export class FortnoxProvider extends BaseAccountingProvider {
   async syncTransactions(params: SyncTransactionsParams): Promise<SyncResult> {
     const { transactions, targetAccountId, tenantId } = params;
 
+    // Sort by date ascending for clean voucher number sequence
+    // Fortnox assigns voucher numbers in creation order, so sorting by date
+    // ensures numbers roughly follow chronological order (better for auditing)
+    const sortedTransactions = [...transactions].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
+
     logger.info("Starting Fortnox transaction sync", {
       provider: "fortnox",
-      transactionCount: transactions.length,
+      transactionCount: sortedTransactions.length,
       targetAccountId,
       tenantId,
     });
@@ -602,7 +643,7 @@ export class FortnoxProvider extends BaseAccountingProvider {
     let syncedCount = 0;
     let failedCount = 0;
 
-    for (const tx of transactions) {
+    for (const tx of sortedTransactions) {
       try {
         const result = await this.createVoucher(tx, targetAccountId);
         results.push({
@@ -632,7 +673,7 @@ export class FortnoxProvider extends BaseAccountingProvider {
       provider: "fortnox",
       syncedCount,
       failedCount,
-      totalTransactions: transactions.length,
+      totalTransactions: sortedTransactions.length,
     });
 
     return {
@@ -659,12 +700,14 @@ export class FortnoxProvider extends BaseAccountingProvider {
       const amount = Math.abs(tx.amount);
 
       // Determine contra account (expense or income)
-      const contraAccount =
-        tx.categoryReportingCode ??
-        (isExpense ? DEFAULT_EXPENSE_ACCOUNT : DEFAULT_INCOME_ACCOUNT);
-
-      // Get the year from the transaction date
-      const transactionYear = new Date(tx.date).getFullYear();
+      const defaultAccount = isExpense
+        ? DEFAULT_EXPENSE_ACCOUNT
+        : DEFAULT_INCOME_ACCOUNT;
+      const contraAccount = this.getValidAccountCode(
+        tx.categoryReportingCode,
+        tx.id,
+        defaultAccount,
+      );
 
       // Build voucher rows for double-entry
       const voucherRows: FortnoxVoucherRow[] = isExpense
@@ -695,13 +738,12 @@ export class FortnoxProvider extends BaseAccountingProvider {
             },
           ];
 
-      // Build description with Midday reference for tracking
-      const description =
+      // Use the same description as shown in Midday
+      const voucherDescription =
         tx.description || tx.counterpartyName || "Transaction";
-      const voucherDescription = `${description} (midday:${tx.id.substring(0, 8)})`;
 
       // Note: ReferenceNumber, Year, and ApprovalState are read-only in Fortnox API
-      // Vouchers are created as drafts by default
+      // Vouchers are created as posted/finalized entries (standard for accounting integrations)
       const response = await this.apiCall<FortnoxVoucherResponse>("/vouchers", {
         method: "POST",
         body: JSON.stringify({
@@ -717,9 +759,9 @@ export class FortnoxProvider extends BaseAccountingProvider {
               // Additional Fortnox-specific fields
               CostCenter: tx.costCenter || undefined,
               Project: tx.project || undefined,
-              // TransactionInformation: Additional text (max 100 chars)
+              // TransactionInformation: WHO the transaction is with (max 100 chars)
               TransactionInformation:
-                tx.reference?.substring(0, 100) || undefined,
+                tx.counterpartyName?.substring(0, 100) || undefined,
             })),
           },
         }),
@@ -883,5 +925,50 @@ export class FortnoxProvider extends BaseAccountingProvider {
         },
       );
     }, "createVoucherFileConnection");
+  }
+
+  /**
+   * Delete/unlink an attachment from a voucher
+   *
+   * Fortnox API: DELETE /voucherfileconnections/{FileId}
+   */
+  async deleteAttachment(
+    params: DeleteAttachmentParams,
+  ): Promise<DeleteAttachmentResult> {
+    const { transactionId, attachmentId } = params;
+
+    logger.info("Deleting Fortnox attachment", {
+      provider: "fortnox",
+      transactionId,
+      attachmentId,
+    });
+
+    try {
+      await this.withRetry(async () => {
+        await this.apiCall(`/voucherfileconnections/${attachmentId}`, {
+          method: "DELETE",
+        });
+      }, "deleteAttachment");
+
+      logger.info("Fortnox attachment deleted successfully", {
+        provider: "fortnox",
+        transactionId,
+        attachmentId,
+      });
+
+      return { success: true };
+    } catch (error) {
+      const parsed = this.parseError(error);
+      logger.error("Fortnox attachment deletion failed", {
+        provider: "fortnox",
+        transactionId,
+        attachmentId,
+        error: parsed.message,
+      });
+      return {
+        success: false,
+        error: parsed.message,
+      };
+    }
   }
 }

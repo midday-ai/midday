@@ -14,9 +14,11 @@ export type AccountingSyncRecord = {
   provider: "xero" | "quickbooks" | "fortnox" | "visma";
   providerTenantId: string;
   providerTransactionId: string | null;
-  syncedAttachmentIds: string[];
+  /** Maps Midday attachment IDs to provider attachment IDs */
+  syncedAttachmentMapping: Record<string, string | null>;
   syncedAt: string;
-  syncType: "auto" | "manual" | null;
+  /** Sync type (always "manual" - auto-sync was removed) */
+  syncType: "manual" | null;
   status: "synced" | "failed" | "pending";
   errorMessage: string | null;
   providerEntityType: string | null;
@@ -29,8 +31,10 @@ export type CreateAccountingSyncRecordParams = {
   provider: "xero" | "quickbooks" | "fortnox" | "visma";
   providerTenantId: string;
   providerTransactionId?: string;
-  syncedAttachmentIds?: string[];
-  syncType?: "auto" | "manual";
+  /** Maps Midday attachment IDs to provider attachment IDs */
+  syncedAttachmentMapping?: Record<string, string | null>;
+  /** Sync type (always "manual" - auto-sync was removed) */
+  syncType?: "manual";
   status?: "synced" | "failed" | "pending";
   errorMessage?: string;
   /** Provider-specific entity type (e.g., "Purchase", "SalesReceipt", "Voucher", "BankTransaction") */
@@ -57,7 +61,7 @@ export const upsertAccountingSyncRecord = async (
       provider: params.provider,
       providerTenantId: params.providerTenantId,
       providerTransactionId: params.providerTransactionId,
-      syncedAttachmentIds: params.syncedAttachmentIds ?? [],
+      syncedAttachmentMapping: params.syncedAttachmentMapping ?? {},
       syncType: params.syncType,
       status,
       errorMessage,
@@ -70,7 +74,7 @@ export const upsertAccountingSyncRecord = async (
       ],
       set: {
         providerTransactionId: params.providerTransactionId,
-        syncedAttachmentIds: params.syncedAttachmentIds ?? [],
+        syncedAttachmentMapping: params.syncedAttachmentMapping ?? {},
         syncedAt: new Date().toISOString(),
         syncType: params.syncType,
         status,
@@ -339,11 +343,12 @@ export const getTransactionAttachmentsForSync = async (
   return results;
 };
 
-export type TransactionWithNewAttachments = {
+export type TransactionWithAttachmentChanges = {
   transactionId: string;
   providerTransactionId: string;
   syncRecordId: string;
-  syncedAttachmentIds: string[];
+  /** Maps Midday attachment IDs to provider attachment IDs */
+  syncedAttachmentMapping: Record<string, string | null>;
   currentAttachments: Array<{
     id: string;
     name: string | null;
@@ -351,7 +356,10 @@ export type TransactionWithNewAttachments = {
     type: string | null;
     size: number | null;
   }>;
+  /** Attachment IDs that exist now but weren't synced before */
   newAttachmentIds: string[];
+  /** Attachment IDs that were synced but no longer exist (with their provider IDs) */
+  removedAttachments: Array<{ middayId: string; providerId: string | null }>;
 };
 
 export type GetSyncedTransactionsWithAttachmentChangesParams = {
@@ -362,21 +370,21 @@ export type GetSyncedTransactionsWithAttachmentChangesParams = {
 };
 
 /**
- * Get synced transactions that have new attachments (not previously synced)
+ * Get synced transactions that have attachment changes (new or removed)
  *
  * This finds transactions where:
  * - Already synced to the provider (status = 'synced')
- * - Have new attachments that weren't in the original sync
+ * - Have new attachments that weren't synced before OR
+ * - Have removed attachments that were previously synced
  *
  * Used to push attachment updates to already-synced transactions.
- * Note: We only push NEW attachments, we don't delete if attachments were removed.
  *
  * Optimized: Single JOIN query instead of 2 separate queries
  */
 export const getSyncedTransactionsWithAttachmentChanges = async (
   db: Database,
   params: GetSyncedTransactionsWithAttachmentChangesParams,
-): Promise<TransactionWithNewAttachments[]> => {
+): Promise<TransactionWithAttachmentChanges[]> => {
   const { teamId, provider, sinceDaysAgo = 30, limit = 100 } = params;
 
   // Calculate the date threshold
@@ -390,7 +398,7 @@ export const getSyncedTransactionsWithAttachmentChanges = async (
       syncRecordId: accountingSyncRecords.id,
       transactionId: accountingSyncRecords.transactionId,
       providerTransactionId: accountingSyncRecords.providerTransactionId,
-      syncedAttachmentIds: accountingSyncRecords.syncedAttachmentIds,
+      syncedAttachmentMapping: accountingSyncRecords.syncedAttachmentMapping,
       currentAttachments: sql<
         Array<{
           id: string;
@@ -438,28 +446,42 @@ export const getSyncedTransactionsWithAttachmentChanges = async (
     .groupBy(accountingSyncRecords.id)
     .limit(limit);
 
-  // Filter and map to find transactions with new attachments
-  const result: TransactionWithNewAttachments[] = [];
+  // Filter and map to find transactions with attachment changes
+  const result: TransactionWithAttachmentChanges[] = [];
 
   for (const row of results) {
-    if (!row.currentAttachments || row.currentAttachments.length === 0)
-      continue;
     if (!row.providerTransactionId) continue;
 
-    const syncedSet = new Set(row.syncedAttachmentIds);
-    const currentIds = row.currentAttachments.map((a) => a.id);
+    const syncedMapping = (row.syncedAttachmentMapping ?? {}) as Record<
+      string,
+      string | null
+    >;
+    const syncedIds = new Set(Object.keys(syncedMapping));
+    const currentIds = new Set(
+      row.currentAttachments?.map((a) => a.id) ?? [],
+    );
 
-    // Find attachments that exist now but weren't synced before
-    const newAttachmentIds = currentIds.filter((id) => !syncedSet.has(id));
+    // Find attachments that exist now but weren't synced before (NEW)
+    const newAttachmentIds = [...currentIds].filter((id) => !syncedIds.has(id));
 
-    if (newAttachmentIds.length > 0) {
+    // Find attachments that were synced but no longer exist (REMOVED)
+    const removedAttachments = [...syncedIds]
+      .filter((id) => !currentIds.has(id))
+      .map((middayId) => ({
+        middayId,
+        providerId: syncedMapping[middayId] ?? null,
+      }));
+
+    // Only include if there are changes
+    if (newAttachmentIds.length > 0 || removedAttachments.length > 0) {
       result.push({
         transactionId: row.transactionId,
         providerTransactionId: row.providerTransactionId,
         syncRecordId: row.syncRecordId,
-        syncedAttachmentIds: row.syncedAttachmentIds,
-        currentAttachments: row.currentAttachments,
+        syncedAttachmentMapping: syncedMapping,
+        currentAttachments: row.currentAttachments ?? [],
         newAttachmentIds,
+        removedAttachments,
       });
     }
   }
@@ -467,22 +489,23 @@ export const getSyncedTransactionsWithAttachmentChanges = async (
   return result;
 };
 
-export type UpdateSyncedAttachmentIdsParams = {
+export type UpdateSyncedAttachmentMappingParams = {
   syncRecordId: string;
-  syncedAttachmentIds: string[];
+  /** Maps Midday attachment IDs to provider attachment IDs */
+  syncedAttachmentMapping: Record<string, string | null>;
 };
 
 /**
- * Update the synced attachment IDs on a sync record
+ * Update the synced attachment mapping on a sync record
  */
-export const updateSyncedAttachmentIds = async (
+export const updateSyncedAttachmentMapping = async (
   db: Database,
-  params: UpdateSyncedAttachmentIdsParams,
+  params: UpdateSyncedAttachmentMappingParams,
 ) => {
   const [result] = await db
     .update(accountingSyncRecords)
     .set({
-      syncedAttachmentIds: params.syncedAttachmentIds,
+      syncedAttachmentMapping: params.syncedAttachmentMapping,
       syncedAt: new Date().toISOString(),
     })
     .where(eq(accountingSyncRecords.id, params.syncRecordId))
