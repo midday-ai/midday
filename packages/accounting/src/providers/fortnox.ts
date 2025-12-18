@@ -1,8 +1,10 @@
 import { logger } from "@midday/logger";
 import { BaseAccountingProvider } from "../provider";
 import {
+  ACCOUNTING_ERROR_CODES,
   type AccountingAccount,
   type AccountingError,
+  AccountingOperationError,
   type AccountingProviderId,
   type AttachmentResult,
   type DeleteAttachmentParams,
@@ -32,7 +34,8 @@ type FortnoxScope =
   | "companyinformation"
   | "archive"
   | "connectfile"
-  | "inbox";
+  | "inbox"
+  | "settings";
 
 /** Fortnox API base URLs */
 const FORTNOX_AUTH_URL = "https://apps.fortnox.se/oauth-v1";
@@ -48,6 +51,7 @@ export const FORTNOX_SCOPES: FortnoxScope[] = [
   "archive", // Upload files
   "connectfile", // Connect files to vouchers
   "inbox", // Upload files to inbox
+  "settings", // Read/write settings (for financial years)
 ];
 
 /** Default expense account code for Swedish BAS chart */
@@ -110,6 +114,21 @@ interface FortnoxFileResponse {
     Name?: string;
     Path?: string;
   };
+}
+
+interface FortnoxFinancialYear {
+  Id?: number;
+  FromDate?: string;
+  ToDate?: string;
+  AccountingMethod?: string;
+}
+
+interface FortnoxFinancialYearsResponse {
+  FinancialYears?: FortnoxFinancialYear[];
+}
+
+interface FortnoxFinancialYearResponse {
+  FinancialYear?: FortnoxFinancialYear;
 }
 
 // ============================================================================
@@ -320,6 +339,11 @@ export class FortnoxProvider extends BaseAccountingProvider {
    * Parse Fortnox-specific errors into standardized format
    */
   protected override parseError(error: unknown): AccountingError {
+    // Check if it's already an AccountingOperationError with structured data
+    if (error instanceof AccountingOperationError) {
+      return error.toJSON();
+    }
+
     if (error instanceof Error) {
       const message = error.message.toLowerCase();
 
@@ -328,6 +352,7 @@ export class FortnoxProvider extends BaseAccountingProvider {
         logger.warn("Fortnox rate limit hit", { provider: "fortnox" });
         return {
           type: "rate_limit",
+          code: ACCOUNTING_ERROR_CODES.RATE_LIMIT,
           message: "Rate limit exceeded. Please try again in a few seconds.",
           providerCode: "429",
           retryable: true,
@@ -338,6 +363,7 @@ export class FortnoxProvider extends BaseAccountingProvider {
       if (message.includes("401") || message.includes("unauthorized")) {
         return {
           type: "auth_expired",
+          code: ACCOUNTING_ERROR_CODES.AUTH_EXPIRED,
           message:
             "Authentication failed. Please reconnect your Fortnox account.",
           providerCode: "401",
@@ -349,6 +375,7 @@ export class FortnoxProvider extends BaseAccountingProvider {
       if (message.includes("400") || message.includes("validation")) {
         return {
           type: "validation",
+          code: ACCOUNTING_ERROR_CODES.VALIDATION,
           message: `Validation error: ${error.message}`,
           providerCode: "400",
           retryable: false,
@@ -359,6 +386,7 @@ export class FortnoxProvider extends BaseAccountingProvider {
       if (message.includes("404") || message.includes("not found")) {
         return {
           type: "not_found",
+          code: ACCOUNTING_ERROR_CODES.NOT_FOUND,
           message: error.message,
           providerCode: "404",
           retryable: false,
@@ -369,6 +397,7 @@ export class FortnoxProvider extends BaseAccountingProvider {
       if (message.includes("500") || message.includes("internal server")) {
         return {
           type: "server_error",
+          code: ACCOUNTING_ERROR_CODES.SERVER_ERROR,
           message: "Fortnox server error. Please try again later.",
           providerCode: "500",
           retryable: true,
@@ -377,6 +406,7 @@ export class FortnoxProvider extends BaseAccountingProvider {
 
       return {
         type: "unknown",
+        code: ACCOUNTING_ERROR_CODES.UNKNOWN,
         message: error.message,
         retryable: false,
       };
@@ -384,6 +414,7 @@ export class FortnoxProvider extends BaseAccountingProvider {
 
     return {
       type: "unknown",
+      code: ACCOUNTING_ERROR_CODES.UNKNOWN,
       message: String(error),
       retryable: false,
     };
@@ -721,11 +752,13 @@ export class FortnoxProvider extends BaseAccountingProvider {
           provider: "fortnox",
           transactionId: tx.id,
           error: parsed.message,
+          errorCode: parsed.code,
         });
         results.push({
           transactionId: tx.id,
           success: false,
           error: parsed.message,
+          errorCode: parsed.code,
         });
         failedCount++;
       }
@@ -746,17 +779,274 @@ export class FortnoxProvider extends BaseAccountingProvider {
     };
   }
 
+  // ============================================================================
+  // Financial Year Methods
+  // ============================================================================
+
+  /**
+   * Check if an error is a "no financial year" error from Fortnox
+   * Error code 2002375: "Inget bokföringsår existerar för angivet bokföringsdatum"
+   * (No fiscal year exists for the specified accounting date)
+   */
+  private isNoFinancialYearError(error: unknown): boolean {
+    if (error instanceof Error) {
+      return error.message.includes("2002375");
+    }
+    return false;
+  }
+
+  // Cache for financial years to avoid repeated API calls
+  private financialYearsCache: FortnoxFinancialYear[] | null = null;
+  private createdYearsCache: Set<number> = new Set();
+
+  /**
+   * Get all financial years from Fortnox
+   */
+  private async getAllFinancialYears(): Promise<FortnoxFinancialYear[]> {
+    if (this.financialYearsCache) {
+      return this.financialYearsCache;
+    }
+    const response =
+      await this.apiCall<FortnoxFinancialYearsResponse>("/financialyears");
+    this.financialYearsCache = response.FinancialYears ?? [];
+    return this.financialYearsCache;
+  }
+
+  /**
+   * Check if a financial year exists for a specific date
+   * Uses Fortnox recommended endpoint: GET /financialyears/?date={date}
+   * See: https://www.fortnox.se/developer/guides-and-good-to-know/best-practices/vouchers
+   */
+  private async hasFinancialYearForDate(date: string): Promise<boolean> {
+    try {
+      const response = await this.apiCall<FortnoxFinancialYearsResponse>(
+        `/financialyears/?date=${date}`,
+      );
+      const years = response.FinancialYears ?? [];
+      return years.length > 0;
+    } catch (error) {
+      logger.warn("Failed to check financial year for date", {
+        provider: "fortnox",
+        date,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return false;
+    }
+  }
+
+  /**
+   * Get the period pattern from existing financial years
+   * Returns the month/day pattern to use for new years
+   */
+  private getPeriodPattern(existingYears: FortnoxFinancialYear[]): {
+    fromMonth: number;
+    fromDay: number;
+    toMonth: number;
+    toDay: number;
+  } {
+    // Default to calendar year (Jan 1 - Dec 31)
+    let fromMonth = 1;
+    let fromDay = 1;
+    let toMonth = 12;
+    let toDay = 31;
+
+    if (existingYears.length > 0 && existingYears[0]?.FromDate) {
+      const existingFrom = new Date(existingYears[0].FromDate);
+      const existingTo = existingYears[0].ToDate
+        ? new Date(existingYears[0].ToDate)
+        : null;
+
+      fromMonth = existingFrom.getMonth() + 1;
+      fromDay = existingFrom.getDate();
+
+      if (existingTo) {
+        toMonth = existingTo.getMonth() + 1;
+        toDay = existingTo.getDate();
+      }
+    }
+
+    return { fromMonth, fromDay, toMonth, toDay };
+  }
+
+  /**
+   * Create a single financial year in Fortnox
+   */
+  private async createSingleFinancialYear(
+    targetYear: number,
+    pattern: {
+      fromMonth: number;
+      fromDay: number;
+      toMonth: number;
+      toDay: number;
+    },
+  ): Promise<void> {
+    // Check if already created this session
+    if (this.createdYearsCache.has(targetYear)) {
+      return;
+    }
+
+    // Handle broken fiscal years (e.g., Jul 2024 - Jun 2025)
+    const isBrokenFiscalYear = pattern.fromMonth > pattern.toMonth;
+    const toYear = isBrokenFiscalYear ? targetYear + 1 : targetYear;
+
+    const fromDate = `${targetYear}-${String(pattern.fromMonth).padStart(2, "0")}-${String(pattern.fromDay).padStart(2, "0")}`;
+    const toDate = `${toYear}-${String(pattern.toMonth).padStart(2, "0")}-${String(pattern.toDay).padStart(2, "0")}`;
+
+    logger.info("Creating financial year in Fortnox", {
+      provider: "fortnox",
+      targetYear,
+      fromDate,
+      toDate,
+    });
+
+    const response = await this.apiCall<FortnoxFinancialYearResponse>(
+      "/financialyears",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          FinancialYear: {
+            FromDate: fromDate,
+            ToDate: toDate,
+            AccountingMethod: "ACCRUAL",
+          },
+        }),
+      },
+    );
+
+    if (!response.FinancialYear) {
+      throw new Error("Failed to create financial year - no response");
+    }
+
+    this.createdYearsCache.add(targetYear);
+    // Invalidate cache so next fetch gets updated data
+    this.financialYearsCache = null;
+
+    logger.info("Financial year created successfully", {
+      provider: "fortnox",
+      targetYear,
+      id: response.FinancialYear.Id,
+    });
+  }
+
+  /**
+   * Ensure a financial year exists for the given date, creating it if necessary
+   * Note: Fortnox only allows creating years FORWARD from the latest existing year.
+   * Years before the earliest existing year must be created manually in Fortnox.
+   * See: https://www.fortnox.se/developer/guides-and-good-to-know/best-practices/vouchers
+   */
+  private async ensureFinancialYearExists(date: string): Promise<void> {
+    // First check if year already exists for this date
+    const hasYear = await this.hasFinancialYearForDate(date);
+    if (hasYear) {
+      return;
+    }
+
+    const targetYear = new Date(date).getFullYear();
+    logger.info("Financial year not found, will create it", {
+      provider: "fortnox",
+      date,
+      targetYear,
+    });
+
+    // Get all existing financial years to determine pattern and range
+    const existingYears = await this.getAllFinancialYears();
+    const pattern = this.getPeriodPattern(existingYears);
+
+    logger.info("Financial year pattern determined", {
+      provider: "fortnox",
+      pattern,
+      existingYearsCount: existingYears.length,
+    });
+
+    // If no existing years, we cannot create via API
+    // Fortnox requires at least one year to exist as a reference
+    if (existingYears.length === 0) {
+      throw new AccountingOperationError({
+        type: "financial_year_setup_required",
+        code: ACCOUNTING_ERROR_CODES.FINANCIAL_YEAR_SETUP_REQUIRED,
+        message:
+          "No fiscal years exist in Fortnox. Please create the first fiscal year manually in Fortnox before exporting.",
+        retryable: false,
+        metadata: {
+          year: targetYear,
+          provider: "fortnox",
+        },
+      });
+    }
+
+    // Get sorted list of existing year numbers
+    const existingYearNumbers = existingYears
+      .filter((y) => y.FromDate)
+      .map((y) => new Date(y.FromDate!).getFullYear())
+      .sort((a, b) => a - b);
+
+    if (existingYearNumbers.length === 0) {
+      throw new AccountingOperationError({
+        type: "financial_year_setup_required",
+        code: ACCOUNTING_ERROR_CODES.FINANCIAL_YEAR_SETUP_REQUIRED,
+        message:
+          "No valid fiscal years found in Fortnox. Please check your Fortnox fiscal year settings.",
+        retryable: false,
+        metadata: {
+          year: targetYear,
+          provider: "fortnox",
+        },
+      });
+    }
+
+    const earliestYear = existingYearNumbers[0]!;
+    const latestYear = existingYearNumbers[existingYearNumbers.length - 1]!;
+
+    // Fortnox only allows creating years FORWARD from the latest year
+    // Years before the earliest must be created manually
+    if (targetYear < earliestYear) {
+      throw new AccountingOperationError({
+        type: "financial_year_missing",
+        code: ACCOUNTING_ERROR_CODES.FINANCIAL_YEAR_MISSING,
+        message: `The fiscal year ${targetYear} does not exist in Fortnox. Please create it manually in Fortnox (Settings → Fiscal Years) before exporting transactions from this year.`,
+        retryable: false,
+        metadata: {
+          year: targetYear,
+          earliestYear,
+          provider: "fortnox",
+        },
+      });
+    }
+
+    if (targetYear > latestYear) {
+      // Going forwards: create from (latest+1) up to targetYear
+      logger.info("Creating financial years forwards", {
+        provider: "fortnox",
+        from: latestYear + 1,
+        to: targetYear,
+      });
+      for (let year = latestYear + 1; year <= targetYear; year++) {
+        await this.createSingleFinancialYear(year, pattern);
+      }
+    }
+  }
+
+  // ============================================================================
+  // Voucher Methods
+  // ============================================================================
+
   /**
    * Create a voucher in Fortnox for a transaction
    *
    * Voucher structure:
    * - Expense (negative): Credit bank (e.g., 1930), Debit expense (e.g., 4000)
    * - Income (positive): Debit bank (e.g., 1930), Credit income (e.g., 3000)
+   *
+   * Automatically creates missing financial years if needed.
+   * See: https://www.fortnox.se/developer/guides-and-good-to-know/best-practices/vouchers
    */
   private async createVoucher(
     tx: MappedTransaction,
     bankAccountCode: string,
   ): Promise<{ voucherId: string }> {
+    // Ensure financial year exists, create if needed
+    await this.ensureFinancialYearExists(tx.date);
+
     return this.withRetry(async () => {
       const isExpense = tx.amount < 0;
       const amount = Math.abs(tx.amount);

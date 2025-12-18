@@ -18,6 +18,7 @@ import {
   getTransactionById,
   getTransactions,
   getTransactionsAmountFullRangeData,
+  getTransactionsReadyForExportCount,
   searchTransactionMatch,
   updateBankAccount,
   updateTransaction,
@@ -32,6 +33,7 @@ export const transactionsRouter = createTRPCRouter({
     .query(async ({ input, ctx: { db, teamId } }) => {
       return getTransactions(db, {
         ...input,
+        excludeSynced: input.excludeSynced ?? undefined,
         teamId: teamId!,
       });
     }),
@@ -53,6 +55,10 @@ export const transactionsRouter = createTRPCRouter({
 
   getAmountRange: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
     return getTransactionsAmountFullRangeData(db, teamId!);
+  }),
+
+  getReviewCount: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
+    return getTransactionsReadyForExportCount(db, teamId!);
   }),
 
   update: protectedProcedure

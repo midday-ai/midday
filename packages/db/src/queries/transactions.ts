@@ -1,5 +1,6 @@
 import type { Database } from "@db/client";
 import {
+  accountingSyncRecords,
   bankAccounts,
   bankConnections,
   inbox,
@@ -63,6 +64,8 @@ export type GetTransactionsParams = {
   amountRange?: number[] | null;
   amount?: string[] | null;
   manual?: "include" | "exclude" | null;
+  /** Exclude transactions synced to accounting software (status='synced') */
+  excludeSynced?: boolean | null;
 };
 
 // Helper type from schema if not already exported
@@ -93,6 +96,7 @@ export async function getTransactions(
     amount: filterAmount,
     amountRange: filterAmountRange,
     manual: filterManual,
+    excludeSynced,
   } = params;
 
   // Always start with teamId filter
@@ -323,6 +327,18 @@ export async function getTransactions(
     whereConditions.push(eq(transactions.manual, true));
   } else if (filterManual === "exclude") {
     whereConditions.push(eq(transactions.manual, false));
+  }
+
+  // Exclude synced transactions (for review tab)
+  if (excludeSynced) {
+    whereConditions.push(
+      sql`NOT EXISTS (
+        SELECT 1 FROM ${accountingSyncRecords}
+        WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
+        AND ${accountingSyncRecords.teamId} = ${teamId}
+        AND ${accountingSyncRecords.status} = 'synced'
+      )`,
+    );
   }
 
   const finalWhereConditions = whereConditions.filter(
@@ -1958,4 +1974,55 @@ export async function bulkUpdateTransactionsBaseCurrency(
       teamId,
     });
   }
+}
+
+/**
+ * Count transactions that are ready for export to accounting software
+ *
+ * Ready for export means:
+ * - Fulfilled (has attachments OR status = 'completed')
+ * - Not excluded or archived
+ * - Not already synced to any accounting provider with status 'synced'
+ */
+export async function getTransactionsReadyForExportCount(
+  db: Database,
+  teamId: string,
+): Promise<number> {
+  const result = await db
+    .select({
+      count: sql<number>`COUNT(DISTINCT ${transactions.id})`.as("count"),
+    })
+    .from(transactions)
+    .leftJoin(
+      transactionAttachments,
+      and(
+        eq(transactionAttachments.transactionId, transactions.id),
+        eq(transactionAttachments.teamId, teamId),
+      ),
+    )
+    .leftJoin(
+      accountingSyncRecords,
+      and(
+        eq(accountingSyncRecords.transactionId, transactions.id),
+        eq(accountingSyncRecords.teamId, teamId),
+        eq(accountingSyncRecords.status, "synced"),
+      ),
+    )
+    .where(
+      and(
+        eq(transactions.teamId, teamId),
+        // Not excluded or archived
+        sql`${transactions.status} NOT IN ('excluded', 'archived')`,
+        // Not already synced
+        isNull(accountingSyncRecords.id),
+      ),
+    )
+    .groupBy(transactions.id)
+    // Fulfilled: has attachments OR status = 'completed'
+    .having(
+      sql`(COUNT(${transactionAttachments.id}) > 0 OR ${transactions.status} = 'completed')`,
+    );
+
+  // The query returns one row per fulfilled transaction, so we count the rows
+  return result.length;
 }

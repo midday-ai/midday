@@ -206,6 +206,18 @@ export const getTransactionsSchema = z.object({
         in: "query",
       },
     }),
+  excludeSynced: z
+    .boolean()
+    .nullable()
+    .optional()
+    .openapi({
+      description:
+        "When true, excludes transactions that have been synced to accounting software (status='synced' in accounting_sync_records)",
+      example: true,
+      param: {
+        in: "query",
+      },
+    }),
 });
 
 export const transactionResponseSchema = z

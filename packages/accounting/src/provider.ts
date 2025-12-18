@@ -1,17 +1,18 @@
-import type {
-  AccountingAccount,
-  AccountingError,
-  AccountingErrorType,
-  AccountingProviderId,
-  AttachmentResult,
-  DeleteAttachmentParams,
-  DeleteAttachmentResult,
-  ProviderInitConfig,
-  RateLimitConfig,
-  SyncResult,
-  SyncTransactionsParams,
-  TokenSet,
-  UploadAttachmentParams,
+import {
+  ACCOUNTING_ERROR_CODES,
+  type AccountingAccount,
+  type AccountingError,
+  AccountingOperationError,
+  type AccountingProviderId,
+  type AttachmentResult,
+  type DeleteAttachmentParams,
+  type DeleteAttachmentResult,
+  type ProviderInitConfig,
+  type RateLimitConfig,
+  type SyncResult,
+  type SyncTransactionsParams,
+  type TokenSet,
+  type UploadAttachmentParams,
 } from "./types";
 
 /**
@@ -204,6 +205,7 @@ export abstract class BaseAccountingProvider implements AccountingProvider {
     if (messageLower.includes("429") || messageLower.includes("rate limit")) {
       return {
         type: "rate_limit",
+        code: ACCOUNTING_ERROR_CODES.RATE_LIMIT,
         message: "Rate limit exceeded. Please try again later.",
         retryable: true,
       };
@@ -212,6 +214,7 @@ export abstract class BaseAccountingProvider implements AccountingProvider {
     if (messageLower.includes("401") || messageLower.includes("unauthorized")) {
       return {
         type: "auth_expired",
+        code: ACCOUNTING_ERROR_CODES.AUTH_EXPIRED,
         message: "Authentication failed. Please reconnect your account.",
         retryable: false,
       };
@@ -220,6 +223,7 @@ export abstract class BaseAccountingProvider implements AccountingProvider {
     if (messageLower.includes("400") || messageLower.includes("validation")) {
       return {
         type: "validation",
+        code: ACCOUNTING_ERROR_CODES.VALIDATION,
         message,
         retryable: false,
       };
@@ -228,6 +232,7 @@ export abstract class BaseAccountingProvider implements AccountingProvider {
     if (messageLower.includes("404") || messageLower.includes("not found")) {
       return {
         type: "not_found",
+        code: ACCOUNTING_ERROR_CODES.NOT_FOUND,
         message,
         retryable: false,
       };
@@ -237,6 +242,7 @@ export abstract class BaseAccountingProvider implements AccountingProvider {
       // 5xx errors
       return {
         type: "server_error",
+        code: ACCOUNTING_ERROR_CODES.SERVER_ERROR,
         message: message || "Server error. Please try again later.",
         retryable: true,
       };
@@ -244,6 +250,7 @@ export abstract class BaseAccountingProvider implements AccountingProvider {
 
     return {
       type: "unknown",
+      code: ACCOUNTING_ERROR_CODES.UNKNOWN,
       message,
       retryable: false,
     };
@@ -378,12 +385,20 @@ export abstract class BaseAccountingProvider implements AccountingProvider {
           continue;
         }
 
-        throw new Error(`${context}: ${lastError.message}`);
+        throw new AccountingOperationError({
+          ...lastError,
+          message: `${context}: ${lastError.message}`,
+        });
       }
     }
 
-    throw new Error(
-      `${context}: ${lastError?.message || "Max retries exceeded"}`,
+    throw new AccountingOperationError(
+      lastError ?? {
+        type: "unknown",
+        code: ACCOUNTING_ERROR_CODES.UNKNOWN,
+        message: `${context}: Max retries exceeded`,
+        retryable: false,
+      },
     );
   }
 

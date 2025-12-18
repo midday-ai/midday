@@ -32,18 +32,79 @@ export type AccountingErrorType =
   | "validation"
   | "not_found"
   | "server_error"
+  | "financial_year_missing" // Fiscal year doesn't exist and can't be auto-created (past years)
+  | "financial_year_setup_required" // No fiscal years exist at all, manual setup needed
   | "unknown";
+
+/**
+ * Error codes for frontend handling
+ * These codes can be used to show specific toast messages
+ */
+export const ACCOUNTING_ERROR_CODES = {
+  FINANCIAL_YEAR_MISSING: "FINANCIAL_YEAR_MISSING",
+  FINANCIAL_YEAR_SETUP_REQUIRED: "FINANCIAL_YEAR_SETUP_REQUIRED",
+  RATE_LIMIT: "RATE_LIMIT",
+  AUTH_EXPIRED: "AUTH_EXPIRED",
+  VALIDATION: "VALIDATION",
+  NOT_FOUND: "NOT_FOUND",
+  SERVER_ERROR: "SERVER_ERROR",
+  UNKNOWN: "UNKNOWN",
+} as const;
+
+export type AccountingErrorCode =
+  (typeof ACCOUNTING_ERROR_CODES)[keyof typeof ACCOUNTING_ERROR_CODES];
 
 /**
  * Standardized error structure for accounting operations
  */
 export interface AccountingError {
   type: AccountingErrorType;
+  /** Standardized error code for frontend handling */
+  code: AccountingErrorCode;
   message: string;
   /** Original error code from the provider (e.g., "429", "INVALID_ACCOUNT") */
   providerCode?: string;
   /** Whether this error can be retried */
   retryable: boolean;
+  /** Additional context data for the frontend */
+  metadata?: {
+    year?: number;
+    earliestYear?: number;
+    provider?: string;
+  };
+}
+
+/**
+ * Custom error class for accounting operations
+ * Extends Error with standardized error codes for frontend handling
+ */
+export class AccountingOperationError extends Error {
+  readonly code: AccountingErrorCode;
+  readonly type: AccountingErrorType;
+  readonly retryable: boolean;
+  readonly providerCode?: string;
+  readonly metadata?: AccountingError["metadata"];
+
+  constructor(error: AccountingError) {
+    super(error.message);
+    this.name = "AccountingOperationError";
+    this.code = error.code;
+    this.type = error.type;
+    this.retryable = error.retryable;
+    this.providerCode = error.providerCode;
+    this.metadata = error.metadata;
+  }
+
+  toJSON(): AccountingError {
+    return {
+      type: this.type,
+      code: this.code,
+      message: this.message,
+      providerCode: this.providerCode,
+      retryable: this.retryable,
+      metadata: this.metadata,
+    };
+  }
 }
 
 /**
@@ -424,6 +485,7 @@ export interface SyncResult {
     providerEntityType?: ProviderEntityType;
     success: boolean;
     error?: string;
+    errorCode?: AccountingErrorCode;
   }>;
 }
 

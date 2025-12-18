@@ -73,6 +73,11 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
     skippedCount: number;
     failedCount: number;
     exportedAt: string;
+    errors?: Array<{
+      code?: string;
+      message: string;
+      transactionId?: string;
+    }>;
   }> {
     const { teamId, userId, providerId, transactionIds } = job.data;
 
@@ -94,6 +99,13 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
         exportedAt: new Date().toISOString(),
       };
     }
+
+    // Track errors for structured response
+    const errors: Array<{
+      code?: string;
+      message: string;
+      transactionId?: string;
+    }> = [];
 
     // Progress: 0% - Starting
     await this.updateProgress(job, 2);
@@ -220,6 +232,26 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
               providerEntityType: txResult.providerEntityType,
             });
 
+            // Collect errors from failed transactions
+            if (!txResult.success && txResult.error) {
+              const errorCode = txResult.errorCode;
+              const errorMessage = txResult.error;
+
+              // Add to errors array (dedupe by code or message)
+              if (
+                !errors.some(
+                  (e) =>
+                    (errorCode && e.code === errorCode) ||
+                    e.message === errorMessage,
+                )
+              ) {
+                errors.push({
+                  code: errorCode,
+                  message: errorMessage,
+                });
+              }
+            }
+
             // Trigger attachment sync for successful transactions
             if (txResult.success && txResult.providerTransactionId) {
               const originalTx = toExportTransactions.find(
@@ -292,14 +324,44 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
             failed: result.failedCount,
           });
         } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : "Unknown error";
+
           this.logger.error("Export batch failed", {
             teamId,
             providerId,
             batchIndex: Math.floor(i / BATCH_SIZE) + 1,
-            error: error instanceof Error ? error.message : "Unknown error",
+            error: errorMessage,
           });
 
           totalFailed += batch.length;
+
+          // Parse error for structured response
+          let errorCode: string | undefined;
+          let userMessage = errorMessage;
+
+          // Try to parse JSON error from AccountingOperationError
+          try {
+            const parsed = JSON.parse(errorMessage);
+            if (parsed.code) {
+              errorCode = parsed.code;
+              userMessage = parsed.message || errorMessage;
+            }
+          } catch {
+            // Not JSON, use as-is
+          }
+
+          // Add to errors array (dedupe by code)
+          if (
+            !errors.some(
+              (e) => e.code === errorCode && e.message === userMessage,
+            )
+          ) {
+            errors.push({
+              code: errorCode,
+              message: userMessage,
+            });
+          }
 
           for (const tx of batch) {
             await upsertAccountingSyncRecord(db, {
@@ -309,8 +371,7 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
               providerTenantId: orgId,
               syncType: "manual",
               status: "failed",
-              errorMessage:
-                error instanceof Error ? error.message : "Unknown error",
+              errorMessage,
             });
           }
         }
@@ -385,6 +446,7 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
       skippedCount: categorized.alreadyComplete.length,
       failedCount: totalFailed,
       exportedAt: new Date().toISOString(),
+      errors: errors.length > 0 ? errors : undefined,
     };
   }
 

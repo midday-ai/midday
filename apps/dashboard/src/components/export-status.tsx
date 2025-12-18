@@ -138,6 +138,11 @@ export function ExportStatus() {
   const lastProgressRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
+    // Skip error handling for accounting exports - the export bar handles those
+    if (exportData?.exportType === "accounting") {
+      return;
+    }
+
     if (status === "failed" || queryError) {
       // Dismiss the progress toast if it exists
       if (toastId) {
@@ -153,22 +158,28 @@ export function ExportStatus() {
       setToastId(null);
       setExportData(undefined);
     }
-  }, [status, queryError, toast, setExportData, toastId, dismiss]);
+  }, [
+    status,
+    queryError,
+    toast,
+    setExportData,
+    toastId,
+    dismiss,
+    exportData?.exportType,
+  ]);
 
-  // Create toast when export starts
+  // Create toast when export starts (only for file exports - accounting uses the export bar)
   useEffect(() => {
     if (exportData?.runId && !toastId) {
-      const isAccountingExport = exportData.exportType === "accounting";
-      const providerName = exportData.providerName ?? "accounting software";
+      // Skip toast for accounting exports - the export bar handles those
+      if (exportData.exportType === "accounting") {
+        return;
+      }
 
       const { id } = toast({
-        title: isAccountingExport
-          ? `Exporting to ${providerName}`
-          : "Exporting transactions.",
+        title: "Exporting transactions.",
         variant: "progress",
-        description: isAccountingExport
-          ? "Syncing transactions with your accounting software"
-          : "Please do not close browser until completed",
+        description: "Please do not close browser until completed",
         duration: Number.POSITIVE_INFINITY,
         progress: 0,
       });
@@ -177,17 +188,11 @@ export function ExportStatus() {
       lastProgressRef.current = 0;
       completionHandledRef.current = false; // Reset completion flag for new export
     }
-  }, [
-    exportData?.runId,
-    exportData?.exportType,
-    exportData?.providerName,
-    toastId,
-    toast,
-  ]);
+  }, [exportData?.runId, exportData?.exportType, toastId, toast]);
 
-  // Update progress only when it changes
+  // Update progress only when it changes (skip for accounting exports)
   useEffect(() => {
-    if (!toastId) return;
+    if (!toastId || exportData?.exportType === "accounting") return;
 
     const currentProgress =
       status === "completed"
@@ -207,39 +212,32 @@ export function ExportStatus() {
         progress: currentProgress,
       });
     }
-  }, [toastId, status, progress, update]);
+  }, [toastId, status, progress, update, exportData?.exportType]);
 
   // Handle completion separately - use a ref to prevent multiple triggers
   const completionHandledRef = useRef(false);
 
+  // Handle file export completion (accounting exports are handled by export bar)
   useEffect(() => {
+    // Skip completion handling for accounting exports
+    if (exportData?.exportType === "accounting") {
+      return;
+    }
+
     if (status === "completed" && toastId && !completionHandledRef.current) {
       completionHandledRef.current = true;
 
-      const isAccountingExport = exportData?.exportType === "accounting";
-      const providerName = exportData?.providerName ?? "accounting software";
-
-      // Invalidate queries (only for file exports - accounting doesn't create vault files)
-      if (!isAccountingExport) {
-        queryClient.invalidateQueries({
-          queryKey: trpc.documents.get.infiniteQueryKey(),
-        });
-        queryClient.invalidateQueries({
-          queryKey: trpc.search.global.queryKey(),
-        });
-      }
+      // Invalidate queries for file exports
+      queryClient.invalidateQueries({
+        queryKey: trpc.documents.get.infiniteQueryKey(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: trpc.search.global.queryKey(),
+      });
 
       // Wait a bit for result to be available, then update toast
       setTimeout(() => {
-        if (isAccountingExport) {
-          // Accounting export completion - different message, no download buttons
-          update(toastId, {
-            id: toastId,
-            title: `Transactions synced to ${providerName}`,
-            description: "Receipts uploading in the background.",
-            variant: "success",
-          });
-        } else if (exportResult) {
+        if (exportResult) {
           // File export completion with download/share options
           update(toastId, {
             id: toastId,
@@ -306,7 +304,6 @@ export function ExportStatus() {
     status,
     exportResult,
     exportData?.exportType,
-    exportData?.providerName,
     toastId,
     update,
     queryClient,

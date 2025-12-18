@@ -7,13 +7,13 @@ import { useStickyColumns } from "@/hooks/use-sticky-columns";
 import { useTableScroll } from "@/hooks/use-table-scroll";
 import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
+import { useTransactionTab } from "@/hooks/use-transaction-tab";
 import { useUpdateTransactionCategory } from "@/hooks/use-update-transaction-category";
+import { useExportStore } from "@/store/export";
 import { useTransactionsStore } from "@/store/transactions";
 import { useTRPC } from "@/trpc/client";
 import { Cookies } from "@/utils/constants";
-import { cn } from "@midday/ui/cn";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
-import { ToastAction } from "@midday/ui/toast";
 import { Tooltip, TooltipProvider } from "@midday/ui/tooltip";
 import { toast } from "@midday/ui/use-toast";
 import {
@@ -48,14 +48,17 @@ import { Loading } from "./loading";
 
 type Props = {
   columnVisibility: Promise<VisibilityState>;
+  initialTab?: "all" | "review";
 };
 
 export function DataTable({
   columnVisibility: columnVisibilityPromise,
+  initialTab,
 }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { filter, hasFilters } = useTransactionFilterParamsWithPersistence();
+  const { tab, setTab } = useTransactionTab();
   const {
     setRowSelection,
     rowSelection,
@@ -64,10 +67,15 @@ export function DataTable({
     lastClickedIndex,
     setLastClickedIndex,
   } = useTransactionsStore();
+  const { exportingTransactionIds } = useExportStore();
   const deferredSearch = useDeferredValue(filter.q);
   const { params } = useSortParams();
   const { ref, inView } = useInView();
   const { transactionId, setParams } = useTransactionParams();
+
+  // Use the current tab from URL, falling back to initial value
+  const activeTab = tab ?? initialTab ?? "all";
+  const isReviewTab = activeTab === "review";
 
   const showBottomBar = hasFilters && !Object.keys(rowSelection).length;
   const initialColumnVisibility = use(columnVisibilityPromise);
@@ -75,8 +83,23 @@ export function DataTable({
     initialColumnVisibility ?? {},
   );
 
-  const infiniteQueryOptions = trpc.transactions.get.infiniteQueryOptions(
-    {
+  // Build query filters based on active tab
+  // Review tab: show fulfilled transactions (has attachments OR completed) that are not yet synced
+  const queryFilter = useMemo(() => {
+    if (isReviewTab) {
+      return {
+        ...filter,
+        amountRange: filter.amount_range ?? null,
+        q: deferredSearch,
+        sort: params.sort,
+        // Fulfilled = has attachments OR status=completed
+        attachments: "include" as const,
+        // Exclude transactions already synced to accounting
+        excludeSynced: true,
+        pageSize: 10000, // Load all for review
+      };
+    }
+    return {
       ...filter,
       amountRange: filter.amount_range ?? null,
       q: deferredSearch,
@@ -84,7 +107,11 @@ export function DataTable({
       // When filters are active, load all results for analysis/export
       // Otherwise use default pagination for browsing
       pageSize: hasFilters ? 10000 : undefined,
-    },
+    };
+  }, [filter, deferredSearch, params.sort, isReviewTab, hasFilters]);
+
+  const infiniteQueryOptions = trpc.transactions.get.infiniteQueryOptions(
+    queryFilter,
     {
       getNextPageParam: ({ meta }) => meta?.cursor,
     },
@@ -269,6 +296,7 @@ export function DataTable({
         handleShiftClickRangeRef.current(startIndex, endIndex),
       lastClickedIndex,
       setLastClickedIndex,
+      exportingTransactionIds,
     },
   });
 

@@ -2,21 +2,23 @@
 import { logger } from "@midday/logger";
 import OAuthClient from "intuit-oauth";
 import { BaseAccountingProvider } from "../provider";
-import type {
-  AccountingAccount,
-  AccountingError,
-  AccountingProviderId,
-  AttachmentResult,
-  DeleteAttachmentParams,
-  DeleteAttachmentResult,
-  MappedTransaction,
-  ProviderInitConfig,
-  QuickBooksProviderConfig,
-  RateLimitConfig,
-  SyncResult,
-  SyncTransactionsParams,
-  TokenSet,
-  UploadAttachmentParams,
+import {
+  ACCOUNTING_ERROR_CODES,
+  type AccountingAccount,
+  type AccountingError,
+  AccountingOperationError,
+  type AccountingProviderId,
+  type AttachmentResult,
+  type DeleteAttachmentParams,
+  type DeleteAttachmentResult,
+  type MappedTransaction,
+  type ProviderInitConfig,
+  type QuickBooksProviderConfig,
+  type RateLimitConfig,
+  type SyncResult,
+  type SyncTransactionsParams,
+  type TokenSet,
+  type UploadAttachmentParams,
 } from "../types";
 import {
   buildPrivateNote,
@@ -174,6 +176,11 @@ export class QuickBooksProvider extends BaseAccountingProvider {
    * Parse QuickBooks-specific errors into standardized format
    */
   protected override parseError(error: unknown): AccountingError {
+    // Check if it's already an AccountingOperationError with structured data
+    if (error instanceof AccountingOperationError) {
+      return error.toJSON();
+    }
+
     if (error instanceof Error) {
       const message = error.message.toLowerCase();
 
@@ -186,6 +193,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
         logger.warn("QuickBooks rate limit hit", { provider: "quickbooks" });
         return {
           type: "rate_limit",
+          code: ACCOUNTING_ERROR_CODES.RATE_LIMIT,
           message: "Rate limit exceeded. Please try again shortly.",
           providerCode: "429",
           retryable: true,
@@ -200,6 +208,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
       ) {
         return {
           type: "auth_expired",
+          code: ACCOUNTING_ERROR_CODES.AUTH_EXPIRED,
           message:
             "Authentication failed. Please reconnect your QuickBooks account.",
           providerCode: "401",
@@ -215,6 +224,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
       ) {
         return {
           type: "validation",
+          code: ACCOUNTING_ERROR_CODES.VALIDATION,
           message: `Validation error: ${error.message}`,
           providerCode: "400",
           retryable: false,
@@ -229,6 +239,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
           const detail = firstError?.Detail ? ` - ${firstError.Detail}` : "";
           return {
             type: "unknown",
+            code: ACCOUNTING_ERROR_CODES.UNKNOWN,
             message: `QuickBooks error: ${firstError?.Message || error.message}${detail}`,
             providerCode: firstError?.code,
             retryable: false,
@@ -242,6 +253,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
       if (message.includes("5")) {
         return {
           type: "server_error",
+          code: ACCOUNTING_ERROR_CODES.SERVER_ERROR,
           message: "QuickBooks server error. Please try again later.",
           retryable: true,
         };
@@ -249,6 +261,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
 
       return {
         type: "unknown",
+        code: ACCOUNTING_ERROR_CODES.UNKNOWN,
         message: error.message,
         retryable: false,
       };
@@ -256,6 +269,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
 
     return {
       type: "unknown",
+      code: ACCOUNTING_ERROR_CODES.UNKNOWN,
       message: "Unknown error occurred",
       retryable: false,
     };

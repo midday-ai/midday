@@ -141,15 +141,10 @@ export abstract class AccountingProcessorBase<
     const credentials = getProviderCredentials(providerId);
     validateProviderCredentials(providerId, credentials);
 
-    const { clientId, clientSecret, redirectUri } = credentials;
-
-    // Initialize the accounting provider
-    const provider = getAccountingProvider(providerId as AccountingProviderId, {
-      clientId: clientId!,
-      clientSecret: clientSecret!,
-      redirectUri: redirectUri!,
+    const provider = getAccountingProvider(
+      providerId as AccountingProviderId,
       config,
-    });
+    );
 
     // Ensure token is valid (refresh if expired)
     try {

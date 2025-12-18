@@ -454,7 +454,19 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     accessorKey: "status",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
+      const meta = table.options.meta;
+
+      // Show exporting state when transaction is being exported
+      if (meta?.exportingTransactionIds?.includes(row.original.id)) {
+        return (
+          <div className="flex items-center space-x-2">
+            <Spinner size={14} className="stroke-primary" />
+            <span className="text-[#878787] text-sm">Exporting</span>
+          </div>
+        );
+      }
+
       const fullfilled =
         row.original.status === "completed" || row.original.isFulfilled;
       const hasPendingSuggestion = row.original.hasPendingSuggestion;

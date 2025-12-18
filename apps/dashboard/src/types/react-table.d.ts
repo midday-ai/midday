@@ -21,6 +21,7 @@ declare module "@tanstack/table-core" {
     lastClickedIndex?: number | null;
     setLastClickedIndex?: (index: number | null) => void;
     handleShiftClickRange?: (startIndex: number, endIndex: number) => void;
+    exportingTransactionIds?: string[];
 
     // Vault table meta
     handleDelete?: (id: string) => void;

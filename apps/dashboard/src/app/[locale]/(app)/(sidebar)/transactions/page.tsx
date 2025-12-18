@@ -1,9 +1,12 @@
+import { AddTransactions } from "@/components/add-transactions";
 import { DataTable } from "@/components/tables/transactions/data-table";
 import { Loading } from "@/components/tables/transactions/loading";
-import { TransactionsActions } from "@/components/transactions-actions";
+import { TransactionTabs } from "@/components/transaction-tabs";
+import { TransactionsColumnVisibility } from "@/components/transactions-column-visibility";
 import { TransactionsSearchFilter } from "@/components/transactions-search-filter";
 import { loadSortParams } from "@/hooks/use-sort-params";
 import { loadTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
+import { loadTransactionTab } from "@/hooks/use-transaction-tab";
 import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
 import { getInitialTransactionsColumnVisibility } from "@/utils/columns";
 import type { Metadata } from "next";
@@ -24,6 +27,7 @@ export default async function Transactions(props: Props) {
 
   const filter = loadTransactionFilterParams(searchParams);
   const { sort } = loadSortParams(searchParams);
+  const { tab } = loadTransactionTab(searchParams);
 
   const columnVisibility = getInitialTransactionsColumnVisibility();
 
@@ -36,15 +40,24 @@ export default async function Transactions(props: Props) {
     }),
   );
 
+  // Prefetch review count for tabs
+  queryClient.prefetchQuery(trpc.transactions.getReviewCount.queryOptions());
+
   return (
     <HydrateClient>
-      <div className="flex justify-between py-6">
+      <div className="flex justify-between items-center py-6">
         <TransactionsSearchFilter />
-        <TransactionsActions />
+        <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-2">
+            <TransactionsColumnVisibility />
+            <AddTransactions />
+          </div>
+          <TransactionTabs />
+        </div>
       </div>
 
       <Suspense fallback={<Loading />}>
-        <DataTable columnVisibility={columnVisibility} />
+        <DataTable columnVisibility={columnVisibility} initialTab={tab} />
       </Suspense>
     </HydrateClient>
   );

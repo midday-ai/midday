@@ -9,15 +9,17 @@ import {
   XeroClient,
 } from "xero-node";
 import { BaseAccountingProvider } from "../provider";
-import type {
-  AccountingAccount,
-  AccountingError,
-  AccountingProviderId,
-  AttachmentResult,
-  DeleteAttachmentParams,
-  DeleteAttachmentResult,
-  MappedTransaction,
-  ProviderInitConfig,
+import {
+  ACCOUNTING_ERROR_CODES,
+  AccountingOperationError,
+  type AccountingAccount,
+  type AccountingError,
+  type AccountingProviderId,
+  type AttachmentResult,
+  type DeleteAttachmentParams,
+  type DeleteAttachmentResult,
+  type MappedTransaction,
+  type ProviderInitConfig,
   RateLimitConfig,
   SyncResult,
   SyncTransactionsParams,
@@ -183,6 +185,11 @@ export class XeroProvider extends BaseAccountingProvider {
    * Parse Xero-specific errors into standardized format
    */
   protected override parseError(error: unknown): AccountingError {
+    // Check if it's already an AccountingOperationError with structured data
+    if (error instanceof AccountingOperationError) {
+      return error.toJSON();
+    }
+
     if (error instanceof Error) {
       const message = error.message.toLowerCase();
 
@@ -191,6 +198,7 @@ export class XeroProvider extends BaseAccountingProvider {
         logger.warn("Xero rate limit hit", { provider: "xero" });
         return {
           type: "rate_limit",
+          code: ACCOUNTING_ERROR_CODES.RATE_LIMIT,
           message: "Rate limit exceeded. Please try again in a minute.",
           providerCode: "429",
           retryable: true,
@@ -201,6 +209,7 @@ export class XeroProvider extends BaseAccountingProvider {
       if (message.includes("401") || message.includes("unauthorized")) {
         return {
           type: "auth_expired",
+          code: ACCOUNTING_ERROR_CODES.AUTH_EXPIRED,
           message: "Authentication failed. Please reconnect your Xero account.",
           providerCode: "401",
           retryable: false,
@@ -211,6 +220,7 @@ export class XeroProvider extends BaseAccountingProvider {
       if (message.includes("400")) {
         return {
           type: "validation",
+          code: ACCOUNTING_ERROR_CODES.VALIDATION,
           message: `Validation error: ${error.message}`,
           providerCode: "400",
           retryable: false,
@@ -227,6 +237,7 @@ export class XeroProvider extends BaseAccountingProvider {
           : "";
         return {
           type: "unknown",
+          code: ACCOUNTING_ERROR_CODES.UNKNOWN,
           message: `Xero error: ${xeroError.response.body.Message}${detail}`,
           retryable: false,
         };
@@ -236,6 +247,7 @@ export class XeroProvider extends BaseAccountingProvider {
       if (message.includes("5")) {
         return {
           type: "server_error",
+          code: ACCOUNTING_ERROR_CODES.SERVER_ERROR,
           message: "Xero server error. Please try again later.",
           retryable: true,
         };
@@ -243,6 +255,7 @@ export class XeroProvider extends BaseAccountingProvider {
 
       return {
         type: "unknown",
+        code: ACCOUNTING_ERROR_CODES.UNKNOWN,
         message: error.message,
         retryable: false,
       };
@@ -250,6 +263,7 @@ export class XeroProvider extends BaseAccountingProvider {
 
     return {
       type: "unknown",
+      code: ACCOUNTING_ERROR_CODES.UNKNOWN,
       message: "Unknown error occurred",
       retryable: false,
     };
