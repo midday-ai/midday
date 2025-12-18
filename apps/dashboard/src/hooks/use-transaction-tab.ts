@@ -15,4 +15,3 @@ export function useTransactionTab() {
 }
 
 export const loadTransactionTab = createLoader(transactionTabSchema);
-

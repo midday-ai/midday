@@ -11,20 +11,20 @@ import {
 import { BaseAccountingProvider } from "../provider";
 import {
   ACCOUNTING_ERROR_CODES,
-  AccountingOperationError,
   type AccountingAccount,
   type AccountingError,
+  AccountingOperationError,
   type AccountingProviderId,
   type AttachmentResult,
   type DeleteAttachmentParams,
   type DeleteAttachmentResult,
   type MappedTransaction,
   type ProviderInitConfig,
-  RateLimitConfig,
-  SyncResult,
-  SyncTransactionsParams,
-  TokenSet,
-  UploadAttachmentParams,
+  type RateLimitConfig,
+  type SyncResult,
+  type SyncTransactionsParams,
+  type TokenSet,
+  type UploadAttachmentParams,
 } from "../types";
 import {
   buildPrivateNote,
