@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: bun install
       - name: 🏗 Build @midday/engine
-        run: bunx turbo run build --filter=@midday/engine...
+        run: bunx turbo run build --filter=@midday/engine --only
       - name: 🔦 Run linter
         run: bun run lint
         working-directory: ./apps/dashboard
