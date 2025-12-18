@@ -47,8 +47,7 @@ export function getAccountingProvider(
 
     case "visma":
       throw new Error(
-        `Accounting provider "${providerId}" is not yet implemented. ` +
-          `Currently supported: xero, quickbooks, fortnox`,
+        `Accounting provider "${providerId}" is not yet implemented. Currently supported: xero, quickbooks, fortnox`,
       );
 
     default: {

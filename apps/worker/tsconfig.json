@@ -26,7 +26,7 @@
       "@documents/*": ["../../packages/documents/src/*"],
       "@supabase/*": ["../../packages/supabase/src/*"]
     },
-    "typeRoots": ["../../types"]
+    "types": ["bun-types"]
   },
   "exclude": ["node_modules"],
   "include": ["src/**/*.ts"]
