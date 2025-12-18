@@ -12,6 +12,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
     "test": "jest",
     "migrate": "tsx scripts/migrate.ts",
     "migrate:preview": "tsx scripts/migrate.ts --command preview",
@@ -24,7 +25,6 @@
     "@midday/logger": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1",
     "typescript": "^5.9.3"
   }
 }
