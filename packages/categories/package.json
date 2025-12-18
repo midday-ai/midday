@@ -10,8 +10,6 @@
     "./embeddings": "./src/embeddings.ts"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "migrate": "tsx scripts/migrate.ts",
@@ -25,6 +23,8 @@
     "@midday/logger": "workspace:*"
   },
   "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^25.0.3",
     "typescript": "^5.9.3"
   }
 }
