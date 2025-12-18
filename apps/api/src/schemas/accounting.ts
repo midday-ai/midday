@@ -7,7 +7,6 @@ export const accountingProviderIdSchema = z.enum([
   "xero",
   "quickbooks",
   "fortnox",
-  "visma",
 ]);
 
 /**

@@ -97,7 +97,7 @@ export const accountingRouter = createTRPCRouter({
 
     const apps = await getApps(db, teamId);
 
-    const accountingProviderIds = ["xero", "quickbooks", "fortnox", "visma"];
+    const accountingProviderIds = ["xero", "quickbooks", "fortnox"];
     const connectedProviders = apps
       .filter((app) => accountingProviderIds.includes(app.app_id))
       .map((app) => {
@@ -141,49 +141,9 @@ export const accountingRouter = createTRPCRouter({
 
       const config = app.config as AccountingProviderConfig;
 
-      // Get OAuth credentials
-      const clientId =
-        providerId === "xero"
-          ? process.env.XERO_CLIENT_ID
-          : providerId === "quickbooks"
-            ? process.env.QUICKBOOKS_CLIENT_ID
-            : undefined;
-
-      const clientSecret =
-        providerId === "xero"
-          ? process.env.XERO_CLIENT_SECRET
-          : providerId === "quickbooks"
-            ? process.env.QUICKBOOKS_CLIENT_SECRET
-            : undefined;
-
-      const redirectUri =
-        providerId === "xero"
-          ? process.env.XERO_OAUTH_REDIRECT_URL
-          : providerId === "quickbooks"
-            ? process.env.QUICKBOOKS_OAUTH_REDIRECT_URL
-            : undefined;
-
-      if (!clientId || !clientSecret || !redirectUri) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Provider OAuth configuration missing",
-        });
-      }
-
-      const provider = getAccountingProvider(
-        providerId as "xero" | "quickbooks",
-        {
-          clientId,
-          clientSecret,
-          redirectUri,
-          config,
-        },
-      );
-
       try {
-        // Use getOrgId to get the tenant/realm ID in a provider-agnostic way
-        const orgId = getOrgId(config);
-        const accounts = await provider.getAccounts(orgId);
+        const provider = getAccountingProvider(providerId, config);
+        const accounts = await provider.getAccounts(getOrgId(config));
         return accounts;
       } catch (error) {
         throw new TRPCError({

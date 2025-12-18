@@ -11,7 +11,7 @@ export type AccountingSyncRecord = {
   id: string;
   transactionId: string;
   teamId: string;
-  provider: "xero" | "quickbooks" | "fortnox" | "visma";
+  provider: "xero" | "quickbooks" | "fortnox";
   providerTenantId: string;
   providerTransactionId: string | null;
   /** Maps Midday attachment IDs to provider attachment IDs */
@@ -29,7 +29,7 @@ export type AccountingSyncRecord = {
 export type CreateAccountingSyncRecordParams = {
   transactionId: string;
   teamId: string;
-  provider: "xero" | "quickbooks" | "fortnox" | "visma";
+  provider: "xero" | "quickbooks" | "fortnox";
   providerTenantId: string;
   providerTransactionId?: string;
   /** Maps Midday attachment IDs to provider attachment IDs */
@@ -91,7 +91,7 @@ export const upsertAccountingSyncRecord = async (
 
 export type GetSyncedTransactionIdsParams = {
   teamId: string;
-  provider: "xero" | "quickbooks" | "fortnox" | "visma";
+  provider: "xero" | "quickbooks" | "fortnox";
 };
 
 /**
@@ -118,7 +118,7 @@ export const getSyncedTransactionIds = async (
 export type GetSyncStatusParams = {
   teamId: string;
   transactionIds?: string[];
-  provider?: "xero" | "quickbooks" | "fortnox" | "visma";
+  provider?: "xero" | "quickbooks" | "fortnox";
 };
 
 /**
@@ -150,7 +150,7 @@ export const getAccountingSyncStatus = async (
 
 export type GetUnsyncedTransactionsParams = {
   teamId: string;
-  provider: "xero" | "quickbooks" | "fortnox" | "visma";
+  provider: "xero" | "quickbooks" | "fortnox";
   transactionIds?: string[];
   limit?: number;
 };
@@ -210,7 +210,7 @@ export type TransactionForSync = {
 
 export type GetTransactionsForAccountingSyncParams = {
   teamId: string;
-  provider: "xero" | "quickbooks" | "fortnox" | "visma";
+  provider: "xero" | "quickbooks" | "fortnox";
   transactionIds?: string[];
   sinceDaysAgo?: number;
   limit?: number;
@@ -393,7 +393,7 @@ export type TransactionWithAttachmentChanges = {
 
 export type GetSyncedTransactionsWithAttachmentChangesParams = {
   teamId: string;
-  provider: "xero" | "quickbooks" | "fortnox" | "visma";
+  provider: "xero" | "quickbooks" | "fortnox";
   sinceDaysAgo?: number;
   limit?: number;
 };

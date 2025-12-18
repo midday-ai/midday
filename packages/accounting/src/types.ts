@@ -7,7 +7,6 @@ export const AccountingProviderIdSchema = z.enum([
   "xero",
   "quickbooks",
   "fortnox",
-  "visma",
 ]);
 
 export type AccountingProviderId = z.infer<typeof AccountingProviderIdSchema>;

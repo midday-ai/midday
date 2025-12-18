@@ -31,11 +31,6 @@ const PROVIDER_INFO = {
     icon: "🟣",
     description: "Swedish business software",
   },
-  visma: {
-    name: "Visma",
-    icon: "🔵",
-    description: "Business software for the Nordics",
-  },
 } as const;
 
 export function AccountingSettings() {
@@ -147,8 +142,7 @@ export function AccountingSettings() {
                       providerId: connection.providerId as
                         | "xero"
                         | "quickbooks"
-                        | "fortnox"
-                        | "visma",
+                        | "fortnox",
                     })
                   }
                   disabled={disconnectMutation.isPending}

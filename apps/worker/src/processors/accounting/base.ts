@@ -65,7 +65,7 @@ export interface TransactionForMapping {
 /**
  * Supported accounting provider IDs
  */
-export type AccountingProviderId = "xero" | "quickbooks" | "fortnox" | "visma";
+export type AccountingProviderId = "xero" | "quickbooks" | "fortnox";
 
 /**
  * Check if config has required fields for any accounting provider

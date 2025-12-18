@@ -91,7 +91,6 @@ export const accountingProviderEnum = pgEnum("accounting_provider", [
   "xero",
   "quickbooks",
   "fortnox",
-  "visma",
 ]);
 
 export const accountingSyncStatusEnum = pgEnum("accounting_sync_status", [

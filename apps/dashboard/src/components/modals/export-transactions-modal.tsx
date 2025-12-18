@@ -94,11 +94,6 @@ const ACCOUNTING_PROVIDERS = {
     icon: "🟣",
     description: "Push transactions to Fortnox",
   },
-  visma: {
-    name: "Visma",
-    icon: "🔵",
-    description: "Push transactions to Visma",
-  },
 } as const;
 
 interface ExportTransactionsModalProps {
@@ -127,7 +122,7 @@ export function ExportTransactionsModal({
   );
 
   // Filter to only accounting providers
-  const accountingProviderIds = ["xero", "quickbooks", "fortnox", "visma"];
+  const accountingProviderIds = ["xero", "quickbooks", "fortnox"];
   const connectedAccountingProviders =
     connectedApps?.filter((app) =>
       accountingProviderIds.includes(app.app_id),
@@ -255,11 +250,7 @@ export function ExportTransactionsModal({
 
     accountingExportMutation.mutate({
       transactionIds: ids,
-      providerId: selectedProvider as
-        | "xero"
-        | "quickbooks"
-        | "fortnox"
-        | "visma",
+      providerId: selectedProvider as "xero" | "quickbooks" | "fortnox",
     });
   };
 

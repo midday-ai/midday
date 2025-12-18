@@ -2,7 +2,11 @@ import type { AccountingProvider } from "./provider";
 import { FortnoxProvider } from "./providers/fortnox";
 import { QuickBooksProvider } from "./providers/quickbooks";
 import { XeroProvider } from "./providers/xero";
-import type { AccountingProviderId, ProviderInitConfig } from "./types";
+import type {
+  AccountingProviderConfig,
+  AccountingProviderId,
+  ProviderInitConfig,
+} from "./types";
 
 // Re-export types
 export * from "./types";
@@ -13,42 +17,82 @@ export { QuickBooksProvider, QUICKBOOKS_SCOPES } from "./providers/quickbooks";
 export { FortnoxProvider, FORTNOX_SCOPES } from "./providers/fortnox";
 
 /**
- * Get an accounting provider instance by ID
+ * OAuth environment variable mapping for each provider
+ */
+const PROVIDER_ENV_KEYS = {
+  xero: {
+    clientId: "XERO_CLIENT_ID",
+    clientSecret: "XERO_CLIENT_SECRET",
+    redirectUri: "XERO_OAUTH_REDIRECT_URL",
+  },
+  quickbooks: {
+    clientId: "QUICKBOOKS_CLIENT_ID",
+    clientSecret: "QUICKBOOKS_CLIENT_SECRET",
+    redirectUri: "QUICKBOOKS_OAUTH_REDIRECT_URL",
+  },
+  fortnox: {
+    clientId: "FORTNOX_CLIENT_ID",
+    clientSecret: "FORTNOX_CLIENT_SECRET",
+    redirectUri: "FORTNOX_OAUTH_REDIRECT_URL",
+  },
+} as const;
+
+/**
+ * Get OAuth credentials from environment variables for a provider
  *
- * @param providerId - The provider identifier (xero, quickbooks, etc.)
- * @param config - Provider configuration including OAuth credentials
- * @returns An AccountingProvider instance
+ * @throws Error if any required credentials are missing
+ */
+export function getProviderOAuthCredentials(providerId: AccountingProviderId): {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+} {
+  const envKeys = PROVIDER_ENV_KEYS[providerId];
+
+  const clientId = process.env[envKeys.clientId];
+  const clientSecret = process.env[envKeys.clientSecret];
+  const redirectUri = process.env[envKeys.redirectUri];
+
+  if (!clientId || !clientSecret || !redirectUri) {
+    throw new Error(`OAuth configuration missing for ${providerId}`);
+  }
+
+  return { clientId, clientSecret, redirectUri };
+}
+
+/**
+ * Get an initialized accounting provider instance
+ *
+ * @param providerId - The provider identifier
+ * @param config - Optional stored provider config (tokens, tenant info)
+ * @returns An initialized AccountingProvider instance
  *
  * @example
  * ```typescript
- * const provider = getAccountingProvider('xero', {
- *   clientId: process.env.XERO_CLIENT_ID,
- *   clientSecret: process.env.XERO_CLIENT_SECRET,
- *   redirectUri: process.env.XERO_REDIRECT_URI,
- *   config: storedConfig, // Optional: existing token config
- * });
- *
- * const url = await provider.buildConsentUrl(encryptedState);
+ * const provider = getAccountingProvider('xero', storedConfig);
+ * const accounts = await provider.getAccounts(orgId);
  * ```
  */
 export function getAccountingProvider(
   providerId: AccountingProviderId,
-  config: ProviderInitConfig,
+  config?: AccountingProviderConfig,
 ): AccountingProvider {
+  const credentials = getProviderOAuthCredentials(providerId);
+
+  const initConfig: ProviderInitConfig = {
+    ...credentials,
+    config,
+  };
+
   switch (providerId) {
     case "xero":
-      return new XeroProvider(config);
+      return new XeroProvider(initConfig);
 
     case "quickbooks":
-      return new QuickBooksProvider(config);
+      return new QuickBooksProvider(initConfig);
 
     case "fortnox":
-      return new FortnoxProvider(config);
-
-    case "visma":
-      throw new Error(
-        `Accounting provider "${providerId}" is not yet implemented. Currently supported: xero, quickbooks, fortnox`,
-      );
+      return new FortnoxProvider(initConfig);
 
     default: {
       // TypeScript exhaustive check
