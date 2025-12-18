@@ -99,22 +99,8 @@ app.openapi(
       });
     }
 
-    const clientId = process.env.FORTNOX_CLIENT_ID;
-    const clientSecret = process.env.FORTNOX_CLIENT_SECRET;
-    const redirectUri = process.env.FORTNOX_OAUTH_REDIRECT_URL;
-
-    if (!clientId || !clientSecret || !redirectUri) {
-      throw new HTTPException(500, {
-        message: "Fortnox OAuth configuration missing",
-      });
-    }
-
     try {
-      const provider = getAccountingProvider("fortnox", {
-        clientId,
-        clientSecret,
-        redirectUri,
-      });
+      const provider = getAccountingProvider("fortnox");
 
       // Exchange code for tokens (this also stores tokens in the provider instance)
       const tokenSet = await provider.exchangeCodeForTokens(code);

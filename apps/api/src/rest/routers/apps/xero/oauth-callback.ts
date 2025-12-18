@@ -99,22 +99,8 @@ app.openapi(
       });
     }
 
-    const clientId = process.env.XERO_CLIENT_ID;
-    const clientSecret = process.env.XERO_CLIENT_SECRET;
-    const redirectUri = process.env.XERO_OAUTH_REDIRECT_URL;
-
-    if (!clientId || !clientSecret || !redirectUri) {
-      throw new HTTPException(500, {
-        message: "Xero OAuth configuration missing",
-      });
-    }
-
     try {
-      const provider = getAccountingProvider("xero", {
-        clientId,
-        clientSecret,
-        redirectUri,
-      });
+      const provider = getAccountingProvider("xero");
 
       // Build the full callback URL that includes the code
       const callbackUrl = new URL(c.req.url);

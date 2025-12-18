@@ -110,22 +110,8 @@ app.openapi(
       });
     }
 
-    const clientId = process.env.QUICKBOOKS_CLIENT_ID;
-    const clientSecret = process.env.QUICKBOOKS_CLIENT_SECRET;
-    const redirectUri = process.env.QUICKBOOKS_OAUTH_REDIRECT_URL;
-
-    if (!clientId || !clientSecret || !redirectUri) {
-      throw new HTTPException(500, {
-        message: "QuickBooks OAuth configuration missing",
-      });
-    }
-
     try {
-      const provider = getAccountingProvider("quickbooks", {
-        clientId,
-        clientSecret,
-        redirectUri,
-      });
+      const provider = getAccountingProvider("quickbooks");
 
       // Build the full callback URL that includes the code and realmId
       const callbackUrl = new URL(c.req.url);
@@ -135,20 +121,13 @@ app.openapi(
         callbackUrl.toString(),
       );
 
-      // Get company information
-      // Note: QuickBooks uses realmId from the callback URL
-      // We need to initialize the provider with tokens first
+      // Get company information using provider with stored tokens
       const providerWithTokens = getAccountingProvider("quickbooks", {
-        clientId,
-        clientSecret,
-        redirectUri,
-        config: {
-          provider: "quickbooks", // Discriminator field
-          accessToken: tokenSet.accessToken,
-          refreshToken: tokenSet.refreshToken,
-          expiresAt: tokenSet.expiresAt.toISOString(),
-          realmId,
-        },
+        provider: "quickbooks",
+        accessToken: tokenSet.accessToken,
+        refreshToken: tokenSet.refreshToken,
+        expiresAt: tokenSet.expiresAt.toISOString(),
+        realmId,
       });
 
       const companyInfo = await providerWithTokens.getTenantInfo(realmId);

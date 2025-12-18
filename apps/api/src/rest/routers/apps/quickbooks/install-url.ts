@@ -56,16 +56,6 @@ app.openapi(
       });
     }
 
-    const clientId = process.env.QUICKBOOKS_CLIENT_ID;
-    const clientSecret = process.env.QUICKBOOKS_CLIENT_SECRET;
-    const redirectUri = process.env.QUICKBOOKS_OAUTH_REDIRECT_URL;
-
-    if (!clientId || !clientSecret || !redirectUri) {
-      throw new HTTPException(500, {
-        message: "QuickBooks OAuth configuration missing",
-      });
-    }
-
     // Encrypt state to prevent tampering with teamId
     const state = encryptAccountingOAuthState({
       teamId: session.teamId,
@@ -74,15 +64,18 @@ app.openapi(
       source: "apps",
     });
 
-    const provider = getAccountingProvider("quickbooks", {
-      clientId,
-      clientSecret,
-      redirectUri,
-    });
-
-    const url = await provider.buildConsentUrl(state);
-
-    return c.json({ url });
+    try {
+      const provider = getAccountingProvider("quickbooks");
+      const url = await provider.buildConsentUrl(state);
+      return c.json({ url });
+    } catch (error) {
+      throw new HTTPException(500, {
+        message:
+          error instanceof Error
+            ? error.message
+            : "QuickBooks OAuth configuration missing",
+      });
+    }
   },
 );
 
