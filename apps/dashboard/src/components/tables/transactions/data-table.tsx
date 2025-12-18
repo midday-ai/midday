@@ -1,7 +1,6 @@
 "use client";
 
 import { updateColumnVisibilityAction } from "@/actions/update-column-visibility-action";
-import { LoadMore } from "@/components/load-more";
 import { useSortParams } from "@/hooks/use-sort-params";
 import { useStickyColumns } from "@/hooks/use-sticky-columns";
 import { useTableScroll } from "@/hooks/use-table-scroll";
@@ -27,6 +26,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { type VirtualItem, useVirtualizer } from "@tanstack/react-virtual";
 import { AnimatePresence } from "framer-motion";
 import {
   use,
@@ -38,7 +38,6 @@ import {
   useState,
 } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useInView } from "react-intersection-observer";
 import { BottomBar } from "./bottom-bar";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
@@ -70,8 +69,8 @@ export function DataTable({
   const { exportingTransactionIds } = useExportStore();
   const deferredSearch = useDeferredValue(filter.q);
   const { params } = useSortParams();
-  const { ref, inView } = useInView();
   const { transactionId, setParams } = useTransactionParams();
+  const parentRef = useRef<HTMLDivElement>(null);
 
   // Use the current tab from URL, falling back to initial value
   const activeTab = tab ?? initialTab ?? "all";
@@ -154,12 +153,6 @@ export function DataTable({
       refetch();
     },
   });
-
-  useEffect(() => {
-    if (inView) {
-      fetchNextPage();
-    }
-  }, [inView]);
 
   const tableData = useMemo(() => {
     return data?.pages.flatMap((page) => page.data) ?? [];
@@ -348,6 +341,31 @@ export function DataTable({
     startFromColumn: 3, // Skip sticky columns: select, date, description
   });
 
+  const rows = table.getRowModel().rows;
+
+  // Row virtualizer for performance
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 45, // Row height in pixels
+    overscan: 10, // Number of rows to render outside visible area
+  });
+
+  // Trigger infinite load when scrolling near the bottom
+  useEffect(() => {
+    const virtualItems = rowVirtualizer.getVirtualItems();
+    const lastItem = virtualItems[virtualItems.length - 1];
+
+    if (lastItem && lastItem.index >= rows.length - 20 && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [
+    rowVirtualizer.getVirtualItems(),
+    rows.length,
+    hasNextPage,
+    fetchNextPage,
+  ]);
+
   useEffect(() => {
     setColumns(table.getAllLeafColumns());
   }, [columnVisibility]);
@@ -421,60 +439,108 @@ export function DataTable({
     );
   }
 
+  const virtualItems = rowVirtualizer.getVirtualItems();
+
   return (
     <div className="relative">
       <TooltipProvider delayDuration={20}>
         <Tooltip>
           <div className="w-full">
             <div
-              ref={tableScroll.containerRef}
-              className="overflow-x-auto overscroll-x-none md:border-l md:border-r border-border scrollbar-hide"
+              ref={(el) => {
+                // Combine refs for both scroll container and virtualizer
+                if (parentRef) {
+                  (
+                    parentRef as React.MutableRefObject<HTMLDivElement | null>
+                  ).current = el;
+                }
+                if (tableScroll.containerRef) {
+                  (
+                    tableScroll.containerRef as React.MutableRefObject<HTMLDivElement | null>
+                  ).current = el;
+                }
+              }}
+              className="h-[calc(100vh-180px)] overflow-auto overscroll-x-none md:border-l md:border-r md:border-b md:border-border scrollbar-hide"
             >
               <Table>
                 <DataTableHeader table={table} tableScroll={tableScroll} />
 
-                <TableBody className="border-l-0 border-r-0">
-                  {table.getRowModel().rows?.length ? (
-                    table.getRowModel().rows.map((row, rowIndex) => (
-                      <TableRow
-                        key={row.id}
-                        className="group h-[40px] md:h-[45px] cursor-pointer select-text hover:bg-[#F2F1EF] hover:dark:bg-[#0f0f0f]"
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell
-                            key={cell.id}
-                            className={getStickyClassName(
-                              cell.column.id,
-                              cell.column.columnDef.meta?.className,
-                            )}
-                            style={getStickyStyle(cell.column.id)}
-                            onClick={() => {
-                              // Handle other column clicks (select column is handled in SelectCell)
-                              if (
-                                cell.column.id !== "select" &&
-                                cell.column.id !== "actions" &&
-                                cell.column.id !== "category" &&
-                                cell.column.id !== "assigned" &&
-                                cell.column.id !== "tags"
-                              ) {
-                                if (row.original.manual) {
-                                  setParams({
-                                    editTransaction: row.original.id,
-                                  });
-                                } else {
-                                  setParams({ transactionId: row.original.id });
-                                }
-                              }
-                            }}
-                          >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
+                <TableBody
+                  className="border-l-0 border-r-0"
+                  style={{
+                    height: `${rowVirtualizer.getTotalSize()}px`,
+                    position: "relative",
+                  }}
+                >
+                  {virtualItems.length > 0 ? (
+                    virtualItems.map((virtualRow: VirtualItem) => {
+                      const row = rows[virtualRow.index];
+                      if (!row) return null;
+
+                      return (
+                        <TableRow
+                          key={row.id}
+                          data-index={virtualRow.index}
+                          ref={(node) => rowVirtualizer.measureElement(node)}
+                          className="group h-[45px] cursor-pointer select-text hover:bg-[#F2F1EF] hover:dark:bg-[#0f0f0f] flex items-center border-b border-border"
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            transform: `translateY(${virtualRow.start}px)`,
+                          }}
+                        >
+                          {row.getVisibleCells().map((cell) => {
+                            const isActions = cell.column.id === "actions";
+                            return (
+                              <TableCell
+                                key={cell.id}
+                                className={`h-full flex items-center ${getStickyClassName(
+                                  cell.column.id,
+                                  cell.column.columnDef.meta?.className,
+                                )}`}
+                                style={{
+                                  ...getStickyStyle(cell.column.id),
+                                  ...(isActions && {
+                                    borderLeft: "1px solid hsl(var(--border))",
+                                    borderBottom:
+                                      "1px solid hsl(var(--border))",
+                                    borderRight: "none",
+                                    zIndex: 50,
+                                  }),
+                                }}
+                                onClick={() => {
+                                  // Handle other column clicks (select column is handled in SelectCell)
+                                  if (
+                                    cell.column.id !== "select" &&
+                                    cell.column.id !== "actions" &&
+                                    cell.column.id !== "category" &&
+                                    cell.column.id !== "assigned" &&
+                                    cell.column.id !== "tags"
+                                  ) {
+                                    if (row.original.manual) {
+                                      setParams({
+                                        editTransaction: row.original.id,
+                                      });
+                                    } else {
+                                      setParams({
+                                        transactionId: row.original.id,
+                                      });
+                                    }
+                                  }
+                                }}
+                              >
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext(),
+                                )}
+                              </TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      );
+                    })
                   ) : (
                     <TableRow>
                       <TableCell
@@ -488,8 +554,6 @@ export function DataTable({
                 </TableBody>
               </Table>
             </div>
-
-            <LoadMore ref={ref} hasNextPage={hasNextPage} />
           </div>
         </Tooltip>
       </TooltipProvider>

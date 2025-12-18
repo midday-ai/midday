@@ -171,12 +171,11 @@ export function useAccountingError() {
   );
 
   /**
-   * Show toast for export result (success, partial failure, or complete failure)
+   * Show toast for export errors only (no success toast - the UI shows completion state)
    */
   const showExportResult = useCallback(
     (result: AccountingJobResult | null | undefined, providerName: string) => {
       const failedCount = result?.failedCount ?? 0;
-      const exportedCount = result?.exportedCount ?? 0;
 
       if (failedCount > 0) {
         const { title, description } = getErrorInfo(
@@ -188,13 +187,6 @@ export function useAccountingError() {
           variant: "error",
           title,
           description,
-        });
-      } else if (exportedCount > 0) {
-        toast({
-          duration: 4000,
-          variant: "success",
-          title: "Export complete",
-          description: `${exportedCount} transaction${exportedCount > 1 ? "s" : ""} exported successfully.`,
         });
       }
     },

@@ -256,7 +256,7 @@ export const columns: ColumnDef<Transaction>[] = [
     id: "select",
     meta: {
       className:
-        "md:sticky bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:opacity-0 after:z-[-1]",
+        "w-[50px] min-w-[50px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border",
     },
     cell: ({ row, table }) => {
       const meta = table.options.meta;
@@ -296,7 +296,7 @@ export const columns: ColumnDef<Transaction>[] = [
     header: "Date",
     meta: {
       className:
-        "md:sticky bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:opacity-0 after:z-[-1]",
+        "w-[110px] min-w-[110px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border",
     },
     cell: ({ row, table }) => (
       <DateCell
@@ -311,7 +311,7 @@ export const columns: ColumnDef<Transaction>[] = [
     header: "Description",
     meta: {
       className:
-        "md:sticky bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:opacity-0 after:z-[-1]",
+        "w-[320px] min-w-[320px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border",
     },
     cell: ({ row }) => (
       <DescriptionCell
@@ -326,7 +326,7 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "amount",
     header: "Amount",
     meta: {
-      className: "border-l border-border",
+      className: "w-[170px] min-w-[170px]",
     },
     cell: ({ row }) => (
       <AmountCell
@@ -338,6 +338,9 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "taxAmount",
     header: "Tax Amount",
+    meta: {
+      className: "w-[170px] min-w-[170px]",
+    },
     cell: ({ row }) => (
       <FormatAmount
         amount={row.original.taxAmount ?? 0}
@@ -349,6 +352,9 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "category",
     header: "Category",
+    meta: {
+      className: "w-[250px] min-w-[250px]",
+    },
     cell: ({ row, table }) => {
       // Show analyzing state when enrichment is not completed
       if (!row.original.enrichmentCompleted) {
@@ -399,6 +405,9 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "counterparty",
     header: "From / To",
+    meta: {
+      className: "w-[200px] min-w-[200px]",
+    },
     cell: ({ row }) => (
       <span className="text-muted-foreground">
         {row.original.counterpartyName ?? "-"}
@@ -421,6 +430,9 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "bank_account",
     header: "Account",
+    meta: {
+      className: "w-[250px] min-w-[250px]",
+    },
     cell: ({ row }) => (
       <TransactionBankAccount
         name={row.original?.account?.name ?? undefined}
@@ -431,11 +443,17 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "method",
     header: "Method",
+    meta: {
+      className: "w-[140px] min-w-[140px]",
+    },
     cell: ({ row }) => <TransactionMethod method={row.original.method} />,
   },
   {
     accessorKey: "assigned",
     header: "Assigned",
+    meta: {
+      className: "w-[220px] min-w-[220px]",
+    },
     cell: ({ row, table }) => {
       const meta = table.options.meta;
 
@@ -454,6 +472,9 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     accessorKey: "status",
+    meta: {
+      className: "w-[160px] min-w-[160px] !border-r-0",
+    },
     cell: ({ row, table }) => {
       const meta = table.options.meta;
 
@@ -485,7 +506,7 @@ export const columns: ColumnDef<Transaction>[] = [
     enableHiding: false,
     meta: {
       className:
-        "text-right md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background group-hover:after:opacity-0 after:z-[-1]",
+        "w-[100px] min-w-[100px] text-right md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 !border-solid !border-l !border-l-border !border-r-0 !border-t-0 !border-b-0",
     },
     cell: ({ row, table }) => {
       const meta = table.options.meta;

@@ -47,6 +47,7 @@
     "@sentry/nextjs": "^10",
     "@tanstack/react-query": "^5.90.12",
     "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.13.13",
     "@team-plain/typescript-sdk": "^5.11.0",
     "@trigger.dev/react-hooks": "4.1.1",
     "@trigger.dev/sdk": "4.1.1",
