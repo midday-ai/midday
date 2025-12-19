@@ -1,7 +1,7 @@
 import { ExportStatus } from "@/components/export-status";
 import { GlobalTimerProvider } from "@/components/global-timer-provider";
 import { Header } from "@/components/header";
-import { GlobalSheets } from "@/components/sheets/global-sheets";
+import { GlobalSheetsProvider } from "@/components/sheets/global-sheets-provider";
 import { Sidebar } from "@/components/sidebar";
 import { TimezoneDetector } from "@/components/timezone-detector";
 import { UpgradeContent } from "@/components/upgrade-content";
@@ -69,7 +69,7 @@ export default async function Layout({
         </div>
 
         <ExportStatus />
-        <GlobalSheets />
+        <GlobalSheetsProvider />
         <GlobalTimerProvider />
         <TimezoneDetector />
       </div>
