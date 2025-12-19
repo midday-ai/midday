@@ -1,7 +1,3 @@
-import { DevMessage } from "@/components/dev-message";
-import { Footer } from "@/components/footer";
-import { FooterCTA } from "@/components/footer-cta";
-import { Header } from "@/components/header";
 import "@/styles/globals.css";
 import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
@@ -11,6 +7,8 @@ import type { Metadata } from "next";
 import { Hedvig_Letters_Sans, Hedvig_Letters_Serif } from "next/font/google";
 import type { ReactElement } from "react";
 import { baseUrl } from "./sitemap";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 const hedvigSans = Hedvig_Letters_Sans({
   weight: "400",
@@ -112,11 +110,9 @@ export default function Layout({ children }: { children: ReactElement }) {
           <main className="container mx-auto px-4 overflow-hidden md:overflow-visible">
             {children}
           </main>
-          <FooterCTA />
-          <Footer />
+           <Footer />
           <Analytics />
-          <DevMessage />
-        </ThemeProvider>
+         </ThemeProvider>
       </body>
     </html>
   );
