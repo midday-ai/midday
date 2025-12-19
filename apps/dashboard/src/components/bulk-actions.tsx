@@ -39,8 +39,8 @@ export function BulkActions({ ids }: Props) {
           queryKey: trpc.transactions.get.infiniteQueryKey(),
         });
 
-        // Reset the row selection
-        setRowSelection({});
+        // Reset the row selection (BulkActions is used on "all" tab)
+        setRowSelection("all", {});
 
         toast({
           title: `Updated ${data?.ids.length} transactions.`,

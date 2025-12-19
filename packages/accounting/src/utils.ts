@@ -179,6 +179,57 @@ export async function streamToBuffer(
 // ============================================================================
 
 /**
+ * Provider-specific attachment configuration.
+ * Each provider has different supported file types and size limits.
+ */
+export const PROVIDER_ATTACHMENT_CONFIG = {
+  quickbooks: {
+    supportedTypes: new Set([
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/tiff",
+      "image/bmp",
+    ]),
+    maxSizeBytes: 20 * 1024 * 1024, // 20 MB
+  },
+  xero: {
+    supportedTypes: new Set([
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+    ]),
+    maxSizeBytes: 3 * 1024 * 1024, // 3 MB
+  },
+  fortnox: {
+    supportedTypes: new Set([
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+    ]),
+    maxSizeBytes: 10 * 1024 * 1024, // 10 MB
+  },
+} as const;
+
+/**
+ * Map of file extensions to MIME types.
+ * Used to infer MIME type from filename when stored type is invalid.
+ */
+const EXTENSION_TO_MIME: Record<string, string> = {
+  ".pdf": "application/pdf",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".gif": "image/gif",
+  ".tiff": "image/tiff",
+  ".tif": "image/tiff",
+  ".bmp": "image/bmp",
+  ".webp": "image/webp",
+};
+
+/**
  * Map of common MIME types to file extensions.
  * Used to ensure files have proper extensions for accounting providers.
  */
@@ -228,6 +279,165 @@ export function ensureFileExtension(
   const baseName = fileName.replace(/\.+$/, "");
 
   return `${baseName}${extension}`;
+}
+
+/**
+ * Result of MIME type resolution
+ */
+export interface MimeTypeResolution {
+  /** Resolved MIME type, or null if could not be determined */
+  mimeType: string | null;
+  /** Source of the resolution */
+  source: "stored" | "extension" | "buffer" | "failed";
+  /** Error message if resolution failed or type is unsupported */
+  error?: string;
+}
+
+/**
+ * Detect MIME type from buffer by checking magic bytes.
+ * Supports PDF, JPEG, PNG, GIF, TIFF, BMP, WebP.
+ */
+function detectMimeTypeFromBuffer(buffer: Buffer): string | null {
+  if (buffer.length < 4) {
+    return null;
+  }
+
+  // Check PDF (starts with %PDF)
+  const header = buffer.subarray(0, 4).toString("utf8");
+  if (header.startsWith("%PDF")) {
+    return "application/pdf";
+  }
+
+  // Check JPEG (starts with 0xFF 0xD8 0xFF)
+  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return "image/jpeg";
+  }
+
+  // Check PNG (starts with 0x89 0x50 0x4E 0x47)
+  if (
+    buffer.length >= 4 &&
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47
+  ) {
+    return "image/png";
+  }
+
+  // Check GIF (starts with GIF87a or GIF89a)
+  if (buffer.length >= 6) {
+    const gifHeader = buffer.subarray(0, 6).toString("utf8");
+    if (gifHeader === "GIF87a" || gifHeader === "GIF89a") {
+      return "image/gif";
+    }
+  }
+
+  // Check TIFF (starts with II or MM)
+  if (buffer.length >= 4) {
+    const tiffLE =
+      buffer[0] === 0x49 &&
+      buffer[1] === 0x49 &&
+      buffer[2] === 0x2a &&
+      buffer[3] === 0x00;
+    const tiffBE =
+      buffer[0] === 0x4d &&
+      buffer[1] === 0x4d &&
+      buffer[2] === 0x00 &&
+      buffer[3] === 0x2a;
+    if (tiffLE || tiffBE) {
+      return "image/tiff";
+    }
+  }
+
+  // Check BMP (starts with BM)
+  if (buffer[0] === 0x42 && buffer[1] === 0x4d) {
+    return "image/bmp";
+  }
+
+  // Check WebP (starts with RIFF...WEBP)
+  if (
+    buffer.length >= 12 &&
+    buffer.subarray(0, 4).toString("ascii") === "RIFF" &&
+    buffer.subarray(8, 12).toString("ascii") === "WEBP"
+  ) {
+    return "image/webp";
+  }
+
+  return null;
+}
+
+/**
+ * Resolves the correct MIME type for an attachment using a layered approach.
+ * Validates against provider-specific supported types.
+ *
+ * Resolution order:
+ * 1. Check if stored type is valid and supported by the provider
+ * 2. Try to infer from file extension
+ * 3. Detect from magic bytes in the buffer
+ * 4. Return error if type cannot be determined or is unsupported
+ *
+ * @param storedType - The MIME type stored in the database
+ * @param fileName - The filename (used to infer type from extension)
+ * @param buffer - The file buffer (used for magic byte detection)
+ * @param providerId - The accounting provider ID
+ * @returns Resolution result with mimeType, source, and optional error
+ *
+ * @example
+ * resolveMimeType("application/octet-stream", "receipt.pdf", buffer, "quickbooks")
+ * // Returns: { mimeType: "application/pdf", source: "extension" }
+ */
+export function resolveMimeType(
+  storedType: string | null,
+  fileName: string | null,
+  buffer: Buffer,
+  providerId: keyof typeof PROVIDER_ATTACHMENT_CONFIG,
+): MimeTypeResolution {
+  const providerConfig = PROVIDER_ATTACHMENT_CONFIG[providerId];
+
+  // 1. Check if stored type is valid and supported
+  if (storedType && providerConfig.supportedTypes.has(storedType)) {
+    return { mimeType: storedType, source: "stored" };
+  }
+
+  // 2. Try to infer from file extension
+  if (fileName) {
+    const ext = fileName.toLowerCase().match(/\.[a-z0-9]+$/)?.[0];
+    if (ext) {
+      const inferredType = EXTENSION_TO_MIME[ext];
+      if (inferredType && providerConfig.supportedTypes.has(inferredType)) {
+        return { mimeType: inferredType, source: "extension" };
+      }
+    }
+  }
+
+  // 3. Detect from magic bytes
+  const detectedType = detectMimeTypeFromBuffer(buffer);
+  if (detectedType && providerConfig.supportedTypes.has(detectedType)) {
+    return { mimeType: detectedType, source: "buffer" };
+  }
+
+  // 4. Could not determine valid type - check if we detected something unsupported
+  if (detectedType) {
+    return {
+      mimeType: null,
+      source: "failed",
+      error: `File type "${detectedType}" is not supported by ${providerId}`,
+    };
+  }
+
+  if (storedType && storedType !== "application/octet-stream") {
+    return {
+      mimeType: null,
+      source: "failed",
+      error: `File type "${storedType}" is not supported by ${providerId}`,
+    };
+  }
+
+  return {
+    mimeType: null,
+    source: "failed",
+    error: "Could not determine file type",
+  };
 }
 
 // ============================================================================

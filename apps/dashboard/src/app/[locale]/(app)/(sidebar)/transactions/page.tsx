@@ -30,14 +30,27 @@ export default async function Transactions(props: Props) {
   const { tab } = loadTransactionTab(searchParams);
 
   const columnVisibility = getInitialTransactionsColumnVisibility();
+  const isReviewTab = tab === "review";
+
+  // Build query filter matching the client-side filter in data-table.tsx
+  const queryFilter = isReviewTab
+    ? {
+        ...filter,
+        amountRange: filter.amount_range ?? null,
+        sort,
+        fulfilled: true,
+        exported: false,
+        pageSize: 10000,
+      }
+    : {
+        ...filter,
+        amountRange: filter.amount_range ?? null,
+        sort,
+      };
 
   // Change this to prefetch once this is fixed: https://github.com/trpc/trpc/issues/6632
   await queryClient.fetchInfiniteQuery(
-    trpc.transactions.get.infiniteQueryOptions({
-      ...filter,
-      amountRange: filter.amount_range ?? null,
-      sort,
-    }),
+    trpc.transactions.get.infiniteQueryOptions(queryFilter),
   );
 
   // Prefetch review count for tabs

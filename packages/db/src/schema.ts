@@ -3404,6 +3404,8 @@ export const accountingSyncRecords = pgTable(
     syncType: accountingSyncTypeEnum("sync_type"),
     status: accountingSyncStatusEnum().default("synced").notNull(),
     errorMessage: text("error_message"),
+    // Standardized error code for frontend handling (e.g., "ATTACHMENT_UNSUPPORTED_TYPE", "AUTH_EXPIRED")
+    errorCode: text("error_code"),
     // Provider-specific entity type (e.g., "Purchase", "SalesReceipt", "Voucher", "BankTransaction")
     providerEntityType: text("provider_entity_type"),
     // When the record was first created (synced_at gets updated on every sync)

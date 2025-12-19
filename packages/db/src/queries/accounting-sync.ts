@@ -22,6 +22,8 @@ export type AccountingSyncRecord = {
   /** Status: synced (all done), partial (attachments failed), failed (transaction failed), pending */
   status: "synced" | "partial" | "failed" | "pending";
   errorMessage: string | null;
+  /** Standardized error code for frontend handling */
+  errorCode: string | null;
   providerEntityType: string | null;
   createdAt: string;
 };
@@ -39,6 +41,8 @@ export type CreateAccountingSyncRecordParams = {
   /** Status: synced (all done), partial (attachments failed), failed (transaction failed), pending */
   status?: "synced" | "partial" | "failed" | "pending";
   errorMessage?: string;
+  /** Standardized error code for frontend handling (e.g., "ATTACHMENT_UNSUPPORTED_TYPE", "AUTH_EXPIRED") */
+  errorCode?: string;
   /** Provider-specific entity type (e.g., "Purchase", "SalesReceipt", "Voucher", "BankTransaction") */
   providerEntityType?: string;
 };
@@ -51,9 +55,10 @@ export const upsertAccountingSyncRecord = async (
   params: CreateAccountingSyncRecordParams,
 ) => {
   const status = params.status ?? "synced";
-  // Clear error message when status is synced (successful re-export should clear previous errors)
+  // Clear error fields when status is synced (successful re-export should clear previous errors)
   const errorMessage =
     status === "synced" ? null : (params.errorMessage ?? null);
+  const errorCode = status === "synced" ? null : (params.errorCode ?? null);
 
   const [result] = await db
     .insert(accountingSyncRecords)
@@ -67,6 +72,7 @@ export const upsertAccountingSyncRecord = async (
       syncType: params.syncType,
       status,
       errorMessage,
+      errorCode,
       providerEntityType: params.providerEntityType,
     })
     .onConflictDoUpdate({
@@ -81,6 +87,7 @@ export const upsertAccountingSyncRecord = async (
         syncType: params.syncType,
         status,
         errorMessage,
+        errorCode,
         providerEntityType: params.providerEntityType,
       },
     })
@@ -524,6 +531,8 @@ export type UpdateSyncedAttachmentMappingParams = {
   status?: "synced" | "partial" | "failed";
   /** Optional error message for failed attachments */
   errorMessage?: string | null;
+  /** Optional error code for frontend handling */
+  errorCode?: string | null;
 };
 
 /**
@@ -542,6 +551,9 @@ export const updateSyncedAttachmentMapping = async (
       ...(params.status && { status: params.status }),
       ...(params.errorMessage !== undefined && {
         errorMessage: params.errorMessage,
+      }),
+      ...(params.errorCode !== undefined && {
+        errorCode: params.errorCode,
       }),
     })
     .where(eq(accountingSyncRecords.id, params.syncRecordId))

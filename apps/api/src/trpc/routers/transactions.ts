@@ -33,7 +33,8 @@ export const transactionsRouter = createTRPCRouter({
     .query(async ({ input, ctx: { db, teamId } }) => {
       return getTransactions(db, {
         ...input,
-        excludeSynced: input.excludeSynced ?? undefined,
+        exported: input.exported ?? undefined,
+        fulfilled: input.fulfilled ?? undefined,
         teamId: teamId!,
       });
     }),

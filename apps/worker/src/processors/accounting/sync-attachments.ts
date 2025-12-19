@@ -3,7 +3,12 @@ import {
   type ProviderEntityType,
   RATE_LIMITS,
 } from "@midday/accounting";
-import { sleep, throttledConcurrent } from "@midday/accounting/utils";
+import {
+  PROVIDER_ATTACHMENT_CONFIG,
+  resolveMimeType,
+  sleep,
+  throttledConcurrent,
+} from "@midday/accounting/utils";
 import {
   getAccountingSyncStatus,
   getTransactionAttachmentsForSync,
@@ -22,9 +27,6 @@ import { AccountingProcessorBase, type AccountingProviderId } from "./base";
  * RATE_LIMITS is still used for throttledConcurrent when a transaction
  * has multiple attachments.
  */
-
-/** Maximum attachment size allowed for upload (10MB) */
-const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024;
 
 /** Number of retries for individual attachment uploads */
 const ATTACHMENT_UPLOAD_RETRIES = 3;
@@ -166,6 +168,10 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
       };
     }
 
+    // Track error codes and messages from failed uploads
+    const errorCodes: string[] = [];
+    const errorMessages: string[] = [];
+
     // Step 3: Upload new attachments concurrently with rate limiting
     if (newAttachmentIds.length > 0) {
       // Get attachment details from database
@@ -198,6 +204,7 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
             provider,
             orgId,
             providerTransactionId,
+            providerId as keyof typeof PROVIDER_ATTACHMENT_CONFIG,
             providerEntityType,
           );
         },
@@ -214,17 +221,24 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
         },
       );
 
-      // Process results
+      // Process results and collect error codes
+
       for (const result of uploadResults.results) {
         if (result.success) {
           uploadedCount++;
           currentMapping[result.attachmentId] = result.providerAttachmentId;
         } else {
           failedCount++;
+          if (result.errorCode) {
+            errorCodes.push(result.errorCode);
+          }
+          if (result.error) {
+            errorMessages.push(result.error);
+          }
         }
       }
 
-      // Count errors
+      // Count errors from throttledConcurrent
       failedCount += uploadResults.errors.length;
 
       // Log any errors
@@ -241,15 +255,21 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
     if (hasChanges) {
       // Determine status: 'partial' if any failures, 'synced' if all succeeded
       const status = failedCount > 0 ? "partial" : "synced";
+
+      // Use the first error code and message for the sync record
+      // (most attachment failures have the same root cause)
+      const errorCode = failedCount > 0 ? errorCodes[0] : undefined;
       const errorMessage =
         failedCount > 0
-          ? `${failedCount} attachment(s) failed to upload`
+          ? (errorMessages[0] ??
+            `${failedCount} attachment(s) failed to upload`)
           : null;
 
       const updateParams = {
         syncedAttachmentMapping: currentMapping,
         status: status as "synced" | "partial",
         errorMessage,
+        errorCode,
       };
 
       if (syncRecordId) {
@@ -332,15 +352,17 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
     provider: AccountingProvider,
     orgId: string,
     providerTransactionId: string,
+    providerId: keyof typeof PROVIDER_ATTACHMENT_CONFIG,
     providerEntityType?: ProviderEntityType,
   ): Promise<{
     success: boolean;
     attachmentId: string;
     providerAttachmentId: string | null;
     error?: string;
+    errorCode?: string;
   }> {
     // Validate attachment data
-    if (!attachment.path || !attachment.name || !attachment.type) {
+    if (!attachment.path || !attachment.name) {
       this.logger.warn("Skipping attachment with missing data", {
         attachmentId: attachment.id,
       });
@@ -378,19 +400,59 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
     // Convert Blob to Buffer
     const buffer = Buffer.from(await fileData.arrayBuffer());
 
-    // Check file size limit
-    if (buffer.length > MAX_ATTACHMENT_SIZE_BYTES) {
-      this.logger.warn("Attachment exceeds size limit, skipping", {
+    // Resolve and validate MIME type using layered approach
+    const providerConfig = PROVIDER_ATTACHMENT_CONFIG[providerId];
+    const mimeResolution = resolveMimeType(
+      attachment.type,
+      attachment.name,
+      buffer,
+      providerId,
+    );
+
+    if (!mimeResolution.mimeType) {
+      this.logger.warn("Could not determine valid MIME type for attachment", {
         attachmentId: attachment.id,
+        storedType: attachment.type,
         fileName: attachment.name,
-        size: buffer.length,
-        maxSize: MAX_ATTACHMENT_SIZE_BYTES,
+        error: mimeResolution.error,
       });
       return {
         success: false,
         attachmentId: attachment.id,
         providerAttachmentId: null,
-        error: `File too large: ${buffer.length} bytes (max: ${MAX_ATTACHMENT_SIZE_BYTES})`,
+        error: mimeResolution.error ?? "Unsupported file type",
+        errorCode: "ATTACHMENT_UNSUPPORTED_TYPE",
+      };
+    }
+
+    // Log if MIME type was resolved from fallback
+    if (mimeResolution.source !== "stored") {
+      this.logger.info("Resolved MIME type from fallback", {
+        attachmentId: attachment.id,
+        storedType: attachment.type,
+        resolvedType: mimeResolution.mimeType,
+        source: mimeResolution.source,
+      });
+    }
+
+    const resolvedMimeType = mimeResolution.mimeType;
+
+    // Check file size limit (provider-specific)
+    if (buffer.length > providerConfig.maxSizeBytes) {
+      const maxSizeMB = Math.round(providerConfig.maxSizeBytes / 1024 / 1024);
+      this.logger.warn("Attachment exceeds size limit, skipping", {
+        attachmentId: attachment.id,
+        fileName: attachment.name,
+        size: buffer.length,
+        maxSize: providerConfig.maxSizeBytes,
+        provider: providerId,
+      });
+      return {
+        success: false,
+        attachmentId: attachment.id,
+        providerAttachmentId: null,
+        error: `File too large for ${providerId} (max: ${maxSizeMB}MB)`,
+        errorCode: "ATTACHMENT_TOO_LARGE",
       };
     }
 
@@ -422,7 +484,7 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
           tenantId: orgId,
           transactionId: providerTransactionId,
           fileName: attachment.name,
-          mimeType: attachment.type,
+          mimeType: resolvedMimeType,
           content: buffer,
           entityType: providerEntityType,
         });
@@ -461,6 +523,7 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
       attachmentId: attachment.id,
       providerAttachmentId: null,
       error: lastError,
+      errorCode: "ATTACHMENT_UPLOAD_FAILED",
     };
   }
 

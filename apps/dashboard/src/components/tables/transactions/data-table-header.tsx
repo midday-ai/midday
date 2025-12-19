@@ -270,7 +270,7 @@ export function DataTableHeader({ table, loading, tableScroll }: Props) {
         )}
 
         {isVisible("actions") && (
-          <TableHead className="w-[100px] min-w-[100px] h-full px-4 md:sticky md:right-0 bg-background z-10 !border-solid !border-l !border-l-border !border-t !border-t-border !border-r-0 !border-b-0 flex items-center justify-end">
+          <TableHead className="w-[100px] min-w-[100px] h-full px-4 md:sticky md:right-0 bg-background z-10 !border-solid !border-l !border-l-border !border-t !border-t-border !border-r-0 !border-b-0 flex items-center justify-center text-muted-foreground">
             Actions
           </TableHead>
         )}

@@ -198,53 +198,57 @@ const ActionsCell = memo(
     }, [transaction.id, onDeleteTransaction]);
 
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <Icons.MoreHoriz />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleViewDetails}>
-            View details
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleCopyUrl}>Share URL</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          {!transaction.manual && transaction.status === "excluded" && (
-            <DropdownMenuItem onClick={handleUpdateToPosted}>
-              Include
+      <div className="flex justify-center w-full">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <Icons.MoreHoriz className="text-muted-foreground" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleViewDetails}>
+              View details
             </DropdownMenuItem>
-          )}
+            <DropdownMenuItem onClick={handleCopyUrl}>
+              Share URL
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {!transaction.manual && transaction.status === "excluded" && (
+              <DropdownMenuItem onClick={handleUpdateToPosted}>
+                Include
+              </DropdownMenuItem>
+            )}
 
-          {!transaction.isFulfilled && (
-            <DropdownMenuItem onClick={handleUpdateToCompleted}>
-              Mark as completed
-            </DropdownMenuItem>
-          )}
+            {!transaction.isFulfilled && (
+              <DropdownMenuItem onClick={handleUpdateToCompleted}>
+                Mark as completed
+              </DropdownMenuItem>
+            )}
 
-          {transaction.isFulfilled && transaction.status === "completed" && (
-            <DropdownMenuItem onClick={handleUpdateToPosted}>
-              Mark as uncompleted
-            </DropdownMenuItem>
-          )}
+            {transaction.isFulfilled && transaction.status === "completed" && (
+              <DropdownMenuItem onClick={handleUpdateToPosted}>
+                Mark as uncompleted
+              </DropdownMenuItem>
+            )}
 
-          {!transaction.manual && transaction.status !== "excluded" && (
-            <DropdownMenuItem onClick={handleUpdateToExcluded}>
-              Exclude
-            </DropdownMenuItem>
-          )}
+            {!transaction.manual && transaction.status !== "excluded" && (
+              <DropdownMenuItem onClick={handleUpdateToExcluded}>
+                Exclude
+              </DropdownMenuItem>
+            )}
 
-          {transaction.manual && (
-            <DropdownMenuItem
-              className="text-destructive"
-              onClick={handleDeleteTransaction}
-            >
-              Delete
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+            {transaction.manual && (
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={handleDeleteTransaction}
+              >
+                Delete
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     );
   },
 );
@@ -488,14 +492,17 @@ export const columns: ColumnDef<Transaction>[] = [
         );
       }
 
-      const fullfilled =
-        row.original.status === "completed" || row.original.isFulfilled;
-      const hasPendingSuggestion = row.original.hasPendingSuggestion;
-
       return (
         <TransactionStatus
-          fullfilled={fullfilled}
-          hasPendingSuggestion={hasPendingSuggestion}
+          isFulfilled={
+            row.original.status === "completed" || row.original.isFulfilled
+          }
+          isExported={row.original.isExported ?? false}
+          hasExportError={row.original.hasExportError}
+          exportErrorCode={row.original.exportErrorCode}
+          exportProvider={row.original.exportProvider}
+          exportedAt={row.original.exportedAt}
+          hasPendingSuggestion={row.original.hasPendingSuggestion}
         />
       );
     },
@@ -506,7 +513,7 @@ export const columns: ColumnDef<Transaction>[] = [
     enableHiding: false,
     meta: {
       className:
-        "w-[100px] min-w-[100px] text-right md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 !border-solid !border-l !border-l-border !border-r-0 !border-t-0 !border-b-0",
+        "w-[100px] min-w-[100px] md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 !border-solid !border-l !border-l-border !border-r-0 !border-t-0 !border-b-0",
     },
     cell: ({ row, table }) => {
       const meta = table.options.meta;

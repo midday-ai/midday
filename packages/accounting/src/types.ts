@@ -34,6 +34,7 @@ export type AccountingErrorType =
   | "server_error"
   | "financial_year_missing" // Fiscal year doesn't exist and can't be auto-created (past years)
   | "financial_year_setup_required" // No fiscal years exist at all, manual setup needed
+  | "attachment_error" // Attachment-related errors
   | "unknown";
 
 /**
@@ -41,18 +42,73 @@ export type AccountingErrorType =
  * These codes can be used to show specific toast messages
  */
 export const ACCOUNTING_ERROR_CODES = {
+  // Financial year errors
   FINANCIAL_YEAR_MISSING: "FINANCIAL_YEAR_MISSING",
   FINANCIAL_YEAR_SETUP_REQUIRED: "FINANCIAL_YEAR_SETUP_REQUIRED",
-  RATE_LIMIT: "RATE_LIMIT",
+
+  // Authentication errors
   AUTH_EXPIRED: "AUTH_EXPIRED",
+
+  // Rate limiting
+  RATE_LIMIT: "RATE_LIMIT",
+
+  // Validation errors
   VALIDATION: "VALIDATION",
   NOT_FOUND: "NOT_FOUND",
+
+  // Server errors
   SERVER_ERROR: "SERVER_ERROR",
+
+  // Attachment-specific errors
+  ATTACHMENT_UNSUPPORTED_TYPE: "ATTACHMENT_UNSUPPORTED_TYPE",
+  ATTACHMENT_TOO_LARGE: "ATTACHMENT_TOO_LARGE",
+  ATTACHMENT_TIMEOUT: "ATTACHMENT_TIMEOUT",
+  ATTACHMENT_UPLOAD_FAILED: "ATTACHMENT_UPLOAD_FAILED",
+  ATTACHMENT_NOT_FOUND: "ATTACHMENT_NOT_FOUND",
+
+  // General
   UNKNOWN: "UNKNOWN",
 } as const;
 
 export type AccountingErrorCode =
   (typeof ACCOUNTING_ERROR_CODES)[keyof typeof ACCOUNTING_ERROR_CODES];
+
+/**
+ * User-friendly error messages for each error code
+ * Used by the frontend to display meaningful messages to users
+ */
+export const ACCOUNTING_ERROR_MESSAGES: Record<AccountingErrorCode, string> = {
+  [ACCOUNTING_ERROR_CODES.FINANCIAL_YEAR_MISSING]:
+    "Financial year not set up in your accounting software",
+  [ACCOUNTING_ERROR_CODES.FINANCIAL_YEAR_SETUP_REQUIRED]:
+    "Please set up financial years in your accounting software first",
+  [ACCOUNTING_ERROR_CODES.AUTH_EXPIRED]:
+    "Connection expired — please reconnect your accounting software",
+  [ACCOUNTING_ERROR_CODES.RATE_LIMIT]:
+    "Too many requests — will retry automatically",
+  [ACCOUNTING_ERROR_CODES.VALIDATION]: "Invalid data format",
+  [ACCOUNTING_ERROR_CODES.NOT_FOUND]: "Resource not found in accounting software",
+  [ACCOUNTING_ERROR_CODES.SERVER_ERROR]:
+    "Accounting software is temporarily unavailable",
+  [ACCOUNTING_ERROR_CODES.ATTACHMENT_UNSUPPORTED_TYPE]:
+    "Attachment file type not supported",
+  [ACCOUNTING_ERROR_CODES.ATTACHMENT_TOO_LARGE]: "Attachment file is too large",
+  [ACCOUNTING_ERROR_CODES.ATTACHMENT_TIMEOUT]: "Attachment upload timed out",
+  [ACCOUNTING_ERROR_CODES.ATTACHMENT_UPLOAD_FAILED]:
+    "Failed to upload attachment",
+  [ACCOUNTING_ERROR_CODES.ATTACHMENT_NOT_FOUND]: "Attachment file not found",
+  [ACCOUNTING_ERROR_CODES.UNKNOWN]: "An unexpected error occurred",
+};
+
+/**
+ * Get user-friendly message for an error code
+ */
+export function getErrorMessage(code: AccountingErrorCode | string): string {
+  return (
+    ACCOUNTING_ERROR_MESSAGES[code as AccountingErrorCode] ??
+    ACCOUNTING_ERROR_MESSAGES[ACCOUNTING_ERROR_CODES.UNKNOWN]
+  );
+}
 
 /**
  * Standardized error structure for accounting operations

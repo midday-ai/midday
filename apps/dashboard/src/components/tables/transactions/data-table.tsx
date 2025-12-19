@@ -9,17 +9,16 @@ import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useTransactionTab } from "@/hooks/use-transaction-tab";
 import { useUpdateTransactionCategory } from "@/hooks/use-update-transaction-category";
 import { useExportStore } from "@/store/export";
-import { useTransactionsStore } from "@/store/transactions";
+import {
+  type TransactionTab,
+  useTransactionsStore,
+} from "@/store/transactions";
 import { useTRPC } from "@/trpc/client";
 import { Cookies } from "@/utils/constants";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { Tooltip, TooltipProvider } from "@midday/ui/tooltip";
 import { toast } from "@midday/ui/use-toast";
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseInfiniteQuery,
-} from "@tanstack/react-query";
+import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import {
   type VisibilityState,
   flexRender,
@@ -39,11 +38,13 @@ import {
 } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { BottomBar } from "./bottom-bar";
+import { BulkEditBar } from "./bulk-edit-bar";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
 import { NoResults, NoTransactions } from "./empty-states";
 import { ExportBar } from "./export-bar";
 import { Loading } from "./loading";
+import { TransactionTableProvider } from "./transaction-table-context";
 
 type Props = {
   columnVisibility: Promise<VisibilityState>;
@@ -55,12 +56,11 @@ export function DataTable({
   initialTab,
 }: Props) {
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
   const { filter, hasFilters } = useTransactionFilterParamsWithPersistence();
   const { tab, setTab } = useTransactionTab();
   const {
-    setRowSelection,
-    rowSelection,
+    setRowSelection: setRowSelectionForTab,
+    rowSelectionByTab,
     setColumns,
     setCanDelete,
     lastClickedIndex,
@@ -73,8 +73,17 @@ export function DataTable({
   const parentRef = useRef<HTMLDivElement>(null);
 
   // Use the current tab from URL, falling back to initial value
-  const activeTab = tab ?? initialTab ?? "all";
+  const activeTab = (tab ?? initialTab ?? "all") as TransactionTab;
   const isReviewTab = activeTab === "review";
+
+  // Get tab-specific row selection
+  const rowSelection = rowSelectionByTab[activeTab];
+  const setRowSelection = useCallback(
+    (updater: Parameters<typeof setRowSelectionForTab>[1]) => {
+      setRowSelectionForTab(activeTab, updater);
+    },
+    [activeTab, setRowSelectionForTab],
+  );
 
   const showBottomBar = hasFilters && !Object.keys(rowSelection).length;
   const initialColumnVisibility = use(columnVisibilityPromise);
@@ -83,7 +92,7 @@ export function DataTable({
   );
 
   // Build query filters based on active tab
-  // Review tab: show fulfilled transactions (has attachments OR completed) that are not yet synced
+  // Review tab: show fulfilled transactions (has attachments OR completed) that are not yet exported
   const queryFilter = useMemo(() => {
     if (isReviewTab) {
       return {
@@ -92,9 +101,9 @@ export function DataTable({
         q: deferredSearch,
         sort: params.sort,
         // Fulfilled = has attachments OR status=completed
-        attachments: "include" as const,
-        // Exclude transactions already synced to accounting
-        excludeSynced: true,
+        fulfilled: true,
+        // Only show transactions not yet exported
+        exported: false,
         pageSize: 10000, // Load all for review
       };
     }
@@ -116,7 +125,7 @@ export function DataTable({
     },
   );
 
-  const { data, fetchNextPage, hasNextPage, refetch } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
     useSuspenseInfiniteQuery(infiniteQueryOptions);
 
   const updateTransactionMutation = useMutation(
@@ -199,6 +208,130 @@ export function DataTable({
     (startIndex: number, endIndex: number) => void
   >(() => {});
 
+  // Memoized table meta callbacks for stable references (prevents unnecessary re-renders)
+  const setOpen = useCallback(
+    (id: string) => {
+      setParams({ transactionId: id });
+    },
+    [setParams],
+  );
+
+  const copyUrl = useCallback((id: string) => {
+    try {
+      window.navigator.clipboard.writeText(
+        `${process.env.NEXT_PUBLIC_URL}/transactions/?transactionId=${id}`,
+      );
+
+      toast({
+        title: "Transaction URL copied to clipboard",
+        variant: "success",
+      });
+    } catch {
+      toast({
+        title: "Failed to copy transaction URL to clipboard",
+        variant: "error",
+      });
+    }
+  }, []);
+
+  const updateTransaction = useCallback(
+    (data: {
+      id: string;
+      status?: string;
+      categorySlug?: string | null;
+      categoryName?: string;
+      assignedId?: string | null;
+    }) => {
+      // If updating category, use the hook that checks for similar transactions
+      if (
+        data.categorySlug !== undefined &&
+        data.categorySlug !== null &&
+        data.categoryName
+      ) {
+        const transaction = tableData.find((t) => t.id === data.id);
+        if (transaction) {
+          updateCategory(transaction.id, transaction.name, {
+            name: data.categoryName,
+            slug: data.categorySlug,
+          });
+        }
+        return;
+      }
+
+      // Handle null category (uncategorizing)
+      if (data.categorySlug === null) {
+        updateTransactionMutation.mutate({
+          id: data.id,
+          categorySlug: null,
+        });
+        return;
+      }
+
+      // For other updates (status, assignedId), use the regular mutation
+      updateTransactionMutation.mutate({
+        id: data.id,
+        ...(data.status && {
+          status: data.status as
+            | "pending"
+            | "archived"
+            | "completed"
+            | "posted"
+            | "excluded",
+        }),
+        ...(data.assignedId !== undefined && {
+          assignedId: data.assignedId,
+        }),
+      });
+    },
+    [tableData, updateCategory, updateTransactionMutation],
+  );
+
+  const onDeleteTransaction = useCallback(
+    (id: string) => {
+      deleteTransactionMutation.mutate([id]);
+    },
+    [deleteTransactionMutation],
+  );
+
+  const editTransaction = useCallback(
+    (id: string) => {
+      setParams({ editTransaction: id });
+    },
+    [setParams],
+  );
+
+  const handleShiftClickRange = useCallback(
+    (startIndex: number, endIndex: number) =>
+      handleShiftClickRangeRef.current(startIndex, endIndex),
+    [],
+  );
+
+  // Memoize the meta object to prevent table re-renders
+  const tableMeta = useMemo(
+    () => ({
+      setOpen,
+      copyUrl,
+      updateTransaction,
+      onDeleteTransaction,
+      editTransaction,
+      handleShiftClickRange,
+      lastClickedIndex,
+      setLastClickedIndex,
+      exportingTransactionIds,
+    }),
+    [
+      setOpen,
+      copyUrl,
+      updateTransaction,
+      onDeleteTransaction,
+      editTransaction,
+      handleShiftClickRange,
+      lastClickedIndex,
+      setLastClickedIndex,
+      exportingTransactionIds,
+    ],
+  );
+
   const table = useReactTable({
     getRowId: (row) => row?.id,
     data: tableData,
@@ -210,87 +343,7 @@ export function DataTable({
       rowSelection,
       columnVisibility,
     },
-    meta: {
-      setOpen: (id: string) => {
-        setParams({ transactionId: id });
-      },
-      copyUrl: (id: string) => {
-        try {
-          window.navigator.clipboard.writeText(
-            `${process.env.NEXT_PUBLIC_URL}/transactions/?transactionId=${id}`,
-          );
-
-          toast({
-            title: "Transaction URL copied to clipboard",
-            variant: "success",
-          });
-        } catch {
-          toast({
-            title: "Failed to copy transaction URL to clipboard",
-            variant: "error",
-          });
-        }
-      },
-      updateTransaction: (data: {
-        id: string;
-        status?: string;
-        categorySlug?: string | null;
-        categoryName?: string;
-        assignedId?: string | null;
-      }) => {
-        // If updating category, use the hook that checks for similar transactions
-        if (
-          data.categorySlug !== undefined &&
-          data.categorySlug !== null &&
-          data.categoryName
-        ) {
-          const transaction = tableData.find((t) => t.id === data.id);
-          if (transaction) {
-            updateCategory(transaction.id, transaction.name, {
-              name: data.categoryName,
-              slug: data.categorySlug, // TypeScript now knows this is string (not null)
-            });
-          }
-          return;
-        }
-
-        // Handle null category (uncategorizing)
-        if (data.categorySlug === null) {
-          updateTransactionMutation.mutate({
-            id: data.id,
-            categorySlug: null,
-          });
-          return;
-        }
-
-        // For other updates (status, assignedId), use the regular mutation
-        updateTransactionMutation.mutate({
-          id: data.id,
-          ...(data.status && {
-            status: data.status as
-              | "pending"
-              | "archived"
-              | "completed"
-              | "posted"
-              | "excluded",
-          }),
-          ...(data.assignedId !== undefined && {
-            assignedId: data.assignedId,
-          }),
-        });
-      },
-      onDeleteTransaction: (id: string) => {
-        deleteTransactionMutation.mutate([id]);
-      },
-      editTransaction: (id: string) => {
-        setParams({ editTransaction: id });
-      },
-      handleShiftClickRange: (startIndex: number, endIndex: number) =>
-        handleShiftClickRangeRef.current(startIndex, endIndex),
-      lastClickedIndex,
-      setLastClickedIndex,
-      exportingTransactionIds,
-    },
+    meta: tableMeta,
   });
 
   // Update handleShiftClickRange to use the table
@@ -353,16 +406,33 @@ export function DataTable({
 
   // Trigger infinite load when scrolling near the bottom
   useEffect(() => {
-    const virtualItems = rowVirtualizer.getVirtualItems();
-    const lastItem = virtualItems[virtualItems.length - 1];
+    const scrollElement = parentRef.current;
+    if (!scrollElement) return;
 
-    if (lastItem && lastItem.index >= rows.length - 20 && hasNextPage) {
-      fetchNextPage();
-    }
+    const checkLoadMore = () => {
+      // Don't fetch if already fetching
+      if (isFetchingNextPage) return;
+
+      const virtualItems = rowVirtualizer.getVirtualItems();
+      const lastItem = virtualItems[virtualItems.length - 1];
+
+      // Load more when within 50 rows of the end for smoother infinite scroll
+      if (lastItem && lastItem.index >= rows.length - 50 && hasNextPage) {
+        fetchNextPage();
+      }
+    };
+
+    // Check on mount and when deps change
+    checkLoadMore();
+
+    // Also check on scroll
+    scrollElement.addEventListener("scroll", checkLoadMore);
+    return () => scrollElement.removeEventListener("scroll", checkLoadMore);
   }, [
-    rowVirtualizer.getVirtualItems(),
+    rowVirtualizer,
     rows.length,
     hasNextPage,
+    isFetchingNextPage,
     fetchNextPage,
   ]);
 
@@ -377,25 +447,24 @@ export function DataTable({
     });
   }, [columnVisibility]);
 
+  // Determine if selected transactions can be deleted (only manual transactions can be deleted)
   useEffect(() => {
-    const transactions = tableData.filter((transaction) => {
-      if (!transaction?.id) return false;
-      const found = rowSelection[transaction.id];
+    const selectedIds = Object.keys(rowSelection);
 
-      if (found) {
-        return !transaction?.manual;
-      }
-      return false;
+    // Early exit: no selections means nothing to check
+    if (selectedIds.length === 0) {
+      return;
+    }
+
+    // Check if any selected non-manual transaction exists (these cannot be deleted)
+    const hasNonManualSelected = selectedIds.some((id) => {
+      const transaction = tableData.find((t) => t?.id === id);
+      return transaction && !transaction.manual;
     });
 
-    if (Object.keys(rowSelection)?.length > 0) {
-      if (transactions.length === 0) {
-        setCanDelete(true);
-      } else {
-        setCanDelete(false);
-      }
-    }
-  }, [rowSelection]);
+    // Can delete only if all selected transactions are manual
+    setCanDelete(!hasNonManualSelected);
+  }, [rowSelection, tableData, setCanDelete]);
 
   useHotkeys(
     "ArrowUp, ArrowDown",
@@ -442,127 +511,131 @@ export function DataTable({
   const virtualItems = rowVirtualizer.getVirtualItems();
 
   return (
-    <div className="relative">
-      <TooltipProvider delayDuration={20}>
-        <Tooltip>
-          <div className="w-full">
-            <div
-              ref={(el) => {
-                // Combine refs for both scroll container and virtualizer
-                if (parentRef) {
-                  (
-                    parentRef as React.MutableRefObject<HTMLDivElement | null>
-                  ).current = el;
-                }
-                if (tableScroll.containerRef) {
-                  (
-                    tableScroll.containerRef as React.MutableRefObject<HTMLDivElement | null>
-                  ).current = el;
-                }
-              }}
-              className="h-[calc(100vh-180px)] overflow-auto overscroll-x-none md:border-l md:border-r md:border-b md:border-border scrollbar-hide"
-            >
-              <Table>
-                <DataTableHeader table={table} tableScroll={tableScroll} />
+    <TransactionTableProvider>
+      <div className="relative">
+        <TooltipProvider delayDuration={20}>
+          <Tooltip>
+            <div className="w-full">
+              <div
+                ref={(el) => {
+                  // Combine refs for both scroll container and virtualizer
+                  if (parentRef) {
+                    (
+                      parentRef as React.MutableRefObject<HTMLDivElement | null>
+                    ).current = el;
+                  }
+                  if (tableScroll.containerRef) {
+                    (
+                      tableScroll.containerRef as React.MutableRefObject<HTMLDivElement | null>
+                    ).current = el;
+                  }
+                }}
+                className="h-[calc(100vh-180px)] overflow-auto overscroll-x-none md:border-l md:border-r md:border-b md:border-border scrollbar-hide"
+              >
+                <Table>
+                  <DataTableHeader table={table} tableScroll={tableScroll} />
 
-                <TableBody
-                  className="border-l-0 border-r-0"
-                  style={{
-                    height: `${rowVirtualizer.getTotalSize()}px`,
-                    position: "relative",
-                  }}
-                >
-                  {virtualItems.length > 0 ? (
-                    virtualItems.map((virtualRow: VirtualItem) => {
-                      const row = rows[virtualRow.index];
-                      if (!row) return null;
+                  <TableBody
+                    className="border-l-0 border-r-0"
+                    style={{
+                      height: `${rowVirtualizer.getTotalSize()}px`,
+                      position: "relative",
+                    }}
+                  >
+                    {virtualItems.length > 0 ? (
+                      virtualItems.map((virtualRow: VirtualItem) => {
+                        const row = rows[virtualRow.index];
+                        if (!row) return null;
 
-                      return (
-                        <TableRow
-                          key={row.id}
-                          data-index={virtualRow.index}
-                          ref={(node) => rowVirtualizer.measureElement(node)}
-                          className="group h-[45px] cursor-pointer select-text hover:bg-[#F2F1EF] hover:dark:bg-[#0f0f0f] flex items-center border-b border-border"
-                          style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            transform: `translateY(${virtualRow.start}px)`,
-                          }}
-                        >
-                          {row.getVisibleCells().map((cell) => {
-                            const isActions = cell.column.id === "actions";
-                            return (
-                              <TableCell
-                                key={cell.id}
-                                className={`h-full flex items-center ${getStickyClassName(
-                                  cell.column.id,
-                                  cell.column.columnDef.meta?.className,
-                                )}`}
-                                style={{
-                                  ...getStickyStyle(cell.column.id),
-                                  ...(isActions && {
-                                    borderLeft: "1px solid hsl(var(--border))",
-                                    borderBottom:
-                                      "1px solid hsl(var(--border))",
-                                    borderRight: "none",
-                                    zIndex: 50,
-                                  }),
-                                }}
-                                onClick={() => {
-                                  // Handle other column clicks (select column is handled in SelectCell)
-                                  if (
-                                    cell.column.id !== "select" &&
-                                    cell.column.id !== "actions" &&
-                                    cell.column.id !== "category" &&
-                                    cell.column.id !== "assigned" &&
-                                    cell.column.id !== "tags"
-                                  ) {
-                                    if (row.original.manual) {
-                                      setParams({
-                                        editTransaction: row.original.id,
-                                      });
-                                    } else {
-                                      setParams({
-                                        transactionId: row.original.id,
-                                      });
+                        return (
+                          <TableRow
+                            key={row.id}
+                            data-index={virtualRow.index}
+                            ref={(node) => rowVirtualizer.measureElement(node)}
+                            className="group h-[45px] cursor-pointer select-text hover:bg-[#F2F1EF] hover:dark:bg-[#0f0f0f] flex items-center border-b border-border"
+                            style={{
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              width: "100%",
+                              transform: `translateY(${virtualRow.start}px)`,
+                            }}
+                          >
+                            {row.getVisibleCells().map((cell) => {
+                              const isActions = cell.column.id === "actions";
+                              return (
+                                <TableCell
+                                  key={cell.id}
+                                  className={`h-full flex items-center ${getStickyClassName(
+                                    cell.column.id,
+                                    cell.column.columnDef.meta?.className,
+                                  )}`}
+                                  style={{
+                                    ...getStickyStyle(cell.column.id),
+                                    ...(isActions && {
+                                      borderLeft:
+                                        "1px solid hsl(var(--border))",
+                                      borderBottom:
+                                        "1px solid hsl(var(--border))",
+                                      borderRight: "none",
+                                      zIndex: 50,
+                                    }),
+                                  }}
+                                  onClick={() => {
+                                    // Handle other column clicks (select column is handled in SelectCell)
+                                    if (
+                                      cell.column.id !== "select" &&
+                                      cell.column.id !== "actions" &&
+                                      cell.column.id !== "category" &&
+                                      cell.column.id !== "assigned" &&
+                                      cell.column.id !== "tags"
+                                    ) {
+                                      if (row.original.manual) {
+                                        setParams({
+                                          editTransaction: row.original.id,
+                                        });
+                                      } else {
+                                        setParams({
+                                          transactionId: row.original.id,
+                                        });
+                                      }
                                     }
-                                  }
-                                }}
-                              >
-                                {flexRender(
-                                  cell.column.columnDef.cell,
-                                  cell.getContext(),
-                                )}
-                              </TableCell>
-                            );
-                          })}
-                        </TableRow>
-                      );
-                    })
-                  ) : (
-                    <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className="h-24 text-center"
-                      >
-                        No results.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                                  }}
+                                >
+                                  {flexRender(
+                                    cell.column.columnDef.cell,
+                                    cell.getContext(),
+                                  )}
+                                </TableCell>
+                              );
+                            })}
+                          </TableRow>
+                        );
+                      })
+                    ) : (
+                      <TableRow>
+                        <TableCell
+                          colSpan={columns.length}
+                          className="h-24 text-center"
+                        >
+                          No results.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
-          </div>
-        </Tooltip>
-      </TooltipProvider>
+          </Tooltip>
+        </TooltipProvider>
 
-      <ExportBar />
+        <ExportBar />
+        <BulkEditBar />
 
-      <AnimatePresence>
-        {showBottomBar && <BottomBar transactions={tableData} />}
-      </AnimatePresence>
-    </div>
+        <AnimatePresence>
+          {showBottomBar && <BottomBar transactions={tableData} />}
+        </AnimatePresence>
+      </div>
+    </TransactionTableProvider>
   );
 }

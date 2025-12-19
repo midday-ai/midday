@@ -206,13 +206,25 @@ export const getTransactionsSchema = z.object({
         in: "query",
       },
     }),
-  excludeSynced: z
+  exported: z
     .boolean()
     .nullable()
     .optional()
     .openapi({
       description:
-        "When true, excludes transactions that have been synced to accounting software (status='synced' in accounting_sync_records)",
+        "Filter by export status. true = only exported transactions, false = only NOT exported transactions, undefined = no filter",
+      example: false,
+      param: {
+        in: "query",
+      },
+    }),
+  fulfilled: z
+    .boolean()
+    .nullable()
+    .optional()
+    .openapi({
+      description:
+        "Filter by fulfillment status. true = transactions ready for review (has attachments OR status=completed), false = not ready, undefined = no filter",
       example: true,
       param: {
         in: "query",

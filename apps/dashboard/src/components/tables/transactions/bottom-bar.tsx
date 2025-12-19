@@ -70,9 +70,9 @@ export function BottomBar({ transactions }: Props) {
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 100, opacity: 0 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
     >
-      <div className="pointer-events-auto backdrop-filter  dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-12 justify-between items-center flex px-4 border dark:border-[#2C2C2C] border-[#DCDAD2] space-x-2">
+      <div className="pointer-events-auto backdrop-filter  dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-12 justify-between items-center flex pl-4 pr-2 border dark:border-[#2C2C2C] border-[#DCDAD2] space-x-2">
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger className="flex items-center space-x-2">

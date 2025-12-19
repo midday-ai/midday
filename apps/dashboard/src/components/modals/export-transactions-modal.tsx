@@ -81,7 +81,9 @@ export function ExportTransactionsModal({
   onOpenChange,
 }: ExportTransactionsModalProps) {
   const { exportData, setExportData, setIsExporting } = useExportStore();
-  const { rowSelection, setRowSelection } = useTransactionsStore();
+  const { rowSelectionByTab, setRowSelection } = useTransactionsStore();
+  // Export modal is used from review tab, so use review tab selection
+  const rowSelection = rowSelectionByTab.review;
   const { data: user } = useUserQuery();
   const { data: team } = useTeamQuery();
   const teamMutation = useTeamMutation();
@@ -96,8 +98,8 @@ export function ExportTransactionsModal({
   const { data: reviewData } = useInfiniteQuery(
     trpc.transactions.get.infiniteQueryOptions(
       {
-        attachments: "include",
-        excludeSynced: true,
+        fulfilled: true,
+        exported: false,
         pageSize: 10000,
       },
       {
@@ -183,7 +185,7 @@ export function ExportTransactionsModal({
       onSuccess: (data) => {
         if (data?.id) {
           setExportData({ runId: data.id, exportType: "file" });
-          setRowSelection(() => ({}));
+          setRowSelection("review", {});
         }
       },
       onError: () => {
