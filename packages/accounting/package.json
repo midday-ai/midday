@@ -11,7 +11,8 @@
     "./utils": "./src/utils.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
   },
   "dependencies": {
     "@midday/encryption": "workspace:*",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
+    "@types/bun": "latest",
     "typescript": "^5.9.3"
   }
 }

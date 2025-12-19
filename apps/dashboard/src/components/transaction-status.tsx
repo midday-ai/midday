@@ -82,7 +82,25 @@ export function TransactionStatus({
   exportedAt,
   hasPendingSuggestion,
 }: Props) {
-  // Priority: In review (with optional error) > Receipt match > Exported
+  // Priority: Export error > In review > Receipt match > Exported
+
+  // Show "Export error" in red if export failed or partially failed
+  if (hasExportError && !isExported) {
+    return (
+      <TooltipProvider delayDuration={0}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span style={{ color: "#f44336" }} className="cursor-default">
+              Export error
+            </span>
+          </TooltipTrigger>
+          <TooltipContent sideOffset={10} className="text-xs">
+            <p>{getErrorMessage(exportErrorCode)}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
 
   if (isFulfilled && !isExported) {
     return (
@@ -92,16 +110,10 @@ export function TransactionStatus({
             <span className="cursor-default">In review</span>
           </TooltipTrigger>
           <TooltipContent sideOffset={10} className="text-xs">
-            {hasExportError ? (
-              <p style={{ color: "#f44336" }}>
-                {getErrorMessage(exportErrorCode)}
-              </p>
-            ) : (
-              <p>
-                Receipt attached and categorized —<br />
-                ready to export
-              </p>
-            )}
+            <p>
+              Receipt attached and categorized —<br />
+              ready to export
+            </p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

@@ -258,7 +258,8 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
 
       // Use the first error code and message for the sync record
       // (most attachment failures have the same root cause)
-      const errorCode = failedCount > 0 ? errorCodes[0] : undefined;
+      // Use null to clear values on successful retry
+      const errorCode = failedCount > 0 ? (errorCodes[0] ?? null) : null;
       const errorMessage =
         failedCount > 0
           ? (errorMessages[0] ??
@@ -272,12 +273,9 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
         errorCode,
       };
 
-      if (syncRecordId) {
-        await updateSyncedAttachmentMapping(db, {
-          syncRecordId,
-          ...updateParams,
-        });
-      } else {
+      let recordIdToUpdate = syncRecordId;
+
+      if (!recordIdToUpdate) {
         // For new syncs, find the sync record and update it
         const syncRecords = await getAccountingSyncStatus(db, {
           teamId,
@@ -286,11 +284,33 @@ export class SyncAttachmentsProcessor extends AccountingProcessorBase<Accounting
         });
 
         if (syncRecords.length > 0 && syncRecords[0]) {
-          await updateSyncedAttachmentMapping(db, {
-            syncRecordId: syncRecords[0].id,
-            ...updateParams,
-          });
+          recordIdToUpdate = syncRecords[0].id;
         }
+      }
+
+      if (recordIdToUpdate) {
+        await updateSyncedAttachmentMapping(db, {
+          syncRecordId: recordIdToUpdate,
+          ...updateParams,
+        });
+
+        this.logger.info("Sync record status updated", {
+          syncRecordId: recordIdToUpdate,
+          transactionId,
+          status,
+          uploadedCount,
+          deletedCount,
+          failedCount,
+          errorMessage: errorMessage ?? undefined,
+        });
+      } else {
+        this.logger.error("Could not find sync record to update status", {
+          transactionId,
+          teamId,
+          providerId,
+          status,
+          failedCount,
+        });
       }
     }
 
