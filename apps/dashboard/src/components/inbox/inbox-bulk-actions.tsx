@@ -1,6 +1,7 @@
 "use client";
 
 import { revalidateInbox } from "@/actions/revalidate-action";
+import { Portal } from "@/components/portal";
 import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useInboxStore } from "@/store/inbox";
@@ -136,7 +137,7 @@ export function InboxBulkActions() {
   }
 
   return (
-    <>
+    <Portal>
       <AnimatePresence>
         <motion.div
           className="h-12 fixed bottom-6 left-0 right-0 pointer-events-none flex justify-center z-50"
@@ -202,6 +203,6 @@ export function InboxBulkActions() {
           </div>
         </motion.div>
       </AnimatePresence>
-    </>
+    </Portal>
   );
 }

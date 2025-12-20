@@ -9,6 +9,11 @@ import { type RefObject, useEffect, useRef } from "react";
 export const HEADER_OFFSET_VAR = "--header-offset";
 
 /**
+ * CSS variable name for header transition duration
+ */
+export const HEADER_TRANSITION_VAR = "--header-transition";
+
+/**
  * Hook to manage header visibility based on scroll position.
  * Uses CSS custom properties for performant updates without React re-renders.
  *
@@ -34,6 +39,9 @@ export function useScrollHeader(scrollRef?: RefObject<HTMLElement | null>) {
   }, [pathname]);
 
   useEffect(() => {
+    // Restore transition duration on mount (may have been disabled during previous navigation)
+    document.documentElement.style.setProperty(HEADER_TRANSITION_VAR, "200ms");
+
     const handleScroll = () => {
       // Cancel any pending RAF to avoid stacking
       if (rafRef.current !== null) {
@@ -81,8 +89,11 @@ export function useScrollHeader(scrollRef?: RefObject<HTMLElement | null>) {
         cancelAnimationFrame(rafRef.current);
       }
 
-      // Don't reset CSS variable on cleanup - preserve state across tab changes
-      // The pathname effect handles resetting when navigating to different pages
+      // Reset CSS variable on cleanup - each page manages its own state
+      // Disable transition to prevent animation during navigation
+      document.documentElement.style.setProperty(HEADER_TRANSITION_VAR, "0s");
+      document.documentElement.style.setProperty(HEADER_OFFSET_VAR, "0px");
+      document.body.style.overflow = "";
     };
   }, [scrollRef]);
 }
