@@ -1,6 +1,7 @@
 "use client";
 
 import { ExportTransactionsModal } from "@/components/modals/export-transactions-modal";
+import { Portal } from "@/components/portal";
 import {
   type AccountingJobResult,
   useAccountingError,
@@ -311,101 +312,103 @@ export function ExportBar() {
 
   return (
     <>
-      <AnimatePresence>
-        <motion.div
-          className="h-12 fixed left-[50%] bottom-6 w-[400px] -ml-[200px] z-50"
-          animate={{ y: isOpen ? 0 : 100 }}
-          initial={{ y: 100 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
-        >
-          {/* Blur layer fades in separately to avoid backdrop-filter animation issues */}
+      <Portal>
+        <AnimatePresence>
           <motion.div
-            className="absolute inset-0 mx-2 md:mx-0 backdrop-filter backdrop-blur-lg bg-[rgba(247,247,247,0.85)] dark:bg-[rgba(19,19,19,0.7)]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: isOpen ? 1 : 0 }}
-            transition={{ duration: 0.15 }}
-          />
-          <div className="relative mx-2 md:mx-0 h-12 justify-between items-center flex pl-4 pr-2">
-            <span className="text-sm">
-              {displayCount}{" "}
-              {exportingCount !== null
-                ? "exporting"
-                : hasManualSelection
-                  ? "selected"
-                  : "transactions ready to export"}
-            </span>
+            className="h-12 fixed left-[50%] bottom-6 w-[400px] -ml-[200px] z-50"
+            animate={{ y: isOpen ? 0 : 100 }}
+            initial={{ y: 100 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+          >
+            {/* Blur layer fades in separately to avoid backdrop-filter animation issues */}
+            <motion.div
+              className="absolute inset-0 mx-2 md:mx-0 backdrop-filter backdrop-blur-lg bg-[rgba(247,247,247,0.85)] dark:bg-[rgba(19,19,19,0.7)]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: isOpen ? 1 : 0 }}
+              transition={{ duration: 0.15 }}
+            />
+            <div className="relative mx-2 md:mx-0 h-12 justify-between items-center flex pl-4 pr-2">
+              <span className="text-sm">
+                {displayCount}{" "}
+                {exportingCount !== null
+                  ? "exporting"
+                  : hasManualSelection
+                    ? "selected"
+                    : "transactions ready to export"}
+              </span>
 
-            <div className="flex items-center space-x-2">
-              {hasManualSelection && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-muted-foreground"
-                  onClick={() => setRowSelection("review", {})}
-                >
-                  Deselect
-                </Button>
-              )}
-
-              {isExportingAccounting ? (
-                <Button disabled className="gap-2">
-                  <Spinner className="size-4" />
-                  <span>Exporting...</span>
-                </Button>
-              ) : (
-                <div className="flex items-center gap-[1px]">
+              <div className="flex items-center space-x-2">
+                {hasManualSelection && (
                   <Button
-                    onClick={handlePrimaryExport}
-                    disabled={displayCount === 0}
-                    className="rounded-r-none gap-2"
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground"
+                    onClick={() => setRowSelection("review", {})}
                   >
-                    {/* Show provider icon only for accounting export */}
-                    {connectedProvider &&
-                      exportPreference === "accounting" &&
-                      ProviderIcon && <ProviderIcon className="size-4" />}
-                    <span>Export</span>
+                    Deselect
                   </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        disabled={displayCount === 0}
-                        className="rounded-l-none px-2"
-                      >
-                        <Icons.ChevronDown className="size-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" sideOffset={10}>
-                      {connectedProvider && ProviderIcon ? (
-                        <DropdownMenuItem onClick={selectAccountingExport}>
-                          <ProviderIcon className="size-4 mr-2" />
-                          Export to {PROVIDER_NAMES[connectedProvider.app_id]}
+                )}
+
+                {isExportingAccounting ? (
+                  <Button disabled className="gap-2">
+                    <Spinner className="size-4" />
+                    <span>Exporting...</span>
+                  </Button>
+                ) : (
+                  <div className="flex items-center gap-[1px]">
+                    <Button
+                      onClick={handlePrimaryExport}
+                      disabled={displayCount === 0}
+                      className="rounded-r-none gap-2"
+                    >
+                      {/* Show provider icon only for accounting export */}
+                      {connectedProvider &&
+                        exportPreference === "accounting" &&
+                        ProviderIcon && <ProviderIcon className="size-4" />}
+                      <span>Export</span>
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          disabled={displayCount === 0}
+                          className="rounded-l-none px-2"
+                        >
+                          <Icons.ChevronDown className="size-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" sideOffset={10}>
+                        {connectedProvider && ProviderIcon ? (
+                          <DropdownMenuItem onClick={selectAccountingExport}>
+                            <ProviderIcon className="size-4 mr-2" />
+                            Export to {PROVIDER_NAMES[connectedProvider.app_id]}
+                          </DropdownMenuItem>
+                        ) : (
+                          // Show connect options when no provider is connected
+                          ACCOUNTING_PROVIDERS.map((provider) => {
+                            const Icon = PROVIDER_ICONS[provider.id];
+                            return (
+                              <DropdownMenuItem key={provider.id} asChild>
+                                <Link href={`/apps?app=${provider.id}`}>
+                                  {Icon && <Icon className="size-4 mr-2" />}
+                                  Connect {provider.name}
+                                </Link>
+                              </DropdownMenuItem>
+                            );
+                          })
+                        )}
+                        <DropdownMenuItem onClick={selectFileExport}>
+                          <Icons.FolderZip className="size-4 mr-2" />
+                          Export to file
                         </DropdownMenuItem>
-                      ) : (
-                        // Show connect options when no provider is connected
-                        ACCOUNTING_PROVIDERS.map((provider) => {
-                          const Icon = PROVIDER_ICONS[provider.id];
-                          return (
-                            <DropdownMenuItem key={provider.id} asChild>
-                              <Link href={`/apps?app=${provider.id}`}>
-                                {Icon && <Icon className="size-4 mr-2" />}
-                                Connect {provider.name}
-                              </Link>
-                            </DropdownMenuItem>
-                          );
-                        })
-                      )}
-                      <DropdownMenuItem onClick={selectFileExport}>
-                        <Icons.FolderZip className="size-4 mr-2" />
-                        Export to file
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </motion.div>
-      </AnimatePresence>
+          </motion.div>
+        </AnimatePresence>
+      </Portal>
 
       <ExportTransactionsModal
         isOpen={isModalOpen}

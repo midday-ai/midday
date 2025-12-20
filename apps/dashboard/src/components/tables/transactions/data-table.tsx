@@ -1,6 +1,7 @@
 "use client";
 
 import { updateColumnVisibilityAction } from "@/actions/update-column-visibility-action";
+import { useScrollHeader } from "@/hooks/use-scroll-header";
 import { useSortParams } from "@/hooks/use-sort-params";
 import { useStickyColumns } from "@/hooks/use-sticky-columns";
 import { useTableScroll } from "@/hooks/use-table-scroll";
@@ -26,7 +27,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { type VirtualItem, useVirtualizer } from "@tanstack/react-virtual";
-import { AnimatePresence } from "framer-motion";
 import {
   use,
   useCallback,
@@ -37,7 +37,6 @@ import {
   useState,
 } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { BottomBar } from "./bottom-bar";
 import { BulkEditBar } from "./bulk-edit-bar";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
@@ -72,6 +71,9 @@ export function DataTable({
   const { transactionId, setParams } = useTransactionParams();
   const parentRef = useRef<HTMLDivElement>(null);
 
+  // Hide header on scroll
+  useScrollHeader(parentRef);
+
   // Use the current tab from URL, falling back to initial value
   const activeTab = (tab ?? initialTab ?? "all") as TransactionTab;
   const isReviewTab = activeTab === "review";
@@ -85,7 +87,6 @@ export function DataTable({
     [activeTab, setRowSelectionForTab],
   );
 
-  const showBottomBar = hasFilters && !Object.keys(rowSelection).length;
   const initialColumnVisibility = use(columnVisibilityPromise);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     initialColumnVisibility ?? {},
@@ -530,7 +531,10 @@ export function DataTable({
                     ).current = el;
                   }
                 }}
-                className="h-[calc(100vh-180px)] overflow-auto overscroll-x-none md:border-l md:border-r md:border-b md:border-border scrollbar-hide"
+                className="overflow-auto overscroll-x-none md:border-l md:border-r md:border-b md:border-border scrollbar-hide"
+                style={{
+                  height: "calc(100vh - 180px + var(--header-offset, 0px))",
+                }}
               >
                 <Table>
                   <DataTableHeader table={table} tableScroll={tableScroll} />
@@ -631,10 +635,6 @@ export function DataTable({
 
         <ExportBar />
         <BulkEditBar />
-
-        <AnimatePresence>
-          {showBottomBar && <BottomBar transactions={tableData} />}
-        </AnimatePresence>
       </div>
     </TransactionTableProvider>
   );

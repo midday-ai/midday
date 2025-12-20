@@ -7,7 +7,7 @@ import { TransactionsSearchFilter } from "@/components/transactions-search-filte
 import { loadSortParams } from "@/hooks/use-sort-params";
 import { loadTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
 import { loadTransactionTab } from "@/hooks/use-transaction-tab";
-import { HydrateClient, getQueryClient, trpc } from "@/trpc/server";
+import { HydrateClient, batchPrefetch, trpc } from "@/trpc/server";
 import { getInitialTransactionsColumnVisibility } from "@/utils/columns";
 import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
@@ -22,7 +22,6 @@ type Props = {
 };
 
 export default async function Transactions(props: Props) {
-  const queryClient = getQueryClient();
   const searchParams = await props.searchParams;
 
   const filter = loadTransactionFilterParams(searchParams);
@@ -30,31 +29,29 @@ export default async function Transactions(props: Props) {
   const { tab } = loadTransactionTab(searchParams);
 
   const columnVisibility = getInitialTransactionsColumnVisibility();
-  const isReviewTab = tab === "review";
 
-  // Build query filter matching the client-side filter in data-table.tsx
-  const queryFilter = isReviewTab
-    ? {
-        ...filter,
-        amountRange: filter.amount_range ?? null,
-        sort,
-        fulfilled: true,
-        exported: false,
-        pageSize: 10000,
-      }
-    : {
-        ...filter,
-        amountRange: filter.amount_range ?? null,
-        sort,
-      };
+  // Build query filters for both tabs
+  const allTabFilter = {
+    ...filter,
+    amountRange: filter.amount_range ?? null,
+    sort,
+  };
 
-  // Change this to prefetch once this is fixed: https://github.com/trpc/trpc/issues/6632
-  await queryClient.fetchInfiniteQuery(
-    trpc.transactions.get.infiniteQueryOptions(queryFilter),
-  );
+  const reviewTabFilter = {
+    ...filter,
+    amountRange: filter.amount_range ?? null,
+    sort,
+    fulfilled: true,
+    exported: false,
+    pageSize: 10000,
+  };
 
-  // Prefetch review count for tabs
-  queryClient.prefetchQuery(trpc.transactions.getReviewCount.queryOptions());
+  // Prefetch both tabs + review count in parallel
+  batchPrefetch([
+    trpc.transactions.get.infiniteQueryOptions(allTabFilter),
+    trpc.transactions.get.infiniteQueryOptions(reviewTabFilter),
+    trpc.transactions.getReviewCount.queryOptions(),
+  ]);
 
   return (
     <HydrateClient>
