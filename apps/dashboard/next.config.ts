@@ -4,6 +4,18 @@ import { withSentryConfig } from "@sentry/nextjs";
 const config = {
   poweredByHeader: false,
   reactStrictMode: true,
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "react-icons",
+      "date-fns",
+      "framer-motion",
+      "recharts",
+      "@dnd-kit/core",
+      "@dnd-kit/sortable",
+      "usehooks-ts",
+    ],
+  },
   images: {
     loader: "custom",
     loaderFile: "./image-loader.ts",
