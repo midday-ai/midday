@@ -46,11 +46,17 @@ export default async function Transactions(props: Props) {
     pageSize: 10000,
   };
 
-  // Prefetch both tabs + review count in parallel
+  // Prefetch all data needed for instant experience
   batchPrefetch([
+    // Transaction data for both tabs
     trpc.transactions.get.infiniteQueryOptions(allTabFilter),
     trpc.transactions.get.infiniteQueryOptions(reviewTabFilter),
     trpc.transactions.getReviewCount.queryOptions(),
+    // Shared data used by table rows (assign user, tags)
+    trpc.team.members.queryOptions(),
+    trpc.tags.get.queryOptions(),
+    // Apps for export bar (accounting providers)
+    trpc.apps.getApps.queryOptions(),
   ]);
 
   return (

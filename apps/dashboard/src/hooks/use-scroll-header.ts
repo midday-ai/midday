@@ -29,6 +29,7 @@ export function useScrollHeader(scrollRef?: RefObject<HTMLElement | null>) {
       prevPathnameRef.current = pathname;
       prevHiddenRef.current = false;
       document.documentElement.style.setProperty(HEADER_OFFSET_VAR, "0px");
+      document.body.style.overflow = "";
     }
   }, [pathname]);
 
@@ -53,12 +54,14 @@ export function useScrollHeader(scrollRef?: RefObject<HTMLElement | null>) {
         // Only update if state changed
         if (shouldHide !== prevHiddenRef.current) {
           prevHiddenRef.current = shouldHide;
-          // Update CSS variable - this is very performant as it only touches the DOM once
+          // Update CSS variables - this is very performant as it only touches the DOM once
           // and all CSS calculations using var(--header-offset) update automatically
           document.documentElement.style.setProperty(
             HEADER_OFFSET_VAR,
             shouldHide ? "70px" : "0px",
           );
+          // Set overflow on body to prevent body scroll when header is collapsed
+          document.body.style.overflow = shouldHide ? "hidden" : "";
         }
 
         rafRef.current = null;
