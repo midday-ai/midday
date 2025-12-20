@@ -1,6 +1,5 @@
 "use client";
 
-import { Canvas } from "@/components/canvas";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useChatStatus } from "@/hooks/use-chat-status";
 import { useChat, useChatActions, useDataPart } from "@ai-sdk-tools/store";
@@ -10,6 +9,7 @@ import { cn } from "@midday/ui/cn";
 import { Conversation, ConversationContent } from "@midday/ui/conversation";
 import type { Geo } from "@vercel/functions";
 import { DefaultChatTransport, generateId } from "ai";
+import dynamic from "next/dynamic";
 import { parseAsString, useQueryState } from "nuqs";
 import { useEffect, useMemo, useRef } from "react";
 import {
@@ -20,6 +20,12 @@ import {
   ChatStatusIndicators,
 } from "./";
 import { SuggestedPrompts } from "./suggested-prompts";
+
+// Dynamically load Canvas (15 chart components) - only loads when user opens an artifact
+const Canvas = dynamic(
+  () => import("@/components/canvas").then((mod) => mod.Canvas),
+  { ssr: false },
+);
 
 type Props = {
   geo?: Geo;
@@ -115,8 +121,6 @@ export function ChatInterface({ geo }: Props) {
 
   const hasMessages = messages.length > 0;
 
-  const [suggestions] = useDataPart<{ prompts: string[] }>("suggestions");
-  const hasSuggestions = suggestions?.prompts && suggestions.prompts.length > 0;
   const showCanvas = Boolean(selectedType);
 
   return (

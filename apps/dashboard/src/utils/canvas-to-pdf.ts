@@ -1,8 +1,5 @@
 "use client";
 
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
-
 export interface CanvasPdfOptions {
   filename?: string;
   quality?: number;
@@ -40,6 +37,9 @@ export async function generateCanvasPdf(
       : { r: 255, g: 255, b: 255 };
 
   try {
+    // Dynamically import heavy libraries (saves ~600KB from initial bundle)
+    const html2canvas = (await import("html2canvas")).default;
+
     // Find the canvas content
     const canvasContent = getCanvasContent();
     if (!canvasContent) {
@@ -165,6 +165,9 @@ export async function generateCanvasPdfBlob(
       : { r: 255, g: 255, b: 255 };
 
   try {
+    // Dynamically import heavy libraries (saves ~600KB from initial bundle)
+    const html2canvas = (await import("html2canvas")).default;
+
     // Find the canvas content
     const canvasContent = getCanvasContent();
     if (!canvasContent) {
@@ -274,6 +277,9 @@ async function createPdfFromCanvas(
     backgroundRgb: { r: number; g: number; b: number };
   },
 ): Promise<void> {
+  // Dynamically import jsPDF
+  const { jsPDF } = await import("jspdf");
+
   // Use JPEG for better compression while maintaining quality
   const imgData = canvas.toDataURL("image/jpeg", options.quality);
 
@@ -339,6 +345,9 @@ async function createPdfBlobFromCanvas(
     backgroundRgb: { r: number; g: number; b: number };
   },
 ): Promise<Blob> {
+  // Dynamically import jsPDF
+  const { jsPDF } = await import("jspdf");
+
   // Use JPEG for better compression while maintaining quality
   const imgData = canvas.toDataURL("image/jpeg", options.quality);
 

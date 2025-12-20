@@ -23,17 +23,25 @@ import {
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
+import { Skeleton } from "@midday/ui/skeleton";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { Textarea } from "@midday/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
 import { z } from "zod/v3";
 import { CountrySelector } from "../country-selector";
-import {
-  type AddressDetails,
-  SearchAddressInput,
-} from "../search-address-input";
+import type { AddressDetails } from "../search-address-input";
 import { SelectTags } from "../select-tags";
 import { VatNumberInput } from "../vat-number-input";
+
+// Dynamically import Google Maps component (saves ~200KB from initial bundle)
+const SearchAddressInput = dynamic(
+  () => import("../search-address-input").then((mod) => mod.SearchAddressInput),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-9 w-full" />,
+  },
+);
 
 const formSchema = z.object({
   id: z.string().uuid().optional(),
