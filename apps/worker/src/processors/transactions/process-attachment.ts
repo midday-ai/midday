@@ -71,7 +71,7 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
           quality: 1,
         });
 
-        image = await sharp(decodedImage)
+        image = await sharp(Buffer.from(decodedImage))
           .rotate()
           .resize({ width: MAX_SIZE })
           .toFormat("jpeg")
