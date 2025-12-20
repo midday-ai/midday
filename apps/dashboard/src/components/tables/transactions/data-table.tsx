@@ -1,6 +1,7 @@
 "use client";
 
 import { updateColumnVisibilityAction } from "@/actions/update-column-visibility-action";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useScrollHeader } from "@/hooks/use-scroll-header";
 import { useSortParams } from "@/hooks/use-sort-params";
 import { useStickyColumns } from "@/hooks/use-sticky-columns";
@@ -21,6 +22,8 @@ import { Tooltip, TooltipProvider } from "@midday/ui/tooltip";
 import { toast } from "@midday/ui/use-toast";
 import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import {
+  type ColumnOrderState,
+  type ColumnSizingState,
   type VisibilityState,
   flexRender,
   getCoreRowModel,
@@ -90,6 +93,18 @@ export function DataTable({
   const initialColumnVisibility = use(columnVisibilityPromise);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     initialColumnVisibility ?? {},
+  );
+
+  // Column sizing state persisted to localStorage
+  const [columnSizing, setColumnSizing] = useLocalStorage<ColumnSizingState>(
+    "transactions-column-sizing",
+    {},
+  );
+
+  // Column order state persisted to localStorage
+  const [columnOrder, setColumnOrder] = useLocalStorage<ColumnOrderState>(
+    "transactions-column-order",
+    [],
   );
 
   // Build query filters based on active tab
@@ -340,9 +355,16 @@ export function DataTable({
     getCoreRowModel: getCoreRowModel(),
     onRowSelectionChange: setRowSelection,
     onColumnVisibilityChange: setColumnVisibility,
+    // Column resizing
+    enableColumnResizing: true,
+    columnResizeMode: "onChange",
+    onColumnSizingChange: setColumnSizing,
+    onColumnOrderChange: setColumnOrder,
     state: {
       rowSelection,
       columnVisibility,
+      columnSizing,
+      columnOrder,
     },
     meta: tableMeta,
   });
@@ -567,14 +589,26 @@ export function DataTable({
                           >
                             {row.getVisibleCells().map((cell) => {
                               const isActions = cell.column.id === "actions";
+                              const meta = cell.column.columnDef.meta as
+                                | { sticky?: boolean; className?: string }
+                                | undefined;
+                              const isSticky = meta?.sticky;
                               return (
                                 <TableCell
                                   key={cell.id}
                                   className={`h-full flex items-center ${getStickyClassName(
                                     cell.column.id,
-                                    cell.column.columnDef.meta?.className,
+                                    meta?.className,
                                   )}`}
                                   style={{
+                                    // Use dynamic width from column sizing (respects user resizing)
+                                    width: cell.column.getSize(),
+                                    minWidth: isSticky
+                                      ? cell.column.getSize()
+                                      : cell.column.columnDef.minSize,
+                                    maxWidth: isSticky
+                                      ? cell.column.getSize()
+                                      : cell.column.columnDef.maxSize,
                                     ...getStickyStyle(cell.column.id),
                                     ...(isActions && {
                                       borderLeft:

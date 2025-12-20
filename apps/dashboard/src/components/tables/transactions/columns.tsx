@@ -258,7 +258,12 @@ ActionsCell.displayName = "ActionsCell";
 export const columns: ColumnDef<Transaction>[] = [
   {
     id: "select",
+    size: 50,
+    minSize: 50,
+    maxSize: 50,
+    enableResizing: false,
     meta: {
+      sticky: true,
       className:
         "w-[50px] min-w-[50px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border",
     },
@@ -298,7 +303,12 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "date",
     header: "Date",
+    size: 110,
+    minSize: 110,
+    maxSize: 110,
+    enableResizing: false,
     meta: {
+      sticky: true,
       className:
         "w-[110px] min-w-[110px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border",
     },
@@ -313,9 +323,14 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "description",
     header: "Description",
+    size: 320,
+    minSize: 200,
+    maxSize: 600,
+    enableResizing: true,
     meta: {
+      sticky: true,
       className:
-        "w-[320px] min-w-[320px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border",
+        "w-[320px] min-w-[200px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border",
     },
     cell: ({ row }) => (
       <DescriptionCell
@@ -329,6 +344,10 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "amount",
     header: "Amount",
+    size: 170,
+    minSize: 100,
+    maxSize: 400,
+    enableResizing: true,
     meta: {
       className: "w-[170px] min-w-[170px]",
     },
@@ -342,6 +361,10 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "taxAmount",
     header: "Tax Amount",
+    size: 170,
+    minSize: 100,
+    maxSize: 400,
+    enableResizing: true,
     meta: {
       className: "w-[170px] min-w-[170px]",
     },
@@ -356,6 +379,10 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "category",
     header: "Category",
+    size: 250,
+    minSize: 150,
+    maxSize: 400,
+    enableResizing: true,
     meta: {
       className: "w-[250px] min-w-[250px]",
     },
@@ -409,6 +436,10 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "counterparty",
     header: "From / To",
+    size: 200,
+    minSize: 120,
+    maxSize: 400,
+    enableResizing: true,
     meta: {
       className: "w-[200px] min-w-[200px]",
     },
@@ -421,6 +452,10 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "tags",
     header: "Tags",
+    size: 280,
+    minSize: 150,
+    maxSize: 500,
+    enableResizing: true,
     meta: {
       className: "w-[280px] min-w-[280px] max-w-[280px]",
     },
@@ -434,6 +469,10 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "bank_account",
     header: "Account",
+    size: 250,
+    minSize: 150,
+    maxSize: 400,
+    enableResizing: true,
     meta: {
       className: "w-[250px] min-w-[250px]",
     },
@@ -447,6 +486,10 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "method",
     header: "Method",
+    size: 140,
+    minSize: 100,
+    maxSize: 300,
+    enableResizing: true,
     meta: {
       className: "w-[140px] min-w-[140px]",
     },
@@ -455,6 +498,10 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "assigned",
     header: "Assigned",
+    size: 220,
+    minSize: 150,
+    maxSize: 400,
+    enableResizing: true,
     meta: {
       className: "w-[220px] min-w-[220px]",
     },
@@ -476,6 +523,11 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     accessorKey: "status",
+    header: "Status",
+    size: 160,
+    minSize: 120,
+    maxSize: 300,
+    enableResizing: true,
     meta: {
       className: "w-[160px] min-w-[160px] !border-r-0",
     },
@@ -509,9 +561,14 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     id: "actions",
+    size: 100,
+    minSize: 100,
+    maxSize: 100,
+    enableResizing: false,
     enableSorting: false,
     enableHiding: false,
     meta: {
+      sticky: true,
       className:
         "w-[100px] min-w-[100px] md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 !border-solid !border-l !border-l-border !border-r-0 !border-t-0 !border-b-0",
     },
