@@ -16,7 +16,7 @@ const google = createGoogleGenerativeAI({
 export class DocumentClassifier {
   async #processDocument({ content }: DocumentClassifierRequest) {
     const result = await generateObject({
-      model: google("gemini-2.5-flash"),
+      model: google("gemini-3-flash-preview"),
       schema: documentClassifierSchema,
       temperature: 0.1,
       messages: [
@@ -43,7 +43,7 @@ CRITICAL: The previous attempt returned a null title, which is not acceptable. Y
 Never return null for the title field.`;
 
       const retryResult = await generateObject({
-        model: google("gemini-2.5-flash"),
+        model: google("gemini-3-flash-preview"),
         schema: documentClassifierSchema,
         temperature: 0.1,
         messages: [
@@ -66,7 +66,7 @@ Never return null for the title field.`;
 
   async #processImage(request: DocumentClassifierImageRequest) {
     const result = await generateObject({
-      model: google("gemini-2.5-flash"),
+      model: google("gemini-3-flash-preview"),
       schema: imageClassifierSchema,
       temperature: 0.1, // Lower temperature for more consistent, deterministic title extraction
       messages: [
@@ -98,7 +98,7 @@ CRITICAL: The previous attempt returned a null title, which is not acceptable. Y
 Never return null for the title field.`;
 
       const retryResult = await generateObject({
-        model: google("gemini-2.5-flash"),
+        model: google("gemini-3-flash-preview"),
         schema: imageClassifierSchema,
         temperature: 0.1,
         messages: [

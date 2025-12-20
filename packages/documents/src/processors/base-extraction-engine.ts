@@ -1,8 +1,12 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createMistral } from "@ai-sdk/mistral";
 import { createLoggerWithContext } from "@midday/logger";
 import { generateObject } from "ai";
 import type { z } from "zod/v4";
-import type { ExtractionConfig } from "../config/extraction-config";
+import type {
+  ExtractionConfig,
+  ModelConfig,
+} from "../config/extraction-config";
 import type { PromptComponents } from "../prompts/factory";
 import { createFieldSpecificPrompt } from "../prompts/field-specific";
 import type { DocumentFormat } from "../utils/format-detection";
@@ -12,6 +16,27 @@ import { retryCall } from "../utils/retry";
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY!,
 });
+
+const mistral = createMistral({
+  apiKey: process.env.MISTRAL_API_KEY!,
+});
+
+/**
+ * Check if an error is a rate limit error
+ */
+function isRateLimitError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+
+  const message = error.message.toLowerCase();
+  return (
+    message.includes("rate limit") ||
+    message.includes("rate_limit") ||
+    message.includes("too many requests") ||
+    message.includes("quota") ||
+    message.includes("429") ||
+    message.includes("resource_exhausted")
+  );
+}
 
 export interface ExtractionResult<T> {
   data: T;
@@ -51,14 +76,13 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
   }
 
   /**
-   * Extract data using a specific model
+   * Extract data using a specific provider and model
    */
-  protected async extractWithModel(
+  protected async extractWithProvider(
     documentUrl: string,
     prompt: string,
-    model: string,
+    modelConfig: ModelConfig,
   ): Promise<z.infer<T>> {
-    const contentType = this.config.contentType === "file" ? "file" : "image";
     const contentField =
       this.config.contentType === "file"
         ? {
@@ -71,10 +95,25 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
             image: documentUrl,
           };
 
+    const model =
+      modelConfig.provider === "mistral"
+        ? mistral(modelConfig.model)
+        : google(modelConfig.model);
+
+    // Provider-specific options
+    const providerOptions =
+      modelConfig.provider === "mistral"
+        ? {
+            mistral: {
+              documentPageLimit: 10,
+            },
+          }
+        : undefined;
+
     const result = await retryCall(
       () =>
         generateObject({
-          model: google(model),
+          model,
           schema: this.config.schema,
           temperature: 0.1,
           abortSignal: AbortSignal.timeout(this.config.timeout),
@@ -88,6 +127,7 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
               content: [contentField],
             },
           ],
+          ...(providerOptions && { providerOptions }),
         }),
       this.config.retries,
       2000, // Start with 2s delay
@@ -97,27 +137,96 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
   }
 
   /**
-   * Extract with primary model
+   * Extract with cascading fallback across providers
+   * Tries primary -> secondary -> tertiary with rate limit detection
+   */
+  protected async extractWithCascadingFallback(
+    documentUrl: string,
+    prompt: string,
+  ): Promise<{ result: z.infer<T>; usedModel: ModelConfig }> {
+    const models = [
+      { config: this.config.models.primary, name: "primary" },
+      { config: this.config.models.secondary, name: "secondary" },
+      { config: this.config.models.tertiary, name: "tertiary" },
+    ];
+
+    let lastError: Error | null = null;
+
+    for (const { config: modelConfig, name } of models) {
+      try {
+        this.logger.info(`Attempting extraction with ${name} model`, {
+          provider: modelConfig.provider,
+          model: modelConfig.model,
+        });
+
+        const result = await this.extractWithProvider(
+          documentUrl,
+          prompt,
+          modelConfig,
+        );
+
+        this.logger.info(`Extraction succeeded with ${name} model`, {
+          provider: modelConfig.provider,
+          model: modelConfig.model,
+        });
+
+        return { result, usedModel: modelConfig };
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+
+        const isRateLimit = isRateLimitError(error);
+        this.logger.warn(`${name} model extraction failed`, {
+          provider: modelConfig.provider,
+          model: modelConfig.model,
+          isRateLimit,
+          error: lastError.message,
+        });
+        // Continue to next model on rate limit or any error
+      }
+    }
+
+    // All models failed
+    throw lastError || new Error("All extraction models failed");
+  }
+
+  /**
+   * Extract with primary model (uses cascading fallback)
    */
   protected async extractWithPrimaryModel(
     documentUrl: string,
     prompt: string,
   ): Promise<z.infer<T>> {
-    return this.extractWithModel(documentUrl, prompt, this.config.primaryModel);
+    const { result } = await this.extractWithCascadingFallback(
+      documentUrl,
+      prompt,
+    );
+    return result;
   }
 
   /**
-   * Extract with fallback model
+   * Extract with secondary/fallback model (skips primary)
    */
   protected async extractWithFallbackModel(
     documentUrl: string,
     prompt: string,
   ): Promise<z.infer<T>> {
-    return this.extractWithModel(
-      documentUrl,
-      prompt,
-      this.config.fallbackModel,
-    );
+    // Try secondary first, then tertiary
+    try {
+      return await this.extractWithProvider(
+        documentUrl,
+        prompt,
+        this.config.models.secondary,
+      );
+    } catch (error) {
+      this.logger.warn("Secondary model failed, trying tertiary", {
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+      return await this.extractWithProvider(
+        documentUrl,
+        prompt,
+        this.config.models.tertiary,
+      );
+    }
   }
 
   /**
@@ -127,7 +236,7 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
   protected async extractWithTextFallback(
     documentUrl: string,
     prompt: string,
-    model: string,
+    modelConfig: ModelConfig,
   ): Promise<z.infer<T>> {
     // Extract text from PDF
     const extractedText = await extractTextFromPdf(documentUrl);
@@ -141,11 +250,16 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
     // Modify prompt to indicate text was extracted from PDF
     const modifiedPrompt = `${prompt}\n\nNOTE: The document content below was extracted as text from a PDF. Some formatting, layout, or visual elements may be missing. Please extract the requested information from the text content.`;
 
-    // Send extracted text as text content (not file) to Gemini
+    const model =
+      modelConfig.provider === "mistral"
+        ? mistral(modelConfig.model)
+        : google(modelConfig.model);
+
+    // Send extracted text as text content (not file)
     const result = await retryCall(
       () =>
         generateObject({
-          model: google(model),
+          model,
           schema: this.config.schema,
           temperature: 0.1,
           abortSignal: AbortSignal.timeout(this.config.timeout),
@@ -275,10 +389,17 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
                 fieldPrompt = `${fieldPrompt}\n\n${formatHints}`;
               }
             }
+            // Use secondary model (Google) for field re-extraction for reliability
+            const modelConfig = this.config.models.secondary;
+            const model =
+              modelConfig.provider === "mistral"
+                ? mistral(modelConfig.model)
+                : google(modelConfig.model);
+
             const result = await retryCall(
               () =>
                 generateObject({
-                  model: google(this.config.primaryModel),
+                  model,
                   schema: this.config.schema,
                   temperature: 0.1,
                   abortSignal: AbortSignal.timeout(90000),
@@ -355,10 +476,18 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
                 fieldPrompt = `${fieldPrompt}\n\n${formatHints}`;
               }
             }
+
+            // Use secondary model (Google) for field re-extraction for reliability
+            const modelConfig = this.config.models.secondary;
+            const model =
+              modelConfig.provider === "mistral"
+                ? mistral(modelConfig.model)
+                : google(modelConfig.model);
+
             const result = await retryCall(
               () =>
                 generateObject({
-                  model: google(this.config.primaryModel),
+                  model,
                   schema: this.config.schema,
                   temperature: 0.1,
                   abortSignal: AbortSignal.timeout(30000),
@@ -439,9 +568,9 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
       const promptComponents = promptFactory(companyName);
       const prompt = this.composePrompt(promptComponents, false);
 
-      logger.info("Pass 1: Extracting with primary model", {
+      logger.info("Pass 1: Extracting with cascading fallback", {
         pass: 1,
-        model: this.config.primaryModel,
+        primaryModel: `${this.config.models.primary.provider}:${this.config.models.primary.model}`,
       });
 
       result = await this.extractWithPrimaryModel(documentUrl, prompt);
@@ -474,7 +603,7 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
           result = await this.extractWithTextFallback(
             documentUrl,
             prompt,
-            this.config.primaryModel,
+            this.config.models.secondary,
           );
 
           logger.info("Text extraction fallback succeeded", {
@@ -529,7 +658,7 @@ export abstract class BaseExtractionEngine<T extends z.ZodSchema> {
       "Pass 1 quality poor, running Pass 2 with fallback model and chain-of-thought",
       {
         pass: 2,
-        model: this.config.fallbackModel,
+        model: `${this.config.models.secondary.provider}:${this.config.models.secondary.model}`,
       },
     );
     try {

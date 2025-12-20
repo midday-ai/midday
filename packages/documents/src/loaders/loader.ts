@@ -38,7 +38,7 @@ export async function loadDocument({
         const result = await retryCall(
           () =>
             generateText({
-              model: google("gemini-2.5-flash"),
+              model: google("gemini-3-flash-preview"),
               abortSignal: AbortSignal.timeout(60000), // 60s timeout for PDF extraction
               messages: [
                 {

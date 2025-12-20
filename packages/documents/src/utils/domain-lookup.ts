@@ -50,7 +50,7 @@ If you cannot find the official website, respond with "unknown".
 Domain:`;
 
     const result = await generateText({
-      model: google("gemini-2.5-flash"),
+      model: google("gemini-3-flash-preview"),
       tools: {
         google_search: google.tools.googleSearch({}),
       } as any,

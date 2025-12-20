@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.33",
+    "@ai-sdk/mistral": "^2.0.26",
     "@langchain/community": "1.0.3",
     "@langchain/core": "1.0.5",
     "@midday/utils": "workspace:*",
