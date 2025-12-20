@@ -1,10 +1,8 @@
-import { DevMessage } from "@/components/dev-message";
-import { Footer } from "@/components/footer";
-import { FooterCTA } from "@/components/footer-cta";
-import { Header } from "@/components/header";
 import "@/styles/globals.css";
 import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
+import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Provider as Analytics } from "@midday/events/client";
 import type { Metadata } from "next";
@@ -112,10 +110,8 @@ export default function Layout({ children }: { children: ReactElement }) {
           <main className="container mx-auto px-4 overflow-hidden md:overflow-visible">
             {children}
           </main>
-          <FooterCTA />
           <Footer />
           <Analytics />
-          <DevMessage />
         </ThemeProvider>
       </body>
     </html>
