@@ -264,6 +264,7 @@ export const columns: ColumnDef<Transaction>[] = [
     enableResizing: false,
     meta: {
       sticky: true,
+      skeleton: { type: "checkbox" },
       className:
         "w-[50px] min-w-[50px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border",
     },
@@ -309,6 +310,8 @@ export const columns: ColumnDef<Transaction>[] = [
     enableResizing: false,
     meta: {
       sticky: true,
+      skeleton: { type: "text", width: "w-16" },
+      headerLabel: "Date",
       className:
         "w-[110px] min-w-[110px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border",
     },
@@ -329,6 +332,8 @@ export const columns: ColumnDef<Transaction>[] = [
     enableResizing: true,
     meta: {
       sticky: true,
+      skeleton: { type: "text", width: "w-40" },
+      headerLabel: "Description",
       className:
         "w-[320px] min-w-[200px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border",
     },
@@ -349,6 +354,8 @@ export const columns: ColumnDef<Transaction>[] = [
     maxSize: 400,
     enableResizing: true,
     meta: {
+      skeleton: { type: "text", width: "w-20" },
+      headerLabel: "Amount",
       className: "w-[170px] min-w-[170px]",
     },
     cell: ({ row }) => (
@@ -366,6 +373,8 @@ export const columns: ColumnDef<Transaction>[] = [
     maxSize: 400,
     enableResizing: true,
     meta: {
+      skeleton: { type: "text", width: "w-24" },
+      headerLabel: "Tax Amount",
       className: "w-[170px] min-w-[170px]",
     },
     cell: ({ row }) => (
@@ -384,6 +393,8 @@ export const columns: ColumnDef<Transaction>[] = [
     maxSize: 400,
     enableResizing: true,
     meta: {
+      skeleton: { type: "icon-text", width: "w-28" },
+      headerLabel: "Category",
       className: "w-[250px] min-w-[250px]",
     },
     cell: ({ row, table }) => {
@@ -441,6 +452,8 @@ export const columns: ColumnDef<Transaction>[] = [
     maxSize: 400,
     enableResizing: true,
     meta: {
+      skeleton: { type: "text", width: "w-28" },
+      headerLabel: "From / To",
       className: "w-[200px] min-w-[200px]",
     },
     cell: ({ row }) => (
@@ -457,6 +470,8 @@ export const columns: ColumnDef<Transaction>[] = [
     maxSize: 500,
     enableResizing: true,
     meta: {
+      skeleton: { type: "tags" },
+      headerLabel: "Tags",
       className: "w-[280px] min-w-[280px] max-w-[280px]",
     },
     cell: ({ row }) => (
@@ -474,6 +489,8 @@ export const columns: ColumnDef<Transaction>[] = [
     maxSize: 400,
     enableResizing: true,
     meta: {
+      skeleton: { type: "avatar-text", width: "w-32" },
+      headerLabel: "Account",
       className: "w-[250px] min-w-[250px]",
     },
     cell: ({ row }) => (
@@ -491,6 +508,8 @@ export const columns: ColumnDef<Transaction>[] = [
     maxSize: 300,
     enableResizing: true,
     meta: {
+      skeleton: { type: "text", width: "w-16" },
+      headerLabel: "Method",
       className: "w-[140px] min-w-[140px]",
     },
     cell: ({ row }) => <TransactionMethod method={row.original.method} />,
@@ -503,6 +522,8 @@ export const columns: ColumnDef<Transaction>[] = [
     maxSize: 400,
     enableResizing: true,
     meta: {
+      skeleton: { type: "avatar-text", width: "w-24" },
+      headerLabel: "Assigned",
       className: "w-[220px] min-w-[220px]",
     },
     cell: ({ row, table }) => {
@@ -529,6 +550,8 @@ export const columns: ColumnDef<Transaction>[] = [
     maxSize: 300,
     enableResizing: true,
     meta: {
+      skeleton: { type: "badge", width: "w-20" },
+      headerLabel: "Status",
       className: "w-[160px] min-w-[160px] !border-r-0",
     },
     cell: ({ row, table }) => {
@@ -569,6 +592,8 @@ export const columns: ColumnDef<Transaction>[] = [
     enableHiding: false,
     meta: {
       sticky: true,
+      skeleton: { type: "icon" },
+      headerLabel: "Actions",
       className:
         "w-[100px] min-w-[100px] md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 !border-solid !border-l !border-l-border !border-r-0 !border-t-0 !border-b-0",
     },

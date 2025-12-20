@@ -50,3 +50,15 @@ export async function getInitialInvoicesColumnVisibility() {
         {} as Record<string, boolean>,
       );
 }
+
+export async function getInitialTransactionsColumnSizing() {
+  const cookieStore = await cookies();
+  const saved = cookieStore.get(Cookies.TransactionsColumnSizing)?.value;
+  return saved ? JSON.parse(saved) : {};
+}
+
+export async function getInitialTransactionsColumnOrder() {
+  const cookieStore = await cookies();
+  const saved = cookieStore.get(Cookies.TransactionsColumnOrder)?.value;
+  return saved ? JSON.parse(saved) : [];
+}

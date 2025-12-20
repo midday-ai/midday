@@ -49,5 +49,20 @@ declare module "@tanstack/table-core" {
   interface ColumnMeta<TData extends RowData, TValue> {
     className?: string;
     sticky?: boolean;
+    sortField?: string;
+    /** Skeleton configuration for loading states */
+    skeleton?: {
+      type:
+        | "checkbox"
+        | "text"
+        | "avatar-text"
+        | "icon-text"
+        | "badge"
+        | "tags"
+        | "icon";
+      width?: string;
+    };
+    /** Header label for skeleton headers */
+    headerLabel?: string;
   }
 }

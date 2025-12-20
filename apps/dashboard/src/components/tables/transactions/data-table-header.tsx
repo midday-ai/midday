@@ -6,17 +6,8 @@ import { ResizeHandle } from "@/components/tables/resize-handle";
 import { useSortParams } from "@/hooks/use-sort-params";
 import { useStickyColumns } from "@/hooks/use-sticky-columns";
 import {
-  DndContext,
-  PointerSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from "@dnd-kit/core";
-import {
   SortableContext,
   horizontalListSortingStrategy,
-  arrayMove,
 } from "@dnd-kit/sortable";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
@@ -70,15 +61,6 @@ export function DataTableHeader<TData>({
   const { params, setParams } = useSortParams();
   const [sortColumn, sortValue] = params.sort || [];
 
-  // Configure sensors for drag
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-  );
-
   const createSortQuery = useCallback(
     (name: string) => {
       if (sortValue === "asc") {
@@ -107,129 +89,107 @@ export function DataTableHeader<TData>({
       .map((col) => col.id);
   }, [table]);
 
-  const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
-      const { active, over } = event;
-      if (!over || !table || active.id === over.id) return;
-
-      const currentOrder = table.getAllLeafColumns().map((col) => col.id);
-      const oldIndex = currentOrder.indexOf(active.id as string);
-      const newIndex = currentOrder.indexOf(over.id as string);
-
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newOrder = arrayMove(currentOrder, oldIndex, newIndex);
-        table.setColumnOrder(newOrder);
-      }
-    },
-    [table],
-  );
-
   if (!table) return null;
 
   const headerGroups = table.getHeaderGroups();
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <TableHeader className="border-0 sticky top-0 z-20 bg-background">
-        {headerGroups.map((headerGroup) => (
-          <TableRow
-            key={headerGroup.id}
-            className="h-[45px] hover:bg-transparent flex items-center !border-b-0"
+    <TableHeader className="border-0 sticky top-0 z-20 bg-background">
+      {headerGroups.map((headerGroup) => (
+        <TableRow
+          key={headerGroup.id}
+          className="h-[45px] hover:bg-transparent flex items-center !border-b-0"
+        >
+          <SortableContext
+            items={sortableColumnIds}
+            strategy={horizontalListSortingStrategy}
           >
-            <SortableContext
-              items={sortableColumnIds}
-              strategy={horizontalListSortingStrategy}
-            >
-              {headerGroup.headers.map((header) => {
-                const columnId = header.column.id;
-                const meta = header.column.columnDef.meta as
-                  | { sticky?: boolean; className?: string }
-                  | undefined;
-                const isSticky = meta?.sticky;
-                const canReorder = !NON_REORDERABLE_COLUMNS.has(columnId);
+            {headerGroup.headers.map((header) => {
+              const columnId = header.column.id;
+              const meta = header.column.columnDef.meta as
+                | { sticky?: boolean; className?: string }
+                | undefined;
+              const isSticky = meta?.sticky;
+              const canReorder = !NON_REORDERABLE_COLUMNS.has(columnId);
 
-                if (!isVisible(columnId)) return null;
+              if (!isVisible(columnId)) return null;
 
-                const headerStyle = {
-                  width: header.getSize(),
-                  minWidth: isSticky
-                    ? header.getSize()
-                    : header.column.columnDef.minSize,
-                  maxWidth: isSticky
-                    ? header.getSize()
-                    : header.column.columnDef.maxSize,
-                  ...getStickyStyle(columnId),
-                  ...(columnId !== "actions" &&
-                    columnId !== "status" && {
-                      borderRight: "1px solid hsl(var(--border))",
-                    }),
-                  ...(columnId === "actions" && {
-                    borderLeft: "1px solid hsl(var(--border))",
+              const headerStyle = {
+                width: header.getSize(),
+                minWidth: isSticky
+                  ? header.getSize()
+                  : header.column.columnDef.minSize,
+                maxWidth: isSticky
+                  ? header.getSize()
+                  : header.column.columnDef.maxSize,
+                ...getStickyStyle(columnId),
+                ...(columnId !== "actions" &&
+                  columnId !== "status" && {
+                    borderRight: "1px solid hsl(var(--border))",
                   }),
-                };
+                ...(columnId === "actions" && {
+                  borderLeft: "1px solid hsl(var(--border))",
+                  borderTop: "1px solid hsl(var(--border))",
+                }),
+              };
 
-                // Sticky columns use regular TableHead (not draggable)
-                if (!canReorder) {
-                  const stickyClass = getStickyClassName(
-                    columnId,
-                    "group/header relative h-full px-4 border-t border-border flex items-center",
-                  );
-                  const isActionsColumn = columnId === "actions";
-                  const finalClassName = isActionsColumn
-                    ? "group/header relative h-full px-4 border-t border-border flex items-center md:sticky md:right-0 bg-background z-10"
-                    : `${stickyClass} bg-background z-10`;
+              // Sticky columns use regular TableHead (not draggable)
+              if (!canReorder) {
+                const stickyClass = getStickyClassName(
+                  columnId,
+                  "group/header relative h-full px-4 border-t border-border flex items-center",
+                );
+                const isActionsColumn = columnId === "actions";
+                const finalClassName = isActionsColumn
+                  ? "group/header relative h-full px-4 border-t border-border flex items-center md:sticky md:right-0 bg-background z-10"
+                  : `${stickyClass} bg-background z-10`;
 
-                  return (
-                    <TableHead
-                      key={header.id}
-                      className={finalClassName}
-                      style={headerStyle}
-                    >
-                      {renderHeaderContent(
-                        header,
-                        columnId,
-                        sortColumn,
-                        sortValue,
-                        createSortQuery,
-                        table,
-                        tableScroll,
-                      )}
-                      <ResizeHandle header={header} />
-                    </TableHead>
-                  );
-                }
-
-                // Draggable columns
                 return (
-                  <DraggableHeader
+                  <TableHead
                     key={header.id}
-                    id={columnId}
+                    className={finalClassName}
                     style={headerStyle}
                   >
-                    <div className="flex items-center flex-1 min-w-0">
-                      {renderHeaderContent(
-                        header,
-                        columnId,
-                        sortColumn,
-                        sortValue,
-                        createSortQuery,
-                        table,
-                        tableScroll,
-                      )}
-                    </div>
+                    {renderHeaderContent(
+                      header,
+                      columnId,
+                      sortColumn,
+                      sortValue,
+                      createSortQuery,
+                      table,
+                      tableScroll,
+                    )}
                     <ResizeHandle header={header} />
-                  </DraggableHeader>
+                  </TableHead>
                 );
-              })}
-            </SortableContext>
-          </TableRow>
-        ))}
-      </TableHeader>
-    </DndContext>
+              }
+
+              // Draggable columns
+              return (
+                <DraggableHeader
+                  key={header.id}
+                  id={columnId}
+                  style={headerStyle}
+                >
+                  <div className="flex items-center flex-1 min-w-0 overflow-hidden">
+                    {renderHeaderContent(
+                      header,
+                      columnId,
+                      sortColumn,
+                      sortValue,
+                      createSortQuery,
+                      table,
+                      tableScroll,
+                    )}
+                  </div>
+                  <ResizeHandle header={header} />
+                </DraggableHeader>
+              );
+            })}
+          </SortableContext>
+        </TableRow>
+      ))}
+    </TableHeader>
   );
 }
 
@@ -266,27 +226,29 @@ function renderHeaderContent<TData>(
 
   // Tax Amount - not sortable
   if (columnId === "taxAmount") {
-    return <span>Tax Amount</span>;
+    return <span className="truncate">Tax Amount</span>;
   }
 
   // Description column - special case with horizontal pagination
   if (columnId === "description") {
     return (
-      <div className="flex items-center justify-between w-full">
-        <SortButton
-          label="Description"
-          sortField="name"
-          currentSortColumn={sortColumn}
-          currentSortValue={sortValue}
-          onSort={createSortQuery}
-        />
+      <div className="flex items-center justify-between w-full overflow-hidden">
+        <div className="min-w-0 overflow-hidden">
+          <SortButton
+            label="Description"
+            sortField="name"
+            currentSortColumn={sortColumn}
+            currentSortValue={sortValue}
+            onSort={createSortQuery}
+          />
+        </div>
         {tableScroll?.isScrollable && (
           <HorizontalPagination
             canScrollLeft={tableScroll.canScrollLeft}
             canScrollRight={tableScroll.canScrollRight}
             onScrollLeft={tableScroll.scrollLeft}
             onScrollRight={tableScroll.scrollRight}
-            className="hidden md:flex"
+            className="hidden md:flex flex-shrink-0"
           />
         )}
       </div>
@@ -297,18 +259,22 @@ function renderHeaderContent<TData>(
   if (sortField) {
     const headerLabel = getHeaderLabel(columnId);
     return (
-      <SortButton
-        label={headerLabel}
-        sortField={sortField}
-        currentSortColumn={sortColumn}
-        currentSortValue={sortValue}
-        onSort={createSortQuery}
-      />
+      <div className="w-full overflow-hidden">
+        <SortButton
+          label={headerLabel}
+          sortField={sortField}
+          currentSortColumn={sortColumn}
+          currentSortValue={sortValue}
+          onSort={createSortQuery}
+        />
+      </div>
     );
   }
 
   // Fallback - just render the header text
-  return <span>{header.column.columnDef.header as string}</span>;
+  return (
+    <span className="truncate">{header.column.columnDef.header as string}</span>
+  );
 }
 
 function SortButton({
@@ -326,14 +292,14 @@ function SortButton({
 }) {
   return (
     <Button
-      className="p-0 hover:bg-transparent space-x-2"
+      className="p-0 hover:bg-transparent space-x-2 min-w-0 max-w-full"
       variant="ghost"
       onClick={(e) => {
         e.stopPropagation(); // Prevent drag when clicking sort
         onSort(sortField);
       }}
     >
-      <span>{label}</span>
+      <span className="truncate">{label}</span>
       {sortField === currentSortColumn && currentSortValue === "asc" && (
         <ArrowDown size={16} />
       )}

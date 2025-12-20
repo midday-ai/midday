@@ -1,7 +1,7 @@
 "use client";
 
 import { updateColumnVisibilityAction } from "@/actions/update-column-visibility-action";
-import { useLocalStorage } from "@/hooks/use-local-storage";
+import { updateTableSettingsAction } from "@/actions/update-table-settings-action";
 import { useScrollHeader } from "@/hooks/use-scroll-header";
 import { useSortParams } from "@/hooks/use-sort-params";
 import { useStickyColumns } from "@/hooks/use-sticky-columns";
@@ -17,6 +17,15 @@ import {
 } from "@/store/transactions";
 import { useTRPC } from "@/trpc/client";
 import { Cookies } from "@/utils/constants";
+import {
+  DndContext,
+  type DragEndEvent,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { Tooltip, TooltipProvider } from "@midday/ui/tooltip";
 import { toast } from "@midday/ui/use-toast";
@@ -50,11 +59,15 @@ import { TransactionTableProvider } from "./transaction-table-context";
 
 type Props = {
   columnVisibility: Promise<VisibilityState>;
+  columnSizing: Promise<ColumnSizingState>;
+  columnOrder: Promise<ColumnOrderState>;
   initialTab?: "all" | "review";
 };
 
 export function DataTable({
   columnVisibility: columnVisibilityPromise,
+  columnSizing: columnSizingPromise,
+  columnOrder: columnOrderPromise,
   initialTab,
 }: Props) {
   const trpc = useTRPC();
@@ -91,20 +104,21 @@ export function DataTable({
   );
 
   const initialColumnVisibility = use(columnVisibilityPromise);
+  const initialColumnSizing = use(columnSizingPromise);
+  const initialColumnOrder = use(columnOrderPromise);
+
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     initialColumnVisibility ?? {},
   );
 
-  // Column sizing state persisted to localStorage
-  const [columnSizing, setColumnSizing] = useLocalStorage<ColumnSizingState>(
-    "transactions-column-sizing",
-    {},
+  // Column sizing state persisted to cookies
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(
+    initialColumnSizing ?? {},
   );
 
-  // Column order state persisted to localStorage
-  const [columnOrder, setColumnOrder] = useLocalStorage<ColumnOrderState>(
-    "transactions-column-order",
-    [],
+  // Column order state persisted to cookies
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
+    initialColumnOrder ?? [],
   );
 
   // Build query filters based on active tab
@@ -369,6 +383,32 @@ export function DataTable({
     meta: tableMeta,
   });
 
+  // DnD sensors for column reordering
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+  );
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+
+      const currentOrder = table.getAllLeafColumns().map((col) => col.id);
+      const oldIndex = currentOrder.indexOf(active.id as string);
+      const newIndex = currentOrder.indexOf(over.id as string);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newOrder = arrayMove(currentOrder, oldIndex, newIndex);
+        table.setColumnOrder(newOrder);
+      }
+    },
+    [table],
+  );
+
   // Update handleShiftClickRange to use the table
   handleShiftClickRangeRef.current = useCallback(
     (startIndex: number, endIndex: number) => {
@@ -470,6 +510,22 @@ export function DataTable({
     });
   }, [columnVisibility]);
 
+  // Persist column sizing to cookies
+  useEffect(() => {
+    updateTableSettingsAction({
+      key: Cookies.TransactionsColumnSizing,
+      data: columnSizing,
+    });
+  }, [columnSizing]);
+
+  // Persist column order to cookies
+  useEffect(() => {
+    updateTableSettingsAction({
+      key: Cookies.TransactionsColumnOrder,
+      data: columnOrder,
+    });
+  }, [columnOrder]);
+
   // Determine if selected transactions can be deleted (only manual transactions can be deleted)
   useEffect(() => {
     const selectedIds = Object.keys(rowSelection);
@@ -558,110 +614,121 @@ export function DataTable({
                   height: "calc(100vh - 180px + var(--header-offset, 0px))",
                 }}
               >
-                <Table>
-                  <DataTableHeader table={table} tableScroll={tableScroll} />
+                <DndContext
+                  id="transactions-table-dnd"
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <Table>
+                    <DataTableHeader table={table} tableScroll={tableScroll} />
 
-                  <TableBody
-                    className="border-l-0 border-r-0"
-                    style={{
-                      height: `${rowVirtualizer.getTotalSize()}px`,
-                      position: "relative",
-                    }}
-                  >
-                    {virtualItems.length > 0 ? (
-                      virtualItems.map((virtualRow: VirtualItem) => {
-                        const row = rows[virtualRow.index];
-                        if (!row) return null;
+                    <TableBody
+                      className="border-l-0 border-r-0"
+                      style={{
+                        height: `${rowVirtualizer.getTotalSize()}px`,
+                        position: "relative",
+                      }}
+                    >
+                      {virtualItems.length > 0 ? (
+                        virtualItems.map((virtualRow: VirtualItem) => {
+                          const row = rows[virtualRow.index];
+                          if (!row) return null;
 
-                        return (
-                          <TableRow
-                            key={row.id}
-                            data-index={virtualRow.index}
-                            ref={(node) => rowVirtualizer.measureElement(node)}
-                            className="group h-[45px] cursor-pointer select-text hover:bg-[#F2F1EF] hover:dark:bg-[#0f0f0f] flex items-center border-b border-border"
-                            style={{
-                              position: "absolute",
-                              top: 0,
-                              left: 0,
-                              width: "100%",
-                              transform: `translateY(${virtualRow.start}px)`,
-                            }}
-                          >
-                            {row.getVisibleCells().map((cell) => {
-                              const isActions = cell.column.id === "actions";
-                              const meta = cell.column.columnDef.meta as
-                                | { sticky?: boolean; className?: string }
-                                | undefined;
-                              const isSticky = meta?.sticky;
-                              return (
-                                <TableCell
-                                  key={cell.id}
-                                  className={`h-full flex items-center ${getStickyClassName(
-                                    cell.column.id,
-                                    meta?.className,
-                                  )}`}
-                                  style={{
-                                    // Use dynamic width from column sizing (respects user resizing)
-                                    width: cell.column.getSize(),
-                                    minWidth: isSticky
-                                      ? cell.column.getSize()
-                                      : cell.column.columnDef.minSize,
-                                    maxWidth: isSticky
-                                      ? cell.column.getSize()
-                                      : cell.column.columnDef.maxSize,
-                                    ...getStickyStyle(cell.column.id),
-                                    ...(isActions && {
-                                      borderLeft:
-                                        "1px solid hsl(var(--border))",
-                                      borderBottom:
-                                        "1px solid hsl(var(--border))",
-                                      borderRight: "none",
-                                      zIndex: 50,
-                                    }),
-                                  }}
-                                  onClick={() => {
-                                    // Handle other column clicks (select column is handled in SelectCell)
-                                    if (
-                                      cell.column.id !== "select" &&
-                                      cell.column.id !== "actions" &&
-                                      cell.column.id !== "category" &&
-                                      cell.column.id !== "assigned" &&
-                                      cell.column.id !== "tags"
-                                    ) {
-                                      if (row.original.manual) {
-                                        setParams({
-                                          editTransaction: row.original.id,
-                                        });
-                                      } else {
-                                        setParams({
-                                          transactionId: row.original.id,
-                                        });
+                          return (
+                            <TableRow
+                              key={row.id}
+                              data-index={virtualRow.index}
+                              ref={(node) =>
+                                rowVirtualizer.measureElement(node)
+                              }
+                              className="group h-[45px] cursor-pointer select-text hover:bg-[#F2F1EF] hover:dark:bg-[#0f0f0f] flex items-center border-b border-border"
+                              style={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                width: "100%",
+                                transform: `translateY(${virtualRow.start}px)`,
+                              }}
+                            >
+                              {row.getVisibleCells().map((cell) => {
+                                const isActions = cell.column.id === "actions";
+                                const meta = cell.column.columnDef.meta as
+                                  | { sticky?: boolean; className?: string }
+                                  | undefined;
+                                const isSticky = meta?.sticky;
+                                return (
+                                  <TableCell
+                                    key={cell.id}
+                                    className={`h-full flex items-center ${getStickyClassName(
+                                      cell.column.id,
+                                      meta?.className,
+                                    )}`}
+                                    style={{
+                                      // Use dynamic width from column sizing (respects user resizing)
+                                      width: cell.column.getSize(),
+                                      minWidth: isSticky
+                                        ? cell.column.getSize()
+                                        : cell.column.columnDef.minSize,
+                                      maxWidth: isSticky
+                                        ? cell.column.getSize()
+                                        : cell.column.columnDef.maxSize,
+                                      ...getStickyStyle(cell.column.id),
+                                      ...(isActions && {
+                                        borderLeft:
+                                          "1px solid hsl(var(--border))",
+                                        borderBottom:
+                                          "1px solid hsl(var(--border))",
+                                        borderRight: "none",
+                                        zIndex: 50,
+                                      }),
+                                    }}
+                                    onClick={() => {
+                                      // Handle other column clicks (select column is handled in SelectCell)
+                                      if (
+                                        cell.column.id !== "select" &&
+                                        cell.column.id !== "actions" &&
+                                        cell.column.id !== "category" &&
+                                        cell.column.id !== "assigned" &&
+                                        cell.column.id !== "tags"
+                                      ) {
+                                        if (row.original.manual) {
+                                          setParams({
+                                            editTransaction: row.original.id,
+                                          });
+                                        } else {
+                                          setParams({
+                                            transactionId: row.original.id,
+                                          });
+                                        }
                                       }
-                                    }
-                                  }}
-                                >
-                                  {flexRender(
-                                    cell.column.columnDef.cell,
-                                    cell.getContext(),
-                                  )}
-                                </TableCell>
-                              );
-                            })}
-                          </TableRow>
-                        );
-                      })
-                    ) : (
-                      <TableRow>
-                        <TableCell
-                          colSpan={columns.length}
-                          className="h-24 text-center"
-                        >
-                          No results.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                                    }}
+                                  >
+                                    <div className="w-full overflow-hidden truncate">
+                                      {flexRender(
+                                        cell.column.columnDef.cell,
+                                        cell.getContext(),
+                                      )}
+                                    </div>
+                                  </TableCell>
+                                );
+                              })}
+                            </TableRow>
+                          );
+                        })
+                      ) : (
+                        <TableRow>
+                          <TableCell
+                            colSpan={columns.length}
+                            className="h-24 text-center"
+                          >
+                            No results.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </DndContext>
               </div>
             </div>
           </Tooltip>

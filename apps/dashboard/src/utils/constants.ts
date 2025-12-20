@@ -1,6 +1,8 @@
 export const Cookies = {
   PreferredSignInProvider: "preferred-signin-provider",
   TransactionsColumns: "transactions-columns",
+  TransactionsColumnSizing: "transactions-column-sizing",
+  TransactionsColumnOrder: "transactions-column-order",
   InvoicesColumns: "invoices-columns",
   InboxFilter: "inbox-filter-v2",
   InboxOrder: "inbox-order",
