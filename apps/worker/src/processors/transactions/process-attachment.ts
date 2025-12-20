@@ -57,7 +57,10 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
           "Sharp failed to process HEIC, falling back to heic-convert",
           {
             filePath: filePath.join("/"),
-            error: sharpError instanceof Error ? sharpError.message : "Unknown error",
+            error:
+              sharpError instanceof Error
+                ? sharpError.message
+                : "Unknown error",
           },
         );
 

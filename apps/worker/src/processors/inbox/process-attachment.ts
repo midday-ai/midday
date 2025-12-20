@@ -95,7 +95,10 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           "Sharp failed to process HEIC, falling back to heic-convert",
           {
             filePath: fileName,
-            error: sharpError instanceof Error ? sharpError.message : "Unknown error",
+            error:
+              sharpError instanceof Error
+                ? sharpError.message
+                : "Unknown error",
           },
         );
 
@@ -113,8 +116,14 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
             "Both sharp and heic-convert failed - file may be corrupted or unsupported format",
             {
               filePath: fileName,
-              sharpError: sharpError instanceof Error ? sharpError.message : "Unknown error",
-              heicError: heicError instanceof Error ? heicError.message : "Unknown error",
+              sharpError:
+                sharpError instanceof Error
+                  ? sharpError.message
+                  : "Unknown error",
+              heicError:
+                heicError instanceof Error
+                  ? heicError.message
+                  : "Unknown error",
             },
           );
           throw new Error(
@@ -138,7 +147,10 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
             "Failed to process heic-convert output with sharp",
             {
               filePath: fileName,
-              error: finalSharpError instanceof Error ? finalSharpError.message : "Unknown error",
+              error:
+                finalSharpError instanceof Error
+                  ? finalSharpError.message
+                  : "Unknown error",
             },
           );
           throw new Error(
