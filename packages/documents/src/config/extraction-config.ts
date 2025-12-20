@@ -7,10 +7,20 @@ import {
 import { invoiceSchema, receiptSchema } from "../schema";
 import type { DocumentFormat } from "../utils/format-detection";
 
+export type AIProvider = "mistral" | "google";
+
+export interface ModelConfig {
+  provider: AIProvider;
+  model: string;
+}
+
 export interface ExtractionConfig<T extends z.ZodSchema> {
   schema: T;
-  primaryModel: string;
-  fallbackModel: string;
+  models: {
+    primary: ModelConfig;
+    secondary: ModelConfig;
+    tertiary: ModelConfig;
+  };
   timeout: number;
   retries: number;
   contentType: "file" | "image";
@@ -29,8 +39,11 @@ export interface ExtractionConfig<T extends z.ZodSchema> {
  */
 export const invoiceConfig: ExtractionConfig<typeof invoiceSchema> = {
   schema: invoiceSchema,
-  primaryModel: "gemini-2.5-flash",
-  fallbackModel: "gemini-2.5-pro",
+  models: {
+    primary: { provider: "mistral", model: "mistral-small-latest" },
+    secondary: { provider: "google", model: "gemini-3-flash-preview" },
+    tertiary: { provider: "google", model: "gemini-3-pro-preview" },
+  },
   timeout: 180000, // 3 minutes
   retries: 2, // 2 retries (3 total attempts)
   contentType: "file",
@@ -71,8 +84,11 @@ export const invoiceConfig: ExtractionConfig<typeof invoiceSchema> = {
  */
 export const receiptConfig: ExtractionConfig<typeof receiptSchema> = {
   schema: receiptSchema,
-  primaryModel: "gemini-2.5-flash",
-  fallbackModel: "gemini-2.5-pro",
+  models: {
+    primary: { provider: "mistral", model: "mistral-small-latest" },
+    secondary: { provider: "google", model: "gemini-3-flash-preview" },
+    tertiary: { provider: "google", model: "gemini-3-pro-preview" },
+  },
   timeout: 20000, // 20s for image processing
   retries: 2, // 2 retries (3 total attempts)
   contentType: "image",
