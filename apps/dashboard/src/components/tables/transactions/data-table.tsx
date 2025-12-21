@@ -38,7 +38,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { BulkEditBar } from "./bulk-edit-bar";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
-import { NoResults, NoTransactions } from "./empty-states";
+import { NoResults, NoTransactions, ReviewComplete } from "./empty-states";
 import { ExportBar } from "./export-bar";
 import { Loading } from "./loading";
 import { TransactionTableProvider } from "./transaction-table-context";
@@ -492,10 +492,16 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   );
 
   if (!tableData.length && !hasFilters) {
+    if (isReviewTab) {
+      return (
+        <div className="relative h-[calc(100vh-200px)] overflow-hidden">
+          <ReviewComplete />
+        </div>
+      );
+    }
     return (
       <div className="relative h-[calc(100vh-200px)] overflow-hidden">
         <NoTransactions />
-        <Loading isEmpty />
       </div>
     );
   }
@@ -504,7 +510,6 @@ export function DataTable({ initialSettings, initialTab }: Props) {
     return (
       <div className="relative h-[calc(100vh-200px)] overflow-hidden">
         <NoResults />
-        <Loading isEmpty />
       </div>
     );
   }

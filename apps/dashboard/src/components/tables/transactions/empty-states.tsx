@@ -43,3 +43,17 @@ export function NoTransactions() {
     </div>
   );
 }
+
+export function ReviewComplete() {
+  return (
+    <div className="absolute w-full h-[calc(100vh-300px)] top-0 left-0 flex items-center justify-center z-20">
+      <div className="text-center max-w-sm mx-auto flex flex-col items-center justify-center">
+        <h2 className="text-xl font-medium mb-2">All caught up!</h2>
+        <p className="text-sm text-[#878787]">
+          You've reviewed and exported all your transactions. New transactions
+          will appear here when they're ready for review.
+        </p>
+      </div>
+    </div>
+  );
+}

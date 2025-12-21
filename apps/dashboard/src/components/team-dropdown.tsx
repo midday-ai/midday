@@ -1,5 +1,6 @@
 "use client";
 
+import { revalidateAfterTeamChange } from "@/actions/revalidate-action";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
@@ -36,9 +37,10 @@ export function TeamDropdown({ isExpanded = false }: Props) {
 
   const changeTeamMutation = useMutation(
     trpc.user.update.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries();
+      onSuccess: async () => {
+        await queryClient.invalidateQueries();
         setIsChangingTeam(false);
+        await revalidateAfterTeamChange();
       },
     }),
   );
