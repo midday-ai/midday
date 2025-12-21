@@ -569,7 +569,14 @@ export const updateTransactionSchema = z.object({
     description: "Category slug for the transaction.",
   }),
   status: z
-    .enum(["pending", "archived", "completed", "posted", "excluded"])
+    .enum([
+      "pending",
+      "archived",
+      "completed",
+      "posted",
+      "excluded",
+      "exported",
+    ])
     .nullable()
     .optional()
     .openapi({
@@ -612,7 +619,14 @@ export const updateTransactionsSchema = z.object({
     description: "Category slug for the transactions.",
   }),
   status: z
-    .enum(["pending", "archived", "completed", "posted", "excluded"])
+    .enum([
+      "pending",
+      "archived",
+      "completed",
+      "posted",
+      "excluded",
+      "exported",
+    ])
     .nullable()
     .optional()
     .openapi({

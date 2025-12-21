@@ -567,6 +567,13 @@ export function DataTable({ initialSettings, initialTab }: Props) {
                               getStickyClassName={getStickyClassName}
                               nonClickableColumns={NON_CLICKABLE_COLUMNS}
                               onCellClick={handleCellClick}
+                              columnSizing={columnSizing}
+                              columnOrder={columnOrder}
+                              columnVisibility={columnVisibility}
+                              isSelected={rowSelection[row.id] ?? false}
+                              isExporting={exportingTransactionIds.includes(
+                                row.id,
+                              )}
                             />
                           );
                         })

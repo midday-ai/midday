@@ -146,10 +146,22 @@ export async function getTransactions(
     whereConditions.push(eq(transactions.status, "excluded"));
   } else if (statuses?.includes("archived")) {
     whereConditions.push(eq(transactions.status, "archived"));
-  } else {
-    // Default: pending, posted, or completed
+  } else if (statuses?.includes("exported")) {
+    // Show all exported transactions: manually marked OR synced to accounting provider
     whereConditions.push(
-      inArray(transactions.status, ["pending", "posted", "completed"]),
+      sql`(
+        ${transactions.status} = 'exported' OR EXISTS (
+          SELECT 1 FROM ${accountingSyncRecords}
+          WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
+          AND ${accountingSyncRecords.teamId} = ${teamId}
+          AND ${accountingSyncRecords.status} = 'synced'
+        )
+      )`,
+    );
+  } else {
+    // Default: pending, posted, completed, or exported (exclude archived/excluded)
+    whereConditions.push(
+      inArray(transactions.status, ["pending", "posted", "completed", "exported"]),
     );
   }
 
@@ -333,24 +345,29 @@ export async function getTransactions(
   }
 
   // Exported filter: true = only exported, false = only NOT exported
+  // A transaction is considered exported if status = 'exported' OR has a synced accounting record
   if (exported === true) {
     // Only exported transactions
     whereConditions.push(
-      sql`EXISTS (
-        SELECT 1 FROM ${accountingSyncRecords}
-        WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
-        AND ${accountingSyncRecords.teamId} = ${teamId}
-        AND ${accountingSyncRecords.status} = 'synced'
+      sql`(
+        ${transactions.status} = 'exported' OR EXISTS (
+          SELECT 1 FROM ${accountingSyncRecords}
+          WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
+          AND ${accountingSyncRecords.teamId} = ${teamId}
+          AND ${accountingSyncRecords.status} = 'synced'
+        )
       )`,
     );
   } else if (exported === false) {
     // Only NOT exported transactions
     whereConditions.push(
-      sql`NOT EXISTS (
-        SELECT 1 FROM ${accountingSyncRecords}
-        WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
-        AND ${accountingSyncRecords.teamId} = ${teamId}
-        AND ${accountingSyncRecords.status} = 'synced'
+      sql`(
+        ${transactions.status} != 'exported' AND NOT EXISTS (
+          SELECT 1 FROM ${accountingSyncRecords}
+          WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
+          AND ${accountingSyncRecords.teamId} = ${teamId}
+          AND ${accountingSyncRecords.status} = 'synced'
+        )
       )`,
     );
   }
@@ -402,11 +419,13 @@ export async function getTransactions(
           AND tms.team_id = ${teamId} 
           AND tms.status = 'pending'
         )`.as("hasPendingSuggestion"),
-      isExported: sql<boolean>`EXISTS (
-          SELECT 1 FROM ${accountingSyncRecords}
-          WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
-          AND ${accountingSyncRecords.teamId} = ${teamId}
-          AND ${accountingSyncRecords.status} = 'synced'
+      isExported: sql<boolean>`(
+          ${transactions.status} = 'exported' OR EXISTS (
+            SELECT 1 FROM ${accountingSyncRecords}
+            WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
+            AND ${accountingSyncRecords.teamId} = ${teamId}
+            AND ${accountingSyncRecords.status} = 'synced'
+          )
         )`.as("isExported"),
       exportProvider: sql<string | null>`(
           SELECT ${accountingSyncRecords.provider}
@@ -1437,7 +1456,7 @@ type UpdateTransactionData = {
   date?: string;
   bankAccountId?: string;
   categorySlug?: string | null;
-  status?: "pending" | "archived" | "completed" | "posted" | "excluded" | null;
+  status?: "pending" | "archived" | "completed" | "posted" | "excluded" | "exported" | null;
   internal?: boolean;
   note?: string | null;
   assignedId?: string | null;
@@ -1624,7 +1643,7 @@ type UpdateTransactionsData = {
   teamId: string;
   userId?: string;
   categorySlug?: string | null;
-  status?: "pending" | "archived" | "completed" | "posted" | "excluded" | null;
+  status?: "pending" | "archived" | "completed" | "posted" | "excluded" | "exported" | null;
   internal?: boolean;
   note?: string | null;
   assignedId?: string | null;

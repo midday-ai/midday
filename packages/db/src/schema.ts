@@ -185,6 +185,7 @@ export const transactionStatusEnum = pgEnum("transactionStatus", [
   "excluded",
   "completed",
   "archived",
+  "exported",
 ]);
 
 export const transactionFrequencyEnum = pgEnum("transaction_frequency", [

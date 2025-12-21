@@ -27,6 +27,7 @@ export const transactionFilterParamsSchema = {
       "uncompleted",
       "archived",
       "excluded",
+      "exported",
     ] as const),
   ),
   manual: parseAsStringLiteral(["exclude", "include"] as const),

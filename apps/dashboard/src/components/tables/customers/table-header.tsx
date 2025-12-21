@@ -88,18 +88,11 @@ export function DataTableHeader<TData>({
                   : header.column.columnDef.minSize,
                 maxWidth: isSticky ? header.getSize() : undefined,
                 ...getStickyStyle(columnId),
-                ...(columnId !== "actions" && {
-                  borderRight: "1px solid hsl(var(--border))",
-                }),
                 // Only apply flex: 1 to non-sticky columns
                 ...(isLastBeforeActions &&
                   !isSticky && {
                     flex: 1,
                   }),
-                ...(columnId === "actions" && {
-                  borderLeft: "1px solid hsl(var(--border))",
-                  borderTop: "1px solid hsl(var(--border))",
-                }),
               };
 
               // Sticky columns use regular TableHead (not draggable)
@@ -110,7 +103,7 @@ export function DataTableHeader<TData>({
                 );
                 const isActionsColumn = columnId === "actions";
                 const finalClassName = isActionsColumn
-                  ? "group/header relative h-full px-4 border-t border-border flex items-center justify-center md:sticky md:right-0 bg-background z-10"
+                  ? "group/header relative h-full px-4 !border-t !border-l !border-border flex items-center justify-center md:sticky md:right-0 bg-background z-10"
                   : `${stickyClass} bg-background z-10`;
 
                 return (

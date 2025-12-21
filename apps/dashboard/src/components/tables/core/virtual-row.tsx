@@ -2,7 +2,13 @@
 
 import { cn } from "@midday/ui/cn";
 import { TableCell, TableRow } from "@midday/ui/table";
-import type { Cell, Row } from "@tanstack/react-table";
+import type {
+  Cell,
+  ColumnOrderState,
+  ColumnSizingState,
+  Row,
+  VisibilityState,
+} from "@tanstack/react-table";
 import { flexRender } from "@tanstack/react-table";
 import type React from "react";
 import type { CSSProperties } from "react";
@@ -17,6 +23,11 @@ interface VirtualRowProps<TData> {
   getStickyStyle: (columnId: string) => CSSProperties;
   getStickyClassName: (columnId: string, baseClassName?: string) => string;
   nonClickableColumns?: Set<string>;
+  columnSizing?: ColumnSizingState;
+  columnOrder?: ColumnOrderState;
+  columnVisibility?: VisibilityState;
+  isSelected?: boolean;
+  isExporting?: boolean;
 }
 
 function VirtualRowInner<TData>({
@@ -37,7 +48,7 @@ function VirtualRowInner<TData>({
       className={cn(
         "group cursor-pointer select-text",
         "hover:bg-[#F2F1EF] hover:dark:bg-[#0f0f0f]",
-        "flex items-center border-b border-border",
+        "flex items-center border-0",
         "absolute top-0 left-0 w-full min-w-full",
       )}
       style={{
@@ -69,7 +80,7 @@ function VirtualRowInner<TData>({
           <TableCell
             key={cell.id}
             className={cn(
-              "h-full flex items-center",
+              "h-full flex items-center border-b border-border",
               cellClassName,
               isActions && "justify-center",
             )}
@@ -90,7 +101,7 @@ function VirtualRowInner<TData>({
   );
 }
 
-// Custom comparison for memo - only re-render when row data or position changes
+// Custom comparison for memo - re-render when row data, position, or column state changes
 function arePropsEqual<TData>(
   prevProps: VirtualRowProps<TData>,
   nextProps: VirtualRowProps<TData>,
@@ -99,8 +110,16 @@ function arePropsEqual<TData>(
     prevProps.row.id === nextProps.row.id &&
     prevProps.virtualStart === nextProps.virtualStart &&
     prevProps.rowHeight === nextProps.rowHeight &&
-    // Check if row selection state changed
-    prevProps.row.getIsSelected() === nextProps.row.getIsSelected()
+    // Check if row selection state changed (use prop for reliable comparison)
+    prevProps.isSelected === nextProps.isSelected &&
+    // Check if exporting state changed (for showing loading spinners)
+    prevProps.isExporting === nextProps.isExporting &&
+    // Re-render when column sizing, order, or visibility changes (reference equality)
+    prevProps.columnSizing === nextProps.columnSizing &&
+    prevProps.columnOrder === nextProps.columnOrder &&
+    prevProps.columnVisibility === nextProps.columnVisibility &&
+    // Re-render when row data changes (e.g., category, assigned, status)
+    prevProps.row.original === nextProps.row.original
   );
 }
 

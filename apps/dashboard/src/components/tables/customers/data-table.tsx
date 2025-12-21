@@ -223,6 +223,9 @@ export function DataTable({ initialSettings }: Props) {
                         getStickyClassName={getStickyClassName}
                         nonClickableColumns={NON_CLICKABLE_COLUMNS}
                         onCellClick={setOpen}
+                        columnSizing={columnSizing}
+                        columnOrder={columnOrder}
+                        columnVisibility={columnVisibility}
                       />
                     );
                   })

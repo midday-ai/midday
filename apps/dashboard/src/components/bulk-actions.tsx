@@ -201,6 +201,39 @@ export function BulkActions({ ids }: Props) {
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
+              <Icons.Check className="mr-2 h-4 w-4" />
+              <span>Mark as exported</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent sideOffset={14}>
+                <DropdownMenuCheckboxItem
+                  onCheckedChange={() => {
+                    updateTransactionsMutation.mutate({
+                      ids,
+                      status: "exported",
+                    });
+                  }}
+                >
+                  Yes
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  onCheckedChange={() => {
+                    updateTransactionsMutation.mutate({
+                      ids,
+                      status: "posted",
+                    });
+                  }}
+                >
+                  No
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
+
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
               <Icons.Face className="mr-2 h-4 w-4" />
               <span>Assign</span>
             </DropdownMenuSubTrigger>

@@ -193,6 +193,10 @@ const ActionsCell = memo(
       onUpdateTransaction?.({ id: transaction.id, status: "excluded" });
     }, [transaction.id, onUpdateTransaction]);
 
+    const handleUpdateToExported = useCallback(() => {
+      onUpdateTransaction?.({ id: transaction.id, status: "exported" });
+    }, [transaction.id, onUpdateTransaction]);
+
     const handleDeleteTransaction = useCallback(() => {
       onDeleteTransaction?.(transaction.id);
     }, [transaction.id, onDeleteTransaction]);
@@ -232,6 +236,12 @@ const ActionsCell = memo(
               </DropdownMenuItem>
             )}
 
+            {!transaction.isExported && transaction.status !== "exported" && (
+              <DropdownMenuItem onClick={handleUpdateToExported}>
+                Mark as exported
+              </DropdownMenuItem>
+            )}
+
             {!transaction.manual && transaction.status !== "excluded" && (
               <DropdownMenuItem onClick={handleUpdateToExcluded}>
                 Exclude
@@ -266,7 +276,7 @@ export const columns: ColumnDef<Transaction>[] = [
       sticky: true,
       skeleton: { type: "checkbox" },
       className:
-        "w-[50px] min-w-[50px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border",
+        "w-[50px] min-w-[50px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10",
     },
     cell: ({ row, table }) => {
       const meta = table.options.meta;
@@ -313,7 +323,7 @@ export const columns: ColumnDef<Transaction>[] = [
       skeleton: { type: "text", width: "w-16" },
       headerLabel: "Date",
       className:
-        "w-[110px] min-w-[110px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border",
+        "w-[110px] min-w-[110px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10",
     },
     cell: ({ row, table }) => (
       <DateCell
@@ -335,7 +345,7 @@ export const columns: ColumnDef<Transaction>[] = [
       skeleton: { type: "text", width: "w-40" },
       headerLabel: "Description",
       className:
-        "w-[320px] min-w-[200px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border",
+        "w-[320px] min-w-[200px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10",
     },
     cell: ({ row }) => (
       <DescriptionCell
@@ -356,7 +366,7 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       skeleton: { type: "text", width: "w-20" },
       headerLabel: "Amount",
-      className: "w-[170px] min-w-[100px] border-r border-border",
+      className: "w-[170px] min-w-[100px]",
     },
     cell: ({ row }) => (
       <AmountCell
@@ -375,7 +385,7 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       skeleton: { type: "text", width: "w-24" },
       headerLabel: "Tax Amount",
-      className: "w-[170px] min-w-[100px] border-r border-border",
+      className: "w-[170px] min-w-[100px]",
     },
     cell: ({ row }) => (
       <FormatAmount
@@ -395,7 +405,7 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       skeleton: { type: "icon-text", width: "w-28" },
       headerLabel: "Category",
-      className: "w-[250px] min-w-[150px] border-r border-border",
+      className: "w-[250px] min-w-[150px]",
     },
     cell: ({ row, table }) => {
       // Show analyzing state when enrichment is not completed
@@ -454,7 +464,7 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       skeleton: { type: "text", width: "w-28" },
       headerLabel: "From / To",
-      className: "w-[200px] min-w-[120px] border-r border-border",
+      className: "w-[200px] min-w-[120px]",
     },
     cell: ({ row }) => (
       <span className="text-muted-foreground">
@@ -472,7 +482,7 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       skeleton: { type: "tags" },
       headerLabel: "Tags",
-      className: "w-[280px] min-w-[150px] border-r border-border",
+      className: "w-[280px] min-w-[150px]",
     },
     cell: ({ row }) => (
       <InlineSelectTags
@@ -491,7 +501,7 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       skeleton: { type: "avatar-text", width: "w-32" },
       headerLabel: "Account",
-      className: "w-[250px] min-w-[150px] border-r border-border",
+      className: "w-[250px] min-w-[150px]",
     },
     cell: ({ row }) => (
       <TransactionBankAccount
@@ -510,7 +520,7 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       skeleton: { type: "text", width: "w-16" },
       headerLabel: "Method",
-      className: "w-[140px] min-w-[100px] border-r border-border",
+      className: "w-[140px] min-w-[100px]",
     },
     cell: ({ row }) => <TransactionMethod method={row.original.method} />,
   },
@@ -524,7 +534,7 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       skeleton: { type: "avatar-text", width: "w-24" },
       headerLabel: "Assigned",
-      className: "w-[220px] min-w-[150px] border-r border-border",
+      className: "w-[220px] min-w-[150px]",
     },
     cell: ({ row, table }) => {
       const meta = table.options.meta;
@@ -595,7 +605,7 @@ export const columns: ColumnDef<Transaction>[] = [
       skeleton: { type: "icon" },
       headerLabel: "Actions",
       className:
-        "w-[100px] min-w-[100px] md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 !border-solid !border-l !border-l-border !border-r-0 !border-t-0 !border-b-0 justify-center",
+        "w-[100px] min-w-[100px] md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 justify-center !border-l !border-border",
     },
     cell: ({ row, table }) => {
       const meta = table.options.meta;

@@ -127,7 +127,7 @@ export const columns: ColumnDef<Customer>[] = [
       skeleton: { type: "avatar-text", width: "w-32" },
       headerLabel: "Name",
       className:
-        "w-[320px] min-w-[240px] md:sticky md:left-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-20 border-r border-border",
+        "w-[320px] min-w-[240px] md:sticky md:left-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-20",
     },
     cell: ({ row }) => (
       <NameCell name={row.original.name} website={row.original.website} />
@@ -144,7 +144,7 @@ export const columns: ColumnDef<Customer>[] = [
     meta: {
       skeleton: { type: "text", width: "w-24" },
       headerLabel: "Contact",
-      className: "w-[260px] min-w-[180px] border-r border-border",
+      className: "w-[260px] min-w-[180px]",
     },
     cell: ({ row }) => row.getValue("contact") ?? "-",
   },
@@ -159,7 +159,7 @@ export const columns: ColumnDef<Customer>[] = [
     meta: {
       skeleton: { type: "text", width: "w-32" },
       headerLabel: "Email",
-      className: "w-[300px] min-w-[220px] border-r border-border",
+      className: "w-[300px] min-w-[220px]",
     },
     cell: ({ row }) => row.getValue("email") ?? "-",
   },
@@ -174,7 +174,7 @@ export const columns: ColumnDef<Customer>[] = [
     meta: {
       skeleton: { type: "text", width: "w-8" },
       headerLabel: "Invoices",
-      className: "w-[120px] min-w-[100px] border-r border-border",
+      className: "w-[120px] min-w-[100px]",
     },
     cell: ({ row }) => {
       if (row.original.invoiceCount > 0) {
@@ -199,7 +199,7 @@ export const columns: ColumnDef<Customer>[] = [
     meta: {
       skeleton: { type: "text", width: "w-8" },
       headerLabel: "Projects",
-      className: "w-[120px] min-w-[100px] border-r border-border",
+      className: "w-[120px] min-w-[100px]",
     },
     cell: ({ row }) => {
       if (row.original.projectCount > 0) {
@@ -242,7 +242,7 @@ export const columns: ColumnDef<Customer>[] = [
       skeleton: { type: "icon" },
       headerLabel: "Actions",
       className:
-        "text-right sticky right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-30 !border-solid !border-l !border-l-border !border-r-0 !border-t-0 !border-b-0 justify-center",
+        "text-right sticky right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-30 justify-center !border-l !border-border",
     },
     cell: ({ row, table }) => (
       <ActionsCell
