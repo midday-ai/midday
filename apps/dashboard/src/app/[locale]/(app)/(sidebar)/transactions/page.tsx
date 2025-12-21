@@ -8,11 +8,7 @@ import { loadSortParams } from "@/hooks/use-sort-params";
 import { loadTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
 import { loadTransactionTab } from "@/hooks/use-transaction-tab";
 import { HydrateClient, batchPrefetch, trpc } from "@/trpc/server";
-import {
-  getInitialTransactionsColumnOrder,
-  getInitialTransactionsColumnSizing,
-  getInitialTransactionsColumnVisibility,
-} from "@/utils/columns";
+import { getInitialTableSettings } from "@/utils/columns";
 import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
@@ -32,16 +28,8 @@ export default async function Transactions(props: Props) {
   const { sort } = loadSortParams(searchParams);
   const { tab } = loadTransactionTab(searchParams);
 
-  const columnVisibilityPromise = getInitialTransactionsColumnVisibility();
-  const columnSizingPromise = getInitialTransactionsColumnSizing();
-  const columnOrderPromise = getInitialTransactionsColumnOrder();
-
-  // Await values for the skeleton loader (renders immediately)
-  const [columnVisibility, columnSizing, columnOrder] = await Promise.all([
-    columnVisibilityPromise,
-    columnSizingPromise,
-    columnOrderPromise,
-  ]);
+  // Get unified table settings from cookie
+  const initialSettings = await getInitialTableSettings("transactions");
 
   // Build query filters for both tabs
   const allTabFilter = {
@@ -88,18 +76,13 @@ export default async function Transactions(props: Props) {
       <Suspense
         fallback={
           <Loading
-            columnVisibility={columnVisibility}
-            columnSizing={columnSizing}
-            columnOrder={columnOrder}
+            columnVisibility={initialSettings.columns}
+            columnSizing={initialSettings.sizing}
+            columnOrder={initialSettings.order}
           />
         }
       >
-        <DataTable
-          columnVisibility={Promise.resolve(columnVisibility)}
-          columnSizing={Promise.resolve(columnSizing)}
-          columnOrder={Promise.resolve(columnOrder)}
-          initialTab={tab}
-        />
+        <DataTable initialSettings={initialSettings} initialTab={tab} />
       </Suspense>
     </HydrateClient>
   );

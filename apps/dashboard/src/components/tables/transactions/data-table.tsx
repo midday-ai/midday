@@ -1,11 +1,10 @@
 "use client";
 
-import { updateColumnVisibilityAction } from "@/actions/update-column-visibility-action";
-import { updateTableSettingsAction } from "@/actions/update-table-settings-action";
 import { useScrollHeader } from "@/hooks/use-scroll-header";
 import { useSortParams } from "@/hooks/use-sort-params";
 import { useStickyColumns } from "@/hooks/use-sticky-columns";
 import { useTableScroll } from "@/hooks/use-table-scroll";
+import { useTableSettings } from "@/hooks/use-table-settings";
 import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
 import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useTransactionTab } from "@/hooks/use-transaction-tab";
@@ -16,7 +15,7 @@ import {
   useTransactionsStore,
 } from "@/store/transactions";
 import { useTRPC } from "@/trpc/client";
-import { Cookies } from "@/utils/constants";
+import type { TableSettings } from "@/utils/table-settings";
 import {
   DndContext,
   type DragEndEvent,
@@ -31,22 +30,17 @@ import { Tooltip, TooltipProvider } from "@midday/ui/tooltip";
 import { toast } from "@midday/ui/use-toast";
 import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import {
-  type ColumnOrderState,
-  type ColumnSizingState,
-  type VisibilityState,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { type VirtualItem, useVirtualizer } from "@tanstack/react-virtual";
 import {
-  use,
   useCallback,
   useDeferredValue,
   useEffect,
   useMemo,
   useRef,
-  useState,
 } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { BulkEditBar } from "./bulk-edit-bar";
@@ -58,21 +52,14 @@ import { Loading } from "./loading";
 import { TransactionTableProvider } from "./transaction-table-context";
 
 type Props = {
-  columnVisibility: Promise<VisibilityState>;
-  columnSizing: Promise<ColumnSizingState>;
-  columnOrder: Promise<ColumnOrderState>;
+  initialSettings?: Partial<TableSettings>;
   initialTab?: "all" | "review";
 };
 
-export function DataTable({
-  columnVisibility: columnVisibilityPromise,
-  columnSizing: columnSizingPromise,
-  columnOrder: columnOrderPromise,
-  initialTab,
-}: Props) {
+export function DataTable({ initialSettings, initialTab }: Props) {
   const trpc = useTRPC();
   const { filter, hasFilters } = useTransactionFilterParamsWithPersistence();
-  const { tab, setTab } = useTransactionTab();
+  const { tab } = useTransactionTab();
   const {
     setRowSelection: setRowSelectionForTab,
     rowSelectionByTab,
@@ -90,6 +77,19 @@ export function DataTable({
   // Hide header on scroll
   useScrollHeader(parentRef);
 
+  // Use unified table settings hook for column state management
+  const {
+    columnVisibility,
+    setColumnVisibility,
+    columnSizing,
+    setColumnSizing,
+    columnOrder,
+    setColumnOrder,
+  } = useTableSettings({
+    tableId: "transactions",
+    initialSettings,
+  });
+
   // Use the current tab from URL, falling back to initial value
   const activeTab = (tab ?? initialTab ?? "all") as TransactionTab;
   const isReviewTab = activeTab === "review";
@@ -101,24 +101,6 @@ export function DataTable({
       setRowSelectionForTab(activeTab, updater);
     },
     [activeTab, setRowSelectionForTab],
-  );
-
-  const initialColumnVisibility = use(columnVisibilityPromise);
-  const initialColumnSizing = use(columnSizingPromise);
-  const initialColumnOrder = use(columnOrderPromise);
-
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
-    initialColumnVisibility ?? {},
-  );
-
-  // Column sizing state persisted to cookies
-  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(
-    initialColumnSizing ?? {},
-  );
-
-  // Column order state persisted to cookies
-  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
-    initialColumnOrder ?? [],
   );
 
   // Build query filters based on active tab
@@ -173,14 +155,6 @@ export function DataTable({
 
   const deleteTransactionMutation = useMutation(
     trpc.transactions.deleteMany.mutationOptions({
-      onSuccess: () => {
-        refetch();
-      },
-    }),
-  );
-
-  const updateTransactionsMutation = useMutation(
-    trpc.transactions.updateMany.mutationOptions({
       onSuccess: () => {
         refetch();
       },
@@ -501,30 +475,7 @@ export function DataTable({
 
   useEffect(() => {
     setColumns(table.getAllLeafColumns());
-  }, [columnVisibility]);
-
-  useEffect(() => {
-    updateColumnVisibilityAction({
-      key: Cookies.TransactionsColumns,
-      data: columnVisibility,
-    });
-  }, [columnVisibility]);
-
-  // Persist column sizing to cookies
-  useEffect(() => {
-    updateTableSettingsAction({
-      key: Cookies.TransactionsColumnSizing,
-      data: columnSizing,
-    });
-  }, [columnSizing]);
-
-  // Persist column order to cookies
-  useEffect(() => {
-    updateTableSettingsAction({
-      key: Cookies.TransactionsColumnOrder,
-      data: columnOrder,
-    });
-  }, [columnOrder]);
+  }, [columnVisibility, setColumns, table]);
 
   // Determine if selected transactions can be deleted (only manual transactions can be deleted)
   useEffect(() => {
