@@ -1,3 +1,5 @@
+import type { StickyColumnConfig } from "@/components/tables/core";
+import { STICKY_COLUMNS } from "@/utils/table-configs";
 import { cn } from "@midday/ui/cn";
 import type { VisibilityState } from "@tanstack/react-table";
 import { useCallback, useMemo } from "react";
@@ -11,30 +13,6 @@ interface TableInterface {
   getAllLeafColumns: () => TableColumn[];
 }
 
-// Sticky column configuration: id and width
-type StickyColumnConfig = { id: string; width: number };
-
-// Predefined sticky column configs for different tables
-export const TRANSACTIONS_STICKY_COLUMNS: StickyColumnConfig[] = [
-  { id: "select", width: 50 },
-  { id: "date", width: 110 },
-  { id: "description", width: 320 },
-];
-
-export const INVOICES_STICKY_COLUMNS: StickyColumnConfig[] = [
-  { id: "select", width: 50 },
-  { id: "invoiceNumber", width: 180 },
-];
-
-export const CUSTOMERS_STICKY_COLUMNS: StickyColumnConfig[] = [
-  { id: "name", width: 320 },
-];
-
-export const VAULT_STICKY_COLUMNS: StickyColumnConfig[] = [
-  { id: "select", width: 50 },
-  { id: "title", width: 250 },
-];
-
 interface UseStickyColumnsProps {
   columnVisibility?: VisibilityState;
   table?: TableInterface;
@@ -47,7 +25,7 @@ export function useStickyColumns({
   columnVisibility,
   table,
   loading,
-  stickyColumns = TRANSACTIONS_STICKY_COLUMNS,
+  stickyColumns = STICKY_COLUMNS.transactions,
 }: UseStickyColumnsProps) {
   // Memoize isVisible to prevent breaking downstream useMemo dependencies
   const isVisible = useCallback(

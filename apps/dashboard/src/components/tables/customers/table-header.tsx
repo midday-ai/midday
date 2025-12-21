@@ -1,13 +1,16 @@
 "use client";
 
 import { HorizontalPagination } from "@/components/horizontal-pagination";
+import type { TableScrollState } from "@/components/tables/core";
 import { DraggableHeader } from "@/components/tables/draggable-header";
 import { ResizeHandle } from "@/components/tables/resize-handle";
-import { useSortParams } from "@/hooks/use-sort-params";
+import { useSortQuery } from "@/hooks/use-sort-query";
+import { useStickyColumns } from "@/hooks/use-sticky-columns";
 import {
-  CUSTOMERS_STICKY_COLUMNS,
-  useStickyColumns,
-} from "@/hooks/use-sticky-columns";
+  NON_REORDERABLE_COLUMNS,
+  SORT_FIELD_MAPS,
+  STICKY_COLUMNS,
+} from "@/utils/table-configs";
 import {
   SortableContext,
   horizontalListSortingStrategy,
@@ -16,16 +19,7 @@ import { Button } from "@midday/ui/button";
 import { TableHead, TableHeader, TableRow } from "@midday/ui/table";
 import type { Header, Table } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp } from "lucide-react";
-import { useCallback, useMemo } from "react";
-
-interface TableScrollState {
-  containerRef: React.RefObject<HTMLDivElement | null>;
-  canScrollLeft: boolean;
-  canScrollRight: boolean;
-  isScrollable: boolean;
-  scrollLeft: () => void;
-  scrollRight: () => void;
-}
+import { useMemo } from "react";
 
 interface Props<TData> {
   table?: Table<TData>;
@@ -33,45 +27,18 @@ interface Props<TData> {
   tableScroll?: TableScrollState;
 }
 
-// Map column IDs to their sortable field names
-const sortFieldMap: Record<string, string> = {
-  name: "name",
-  contact: "contact",
-  email: "email",
-  invoices: "invoices",
-  projects: "projects",
-  tags: "tags",
-};
-
-// Columns that cannot be reordered (sticky columns)
-const NON_REORDERABLE_COLUMNS = new Set(["name", "actions"]);
-
 export function DataTableHeader<TData>({
   table,
   loading,
   tableScroll,
 }: Props<TData>) {
-  const { params, setParams } = useSortParams();
-  const [sortColumn, sortValue] = params.sort || [];
-
-  const createSortQuery = useCallback(
-    (name: string) => {
-      if (sortValue === "asc") {
-        setParams({ sort: [name, "desc"] });
-      } else if (sortValue === "desc") {
-        setParams({ sort: null });
-      } else {
-        setParams({ sort: [name, "asc"] });
-      }
-    },
-    [sortValue, setParams],
-  );
+  const { sortColumn, sortValue, createSortQuery } = useSortQuery();
 
   // Use the reusable sticky columns hook
   const { getStickyStyle, getStickyClassName, isVisible } = useStickyColumns({
     table,
     loading,
-    stickyColumns: CUSTOMERS_STICKY_COLUMNS,
+    stickyColumns: STICKY_COLUMNS.customers,
   });
 
   // Get sortable column IDs (excluding sticky columns)
@@ -79,7 +46,7 @@ export function DataTableHeader<TData>({
     if (!table) return [];
     return table
       .getAllLeafColumns()
-      .filter((col) => !NON_REORDERABLE_COLUMNS.has(col.id))
+      .filter((col) => !NON_REORDERABLE_COLUMNS.customers.has(col.id))
       .map((col) => col.id);
   }, [table]);
 
@@ -104,7 +71,8 @@ export function DataTableHeader<TData>({
                 | { sticky?: boolean; className?: string }
                 | undefined;
               const isSticky = meta?.sticky;
-              const canReorder = !NON_REORDERABLE_COLUMNS.has(columnId);
+              const canReorder =
+                !NON_REORDERABLE_COLUMNS.customers.has(columnId);
 
               if (!isVisible(columnId)) return null;
 
@@ -200,7 +168,7 @@ function renderHeaderContent<TData>(
   createSortQuery: (name: string) => void,
   tableScroll?: TableScrollState,
 ) {
-  const sortField = sortFieldMap[columnId];
+  const sortField = SORT_FIELD_MAPS.customers[columnId];
 
   // Actions column - static text
   if (columnId === "actions") {

@@ -1,12 +1,11 @@
 "use client";
 
 import { HorizontalPagination } from "@/components/horizontal-pagination";
+import type { TableScrollState } from "@/components/tables/core";
 import { DraggableHeader } from "@/components/tables/draggable-header";
 import { ResizeHandle } from "@/components/tables/resize-handle";
-import {
-  VAULT_STICKY_COLUMNS,
-  useStickyColumns,
-} from "@/hooks/use-sticky-columns";
+import { useStickyColumns } from "@/hooks/use-sticky-columns";
+import { NON_REORDERABLE_COLUMNS, STICKY_COLUMNS } from "@/utils/table-configs";
 import {
   SortableContext,
   horizontalListSortingStrategy,
@@ -14,25 +13,13 @@ import {
 import { Checkbox } from "@midday/ui/checkbox";
 import { TableHead, TableHeader, TableRow } from "@midday/ui/table";
 import type { Header, Table } from "@tanstack/react-table";
-import { useCallback, useMemo } from "react";
-
-interface TableScrollState {
-  containerRef: React.RefObject<HTMLDivElement | null>;
-  canScrollLeft: boolean;
-  canScrollRight: boolean;
-  isScrollable: boolean;
-  scrollLeft: () => void;
-  scrollRight: () => void;
-}
+import { useMemo } from "react";
 
 interface Props<TData> {
   table?: Table<TData>;
   loading?: boolean;
   tableScroll?: TableScrollState;
 }
-
-// Columns that cannot be reordered (sticky columns)
-const NON_REORDERABLE_COLUMNS = new Set(["select", "title", "actions"]);
 
 export function DataTableHeader<TData>({
   table,
@@ -43,7 +30,7 @@ export function DataTableHeader<TData>({
   const { getStickyStyle, getStickyClassName, isVisible } = useStickyColumns({
     table,
     loading,
-    stickyColumns: VAULT_STICKY_COLUMNS,
+    stickyColumns: STICKY_COLUMNS.vault,
   });
 
   // Get sortable column IDs (excluding sticky columns)
@@ -51,7 +38,7 @@ export function DataTableHeader<TData>({
     if (!table) return [];
     return table
       .getAllLeafColumns()
-      .filter((col) => !NON_REORDERABLE_COLUMNS.has(col.id))
+      .filter((col) => !NON_REORDERABLE_COLUMNS.vault.has(col.id))
       .map((col) => col.id);
   }, [table]);
 
@@ -76,7 +63,7 @@ export function DataTableHeader<TData>({
                 | { sticky?: boolean; className?: string }
                 | undefined;
               const isSticky = meta?.sticky;
-              const canReorder = !NON_REORDERABLE_COLUMNS.has(columnId);
+              const canReorder = !NON_REORDERABLE_COLUMNS.vault.has(columnId);
 
               if (!isVisible(columnId)) return null;
 

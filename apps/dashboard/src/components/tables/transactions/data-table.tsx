@@ -1,8 +1,11 @@
 "use client";
 
+import { getCellStyle } from "@/components/tables/core";
+import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { useScrollHeader } from "@/hooks/use-scroll-header";
 import { useSortParams } from "@/hooks/use-sort-params";
 import { useStickyColumns } from "@/hooks/use-sticky-columns";
+import { useTableDnd } from "@/hooks/use-table-dnd";
 import { useTableScroll } from "@/hooks/use-table-scroll";
 import { useTableSettings } from "@/hooks/use-table-settings";
 import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
@@ -15,16 +18,9 @@ import {
   useTransactionsStore,
 } from "@/store/transactions";
 import { useTRPC } from "@/trpc/client";
+import { STICKY_COLUMNS } from "@/utils/table-configs";
 import type { TableSettings } from "@/utils/table-settings";
-import {
-  DndContext,
-  type DragEndEvent,
-  PointerSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
+import { DndContext, closestCenter } from "@dnd-kit/core";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { Tooltip, TooltipProvider } from "@midday/ui/tooltip";
 import { toast } from "@midday/ui/use-toast";
@@ -357,31 +353,8 @@ export function DataTable({ initialSettings, initialTab }: Props) {
     meta: tableMeta,
   });
 
-  // DnD sensors for column reordering
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-  );
-
-  const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
-      const { active, over } = event;
-      if (!over || active.id === over.id) return;
-
-      const currentOrder = table.getAllLeafColumns().map((col) => col.id);
-      const oldIndex = currentOrder.indexOf(active.id as string);
-      const newIndex = currentOrder.indexOf(over.id as string);
-
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newOrder = arrayMove(currentOrder, oldIndex, newIndex);
-        table.setColumnOrder(newOrder);
-      }
-    },
-    [table],
-  );
+  // DnD for column reordering
+  const { sensors, handleDragEnd } = useTableDnd(table);
 
   // Update handleShiftClickRange to use the table
   handleShiftClickRangeRef.current = useCallback(
@@ -423,6 +396,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   const { getStickyStyle, getStickyClassName } = useStickyColumns({
     columnVisibility,
     table,
+    stickyColumns: STICKY_COLUMNS.transactions,
   });
 
   // Use the reusable table scroll hook with column-width scrolling starting after sticky columns
@@ -442,36 +416,15 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   });
 
   // Trigger infinite load when scrolling near the bottom
-  useEffect(() => {
-    const scrollElement = parentRef.current;
-    if (!scrollElement) return;
-
-    const checkLoadMore = () => {
-      // Don't fetch if already fetching
-      if (isFetchingNextPage) return;
-
-      const virtualItems = rowVirtualizer.getVirtualItems();
-      const lastItem = virtualItems[virtualItems.length - 1];
-
-      // Load more when within 50 rows of the end for smoother infinite scroll
-      if (lastItem && lastItem.index >= rows.length - 50 && hasNextPage) {
-        fetchNextPage();
-      }
-    };
-
-    // Check on mount and when deps change
-    checkLoadMore();
-
-    // Also check on scroll
-    scrollElement.addEventListener("scroll", checkLoadMore);
-    return () => scrollElement.removeEventListener("scroll", checkLoadMore);
-  }, [
+  useInfiniteScroll<HTMLDivElement>({
+    scrollRef: parentRef,
     rowVirtualizer,
-    rows.length,
+    rowCount: rows.length,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  ]);
+    threshold: 50,
+  });
 
   useEffect(() => {
     setColumns(table.getAllLeafColumns());
@@ -606,17 +559,22 @@ export function DataTable({ initialSettings, initialTab }: Props) {
                                 .getVisibleCells()
                                 .map((cell, cellIndex, cells) => {
                                   const columnId = cell.column.id;
-                                  const isActions = columnId === "actions";
                                   const meta = cell.column.columnDef.meta as
                                     | { sticky?: boolean; className?: string }
                                     | undefined;
-                                  const isSticky = meta?.sticky;
+                                  const isSticky = meta?.sticky ?? false;
 
-                                  // Check if this is the last column before actions
-                                  const isLastBeforeActions =
-                                    cellIndex === cells.length - 2 &&
-                                    cells[cells.length - 1]?.column.id ===
-                                      "actions";
+                                  const cellStyle = getCellStyle({
+                                    columnId,
+                                    cellIndex,
+                                    totalCells: cells.length,
+                                    lastCellId:
+                                      cells[cells.length - 1]?.column.id ?? "",
+                                    getStickyStyle,
+                                    isSticky,
+                                    columnSize: cell.column.getSize(),
+                                    minSize: cell.column.columnDef.minSize,
+                                  });
 
                                   return (
                                     <TableCell
@@ -625,36 +583,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
                                         columnId,
                                         meta?.className,
                                       )}`}
-                                      style={{
-                                        // Use dynamic width from column sizing (respects user resizing)
-                                        width: cell.column.getSize(),
-                                        minWidth: isSticky
-                                          ? cell.column.getSize()
-                                          : cell.column.columnDef.minSize,
-                                        maxWidth: isSticky
-                                          ? cell.column.getSize()
-                                          : undefined,
-                                        ...getStickyStyle(columnId),
-                                        ...(columnId !== "actions" &&
-                                          !isLastBeforeActions && {
-                                            borderRight:
-                                              "1px solid hsl(var(--border))",
-                                          }),
-                                        // Only apply flex: 1 to non-sticky columns
-                                        ...(isLastBeforeActions &&
-                                          !isSticky && {
-                                            flex: 1,
-                                          }),
-                                        ...(isActions && {
-                                          borderLeft:
-                                            "1px solid hsl(var(--border))",
-                                          borderBottom:
-                                            "1px solid hsl(var(--border))",
-                                          borderRight: "none",
-                                          zIndex: 50,
-                                          justifyContent: "center",
-                                        }),
-                                      }}
+                                      style={cellStyle}
                                       onClick={() => {
                                         // Handle other column clicks (select column is handled in SelectCell)
                                         if (

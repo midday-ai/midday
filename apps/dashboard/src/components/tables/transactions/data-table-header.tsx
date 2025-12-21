@@ -1,10 +1,16 @@
 "use client";
 
 import { HorizontalPagination } from "@/components/horizontal-pagination";
+import type { TableScrollState } from "@/components/tables/core";
 import { DraggableHeader } from "@/components/tables/draggable-header";
 import { ResizeHandle } from "@/components/tables/resize-handle";
-import { useSortParams } from "@/hooks/use-sort-params";
+import { useSortQuery } from "@/hooks/use-sort-query";
 import { useStickyColumns } from "@/hooks/use-sticky-columns";
+import {
+  NON_REORDERABLE_COLUMNS,
+  SORT_FIELD_MAPS,
+  STICKY_COLUMNS,
+} from "@/utils/table-configs";
 import {
   SortableContext,
   horizontalListSortingStrategy,
@@ -14,16 +20,7 @@ import { Checkbox } from "@midday/ui/checkbox";
 import { TableHead, TableHeader, TableRow } from "@midday/ui/table";
 import type { Header, Table } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp } from "lucide-react";
-import { useCallback, useMemo } from "react";
-
-interface TableScrollState {
-  containerRef: React.RefObject<HTMLDivElement | null>;
-  canScrollLeft: boolean;
-  canScrollRight: boolean;
-  isScrollable: boolean;
-  scrollLeft: () => void;
-  scrollRight: () => void;
-}
+import { useMemo } from "react";
 
 interface Props<TData> {
   table?: Table<TData>;
@@ -31,53 +28,18 @@ interface Props<TData> {
   tableScroll?: TableScrollState;
 }
 
-// Map column IDs to their sortable field names
-const sortFieldMap: Record<string, string> = {
-  date: "date",
-  description: "name",
-  amount: "amount",
-  category: "category",
-  counterparty: "counterparty",
-  tags: "tags",
-  bank_account: "bank_account",
-  method: "method",
-  assigned: "assigned",
-  status: "attachment",
-};
-
-// Columns that cannot be reordered (sticky columns)
-const NON_REORDERABLE_COLUMNS = new Set([
-  "select",
-  "date",
-  "description",
-  "actions",
-]);
-
 export function DataTableHeader<TData>({
   table,
   loading,
   tableScroll,
 }: Props<TData>) {
-  const { params, setParams } = useSortParams();
-  const [sortColumn, sortValue] = params.sort || [];
-
-  const createSortQuery = useCallback(
-    (name: string) => {
-      if (sortValue === "asc") {
-        setParams({ sort: [name, "desc"] });
-      } else if (sortValue === "desc") {
-        setParams({ sort: null });
-      } else {
-        setParams({ sort: [name, "asc"] });
-      }
-    },
-    [sortValue, setParams],
-  );
+  const { sortColumn, sortValue, createSortQuery } = useSortQuery();
 
   // Use the reusable sticky columns hook
   const { getStickyStyle, getStickyClassName, isVisible } = useStickyColumns({
     table,
     loading,
+    stickyColumns: STICKY_COLUMNS.transactions,
   });
 
   // Get sortable column IDs (excluding sticky columns)
@@ -85,7 +47,7 @@ export function DataTableHeader<TData>({
     if (!table) return [];
     return table
       .getAllLeafColumns()
-      .filter((col) => !NON_REORDERABLE_COLUMNS.has(col.id))
+      .filter((col) => !NON_REORDERABLE_COLUMNS.transactions.has(col.id))
       .map((col) => col.id);
   }, [table]);
 
@@ -110,7 +72,8 @@ export function DataTableHeader<TData>({
                 | { sticky?: boolean; className?: string }
                 | undefined;
               const isSticky = meta?.sticky;
-              const canReorder = !NON_REORDERABLE_COLUMNS.has(columnId);
+              const canReorder =
+                !NON_REORDERABLE_COLUMNS.transactions.has(columnId);
 
               if (!isVisible(columnId)) return null;
 
@@ -177,20 +140,24 @@ export function DataTableHeader<TData>({
                 <DraggableHeader
                   key={header.id}
                   id={columnId}
+                  className={getStickyClassName(
+                    columnId,
+                    "group/header relative h-full px-4 border-t border-border flex items-center",
+                  )}
                   style={headerStyle}
                 >
-                  <div className="flex items-center flex-1 min-w-0 overflow-hidden">
-                    {renderHeaderContent(
-                      header,
-                      columnId,
-                      sortColumn,
-                      sortValue,
-                      createSortQuery,
-                      table,
-                      tableScroll,
-                    )}
-                  </div>
-                  <ResizeHandle header={header} />
+                  {renderHeaderContent(
+                    header,
+                    columnId,
+                    sortColumn,
+                    sortValue,
+                    createSortQuery,
+                    table,
+                    tableScroll,
+                  )}
+                  {header.column.getCanResize() && (
+                    <ResizeHandle header={header} />
+                  )}
                 </DraggableHeader>
               );
             })}
@@ -201,6 +168,9 @@ export function DataTableHeader<TData>({
   );
 }
 
+/**
+ * Renders the content inside a header cell
+ */
 function renderHeaderContent<TData>(
   header: Header<TData, unknown>,
   columnId: string,
@@ -210,7 +180,7 @@ function renderHeaderContent<TData>(
   table: Table<TData>,
   tableScroll?: TableScrollState,
 ) {
-  const sortField = sortFieldMap[columnId];
+  const sortField = SORT_FIELD_MAPS.transactions[columnId];
 
   // Select column - checkbox
   if (columnId === "select") {

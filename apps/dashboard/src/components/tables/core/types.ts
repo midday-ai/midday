@@ -1,4 +1,6 @@
+import type { TableId } from "@/utils/table-settings";
 import type { ColumnDef } from "@tanstack/react-table";
+import type { RefObject } from "react";
 
 /**
  * Skeleton types for rendering loading states
@@ -11,6 +13,39 @@ export type SkeletonType =
   | "badge"
   | "tags"
   | "icon";
+
+/**
+ * Scroll state for horizontal table scrolling
+ * Used by table headers to show horizontal pagination
+ */
+export interface TableScrollState {
+  containerRef: RefObject<HTMLDivElement | null>;
+  canScrollLeft: boolean;
+  canScrollRight: boolean;
+  isScrollable: boolean;
+  scrollLeft: () => void;
+  scrollRight: () => void;
+}
+
+/**
+ * Sticky column configuration
+ */
+export interface StickyColumnConfig {
+  id: string;
+  width: number;
+}
+
+/**
+ * Configuration for a table type
+ */
+export interface TableConfig {
+  tableId: TableId;
+  stickyColumns: StickyColumnConfig[];
+  sortFieldMap: Record<string, string>;
+  nonReorderableColumns: Set<string>;
+  rowHeight: number;
+  summaryGridHeight?: number;
+}
 
 /**
  * Configuration for skeleton rendering in column meta

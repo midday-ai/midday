@@ -1,31 +1,23 @@
 "use client";
 
-import { LoadMore } from "@/components/load-more";
+import { getCellStyle } from "@/components/tables/core";
 import { NoResults } from "@/components/vault/empty-states";
 import { VaultGetStarted } from "@/components/vault/vault-get-started";
 import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
+import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { useRealtime } from "@/hooks/use-realtime";
 import { useScrollHeader } from "@/hooks/use-scroll-header";
-import {
-  VAULT_STICKY_COLUMNS,
-  useStickyColumns,
-} from "@/hooks/use-sticky-columns";
+import { useStickyColumns } from "@/hooks/use-sticky-columns";
+import { useTableDnd } from "@/hooks/use-table-dnd";
 import { useTableScroll } from "@/hooks/use-table-scroll";
 import { useTableSettings } from "@/hooks/use-table-settings";
 import { useUserQuery } from "@/hooks/use-user";
 import { useDocumentsStore } from "@/store/vault";
 import { useTRPC } from "@/trpc/client";
+import { STICKY_COLUMNS } from "@/utils/table-configs";
 import type { TableSettings } from "@/utils/table-settings";
-import {
-  DndContext,
-  type DragEndEvent,
-  PointerSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
+import { DndContext, closestCenter } from "@dnd-kit/core";
 import { Checkbox } from "@midday/ui/checkbox";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import {
@@ -40,9 +32,8 @@ import {
 } from "@tanstack/react-table";
 import { type VirtualItem, useVirtualizer } from "@tanstack/react-virtual";
 import { AnimatePresence } from "framer-motion";
-import { useCallback, useEffect, useMemo, useRef } from "react";
-import { useDebounceCallback } from "usehooks-ts";
-import { useCopyToClipboard } from "usehooks-ts";
+import { useCallback, useMemo, useRef } from "react";
+import { useCopyToClipboard, useDebounceCallback } from "usehooks-ts";
 import { BottomBar } from "./bottom-bar";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
@@ -212,37 +203,14 @@ export function DataTable({ initialSettings }: Props) {
     },
   });
 
-  // DnD sensors for column reordering
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-  );
-
-  const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
-      const { active, over } = event;
-      if (!over || active.id === over.id) return;
-
-      const currentOrder = table.getAllLeafColumns().map((col) => col.id);
-      const oldIndex = currentOrder.indexOf(active.id as string);
-      const newIndex = currentOrder.indexOf(over.id as string);
-
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newOrder = arrayMove(currentOrder, oldIndex, newIndex);
-        table.setColumnOrder(newOrder);
-      }
-    },
-    [table],
-  );
+  // DnD for column reordering
+  const { sensors, handleDragEnd } = useTableDnd(table);
 
   // Use the reusable sticky columns hook
   const { getStickyStyle, getStickyClassName } = useStickyColumns({
     columnVisibility,
     table,
-    stickyColumns: VAULT_STICKY_COLUMNS,
+    stickyColumns: STICKY_COLUMNS.vault,
   });
 
   const rows = table.getRowModel().rows;
@@ -256,32 +224,14 @@ export function DataTable({ initialSettings }: Props) {
   });
 
   // Trigger infinite load when scrolling near the bottom
-  useEffect(() => {
-    const scrollElement = parentRef.current;
-    if (!scrollElement) return;
-
-    const checkLoadMore = () => {
-      if (isFetchingNextPage) return;
-
-      const virtualItems = rowVirtualizer.getVirtualItems();
-      const lastItem = virtualItems[virtualItems.length - 1];
-
-      if (lastItem && lastItem.index >= rows.length - 20 && hasNextPage) {
-        fetchNextPage();
-      }
-    };
-
-    checkLoadMore();
-
-    scrollElement.addEventListener("scroll", checkLoadMore);
-    return () => scrollElement.removeEventListener("scroll", checkLoadMore);
-  }, [
+  useInfiniteScroll<HTMLDivElement>({
+    scrollRef: parentRef,
     rowVirtualizer,
-    rows.length,
+    rowCount: rows.length,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  ]);
+  });
 
   if (hasFilters && !documents?.length) {
     return <NoResults />;
@@ -353,16 +303,22 @@ export function DataTable({ initialSettings }: Props) {
                       >
                         {row.getVisibleCells().map((cell, cellIndex, cells) => {
                           const columnId = cell.column.id;
-                          const isActions = columnId === "actions";
                           const meta = cell.column.columnDef.meta as
                             | { sticky?: boolean; className?: string }
                             | undefined;
-                          const isSticky = meta?.sticky;
+                          const isSticky = meta?.sticky ?? false;
 
-                          // Check if this is the last column before actions
-                          const isLastBeforeActions =
-                            cellIndex === cells.length - 2 &&
-                            cells[cells.length - 1]?.column.id === "actions";
+                          const cellStyle = getCellStyle({
+                            columnId,
+                            cellIndex,
+                            totalCells: cells.length,
+                            lastCellId:
+                              cells[cells.length - 1]?.column.id ?? "",
+                            getStickyStyle,
+                            isSticky,
+                            columnSize: cell.column.getSize(),
+                            minSize: cell.column.columnDef.minSize,
+                          });
 
                           return (
                             <TableCell
@@ -371,32 +327,7 @@ export function DataTable({ initialSettings }: Props) {
                                 columnId,
                                 meta?.className,
                               )}`}
-                              style={{
-                                width: cell.column.getSize(),
-                                minWidth: isSticky
-                                  ? cell.column.getSize()
-                                  : cell.column.columnDef.minSize,
-                                maxWidth: isSticky
-                                  ? cell.column.getSize()
-                                  : undefined,
-                                ...getStickyStyle(columnId),
-                                ...(columnId !== "actions" &&
-                                  !isLastBeforeActions && {
-                                    borderRight: "1px solid hsl(var(--border))",
-                                  }),
-                                // Only apply flex: 1 to non-sticky columns
-                                ...(isLastBeforeActions &&
-                                  !isSticky && {
-                                    flex: 1,
-                                  }),
-                                ...(isActions && {
-                                  borderLeft: "1px solid hsl(var(--border))",
-                                  borderBottom: "1px solid hsl(var(--border))",
-                                  borderRight: "none",
-                                  zIndex: 50,
-                                  justifyContent: "center",
-                                }),
-                              }}
+                              style={cellStyle}
                               onClick={() => {
                                 // Don't navigate for select, tags, or actions column
                                 if (
