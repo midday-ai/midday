@@ -69,7 +69,7 @@ export default async function Transactions(props: Props) {
     trpc.team.members.queryOptions(),
     trpc.tags.get.queryOptions(),
     // Apps for export bar (accounting providers)
-    trpc.apps.getApps.queryOptions(),
+    trpc.apps.get.queryOptions(),
   ]);
 
   return (

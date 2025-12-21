@@ -7,6 +7,7 @@ import {
   useAccountingError,
 } from "@/hooks/use-accounting-error";
 import { useJobStatus } from "@/hooks/use-job-status";
+import { useReviewTransactions } from "@/hooks/use-review-transactions";
 import { useSuccessSound } from "@/hooks/use-success-sound";
 import { useTransactionTab } from "@/hooks/use-transaction-tab";
 import { useExportStore } from "@/store/export";
@@ -21,12 +22,7 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { Spinner } from "@midday/ui/spinner";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -60,6 +56,7 @@ export function ExportBar() {
     useAccountingError();
   const { play: playSuccessSound } = useSuccessSound();
   const { tab } = useTransactionTab();
+  const { transactionIds: reviewTransactionIds } = useReviewTransactions();
   const {
     exportData,
     setExportData,
@@ -96,21 +93,7 @@ export function ExportBar() {
   );
 
   // Fetch connected accounting providers
-  const { data: connectedApps } = useQuery(trpc.apps.getApps.queryOptions());
-
-  // Fetch review transaction IDs when on review tab without selection (for accounting export)
-  const { data: reviewData } = useInfiniteQuery(
-    trpc.transactions.get.infiniteQueryOptions(
-      {
-        fulfilled: true,
-        exported: false,
-        pageSize: 10000,
-      },
-      {
-        getNextPageParam: ({ meta }) => meta?.cursor,
-      },
-    ),
-  );
+  const { data: connectedApps } = useQuery(trpc.apps.get.queryOptions());
 
   // Find the first connected accounting provider
   const connectedProvider = useMemo(() => {
@@ -156,21 +139,36 @@ export function ExportBar() {
     if (hasManualSelection) {
       return Object.keys(rowSelection);
     }
-    // Get all IDs from review data
-    return (
-      reviewData?.pages.flatMap((page) => page.data.map((tx) => tx.id)) ?? []
-    );
-  }, [hasManualSelection, rowSelection, reviewData]);
+    // Get all IDs from review data (with user filters applied)
+    return reviewTransactionIds;
+  }, [hasManualSelection, rowSelection, reviewTransactionIds]);
 
   // Track job status for accounting export
-  const { status: jobStatus, result: jobResult } = useJobStatus({
+  const {
+    status: jobStatus,
+    result: jobResult,
+    queryError,
+  } = useJobStatus({
     jobId: exportData?.runId,
     enabled: !!exportData?.runId && exportData?.exportType === "accounting",
   });
 
-  // Handle job completion/failure
+  // Handle job completion/failure/query errors
   useEffect(() => {
     const providerName = exportData?.providerName ?? "accounting software";
+
+    // Handle query errors (network error, job not found, access denied, etc.)
+    if (queryError && !hasShownErrorRef.current) {
+      hasShownErrorRef.current = true;
+      setIsExporting(false);
+
+      showJobFailure(providerName);
+
+      setExportData(undefined);
+      setExportingCount(null);
+      setExportingTransactionIds([]);
+      return;
+    }
 
     if (jobStatus === "completed") {
       setIsExporting(false);
@@ -214,6 +212,7 @@ export function ExportBar() {
   }, [
     jobStatus,
     jobResult,
+    queryError,
     exportData?.providerName,
     showExportResult,
     showJobFailure,
@@ -301,6 +300,7 @@ export function ExportBar() {
   // 1. Mutation is in flight
   // 2. Job is active/waiting
   // 3. We have an accounting export runId but job status hasn't updated yet
+  // Note: Don't show loading if there's a query error (network failure, job not found, etc.)
   const isExportingAccounting =
     accountingExportMutation.isPending ||
     jobStatus === "active" ||
@@ -308,7 +308,8 @@ export function ExportBar() {
     (exportData?.runId &&
       exportData?.exportType === "accounting" &&
       jobStatus !== "completed" &&
-      jobStatus !== "failed");
+      jobStatus !== "failed" &&
+      !queryError);
 
   return (
     <>

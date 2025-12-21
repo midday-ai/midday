@@ -1,6 +1,7 @@
 "use client";
 
 import { useJobStatus } from "@/hooks/use-job-status";
+import { useReviewTransactions } from "@/hooks/use-review-transactions";
 import { useTeamMutation, useTeamQuery } from "@/hooks/use-team";
 import { useUserQuery } from "@/hooks/use-user";
 import { useZodForm } from "@/hooks/use-zod-form";
@@ -35,11 +36,7 @@ import { Separator } from "@midday/ui/separator";
 import { Spinner } from "@midday/ui/spinner";
 import { Switch } from "@midday/ui/switch";
 import NumberFlow from "@number-flow/react";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 import { z } from "zod/v3";
 
@@ -89,35 +86,19 @@ export function ExportTransactionsModal({
   const teamMutation = useTeamMutation();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { transactionIds: reviewTransactionIds } = useReviewTransactions();
 
   // Get transaction IDs - either from selection or all review transactions
   const selectedIds = Object.keys(rowSelection);
   const hasManualSelection = selectedIds.length > 0;
 
-  // Fetch review transaction IDs when on review tab without selection
-  const { data: reviewData } = useInfiniteQuery(
-    trpc.transactions.get.infiniteQueryOptions(
-      {
-        fulfilled: true,
-        exported: false,
-        pageSize: 10000,
-      },
-      {
-        getNextPageParam: ({ meta }) => meta?.cursor,
-      },
-    ),
-  );
-
-  // Get IDs for export - either selected or all review transactions
+  // Get IDs for export - either selected or all review transactions (with user filters applied)
   const transactionIds = useMemo(() => {
     if (hasManualSelection) {
       return selectedIds;
     }
-    // Get all IDs from review data
-    return (
-      reviewData?.pages.flatMap((page) => page.data.map((tx) => tx.id)) ?? []
-    );
-  }, [hasManualSelection, selectedIds, reviewData]);
+    return reviewTransactionIds;
+  }, [hasManualSelection, selectedIds, reviewTransactionIds]);
 
   const totalCount = transactionIds.length;
 

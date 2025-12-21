@@ -50,7 +50,7 @@ export function AccountingSettings() {
           queryKey: trpc.accounting.getConnections.queryKey(),
         });
         queryClient.invalidateQueries({
-          queryKey: trpc.apps.getApps.queryKey(),
+          queryKey: trpc.apps.get.queryKey(),
         });
       },
     }),

@@ -18,10 +18,6 @@ export const appsRouter = createTRPCRouter({
     return getApps(db, teamId!);
   }),
 
-  getApps: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
-    return getApps(db, teamId!);
-  }),
-
   disconnect: protectedProcedure
     .input(disconnectAppSchema)
     .mutation(async ({ ctx: { db, teamId }, input }) => {
