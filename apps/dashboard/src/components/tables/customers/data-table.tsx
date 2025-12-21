@@ -1,6 +1,6 @@
 "use client";
 
-import { getCellStyle } from "@/components/tables/core";
+import { VirtualRow } from "@/components/tables/core";
 import { useCustomerFilterParams } from "@/hooks/use-customer-filter-params";
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
@@ -16,16 +16,15 @@ import type { TableSettings } from "@/utils/table-settings";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import {
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { type VirtualItem, useVirtualizer } from "@tanstack/react-virtual";
 import { useCallback, useDeferredValue, useMemo, useRef } from "react";
 import { columns } from "./columns";
 import { EmptyState, NoResults } from "./empty-states";
 import { DataTableHeader } from "./table-header";
+
+// Stable reference for non-clickable columns (avoids recreation on each render)
+const NON_CLICKABLE_COLUMNS = new Set(["actions"]);
 
 type Props = {
   initialSettings?: Partial<TableSettings>;
@@ -215,62 +214,16 @@ export function DataTable({ initialSettings }: Props) {
                     if (!row) return null;
 
                     return (
-                      <TableRow
+                      <VirtualRow
                         key={row.id}
-                        data-index={virtualRow.index}
-                        ref={(node) => rowVirtualizer.measureElement(node)}
-                        className="group h-[45px] cursor-pointer select-text hover:bg-[#F2F1EF] hover:dark:bg-[#0f0f0f] flex items-center border-b border-border min-w-full"
-                        style={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          width: "100%",
-                          transform: `translateY(${virtualRow.start}px)`,
-                        }}
-                      >
-                        {row.getVisibleCells().map((cell, cellIndex, cells) => {
-                          const columnId = cell.column.id;
-                          const meta = cell.column.columnDef.meta as
-                            | { sticky?: boolean; className?: string }
-                            | undefined;
-                          const isSticky = meta?.sticky ?? false;
-
-                          const cellStyle = getCellStyle({
-                            columnId,
-                            cellIndex,
-                            totalCells: cells.length,
-                            lastCellId:
-                              cells[cells.length - 1]?.column.id ?? "",
-                            getStickyStyle,
-                            isSticky,
-                            columnSize: cell.column.getSize(),
-                            minSize: cell.column.columnDef.minSize,
-                          });
-
-                          return (
-                            <TableCell
-                              key={cell.id}
-                              className={`h-full flex items-center ${getStickyClassName(
-                                columnId,
-                                meta?.className,
-                              )}`}
-                              style={cellStyle}
-                              onClick={() => {
-                                if (columnId !== "actions") {
-                                  setOpen(row.original.id);
-                                }
-                              }}
-                            >
-                              <div className="w-full overflow-hidden truncate">
-                                {flexRender(
-                                  cell.column.columnDef.cell,
-                                  cell.getContext(),
-                                )}
-                              </div>
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
+                        row={row}
+                        virtualStart={virtualRow.start}
+                        rowHeight={45}
+                        getStickyStyle={getStickyStyle}
+                        getStickyClassName={getStickyClassName}
+                        nonClickableColumns={NON_CLICKABLE_COLUMNS}
+                        onCellClick={setOpen}
+                      />
                     );
                   })
                 ) : (

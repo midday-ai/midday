@@ -88,6 +88,7 @@ export const columns: ColumnDef<Invoice>[] = [
       skeleton: { type: "badge", width: "w-16" },
       headerLabel: "Status",
       sortField: "status",
+      className: "w-[120px] min-w-[100px] border-r border-border",
     },
     cell: ({ row, table }) => {
       const status = row.getValue("status") as string;
@@ -131,6 +132,7 @@ export const columns: ColumnDef<Invoice>[] = [
       skeleton: { type: "text", width: "w-20" },
       headerLabel: "Due date",
       sortField: "due_date",
+      className: "w-[140px] min-w-[120px] border-r border-border",
     },
     cell: ({ row, table }) => {
       const date = row.original.dueDate;
@@ -164,6 +166,7 @@ export const columns: ColumnDef<Invoice>[] = [
       skeleton: { type: "avatar-text", width: "w-32" },
       headerLabel: "Customer",
       sortField: "customer",
+      className: "w-[220px] min-w-[160px] border-r border-border",
     },
     cell: ({ row }) => {
       const customer = row.original.customer;
@@ -262,6 +265,7 @@ export const columns: ColumnDef<Invoice>[] = [
       skeleton: { type: "text", width: "w-20" },
       headerLabel: "Amount",
       sortField: "amount",
+      className: "w-[140px] min-w-[100px] border-r border-border",
     },
     cell: ({ row }) => {
       if (!row.original.amount) return "-";
@@ -290,6 +294,7 @@ export const columns: ColumnDef<Invoice>[] = [
     meta: {
       skeleton: { type: "text", width: "w-12" },
       headerLabel: "VAT Rate",
+      className: "w-[100px] min-w-[80px] border-r border-border",
     },
     cell: ({ row }) => {
       // @ts-expect-error template is a jsonb field
@@ -318,6 +323,7 @@ export const columns: ColumnDef<Invoice>[] = [
     meta: {
       skeleton: { type: "text", width: "w-20" },
       headerLabel: "VAT Amount",
+      className: "w-[130px] min-w-[100px] border-r border-border",
     },
     cell: ({ row }) => (
       <span
@@ -344,6 +350,7 @@ export const columns: ColumnDef<Invoice>[] = [
     meta: {
       skeleton: { type: "text", width: "w-12" },
       headerLabel: "Tax Rate",
+      className: "w-[100px] min-w-[80px] border-r border-border",
     },
     cell: ({ row }) => {
       // @ts-expect-error template is a jsonb field
@@ -372,6 +379,7 @@ export const columns: ColumnDef<Invoice>[] = [
     meta: {
       skeleton: { type: "text", width: "w-20" },
       headerLabel: "Tax Amount",
+      className: "w-[130px] min-w-[100px] border-r border-border",
     },
     cell: ({ row }) => (
       <span
@@ -398,6 +406,7 @@ export const columns: ColumnDef<Invoice>[] = [
     meta: {
       skeleton: { type: "text", width: "w-20" },
       headerLabel: "Excl. VAT",
+      className: "w-[130px] min-w-[100px] border-r border-border",
     },
     cell: ({ row }) => (
       <span
@@ -425,6 +434,7 @@ export const columns: ColumnDef<Invoice>[] = [
     meta: {
       skeleton: { type: "text", width: "w-20" },
       headerLabel: "Excl. Tax",
+      className: "w-[130px] min-w-[100px] border-r border-border",
     },
     cell: ({ row }) => (
       <span
@@ -452,6 +462,7 @@ export const columns: ColumnDef<Invoice>[] = [
     meta: {
       skeleton: { type: "text", width: "w-24" },
       headerLabel: "Internal Note",
+      className: "w-[180px] min-w-[120px] border-r border-border",
     },
     cell: ({ row }) => {
       return <span className="truncate">{row.original.internalNote}</span>;
@@ -469,6 +480,7 @@ export const columns: ColumnDef<Invoice>[] = [
       skeleton: { type: "text", width: "w-20" },
       headerLabel: "Issue date",
       sortField: "issue_date",
+      className: "w-[120px] min-w-[100px] border-r border-border",
     },
     cell: ({ row, table }) => {
       const date = row.original.issueDate;
@@ -490,6 +502,7 @@ export const columns: ColumnDef<Invoice>[] = [
     meta: {
       skeleton: { type: "text", width: "w-20" },
       headerLabel: "Sent at",
+      className: "w-[120px] min-w-[100px]",
     },
     cell: ({ row, table }) => {
       const sentAt = row.original.sentAt;
@@ -536,10 +549,11 @@ export const columns: ColumnDef<Invoice>[] = [
     enableResizing: false,
     enableHiding: false,
     meta: {
+      sticky: true,
       skeleton: { type: "icon" },
       headerLabel: "Actions",
       className:
-        "w-[100px] min-w-[80px] md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-30 justify-center",
+        "w-[100px] min-w-[80px] md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-30 border-l border-border justify-center",
     },
     cell: ({ row }) => {
       return <ActionsMenu row={row.original} />;

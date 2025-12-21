@@ -45,8 +45,6 @@ const PROVIDER_ICONS: Record<string, React.FC<{ className?: string }>> = {
   fortnox: Icons.Fortnox,
 };
 
-const EXPORT_PREFERENCE_KEY = "midday-export-preference";
-
 type ExportPreference = "accounting" | "file";
 
 export function ExportBar() {
@@ -70,16 +68,8 @@ export function ExportBar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [exportingCount, setExportingCount] = useState<number | null>(null);
   const [exportPreference, setExportPreference] =
-    useState<ExportPreference>("accounting");
+    useState<ExportPreference>("file");
   const hasShownErrorRef = useRef(false);
-
-  // Load export preference from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem(EXPORT_PREFERENCE_KEY);
-    if (stored === "accounting" || stored === "file") {
-      setExportPreference(stored);
-    }
-  }, []);
 
   const isReviewTab = tab === "review";
   const selectedCount = Object.keys(rowSelection).length;
@@ -104,6 +94,11 @@ export function ExportBar() {
       ) ?? [];
     return providers[0];
   }, [connectedApps]);
+
+  // Default to connected provider if available, otherwise file export
+  useEffect(() => {
+    setExportPreference(connectedProvider ? "accounting" : "file");
+  }, [connectedProvider]);
 
   // Accounting export mutation
   const accountingExportMutation = useMutation(
@@ -250,13 +245,11 @@ export function ExportBar() {
 
   // Select accounting export (just sets preference, doesn't trigger export)
   const selectAccountingExport = () => {
-    localStorage.setItem(EXPORT_PREFERENCE_KEY, "accounting");
     setExportPreference("accounting");
   };
 
   // Select file export (just sets preference, doesn't trigger export)
   const selectFileExport = () => {
-    localStorage.setItem(EXPORT_PREFERENCE_KEY, "file");
     setExportPreference("file");
   };
 

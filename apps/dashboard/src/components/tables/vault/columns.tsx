@@ -131,7 +131,7 @@ export const columns: ColumnDef<Document>[] = [
     meta: {
       skeleton: { type: "badge", width: "w-20" },
       headerLabel: "Tags",
-      className: "w-[280px] max-w-[400px]",
+      className: "w-[280px] min-w-[200px] border-r border-border",
     },
     cell: ({ row }) => {
       const { setFilter } = useDocumentFilterParams();
@@ -180,6 +180,7 @@ export const columns: ColumnDef<Document>[] = [
     meta: {
       skeleton: { type: "text", width: "w-12" },
       headerLabel: "Size",
+      className: "w-[100px] min-w-[80px]",
     },
     cell: ({ row }) => {
       // @ts-expect-error - size is not typed (JSONB)
@@ -195,10 +196,11 @@ export const columns: ColumnDef<Document>[] = [
     enableResizing: false,
     enableHiding: false,
     meta: {
+      sticky: true,
       skeleton: { type: "icon" },
       headerLabel: "Actions",
       className:
-        "w-[100px] min-w-[80px] md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-30 justify-center",
+        "w-[100px] min-w-[80px] md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-30 border-l border-border justify-center",
     },
     cell: ({ row, table }) => {
       const { setParams } = useDocumentParams();

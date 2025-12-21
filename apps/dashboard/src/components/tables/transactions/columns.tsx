@@ -356,7 +356,7 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       skeleton: { type: "text", width: "w-20" },
       headerLabel: "Amount",
-      className: "w-[170px] min-w-[170px]",
+      className: "w-[170px] min-w-[100px] border-r border-border",
     },
     cell: ({ row }) => (
       <AmountCell
@@ -375,7 +375,7 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       skeleton: { type: "text", width: "w-24" },
       headerLabel: "Tax Amount",
-      className: "w-[170px] min-w-[170px]",
+      className: "w-[170px] min-w-[100px] border-r border-border",
     },
     cell: ({ row }) => (
       <FormatAmount
@@ -395,7 +395,7 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       skeleton: { type: "icon-text", width: "w-28" },
       headerLabel: "Category",
-      className: "w-[250px] min-w-[250px]",
+      className: "w-[250px] min-w-[150px] border-r border-border",
     },
     cell: ({ row, table }) => {
       // Show analyzing state when enrichment is not completed
@@ -454,7 +454,7 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       skeleton: { type: "text", width: "w-28" },
       headerLabel: "From / To",
-      className: "w-[200px] min-w-[200px]",
+      className: "w-[200px] min-w-[120px] border-r border-border",
     },
     cell: ({ row }) => (
       <span className="text-muted-foreground">
@@ -472,7 +472,7 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       skeleton: { type: "tags" },
       headerLabel: "Tags",
-      className: "w-[280px] min-w-[280px] max-w-[280px]",
+      className: "w-[280px] min-w-[150px] border-r border-border",
     },
     cell: ({ row }) => (
       <InlineSelectTags
@@ -491,7 +491,7 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       skeleton: { type: "avatar-text", width: "w-32" },
       headerLabel: "Account",
-      className: "w-[250px] min-w-[250px]",
+      className: "w-[250px] min-w-[150px] border-r border-border",
     },
     cell: ({ row }) => (
       <TransactionBankAccount
@@ -510,7 +510,7 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       skeleton: { type: "text", width: "w-16" },
       headerLabel: "Method",
-      className: "w-[140px] min-w-[140px]",
+      className: "w-[140px] min-w-[100px] border-r border-border",
     },
     cell: ({ row }) => <TransactionMethod method={row.original.method} />,
   },
@@ -524,7 +524,7 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       skeleton: { type: "avatar-text", width: "w-24" },
       headerLabel: "Assigned",
-      className: "w-[220px] min-w-[220px]",
+      className: "w-[220px] min-w-[150px] border-r border-border",
     },
     cell: ({ row, table }) => {
       const meta = table.options.meta;
@@ -552,7 +552,7 @@ export const columns: ColumnDef<Transaction>[] = [
     meta: {
       skeleton: { type: "badge", width: "w-20" },
       headerLabel: "Status",
-      className: "w-[160px] min-w-[160px] !border-r-0",
+      className: "w-[160px] min-w-[120px]",
     },
     cell: ({ row, table }) => {
       const meta = table.options.meta;

@@ -144,7 +144,7 @@ export const columns: ColumnDef<Customer>[] = [
     meta: {
       skeleton: { type: "text", width: "w-24" },
       headerLabel: "Contact",
-      className: "w-[260px] min-w-[180px]",
+      className: "w-[260px] min-w-[180px] border-r border-border",
     },
     cell: ({ row }) => row.getValue("contact") ?? "-",
   },
@@ -159,7 +159,7 @@ export const columns: ColumnDef<Customer>[] = [
     meta: {
       skeleton: { type: "text", width: "w-32" },
       headerLabel: "Email",
-      className: "w-[300px] min-w-[220px]",
+      className: "w-[300px] min-w-[220px] border-r border-border",
     },
     cell: ({ row }) => row.getValue("email") ?? "-",
   },
@@ -174,7 +174,7 @@ export const columns: ColumnDef<Customer>[] = [
     meta: {
       skeleton: { type: "text", width: "w-8" },
       headerLabel: "Invoices",
-      className: "w-[120px] min-w-[100px]",
+      className: "w-[120px] min-w-[100px] border-r border-border",
     },
     cell: ({ row }) => {
       if (row.original.invoiceCount > 0) {
@@ -199,7 +199,7 @@ export const columns: ColumnDef<Customer>[] = [
     meta: {
       skeleton: { type: "text", width: "w-8" },
       headerLabel: "Projects",
-      className: "w-[120px] min-w-[100px]",
+      className: "w-[120px] min-w-[100px] border-r border-border",
     },
     cell: ({ row }) => {
       if (row.original.projectCount > 0) {
