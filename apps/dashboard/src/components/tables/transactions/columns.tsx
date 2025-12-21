@@ -595,7 +595,7 @@ export const columns: ColumnDef<Transaction>[] = [
       skeleton: { type: "icon" },
       headerLabel: "Actions",
       className:
-        "w-[100px] min-w-[100px] md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 !border-solid !border-l !border-l-border !border-r-0 !border-t-0 !border-b-0",
+        "w-[100px] min-w-[100px] md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 !border-solid !border-l !border-l-border !border-r-0 !border-t-0 !border-b-0 justify-center",
     },
     cell: ({ row, table }) => {
       const meta = table.options.meta;

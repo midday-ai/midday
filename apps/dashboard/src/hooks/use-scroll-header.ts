@@ -43,6 +43,7 @@ export function useScrollHeader(
   const { extraOffset = 0 } = options ?? {};
   const prevHiddenRef = useRef<boolean>(false);
   const rafRef = useRef<number | null>(null);
+  const hasScrolledRef = useRef<boolean>(false);
   const pathname = usePathname();
   const prevPathnameRef = useRef<string>(pathname);
 
@@ -51,14 +52,15 @@ export function useScrollHeader(
     if (prevPathnameRef.current !== pathname) {
       prevPathnameRef.current = pathname;
       prevHiddenRef.current = false;
+      hasScrolledRef.current = false;
       document.documentElement.style.setProperty(HEADER_OFFSET_VAR, "0px");
       document.body.style.overflow = "";
     }
   }, [pathname]);
 
   useEffect(() => {
-    // Restore transition duration on mount (may have been disabled during previous navigation)
-    document.documentElement.style.setProperty(HEADER_TRANSITION_VAR, "200ms");
+    // Don't restore transition on mount - let first scroll enable it
+    // This ensures navigation resets are instant (no animation)
 
     const handleScroll = () => {
       // Cancel any pending RAF to avoid stacking
@@ -67,6 +69,15 @@ export function useScrollHeader(
       }
 
       rafRef.current = requestAnimationFrame(() => {
+        // Enable transition after first scroll (keeps navigation instant)
+        if (!hasScrolledRef.current) {
+          hasScrolledRef.current = true;
+          document.documentElement.style.setProperty(
+            HEADER_TRANSITION_VAR,
+            "200ms",
+          );
+        }
+
         let scrollTop: number;
 
         if (scrollRef?.current) {
@@ -108,6 +119,9 @@ export function useScrollHeader(
       if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current);
       }
+
+      // Reset state for next mount
+      hasScrolledRef.current = false;
 
       // Reset CSS variable on cleanup - each page manages its own state
       // Disable transition to prevent animation during navigation

@@ -88,7 +88,7 @@ const ActionsCell = memo(
     }, [customerId, onDelete]);
 
     return (
-      <div>
+      <div className="flex items-center justify-center w-full">
         <DropdownMenu>
           <DropdownMenuTrigger asChild className="relative">
             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -118,16 +118,16 @@ export const columns: ColumnDef<Customer>[] = [
     id: "name",
     accessorKey: "name",
     header: "Name",
-    size: 240,
-    minSize: 180,
-    maxSize: 400,
+    size: 320,
+    minSize: 240,
+    maxSize: 500,
     enableResizing: true,
     meta: {
       sticky: true,
       skeleton: { type: "avatar-text", width: "w-32" },
       headerLabel: "Name",
       className:
-        "w-[240px] min-w-[180px] md:sticky md:left-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-20 border-r border-border",
+        "w-[320px] min-w-[240px] md:sticky md:left-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-20 border-r border-border",
     },
     cell: ({ row }) => (
       <NameCell name={row.original.name} website={row.original.website} />
@@ -137,14 +137,14 @@ export const columns: ColumnDef<Customer>[] = [
     id: "contact",
     accessorKey: "contact",
     header: "Contact person",
-    size: 180,
-    minSize: 120,
-    maxSize: 300,
+    size: 260,
+    minSize: 180,
+    maxSize: 400,
     enableResizing: true,
     meta: {
       skeleton: { type: "text", width: "w-24" },
       headerLabel: "Contact",
-      className: "w-[180px] min-w-[120px]",
+      className: "w-[260px] min-w-[180px]",
     },
     cell: ({ row }) => row.getValue("contact") ?? "-",
   },
@@ -152,14 +152,14 @@ export const columns: ColumnDef<Customer>[] = [
     id: "email",
     accessorKey: "email",
     header: "Email",
-    size: 220,
-    minSize: 150,
-    maxSize: 350,
+    size: 300,
+    minSize: 220,
+    maxSize: 450,
     enableResizing: true,
     meta: {
       skeleton: { type: "text", width: "w-32" },
       headerLabel: "Email",
-      className: "w-[220px] min-w-[150px]",
+      className: "w-[300px] min-w-[220px]",
     },
     cell: ({ row }) => row.getValue("email") ?? "-",
   },
@@ -167,14 +167,14 @@ export const columns: ColumnDef<Customer>[] = [
     id: "invoices",
     accessorKey: "invoices",
     header: "Invoices",
-    size: 100,
-    minSize: 80,
-    maxSize: 150,
+    size: 120,
+    minSize: 100,
+    maxSize: 180,
     enableResizing: true,
     meta: {
       skeleton: { type: "text", width: "w-8" },
       headerLabel: "Invoices",
-      className: "w-[100px] min-w-[80px]",
+      className: "w-[120px] min-w-[100px]",
     },
     cell: ({ row }) => {
       if (row.original.invoiceCount > 0) {
@@ -192,14 +192,14 @@ export const columns: ColumnDef<Customer>[] = [
     id: "projects",
     accessorKey: "projects",
     header: "Projects",
-    size: 100,
-    minSize: 80,
-    maxSize: 150,
+    size: 120,
+    minSize: 100,
+    maxSize: 180,
     enableResizing: true,
     meta: {
       skeleton: { type: "text", width: "w-8" },
       headerLabel: "Projects",
-      className: "w-[100px] min-w-[80px]",
+      className: "w-[120px] min-w-[100px]",
     },
     cell: ({ row }) => {
       if (row.original.projectCount > 0) {
@@ -217,14 +217,14 @@ export const columns: ColumnDef<Customer>[] = [
     id: "tags",
     accessorKey: "tags",
     header: "Tags",
-    size: 280,
-    minSize: 150,
-    maxSize: 400,
+    size: 320,
+    minSize: 180,
+    maxSize: 500,
     enableResizing: true,
     meta: {
       skeleton: { type: "tags" },
       headerLabel: "Tags",
-      className: "w-[280px] max-w-[280px]",
+      className: "w-[320px] min-w-[180px]",
     },
     cell: ({ row }) => <TagsCell tags={row.original.tags} />,
   },
@@ -242,7 +242,7 @@ export const columns: ColumnDef<Customer>[] = [
       skeleton: { type: "icon" },
       headerLabel: "Actions",
       className:
-        "text-right sticky right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-30 !border-solid !border-l !border-l-border !border-r-0 !border-t-0 !border-b-0",
+        "text-right sticky right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-30 !border-solid !border-l !border-l-border !border-r-0 !border-t-0 !border-b-0 justify-center",
     },
     cell: ({ row, table }) => (
       <ActionsCell

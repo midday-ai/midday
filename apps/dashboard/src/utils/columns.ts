@@ -1,5 +1,4 @@
 import { cookies } from "next/headers";
-import { Cookies } from "./constants";
 import {
   type AllTableSettings,
   TABLE_SETTINGS_COOKIE,
@@ -29,34 +28,4 @@ export async function getInitialTableSettings(
     // Invalid JSON, return defaults
     return mergeWithDefaults(undefined, tableId);
   }
-}
-
-/**
- * Get initial invoices column visibility from cookie
- * Invoices table uses a simpler pattern (visibility only, no resizing/ordering)
- */
-export async function getInitialInvoicesColumnVisibility() {
-  const cookieStore = await cookies();
-
-  const columnsToHide = [
-    "sentAt",
-    "exclVat",
-    "exclTax",
-    "vatAmount",
-    "taxAmount",
-    "vatRate",
-    "taxRate",
-    "internalNote",
-  ];
-
-  const savedColumns = cookieStore.get(Cookies.InvoicesColumns)?.value;
-  return savedColumns
-    ? JSON.parse(savedColumns)
-    : columnsToHide.reduce(
-        (acc, col) => {
-          acc[col] = false;
-          return acc;
-        },
-        {} as Record<string, boolean>,
-      );
 }

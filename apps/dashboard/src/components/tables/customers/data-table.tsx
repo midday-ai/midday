@@ -4,7 +4,10 @@ import { useCustomerFilterParams } from "@/hooks/use-customer-filter-params";
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useScrollHeader } from "@/hooks/use-scroll-header";
 import { useSortParams } from "@/hooks/use-sort-params";
-import { useStickyColumns } from "@/hooks/use-sticky-columns";
+import {
+  CUSTOMERS_STICKY_COLUMNS,
+  useStickyColumns,
+} from "@/hooks/use-sticky-columns";
 import { useTableScroll } from "@/hooks/use-table-scroll";
 import { useTableSettings } from "@/hooks/use-table-settings";
 import { useTRPC } from "@/trpc/client";
@@ -38,7 +41,7 @@ import { EmptyState, NoResults } from "./empty-states";
 import { DataTableHeader } from "./table-header";
 
 // Height of the summary grid (4 cards) - used for extra scroll offset
-const SUMMARY_GRID_HEIGHT = 150;
+const SUMMARY_GRID_HEIGHT = 180;
 
 type Props = {
   initialSettings?: Partial<TableSettings>;
@@ -168,6 +171,7 @@ export function DataTable({ initialSettings }: Props) {
   const { getStickyStyle, getStickyClassName } = useStickyColumns({
     columnVisibility,
     table,
+    stickyColumns: CUSTOMERS_STICKY_COLUMNS,
   });
 
   // Use the reusable table scroll hook
@@ -242,7 +246,7 @@ export function DataTable({ initialSettings }: Props) {
           }}
           className="overflow-auto overscroll-x-none md:border-l md:border-r md:border-b md:border-border scrollbar-hide"
           style={{
-            height: "calc(100vh - 330px + var(--header-offset, 0px))",
+            height: "calc(100vh - 350px + var(--header-offset, 0px))",
           }}
         >
           <DndContext
@@ -251,7 +255,7 @@ export function DataTable({ initialSettings }: Props) {
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
           >
-            <Table>
+            <Table className="w-full min-w-full">
               <DataTableHeader table={table} tableScroll={tableScroll} />
 
               <TableBody
@@ -271,7 +275,7 @@ export function DataTable({ initialSettings }: Props) {
                         key={row.id}
                         data-index={virtualRow.index}
                         ref={(node) => rowVirtualizer.measureElement(node)}
-                        className="group h-[45px] cursor-pointer select-text hover:bg-[#F2F1EF] hover:dark:bg-[#0f0f0f] flex items-center border-b border-border"
+                        className="group h-[45px] cursor-pointer select-text hover:bg-[#F2F1EF] hover:dark:bg-[#0f0f0f] flex items-center border-b border-border min-w-full"
                         style={{
                           position: "absolute",
                           top: 0,
@@ -307,14 +311,17 @@ export function DataTable({ initialSettings }: Props) {
                                   ? cell.column.getSize()
                                   : undefined,
                                 ...getStickyStyle(cell.column.id),
-                                ...(isLastBeforeActions && {
-                                  flex: 1,
-                                }),
+                                // Only apply flex: 1 to non-sticky columns
+                                ...(isLastBeforeActions &&
+                                  !isSticky && {
+                                    flex: 1,
+                                  }),
                                 ...(isActions && {
                                   borderLeft: "1px solid hsl(var(--border))",
                                   borderBottom: "1px solid hsl(var(--border))",
                                   borderRight: "none",
                                   zIndex: 50,
+                                  justifyContent: "center",
                                 }),
                               }}
                               onClick={() => {

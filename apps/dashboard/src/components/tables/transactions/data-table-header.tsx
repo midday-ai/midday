@@ -94,17 +94,17 @@ export function DataTableHeader<TData>({
   const headerGroups = table.getHeaderGroups();
 
   return (
-    <TableHeader className="border-0 sticky top-0 z-20 bg-background">
+    <TableHeader className="border-0 sticky top-0 z-20 bg-background w-full">
       {headerGroups.map((headerGroup) => (
         <TableRow
           key={headerGroup.id}
-          className="h-[45px] hover:bg-transparent flex items-center !border-b-0"
+          className="h-[45px] hover:bg-transparent flex items-center !border-b-0 min-w-full"
         >
           <SortableContext
             items={sortableColumnIds}
             strategy={horizontalListSortingStrategy}
           >
-            {headerGroup.headers.map((header) => {
+            {headerGroup.headers.map((header, headerIndex, headers) => {
               const columnId = header.column.id;
               const meta = header.column.columnDef.meta as
                 | { sticky?: boolean; className?: string }
@@ -114,18 +114,26 @@ export function DataTableHeader<TData>({
 
               if (!isVisible(columnId)) return null;
 
+              // Check if this is the last column before actions (should flex to fill space)
+              const isLastBeforeActions =
+                headerIndex === headers.length - 2 &&
+                headers[headers.length - 1]?.column.id === "actions";
+
               const headerStyle = {
                 width: header.getSize(),
                 minWidth: isSticky
                   ? header.getSize()
                   : header.column.columnDef.minSize,
-                maxWidth: isSticky
-                  ? header.getSize()
-                  : header.column.columnDef.maxSize,
+                maxWidth: isSticky ? header.getSize() : undefined,
                 ...getStickyStyle(columnId),
                 ...(columnId !== "actions" &&
-                  columnId !== "status" && {
+                  !isLastBeforeActions && {
                     borderRight: "1px solid hsl(var(--border))",
+                  }),
+                // Only apply flex: 1 to non-sticky columns
+                ...(isLastBeforeActions &&
+                  !isSticky && {
+                    flex: 1,
                   }),
                 ...(columnId === "actions" && {
                   borderLeft: "1px solid hsl(var(--border))",
@@ -141,7 +149,7 @@ export function DataTableHeader<TData>({
                 );
                 const isActionsColumn = columnId === "actions";
                 const finalClassName = isActionsColumn
-                  ? "group/header relative h-full px-4 border-t border-border flex items-center md:sticky md:right-0 bg-background z-10"
+                  ? "group/header relative h-full px-4 border-t border-border flex items-center justify-center md:sticky md:right-0 bg-background z-10"
                   : `${stickyClass} bg-background z-10`;
 
                 return (

@@ -1,3 +1,5 @@
+"use client";
+
 import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
 import { useFileUrl } from "@/hooks/use-file-url";
@@ -14,7 +16,11 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Skeleton } from "@midday/ui/skeleton";
+import type { ColumnDef } from "@tanstack/react-table";
+import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
+
+export type Document = RouterOutputs["documents"]["get"]["data"][number];
 
 function DownloadFileMenuItem({
   pathTokens,
@@ -56,17 +62,21 @@ function DownloadFileMenuItem({
     </DropdownMenuItem>
   );
 }
-import type { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
-
-type Document = RouterOutputs["documents"]["get"]["data"][number];
 
 export const columns: ColumnDef<Document>[] = [
   {
     id: "select",
+    size: 50,
+    minSize: 50,
+    maxSize: 50,
+    enableResizing: false,
+    enableHiding: false,
+    enableSorting: false,
     meta: {
+      sticky: true,
+      skeleton: { type: "checkbox" },
       className:
-        "md:sticky md:left-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:opacity-0 after:z-[-1]",
+        "w-[50px] min-w-[50px] md:sticky md:left-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-20 border-r border-border",
     },
     cell: ({ row }) => (
       <Checkbox
@@ -80,15 +90,21 @@ export const columns: ColumnDef<Document>[] = [
         }}
       />
     ),
-    enableSorting: false,
-    enableHiding: false,
   },
   {
     id: "title",
+    header: "Name",
     accessorKey: "title",
+    size: 250,
+    minSize: 180,
+    maxSize: 400,
+    enableResizing: true,
     meta: {
+      sticky: true,
+      skeleton: { type: "text", width: "w-52" },
+      headerLabel: "Name",
       className:
-        "w-[250px] min-w-[250px] md:sticky md:left-[50px] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-20 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:opacity-0 after:z-[-1]",
+        "w-[250px] min-w-[180px] md:sticky md:left-[50px] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-20 border-r border-border",
     },
     cell: ({ row }) => {
       const isLoading = row.original.processingStatus === "pending";
@@ -106,9 +122,16 @@ export const columns: ColumnDef<Document>[] = [
   },
   {
     id: "tags",
+    header: "Tags",
     accessorKey: "tags",
+    size: 280,
+    minSize: 200,
+    maxSize: 400,
+    enableResizing: true,
     meta: {
-      className: "w-[280px] max-w-[280px]",
+      skeleton: { type: "badge", width: "w-20" },
+      headerLabel: "Tags",
+      className: "w-[280px] max-w-[400px]",
     },
     cell: ({ row }) => {
       const { setFilter } = useDocumentFilterParams();
@@ -148,7 +171,16 @@ export const columns: ColumnDef<Document>[] = [
   },
   {
     id: "size",
+    header: "Size",
     accessorKey: "size",
+    size: 100,
+    minSize: 80,
+    maxSize: 150,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-12" },
+      headerLabel: "Size",
+    },
     cell: ({ row }) => {
       // @ts-expect-error - size is not typed (JSONB)
       return <span>{formatSize(row.original.metadata?.size)}</span>;
@@ -156,6 +188,18 @@ export const columns: ColumnDef<Document>[] = [
   },
   {
     id: "actions",
+    header: "Actions",
+    size: 100,
+    minSize: 80,
+    maxSize: 100,
+    enableResizing: false,
+    enableHiding: false,
+    meta: {
+      skeleton: { type: "icon" },
+      headerLabel: "Actions",
+      className:
+        "w-[100px] min-w-[80px] md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-30 justify-center",
+    },
     cell: ({ row, table }) => {
       const { setParams } = useDocumentParams();
 
@@ -166,50 +210,48 @@ export const columns: ColumnDef<Document>[] = [
       const { handleDelete, handleShare } = table.options.meta;
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal size={16} />
-            </Button>
-          </DropdownMenuTrigger>
+        <div className="flex items-center justify-center w-full">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal size={16} />
+              </Button>
+            </DropdownMenuTrigger>
 
-          <DropdownMenuContent>
-            <DropdownMenuItem
-              onClick={() => {
-                setParams({ documentId: row.original.id });
-              }}
-            >
-              View details
-            </DropdownMenuItem>
-            <DownloadFileMenuItem
-              pathTokens={row.original.pathTokens}
-              filename={row.original.name?.split("/").at(-1) || "download"}
-            />
-            <DropdownMenuItem
-              onClick={() => {
-                if (row.original.pathTokens) {
-                  handleShare?.(row.original.pathTokens);
-                }
-              }}
-              disabled={!row.original.pathTokens}
-            >
-              Copy link
-            </DropdownMenuItem>
+            <DropdownMenuContent>
+              <DropdownMenuItem
+                onClick={() => {
+                  setParams({ documentId: row.original.id });
+                }}
+              >
+                View details
+              </DropdownMenuItem>
+              <DownloadFileMenuItem
+                pathTokens={row.original.pathTokens}
+                filename={row.original.name?.split("/").at(-1) || "download"}
+              />
+              <DropdownMenuItem
+                onClick={() => {
+                  if (row.original.pathTokens) {
+                    handleShare?.(row.original.pathTokens);
+                  }
+                }}
+                disabled={!row.original.pathTokens}
+              >
+                Copy link
+              </DropdownMenuItem>
 
-            <DropdownMenuItem
-              onClick={() => {
-                handleDelete?.(row.original.id);
-              }}
-            >
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuItem
+                onClick={() => {
+                  handleDelete?.(row.original.id);
+                }}
+              >
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       );
-    },
-    meta: {
-      className:
-        "text-right sticky right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-30 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background group-hover:after:opacity-0 after:z-[-1]",
     },
   },
 ];

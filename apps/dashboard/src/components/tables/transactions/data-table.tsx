@@ -571,7 +571,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
                   collisionDetection={closestCenter}
                   onDragEnd={handleDragEnd}
                 >
-                  <Table>
+                  <Table className="w-full min-w-full">
                     <DataTableHeader table={table} tableScroll={tableScroll} />
 
                     <TableBody
@@ -593,7 +593,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
                               ref={(node) =>
                                 rowVirtualizer.measureElement(node)
                               }
-                              className="group h-[45px] cursor-pointer select-text hover:bg-[#F2F1EF] hover:dark:bg-[#0f0f0f] flex items-center border-b border-border"
+                              className="group h-[45px] cursor-pointer select-text hover:bg-[#F2F1EF] hover:dark:bg-[#0f0f0f] flex items-center border-b border-border min-w-full"
                               style={{
                                 position: "absolute",
                                 top: 0,
@@ -602,68 +602,89 @@ export function DataTable({ initialSettings, initialTab }: Props) {
                                 transform: `translateY(${virtualRow.start}px)`,
                               }}
                             >
-                              {row.getVisibleCells().map((cell) => {
-                                const isActions = cell.column.id === "actions";
-                                const meta = cell.column.columnDef.meta as
-                                  | { sticky?: boolean; className?: string }
-                                  | undefined;
-                                const isSticky = meta?.sticky;
-                                return (
-                                  <TableCell
-                                    key={cell.id}
-                                    className={`h-full flex items-center ${getStickyClassName(
-                                      cell.column.id,
-                                      meta?.className,
-                                    )}`}
-                                    style={{
-                                      // Use dynamic width from column sizing (respects user resizing)
-                                      width: cell.column.getSize(),
-                                      minWidth: isSticky
-                                        ? cell.column.getSize()
-                                        : cell.column.columnDef.minSize,
-                                      maxWidth: isSticky
-                                        ? cell.column.getSize()
-                                        : cell.column.columnDef.maxSize,
-                                      ...getStickyStyle(cell.column.id),
-                                      ...(isActions && {
-                                        borderLeft:
-                                          "1px solid hsl(var(--border))",
-                                        borderBottom:
-                                          "1px solid hsl(var(--border))",
-                                        borderRight: "none",
-                                        zIndex: 50,
-                                      }),
-                                    }}
-                                    onClick={() => {
-                                      // Handle other column clicks (select column is handled in SelectCell)
-                                      if (
-                                        cell.column.id !== "select" &&
-                                        cell.column.id !== "actions" &&
-                                        cell.column.id !== "category" &&
-                                        cell.column.id !== "assigned" &&
-                                        cell.column.id !== "tags"
-                                      ) {
-                                        if (row.original.manual) {
-                                          setParams({
-                                            editTransaction: row.original.id,
-                                          });
-                                        } else {
-                                          setParams({
-                                            transactionId: row.original.id,
-                                          });
+                              {row
+                                .getVisibleCells()
+                                .map((cell, cellIndex, cells) => {
+                                  const columnId = cell.column.id;
+                                  const isActions = columnId === "actions";
+                                  const meta = cell.column.columnDef.meta as
+                                    | { sticky?: boolean; className?: string }
+                                    | undefined;
+                                  const isSticky = meta?.sticky;
+
+                                  // Check if this is the last column before actions
+                                  const isLastBeforeActions =
+                                    cellIndex === cells.length - 2 &&
+                                    cells[cells.length - 1]?.column.id ===
+                                      "actions";
+
+                                  return (
+                                    <TableCell
+                                      key={cell.id}
+                                      className={`h-full flex items-center ${getStickyClassName(
+                                        columnId,
+                                        meta?.className,
+                                      )}`}
+                                      style={{
+                                        // Use dynamic width from column sizing (respects user resizing)
+                                        width: cell.column.getSize(),
+                                        minWidth: isSticky
+                                          ? cell.column.getSize()
+                                          : cell.column.columnDef.minSize,
+                                        maxWidth: isSticky
+                                          ? cell.column.getSize()
+                                          : undefined,
+                                        ...getStickyStyle(columnId),
+                                        ...(columnId !== "actions" &&
+                                          !isLastBeforeActions && {
+                                            borderRight:
+                                              "1px solid hsl(var(--border))",
+                                          }),
+                                        // Only apply flex: 1 to non-sticky columns
+                                        ...(isLastBeforeActions &&
+                                          !isSticky && {
+                                            flex: 1,
+                                          }),
+                                        ...(isActions && {
+                                          borderLeft:
+                                            "1px solid hsl(var(--border))",
+                                          borderBottom:
+                                            "1px solid hsl(var(--border))",
+                                          borderRight: "none",
+                                          zIndex: 50,
+                                          justifyContent: "center",
+                                        }),
+                                      }}
+                                      onClick={() => {
+                                        // Handle other column clicks (select column is handled in SelectCell)
+                                        if (
+                                          columnId !== "select" &&
+                                          columnId !== "actions" &&
+                                          columnId !== "category" &&
+                                          columnId !== "assigned" &&
+                                          columnId !== "tags"
+                                        ) {
+                                          if (row.original.manual) {
+                                            setParams({
+                                              editTransaction: row.original.id,
+                                            });
+                                          } else {
+                                            setParams({
+                                              transactionId: row.original.id,
+                                            });
+                                          }
                                         }
-                                      }
-                                    }}
-                                  >
-                                    <div className="w-full overflow-hidden truncate">
-                                      {flexRender(
-                                        cell.column.columnDef.cell,
-                                        cell.getContext(),
-                                      )}
-                                    </div>
-                                  </TableCell>
-                                );
-                              })}
+                                      }}
+                                    >
+                                      <div className="w-full overflow-hidden truncate">
+                                        {flexRender(
+                                          cell.column.columnDef.cell,
+                                          cell.getContext(),
+                                        )}
+                                      </div>
+                                    </TableCell>
+                                  );
+                                })}
                             </TableRow>
                           );
                         })

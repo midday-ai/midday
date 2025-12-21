@@ -11,16 +11,43 @@ interface TableInterface {
   getAllLeafColumns: () => TableColumn[];
 }
 
+// Sticky column configuration: id and width
+type StickyColumnConfig = { id: string; width: number };
+
+// Predefined sticky column configs for different tables
+export const TRANSACTIONS_STICKY_COLUMNS: StickyColumnConfig[] = [
+  { id: "select", width: 50 },
+  { id: "date", width: 110 },
+  { id: "description", width: 320 },
+];
+
+export const INVOICES_STICKY_COLUMNS: StickyColumnConfig[] = [
+  { id: "select", width: 50 },
+  { id: "invoiceNumber", width: 180 },
+];
+
+export const CUSTOMERS_STICKY_COLUMNS: StickyColumnConfig[] = [
+  { id: "name", width: 320 },
+];
+
+export const VAULT_STICKY_COLUMNS: StickyColumnConfig[] = [
+  { id: "select", width: 50 },
+  { id: "title", width: 250 },
+];
+
 interface UseStickyColumnsProps {
   columnVisibility?: VisibilityState;
   table?: TableInterface;
   loading?: boolean;
+  /** Sticky column configuration - defaults to transactions columns */
+  stickyColumns?: StickyColumnConfig[];
 }
 
 export function useStickyColumns({
   columnVisibility,
   table,
   loading,
+  stickyColumns = TRANSACTIONS_STICKY_COLUMNS,
 }: UseStickyColumnsProps) {
   // Memoize isVisible to prevent breaking downstream useMemo dependencies
   const isVisible = useCallback(
@@ -34,8 +61,13 @@ export function useStickyColumns({
     [loading, table, columnVisibility],
   );
 
-  // Calculate dynamic sticky positions for transaction columns
-  // Uses inline visibility check to avoid dependency on isVisible callback
+  // Get sticky column IDs for quick lookup
+  const stickyColumnIds = useMemo(
+    () => new Set(stickyColumns.map((col) => col.id)),
+    [stickyColumns],
+  );
+
+  // Calculate dynamic sticky positions based on configuration
   const stickyPositions = useMemo(() => {
     const checkVisible = (id: string) =>
       loading ||
@@ -48,23 +80,15 @@ export function useStickyColumns({
     let position = 0;
     const positions: Record<string, number> = {};
 
-    // Select column (always visible)
-    positions.select = position;
-    position += 50; // width of select column
-
-    // Date column
-    if (checkVisible("date")) {
-      positions.date = position;
-      position += 110; // width of date column
-    }
-
-    // Description column
-    if (checkVisible("description")) {
-      positions.description = position;
+    for (const col of stickyColumns) {
+      if (checkVisible(col.id)) {
+        positions[col.id] = position;
+        position += col.width;
+      }
     }
 
     return positions;
-  }, [loading, table, columnVisibility]);
+  }, [loading, table, columnVisibility, stickyColumns]);
 
   // Memoize getStickyStyle to return stable function reference
   const getStickyStyle = useCallback(
@@ -80,14 +104,13 @@ export function useStickyColumns({
   // Memoize getStickyClassName to return stable function reference
   const getStickyClassName = useCallback(
     (columnId: string, baseClassName?: string) => {
-      const stickyColumns = ["select", "date", "description"];
-      const isSticky = stickyColumns.includes(columnId);
+      const isSticky = stickyColumnIds.has(columnId);
       return cn(
         baseClassName,
         isSticky && "md:sticky md:left-[var(--stick-left)]",
       );
     },
-    [],
+    [stickyColumnIds],
   );
 
   return {

@@ -152,7 +152,7 @@ export function ActionsMenu({ row }: Props) {
   };
 
   return (
-    <div>
+    <div className="flex items-center justify-center w-full">
       <DropdownMenu>
         <DropdownMenuTrigger asChild className="relative">
           <Button variant="ghost" className="h-8 w-8 p-0">
