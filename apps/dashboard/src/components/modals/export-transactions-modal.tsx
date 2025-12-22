@@ -167,6 +167,8 @@ export function ExportTransactionsModal({
         if (data?.id) {
           setExportData({ runId: data.id, exportType: "file" });
           setRowSelection("review", {});
+          // Close modal immediately - toast will show progress
+          onOpenChange(false);
         }
       },
       onError: () => {

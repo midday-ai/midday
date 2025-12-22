@@ -24,7 +24,11 @@ import { DndContext, closestCenter } from "@dnd-kit/core";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { Tooltip, TooltipProvider } from "@midday/ui/tooltip";
 import { toast } from "@midday/ui/use-toast";
-import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseInfiniteQuery,
+} from "@tanstack/react-query";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { type VirtualItem, useVirtualizer } from "@tanstack/react-virtual";
 import {
@@ -59,6 +63,7 @@ type Props = {
 
 export function DataTable({ initialSettings, initialTab }: Props) {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { filter, hasFilters } = useTransactionFilterParamsWithPersistence();
   const { tab } = useTransactionTab();
   const {
@@ -144,7 +149,9 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   const updateTransactionMutation = useMutation(
     trpc.transactions.update.mutationOptions({
       onSuccess: () => {
-        refetch();
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
 
         toast({
           title: "Transaction updated",
@@ -157,14 +164,37 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   const deleteTransactionMutation = useMutation(
     trpc.transactions.deleteMany.mutationOptions({
       onSuccess: () => {
-        refetch();
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
+      },
+    }),
+  );
+
+  const moveToReviewMutation = useMutation(
+    trpc.transactions.moveToReview.mutationOptions({
+      onSuccess: () => {
+        // Invalidate transactions and review count
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: trpc.transactions.getReviewCount.queryKey(),
+        });
+
+        toast({
+          title: "Transaction moved to review",
+          variant: "success",
+        });
       },
     }),
   );
 
   const { updateCategory } = useUpdateTransactionCategory({
     onSuccess: () => {
-      refetch();
+      queryClient.invalidateQueries({
+        queryKey: trpc.transactions.get.infiniteQueryKey(),
+      });
     },
   });
 
@@ -298,6 +328,13 @@ export function DataTable({ initialSettings, initialTab }: Props) {
     [deleteTransactionMutation],
   );
 
+  const moveToReview = useCallback(
+    (id: string) => {
+      moveToReviewMutation.mutate({ transactionId: id });
+    },
+    [moveToReviewMutation],
+  );
+
   const editTransaction = useCallback(
     (id: string) => {
       setParams({ editTransaction: id });
@@ -319,6 +356,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
       updateTransaction,
       onDeleteTransaction,
       editTransaction,
+      moveToReview,
       handleShiftClickRange,
       lastClickedIndex,
       setLastClickedIndex,
@@ -330,6 +368,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
       updateTransaction,
       onDeleteTransaction,
       editTransaction,
+      moveToReview,
       handleShiftClickRange,
       lastClickedIndex,
       setLastClickedIndex,
@@ -452,8 +491,9 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   useEffect(() => {
     const selectedIds = Object.keys(rowSelection);
 
-    // Early exit: no selections means nothing to check
+    // No selections means nothing can be deleted
     if (selectedIds.length === 0) {
+      setCanDelete(false);
       return;
     }
 
@@ -536,7 +576,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
                     ).current = el;
                   }
                 }}
-                className="overflow-auto overscroll-x-none md:border-l md:border-r md:border-b md:border-border scrollbar-hide"
+                className="overflow-auto overscroll-x-none border-l border-r border-b border-border scrollbar-hide"
                 style={{
                   height: "calc(100vh - 180px + var(--header-offset, 0px))",
                 }}

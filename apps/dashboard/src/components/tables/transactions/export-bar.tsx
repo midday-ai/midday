@@ -75,13 +75,6 @@ export function ExportBar() {
   const selectedCount = Object.keys(rowSelection).length;
   const hasManualSelection = selectedCount > 0;
 
-  // Fetch review count for displaying when on review tab with no selection
-  const { data: reviewCount } = useQuery(
-    trpc.transactions.getReviewCount.queryOptions(undefined, {
-      enabled: isReviewTab && !hasManualSelection,
-    }),
-  );
-
   // Fetch connected accounting providers
   const { data: connectedApps } = useQuery(trpc.apps.get.queryOptions());
 
@@ -221,12 +214,15 @@ export function ExportBar() {
   ]);
 
   // Determine what count to show - use exportingCount during export to prevent flickering
+  // IMPORTANT: Use transactionIdsForExport.length instead of reviewCount to ensure
+  // the displayed count matches what will actually be exported. This prevents a mismatch
+  // when: 1) user has filters applied, or 2) there are more than pageSize transactions
   const displayCount =
     exportingCount !== null
       ? exportingCount
       : hasManualSelection
         ? selectedCount
-        : (reviewCount ?? 0);
+        : transactionIdsForExport.length;
 
   // Show bar only on review tab - for exporting transactions
   // Bulk edit bar handles selection on all/other tabs
@@ -361,7 +357,7 @@ export function ExportBar() {
                         ProviderIcon && <ProviderIcon className="size-4" />}
                       <span>Export</span>
                     </Button>
-                    <DropdownMenu>
+                    {/* <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           disabled={displayCount === 0}
@@ -395,7 +391,7 @@ export function ExportBar() {
                           Export to file
                         </DropdownMenuItem>
                       </DropdownMenuContent>
-                    </DropdownMenu>
+                    </DropdownMenu> */}
                   </div>
                 )}
               </div>

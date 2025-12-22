@@ -2,6 +2,7 @@
 
 import { useFileUrl } from "@/hooks/use-file-url";
 import { useJobStatus } from "@/hooks/use-job-status";
+import { useSuccessSound } from "@/hooks/use-success-sound";
 import { downloadFile } from "@/lib/download";
 import { useExportStore } from "@/store/export";
 import { useTRPC } from "@/trpc/client";
@@ -81,6 +82,7 @@ export function ExportStatus() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { toast, dismiss, update } = useToast();
+  const { play: playSuccessSound } = useSuccessSound();
   const [toastId, setToastId] = useState<string | null>(null);
   const { exportData, setExportData } = useExportStore();
   const { status, progress, result, isLoading, queryError } = useJobStatus({
@@ -227,6 +229,9 @@ export function ExportStatus() {
     if (status === "completed" && toastId && !completionHandledRef.current) {
       completionHandledRef.current = true;
 
+      // Play success sound
+      playSuccessSound();
+
       // Invalidate queries for file exports
       queryClient.invalidateQueries({
         queryKey: trpc.documents.get.infiniteQueryKey(),
@@ -311,6 +316,7 @@ export function ExportStatus() {
     setExportData,
     handleOnShare,
     handleOnDownload,
+    playSuccessSound,
   ]);
 
   return null;

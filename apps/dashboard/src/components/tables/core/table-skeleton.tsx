@@ -126,7 +126,7 @@ export function TableSkeleton<TData>({
                   "group/header relative h-full px-4 border-t border-border flex items-center",
                 );
                 const headerClassName = isActions
-                  ? "group/header relative h-full px-4 border-t border-border flex items-center md:sticky md:right-0 bg-background z-10"
+                  ? "group/header relative h-full px-4 border-t border-border flex items-center justify-center md:sticky md:right-0 bg-background z-10"
                   : sticky
                     ? `${stickyClass} bg-background z-10`
                     : stickyClass;
@@ -193,7 +193,8 @@ export function TableSkeleton<TData>({
                   const cellClassName = cn(
                     "h-full flex items-center",
                     getStickyClassName(columnId, meta?.className),
-                    isActions && "md:sticky md:right-0 bg-background z-10",
+                    isActions &&
+                      "md:sticky md:right-0 bg-background z-10 justify-center",
                   );
 
                   return (

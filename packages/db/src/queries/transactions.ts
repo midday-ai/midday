@@ -2106,3 +2106,50 @@ export async function getTransactionsReadyForExportCount(
   // The query returns one row per fulfilled transaction, so we count the rows
   return result.length;
 }
+
+/**
+ * Mark transactions as exported (for file exports)
+ * This removes them from the review tab
+ */
+export async function markTransactionsAsExported(
+  db: Database,
+  transactionIds: string[],
+): Promise<void> {
+  if (transactionIds.length === 0) return;
+
+  await db
+    .update(transactions)
+    .set({ status: "exported" })
+    .where(inArray(transactions.id, transactionIds));
+}
+
+/**
+ * Move a transaction back to review by resetting its export status
+ * This handles both file exports (status = 'exported') and accounting exports (sync records)
+ */
+export async function moveTransactionToReview(
+  db: Database,
+  params: { transactionId: string; teamId: string },
+): Promise<void> {
+  // Reset status if it's 'exported' (file export)
+  await db
+    .update(transactions)
+    .set({ status: "posted" })
+    .where(
+      and(
+        eq(transactions.id, params.transactionId),
+        eq(transactions.teamId, params.teamId),
+        eq(transactions.status, "exported"),
+      ),
+    );
+
+  // Delete accounting sync records (accounting export)
+  await db
+    .delete(accountingSyncRecords)
+    .where(
+      and(
+        eq(accountingSyncRecords.transactionId, params.transactionId),
+        eq(accountingSyncRecords.teamId, params.teamId),
+      ),
+    );
+}

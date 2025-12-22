@@ -5,7 +5,7 @@ export const baseConfig = {
   name: "Xero",
   id: "xero",
   category: "Accounting",
-  active: true,
+  active: false,
   logo: Logo,
   short_description:
     "Export transactions and receipts to Xero. Keep your books up-to-date without manual data entry.",

@@ -911,3 +911,9 @@ export const importTransactionsSchema = z.object({
     balance: z.string().optional(),
   }),
 });
+
+export const moveToReviewSchema = z.object({
+  transactionId: z.string().uuid().openapi({
+    description: "Transaction ID to move back to review.",
+  }),
+});

@@ -156,6 +156,7 @@ const ActionsCell = memo(
     onUpdateTransaction,
     onDeleteTransaction,
     onEditTransaction,
+    onMoveToReview,
   }: {
     transaction: Transaction;
     onViewDetails?: (id: string) => void;
@@ -168,6 +169,7 @@ const ActionsCell = memo(
     }) => void;
     onDeleteTransaction?: (id: string) => void;
     onEditTransaction?: (id: string) => void;
+    onMoveToReview?: (id: string) => void;
   }) => {
     const handleViewDetails = useCallback(() => {
       if (transaction.manual) {
@@ -200,6 +202,10 @@ const ActionsCell = memo(
     const handleDeleteTransaction = useCallback(() => {
       onDeleteTransaction?.(transaction.id);
     }, [transaction.id, onDeleteTransaction]);
+
+    const handleMoveToReview = useCallback(() => {
+      onMoveToReview?.(transaction.id);
+    }, [transaction.id, onMoveToReview]);
 
     return (
       <div className="flex justify-center w-full">
@@ -239,6 +245,12 @@ const ActionsCell = memo(
             {!transaction.isExported && transaction.status !== "exported" && (
               <DropdownMenuItem onClick={handleUpdateToExported}>
                 Mark as exported
+              </DropdownMenuItem>
+            )}
+
+            {(transaction.isExported || transaction.status === "exported") && (
+              <DropdownMenuItem onClick={handleMoveToReview}>
+                Move to review
               </DropdownMenuItem>
             )}
 
@@ -618,6 +630,7 @@ export const columns: ColumnDef<Transaction>[] = [
           onUpdateTransaction={meta?.updateTransaction}
           onDeleteTransaction={meta?.onDeleteTransaction}
           onEditTransaction={meta?.editTransaction}
+          onMoveToReview={meta?.moveToReview}
         />
       );
     },

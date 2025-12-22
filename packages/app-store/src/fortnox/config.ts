@@ -4,7 +4,7 @@ export default {
   name: "Fortnox",
   id: "fortnox",
   category: "Accounting",
-  active: true,
+  active: false,
   logo: Logo,
   short_description:
     "Export transactions and receipts to Fortnox. Keep your Swedish accounting compliant and up-to-date.",

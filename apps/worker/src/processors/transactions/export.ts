@@ -1,6 +1,10 @@
 import { PassThrough } from "node:stream";
 import { writeToString } from "@fast-csv/format";
-import { createShortLink, updateDocumentByPath } from "@midday/db/queries";
+import {
+  createShortLink,
+  markTransactionsAsExported,
+  updateDocumentByPath,
+} from "@midday/db/queries";
 import { createClient } from "@midday/supabase/job";
 import { signedUrl } from "@midday/supabase/storage";
 import { getAppUrl } from "@midday/utils/envs";
@@ -223,6 +227,9 @@ export class ExportTransactionsProcessor extends BaseProcessor<ExportTransaction
       teamId,
       processingStatus: "completed",
     });
+
+    // Mark transactions as exported so they disappear from review tab
+    await markTransactionsAsExported(db, transactionIds);
 
     // Create short link if email is enabled
     if (settings.sendEmail && settings.accountantEmail) {

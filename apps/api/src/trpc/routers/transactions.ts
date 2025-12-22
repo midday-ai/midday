@@ -6,6 +6,7 @@ import {
   getTransactionByIdSchema,
   getTransactionsSchema,
   importTransactionsSchema,
+  moveToReviewSchema,
   searchTransactionMatchSchema,
   updateTransactionSchema,
   updateTransactionsSchema,
@@ -19,6 +20,7 @@ import {
   getTransactions,
   getTransactionsAmountFullRangeData,
   getTransactionsReadyForExportCount,
+  moveTransactionToReview,
   searchTransactionMatch,
   updateBankAccount,
   updateTransaction,
@@ -182,5 +184,20 @@ export const transactionsRouter = createTRPCRouter({
         },
         "transactions",
       );
+    }),
+
+  moveToReview: protectedProcedure
+    .input(moveToReviewSchema)
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      if (!teamId) {
+        throw new Error("Team not found");
+      }
+
+      await moveTransactionToReview(db, {
+        transactionId: input.transactionId,
+        teamId,
+      });
+
+      return { success: true };
     }),
 });

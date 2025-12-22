@@ -4,7 +4,7 @@ export default {
   name: "QuickBooks",
   id: "quickbooks",
   category: "Accounting",
-  active: true,
+  active: false,
   logo: Logo,
   short_description:
     "Export transactions and receipts to QuickBooks Online. Keep your books up-to-date without manual data entry.",
