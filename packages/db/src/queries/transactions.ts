@@ -1,5 +1,6 @@
 import type { Database } from "@db/client";
 import {
+  accountingSyncRecords,
   bankAccounts,
   bankConnections,
   inbox,
@@ -63,6 +64,10 @@ export type GetTransactionsParams = {
   amountRange?: number[] | null;
   amount?: string[] | null;
   manual?: "include" | "exclude" | null;
+  /** Filter by export status: true = only exported, false = only NOT exported, undefined = no filter */
+  exported?: boolean | null;
+  /** Filter by fulfillment: true = ready for review (has attachments OR status=completed), false = not ready */
+  fulfilled?: boolean | null;
 };
 
 // Helper type from schema if not already exported
@@ -93,6 +98,8 @@ export async function getTransactions(
     amount: filterAmount,
     amountRange: filterAmountRange,
     manual: filterManual,
+    exported,
+    fulfilled,
   } = params;
 
   // Always start with teamId filter
@@ -139,10 +146,22 @@ export async function getTransactions(
     whereConditions.push(eq(transactions.status, "excluded"));
   } else if (statuses?.includes("archived")) {
     whereConditions.push(eq(transactions.status, "archived"));
-  } else {
-    // Default: pending, posted, or completed
+  } else if (statuses?.includes("exported")) {
+    // Show all exported transactions: manually marked OR synced to accounting provider
     whereConditions.push(
-      inArray(transactions.status, ["pending", "posted", "completed"]),
+      sql`(
+        ${transactions.status} = 'exported' OR EXISTS (
+          SELECT 1 FROM ${accountingSyncRecords}
+          WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
+          AND ${accountingSyncRecords.teamId} = ${teamId}
+          AND ${accountingSyncRecords.status} = 'synced'
+        )
+      )`,
+    );
+  } else {
+    // Default: pending, posted, completed, or exported (exclude archived/excluded)
+    whereConditions.push(
+      inArray(transactions.status, ["pending", "posted", "completed", "exported"]),
     );
   }
 
@@ -325,6 +344,45 @@ export async function getTransactions(
     whereConditions.push(eq(transactions.manual, false));
   }
 
+  // Exported filter: true = only exported, false = only NOT exported
+  // A transaction is considered exported if status = 'exported' OR has a synced accounting record
+  if (exported === true) {
+    // Only exported transactions
+    whereConditions.push(
+      sql`(
+        ${transactions.status} = 'exported' OR EXISTS (
+          SELECT 1 FROM ${accountingSyncRecords}
+          WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
+          AND ${accountingSyncRecords.teamId} = ${teamId}
+          AND ${accountingSyncRecords.status} = 'synced'
+        )
+      )`,
+    );
+  } else if (exported === false) {
+    // Only NOT exported transactions
+    whereConditions.push(
+      sql`(
+        ${transactions.status} != 'exported' AND NOT EXISTS (
+          SELECT 1 FROM ${accountingSyncRecords}
+          WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
+          AND ${accountingSyncRecords.teamId} = ${teamId}
+          AND ${accountingSyncRecords.status} = 'synced'
+        )
+      )`,
+    );
+  }
+
+  // Fulfilled filter: true = has attachments OR status=completed, false = no attachments AND status!=completed
+  if (fulfilled === true) {
+    whereConditions.push(
+      sql`(EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`,
+    );
+  } else if (fulfilled === false) {
+    whereConditions.push(
+      sql`NOT (EXISTS (SELECT 1 FROM ${transactionAttachments} WHERE ${eq(transactionAttachments.transactionId, transactions.id)} AND ${eq(transactionAttachments.teamId, teamId)}) OR ${transactions.status} = 'completed')`,
+    );
+  }
+
   const finalWhereConditions = whereConditions.filter(
     (c) => c !== undefined,
   ) as SQL[];
@@ -361,6 +419,44 @@ export async function getTransactions(
           AND tms.team_id = ${teamId} 
           AND tms.status = 'pending'
         )`.as("hasPendingSuggestion"),
+      isExported: sql<boolean>`(
+          ${transactions.status} = 'exported' OR EXISTS (
+            SELECT 1 FROM ${accountingSyncRecords}
+            WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
+            AND ${accountingSyncRecords.teamId} = ${teamId}
+            AND ${accountingSyncRecords.status} = 'synced'
+          )
+        )`.as("isExported"),
+      exportProvider: sql<string | null>`(
+          SELECT ${accountingSyncRecords.provider}
+          FROM ${accountingSyncRecords}
+          WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
+          AND ${accountingSyncRecords.teamId} = ${teamId}
+          AND ${accountingSyncRecords.status} = 'synced'
+          LIMIT 1
+        )`.as("exportProvider"),
+      exportedAt: sql<string | null>`(
+          SELECT ${accountingSyncRecords.syncedAt}
+          FROM ${accountingSyncRecords}
+          WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
+          AND ${accountingSyncRecords.teamId} = ${teamId}
+          AND ${accountingSyncRecords.status} = 'synced'
+          LIMIT 1
+        )`.as("exportedAt"),
+      hasExportError: sql<boolean>`EXISTS (
+          SELECT 1 FROM ${accountingSyncRecords}
+          WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
+          AND ${accountingSyncRecords.teamId} = ${teamId}
+          AND ${accountingSyncRecords.status} IN ('failed', 'partial')
+        )`.as("hasExportError"),
+      exportErrorCode: sql<string | null>`(
+          SELECT ${accountingSyncRecords.errorCode}
+          FROM ${accountingSyncRecords}
+          WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
+          AND ${accountingSyncRecords.teamId} = ${teamId}
+          AND ${accountingSyncRecords.status} IN ('failed', 'partial')
+          LIMIT 1
+        )`.as("exportErrorCode"),
       attachments: sql<
         Array<{
           id: string;
@@ -1360,7 +1456,7 @@ type UpdateTransactionData = {
   date?: string;
   bankAccountId?: string;
   categorySlug?: string | null;
-  status?: "pending" | "archived" | "completed" | "posted" | "excluded" | null;
+  status?: "pending" | "archived" | "completed" | "posted" | "excluded" | "exported" | null;
   internal?: boolean;
   note?: string | null;
   assignedId?: string | null;
@@ -1547,7 +1643,7 @@ type UpdateTransactionsData = {
   teamId: string;
   userId?: string;
   categorySlug?: string | null;
-  status?: "pending" | "archived" | "completed" | "posted" | "excluded" | null;
+  status?: "pending" | "archived" | "completed" | "posted" | "excluded" | "exported" | null;
   internal?: boolean;
   note?: string | null;
   assignedId?: string | null;
@@ -1958,4 +2054,102 @@ export async function bulkUpdateTransactionsBaseCurrency(
       teamId,
     });
   }
+}
+
+/**
+ * Count transactions that are ready for export to accounting software
+ *
+ * Ready for export means:
+ * - Fulfilled (has attachments OR status = 'completed')
+ * - Not excluded or archived
+ * - Not already synced to any accounting provider with status 'synced'
+ */
+export async function getTransactionsReadyForExportCount(
+  db: Database,
+  teamId: string,
+): Promise<number> {
+  const result = await db
+    .select({
+      count: sql<number>`COUNT(DISTINCT ${transactions.id})`.as("count"),
+    })
+    .from(transactions)
+    .leftJoin(
+      transactionAttachments,
+      and(
+        eq(transactionAttachments.transactionId, transactions.id),
+        eq(transactionAttachments.teamId, teamId),
+      ),
+    )
+    .leftJoin(
+      accountingSyncRecords,
+      and(
+        eq(accountingSyncRecords.transactionId, transactions.id),
+        eq(accountingSyncRecords.teamId, teamId),
+        eq(accountingSyncRecords.status, "synced"),
+      ),
+    )
+    .where(
+      and(
+        eq(transactions.teamId, teamId),
+        // Not excluded or archived
+        sql`${transactions.status} NOT IN ('excluded', 'archived')`,
+        // Not already synced
+        isNull(accountingSyncRecords.id),
+      ),
+    )
+    .groupBy(transactions.id)
+    // Fulfilled: has attachments OR status = 'completed'
+    .having(
+      sql`(COUNT(${transactionAttachments.id}) > 0 OR ${transactions.status} = 'completed')`,
+    );
+
+  // The query returns one row per fulfilled transaction, so we count the rows
+  return result.length;
+}
+
+/**
+ * Mark transactions as exported (for file exports)
+ * This removes them from the review tab
+ */
+export async function markTransactionsAsExported(
+  db: Database,
+  transactionIds: string[],
+): Promise<void> {
+  if (transactionIds.length === 0) return;
+
+  await db
+    .update(transactions)
+    .set({ status: "exported" })
+    .where(inArray(transactions.id, transactionIds));
+}
+
+/**
+ * Move a transaction back to review by resetting its export status
+ * This handles both file exports (status = 'exported') and accounting exports (sync records)
+ */
+export async function moveTransactionToReview(
+  db: Database,
+  params: { transactionId: string; teamId: string },
+): Promise<void> {
+  // Reset status if it's 'exported' (file export)
+  await db
+    .update(transactions)
+    .set({ status: "posted" })
+    .where(
+      and(
+        eq(transactions.id, params.transactionId),
+        eq(transactions.teamId, params.teamId),
+        eq(transactions.status, "exported"),
+      ),
+    );
+
+  // Delete accounting sync records (accounting export)
+  await db
+    .delete(accountingSyncRecords)
+    .where(
+      and(
+        eq(accountingSyncRecords.transactionId, params.transactionId),
+        eq(accountingSyncRecords.teamId, params.teamId),
+      ),
+    );
 }

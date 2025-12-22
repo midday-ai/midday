@@ -156,6 +156,7 @@ const ActionsCell = memo(
     onUpdateTransaction,
     onDeleteTransaction,
     onEditTransaction,
+    onMoveToReview,
   }: {
     transaction: Transaction;
     onViewDetails?: (id: string) => void;
@@ -168,6 +169,7 @@ const ActionsCell = memo(
     }) => void;
     onDeleteTransaction?: (id: string) => void;
     onEditTransaction?: (id: string) => void;
+    onMoveToReview?: (id: string) => void;
   }) => {
     const handleViewDetails = useCallback(() => {
       if (transaction.manual) {
@@ -193,58 +195,82 @@ const ActionsCell = memo(
       onUpdateTransaction?.({ id: transaction.id, status: "excluded" });
     }, [transaction.id, onUpdateTransaction]);
 
+    const handleUpdateToExported = useCallback(() => {
+      onUpdateTransaction?.({ id: transaction.id, status: "exported" });
+    }, [transaction.id, onUpdateTransaction]);
+
     const handleDeleteTransaction = useCallback(() => {
       onDeleteTransaction?.(transaction.id);
     }, [transaction.id, onDeleteTransaction]);
 
+    const handleMoveToReview = useCallback(() => {
+      onMoveToReview?.(transaction.id);
+    }, [transaction.id, onMoveToReview]);
+
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <Icons.MoreHoriz />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleViewDetails}>
-            View details
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleCopyUrl}>Share URL</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          {!transaction.manual && transaction.status === "excluded" && (
-            <DropdownMenuItem onClick={handleUpdateToPosted}>
-              Include
+      <div className="flex justify-center w-full">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <Icons.MoreHoriz className="text-muted-foreground" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleViewDetails}>
+              View details
             </DropdownMenuItem>
-          )}
+            <DropdownMenuItem onClick={handleCopyUrl}>
+              Share URL
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {!transaction.manual && transaction.status === "excluded" && (
+              <DropdownMenuItem onClick={handleUpdateToPosted}>
+                Include
+              </DropdownMenuItem>
+            )}
 
-          {!transaction.isFulfilled && (
-            <DropdownMenuItem onClick={handleUpdateToCompleted}>
-              Mark as completed
-            </DropdownMenuItem>
-          )}
+            {!transaction.isFulfilled && (
+              <DropdownMenuItem onClick={handleUpdateToCompleted}>
+                Mark as completed
+              </DropdownMenuItem>
+            )}
 
-          {transaction.isFulfilled && transaction.status === "completed" && (
-            <DropdownMenuItem onClick={handleUpdateToPosted}>
-              Mark as uncompleted
-            </DropdownMenuItem>
-          )}
+            {transaction.isFulfilled && transaction.status === "completed" && (
+              <DropdownMenuItem onClick={handleUpdateToPosted}>
+                Mark as uncompleted
+              </DropdownMenuItem>
+            )}
 
-          {!transaction.manual && transaction.status !== "excluded" && (
-            <DropdownMenuItem onClick={handleUpdateToExcluded}>
-              Exclude
-            </DropdownMenuItem>
-          )}
+            {!transaction.isExported && transaction.status !== "exported" && (
+              <DropdownMenuItem onClick={handleUpdateToExported}>
+                Mark as exported
+              </DropdownMenuItem>
+            )}
 
-          {transaction.manual && (
-            <DropdownMenuItem
-              className="text-destructive"
-              onClick={handleDeleteTransaction}
-            >
-              Delete
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+            {(transaction.isExported || transaction.status === "exported") && (
+              <DropdownMenuItem onClick={handleMoveToReview}>
+                Move to review
+              </DropdownMenuItem>
+            )}
+
+            {!transaction.manual && transaction.status !== "excluded" && (
+              <DropdownMenuItem onClick={handleUpdateToExcluded}>
+                Exclude
+              </DropdownMenuItem>
+            )}
+
+            {transaction.manual && (
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={handleDeleteTransaction}
+              >
+                Delete
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     );
   },
 );
@@ -254,9 +280,15 @@ ActionsCell.displayName = "ActionsCell";
 export const columns: ColumnDef<Transaction>[] = [
   {
     id: "select",
+    size: 50,
+    minSize: 50,
+    maxSize: 50,
+    enableResizing: false,
     meta: {
+      sticky: true,
+      skeleton: { type: "checkbox" },
       className:
-        "md:sticky bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:opacity-0 after:z-[-1]",
+        "w-[50px] min-w-[50px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10",
     },
     cell: ({ row, table }) => {
       const meta = table.options.meta;
@@ -294,9 +326,16 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "date",
     header: "Date",
+    size: 110,
+    minSize: 110,
+    maxSize: 110,
+    enableResizing: false,
     meta: {
+      sticky: true,
+      skeleton: { type: "text", width: "w-16" },
+      headerLabel: "Date",
       className:
-        "md:sticky bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:opacity-0 after:z-[-1]",
+        "w-[110px] min-w-[110px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10",
     },
     cell: ({ row, table }) => (
       <DateCell
@@ -309,9 +348,16 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "description",
     header: "Description",
+    size: 320,
+    minSize: 200,
+    maxSize: 600,
+    enableResizing: true,
     meta: {
+      sticky: true,
+      skeleton: { type: "text", width: "w-40" },
+      headerLabel: "Description",
       className:
-        "md:sticky bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 border-r border-border before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background group-hover:after:opacity-0 after:z-[-1]",
+        "w-[320px] min-w-[200px] md:sticky md:left-[var(--stick-left)] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10",
     },
     cell: ({ row }) => (
       <DescriptionCell
@@ -325,8 +371,14 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "amount",
     header: "Amount",
+    size: 170,
+    minSize: 100,
+    maxSize: 400,
+    enableResizing: true,
     meta: {
-      className: "border-l border-border",
+      skeleton: { type: "text", width: "w-20" },
+      headerLabel: "Amount",
+      className: "w-[170px] min-w-[100px]",
     },
     cell: ({ row }) => (
       <AmountCell
@@ -338,6 +390,15 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "taxAmount",
     header: "Tax Amount",
+    size: 170,
+    minSize: 100,
+    maxSize: 400,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-24" },
+      headerLabel: "Tax Amount",
+      className: "w-[170px] min-w-[100px]",
+    },
     cell: ({ row }) => (
       <FormatAmount
         amount={row.original.taxAmount ?? 0}
@@ -349,6 +410,15 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "category",
     header: "Category",
+    size: 250,
+    minSize: 150,
+    maxSize: 400,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "icon-text", width: "w-28" },
+      headerLabel: "Category",
+      className: "w-[250px] min-w-[150px]",
+    },
     cell: ({ row, table }) => {
       // Show analyzing state when enrichment is not completed
       if (!row.original.enrichmentCompleted) {
@@ -399,6 +469,15 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "counterparty",
     header: "From / To",
+    size: 200,
+    minSize: 120,
+    maxSize: 400,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-28" },
+      headerLabel: "From / To",
+      className: "w-[200px] min-w-[120px]",
+    },
     cell: ({ row }) => (
       <span className="text-muted-foreground">
         {row.original.counterpartyName ?? "-"}
@@ -408,8 +487,14 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "tags",
     header: "Tags",
+    size: 280,
+    minSize: 150,
+    maxSize: 500,
+    enableResizing: true,
     meta: {
-      className: "w-[280px] min-w-[280px] max-w-[280px]",
+      skeleton: { type: "tags" },
+      headerLabel: "Tags",
+      className: "w-[280px] min-w-[150px]",
     },
     cell: ({ row }) => (
       <InlineSelectTags
@@ -421,6 +506,15 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "bank_account",
     header: "Account",
+    size: 250,
+    minSize: 150,
+    maxSize: 400,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "avatar-text", width: "w-32" },
+      headerLabel: "Account",
+      className: "w-[250px] min-w-[150px]",
+    },
     cell: ({ row }) => (
       <TransactionBankAccount
         name={row.original?.account?.name ?? undefined}
@@ -431,11 +525,29 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "method",
     header: "Method",
+    size: 140,
+    minSize: 100,
+    maxSize: 300,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-16" },
+      headerLabel: "Method",
+      className: "w-[140px] min-w-[100px]",
+    },
     cell: ({ row }) => <TransactionMethod method={row.original.method} />,
   },
   {
     accessorKey: "assigned",
     header: "Assigned",
+    size: 220,
+    minSize: 150,
+    maxSize: 400,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "avatar-text", width: "w-24" },
+      headerLabel: "Assigned",
+      className: "w-[220px] min-w-[150px]",
+    },
     cell: ({ row, table }) => {
       const meta = table.options.meta;
 
@@ -454,26 +566,58 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     accessorKey: "status",
-    cell: ({ row }) => {
-      const fullfilled =
-        row.original.status === "completed" || row.original.isFulfilled;
-      const hasPendingSuggestion = row.original.hasPendingSuggestion;
+    header: "Status",
+    size: 160,
+    minSize: 120,
+    maxSize: 300,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "badge", width: "w-20" },
+      headerLabel: "Status",
+      className: "w-[160px] min-w-[120px]",
+    },
+    cell: ({ row, table }) => {
+      const meta = table.options.meta;
+
+      // Show exporting state when transaction is being exported
+      if (meta?.exportingTransactionIds?.includes(row.original.id)) {
+        return (
+          <div className="flex items-center space-x-2">
+            <Spinner size={14} className="stroke-primary" />
+            <span className="text-[#878787] text-sm">Exporting</span>
+          </div>
+        );
+      }
 
       return (
         <TransactionStatus
-          fullfilled={fullfilled}
-          hasPendingSuggestion={hasPendingSuggestion}
+          isFulfilled={
+            row.original.status === "completed" || row.original.isFulfilled
+          }
+          isExported={row.original.isExported ?? false}
+          hasExportError={row.original.hasExportError}
+          exportErrorCode={row.original.exportErrorCode}
+          exportProvider={row.original.exportProvider}
+          exportedAt={row.original.exportedAt}
+          hasPendingSuggestion={row.original.hasPendingSuggestion}
         />
       );
     },
   },
   {
     id: "actions",
+    size: 100,
+    minSize: 100,
+    maxSize: 100,
+    enableResizing: false,
     enableSorting: false,
     enableHiding: false,
     meta: {
+      sticky: true,
+      skeleton: { type: "icon" },
+      headerLabel: "Actions",
       className:
-        "text-right md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background group-hover:after:opacity-0 after:z-[-1]",
+        "w-[100px] min-w-[100px] md:sticky md:right-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-10 justify-center !border-l !border-border",
     },
     cell: ({ row, table }) => {
       const meta = table.options.meta;
@@ -486,6 +630,7 @@ export const columns: ColumnDef<Transaction>[] = [
           onUpdateTransaction={meta?.updateTransaction}
           onDeleteTransaction={meta?.onDeleteTransaction}
           onEditTransaction={meta?.editTransaction}
+          onMoveToReview={meta?.moveToReview}
         />
       );
     },

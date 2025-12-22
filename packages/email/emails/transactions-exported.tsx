@@ -15,14 +15,12 @@ import {
 } from "../components/theme";
 
 interface Props {
-  accountantEmail: string;
-  teamName: string;
+   teamName: string;
   transactionCount: number;
   downloadLink: string;
 }
 
 export const TransactionsExportedEmail = ({
-  accountantEmail = "accountant@example.com",
   teamName = "Midday",
   transactionCount = 100,
   downloadLink = "https://app.midday.ai/s/abc123",

@@ -206,6 +206,30 @@ export const getTransactionsSchema = z.object({
         in: "query",
       },
     }),
+  exported: z
+    .boolean()
+    .nullable()
+    .optional()
+    .openapi({
+      description:
+        "Filter by export status. true = only exported transactions, false = only NOT exported transactions, undefined = no filter",
+      example: false,
+      param: {
+        in: "query",
+      },
+    }),
+  fulfilled: z
+    .boolean()
+    .nullable()
+    .optional()
+    .openapi({
+      description:
+        "Filter by fulfillment status. true = transactions ready for review (has attachments OR status=completed), false = not ready, undefined = no filter",
+      example: true,
+      param: {
+        in: "query",
+      },
+    }),
 });
 
 export const transactionResponseSchema = z
@@ -545,7 +569,14 @@ export const updateTransactionSchema = z.object({
     description: "Category slug for the transaction.",
   }),
   status: z
-    .enum(["pending", "archived", "completed", "posted", "excluded"])
+    .enum([
+      "pending",
+      "archived",
+      "completed",
+      "posted",
+      "excluded",
+      "exported",
+    ])
     .nullable()
     .optional()
     .openapi({
@@ -588,7 +619,14 @@ export const updateTransactionsSchema = z.object({
     description: "Category slug for the transactions.",
   }),
   status: z
-    .enum(["pending", "archived", "completed", "posted", "excluded"])
+    .enum([
+      "pending",
+      "archived",
+      "completed",
+      "posted",
+      "excluded",
+      "exported",
+    ])
     .nullable()
     .optional()
     .openapi({
@@ -871,5 +909,11 @@ export const importTransactionsSchema = z.object({
     date: z.string(),
     description: z.string(),
     balance: z.string().optional(),
+  }),
+});
+
+export const moveToReviewSchema = z.object({
+  transactionId: z.string().uuid().openapi({
+    description: "Transaction ID to move back to review.",
   }),
 });

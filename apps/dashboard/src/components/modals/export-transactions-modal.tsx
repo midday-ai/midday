@@ -1,6 +1,7 @@
 "use client";
 
 import { useJobStatus } from "@/hooks/use-job-status";
+import { useReviewTransactions } from "@/hooks/use-review-transactions";
 import { useTeamMutation, useTeamQuery } from "@/hooks/use-team";
 import { useUserQuery } from "@/hooks/use-user";
 import { useZodForm } from "@/hooks/use-zod-form";
@@ -35,8 +36,8 @@ import { Separator } from "@midday/ui/separator";
 import { Spinner } from "@midday/ui/spinner";
 import { Switch } from "@midday/ui/switch";
 import NumberFlow from "@number-flow/react";
-import { useMutation } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo } from "react";
 import { z } from "zod/v3";
 
 const exportSettingsSchema = z
@@ -53,7 +54,6 @@ const exportSettingsSchema = z
         if (!data.accountantEmail || data.accountantEmail.trim() === "") {
           return false;
         }
-
         return z.string().email().safeParse(data.accountantEmail.trim())
           .success;
       }
@@ -78,18 +78,31 @@ export function ExportTransactionsModal({
   onOpenChange,
 }: ExportTransactionsModalProps) {
   const { exportData, setExportData, setIsExporting } = useExportStore();
-  const { rowSelection, setRowSelection } = useTransactionsStore();
+  const { rowSelectionByTab, setRowSelection } = useTransactionsStore();
+  // Export modal is used from review tab, so use review tab selection
+  const rowSelection = rowSelectionByTab.review;
   const { data: user } = useUserQuery();
   const { data: team } = useTeamQuery();
   const teamMutation = useTeamMutation();
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const { transactionIds: reviewTransactionIds } = useReviewTransactions();
 
-  // Poll job status if we have a job ID
-  const {
-    status: jobStatus,
-    progress,
-    error: jobError,
-  } = useJobStatus({
+  // Get transaction IDs - either from selection or all review transactions
+  const selectedIds = Object.keys(rowSelection);
+  const hasManualSelection = selectedIds.length > 0;
+
+  // Get IDs for export - either selected or all review transactions (with user filters applied)
+  const transactionIds = useMemo(() => {
+    if (hasManualSelection) {
+      return selectedIds;
+    }
+    return reviewTransactionIds;
+  }, [hasManualSelection, selectedIds, reviewTransactionIds]);
+
+  const totalCount = transactionIds.length;
+
+  const { status: jobStatus } = useJobStatus({
     jobId: exportData?.runId,
     enabled: !!exportData?.runId && isOpen,
   });
@@ -98,6 +111,13 @@ export function ExportTransactionsModal({
   useEffect(() => {
     if (jobStatus === "completed") {
       setIsExporting(false);
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({
+        queryKey: trpc.transactions.get.infiniteQueryKey(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: trpc.transactions.getReviewCount.queryKey(),
+      });
       // Delay clearing exportData to allow export bar to show completion
       setTimeout(() => {
         setExportData(undefined);
@@ -107,10 +127,15 @@ export function ExportTransactionsModal({
       setIsExporting(false);
       setExportData(undefined);
     }
-  }, [jobStatus, setIsExporting, setExportData, onOpenChange]);
-
-  const ids = Object.keys(rowSelection);
-  const totalSelected = ids.length;
+  }, [
+    jobStatus,
+    setIsExporting,
+    setExportData,
+    onOpenChange,
+    queryClient,
+    trpc.transactions.get,
+    trpc.transactions.getReviewCount,
+  ]);
 
   // Load saved settings from team
   const savedSettings = (team?.exportSettings as z.infer<
@@ -135,17 +160,15 @@ export function ExportTransactionsModal({
     }
   }, [team?.exportSettings, form]);
 
+  // File export mutation
   const exportMutation = useMutation(
     trpc.transactions.export.mutationOptions({
       onSuccess: (data) => {
         if (data?.id) {
-          setExportData({
-            runId: data.id,
-          });
-
-          setRowSelection(() => ({}));
-          // Don't set isExporting to false here - let job status handle it
-          // Don't close modal immediately - wait for job to complete
+          setExportData({ runId: data.id, exportType: "file" });
+          setRowSelection("review", {});
+          // Close modal immediately - toast will show progress
+          onOpenChange(false);
         }
       },
       onError: () => {
@@ -154,7 +177,9 @@ export function ExportTransactionsModal({
     }),
   );
 
-  const onSubmit = async (values: z.infer<typeof exportSettingsSchema>) => {
+  const onFileExport = async (values: z.infer<typeof exportSettingsSchema>) => {
+    if (transactionIds.length === 0) return;
+
     setIsExporting(true);
 
     await teamMutation.mutateAsync({
@@ -162,7 +187,7 @@ export function ExportTransactionsModal({
     });
 
     exportMutation.mutate({
-      transactionIds: ids,
+      transactionIds,
       dateFormat: user?.dateFormat ?? undefined,
       locale: user?.locale ?? undefined,
       exportSettings: values,
@@ -173,24 +198,27 @@ export function ExportTransactionsModal({
     exportMutation.isPending ||
     jobStatus === "active" ||
     jobStatus === "waiting";
+
   const sendEmail = form.watch("sendEmail");
   const includeCSV = form.watch("includeCSV");
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[600px]">
+      <DialogContent className="max-w-[500px]">
         <div className="p-4">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <DialogHeader className="mb-8">
-                <DialogTitle>Export Transactions</DialogTitle>
-                <DialogDescription>
-                  Export <NumberFlow value={totalSelected} /> selected
-                  transactions with your preferred settings. You'll be notified
-                  when ready.
-                </DialogDescription>
-              </DialogHeader>
+          <DialogHeader className="mb-6">
+            <DialogTitle>Export Transactions</DialogTitle>
+            <DialogDescription>
+              Export <NumberFlow value={totalCount} /> transaction
+              {totalCount !== 1 ? "s" : ""} to your vault.
+            </DialogDescription>
+          </DialogHeader>
 
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onFileExport)}
+              className="space-y-4"
+            >
               <div className="space-y-3">
                 <FormField
                   control={form.control}
@@ -377,10 +405,11 @@ export function ExportTransactionsModal({
                   disabled={
                     isExporting ||
                     !form.formState.isValid ||
-                    form.formState.isSubmitting
+                    form.formState.isSubmitting ||
+                    transactionIds.length === 0
                   }
                 >
-                  {isExporting ? (
+                  {exportMutation.isPending ? (
                     <div className="flex items-center space-x-2">
                       <Spinner className="size-4" />
                       <span>Exporting...</span>

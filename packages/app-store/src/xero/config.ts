@@ -1,15 +1,8 @@
-import { Logo } from "./assets/logo";
+import { baseConfig } from "./config-base";
 
+// Server-safe config without images - used by API
+// Images are excluded to avoid bun trying to execute PNG files when imported in server contexts
 export default {
-  name: "Xero",
-  id: "xero",
-  active: false,
-  logo: Logo,
-  short_description:
-    "Integrating with Xero allows you to synchronize transactions and attachments neatly organized in your bookkeeping software, making it easier for you or your accountant to close your books faster.",
-  description: null,
-  images: [],
-  onInitialize: () => {},
-  settings: {},
-  config: {},
+  ...baseConfig,
+  images: [] as string[],
 };

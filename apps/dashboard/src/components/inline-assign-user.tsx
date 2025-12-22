@@ -1,6 +1,7 @@
 "use client";
 
 import { AssignedUser } from "@/components/assigned-user";
+import { useTransactionTableContextOptional } from "@/components/tables/transactions/transaction-table-context";
 import { useTRPC } from "@/trpc/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { useQuery } from "@tanstack/react-query";
@@ -21,8 +22,15 @@ export function InlineAssignUser({ selectedId, onSelect }: Props) {
   const [open, setOpen] = useState(false);
   const trpc = useTRPC();
 
-  const { data: users } = useQuery(trpc.team.members.queryOptions());
+  // Use shared context when available (inside transaction table), fallback to direct query
+  const tableContext = useTransactionTableContextOptional();
+  const { data: fallbackUsers } = useQuery({
+    ...trpc.team.members.queryOptions(),
+    // Skip query if we have context data (already fetched by provider)
+    enabled: !tableContext,
+  });
 
+  const users = tableContext?.teamMembers ?? fallbackUsers;
   const selectedUser = users?.find(({ user }) => user?.id === selectedId)?.user;
 
   const handleSelect = (user: User) => {

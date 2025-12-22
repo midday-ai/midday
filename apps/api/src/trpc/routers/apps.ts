@@ -9,7 +9,9 @@ import {
   getApps,
   removeWhatsAppConnection,
   updateAppSettings,
+  updateAppSettingsBulk,
 } from "@midday/db/queries";
+import { z } from "zod";
 
 export const appsRouter = createTRPCRouter({
   get: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
@@ -33,6 +35,32 @@ export const appsRouter = createTRPCRouter({
         appId,
         teamId: teamId!,
         option,
+      });
+    }),
+
+  updateSettings: protectedProcedure
+    .input(
+      z.object({
+        appId: z.string(),
+        settings: z.array(
+          z.object({
+            id: z.string(),
+            label: z.string().optional(),
+            description: z.string().optional(),
+            type: z.string().optional(),
+            required: z.boolean().optional(),
+            value: z.unknown(),
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      const { appId, settings } = input;
+
+      return updateAppSettingsBulk(db, {
+        appId,
+        teamId: teamId!,
+        settings,
       });
     }),
 

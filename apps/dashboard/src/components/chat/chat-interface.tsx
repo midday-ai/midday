@@ -1,5 +1,6 @@
 "use client";
 
+import { Portal } from "@/components/portal";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useChatStatus } from "@/hooks/use-chat-status";
 import { useChat, useChatActions, useDataPart } from "@ai-sdk-tools/store";
@@ -189,32 +190,36 @@ export function ChatInterface({ geo }: Props) {
                   </div>
                 </ConversationContent>
 
-                <div
-                  className={cn(
-                    "fixed bottom-32 z-0 transition-all duration-300 ease-in-out",
-                    "left-0 md:left-[70px] px-4 md:px-6",
-                    showCanvas ? "right-0 md:right-[603px]" : "right-0",
-                  )}
-                >
-                  <div className="mx-auto w-full max-w-full md:max-w-[770px]">
-                    <SuggestedPrompts />
+                <Portal>
+                  <div
+                    className={cn(
+                      "fixed bottom-32 z-0 transition-all duration-300 ease-in-out",
+                      "left-0 md:left-[70px] px-4 md:px-6",
+                      showCanvas ? "right-0 md:right-[603px]" : "right-0",
+                    )}
+                  >
+                    <div className="mx-auto w-full max-w-full md:max-w-[770px]">
+                      <SuggestedPrompts />
+                    </div>
                   </div>
-                </div>
+                </Portal>
               </Conversation>
             </div>
           </>
         )}
 
-        <div
-          className={cn(
-            "fixed bottom-0 left-0",
-            hasMessages && "transition-all duration-300 ease-in-out",
-            showCanvas ? "right-0 md:right-[600px]" : "right-0",
-            isHome && "chat-input-wrapper-static",
-          )}
-        >
-          <ChatInput />
-        </div>
+        <Portal>
+          <div
+            className={cn(
+              "fixed bottom-0 left-0",
+              hasMessages && "transition-all duration-300 ease-in-out",
+              showCanvas ? "right-0 md:right-[600px]" : "right-0",
+              isHome && "chat-input-wrapper-static",
+            )}
+          >
+            <ChatInput />
+          </div>
+        </Portal>
       </div>
     </div>
   );

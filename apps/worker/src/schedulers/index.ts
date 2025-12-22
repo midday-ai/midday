@@ -20,6 +20,7 @@ export const staticSchedulerConfigs: StaticSchedulerConfig[] = [
 /**
  * All dynamic scheduler templates
  * Add new dynamic scheduler templates here
+ * Note: Accounting auto-sync has been removed in favor of manual export only
  */
 export const dynamicSchedulerTemplates: DynamicSchedulerTemplate[] = [
   ...inboxDynamicSchedulerTemplates,

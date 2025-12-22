@@ -1,3 +1,4 @@
+import { CollapsibleSummary } from "@/components/collapsible-summary";
 import { CustomersHeader } from "@/components/customers-header";
 import { ErrorFallback } from "@/components/error-fallback";
 import { InactiveClients } from "@/components/inactive-clients";
@@ -15,6 +16,7 @@ import {
   getQueryClient,
   trpc,
 } from "@/trpc/server";
+import { getInitialTableSettings } from "@/utils/columns";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import type { SearchParams } from "nuqs";
@@ -35,6 +37,9 @@ export default async function Page(props: Props) {
   const filter = loadCustomerFilterParams(searchParams);
   const { sort } = loadSortParams(searchParams);
 
+  // Get unified table settings from cookie
+  const initialSettings = await getInitialTableSettings("customers");
+
   // Change this to prefetch once this is fixed: https://github.com/trpc/trpc/issues/6632
   await queryClient.fetchInfiniteQuery(
     trpc.customers.get.infiniteQueryOptions({
@@ -54,26 +59,28 @@ export default async function Page(props: Props) {
   return (
     <HydrateClient>
       <div className="flex flex-col gap-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-6">
-          <Suspense fallback={<InvoiceSummarySkeleton />}>
-            <MostActiveClient />
-          </Suspense>
-          <Suspense fallback={<InvoiceSummarySkeleton />}>
-            <InactiveClients />
-          </Suspense>
-          <Suspense fallback={<InvoiceSummarySkeleton />}>
-            <TopRevenueClient />
-          </Suspense>
-          <Suspense fallback={<InvoiceSummarySkeleton />}>
-            <NewCustomersThisMonth />
-          </Suspense>
-        </div>
+        <CollapsibleSummary>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-6">
+            <Suspense fallback={<InvoiceSummarySkeleton />}>
+              <MostActiveClient />
+            </Suspense>
+            <Suspense fallback={<InvoiceSummarySkeleton />}>
+              <InactiveClients />
+            </Suspense>
+            <Suspense fallback={<InvoiceSummarySkeleton />}>
+              <TopRevenueClient />
+            </Suspense>
+            <Suspense fallback={<InvoiceSummarySkeleton />}>
+              <NewCustomersThisMonth />
+            </Suspense>
+          </div>
+        </CollapsibleSummary>
 
         <CustomersHeader />
 
         <ErrorBoundary errorComponent={ErrorFallback}>
           <Suspense fallback={<CustomersSkeleton />}>
-            <DataTable />
+            <DataTable initialSettings={initialSettings} />
           </Suspense>
         </ErrorBoundary>
       </div>

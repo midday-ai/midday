@@ -172,6 +172,9 @@ export function CategoryForm({ data }: Props) {
                       placeholder="Report Code"
                     />
                   </FormControl>
+                  <p className="text-xs text-muted-foreground pt-1">
+                    Maps to account codes when exporting to accounting software
+                  </p>
                 </FormItem>
               )}
             />

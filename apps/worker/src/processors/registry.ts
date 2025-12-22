@@ -1,5 +1,6 @@
 import type { Job } from "bullmq";
 import { isDevelopment } from "../utils/env";
+import { accountingProcessors } from "./accounting";
 import { documentProcessors } from "./documents";
 import { embeddingsProcessors } from "./embeddings";
 import { inboxProcessors } from "./inbox";
@@ -37,6 +38,11 @@ for (const [jobName, processor] of Object.entries(documentProcessors)) {
 
 // Register rates processors
 for (const [jobName, processor] of Object.entries(ratesProcessors)) {
+  processors.set(jobName, processor);
+}
+
+// Register accounting processors
+for (const [jobName, processor] of Object.entries(accountingProcessors)) {
   processors.set(jobName, processor);
 }
 

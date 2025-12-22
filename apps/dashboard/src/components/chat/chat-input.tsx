@@ -8,6 +8,7 @@ import {
 } from "@/components/chat/chat-history";
 import { CommandMenu } from "@/components/chat/command-menu";
 import { RecordButton } from "@/components/chat/record-button";
+import { Portal } from "@/components/portal";
 import { SuggestedActionsButton } from "@/components/suggested-actions-button";
 import { WebSearchButton } from "@/components/web-search-button";
 import { useChatInterface } from "@/hooks/use-chat-interface";
@@ -509,17 +510,19 @@ export function ChatInput() {
   const isCanvasVisible = !!selectedType;
 
   return (
-    <div
-      className={cn(
-        "fixed bottom-6 z-[100] transition-all duration-300 ease-in-out",
-        "left-0 md:left-[70px] px-4 md:px-6",
-        isCanvasVisible ? "right-0 md:right-[603px]" : "right-0",
-        isHome && "chat-input-static",
-      )}
-    >
-      <ChatHistoryProvider>
-        <ChatInputContent />
-      </ChatHistoryProvider>
-    </div>
+    <Portal>
+      <div
+        className={cn(
+          "fixed bottom-6 z-[100] transition-all duration-300 ease-in-out",
+          "left-0 md:left-[70px] px-4 md:px-6",
+          isCanvasVisible ? "right-0 md:right-[603px]" : "right-0",
+          isHome && "chat-input-static",
+        )}
+      >
+        <ChatHistoryProvider>
+          <ChatInputContent />
+        </ChatHistoryProvider>
+      </div>
+    </Portal>
   );
 }

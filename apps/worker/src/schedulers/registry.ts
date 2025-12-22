@@ -1,5 +1,6 @@
 import { createLoggerWithContext } from "@midday/logger";
 import type { Queue } from "bullmq";
+import { accountingQueue } from "../queues/accounting";
 import { documentsQueue } from "../queues/documents";
 import { inboxProviderQueue, inboxQueue } from "../queues/inbox";
 import { ratesQueue } from "../queues/rates";
@@ -28,6 +29,8 @@ function getQueueByName(queueName: string): Queue {
       return documentsQueue;
     case "rates":
       return ratesQueue;
+    case "accounting":
+      return accountingQueue;
     default:
       throw new Error(`Unknown queue: ${queueName}`);
   }

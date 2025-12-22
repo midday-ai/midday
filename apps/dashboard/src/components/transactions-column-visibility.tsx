@@ -1,3 +1,5 @@
+"use client";
+
 import { useTransactionsStore } from "@/store/transactions";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";

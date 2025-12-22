@@ -17,10 +17,12 @@ declare module "@tanstack/table-core" {
       assignedId?: string | null;
     }) => void;
     onDeleteTransaction?: (id: string) => void;
+    moveToReview?: (id: string) => void;
     editTransaction?: (id: string) => void;
     lastClickedIndex?: number | null;
     setLastClickedIndex?: (index: number | null) => void;
     handleShiftClickRange?: (startIndex: number, endIndex: number) => void;
+    exportingTransactionIds?: string[];
 
     // Vault table meta
     handleDelete?: (id: string) => void;
@@ -47,5 +49,21 @@ declare module "@tanstack/table-core" {
 
   interface ColumnMeta<TData extends RowData, TValue> {
     className?: string;
+    sticky?: boolean;
+    sortField?: string;
+    /** Skeleton configuration for loading states */
+    skeleton?: {
+      type:
+        | "checkbox"
+        | "text"
+        | "avatar-text"
+        | "icon-text"
+        | "badge"
+        | "tags"
+        | "icon";
+      width?: string;
+    };
+    /** Header label for skeleton headers */
+    headerLabel?: string;
   }
 }

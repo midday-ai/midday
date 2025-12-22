@@ -3,6 +3,7 @@ import { VaultSkeleton } from "@/components/vault/vault-skeleton";
 import { VaultView } from "@/components/vault/vault-view";
 import { loadDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { prefetch, trpc } from "@/trpc/server";
+import { getInitialTableSettings } from "@/utils/columns";
 import type { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
@@ -20,6 +21,8 @@ export default async function Page(props: Props) {
 
   const filter = loadDocumentFilterParams(searchParams);
 
+  const initialSettings = await getInitialTableSettings("vault");
+
   prefetch(
     trpc.documents.get.infiniteQueryOptions({
       ...filter,
@@ -32,7 +35,7 @@ export default async function Page(props: Props) {
       <VaultHeader />
 
       <Suspense fallback={<VaultSkeleton />}>
-        <VaultView />
+        <VaultView initialSettings={initialSettings} />
       </Suspense>
     </div>
   );

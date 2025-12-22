@@ -2,6 +2,7 @@
 
 import { useUserQuery } from "@/hooks/use-user";
 import { formatAmount } from "@/utils/format";
+import { memo } from "react";
 
 type Props = {
   amount: number;
@@ -11,7 +12,7 @@ type Props = {
   locale?: string;
 };
 
-export function FormatAmount({
+export const FormatAmount = memo(function FormatAmount({
   amount,
   currency,
   maximumFractionDigits,
@@ -22,9 +23,9 @@ export function FormatAmount({
 
   return formatAmount({
     locale: locale || user?.locale,
-    amount: amount,
+    amount,
     currency,
     maximumFractionDigits,
     minimumFractionDigits,
   });
-}
+});

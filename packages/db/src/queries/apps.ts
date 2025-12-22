@@ -213,6 +213,51 @@ export const updateAppSettings = async (
   return result;
 };
 
+export type UpdateAppSettingsBulkParams = {
+  appId: string;
+  teamId: string;
+  settings: Array<{
+    id: string;
+    value: unknown;
+    [key: string]: unknown;
+  }>;
+};
+
+/**
+ * Update all settings for an app at once
+ */
+export const updateAppSettingsBulk = async (
+  db: Database,
+  params: UpdateAppSettingsBulkParams,
+) => {
+  const { appId, teamId, settings } = params;
+
+  // Update the record directly with new settings
+  const [result] = await db
+    .update(apps)
+    .set({ settings })
+    .where(and(eq(apps.appId, appId), eq(apps.teamId, teamId)))
+    .returning();
+
+  if (!result) {
+    throw new Error("Failed to update app settings");
+  }
+
+  return result;
+};
+
+export type DeleteAppParams = {
+  appId: string;
+  teamId: string;
+};
+
+/**
+ * Delete an app (alias for disconnectApp for semantic clarity)
+ */
+export const deleteApp = async (db: Database, params: DeleteAppParams) => {
+  return disconnectApp(db, params);
+};
+
 // WhatsApp connection types
 export type WhatsAppConnection = {
   phoneNumber: string;
@@ -391,4 +436,43 @@ export const getWhatsAppConnections = async (db: Database, teamId: string) => {
 
   const config = (app.config as WhatsAppConfig) || {};
   return config.connections || [];
+};
+
+export type UpdateAppTokensParams = {
+  teamId: string;
+  appId: string;
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string;
+};
+
+/**
+ * Update OAuth tokens for an app (atomic operation)
+ * Used for token refresh in accounting integrations (Xero, QuickBooks, etc.)
+ * Uses JSONB merge to preserve other config fields
+ */
+export const updateAppTokens = async (
+  db: Database,
+  params: UpdateAppTokensParams,
+) => {
+  const { teamId, appId, accessToken, refreshToken, expiresAt } = params;
+
+  // Use SQL JSONB concatenation for atomic merge
+  const [result] = await db
+    .update(apps)
+    .set({
+      config: sql`COALESCE(${apps.config}, '{}'::jsonb) || ${JSON.stringify({
+        accessToken,
+        refreshToken,
+        expiresAt,
+      })}::jsonb`,
+    })
+    .where(and(eq(apps.appId, appId), eq(apps.teamId, teamId)))
+    .returning();
+
+  if (!result) {
+    throw new Error(`Failed to update tokens for app ${appId}`);
+  }
+
+  return result;
 };

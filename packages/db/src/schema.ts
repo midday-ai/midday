@@ -87,6 +87,24 @@ export const inboxAccountStatusEnum = pgEnum("inbox_account_status", [
   "disconnected",
 ]);
 
+export const accountingProviderEnum = pgEnum("accounting_provider", [
+  "xero",
+  "quickbooks",
+  "fortnox",
+]);
+
+export const accountingSyncStatusEnum = pgEnum("accounting_sync_status", [
+  "synced",
+  "failed",
+  "pending",
+  "partial",
+]);
+
+export const accountingSyncTypeEnum = pgEnum("accounting_sync_type", [
+  "auto",
+  "manual",
+]);
+
 export const inboxStatusEnum = pgEnum("inbox_status", [
   "processing",
   "pending",
@@ -167,6 +185,7 @@ export const transactionStatusEnum = pgEnum("transactionStatus", [
   "excluded",
   "completed",
   "archived",
+  "exported",
 ]);
 
 export const transactionFrequencyEnum = pgEnum("transaction_frequency", [
@@ -3358,4 +3377,94 @@ export const notificationSettings = pgTable(
       using: sql`(user_id = auth.uid())`,
     }),
   ],
+);
+
+/**
+ * Accounting Sync Records
+ * Tracks which transactions have been synced to which accounting providers
+ * Supports multiple providers per transaction (Xero AND QuickBooks, etc.)
+ */
+export const accountingSyncRecords = pgTable(
+  "accounting_sync_records",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    transactionId: uuid("transaction_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+    provider: accountingProviderEnum().notNull(),
+    providerTenantId: text("provider_tenant_id").notNull(),
+    providerTransactionId: text("provider_transaction_id"),
+    // Maps Midday attachment IDs to provider attachment IDs for sync tracking
+    // Format: { "midday-attachment-id": "provider-attachment-id" }
+    syncedAttachmentMapping: jsonb("synced_attachment_mapping")
+      .default(sql`'{}'::jsonb`)
+      .notNull()
+      .$type<Record<string, string | null>>(),
+    syncedAt: timestamp("synced_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    syncType: accountingSyncTypeEnum("sync_type"),
+    status: accountingSyncStatusEnum().default("synced").notNull(),
+    errorMessage: text("error_message"),
+    // Standardized error code for frontend handling (e.g., "ATTACHMENT_UNSUPPORTED_TYPE", "AUTH_EXPIRED")
+    errorCode: text("error_code"),
+    // Provider-specific entity type (e.g., "Purchase", "SalesReceipt", "Voucher", "BankTransaction")
+    providerEntityType: text("provider_entity_type"),
+    // When the record was first created (synced_at gets updated on every sync)
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    // Primary lookup: find syncs for a transaction
+    index("idx_accounting_sync_transaction").on(table.transactionId),
+    // Query syncs by team and provider
+    index("idx_accounting_sync_team_provider").on(table.teamId, table.provider),
+    // Query by status for retry logic
+    index("idx_accounting_sync_status").on(table.teamId, table.status),
+    // Unique constraint: one sync record per transaction per provider
+    unique("accounting_sync_records_transaction_provider_key").on(
+      table.transactionId,
+      table.provider,
+    ),
+    foreignKey({
+      columns: [table.transactionId],
+      foreignColumns: [transactions.id],
+      name: "accounting_sync_records_transaction_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "accounting_sync_records_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Team members can view their sync records", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+    }),
+    pgPolicy("Team members can insert sync records", {
+      as: "permissive",
+      for: "insert",
+      to: ["public"],
+      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Team members can update sync records", {
+      as: "permissive",
+      for: "update",
+      to: ["public"],
+    }),
+  ],
+);
+
+export const accountingSyncRecordsRelations = relations(
+  accountingSyncRecords,
+  ({ one }) => ({
+    transaction: one(transactions, {
+      fields: [accountingSyncRecords.transactionId],
+      references: [transactions.id],
+    }),
+    team: one(teams, {
+      fields: [accountingSyncRecords.teamId],
+      references: [teams.id],
+    }),
+  }),
 );

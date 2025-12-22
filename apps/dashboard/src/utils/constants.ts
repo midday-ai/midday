@@ -1,7 +1,7 @@
 export const Cookies = {
   PreferredSignInProvider: "preferred-signin-provider",
-  TransactionsColumns: "transactions-columns",
-  InvoicesColumns: "invoices-columns",
+  // Unified table settings cookie (used by transactions, customers, invoices)
+  TableSettings: "table-settings",
   InboxFilter: "inbox-filter-v2",
   InboxOrder: "inbox-order",
   HideConnectFlow: "hide-connect-flow",

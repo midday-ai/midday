@@ -255,7 +255,7 @@ export const teamRouter = createTRPCRouter({
   updateBaseCurrency: protectedProcedure
     .input(updateBaseCurrencySchema)
     .mutation(async ({ ctx: { teamId }, input }) => {
-      const event = await triggerJob(
+      return triggerJob(
         "update-base-currency",
         {
           teamId: teamId!,
@@ -263,7 +263,5 @@ export const teamRouter = createTRPCRouter({
         },
         "transactions",
       );
-
-      return event;
     }),
 });

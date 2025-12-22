@@ -6,5 +6,5 @@ import { onInitialize } from "./initialize";
 export default {
   ...baseConfig,
   onInitialize,
-  images: [require("./assets/image.png")],
+  images: [require("./assets/slack.jpg")],
 };

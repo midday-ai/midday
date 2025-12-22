@@ -68,7 +68,9 @@ export const transactionFilterOutputSchema = z.object({
     .array(z.enum(["all", "weekly", "monthly", "annually"]))
     .nullable(),
   statuses: z
-    .array(z.enum(["completed", "uncompleted", "archived", "excluded"]))
+    .array(
+      z.enum(["completed", "uncompleted", "archived", "excluded", "exported"]),
+    )
     .nullable(),
   manual: z.enum(["exclude", "include"]).nullable(),
 });

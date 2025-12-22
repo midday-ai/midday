@@ -2,6 +2,7 @@
 
 import { useFileUrl } from "@/hooks/use-file-url";
 import { useJobStatus } from "@/hooks/use-job-status";
+import { useSuccessSound } from "@/hooks/use-success-sound";
 import { downloadFile } from "@/lib/download";
 import { useExportStore } from "@/store/export";
 import { useTRPC } from "@/trpc/client";
@@ -81,9 +82,10 @@ export function ExportStatus() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { toast, dismiss, update } = useToast();
+  const { play: playSuccessSound } = useSuccessSound();
   const [toastId, setToastId] = useState<string | null>(null);
   const { exportData, setExportData } = useExportStore();
-  const { status, progress, result, isLoading } = useJobStatus({
+  const { status, progress, result, isLoading, queryError } = useJobStatus({
     jobId: exportData?.runId,
     enabled: !!exportData?.runId,
   });
@@ -138,7 +140,17 @@ export function ExportStatus() {
   const lastProgressRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
-    if (status === "failed") {
+    // Skip error handling for accounting exports - the export bar handles those
+    if (exportData?.exportType === "accounting") {
+      return;
+    }
+
+    if (status === "failed" || queryError) {
+      // Dismiss the progress toast if it exists
+      if (toastId) {
+        dismiss(toastId);
+      }
+
       toast({
         duration: 2500,
         variant: "error",
@@ -148,11 +160,24 @@ export function ExportStatus() {
       setToastId(null);
       setExportData(undefined);
     }
-  }, [status, toast, setExportData]);
+  }, [
+    status,
+    queryError,
+    toast,
+    setExportData,
+    toastId,
+    dismiss,
+    exportData?.exportType,
+  ]);
 
-  // Create toast when export starts
+  // Create toast when export starts (only for file exports - accounting uses the export bar)
   useEffect(() => {
     if (exportData?.runId && !toastId) {
+      // Skip toast for accounting exports - the export bar handles those
+      if (exportData.exportType === "accounting") {
+        return;
+      }
+
       const { id } = toast({
         title: "Exporting transactions.",
         variant: "progress",
@@ -165,11 +190,11 @@ export function ExportStatus() {
       lastProgressRef.current = 0;
       completionHandledRef.current = false; // Reset completion flag for new export
     }
-  }, [exportData?.runId, toastId, toast]);
+  }, [exportData?.runId, exportData?.exportType, toastId, toast]);
 
-  // Update progress only when it changes
+  // Update progress only when it changes (skip for accounting exports)
   useEffect(() => {
-    if (!toastId) return;
+    if (!toastId || exportData?.exportType === "accounting") return;
 
     const currentProgress =
       status === "completed"
@@ -189,16 +214,25 @@ export function ExportStatus() {
         progress: currentProgress,
       });
     }
-  }, [toastId, status, progress, update]);
+  }, [toastId, status, progress, update, exportData?.exportType]);
 
   // Handle completion separately - use a ref to prevent multiple triggers
   const completionHandledRef = useRef(false);
 
+  // Handle file export completion (accounting exports are handled by export bar)
   useEffect(() => {
+    // Skip completion handling for accounting exports
+    if (exportData?.exportType === "accounting") {
+      return;
+    }
+
     if (status === "completed" && toastId && !completionHandledRef.current) {
       completionHandledRef.current = true;
 
-      // Invalidate queries
+      // Play success sound
+      playSuccessSound();
+
+      // Invalidate queries for file exports
       queryClient.invalidateQueries({
         queryKey: trpc.documents.get.infiniteQueryKey(),
       });
@@ -209,7 +243,7 @@ export function ExportStatus() {
       // Wait a bit for result to be available, then update toast
       setTimeout(() => {
         if (exportResult) {
-          // Show full completion toast with download/share options
+          // File export completion with download/share options
           update(toastId, {
             id: toastId,
             title: "Export completed",
@@ -254,7 +288,7 @@ export function ExportStatus() {
             ),
           });
         } else {
-          // Show simple completion toast if result isn't available
+          // Simple completion toast if result isn't available
           update(toastId, {
             id: toastId,
             title: "Export completed",
@@ -274,6 +308,7 @@ export function ExportStatus() {
   }, [
     status,
     exportResult,
+    exportData?.exportType,
     toastId,
     update,
     queryClient,
@@ -281,6 +316,7 @@ export function ExportStatus() {
     setExportData,
     handleOnShare,
     handleOnDownload,
+    playSuccessSound,
   ]);
 
   return null;

@@ -1,0 +1,29 @@
+{
+  "name": "@midday/accounting",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./providers/*": "./src/providers/*.ts",
+    "./utils": "./src/utils.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@midday/encryption": "workspace:*",
+    "@midday/logger": "workspace:*",
+    "intuit-oauth": "^4.2.2",
+    "xero-node": "^13.3.0",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@midday/tsconfig": "workspace:*",
+    "@types/bun": "latest",
+    "typescript": "^5.9.3"
+  }
+}

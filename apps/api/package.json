@@ -24,6 +24,7 @@
     "@hono/trpc-server": "^0.4.1",
     "@hono/zod-openapi": "^1.1.5",
     "@hono/zod-validator": "^0.7.5",
+    "@midday/accounting": "workspace:*",
     "@midday/cache": "workspace:*",
     "@midday/categories": "workspace:*",
     "@midday/db": "workspace:*",

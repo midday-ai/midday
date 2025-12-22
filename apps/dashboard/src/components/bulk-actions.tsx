@@ -39,8 +39,8 @@ export function BulkActions({ ids }: Props) {
           queryKey: trpc.transactions.get.infiniteQueryKey(),
         });
 
-        // Reset the row selection
-        setRowSelection({});
+        // Reset the row selection (BulkActions is used on "all" tab)
+        setRowSelection("all", {});
 
         toast({
           title: `Updated ${data?.ids.length} transactions.`,
@@ -178,6 +178,39 @@ export function BulkActions({ ids }: Props) {
                     updateTransactionsMutation.mutate({
                       ids,
                       status: "archived",
+                    });
+                  }}
+                >
+                  Yes
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  onCheckedChange={() => {
+                    updateTransactionsMutation.mutate({
+                      ids,
+                      status: "posted",
+                    });
+                  }}
+                >
+                  No
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
+
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Icons.Check className="mr-2 h-4 w-4" />
+              <span>Mark as exported</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent sideOffset={14}>
+                <DropdownMenuCheckboxItem
+                  onCheckedChange={() => {
+                    updateTransactionsMutation.mutate({
+                      ids,
+                      status: "exported",
                     });
                   }}
                 >

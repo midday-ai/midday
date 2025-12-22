@@ -1,299 +1,299 @@
 "use client";
 
 import { HorizontalPagination } from "@/components/horizontal-pagination";
-import { useSortParams } from "@/hooks/use-sort-params";
+import type { TableScrollState } from "@/components/tables/core";
+import { DraggableHeader } from "@/components/tables/draggable-header";
+import { ResizeHandle } from "@/components/tables/resize-handle";
+import { useSortQuery } from "@/hooks/use-sort-query";
 import { useStickyColumns } from "@/hooks/use-sticky-columns";
+import {
+  NON_REORDERABLE_COLUMNS,
+  SORT_FIELD_MAPS,
+  STICKY_COLUMNS,
+} from "@/utils/table-configs";
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
-import { cn } from "@midday/ui/cn";
 import { TableHead, TableHeader, TableRow } from "@midday/ui/table";
+import type { Header, Table } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp } from "lucide-react";
-import { useCallback } from "react";
+import { useMemo } from "react";
 
-interface TableColumn {
-  id: string;
-  getIsVisible: () => boolean;
-}
-
-interface TableInterface {
-  getAllLeafColumns: () => TableColumn[];
-  getIsAllPageRowsSelected: () => boolean;
-  getIsSomePageRowsSelected: () => boolean;
-  toggleAllPageRowsSelected: (value: boolean) => void;
-}
-
-interface TableScrollState {
-  containerRef: React.RefObject<HTMLDivElement | null>;
-  canScrollLeft: boolean;
-  canScrollRight: boolean;
-  isScrollable: boolean;
-  scrollLeft: () => void;
-  scrollRight: () => void;
-}
-
-interface Props {
-  table?: TableInterface;
+interface Props<TData> {
+  table?: Table<TData>;
   loading?: boolean;
   tableScroll?: TableScrollState;
 }
 
-export function DataTableHeader({ table, loading, tableScroll }: Props) {
-  const { params, setParams } = useSortParams();
-  const [column, value] = params.sort || [];
-
-  const createSortQuery = useCallback(
-    (name: string) => {
-      if (value === "asc") {
-        // If currently ascending, switch to descending
-        setParams({ sort: [name, "desc"] });
-      } else if (value === "desc") {
-        // If currently descending, clear sort
-        setParams({ sort: null });
-      } else {
-        // If not sorted on this column, set to ascending
-        setParams({ sort: [name, "asc"] });
-      }
-    },
-    [value, setParams],
-  );
+export function DataTableHeader<TData>({
+  table,
+  loading,
+  tableScroll,
+}: Props<TData>) {
+  const { sortColumn, sortValue, createSortQuery } = useSortQuery();
 
   // Use the reusable sticky columns hook
-  const { getStickyStyle, isVisible } = useStickyColumns({
+  const { getStickyStyle, getStickyClassName, isVisible } = useStickyColumns({
     table,
     loading,
+    stickyColumns: STICKY_COLUMNS.transactions,
   });
 
+  // Get sortable column IDs (excluding sticky columns)
+  const sortableColumnIds = useMemo(() => {
+    if (!table) return [];
+    return table
+      .getAllLeafColumns()
+      .filter((col) => !NON_REORDERABLE_COLUMNS.transactions.has(col.id))
+      .map((col) => col.id);
+  }, [table]);
+
+  if (!table) return null;
+
+  const headerGroups = table.getHeaderGroups();
+
   return (
-    <TableHeader className="border-l-0 border-r-0">
-      <TableRow className="h-[45px] hover:bg-transparent">
-        <TableHead
-          className={cn(
-            "min-w-[50px] w-[50px] px-3 md:px-4 py-2 md:sticky md:left-[var(--stick-left)] bg-background z-10 border-r border-border",
-            "before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border",
-            "after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]",
-          )}
-          style={getStickyStyle("select")}
+    <TableHeader className="border-0 sticky top-0 z-20 bg-background w-full">
+      {headerGroups.map((headerGroup) => (
+        <TableRow
+          key={headerGroup.id}
+          className="h-[45px] hover:bg-transparent flex items-center !border-b-0 min-w-full"
         >
-          <Checkbox
-            checked={
-              table?.getIsAllPageRowsSelected() ||
-              (table?.getIsSomePageRowsSelected() && "indeterminate")
-            }
-            onCheckedChange={(value) =>
-              table?.toggleAllPageRowsSelected(!!value)
-            }
-          />
-        </TableHead>
-
-        {isVisible("date") && (
-          <TableHead
-            className={cn(
-              "w-[110px] min-w-[110px] px-3 md:px-4 py-2 md:sticky md:left-[var(--stick-left)] bg-background z-10 border-r border-border",
-              "before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border",
-              "after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]",
-            )}
-            style={getStickyStyle("date")}
+          <SortableContext
+            items={sortableColumnIds}
+            strategy={horizontalListSortingStrategy}
           >
-            <Button
-              className="p-0 hover:bg-transparent space-x-2"
-              variant="ghost"
-              onClick={() => createSortQuery("date")}
-            >
-              <span>Date</span>
-              {"date" === column && value === "asc" && <ArrowDown size={16} />}
-              {"date" === column && value === "desc" && <ArrowUp size={16} />}
-            </Button>
-          </TableHead>
-        )}
+            {headerGroup.headers.map((header, headerIndex, headers) => {
+              const columnId = header.column.id;
+              const meta = header.column.columnDef.meta as
+                | { sticky?: boolean; className?: string }
+                | undefined;
+              const isSticky = meta?.sticky;
+              const canReorder =
+                !NON_REORDERABLE_COLUMNS.transactions.has(columnId);
 
-        {isVisible("description") && (
-          <TableHead
-            className={cn(
-              "w-[320px] min-w-[320px] px-3 md:px-4 py-2 md:sticky md:left-[var(--stick-left)] bg-background z-10 border-r border-border",
-              "before:absolute before:right-0 before:top-0 before:bottom-0 before:w-px before:bg-border",
-              "after:absolute after:right-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-l after:from-transparent after:to-background after:z-[-1]",
-            )}
-            style={getStickyStyle("description")}
-          >
-            <div className="flex items-center justify-between">
-              <Button
-                className="p-0 hover:bg-transparent space-x-2"
-                variant="ghost"
-                onClick={() => createSortQuery("name")}
-              >
-                <span>Description</span>
-                {"name" === column && value === "asc" && (
-                  <ArrowDown size={16} />
-                )}
-                {"name" === column && value === "desc" && <ArrowUp size={16} />}
-              </Button>
-              {tableScroll?.isScrollable && (
-                <HorizontalPagination
-                  canScrollLeft={tableScroll.canScrollLeft}
-                  canScrollRight={tableScroll.canScrollRight}
-                  onScrollLeft={tableScroll.scrollLeft}
-                  onScrollRight={tableScroll.scrollRight}
-                  className="hidden md:flex"
-                />
-              )}
-            </div>
-          </TableHead>
-        )}
+              if (!isVisible(columnId)) return null;
 
-        {isVisible("amount") && (
-          <TableHead className="w-[170px] min-w-[170px] px-3 md:px-4 py-2 border-l border-border">
-            <Button
-              className="p-0 hover:bg-transparent space-x-2"
-              variant="ghost"
-              onClick={() => createSortQuery("amount")}
-            >
-              <span>Amount</span>
-              {"amount" === column && value === "asc" && (
-                <ArrowDown size={16} />
-              )}
-              {"amount" === column && value === "desc" && <ArrowUp size={16} />}
-            </Button>
-          </TableHead>
-        )}
+              // Check if this is the last column before actions (should flex to fill space)
+              const isLastBeforeActions =
+                headerIndex === headers.length - 2 &&
+                headers[headers.length - 1]?.column.id === "actions";
 
-        {isVisible("taxAmount") && (
-          <TableHead className="w-[170px] min-w-[170px] px-3 md:px-4 py-2">
-            <span>Tax Amount</span>
-          </TableHead>
-        )}
+              const headerStyle = {
+                width: header.getSize(),
+                minWidth: isSticky
+                  ? header.getSize()
+                  : header.column.columnDef.minSize,
+                maxWidth: isSticky ? header.getSize() : undefined,
+                ...getStickyStyle(columnId),
+                // Only apply flex: 1 to non-sticky columns
+                ...(isLastBeforeActions &&
+                  !isSticky && {
+                    flex: 1,
+                  }),
+              };
 
-        {isVisible("category") && (
-          <TableHead className="w-[250px] min-w-[250px] px-3 md:px-4 py-2">
-            <Button
-              className="p-0 hover:bg-transparent space-x-2"
-              variant="ghost"
-              onClick={() => createSortQuery("category")}
-            >
-              <span>Category</span>
-              {"category" === column && value === "asc" && (
-                <ArrowDown size={16} />
-              )}
-              {"category" === column && value === "desc" && (
-                <ArrowUp size={16} />
-              )}
-            </Button>
-          </TableHead>
-        )}
+              // Sticky columns use regular TableHead (not draggable)
+              if (!canReorder) {
+                const stickyClass = getStickyClassName(
+                  columnId,
+                  "group/header relative h-full px-4 border-t border-border flex items-center",
+                );
+                const isActionsColumn = columnId === "actions";
+                const finalClassName = isActionsColumn
+                  ? "group/header relative h-full px-4 !border-t !border-l !border-border flex items-center justify-center md:sticky md:right-0 bg-background z-10"
+                  : `${stickyClass} bg-background z-10`;
 
-        {isVisible("counterparty") && (
-          <TableHead className="w-[200px] min-w-[200px] px-3 md:px-4 py-2">
-            <Button
-              className="p-0 hover:bg-transparent space-x-2"
-              variant="ghost"
-              onClick={() => createSortQuery("counterparty")}
-            >
-              <span>From / To</span>
-              {"counterparty" === column && value === "asc" && (
-                <ArrowDown size={16} />
-              )}
-              {"counterparty" === column && value === "desc" && (
-                <ArrowUp size={16} />
-              )}
-            </Button>
-          </TableHead>
-        )}
+                return (
+                  <TableHead
+                    key={header.id}
+                    className={finalClassName}
+                    style={headerStyle}
+                  >
+                    {renderHeaderContent(
+                      header,
+                      columnId,
+                      sortColumn,
+                      sortValue,
+                      createSortQuery,
+                      table,
+                      tableScroll,
+                    )}
+                    <ResizeHandle header={header} />
+                  </TableHead>
+                );
+              }
 
-        {isVisible("tags") && (
-          <TableHead className="w-[280px] max-w-[280px] px-3 md:px-4 py-2">
-            <Button
-              className="p-0 hover:bg-transparent space-x-2"
-              variant="ghost"
-              onClick={() => createSortQuery("tags")}
-            >
-              <span>Tags</span>
-              {"tags" === column && value === "asc" && <ArrowDown size={16} />}
-              {"tags" === column && value === "desc" && <ArrowUp size={16} />}
-            </Button>
-          </TableHead>
-        )}
-
-        {isVisible("bank_account") && (
-          <TableHead className="w-[250px] px-3 md:px-4 py-2">
-            <Button
-              className="p-0 hover:bg-transparent space-x-2"
-              variant="ghost"
-              onClick={() => createSortQuery("bank_account")}
-            >
-              <span>Account</span>
-              {"bank_account" === column && value === "asc" && (
-                <ArrowDown size={16} />
-              )}
-              {"bank_account" === column && value === "desc" && (
-                <ArrowUp size={16} />
-              )}
-            </Button>
-          </TableHead>
-        )}
-
-        {isVisible("method") && (
-          <TableHead className="w-[140px] min-w-[140px] px-3 md:px-4 py-2">
-            <Button
-              className="p-0 hover:bg-transparent space-x-2"
-              variant="ghost"
-              onClick={() => createSortQuery("method")}
-            >
-              <span>Method</span>
-              {"method" === column && value === "asc" && (
-                <ArrowDown size={16} />
-              )}
-              {"method" === column && value === "desc" && <ArrowUp size={16} />}
-            </Button>
-          </TableHead>
-        )}
-
-        {isVisible("assigned") && (
-          <TableHead className="w-[220px] min-w-[220px] px-3 md:px-4 py-2">
-            <Button
-              className="p-0 hover:bg-transparent space-x-2"
-              variant="ghost"
-              onClick={() => createSortQuery("assigned")}
-            >
-              <span>Assigned</span>
-              {"assigned" === column && value === "asc" && (
-                <ArrowDown size={16} />
-              )}
-              {"assigned" === column && value === "desc" && (
-                <ArrowUp size={16} />
-              )}
-            </Button>
-          </TableHead>
-        )}
-
-        {isVisible("status") && (
-          <TableHead className="w-[160px] min-w-[160px] px-3 md:px-4 py-2">
-            <Button
-              className="p-0 hover:bg-transparent space-x-2"
-              variant="ghost"
-              onClick={() => createSortQuery("attachment")}
-            >
-              <span>Status</span>
-              {"attachment" === column && value === "asc" && (
-                <ArrowDown size={16} />
-              )}
-              {"attachment" === column && value === "desc" && (
-                <ArrowUp size={16} />
-              )}
-            </Button>
-          </TableHead>
-        )}
-
-        {isVisible("actions") && (
-          <TableHead
-            className={cn(
-              "w-[100px] md:sticky md:right-0 bg-background z-10",
-              "before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border",
-              "after:absolute after:left-[-24px] after:top-0 after:bottom-0 after:w-6 after:bg-gradient-to-r after:from-transparent after:to-background after:z-[-1]",
-            )}
-          >
-            Actions
-          </TableHead>
-        )}
-      </TableRow>
+              // Draggable columns
+              return (
+                <DraggableHeader
+                  key={header.id}
+                  id={columnId}
+                  className={getStickyClassName(
+                    columnId,
+                    "group/header relative h-full px-4 border-t border-border flex items-center",
+                  )}
+                  style={headerStyle}
+                >
+                  {renderHeaderContent(
+                    header,
+                    columnId,
+                    sortColumn,
+                    sortValue,
+                    createSortQuery,
+                    table,
+                    tableScroll,
+                  )}
+                  {header.column.getCanResize() && (
+                    <ResizeHandle header={header} />
+                  )}
+                </DraggableHeader>
+              );
+            })}
+          </SortableContext>
+        </TableRow>
+      ))}
     </TableHeader>
   );
+}
+
+/**
+ * Renders the content inside a header cell
+ */
+function renderHeaderContent<TData>(
+  header: Header<TData, unknown>,
+  columnId: string,
+  sortColumn: string | undefined,
+  sortValue: string | undefined,
+  createSortQuery: (name: string) => void,
+  table: Table<TData>,
+  tableScroll?: TableScrollState,
+) {
+  const sortField = SORT_FIELD_MAPS.transactions[columnId];
+
+  // Select column - checkbox
+  if (columnId === "select") {
+    return (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+      />
+    );
+  }
+
+  // Actions column - static text
+  if (columnId === "actions") {
+    return (
+      <span className="text-muted-foreground w-full text-center">Actions</span>
+    );
+  }
+
+  // Tax Amount - not sortable
+  if (columnId === "taxAmount") {
+    return <span className="truncate">Tax Amount</span>;
+  }
+
+  // Description column - special case with horizontal pagination
+  if (columnId === "description") {
+    return (
+      <div className="flex items-center justify-between w-full overflow-hidden">
+        <div className="min-w-0 overflow-hidden">
+          <SortButton
+            label="Description"
+            sortField="name"
+            currentSortColumn={sortColumn}
+            currentSortValue={sortValue}
+            onSort={createSortQuery}
+          />
+        </div>
+        {tableScroll?.isScrollable && (
+          <HorizontalPagination
+            canScrollLeft={tableScroll.canScrollLeft}
+            canScrollRight={tableScroll.canScrollRight}
+            onScrollLeft={tableScroll.scrollLeft}
+            onScrollRight={tableScroll.scrollRight}
+            className="hidden md:flex flex-shrink-0"
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Default sortable header
+  if (sortField) {
+    const headerLabel = getHeaderLabel(columnId);
+    return (
+      <div className="w-full overflow-hidden">
+        <SortButton
+          label={headerLabel}
+          sortField={sortField}
+          currentSortColumn={sortColumn}
+          currentSortValue={sortValue}
+          onSort={createSortQuery}
+        />
+      </div>
+    );
+  }
+
+  // Fallback - just render the header text
+  return (
+    <span className="truncate">{header.column.columnDef.header as string}</span>
+  );
+}
+
+function SortButton({
+  label,
+  sortField,
+  currentSortColumn,
+  currentSortValue,
+  onSort,
+}: {
+  label: string;
+  sortField: string;
+  currentSortColumn?: string;
+  currentSortValue?: string;
+  onSort: (field: string) => void;
+}) {
+  return (
+    <Button
+      className="p-0 hover:bg-transparent space-x-2 min-w-0 max-w-full"
+      variant="ghost"
+      onClick={(e) => {
+        e.stopPropagation(); // Prevent drag when clicking sort
+        onSort(sortField);
+      }}
+    >
+      <span className="truncate">{label}</span>
+      {sortField === currentSortColumn && currentSortValue === "asc" && (
+        <ArrowDown size={16} />
+      )}
+      {sortField === currentSortColumn && currentSortValue === "desc" && (
+        <ArrowUp size={16} />
+      )}
+    </Button>
+  );
+}
+
+function getHeaderLabel(columnId: string): string {
+  const labels: Record<string, string> = {
+    date: "Date",
+    description: "Description",
+    amount: "Amount",
+    taxAmount: "Tax Amount",
+    category: "Category",
+    counterparty: "From / To",
+    tags: "Tags",
+    bank_account: "Account",
+    method: "Method",
+    assigned: "Assigned",
+    status: "Status",
+    actions: "Actions",
+  };
+  return labels[columnId] || columnId;
 }

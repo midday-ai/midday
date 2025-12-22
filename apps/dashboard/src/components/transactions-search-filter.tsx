@@ -40,7 +40,12 @@ import { AmountRange } from "./amount-range";
 import { FilterList } from "./filter-list";
 import { SelectCategory } from "./select-category";
 
-type StatusFilter = "completed" | "uncompleted" | "archived" | "excluded";
+type StatusFilter =
+  | "completed"
+  | "uncompleted"
+  | "archived"
+  | "excluded"
+  | "exported";
 type AttachmentFilter = "include" | "exclude";
 type RecurringFilter = "all" | "weekly" | "monthly" | "annually";
 type ManualFilter = "include" | "exclude";
@@ -97,6 +102,7 @@ const statusFilters: FilterItem<StatusFilter>[] = [
   { id: "uncompleted", name: "Uncompleted" },
   { id: "archived", name: "Archived" },
   { id: "excluded", name: "Excluded" },
+  { id: "exported", name: "Exported" },
 ];
 
 const attachmentsFilters: FilterItem<AttachmentFilter>[] = [

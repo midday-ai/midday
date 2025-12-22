@@ -1,6 +1,11 @@
 import type { Database } from "@db/client";
-import { inbox, transactionAttachments, transactions } from "@db/schema";
-import { and, eq, sql } from "drizzle-orm";
+import {
+  accountingSyncRecords,
+  inbox,
+  transactionAttachments,
+  transactions,
+} from "@db/schema";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { createActivity } from "./activities";
 
 export type Attachment = {
@@ -32,6 +37,26 @@ export async function createAttachments(
       })),
     )
     .returning();
+
+  // Reset export status for affected transactions so they reappear in review
+  const transactionIds = [
+    ...new Set(
+      result
+        .map((a) => a.transactionId)
+        .filter((id): id is string => id !== null),
+    ),
+  ];
+
+  if (transactionIds.length > 0) {
+    await db
+      .delete(accountingSyncRecords)
+      .where(
+        and(
+          inArray(accountingSyncRecords.transactionId, transactionIds),
+          eq(accountingSyncRecords.teamId, teamId),
+        ),
+      );
+  }
 
   // Create activity for each attachment created
   for (const attachment of result) {
@@ -156,6 +181,16 @@ export async function deleteAttachment(
       .update(transactions)
       .set({ taxRate: null, taxType: null })
       .where(eq(transactions.id, result.transactionId));
+
+    // Reset export status so transaction reappears in review
+    await db
+      .delete(accountingSyncRecords)
+      .where(
+        and(
+          eq(accountingSyncRecords.transactionId, result.transactionId),
+          eq(accountingSyncRecords.teamId, params.teamId),
+        ),
+      );
   }
 
   // Delete the attachment

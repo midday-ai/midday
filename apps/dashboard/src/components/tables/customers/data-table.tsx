@@ -1,37 +1,58 @@
 "use client";
 
-import { LoadMore } from "@/components/load-more";
+import { VirtualRow } from "@/components/tables/core";
 import { useCustomerFilterParams } from "@/hooks/use-customer-filter-params";
 import { useCustomerParams } from "@/hooks/use-customer-params";
+import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
+import { useScrollHeader } from "@/hooks/use-scroll-header";
 import { useSortParams } from "@/hooks/use-sort-params";
+import { useStickyColumns } from "@/hooks/use-sticky-columns";
+import { useTableDnd } from "@/hooks/use-table-dnd";
 import { useTableScroll } from "@/hooks/use-table-scroll";
+import { useTableSettings } from "@/hooks/use-table-settings";
 import { useTRPC } from "@/trpc/client";
-import { Table, TableBody } from "@midday/ui/table";
+import { STICKY_COLUMNS, SUMMARY_GRID_HEIGHTS } from "@/utils/table-configs";
+import type { TableSettings } from "@/utils/table-settings";
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import {
-  getCoreRowModel,
-  getFilteredRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import React, { useDeferredValue, useEffect, useMemo } from "react";
-import { useInView } from "react-intersection-observer";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { type VirtualItem, useVirtualizer } from "@tanstack/react-virtual";
+import { useCallback, useDeferredValue, useMemo, useRef } from "react";
 import { columns } from "./columns";
 import { EmptyState, NoResults } from "./empty-states";
-import { CustomerRow } from "./row";
-import { TableHeader } from "./table-header";
+import { DataTableHeader } from "./table-header";
 
-export function DataTable() {
-  const { ref, inView } = useInView();
-  const { setParams } = useCustomerParams();
+// Stable reference for non-clickable columns (avoids recreation on each render)
+const NON_CLICKABLE_COLUMNS = new Set(["actions"]);
+
+type Props = {
+  initialSettings?: Partial<TableSettings>;
+};
+
+export function DataTable({ initialSettings }: Props) {
   const trpc = useTRPC();
+  const { setParams } = useCustomerParams();
   const { filter, hasFilters } = useCustomerFilterParams();
   const { params } = useSortParams();
+  const parentRef = useRef<HTMLDivElement>(null);
 
   const deferredSearch = useDeferredValue(filter.q);
 
-  const tableScroll = useTableScroll({
-    useColumnWidths: true,
-    startFromColumn: 1,
+  // Hide header and summary grid on scroll
+  useScrollHeader(parentRef, { extraOffset: SUMMARY_GRID_HEIGHTS.customers });
+
+  // Use unified table settings hook for column state management
+  const {
+    columnVisibility,
+    setColumnVisibility,
+    columnSizing,
+    setColumnSizing,
+    columnOrder,
+    setColumnOrder,
+  } = useTableSettings({
+    tableId: "customers",
+    initialSettings,
   });
 
   const infiniteQueryOptions = trpc.customers.get.infiniteQueryOptions(
@@ -45,7 +66,7 @@ export function DataTable() {
     },
   );
 
-  const { data, fetchNextPage, hasNextPage, refetch } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
     useSuspenseInfiniteQuery(infiniteQueryOptions);
 
   const deleteCustomerMutation = useMutation(
@@ -56,37 +77,88 @@ export function DataTable() {
     }),
   );
 
-  const handleDeleteCustomer = (id: string) => {
-    deleteCustomerMutation.mutate({ id });
-  };
-
-  useEffect(() => {
-    if (inView) {
-      fetchNextPage();
-    }
-  }, [inView]);
+  const handleDeleteCustomer = useCallback(
+    (id: string) => {
+      deleteCustomerMutation.mutate({ id });
+    },
+    [deleteCustomerMutation],
+  );
 
   const tableData = useMemo(() => {
     return data?.pages.flatMap((page) => page.data) ?? [];
   }, [data]);
 
-  const setOpen = (id?: string) => {
-    if (id) {
-      setParams({ customerId: id, details: true });
-    } else {
-      setParams(null);
-    }
-  };
+  const setOpen = useCallback(
+    (id?: string) => {
+      if (id) {
+        setParams({ customerId: id, details: true });
+      } else {
+        setParams(null);
+      }
+    },
+    [setParams],
+  );
+
+  const tableMeta = useMemo(
+    () => ({
+      deleteCustomer: handleDeleteCustomer,
+    }),
+    [handleDeleteCustomer],
+  );
 
   const table = useReactTable({
     data: tableData,
     getRowId: (row) => row.id,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    meta: {
-      deleteCustomer: handleDeleteCustomer,
+    onColumnVisibilityChange: setColumnVisibility,
+    enableColumnResizing: true,
+    columnResizeMode: "onChange",
+    onColumnSizingChange: setColumnSizing,
+    onColumnOrderChange: setColumnOrder,
+    state: {
+      columnVisibility,
+      columnSizing,
+      columnOrder,
     },
+    meta: tableMeta,
+  });
+
+  // DnD for column reordering
+  const { sensors, handleDragEnd } = useTableDnd(table);
+
+  // Use the reusable sticky columns hook
+  const { getStickyStyle, getStickyClassName } = useStickyColumns({
+    columnVisibility,
+    table,
+    stickyColumns: STICKY_COLUMNS.customers,
+  });
+
+  // Use the reusable table scroll hook
+  const tableScroll = useTableScroll({
+    useColumnWidths: true,
+    startFromColumn: 1, // Skip sticky name column
+  });
+
+  const rows = table.getRowModel().rows;
+
+  // Row virtualizer for performance
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 45,
+    overscan: 10,
+  });
+
+  // Trigger infinite load when scrolling near the bottom
+  useInfiniteScroll<HTMLDivElement>({
+    scrollRef: parentRef,
+    rowVirtualizer,
+    rowCount: rows.length,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    threshold: 50,
   });
 
   if (!tableData.length && hasFilters) {
@@ -97,24 +169,86 @@ export function DataTable() {
     return <EmptyState />;
   }
 
+  const virtualItems = rowVirtualizer.getVirtualItems();
+
   return (
-    <div className="w-full">
-      <div
-        ref={tableScroll.containerRef}
-        className="overflow-x-auto overscroll-x-none md:border-l md:border-r border-border scrollbar-hide"
-      >
-        <Table>
-          <TableHeader tableScroll={tableScroll} />
+    <div className="relative">
+      <div className="w-full">
+        <div
+          ref={(el) => {
+            if (parentRef) {
+              (
+                parentRef as React.MutableRefObject<HTMLDivElement | null>
+              ).current = el;
+            }
+            if (tableScroll.containerRef) {
+              (
+                tableScroll.containerRef as React.MutableRefObject<HTMLDivElement | null>
+              ).current = el;
+            }
+          }}
+          className="overflow-auto overscroll-x-none border-l border-r border-b border-border scrollbar-hide"
+          style={{
+            height: "calc(100vh - 350px + var(--header-offset, 0px))",
+          }}
+        >
+          <DndContext
+            id="customers-table-dnd"
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <Table className="w-full min-w-full">
+              <DataTableHeader table={table} tableScroll={tableScroll} />
 
-          <TableBody className="border-l-0 border-r-0">
-            {table.getRowModel().rows.map((row) => (
-              <CustomerRow key={row.id} row={row} setOpen={setOpen} />
-            ))}
-          </TableBody>
-        </Table>
+              <TableBody
+                className="border-l-0 border-r-0"
+                style={{
+                  height: `${rowVirtualizer.getTotalSize()}px`,
+                  position: "relative",
+                }}
+              >
+                {virtualItems.length > 0 ? (
+                  virtualItems.map((virtualRow: VirtualItem) => {
+                    const row = rows[virtualRow.index];
+                    if (!row) return null;
+
+                    return (
+                      <VirtualRow
+                        key={row.id}
+                        row={row}
+                        virtualStart={virtualRow.start}
+                        rowHeight={45}
+                        getStickyStyle={getStickyStyle}
+                        getStickyClassName={getStickyClassName}
+                        nonClickableColumns={NON_CLICKABLE_COLUMNS}
+                        onCellClick={setOpen}
+                        columnSizing={columnSizing}
+                        columnOrder={columnOrder}
+                        columnVisibility={columnVisibility}
+                      />
+                    );
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </DndContext>
+          {/* Spacer ensures scrolling works when content barely overflows */}
+          <div
+            style={{ height: "var(--header-offset, 0px)", flexShrink: 0 }}
+            aria-hidden
+          />
+        </div>
       </div>
-
-      <LoadMore ref={ref} hasNextPage={hasNextPage} />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import {
   getTransactionByIdSchema,
   getTransactionsSchema,
   importTransactionsSchema,
+  moveToReviewSchema,
   searchTransactionMatchSchema,
   updateTransactionSchema,
   updateTransactionsSchema,
@@ -18,6 +19,8 @@ import {
   getTransactionById,
   getTransactions,
   getTransactionsAmountFullRangeData,
+  getTransactionsReadyForExportCount,
+  moveTransactionToReview,
   searchTransactionMatch,
   updateBankAccount,
   updateTransaction,
@@ -32,6 +35,8 @@ export const transactionsRouter = createTRPCRouter({
     .query(async ({ input, ctx: { db, teamId } }) => {
       return getTransactions(db, {
         ...input,
+        exported: input.exported ?? undefined,
+        fulfilled: input.fulfilled ?? undefined,
         teamId: teamId!,
       });
     }),
@@ -53,6 +58,10 @@ export const transactionsRouter = createTRPCRouter({
 
   getAmountRange: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
     return getTransactionsAmountFullRangeData(db, teamId!);
+  }),
+
+  getReviewCount: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
+    return getTransactionsReadyForExportCount(db, teamId!);
   }),
 
   update: protectedProcedure
@@ -130,7 +139,7 @@ export const transactionsRouter = createTRPCRouter({
         throw new Error("Team not found");
       }
 
-      const result = await triggerJob(
+      return triggerJob(
         "export-transactions",
         {
           teamId,
@@ -142,8 +151,6 @@ export const transactionsRouter = createTRPCRouter({
         },
         "transactions",
       );
-
-      return result;
     }),
 
   import: protectedProcedure
@@ -165,7 +172,7 @@ export const transactionsRouter = createTRPCRouter({
         balance: balance ?? undefined,
       });
 
-      const result = await triggerJob(
+      return triggerJob(
         "import-transactions",
         {
           filePath: input.filePath,
@@ -177,7 +184,20 @@ export const transactionsRouter = createTRPCRouter({
         },
         "transactions",
       );
+    }),
 
-      return result;
+  moveToReview: protectedProcedure
+    .input(moveToReviewSchema)
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      if (!teamId) {
+        throw new Error("Team not found");
+      }
+
+      await moveTransactionToReview(db, {
+        transactionId: input.transactionId,
+        teamId,
+      });
+
+      return { success: true };
     }),
 });

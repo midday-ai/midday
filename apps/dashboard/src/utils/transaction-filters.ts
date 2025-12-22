@@ -11,7 +11,9 @@ export type TransactionFilters = {
   amount_range?: number[] | null;
   amount?: string[] | null;
   recurring?: ("all" | "weekly" | "monthly" | "annually")[] | null;
-  statuses?: ("completed" | "uncompleted" | "archived" | "excluded")[] | null;
+  statuses?:
+    | ("completed" | "uncompleted" | "archived" | "excluded" | "exported")[]
+    | null;
   manual?: "include" | "exclude" | null;
 };
 

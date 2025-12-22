@@ -15,7 +15,7 @@ export function CategoryColor({
 }: CategoryIconProps) {
   return (
     <div
-      className={className}
+      className={cn("flex-shrink-0", className)}
       style={{
         backgroundColor: color,
         width: size,
@@ -33,9 +33,14 @@ type Props = {
 
 export function Category({ name, color, className }: Props) {
   return (
-    <div className={cn("flex space-x-2 items-center", className)}>
+    <div
+      className={cn(
+        "flex space-x-2 items-center min-w-0 overflow-hidden",
+        className,
+      )}
+    >
       <CategoryColor color={color} />
-      {name && <span>{name}</span>}
+      {name && <span className="truncate">{name}</span>}
     </div>
   );
 }

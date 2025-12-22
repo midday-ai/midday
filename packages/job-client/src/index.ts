@@ -1,30 +1,44 @@
 import { createLoggerWithContext } from "@midday/logger";
 import { getQueue } from "./queues";
 import type { JobStatus, JobStatusResponse, JobTriggerResponse } from "./types";
+import { decodeJobId, encodeJobId } from "./utils";
 
-// Re-export getQueue for use in API routes that need direct queue access
+// Re-export utilities
 export { getQueue } from "./queues";
+export { decodeJobId, encodeJobId } from "./utils";
 
 // Create logger with job-client context
 export const logger = createLoggerWithContext("job-client");
+
+/**
+ * Options for triggering a job
+ */
+export interface TriggerJobOptions {
+  /** Delay in milliseconds before the job starts processing */
+  delay?: number;
+}
 
 /**
  * Trigger a job in the specified queue
  * @param jobName - Name of the job (e.g., "export-transactions")
  * @param payload - Job payload data
  * @param queueName - Name of the queue (e.g., "transactions", "inbox", "inbox-provider")
+ * @param options - Optional job options (delay, etc.)
  * @returns Job information including the job ID
  */
 export async function triggerJob(
   jobName: string,
   payload: unknown,
   queueName: string,
+  options?: TriggerJobOptions,
 ): Promise<JobTriggerResponse> {
   const queue = getQueue(queueName);
   const enqueueStartTime = Date.now();
 
   try {
-    const job = await queue.add(jobName, payload);
+    const job = await queue.add(jobName, payload, {
+      delay: options?.delay,
+    });
 
     if (!job?.id) {
       throw new Error(
@@ -33,15 +47,16 @@ export async function triggerJob(
     }
 
     const enqueueDuration = Date.now() - enqueueStartTime;
+    const compositeId = encodeJobId(queueName, job.id);
     logger.info("Enqueued job", {
       jobName,
-      jobId: job.id,
+      jobId: compositeId,
       queueName,
       duration: `${enqueueDuration}ms`,
     });
 
     return {
-      id: job.id,
+      id: compositeId,
     };
   } catch (error) {
     const enqueueDuration = Date.now() - enqueueStartTime;
@@ -84,10 +99,11 @@ export async function triggerJobAndWait(
       );
     }
 
+    const compositeId = encodeJobId(queueName, job.id);
     const enqueueDuration = Date.now() - enqueueStartTime;
     logger.info("Enqueued job (waiting for completion)", {
       jobName,
-      jobId: job.id,
+      jobId: compositeId,
       queueName,
       enqueueDuration: `${enqueueDuration}ms`,
     });
@@ -111,7 +127,7 @@ export async function triggerJobAndWait(
         const totalDuration = Date.now() - enqueueStartTime;
         logger.info("Job completed (via polling)", {
           jobName,
-          jobId: job.id,
+          jobId: compositeId,
           queueName,
           waitDuration: `${waitDuration}ms`,
           totalDuration: `${totalDuration}ms`,
@@ -160,7 +176,7 @@ export async function triggerJobAndWait(
 
     logger.info("Job completed successfully", {
       jobName,
-      jobId: job.id,
+      jobId: compositeId,
       queueName,
       waitDuration: `${waitDuration}ms`,
       totalDuration: `${totalDuration}ms`,
@@ -168,7 +184,7 @@ export async function triggerJobAndWait(
     });
 
     return {
-      id: job.id,
+      id: compositeId,
       result,
     };
   } catch (error) {
@@ -185,124 +201,95 @@ export async function triggerJobAndWait(
 }
 
 /**
- * Known queue names in the worker system
- * Must match the queues defined in apps/worker/src/queues/index.ts
- */
-const KNOWN_QUEUES = [
-  "transactions",
-  "inbox",
-  "inbox-provider",
-  "documents",
-  "embeddings",
-  "rates",
-];
-
-/**
- * Get job status by ID
- * Tries all known queues if queueName is not provided
- * @param jobId - The job ID to query
+ * Get job status by composite ID
+ * The composite ID encodes both queue name and job ID (e.g., "accounting:21")
+ * @param compositeJobId - The composite job ID (format: "queueName:jobId")
  * @param options - Optional parameters
- * @param options.queueName - Specific queue name to search (optional)
  * @param options.teamId - Team ID to verify authorization (required for security)
  * @returns Job status response
  * @throws Error if teamId is provided and doesn't match the job's teamId
  */
 export async function getJobStatus(
-  jobId: string,
+  compositeJobId: string,
   options?: {
-    queueName?: string;
     teamId?: string;
   },
 ): Promise<JobStatusResponse> {
-  const queueNames = options?.queueName ? [options.queueName] : KNOWN_QUEUES;
+  const { queueName, jobId } = decodeJobId(compositeJobId);
   const requestingTeamId = options?.teamId;
+  const queue = getQueue(queueName);
 
-  for (const name of queueNames) {
-    const queue = getQueue(name);
+  const job = await queue.getJob(jobId);
 
-    try {
-      const job = await queue.getJob(jobId);
+  if (!job) {
+    // Job not found
+    return {
+      status: "unknown",
+    };
+  }
 
-      if (job) {
-        // Extract teamId from job data payload for authorization check
-        const jobData = job.data as { teamId?: string };
-        const jobTeamId = jobData?.teamId;
+  // Extract teamId from job data payload for authorization check
+  const jobData = job.data as { teamId?: string };
+  const jobTeamId = jobData?.teamId;
 
-        // If teamId is provided, verify authorization
-        if (requestingTeamId) {
-          if (!jobTeamId) {
-            // Job doesn't have teamId - this is a system job (e.g., rates-scheduler)
-            // Users should not be able to access system jobs from their team context
-            logger.warn("Attempted to access system job from team context", {
-              jobId,
-              queueName: name,
-              jobName: job.name,
-              requestingTeamId,
-            });
-            throw new Error("Job not found or access denied");
-          }
-          if (jobTeamId !== requestingTeamId) {
-            // Team IDs don't match - unauthorized access attempt
-            logger.warn("Unauthorized job access attempt", {
-              jobId,
-              queueName: name,
-              jobName: job.name,
-              requestingTeamId,
-              jobTeamId,
-            });
-            throw new Error("Job not found or access denied");
-          }
-        }
-
-        const state = await job.getState();
-        const progress = job.progress;
-        const returnValue = job.returnvalue;
-        const failedReason = job.failedReason;
-
-        // Map BullMQ states to our status enum
-        let status: JobStatus;
-        switch (state) {
-          case "waiting":
-            status = "waiting";
-            break;
-          case "active":
-            status = "active";
-            break;
-          case "completed":
-            status = "completed";
-            break;
-          case "failed":
-            status = "failed";
-            break;
-          case "delayed":
-            status = "delayed";
-            break;
-          default:
-            status = "unknown";
-            break;
-        }
-
-        return {
-          status,
-          progress: typeof progress === "number" ? progress : undefined,
-          result: returnValue,
-          error: failedReason,
-        };
-      }
-    } catch (error) {
-      // If it's an authorization error, rethrow it
-      if (
-        error instanceof Error &&
-        error.message === "Job not found or access denied"
-      ) {
-        throw error;
-      }
-      // Otherwise continue to next queue
+  // If teamId is provided, verify authorization
+  if (requestingTeamId) {
+    if (!jobTeamId) {
+      // Job doesn't have teamId - this is a system job (e.g., rates-scheduler)
+      // Users should not be able to access system jobs from their team context
+      logger.warn("Attempted to access system job from team context", {
+        jobId: compositeJobId,
+        queueName,
+        jobName: job.name,
+        requestingTeamId,
+      });
+      throw new Error("Job not found or access denied");
+    }
+    if (jobTeamId !== requestingTeamId) {
+      // Team IDs don't match - unauthorized access attempt
+      logger.warn("Unauthorized job access attempt", {
+        jobId: compositeJobId,
+        queueName,
+        jobName: job.name,
+        requestingTeamId,
+        jobTeamId,
+      });
+      throw new Error("Job not found or access denied");
     }
   }
 
-  // Job not found in any queue
+  const state = await job.getState();
+  const progress = job.progress;
+  const returnValue = job.returnvalue;
+  const failedReason = job.failedReason;
+
+  // Map BullMQ states to our status enum
+  let status: JobStatus;
+  switch (state) {
+    case "waiting":
+      status = "waiting";
+      break;
+    case "active":
+      status = "active";
+      break;
+    case "completed":
+      status = "completed";
+      break;
+    case "failed":
+      status = "failed";
+      break;
+    case "delayed":
+      status = "delayed";
+      break;
+    default:
+      status = "unknown";
+      break;
+  }
+
   return {
-    status: "unknown",
+    status,
+    progress: typeof progress === "number" ? progress : undefined,
+    result: returnValue,
+    error: failedReason,
   };
 }
