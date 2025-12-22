@@ -4,5 +4,6 @@ import { baseConfig } from "./config-base";
 // This file uses require() which works in webpack/bundler contexts but not in bun runtime
 export default {
   ...baseConfig,
-  images: [require("./assets/gmail.jpg")],
+  images: [require("./assets/fortnox.jpg")],
 };
+

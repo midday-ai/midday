@@ -322,6 +322,11 @@ export function DataTable({ initialSettings }: Props) {
               </TableBody>
             </Table>
           </DndContext>
+          {/* Spacer ensures scrolling works when content barely overflows */}
+          <div
+            style={{ height: "var(--header-offset, 0px)", flexShrink: 0 }}
+            aria-hidden
+          />
         </div>
       </div>
 

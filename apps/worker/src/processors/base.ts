@@ -74,7 +74,9 @@ export abstract class BaseProcessor<TData = unknown> {
 
     try {
       // Validate payload if schema is provided (throws on validation error)
-      this.validatePayload(job);
+      // Store the validated data and update job.data to include any Zod transformations/defaults
+      const validatedData = this.validatePayload(job);
+      job.data = validatedData;
 
       // Check idempotency
       const shouldProcess = await this.shouldProcess(job);
@@ -96,7 +98,7 @@ export abstract class BaseProcessor<TData = unknown> {
         );
       }
 
-      // Process with the original job (preserves prototype methods like updateProgress)
+      // Process with the job (now contains validated/transformed data, preserves prototype methods)
       const result = await this.process(job);
 
       const duration = Date.now() - startTime;
