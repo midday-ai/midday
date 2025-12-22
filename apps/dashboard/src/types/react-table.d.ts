@@ -17,6 +17,7 @@ declare module "@tanstack/table-core" {
       assignedId?: string | null;
     }) => void;
     onDeleteTransaction?: (id: string) => void;
+    moveToReview?: (id: string) => void;
     editTransaction?: (id: string) => void;
     lastClickedIndex?: number | null;
     setLastClickedIndex?: (index: number | null) => void;
