@@ -70,7 +70,7 @@ export function useUploadProcessingToast({
   useRealtime({
     channelName: "realtime_inbox_matches",
     table: "inbox",
-    filter: `team_id=eq.${teamId}`,
+    filter: teamId ? `team_id=eq.${teamId}` : undefined,
     onEvent: (payload) => {
       if (payload.eventType === "UPDATE") {
         const inboxId = (payload.new as { id?: string })?.id;

@@ -164,7 +164,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   useRealtime({
     channelName: "realtime_transactions",
     table: "transactions",
-    filter: `team_id=eq.${user?.teamId}`,
+    filter: user?.teamId ? `team_id=eq.${user.teamId}` : undefined,
     onEvent: (payload) => {
       if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
         debouncedRefetch();

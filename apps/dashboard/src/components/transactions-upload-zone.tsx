@@ -76,12 +76,22 @@ export function TransactionsUploadZone({ children }: Props) {
       return;
     }
 
+    // Guard against missing teamId to prevent uploads to incorrect paths
+    if (!user?.teamId) {
+      toast({
+        duration: 2500,
+        variant: "error",
+        title: "Unable to upload. Please try again.",
+      });
+      return;
+    }
+
     // Set default progress
     uploadProgress.current = files.map(() => 0);
 
     setShowProgress(true);
 
-    const path = [user?.teamId, "inbox"] as string[];
+    const path = [user.teamId, "inbox"];
 
     try {
       // First, create inbox items immediately for instant feedback
