@@ -21,6 +21,7 @@ export function Header({
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
+  const [isMobileFeaturesOpen, setIsMobileFeaturesOpen] = useState(false);
   const featuresTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -40,7 +41,7 @@ export function Header({
             transparent
               ? "bg-transparent"
               : "bg-background/95 backdrop-blur-md",
-            "py-3 xl:py-4 px-4 sm:px-2 md:px-3 lg:px-4 xl:px-6 2xl:px-8 flex items-center justify-between xl:gap-6",
+            "py-3 xl:py-4 px-4 sm:px-4 md:px-4 lg:px-4 xl:px-6 2xl:px-8 flex items-center justify-between xl:gap-6",
           )}
         >
           {/* Logo and Brand */}
@@ -288,37 +289,122 @@ export function Header({
           >
             <div className="pt-32 px-6">
               <div className="flex flex-col space-y-6 text-left">
-                <Link
-                  href="/features"
-                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Features
-                </Link>
+                {/* Features Expandable Section */}
+                <div className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setIsMobileFeaturesOpen(!isMobileFeaturesOpen)
+                    }
+                    className="text-xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground flex items-center justify-between"
+                  >
+                    <span>Features</span>
+                    <Icons.ChevronDown
+                      className={`w-5 h-5 transition-transform duration-200 ${
+                        isMobileFeaturesOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {isMobileFeaturesOpen && (
+                    <>
+                      <div className="h-px w-full border-t border-border my-2" />
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="flex flex-col space-y-4 pt-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsMenuOpen(false);
+                              setIsMobileFeaturesOpen(false);
+                            }}
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            Assistant
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsMenuOpen(false);
+                              setIsMobileFeaturesOpen(false);
+                            }}
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            Inbox
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsMenuOpen(false);
+                              setIsMobileFeaturesOpen(false);
+                            }}
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            Time Tracker
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsMenuOpen(false);
+                              setIsMobileFeaturesOpen(false);
+                            }}
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            Invoice
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              router.push("/file-storage");
+                              setIsMenuOpen(false);
+                              setIsMobileFeaturesOpen(false);
+                            }}
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            File Storage
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsMenuOpen(false);
+                              setIsMobileFeaturesOpen(false);
+                            }}
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            Customers
+                          </button>
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+                </div>
                 <Link
                   href="/pricing"
-                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
+                  className="text-xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Pricing
                 </Link>
                 <Link
                   href="/updates"
-                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
+                  className="text-xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Updates
                 </Link>
                 <Link
                   href="/story"
-                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
+                  className="text-xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Story
                 </Link>
                 <Link
                   href="/download"
-                  className="text-2xl font-sans py-2 text-foreground"
+                  className="text-xl font-sans py-2 text-foreground"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Download
@@ -328,7 +414,7 @@ export function Header({
                 <div className="border-t border-border pt-8 mt-8">
                   <Link
                     href="/login"
-                    className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
+                    className="text-xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Sign in
