@@ -354,24 +354,9 @@ export function TransactionEditForm({ transaction }: Props) {
             placeholder="0.00"
             allowNegative={false}
             onValueChange={(values) => {
+              // Only update local state - the debounced effect handles the mutation
               if (values.floatValue !== undefined) {
-                const positiveValue = Math.abs(values.floatValue);
-                setAmount(positiveValue);
-
-                // Update amount with correct sign based on transaction type
-                const finalAmount =
-                  transactionType === "expense"
-                    ? -positiveValue
-                    : positiveValue;
-
-                // Ensure we're comparing numbers
-                const currentAmount = Number(transaction.amount);
-                if (finalAmount !== currentAmount) {
-                  updateTransactionMutation.mutate({
-                    id: transaction.id,
-                    amount: finalAmount,
-                  });
-                }
+                setAmount(Math.abs(values.floatValue));
               }
             }}
           />

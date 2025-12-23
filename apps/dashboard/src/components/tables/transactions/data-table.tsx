@@ -2,6 +2,7 @@
 
 import { VirtualRow } from "@/components/tables/core";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
+import { useRealtime } from "@/hooks/use-realtime";
 import { useScrollHeader } from "@/hooks/use-scroll-header";
 import { useSortParams } from "@/hooks/use-sort-params";
 import { useStickyColumns } from "@/hooks/use-sticky-columns";
@@ -12,6 +13,8 @@ import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transacti
 import { useTransactionParams } from "@/hooks/use-transaction-params";
 import { useTransactionTab } from "@/hooks/use-transaction-tab";
 import { useUpdateTransactionCategory } from "@/hooks/use-update-transaction-category";
+import { useUploadProcessingToast } from "@/hooks/use-upload-processing-toast";
+import { useUserQuery } from "@/hooks/use-user";
 import { useExportStore } from "@/store/export";
 import {
   type TransactionTab,
@@ -39,6 +42,7 @@ import {
   useRef,
 } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import { useDebounceCallback } from "usehooks-ts";
 import { BulkEditBar } from "./bulk-edit-bar";
 import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
@@ -64,6 +68,7 @@ type Props = {
 export function DataTable({ initialSettings, initialTab }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { data: user } = useUserQuery();
   const { filter, hasFilters } = useTransactionFilterParamsWithPersistence();
   const { tab } = useTransactionTab();
   const {
@@ -146,6 +151,33 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
     useSuspenseInfiniteQuery(infiniteQueryOptions);
 
+  // Debounced refetch for realtime updates
+  const debouncedRefetch = useDebounceCallback(() => {
+    refetch();
+    // Also invalidate related queries
+    queryClient.invalidateQueries({
+      queryKey: trpc.transactions.getReviewCount.queryKey(),
+    });
+  }, 200);
+
+  // Realtime subscription for transaction updates
+  useRealtime({
+    channelName: "realtime_transactions",
+    table: "transactions",
+    filter: user?.teamId ? `team_id=eq.${user.teamId}` : undefined,
+    onEvent: (payload) => {
+      if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
+        debouncedRefetch();
+      }
+    },
+  });
+
+  // Handle upload processing toast and inbox status tracking
+  useUploadProcessingToast({
+    teamId: user?.teamId as string,
+    onStatusChange: debouncedRefetch,
+  });
+
   const updateTransactionMutation = useMutation(
     trpc.transactions.update.mutationOptions({
       onSuccess: () => {
@@ -205,37 +237,6 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   const ids = useMemo(() => {
     return tableData.map((row) => row?.id);
   }, [tableData]);
-
-  // Only poll for enrichment on the first page (most recent transactions)
-  // This prevents unnecessary polling for old transactions that may never be enriched
-  const shouldPollForEnrichment = useMemo(() => {
-    const firstPage = data?.pages?.[0]?.data;
-    if (!firstPage || firstPage.length === 0) return false;
-    // Check if any transaction in the first page needs enrichment
-    return firstPage.some((row) => !row?.enrichmentCompleted);
-  }, [data]);
-
-  // Poll for enrichment completion when needed
-  useEffect(() => {
-    if (!shouldPollForEnrichment) return;
-
-    const pollInterval = setInterval(() => {
-      refetch();
-    }, 3000); // Poll every 3 seconds
-
-    // Cleanup after 1 minute to avoid infinite polling
-    const timeoutId = setTimeout(
-      () => {
-        clearInterval(pollInterval);
-      },
-      1 * 60 * 1000,
-    );
-
-    return () => {
-      clearInterval(pollInterval);
-      clearTimeout(timeoutId);
-    };
-  }, [shouldPollForEnrichment, refetch]);
 
   // Handle shift-click range selection
   // Note: This function will be updated after table creation to use table.getRowModel().rows
@@ -454,14 +455,9 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   // Stable cell click handler for VirtualRow
   const handleCellClick = useCallback(
     (rowId: string) => {
-      const clickedRow = rows.find((r) => r.id === rowId);
-      if (clickedRow?.original.manual) {
-        setParams({ editTransaction: rowId });
-      } else {
-        setParams({ transactionId: rowId });
-      }
+      setParams({ transactionId: rowId });
     },
-    [rows, setParams],
+    [setParams],
   );
 
   // Row virtualizer for performance
@@ -597,41 +593,30 @@ export function DataTable({ initialSettings, initialTab }: Props) {
                         position: "relative",
                       }}
                     >
-                      {virtualItems.length > 0 ? (
-                        virtualItems.map((virtualRow: VirtualItem) => {
-                          const row = rows[virtualRow.index];
-                          if (!row) return null;
+                      {virtualItems.map((virtualRow: VirtualItem) => {
+                        const row = rows[virtualRow.index];
+                        if (!row) return null;
 
-                          return (
-                            <VirtualRow
-                              key={row.id}
-                              row={row}
-                              virtualStart={virtualRow.start}
-                              rowHeight={45}
-                              getStickyStyle={getStickyStyle}
-                              getStickyClassName={getStickyClassName}
-                              nonClickableColumns={NON_CLICKABLE_COLUMNS}
-                              onCellClick={handleCellClick}
-                              columnSizing={columnSizing}
-                              columnOrder={columnOrder}
-                              columnVisibility={columnVisibility}
-                              isSelected={rowSelection[row.id] ?? false}
-                              isExporting={exportingTransactionIds.includes(
-                                row.id,
-                              )}
-                            />
-                          );
-                        })
-                      ) : (
-                        <TableRow>
-                          <TableCell
-                            colSpan={columns.length}
-                            className="h-24 text-center"
-                          >
-                            No results.
-                          </TableCell>
-                        </TableRow>
-                      )}
+                        return (
+                          <VirtualRow
+                            key={row.id}
+                            row={row}
+                            virtualStart={virtualRow.start}
+                            rowHeight={45}
+                            getStickyStyle={getStickyStyle}
+                            getStickyClassName={getStickyClassName}
+                            nonClickableColumns={NON_CLICKABLE_COLUMNS}
+                            onCellClick={handleCellClick}
+                            columnSizing={columnSizing}
+                            columnOrder={columnOrder}
+                            columnVisibility={columnVisibility}
+                            isSelected={rowSelection[row.id] ?? false}
+                            isExporting={exportingTransactionIds.includes(
+                              row.id,
+                            )}
+                          />
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </DndContext>

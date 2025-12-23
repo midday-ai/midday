@@ -121,9 +121,13 @@ export function TransactionCreateForm() {
 
   useEffect(() => {
     if (!bankAccountId && accounts?.length) {
-      const firstAccountId = accounts.at(0)?.id;
-      if (firstAccountId) {
-        form.setValue("bankAccountId", firstAccountId);
+      const firstAccount = accounts.at(0);
+      if (firstAccount?.id) {
+        form.setValue("bankAccountId", firstAccount.id);
+        // Also set currency from the account if available
+        if (firstAccount.currency) {
+          form.setValue("currency", firstAccount.currency);
+        }
       }
     }
   }, [accounts, bankAccountId]);

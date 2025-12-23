@@ -48,6 +48,15 @@ export function AddTransactions() {
           <Icons.CreateTransaction size={18} />
           <span>Create transaction</span>
         </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() =>
+            document.getElementById("upload-transaction-files")?.click()
+          }
+          className="space-x-2"
+        >
+          <Icons.ReceiptLong size={18} />
+          <span>Upload receipts</span>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
