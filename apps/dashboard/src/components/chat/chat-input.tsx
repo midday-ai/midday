@@ -67,8 +67,6 @@ function ChatInputContent() {
     "suggestions",
   );
 
-  const [selectedType] = useQueryState("artifact-type", parseAsString);
-
   const {
     input,
     isWebSearch,
@@ -357,7 +355,6 @@ function ChatInputContent() {
               >
                 <PromptInputTextarea
                   ref={textareaRef}
-                  autoFocus
                   onChange={(e) => {
                     isTypingRef.current = true;
                     handleInputChange(e);
