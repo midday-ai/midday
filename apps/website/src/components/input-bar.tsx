@@ -3,7 +3,6 @@
 import { Input } from '@midday/ui/input'
 import { cn } from '@midday/ui/cn'
 import type { RefObject } from 'react'
-import { MdIosShare } from 'react-icons/md'
 
 interface InputBarProps {
   isLightMode: boolean
@@ -30,10 +29,9 @@ export function InputBar({
         placeholder={placeholder}
         className={cn(
           'w-full bg-background border-border text-foreground placeholder:text-muted-foreground',
-          'text-sm px-3 py-2 pr-8',
+          'text-sm px-3 py-2',
         )}
       />
-      <MdIosShare className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-base" size={16} />
     </div>
   )
 }

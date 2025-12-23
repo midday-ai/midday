@@ -97,7 +97,7 @@ export default function Layout({ children }: { children: ReactElement }) {
       <body
         className={cn(
           `${hedvigSans.variable} ${hedvigSerif.variable} font-sans`,
-          "bg-[#fbfbfb] dark:bg-[#0C0C0C] overflow-x-hidden font-sans antialiased",
+          "bg-background overflow-x-hidden font-sans antialiased",
         )}
       >
         <ThemeProvider

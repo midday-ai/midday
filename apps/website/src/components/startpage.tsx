@@ -127,8 +127,8 @@ export function StartPage() {
       {/* Hero Section */}
       <div className="bg-background relative min-h-screen overflow-visible lg:overflow-hidden">
         {/* Mobile Layout */}
-        <div className="lg:hidden flex flex-col min-h-screen relative px-3 sm:px-4 pt-32 pb-12 sm:py-32 md:pt-24 overflow-hidden">
-          <div className="flex-1 flex flex-col justify-center md:justify-start md:pt-16 items-center space-y-8 z-20">
+        <div className="lg:hidden flex flex-col min-h-screen relative pt-32 pb-12 sm:py-32 md:pt-24 overflow-hidden">
+          <div className="flex-1 flex flex-col justify-center md:justify-start md:pt-16 items-center space-y-8 z-20 px-3 sm:px-4">
             <div className="space-y-4 text-center max-w-xl px-2">
               <h1 className="font-serif text-2xl sm:text-3xl md:text-3xl lg:text-2xl xl:text-2xl 2xl:text-2xl leading-tight">
                 <span className="text-foreground">
