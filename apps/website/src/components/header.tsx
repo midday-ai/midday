@@ -1,5 +1,317 @@
-'use client'
+"use client";
 
-export function Header() {
-  return <div>Header</div>;
+import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
+import { Icons } from "@midday/ui/icons";
+import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+interface HeaderProps {
+  transparent?: boolean;
+  hideMenuItems?: boolean;
+}
+
+export function Header({
+  transparent = false,
+  hideMenuItems = false,
+}: HeaderProps) {
+  const router = useRouter();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  return (
+    <>
+      {/* Navigation Bar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 w-full">
+        <div
+          className={cn(
+            transparent
+              ? "bg-transparent"
+              : "bg-background/95 backdrop-blur-md",
+            "py-3 xl:py-4 px-4 sm:px-2 md:px-3 lg:px-4 xl:px-6 2xl:px-8 flex items-center justify-between xl:gap-6",
+          )}
+        >
+          {/* Logo and Brand */}
+          <div
+            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity duration-200"
+            onClick={() => router.push("/")}
+          >
+            <div className="w-6 h-6">
+              <Icons.LogoSmall className="w-full h-full text-foreground" />
+            </div>
+            <span className="font-sans text-base xl:hidden text-foreground">
+              midday
+            </span>
+          </div>
+
+          {/* Desktop Navigation Links */}
+          {!hideMenuItems && (
+            <div className="hidden xl:flex items-center gap-6">
+              {/* Features with Dropdown */}
+              <div className="relative group">
+                <button
+                  type="button"
+                  className="text-sm transition-colors text-muted-foreground hover:text-foreground"
+                >
+                  Features
+                </button>
+
+                {/* Features Dropdown - Full Width */}
+                <div
+                  className="fixed left-0 right-0 bg-background border-t border-b border-border shadow-lg z-50 overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-150"
+                  style={{ top: "100%" }}
+                >
+                  <div className="pt-4 pb-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-10">
+                      {/* Left Column - Features List */}
+                      <div className="lg:col-span-3 px-1 sm:px-2 md:px-3 lg:px-4 xl:px-6 2xl:px-8">
+                        <div className="mb-2">
+                          <span className="font-sans text-xs text-muted-foreground">
+                            Features
+                          </span>
+                        </div>
+                        <div className="flex items-center py-2 cursor-pointer rounded group">
+                          <div className="flex flex-col">
+                            <span className="font-sans text-base text-foreground">
+                              Assistant
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              Daily help and insights
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center py-2 cursor-pointer rounded group">
+                          <div className="flex flex-col">
+                            <span className="font-sans text-base text-foreground">
+                              Inbox
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              Document matching
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center py-2 cursor-pointer rounded group">
+                          <div className="flex flex-col">
+                            <span className="font-sans text-base text-foreground">
+                              Time Tracker
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              Track projects
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center py-2 cursor-pointer rounded group">
+                          <div className="flex flex-col">
+                            <span className="font-sans text-base text-foreground">
+                              Invoice
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              Quick billing
+                            </span>
+                          </div>
+                        </div>
+                        <div
+                          className="flex items-center py-2 cursor-pointer group rounded"
+                          onClick={() => router.push("/file-storage")}
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-sans text-base text-foreground">
+                              File Storage
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              Organized files
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center py-2 cursor-pointer group rounded">
+                          <div className="flex flex-col">
+                            <span className="font-sans text-base text-foreground">
+                              Customers
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              Client overview
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Column - Preview */}
+                      <div className="lg:col-span-7 flex items-start justify-center lg:pl-8 lg:pt-6">
+                        <div className="w-full max-w-4xl h-full">
+                          <div className="rounded h-full">
+                            <div className="grid grid-cols-2 gap-6 h-full">
+                              {/* Left Preview */}
+                              <div className="flex flex-col gap-4 h-full">
+                                <div className="flex-1 border border-border p-4 flex items-center justify-center">
+                                  <Image
+                                    src="/illustrations/Search-menu.svg"
+                                    alt="Search Menu Preview"
+                                    width={200}
+                                    height={145}
+                                    className="w-auto h-auto object-contain"
+                                  />
+                                </div>
+                                <div className="text-left">
+                                  <h3 className="font-sans text-sm text-foreground mb-2">
+                                    Find anything, instantly
+                                  </h3>
+                                  <p className="font-sans text-xs text-muted-foreground leading-relaxed">
+                                    No more hunting. Instantly surface anything
+                                    across your entire workspace with natural
+                                    language search.
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Right Preview */}
+                              <div className="flex flex-col gap-4 h-full">
+                                <div className="flex-1 border border-border p-4 flex items-center justify-center">
+                                  <Image
+                                    src="/illustrations/Search-menu.svg"
+                                    alt="Search Menu Preview"
+                                    width={200}
+                                    height={145}
+                                    className="w-auto h-auto object-contain"
+                                  />
+                                </div>
+                                <div className="text-left">
+                                  <h3 className="font-sans text-sm text-foreground mb-2">
+                                    Find anything, instantly
+                                  </h3>
+                                  <p className="font-sans text-xs text-muted-foreground leading-relaxed">
+                                    No more hunting. Instantly surface anything
+                                    across your entire workspace with natural
+                                    language search.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Link
+                href="/pricing"
+                className="text-sm transition-colors text-muted-foreground hover:text-foreground"
+              >
+                Pricing
+              </Link>
+              <Link
+                href="/updates"
+                className="text-sm transition-colors text-muted-foreground hover:text-foreground"
+              >
+                Updates
+              </Link>
+              <Link
+                href="/story"
+                className="text-sm transition-colors text-muted-foreground hover:text-foreground"
+              >
+                Story
+              </Link>
+              <Link
+                href="/download"
+                className="text-sm transition-colors text-muted-foreground hover:text-foreground"
+              >
+                Download
+              </Link>
+
+              {/* Sign in */}
+              <div className="border-l border-border pl-4">
+                <Link
+                  href="/login"
+                  className="text-sm transition-colors text-foreground hover:text-muted-foreground"
+                >
+                  Sign in
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* Mobile & Tablet Hamburger Menu */}
+          <div className="xl:hidden flex items-center">
+            <button
+              type="button"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="transition-colors flex items-center justify-end p-2 min-w-[44px] min-h-[44px] text-foreground hover:text-muted-foreground"
+            >
+              {isMenuOpen ? (
+                <Icons.Close className="w-5 h-5" />
+              ) : (
+                <Icons.Menu className="w-5 h-5" />
+              )}
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile & Tablet Menu Overlay */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 xl:hidden bg-background"
+          >
+            <div className="pt-32 px-6">
+              <div className="flex flex-col space-y-6 text-left">
+                <Link
+                  href="/features"
+                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Features
+                </Link>
+                <Link
+                  href="/pricing"
+                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Pricing
+                </Link>
+                <Link
+                  href="/updates"
+                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Updates
+                </Link>
+                <Link
+                  href="/story"
+                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Story
+                </Link>
+                <Link
+                  href="/download"
+                  className="text-2xl font-sans py-2 text-foreground"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Download
+                </Link>
+
+                {/* Sign in - highlighted */}
+                <div className="border-t border-border pt-8 mt-8">
+                  <Link
+                    href="/login"
+                    className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Sign in
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
 }

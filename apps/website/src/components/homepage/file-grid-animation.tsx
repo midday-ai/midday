@@ -1,0 +1,217 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { useTheme } from 'next-themes'
+import { MaterialIcon } from './icon-mapping'
+
+export function FileGridAnimation({
+  onComplete,
+}: {
+  onComplete?: () => void
+}) {
+  const { resolvedTheme } = useTheme()
+  const isLightMode = resolvedTheme !== 'dark'
+  const [query, setQuery] = useState('')
+  const [firstCardLoaded, setFirstCardLoaded] = useState(false)
+  const [showCards, setShowCards] = useState(false)
+
+  useEffect(() => {
+    setFirstCardLoaded(false)
+    setShowCards(false)
+    const cardsTimer = setTimeout(() => setShowCards(true), 300)
+    const contentTimer = setTimeout(() => setFirstCardLoaded(true), 1500)
+    return () => {
+      clearTimeout(cardsTimer)
+      clearTimeout(contentTimer)
+    }
+  }, [onComplete])
+
+  useEffect(() => {
+    if (!onComplete) {
+      const interval = setInterval(() => {
+        setFirstCardLoaded(false)
+        setShowCards(false)
+        const cardsTimer = setTimeout(() => setShowCards(true), 300)
+        const contentTimer = setTimeout(() => setFirstCardLoaded(true), 1500)
+      }, 12000)
+
+      return () => clearInterval(interval)
+    }
+  }, [onComplete])
+
+  const files = [
+    {
+      id: 1,
+      title: 'Invoice — Acme Co',
+      desc: 'Mar 2025 • $3,000',
+      description:
+        'Final invoice for Q1 development work including 20 hours of backend development and 15 hours of frontend integration.',
+      tags: ['invoice', 'acme', 'paid'],
+      icon: 'description',
+    },
+    {
+      id: 2,
+      title: 'Receipt — Figma',
+      desc: 'Mar 12 • $24.00',
+      description:
+        'Monthly subscription renewal for design collaboration tools used across all client projects.',
+      tags: ['receipt', 'design', 'subscription'],
+      icon: 'receipt_long',
+    },
+    {
+      id: 3,
+      title: 'Proposal — Redstone',
+      desc: 'Q2 • Draft',
+      description:
+        'Project proposal for mobile app development including timeline, deliverables, and pricing breakdown.',
+      tags: ['proposal', 'client'],
+      icon: 'draft',
+    },
+    {
+      id: 4,
+      title: 'Timesheet — Sprint 14',
+      desc: '42h • Dev/Design',
+      description:
+        'Weekly timesheet tracking development and design work across multiple client projects.',
+      tags: ['timesheet', 'hours'],
+      icon: 'schedule',
+    },
+    {
+      id: 5,
+      title: 'Contract — NDA',
+      desc: 'Signed • 2025',
+      description:
+        'Non-disclosure agreement for confidential client project discussions and proprietary information.',
+      tags: ['contract', 'legal'],
+      icon: 'gavel',
+    },
+    {
+      id: 6,
+      title: 'Report — Q1 Expenses',
+      desc: 'Auto-generated',
+      description:
+        'Automated expense report summarizing all business costs, categorized by type and project.',
+      tags: ['report', 'expenses'],
+      icon: 'analytics',
+    },
+  ]
+
+  const filtered = files.filter((f) => {
+    const q = query.toLowerCase()
+    return (
+      f.title.toLowerCase().includes(q) ||
+      f.desc.toLowerCase().includes(q) ||
+      f.description.toLowerCase().includes(q) ||
+      f.tags.some((t) => t.toLowerCase().includes(q))
+    )
+  })
+
+  return (
+    <div className="w-full h-full bg-background flex flex-col">
+      <div className="px-3 pt-3 pb-2">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-[14px] text-foreground ">Files</h3>
+          <div className="flex items-center gap-2">
+            <button className="w-6 h-6 flex items-center justify-center hover:bg-muted transition-colors">
+              <MaterialIcon name="more_vert" className="text-sm text-muted-foreground" size={16} />
+            </button>
+          </div>
+        </div>
+        <div className="relative pr-1">
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search files..."
+            className="w-full bg-background border border-border px-3 py-2 text-[12px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-border/50 rounded-none"
+          />
+          <MaterialIcon
+            name="search"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground"
+            size={16}
+          />
+        </div>
+      </div>
+
+      <div className="flex-1 px-3 pb-3 overflow-y-auto mt-3">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 h-full">
+          {filtered.slice(0, 6).map((f, idx) => (
+            <motion.div
+              key={f.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: showCards ? 1 : 0, y: showCards ? 0 : 12 }}
+              transition={{ duration: 0.25, delay: showCards ? idx * 0.08 : 0 }}
+              className="bg-secondary border border-border p-2 sm:p-3 flex flex-col gap-2 h-full min-h-[140px]"
+            >
+              {idx === 0 && !firstCardLoaded ? (
+                <>
+                  <div className="flex flex-col">
+                    <div
+                      className="animate-pulse h-3 bg-muted"
+                      style={{ width: '75%', borderRadius: '0' }}
+                    ></div>
+                    <div
+                      className="animate-pulse h-3 bg-muted mt-2"
+                      style={{ width: '50%', borderRadius: '0' }}
+                    ></div>
+                    <div
+                      className="animate-pulse h-2 bg-muted mt-3"
+                      style={{ width: '95%', borderRadius: '0' }}
+                    ></div>
+                    <div
+                      className="animate-pulse h-2 bg-muted mt-1"
+                      style={{ width: '80%', borderRadius: '0' }}
+                    ></div>
+                    <div
+                      className="animate-pulse h-2 bg-muted mt-1"
+                      style={{ width: '60%', borderRadius: '0' }}
+                    ></div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap mt-auto">
+                    <div
+                      className="h-5 w-16 bg-muted rounded-full"
+                    ></div>
+                    <div
+                      className="h-5 w-14 bg-muted rounded-full"
+                    ></div>
+                    <div
+                      className="h-5 w-12 bg-muted rounded-full"
+                    ></div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex flex-col">
+                    <div className="text-[11px] text-foreground  mb-1">
+                      {f.title}
+                    </div>
+                    <div className="text-[9px] text-muted-foreground mb-2">
+                      {f.desc}
+                    </div>
+                    <div className="text-[9px] text-muted-foreground leading-relaxed">
+                      {f.description}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 flex-wrap mt-auto">
+                    {f.tags.slice(0, 2).map((tag) => (
+                      <div
+                        key={tag}
+                        className="inline-flex items-center h-4 px-1.5 bg-muted rounded-full"
+                      >
+                        <span className="text-[9px] leading-none text-muted-foreground">
+                          {tag}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
