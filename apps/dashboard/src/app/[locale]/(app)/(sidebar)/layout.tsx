@@ -1,7 +1,6 @@
 import { ExportStatus } from "@/components/export-status";
 import { GlobalTimerProvider } from "@/components/global-timer-provider";
 import { Header } from "@/components/header";
-import { MainContent } from "@/components/main-content";
 import { GlobalSheetsProvider } from "@/components/sheets/global-sheets-provider";
 import { Sidebar } from "@/components/sidebar";
 import { TimezoneDetector } from "@/components/timezone-detector";
@@ -65,7 +64,7 @@ export default async function Layout({
           {showUpgradeContent ? (
             <UpgradeContent user={user} />
           ) : (
-            <MainContent>{children}</MainContent>
+            <div className="px-4 md:px-8">{children}</div>
           )}
         </div>
 

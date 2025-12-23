@@ -115,10 +115,7 @@ export function ChatInterface({ geo }: Props) {
     hasTextContent,
   } = useChatStatus(messages, status);
 
-  const [selectedType, setSelectedType] = useQueryState(
-    "artifact-type",
-    parseAsString,
-  );
+  const [selectedType] = useQueryState("artifact-type", parseAsString);
 
   const hasMessages = messages.length > 0;
 

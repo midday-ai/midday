@@ -5,6 +5,7 @@ import { ErrorFallback } from "@/components/error-fallback";
 import { InactiveClients } from "@/components/inactive-clients";
 import { MostActiveClient } from "@/components/most-active-client";
 import { NewCustomersThisMonth } from "@/components/new-customers-this-month";
+import { ScrollableContent } from "@/components/scrollable-content";
 import { DataTable } from "@/components/tables/customers/data-table";
 import { CustomersSkeleton } from "@/components/tables/customers/skeleton";
 import { TopRevenueClient } from "@/components/top-revenue-client";
@@ -48,32 +49,34 @@ export default async function Page(props: Props) {
 
   return (
     <HydrateClient>
-      <div className="flex flex-col gap-6">
-        <CollapsibleSummary>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-6">
-            <Suspense fallback={<CustomerSummarySkeleton />}>
-              <MostActiveClient />
-            </Suspense>
-            <Suspense fallback={<CustomerSummarySkeleton />}>
-              <InactiveClients />
-            </Suspense>
-            <Suspense fallback={<CustomerSummarySkeleton />}>
-              <TopRevenueClient />
-            </Suspense>
-            <Suspense fallback={<CustomerSummarySkeleton />}>
-              <NewCustomersThisMonth />
-            </Suspense>
-          </div>
-        </CollapsibleSummary>
+      <ScrollableContent>
+        <div className="flex flex-col gap-6">
+          <CollapsibleSummary>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-6">
+              <Suspense fallback={<CustomerSummarySkeleton />}>
+                <MostActiveClient />
+              </Suspense>
+              <Suspense fallback={<CustomerSummarySkeleton />}>
+                <InactiveClients />
+              </Suspense>
+              <Suspense fallback={<CustomerSummarySkeleton />}>
+                <TopRevenueClient />
+              </Suspense>
+              <Suspense fallback={<CustomerSummarySkeleton />}>
+                <NewCustomersThisMonth />
+              </Suspense>
+            </div>
+          </CollapsibleSummary>
 
-        <CustomersHeader />
+          <CustomersHeader />
 
-        <ErrorBoundary errorComponent={ErrorFallback}>
-          <Suspense fallback={<CustomersSkeleton />}>
-            <DataTable initialSettings={initialSettings} />
-          </Suspense>
-        </ErrorBoundary>
-      </div>
+          <ErrorBoundary errorComponent={ErrorFallback}>
+            <Suspense fallback={<CustomersSkeleton />}>
+              <DataTable initialSettings={initialSettings} />
+            </Suspense>
+          </ErrorBoundary>
+        </div>
+      </ScrollableContent>
     </HydrateClient>
   );
 }

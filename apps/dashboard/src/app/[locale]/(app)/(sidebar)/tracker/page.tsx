@@ -1,4 +1,5 @@
 import { OpenTrackerSheet } from "@/components/open-tracker-sheet";
+import { ScrollableContent } from "@/components/scrollable-content";
 import { DataTable } from "@/components/tables/tracker";
 import { Loading } from "@/components/tables/tracker/loading";
 import { TrackerCalendar } from "@/components/tracker-calendar";
@@ -34,7 +35,7 @@ export default async function Page(props: Props) {
   );
 
   return (
-    <div>
+    <ScrollableContent>
       <TrackerCalendar weeklyCalendar={weeklyCalendar?.value === "true"} />
 
       <div className="mt-14 mb-6 flex items-center justify-between space-x-4">
@@ -49,6 +50,6 @@ export default async function Page(props: Props) {
       <Suspense fallback={<Loading />}>
         <DataTable />
       </Suspense>
-    </div>
+    </ScrollableContent>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { PROCESSING_TOAST_ID } from "@/components/transactions-upload-zone";
+import { useMatchSound } from "@/hooks/use-match-sound";
 import { useRealtime } from "@/hooks/use-realtime";
 import { usePendingUploadsStore } from "@/store/pending-uploads";
 import { toast } from "@midday/ui/use-toast";
@@ -35,6 +36,7 @@ export function useUploadProcessingToast({
     reset: resetPendingUploads,
     getState,
   } = usePendingUploadsStore();
+  const { play: playMatchSound } = useMatchSound();
 
   // Finalize toast with current match count
   const finalizeToast = useCallback(
@@ -85,6 +87,9 @@ export function useUploadProcessingToast({
           !TERMINAL_STATUSES.has(oldStatus ?? "")
         ) {
           const isMatch = newStatus === "suggested_match";
+          if (isMatch) {
+            playMatchSound();
+          }
           markComplete(inboxId, isMatch);
           onStatusChange?.();
         } else if (newStatus === "done" && oldStatus !== "done") {

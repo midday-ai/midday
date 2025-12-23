@@ -3,6 +3,7 @@
 import { LoadMore } from "@/components/load-more";
 import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { useInboxParams } from "@/hooks/use-inbox-params";
+import { useMatchSound } from "@/hooks/use-match-sound";
 import { useRealtime } from "@/hooks/use-realtime";
 import { useUserQuery } from "@/hooks/use-user";
 import { useInboxStore } from "@/store/inbox";
@@ -36,6 +37,7 @@ export function InboxView() {
     setLastClickedIndex,
     toggleSelection,
   } = useInboxStore();
+  const { play: playMatchSound } = useMatchSound();
 
   const allSeenIdsRef = useRef(new Set<string>());
   const itemRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
@@ -79,6 +81,14 @@ export function InboxView() {
     if (payload?.new) {
       const newRecord = payload.new;
       const oldRecord = payload.old;
+
+      // Play sound when transitioning to suggested_match
+      if (
+        newRecord.status === "suggested_match" &&
+        oldRecord?.status !== "suggested_match"
+      ) {
+        playMatchSound();
+      }
 
       return (
         newRecord.status !== oldRecord?.status &&

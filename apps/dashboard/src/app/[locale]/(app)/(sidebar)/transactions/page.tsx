@@ -1,4 +1,5 @@
 import { AddTransactions } from "@/components/add-transactions";
+import { ScrollableContent } from "@/components/scrollable-content";
 import { DataTable } from "@/components/tables/transactions/data-table";
 import { Loading } from "@/components/tables/transactions/loading";
 import { TransactionTabs } from "@/components/transaction-tabs";
@@ -63,30 +64,32 @@ export default async function Transactions(props: Props) {
 
   return (
     <HydrateClient>
-      <TransactionsUploadZone>
-        <div className="flex justify-between items-center py-6">
-          <TransactionsSearchFilter />
-          <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-2">
-              <TransactionsColumnVisibility />
-              <AddTransactions />
+      <ScrollableContent>
+        <TransactionsUploadZone>
+          <div className="flex justify-between items-center py-6">
+            <TransactionsSearchFilter />
+            <div className="flex items-center gap-4">
+              <div className="hidden md:flex items-center gap-2">
+                <TransactionsColumnVisibility />
+                <AddTransactions />
+              </div>
+              <TransactionTabs />
             </div>
-            <TransactionTabs />
           </div>
-        </div>
 
-        <Suspense
-          fallback={
-            <Loading
-              columnVisibility={initialSettings.columns}
-              columnSizing={initialSettings.sizing}
-              columnOrder={initialSettings.order}
-            />
-          }
-        >
-          <DataTable initialSettings={initialSettings} initialTab={tab} />
-        </Suspense>
-      </TransactionsUploadZone>
+          <Suspense
+            fallback={
+              <Loading
+                columnVisibility={initialSettings.columns}
+                columnSizing={initialSettings.sizing}
+                columnOrder={initialSettings.order}
+              />
+            }
+          >
+            <DataTable initialSettings={initialSettings} initialTab={tab} />
+          </Suspense>
+        </TransactionsUploadZone>
+      </ScrollableContent>
     </HydrateClient>
   );
 }

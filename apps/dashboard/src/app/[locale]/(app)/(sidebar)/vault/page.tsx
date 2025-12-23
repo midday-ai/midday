@@ -1,3 +1,4 @@
+import { ScrollableContent } from "@/components/scrollable-content";
 import { VaultHeader } from "@/components/vault/vault-header";
 import { VaultSkeleton } from "@/components/vault/vault-skeleton";
 import { VaultView } from "@/components/vault/vault-view";
@@ -31,12 +32,12 @@ export default async function Page(props: Props) {
   );
 
   return (
-    <div>
+    <ScrollableContent>
       <VaultHeader />
 
       <Suspense fallback={<VaultSkeleton />}>
         <VaultView initialSettings={initialSettings} />
       </Suspense>
-    </div>
+    </ScrollableContent>
   );
 }

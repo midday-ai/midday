@@ -424,7 +424,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
   .chat-input-static {
     position: relative !important;
-    bottom: auto !important;
+    bottom: 30px !important;
     left: 0 !important;
     right: 0 !important;
     width: 100% !important;
