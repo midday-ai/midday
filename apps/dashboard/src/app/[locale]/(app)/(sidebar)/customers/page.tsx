@@ -40,16 +40,13 @@ export default async function Page(props: Props) {
   // Get unified table settings from cookie
   const initialSettings = await getInitialTableSettings("customers");
 
-  // Change this to prefetch once this is fixed: https://github.com/trpc/trpc/issues/6632
-  await queryClient.fetchInfiniteQuery(
+ 
+  // Prefetch customer analytics
+  batchPrefetch([
     trpc.customers.get.infiniteQueryOptions({
       ...filter,
       sort,
     }),
-  );
-
-  // Prefetch customer analytics
-  batchPrefetch([
     trpc.invoice.mostActiveClient.queryOptions(),
     trpc.invoice.inactiveClientsCount.queryOptions(),
     trpc.invoice.topRevenueClient.queryOptions(),

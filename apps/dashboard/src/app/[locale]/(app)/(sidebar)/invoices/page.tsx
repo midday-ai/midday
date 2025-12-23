@@ -13,7 +13,7 @@ import { DataTable } from "@/components/tables/invoices/data-table";
 import { InvoiceSkeleton } from "@/components/tables/invoices/skeleton";
 import { loadInvoiceFilterParams } from "@/hooks/use-invoice-filter-params";
 import { loadSortParams } from "@/hooks/use-sort-params";
-import { batchPrefetch, trpc } from "@/trpc/server";
+import { HydrateClient, batchPrefetch, trpc } from "@/trpc/server";
 import { getInitialTableSettings } from "@/utils/columns";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
@@ -55,6 +55,7 @@ export default async function Page(props: Props) {
   ]);
 
   return (
+    <HydrateClient>
     <div className="flex flex-col gap-6">
       <CollapsibleSummary>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-6">
@@ -81,5 +82,6 @@ export default async function Page(props: Props) {
         </Suspense>
       </ErrorBoundary>
     </div>
+    </HydrateClient>
   );
 }
