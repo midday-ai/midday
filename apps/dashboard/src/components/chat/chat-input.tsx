@@ -506,9 +506,13 @@ export function ChatInput() {
   const isCanvasVisible = !!selectedType;
 
   return (
-    <div
+    <motion.div
+      initial={isHome ? { opacity: 0, y: 6 } : false}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
       className={cn(
-        "fixed bottom-6 z-[100] transition-all duration-300 ease-in-out",
+        "fixed bottom-6 z-[100]",
+        !isHome && "transition-all duration-300 ease-in-out",
         "left-0 md:left-[70px] px-4 md:px-6",
         isCanvasVisible ? "right-0 md:right-[603px]" : "right-0",
         isHome && "chat-input-static",
@@ -517,6 +521,6 @@ export function ChatInput() {
       <ChatHistoryProvider>
         <ChatInputContent />
       </ChatHistoryProvider>
-    </div>
+    </motion.div>
   );
 }
