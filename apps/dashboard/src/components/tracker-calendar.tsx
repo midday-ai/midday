@@ -204,7 +204,7 @@ export function TrackerCalendar({ weeklyCalendar }: Props) {
 
   return (
     <div ref={ref}>
-      <div className="mt-8">
+      <div className="mt-4">
         <CalendarHeader
           totalDuration={billableHoursData?.totalDuration}
           selectedView={selectedView as "week" | "month"}
