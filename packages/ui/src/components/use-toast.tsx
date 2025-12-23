@@ -5,7 +5,7 @@ import type { ToastActionElement, ToastProps } from "./toast";
 const TOAST_LIMIT = 1;
 const TOAST_REMOVE_DELAY = 1000000;
 
-type ToasterToast = ToastProps & {
+type ToasterToast = Omit<ToastProps, "title"> & {
   id: string;
   title?: React.ReactNode;
   description?: React.ReactNode;
@@ -72,11 +72,26 @@ const addToRemoveQueue = (toastId: string) => {
 
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case "ADD_TOAST":
+    case "ADD_TOAST": {
+      // If toast with same ID exists, update it instead of adding a new one
+      const existingIndex = state.toasts.findIndex(
+        (t) => t.id === action.toast.id,
+      );
+      if (existingIndex !== -1) {
+        return {
+          ...state,
+          toasts: state.toasts.map((t) =>
+            t.id === action.toast.id
+              ? { ...t, ...action.toast, open: true }
+              : t,
+          ),
+        };
+      }
       return {
         ...state,
         toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
       };
+    }
 
     case "UPDATE_TOAST":
       return {
@@ -136,10 +151,10 @@ function dispatch(action: Action) {
   }
 }
 
-type Toast = Omit<ToasterToast, "id">;
+type Toast = Omit<ToasterToast, "id"> & { id?: string };
 
-function toast({ ...props }: Toast) {
-  const id = genId();
+function toast({ id: providedId, ...props }: Toast) {
+  const id = providedId ?? genId();
 
   const update = (props: ToasterToast) =>
     dispatch({

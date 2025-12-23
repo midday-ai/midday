@@ -4,6 +4,7 @@ import { Loading } from "@/components/tables/transactions/loading";
 import { TransactionTabs } from "@/components/transaction-tabs";
 import { TransactionsColumnVisibility } from "@/components/transactions-column-visibility";
 import { TransactionsSearchFilter } from "@/components/transactions-search-filter";
+import { TransactionsUploadZone } from "@/components/transactions-upload-zone";
 import { loadSortParams } from "@/hooks/use-sort-params";
 import { loadTransactionFilterParams } from "@/hooks/use-transaction-filter-params";
 import { loadTransactionTab } from "@/hooks/use-transaction-tab";
@@ -62,28 +63,30 @@ export default async function Transactions(props: Props) {
 
   return (
     <HydrateClient>
-      <div className="flex justify-between items-center py-6">
-        <TransactionsSearchFilter />
-        <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-2">
-            <TransactionsColumnVisibility />
-            <AddTransactions />
+      <TransactionsUploadZone>
+        <div className="flex justify-between items-center py-6">
+          <TransactionsSearchFilter />
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-2">
+              <TransactionsColumnVisibility />
+              <AddTransactions />
+            </div>
+            <TransactionTabs />
           </div>
-          <TransactionTabs />
         </div>
-      </div>
 
-      <Suspense
-        fallback={
-          <Loading
-            columnVisibility={initialSettings.columns}
-            columnSizing={initialSettings.sizing}
-            columnOrder={initialSettings.order}
-          />
-        }
-      >
-        <DataTable initialSettings={initialSettings} initialTab={tab} />
-      </Suspense>
+        <Suspense
+          fallback={
+            <Loading
+              columnVisibility={initialSettings.columns}
+              columnSizing={initialSettings.sizing}
+              columnOrder={initialSettings.order}
+            />
+          }
+        >
+          <DataTable initialSettings={initialSettings} initialTab={tab} />
+        </Suspense>
+      </TransactionsUploadZone>
     </HydrateClient>
   );
 }
