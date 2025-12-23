@@ -1079,10 +1079,10 @@ export function StartPage() {
               <div className="flex items-stretch">
                 <button
                   onClick={() => setBillingPeriod('yearly')}
-                  className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border border-transparent transition-colors ${
+                  className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors ${
                     billingPeriod === 'yearly'
-                      ? 'text-foreground bg-secondary'
-                      : 'text-muted-foreground hover:text-foreground bg-muted'
+                      ? 'text-foreground bg-background border-border'
+                      : 'text-muted-foreground hover:text-foreground bg-muted border-transparent'
                   }`}
                   style={{
                     marginBottom: billingPeriod === 'yearly' ? '-1px' : '0px',
@@ -1094,10 +1094,10 @@ export function StartPage() {
                 </button>
                 <button
                   onClick={() => setBillingPeriod('monthly')}
-                  className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border border-transparent transition-colors ${
+                  className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors ${
                     billingPeriod === 'monthly'
-                      ? 'text-foreground bg-secondary'
-                      : 'text-muted-foreground hover:text-foreground bg-muted'
+                      ? 'text-foreground bg-background border-border'
+                      : 'text-muted-foreground hover:text-foreground bg-muted border-transparent'
                   }`}
                   style={{
                     marginBottom: billingPeriod === 'monthly' ? '-1px' : '0px',
