@@ -58,6 +58,7 @@ export const IconMap = {
   receipt_long: MdOutlineReceiptLong,
   link: MdOutlineLink,
   open_in_new: MdOutlineOpenInNew,
+  arrow_outward: MdOutlineOpenInNew, // Using open_in_new as arrow_outward alternative
   send: MdIosShare, // Using share icon as send alternative
 }
 

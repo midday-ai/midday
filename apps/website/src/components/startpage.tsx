@@ -560,8 +560,11 @@ export function StartPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col items-center w-full sm:w-[150px]">
-                <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover:border-muted-foreground transition-all duration-200 cursor-pointer">
+              <div 
+                className="flex flex-col items-center w-full sm:w-[150px] cursor-pointer"
+                onClick={() => router.push('/file-storage')}
+              >
+                <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover:border-muted-foreground transition-all duration-200">
                   <MaterialIcon name="folder_zip" className="text-muted-foreground " size={24} />
                 </div>
                 <div className="flex flex-col items-center text-center">
