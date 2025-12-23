@@ -593,41 +593,30 @@ export function DataTable({ initialSettings, initialTab }: Props) {
                         position: "relative",
                       }}
                     >
-                      {virtualItems.length > 0 ? (
-                        virtualItems.map((virtualRow: VirtualItem) => {
-                          const row = rows[virtualRow.index];
-                          if (!row) return null;
+                      {virtualItems.map((virtualRow: VirtualItem) => {
+                        const row = rows[virtualRow.index];
+                        if (!row) return null;
 
-                          return (
-                            <VirtualRow
-                              key={row.id}
-                              row={row}
-                              virtualStart={virtualRow.start}
-                              rowHeight={45}
-                              getStickyStyle={getStickyStyle}
-                              getStickyClassName={getStickyClassName}
-                              nonClickableColumns={NON_CLICKABLE_COLUMNS}
-                              onCellClick={handleCellClick}
-                              columnSizing={columnSizing}
-                              columnOrder={columnOrder}
-                              columnVisibility={columnVisibility}
-                              isSelected={rowSelection[row.id] ?? false}
-                              isExporting={exportingTransactionIds.includes(
-                                row.id,
-                              )}
-                            />
-                          );
-                        })
-                      ) : (
-                        <TableRow>
-                          <TableCell
-                            colSpan={columns.length}
-                            className="h-24 text-center"
-                          >
-                            No results.
-                          </TableCell>
-                        </TableRow>
-                      )}
+                        return (
+                          <VirtualRow
+                            key={row.id}
+                            row={row}
+                            virtualStart={virtualRow.start}
+                            rowHeight={45}
+                            getStickyStyle={getStickyStyle}
+                            getStickyClassName={getStickyClassName}
+                            nonClickableColumns={NON_CLICKABLE_COLUMNS}
+                            onCellClick={handleCellClick}
+                            columnSizing={columnSizing}
+                            columnOrder={columnOrder}
+                            columnVisibility={columnVisibility}
+                            isSelected={rowSelection[row.id] ?? false}
+                            isExporting={exportingTransactionIds.includes(
+                              row.id,
+                            )}
+                          />
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </DndContext>
