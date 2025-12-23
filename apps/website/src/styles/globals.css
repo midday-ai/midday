@@ -3,6 +3,9 @@
 @tailwind utilities;
 
 :root {
+  --font-hedvig-sans: "Hedvig Letters Sans", system-ui, sans-serif;
+  --font-hedvig-serif: "Hedvig Letters Serif", Georgia, serif;
+
   --sh-class: #ffffff;
   --sh-identifier: #ffffff;
   --sh-sign: #8996a3;
