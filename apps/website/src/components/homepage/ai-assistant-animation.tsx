@@ -238,25 +238,14 @@ export function AIAssistantAnimation({
       <div className="flex-1 px-3 py-3 overflow-hidden">
         <div className="space-y-2 h-full flex flex-col">
           <div className="flex justify-end">
-            <div className="flex items-end gap-2">
-              <div
-                className={`px-2 py-1 max-w-xs rounded-bl-[100px] rounded-tl-[100px] bg-secondary transition-opacity duration-75 ease-out ${
-                  showUserMessage ? 'opacity-100' : 'opacity-0'
-                }`}
-              >
-                <p className="text-[12px] text-right text-foreground">
-                  Show me weekly summary
-                </p>
-              </div>
-              <div className="w-4 h-4 rounded-full overflow-hidden flex-shrink-0">
-                <Image
-                  src="/Images/Avatar.jpeg"
-                  alt="User Avatar"
-                  width={16}
-                  height={16}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+            <div
+              className={`px-2 py-1 max-w-xs rounded-bl-[100px] rounded-tl-[100px] bg-secondary transition-opacity duration-75 ease-out ${
+                showUserMessage ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              <p className="text-[12px] text-right text-foreground">
+                Show me weekly summary
+              </p>
             </div>
           </div>
 
