@@ -576,7 +576,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
                     ).current = el;
                   }
                 }}
-                className="overflow-auto overscroll-x-none border-l border-r border-b border-border scrollbar-hide"
+                className="overflow-auto overscroll-none border-l border-r border-b border-border scrollbar-hide"
                 style={{
                   height: "calc(100vh - 180px + var(--header-offset, 0px))",
                 }}
