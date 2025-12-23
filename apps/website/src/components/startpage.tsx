@@ -462,7 +462,7 @@ export function StartPage() {
             <div className="grid grid-cols-2 gap-6 sm:flex sm:justify-center sm:gap-20">
               <div className="flex flex-col items-center w-full sm:w-[150px]">
                 <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover-border transition-all duration-200 cursor-pointer">
-                  <MaterialIcon name="widgets" className="text-muted-foreground " size={30} />
+                  <MaterialIcon name="widgets" className="text-muted-foreground " size={24} />
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <h3 className="font-sans text-sm text-foreground leading-[21px]">
@@ -476,7 +476,7 @@ export function StartPage() {
 
               <div className="flex flex-col items-center w-full sm:w-[150px]">
                 <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover-border transition-all duration-200 cursor-pointer">
-                  <MaterialIcon name="trending_up" className="text-muted-foreground " size={30} />
+                  <MaterialIcon name="trending_up" className="text-muted-foreground " size={24} />
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <h3 className="font-sans text-sm text-foreground leading-[21px]">
@@ -490,7 +490,7 @@ export function StartPage() {
 
               <div className="flex flex-col items-center w-full sm:w-[150px]">
                 <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover-border transition-all duration-200 cursor-pointer">
-                  <MaterialIcon name="list_alt" className="text-muted-foreground " size={30} />
+                  <MaterialIcon name="list_alt" className="text-muted-foreground " size={24} />
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <h3 className="font-sans text-sm text-foreground leading-[21px]">
@@ -504,7 +504,7 @@ export function StartPage() {
 
               <div className="flex flex-col items-center w-full sm:w-[150px]">
                 <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover-border transition-all duration-200 cursor-pointer">
-                  <MaterialIcon name="inbox" className="text-muted-foreground " size={30} />
+                  <MaterialIcon name="inbox" className="text-muted-foreground " size={24} />
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <h3 className="font-sans text-sm text-foreground leading-[21px]">
@@ -520,7 +520,7 @@ export function StartPage() {
             <div className="grid grid-cols-2 gap-6 sm:flex sm:justify-center sm:gap-20">
               <div className="flex flex-col items-center w-full sm:w-[150px]">
                 <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover-border transition-all duration-200 cursor-pointer">
-                  <MaterialIcon name="timer" className="text-muted-foreground " size={30} />
+                  <MaterialIcon name="timer" className="text-muted-foreground " size={24} />
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <h3 className="font-sans text-sm text-foreground leading-[21px]">
@@ -534,7 +534,7 @@ export function StartPage() {
 
               <div className="flex flex-col items-center w-full sm:w-[150px]">
                 <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover-border transition-all duration-200 cursor-pointer">
-                  <MaterialIcon name="description" className="text-muted-foreground " size={30} />
+                  <MaterialIcon name="description" className="text-muted-foreground " size={24} />
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <h3 className="font-sans text-sm text-foreground leading-[21px]">
@@ -548,7 +548,7 @@ export function StartPage() {
 
               <div className="flex flex-col items-center w-full sm:w-[150px]">
                 <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover-border transition-all duration-200 cursor-pointer">
-                  <MaterialIcon name="scatter_plot" className="text-muted-foreground " size={30} />
+                  <MaterialIcon name="scatter_plot" className="text-muted-foreground " size={24} />
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <h3 className="font-sans text-sm text-foreground leading-[21px]">
@@ -562,7 +562,7 @@ export function StartPage() {
 
               <div className="flex flex-col items-center w-full sm:w-[150px]">
                 <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover:border-muted-foreground transition-all duration-200 cursor-pointer">
-                  <MaterialIcon name="folder_zip" className="text-muted-foreground " size={30} />
+                  <MaterialIcon name="folder_zip" className="text-muted-foreground " size={24} />
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <h3 className="font-sans text-sm text-foreground leading-[21px]">
@@ -893,17 +893,17 @@ export function StartPage() {
 
               <article
                 onClick={() => router.push('/login')}
-                className="relative overflow-hidden bg-secondary border border-border p-4 sm:p-5 md:p-5 lg:p-6 hover-inverse transition-all duration-200 cursor-pointer group hidden xl:block xl:col-span-7"
+                className="relative overflow-hidden bg-secondary border border-border p-4 sm:p-5 md:p-5 lg:p-6 transition-all duration-200 cursor-pointer group hidden xl:block xl:col-span-7 hover:border-muted-foreground"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex-1">
-                    <p className="text-xs tracking-wide/loose text-muted-foreground group-hover:text-background transition-colors duration-200">
+                    <p className="text-xs tracking-wide/loose text-muted-foreground transition-colors duration-200">
                       Time savings
                     </p>
-                    <p className="mt-1 text-base sm:text-lg text-foreground group-hover:text-background transition-colors duration-200">
+                    <p className="mt-1 text-base sm:text-lg text-foreground transition-colors duration-200">
                       Get your time back
                     </p>
-                    <p className="mt-1 text-sm text-muted-foreground group-hover:text-background transition-colors duration-200">
+                    <p className="mt-1 text-sm text-muted-foreground transition-colors duration-200">
                       <span className="group-hover:hidden transition-opacity duration-200">
                         Less admin means fewer late nights and more space for
                         the work that actually matters.
@@ -914,10 +914,10 @@ export function StartPage() {
                     </p>
                   </div>
                   <div className="flex flex-col items-end">
-                    <div className="text-4xl sm:text-5xl text-foreground group-hover:text-background transition-colors duration-200">
+                    <div className="text-4xl sm:text-5xl text-foreground transition-colors duration-200">
                       4-6h
                     </div>
-                    <p className="text-xs text-muted-foreground group-hover:text-background mt-1 transition-colors duration-200">
+                    <p className="text-xs text-muted-foreground mt-1 transition-colors duration-200">
                       saved per week
                     </p>
                   </div>
@@ -928,17 +928,17 @@ export function StartPage() {
             <div className="grid grid-cols-1 gap-3 sm:gap-4 xl:hidden">
               <article
                 onClick={() => router.push('/login')}
-                className="relative overflow-hidden bg-secondary border border-border p-4 sm:p-5 md:p-5 lg:p-6 hover-inverse transition-all duration-200 cursor-pointer group"
+                className="relative overflow-hidden bg-secondary border border-border p-4 sm:p-5 md:p-5 lg:p-6 transition-all duration-200 cursor-pointer group hover:border-muted-foreground"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex-1">
-                    <p className="text-xs tracking-wide/loose text-muted-foreground group-hover:text-background transition-colors duration-200">
+                    <p className="text-xs tracking-wide/loose text-muted-foreground transition-colors duration-200">
                       Time savings
                     </p>
-                    <p className="mt-1 text-base sm:text-lg text-foreground group-hover:text-background transition-colors duration-200">
+                    <p className="mt-1 text-base sm:text-lg text-foreground transition-colors duration-200">
                       Get your time back
                     </p>
-                    <p className="mt-1 text-sm text-muted-foreground group-hover:text-background transition-colors duration-200">
+                    <p className="mt-1 text-sm text-muted-foreground transition-colors duration-200">
                       <span className="group-hover:hidden transition-opacity duration-200">
                         Less admin means fewer late nights and more space for
                         the work that actually matters.
@@ -949,10 +949,10 @@ export function StartPage() {
                     </p>
                   </div>
                   <div className="flex flex-col items-end">
-                    <div className="text-4xl sm:text-5xl text-foreground group-hover:text-background transition-colors duration-200">
+                    <div className="text-4xl sm:text-5xl text-foreground transition-colors duration-200">
                       4-6h
                     </div>
-                    <p className="text-xs text-muted-foreground group-hover:text-background mt-1 transition-colors duration-200">
+                    <p className="text-xs text-muted-foreground mt-1 transition-colors duration-200">
                       saved per week
                     </p>
                   </div>

@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface HeaderProps {
   transparent?: boolean;
@@ -20,6 +20,16 @@ export function Header({
 }: HeaderProps) {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
+  const featuresTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (featuresTimeoutRef.current) {
+        clearTimeout(featuresTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <>
@@ -50,7 +60,20 @@ export function Header({
           {!hideMenuItems && (
             <div className="hidden xl:flex items-center gap-6">
               {/* Features with Dropdown */}
-              <div className="relative group">
+              <div
+                className="relative"
+                onMouseEnter={() => {
+                  if (featuresTimeoutRef.current) {
+                    clearTimeout(featuresTimeoutRef.current);
+                  }
+                  setIsFeaturesOpen(true);
+                }}
+                onMouseLeave={() => {
+                  featuresTimeoutRef.current = setTimeout(() => {
+                    setIsFeaturesOpen(false);
+                  }, 200);
+                }}
+              >
                 <button
                   type="button"
                   className="text-sm transition-colors text-muted-foreground hover:text-foreground"
@@ -60,7 +83,11 @@ export function Header({
 
                 {/* Features Dropdown - Full Width */}
                 <div
-                  className="fixed left-0 right-0 bg-background border-t border-b border-border shadow-lg z-50 overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-150"
+                  className={`fixed left-0 right-0 bg-background border-t border-b border-border shadow-lg z-50 overflow-hidden transition-opacity duration-150 ${
+                    isFeaturesOpen
+                      ? "opacity-100 visible"
+                      : "opacity-0 invisible"
+                  }`}
                   style={{ top: "100%" }}
                 >
                   <div className="pt-4 pb-8">
