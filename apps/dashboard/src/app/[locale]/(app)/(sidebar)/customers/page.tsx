@@ -2,7 +2,7 @@ import { CollapsibleSummary } from "@/components/collapsible-summary";
 import { CustomersHeader } from "@/components/customers-header";
 import { ErrorFallback } from "@/components/error-fallback";
 import { InactiveClients } from "@/components/inactive-clients";
-import { InvoiceSummarySkeleton } from "@/components/invoice-summary";
+import { CustomerSummarySkeleton } from "@/components/customer-summary-skeleton";
 import { MostActiveClient } from "@/components/most-active-client";
 import { NewCustomersThisMonth } from "@/components/new-customers-this-month";
 import { DataTable } from "@/components/tables/customers/data-table";
@@ -13,8 +13,7 @@ import { loadSortParams } from "@/hooks/use-sort-params";
 import {
   HydrateClient,
   batchPrefetch,
-  getQueryClient,
-  trpc,
+   trpc,
 } from "@/trpc/server";
 import { getInitialTableSettings } from "@/utils/columns";
 import type { Metadata } from "next";
@@ -31,8 +30,7 @@ type Props = {
 };
 
 export default async function Page(props: Props) {
-  const queryClient = getQueryClient();
-  const searchParams = await props.searchParams;
+   const searchParams = await props.searchParams;
 
   const filter = loadCustomerFilterParams(searchParams);
   const { sort } = loadSortParams(searchParams);
@@ -57,16 +55,16 @@ export default async function Page(props: Props) {
       <div className="flex flex-col gap-6">
         <CollapsibleSummary>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-6">
-            <Suspense fallback={<InvoiceSummarySkeleton />}>
+            <Suspense fallback={<CustomerSummarySkeleton />}>
               <MostActiveClient />
             </Suspense>
-            <Suspense fallback={<InvoiceSummarySkeleton />}>
+            <Suspense fallback={<CustomerSummarySkeleton />}>
               <InactiveClients />
             </Suspense>
-            <Suspense fallback={<InvoiceSummarySkeleton />}>
+            <Suspense fallback={<CustomerSummarySkeleton />}>
               <TopRevenueClient />
             </Suspense>
-            <Suspense fallback={<InvoiceSummarySkeleton />}>
+            <Suspense fallback={<CustomerSummarySkeleton />}>
               <NewCustomersThisMonth />
             </Suspense>
           </div>
