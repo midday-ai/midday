@@ -34,7 +34,7 @@ export function TransactionEditSheet() {
     }
   };
 
-  if (!transaction) {
+  if (!transaction || !transaction.manual) {
     return null;
   }
 
