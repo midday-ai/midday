@@ -172,12 +172,12 @@ const ActionsCell = memo(
     onMoveToReview?: (id: string) => void;
   }) => {
     const handleViewDetails = useCallback(() => {
-      if (transaction.manual) {
-        onEditTransaction?.(transaction.id);
-      } else {
-        onViewDetails?.(transaction.id);
-      }
-    }, [transaction.id, transaction.manual, onViewDetails, onEditTransaction]);
+      onViewDetails?.(transaction.id);
+    }, [transaction.id, onViewDetails]);
+
+    const handleEditTransaction = useCallback(() => {
+      onEditTransaction?.(transaction.id);
+    }, [transaction.id, onEditTransaction]);
 
     const handleCopyUrl = useCallback(() => {
       onCopyUrl?.(transaction.id);
@@ -220,6 +220,11 @@ const ActionsCell = memo(
             <DropdownMenuItem onClick={handleViewDetails}>
               View details
             </DropdownMenuItem>
+            {transaction.manual && (
+              <DropdownMenuItem onClick={handleEditTransaction}>
+                Edit transaction
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onClick={handleCopyUrl}>
               Share URL
             </DropdownMenuItem>

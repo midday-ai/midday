@@ -455,14 +455,9 @@ export function DataTable({ initialSettings, initialTab }: Props) {
   // Stable cell click handler for VirtualRow
   const handleCellClick = useCallback(
     (rowId: string) => {
-      const clickedRow = rows.find((r) => r.id === rowId);
-      if (clickedRow?.original.manual) {
-        setParams({ editTransaction: rowId });
-      } else {
-        setParams({ transactionId: rowId });
-      }
+      setParams({ transactionId: rowId });
     },
-    [rows, setParams],
+    [setParams],
   );
 
   // Row virtualizer for performance
