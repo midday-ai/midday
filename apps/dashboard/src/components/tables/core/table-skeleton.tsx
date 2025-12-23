@@ -107,7 +107,7 @@ export function TableSkeleton<TData>({
         <Table
           className={cn(isEmpty && "opacity-20 pointer-events-none blur-[7px]")}
         >
-          <TableHeader className="border-0 sticky top-0 z-20 bg-background">
+          <TableHeader className="border-0 block sticky top-0 z-20 bg-background">
             <TableRow className="h-[45px] hover:bg-transparent flex items-center !border-b-0">
               {visibleColumns.map((col) => {
                 const columnId = getColumnId(col);

@@ -17,15 +17,15 @@ export default async function Account() {
 
   return (
     <HydrateClient>
-    <div className="space-y-12">
-      <CompanyLogo />
-      <CompanyName />
-      <CompanyEmail />
-      <CompanyCountry />
-      <BaseCurrency />
-      <CompanyFiscalYear />
-      <DeleteTeam />
-    </div>
+      <div className="space-y-12">
+        <CompanyLogo />
+        <CompanyName />
+        <CompanyEmail />
+        <CompanyCountry />
+        <BaseCurrency />
+        <CompanyFiscalYear />
+        <DeleteTeam />
+      </div>
     </HydrateClient>
   );
 }

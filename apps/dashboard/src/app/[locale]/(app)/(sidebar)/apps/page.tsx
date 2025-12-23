@@ -1,7 +1,12 @@
 import { Apps } from "@/components/apps";
 import { AppsHeader } from "@/components/apps-header";
 import { AppsSkeleton } from "@/components/apps.skeleton";
-import { batchPrefetch, HydrateClient, getQueryClient, trpc } from "@/trpc/server";
+import {
+  HydrateClient,
+  batchPrefetch,
+  getQueryClient,
+  trpc,
+} from "@/trpc/server";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -12,7 +17,7 @@ export const metadata: Metadata = {
 export default async function Page() {
   const queryClient = getQueryClient();
 
-   batchPrefetch([
+  batchPrefetch([
     trpc.apps.get.queryOptions(),
     trpc.oauthApplications.list.queryOptions(),
     trpc.oauthApplications.authorized.queryOptions(),

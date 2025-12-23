@@ -591,7 +591,7 @@ export function DataTable({ initialSettings, initialTab }: Props) {
                     <DataTableHeader table={table} tableScroll={tableScroll} />
 
                     <TableBody
-                      className="border-l-0 border-r-0"
+                      className="border-l-0 border-r-0 block"
                       style={{
                         height: `${rowVirtualizer.getTotalSize()}px`,
                         position: "relative",

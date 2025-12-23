@@ -40,7 +40,6 @@ export default async function Page(props: Props) {
   // Get unified table settings from cookie
   const initialSettings = await getInitialTableSettings("customers");
 
- 
   // Prefetch customer analytics
   batchPrefetch([
     trpc.customers.get.infiniteQueryOptions({

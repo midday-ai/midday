@@ -56,32 +56,32 @@ export default async function Page(props: Props) {
 
   return (
     <HydrateClient>
-    <div className="flex flex-col gap-6">
-      <CollapsibleSummary>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-6">
-          <Suspense fallback={<InvoiceSummarySkeleton />}>
-            <InvoicesOpen />
-          </Suspense>
-          <Suspense fallback={<InvoiceSummarySkeleton />}>
-            <InvoicesOverdue />
-          </Suspense>
-          <Suspense fallback={<InvoiceSummarySkeleton />}>
-            <InvoicesPaid />
-          </Suspense>
-          <Suspense fallback={<InvoicePaymentScoreSkeleton />}>
-            <InvoicePaymentScore />
-          </Suspense>
-        </div>
-      </CollapsibleSummary>
+      <div className="flex flex-col gap-6">
+        <CollapsibleSummary>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-6">
+            <Suspense fallback={<InvoiceSummarySkeleton />}>
+              <InvoicesOpen />
+            </Suspense>
+            <Suspense fallback={<InvoiceSummarySkeleton />}>
+              <InvoicesOverdue />
+            </Suspense>
+            <Suspense fallback={<InvoiceSummarySkeleton />}>
+              <InvoicesPaid />
+            </Suspense>
+            <Suspense fallback={<InvoicePaymentScoreSkeleton />}>
+              <InvoicePaymentScore />
+            </Suspense>
+          </div>
+        </CollapsibleSummary>
 
-      <InvoiceHeader />
+        <InvoiceHeader />
 
-      <ErrorBoundary errorComponent={ErrorFallback}>
-        <Suspense fallback={<InvoiceSkeleton />}>
-          <DataTable initialSettings={initialSettings} />
-        </Suspense>
-      </ErrorBoundary>
-    </div>
+        <ErrorBoundary errorComponent={ErrorFallback}>
+          <Suspense fallback={<InvoiceSkeleton />}>
+            <DataTable initialSettings={initialSettings} />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
     </HydrateClient>
   );
 }

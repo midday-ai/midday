@@ -23,7 +23,7 @@ export default async function Page(props: Props) {
   const filter = loadInboxFilterParams(searchParams);
   const params = loadInboxParams(searchParams);
 
-   const data = await queryClient.fetchInfiniteQuery(
+  const data = await queryClient.fetchInfiniteQuery(
     trpc.inbox.get.infiniteQueryOptions({
       order: params.order,
       sort: params.sort,

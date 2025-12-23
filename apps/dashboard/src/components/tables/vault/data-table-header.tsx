@@ -47,7 +47,7 @@ export function DataTableHeader<TData>({
   const headerGroups = table.getHeaderGroups();
 
   return (
-    <TableHeader className="border-0 sticky top-0 z-20 bg-background w-full">
+    <TableHeader className="border-0 block sticky top-0 z-20 bg-background w-full">
       {headerGroups.map((headerGroup) => (
         <TableRow
           key={headerGroup.id}
