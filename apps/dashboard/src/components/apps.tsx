@@ -81,7 +81,7 @@ export function Apps() {
       name: app.name,
       category: "category" in app ? app.category : "Integration",
       active: app.active,
-      beta: "beta" in app ? (app.beta as boolean | undefined) : undefined,
+      beta: "beta" in app && typeof app.beta === "boolean" ? app.beta : undefined,
       logo: app.logo,
       short_description: app.short_description,
       description: app.description || undefined,
