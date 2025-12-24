@@ -269,6 +269,11 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
                 Coming soon
               </span>
             )}
+            {app.active && app.beta && (
+              <span className="text-[#878787] bg-[#F2F1EF] text-[10px] dark:bg-[#1D1D1D] px-3 py-1 rounded-full font-mono">
+                Beta
+              </span>
+            )}
           </div>
         </CardHeader>
         <CardContent className="text-xs text-[#878787] pb-4">
