@@ -357,7 +357,7 @@ export function ExportBar() {
                         ProviderIcon && <ProviderIcon className="size-4" />}
                       <span>Export</span>
                     </Button>
-                    {/* <DropdownMenu>
+                      <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           disabled={displayCount === 0}
@@ -391,7 +391,7 @@ export function ExportBar() {
                           Export to file
                         </DropdownMenuItem>
                       </DropdownMenuContent>
-                    </DropdownMenu> */}
+                    </DropdownMenu>  
                   </div>
                 )}
               </div>
