@@ -10,6 +10,7 @@ export * from "./document-tag-assignments";
 export * from "./document-tag-embedings";
 export * from "./document-tags";
 export * from "./documents";
+export * from "./e-invoicing";
 export * from "./exhange-rates";
 export * from "./inbox";
 export * from "./inbox-accounts";

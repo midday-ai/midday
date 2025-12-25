@@ -42,6 +42,7 @@ export const getTeamById = async (db: Database, id: string) => {
       countryCode: teams.countryCode,
       fiscalYearStartMonth: teams.fiscalYearStartMonth,
       exportSettings: teams.exportSettings,
+      einvoicingEnabled: teams.einvoicingEnabled,
     })
     .from(teams)
     .where(eq(teams.id, id));

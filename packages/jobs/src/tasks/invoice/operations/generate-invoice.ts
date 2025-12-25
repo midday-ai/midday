@@ -5,6 +5,7 @@ import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import camelcaseKeys from "camelcase-keys";
 import { sendInvoiceEmail } from "../email/send-email";
+import { sendEInvoice } from "./send-einvoice";
 
 export const generateInvoice = schemaTask({
   id: "generate-invoice",
@@ -24,7 +25,7 @@ export const generateInvoice = schemaTask({
     const { data: invoiceData } = await supabase
       .from("invoices")
       .select(
-        "*, team_id, customer:customer_id(name), user:user_id(timezone, locale)",
+        "*, team_id, customer:customer_id(name, peppol_id), user:user_id(timezone, locale), team:team_id(einvoicing_enabled)",
       )
       .eq("id", invoiceId)
       .single()
@@ -64,6 +65,23 @@ export const generateInvoice = schemaTask({
         filename,
         fullPath,
       });
+
+      // Send e-invoice if team has e-invoicing enabled and customer has Peppol ID
+      const team = invoiceData?.team as { einvoicing_enabled?: boolean } | null;
+      const customer = invoiceData?.customer as { peppol_id?: string } | null;
+
+      if (team?.einvoicing_enabled && customer?.peppol_id) {
+        logger.info("Triggering e-invoice send", {
+          invoiceId,
+          teamId: invoiceData?.team_id,
+          customerPeppolId: customer.peppol_id,
+        });
+
+        await sendEInvoice.trigger({
+          invoiceId,
+          teamId: invoiceData?.team_id,
+        });
+      }
     }
 
     await processDocument.trigger({

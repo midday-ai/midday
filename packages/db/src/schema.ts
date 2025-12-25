@@ -138,6 +138,13 @@ export const invoiceStatusEnum = pgEnum("invoice_status", [
   "scheduled",
 ]);
 
+export const einvoiceStatusEnum = pgEnum("einvoice_status", [
+  "pending", // Queued for sending
+  "sent", // Sent to provider
+  "delivered", // Confirmed delivered to recipient
+  "failed", // Delivery failed
+]);
+
 export const plansEnum = pgEnum("plans", ["trial", "starter", "pro"]);
 export const subscriptionStatusEnum = pgEnum("subscription_status", [
   "active",
@@ -760,6 +767,18 @@ export const invoices = pgTable(
       mode: "string",
     }),
     scheduledJobId: text("scheduled_job_id"),
+    // E-invoicing (Peppol) fields
+    einvoiceStatus: einvoiceStatusEnum("einvoice_status"),
+    einvoiceDocumentId: text("einvoice_document_id"), // Provider's document ID (e.g., Storecove GUID)
+    einvoiceSentAt: timestamp("einvoice_sent_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    einvoiceDeliveredAt: timestamp("einvoice_delivered_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    einvoiceError: text("einvoice_error"),
   },
   (table) => [
     index("invoices_created_at_idx").using(
@@ -823,6 +842,8 @@ export const customers = pgTable(
     countryCode: text("country_code"),
     token: text().default("").notNull(),
     contact: text(),
+    // Peppol e-invoicing identifier (e.g., "0007:5567890123" for Swedish org number)
+    peppolId: text("peppol_id"),
     fts: tsvector("fts")
       .notNull()
       .generatedAlwaysAs(
@@ -1356,6 +1377,10 @@ export const teams = pgTable(
     plan: plansEnum().default("trial").notNull(),
     // subscriptionStatus: subscriptionStatusEnum("subscription_status"),
     exportSettings: jsonb("export_settings"),
+    // E-invoicing (Peppol) settings
+    peppolId: text("peppol_id"), // Company's Peppol participant ID (e.g., "0007:5567890123")
+    einvoicingEnabled: boolean("einvoicing_enabled").default(false),
+    einvoicingSettings: jsonb("einvoicing_settings"), // Provider config, legal entity ID, etc.
   },
   (table) => [
     unique("teams_inbox_id_key").on(table.inboxId),

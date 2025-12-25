@@ -44,6 +44,7 @@ export const getCustomerById = async (
       countryCode: customers.countryCode,
       token: customers.token,
       contact: customers.contact,
+      peppolId: customers.peppolId,
       invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
       projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
       tags: sql<CustomerTag[]>`
@@ -130,6 +131,7 @@ export const getCustomers = async (
       countryCode: customers.countryCode,
       token: customers.token,
       contact: customers.contact,
+      peppolId: customers.peppolId,
       invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
       projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
       tags: sql<CustomerTag[]>`
@@ -237,6 +239,7 @@ export type UpsertCustomerParams = {
   contact?: string | null;
   vatNumber?: string | null;
   countryCode?: string | null;
+  peppolId?: string | null;
   tags?: { id: string; name: string }[] | null;
 };
 
@@ -277,6 +280,7 @@ export const upsertCustomer = async (
         contact: rest.contact,
         vatNumber: rest.vatNumber,
         countryCode: rest.countryCode,
+        peppolId: rest.peppolId,
       },
     })
     .returning();
@@ -377,6 +381,7 @@ export const upsertCustomer = async (
       countryCode: customers.countryCode,
       token: customers.token,
       contact: customers.contact,
+      peppolId: customers.peppolId,
       invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
       projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
       tags: sql<CustomerTag[]>`

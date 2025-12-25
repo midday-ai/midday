@@ -135,6 +135,11 @@ export const customerResponseSchema = z.object({
     description: "Primary contact person's name at the customer organization",
     example: "John Smith",
   }),
+  peppolId: z.string().nullable().openapi({
+    description:
+      "Peppol participant ID for e-invoicing (e.g., '0007:5567890123' for Swedish org number)",
+    example: "0007:5567890123",
+  }),
   invoiceCount: z.number().openapi({
     description: "Total number of invoices created for this customer",
     example: 12,
@@ -315,6 +320,11 @@ export const upsertCustomerSchema = z.object({
   contact: z.string().nullable().optional().openapi({
     description: "Primary contact person's name at the customer organization",
     example: "John Smith",
+  }),
+  peppolId: z.string().nullable().optional().openapi({
+    description:
+      "Peppol participant ID for e-invoicing (e.g., '0007:5567890123' for Swedish org number)",
+    example: "0007:5567890123",
   }),
   tags: z
     .array(

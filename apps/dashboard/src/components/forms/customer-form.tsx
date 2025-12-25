@@ -2,6 +2,7 @@
 
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useTeamQuery } from "@/hooks/use-team";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
@@ -74,6 +75,7 @@ const formSchema = z.object({
   zip: z.string().optional(),
   vatNumber: z.string().optional(),
   note: z.string().optional(),
+  peppolId: z.string().optional(),
   tags: z
     .array(
       z.object({
@@ -109,6 +111,7 @@ export function CustomerForm({ data }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const isEdit = !!data;
+  const { data: team } = useTeamQuery();
 
   const { setParams: setCustomerParams, name } = useCustomerParams();
   const { setParams: setInvoiceParams, type } = useInvoiceParams();
@@ -163,6 +166,7 @@ export function CustomerForm({ data }: Props) {
       contact: data?.contact ?? undefined,
       note: data?.note ?? undefined,
       vatNumber: data?.vatNumber ?? undefined,
+      peppolId: data?.peppolId ?? undefined,
       tags:
         data?.tags?.map((tag) => ({
           id: tag?.id ?? "",
@@ -207,6 +211,7 @@ export function CustomerForm({ data }: Props) {
       phone: data.phone || null,
       zip: data.zip || null,
       vatNumber: data.vatNumber || null,
+      peppolId: data.peppolId || null,
       tags: data.tags?.length
         ? data.tags.map((tag) => ({
             id: tag.id,
@@ -613,6 +618,41 @@ export function CustomerForm({ data }: Props) {
                   </div>
                 </AccordionContent>
               </AccordionItem>
+
+              {team?.einvoicingEnabled && (
+                <AccordionItem value="e-invoicing">
+                  <AccordionTrigger>E-Invoicing</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="peppolId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-[#878787] font-normal">
+                              Peppol ID
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                value={field.value ?? ""}
+                                placeholder="0007:5567890123"
+                                autoComplete="off"
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              When set, invoices will be delivered directly to
+                              this customer's accounting system via the Peppol
+                              network.
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
             </Accordion>
           </div>
         </div>

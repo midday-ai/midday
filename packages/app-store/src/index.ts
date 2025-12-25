@@ -1,4 +1,5 @@
 import calApp from "./cal/config";
+import eInvoicingApp from "./e-invoicing/config-client";
 import fortnoxApp from "./fortnox/config";
 import gmailApp from "./gmail/config-client";
 import outlookApp from "./outlook/config-client";
@@ -14,11 +15,12 @@ export const apps = [
   gmailApp,
   outlookApp,
   slackApp,
-  whatsappApp,
-  raycastApp,
+  eInvoicingApp,
   quickBooksApp,
   xeroApp,
-  calApp,
   fortnoxApp,
+  whatsappApp,
+  raycastApp,
+  calApp,
   zapierApp,
 ];

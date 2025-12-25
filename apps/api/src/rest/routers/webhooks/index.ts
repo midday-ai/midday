@@ -1,6 +1,7 @@
 import { publicMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import { OpenAPIHono } from "@hono/zod-openapi";
+import { eInvoicingWebhookRouter } from "./e-invoicing";
 import { inboxWebhookRouter } from "./inbox";
 import { whatsappWebhookRouter } from "./whatsapp";
 
@@ -12,5 +13,6 @@ app.use("*", ...publicMiddleware);
 // Mount individual webhook routes
 app.route("/inbox", inboxWebhookRouter);
 app.route("/whatsapp", whatsappWebhookRouter);
+app.route("/e-invoicing", eInvoicingWebhookRouter);
 
 export { app as webhookRouter };

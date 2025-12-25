@@ -218,6 +218,13 @@ export type ScheduleInvoiceJobPayload = z.infer<
   typeof scheduleInvoiceJobSchema
 >;
 
+export const sendEInvoiceSchema = z.object({
+  invoiceId: z.string().uuid(),
+  teamId: z.string().uuid(),
+});
+
+export type SendEInvoicePayload = z.infer<typeof sendEInvoiceSchema>;
+
 const baseJobSchema = z.object({
   teamId: z.string().uuid(),
   sendEmail: z.boolean().optional().default(false),
