@@ -1,4 +1,4 @@
-import { RATE_LIMITS } from "@midday/accounting";
+import { ACCOUNTING_ERROR_CODES, RATE_LIMITS } from "@midday/accounting";
 import {
   type AccountingSyncRecord,
   getAccountingSyncStatus,
@@ -9,6 +9,47 @@ import { triggerJob } from "@midday/job-client";
 import type { Job } from "bullmq";
 import type { AccountingExportPayload } from "../../schemas/accounting";
 import { AccountingProcessorBase, type AccountingProviderId } from "./base";
+
+/**
+ * Derive error code from error message for database storage
+ * This allows the frontend to show appropriate error messages
+ */
+function deriveErrorCodeFromMessage(
+  errorMessage: string | undefined,
+): string | undefined {
+  if (!errorMessage) return undefined;
+
+  const messageLower = errorMessage.toLowerCase();
+
+  if (messageLower.includes("rate limit")) {
+    return ACCOUNTING_ERROR_CODES.RATE_LIMIT;
+  }
+  if (
+    messageLower.includes("401") ||
+    messageLower.includes("unauthorized") ||
+    messageLower.includes("authentication failed")
+  ) {
+    return ACCOUNTING_ERROR_CODES.AUTH_EXPIRED;
+  }
+  if (
+    messageLower.includes("financial year") ||
+    messageLower.includes("fiscal year") ||
+    messageLower.includes("bokföringsår")
+  ) {
+    return ACCOUNTING_ERROR_CODES.FINANCIAL_YEAR_MISSING;
+  }
+  if (messageLower.includes("validation") || messageLower.includes("400")) {
+    return ACCOUNTING_ERROR_CODES.VALIDATION;
+  }
+  if (messageLower.includes("not found") || messageLower.includes("404")) {
+    return ACCOUNTING_ERROR_CODES.NOT_FOUND;
+  }
+  if (/\b5\d{2}\b/.test(messageLower)) {
+    return ACCOUNTING_ERROR_CODES.SERVER_ERROR;
+  }
+
+  return ACCOUNTING_ERROR_CODES.UNKNOWN;
+}
 
 // Process transactions in batches
 const BATCH_SIZE = 50;
@@ -220,6 +261,8 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
 
           // Create/update sync records for each transaction
           for (const txResult of result.results) {
+            const errorCode = deriveErrorCodeFromMessage(txResult.error);
+
             await upsertAccountingSyncRecord(db, {
               transactionId: txResult.transactionId,
               teamId,
@@ -229,12 +272,12 @@ export class ExportTransactionsProcessor extends AccountingProcessorBase<Account
               syncType: "manual",
               status: txResult.success ? "synced" : "failed",
               errorMessage: txResult.error,
+              errorCode,
               providerEntityType: txResult.providerEntityType,
             });
 
             // Collect errors from failed transactions
             if (!txResult.success && txResult.error) {
-              const errorCode = txResult.errorCode;
               const errorMessage = txResult.error;
 
               // Add to errors array (dedupe by code or message)
