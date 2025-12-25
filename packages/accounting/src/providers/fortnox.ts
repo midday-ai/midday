@@ -22,6 +22,7 @@ import {
   appendTaxInfoToDescription,
   buildPrivateNote,
   ensureFileExtension,
+  sleep,
   streamToBuffer,
 } from "../utils";
 
@@ -176,28 +177,39 @@ export class FortnoxProvider extends BaseAccountingProvider {
   // ============================================================================
 
   /**
-   * Validate and return account code, falling back to default if invalid
+   * Validate and return account code, throwing an error if invalid
    * Fortnox uses 4-digit Swedish BAS account codes
+   *
+   * @throws AccountingOperationError if the code is invalid format
    */
   private getValidAccountCode(
     categoryReportingCode: string | undefined,
     transactionId: string,
     defaultAccount: string,
   ): string {
-    // Valid Fortnox account codes are 4-digit numbers (Swedish BAS)
-    const isValid =
-      categoryReportingCode && /^\d{4}$/.test(categoryReportingCode);
+    // If no category reporting code provided, use default
+    if (!categoryReportingCode) {
+      return defaultAccount;
+    }
 
-    if (categoryReportingCode && !isValid) {
-      logger.warn("Invalid Fortnox account code, using default", {
-        provider: "fortnox",
-        transactionId,
-        invalidCode: categoryReportingCode,
-        defaultAccount,
+    // Valid Fortnox account codes are 4-digit numbers (Swedish BAS)
+    const isValid = /^\d{4}$/.test(categoryReportingCode);
+
+    if (!isValid) {
+      throw new AccountingOperationError({
+        type: "invalid_account",
+        code: ACCOUNTING_ERROR_CODES.INVALID_ACCOUNT,
+        message: `Invalid account code '${categoryReportingCode}'. Fortnox requires 4-digit BAS account codes (e.g., 4000, 5400).`,
+        retryable: false,
+        metadata: {
+          transactionId,
+          invalidCode: categoryReportingCode,
+          expectedFormat: "4-digit number",
+        },
       });
     }
 
-    return isValid ? categoryReportingCode : defaultAccount;
+    return categoryReportingCode;
   }
 
   /**
@@ -736,7 +748,18 @@ export class FortnoxProvider extends BaseAccountingProvider {
     let syncedCount = 0;
     let failedCount = 0;
 
-    for (const tx of sortedTransactions) {
+    // Fortnox rate limit: 25 requests per 5 seconds = 200ms per request
+    // Use 250ms to stay safely under the limit
+    const THROTTLE_DELAY_MS = 250;
+
+    for (let i = 0; i < sortedTransactions.length; i++) {
+      const tx = sortedTransactions[i]!;
+
+      // Throttle between calls to respect rate limit (skip first call)
+      if (i > 0) {
+        await sleep(THROTTLE_DELAY_MS);
+      }
+
       try {
         const result = await this.createVoucher(tx, targetAccountId);
         results.push({
@@ -783,21 +806,11 @@ export class FortnoxProvider extends BaseAccountingProvider {
   // Financial Year Methods
   // ============================================================================
 
-  /**
-   * Check if an error is a "no financial year" error from Fortnox
-   * Error code 2002375: "Inget bokföringsår existerar för angivet bokföringsdatum"
-   * (No fiscal year exists for the specified accounting date)
-   */
-  private isNoFinancialYearError(error: unknown): boolean {
-    if (error instanceof Error) {
-      return error.message.includes("2002375");
-    }
-    return false;
-  }
-
   // Cache for financial years to avoid repeated API calls
   private financialYearsCache: FortnoxFinancialYear[] | null = null;
   private createdYearsCache: Set<number> = new Set();
+  // Cache for dates we've already verified have a financial year
+  private verifiedDatesCache: Set<string> = new Set();
 
   /**
    * Get all financial years from Fortnox
@@ -813,17 +826,54 @@ export class FortnoxProvider extends BaseAccountingProvider {
   }
 
   /**
+   * Check if a date falls within any cached financial year range
+   * Returns true if we can determine from cache, false if API call needed
+   */
+  private isDateInCachedYears(date: string): boolean {
+    if (!this.financialYearsCache || this.financialYearsCache.length === 0) {
+      return false;
+    }
+
+    const checkDate = new Date(date);
+    return this.financialYearsCache.some((year) => {
+      if (!year.FromDate || !year.ToDate) return false;
+      const fromDate = new Date(year.FromDate);
+      const toDate = new Date(year.ToDate);
+      return checkDate >= fromDate && checkDate <= toDate;
+    });
+  }
+
+  /**
    * Check if a financial year exists for a specific date
-   * Uses Fortnox recommended endpoint: GET /financialyears/?date={date}
+   * Uses caching to minimize API calls during batch operations.
    * See: https://www.fortnox.se/developer/guides-and-good-to-know/best-practices/vouchers
    */
   private async hasFinancialYearForDate(date: string): Promise<boolean> {
+    // Check if we've already verified this date
+    if (this.verifiedDatesCache.has(date)) {
+      return true;
+    }
+
+    // Check against cached financial years first (no API call)
+    if (this.isDateInCachedYears(date)) {
+      this.verifiedDatesCache.add(date);
+      return true;
+    }
+
+    // If we have a cache but date isn't in it, it's likely missing
+    // Only make API call if we haven't loaded cache yet
+    if (this.financialYearsCache !== null) {
+      return false;
+    }
+
+    // First time: fetch all financial years and check
     try {
-      const response = await this.apiCall<FortnoxFinancialYearsResponse>(
-        `/financialyears/?date=${date}`,
-      );
-      const years = response.FinancialYears ?? [];
-      return years.length > 0;
+      await this.getAllFinancialYears();
+      if (this.isDateInCachedYears(date)) {
+        this.verifiedDatesCache.add(date);
+        return true;
+      }
+      return false;
     } catch (error) {
       logger.warn("Failed to check financial year for date", {
         provider: "fortnox",
@@ -918,8 +968,9 @@ export class FortnoxProvider extends BaseAccountingProvider {
     }
 
     this.createdYearsCache.add(targetYear);
-    // Invalidate cache so next fetch gets updated data
+    // Invalidate caches so next fetch gets updated data
     this.financialYearsCache = null;
+    this.verifiedDatesCache.clear();
 
     logger.info("Financial year created successfully", {
       provider: "fortnox",

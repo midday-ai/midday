@@ -186,9 +186,10 @@ describe("XeroProvider", () => {
       );
     });
 
-    test("uses default expense account code (429) when categoryReportingCode is invalid", async () => {
+    test("fails with INVALID_ACCOUNT error when categoryReportingCode is invalid format", async () => {
       const provider = createProvider();
 
+      // API should not be called since validation fails before sync
       mockAccountingApi.updateOrCreateBankTransactions.mockImplementation(
         async () => ({
           body: {
@@ -197,7 +198,7 @@ describe("XeroProvider", () => {
         }),
       );
 
-      await provider.syncTransactions({
+      const result = await provider.syncTransactions({
         transactions: [
           {
             id: "tx-3",
@@ -205,7 +206,7 @@ describe("XeroProvider", () => {
             date: "2024-06-15",
             description: "Lunch",
             currency: "USD",
-            categoryReportingCode: "invalid-code!@#", // Invalid
+            categoryReportingCode: "invalid-code!@#", // Invalid - not alphanumeric
           },
         ],
         targetAccountId: "bank-account-123",
@@ -213,9 +214,12 @@ describe("XeroProvider", () => {
         jobId: "test-job-3",
       });
 
-      const call =
-        mockAccountingApi.updateOrCreateBankTransactions.mock.calls[0];
-      expect(call[1].bankTransactions[0].lineItems[0].accountCode).toBe("429");
+      // Should fail with error about invalid account code
+      expect(result.success).toBe(false);
+      expect(result.failedCount).toBe(1);
+      expect(result.results[0]?.success).toBe(false);
+      expect(result.results[0]?.error).toContain("Invalid account code");
+      expect(result.results[0]?.error).toContain("invalid-code!@#");
     });
 
     test("uses default income account code (200) when categoryReportingCode is missing", async () => {

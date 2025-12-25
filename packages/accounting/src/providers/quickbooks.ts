@@ -11,7 +11,6 @@ import {
   type AttachmentResult,
   type DeleteAttachmentParams,
   type DeleteAttachmentResult,
-  type MappedTransaction,
   type ProviderInitConfig,
   type QuickBooksProviderConfig,
   type RateLimitConfig,
@@ -283,26 +282,38 @@ export class QuickBooksProvider extends BaseAccountingProvider {
   }
 
   /**
-   * Validate and return account name, falling back to default if invalid
+   * Validate and return account name, throwing an error if invalid
+   *
+   * @throws AccountingOperationError if the account name is invalid
    */
   private getValidAccountName(
     categoryReportingCode: string | undefined,
     transactionId: string,
   ): string {
-    // Valid account name is non-empty string after trimming
-    const isValid =
-      categoryReportingCode && categoryReportingCode.trim().length > 0;
+    // If no category reporting code provided, use default
+    if (!categoryReportingCode) {
+      return DEFAULT_EXPENSE_ACCOUNT;
+    }
 
-    if (categoryReportingCode && !isValid) {
-      logger.warn("Invalid QuickBooks account name, using default", {
-        provider: "quickbooks",
-        transactionId,
-        invalidCode: categoryReportingCode,
-        defaultAccount: DEFAULT_EXPENSE_ACCOUNT,
+    // Valid account name is non-empty string after trimming
+    const trimmed = categoryReportingCode.trim();
+    const isValid = trimmed.length > 0;
+
+    if (!isValid) {
+      throw new AccountingOperationError({
+        type: "invalid_account",
+        code: ACCOUNTING_ERROR_CODES.INVALID_ACCOUNT,
+        message: `Invalid account name '${categoryReportingCode}'. QuickBooks requires a non-empty account name.`,
+        retryable: false,
+        metadata: {
+          transactionId,
+          invalidCode: categoryReportingCode,
+          expectedFormat: "non-empty string",
+        },
       });
     }
 
-    return isValid ? categoryReportingCode.trim() : DEFAULT_EXPENSE_ACCOUNT;
+    return trimmed;
   }
 
   /**

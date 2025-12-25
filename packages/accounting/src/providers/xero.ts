@@ -344,30 +344,83 @@ export class XeroProvider extends BaseAccountingProvider {
   }
 
   /**
-   * Validate and return account code, falling back to default if invalid
-   * Uses different defaults for expenses vs income
+   * Validate and return account code, throwing an error if invalid
+   * Uses different defaults for expenses vs income when no code is provided
+   *
+   * @throws AccountingOperationError if the code is invalid format
    */
   private getValidAccountCode(
     categoryReportingCode: string | undefined,
     transactionId: string,
     isExpense: boolean,
   ): string {
-    // Valid Xero account codes are non-empty alphanumeric strings
-    const isValid =
-      categoryReportingCode && /^[a-zA-Z0-9]+$/.test(categoryReportingCode);
-
     const defaultCode = isExpense ? DEFAULT_EXPENSE_CODE : DEFAULT_INCOME_CODE;
 
-    if (categoryReportingCode && !isValid) {
-      logger.warn("Invalid Xero account code, using default", {
-        provider: "xero",
-        transactionId,
-        invalidCode: categoryReportingCode,
-        defaultAccount: defaultCode,
+    // If no category reporting code provided, use default
+    if (!categoryReportingCode) {
+      return defaultCode;
+    }
+
+    // Valid Xero account codes are non-empty alphanumeric strings
+    const isValid = /^[a-zA-Z0-9]+$/.test(categoryReportingCode);
+
+    if (!isValid) {
+      throw new AccountingOperationError({
+        type: "invalid_account",
+        code: ACCOUNTING_ERROR_CODES.INVALID_ACCOUNT,
+        message: `Invalid account code '${categoryReportingCode}'. Xero requires alphanumeric account codes (e.g., 200, 429).`,
+        retryable: false,
+        metadata: {
+          transactionId,
+          invalidCode: categoryReportingCode,
+          expectedFormat: "alphanumeric",
+        },
       });
     }
 
-    return isValid ? categoryReportingCode : defaultCode;
+    return categoryReportingCode;
+  }
+
+  /**
+   * Map a MappedTransaction to a Xero BankTransaction object
+   * This method may throw AccountingOperationError for invalid account codes
+   */
+  private mapToBankTransaction(tx: MappedTransaction, targetAccountId: string) {
+    const isExpense = tx.amount < 0;
+
+    return {
+      type: isExpense
+        ? BankTransaction.TypeEnum.SPEND
+        : BankTransaction.TypeEnum.RECEIVE,
+      // Bank transactions are gross amounts (tax-inclusive)
+      // Let Xero calculate tax using the account's default tax rate
+      lineAmountTypes: LineAmountTypes.Inclusive,
+      contact: tx.counterpartyName
+        ? {
+            name: tx.counterpartyName,
+          }
+        : undefined,
+      lineItems: [
+        {
+          // Clean description - tax info goes in History & Notes
+          description: tx.description,
+          quantity: 1,
+          unitAmount: Math.abs(tx.amount),
+          // Use category's reporting code if valid, otherwise default based on type
+          accountCode: this.getValidAccountCode(
+            tx.categoryReportingCode,
+            tx.id,
+            isExpense,
+          ),
+        },
+      ],
+      bankAccount: {
+        accountID: targetAccountId,
+      },
+      date: tx.date,
+      reference: tx.reference || tx.id,
+      currencyCode: tx.currency as unknown as CurrencyCode,
+    };
   }
 
   /**
@@ -655,49 +708,52 @@ export class XeroProvider extends BaseAccountingProvider {
     for (let i = 0; i < sortedTransactions.length; i += BATCH_SIZE) {
       const batch = sortedTransactions.slice(i, i + BATCH_SIZE);
 
-      const bankTransactions = batch.map((tx: MappedTransaction) => {
-        const isExpense = tx.amount < 0;
-
-        return {
-          type: isExpense
-            ? BankTransaction.TypeEnum.SPEND
-            : BankTransaction.TypeEnum.RECEIVE,
-          // Bank transactions are gross amounts (tax-inclusive)
-          // Let Xero calculate tax using the account's default tax rate
-          lineAmountTypes: LineAmountTypes.Inclusive,
-          contact: tx.counterpartyName
-            ? {
-                name: tx.counterpartyName,
-              }
-            : undefined,
-          lineItems: [
-            {
-              // Clean description - tax info goes in History & Notes
-              description: tx.description,
-              quantity: 1,
-              unitAmount: Math.abs(tx.amount),
-              // Use category's reporting code if valid, otherwise default based on type
-              accountCode: this.getValidAccountCode(
-                tx.categoryReportingCode,
-                tx.id,
-                isExpense,
-              ),
-            },
-          ],
-          bankAccount: {
-            accountID: targetAccountId,
-          },
-          date: tx.date,
-          reference: tx.reference || tx.id,
-          currencyCode: tx.currency as unknown as CurrencyCode,
-        };
+      // Map transactions with validation, tracking any that fail validation
+      const mappedResults: Array<{
+        tx: MappedTransaction;
+        bankTransaction?: BankTransaction;
+        error?: string;
+      }> = batch.map((tx: MappedTransaction) => {
+        try {
+          return {
+            tx,
+            bankTransaction: this.mapToBankTransaction(tx, targetAccountId),
+          };
+        } catch (error) {
+          return {
+            tx,
+            error: this.getErrorMessage(error),
+          };
+        }
       });
+
+      // Separate valid and failed transactions
+      const validMappings = mappedResults.filter((r) => r.bankTransaction);
+      const failedMappings = mappedResults.filter((r) => r.error);
+
+      // Record validation failures immediately
+      for (const failed of failedMappings) {
+        results.push({
+          transactionId: failed.tx.id,
+          success: false,
+          error: failed.error,
+        });
+        failedCount++;
+      }
+
+      // Skip API call if no valid transactions in this batch
+      if (validMappings.length === 0) {
+        continue;
+      }
+
+      const bankTransactions = validMappings.map((r) => r.bankTransaction!);
+      const validBatch = validMappings.map((r) => r.tx);
 
       try {
         // Use job-based idempotency key:
         // - Same job retrying = same key = no duplicate (retry safe)
         // - New export job = new key = allows re-export after deletion
-        const firstTx = batch[0];
+        const firstTx = validBatch[0];
         const idempotencyKey = firstTx
           ? generateTransactionIdempotencyKey(firstTx.id, jobId)
           : undefined;
@@ -713,9 +769,9 @@ export class XeroProvider extends BaseAccountingProvider {
 
         const createdTransactions = response.body.bankTransactions || [];
 
-        for (let j = 0; j < batch.length; j++) {
+        for (let j = 0; j < validBatch.length; j++) {
           const created = createdTransactions[j];
-          const original = batch[j];
+          const original = validBatch[j];
 
           if (created?.bankTransactionID) {
             results.push({
@@ -747,7 +803,7 @@ export class XeroProvider extends BaseAccountingProvider {
         logger.error("Xero batch sync failed", {
           provider: "xero",
           batchIndex: i,
-          batchSize: batch.length,
+          batchSize: validBatch.length,
           error: errorMessage,
           errorType: typeof error,
           errorName: error?.constructor?.name,
@@ -760,7 +816,7 @@ export class XeroProvider extends BaseAccountingProvider {
 
         // Mark all transactions in batch as failed with descriptive error
         const batchError = `Batch ${Math.floor(i / 50) + 1} failed: ${errorMessage}`;
-        for (const tx of batch) {
+        for (const tx of validBatch) {
           results.push({
             transactionId: tx.id,
             success: false,

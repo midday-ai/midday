@@ -38,6 +38,21 @@ function deriveErrorCodeFromMessage(
   ) {
     return ACCOUNTING_ERROR_CODES.FINANCIAL_YEAR_MISSING;
   }
+  // Detect invalid account errors from various providers:
+  // Xero: "Account code <number> is not valid", "Account code not found"
+  // Fortnox: "konto" (Swedish for account), error code 2000106
+  // QuickBooks: validation errors mentioning account
+  // Also detect errors thrown by our validation
+  if (
+    (messageLower.includes("account") &&
+      (messageLower.includes("invalid") ||
+        messageLower.includes("not valid") ||
+        messageLower.includes("not found"))) ||
+    messageLower.includes("konto") || // Swedish: account
+    messageLower.includes("2000106") // Fortnox: alphanumeric validation error
+  ) {
+    return ACCOUNTING_ERROR_CODES.INVALID_ACCOUNT;
+  }
   if (messageLower.includes("validation") || messageLower.includes("400")) {
     return ACCOUNTING_ERROR_CODES.VALIDATION;
   }

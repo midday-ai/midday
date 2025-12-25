@@ -42,8 +42,8 @@ const accountingQueueOptions: QueueOptions = {
 const accountingWorkerOptions: WorkerOptions = {
   connection: getRedisConnection(),
   concurrency: 10, // High parallelism - delays prevent rate limit issues
-  lockDuration: 300000, // 5 minutes
-  stalledInterval: 5 * 60 * 1000, // 5 minutes
+  lockDuration: 600000, // 10 minutes - allows ~2000 transactions at 250ms throttle
+  stalledInterval: 10 * 60 * 1000, // 10 minutes
   maxStalledCount: 1,
 };
 
