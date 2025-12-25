@@ -359,10 +359,12 @@ export async function getTransactions(
       )`,
     );
   } else if (exported === false) {
-    // Only NOT exported transactions
+    // Only NOT exported transactions (not synced to accounting)
+    // Also exclude 'excluded' and 'archived' to match getTransactionsReadyForExportCount
+    // Note: 'exported' status is for file exports, those can still be synced to accounting
     whereConditions.push(
       sql`(
-        ${transactions.status} != 'exported' AND NOT EXISTS (
+        ${transactions.status} NOT IN ('excluded', 'archived') AND NOT EXISTS (
           SELECT 1 FROM ${accountingSyncRecords}
           WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
           AND ${accountingSyncRecords.teamId} = ${teamId}

@@ -270,7 +270,7 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
               </span>
             )}
             {app.active && app.beta && (
-              <span className="text-[#878787] bg-[#F2F1EF] text-[10px] dark:bg-[#1D1D1D] px-3 py-1 rounded-full font-mono">
+              <span className="text-[#1D1D1D] bg-[#e6e6e6] text-[10px] dark:bg-[#2c2c2c] dark:text-[#F2F1EF] px-3 py-1 rounded-full font-mono">
                 Beta
               </span>
             )}
