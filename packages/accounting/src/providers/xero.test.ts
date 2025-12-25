@@ -93,6 +93,7 @@ describe("XeroProvider", () => {
       expect(XERO_SCOPES).toContain("accounting.attachments");
       expect(XERO_SCOPES).toContain("accounting.settings");
       expect(XERO_SCOPES).toContain("accounting.contacts.read");
+      expect(XERO_SCOPES).toContain("accounting.bankfeeds.read");
       expect(XERO_SCOPES).toContain("offline_access");
     });
   });
