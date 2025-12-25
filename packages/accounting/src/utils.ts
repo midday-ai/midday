@@ -204,11 +204,7 @@ export const PROVIDER_ATTACHMENT_CONFIG = {
     maxSizeBytes: 3 * 1024 * 1024, // 3 MB
   },
   fortnox: {
-    supportedTypes: new Set([
-      "application/pdf",
-      "image/jpeg",
-      "image/png",
-    ]),
+    supportedTypes: new Set(["application/pdf", "image/jpeg", "image/png"]),
     maxSizeBytes: 10 * 1024 * 1024, // 10 MB
   },
 } as const;
