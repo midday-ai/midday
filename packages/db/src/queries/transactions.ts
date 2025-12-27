@@ -161,7 +161,12 @@ export async function getTransactions(
   } else {
     // Default: pending, posted, completed, or exported (exclude archived/excluded)
     whereConditions.push(
-      inArray(transactions.status, ["pending", "posted", "completed", "exported"]),
+      inArray(transactions.status, [
+        "pending",
+        "posted",
+        "completed",
+        "exported",
+      ]),
     );
   }
 
@@ -359,10 +364,12 @@ export async function getTransactions(
       )`,
     );
   } else if (exported === false) {
-    // Only NOT exported transactions
+    // Only NOT exported transactions (not synced to accounting)
+    // Also exclude 'excluded' and 'archived' to match getTransactionsReadyForExportCount
+    // Include 'exported' in exclusion list to maintain mutual exclusivity with exported === true
     whereConditions.push(
       sql`(
-        ${transactions.status} != 'exported' AND NOT EXISTS (
+        ${transactions.status} NOT IN ('exported', 'excluded', 'archived') AND NOT EXISTS (
           SELECT 1 FROM ${accountingSyncRecords}
           WHERE ${accountingSyncRecords.transactionId} = ${transactions.id}
           AND ${accountingSyncRecords.teamId} = ${teamId}
@@ -1456,7 +1463,14 @@ type UpdateTransactionData = {
   date?: string;
   bankAccountId?: string;
   categorySlug?: string | null;
-  status?: "pending" | "archived" | "completed" | "posted" | "excluded" | "exported" | null;
+  status?:
+    | "pending"
+    | "archived"
+    | "completed"
+    | "posted"
+    | "excluded"
+    | "exported"
+    | null;
   internal?: boolean;
   note?: string | null;
   assignedId?: string | null;
@@ -1643,7 +1657,14 @@ type UpdateTransactionsData = {
   teamId: string;
   userId?: string;
   categorySlug?: string | null;
-  status?: "pending" | "archived" | "completed" | "posted" | "excluded" | "exported" | null;
+  status?:
+    | "pending"
+    | "archived"
+    | "completed"
+    | "posted"
+    | "excluded"
+    | "exported"
+    | null;
   internal?: boolean;
   note?: string | null;
   assignedId?: string | null;
@@ -2091,8 +2112,8 @@ export async function getTransactionsReadyForExportCount(
     .where(
       and(
         eq(transactions.teamId, teamId),
-        // Not excluded or archived
-        sql`${transactions.status} NOT IN ('excluded', 'archived')`,
+        // Not exported, excluded, or archived
+        sql`${transactions.status} NOT IN ('exported', 'excluded', 'archived')`,
         // Not already synced
         isNull(accountingSyncRecords.id),
       ),

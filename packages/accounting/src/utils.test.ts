@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-  ensureFileExtension,
   PROVIDER_ATTACHMENT_CONFIG,
+  ensureFileExtension,
   resolveMimeType,
 } from "./utils";
 
@@ -298,8 +298,12 @@ describe("resolveMimeType", () => {
     test("quickbooks supports PDF, JPEG, PNG, GIF, TIFF, BMP", () => {
       // All supported
       expect(
-        resolveMimeType("application/pdf", null, createPdfBuffer(), "quickbooks")
-          .mimeType,
+        resolveMimeType(
+          "application/pdf",
+          null,
+          createPdfBuffer(),
+          "quickbooks",
+        ).mimeType,
       ).toBe("application/pdf");
       expect(
         resolveMimeType("image/jpeg", null, createJpegBuffer(), "quickbooks")
@@ -473,4 +477,3 @@ describe("ensureFileExtension", () => {
     expect(ensureFileExtension("file.tiff", "image/png")).toBe("file.tiff");
   });
 });
-

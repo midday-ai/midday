@@ -31,6 +31,7 @@ export type AccountingErrorType =
   | "auth_expired"
   | "validation"
   | "not_found"
+  | "invalid_account" // Category report code doesn't match a valid account in accounting software
   | "server_error"
   | "financial_year_missing" // Fiscal year doesn't exist and can't be auto-created (past years)
   | "financial_year_setup_required" // No fiscal years exist at all, manual setup needed
@@ -55,6 +56,7 @@ export const ACCOUNTING_ERROR_CODES = {
   // Validation errors
   VALIDATION: "VALIDATION",
   NOT_FOUND: "NOT_FOUND",
+  INVALID_ACCOUNT: "INVALID_ACCOUNT",
 
   // Server errors
   SERVER_ERROR: "SERVER_ERROR",
@@ -87,7 +89,10 @@ export const ACCOUNTING_ERROR_MESSAGES: Record<AccountingErrorCode, string> = {
   [ACCOUNTING_ERROR_CODES.RATE_LIMIT]:
     "Too many requests — will retry automatically",
   [ACCOUNTING_ERROR_CODES.VALIDATION]: "Invalid data format",
-  [ACCOUNTING_ERROR_CODES.NOT_FOUND]: "Resource not found in accounting software",
+  [ACCOUNTING_ERROR_CODES.NOT_FOUND]:
+    "Resource not found in accounting software",
+  [ACCOUNTING_ERROR_CODES.INVALID_ACCOUNT]:
+    "Invalid account code — check category report code mapping",
   [ACCOUNTING_ERROR_CODES.SERVER_ERROR]:
     "Accounting software is temporarily unavailable",
   [ACCOUNTING_ERROR_CODES.ATTACHMENT_UNSUPPORTED_TYPE]:
@@ -127,6 +132,10 @@ export interface AccountingError {
     year?: number;
     earliestYear?: number;
     provider?: string;
+    // For invalid account errors
+    transactionId?: string;
+    invalidCode?: string;
+    expectedFormat?: string;
   };
 }
 

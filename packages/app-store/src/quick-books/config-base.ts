@@ -5,7 +5,8 @@ export const baseConfig = {
   name: "QuickBooks",
   id: "quickbooks",
   category: "Accounting",
-  active: false,
+  active: true,
+  beta: true,
   logo: Logo,
   short_description:
     "Export transactions and receipts to QuickBooks Online. Keep your books up-to-date without manual data entry.",

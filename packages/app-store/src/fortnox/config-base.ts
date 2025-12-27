@@ -5,7 +5,8 @@ export const baseConfig = {
   name: "Fortnox",
   id: "fortnox",
   category: "Accounting",
-  active: false,
+  active: true,
+  beta: true,
   logo: Logo,
   short_description:
     "Export transactions and receipts to Fortnox. Keep your Swedish accounting compliant and up-to-date.",

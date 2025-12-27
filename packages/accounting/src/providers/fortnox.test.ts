@@ -245,7 +245,7 @@ describe("FortnoxProvider", () => {
       expect(creditRow.Credit).toBe(500);
     });
 
-    test("uses default expense account (4000) when categoryReportingCode is invalid", async () => {
+    test("fails with INVALID_ACCOUNT error when categoryReportingCode is invalid format", async () => {
       const provider = createProvider();
 
       mockFetchFn.mockImplementation(async (url: string) => {
@@ -275,28 +275,22 @@ describe("FortnoxProvider", () => {
         date: "2024-06-15",
         description: "Lunch",
         currency: "SEK",
-        categoryReportingCode: "invalid-code", // Invalid
+        categoryReportingCode: "invalid-code", // Invalid - not 4-digit number
       };
 
-      await provider.syncTransactions({
+      const result = await provider.syncTransactions({
         transactions: [expense],
         targetAccountId: "1930",
         tenantId: "tenant-1",
         jobId: "test-job-3",
       });
 
-      const voucherCall = mockFetchFn.mock.calls.find(
-        (call: [string, RequestInit?]) =>
-          call[0].includes("/vouchers") && call[1]?.method === "POST",
-      );
-      const body = JSON.parse(
-        (voucherCall as [string, RequestInit])[1].body as string,
-      );
-
-      const debitRow = body.Voucher.VoucherRows.find(
-        (r: { Debit: number }) => r.Debit > 0,
-      );
-      expect(debitRow.Account).toBe(4000); // Default expense account
+      // Should fail with error about invalid account code
+      expect(result.success).toBe(false);
+      expect(result.failedCount).toBe(1);
+      expect(result.results[0]?.success).toBe(false);
+      expect(result.results[0]?.error).toContain("Invalid account code");
+      expect(result.results[0]?.error).toContain("invalid-code");
     });
 
     test("uses default income account (3000) when categoryReportingCode is missing", async () => {
