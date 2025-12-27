@@ -33,3 +33,12 @@ export class WhatsAppAlreadyConnectedToAnotherTeamError extends Error {
     this.name = "WhatsAppAlreadyConnectedToAnotherTeamError";
   }
 }
+
+export class TelegramAlreadyConnectedToAnotherTeamError extends Error {
+  code = "TELEGRAM_ALREADY_CONNECTED_TO_ANOTHER_TEAM" as const;
+
+  constructor() {
+    super("Telegram chat already connected to another team");
+    this.name = "TelegramAlreadyConnectedToAnotherTeamError";
+  }
+}

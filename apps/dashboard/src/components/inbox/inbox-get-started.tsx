@@ -4,6 +4,7 @@ import { revalidateInbox } from "@/actions/revalidate-action";
 import { ConnectGmail } from "@/components/inbox/connect-gmail";
 import { ConnectOutlook } from "@/components/inbox/connect-outlook";
 import { ConnectSlack } from "@/components/inbox/connect-slack";
+import { ConnectTelegram } from "@/components/inbox/connect-telegram";
 import { ConnectWhatsApp } from "@/components/inbox/connect-whatsapp";
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useRealtime } from "@/hooks/use-realtime";
@@ -104,6 +105,7 @@ export function InboxGetStarted() {
                     <div className="flex flex-col space-y-4">
                       <ConnectSlack />
                       {/* <ConnectWhatsApp /> */}
+                      {/* <ConnectTelegram /> */}
                       {user?.team?.inboxId && (
                         <CopyInput value={getInboxEmail(user.team.inboxId)} />
                       )}

@@ -12,6 +12,7 @@ import raycastApp from "./raycast/config";
 // Import client config for dashboard (includes images)
 import slackApp from "./slack/config-client";
 import stripeApp from "./stripe/config";
+import telegramApp from "./telegram/config-client";
 import whatsappApp from "./whatsapp/config-client";
 import xeroApp from "./xero/config-client";
 
@@ -24,6 +25,7 @@ export const apps = [
   fortnoxApp,
   middayDesktopApp,
   whatsappApp,
+  telegramApp,
   raycastApp,
   googleDriveApp,
   dropboxApp,

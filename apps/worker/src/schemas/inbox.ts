@@ -77,6 +77,18 @@ export const whatsappUploadSchema = z.object({
 
 export type WhatsAppUploadPayload = z.infer<typeof whatsappUploadSchema>;
 
+export const telegramUploadSchema = z.object({
+  teamId: z.string().uuid(),
+  chatId: z.number(), // Telegram chat ID
+  messageId: z.number(), // Telegram message ID
+  fileId: z.string(), // Telegram file_id
+  mimeType: z.string(),
+  filename: z.string().optional(),
+  caption: z.string().optional(),
+});
+
+export type TelegramUploadPayload = z.infer<typeof telegramUploadSchema>;
+
 // Provider schemas
 export const inboxProviderInitialSetupSchema = z.object({
   inboxAccountId: z.string().uuid(),

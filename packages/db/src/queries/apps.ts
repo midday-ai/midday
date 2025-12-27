@@ -476,3 +476,180 @@ export const updateAppTokens = async (
 
   return result;
 };
+
+// Telegram connection types
+export type TelegramConnection = {
+  chatId: number;
+  displayName?: string;
+  connectedAt: string;
+};
+
+type TelegramConfig = {
+  connections?: TelegramConnection[];
+};
+
+/**
+ * Find team by Telegram chat ID
+ * Searches all Telegram app installations for a matching chat ID in connections
+ */
+export const getAppByTelegramChatId = async (
+  db: Database,
+  chatId: number,
+) => {
+  const results = await db
+    .select()
+    .from(apps)
+    .where(
+      and(
+        eq(apps.appId, "telegram"),
+        sql`${apps.config}->'connections' @> ${JSON.stringify([{ chatId }])}::jsonb`,
+      ),
+    );
+
+  return results[0] || null;
+};
+
+export type AddTelegramConnectionParams = {
+  teamId: string;
+  chatId: number;
+  displayName?: string;
+};
+
+/**
+ * Add a Telegram connection to a team
+ * Creates the Telegram app if it doesn't exist, or adds to existing connections
+ */
+export const addTelegramConnection = async (
+  db: Database,
+  params: AddTelegramConnectionParams,
+) => {
+  const { TelegramAlreadyConnectedToAnotherTeamError } = await import("../errors");
+  const { teamId, chatId, displayName } = params;
+
+  // Check if this chat ID is already connected to any team
+  const existingConnection = await getAppByTelegramChatId(db, chatId);
+  if (existingConnection) {
+    // If already connected to this team, just return success
+    if (existingConnection.teamId === teamId) {
+      return existingConnection;
+    }
+    // If connected to a different team, throw error
+    throw new TelegramAlreadyConnectedToAnotherTeamError();
+  }
+
+  // Get existing Telegram app for this team
+  const existingApp = await getAppByAppId(db, { appId: "telegram", teamId });
+
+  const newConnection: TelegramConnection = {
+    chatId,
+    displayName,
+    connectedAt: new Date().toISOString(),
+  };
+
+  if (existingApp) {
+    // Add to existing connections
+    const config = (existingApp.config as TelegramConfig) || {};
+    const connections = config.connections || [];
+
+    const [result] = await db
+      .update(apps)
+      .set({
+        config: {
+          ...config,
+          connections: [...connections, newConnection],
+        },
+      })
+      .where(and(eq(apps.appId, "telegram"), eq(apps.teamId, teamId)))
+      .returning();
+
+    return result;
+  }
+
+  // Get first team member to use as createdBy
+  const firstMember = await db
+    .select({ userId: usersOnTeam.userId })
+    .from(usersOnTeam)
+    .where(eq(usersOnTeam.teamId, teamId))
+    .limit(1);
+
+  const createdBy = firstMember[0]?.userId || teamId;
+
+  // Create new Telegram app with this connection
+  const [result] = await db
+    .insert(apps)
+    .values({
+      appId: "telegram",
+      teamId,
+      createdBy,
+      config: {
+        connections: [newConnection],
+      },
+    })
+    .returning();
+
+  return result;
+};
+
+export type RemoveTelegramConnectionParams = {
+  teamId: string;
+  chatId: number;
+};
+
+/**
+ * Remove a Telegram connection from a team
+ */
+export const removeTelegramConnection = async (
+  db: Database,
+  params: RemoveTelegramConnectionParams,
+) => {
+  const { teamId, chatId } = params;
+
+  const existingApp = await getAppByAppId(db, { appId: "telegram", teamId });
+
+  if (!existingApp) {
+    throw new Error("Telegram app not found for this team");
+  }
+
+  const config = (existingApp.config as TelegramConfig) || {};
+  const connections = config.connections || [];
+
+  const updatedConnections = connections.filter(
+    (c) => c.chatId !== chatId,
+  );
+
+  // If no connections left, delete the app entirely
+  if (updatedConnections.length === 0) {
+    await db
+      .delete(apps)
+      .where(and(eq(apps.appId, "telegram"), eq(apps.teamId, teamId)));
+    return null;
+  }
+
+  // Update with remaining connections
+  const [result] = await db
+    .update(apps)
+    .set({
+      config: {
+        ...config,
+        connections: updatedConnections,
+      },
+    })
+    .where(and(eq(apps.appId, "telegram"), eq(apps.teamId, teamId)))
+    .returning();
+
+  return result;
+};
+
+/**
+ * Get all Telegram connections for a team
+ */
+export const getTelegramConnections = async (db: Database, teamId: string) => {
+  const app = await getAppByAppId(db, { appId: "telegram", teamId });
+
+  if (!app) {
+    return [];
+  }
+
+  const config = (app.config as TelegramConfig) || {};
+  return config.connections || [];
+};

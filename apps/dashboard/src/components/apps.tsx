@@ -1,5 +1,6 @@
 "use client";
 
+// import { ConnectTelegram } from "@/components/inbox/connect-telegram";
 // import { ConnectWhatsApp } from "@/components/inbox/connect-whatsapp";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
@@ -211,6 +212,9 @@ export function Apps() {
 
       {/* WhatsApp connect dialog - listens for openWhatsAppConnect event */}
       {/* <ConnectWhatsApp showTrigger={false} /> */}
+
+      {/* Telegram connect dialog - listens for openTelegramConnect event */}
+      {/* <ConnectTelegram showTrigger={false} /> */}
     </>
   );
 }
