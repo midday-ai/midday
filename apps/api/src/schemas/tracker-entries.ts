@@ -64,11 +64,16 @@ export const upsertTrackerEntriesSchema = z.object({
       description: "Array of dates for which to create tracker entries",
       example: ["2024-04-15", "2024-04-16"],
     }),
-  assignedId: z.string().uuid().nullable().optional().openapi({
-    description:
-      "Unique identifier of the user assigned to this tracker entry. If not provided, will use the authenticated user",
-    example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  }),
+  assignedId: z
+    .string()
+    .uuid({ message: "assignedId must be a valid UUID or null" })
+    .nullable()
+    .optional()
+    .openapi({
+      description:
+        "Unique identifier of the user assigned to this tracker entry. If not provided, will use the authenticated user",
+      example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    }),
   projectId: z.string().openapi({
     description:
       "Unique identifier of the project associated with this tracker entry",
@@ -294,11 +299,16 @@ export const startTimerSchema = z.object({
     description: "Unique identifier of the project to track time for",
     example: "b3b6e2c2-1f2a-4e3b-9c1d-2a4b6e2c21f2",
   }),
-  assignedId: z.string().uuid().optional().nullable().openapi({
-    description:
-      "Unique identifier of the user to assign the timer to. If not provided, will use the authenticated user",
-    example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  }),
+  assignedId: z
+    .string()
+    .uuid({ message: "assignedId must be a valid UUID or null" })
+    .optional()
+    .nullable()
+    .openapi({
+      description:
+        "Unique identifier of the user to assign the timer to. If not provided, will use the authenticated user",
+      example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    }),
   description: z.string().optional().nullable().openapi({
     description: "Optional description for the timer session",
     example: "Working on implementing timer feature",
@@ -340,12 +350,17 @@ export const getCurrentTimerSchema = z.object({
   }),
 });
 
-// Reuse existing trackerEntryResponseSchema but make duration nullable for running entries
+// Reuse existing trackerEntryResponseSchema but make duration and stop nullable for running entries
 export const timerResponseSchema = trackerEntryResponseSchema.extend({
   duration: z.number().nullable().openapi({
     description:
       "Duration of the timer entry in seconds. -1 indicates running, null for paused, positive number for completed",
     example: -1,
+  }),
+  stop: z.string().nullable().openapi({
+    description:
+      "Stop time of the tracker entry in ISO 8601 format. Null for running timers.",
+    example: "2024-04-15T17:00:00.000Z",
   }),
 });
 
