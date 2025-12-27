@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Updates",
-  description: "Keep up to date with product updates and announcments.",
+  description: "Keep up to date with product updates and announcements.",
 };
 
 export default async function Page() {

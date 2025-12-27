@@ -404,15 +404,7 @@ app.openapi(
   },
 );
 
-// app.post(
-//   "/:id/attachments",
-//   describeRoute({
-//     description: "Upload an attachment to a transaction",
-//     tags: ["Transactions"],
-//   }),
-// );
-
-// NOTE: This endpoint needs to be registred before :id delete
+// NOTE: This endpoint needs to be registered before :id delete
 app.openapi(
   createRoute({
     method: "delete",
