@@ -4,6 +4,7 @@ import { accountingQueue } from "../queues/accounting";
 import { documentsQueue } from "../queues/documents";
 import { inboxProviderQueue, inboxQueue } from "../queues/inbox";
 import { ratesQueue } from "../queues/rates";
+import { stripeQueue } from "../queues/stripe";
 import { transactionsQueue } from "../queues/transactions";
 import type {
   DynamicSchedulerTemplate,
@@ -31,6 +32,8 @@ function getQueueByName(queueName: string): Queue {
       return ratesQueue;
     case "accounting":
       return accountingQueue;
+    case "stripe":
+      return stripeQueue;
     default:
       throw new Error(`Unknown queue: ${queueName}`);
   }

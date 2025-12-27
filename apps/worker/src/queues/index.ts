@@ -10,6 +10,8 @@ import { inboxProviderQueue, inboxQueue } from "./inbox";
 import { inboxProviderQueueConfig, inboxQueueConfig } from "./inbox.config";
 import { ratesQueue } from "./rates";
 import { ratesQueueConfig } from "./rates.config";
+import { stripeQueue } from "./stripe";
+import { stripeQueueConfig } from "./stripe.config";
 import { transactionsQueue } from "./transactions";
 import { transactionsQueueConfig } from "./transactions.config";
 
@@ -25,6 +27,7 @@ export const queueConfigs: QueueConfig[] = [
   embeddingsQueueConfig,
   ratesQueueConfig,
   accountingQueueConfig,
+  stripeQueueConfig,
 ];
 
 /**
@@ -40,5 +43,6 @@ export function getAllQueues(): Queue[] {
     embeddingsQueue,
     ratesQueue,
     accountingQueue,
+    stripeQueue,
   ];
 }

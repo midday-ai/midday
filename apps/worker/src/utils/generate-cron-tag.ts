@@ -34,6 +34,21 @@ export function generateQuarterDailyCronTag(id: string): string {
   return `${minute} */6 * * *`;
 }
 
+export function generateBiHourlyCronTag(id: string): string {
+  // Use id to generate a deterministic random minute
+  const hash = Array.from(id).reduce(
+    (acc, char) => acc + char.charCodeAt(0),
+    0,
+  );
+
+  // Generate minute (0-59) for consistency across all bi-hourly intervals
+  const minute = hash % 60;
+
+  // Return cron expression that runs every 2 hours at the same minute
+  // Format: minute */2 * * * (runs at 00:XX, 02:XX, 04:XX, ... 22:XX)
+  return `${minute} */2 * * *`;
+}
+
 /**
  * Generate a deterministic cron pattern with an hour offset
  * Used to spread load across different times and avoid running at same time as other jobs
