@@ -195,6 +195,17 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
         return;
       }
 
+      // Handle apps with installUrl (like Midday Desktop download page)
+      if (app.installUrl) {
+        if (isDesktopApp()) {
+          openUrl(app.installUrl);
+        } else {
+          window.open(app.installUrl, "_blank");
+        }
+        setLoading(false);
+        return;
+      }
+
       if (app.onInitialize) {
         const supabase = createClient();
         const {
@@ -222,16 +233,6 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
             setLoading(false);
           },
         });
-      } else if (app.type === "external" && app.installUrl) {
-        // Open the install URL for the OAuth application
-        if (isDesktopApp()) {
-          openUrl(app.installUrl);
-        } else {
-          window.open(app.installUrl, "_blank");
-        }
-        // Reset loading state after opening URL
-        // External apps handle their own OAuth flow, so we can't track completion
-        setLoading(false);
       }
     } catch (error) {
       setLoading(false);
@@ -281,34 +282,47 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
         </CardContent>
 
         <div className="px-6 pb-6 flex gap-2 mt-auto">
-          <Button
-            variant="outline"
-            className="w-full"
-            disabled={!app.active}
-            onClick={() => setParams({ app: app.id })}
-          >
-            Details
-          </Button>
-
-          {app.installed ? (
-            <SubmitButton
-              variant="outline"
-              className="w-full"
-              onClick={handleDisconnect}
-              isSubmitting={isDisconnecting}
-            >
-              Disconnect
-            </SubmitButton>
-          ) : (
-            <SubmitButton
+          {app.installUrl ? (
+            <Button
               variant="outline"
               className="w-full"
               onClick={handleOnInitialize}
               disabled={!app.active}
-              isSubmitting={isInstalling}
             >
-              Install
-            </SubmitButton>
+              Download
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                className="w-full"
+                disabled={!app.active}
+                onClick={() => setParams({ app: app.id })}
+              >
+                Details
+              </Button>
+
+              {app.installed ? (
+                <SubmitButton
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleDisconnect}
+                  isSubmitting={isDisconnecting}
+                >
+                  Disconnect
+                </SubmitButton>
+              ) : (
+                <SubmitButton
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleOnInitialize}
+                  disabled={!app.active}
+                  isSubmitting={isInstalling}
+                >
+                  Install
+                </SubmitButton>
+              )}
+            </>
           )}
         </div>
 
@@ -378,7 +392,7 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
                     disabled={!app.active}
                     isSubmitting={isInstalling}
                   >
-                    Install
+                    {app.installUrl ? "Download" : "Install"}
                   </SubmitButton>
                 )}
               </div>

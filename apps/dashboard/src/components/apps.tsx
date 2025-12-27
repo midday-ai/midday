@@ -113,6 +113,11 @@ export function Apps() {
           ?.settings as Record<string, any>) || undefined,
       // Include inbox account ID for Gmail/Outlook disconnect
       inboxAccountId: inboxAccount?.id,
+      // Include installUrl for apps with external download pages
+      installUrl:
+        "installUrl" in app && typeof app.installUrl === "string"
+          ? app.installUrl
+          : undefined,
     };
   });
 
