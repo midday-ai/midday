@@ -41,6 +41,7 @@ const oauthAppConfig: Record<
   xero: { endpoint: "/apps/xero/install-url", queryKey: "apps" },
   quickbooks: { endpoint: "/apps/quickbooks/install-url", queryKey: "apps" },
   fortnox: { endpoint: "/apps/fortnox/install-url", queryKey: "apps" },
+  stripe: { endpoint: "/apps/stripe/install-url", queryKey: "apps" },
 };
 
 interface UnifiedAppProps {

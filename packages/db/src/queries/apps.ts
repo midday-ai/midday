@@ -476,3 +476,46 @@ export const updateAppTokens = async (
 
   return result;
 };
+
+export type GetAppByIdParams = {
+  id: string;
+};
+
+/**
+ * Get app by its UUID primary key
+ */
+export const getAppById = async (db: Database, params: GetAppByIdParams) => {
+  const [result] = await db
+    .select()
+    .from(apps)
+    .where(eq(apps.id, params.id))
+    .limit(1);
+
+  return result || null;
+};
+
+export type UpdateAppConfigParams = {
+  id: string;
+  config: Record<string, unknown>;
+};
+
+/**
+ * Update app config by ID (merges with existing config)
+ * Uses JSONB merge to preserve other config fields
+ */
+export const updateAppConfig = async (
+  db: Database,
+  params: UpdateAppConfigParams,
+) => {
+  const { id, config } = params;
+
+  const [result] = await db
+    .update(apps)
+    .set({
+      config: sql`COALESCE(${apps.config}, '{}'::jsonb) || ${JSON.stringify(config)}::jsonb`,
+    })
+    .where(eq(apps.id, id))
+    .returning();
+
+  return result || null;
+};

@@ -7,6 +7,7 @@ import {
   inboxStaticSchedulers,
 } from "./inbox.config";
 import { ratesStaticSchedulers } from "./rates.config";
+import { stripeDynamicSchedulerTemplates } from "./stripe.config";
 
 /**
  * All static scheduler configurations
@@ -24,4 +25,5 @@ export const staticSchedulerConfigs: StaticSchedulerConfig[] = [
  */
 export const dynamicSchedulerTemplates: DynamicSchedulerTemplate[] = [
   ...inboxDynamicSchedulerTemplates,
+  ...stripeDynamicSchedulerTemplates,
 ];

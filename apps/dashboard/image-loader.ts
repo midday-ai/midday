@@ -6,6 +6,25 @@ interface ImageLoaderParams {
 
 const CDN_URL = "https://midday.ai";
 
+/**
+ * Check if we should skip CDN optimization (not production)
+ * Uses environment variables for reliable detection in both SSR and client
+ */
+function shouldSkipCdn(): boolean {
+  // Check Vercel environment
+  if (process.env.VERCEL_ENV === "production") {
+    return false;
+  }
+
+  // Check NODE_ENV
+  if (process.env.NODE_ENV === "production") {
+    return false;
+  }
+
+  // Not production = skip CDN
+  return true;
+}
+
 export default function imageLoader({
   src,
   width,
@@ -34,9 +53,42 @@ export default function imageLoader({
     }
   }
 
-  // Existing logic for other URLs
+  // Skip CDN for development/localhost (uses environment variables)
+  if (shouldSkipCdn()) {
+    // Handle relative paths from require() - these work directly in Next.js
+    // Paths like /_next/static/media/stripe.jpg or /static/media/stripe.jpg
+    if (src.startsWith("/")) {
+      return src;
+    }
+    // Handle full localhost URLs
+    if (
+      src.startsWith("http://localhost") ||
+      src.startsWith("http://127.0.0.1")
+    ) {
+      return src;
+    }
+    // For any other paths in development, return as-is
+    return src;
+  }
+
+  // Production logic below
+  // Handle relative paths from require() - static assets don't need CDN
+  // Paths like /static/media/stripe.jpg are served by Next.js
+  if (src.startsWith("/") && !src.startsWith("/_next")) {
+    return src;
+  }
+
+  // Handle Next.js static assets - these are already optimized
+  // Only apply CDN to non-static _next paths if needed
+  if (src.startsWith("/_next/static")) {
+    return src; // Static assets are already optimized, return as-is
+  }
+
+  // Other _next paths (like dynamic routes)
   if (src.startsWith("/_next")) {
     return `${CDN_URL}/cdn-cgi/image/width=${width},quality=${quality}/https://app.midday.ai${src}`;
   }
+
+  // For external URLs in production, use CDN
   return `${CDN_URL}/cdn-cgi/image/width=${width},quality=${quality}/${src}`;
 }
