@@ -45,7 +45,6 @@ export const XERO_SCOPES = [
   "accounting.attachments",
   "accounting.settings",
   "accounting.contacts.read",
-  "accounting.bankfeeds.read",
   "offline_access",
 ];
 
