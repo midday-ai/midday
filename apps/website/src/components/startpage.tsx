@@ -51,9 +51,9 @@ export function StartPage() {
     {
       title: 'All transactions in one place',
       subtitle:
-        'Every payment in and out of your business shows up automatically.',
+        'Every payment in and out of the business shows up automatically.',
       mergedText:
-        'All transactions in one place. Every payment in and out of your business shows up automatically.',
+        'All transactions in one place. Every payment in and out of the business shows up automatically.',
       illustration: 'animation',
     },
     {
@@ -65,19 +65,19 @@ export function StartPage() {
       illustration: 'animation',
     },
     {
-      title: 'You stay in control',
+      title: "Understand what's happening",
       subtitle:
-        'Your financial overview and widgets stay up to date as things come in.',
+        'The financial overview and widgets show the current state of the business and why.',
       mergedText:
-        'You stay in control. Your financial overview and widgets stay up to date as things come in.',
+        "Understand what's happening. The financial overview and widgets show the current state of the business and why.",
       illustration: '/illustrations/Files.svg',
     },
     {
-      title: 'You stay informed',
+      title: 'Stay updated and in control',
       subtitle:
-        'Ask questions, get weekly summaries, and see what changed without digging.',
+        'Weekly summaries and questions keep the business up to date without constant checking.',
       mergedText:
-        'You stay informed. Ask questions, get weekly summaries, and see what changed without digging.',
+        'Stay updated and in control. Weekly summaries and questions keep the business up to date without constant checking.',
       illustration: 'animation',
     },
   ]

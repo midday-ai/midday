@@ -30,6 +30,16 @@ export function TransactionFlowAnimation({
   const [showAccounts, setShowAccounts] = useState(false)
   const [showArrows, setShowArrows] = useState(false)
   const [showTransactions, setShowTransactions] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Account nodes positioned horizontally at the top, centered
   // Use responsive spacing that adapts via viewBox scaling
@@ -195,8 +205,10 @@ export function TransactionFlowAnimation({
 
   // Straight line paths from top accounts down to transaction list
   // Lines go straight down from each account node to the table
-  // The SVG viewBox is 500x200, so lines should end at y=200 to connect to table
-  const transactionListTopY = 200
+  // The SVG viewBox is 500x140 on mobile, 500x200 on desktop
+  // Lines end at the bottom of the viewBox to connect to table
+  const transactionListTopY = isMobile ? 140 : 200
+  const viewBoxHeight = isMobile ? 140 : 200
   
   const arrowPaths = [
     { 
@@ -279,10 +291,10 @@ export function TransactionFlowAnimation({
       {/* Main content area */}
       <div className="flex-1 relative overflow-hidden flex flex-col">
         {/* SVG for account nodes and arrows */}
-        <div className="flex-shrink-0 h-[180px] md:h-[200px] relative overflow-hidden">
+        <div className="flex-shrink-0 h-[140px] md:h-[200px] relative overflow-hidden">
           <svg
             className="w-full h-full"
-            viewBox="0 0 500 200"
+            viewBox={`0 0 500 ${viewBoxHeight}`}
             preserveAspectRatio="xMidYMin meet"
           >
           {/* Account nodes horizontally at the top */}
@@ -408,8 +420,7 @@ export function TransactionFlowAnimation({
 
         {/* Transaction list full width below - Midday table style */}
         <div className="flex-1 min-h-0 overflow-hidden border border-border bg-background">
-          <div className="h-full overflow-y-auto overflow-x-auto">
-            <table className="w-full border-collapse min-w-[400px] md:min-w-[450px]">
+          <table className="w-full border-collapse">
               <thead className="sticky top-0 z-10 bg-secondary border-b border-border">
                 <tr className="h-[28px] md:h-[32px]">
                   <th className="w-[60px] md:w-[70px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">Date</th>
@@ -471,7 +482,6 @@ export function TransactionFlowAnimation({
                 ))}
               </tbody>
             </table>
-          </div>
         </div>
       </div>
     </div>

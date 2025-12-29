@@ -98,7 +98,7 @@ export function AIAssistantAnimation({
         elements.push(
           <h1
             key={index}
-            className="text-[14px]  mb-1 mt-2 first:mt-0 text-foreground"
+            className="text-[14px] mb-1 md:mb-2 mt-2 md:mt-3 first:mt-0 text-foreground"
           >
             {line.slice(2)}
           </h1>,
@@ -107,7 +107,7 @@ export function AIAssistantAnimation({
         elements.push(
           <h2
             key={index}
-            className="text-[12px]  mb-1 mt-2 text-foreground"
+            className="text-[12px] mb-1 md:mb-2 mt-2 md:mt-3 text-foreground"
           >
             {line.slice(3)}
           </h2>,
@@ -116,7 +116,7 @@ export function AIAssistantAnimation({
         elements.push(
           <p
             key={index}
-            className="text-[12px] leading-[16px] text-foreground"
+            className="text-[12px] leading-[16px] md:leading-[18px] text-foreground mb-1 md:mb-1.5"
           >
             {line}
           </p>,
@@ -234,7 +234,7 @@ export function AIAssistantAnimation({
   return (
     <div className="w-full h-full bg-background flex flex-col relative">
       <div className="flex-1 px-2 md:px-3 py-2 md:py-3 overflow-hidden">
-        <div className="space-y-2 h-full flex flex-col">
+        <div className="space-y-2 md:space-y-4 h-full flex flex-col">
           <div className="flex justify-end">
             <div
               className={`px-2 py-1 max-w-[85%] md:max-w-xs rounded-bl-[100px] rounded-tl-[100px] bg-secondary transition-opacity duration-75 ease-out ${
@@ -259,14 +259,14 @@ export function AIAssistantAnimation({
             )}
 
             {displayedSegments.map((segment, index) => (
-              <div key={`${segment.id}-${index}`}>
+              <div key={`${segment.id}-${index}`} className={index > 0 ? 'mt-3 md:mt-5' : ''}>
                 <div className="flex justify-start">
                   <div className="flex flex-col max-w-full w-full">
                     <div className="prose prose-sm max-w-none">
                       {renderMarkdown(segment.text)}
                     </div>
                     {!segment.isComplete && (
-                      <div className="flex items-center gap-0.5 mt-2">
+                      <div className="flex items-center gap-0.5 mt-2 md:mt-3">
                         <div
                           className="w-0.5 h-0.5 bg-foreground animate-pulse"
                           style={{ borderRadius: '0' }}
@@ -291,7 +291,7 @@ export function AIAssistantAnimation({
                 </div>
 
                 {segment.isComplete && segment.showCards && showCards && (
-                  <div className="flex justify-start mt-4">
+                  <div className="flex justify-start mt-4 md:mt-6">
                     <div className="w-full">
                       <div className="grid grid-cols-2 gap-2 md:gap-3">
                         {cards.map((card, cardIndex) => (
@@ -324,7 +324,7 @@ export function AIAssistantAnimation({
                 {segment.isComplete &&
                   index === displayedSegments.length - 1 &&
                   activeToolCall && (
-                    <div className="flex justify-start mt-3 animate-fade-in">
+                    <div className="flex justify-start mt-3 md:mt-4 animate-fade-in">
                       <div className="px-2 py-1 flex items-center gap-2 h-6 w-fit bg-secondary border border-border">
                         <MaterialIcon
                           name={activeToolCall.icon as keyof typeof IconMap}
