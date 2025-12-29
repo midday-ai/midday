@@ -261,7 +261,7 @@ export function AIAssistantAnimation({
             )}
 
             {displayedSegments.map((segment, index) => (
-              <div key={segment.id}>
+              <div key={`${segment.id}-${index}`}>
                 <div className="flex justify-start">
                   <div className="flex flex-col max-w-full w-full">
                     <div className="prose prose-sm max-w-none">
