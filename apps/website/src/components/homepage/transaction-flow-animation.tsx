@@ -32,6 +32,7 @@ export function TransactionFlowAnimation({
   const [showTransactions, setShowTransactions] = useState(false)
 
   // Account nodes positioned horizontally at the top, centered
+  // Use responsive spacing that adapts via viewBox scaling
   const topY = 80
   const nodeSpacing = 90
   const viewBoxWidth = 500
@@ -271,19 +272,19 @@ export function TransactionFlowAnimation({
   return (
     <div className="w-full h-full bg-background flex flex-col relative overflow-hidden">
       {/* Header */}
-      <div className="px-3 pt-3 pb-2 border-b border-border">
-        <h3 className="text-[14px] text-foreground">Transactions</h3>
+      <div className="px-2 md:px-3 pt-2 md:pt-3 pb-1.5 md:pb-2 border-b border-border">
+        <h3 className="text-[13px] md:text-[14px] text-foreground">Transactions</h3>
       </div>
 
       {/* Main content area */}
       <div className="flex-1 relative overflow-hidden flex flex-col">
         {/* SVG for account nodes and arrows */}
-        <svg
-          className="absolute top-0 left-0 right-0 w-full"
-          style={{ height: 'calc(100% - 450px)' }}
-          viewBox="0 0 500 200"
-          preserveAspectRatio="xMidYMin meet"
-        >
+        <div className="flex-shrink-0 h-[180px] md:h-[200px] relative overflow-hidden">
+          <svg
+            className="w-full h-full"
+            viewBox="0 0 500 200"
+            preserveAspectRatio="xMidYMin meet"
+          >
           {/* Account nodes horizontally at the top */}
           {accountNodes.map((node, index) => (
             <g key={node.id}>
@@ -307,6 +308,45 @@ export function TransactionFlowAnimation({
                   ease: 'easeOut',
                 }}
               />
+              {/* Account icon inside the container */}
+              <foreignObject
+                x={node.x - 18}
+                y={node.y - 18}
+                width={36}
+                height={36}
+                style={{ overflow: 'visible' }}
+              >
+                <div
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: showAccounts ? 1 : 0 }}
+                    transition={{
+                      duration: 0.3,
+                      delay: index * 0.1 + 0.15,
+                    }}
+                    style={{
+                      color: 'hsl(var(--muted-foreground))',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <MaterialIcon
+                      name="account_balance"
+                      size={18}
+                    />
+                  </motion.div>
+                </div>
+              </foreignObject>
+              {/* Account label - hidden on mobile to save space */}
               <motion.text
                 x={node.x}
                 y={node.y - 25}
@@ -319,6 +359,7 @@ export function TransactionFlowAnimation({
                   duration: 0.3,
                   delay: index * 0.1 + 0.2,
                 }}
+                className="hidden md:block"
               >
                 {node.label}
               </motion.text>
@@ -330,8 +371,8 @@ export function TransactionFlowAnimation({
             const pathId = `arrow-${arrow.id}`
             // Create a straight line path
             const pathD = `M ${arrow.from.x} ${arrow.from.y} L ${arrow.to.x} ${arrow.to.y}`
-            const dashLength = 10 // Length of dash
-            const gapLength = 6 // Length of gap
+            const dashLength = 4 // Length of dash
+            const gapLength = 3 // Length of gap
             const totalDashLength = dashLength + gapLength
 
             return (
@@ -362,19 +403,20 @@ export function TransactionFlowAnimation({
               />
             )
           })}
-        </svg>
+          </svg>
+        </div>
 
-        {/* Transaction list full width below - Midday table style (longer, moved up) */}
-        <div className="absolute bottom-0 left-0 right-0 h-[450px] overflow-hidden border border-border bg-background">
-          <div className="h-full overflow-y-auto">
-            <table className="w-full border-collapse">
+        {/* Transaction list full width below - Midday table style */}
+        <div className="flex-1 min-h-0 overflow-hidden border border-border bg-background">
+          <div className="h-full overflow-y-auto overflow-x-auto">
+            <table className="w-full border-collapse min-w-[480px] md:min-w-[530px]">
               <thead className="sticky top-0 z-10 bg-secondary border-b border-border">
-                <tr className="h-[32px]">
-                  <th className="w-[70px] px-2 text-left text-[11px] font-medium text-muted-foreground border-r border-border">Date</th>
-                  <th className="px-2 text-left text-[11px] font-medium text-muted-foreground border-r border-border">Description</th>
-                  <th className="w-[90px] px-2 text-left text-[11px] font-medium text-muted-foreground border-r border-border">Amount</th>
-                  <th className="w-[90px] px-2 text-left text-[11px] font-medium text-muted-foreground border-r border-border">Tax</th>
-                  <th className="w-[140px] px-2 text-left text-[11px] font-medium text-muted-foreground">Category</th>
+                <tr className="h-[28px] md:h-[32px]">
+                  <th className="w-[60px] md:w-[70px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">Date</th>
+                  <th className="w-[120px] md:w-[140px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">Description</th>
+                  <th className="w-[80px] md:w-[90px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">Amount</th>
+                  <th className="w-[80px] md:w-[90px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">Tax</th>
+                  <th className="w-[120px] md:w-[140px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground">Category</th>
                 </tr>
               </thead>
               <tbody>
@@ -391,40 +433,42 @@ export function TransactionFlowAnimation({
                       delay: index * 0.08,
                       ease: 'easeOut',
                     }}
-                    className="h-[32px] border-b border-border bg-background hover:bg-secondary transition-colors"
+                    className="h-[28px] md:h-[32px] border-b border-border bg-background hover:bg-secondary transition-colors"
                   >
                     {/* Date */}
-                    <td className="w-[70px] px-2 text-[11px] text-muted-foreground border-r border-border">
+                    <td className="w-[60px] md:w-[70px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-muted-foreground border-r border-border">
                       {transaction.date}
                     </td>
 
                     {/* Description */}
-                    <td className={`px-2 text-[11px] border-r border-border ${
+                    <td className={`w-[120px] md:w-[140px] px-1.5 md:px-2 text-[10px] md:text-[11px] border-r border-border ${
                       transaction.amount > 0 ? 'text-[#4CAF50]' : 'text-foreground'
                     }`}>
-                      {transaction.description}
+                      <div className="truncate" title={transaction.description}>
+                        {transaction.description}
+                      </div>
                     </td>
 
                     {/* Amount */}
-                    <td className={`w-[90px] px-2 text-[11px] border-r border-border ${
+                    <td className={`w-[80px] md:w-[90px] px-1.5 md:px-2 text-[10px] md:text-[11px] border-r border-border ${
                       transaction.amount > 0 ? 'text-[#4CAF50]' : 'text-foreground'
                     }`}>
                       {transaction.amount > 0 ? '+' : '-'}{formatAmount(transaction.amount)} kr
                     </td>
 
                     {/* Tax Amount */}
-                    <td className="w-[90px] px-2 text-[11px] text-foreground border-r border-border">
+                    <td className="w-[80px] md:w-[90px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-foreground border-r border-border">
                       {formatAmount(transaction.taxAmount)} kr
                     </td>
 
                     {/* Category */}
-                    <td className="w-[140px] px-2">
-                      <div className="flex items-center gap-1.5">
+                    <td className="w-[120px] md:w-[140px] px-1.5 md:px-2">
+                      <div className="flex items-center gap-1 md:gap-1.5">
                         <div 
-                          className="w-2.5 h-2.5"
+                          className="w-2 h-2 md:w-2.5 md:h-2.5 flex-shrink-0"
                           style={{ backgroundColor: transaction.categoryColor }}
                         />
-                        <span className="text-[11px] text-foreground">
+                        <span className="text-[10px] md:text-[11px] text-foreground truncate">
                           {transaction.category}
                         </span>
                       </div>

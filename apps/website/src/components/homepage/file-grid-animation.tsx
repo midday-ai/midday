@@ -109,9 +109,9 @@ export function FileGridAnimation({
 
   return (
     <div className="w-full h-full bg-background flex flex-col">
-      <div className="px-3 pt-3 pb-2">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-[14px] text-foreground ">Files</h3>
+      <div className="px-2 md:px-3 pt-2 md:pt-3 pb-1.5 md:pb-2">
+        <div className="flex items-center justify-between mb-2 md:mb-3">
+          <h3 className="text-[13px] md:text-[14px] text-foreground">Files</h3>
           <div className="flex items-center gap-2">
             <button className="w-6 h-6 flex items-center justify-center hover:bg-muted transition-colors">
               <MaterialIcon name="more_vert" className="text-sm text-muted-foreground" size={16} />
@@ -124,25 +124,25 @@ export function FileGridAnimation({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search files..."
-            className="w-full bg-background border border-border px-3 py-2 text-[12px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-border/50 rounded-none"
+            className="w-full bg-background border border-border px-2 md:px-3 py-1.5 md:py-2 text-[11px] md:text-[12px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-border/50 rounded-none"
           />
           <MaterialIcon
             name="search"
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground"
-            size={16}
+            className="absolute right-2 md:right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground"
+            size={14}
           />
         </div>
       </div>
 
-      <div className="flex-1 px-3 pb-3 overflow-y-auto mt-3">
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 h-full">
+      <div className="flex-1 px-2 md:px-3 pb-2 md:pb-3 overflow-y-auto mt-2 md:mt-3">
+        <div className="grid grid-cols-2 gap-2 md:gap-3 h-full">
           {filtered.slice(0, 6).map((f, idx) => (
             <motion.div
               key={f.id}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: showCards ? 1 : 0, y: showCards ? 0 : 12 }}
               transition={{ duration: 0.25, delay: showCards ? idx * 0.08 : 0 }}
-              className="bg-secondary border border-border p-2 sm:p-3 flex flex-col gap-2 h-full min-h-[140px]"
+              className="bg-secondary border border-border p-1.5 md:p-2 lg:p-3 flex flex-col gap-1.5 md:gap-2 h-full min-h-[120px] md:min-h-[140px]"
             >
               {idx === 0 && !firstCardLoaded ? (
                 <>
@@ -183,13 +183,13 @@ export function FileGridAnimation({
               ) : (
                 <>
                   <div className="flex flex-col">
-                    <div className="text-[11px] text-foreground  mb-1">
+                    <div className="text-[10px] md:text-[11px] text-foreground mb-0.5 md:mb-1">
                       {f.title}
                     </div>
-                    <div className="text-[9px] text-muted-foreground mb-2">
+                    <div className="text-[8px] md:text-[9px] text-muted-foreground mb-1.5 md:mb-2">
                       {f.desc}
                     </div>
-                    <div className="text-[9px] text-muted-foreground leading-relaxed">
+                    <div className="text-[8px] md:text-[9px] text-muted-foreground leading-relaxed">
                       {f.description}
                     </div>
                   </div>
@@ -197,9 +197,9 @@ export function FileGridAnimation({
                     {f.tags.slice(0, 2).map((tag) => (
                       <div
                         key={tag}
-                        className="inline-flex items-center h-4 px-1.5 bg-muted rounded-full"
+                        className="inline-flex items-center h-3.5 md:h-4 px-1 md:px-1.5 bg-muted rounded-full"
                       >
-                        <span className="text-[9px] leading-none text-muted-foreground">
+                        <span className="text-[8px] md:text-[9px] leading-none text-muted-foreground">
                           {tag}
                         </span>
                       </div>

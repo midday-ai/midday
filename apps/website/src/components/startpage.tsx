@@ -20,6 +20,7 @@ import { AIAssistantAnimation } from './homepage/ai-assistant-animation'
 import { InvoicePromptAnimation } from './homepage/invoice-prompt-animation'
 import { InboxMatchAnimation } from './homepage/inbox-match-animation'
 import { FileGridAnimation } from './homepage/file-grid-animation'
+import { DashboardAnimation } from './homepage/dashboard-animation'
 import { TransactionFlowAnimation } from './homepage/transaction-flow-animation'
 import { MaterialIcon, IconMap } from './homepage/icon-mapping'
 
@@ -48,35 +49,35 @@ export function StartPage() {
 
   const features = [
     {
-      title: 'Transactions flow in automatically',
+      title: 'All transactions in one place',
       subtitle:
-        'Activity from your accounts is continuously pulled in and normalized behind the scenes.',
+        'Every payment in and out of your business shows up automatically.',
       mergedText:
-        'Transactions flow in automatically. Activity from your accounts is continuously pulled in and normalized behind the scenes.',
+        'All transactions in one place. Every payment in and out of your business shows up automatically.',
       illustration: 'animation',
     },
     {
-      title: 'Receipts are pulled and matched',
+      title: 'Reconciliation gets handled',
       subtitle:
-        'Receipts and invoices are fetched from email and payments and matched to the right transactions.',
+        'Receipts, invoices, and transactions are matched so nothing needs manual cleanup.',
       mergedText:
-        'Receipts are pulled and matched. Receipts and invoices are fetched from email and payments and matched to the right transactions.',
+        'Reconciliation gets handled. Receipts, invoices, and transactions are matched so nothing needs manual cleanup.',
       illustration: 'animation',
     },
     {
-      title: 'Everything stays in sync',
+      title: 'You stay in control',
       subtitle:
-        'Balances, categories, and summaries update together as new data arrives.',
+        'Your financial overview and widgets stay up to date as things come in.',
       mergedText:
-        'Everything stays in sync. Balances, categories, and summaries update together as new data arrives.',
+        'You stay in control. Your financial overview and widgets stay up to date as things come in.',
       illustration: '/illustrations/Files.svg',
     },
     {
-      title: 'Your business becomes understandable',
+      title: 'You stay informed',
       subtitle:
-        'You see a clear financial picture that reflects what\'s actually happening in your business.',
+        'Ask questions, get weekly summaries, and see what changed without digging.',
       mergedText:
-        'Your business becomes understandable. You see a clear financial picture that reflects what\'s actually happening in your business.',
+        'You stay informed. Ask questions, get weekly summaries, and see what changed without digging.',
       illustration: 'animation',
     },
   ]
@@ -319,7 +320,7 @@ export function StartPage() {
                       ) : index === 1 ? (
                         <InboxMatchAnimation onComplete={undefined} />
                       ) : index === 2 ? (
-                        <FileGridAnimation onComplete={undefined} />
+                        <DashboardAnimation onComplete={undefined} />
                       ) : index === 3 ? (
                         <AIAssistantAnimation onComplete={undefined} />
                       ) : (
@@ -456,7 +457,7 @@ export function StartPage() {
                     }
                   />
                 ) : activeFeature === 2 ? (
-                  <FileGridAnimation
+                  <DashboardAnimation
                     onComplete={() =>
                       setActiveFeature((prev) => (prev + 1) % features.length)
                     }
