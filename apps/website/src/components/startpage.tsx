@@ -47,36 +47,36 @@ export function StartPage() {
 
   const features = [
     {
-      title: 'Your financial co-pilot',
+      title: 'The story behind the numbers',
       subtitle:
-        'Your assistant keeps you informed with real-time insights, timely nudges and helpful reminders so you stay in control without the noise.',
+        'Weekly insights and explanations that show what changed and why.',
       mergedText:
-        'Your financial co-pilot keeps you informed with real-time insights, timely nudges and helpful reminders so you stay in control without the noise.',
+        'The story behind the numbers. Weekly insights and explanations that show what changed and why.',
       illustration: 'animation',
     },
     {
-      title: 'Auto-matched receipts from Gmail',
+      title: 'Everything stays clean in the background',
       subtitle:
-        'Auto-matched receipts from Gmail are automatically pulled and matched to the right transactions, helping you save time and money.',
+        'Transactions and receipts are organized automatically without manual work.',
       mergedText:
-        'Auto-matched receipts from Gmail are automatically pulled and matched to the right transactions, helping you save time and money.',
+        'Everything stays clean in the background. Transactions and receipts are organized automatically without manual work.',
       illustration: '/illustrations/Mail.svg',
     },
     {
-      title: 'Actions, not just answers',
+      title: 'Context makes answers better',
       subtitle:
-        'Ask the assistant to send an invoice, track time, create reports, or organize files. Behind the scenes, agents handle the busywork while you keep moving.',
+        'Files, invoices, customers, and projects give every answer real business context.',
       mergedText:
-        'Actions, not just answers as you can ask the assistant to send an invoice, track time, create reports, or organize files while agents handle the busywork behind the scenes so you can keep moving.',
-      illustration: '/illustrations/Actions.svg',
+        'Context makes answers better. Files, invoices, customers, and projects give every answer real business context.',
+      illustration: '/illustrations/Files.svg',
     },
     {
-      title: 'Files are tagged and always findable',
+      title: 'Revenue flows into the picture',
       subtitle:
-        'Agents automatically tag, sort and link your files behind the scenes so everything is always in the right place without you lifting a finger.',
+        'Invoicing and time tracking update your financial overview as work happens.',
       mergedText:
-        'Files are tagged and always findable as Files-agent automatically tags, sorts, and links them behind the scenes so everything stays in the right place without you lifting a finger.',
-      illustration: '/illustrations/Files.svg',
+        'Revenue flows into the picture. Invoicing and time tracking update your financial overview as work happens.',
+      illustration: '/illustrations/Actions.svg',
     },
   ]
 
@@ -132,15 +132,12 @@ export function StartPage() {
             <div className="space-y-4 text-center max-w-xl px-2">
               <h1 className="font-serif text-2xl sm:text-3xl md:text-3xl lg:text-2xl xl:text-2xl 2xl:text-2xl leading-tight">
                 <span className="text-foreground">
-                  Give your small business the financial superpowers of a large
-                  one.
+                  For founders who are tired of guessing how their business is doing
                 </span>
               </h1>
 
               <p className="text-muted-foreground text-sm sm:text-base leading-relaxed font-sans max-w-md">
-                With your AI finance assistant, you get automated reconciliation,
-                invoicing, and real-time insights without needing a finance
-                team.
+                A reconciled financial picture that explains itself, without spreadsheets or manual cleanup.
               </p>
             </div>
 
@@ -151,7 +148,7 @@ export function StartPage() {
                   className="w-full btn-inverse h-11 px-5 transition-colors"
                 >
                   <span className="text-inherit text-sm ">
-                    Meet your assistant
+                    See my business
                   </span>
                 </Button>
               </div>
@@ -214,14 +211,11 @@ export function StartPage() {
                   <div className="space-y-3">
                     <h1 className="font-serif text-xl lg:text-2xl xl:text-3xl 2xl:text-3xl leading-tight lg:leading-[1.6] xl:leading-[1.3] text-left">
                       <span className="text-foreground">
-                        Give your small business the financial superpowers of a
-                        large one.
+                        For founders who are tired of guessing how their business is doing
                       </span>
                     </h1>
                     <p className="font-sans text-sm text-muted-foreground leading-relaxed text-left">
-                      With your AI finance assistant, you get automated
-                      reconciliation, invoicing, and real-time insights without
-                      needing a finance team.
+                      A reconciled financial picture that explains itself, without spreadsheets or manual cleanup.
                     </p>
                   </div>
                 </div>
@@ -233,7 +227,7 @@ export function StartPage() {
                       className="btn-inverse h-11 px-4 transition-colors"
                     >
                       <span className="text-inherit text-sm ">
-                        Meet your assistant
+                        See my business
                       </span>
                     </Button>
                   </div>
@@ -319,9 +313,9 @@ export function StartPage() {
                       ) : index === 1 ? (
                         <InboxMatchAnimation onComplete={undefined} />
                       ) : index === 2 ? (
-                        <InvoicePromptAnimation onComplete={undefined} />
-                      ) : index === 3 ? (
                         <FileGridAnimation onComplete={undefined} />
+                      ) : index === 3 ? (
+                        <InvoicePromptAnimation onComplete={undefined} />
                       ) : (
                         <Image
                           src={feature.illustration}
@@ -341,51 +335,97 @@ export function StartPage() {
 
           {/* Desktop: Two-column interactive list + canvas */}
           <div className="hidden lg:grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 lg:h-[740px]">
-            <div className="flex flex-col justify-center space-y-8 lg:space-y-12">
-              {features.map((feature, index) => (
-                <div
-                  key={index}
-                  className={`cursor-pointer transition-all duration-300 ${
-                    activeFeature === index
-                      ? 'opacity-100'
-                      : 'opacity-60 hover:opacity-80'
-                  }`}
-                  onClick={() => setActiveFeature(index)}
-                >
-                  {activeFeature === index ? (
-                    <motion.div
-                      initial={{ opacity: 0, filter: 'blur(6px)' }}
-                      animate={{ opacity: 1, filter: 'blur(0px)' }}
-                      exit={{ opacity: 0, filter: 'blur(6px)' }}
-                      transition={{ duration: 0.35 }}
-                      className="overflow-hidden"
+            <div className="flex gap-6">
+              {/* Timeline */}
+              <div className="flex flex-col justify-center items-center flex-shrink-0 relative">
+                <div className="flex flex-col justify-center space-y-6 lg:space-y-8">
+                  {features.map((feature, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-center relative"
+                      style={{ minHeight: '3.5rem' }}
                     >
-                      <div className="flex items-center gap-1 pl-2 pr-2 h-6 rounded-full border border-border bg-secondary mb-3 w-fit">
-                        <MaterialIcon
-                          name={agentTags[index]?.icon as keyof typeof IconMap}
-                          className="text-muted-foreground"
-                          size={12}
+                      {index > 0 && (
+                        <div
+                          className="absolute top-0 left-1/2 -translate-x-1/2 w-px border-l border-border"
+                          style={{
+                            height: 'calc(1.5rem + 1px)',
+                            top: '-1.5rem',
+                          }}
                         />
-                        <span className="text-[12px] text-foreground">
-                          {agentTags[index]?.label}
-                        </span>
-                      </div>
-                      <h2 className="font-sans text-lg lg:text-xl text-foreground transition-colors duration-300 max-w-md">
-                        {feature.title}
-                      </h2>
-                      <p className="font-sans text-sm text-muted-foreground leading-relaxed max-w-md mt-1">
-                        {feature.subtitle}
-                      </p>
-                    </motion.div>
-                  ) : (
-                    <div>
-                      <h2 className="font-sans text-lg lg:text-xl text-foreground transition-colors duration-300 max-w-md">
-                        {feature.title}
-                      </h2>
+                      )}
+                      <button
+                        onClick={() => setActiveFeature(index)}
+                        className="cursor-pointer relative z-10"
+                      >
+                        <motion.div
+                          className={`w-2 h-2 rounded-none transition-all duration-300 ${
+                            activeFeature === index
+                              ? 'bg-primary'
+                              : 'bg-border hover:bg-muted-foreground'
+                          }`}
+                          animate={{
+                            scale: activeFeature === index ? 1.2 : 1,
+                          }}
+                          transition={{
+                            duration: 0.2,
+                            ease: 'easeOut',
+                          }}
+                        />
+                      </button>
+                      {index < features.length - 1 && (
+                        <div
+                          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-px border-l border-border"
+                          style={{
+                            height: 'calc(1.5rem + 1px)',
+                            bottom: '-1.5rem',
+                          }}
+                        />
+                      )}
                     </div>
-                  )}
+                  ))}
                 </div>
-              ))}
+              </div>
+
+              {/* Text Content */}
+              <div className="flex flex-col justify-center space-y-6 lg:space-y-8 flex-1">
+                {features.map((feature, index) => (
+                  <div
+                    key={index}
+                    className={`cursor-pointer transition-all duration-300 ${
+                      activeFeature === index
+                        ? 'opacity-100'
+                        : 'opacity-60 hover:opacity-80'
+                    }`}
+                    onClick={() => setActiveFeature(index)}
+                    className="flex items-center"
+                    style={{ minHeight: '3.5rem' }}
+                  >
+                    {activeFeature === index ? (
+                      <motion.div
+                        initial={{ opacity: 0, filter: 'blur(6px)' }}
+                        animate={{ opacity: 1, filter: 'blur(0px)' }}
+                        exit={{ opacity: 0, filter: 'blur(6px)' }}
+                        transition={{ duration: 0.35 }}
+                        className="overflow-hidden"
+                      >
+                        <h2 className="font-sans text-lg lg:text-xl text-primary transition-colors duration-300 max-w-md">
+                          {feature.title}
+                        </h2>
+                        <p className="font-sans text-sm text-primary leading-relaxed max-w-md mt-1">
+                          {feature.subtitle}
+                        </p>
+                      </motion.div>
+                    ) : (
+                      <div>
+                        <h2 className="font-sans text-lg lg:text-xl text-muted-foreground transition-colors duration-300 max-w-md">
+                          {feature.title}
+                        </h2>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="flex items-center justify-center p-6 lg:p-8 border border-border h-full overflow-hidden">
@@ -412,13 +452,13 @@ export function StartPage() {
                     }
                   />
                 ) : activeFeature === 2 ? (
-                  <InvoicePromptAnimation
+                  <FileGridAnimation
                     onComplete={() =>
                       setActiveFeature((prev) => (prev + 1) % features.length)
                     }
                   />
                 ) : activeFeature === 3 ? (
-                  <FileGridAnimation
+                  <InvoicePromptAnimation
                     onComplete={() =>
                       setActiveFeature((prev) => (prev + 1) % features.length)
                     }
@@ -449,12 +489,10 @@ export function StartPage() {
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
           <div className="text-center space-y-4 mb-12 sm:mb-16">
             <h2 className="font-serif text-xl sm:text-2xl text-foreground">
-              The assistant that ties it together
+              Everything you need to run your business finances
             </h2>
             <p className="font-sans text-sm text-muted-foreground max-w-2xl mx-auto px-4">
-              Invoices, receipts, clients, transactions, time and files aren't
-              scattered. Your assistant connects them all, keeping everything in
-              one place and working together.
+              Dashboards, insights, transactions, invoicing, time tracking, and files all connected in one system.
             </p>
           </div>
 
@@ -469,7 +507,7 @@ export function StartPage() {
                     Assistant
                   </h3>
                   <p className="font-sans text-sm text-muted-foreground leading-[21px]">
-                    Daily help
+                    Financial assistant
                   </p>
                 </div>
               </div>
@@ -483,7 +521,7 @@ export function StartPage() {
                     Insights
                   </h3>
                   <p className="font-sans text-sm text-muted-foreground leading-[21px]">
-                    Business updates
+                    Business insights
                   </p>
                 </div>
               </div>
@@ -497,7 +535,7 @@ export function StartPage() {
                     Transactions
                   </h3>
                   <p className="font-sans text-sm text-muted-foreground leading-[21px]">
-                    Smart records
+                    Transaction records
                   </p>
                 </div>
               </div>
@@ -511,7 +549,7 @@ export function StartPage() {
                     Inbox
                   </h3>
                   <p className="font-sans text-sm text-muted-foreground leading-[21px]">
-                    Document match
+                    Receipt matching
                   </p>
                 </div>
               </div>
@@ -524,10 +562,10 @@ export function StartPage() {
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <h3 className="font-sans text-sm text-foreground leading-[21px]">
-                    Time tracker
+                    Time tracking
                   </h3>
                   <p className="font-sans text-sm text-muted-foreground leading-[21px]">
-                    Track projects
+                    Time tracking
                   </p>
                 </div>
               </div>
@@ -538,10 +576,10 @@ export function StartPage() {
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <h3 className="font-sans text-sm text-foreground leading-[21px]">
-                    Invoice
+                    Invoicing
                   </h3>
                   <p className="font-sans text-sm text-muted-foreground leading-[21px]">
-                    Quick billing
+                    Invoice management
                   </p>
                 </div>
               </div>
@@ -555,7 +593,7 @@ export function StartPage() {
                     Customers
                   </h3>
                   <p className="font-sans text-sm text-muted-foreground leading-[21px]">
-                    Client overview
+                    Customer insights
                   </p>
                 </div>
               </div>
@@ -569,10 +607,10 @@ export function StartPage() {
                 </div>
                 <div className="flex flex-col items-center text-center">
                   <h3 className="font-sans text-sm text-foreground leading-[21px]">
-                    File storage
+                    Files
                   </h3>
                   <p className="font-sans text-sm text-muted-foreground leading-[21px]">
-                    Organized files
+                    Document storage
                   </p>
                 </div>
               </div>
@@ -784,11 +822,10 @@ export function StartPage() {
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
           <div className="text-center space-y-4 mb-16">
             <h2 className="font-serif text-2xl text-foreground">
-              Time savings that add up
+              Less admin. More focus.
             </h2>
             <p className="font-sans text-sm text-muted-foreground max-w-2xl mx-auto">
-              Cut out the manual reconciliation, filing, and tracking that eats
-              up your week.
+              Midday removes manual financial work so you can spend time on what actually matters.
             </p>
           </div>
 
@@ -801,13 +838,13 @@ export function StartPage() {
                   </span>
                   <div className="min-w-0">
                     <p className="text-xs  tracking-wide text-muted-foreground">
-                      Receipt matching
+                      Chasing receipts
                     </p>
                     <h3 className="mt-1 text-base sm:text-lg text-foreground">
-                      ~1.5 h saved
+                      45 minutes per week
                     </h3>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Reconciliation powered by agents, no more manual matching.
+                      Receipts arrive late, get lost, or need follow-ups.
                     </p>
                   </div>
                 </div>
@@ -820,13 +857,13 @@ export function StartPage() {
                   </span>
                   <div className="min-w-0">
                     <p className="text-xs  tracking-wide text-muted-foreground">
-                      Transaction tagging
+                      Cleaning transactions
                     </p>
                     <h3 className="mt-1 text-base sm:text-lg text-foreground">
-                      ~1 h saved
+                      1 hour per week
                     </h3>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Auto‑categorization with explainable rules & insights.
+                      Categorizing, fixing duplicates, and making numbers line up.
                     </p>
                   </div>
                 </div>
@@ -839,13 +876,13 @@ export function StartPage() {
                   </span>
                   <div className="min-w-0">
                     <p className="text-xs  tracking-wide text-muted-foreground">
-                      Invoices
+                      Preparing invoices
                     </p>
                     <h3 className="mt-1 text-base sm:text-lg text-foreground">
-                      ~1.5–2 h saved
+                      1–2 hours per week
                     </h3>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Fast, connected invoicing—from draft to paid.
+                      Creating invoices, checking payments, and answering questions.
                     </p>
                   </div>
                 </div>
@@ -863,13 +900,13 @@ export function StartPage() {
                   </span>
                   <div className="min-w-0">
                     <p className="text-xs  tracking-wide text-muted-foreground">
-                      Inbox & files
+                      Explaining the numbers
                     </p>
                     <h3 className="mt-1 text-base sm:text-lg text-foreground">
-                      ~1–1.5 h saved
+                      1 hour per week
                     </h3>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Organized, searchable storage across receipts and docs.
+                      Pulling data together and explaining what changed and why.
                     </p>
                   </div>
                 </div>
@@ -882,13 +919,13 @@ export function StartPage() {
                   </span>
                   <div className="min-w-0">
                     <p className="text-xs  tracking-wide text-muted-foreground">
-                      Invoices
+                      Preparing invoices
                     </p>
                     <h3 className="mt-1 text-base sm:text-lg text-foreground">
-                      ~1.5–2 h saved
+                      1–2 hours per week
                     </h3>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Fast, connected invoicing—from draft to paid.
+                      Creating invoices, checking payments, and answering questions.
                     </p>
                   </div>
                 </div>
@@ -901,28 +938,34 @@ export function StartPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex-1">
                     <p className="text-xs tracking-wide/loose text-muted-foreground transition-colors duration-200">
-                      Time savings
+                      <span className="group-hover:hidden transition-opacity duration-200">
+                        As things add up
+                      </span>
+                      <span className="hidden group-hover:inline transition-opacity duration-200">
+                        What changes
+                      </span>
                     </p>
                     <p className="mt-1 text-base sm:text-lg text-foreground transition-colors duration-200">
-                      Get your time back
+                      <span className="group-hover:hidden transition-opacity duration-200">
+                        What disappears over time
+                      </span>
+                      <span className="hidden group-hover:inline transition-opacity duration-200">
+                        Get your time back
+                      </span>
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground transition-colors duration-200">
                       <span className="group-hover:hidden transition-opacity duration-200">
-                        Less admin means fewer late nights and more space for
-                        the work that actually matters.
+                        Manual financial work caused by disconnected tools.
                       </span>
                       <span className="hidden group-hover:inline transition-opacity duration-200">
-                        Meet your assistant and see how it works.
+                        Midday handles the financial busywork so you can focus on running the business.
                       </span>
                     </p>
                   </div>
                   <div className="flex flex-col items-end">
                     <div className="text-4xl sm:text-5xl text-foreground transition-colors duration-200">
-                      4-6h
+                      4–6 hours
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1 transition-colors duration-200">
-                      saved per week
-                    </p>
                   </div>
                 </div>
               </article>
@@ -936,28 +979,34 @@ export function StartPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex-1">
                     <p className="text-xs tracking-wide/loose text-muted-foreground transition-colors duration-200">
-                      Time savings
+                      <span className="group-hover:hidden transition-opacity duration-200">
+                        As things add up
+                      </span>
+                      <span className="hidden group-hover:inline transition-opacity duration-200">
+                        What changes
+                      </span>
                     </p>
                     <p className="mt-1 text-base sm:text-lg text-foreground transition-colors duration-200">
-                      Get your time back
+                      <span className="group-hover:hidden transition-opacity duration-200">
+                        What disappears over time
+                      </span>
+                      <span className="hidden group-hover:inline transition-opacity duration-200">
+                        Get your time back
+                      </span>
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground transition-colors duration-200">
                       <span className="group-hover:hidden transition-opacity duration-200">
-                        Less admin means fewer late nights and more space for
-                        the work that actually matters.
+                        Manual financial work caused by disconnected tools.
                       </span>
                       <span className="hidden group-hover:inline transition-opacity duration-200">
-                        Meet your assistant and see how it works.
+                        Midday handles the financial busywork so you can focus on running the business.
                       </span>
                     </p>
                   </div>
                   <div className="flex flex-col items-end">
                     <div className="text-4xl sm:text-5xl text-foreground transition-colors duration-200">
-                      4-6h
+                      4–6 hours
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1 transition-colors duration-200">
-                      saved per week
-                    </p>
                   </div>
                 </div>
               </article>
