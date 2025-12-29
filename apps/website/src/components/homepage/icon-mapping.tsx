@@ -29,6 +29,7 @@ import {
   MdOutlineOpenInNew,
   MdOutlineInsights,
   MdIosShare,
+  MdOutlineAccountBalance,
 } from 'react-icons/md'
 
 export const IconMap = {
@@ -36,6 +37,7 @@ export const IconMap = {
   trending_up: MdOutlineTrendingUp,
   trending_down: MdTrendingDown,
   account_balance_wallet: MdAccountBalanceWallet,
+  account_balance: MdOutlineAccountBalance,
   savings: MdSavings,
   widgets: MdOutlineWidgets,
   insights: MdOutlineInsights,

@@ -235,15 +235,15 @@ export function AIAssistantAnimation({
 
   return (
     <div className="w-full h-full bg-background flex flex-col relative">
-      <div className="flex-1 px-3 py-3 overflow-hidden">
+      <div className="flex-1 px-2 md:px-3 py-2 md:py-3 overflow-hidden">
         <div className="space-y-2 h-full flex flex-col">
           <div className="flex justify-end">
             <div
-              className={`px-2 py-1 max-w-xs rounded-bl-[100px] rounded-tl-[100px] bg-secondary transition-opacity duration-75 ease-out ${
+              className={`px-2 py-1 max-w-[85%] md:max-w-xs rounded-bl-[100px] rounded-tl-[100px] bg-secondary transition-opacity duration-75 ease-out ${
                 showUserMessage ? 'opacity-100' : 'opacity-0'
               }`}
             >
-              <p className="text-[12px] text-right text-foreground">
+              <p className="text-[11px] md:text-[12px] text-right text-foreground">
                 Show me weekly summary
               </p>
             </div>
@@ -295,7 +295,7 @@ export function AIAssistantAnimation({
                 {segment.isComplete && segment.showCards && showCards && (
                   <div className="flex justify-start mt-4">
                     <div className="w-full">
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-2 md:gap-3">
                         {cards.map((card, cardIndex) => (
                           <motion.div
                             key={card.title}
@@ -305,15 +305,15 @@ export function AIAssistantAnimation({
                               scale: cardsVisible.includes(cardIndex) ? 1 : 0.9,
                             }}
                             transition={{ duration: 0.3 }}
-                            className="bg-secondary border border-border p-2"
+                            className="bg-secondary border border-border p-1.5 md:p-2"
                           >
-                            <div className="text-[10px] mb-1 text-muted-foreground">
+                            <div className="text-[9px] md:text-[10px] mb-0.5 md:mb-1 text-muted-foreground">
                               {card.title}
                             </div>
-                            <div className="text-[14px] font-serif text-foreground">
+                            <div className="text-[12px] md:text-[14px] font-serif text-foreground">
                               {card.value}
                             </div>
-                            <div className="text-[8px] mt-1 text-muted-foreground">
+                            <div className="text-[7px] md:text-[8px] mt-0.5 md:mt-1 text-muted-foreground">
                               {card.change} {card.subtitle}
                             </div>
                           </motion.div>
