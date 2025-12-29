@@ -572,6 +572,16 @@ export async function deleteInbox(db: Database, params: DeleteInboxParams) {
     }
   }
 
+  // Delete any match suggestions for this inbox item
+  await db
+    .delete(transactionMatchSuggestions)
+    .where(
+      and(
+        eq(transactionMatchSuggestions.inboxId, id),
+        eq(transactionMatchSuggestions.teamId, teamId),
+      ),
+    );
+
   // Get filePath before deletion for storage cleanup
   const [inboxItem] = await db
     .select({
@@ -667,6 +677,16 @@ export async function deleteInboxMany(
             .where(eq(transactions.id, item.transactionId));
         }
       }
+
+      // Delete any match suggestions for this inbox item
+      await db
+        .delete(transactionMatchSuggestions)
+        .where(
+          and(
+            eq(transactionMatchSuggestions.inboxId, item.id),
+            eq(transactionMatchSuggestions.teamId, teamId),
+          ),
+        );
 
       // Mark inbox item as deleted and clear attachment/transaction references
       const [deleted] = await db
@@ -1079,6 +1099,16 @@ export async function updateInbox(db: Database, params: UpdateInboxParams) {
           .where(eq(transactions.id, result.transactionId));
       }
     }
+
+    // Delete any match suggestions for this inbox item
+    await db
+      .delete(transactionMatchSuggestions)
+      .where(
+        and(
+          eq(transactionMatchSuggestions.inboxId, id),
+          eq(transactionMatchSuggestions.teamId, teamId),
+        ),
+      );
   }
 
   // Update the inbox record

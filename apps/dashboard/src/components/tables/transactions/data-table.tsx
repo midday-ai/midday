@@ -24,7 +24,7 @@ import { useTRPC } from "@/trpc/client";
 import { STICKY_COLUMNS } from "@/utils/table-configs";
 import type { TableSettings } from "@/utils/table-settings";
 import { DndContext, closestCenter } from "@dnd-kit/core";
-import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
+import { Table, TableBody } from "@midday/ui/table";
 import { Tooltip, TooltipProvider } from "@midday/ui/tooltip";
 import { toast } from "@midday/ui/use-toast";
 import {
@@ -48,7 +48,6 @@ import { columns } from "./columns";
 import { DataTableHeader } from "./data-table-header";
 import { NoResults, NoTransactions, ReviewComplete } from "./empty-states";
 import { ExportBar } from "./export-bar";
-import { Loading } from "./loading";
 import { TransactionTableProvider } from "./transaction-table-context";
 
 // Stable reference for non-clickable columns (avoids recreation on each render)
@@ -198,6 +197,15 @@ export function DataTable({ initialSettings, initialTab }: Props) {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: trpc.transactions.get.infiniteQueryKey(),
+        });
+
+        // Invalidate inbox queries since matched inbox items are cleared
+        queryClient.invalidateQueries({
+          queryKey: trpc.inbox.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.inbox.getById.queryKey(),
         });
       },
     }),
