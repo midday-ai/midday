@@ -15,6 +15,7 @@ export const POST = Webhooks({
           email: payload.data.customer.email ?? undefined,
           plan: getPlanByProductId(payload.data.productId) as "starter" | "pro",
           canceled_at: null,
+          subscription_status: "active",
         });
 
         break;
@@ -31,18 +32,31 @@ export const POST = Webhooks({
         break;
       }
 
-      // Subscription has been revoked/peroid has ended with no renewal
+      // Subscription has been revoked/period has ended with no renewal
+      // Note: This event is also sent for past_due status, so we need to check
       case "subscription.revoked": {
         if (!payload.data.metadata.teamId) {
           console.error("Customer ID or email is missing");
           break;
         }
 
-        await updateTeamPlan(supabase, {
-          id: payload.data.metadata.teamId as string,
-          plan: "trial",
-          canceled_at: new Date().toISOString(),
-        });
+        // Check if this is a past_due status (payment pending) vs actual revocation
+        if (payload.data.status === "past_due") {
+          // Keep the plan active but mark subscription as past_due
+          // User keeps access while they fix their payment method
+          await updateTeamPlan(supabase, {
+            id: payload.data.metadata.teamId as string,
+            subscription_status: "past_due",
+          });
+        } else {
+          // Actual revocation - downgrade to trial
+          await updateTeamPlan(supabase, {
+            id: payload.data.metadata.teamId as string,
+            plan: "trial",
+            canceled_at: new Date().toISOString(),
+            subscription_status: null,
+          });
+        }
 
         break;
       }
