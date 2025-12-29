@@ -20,6 +20,7 @@ import { AIAssistantAnimation } from './homepage/ai-assistant-animation'
 import { InvoicePromptAnimation } from './homepage/invoice-prompt-animation'
 import { InboxMatchAnimation } from './homepage/inbox-match-animation'
 import { FileGridAnimation } from './homepage/file-grid-animation'
+import { TransactionFlowAnimation } from './homepage/transaction-flow-animation'
 import { MaterialIcon, IconMap } from './homepage/icon-mapping'
 
 export function StartPage() {
@@ -60,7 +61,7 @@ export function StartPage() {
         'Receipts and invoices are fetched from email and payments and matched to the right transactions.',
       mergedText:
         'Receipts are pulled and matched. Receipts and invoices are fetched from email and payments and matched to the right transactions.',
-      illustration: '/illustrations/Mail.svg',
+      illustration: 'animation',
     },
     {
       title: 'Everything stays in sync',
@@ -76,7 +77,7 @@ export function StartPage() {
         'You see a clear financial picture that reflects what\'s actually happening in your business.',
       mergedText:
         'Your business becomes understandable. You see a clear financial picture that reflects what\'s actually happening in your business.',
-      illustration: '/illustrations/Actions.svg',
+      illustration: 'animation',
     },
   ]
 
@@ -313,14 +314,14 @@ export function StartPage() {
                 <div className="w-full border border-border overflow-hidden p-1 sm:p-3">
                   <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center">
                     <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
-                      {feature.illustration === 'animation' ? (
-                        <AIAssistantAnimation onComplete={undefined} />
+                      {index === 0 ? (
+                        <TransactionFlowAnimation onComplete={undefined} />
                       ) : index === 1 ? (
                         <InboxMatchAnimation onComplete={undefined} />
                       ) : index === 2 ? (
                         <FileGridAnimation onComplete={undefined} />
                       ) : index === 3 ? (
-                        <InvoicePromptAnimation onComplete={undefined} />
+                        <AIAssistantAnimation onComplete={undefined} />
                       ) : (
                         <Image
                           src={feature.illustration}
@@ -442,8 +443,8 @@ export function StartPage() {
                 }`}
                 style={{ transformOrigin: 'center' }}
               >
-                {features[activeFeature].illustration === 'animation' ? (
-                  <AIAssistantAnimation
+                {activeFeature === 0 ? (
+                  <TransactionFlowAnimation
                     onComplete={() =>
                       setActiveFeature((prev) => (prev + 1) % features.length)
                     }
@@ -461,7 +462,7 @@ export function StartPage() {
                     }
                   />
                 ) : activeFeature === 3 ? (
-                  <InvoicePromptAnimation
+                  <AIAssistantAnimation
                     onComplete={() =>
                       setActiveFeature((prev) => (prev + 1) % features.length)
                     }
