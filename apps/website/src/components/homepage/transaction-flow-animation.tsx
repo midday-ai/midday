@@ -409,14 +409,13 @@ export function TransactionFlowAnimation({
         {/* Transaction list full width below - Midday table style */}
         <div className="flex-1 min-h-0 overflow-hidden border border-border bg-background">
           <div className="h-full overflow-y-auto overflow-x-auto">
-            <table className="w-full border-collapse min-w-[480px] md:min-w-[530px]">
+            <table className="w-full border-collapse min-w-[400px] md:min-w-[450px]">
               <thead className="sticky top-0 z-10 bg-secondary border-b border-border">
                 <tr className="h-[28px] md:h-[32px]">
                   <th className="w-[60px] md:w-[70px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">Date</th>
-                  <th className="w-[120px] md:w-[140px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">Description</th>
-                  <th className="w-[80px] md:w-[90px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">Amount</th>
-                  <th className="w-[80px] md:w-[90px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">Tax</th>
-                  <th className="w-[120px] md:w-[140px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground">Category</th>
+                  <th className="w-[140px] md:w-[160px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">Description</th>
+                  <th className="w-[90px] md:w-[100px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">Amount</th>
+                  <th className="w-[110px] md:w-[120px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground">Category</th>
                 </tr>
               </thead>
               <tbody>
@@ -441,7 +440,7 @@ export function TransactionFlowAnimation({
                     </td>
 
                     {/* Description */}
-                    <td className={`w-[120px] md:w-[140px] px-1.5 md:px-2 text-[10px] md:text-[11px] border-r border-border ${
+                    <td className={`w-[140px] md:w-[160px] px-1.5 md:px-2 text-[10px] md:text-[11px] border-r border-border ${
                       transaction.amount > 0 ? 'text-[#4CAF50]' : 'text-foreground'
                     }`}>
                       <div className="truncate" title={transaction.description}>
@@ -450,19 +449,14 @@ export function TransactionFlowAnimation({
                     </td>
 
                     {/* Amount */}
-                    <td className={`w-[80px] md:w-[90px] px-1.5 md:px-2 text-[10px] md:text-[11px] border-r border-border ${
+                    <td className={`w-[90px] md:w-[100px] px-1.5 md:px-2 text-[10px] md:text-[11px] border-r border-border ${
                       transaction.amount > 0 ? 'text-[#4CAF50]' : 'text-foreground'
                     }`}>
                       {transaction.amount > 0 ? '+' : '-'}{formatAmount(transaction.amount)} kr
                     </td>
 
-                    {/* Tax Amount */}
-                    <td className="w-[80px] md:w-[90px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-foreground border-r border-border">
-                      {formatAmount(transaction.taxAmount)} kr
-                    </td>
-
                     {/* Category */}
-                    <td className="w-[120px] md:w-[140px] px-1.5 md:px-2">
+                    <td className="w-[110px] md:w-[120px] px-1.5 md:px-2">
                       <div className="flex items-center gap-1 md:gap-1.5">
                         <div 
                           className="w-2 h-2 md:w-2.5 md:h-2.5 flex-shrink-0"
