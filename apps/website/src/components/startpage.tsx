@@ -1038,67 +1038,117 @@ export function StartPage() {
               />
             </div>
             <h2 className="font-serif text-2xl text-foreground">
-              Pre-accounting made simple
+              Ready for accounting, without extra work
             </h2>
             <p className="font-sans text-sm text-muted-foreground max-w-2xl mx-auto">
-              Midday connects your inbox, transactions and search to match
-              receipts and invoices automatically, saving hours, cutting costs
-              and doing it all without the accounting bloat.
+              Midday keeps receipts, invoices, and transactions organized automatically, so your finances are always ready for accounting.
             </p>
           </div>
 
           <div className="max-w-2xl mx-auto">
             <div className="bg-secondary border border-border p-6 relative">
-              <div className="space-y-4">
+              <div className="space-y-6">
+                {/* Section 1 */}
                 <div className="flex items-center gap-3">
                   <MaterialIcon name="check" className="text-foreground" size={16} />
                   <span className="font-sans text-sm text-foreground">
-                    Auto-categorize transactions
+                    Transactions from 25,000+ banks are categorized and reconciled automatically
                   </span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <MaterialIcon name="check" className="text-foreground" size={16} />
-                  <span className="font-sans text-sm text-foreground">
-                    Gmail connect receipt sync
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <MaterialIcon name="check" className="text-foreground" size={16} />
-                  <span className="font-sans text-sm text-foreground">
-                    Auto-match receipts to transactions
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <MaterialIcon name="check" className="text-foreground" size={16} />
-                  <span className="font-sans text-sm text-foreground">
-                    Add subcategories for better reporting
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <MaterialIcon name="check" className="text-foreground" size={16} />
-                  <span className="font-sans text-sm text-foreground">
-                    Assign tax type and rates automatically
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <MaterialIcon name="check" className="text-foreground" size={16} />
-                  <span className="font-sans text-sm text-foreground">
-                    Track VAT, sales tax or GST by transaction
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <MaterialIcon name="check" className="text-foreground" size={16} />
-                  <span className="font-sans text-sm text-foreground">
-                    Reconcile and export in one click
-                  </span>
-                </div>
-              </div>
 
-              <div className="flex justify-start mt-4 sm:absolute sm:bottom-6 sm:right-6 sm:mt-0">
-                <span className="font-sans text-sm text-muted-foreground underline">
-                  Learn more
-                </span>
+                {/* Section 2 */}
+                <div className="flex items-center gap-3">
+                  <MaterialIcon name="check" className="text-foreground" size={16} />
+                  <span className="font-sans text-sm text-foreground">
+                    Receipts and invoices are pulled from email and payments, then matched to transactions
+                  </span>
+                </div>
+
+                {/* Section 3 */}
+                <div className="flex items-center gap-3">
+                  <MaterialIcon name="check" className="text-foreground" size={16} />
+                  <span className="font-sans text-sm text-foreground">
+                    Clean records across all connected accounts
+                  </span>
+                </div>
+
+                {/* Section 4 */}
+                <div className="flex items-center gap-3">
+                  <MaterialIcon name="check" className="text-foreground" size={16} />
+                  <span className="font-sans text-sm text-foreground">
+                    Taxes are tracked per transaction
+                  </span>
+                </div>
+
+                {/* Section 5 */}
+                <div className="flex items-center gap-3">
+                  <MaterialIcon name="check" className="text-foreground" size={16} />
+                  <span className="font-sans text-sm text-foreground">
+                    Export-ready for your accounting system
+                  </span>
+                </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Divider */}
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+        <div className="h-px w-full border-t border-border" />
+      </div>
+
+      {/* Integrations Section */}
+      <section className="bg-background py-20 sm:py-32">
+        <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+          <div className="text-center space-y-4 mb-12">
+            <h2 className="font-serif text-2xl text-foreground">
+              Works with the tools you already use
+            </h2>
+            <p className="font-sans text-sm text-muted-foreground">
+              Connect your banks, email, payments, and accounting software in minutes.
+            </p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-2">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+              <Image src="/images/gmail.svg" alt="Gmail" width={16} height={16} className="object-contain" />
+              <span className="font-sans text-sm text-foreground">Gmail</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+              <Image src="/images/outlook.svg" alt="Outlook" width={16} height={16} className="object-contain" />
+              <span className="font-sans text-sm text-foreground">Outlook</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+              <Image src="/images/whatsapp.svg" alt="WhatsApp" width={16} height={16} className="object-contain" />
+              <span className="font-sans text-sm text-foreground">WhatsApp</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+              <Image src="/images/gdrive.svg" alt="Google Drive" width={16} height={16} className="object-contain" />
+              <span className="font-sans text-sm text-foreground">Google Drive</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+              <Image src="/images/dropbox.svg" alt="Dropbox" width={16} height={16} className="object-contain" />
+              <span className="font-sans text-sm text-foreground">Dropbox</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+              <Image src="/images/slack.svg" alt="Slack" width={16} height={16} className="object-contain" />
+              <span className="font-sans text-sm text-foreground">Slack</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+              <Image src="/images/stripe.svg" alt="Stripe" width={16} height={16} className="object-contain" />
+              <span className="font-sans text-sm text-foreground">Stripe</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+              <Image src="/images/xero.svg" alt="Xero" width={16} height={16} className="object-contain" />
+              <span className="font-sans text-sm text-foreground">Xero</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+              <Image src="/images/quickbooks.svg" alt="QuickBooks" width={16} height={16} className="object-contain" />
+              <span className="font-sans text-sm text-foreground">QuickBooks</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+              <Image src="/images/fortnox.svg" alt="Fortnox" width={16} height={16} className="object-contain" />
+              <span className="font-sans text-sm text-foreground">Fortnox</span>
             </div>
           </div>
         </div>
@@ -1113,12 +1163,14 @@ export function StartPage() {
       <section className="bg-background py-20 sm:py-32">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
           <div className="text-center space-y-4 mb-16">
+            <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider">
+              Pricing
+            </p>
             <h2 className="font-serif text-2xl text-foreground">
-              Choose the plan that grows with you
+              Pricing that matches how you run your business
             </h2>
             <p className="font-sans text-sm text-muted-foreground">
-              Try any plan free for 14 days, cancel anytime. No credit card
-              required.
+              Start simple, upgrade when your workflow gets more complex.
             </p>
           </div>
 
@@ -1129,21 +1181,6 @@ export function StartPage() {
               style={{ width: 'fit-content' }}
             >
               <div className="flex items-stretch">
-                <button
-                  onClick={() => setBillingPeriod('yearly')}
-                  className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors ${
-                    billingPeriod === 'yearly'
-                      ? 'text-foreground bg-background border-border'
-                      : 'text-muted-foreground hover:text-foreground bg-muted border-transparent'
-                  }`}
-                  style={{
-                    marginBottom: billingPeriod === 'yearly' ? '-1px' : '0px',
-                    position: 'relative',
-                    zIndex: billingPeriod === 'yearly' ? 10 : 1,
-                  }}
-                >
-                  <span>Yearly (Save 20%)</span>
-                </button>
                 <button
                   onClick={() => setBillingPeriod('monthly')}
                   className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors ${
@@ -1159,6 +1196,21 @@ export function StartPage() {
                 >
                   <span>Monthly</span>
                 </button>
+                <button
+                  onClick={() => setBillingPeriod('yearly')}
+                  className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors ${
+                    billingPeriod === 'yearly'
+                      ? 'text-foreground bg-background border-border'
+                      : 'text-muted-foreground hover:text-foreground bg-muted border-transparent'
+                  }`}
+                  style={{
+                    marginBottom: billingPeriod === 'yearly' ? '-1px' : '0px',
+                    position: 'relative',
+                    zIndex: billingPeriod === 'yearly' ? 10 : 1,
+                  }}
+                >
+                  <span>Yearly (Save 15%)</span>
+                </button>
               </div>
             </div>
           </div>
@@ -1173,238 +1225,237 @@ export function StartPage() {
                     Starter
                   </h3>
                   <p className="font-sans text-sm text-muted-foreground mb-3">
-                    For freelancers & solo operators
+                    For solo founders getting set up
                   </p>
                   <div className="flex items-baseline gap-2">
                     <span className="font-sans text-2xl text-foreground">
-                      {billingPeriod === 'monthly' ? '$29' : '$23'}
+                      {billingPeriod === 'monthly' ? '$29' : '$25'}
                     </span>
                     <span className="font-sans text-sm text-muted-foreground">
-                      /mo
+                      /month
                     </span>
                   </div>
                   <p className="font-sans text-xs text-muted-foreground mt-1">
                     {billingPeriod === 'monthly'
-                      ? 'When billed monthly'
-                      : 'When billed yearly'}
+                      ? 'Billed monthly'
+                      : 'Billed yearly'}
                   </p>
                 </div>
 
                 <div className="flex-1 space-y-1 border-t border-border pt-8 pb-6">
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      2 user
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground leading-[1.5rem]">•</span>
+                    <span className="font-sans text-sm text-foreground leading-relaxed">
+                      Financial overview and widgets
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      Email support
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground leading-[1.5rem]">•</span>
+                    <span className="font-sans text-sm text-foreground leading-relaxed">
+                      Weekly summaries and insights
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      Assistant: limited usage
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground leading-[1.5rem]">•</span>
+                    <span className="font-sans text-sm text-foreground leading-relaxed">
+                      Transactions with categorization
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      Standard reports (expenses + receipts overview)
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground leading-[1.5rem]">•</span>
+                    <span className="font-sans text-sm text-foreground leading-relaxed">
+                      Receipt and invoice matching
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      Up to 5 invoices / month
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground leading-[1.5rem]">•</span>
+                    <span className="font-sans text-sm text-foreground leading-relaxed">
+                      Invoicing and time tracking basics
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      Up to 50 inbox items / month
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      File storage: 2GB
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground leading-[1.5rem]">•</span>
+                    <span className="font-sans text-sm text-foreground leading-relaxed">
+                      Export-ready records via CSV or ZIP
                     </span>
                   </div>
                 </div>
 
-                <Button className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors">
-                  Start free trial
-                </Button>
+                <div className="space-y-3">
+                  <Button className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors">
+                    See my business
+                  </Button>
+                  <p className="font-sans text-xs text-muted-foreground text-center">
+                    Best for getting started
+                  </p>
+                </div>
               </div>
             </div>
 
             {/* Pro */}
             <div className="flex-1 max-w-md">
-              <div className="bg-background backdrop-blur-[43px] border border-border p-4 py-6 h-full flex flex-col">
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-1">
-                    <h3 className="font-sans text-base text-foreground">
-                      Pro
-                    </h3>
-                    <div className="bg-background border border-border px-2 py-1 rounded-full flex items-center justify-center">
-                      <span className="font-sans text-xs text-muted-foreground">
-                        Most Popular
-                      </span>
-                    </div>
+              <div className="bg-background backdrop-blur-[43px] border border-primary p-4 py-6 h-full flex flex-col relative">
+                <div className="absolute top-0 right-4 -translate-y-1/2">
+                  <div className="bg-background border border-primary px-2 py-1 rounded-full flex items-center justify-center">
+                    <span className="font-sans text-xs text-foreground">
+                      Most popular
+                    </span>
                   </div>
+                </div>
+                <div className="mb-4">
+                  <h3 className="font-sans text-base text-foreground mb-1">
+                    Pro
+                  </h3>
                   <p className="font-sans text-sm text-muted-foreground mb-3">
-                    For small teams & startups
+                    For founders and small teams running weekly finance workflows
                   </p>
                   <div className="flex items-baseline gap-2">
                     <span className="font-sans text-2xl text-foreground">
-                      {billingPeriod === 'monthly' ? '$49' : '$39'}
+                      {billingPeriod === 'monthly' ? '$79' : '$67'}
                     </span>
                     <span className="font-sans text-sm text-muted-foreground">
-                      /mo
+                      /month
                     </span>
                   </div>
                   <p className="font-sans text-xs text-muted-foreground mt-1">
                     {billingPeriod === 'monthly'
-                      ? 'When billed monthly'
-                      : 'When billed yearly'}
+                      ? 'Billed monthly'
+                      : 'Billed yearly'}
                   </p>
                 </div>
 
                 <div className="flex-1 space-y-1 border-t border-border pt-8 pb-6">
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      Up to 5 users
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground leading-[1.5rem]">•</span>
+                    <span className="font-sans text-sm text-foreground leading-relaxed">
+                      Everything in Starter
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      Email + Slack support
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground leading-[1.5rem]">•</span>
+                    <span className="font-sans text-sm text-foreground leading-relaxed">
+                      Higher transaction and receipt volume
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      Assistant: extended usage
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground leading-[1.5rem]">•</span>
+                    <span className="font-sans text-sm text-foreground leading-relaxed">
+                      Advanced insights and trends
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      Advanced reports (multi-currency & trends)
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground leading-[1.5rem]">•</span>
+                    <span className="font-sans text-sm text-foreground leading-relaxed">
+                      Multi-currency support
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      Up to 50 invoices / month
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground leading-[1.5rem]">•</span>
+                    <span className="font-sans text-sm text-foreground leading-relaxed">
+                      Team access for collaborators
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      Up to 1,000 inbox items / month
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      File storage: 20GB
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground leading-[1.5rem]">•</span>
+                    <span className="font-sans text-sm text-foreground leading-relaxed">
+                      Priority exports for accounting workflows
                     </span>
                   </div>
                 </div>
 
-                <Button className="w-full btn-inverse font-sans  text-sm py-3 px-4 transition-colors">
-                  Start free trial
-                </Button>
+                <div className="space-y-3">
+                  <Button className="w-full btn-inverse font-sans text-sm py-3 px-4 transition-colors">
+                    Get my time back
+                  </Button>
+                  <p className="font-sans text-xs text-muted-foreground text-center">
+                    Best value for most businesses
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* Max */}
+            {/* Scale */}
             <div className="flex-1 max-w-md">
               <div className="bg-background backdrop-blur-[43px] border border-border p-4 py-6 h-full flex flex-col">
                 <div className="mb-4">
                   <h3 className="font-sans text-base text-foreground mb-1">
-                    Max
+                    Scale
                   </h3>
                   <p className="font-sans text-sm text-muted-foreground mb-3">
-                    For scaling companies & SMBs
+                    For growing companies that need more control and volume
                   </p>
                   <div className="flex items-baseline gap-2">
                     <span className="font-sans text-2xl text-foreground">
-                      {billingPeriod === 'monthly' ? '$99' : '$79'}
+                      {billingPeriod === 'monthly' ? '$129' : '$110'}
                     </span>
                     <span className="font-sans text-sm text-muted-foreground">
-                      /mo
+                      /month
                     </span>
                   </div>
                   <p className="font-sans text-xs text-muted-foreground mt-1">
                     {billingPeriod === 'monthly'
-                      ? 'When billed monthly'
-                      : 'When billed yearly'}
+                      ? 'Billed monthly'
+                      : 'Billed yearly'}
                   </p>
                 </div>
 
                 <div className="flex-1 space-y-1 border-t border-border pt-8 pb-6">
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      Unlimited users
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground leading-[1.5rem]">•</span>
+                    <span className="font-sans text-sm text-foreground leading-relaxed">
+                      Everything in Pro
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      Faster priority support (email + Slack)
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground leading-[1.5rem]">•</span>
+                    <span className="font-sans text-sm text-foreground leading-relaxed">
+                      Unlimited team access
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      Assistant: unlimited usage
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground leading-[1.5rem]">•</span>
+                    <span className="font-sans text-sm text-foreground leading-relaxed">
+                      Highest volumes for receipts and transactions
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      Full reporting suite (forecasts & insights)
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground leading-[1.5rem]">•</span>
+                    <span className="font-sans text-sm text-foreground leading-relaxed">
+                      Advanced reporting and forecasting
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      Unlimited invoices
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground leading-[1.5rem]">•</span>
+                    <span className="font-sans text-sm text-foreground leading-relaxed">
+                      Priority support
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      Unlimited inbox items
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MaterialIcon name="check" className="text-foreground" size={16} />
-                    <span className="font-sans text-sm text-foreground">
-                      File storage: 200GB
+                  <div className="flex items-start gap-2">
+                    <span className="text-foreground leading-[1.5rem]">•</span>
+                    <span className="font-sans text-sm text-foreground leading-relaxed">
+                      Accounting-ready exports at scale
                     </span>
                   </div>
                 </div>
 
-                <Button className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors">
-                  Start free trial
-                </Button>
+                <div className="space-y-3">
+                  <Button className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors">
+                    Run with confidence
+                  </Button>
+                  <p className="font-sans text-xs text-muted-foreground text-center">
+                    For teams scaling operations
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="text-center mt-16">
+          <div className="text-center mt-16 space-y-1">
             <p className="font-sans text-xs text-muted-foreground">
-              All prices in USD. Local taxes (VAT, GST, or sales tax) may be
-              added at checkout.
+              Cancel anytime.
+            </p>
+            <p className="font-sans text-xs text-muted-foreground">
+              Prices shown in USD. Local taxes may apply.
             </p>
           </div>
         </div>
