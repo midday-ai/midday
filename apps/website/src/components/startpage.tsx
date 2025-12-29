@@ -177,7 +177,7 @@ export function StartPage() {
               </video>
 
               <div className="absolute inset-0 flex items-center justify-center p-0">
-                <div className="relative" style={{ transform: 'scale(1.1)' }}>
+                <div className="relative" style={{ transform: 'scale(1.0)' }}>
                       <Image
                         src={
                           isLightMode
