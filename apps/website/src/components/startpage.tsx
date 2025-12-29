@@ -291,14 +291,19 @@ export function StartPage() {
       </div>
 
       {/* Features 2-Column Layout Section */}
-      <section className="bg-background pt-16 sm:pt-24 pb-20">
+      <section className="bg-background pt-12 sm:pt-16 pb-20">
         <div className="max-w-[1400px] mx-auto">
           {/* Mobile: Stacked features */}
-          <div className="grid grid-cols-1 gap-16 lg:hidden">
+          <div className="grid grid-cols-1 gap-12 sm:gap-16 lg:hidden">
+            <div className="text-center mb-2">
+              <h2 className="font-serif text-xl sm:text-2xl text-foreground">
+                How it works, end to end
+              </h2>
+            </div>
             {features.map((feature, index) => (
-              <div key={index} className="space-y-6">
+              <div key={index} className="space-y-6 sm:space-y-8">
                 <div className="space-y-2 text-center">
-                  <h3 className="font-sans text-lg text-foreground max-w-md mx-auto">
+                  <h3 className="font-sans text-base sm:text-lg text-foreground max-w-md mx-auto">
                     {feature.title}
                   </h3>
                   <p className="font-sans text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
@@ -483,7 +488,7 @@ export function StartPage() {
       </div>
 
       {/* Assistant Features Overview Section */}
-      <section className="bg-background py-16 sm:py-24">
+      <section className="bg-background py-12 sm:py-16">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
           <div className="text-center space-y-4 mb-10 sm:mb-12">
             <h2 className="font-serif text-xl sm:text-2xl text-foreground">
@@ -623,10 +628,10 @@ export function StartPage() {
       </div>
 
       {/* Time Savings Bento Grid Section */}
-      <section className="bg-background py-16 sm:py-24">
+      <section className="bg-background py-12 sm:py-16">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
           <div className="text-center space-y-4 mb-12">
-            <h2 className="font-serif text-2xl text-foreground">
+            <h2 className="font-serif text-xl sm:text-2xl text-foreground">
               Less admin. More focus.
             </h2>
             <p className="font-sans text-sm text-muted-foreground max-w-2xl mx-auto">
@@ -826,7 +831,7 @@ export function StartPage() {
       </div>
 
       {/* Pre-accounting Features Section */}
-      <section className="bg-background py-16 sm:py-24">
+      <section className="bg-background py-12 sm:py-16">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
           <div className="text-center space-y-4 mb-12">
             <div className="h-[100px] w-28 mx-auto mb-8">
@@ -842,7 +847,7 @@ export function StartPage() {
                 className="w-full h-full object-contain rounded-none"
               />
             </div>
-            <h2 className="font-serif text-2xl text-foreground">
+            <h2 className="font-serif text-xl sm:text-2xl text-foreground">
               Ready for accounting, without extra work
             </h2>
             <p className="font-sans text-sm text-muted-foreground max-w-2xl mx-auto">
@@ -915,10 +920,10 @@ export function StartPage() {
 
       {/* Testimonials Section */}
       <section className="bg-background">
-        <div className="max-w-[1400px] mx-auto px-3 sm:px-8 py-16 sm:py-24">
+        <div className="max-w-[1400px] mx-auto px-3 sm:px-8 py-12 sm:py-16">
           <div className="flex flex-col gap-4 items-center">
             <div className="flex flex-col gap-4 items-center text-center max-w-3xl">
-              <h2 className="font-serif text-2xl text-foreground">
+              <h2 className="font-serif text-xl sm:text-2xl text-foreground">
                 Built alongside our users
               </h2>
               <p className="font-sans text-sm text-muted-foreground">
@@ -1106,10 +1111,10 @@ export function StartPage() {
       </div>
 
       {/* Integrations Section */}
-      <section className="bg-background py-16 sm:py-24">
+      <section className="bg-background py-12 sm:py-16">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
           <div className="text-center space-y-4 mb-10">
-            <h2 className="font-serif text-2xl text-foreground">
+            <h2 className="font-serif text-xl sm:text-2xl text-foreground">
               Works with the tools you already use
             </h2>
             <p className="font-sans text-sm text-muted-foreground">
@@ -1167,10 +1172,10 @@ export function StartPage() {
       </div>
 
       {/* Pricing Section */}
-      <section className="bg-background py-16 sm:py-24">
+      <section className="bg-background py-12 sm:py-16">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
           <div className="text-center space-y-4 mb-12">
-            <h2 className="font-serif text-2xl text-foreground">
+            <h2 className="font-serif text-xl sm:text-2xl text-foreground">
               Pricing that matches how you run your business
             </h2>
             <p className="font-sans text-sm text-muted-foreground">
