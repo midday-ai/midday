@@ -177,7 +177,7 @@ export function StartPage() {
               </video>
 
               <div className="absolute inset-0 flex items-center justify-center p-0">
-                <div className="relative" style={{ transform: 'scale(0.9)' }}>
+                <div className="relative" style={{ transform: 'scale(1.1)' }}>
                       <Image
                         src={
                           isLightMode
@@ -1106,7 +1106,7 @@ export function StartPage() {
       </div>
 
       {/* Integrations Section */}
-      <section className="bg-background py-20 sm:py-32">
+      <section className="bg-background py-16 sm:py-24">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
           <div className="text-center space-y-4 mb-10">
             <h2 className="font-serif text-2xl text-foreground">
@@ -1167,7 +1167,7 @@ export function StartPage() {
       </div>
 
       {/* Pricing Section */}
-      <section className="bg-background py-20 sm:py-32">
+      <section className="bg-background py-16 sm:py-24">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
           <div className="text-center space-y-4 mb-12">
             <h2 className="font-serif text-2xl text-foreground">
