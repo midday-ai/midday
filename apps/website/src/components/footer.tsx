@@ -132,7 +132,7 @@ export function Footer() {
           {/* Right Column - Text and Compliance Images */}
           <div className="flex flex-col items-start lg:items-end gap-6 lg:gap-10">
             <p className="font-sans text-base sm:text-xl text-foreground text-left lg:text-right">
-              Your AI-powered business assistant.
+              Business finances that explain themselves.
             </p>
 
             {/* Compliance Section */}
