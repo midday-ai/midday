@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
-import { InputBar } from '../input-bar'
 import { MaterialIcon, IconMap } from './icon-mapping'
 
 export function AIAssistantAnimation({
@@ -30,7 +29,6 @@ export function AIAssistantAnimation({
   const [isTyping, setIsTyping] = useState(false)
   const [showCards, setShowCards] = useState(false)
   const [cardsVisible, setCardsVisible] = useState<number[]>([])
-  const inputRef = useRef<HTMLInputElement>(null)
 
   const cards = [
     {
@@ -353,16 +351,6 @@ export function AIAssistantAnimation({
             ))}
           </div>
         </div>
-      </div>
-
-      <div className="px-2 pt-2 pb-2 bg-secondary">
-        <InputBar
-          isLightMode={isLightMode}
-          inputRef={inputRef}
-          searchQuery=""
-          setSearchQuery={() => {}}
-          placeholder="Ask anything"
-        />
       </div>
     </div>
   )

@@ -1,22 +1,17 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { InputBar } from '../input-bar'
-import { useTheme } from 'next-themes'
 
 export function DashboardAnimation({
   onComplete,
 }: {
   onComplete?: () => void
 }) {
-  const { resolvedTheme } = useTheme()
-  const isLightMode = resolvedTheme !== 'dark'
   const [showWidgets, setShowWidgets] = useState(false)
   const [showChart, setShowChart] = useState(false)
   const [showMetrics, setShowMetrics] = useState(false)
   const [showSummary, setShowSummary] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     setShowWidgets(false)
@@ -129,7 +124,7 @@ export function DashboardAnimation({
         {/* Center text */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center">
-            <div className="text-[18px] md:text-[24px] font-normal text-foreground">${total.toLocaleString()}</div>
+            <div className="text-[18px] md:text-[24px] font-normal font-serif text-foreground">${total.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
             <div className="text-[8px] md:text-[10px] text-muted-foreground">Total</div>
           </div>
         </div>
@@ -219,17 +214,6 @@ export function DashboardAnimation({
             </motion.div>
           )}
         </div>
-      </div>
-
-      {/* Input Bar */}
-      <div className="px-2 pt-2 pb-2 bg-secondary">
-        <InputBar
-          isLightMode={isLightMode}
-          inputRef={inputRef}
-          searchQuery=""
-          setSearchQuery={() => {}}
-          placeholder="Ask anything"
-        />
       </div>
     </div>
   )
