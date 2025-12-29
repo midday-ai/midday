@@ -15,8 +15,22 @@ export function DashboardAnimation({
 
   useEffect(() => {
     setShowWidgets(false)
+    setShowChart(false)
+    setShowMetrics(false)
+    setShowSummary(false)
     const timer = setTimeout(() => setShowWidgets(true), 300)
-    return () => clearTimeout(timer)
+    
+    let done: NodeJS.Timeout | undefined
+    if (onComplete) {
+      done = setTimeout(() => {
+        onComplete()
+      }, 10000)
+    }
+    
+    return () => {
+      clearTimeout(timer)
+      if (done) clearTimeout(done)
+    }
   }, [onComplete])
 
   useEffect(() => {
@@ -38,9 +52,9 @@ export function DashboardAnimation({
   // Sequential reveal
   useEffect(() => {
     if (showWidgets) {
-      const chartTimer = setTimeout(() => setShowChart(true), 500)
-      const metricsTimer = setTimeout(() => setShowMetrics(true), 1500)
-      const summaryTimer = setTimeout(() => setShowSummary(true), 2500)
+      const chartTimer = setTimeout(() => setShowChart(true), 300)
+      const metricsTimer = setTimeout(() => setShowMetrics(true), 800)
+      const summaryTimer = setTimeout(() => setShowSummary(true), 1200)
       return () => {
         clearTimeout(chartTimer)
         clearTimeout(metricsTimer)

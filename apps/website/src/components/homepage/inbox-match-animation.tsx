@@ -125,7 +125,7 @@ export function InboxMatchAnimation({
       </div>
 
       <div className="flex-1 px-2 md:px-3 pb-2 md:pb-3 overflow-visible relative">
-        <div className="h-full pr-1 pt-0 pb-24 md:pb-32 flex flex-col justify-end gap-1.5 md:gap-2">
+        <div className="h-full pt-0 pb-24 md:pb-32 flex flex-col justify-end gap-1.5 md:gap-2">
           {items.slice(1).map((item, idx) => (
             <motion.div
               key={item.id}
@@ -173,7 +173,7 @@ export function InboxMatchAnimation({
                 damping: 24,
                 mass: 0.6,
               }}
-              className="bg-secondary border border-border p-2 md:p-3 transform-gpu will-change-transform absolute bottom-[56px] md:bottom-[68px] left-2 md:left-3 right-[9px] md:right-[11px] z-50"
+              className="bg-secondary border border-border p-2 md:p-3 transform-gpu will-change-transform absolute bottom-[56px] md:bottom-[68px] left-2 md:left-3 right-2 md:right-3 z-50"
             >
               <div className="flex items-start gap-1.5 md:gap-2">
                 <span className="inline-flex w-5 h-5 md:w-6 md:h-6 items-center justify-center bg-secondary border border-border flex-shrink-0">
@@ -182,7 +182,7 @@ export function InboxMatchAnimation({
                     alt="Gmail"
                     width={16}
                     height={16}
-                    className="w-3.5 h-3.5 md:w-4 md:h-4 object-contain"
+                    className="w-3 h-3 md:w-3.5 md:h-3.5 object-contain"
                   />
                 </span>
                 <div className="flex-1 min-w-0">

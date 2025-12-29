@@ -300,7 +300,7 @@ export function TransactionFlowAnimation({
           {/* Account nodes horizontally at the top */}
           {accountNodes.map((node, index) => (
             <g key={node.id}>
-              <motion.rect
+              <rect
                 x={node.x - 18}
                 y={node.y - 18}
                 width={36}
@@ -309,16 +309,7 @@ export function TransactionFlowAnimation({
                 fill="hsl(var(--secondary))"
                 stroke="hsl(var(--border))"
                 strokeWidth={1}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{
-                  opacity: showAccounts ? 1 : 0,
-                  scale: showAccounts ? 1 : 0,
-                }}
-                transition={{
-                  duration: 0.3,
-                  delay: index * 0.1,
-                  ease: 'easeOut',
-                }}
+                opacity={showAccounts ? 1 : 0}
               />
               {/* Account icon inside the container */}
               <foreignObject
@@ -337,44 +328,34 @@ export function TransactionFlowAnimation({
                     justifyContent: 'center',
                   }}
                 >
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: showAccounts ? 1 : 0 }}
-                    transition={{
-                      duration: 0.3,
-                      delay: index * 0.1 + 0.15,
-                    }}
+                  <div
                     style={{
                       color: 'hsl(var(--muted-foreground))',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
+                      opacity: showAccounts ? 1 : 0,
                     }}
                   >
                     <MaterialIcon
                       name="account_balance"
                       size={18}
                     />
-                  </motion.div>
+                  </div>
                 </div>
               </foreignObject>
               {/* Account label - hidden on mobile to save space */}
-              <motion.text
+              <text
                 x={node.x}
                 y={node.y - 25}
                 textAnchor="middle"
                 fontSize="9"
                 fill="hsl(var(--muted-foreground))"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: showAccounts ? 1 : 0 }}
-                transition={{
-                  duration: 0.3,
-                  delay: index * 0.1 + 0.2,
-                }}
+                opacity={showAccounts ? 1 : 0}
                 className="hidden md:block"
               >
                 {node.label}
-              </motion.text>
+              </text>
             </g>
           ))}
 
@@ -392,12 +373,12 @@ export function TransactionFlowAnimation({
                 key={pathId}
                 d={pathD}
                 stroke="hsl(var(--border))"
-                strokeWidth={1.5}
+                strokeWidth={1}
                 fill="none"
                 strokeDasharray={`${dashLength} ${gapLength}`}
                 initial={{ opacity: 0, strokeDashoffset: 0 }}
                 animate={{
-                  opacity: showArrows ? 0.4 : 0,
+                  opacity: showArrows ? 1 : 0,
                   strokeDashoffset: showArrows ? [0, -totalDashLength] : 0,
                 }}
                 transition={{
@@ -419,7 +400,7 @@ export function TransactionFlowAnimation({
         </div>
 
         {/* Transaction list full width below - Midday table style */}
-        <div className="flex-1 min-h-0 overflow-hidden border border-border bg-background">
+        <div className="flex-1 min-h-0 overflow-hidden border-t border-l border-r border-border bg-background">
           <table className="w-full border-collapse">
               <thead className="sticky top-0 z-10 bg-secondary border-b border-border">
                 <tr className="h-[28px] md:h-[32px]">
