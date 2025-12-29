@@ -154,7 +154,7 @@ export function StartPage() {
               </div>
 
               <p className="text-muted-foreground text-xs font-sans">
-                14 day trial (No credit card required)
+                14-day free trial. Cancel anytime.
               </p>
             </div>
           </div>
@@ -177,7 +177,7 @@ export function StartPage() {
               </video>
 
               <div className="absolute inset-0 flex items-center justify-center p-0">
-                <div className="relative" style={{ transform: 'scale(1.0)' }}>
+                <div className="relative scale-[0.95] md:scale-100">
                       <Image
                         src={
                           isLightMode
@@ -234,7 +234,7 @@ export function StartPage() {
 
                   <div className="text-right">
                     <p className="text-muted-foreground text-xs font-sans">
-                      14 day trial (No credit card required)
+                      14-day free trial. Cancel anytime.
                     </p>
                   </div>
                 </div>
