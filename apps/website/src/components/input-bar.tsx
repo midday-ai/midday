@@ -28,8 +28,8 @@ export function InputBar({
         onChange={(e) => setSearchQuery(e.target.value)}
         placeholder={placeholder}
         className={cn(
-          'w-full bg-background border-border text-foreground placeholder:text-muted-foreground',
-          'text-sm px-3 py-2',
+          'w-full bg-transparent border-0 text-foreground placeholder:text-muted-foreground',
+          'text-[12px] px-3 py-2',
         )}
       />
     </div>

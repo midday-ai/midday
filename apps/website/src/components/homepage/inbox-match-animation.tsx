@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import { MaterialIcon } from './icon-mapping'
 
 export function InboxMatchAnimation({
@@ -15,44 +16,44 @@ export function InboxMatchAnimation({
   const items = [
     {
       id: 1,
-      title: 'Google Workspace — Invoice.pdf',
+      title: 'Google Workspace Invoice.pdf',
       amount: '$12.00',
       date: 'Sep 08',
     },
     {
       id: 2,
-      title: 'AWS — Receipt.pdf',
+      title: 'AWS Receipt.pdf',
       amount: '$54.30',
       date: 'Sep 07',
     },
     {
       id: 3,
-      title: 'Figma — Receipt.pdf',
+      title: 'Figma Receipt.pdf',
       amount: '$24.00',
       date: 'Sep 06',
     },
     {
       id: 4,
-      title: 'GitHub — Receipt.pdf',
+      title: 'GitHub Receipt.pdf',
       amount: '$9.00',
       date: 'Sep 05',
     },
     {
       id: 5,
-      title: 'Notion — Receipt.pdf',
+      title: 'Notion Receipt.pdf',
       amount: '$16.00',
       date: 'Sep 04',
     },
     {
       id: 6,
-      title: 'Slack — Receipt.pdf',
+      title: 'Slack Receipt.pdf',
       amount: '$8.50',
       date: 'Sep 03',
     },
   ]
   const incomingItem = {
     id: 999,
-    title: 'Stripe, Inc — Receipt.pdf',
+    title: 'Stripe, Inc Receipt.pdf',
     amount: '$89.00',
     date: 'Sep 10',
   }
@@ -176,7 +177,13 @@ export function InboxMatchAnimation({
             >
               <div className="flex items-start gap-2">
                 <span className="inline-flex w-6 h-6 items-center justify-center bg-secondary border border-border">
-                  <MaterialIcon name="receipt_long" className="text-sm text-muted-foreground" size={16} />
+                  <Image
+                    src="/images/gmail.svg"
+                    alt="Gmail"
+                    width={16}
+                    height={16}
+                    className="w-4 h-4 object-contain"
+                  />
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
@@ -212,7 +219,7 @@ export function InboxMatchAnimation({
           <div className="flex items-center gap-3 min-w-0">
             <MaterialIcon name="link" className=" text-sm text-muted-foreground" size={16} />
             <div className="min-w-0">
-              <div className="text-[14px] text-foreground truncate">
+              <div className="text-[12px] text-foreground truncate">
                 Suggested match
               </div>
               <div className="text-[12px] text-muted-foreground truncate">
@@ -220,7 +227,7 @@ export function InboxMatchAnimation({
               </div>
             </div>
           </div>
-          <button className="ml-3 flex items-center justify-center h-8 px-3 bg-background border border-border text-[12px] text-foreground hover:bg-muted transition-colors">
+          <button className="ml-3 flex items-center justify-center h-8 px-3 bg-transparent border border-border text-[12px] text-foreground hover:bg-muted transition-colors">
             Review
           </button>
         </div>

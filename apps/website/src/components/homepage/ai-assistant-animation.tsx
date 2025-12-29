@@ -333,9 +333,19 @@ export function AIAssistantAnimation({
                           className="text-muted-foreground"
                           size={12}
                         />
-                        <span className="animate-shimmer text-[12px] leading-[16px]  text-foreground">
+                        <motion.span 
+                          className="text-[10px] leading-[14px] text-muted-foreground relative inline-block bg-gradient-to-r from-muted-foreground via-foreground to-muted-foreground bg-[length:200%_100%] bg-clip-text text-transparent"
+                          animate={{
+                            backgroundPosition: ['200% 0', '-200% 0'],
+                          }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            ease: 'linear',
+                          }}
+                        >
                           {activeToolCall.text}
-                        </span>
+                        </motion.span>
                       </div>
                     </div>
                   )}
