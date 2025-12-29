@@ -291,7 +291,7 @@ export function StartPage() {
       </div>
 
       {/* Features 2-Column Layout Section */}
-      <section className="bg-background pt-12 sm:pt-16 pb-20">
+      <section className="bg-background pt-12 sm:pt-16 lg:pt-24 pb-20 lg:pb-24">
         <div className="max-w-[1400px] mx-auto">
           {/* Mobile: Stacked features */}
           <div className="grid grid-cols-1 gap-12 sm:gap-16 lg:hidden">
@@ -488,7 +488,7 @@ export function StartPage() {
       </div>
 
       {/* Assistant Features Overview Section */}
-      <section className="bg-background py-12 sm:py-16">
+      <section className="bg-background py-12 sm:py-16 lg:py-24">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
           <div className="text-center space-y-4 mb-10 sm:mb-12">
             <h2 className="font-serif text-xl sm:text-2xl text-foreground">
@@ -628,7 +628,7 @@ export function StartPage() {
       </div>
 
       {/* Time Savings Bento Grid Section */}
-      <section className="bg-background py-12 sm:py-16">
+      <section className="bg-background py-12 sm:py-16 lg:py-24">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
           <div className="text-center space-y-4 mb-12">
             <h2 className="font-serif text-xl sm:text-2xl text-foreground">
@@ -831,7 +831,7 @@ export function StartPage() {
       </div>
 
       {/* Pre-accounting Features Section */}
-      <section className="bg-background py-12 sm:py-16">
+      <section className="bg-background py-12 sm:py-16 lg:py-24">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
           <div className="text-center space-y-4 mb-12">
             <div className="h-[100px] w-28 mx-auto mb-8">
@@ -920,7 +920,7 @@ export function StartPage() {
 
       {/* Testimonials Section */}
       <section className="bg-background">
-        <div className="max-w-[1400px] mx-auto px-3 sm:px-8 py-12 sm:py-16">
+        <div className="max-w-[1400px] mx-auto px-3 sm:px-8 py-12 sm:py-16 lg:py-24">
           <div className="flex flex-col gap-4 items-center">
             <div className="flex flex-col gap-4 items-center text-center max-w-3xl">
               <h2 className="font-serif text-xl sm:text-2xl text-foreground">
@@ -1111,7 +1111,7 @@ export function StartPage() {
       </div>
 
       {/* Integrations Section */}
-      <section className="bg-background py-12 sm:py-16">
+      <section className="bg-background py-12 sm:py-16 lg:py-24">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
           <div className="text-center space-y-4 mb-10">
             <h2 className="font-serif text-xl sm:text-2xl text-foreground">
@@ -1172,7 +1172,7 @@ export function StartPage() {
       </div>
 
       {/* Pricing Section */}
-      <section className="bg-background py-12 sm:py-16">
+      <section className="bg-background py-12 sm:py-16 lg:py-24">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
           <div className="text-center space-y-4 mb-12">
             <h2 className="font-serif text-xl sm:text-2xl text-foreground">
