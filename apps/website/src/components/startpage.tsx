@@ -47,35 +47,35 @@ export function StartPage() {
 
   const features = [
     {
-      title: 'The story behind the numbers',
+      title: 'Transactions flow in automatically',
       subtitle:
-        'Weekly insights and explanations that show what changed and why.',
+        'Activity from your accounts is continuously pulled in and normalized behind the scenes.',
       mergedText:
-        'The story behind the numbers. Weekly insights and explanations that show what changed and why.',
+        'Transactions flow in automatically. Activity from your accounts is continuously pulled in and normalized behind the scenes.',
       illustration: 'animation',
     },
     {
-      title: 'Everything stays clean in the background',
+      title: 'Receipts are pulled and matched',
       subtitle:
-        'Transactions and receipts are organized automatically without manual work.',
+        'Receipts and invoices are fetched from email and payments and matched to the right transactions.',
       mergedText:
-        'Everything stays clean in the background. Transactions and receipts are organized automatically without manual work.',
+        'Receipts are pulled and matched. Receipts and invoices are fetched from email and payments and matched to the right transactions.',
       illustration: '/illustrations/Mail.svg',
     },
     {
-      title: 'Context makes answers better',
+      title: 'Everything stays in sync',
       subtitle:
-        'Files, invoices, customers, and projects give every answer real business context.',
+        'Balances, categories, and summaries update together as new data arrives.',
       mergedText:
-        'Context makes answers better. Files, invoices, customers, and projects give every answer real business context.',
+        'Everything stays in sync. Balances, categories, and summaries update together as new data arrives.',
       illustration: '/illustrations/Files.svg',
     },
     {
-      title: 'Revenue flows into the picture',
+      title: 'Your business becomes understandable',
       subtitle:
-        'Invoicing and time tracking update your financial overview as work happens.',
+        'You see a clear financial picture that reflects what\'s actually happening in your business.',
       mergedText:
-        'Revenue flows into the picture. Invoicing and time tracking update your financial overview as work happens.',
+        'Your business becomes understandable. You see a clear financial picture that reflects what\'s actually happening in your business.',
       illustration: '/illustrations/Actions.svg',
     },
   ]
@@ -137,7 +137,7 @@ export function StartPage() {
               </h1>
 
               <p className="text-muted-foreground text-sm sm:text-base leading-relaxed font-sans max-w-md">
-                A reconciled financial picture that explains itself, without spreadsheets or manual cleanup.
+                Your business finances, reconciled and explained so you always know what's happening.
               </p>
             </div>
 
@@ -215,7 +215,7 @@ export function StartPage() {
                       </span>
                     </h1>
                     <p className="font-sans text-sm text-muted-foreground leading-relaxed text-left">
-                      A reconciled financial picture that explains itself, without spreadsheets or manual cleanup.
+                      Your business finances, reconciled and explained so you always know what's happening.
                     </p>
                   </div>
                 </div>
@@ -291,7 +291,7 @@ export function StartPage() {
       </div>
 
       {/* Features 2-Column Layout Section */}
-      <section className="bg-background pt-8 pb-20">
+      <section className="bg-background pt-16 sm:pt-24 pb-20">
         <div className="max-w-[1400px] mx-auto">
           {/* Mobile: Stacked features */}
           <div className="grid grid-cols-1 gap-16 lg:hidden">
@@ -338,25 +338,19 @@ export function StartPage() {
             <div className="flex gap-6">
               {/* Timeline */}
               <div className="flex flex-col justify-center items-center flex-shrink-0 relative">
-                <div className="flex flex-col justify-center space-y-6 lg:space-y-8">
+                <div className="flex flex-col justify-center space-y-4 lg:space-y-5">
+                  <div className="flex items-center justify-center relative mb-4 lg:mb-6" style={{ minHeight: '3rem' }}>
+                  </div>
                   {features.map((feature, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-center relative"
-                      style={{ minHeight: '3.5rem' }}
+                      className="flex items-start justify-center relative"
+                      style={{ minHeight: '3rem' }}
                     >
-                      {index > 0 && (
-                        <div
-                          className="absolute top-0 left-1/2 -translate-x-1/2 w-px border-l border-border"
-                          style={{
-                            height: 'calc(1.5rem + 1px)',
-                            top: '-1.5rem',
-                          }}
-                        />
-                      )}
                       <button
                         onClick={() => setActiveFeature(index)}
                         className="cursor-pointer relative z-10"
+                        style={{ marginTop: '0.125rem' }}
                       >
                         <motion.div
                           className={`w-2 h-2 rounded-none transition-all duration-300 ${
@@ -375,10 +369,10 @@ export function StartPage() {
                       </button>
                       {index < features.length - 1 && (
                         <div
-                          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-px border-l border-border"
+                          className="absolute left-1/2 -translate-x-1/2 w-px border-l border-border"
                           style={{
-                            height: 'calc(1.5rem + 1px)',
-                            bottom: '-1.5rem',
+                            height: 'calc(3rem + 1rem - 0.25rem)',
+                            top: '0.375rem',
                           }}
                         />
                       )}
@@ -388,18 +382,22 @@ export function StartPage() {
               </div>
 
               {/* Text Content */}
-              <div className="flex flex-col justify-center space-y-6 lg:space-y-8 flex-1">
+              <div className="flex flex-col justify-center space-y-4 lg:space-y-5 flex-1">
+                <div className="flex items-center mb-4 lg:mb-6" style={{ minHeight: '3rem' }}>
+                  <h2 className="font-serif text-2xl text-foreground">
+                    How it works, end to end
+                  </h2>
+                </div>
                 {features.map((feature, index) => (
                   <div
                     key={index}
-                    className={`cursor-pointer transition-all duration-300 ${
+                    className={`cursor-pointer transition-all duration-300 flex items-start ${
                       activeFeature === index
                         ? 'opacity-100'
                         : 'opacity-60 hover:opacity-80'
                     }`}
                     onClick={() => setActiveFeature(index)}
-                    className="flex items-center"
-                    style={{ minHeight: '3.5rem' }}
+                    style={{ minHeight: '3rem' }}
                   >
                     {activeFeature === index ? (
                       <motion.div
@@ -409,7 +407,7 @@ export function StartPage() {
                         transition={{ duration: 0.35 }}
                         className="overflow-hidden"
                       >
-                        <h2 className="font-sans text-lg lg:text-xl text-primary transition-colors duration-300 max-w-md">
+                        <h2 className="font-sans text-base lg:text-lg text-primary transition-colors duration-300 max-w-md">
                           {feature.title}
                         </h2>
                         <p className="font-sans text-sm text-primary leading-relaxed max-w-md mt-1">
@@ -418,7 +416,7 @@ export function StartPage() {
                       </motion.div>
                     ) : (
                       <div>
-                        <h2 className="font-sans text-lg lg:text-xl text-muted-foreground transition-colors duration-300 max-w-md">
+                        <h2 className="font-sans text-base lg:text-lg text-muted-foreground transition-colors duration-300 max-w-md">
                           {feature.title}
                         </h2>
                       </div>
@@ -480,14 +478,14 @@ export function StartPage() {
       </section>
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
       {/* Assistant Features Overview Section */}
       <section className="bg-background py-16 sm:py-24">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
-          <div className="text-center space-y-4 mb-12 sm:mb-16">
+          <div className="text-center space-y-4 mb-10 sm:mb-12">
             <h2 className="font-serif text-xl sm:text-2xl text-foreground">
               Everything you need to run your business finances
             </h2>
@@ -620,207 +618,14 @@ export function StartPage() {
       </section>
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
-        <div className="h-px w-full border-t border-border" />
-      </div>
-
-      {/* Testimonials Section */}
-      <section className="bg-background">
-        <div className="max-w-[1400px] mx-auto px-3 sm:px-8 py-16 sm:py-24">
-          <div className="flex flex-col gap-4 items-center">
-            <div className="flex flex-col gap-4 items-center text-center max-w-3xl">
-              <h2 className="font-serif text-2xl text-foreground">
-                Built with our users, for our users
-              </h2>
-              <p className="font-sans text-sm text-muted-foreground">
-                Midday helps small teams, solo founders, and small businesses
-                do more with less. Here's what that looks like in practice.
-              </p>
-            </div>
-
-            <div className="flex gap-2 items-center">
-              <div className="flex items-center gap-1">
-                <div className="flex gap-1">
-                  <MaterialIcon name="star" className="text-muted-foreground" size={16} />
-                  <MaterialIcon name="star" className="text-muted-foreground" size={16} />
-                  <MaterialIcon name="star" className="text-muted-foreground" size={16} />
-                  <MaterialIcon name="star" className="text-muted-foreground" size={16} />
-                  <MaterialIcon name="star_half" className="text-muted-foreground" size={16} />
-                </div>
-              </div>
-              <p className="font-sans text-xs text-muted-foreground">
-                Used by 14,000 businesses
-              </p>
-            </div>
-
-            {/* Desktop Testimonials Grid */}
-            <div className="hidden lg:flex gap-3 w-full max-w-5xl mt-6 justify-center">
-              {testimonials.map((testimonial, index) => (
-                <MorphingDialog key={index}>
-                  <MorphingDialogTrigger
-                    className={`flex-shrink-0 group ${
-                      index === 0
-                        ? 'transform -rotate-1'
-                        : index === 1
-                          ? 'transform rotate-1'
-                          : index === 2
-                            ? 'transform rotate-2'
-                            : ''
-                    }`}
-                  >
-                    <div className="bg-background border border-border p-6 w-64 flex flex-col gap-4 transition-all duration-200 hover:border-muted-foreground">
-                      <div className="flex gap-2 items-center">
-                        <div className="w-4 h-4 bg-muted rounded-full"></div>
-                        <MorphingDialogTitle className="font-sans text-sm text-foreground">
-                          {testimonial.name}
-                        </MorphingDialogTitle>
-                      </div>
-                      <div className="flex flex-col gap-2 text-left">
-                        <MorphingDialogSubtitle className="font-sans text-xs text-muted-foreground">
-                          {testimonial.title}
-                        </MorphingDialogSubtitle>
-                        <div className="font-sans text-sm text-muted-foreground leading-relaxed">
-                          &quot;{testimonial.content}&quot;
-                        </div>
-                      </div>
-                    </div>
-                  </MorphingDialogTrigger>
-
-                  <MorphingDialogContainer>
-                    <MorphingDialogContent
-                      className="bg-background border border-border p-8 max-w-2xl"
-                    >
-                      <MorphingDialogClose className="text-muted-foreground hover:text-foreground" />
-
-                      <div className="flex flex-col gap-6">
-                        <div className="flex gap-3 items-center">
-                          <div className="w-6 h-6 bg-muted rounded-full"></div>
-                          <div className="flex flex-col">
-                            <MorphingDialogTitle className="font-sans text-sm text-foreground">
-                              {testimonial.name}
-                            </MorphingDialogTitle>
-                            <MorphingDialogSubtitle className="font-sans text-sm text-muted-foreground">
-                              {testimonial.title}
-                            </MorphingDialogSubtitle>
-                          </div>
-                        </div>
-
-                        <MorphingDialogDescription
-                          disableLayoutAnimation
-                          variants={{
-                            initial: { opacity: 0, scale: 0.8, y: 100 },
-                            animate: { opacity: 1, scale: 1, y: 0 },
-                            exit: { opacity: 0, scale: 0.8, y: 100 },
-                          }}
-                          className="font-sans text-sm text-muted-foreground leading-relaxed whitespace-pre-line"
-                        >
-                          &quot;{testimonial.fullContent}&quot;
-                        </MorphingDialogDescription>
-                      </div>
-                    </MorphingDialogContent>
-                  </MorphingDialogContainer>
-                </MorphingDialog>
-              ))}
-            </div>
-
-            {/* Mobile Carousel */}
-            <div className="lg:hidden w-full max-w-sm mt-4 mx-auto">
-              <div className="relative overflow-hidden mb-4">
-                <motion.div
-                  className="flex cursor-grab active:cursor-grabbing"
-                  drag="x"
-                  dragConstraints={{ left: 0, right: 0 }}
-                  dragMomentum={false}
-                  style={{ x: dragX }}
-                  animate={{ translateX: `-${currentSlide * 100}%` }}
-                  onDragEnd={() => {
-                    const x = dragX.get()
-
-                    if (x <= -50 && currentSlide < testimonials.length - 1) {
-                      setCurrentSlide(currentSlide + 1)
-                    } else if (x >= 50 && currentSlide > 0) {
-                      setCurrentSlide(currentSlide - 1)
-                    }
-                  }}
-                  transition={{
-                    damping: 18,
-                    stiffness: 90,
-                    type: 'spring',
-                    duration: 0.2,
-                  }}
-                >
-                  {testimonials.map((testimonial, index) => (
-                    <div key={index} className="w-full flex-shrink-0">
-                      <MorphingDialog>
-                        <MorphingDialogTrigger className="w-full">
-                          <div className="bg-background border border-border p-6 flex flex-col gap-4 select-none hover:border-muted-foreground transition-all duration-200">
-                            <div className="flex gap-2 items-center">
-                              <div className="w-4 h-4 bg-muted rounded-full"></div>
-                              <MorphingDialogTitle className="font-sans text-sm text-foreground">
-                                {testimonial.name}
-                              </MorphingDialogTitle>
-                            </div>
-                            <div className="flex flex-col gap-2 text-left">
-                              <MorphingDialogSubtitle className="font-sans text-sm text-muted-foreground">
-                                {testimonial.title}
-                              </MorphingDialogSubtitle>
-                              <div className="font-sans text-sm text-muted-foreground leading-relaxed">
-                                &quot;{testimonial.content}&quot;
-                              </div>
-                            </div>
-                          </div>
-                        </MorphingDialogTrigger>
-
-                        <MorphingDialogContainer>
-                          <MorphingDialogContent className="bg-background border border-border p-8 max-w-2xl">
-                            <MorphingDialogClose className="text-muted-foreground hover:text-foreground" />
-
-                            <div className="flex flex-col gap-6">
-                              <div className="flex gap-3 items-center">
-                                <div className="w-6 h-6 bg-muted rounded-full"></div>
-                                <div className="flex flex-col">
-                                  <MorphingDialogTitle className="font-sans text-sm text-foreground">
-                                    {testimonial.name}
-                                  </MorphingDialogTitle>
-                                  <MorphingDialogSubtitle className="font-sans text-sm text-muted-foreground">
-                                    {testimonial.title}
-                                  </MorphingDialogSubtitle>
-                                </div>
-                              </div>
-
-                              <MorphingDialogDescription
-                                disableLayoutAnimation
-                                variants={{
-                                  initial: { opacity: 0, scale: 0.8, y: 100 },
-                                  animate: { opacity: 1, scale: 1, y: 0 },
-                                  exit: { opacity: 0, scale: 0.8, y: 100 },
-                                }}
-                                className="font-sans text-sm text-muted-foreground leading-relaxed whitespace-pre-line"
-                              >
-                                &quot;{testimonial.fullContent}&quot;
-                              </MorphingDialogDescription>
-                            </div>
-                          </MorphingDialogContent>
-                        </MorphingDialogContainer>
-                      </MorphingDialog>
-                    </div>
-                  ))}
-                </motion.div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
       {/* Time Savings Bento Grid Section */}
       <section className="bg-background py-16 sm:py-24">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
-          <div className="text-center space-y-4 mb-16">
+          <div className="text-center space-y-4 mb-12">
             <h2 className="font-serif text-2xl text-foreground">
               Less admin. More focus.
             </h2>
@@ -1016,14 +821,14 @@ export function StartPage() {
       </section>
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
       {/* Pre-accounting Features Section */}
       <section className="bg-background py-16 sm:py-24">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
-          <div className="text-center space-y-4 mb-16">
+          <div className="text-center space-y-4 mb-12">
             <div className="h-[100px] w-28 mx-auto mb-8">
               <Image
                 src={
@@ -1041,7 +846,7 @@ export function StartPage() {
               Ready for accounting, without extra work
             </h2>
             <p className="font-sans text-sm text-muted-foreground max-w-2xl mx-auto">
-              Midday keeps receipts, invoices, and transactions organized automatically, so your finances are always ready for accounting.
+              Receipts, invoices, and transactions stay organized automatically so your books are always ready when you need them.
             </p>
           </div>
 
@@ -1050,7 +855,9 @@ export function StartPage() {
               <div className="space-y-6">
                 {/* Section 1 */}
                 <div className="flex items-center gap-3">
-                  <MaterialIcon name="check" className="text-foreground" size={16} />
+                  <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+                    <MaterialIcon name="check" className="text-foreground" size={14} />
+                  </div>
                   <span className="font-sans text-sm text-foreground">
                     Transactions from 25,000+ banks are categorized and reconciled automatically
                   </span>
@@ -1058,7 +865,9 @@ export function StartPage() {
 
                 {/* Section 2 */}
                 <div className="flex items-center gap-3">
-                  <MaterialIcon name="check" className="text-foreground" size={16} />
+                  <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+                    <MaterialIcon name="check" className="text-foreground" size={14} />
+                  </div>
                   <span className="font-sans text-sm text-foreground">
                     Receipts and invoices are pulled from email and payments, then matched to transactions
                   </span>
@@ -1066,7 +875,9 @@ export function StartPage() {
 
                 {/* Section 3 */}
                 <div className="flex items-center gap-3">
-                  <MaterialIcon name="check" className="text-foreground" size={16} />
+                  <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+                    <MaterialIcon name="check" className="text-foreground" size={14} />
+                  </div>
                   <span className="font-sans text-sm text-foreground">
                     Clean records across all connected accounts
                   </span>
@@ -1074,7 +885,9 @@ export function StartPage() {
 
                 {/* Section 4 */}
                 <div className="flex items-center gap-3">
-                  <MaterialIcon name="check" className="text-foreground" size={16} />
+                  <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+                    <MaterialIcon name="check" className="text-foreground" size={14} />
+                  </div>
                   <span className="font-sans text-sm text-foreground">
                     Taxes are tracked per transaction
                   </span>
@@ -1082,7 +895,9 @@ export function StartPage() {
 
                 {/* Section 5 */}
                 <div className="flex items-center gap-3">
-                  <MaterialIcon name="check" className="text-foreground" size={16} />
+                  <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+                    <MaterialIcon name="check" className="text-foreground" size={14} />
+                  </div>
                   <span className="font-sans text-sm text-foreground">
                     Export-ready for your accounting system
                   </span>
@@ -1094,14 +909,206 @@ export function StartPage() {
       </section>
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="h-px w-full border-t border-border" />
+      </div>
+
+      {/* Testimonials Section */}
+      <section className="bg-background">
+        <div className="max-w-[1400px] mx-auto px-3 sm:px-8 py-16 sm:py-24">
+          <div className="flex flex-col gap-4 items-center">
+            <div className="flex flex-col gap-4 items-center text-center max-w-3xl">
+              <h2 className="font-serif text-2xl text-foreground">
+                Built alongside our users
+              </h2>
+              <p className="font-sans text-sm text-muted-foreground">
+                For founders and small teams who run their business every week, every feature earns its place in the workflow.
+              </p>
+            </div>
+
+            <div className="flex gap-2 items-center mb-10">
+              <div className="flex items-center gap-1">
+                <div className="flex gap-1">
+                  <MaterialIcon name="star" className="text-muted-foreground" size={16} />
+                  <MaterialIcon name="star" className="text-muted-foreground" size={16} />
+                  <MaterialIcon name="star" className="text-muted-foreground" size={16} />
+                  <MaterialIcon name="star" className="text-muted-foreground" size={16} />
+                  <MaterialIcon name="star_half" className="text-muted-foreground" size={16} />
+                </div>
+              </div>
+              <p className="font-sans text-xs text-muted-foreground">
+                Used by 14,000 businesses
+              </p>
+            </div>
+
+            {/* Desktop Testimonials Grid */}
+            <div className="hidden lg:flex gap-3 w-full max-w-5xl justify-center">
+              {testimonials.map((testimonial, index) => (
+                <MorphingDialog key={index}>
+                  <MorphingDialogTrigger
+                    className={`flex-shrink-0 group ${
+                      index === 0
+                        ? 'transform -rotate-1'
+                        : index === 1
+                          ? 'transform rotate-1'
+                          : index === 2
+                            ? 'transform rotate-2'
+                            : ''
+                    }`}
+                  >
+                    <div className="bg-background border border-border p-6 w-64 flex flex-col gap-4 transition-all duration-200 hover:border-muted-foreground">
+                      <div className="flex gap-2 items-center">
+                        <div className="w-4 h-4 bg-muted rounded-full"></div>
+                        <MorphingDialogTitle className="font-sans text-sm text-foreground">
+                          {testimonial.name}
+                        </MorphingDialogTitle>
+                      </div>
+                      <div className="flex flex-col gap-2 text-left">
+                        <MorphingDialogSubtitle className="font-sans text-xs text-muted-foreground">
+                          {testimonial.title}
+                        </MorphingDialogSubtitle>
+                        <div className="font-sans text-sm text-muted-foreground leading-relaxed">
+                          &quot;{testimonial.content}&quot;
+                        </div>
+                      </div>
+                    </div>
+                  </MorphingDialogTrigger>
+
+                  <MorphingDialogContainer>
+                    <MorphingDialogContent
+                      className="bg-background border border-border p-8 max-w-2xl"
+                    >
+                      <MorphingDialogClose className="text-muted-foreground hover:text-foreground" />
+
+                      <div className="flex flex-col gap-6">
+                        <div className="flex gap-3 items-center">
+                          <div className="w-6 h-6 bg-muted rounded-full"></div>
+                          <div className="flex flex-col">
+                            <MorphingDialogTitle className="font-sans text-sm text-foreground">
+                              {testimonial.name}
+                            </MorphingDialogTitle>
+                            <MorphingDialogSubtitle className="font-sans text-sm text-muted-foreground">
+                              {testimonial.title}
+                            </MorphingDialogSubtitle>
+                          </div>
+                        </div>
+
+                        <MorphingDialogDescription
+                          disableLayoutAnimation
+                          variants={{
+                            initial: { opacity: 0, scale: 0.8, y: 100 },
+                            animate: { opacity: 1, scale: 1, y: 0 },
+                            exit: { opacity: 0, scale: 0.8, y: 100 },
+                          }}
+                          className="font-sans text-sm text-muted-foreground leading-relaxed whitespace-pre-line"
+                        >
+                          &quot;{testimonial.fullContent}&quot;
+                        </MorphingDialogDescription>
+                      </div>
+                    </MorphingDialogContent>
+                  </MorphingDialogContainer>
+                </MorphingDialog>
+              ))}
+            </div>
+
+            {/* Mobile Carousel */}
+            <div className="lg:hidden w-full max-w-sm mx-auto">
+              <div className="relative overflow-hidden mb-4">
+                <motion.div
+                  className="flex cursor-grab active:cursor-grabbing"
+                  drag="x"
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragMomentum={false}
+                  style={{ x: dragX }}
+                  animate={{ translateX: `-${currentSlide * 100}%` }}
+                  onDragEnd={() => {
+                    const x = dragX.get()
+
+                    if (x <= -50 && currentSlide < testimonials.length - 1) {
+                      setCurrentSlide(currentSlide + 1)
+                    } else if (x >= 50 && currentSlide > 0) {
+                      setCurrentSlide(currentSlide - 1)
+                    }
+                  }}
+                  transition={{
+                    damping: 18,
+                    stiffness: 90,
+                    type: 'spring',
+                    duration: 0.2,
+                  }}
+                >
+                  {testimonials.map((testimonial, index) => (
+                    <div key={index} className="w-full flex-shrink-0">
+                      <MorphingDialog>
+                        <MorphingDialogTrigger className="w-full">
+                          <div className="bg-background border border-border p-6 flex flex-col gap-4 select-none hover:border-muted-foreground transition-all duration-200">
+                            <div className="flex gap-2 items-center">
+                              <div className="w-4 h-4 bg-muted rounded-full"></div>
+                              <MorphingDialogTitle className="font-sans text-sm text-foreground">
+                                {testimonial.name}
+                              </MorphingDialogTitle>
+                            </div>
+                            <div className="flex flex-col gap-2 text-left">
+                              <MorphingDialogSubtitle className="font-sans text-sm text-muted-foreground">
+                                {testimonial.title}
+                              </MorphingDialogSubtitle>
+                              <div className="font-sans text-sm text-muted-foreground leading-relaxed">
+                                &quot;{testimonial.content}&quot;
+                              </div>
+                            </div>
+                          </div>
+                        </MorphingDialogTrigger>
+
+                        <MorphingDialogContainer>
+                          <MorphingDialogContent className="bg-background border border-border p-8 max-w-2xl">
+                            <MorphingDialogClose className="text-muted-foreground hover:text-foreground" />
+
+                            <div className="flex flex-col gap-6">
+                              <div className="flex gap-3 items-center">
+                                <div className="w-6 h-6 bg-muted rounded-full"></div>
+                                <div className="flex flex-col">
+                                  <MorphingDialogTitle className="font-sans text-sm text-foreground">
+                                    {testimonial.name}
+                                  </MorphingDialogTitle>
+                                  <MorphingDialogSubtitle className="font-sans text-sm text-muted-foreground">
+                                    {testimonial.title}
+                                  </MorphingDialogSubtitle>
+                                </div>
+                              </div>
+
+                              <MorphingDialogDescription
+                                disableLayoutAnimation
+                                variants={{
+                                  initial: { opacity: 0, scale: 0.8, y: 100 },
+                                  animate: { opacity: 1, scale: 1, y: 0 },
+                                  exit: { opacity: 0, scale: 0.8, y: 100 },
+                                }}
+                                className="font-sans text-sm text-muted-foreground leading-relaxed whitespace-pre-line"
+                              >
+                                &quot;{testimonial.fullContent}&quot;
+                              </MorphingDialogDescription>
+                            </div>
+                          </MorphingDialogContent>
+                        </MorphingDialogContainer>
+                      </MorphingDialog>
+                    </div>
+                  ))}
+                </motion.div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Divider */}
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
       {/* Integrations Section */}
       <section className="bg-background py-20 sm:py-32">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
-          <div className="text-center space-y-4 mb-12">
+          <div className="text-center space-y-4 mb-10">
             <h2 className="font-serif text-2xl text-foreground">
               Works with the tools you already use
             </h2>
@@ -1155,17 +1162,14 @@ export function StartPage() {
       </section>
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
       {/* Pricing Section */}
       <section className="bg-background py-20 sm:py-32">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
-          <div className="text-center space-y-4 mb-16">
-            <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider">
-              Pricing
-            </p>
+          <div className="text-center space-y-4 mb-12">
             <h2 className="font-serif text-2xl text-foreground">
               Pricing that matches how you run your business
             </h2>
@@ -1225,7 +1229,7 @@ export function StartPage() {
                     Starter
                   </h3>
                   <p className="font-sans text-sm text-muted-foreground mb-3">
-                    For solo founders getting set up
+                    For solo founders who want a clean starting point for their business finances
                   </p>
                   <div className="flex items-baseline gap-2">
                     <span className="font-sans text-2xl text-foreground">
