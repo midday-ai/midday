@@ -931,19 +931,14 @@ export function StartPage() {
               </p>
             </div>
 
-            <div className="flex gap-2 items-center mb-10">
-              <div className="flex items-center gap-1">
-                <div className="flex gap-1">
-                  <MaterialIcon name="star" className="text-muted-foreground" size={16} />
-                  <MaterialIcon name="star" className="text-muted-foreground" size={16} />
-                  <MaterialIcon name="star" className="text-muted-foreground" size={16} />
-                  <MaterialIcon name="star" className="text-muted-foreground" size={16} />
-                  <MaterialIcon name="star_half" className="text-muted-foreground" size={16} />
-                </div>
+            <div className="flex items-center justify-center mb-10">
+              <div className="flex gap-1">
+                <MaterialIcon name="star" className="text-muted-foreground" size={16} />
+                <MaterialIcon name="star" className="text-muted-foreground" size={16} />
+                <MaterialIcon name="star" className="text-muted-foreground" size={16} />
+                <MaterialIcon name="star" className="text-muted-foreground" size={16} />
+                <MaterialIcon name="star_half" className="text-muted-foreground" size={16} />
               </div>
-              <p className="font-sans text-xs text-muted-foreground">
-                Used by 14,000 businesses
-              </p>
             </div>
 
             {/* Desktop Testimonials Grid */}
