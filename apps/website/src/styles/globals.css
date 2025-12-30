@@ -19,32 +19,10 @@
 
 /* Disable hover styles on touch devices */
 @media (hover: none) and (pointer: coarse) {
-  /* Disable common hover effects on touch devices */
-  .hover\:opacity-80:hover,
-  .hover\:opacity-80:active {
-    opacity: 1 !important;
-  }
-
-  .hover\:text-muted-foreground:hover,
-  .hover\:text-muted-foreground:active {
-    color: inherit !important;
-  }
-
-  .hover\:border-muted-foreground:hover,
-  .hover\:border-muted-foreground:active {
-    border-color: inherit !important;
-  }
-
-  .hover\:bg-secondary:hover,
-  .hover\:bg-secondary:active {
-    background-color: inherit !important;
-  }
-
   /* Disable active state on touch devices for elements with this class */
   .no-touch-active:active {
-    background: transparent !important;
-    background-color: inherit !important;
-    color: inherit !important;
-    opacity: 1 !important;
+    background-color: inherit;
+    color: inherit;
+    opacity: 1;
   }
 }
