@@ -105,7 +105,7 @@ export function StartPage() {
               </h1>
 
               <p className="text-muted-foreground text-base leading-normal font-sans max-w-md text-center mx-auto lg:text-left lg:mx-0">
-                Your business finances, reconciled and explained so you always know what's happening.
+                Your finances, reconciled and explained so you always know what's happening.
               </p>
             </div>
 
@@ -116,13 +116,13 @@ export function StartPage() {
                   className="w-full btn-inverse h-11 px-5 transition-colors"
                 >
                   <span className="text-inherit text-sm ">
-                    See my business
+                    Set up your business
                   </span>
                 </Button>
               </div>
 
               <p className="text-muted-foreground text-xs font-sans">
-                14-day free trial. Cancel anytime.
+                14-day free trial · Cancel anytime
               </p>
             </div>
           </div>
@@ -183,7 +183,7 @@ export function StartPage() {
                       </span>
                     </h1>
                     <p className="font-sans text-base text-muted-foreground leading-normal text-left">
-                      Your business finances, reconciled and explained so you always know what's happening.
+                      Your finances, reconciled and explained so you always know what's happening.
                     </p>
                   </div>
                 </div>
@@ -195,7 +195,7 @@ export function StartPage() {
                       className="btn-inverse h-11 px-4 transition-colors"
                     >
                       <span className="text-inherit text-sm ">
-                        See my business
+                        Set up your business
                       </span>
                     </Button>
                   </div>
