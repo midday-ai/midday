@@ -63,9 +63,9 @@ export function Inbox() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <div className="bg-background relative min-h-screen overflow-hidden">
-        {/* Grid Pattern Background */}
-        <div className="absolute inset-0 opacity-10 flex items-center justify-center">
+      <div className="bg-background relative overflow-visible lg:min-h-screen lg:overflow-hidden">
+        {/* Grid Pattern Background - Desktop Only */}
+        <div className={`hidden lg:flex absolute inset-0 items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-[15%]'}`}>
           <Image
             src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
             alt="Grid Pattern"
@@ -76,45 +76,84 @@ export function Inbox() {
           />
         </div>
 
-        {/* Hero Content */}
-        <div className="relative z-20 flex flex-col items-center justify-center min-h-screen px-6 py-20 pt-32 lg:pt-40">
-          {/* Main Heading */}
-          <div className="text-center space-y-8 mb-10">
-            <h1 className="font-serif text-4xl lg:text-8xl xl:text-9xl 2xl:text-[12rem] leading-tight">
-              <span className="text-foreground block">Receipts handled automatically</span>
-            </h1>
-
-            <p className="text-muted-foreground text-sm lg:text-base leading-relaxed max-w-2xl mx-auto font-sans">
-              Receipts and invoices are pulled in from email, uploads, and payments, then matched to transactions so reconciliation doesn't require manual work.
-            </p>
-          </div>
-
-          {/* Inbox Illustration */}
-          <div className="flex justify-center w-full">
+        {/* Mobile Layout */}
+        <div className="lg:hidden flex flex-col relative pt-32 pb-8 sm:pt-40 sm:pb-8 md:pt-48 overflow-hidden">
+          {/* Grid Pattern Background - Mobile/Tablet Only (Limited Height) */}
+          <div className={`absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-[15%]'}`} style={{ height: '600px' }}>
             <Image
-              src="/images/file-Storage.svg"
-              alt="Inbox Interface"
-              width={1200}
-              height={800}
-              className="w-full max-w-6xl h-auto object-contain"
+              src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
+              alt="Grid Pattern"
+              width={1728}
+              height={1080}
+              className="w-[1728px] h-[600px] object-cover"
               priority
             />
+          </div>
+          <div className="flex flex-col justify-start items-center space-y-6 z-20 px-3 sm:px-4">
+            <div className="space-y-4 text-center max-w-xl px-2">
+              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl leading-tight">
+                <span className="text-foreground">Receipts handled automatically</span>
+              </h1>
+              <p className="text-muted-foreground text-base leading-relaxed font-sans">
+                Receipts and invoices are pulled in from email, uploads, and payments, then matched to transactions so reconciliation doesn't require manual work.
+              </p>
+            </div>
+
+            {/* Inbox Illustration */}
+            <div className="flex justify-center w-full">
+              <Image
+                src="/images/file-Storage.svg"
+                alt="Inbox Interface"
+                width={1200}
+                height={800}
+                className="w-full max-w-6xl h-auto object-contain"
+                priority
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Layout */}
+        <div className="hidden lg:flex flex-col min-h-screen relative pt-40 overflow-hidden">
+          <div className="flex-1 flex flex-col justify-start items-center space-y-8 z-20 px-4 pt-16">
+            {/* Main Heading */}
+            <div className="text-center space-y-8 w-full">
+              <h1 className="font-serif text-8xl xl:text-9xl 2xl:text-[12rem] leading-tight text-center">
+                <span className="text-foreground block">Receipts handled automatically</span>
+              </h1>
+
+              <p className="text-muted-foreground text-base leading-relaxed max-w-2xl mx-auto font-sans">
+                Receipts and invoices are pulled in from email, uploads, and payments, then matched to transactions so reconciliation doesn't require manual work.
+              </p>
+            </div>
+
+            {/* Inbox Illustration */}
+            <div className="flex justify-center w-full">
+              <Image
+                src="/images/file-Storage.svg"
+                alt="Inbox Interface"
+                width={1200}
+                height={800}
+                className="w-full max-w-6xl h-auto object-contain"
+                priority
+              />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Highlight Feature Section with Animations */}
       <section className="bg-background py-20 lg:py-24">
-        <div className="max-w-[1400px] mx-auto px-8">
+        <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
           <div className="space-y-24 lg:space-y-32">
             {/* First Animation - Inbox Match */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
               {/* Left: Title and Subtitle */}
-              <div className="space-y-4 lg:space-y-6">
+              <div className="space-y-4 lg:space-y-6 text-center lg:text-left">
                 <h2 className="font-serif text-xl sm:text-2xl text-foreground">
                   Automatic receipt collection
                 </h2>
-                <p className="font-sans text-sm lg:text-base text-muted-foreground leading-relaxed max-w-lg">
+                <p className="font-sans text-base text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
                   Receipts and invoices are automatically pulled from your email, uploads, and payment systems.
                 </p>
               </div>
@@ -122,7 +161,7 @@ export function Inbox() {
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background">
                 {/* Grid Pattern Background */}
-                <div className="absolute inset-0 opacity-10 flex items-center justify-center pointer-events-none z-0">
+                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-50' : 'opacity-10'}`}>
                   <Image
                     src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
                     alt="Grid Pattern"
@@ -143,11 +182,11 @@ export function Inbox() {
             {/* Second Animation - Smart Matching */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
               {/* Left: Title and Subtitle */}
-              <div className="space-y-4 lg:space-y-6 lg:order-2">
+              <div className="space-y-4 lg:space-y-6 lg:order-2 text-center lg:text-left">
                 <h2 className="font-serif text-xl sm:text-2xl text-foreground">
                   Smart transaction matching
                 </h2>
-                <p className="font-sans text-sm lg:text-base text-muted-foreground leading-relaxed max-w-lg">
+                <p className="font-sans text-base text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
                   Receipts and invoices are automatically matched to transactions, so reconciliation happens without manual work.
                 </p>
               </div>
@@ -155,7 +194,7 @@ export function Inbox() {
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background lg:order-1">
                 {/* Grid Pattern Background */}
-                <div className="absolute inset-0 opacity-10 flex items-center justify-center pointer-events-none z-0">
+                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-50' : 'opacity-10'}`}>
                   <Image
                     src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
                     alt="Grid Pattern"

@@ -35,7 +35,7 @@ export function AccountingSection() {
           <h2 className="font-serif text-xl sm:text-2xl text-foreground">
             Ready for accounting, without extra work
           </h2>
-          <p className="font-sans text-sm text-muted-foreground max-w-2xl mx-auto">
+          <p className="font-sans text-base text-muted-foreground max-w-2xl mx-auto">
             Receipts, invoices, and transactions stay organized automatically so your books are always ready when you need them.
           </p>
         </div>

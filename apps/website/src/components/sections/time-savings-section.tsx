@@ -13,7 +13,7 @@ export function TimeSavingsSection() {
           <h2 className="font-serif text-xl sm:text-2xl text-foreground">
             Less admin. More focus.
           </h2>
-          <p className="font-sans text-sm text-muted-foreground max-w-2xl mx-auto">
+          <p className="font-sans text-base text-muted-foreground max-w-2xl mx-auto">
             Midday removes manual financial work so you can spend time on what actually matters.
           </p>
         </div>

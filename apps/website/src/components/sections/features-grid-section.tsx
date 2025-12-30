@@ -13,7 +13,7 @@ export function FeaturesGridSection() {
           <h2 className="font-serif text-xl sm:text-2xl text-foreground">
             Everything you need to run your business finances
           </h2>
-          <p className="font-sans text-sm text-muted-foreground max-w-2xl mx-auto px-4">
+          <p className="font-sans text-base text-muted-foreground max-w-2xl mx-auto px-4">
             Dashboards, insights, transactions, invoicing, time tracking, and files all connected in one system.
           </p>
         </div>
@@ -32,7 +32,7 @@ export function FeaturesGridSection() {
                   Assistant
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground leading-[21px]">
-                  Financial assistant
+                  Financial answers
                 </p>
               </div>
             </div>
@@ -49,7 +49,7 @@ export function FeaturesGridSection() {
                   Insights
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground leading-[21px]">
-                  Business insights
+                  Weekly updates
                 </p>
               </div>
             </div>
@@ -66,7 +66,7 @@ export function FeaturesGridSection() {
                   Transactions
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground leading-[21px]">
-                  Transaction records
+                  Money movement
                 </p>
               </div>
             </div>
@@ -102,7 +102,7 @@ export function FeaturesGridSection() {
                   Time tracking
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground leading-[21px]">
-                  Time tracking
+                  Project hours
                 </p>
               </div>
             </div>
@@ -136,7 +136,7 @@ export function FeaturesGridSection() {
                   Customers
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground leading-[21px]">
-                  Customer insights
+                  Customer performance
                 </p>
               </div>
             </div>
