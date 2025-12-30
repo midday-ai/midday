@@ -84,7 +84,7 @@ export function TestimonialsSection({
           <>
             <div className="flex flex-col gap-4 items-center">
               <div className="flex flex-col gap-4 items-center text-center max-w-3xl">
-                <h2 className="font-serif text-xl sm:text-2xl text-foreground">
+                <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
                   {title}
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal">

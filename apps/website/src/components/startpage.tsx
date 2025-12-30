@@ -98,7 +98,7 @@ export function StartPage() {
         <div className="lg:hidden flex flex-col min-h-screen relative pt-32 pb-12 sm:py-32 md:pt-24 overflow-hidden">
           <div className="flex-1 flex flex-col justify-center md:justify-start md:pt-16 items-center space-y-8 z-20 px-3 sm:px-4">
             <div className="space-y-4 text-center max-w-xl px-2">
-              <h1 className="font-serif text-2xl sm:text-3xl md:text-3xl lg:text-2xl xl:text-2xl 2xl:text-2xl leading-tight">
+              <h1 className="font-serif text-3xl sm:text-3xl md:text-3xl lg:text-3xl xl:text-2xl 2xl:text-2xl leading-tight">
                 <span className="text-foreground">
                   For founders who are tired of guessing how their business is doing
                 </span>
@@ -177,7 +177,7 @@ export function StartPage() {
               <div className="flex justify-between items-end">
                 <div className="max-w-xl">
                   <div className="space-y-3">
-                    <h1 className="font-serif text-xl lg:text-2xl xl:text-3xl 2xl:text-3xl leading-tight lg:leading-[1.6] xl:leading-[1.3] text-left">
+                    <h1 className="font-serif text-xl lg:text-3xl xl:text-3xl 2xl:text-3xl leading-tight lg:leading-tight xl:leading-[1.3] text-left">
                       <span className="text-foreground">
                         For founders who are tired of guessing how their business is doing
                       </span>
@@ -264,7 +264,7 @@ export function StartPage() {
           {/* Mobile: Stacked features */}
           <div className="grid grid-cols-1 gap-12 sm:gap-16 lg:hidden">
             <div className="text-center mb-2">
-              <h2 className="font-serif text-xl sm:text-2xl text-foreground">
+              <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
                 Always know what's going on
               </h2>
             </div>
