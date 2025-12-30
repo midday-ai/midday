@@ -90,11 +90,14 @@ export function Insights() {
             />
           </div>
           <div className="flex flex-col justify-start items-center space-y-6 z-20 px-3 sm:px-4">
-            <div className="space-y-4 text-center max-w-xl px-2">
-              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl leading-tight">
+            <div className="space-y-4 text-center max-w-xl px-2 w-full">
+              <h1 className="font-serif text-4xl sm:text-4xl md:text-5xl leading-tight">
                 <span className="text-foreground">See what's changing</span>
               </h1>
-              <p className="text-muted-foreground text-base leading-relaxed font-sans">
+              <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto lg:hidden">
+                Weekly summaries that show what changed and what matters.
+              </p>
+              <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto hidden lg:block">
                 Understand how your business is evolving over time with trends and summaries that highlight what's moving, what's stable, and where attention is needed.
               </p>
             </div>
@@ -122,7 +125,7 @@ export function Insights() {
                 <span className="text-foreground block">See what's changing</span>
               </h1>
 
-              <p className="text-muted-foreground text-base leading-relaxed max-w-2xl mx-auto font-sans">
+              <p className="text-muted-foreground text-base leading-normal max-w-2xl mx-auto font-sans text-center">
                 Understand how your business is evolving over time with trends and summaries that highlight what's moving, what's stable, and where attention is needed.
               </p>
             </div>
@@ -153,7 +156,7 @@ export function Insights() {
                 <h2 className="font-serif text-xl sm:text-2xl text-foreground">
                   Track trends over time
                 </h2>
-                <p className="font-sans text-base text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
+                <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
                   See how your revenue, expenses, and cash flow change over time with clear visualizations and trend analysis.
                 </p>
               </div>
@@ -161,7 +164,7 @@ export function Insights() {
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background">
                 {/* Grid Pattern Background */}
-                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-50' : 'opacity-10'}`}>
+                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-10'}`}>
                   <Image
                     src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
                     alt="Grid Pattern"
@@ -186,7 +189,7 @@ export function Insights() {
                 <h2 className="font-serif text-xl sm:text-2xl text-foreground">
                   Understand what matters
                 </h2>
-                <p className="font-sans text-base text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
+                <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
                   Get summaries that highlight what's moving, what's stable, and where your attention is needed most.
                 </p>
               </div>
@@ -194,7 +197,7 @@ export function Insights() {
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background lg:order-1">
                 {/* Grid Pattern Background */}
-                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-50' : 'opacity-10'}`}>
+                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-10'}`}>
                   <Image
                     src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
                     alt="Grid Pattern"
