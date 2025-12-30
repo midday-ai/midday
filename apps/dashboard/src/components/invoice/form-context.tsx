@@ -36,6 +36,8 @@ export const invoiceTemplateSchema = z.object({
   includePdf: z.boolean().optional(),
   includeUnits: z.boolean().optional(),
   includeQr: z.boolean().optional(),
+  includeLineItemTax: z.boolean().optional(),
+  lineItemTaxLabel: z.string().optional(),
   taxRate: z.number().min(0).max(100).optional(),
   vatRate: z.number().min(0).max(100).optional(),
   dateFormat: z.enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd.MM.yyyy"]),
@@ -51,6 +53,7 @@ export const lineItemSchema = z.object({
   price: z.number(),
   vat: z.number().min(0, "VAT must be at least 0").optional(),
   tax: z.number().min(0, "Tax must be at least 0").optional(),
+  taxRate: z.number().min(0).max(100).optional(),
 });
 
 export const invoiceFormSchema = z.object({

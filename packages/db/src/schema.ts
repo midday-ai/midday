@@ -1601,6 +1601,8 @@ export const invoiceTemplates = pgTable(
     subtotalLabel: text("subtotal_label"),
     includePdf: boolean("include_pdf"),
     sendCopy: boolean("send_copy"),
+    includeLineItemTax: boolean("include_line_item_tax").default(false),
+    lineItemTaxLabel: text("line_item_tax_label"),
   },
   (table) => [
     foreignKey({
@@ -1636,6 +1638,7 @@ export const invoiceProducts = pgTable(
     price: numericCasted({ precision: 10, scale: 2 }),
     currency: text(),
     unit: text(),
+    taxRate: numericCasted("tax_rate", { precision: 10, scale: 2 }),
     isActive: boolean().default(true).notNull(),
     usageCount: integer("usage_count").default(0).notNull(),
     lastUsedAt: timestamp("last_used_at", {

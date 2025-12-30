@@ -5,13 +5,15 @@ export function calculateTotal({
   discount = 0,
   includeVat = true,
   includeTax = true,
+  includeLineItemTax = false,
 }: {
-  lineItems: Array<{ price?: number; quantity?: number }>;
+  lineItems: Array<{ price?: number; quantity?: number; taxRate?: number }>;
   taxRate?: number;
   vatRate?: number;
   discount?: number;
   includeVat?: boolean;
   includeTax?: boolean;
+  includeLineItemTax?: boolean;
 }) {
   // Handle cases where lineItems might be undefined or null
   const safeLineItems = lineItems || [];
@@ -35,15 +37,27 @@ export function calculateTotal({
   // Calculate VAT (Total): Calculate VAT on the Subtotal
   const totalVAT = includeVat ? (subTotal * safeVatRate) / 100 : 0;
 
-  // Calculate Total: Subtotal + VAT - Discount
-  const total = subTotal + (includeVat ? totalVAT : 0) - safeDiscount;
+  // Calculate tax based on mode
+  let tax = 0;
+  if (includeLineItemTax) {
+    // Calculate tax per line item and sum
+    tax = safeLineItems.reduce((acc, item) => {
+      if (!item) return acc;
+      const itemTotal = (item.price ?? 0) * (item.quantity ?? 0);
+      const itemTaxRate = item.taxRate ?? 0;
+      return acc + (itemTotal * itemTaxRate) / 100;
+    }, 0);
+  } else if (includeTax) {
+    // Invoice-level tax (original behavior)
+    tax = (subTotal * safeTaxRate) / 100;
+  }
 
-  // Calculate tax (if included) - tax should be calculated on subtotal, not total
-  const tax = includeTax ? (subTotal * safeTaxRate) / 100 : 0;
+  // Calculate Total: Subtotal + VAT + Tax - Discount
+  const total = subTotal + (includeVat ? totalVAT : 0) + tax - safeDiscount;
 
   return {
     subTotal,
-    total: total + tax,
+    total,
     vat: totalVAT,
     tax,
   };

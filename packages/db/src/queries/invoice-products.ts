@@ -14,6 +14,7 @@ export type InvoiceProduct = {
   price: number | null;
   currency: string | null;
   unit: string | null;
+  taxRate: number | null;
   isActive: boolean;
   usageCount: number;
   lastUsedAt: string | null;
@@ -27,6 +28,7 @@ export type CreateInvoiceProductParams = {
   price?: number | null;
   currency?: string | null;
   unit?: string | null;
+  taxRate?: number | null;
   isActive?: boolean;
 };
 
@@ -38,6 +40,7 @@ export type UpdateInvoiceProductParams = {
   price?: number | null;
   currency?: string | null;
   unit?: string | null;
+  taxRate?: number | null;
   isActive?: boolean;
   usageCount?: number;
   lastUsedAt?: string | null;
@@ -76,6 +79,7 @@ export type UpsertInvoiceProductParams = {
   price?: number | null;
   currency?: string | null;
   unit?: string | null;
+  taxRate?: number | null;
 };
 
 export async function upsertInvoiceProduct(
@@ -104,6 +108,7 @@ export async function upsertInvoiceProduct(
           description: params.description,
         }),
         ...(params.unit !== undefined && { unit: params.unit }),
+        ...(params.taxRate !== undefined && { taxRate: params.taxRate }),
         usageCount: sql`${invoiceProducts.usageCount} + 1`,
         lastUsedAt: now,
         updatedAt: now,

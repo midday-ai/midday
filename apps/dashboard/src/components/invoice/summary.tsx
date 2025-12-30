@@ -60,6 +60,11 @@ export function Summary() {
     name: "template.includeDiscount",
   });
 
+  const includeLineItemTax = useWatch({
+    control,
+    name: "template.includeLineItemTax",
+  });
+
   const lineItems = useWatch({
     control,
     name: "lineItems",
@@ -81,6 +86,7 @@ export function Summary() {
     vatRate,
     includeVat,
     includeTax,
+    includeLineItemTax,
     discount: discount ?? 0,
   });
 
@@ -183,7 +189,7 @@ export function Summary() {
         </div>
       )}
 
-      {includeTax && (
+      {includeTax && !includeLineItemTax && (
         <div className="flex justify-between items-center py-1">
           <div className="flex items-center gap-1">
             <LabelInput
@@ -208,6 +214,27 @@ export function Summary() {
         </div>
       )}
 
+      {includeLineItemTax && totalTax > 0 && (
+        <div className="flex justify-between items-center py-1">
+          <LabelInput
+            className="flex-shrink-0 min-w-5"
+            name="template.taxLabel"
+            onSave={(value) => {
+              updateTemplateMutation.mutate({ taxLabel: value });
+            }}
+          />
+
+          <span className="text-right text-[11px] text-[#878787]">
+            <FormatAmount
+              amount={totalTax}
+              maximumFractionDigits={2}
+              currency={currency}
+              locale={locale}
+            />
+          </span>
+        </div>
+      )}
+
       <div className="flex justify-between items-center py-4 mt-2 border-t border-border">
         <LabelInput
           name="template.totalSummaryLabel"
@@ -220,7 +247,9 @@ export function Summary() {
             value={total}
             currency={currency}
             maximumFractionDigits={
-              includeTax || includeVat ? 2 : maximumFractionDigits
+              includeTax || includeVat || includeLineItemTax
+                ? 2
+                : maximumFractionDigits
             }
           />
         </span>

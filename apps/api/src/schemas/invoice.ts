@@ -103,6 +103,8 @@ const baseInvoiceTemplateSchema = z.object({
   sendCopy: z.boolean().optional(),
   includeUnits: z.boolean().optional(),
   includeQr: z.boolean().optional(),
+  includeLineItemTax: z.boolean().optional(),
+  lineItemTaxLabel: z.string().optional(),
   taxRate: z.number().min(0).max(100).optional(),
   vatRate: z.number().min(0).max(100).optional(),
   size: z.enum(["a4", "letter"]).optional(),
@@ -140,6 +142,7 @@ const baseDraftLineItemSchema = z.object({
   price: z.number().optional(),
   vat: z.number().min(0, "VAT must be at least 0").nullable().optional(),
   tax: z.number().min(0, "Tax must be at least 0").nullable().optional(),
+  taxRate: z.number().min(0).max(100).optional(),
 });
 
 // tRPC-compatible line item schema (uses string for name field)
@@ -390,6 +393,7 @@ export const lineItemSchema = z.object({
   price: z.number(),
   vat: z.number().min(0, "VAT must be at least 0").optional(),
   tax: z.number().min(0, "Tax must be at least 0").optional(),
+  taxRate: z.number().min(0).max(100).optional(),
   // Optional product reference
   productId: z.string().uuid().optional(),
 });
@@ -401,6 +405,7 @@ export const createInvoiceProductSchema = z.object({
   price: z.number().optional().nullable(),
   currency: z.string().optional().nullable(),
   unit: z.string().optional().nullable(),
+  taxRate: z.number().min(0).max(100).optional().nullable(),
   isActive: z.boolean().optional(),
 });
 
@@ -411,6 +416,7 @@ export const updateInvoiceProductSchema = z.object({
   price: z.number().optional().nullable(),
   currency: z.string().optional().nullable(),
   unit: z.string().optional().nullable(),
+  taxRate: z.number().min(0).max(100).optional().nullable(),
   isActive: z.boolean().optional(),
 });
 
@@ -450,6 +456,7 @@ export const upsertInvoiceProductSchema = z.object({
   price: z.number().optional().nullable(),
   currency: z.string().optional().nullable(),
   unit: z.string().optional().nullable(),
+  taxRate: z.number().min(0).max(100).optional().nullable(),
 });
 
 export const invoiceTemplateSchema = z.object({
@@ -482,6 +489,8 @@ export const invoiceTemplateSchema = z.object({
   includePdf: z.boolean().optional(),
   includeUnits: z.boolean().optional(),
   includeQr: z.boolean().optional(),
+  includeLineItemTax: z.boolean().optional(),
+  lineItemTaxLabel: z.string().optional(),
   taxRate: z.number().min(0).max(100).optional(),
   vatRate: z.number().min(0).max(100).optional(),
   dateFormat: z.enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd.MM.yyyy"]),

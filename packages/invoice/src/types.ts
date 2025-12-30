@@ -5,6 +5,8 @@ export type LineItem = {
   unit?: string;
   // Optional product reference for smart autocomplete
   productId?: string;
+  // Per-line-item tax rate (percentage, 0-100)
+  taxRate?: number;
 };
 
 export type InvoiceProduct = {
@@ -18,6 +20,7 @@ export type InvoiceProduct = {
   price: number | null;
   currency: string | null;
   unit: string | null;
+  taxRate: number | null;
   isActive: boolean;
   usageCount: number;
   lastUsedAt: string | null;
@@ -96,6 +99,8 @@ export type Template = {
   includeDecimals: boolean;
   includeUnits: boolean;
   includeQr: boolean;
+  includeLineItemTax: boolean;
+  lineItemTaxLabel: string;
   taxRate: number;
   vatRate: number;
   size: "a4" | "letter";

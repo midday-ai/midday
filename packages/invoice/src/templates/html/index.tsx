@@ -94,6 +94,7 @@ export function HtmlTemplate({ data, width, height }: Props) {
           <Summary
             includeVat={template.includeVat}
             includeTax={template.includeTax}
+            includeLineItemTax={template.includeLineItemTax}
             taxRate={template.taxRate}
             vatRate={template.vatRate}
             currency={currency}

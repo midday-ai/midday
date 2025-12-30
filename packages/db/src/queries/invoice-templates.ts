@@ -33,6 +33,8 @@ type DraftInvoiceTemplateParams = {
   includeDecimals?: boolean;
   includeUnits?: boolean;
   includeQr?: boolean;
+  includeLineItemTax?: boolean;
+  lineItemTaxLabel?: string;
   taxRate?: number;
   vatRate?: number;
   size?: "a4" | "letter";
@@ -98,6 +100,8 @@ export async function getInvoiceTemplate(db: Database, teamId: string) {
       includeDiscount: invoiceTemplates.includeDiscount,
       includeDecimals: invoiceTemplates.includeDecimals,
       includeQr: invoiceTemplates.includeQr,
+      includeLineItemTax: invoiceTemplates.includeLineItemTax,
+      lineItemTaxLabel: invoiceTemplates.lineItemTaxLabel,
       totalSummaryLabel: invoiceTemplates.totalSummaryLabel,
       title: invoiceTemplates.title,
       vatRate: invoiceTemplates.vatRate,

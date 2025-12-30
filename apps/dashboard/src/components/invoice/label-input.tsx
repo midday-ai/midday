@@ -8,11 +8,13 @@ type Props = {
   required?: boolean;
   className?: string;
   onSave?: (value: string) => void;
+  defaultValue?: string;
 };
 
-export function LabelInput({ name, className, onSave }: Props) {
+export function LabelInput({ name, className, onSave, defaultValue }: Props) {
   const { setValue, watch } = useFormContext();
   const value = watch(name);
+  const displayValue = value ?? defaultValue ?? "";
 
   return (
     <span
@@ -33,7 +35,7 @@ export function LabelInput({ name, className, onSave }: Props) {
         }
       }}
     >
-      {value}
+      {displayValue}
     </span>
   );
 }
