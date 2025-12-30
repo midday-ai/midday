@@ -108,7 +108,7 @@ export function TestimonialsSection({
         )}
 
         {/* Desktop Testimonials Grid */}
-        <div className="hidden lg:flex gap-3 w-full max-w-5xl justify-center">
+        <div className="hidden lg:flex gap-3 w-full max-w-5xl mx-auto justify-center">
             {testimonials.map((testimonial, index) => (
               <MorphingDialog key={index}>
                 <MorphingDialogTrigger

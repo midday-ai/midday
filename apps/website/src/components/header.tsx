@@ -361,7 +361,7 @@ export function Header({
                     onClick={() =>
                       setIsMobileFeaturesOpen(!isMobileFeaturesOpen)
                     }
-                    className="text-xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground flex items-center justify-between"
+                    className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground flex items-center justify-between"
                   >
                     <span>Features</span>
                     <Icons.ChevronDown
@@ -475,28 +475,28 @@ export function Header({
                 </div>
                 <Link
                   href="/pricing"
-                  className="text-xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
+                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Pricing
                 </Link>
                 <Link
                   href="/updates"
-                  className="text-xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
+                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Updates
                 </Link>
                 <Link
                   href="/story"
-                  className="text-xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
+                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Story
                 </Link>
                 <Link
                   href="/download"
-                  className="text-xl font-sans py-2 text-foreground"
+                  className="text-2xl font-sans py-2 text-foreground"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Download
@@ -506,7 +506,7 @@ export function Header({
                 <div className="border-t border-border pt-8 mt-8">
                   <Link
                     href="/login"
-                    className="text-xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
+                    className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Sign in
