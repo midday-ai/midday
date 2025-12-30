@@ -1,0 +1,145 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
+import { MaterialIcon } from '../homepage/icon-mapping'
+
+export function FeaturesGridSection() {
+  const router = useRouter()
+
+  return (
+    <section className="bg-background py-12 sm:py-16 lg:py-24">
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+        <div className="text-center space-y-4 mb-10 sm:mb-12">
+          <h2 className="font-serif text-xl sm:text-2xl text-foreground">
+            Everything you need to run your business finances
+          </h2>
+          <p className="font-sans text-sm text-muted-foreground max-w-2xl mx-auto px-4">
+            Dashboards, insights, transactions, invoicing, time tracking, and files all connected in one system.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-8 sm:gap-10 max-w-sm sm:max-w-none mx-auto">
+          <div className="grid grid-cols-2 gap-6 sm:flex sm:justify-center sm:gap-20">
+            <div className="flex flex-col items-center w-full sm:w-[150px]">
+              <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover-border transition-all duration-200 cursor-pointer">
+                <MaterialIcon name="widgets" className="text-muted-foreground " size={24} />
+              </div>
+              <div className="flex flex-col items-center text-center">
+                <h3 className="font-sans text-sm text-foreground leading-[21px]">
+                  Assistant
+                </h3>
+                <p className="font-sans text-sm text-muted-foreground leading-[21px]">
+                  Financial assistant
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center w-full sm:w-[150px]">
+              <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover-border transition-all duration-200 cursor-pointer">
+                <MaterialIcon name="trending_up" className="text-muted-foreground " size={24} />
+              </div>
+              <div className="flex flex-col items-center text-center">
+                <h3 className="font-sans text-sm text-foreground leading-[21px]">
+                  Insights
+                </h3>
+                <p className="font-sans text-sm text-muted-foreground leading-[21px]">
+                  Business insights
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center w-full sm:w-[150px]">
+              <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover-border transition-all duration-200 cursor-pointer">
+                <MaterialIcon name="list_alt" className="text-muted-foreground " size={24} />
+              </div>
+              <div className="flex flex-col items-center text-center">
+                <h3 className="font-sans text-sm text-foreground leading-[21px]">
+                  Transactions
+                </h3>
+                <p className="font-sans text-sm text-muted-foreground leading-[21px]">
+                  Transaction records
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center w-full sm:w-[150px]">
+              <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover-border transition-all duration-200 cursor-pointer">
+                <MaterialIcon name="inbox" className="text-muted-foreground " size={24} />
+              </div>
+              <div className="flex flex-col items-center text-center">
+                <h3 className="font-sans text-sm text-foreground leading-[21px]">
+                  Inbox
+                </h3>
+                <p className="font-sans text-sm text-muted-foreground leading-[21px]">
+                  Receipt matching
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6 sm:flex sm:justify-center sm:gap-20">
+            <div className="flex flex-col items-center w-full sm:w-[150px]">
+              <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover-border transition-all duration-200 cursor-pointer">
+                <MaterialIcon name="timer" className="text-muted-foreground " size={24} />
+              </div>
+              <div className="flex flex-col items-center text-center">
+                <h3 className="font-sans text-sm text-foreground leading-[21px]">
+                  Time tracking
+                </h3>
+                <p className="font-sans text-sm text-muted-foreground leading-[21px]">
+                  Time tracking
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center w-full sm:w-[150px]">
+              <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover-border transition-all duration-200 cursor-pointer">
+                <MaterialIcon name="description" className="text-muted-foreground " size={24} />
+              </div>
+              <div className="flex flex-col items-center text-center">
+                <h3 className="font-sans text-sm text-foreground leading-[21px]">
+                  Invoicing
+                </h3>
+                <p className="font-sans text-sm text-muted-foreground leading-[21px]">
+                  Invoice management
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center w-full sm:w-[150px]">
+              <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover-border transition-all duration-200 cursor-pointer">
+                <MaterialIcon name="scatter_plot" className="text-muted-foreground " size={24} />
+              </div>
+              <div className="flex flex-col items-center text-center">
+                <h3 className="font-sans text-sm text-foreground leading-[21px]">
+                  Customers
+                </h3>
+                <p className="font-sans text-sm text-muted-foreground leading-[21px]">
+                  Customer insights
+                </p>
+              </div>
+            </div>
+
+            <div 
+              className="flex flex-col items-center w-full sm:w-[150px] cursor-pointer"
+              onClick={() => router.push('/file-storage')}
+            >
+              <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover:border-muted-foreground transition-all duration-200">
+                <MaterialIcon name="folder_zip" className="text-muted-foreground " size={24} />
+              </div>
+              <div className="flex flex-col items-center text-center">
+                <h3 className="font-sans text-sm text-foreground leading-[21px]">
+                  Files
+                </h3>
+                <p className="font-sans text-sm text-muted-foreground leading-[21px]">
+                  Document storage
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
