@@ -13,13 +13,13 @@ export function PricingSection() {
           <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
             Pricing that matches how you run your business
           </h2>
-          <p className="font-sans text-base text-muted-foreground leading-normal">
+          <p className="hidden sm:block font-sans text-base text-muted-foreground leading-normal">
             Start simple, upgrade when your workflow gets more complex.
           </p>
         </div>
 
         {/* Billing Toggle */}
-        <div className="flex justify-center mb-16">
+        <div className="flex justify-center mb-8 sm:mb-16">
           <div
             className="relative flex items-stretch bg-muted"
             style={{ width: 'fit-content' }}

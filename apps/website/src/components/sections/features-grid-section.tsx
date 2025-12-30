@@ -13,7 +13,7 @@ export function FeaturesGridSection() {
           <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
             Everything you need to run your business finances
           </h2>
-          <p className="font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto px-4">
+          <p className="hidden sm:block font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto px-4">
             Dashboards, insights, transactions, invoicing, time tracking, and files all connected in one system.
           </p>
         </div>
