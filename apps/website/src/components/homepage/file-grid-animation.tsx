@@ -134,7 +134,7 @@ export function FileGridAnimation({
         </div>
       </div>
 
-      <div className="flex-1 px-2 md:px-3 pb-2 md:pb-3 overflow-y-auto mt-2 md:mt-3">
+      <div className="flex-1 px-2 md:px-3 pb-2 md:pb-3 overflow-hidden mt-2 md:mt-3">
         <div className="grid grid-cols-2 gap-2 md:gap-3 h-full">
           {filtered.slice(0, 6).map((f, idx) => (
             <motion.div
