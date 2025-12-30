@@ -111,7 +111,7 @@ export function StartPage() {
               </h1>
 
               <p className="text-muted-foreground text-base leading-normal font-sans max-w-md text-center mx-auto lg:text-left lg:mx-0">
-                Your finances, reconciled and explained as your business evolves.
+                Midday keeps your finances reconciled, explained and ready to act on.
               </p>
             </div>
 
@@ -191,7 +191,7 @@ export function StartPage() {
                       </span>
                     </h1>
                     <p className="font-sans text-base text-muted-foreground leading-normal text-left">
-                      Your finances, reconciled and explained as your business evolves.
+                      Midday keeps your finances reconciled, explained and ready to act on.
                     </p>
                   </div>
                 </div>
@@ -273,7 +273,7 @@ export function StartPage() {
           <div className="grid grid-cols-1 gap-12 sm:gap-16 lg:hidden">
             <div className="hidden lg:block text-center mb-2">
               <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-                How Midday works
+                How it works
               </h2>
             </div>
             {features.map((feature, index) => (
@@ -367,7 +367,7 @@ export function StartPage() {
               <div className="flex flex-col justify-center space-y-5 lg:space-y-6 flex-1">
                 <div className="flex items-center mb-4 lg:mb-6" style={{ minHeight: '3rem' }}>
                   <h2 className="font-serif text-2xl text-foreground">
-                    How Midday works
+                    How it works
                   </h2>
                 </div>
                 {features.map((feature, index) => (
