@@ -129,7 +129,7 @@ export function PricingSection() {
 
               <div className="space-y-3">
                 <Button className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors">
-                  See my business
+                  Start your trial
                 </Button>
                 <p className="font-sans text-xs text-muted-foreground text-center">
                   Best for getting started
@@ -211,7 +211,7 @@ export function PricingSection() {
 
               <div className="space-y-3">
                 <Button className="w-full btn-inverse font-sans text-sm py-3 px-4 transition-colors">
-                  Get my time back
+                  Start your trial
                 </Button>
                 <p className="font-sans text-xs text-muted-foreground text-center">
                   Best value for most businesses
@@ -286,7 +286,7 @@ export function PricingSection() {
 
               <div className="space-y-3">
                 <Button className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors">
-                  Run with confidence
+                  Start your trial
                 </Button>
                 <p className="font-sans text-xs text-muted-foreground text-center">
                   For teams scaling operations
@@ -298,7 +298,7 @@ export function PricingSection() {
 
         <div className="text-center mt-16 space-y-1">
           <p className="font-sans text-xs text-muted-foreground">
-            Cancel anytime.
+            14-day free trial · Credit card required · Cancel anytime
           </p>
           <p className="font-sans text-xs text-muted-foreground">
             Prices shown in USD. Local taxes may apply.
