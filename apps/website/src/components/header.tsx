@@ -100,66 +100,131 @@ export function Header({
                             Features
                           </span>
                         </div>
-                        <div className="flex items-center py-2 cursor-pointer rounded group">
+                        <div 
+                          className="flex items-center py-2 cursor-pointer rounded group"
+                          onClick={() => {
+                            setIsFeaturesOpen(false)
+                            router.push("/assistant")
+                          }}
+                        >
                           <div className="flex flex-col">
                             <span className="font-sans text-base text-foreground">
                               Assistant
                             </span>
                             <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Daily help and insights
+                              Get clear answers
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center py-2 cursor-pointer rounded group">
+                        <div 
+                          className="flex items-center py-2 cursor-pointer rounded group"
+                          onClick={() => {
+                            setIsFeaturesOpen(false)
+                            router.push("/insights")
+                          }}
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-sans text-base text-foreground">
+                              Insights
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              See what's changing
+                            </span>
+                          </div>
+                        </div>
+                        <div 
+                          className="flex items-center py-2 cursor-pointer rounded group"
+                          onClick={() => {
+                            setIsFeaturesOpen(false)
+                            router.push("/transactions")
+                          }}
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-sans text-base text-foreground">
+                              Transactions
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              All transactions together
+                            </span>
+                          </div>
+                        </div>
+                        <div 
+                          className="flex items-center py-2 cursor-pointer rounded group"
+                          onClick={() => {
+                            setIsFeaturesOpen(false)
+                            router.push("/inbox")
+                          }}
+                        >
                           <div className="flex flex-col">
                             <span className="font-sans text-base text-foreground">
                               Inbox
                             </span>
                             <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Document matching
+                              Receipts handled automatically
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center py-2 cursor-pointer rounded group">
-                          <div className="flex flex-col">
-                            <span className="font-sans text-base text-foreground">
-                              Time Tracker
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Track projects
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center py-2 cursor-pointer rounded group">
-                          <div className="flex flex-col">
-                            <span className="font-sans text-base text-foreground">
-                              Invoice
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Quick billing
-                            </span>
-                          </div>
-                        </div>
-                        <div
-                          className="flex items-center py-2 cursor-pointer group rounded"
-                          onClick={() => router.push("/file-storage")}
+                        <div 
+                          className="flex items-center py-2 cursor-pointer rounded group"
+                          onClick={() => {
+                            setIsFeaturesOpen(false)
+                            router.push("/time-tracking")
+                          }}
                         >
                           <div className="flex flex-col">
                             <span className="font-sans text-base text-foreground">
-                              File Storage
+                              Time tracking
                             </span>
                             <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Organized files
+                              See where time goes
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center py-2 cursor-pointer group rounded">
+                        <div 
+                          className="flex items-center py-2 cursor-pointer rounded group"
+                          onClick={() => {
+                            setIsFeaturesOpen(false)
+                            router.push("/invoicing")
+                          }}
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-sans text-base text-foreground">
+                              Invoicing
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              Get paid faster
+                            </span>
+                          </div>
+                        </div>
+                        <div 
+                          className="flex items-center py-2 cursor-pointer group rounded"
+                          onClick={() => {
+                            setIsFeaturesOpen(false)
+                            router.push("/customers")
+                          }}
+                        >
                           <div className="flex flex-col">
                             <span className="font-sans text-base text-foreground">
                               Customers
                             </span>
                             <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Client overview
+                              Know your customers
+                            </span>
+                          </div>
+                        </div>
+                        <div
+                          className="flex items-center py-2 cursor-pointer group rounded"
+                          onClick={() => {
+                            setIsFeaturesOpen(false)
+                            router.push("/file-storage")
+                          }}
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-sans text-base text-foreground">
+                              Files
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              Everything in one place
                             </span>
                           </div>
                         </div>
@@ -318,6 +383,7 @@ export function Header({
                           <button
                             type="button"
                             onClick={() => {
+                              router.push("/assistant");
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
@@ -328,6 +394,29 @@ export function Header({
                           <button
                             type="button"
                             onClick={() => {
+                              router.push("/insights");
+                              setIsMenuOpen(false);
+                              setIsMobileFeaturesOpen(false);
+                            }}
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            Insights
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              router.push("/transactions");
+                              setIsMenuOpen(false);
+                              setIsMobileFeaturesOpen(false);
+                            }}
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            Transactions
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              router.push("/inbox");
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
@@ -338,22 +427,35 @@ export function Header({
                           <button
                             type="button"
                             onClick={() => {
+                              router.push("/time-tracking");
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
                             className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
                           >
-                            Time Tracker
+                            Time tracking
                           </button>
                           <button
                             type="button"
                             onClick={() => {
+                              router.push("/invoicing");
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
                             className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
                           >
-                            Invoice
+                            Invoicing
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              router.push("/customers");
+                              setIsMenuOpen(false);
+                              setIsMobileFeaturesOpen(false);
+                            }}
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
+                          >
+                            Customers
                           </button>
                           <button
                             type="button"
@@ -364,17 +466,7 @@ export function Header({
                             }}
                             className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
                           >
-                            File Storage
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setIsMenuOpen(false);
-                              setIsMobileFeaturesOpen(false);
-                            }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            Customers
+                            Files
                           </button>
                         </div>
                       </motion.div>
