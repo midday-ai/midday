@@ -271,10 +271,10 @@ export function StartPage() {
             {features.map((feature, index) => (
               <div key={index} className="space-y-6 sm:space-y-8">
                 <div className="space-y-2 text-center">
-                  <h3 className="font-sans text-base sm:text-lg text-foreground max-w-md mx-auto">
+                  <h3 className="font-sans text-lg sm:text-xl text-foreground max-w-md mx-auto">
                     {feature.title}
                   </h3>
-                  <p className="font-sans text-base text-muted-foreground leading-normal max-w-md mx-auto">
+                  <p className="hidden sm:block font-sans text-base text-muted-foreground leading-normal max-w-md mx-auto">
                     {feature.subtitle}
                   </p>
                 </div>
@@ -380,7 +380,7 @@ export function StartPage() {
                         transition={{ duration: 0.35 }}
                         className="overflow-hidden"
                       >
-                        <h2 className="font-sans text-base lg:text-lg text-primary transition-colors duration-300 max-w-md">
+                        <h2 className="font-sans text-lg lg:text-xl text-primary transition-colors duration-300 max-w-md">
                           {feature.title}
                         </h2>
                         <p className="font-sans text-sm text-primary leading-relaxed max-w-md mt-1">
@@ -389,7 +389,7 @@ export function StartPage() {
                       </motion.div>
                     ) : (
                       <div>
-                        <h2 className="font-sans text-base lg:text-lg text-muted-foreground transition-colors duration-300 max-w-md">
+                        <h2 className="font-sans text-lg lg:text-xl text-muted-foreground transition-colors duration-300 max-w-md">
                           {feature.title}
                         </h2>
                       </div>
