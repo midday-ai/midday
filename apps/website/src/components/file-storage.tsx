@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import Image from 'next/image'
 import { MaterialIcon } from './homepage/icon-mapping'
+import { FileGridAnimation } from './homepage/file-grid-animation'
+import { InboxMatchAnimation } from './homepage/inbox-match-animation'
 import { TestimonialsSection } from './sections/testimonials-section'
 import { FeaturesGridSection } from './sections/features-grid-section'
 import { TimeSavingsSection } from './sections/time-savings-section'
@@ -96,7 +98,7 @@ export function FileStorage() {
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto lg:hidden">
                 Files are organized and connected to your business activity.
               </p>
-              <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto hidden lg:block">
+              <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto lg:text-left lg:mx-0 hidden lg:block">
                 Smart storage that automatically organizes and connects files to transactions, invoices, and customers so you can always find what you need.
               </p>
             </div>
@@ -124,7 +126,7 @@ export function FileStorage() {
                 <span className="text-foreground block">Everything in one place</span>
               </h1>
 
-              <p className="text-muted-foreground text-base leading-relaxed max-w-2xl mx-auto font-sans">
+              <p className="text-muted-foreground text-base leading-normal max-w-2xl font-sans text-center mx-auto lg:text-left lg:mx-0">
                 Smart storage that automatically organizes and connects files to transactions, invoices, and customers so you can always find what you need.
               </p>
             </div>
@@ -144,106 +146,74 @@ export function FileStorage() {
         </div>
       </div>
 
-      {/* Feature Section - Files Organized & Everything Searchable */}
-      <section className="bg-background py-20">
-        <div className="max-w-[1400px] mx-auto px-8 relative">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 relative">
-            {/* Vertical Divider */}
-            <div className="absolute bg-border h-full w-px left-1/2 top-0 transform -translate-x-1/2 hidden lg:block" />
+      {/* Highlight Feature Section with Animations */}
+      <section className="bg-background py-12 sm:py-16 lg:py-24">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="space-y-16 sm:space-y-20 lg:space-y-32">
+            {/* First Animation - File Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
+              {/* Left: Title and Subtitle */}
+              <div className="space-y-4 lg:space-y-6 text-center lg:text-left">
+                <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
+                  Files organized automatically
+                </h2>
+                <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
+                  Midday automatically tags and sorts your files by company, project, and document type. No folders or manual naming needed.
+                </p>
+              </div>
 
-            {/* Left - Files, organized by context */}
-            <div className="space-y-12 p-10 relative">
-              <div className="space-y-10 text-center">
-                <div className="space-y-2">
-                  <h2 className="font-sans text-lg text-foreground">
-                    Files, organized by context
-                  </h2>
-                  <p className="font-sans text-sm text-muted-foreground leading-relaxed">
-                    Midday automatically tags and sorts your files by company,
-                    project and document type. No folders or manual naming
-                    needed.
-                  </p>
+              {/* Right: Animation */}
+              <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background">
+                {/* Grid Pattern Background */}
+                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-10'}`}>
+                  <Image
+                    src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
+                    alt="Grid Pattern"
+                    width={1728}
+                    height={1080}
+                    className="w-full h-full object-cover"
+                    priority
+                  />
+                </div>
+                <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
+                  <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
+                    <FileGridAnimation onComplete={undefined} />
+                  </div>
                 </div>
               </div>
-
-              {/* Files Organized Illustration */}
-              <div className="flex justify-center">
-                <Image
-                  src="/illustrations/Files-organized.svg"
-                  alt="Files Organized by Context"
-                  width={400}
-                  height={300}
-                  className="w-full max-w-md h-auto object-contain"
-                  priority
-                />
-              </div>
             </div>
 
-            {/* Right - Everything searchable */}
-            <div className="space-y-12 p-10 relative">
-              <div className="space-y-10 text-center">
-                <div className="space-y-2">
-                  <h2 className="font-sans text-lg text-foreground">
-                    Everything searchable
-                  </h2>
-                  <p className="font-sans text-sm text-muted-foreground leading-relaxed">
-                    Use natural language to search across all your files, even
-                    scanned PDFs and receipts, and Midday finds exactly what you
-                    need.
-                  </p>
+            {/* Second Animation - Inbox Match */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
+              {/* Left: Title and Subtitle */}
+              <div className="space-y-4 lg:space-y-6 lg:order-2 text-center lg:text-left">
+                <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
+                  Connected to transactions
+                </h2>
+                <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
+                  Files are automatically matched to transactions, invoices, and customers so everything stays connected and easy to find.
+                </p>
+              </div>
+
+              {/* Right: Animation */}
+              <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background lg:order-1">
+                {/* Grid Pattern Background */}
+                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-10'}`}>
+                  <Image
+                    src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
+                    alt="Grid Pattern"
+                    width={1728}
+                    height={1080}
+                    className="w-full h-full object-cover"
+                    priority
+                  />
+                </div>
+                <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
+                  <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
+                    <InboxMatchAnimation onComplete={undefined} />
+                  </div>
                 </div>
               </div>
-
-              {/* Everything Searchable Illustration */}
-              <div className="flex justify-center">
-                <Image
-                  src="/illustrations/Everything-searchable.svg"
-                  alt="Everything Searchable"
-                  width={400}
-                  height={300}
-                  className="w-full max-w-md h-auto object-contain"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Find anything, instantly Section */}
-      <section className="bg-background h-[875px] relative overflow-hidden flex items-center justify-center">
-        {/* Background Image */}
-        <div
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{
-            backgroundImage: "url('/illustrations/Search-background.png')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-          }}
-        />
-
-        <div className="relative z-10 max-w-[800px] mx-auto px-8">
-          <div className="space-y-10 text-center">
-            {/* Title and Subtitle */}
-            <div className="space-y-3">
-              <h2 className="font-serif text-3xl text-foreground">
-                Find anything, instantly
-              </h2>
-              <p className="font-sans text-sm text-muted-foreground max-w-md mx-auto">
-                No more hunting. Instantly surface anything across your entire
-                workspace.
-              </p>
-            </div>
-
-            {/* Search Illustration */}
-            <div className="flex justify-center">
-              <Image
-                src="/illustrations/Search.svg"
-                alt="Search Interface"
-                width={800}
-                height={600}
-                className="w-full max-w-2xl h-auto object-contain"
-              />
             </div>
           </div>
         </div>
