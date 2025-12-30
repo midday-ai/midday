@@ -197,7 +197,7 @@ export function Download() {
               <div className="flex justify-center lg:justify-end mt-auto">
                 <div className="p-4 lg:p-6 bg-background w-full max-w-lg">
                   <Image
-                    src={isLightMode ? '/images/keyboard-light.svg' : '/images/keyboard-dark.svg'}
+                    src={isLightMode ? '/images/keyboard-light.png' : '/images/keyboard-dark.png'}
                     alt="Keyboard Shortcut"
                     width={600}
                     height={400}
