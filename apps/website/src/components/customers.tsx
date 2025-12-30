@@ -90,11 +90,14 @@ export function Customers() {
             />
           </div>
           <div className="flex flex-col justify-start items-center space-y-6 z-20 px-3 sm:px-4">
-            <div className="space-y-4 text-center max-w-xl px-2">
-              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl leading-tight">
+            <div className="space-y-4 text-center max-w-xl px-2 w-full">
+              <h1 className="font-serif text-4xl sm:text-4xl md:text-5xl leading-tight">
                 <span className="text-foreground">Know your customers</span>
               </h1>
-              <p className="text-muted-foreground text-base leading-relaxed font-sans">
+              <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto lg:hidden">
+                See revenue and activity per customer in one view.
+              </p>
+              <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto hidden lg:block">
                 See revenue, profitability, and activity per customer in one place without switching tools or exporting data.
               </p>
             </div>
@@ -122,7 +125,7 @@ export function Customers() {
                 <span className="text-foreground block">Know your customers</span>
               </h1>
 
-              <p className="text-muted-foreground text-base leading-relaxed max-w-2xl mx-auto font-sans">
+              <p className="text-muted-foreground text-base leading-normal max-w-2xl mx-auto font-sans text-center">
                 See revenue, profitability, and activity per customer in one place without switching tools or exporting data.
               </p>
             </div>
@@ -153,7 +156,7 @@ export function Customers() {
                 <h2 className="font-serif text-xl sm:text-2xl text-foreground">
                   Customer insights in one place
                 </h2>
-                <p className="font-sans text-base text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
+                <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
                   See revenue, profitability, and activity for each customer without switching tools or exporting data.
                 </p>
               </div>
@@ -161,7 +164,7 @@ export function Customers() {
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background">
                 {/* Grid Pattern Background */}
-                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-50' : 'opacity-10'}`}>
+                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-10'}`}>
                   <Image
                     src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
                     alt="Grid Pattern"
@@ -186,7 +189,7 @@ export function Customers() {
                 <h2 className="font-serif text-xl sm:text-2xl text-foreground">
                   Understand profitability
                 </h2>
-                <p className="font-sans text-base text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
+                <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
                   Track revenue and profitability per customer to understand which relationships are most valuable.
                 </p>
               </div>
@@ -194,7 +197,7 @@ export function Customers() {
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background lg:order-1">
                 {/* Grid Pattern Background */}
-                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-50' : 'opacity-10'}`}>
+                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-10'}`}>
                   <Image
                     src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
                     alt="Grid Pattern"

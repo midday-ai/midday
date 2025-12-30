@@ -95,11 +95,14 @@ export function FileStorage() {
             />
           </div>
           <div className="flex flex-col justify-start items-center space-y-6 z-20 px-3 sm:px-4">
-            <div className="space-y-4 text-center max-w-xl px-2">
-              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl leading-tight">
+            <div className="space-y-4 text-center max-w-xl px-2 w-full">
+              <h1 className="font-serif text-4xl sm:text-4xl md:text-5xl leading-tight">
                 <span className="text-foreground">Everything in one place</span>
               </h1>
-              <p className="text-muted-foreground text-base leading-relaxed font-sans">
+              <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto lg:hidden">
+                Files are organized and connected to your business activity.
+              </p>
+              <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto hidden lg:block">
                 Smart storage that automatically organizes and connects files to transactions, invoices, and customers so you can always find what you need.
               </p>
             </div>
