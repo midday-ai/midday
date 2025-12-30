@@ -98,11 +98,6 @@ export function Header({
                     <div className="grid grid-cols-1 lg:grid-cols-10">
                       {/* Left Column - Features List */}
                       <div className="lg:col-span-3 px-1 sm:px-2 md:px-3 lg:px-4 xl:px-6 2xl:px-8">
-                        <div className="mb-2">
-                          <span className="font-sans text-xs text-muted-foreground">
-                            Features
-                          </span>
-                        </div>
                         <div
                           className="flex items-center py-2 cursor-pointer rounded group"
                           onClick={() => {
