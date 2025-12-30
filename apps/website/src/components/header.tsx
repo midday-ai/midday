@@ -334,7 +334,11 @@ export function Header({
             <button
               type="button"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="transition-colors flex items-center justify-end p-2 min-w-[44px] min-h-[44px] text-foreground hover:text-muted-foreground active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+              onTouchEnd={(e) => {
+                e.currentTarget.blur();
+                setTimeout(() => e.currentTarget.blur(), 100);
+              }}
+              className="transition-colors flex items-center justify-end p-2 min-w-[44px] min-h-[44px] text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               {isMenuOpen ? (
@@ -365,7 +369,11 @@ export function Header({
                     onClick={() =>
                       setIsMobileFeaturesOpen(!isMobileFeaturesOpen)
                     }
-                    className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation flex items-center justify-between"
+                    onTouchEnd={(e) => {
+                      e.currentTarget.blur();
+                      setTimeout(() => e.currentTarget.blur(), 100);
+                    }}
+                    className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation flex items-center justify-between"
                     style={{ WebkitTapHighlightColor: 'transparent' }}
                   >
                     <span>Features</span>
@@ -392,7 +400,11 @@ export function Header({
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            onTouchEnd={(e) => {
+                              e.currentTarget.blur();
+                              setTimeout(() => e.currentTarget.blur(), 100);
+                            }}
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                             style={{ WebkitTapHighlightColor: 'transparent' }}
                           >
                             Assistant
@@ -404,7 +416,11 @@ export function Header({
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            onTouchEnd={(e) => {
+                              e.currentTarget.blur();
+                              setTimeout(() => e.currentTarget.blur(), 100);
+                            }}
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                             style={{ WebkitTapHighlightColor: 'transparent' }}
                           >
                             Insights
@@ -416,7 +432,11 @@ export function Header({
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            onTouchEnd={(e) => {
+                              e.currentTarget.blur();
+                              setTimeout(() => e.currentTarget.blur(), 100);
+                            }}
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                             style={{ WebkitTapHighlightColor: 'transparent' }}
                           >
                             Transactions
@@ -428,7 +448,11 @@ export function Header({
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            onTouchEnd={(e) => {
+                              e.currentTarget.blur();
+                              setTimeout(() => e.currentTarget.blur(), 100);
+                            }}
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                             style={{ WebkitTapHighlightColor: 'transparent' }}
                           >
                             Inbox
@@ -440,7 +464,11 @@ export function Header({
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            onTouchEnd={(e) => {
+                              e.currentTarget.blur();
+                              setTimeout(() => e.currentTarget.blur(), 100);
+                            }}
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                             style={{ WebkitTapHighlightColor: 'transparent' }}
                           >
                             Time tracking
@@ -452,7 +480,11 @@ export function Header({
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            onTouchEnd={(e) => {
+                              e.currentTarget.blur();
+                              setTimeout(() => e.currentTarget.blur(), 100);
+                            }}
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                             style={{ WebkitTapHighlightColor: 'transparent' }}
                           >
                             Invoicing
@@ -464,7 +496,11 @@ export function Header({
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            onTouchEnd={(e) => {
+                              e.currentTarget.blur();
+                              setTimeout(() => e.currentTarget.blur(), 100);
+                            }}
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                             style={{ WebkitTapHighlightColor: 'transparent' }}
                           >
                             Customers
@@ -476,7 +512,11 @@ export function Header({
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            onTouchEnd={(e) => {
+                              e.currentTarget.blur();
+                              setTimeout(() => e.currentTarget.blur(), 100);
+                            }}
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                             style={{ WebkitTapHighlightColor: 'transparent' }}
                           >
                             Files
@@ -488,7 +528,11 @@ export function Header({
                 </div>
                 <Link
                   href="/pricing"
-                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+                  onTouchEnd={(e) => {
+                    e.currentTarget.blur();
+                    setTimeout(() => e.currentTarget.blur(), 100);
+                  }}
+                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
                   onClick={() => setIsMenuOpen(false)}
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
@@ -496,7 +540,11 @@ export function Header({
                 </Link>
                 <Link
                   href="/updates"
-                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+                  onTouchEnd={(e) => {
+                    e.currentTarget.blur();
+                    setTimeout(() => e.currentTarget.blur(), 100);
+                  }}
+                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
                   onClick={() => setIsMenuOpen(false)}
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
@@ -504,7 +552,11 @@ export function Header({
                 </Link>
                 <Link
                   href="/story"
-                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+                  onTouchEnd={(e) => {
+                    e.currentTarget.blur();
+                    setTimeout(() => e.currentTarget.blur(), 100);
+                  }}
+                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
                   onClick={() => setIsMenuOpen(false)}
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
@@ -512,7 +564,11 @@ export function Header({
                 </Link>
                 <Link
                   href="/download"
-                  className="text-2xl font-sans py-2 text-foreground active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                  onTouchEnd={(e) => {
+                    e.currentTarget.blur();
+                    setTimeout(() => e.currentTarget.blur(), 100);
+                  }}
+                  className="text-2xl font-sans py-2 text-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
@@ -523,7 +579,11 @@ export function Header({
                 <div className="border-t border-border pt-8 mt-8">
                   <Link
                     href="/login"
-                    className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+                    onTouchEnd={(e) => {
+                      e.currentTarget.blur();
+                      setTimeout(() => e.currentTarget.blur(), 100);
+                    }}
+                    className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
                     onClick={() => setIsMenuOpen(false)}
                     style={{ WebkitTapHighlightColor: 'transparent' }}
                   >
