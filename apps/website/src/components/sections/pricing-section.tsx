@@ -27,7 +27,7 @@ export function PricingSection() {
             <div className="flex items-stretch">
               <button
                 onClick={() => setBillingPeriod('monthly')}
-                className={`no-touch-active group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none ${
+                className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none ${
                   billingPeriod === 'monthly'
                     ? 'text-foreground bg-background border-border'
                     : 'text-muted-foreground hover:text-foreground bg-muted border-transparent'
@@ -43,7 +43,7 @@ export function PricingSection() {
               </button>
               <button
                 onClick={() => setBillingPeriod('yearly')}
-                className={`no-touch-active group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none ${
+                className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none ${
                   billingPeriod === 'yearly'
                     ? 'text-foreground bg-background border-border'
                     : 'text-muted-foreground hover:text-foreground bg-muted border-transparent'
