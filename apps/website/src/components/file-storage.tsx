@@ -1,28 +1,17 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion, useMotionValue } from 'motion/react'
 import { useRouter } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import Image from 'next/image'
-import {
-  MorphingDialog,
-  MorphingDialogTrigger,
-  MorphingDialogContainer,
-  MorphingDialogContent,
-  MorphingDialogClose,
-  MorphingDialogTitle,
-  MorphingDialogSubtitle,
-  MorphingDialogDescription,
-} from './motion-primitives/morphing-dialog'
 import { MaterialIcon } from './homepage/icon-mapping'
+import { TestimonialsSection } from './sections/testimonials-section'
+import type { Testimonial } from './sections/testimonials-section'
 
 export function FileStorage() {
   const router = useRouter()
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const dragX = useMotionValue(0)
 
   useEffect(() => {
     setMounted(true)
@@ -30,7 +19,7 @@ export function FileStorage() {
 
   const isLightMode = mounted && resolvedTheme ? resolvedTheme !== 'dark' : true
 
-  const testimonials = [
+  const testimonials: Testimonial[] = [
     {
       name: 'Sarah Chen',
       title: 'Freelance Designer',
@@ -256,10 +245,10 @@ export function FileStorage() {
       </section>
 
       {/* Time Savings Bento Grid Section */}
-      <section className="bg-background py-16 sm:py-24">
+      <section className="bg-background py-12 sm:py-16 lg:py-24">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
           <div className="text-center space-y-4 mb-16">
-            <h2 className="font-serif text-2xl text-foreground">
+            <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
               Time savings that add up
             </h2>
             <p className="font-sans text-sm text-muted-foreground max-w-2xl mx-auto">
@@ -410,192 +399,11 @@ export function FileStorage() {
       </div>
 
       {/* Testimonials Section */}
-      <section className="bg-background">
-        <div className="max-w-[1400px] mx-auto px-3 sm:px-8 py-16 sm:py-24">
-          <div className="flex flex-col gap-4 items-center">
-            <div className="flex flex-col gap-4 items-center text-center max-w-3xl">
-              <h2 className="font-serif text-2xl text-foreground">
-                Built with our users, for our users
-              </h2>
-              <p className="font-sans text-sm text-muted-foreground">
-                Midday helps small teams, solo founders, and small businesses
-                do more with less. Here's what that looks like in practice.
-              </p>
-            </div>
-
-            <div className="flex gap-2 items-center">
-              <div className="flex items-center gap-1">
-                <div className="flex gap-1">
-                  <MaterialIcon name="star" className="text-muted-foreground" size={16} />
-                  <MaterialIcon name="star" className="text-muted-foreground" size={16} />
-                  <MaterialIcon name="star" className="text-muted-foreground" size={16} />
-                  <MaterialIcon name="star" className="text-muted-foreground" size={16} />
-                  <MaterialIcon name="star_half" className="text-muted-foreground" size={16} />
-                </div>
-              </div>
-              <p className="font-sans text-xs text-muted-foreground">
-                Used by 14,000 businesses
-              </p>
-            </div>
-
-            {/* Desktop Testimonials Grid */}
-            <div className="hidden lg:flex gap-3 w-full max-w-5xl mt-6 justify-center">
-              {testimonials.map((testimonial, index) => (
-                <MorphingDialog key={index}>
-                  <MorphingDialogTrigger
-                    className={`flex-shrink-0 group ${
-                      index === 0
-                        ? 'transform -rotate-1'
-                        : index === 1
-                          ? 'transform rotate-1'
-                          : index === 2
-                            ? 'transform rotate-2'
-                            : ''
-                    }`}
-                  >
-                    <div className="bg-background border border-border p-6 w-64 flex flex-col gap-4 transition-all duration-200 hover:border-muted-foreground">
-                      <div className="flex gap-2 items-center">
-                        <div className="w-4 h-4 bg-muted rounded-full"></div>
-                        <MorphingDialogTitle className="font-sans text-sm text-foreground">
-                          {testimonial.name}
-                        </MorphingDialogTitle>
-                      </div>
-                      <div className="flex flex-col gap-2 text-left">
-                        <MorphingDialogSubtitle className="font-sans text-xs text-muted-foreground">
-                          {testimonial.title}
-                        </MorphingDialogSubtitle>
-                        <div className="font-sans text-sm text-muted-foreground leading-relaxed">
-                          &quot;{testimonial.content}&quot;
-                        </div>
-                      </div>
-                    </div>
-                  </MorphingDialogTrigger>
-
-                  <MorphingDialogContainer>
-                    <MorphingDialogContent
-                      className="bg-background border border-border p-8 max-w-2xl"
-                    >
-                      <MorphingDialogClose className="text-muted-foreground hover:text-foreground" />
-
-                      <div className="flex flex-col gap-6">
-                        <div className="flex gap-3 items-center">
-                          <div className="w-6 h-6 bg-muted rounded-full"></div>
-                          <div className="flex flex-col">
-                            <MorphingDialogTitle className="font-sans text-sm text-foreground">
-                              {testimonial.name}
-                            </MorphingDialogTitle>
-                            <MorphingDialogSubtitle className="font-sans text-sm text-muted-foreground">
-                              {testimonial.title}
-                            </MorphingDialogSubtitle>
-                          </div>
-                        </div>
-
-                        <MorphingDialogDescription
-                          disableLayoutAnimation
-                          variants={{
-                            initial: { opacity: 0, scale: 0.8, y: 100 },
-                            animate: { opacity: 1, scale: 1, y: 0 },
-                            exit: { opacity: 0, scale: 0.8, y: 100 },
-                          }}
-                          className="font-sans text-sm text-muted-foreground leading-relaxed whitespace-pre-line"
-                        >
-                          &quot;{testimonial.fullContent}&quot;
-                        </MorphingDialogDescription>
-                      </div>
-                    </MorphingDialogContent>
-                  </MorphingDialogContainer>
-                </MorphingDialog>
-              ))}
-            </div>
-
-            {/* Mobile Carousel */}
-            <div className="lg:hidden w-full max-w-sm mt-4 mx-auto">
-              <div className="relative overflow-hidden mb-4">
-                <motion.div
-                  className="flex cursor-grab active:cursor-grabbing"
-                  drag="x"
-                  dragConstraints={{ left: 0, right: 0 }}
-                  dragMomentum={false}
-                  style={{ x: dragX }}
-                  animate={{ translateX: `-${currentSlide * 100}%` }}
-                  onDragEnd={() => {
-                    const x = dragX.get()
-
-                    if (x <= -50 && currentSlide < testimonials.length - 1) {
-                      setCurrentSlide(currentSlide + 1)
-                    } else if (x >= 50 && currentSlide > 0) {
-                      setCurrentSlide(currentSlide - 1)
-                    }
-                  }}
-                  transition={{
-                    damping: 18,
-                    stiffness: 90,
-                    type: 'spring',
-                    duration: 0.2,
-                  }}
-                >
-                  {testimonials.map((testimonial, index) => (
-                    <div key={index} className="w-full flex-shrink-0">
-                      <MorphingDialog>
-                        <MorphingDialogTrigger className="w-full">
-                          <div className="bg-background border border-border p-6 flex flex-col gap-4 select-none hover:border-muted-foreground transition-all duration-200">
-                            <div className="flex gap-2 items-center">
-                              <div className="w-4 h-4 bg-muted rounded-full"></div>
-                              <MorphingDialogTitle className="font-sans text-sm text-foreground">
-                                {testimonial.name}
-                              </MorphingDialogTitle>
-                            </div>
-                            <div className="flex flex-col gap-2 text-left">
-                              <MorphingDialogSubtitle className="font-sans text-sm text-muted-foreground">
-                                {testimonial.title}
-                              </MorphingDialogSubtitle>
-                              <div className="font-sans text-sm text-muted-foreground leading-relaxed">
-                                &quot;{testimonial.content}&quot;
-                              </div>
-                            </div>
-                          </div>
-                        </MorphingDialogTrigger>
-
-                        <MorphingDialogContainer>
-                          <MorphingDialogContent className="bg-background border border-border p-8 max-w-2xl">
-                            <MorphingDialogClose className="text-muted-foreground hover:text-foreground" />
-
-                            <div className="flex flex-col gap-6">
-                              <div className="flex gap-3 items-center">
-                                <div className="w-6 h-6 bg-muted rounded-full"></div>
-                                <div className="flex flex-col">
-                                  <MorphingDialogTitle className="font-sans text-sm text-foreground">
-                                    {testimonial.name}
-                                  </MorphingDialogTitle>
-                                  <MorphingDialogSubtitle className="font-sans text-sm text-muted-foreground">
-                                    {testimonial.title}
-                                  </MorphingDialogSubtitle>
-                                </div>
-                              </div>
-
-                              <MorphingDialogDescription
-                                disableLayoutAnimation
-                                variants={{
-                                  initial: { opacity: 0, scale: 0.8, y: 100 },
-                                  animate: { opacity: 1, scale: 1, y: 0 },
-                                  exit: { opacity: 0, scale: 0.8, y: 100 },
-                                }}
-                                className="font-sans text-sm text-muted-foreground leading-relaxed whitespace-pre-line"
-                              >
-                                &quot;{testimonial.fullContent}&quot;
-                              </MorphingDialogDescription>
-                            </div>
-                          </MorphingDialogContent>
-                        </MorphingDialogContainer>
-                      </MorphingDialog>
-                    </div>
-                  ))}
-                </motion.div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <TestimonialsSection
+        testimonials={testimonials}
+        title="Built with our users, for our users"
+        subtitle="Midday helps small teams, solo founders, and small businesses do more with less. Here's what that looks like in practice."
+      />
     </div>
   )
 }

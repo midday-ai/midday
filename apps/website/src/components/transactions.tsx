@@ -146,14 +146,14 @@ export function Transactions() {
       </div>
 
       {/* Highlight Feature Section with Animations */}
-      <section className="bg-background py-20 lg:py-24">
+      <section className="bg-background py-12 sm:py-16 lg:py-24">
         <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
-          <div className="space-y-24 lg:space-y-32">
+          <div className="space-y-16 sm:space-y-20 lg:space-y-32">
             {/* First Animation - Transaction Flow */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
               {/* Left: Title and Subtitle */}
               <div className="space-y-4 lg:space-y-6 text-center lg:text-left">
-                <h2 className="font-serif text-xl sm:text-2xl text-foreground">
+                <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
                   All accounts in one place
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
@@ -174,7 +174,7 @@ export function Transactions() {
                     priority
                   />
                 </div>
-                <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
+                <div className="w-full h-[400px] sm:h-[520px] md:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
                   <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
                     <TransactionFlowAnimation onComplete={undefined} />
                   </div>
@@ -183,10 +183,10 @@ export function Transactions() {
             </div>
 
             {/* Second Animation - Categorized */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
               {/* Left: Title and Subtitle */}
               <div className="space-y-4 lg:space-y-6 lg:order-2 text-center lg:text-left">
-                <h2 className="font-serif text-xl sm:text-2xl text-foreground">
+                <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
                   Automatically categorized
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
@@ -207,7 +207,7 @@ export function Transactions() {
                     priority
                   />
                 </div>
-                <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
+                <div className="w-full h-[400px] sm:h-[520px] md:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
                   <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
                     <TransactionFlowAnimation onComplete={undefined} />
                   </div>
@@ -250,36 +250,8 @@ export function Transactions() {
       {/* Testimonials Section */}
       <TestimonialsSection
         testimonials={testimonials}
-        customHeader={
-          <>
-            <div className="flex flex-col gap-4 items-center mb-10">
-              <div className="flex flex-col gap-4 items-center text-center max-w-3xl">
-                <h2 className="font-serif text-2xl text-foreground">
-                  Built with our users, for our users
-                </h2>
-                <p className="font-sans text-sm text-muted-foreground">
-                  Midday helps small teams, solo founders, and small businesses
-                  do more with less. Here's what that looks like in practice.
-                </p>
-              </div>
-
-              <div className="flex gap-2 items-center">
-                <div className="flex items-center gap-1">
-                  <div className="flex gap-1">
-                    <MaterialIcon name="star" className="text-muted-foreground" size={16} />
-                    <MaterialIcon name="star" className="text-muted-foreground" size={16} />
-                    <MaterialIcon name="star" className="text-muted-foreground" size={16} />
-                    <MaterialIcon name="star" className="text-muted-foreground" size={16} />
-                    <MaterialIcon name="star_half" className="text-muted-foreground" size={16} />
-                  </div>
-                </div>
-                <p className="font-sans text-xs text-muted-foreground">
-                  Used by 14,000 businesses
-                </p>
-              </div>
-            </div>
-          </>
-        }
+        title="Built with our users, for our users"
+        subtitle="Midday helps small teams, solo founders, and small businesses do more with less. Here's what that looks like in practice."
       />
 
       {/* Divider */}

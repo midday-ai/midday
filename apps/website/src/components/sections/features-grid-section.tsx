@@ -10,7 +10,7 @@ export function FeaturesGridSection() {
     <section className="bg-background py-12 sm:py-16 lg:py-24">
       <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
         <div className="text-center space-y-4 mb-10 sm:mb-12">
-          <h2 className="font-serif text-xl sm:text-2xl text-foreground">
+          <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
             Everything you need to run your business finances
           </h2>
           <p className="font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto px-4">

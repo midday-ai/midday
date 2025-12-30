@@ -32,7 +32,7 @@ export function AccountingSection() {
               className="w-full h-full object-contain rounded-none"
             />
           </div>
-          <h2 className="font-serif text-xl sm:text-2xl text-foreground">
+          <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
             Ready for accounting, without extra work
           </h2>
           <p className="font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
