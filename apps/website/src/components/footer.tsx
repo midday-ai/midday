@@ -24,28 +24,28 @@ export function Footer() {
               <div className="space-y-2">
                 <Link
                   href="/features"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
+                  className="no-touch-active font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Features
                 </Link>
                 <Link
                   href="/pricing"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
+                  className="no-touch-active font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Pricing
                 </Link>
                 <Link
                   href="/story"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
+                  className="no-touch-active font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Story
                 </Link>
                 <Link
                   href="/download"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
+                  className="no-touch-active font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Download
@@ -57,7 +57,7 @@ export function Footer() {
                     e.currentTarget.blur();
                     setTimeout(() => e.currentTarget.blur(), 100);
                   }}
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors cursor-pointer text-left"
+                  className="no-touch-active font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors cursor-pointer text-left"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Bank coverage
@@ -72,7 +72,7 @@ export function Footer() {
               <div className="space-y-2">
                 <Link
                   href="/roadmap"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
+                  className="no-touch-active font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Roadmap
@@ -81,28 +81,28 @@ export function Footer() {
                   href="https://github.com/midday-ai/midday"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
+                  className="no-touch-active font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Github
                 </Link>
                 <Link
                   href="/support"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
+                  className="no-touch-active font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Support
                 </Link>
                 <Link
                   href="/updates"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
+                  className="no-touch-active font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Updates
                 </Link>
                 <Link
                   href="/privacy"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
+                  className="no-touch-active font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Privacy policy
@@ -117,28 +117,28 @@ export function Footer() {
               <div className="space-y-2">
                 <Link
                   href="/self-hosted"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
+                  className="no-touch-active font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Self hosted
                 </Link>
                 <Link
                   href="/saas-hosting"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
+                  className="no-touch-active font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Saas hosting
                 </Link>
                 <Link
                   href="/open-startup"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
+                  className="no-touch-active font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Open startup
                 </Link>
                 <Link
                   href="/oss-friends"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
+                  className="no-touch-active font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   OSS Friends

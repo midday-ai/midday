@@ -42,14 +42,14 @@ export function Header({
               ? "bg-transparent"
               : "bg-background/95 backdrop-blur-md",
             "py-3 xl:py-4 px-4 sm:px-4 md:px-4 lg:px-4 xl:px-6 2xl:px-8 flex items-center justify-between xl:gap-6",
-            isMenuOpen && "border-b border-border"
+            isMenuOpen && "border-b border-border",
           )}
         >
           {/* Logo and Brand */}
           <div
-            className="flex items-center gap-2 cursor-pointer hover:opacity-80 active:opacity-80 transition-opacity duration-200 touch-manipulation"
+            className="no-touch-active flex items-center gap-2 cursor-pointer hover:opacity-80 active:opacity-80 transition-opacity duration-200 touch-manipulation"
             onClick={() => router.push("/")}
-            style={{ WebkitTapHighlightColor: 'transparent' }}
+            style={{ WebkitTapHighlightColor: "transparent" }}
             onTouchEnd={(e) => e.currentTarget.blur()}
           >
             <div className="w-6 h-6">
@@ -103,11 +103,11 @@ export function Header({
                             Features
                           </span>
                         </div>
-                        <div 
+                        <div
                           className="flex items-center py-2 cursor-pointer rounded group"
                           onClick={() => {
-                            setIsFeaturesOpen(false)
-                            router.push("/assistant")
+                            setIsFeaturesOpen(false);
+                            router.push("/assistant");
                           }}
                         >
                           <div className="flex flex-col">
@@ -119,11 +119,11 @@ export function Header({
                             </span>
                           </div>
                         </div>
-                        <div 
+                        <div
                           className="flex items-center py-2 cursor-pointer rounded group"
                           onClick={() => {
-                            setIsFeaturesOpen(false)
-                            router.push("/insights")
+                            setIsFeaturesOpen(false);
+                            router.push("/insights");
                           }}
                         >
                           <div className="flex flex-col">
@@ -135,11 +135,11 @@ export function Header({
                             </span>
                           </div>
                         </div>
-                        <div 
+                        <div
                           className="flex items-center py-2 cursor-pointer rounded group"
                           onClick={() => {
-                            setIsFeaturesOpen(false)
-                            router.push("/transactions")
+                            setIsFeaturesOpen(false);
+                            router.push("/transactions");
                           }}
                         >
                           <div className="flex flex-col">
@@ -151,11 +151,11 @@ export function Header({
                             </span>
                           </div>
                         </div>
-                        <div 
+                        <div
                           className="flex items-center py-2 cursor-pointer rounded group"
                           onClick={() => {
-                            setIsFeaturesOpen(false)
-                            router.push("/inbox")
+                            setIsFeaturesOpen(false);
+                            router.push("/inbox");
                           }}
                         >
                           <div className="flex flex-col">
@@ -167,11 +167,11 @@ export function Header({
                             </span>
                           </div>
                         </div>
-                        <div 
+                        <div
                           className="flex items-center py-2 cursor-pointer rounded group"
                           onClick={() => {
-                            setIsFeaturesOpen(false)
-                            router.push("/time-tracking")
+                            setIsFeaturesOpen(false);
+                            router.push("/time-tracking");
                           }}
                         >
                           <div className="flex flex-col">
@@ -183,11 +183,11 @@ export function Header({
                             </span>
                           </div>
                         </div>
-                        <div 
+                        <div
                           className="flex items-center py-2 cursor-pointer rounded group"
                           onClick={() => {
-                            setIsFeaturesOpen(false)
-                            router.push("/invoicing")
+                            setIsFeaturesOpen(false);
+                            router.push("/invoicing");
                           }}
                         >
                           <div className="flex flex-col">
@@ -199,11 +199,11 @@ export function Header({
                             </span>
                           </div>
                         </div>
-                        <div 
+                        <div
                           className="flex items-center py-2 cursor-pointer group rounded"
                           onClick={() => {
-                            setIsFeaturesOpen(false)
-                            router.push("/customers")
+                            setIsFeaturesOpen(false);
+                            router.push("/customers");
                           }}
                         >
                           <div className="flex flex-col">
@@ -218,8 +218,8 @@ export function Header({
                         <div
                           className="flex items-center py-2 cursor-pointer group rounded"
                           onClick={() => {
-                            setIsFeaturesOpen(false)
-                            router.push("/file-storage")
+                            setIsFeaturesOpen(false);
+                            router.push("/file-storage");
                           }}
                         >
                           <div className="flex flex-col">
@@ -333,20 +333,46 @@ export function Header({
           <div className="xl:hidden flex items-center">
             <button
               type="button"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={(e) => {
+                setIsMenuOpen(!isMenuOpen);
+                // Immediately blur to prevent active state
+                e.currentTarget.blur();
+              }}
+              onTouchStart={(e) => {
+                // Prevent default touch behavior
+                const target = e.currentTarget;
+                target.style.pointerEvents = "none";
+                setTimeout(() => {
+                  target.style.pointerEvents = "auto";
+                }, 300);
+              }}
               onTouchEnd={(e) => {
                 const target = e.currentTarget;
+                // Force remove focus and active state
                 target.blur();
-                // Force remove active state immediately
+                // Remove any active class
+                target.classList.remove("active");
+                // Force repaint to clear active state
+                const style = target.style;
+                const display = style.display;
+                style.display = "none";
                 setTimeout(() => {
+                  style.display = display;
                   target.blur();
                 }, 0);
               }}
-              className="transition-colors flex items-center justify-end p-2 min-w-[44px] min-h-[44px] text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
-              style={{ 
-                WebkitTapHighlightColor: 'transparent',
-                WebkitUserSelect: 'none',
-                WebkitTouchCallout: 'none'
+              onMouseDown={(e) => {
+                // Only allow active state on desktop
+                if (window.innerWidth < 1280) {
+                  e.preventDefault();
+                }
+              }}
+              className="no-touch-active transition-colors flex items-center justify-end p-2 min-w-[44px] min-h-[44px] text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+              style={{
+                WebkitTapHighlightColor: "transparent",
+                WebkitUserSelect: "none",
+                WebkitTouchCallout: "none",
+                touchAction: "manipulation",
               }}
             >
               {isMenuOpen ? (
@@ -374,21 +400,40 @@ export function Header({
                 <div className="flex flex-col">
                   <button
                     type="button"
-                    onClick={() =>
-                      setIsMobileFeaturesOpen(!isMobileFeaturesOpen)
-                    }
+                    onClick={(e) => {
+                      setIsMobileFeaturesOpen(!isMobileFeaturesOpen);
+                      e.currentTarget.blur();
+                    }}
+                    onTouchStart={(e) => {
+                      const target = e.currentTarget;
+                      target.style.pointerEvents = "none";
+                      setTimeout(() => {
+                        target.style.pointerEvents = "auto";
+                      }, 300);
+                    }}
                     onTouchEnd={(e) => {
                       const target = e.currentTarget;
                       target.blur();
+                      target.classList.remove("active");
+                      const style = target.style;
+                      const display = style.display;
+                      style.display = "none";
                       setTimeout(() => {
+                        style.display = display;
                         target.blur();
                       }, 0);
                     }}
-                    className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation flex items-center justify-between"
-                    style={{ 
-                      WebkitTapHighlightColor: 'transparent',
-                      WebkitUserSelect: 'none',
-                      WebkitTouchCallout: 'none'
+                    onMouseDown={(e) => {
+                      if (window.innerWidth < 1280) {
+                        e.preventDefault();
+                      }
+                    }}
+                    className="no-touch-active text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation flex items-center justify-between"
+                    style={{
+                      WebkitTapHighlightColor: "transparent",
+                      WebkitUserSelect: "none",
+                      WebkitTouchCallout: "none",
+                      touchAction: "manipulation",
                     }}
                   >
                     <span>Features</span>
@@ -419,8 +464,8 @@ export function Header({
                               e.currentTarget.blur();
                               setTimeout(() => e.currentTarget.blur(), 100);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                            style={{ WebkitTapHighlightColor: 'transparent' }}
+                            className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            style={{ WebkitTapHighlightColor: "transparent" }}
                           >
                             Assistant
                           </button>
@@ -435,8 +480,8 @@ export function Header({
                               e.currentTarget.blur();
                               setTimeout(() => e.currentTarget.blur(), 100);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                            style={{ WebkitTapHighlightColor: 'transparent' }}
+                            className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            style={{ WebkitTapHighlightColor: "transparent" }}
                           >
                             Insights
                           </button>
@@ -451,8 +496,8 @@ export function Header({
                               e.currentTarget.blur();
                               setTimeout(() => e.currentTarget.blur(), 100);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                            style={{ WebkitTapHighlightColor: 'transparent' }}
+                            className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            style={{ WebkitTapHighlightColor: "transparent" }}
                           >
                             Transactions
                           </button>
@@ -467,8 +512,8 @@ export function Header({
                               e.currentTarget.blur();
                               setTimeout(() => e.currentTarget.blur(), 100);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                            style={{ WebkitTapHighlightColor: 'transparent' }}
+                            className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            style={{ WebkitTapHighlightColor: "transparent" }}
                           >
                             Inbox
                           </button>
@@ -483,8 +528,8 @@ export function Header({
                               e.currentTarget.blur();
                               setTimeout(() => e.currentTarget.blur(), 100);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                            style={{ WebkitTapHighlightColor: 'transparent' }}
+                            className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            style={{ WebkitTapHighlightColor: "transparent" }}
                           >
                             Time tracking
                           </button>
@@ -499,8 +544,8 @@ export function Header({
                               e.currentTarget.blur();
                               setTimeout(() => e.currentTarget.blur(), 100);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                            style={{ WebkitTapHighlightColor: 'transparent' }}
+                            className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            style={{ WebkitTapHighlightColor: "transparent" }}
                           >
                             Invoicing
                           </button>
@@ -515,8 +560,8 @@ export function Header({
                               e.currentTarget.blur();
                               setTimeout(() => e.currentTarget.blur(), 100);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                            style={{ WebkitTapHighlightColor: 'transparent' }}
+                            className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            style={{ WebkitTapHighlightColor: "transparent" }}
                           >
                             Customers
                           </button>
@@ -531,8 +576,8 @@ export function Header({
                               e.currentTarget.blur();
                               setTimeout(() => e.currentTarget.blur(), 100);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                            style={{ WebkitTapHighlightColor: 'transparent' }}
+                            className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            style={{ WebkitTapHighlightColor: "transparent" }}
                           >
                             Files
                           </button>
@@ -547,9 +592,9 @@ export function Header({
                     e.currentTarget.blur();
                     setTimeout(() => e.currentTarget.blur(), 100);
                   }}
-                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+                  className="no-touch-active text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
                   onClick={() => setIsMenuOpen(false)}
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
                 >
                   Pricing
                 </Link>
@@ -559,9 +604,9 @@ export function Header({
                     e.currentTarget.blur();
                     setTimeout(() => e.currentTarget.blur(), 100);
                   }}
-                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+                  className="no-touch-active text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
                   onClick={() => setIsMenuOpen(false)}
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
                 >
                   Updates
                 </Link>
@@ -571,9 +616,9 @@ export function Header({
                     e.currentTarget.blur();
                     setTimeout(() => e.currentTarget.blur(), 100);
                   }}
-                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+                  className="no-touch-active text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
                   onClick={() => setIsMenuOpen(false)}
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
                 >
                   Story
                 </Link>
@@ -583,9 +628,9 @@ export function Header({
                     e.currentTarget.blur();
                     setTimeout(() => e.currentTarget.blur(), 100);
                   }}
-                  className="text-2xl font-sans py-2 text-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                  className="no-touch-active text-2xl font-sans py-2 text-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                   onClick={() => setIsMenuOpen(false)}
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
                 >
                   Download
                 </Link>
@@ -598,9 +643,9 @@ export function Header({
                       e.currentTarget.blur();
                       setTimeout(() => e.currentTarget.blur(), 100);
                     }}
-                    className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+                    className="no-touch-active text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
                     onClick={() => setIsMenuOpen(false)}
-                    style={{ WebkitTapHighlightColor: 'transparent' }}
+                    style={{ WebkitTapHighlightColor: "transparent" }}
                   >
                     Sign in
                   </Link>
