@@ -75,7 +75,7 @@ export function InvoicePromptAnimation({
   }, [onComplete])
 
   return (
-    <div className="w-full h-full bg-background flex flex-col">
+    <div className="w-full h-full flex flex-col relative">
       <div className="flex-1 px-2 md:px-3 py-2 md:py-3 overflow-hidden">
         <div className="space-y-2 md:space-y-3 h-full flex flex-col">
           <div className="flex justify-end">

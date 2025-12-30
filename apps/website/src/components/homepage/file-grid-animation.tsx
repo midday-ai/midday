@@ -108,7 +108,7 @@ export function FileGridAnimation({
   })
 
   return (
-    <div className="w-full h-full bg-background flex flex-col">
+    <div className="w-full h-full flex flex-col relative">
       <div className="px-2 md:px-3 pt-2 md:pt-3 pb-1.5 md:pb-2">
         <div className="flex items-center justify-between mb-2 md:mb-3">
           <h3 className="text-[13px] md:text-[14px] text-foreground">Files</h3>

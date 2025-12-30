@@ -282,14 +282,14 @@ export function TransactionFlowAnimation({
   }, [onComplete])
 
   return (
-    <div className="w-full h-full bg-background flex flex-col relative overflow-hidden">
+    <div className="w-full h-full flex flex-col relative overflow-hidden">
       {/* Header */}
-      <div className="px-2 md:px-3 pt-2 md:pt-3 pb-1.5 md:pb-2 border-b border-border">
+      <div className="px-2 md:px-3 pt-2 md:pt-3 pb-1.5 md:pb-2 border-b border-border relative z-10">
         <h3 className="text-[13px] md:text-[14px] text-foreground">Transactions</h3>
       </div>
 
       {/* Main content area */}
-      <div className="flex-1 relative overflow-hidden flex flex-col">
+      <div className="flex-1 relative overflow-hidden flex flex-col z-10">
         {/* SVG for account nodes and arrows */}
         <div className="flex-shrink-0 h-[140px] md:h-[200px] relative overflow-hidden">
           <svg
