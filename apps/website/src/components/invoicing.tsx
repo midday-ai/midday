@@ -85,7 +85,7 @@ export function Invoicing() {
               alt="Grid Pattern"
               width={1728}
               height={1080}
-              className="w-[1728px] h-[600px] object-cover"
+              className="w-full h-[600px] object-cover"
               priority
             />
           </div>
