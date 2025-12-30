@@ -469,13 +469,13 @@ export function TransactionCreateForm() {
               htmlFor="settings"
               className="mb-2 block font-medium text-md"
             >
-              Exclude from analytics
+              Exclude from reports
             </Label>
             <div className="flex flex-row items-center justify-between">
               <div className="space-y-0.5 pr-4">
                 <p className="text-xs text-muted-foreground">
-                  Exclude this transaction from analytics like profit, expense
-                  and revenue. This is useful for internal transfers between
+                  Exclude this transaction from reports like profit, expense and
+                  revenue. This is useful for internal transfers between
                   accounts to avoid double-counting.
                 </p>
               </div>

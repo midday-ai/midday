@@ -59,7 +59,7 @@ export function TransactionEditForm({ transaction }: Props) {
   const updateTransactionMutation = useMutation(
     trpc.transactions.update.mutationOptions({
       onSuccess: (_, variables) => {
-        // If category or internal (exclude from analytics) changed, invalidate reports and widgets
+        // If category or internal (exclude from reports) changed, invalidate reports and widgets
         if ("categorySlug" in variables || "internal" in variables) {
           invalidateTransactionQueries();
         } else {
@@ -532,12 +532,12 @@ export function TransactionEditForm({ transaction }: Props) {
 
         <div className="mt-6 mb-4">
           <Label htmlFor="settings" className="mb-2 block font-medium text-md">
-            Exclude from analytics
+            Exclude from reports
           </Label>
           <div className="flex flex-row items-center justify-between">
             <div className="space-y-0.5 pr-4">
               <p className="text-xs text-muted-foreground">
-                Exclude this transaction from analytics like profit, expense and
+                Exclude this transaction from reports like profit, expense and
                 revenue. This is useful for internal transfers between accounts
                 to avoid double-counting.
               </p>

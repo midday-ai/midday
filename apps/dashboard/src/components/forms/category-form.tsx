@@ -250,7 +250,7 @@ export function CategoryForm({ data }: Props) {
                   <div className="flex items-center justify-between space-x-2">
                     <div className="space-y-0.5">
                       <FormLabel className="text-xs text-[#878787] font-normal">
-                        Exclude from Reports
+                        Exclude from reports
                       </FormLabel>
                       <div className="text-xs text-muted-foreground">
                         Transactions in this category won't appear in financial
