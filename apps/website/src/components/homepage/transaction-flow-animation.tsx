@@ -402,12 +402,12 @@ export function TransactionFlowAnimation({
 
         {/* Transaction list full width below - Midday table style */}
         <div className="flex-1 min-h-0 overflow-hidden border-t border-l border-r border-border bg-background">
-          <table className="w-full border-collapse">
+          <table className="w-full border-collapse" style={{ borderSpacing: 0 }}>
               <thead className="sticky top-0 z-10 bg-secondary border-b border-border">
                 <tr className="h-[28px] md:h-[32px]">
-                  <th className="w-[60px] md:w-[70px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">Date</th>
-                  <th className="w-[140px] md:w-[160px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">Description</th>
-                  <th className="w-[90px] md:w-[100px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">Amount</th>
+                  <th className="w-[60px] md:w-[70px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border" style={{ borderWidth: '0 1px 0 0' }}>Date</th>
+                  <th className="w-[140px] md:w-[160px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border" style={{ borderWidth: '0 1px 0 0' }}>Description</th>
+                  <th className="w-[90px] md:w-[100px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border" style={{ borderWidth: '0 1px 0 0' }}>Amount</th>
                   <th className="w-[110px] md:w-[120px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground">Category</th>
                 </tr>
               </thead>
@@ -426,16 +426,17 @@ export function TransactionFlowAnimation({
                       ease: 'easeOut',
                     }}
                     className="h-[28px] md:h-[32px] border-b border-border bg-background hover:bg-secondary transition-colors"
+                    style={{ borderBottomWidth: '1px' }}
                   >
                     {/* Date */}
-                    <td className="w-[60px] md:w-[70px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-muted-foreground border-r border-border">
+                    <td className="w-[60px] md:w-[70px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-muted-foreground border-r border-border" style={{ borderRightWidth: '1px' }}>
                       {transaction.date}
                     </td>
 
                     {/* Description */}
                     <td className={`w-[140px] md:w-[160px] px-1.5 md:px-2 text-[10px] md:text-[11px] border-r border-border ${
                       transaction.amount > 0 ? 'text-[#4CAF50]' : 'text-foreground'
-                    }`}>
+                    }`} style={{ borderRightWidth: '1px' }}>
                       <div className="truncate" title={transaction.description}>
                         {transaction.description}
                       </div>
@@ -444,7 +445,7 @@ export function TransactionFlowAnimation({
                     {/* Amount */}
                     <td className={`w-[90px] md:w-[100px] px-1.5 md:px-2 text-[10px] md:text-[11px] border-r border-border ${
                       transaction.amount > 0 ? 'text-[#4CAF50]' : 'text-foreground'
-                    }`}>
+                    }`} style={{ borderRightWidth: '1px' }}>
                       {transaction.amount > 0 ? '+' : '-'}{formatAmount(transaction.amount)} kr
                     </td>
 

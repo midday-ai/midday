@@ -104,7 +104,7 @@ export function StartPage() {
                 </span>
               </h1>
 
-              <p className="text-muted-foreground text-sm sm:text-base leading-relaxed font-sans max-w-md">
+              <p className="text-muted-foreground text-base leading-relaxed font-sans max-w-md">
                 Your business finances, reconciled and explained so you always know what's happening.
               </p>
             </div>
@@ -182,7 +182,7 @@ export function StartPage() {
                         For founders who are tired of guessing how their business is doing
                       </span>
                     </h1>
-                    <p className="font-sans text-sm text-muted-foreground leading-relaxed text-left">
+                    <p className="font-sans text-base text-muted-foreground leading-relaxed text-left">
                       Your business finances, reconciled and explained so you always know what's happening.
                     </p>
                   </div>
@@ -274,7 +274,7 @@ export function StartPage() {
                   <h3 className="font-sans text-base sm:text-lg text-foreground max-w-md mx-auto">
                     {feature.title}
                   </h3>
-                  <p className="font-sans text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
+                  <p className="font-sans text-base text-muted-foreground leading-relaxed max-w-md mx-auto">
                     {feature.subtitle}
                   </p>
                 </div>

@@ -13,7 +13,7 @@ export function PricingSection() {
           <h2 className="font-serif text-xl sm:text-2xl text-foreground">
             Pricing that matches how you run your business
           </h2>
-          <p className="font-sans text-sm text-muted-foreground">
+          <p className="font-sans text-base text-muted-foreground">
             Start simple, upgrade when your workflow gets more complex.
           </p>
         </div>

@@ -87,7 +87,7 @@ export function TestimonialsSection({
                 <h2 className="font-serif text-xl sm:text-2xl text-foreground">
                   {title}
                 </h2>
-                <p className="font-sans text-sm text-muted-foreground">
+                <p className="font-sans text-base text-muted-foreground">
                   {subtitle}
                 </p>
               </div>
