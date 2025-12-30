@@ -80,6 +80,7 @@ export const documentProcessingStatusEnum = pgEnum(
 export const inboxAccountProvidersEnum = pgEnum("inbox_account_providers", [
   "gmail",
   "outlook",
+  "google_drive",
 ]);
 
 export const inboxAccountStatusEnum = pgEnum("inbox_account_status", [
@@ -587,6 +588,11 @@ export const inboxAccounts = pgTable(
     scheduleId: text("schedule_id"),
     status: inboxAccountStatusEnum().default("connected").notNull(),
     errorMessage: text("error_message"),
+    metadata: jsonb("metadata").$type<{
+      folderId?: string;
+      folderName?: string;
+      folderPath?: string;
+    }>(),
   },
   (table) => [
     foreignKey({

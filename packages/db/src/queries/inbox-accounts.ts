@@ -11,6 +11,7 @@ export async function getInboxAccounts(db: Database, teamId: string) {
       lastAccessed: inboxAccounts.lastAccessed,
       status: inboxAccounts.status,
       errorMessage: inboxAccounts.errorMessage,
+      metadata: inboxAccounts.metadata,
     })
     .from(inboxAccounts)
     .where(eq(inboxAccounts.teamId, teamId));
@@ -34,6 +35,7 @@ export async function getInboxAccountById(
       refreshToken: inboxAccounts.refreshToken,
       expiryDate: inboxAccounts.expiryDate,
       lastAccessed: inboxAccounts.lastAccessed,
+      metadata: inboxAccounts.metadata,
     })
     .from(inboxAccounts)
     .where(
@@ -80,6 +82,11 @@ export type UpdateInboxAccountParams = {
   lastAccessed?: string;
   status?: "connected" | "disconnected";
   errorMessage?: string | null;
+  metadata?: {
+    folderId?: string;
+    folderName?: string;
+    folderPath?: string;
+  } | null;
 };
 
 export async function updateInboxAccount(
@@ -96,6 +103,7 @@ export async function updateInboxAccount(
       lastAccessed: params.lastAccessed,
       status: params.status as any,
       errorMessage: params.errorMessage,
+      metadata: params.metadata,
     })
     .where(eq(inboxAccounts.id, params.id));
 }
@@ -161,6 +169,7 @@ export async function getInboxAccountInfo(
       provider: inboxAccounts.provider,
       teamId: inboxAccounts.teamId,
       lastAccessed: inboxAccounts.lastAccessed,
+      metadata: inboxAccounts.metadata,
     })
     .from(inboxAccounts)
     .where(eq(inboxAccounts.id, params.id))

@@ -65,7 +65,7 @@ export interface UserInfo {
   name?: string;
 }
 
-export type OAuthProvider = "gmail" | "outlook";
+export type OAuthProvider = "gmail" | "outlook" | "google_drive";
 
 // Outlook-specific types
 export interface MicrosoftTokenResponse {

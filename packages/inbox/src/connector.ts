@@ -2,6 +2,7 @@ import type { Database } from "@midday/db/client";
 import { getInboxAccountById, upsertInboxAccount } from "@midday/db/queries";
 import { decrypt, encrypt } from "@midday/encryption";
 import { GmailProvider } from "./providers/gmail";
+import { GoogleDriveProvider } from "./providers/google-drive";
 import { OutlookProvider } from "./providers/outlook";
 import {
   type Account,
@@ -32,6 +33,10 @@ export class InboxConnector extends Connector {
       case "outlook":
         this.#provider = new OutlookProvider(this.#db);
         this.#providerName = "outlook";
+        break;
+      case "google_drive":
+        this.#provider = new GoogleDriveProvider(this.#db);
+        this.#providerName = "google_drive";
         break;
       default:
         throw new Error(`Unsupported provider: ${provider}`);
@@ -88,6 +93,20 @@ export class InboxConnector extends Connector {
 
     // Set the account ID
     this.#provider.setAccountId(account.id);
+
+    // For Google Drive, set the folder ID from metadata
+    if (
+      this.#providerName === "google_drive" &&
+      this.#provider instanceof GoogleDriveProvider
+    ) {
+      const folderId = account.metadata?.folderId;
+      if (!folderId) {
+        throw new Error(
+          "Google Drive folder not configured. Please select a folder to watch.",
+        );
+      }
+      this.#provider.setFolderId(folderId);
+    }
 
     // Set tokens to configure provider auth client with expiry date
     const expiryDate = account.expiryDate
