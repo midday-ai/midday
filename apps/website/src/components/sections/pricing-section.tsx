@@ -8,7 +8,7 @@ export function PricingSection() {
 
   return (
     <section className="bg-background py-12 sm:py-16 lg:py-24">
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="text-center space-y-4 mb-12">
           <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
             Pricing that matches how you run your business
@@ -60,9 +60,9 @@ export function PricingSection() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="flex flex-col lg:flex-row gap-14 justify-center max-w-6xl mx-auto">
+        <div className="flex flex-col lg:flex-row gap-14 justify-center items-center lg:items-stretch max-w-6xl mx-auto">
           {/* Starter */}
-          <div className="flex-1 max-w-md">
+          <div className="flex-1 max-w-md w-full lg:w-auto">
             <div className="bg-background backdrop-blur-[43px] border border-border p-4 py-6 h-full flex flex-col">
               <div className="mb-4">
                 <h3 className="font-sans text-base text-foreground mb-1">
@@ -137,7 +137,7 @@ export function PricingSection() {
           </div>
 
           {/* Pro */}
-          <div className="flex-1 max-w-md">
+          <div className="flex-1 max-w-md w-full lg:w-auto">
             <div className="bg-background backdrop-blur-[43px] border border-primary p-4 py-6 h-full flex flex-col relative">
               <div className="absolute top-0 right-4 -translate-y-1/2">
                 <div className="bg-background border border-primary px-2 py-1 rounded-full flex items-center justify-center">
@@ -219,7 +219,7 @@ export function PricingSection() {
           </div>
 
           {/* Scale */}
-          <div className="flex-1 max-w-md">
+          <div className="flex-1 max-w-md w-full lg:w-auto">
             <div className="bg-background backdrop-blur-[43px] border border-border p-4 py-6 h-full flex flex-col">
               <div className="mb-4">
                 <h3 className="font-sans text-base text-foreground mb-1">

@@ -8,7 +8,7 @@ export function TimeSavingsSection() {
 
   return (
     <section className="bg-background py-12 sm:py-16 lg:py-24">
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="text-center space-y-4 mb-12">
           <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
             Less admin. More focus.

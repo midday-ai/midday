@@ -148,7 +148,7 @@ export function Assistant() {
 
       {/* Highlight Feature Section with Animations */}
       <section className="bg-background py-12 sm:py-16 lg:py-24">
-        <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+        <div className="max-w-[1400px] mx-auto">
           <div className="space-y-16 sm:space-y-20 lg:space-y-32">
             {/* First Animation - AI Assistant */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
@@ -220,7 +220,7 @@ export function Assistant() {
       </section>
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
@@ -228,7 +228,7 @@ export function Assistant() {
       <FeaturesGridSection />
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
@@ -236,7 +236,7 @@ export function Assistant() {
       <TimeSavingsSection />
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
@@ -244,7 +244,7 @@ export function Assistant() {
       <AccountingSection />
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
@@ -256,7 +256,7 @@ export function Assistant() {
       />
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
@@ -264,7 +264,7 @@ export function Assistant() {
       <IntegrationsSection />
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 

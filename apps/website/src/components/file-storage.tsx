@@ -250,7 +250,7 @@ export function FileStorage() {
       </section>
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
@@ -258,7 +258,7 @@ export function FileStorage() {
       <FeaturesGridSection />
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
@@ -266,7 +266,7 @@ export function FileStorage() {
       <TimeSavingsSection />
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
@@ -274,7 +274,7 @@ export function FileStorage() {
       <AccountingSection />
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
@@ -286,7 +286,7 @@ export function FileStorage() {
       />
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
@@ -294,7 +294,7 @@ export function FileStorage() {
       <IntegrationsSection />
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 

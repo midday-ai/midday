@@ -77,7 +77,7 @@ export function TestimonialsSection({
 
   return (
     <section className="bg-background">
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8 py-12 sm:py-16 lg:py-24">
+      <div className="max-w-[1400px] mx-auto py-12 sm:py-16 lg:py-24">
         {customHeader ? (
           customHeader
         ) : (

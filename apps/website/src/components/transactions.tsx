@@ -165,7 +165,7 @@ export function Transactions() {
 
       {/* Highlight Feature Section with Animations */}
       <section className="bg-background py-12 sm:py-16 lg:py-24">
-        <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+        <div className="max-w-[1400px] mx-auto">
           <div className="space-y-16 sm:space-y-20 lg:space-y-32">
             {/* First Animation - Transaction Flow */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
@@ -251,7 +251,7 @@ export function Transactions() {
       </section>
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
@@ -259,7 +259,7 @@ export function Transactions() {
       <FeaturesGridSection />
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
@@ -267,7 +267,7 @@ export function Transactions() {
       <TimeSavingsSection />
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
@@ -275,7 +275,7 @@ export function Transactions() {
       <AccountingSection />
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
@@ -287,7 +287,7 @@ export function Transactions() {
       />
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
@@ -295,7 +295,7 @@ export function Transactions() {
       <IntegrationsSection />
 
       {/* Divider */}
-      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+      <div className="max-w-[1400px] mx-auto">
         <div className="h-px w-full border-t border-border" />
       </div>
 
