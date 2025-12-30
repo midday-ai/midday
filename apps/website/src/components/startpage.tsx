@@ -52,15 +52,17 @@ export function StartPage() {
     {
       title: 'All transactions in one place',
       subtitle:
-        'Every payment in and out of the business shows up automatically.',
+        'Every payment in and out of the business is automatically synced from your connected accounts',
+      mobileSubtitle: 'Every payment in and out is pulled in automatically.',
       mergedText:
-        'All transactions in one place. Every payment in and out of the business shows up automatically.',
+        'All transactions in one place. Every payment in and out of the business is automatically synced from your connected accounts',
       illustration: 'animation',
     },
     {
       title: 'Reconciliation gets handled',
       subtitle:
         'Receipts, invoices, and transactions are matched so nothing needs manual cleanup.',
+      mobileSubtitle: 'Transactions are categorized and reconciled automatically.',
       mergedText:
         'Reconciliation gets handled. Receipts, invoices, and transactions are matched so nothing needs manual cleanup.',
       illustration: 'animation',
@@ -69,6 +71,7 @@ export function StartPage() {
       title: "Understand what's happening",
       subtitle:
         'The financial overview and widgets show the current state of the business and why.',
+      mobileSubtitle: "See what's changing and why.",
       mergedText:
         "Understand what's happening. The financial overview and widgets show the current state of the business and why.",
       illustration: '/illustrations/Files.svg',
@@ -77,6 +80,7 @@ export function StartPage() {
       title: 'Stay updated and in control',
       subtitle:
         'Weekly summaries and clear explanations keep you up to date without constant checking.',
+      mobileSubtitle: 'Weekly summaries keep you up to date.',
       mergedText:
         'Stay updated and in control. Weekly summaries and clear explanations keep you up to date without constant checking.',
       illustration: 'animation',
@@ -100,7 +104,7 @@ export function StartPage() {
             <div className="space-y-4 text-center max-w-xl px-2">
               <h1 className="font-serif text-3xl sm:text-3xl md:text-3xl lg:text-3xl xl:text-2xl 2xl:text-2xl leading-tight">
                 <span className="text-foreground">
-                  For founders who are tired of guessing how their business is doing
+                  Know how your business is doing. No guesswork.
                 </span>
               </h1>
 
@@ -179,7 +183,9 @@ export function StartPage() {
                   <div className="space-y-3">
                     <h1 className="font-serif text-xl lg:text-3xl xl:text-3xl 2xl:text-3xl leading-tight lg:leading-tight xl:leading-[1.3] text-left">
                       <span className="text-foreground">
-                        For founders who are tired of guessing how their business is doing
+                        Know how your business is doing.{' '}
+                        <span className="hidden lg:inline"><br /></span>
+                        <span className="lg:hidden"> </span>No guesswork.
                       </span>
                     </h1>
                     <p className="font-sans text-base text-muted-foreground leading-normal text-left">
@@ -265,7 +271,7 @@ export function StartPage() {
           <div className="grid grid-cols-1 gap-12 sm:gap-16 lg:hidden">
             <div className="hidden lg:block text-center mb-2">
               <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-                Always know what's going on
+                How Midday works
               </h2>
             </div>
             {features.map((feature, index) => (
@@ -275,7 +281,8 @@ export function StartPage() {
                     {feature.title}
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-md mx-auto">
-                    {feature.subtitle}
+                    <span className="sm:hidden">{feature.mobileSubtitle || feature.subtitle}</span>
+                    <span className="hidden sm:inline">{feature.subtitle}</span>
                   </p>
                 </div>
                 <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative">
@@ -311,14 +318,14 @@ export function StartPage() {
             <div className="flex gap-6">
               {/* Timeline */}
               <div className="flex flex-col justify-center items-center flex-shrink-0 relative">
-                <div className="flex flex-col justify-center space-y-4 lg:space-y-5">
+                <div className="flex flex-col justify-center space-y-5 lg:space-y-6 mt-2 lg:mt-3">
                   <div className="flex items-center justify-center relative mb-4 lg:mb-6" style={{ minHeight: '3rem' }}>
                   </div>
                   {features.map((feature, index) => (
                     <div
                       key={index}
                       className="flex items-start justify-center relative"
-                      style={{ minHeight: '3rem' }}
+                      style={{ minHeight: '3.5rem' }}
                     >
                       <button
                         onClick={() => setActiveFeature(index)}
@@ -344,7 +351,7 @@ export function StartPage() {
                         <div
                           className="absolute left-1/2 -translate-x-1/2 w-px border-l border-border"
                           style={{
-                            height: 'calc(3rem + 1rem - 0.25rem)',
+                            height: 'calc(3.5rem + 1.25rem - 0.25rem)',
                             top: '0.375rem',
                           }}
                         />
@@ -355,10 +362,10 @@ export function StartPage() {
               </div>
 
               {/* Text Content */}
-              <div className="flex flex-col justify-center space-y-4 lg:space-y-5 flex-1">
+              <div className="flex flex-col justify-center space-y-5 lg:space-y-6 flex-1">
                 <div className="flex items-center mb-4 lg:mb-6" style={{ minHeight: '3rem' }}>
                   <h2 className="font-serif text-2xl text-foreground">
-                    Always know what's going on
+                    How Midday works
                   </h2>
                 </div>
                 {features.map((feature, index) => (
