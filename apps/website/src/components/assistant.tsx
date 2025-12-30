@@ -155,26 +155,15 @@ export function Assistant() {
               {/* Left: Title and Subtitle */}
               <div className="space-y-4 lg:space-y-6 text-center lg:text-left">
                 <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-                  Ask questions, get answers
+                  Ask questions and generate reports
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                  Use natural language to ask about your business finances and get instant, accurate answers based on your actual data.
+                  Ask questions about revenue, expenses, cash flow, customers, and changes over time, and generate reports, summaries, and breakdowns based on your actual business data.
                 </p>
               </div>
 
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background">
-                {/* Grid Pattern Background */}
-                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-10'}`}>
-                  <Image
-                    src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
-                    alt="Grid Pattern"
-                    width={1728}
-                    height={1080}
-                    className="w-full h-full object-cover"
-                    priority
-                  />
-                </div>
                 <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
                   <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
                     <AIAssistantAnimation onComplete={undefined} />
@@ -188,26 +177,15 @@ export function Assistant() {
               {/* Left: Title and Subtitle */}
               <div className="space-y-4 lg:space-y-6 lg:order-2 text-center lg:text-left">
                 <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-                  Understand your business
+                  Answers with full context
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                  Get insights and summaries that help you understand what's happening with your finances at a glance.
+                  The assistant understands your transactions, invoices, customers, projects, and files so answers are specific to your business, not generic outputs.
                 </p>
               </div>
 
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background lg:order-1">
-                {/* Grid Pattern Background */}
-                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-10'}`}>
-                  <Image
-                    src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
-                    alt="Grid Pattern"
-                    width={1728}
-                    height={1080}
-                    className="w-full h-full object-cover"
-                    priority
-                  />
-                </div>
                 <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
                   <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
                     <DashboardAnimation onComplete={undefined} />

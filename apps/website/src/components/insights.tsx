@@ -153,27 +153,16 @@ export function Insights() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
               {/* Left: Title and Subtitle */}
               <div className="space-y-4 lg:space-y-6 text-center lg:text-left">
-                <h2 className="font-serif text-xl sm:text-2xl text-foreground">
-                  Track trends over time
+                <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
+                  Weekly financial updates
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                  See how your revenue, expenses, and cash flow change over time with clear visualizations and trend analysis.
+                  Get automatic weekly summaries showing how revenue, spending, cash, and key metrics changed since the last period.
                 </p>
               </div>
 
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background">
-                {/* Grid Pattern Background */}
-                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-10'}`}>
-                  <Image
-                    src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
-                    alt="Grid Pattern"
-                    width={1728}
-                    height={1080}
-                    className="w-full h-full object-cover"
-                    priority
-                  />
-                </div>
                 <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
                   <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
                     <DashboardAnimation onComplete={undefined} />
@@ -187,26 +176,15 @@ export function Insights() {
               {/* Left: Title and Subtitle */}
               <div className="space-y-4 lg:space-y-6 lg:order-2 text-center lg:text-left">
                 <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-                  Understand what matters
+                  What changed and why
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                  Get summaries that highlight what's moving, what's stable, and where your attention is needed most.
+                  Important movements are highlighted so you understand what's driving changes without reviewing dashboards or reports.
                 </p>
               </div>
 
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background lg:order-1">
-                {/* Grid Pattern Background */}
-                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-10'}`}>
-                  <Image
-                    src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
-                    alt="Grid Pattern"
-                    width={1728}
-                    height={1080}
-                    className="w-full h-full object-cover"
-                    priority
-                  />
-                </div>
                 <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
                   <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
                     <DashboardAnimation onComplete={undefined} />

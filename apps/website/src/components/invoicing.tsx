@@ -154,26 +154,15 @@ export function Invoicing() {
               {/* Left: Title and Subtitle */}
               <div className="space-y-4 lg:space-y-6 text-center lg:text-left">
                 <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-                  Create and send invoices
+                  Flexible invoicing setup
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                  Quickly create professional invoices and send them to customers with just a few clicks.
+                  Create one-off, recurring, scheduled, or web invoices depending on how you bill your customers.
                 </p>
               </div>
 
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background">
-                {/* Grid Pattern Background */}
-                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-10'}`}>
-                  <Image
-                    src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
-                    alt="Grid Pattern"
-                    width={1728}
-                    height={1080}
-                    className="w-full h-full object-cover"
-                    priority
-                  />
-                </div>
                 <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
                   <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
                     <InvoicePromptAnimation onComplete={undefined} />
@@ -187,26 +176,15 @@ export function Invoicing() {
               {/* Left: Title and Subtitle */}
               <div className="space-y-4 lg:space-y-6 lg:order-2 text-center lg:text-left">
                 <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-                  Track payments automatically
+                  Connected to your finances
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                  Every payment update flows directly into your financial overview, so you always know what's been paid.
+                  Invoices stay linked to customers and revenue as they're sent, updated, and paid.
                 </p>
               </div>
 
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background lg:order-1">
-                {/* Grid Pattern Background */}
-                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-10'}`}>
-                  <Image
-                    src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
-                    alt="Grid Pattern"
-                    width={1728}
-                    height={1080}
-                    className="w-full h-full object-cover"
-                    priority
-                  />
-                </div>
                 <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
                   <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
                     <InvoicePromptAnimation onComplete={undefined} />

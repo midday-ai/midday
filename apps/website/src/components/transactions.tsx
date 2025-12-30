@@ -172,33 +172,16 @@ export function Transactions() {
               {/* Left: Title and Subtitle */}
               <div className="space-y-4 lg:space-y-6 text-center lg:text-left">
                 <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-                  All accounts in one place
+                  All business transactions
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                  Connect all your bank accounts and credit cards to see every
-                  transaction automatically collected in one unified view.
+                  Every payment in and out of your business is automatically
+                  collected from connected accounts and kept in a single list.
                 </p>
               </div>
 
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background">
-                {/* Grid Pattern Background */}
-                <div
-                  className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? "opacity-100" : "opacity-10"}`}
-                >
-                  <Image
-                    src={
-                      isLightMode
-                        ? "/images/grid-light.svg"
-                        : "/images/grid-dark.svg"
-                    }
-                    alt="Grid Pattern"
-                    width={1728}
-                    height={1080}
-                    className="w-full h-full object-cover"
-                    priority
-                  />
-                </div>
                 <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
                   <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
                     <TransactionFlowAnimation onComplete={undefined} />
@@ -212,33 +195,16 @@ export function Transactions() {
               {/* Left: Title and Subtitle */}
               <div className="space-y-4 lg:space-y-6 lg:order-2 text-center lg:text-left">
                 <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-                  Automatically categorized
+                  Categorized and organized
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                  Every transaction is automatically categorized so you can see
-                  where your money is going without manual work.
+                  Transactions are continuously categorized so records stay
+                  structured without repetitive manual work.
                 </p>
               </div>
 
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background lg:order-1">
-                {/* Grid Pattern Background */}
-                <div
-                  className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? "opacity-100" : "opacity-10"}`}
-                >
-                  <Image
-                    src={
-                      isLightMode
-                        ? "/images/grid-light.svg"
-                        : "/images/grid-dark.svg"
-                    }
-                    alt="Grid Pattern"
-                    width={1728}
-                    height={1080}
-                    className="w-full h-full object-cover"
-                    priority
-                  />
-                </div>
                 <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
                   <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
                     <TransactionFlowAnimation onComplete={undefined} />
