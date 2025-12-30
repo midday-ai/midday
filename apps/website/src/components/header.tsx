@@ -335,11 +335,19 @@ export function Header({
               type="button"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               onTouchEnd={(e) => {
-                e.currentTarget.blur();
-                setTimeout(() => e.currentTarget.blur(), 100);
+                const target = e.currentTarget;
+                target.blur();
+                // Force remove active state immediately
+                setTimeout(() => {
+                  target.blur();
+                }, 0);
               }}
               className="transition-colors flex items-center justify-end p-2 min-w-[44px] min-h-[44px] text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
-              style={{ WebkitTapHighlightColor: 'transparent' }}
+              style={{ 
+                WebkitTapHighlightColor: 'transparent',
+                WebkitUserSelect: 'none',
+                WebkitTouchCallout: 'none'
+              }}
             >
               {isMenuOpen ? (
                 <Icons.Close className="w-5 h-5" />
@@ -370,11 +378,18 @@ export function Header({
                       setIsMobileFeaturesOpen(!isMobileFeaturesOpen)
                     }
                     onTouchEnd={(e) => {
-                      e.currentTarget.blur();
-                      setTimeout(() => e.currentTarget.blur(), 100);
+                      const target = e.currentTarget;
+                      target.blur();
+                      setTimeout(() => {
+                        target.blur();
+                      }, 0);
                     }}
                     className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation flex items-center justify-between"
-                    style={{ WebkitTapHighlightColor: 'transparent' }}
+                    style={{ 
+                      WebkitTapHighlightColor: 'transparent',
+                      WebkitUserSelect: 'none',
+                      WebkitTouchCallout: 'none'
+                    }}
                   >
                     <span>Features</span>
                     <Icons.ChevronDown
