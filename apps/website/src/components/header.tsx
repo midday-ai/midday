@@ -333,46 +333,13 @@ export function Header({
           <div className="xl:hidden flex items-center">
             <button
               type="button"
-              onClick={(e) => {
-                setIsMenuOpen(!isMenuOpen);
-                // Immediately blur to prevent active state
-                e.currentTarget.blur();
-              }}
-              onTouchStart={(e) => {
-                // Prevent default touch behavior
-                const target = e.currentTarget;
-                target.style.pointerEvents = "none";
-                setTimeout(() => {
-                  target.style.pointerEvents = "auto";
-                }, 300);
-              }}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
               onTouchEnd={(e) => {
-                const target = e.currentTarget;
-                // Force remove focus and active state
-                target.blur();
-                // Remove any active class
-                target.classList.remove("active");
-                // Force repaint to clear active state
-                const style = target.style;
-                const display = style.display;
-                style.display = "none";
-                setTimeout(() => {
-                  style.display = display;
-                  target.blur();
-                }, 0);
-              }}
-              onMouseDown={(e) => {
-                // Only allow active state on desktop
-                if (window.innerWidth < 1280) {
-                  e.preventDefault();
-                }
+                e.currentTarget.blur();
               }}
               className="no-touch-active transition-colors flex items-center justify-end p-2 min-w-[44px] min-h-[44px] text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
               style={{
                 WebkitTapHighlightColor: "transparent",
-                WebkitUserSelect: "none",
-                WebkitTouchCallout: "none",
-                touchAction: "manipulation",
               }}
             >
               {isMenuOpen ? (
@@ -386,275 +353,236 @@ export function Header({
       </nav>
 
       {/* Mobile & Tablet Menu Overlay */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 xl:hidden bg-background"
-          >
-            <div className="pt-32 px-6">
-              <div className="flex flex-col space-y-6 text-left">
-                {/* Features Expandable Section */}
-                <div className="flex flex-col">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      setIsMobileFeaturesOpen(!isMobileFeaturesOpen);
-                      e.currentTarget.blur();
-                    }}
-                    onTouchStart={(e) => {
-                      const target = e.currentTarget;
-                      target.style.pointerEvents = "none";
-                      setTimeout(() => {
-                        target.style.pointerEvents = "auto";
-                      }, 300);
-                    }}
-                    onTouchEnd={(e) => {
-                      const target = e.currentTarget;
-                      target.blur();
-                      target.classList.remove("active");
-                      const style = target.style;
-                      const display = style.display;
-                      style.display = "none";
-                      setTimeout(() => {
-                        style.display = display;
-                        target.blur();
-                      }, 0);
-                    }}
-                    onMouseDown={(e) => {
-                      if (window.innerWidth < 1280) {
-                        e.preventDefault();
-                      }
-                    }}
-                    className="no-touch-active text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation flex items-center justify-between"
-                    style={{
-                      WebkitTapHighlightColor: "transparent",
-                      WebkitUserSelect: "none",
-                      WebkitTouchCallout: "none",
-                      touchAction: "manipulation",
-                    }}
-                  >
-                    <span>Features</span>
-                    <Icons.ChevronDown
-                      className={`w-5 h-5 transition-transform duration-200 ${
-                        isMobileFeaturesOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {isMobileFeaturesOpen && (
-                    <>
-                      <div className="h-px w-full border-t border-border my-2" />
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="flex flex-col space-y-4 pt-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              router.push("/assistant");
-                              setIsMenuOpen(false);
-                              setIsMobileFeaturesOpen(false);
-                            }}
-                            onTouchEnd={(e) => {
-                              e.currentTarget.blur();
-                              setTimeout(() => e.currentTarget.blur(), 100);
-                            }}
-                            className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                            style={{ WebkitTapHighlightColor: "transparent" }}
-                          >
-                            Assistant
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              router.push("/insights");
-                              setIsMenuOpen(false);
-                              setIsMobileFeaturesOpen(false);
-                            }}
-                            onTouchEnd={(e) => {
-                              e.currentTarget.blur();
-                              setTimeout(() => e.currentTarget.blur(), 100);
-                            }}
-                            className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                            style={{ WebkitTapHighlightColor: "transparent" }}
-                          >
-                            Insights
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              router.push("/transactions");
-                              setIsMenuOpen(false);
-                              setIsMobileFeaturesOpen(false);
-                            }}
-                            onTouchEnd={(e) => {
-                              e.currentTarget.blur();
-                              setTimeout(() => e.currentTarget.blur(), 100);
-                            }}
-                            className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                            style={{ WebkitTapHighlightColor: "transparent" }}
-                          >
-                            Transactions
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              router.push("/inbox");
-                              setIsMenuOpen(false);
-                              setIsMobileFeaturesOpen(false);
-                            }}
-                            onTouchEnd={(e) => {
-                              e.currentTarget.blur();
-                              setTimeout(() => e.currentTarget.blur(), 100);
-                            }}
-                            className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                            style={{ WebkitTapHighlightColor: "transparent" }}
-                          >
-                            Inbox
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              router.push("/time-tracking");
-                              setIsMenuOpen(false);
-                              setIsMobileFeaturesOpen(false);
-                            }}
-                            onTouchEnd={(e) => {
-                              e.currentTarget.blur();
-                              setTimeout(() => e.currentTarget.blur(), 100);
-                            }}
-                            className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                            style={{ WebkitTapHighlightColor: "transparent" }}
-                          >
-                            Time tracking
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              router.push("/invoicing");
-                              setIsMenuOpen(false);
-                              setIsMobileFeaturesOpen(false);
-                            }}
-                            onTouchEnd={(e) => {
-                              e.currentTarget.blur();
-                              setTimeout(() => e.currentTarget.blur(), 100);
-                            }}
-                            className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                            style={{ WebkitTapHighlightColor: "transparent" }}
-                          >
-                            Invoicing
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              router.push("/customers");
-                              setIsMenuOpen(false);
-                              setIsMobileFeaturesOpen(false);
-                            }}
-                            onTouchEnd={(e) => {
-                              e.currentTarget.blur();
-                              setTimeout(() => e.currentTarget.blur(), 100);
-                            }}
-                            className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                            style={{ WebkitTapHighlightColor: "transparent" }}
-                          >
-                            Customers
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              router.push("/file-storage");
-                              setIsMenuOpen(false);
-                              setIsMobileFeaturesOpen(false);
-                            }}
-                            onTouchEnd={(e) => {
-                              e.currentTarget.blur();
-                              setTimeout(() => e.currentTarget.blur(), 100);
-                            }}
-                            className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                            style={{ WebkitTapHighlightColor: "transparent" }}
-                          >
-                            Files
-                          </button>
-                        </div>
-                      </motion.div>
-                    </>
-                  )}
-                </div>
-                <Link
-                  href="/pricing"
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-40 xl:hidden bg-background">
+          <div className="pt-32 px-6">
+            <div className="flex flex-col space-y-6 text-left">
+              {/* Features Expandable Section */}
+              <div className="flex flex-col">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    setIsMobileFeaturesOpen(!isMobileFeaturesOpen);
+                    e.currentTarget.blur();
+                  }}
                   onTouchEnd={(e) => {
                     e.currentTarget.blur();
-                    setTimeout(() => e.currentTarget.blur(), 100);
                   }}
-                  className="no-touch-active text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
-                  onClick={() => setIsMenuOpen(false)}
-                  style={{ WebkitTapHighlightColor: "transparent" }}
-                >
-                  Pricing
-                </Link>
-                <Link
-                  href="/updates"
-                  onTouchEnd={(e) => {
-                    e.currentTarget.blur();
-                    setTimeout(() => e.currentTarget.blur(), 100);
+                  className="no-touch-active text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation flex items-center justify-between"
+                  style={{
+                    WebkitTapHighlightColor: "transparent",
                   }}
-                  className="no-touch-active text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
-                  onClick={() => setIsMenuOpen(false)}
-                  style={{ WebkitTapHighlightColor: "transparent" }}
                 >
-                  Updates
-                </Link>
-                <Link
-                  href="/story"
-                  onTouchEnd={(e) => {
-                    e.currentTarget.blur();
-                    setTimeout(() => e.currentTarget.blur(), 100);
-                  }}
-                  className="no-touch-active text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
-                  onClick={() => setIsMenuOpen(false)}
-                  style={{ WebkitTapHighlightColor: "transparent" }}
-                >
-                  Story
-                </Link>
-                <Link
-                  href="/download"
-                  onTouchEnd={(e) => {
-                    e.currentTarget.blur();
-                    setTimeout(() => e.currentTarget.blur(), 100);
-                  }}
-                  className="no-touch-active text-2xl font-sans py-2 text-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                  style={{ WebkitTapHighlightColor: "transparent" }}
-                >
-                  Download
-                </Link>
+                  <span>Features</span>
+                  <Icons.ChevronDown
+                    className={`w-5 h-5 transition-transform duration-200 ${
+                      isMobileFeaturesOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {isMobileFeaturesOpen && (
+                  <>
+                    <div className="h-px w-full border-t border-border my-2" />
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="flex flex-col space-y-4 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            router.push("/assistant");
+                            setIsMenuOpen(false);
+                            setIsMobileFeaturesOpen(false);
+                          }}
+                          onTouchEnd={(e) => {
+                            e.currentTarget.blur();
+                          }}
+                          className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                          style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
+                          Assistant
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            router.push("/insights");
+                            setIsMenuOpen(false);
+                            setIsMobileFeaturesOpen(false);
+                          }}
+                          onTouchEnd={(e) => {
+                            e.currentTarget.blur();
+                          }}
+                          className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                          style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
+                          Insights
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            router.push("/transactions");
+                            setIsMenuOpen(false);
+                            setIsMobileFeaturesOpen(false);
+                          }}
+                          onTouchEnd={(e) => {
+                            e.currentTarget.blur();
+                          }}
+                          className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                          style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
+                          Transactions
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            router.push("/inbox");
+                            setIsMenuOpen(false);
+                            setIsMobileFeaturesOpen(false);
+                          }}
+                          onTouchEnd={(e) => {
+                            e.currentTarget.blur();
+                          }}
+                          className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                          style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
+                          Inbox
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            router.push("/time-tracking");
+                            setIsMenuOpen(false);
+                            setIsMobileFeaturesOpen(false);
+                          }}
+                          onTouchEnd={(e) => {
+                            e.currentTarget.blur();
+                          }}
+                          className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                          style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
+                          Time tracking
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            router.push("/invoicing");
+                            setIsMenuOpen(false);
+                            setIsMobileFeaturesOpen(false);
+                          }}
+                          onTouchEnd={(e) => {
+                            e.currentTarget.blur();
+                          }}
+                          className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                          style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
+                          Invoicing
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            router.push("/customers");
+                            setIsMenuOpen(false);
+                            setIsMobileFeaturesOpen(false);
+                          }}
+                          onTouchEnd={(e) => {
+                            e.currentTarget.blur();
+                          }}
+                          className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                          style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
+                          Customers
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            router.push("/file-storage");
+                            setIsMenuOpen(false);
+                            setIsMobileFeaturesOpen(false);
+                          }}
+                          onTouchEnd={(e) => {
+                            e.currentTarget.blur();
+                          }}
+                          className="no-touch-active text-lg font-sans text-left text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                          style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
+                          Files
+                        </button>
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </div>
+              <Link
+                href="/pricing"
+                onTouchEnd={(e) => {
+                  e.currentTarget.blur();
+                  setTimeout(() => e.currentTarget.blur(), 100);
+                }}
+                className="no-touch-active text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+                onClick={() => setIsMenuOpen(false)}
+                style={{ WebkitTapHighlightColor: "transparent" }}
+              >
+                Pricing
+              </Link>
+              <Link
+                href="/updates"
+                onTouchEnd={(e) => {
+                  e.currentTarget.blur();
+                  setTimeout(() => e.currentTarget.blur(), 100);
+                }}
+                className="no-touch-active text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+                onClick={() => setIsMenuOpen(false)}
+                style={{ WebkitTapHighlightColor: "transparent" }}
+              >
+                Updates
+              </Link>
+              <Link
+                href="/story"
+                onTouchEnd={(e) => {
+                  e.currentTarget.blur();
+                  setTimeout(() => e.currentTarget.blur(), 100);
+                }}
+                className="no-touch-active text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+                onClick={() => setIsMenuOpen(false)}
+                style={{ WebkitTapHighlightColor: "transparent" }}
+              >
+                Story
+              </Link>
+              <Link
+                href="/download"
+                onTouchEnd={(e) => {
+                  e.currentTarget.blur();
+                  setTimeout(() => e.currentTarget.blur(), 100);
+                }}
+                className="no-touch-active text-2xl font-sans py-2 text-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+                style={{ WebkitTapHighlightColor: "transparent" }}
+              >
+                Download
+              </Link>
 
-                {/* Sign in - highlighted */}
-                <div className="border-t border-border pt-8 mt-8">
-                  <Link
-                    href="/login"
-                    onTouchEnd={(e) => {
-                      e.currentTarget.blur();
-                      setTimeout(() => e.currentTarget.blur(), 100);
-                    }}
-                    className="no-touch-active text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
-                    onClick={() => setIsMenuOpen(false)}
-                    style={{ WebkitTapHighlightColor: "transparent" }}
-                  >
-                    Sign in
-                  </Link>
-                </div>
+              {/* Sign in - highlighted */}
+              <div className="border-t border-border pt-8 mt-8">
+                <Link
+                  href="/login"
+                  onTouchEnd={(e) => {
+                    e.currentTarget.blur();
+                    setTimeout(() => e.currentTarget.blur(), 100);
+                  }}
+                  className="no-touch-active text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+                  onClick={() => setIsMenuOpen(false)}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
+                >
+                  Sign in
+                </Link>
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      )}
     </>
   );
 }
