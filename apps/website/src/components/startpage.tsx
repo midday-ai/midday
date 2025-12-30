@@ -279,17 +279,6 @@ export function StartPage() {
                   </p>
                 </div>
                 <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative">
-                  {/* Grid Pattern Background */}
-                  <div className="absolute inset-0 opacity-10 flex items-center justify-center pointer-events-none z-0">
-                    <Image
-                      src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
-                      alt="Grid Pattern"
-                      width={1728}
-                      height={1080}
-                      className="w-full h-full object-cover"
-                      priority
-                    />
-                  </div>
                   <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
                     <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
                       {index === 0 ? (
@@ -411,17 +400,6 @@ export function StartPage() {
             </div>
 
             <div className="flex items-center justify-center p-6 lg:p-8 border border-border h-full overflow-hidden relative bg-background">
-              {/* Grid Pattern Background */}
-              <div className="absolute inset-0 opacity-10 flex items-center justify-center pointer-events-none z-0">
-                <Image
-                  src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
-                  alt="Grid Pattern"
-                  width={1728}
-                  height={1080}
-                  className="w-full h-full object-cover"
-                  priority
-                />
-              </div>
               <motion.div
                 key={activeFeature}
                 initial={{ opacity: 0, scale: 0.9 }}

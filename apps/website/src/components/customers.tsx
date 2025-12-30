@@ -154,26 +154,15 @@ export function Customers() {
               {/* Left: Title and Subtitle */}
               <div className="space-y-4 lg:space-y-6 text-center lg:text-left">
                 <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-                  Customer insights in one place
+                  Customer revenue and activity
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                  See revenue, profitability, and activity for each customer without switching tools or exporting data.
+                  See revenue, invoices, time, and activity per customer in one place.
                 </p>
               </div>
 
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background">
-                {/* Grid Pattern Background */}
-                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-10'}`}>
-                  <Image
-                    src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
-                    alt="Grid Pattern"
-                    width={1728}
-                    height={1080}
-                    className="w-full h-full object-cover"
-                    priority
-                  />
-                </div>
                 <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
                   <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
                     <DashboardAnimation onComplete={undefined} />
@@ -187,26 +176,15 @@ export function Customers() {
               {/* Left: Title and Subtitle */}
               <div className="space-y-4 lg:space-y-6 lg:order-2 text-center lg:text-left">
                 <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-                  Understand profitability
+                  Profitability over time
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                  Track revenue and profitability per customer to understand which relationships are most valuable.
+                  Understand how each customer contributes to your business using real financial data.
                 </p>
               </div>
 
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background lg:order-1">
-                {/* Grid Pattern Background */}
-                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-10'}`}>
-                  <Image
-                    src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
-                    alt="Grid Pattern"
-                    width={1728}
-                    height={1080}
-                    className="w-full h-full object-cover"
-                    priority
-                  />
-                </div>
                 <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
                   <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
                     <DashboardAnimation onComplete={undefined} />

@@ -98,9 +98,6 @@ export function FileStorage() {
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto lg:hidden">
                 Files are organized and connected to your business activity.
               </p>
-              <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto lg:text-left lg:mx-0 hidden lg:block">
-                Smart storage that automatically organizes and connects files to transactions, invoices, and customers so you can always find what you need.
-              </p>
             </div>
 
             {/* File Storage Illustration */}
@@ -126,7 +123,7 @@ export function FileStorage() {
                 <span className="text-foreground block">Everything in one place</span>
               </h1>
 
-              <p className="text-muted-foreground text-base leading-normal max-w-2xl font-sans text-center mx-auto lg:text-left lg:mx-0">
+              <p className="text-muted-foreground text-base leading-normal max-w-2xl mx-auto font-sans text-center">
                 Smart storage that automatically organizes and connects files to transactions, invoices, and customers so you can always find what you need.
               </p>
             </div>
@@ -155,26 +152,15 @@ export function FileStorage() {
               {/* Left: Title and Subtitle */}
               <div className="space-y-4 lg:space-y-6 text-center lg:text-left">
                 <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-                  Files organized automatically
+                  Central file storage
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                  Midday automatically tags and sorts your files by company, project, and document type. No folders or manual naming needed.
+                  Store contracts, receipts, invoices, and other documents in one place connected to your business.
                 </p>
               </div>
 
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background">
-                {/* Grid Pattern Background */}
-                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-10'}`}>
-                  <Image
-                    src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
-                    alt="Grid Pattern"
-                    width={1728}
-                    height={1080}
-                    className="w-full h-full object-cover"
-                    priority
-                  />
-                </div>
                 <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
                   <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
                     <FileGridAnimation onComplete={undefined} />
@@ -188,26 +174,15 @@ export function FileStorage() {
               {/* Left: Title and Subtitle */}
               <div className="space-y-4 lg:space-y-6 lg:order-2 text-center lg:text-left">
                 <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-                  Connected to transactions
+                  Searchable and findable
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                  Files are automatically matched to transactions, invoices, and customers so everything stays connected and easy to find.
+                  Find files quickly using search across names and details without digging through folders.
                 </p>
               </div>
 
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background lg:order-1">
-                {/* Grid Pattern Background */}
-                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-10'}`}>
-                  <Image
-                    src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
-                    alt="Grid Pattern"
-                    width={1728}
-                    height={1080}
-                    className="w-full h-full object-cover"
-                    priority
-                  />
-                </div>
                 <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
                   <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
                     <InboxMatchAnimation onComplete={undefined} />
