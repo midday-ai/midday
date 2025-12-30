@@ -1,73 +1,78 @@
-'use client'
+"use client";
 
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
-import { useTheme } from 'next-themes'
-import { useEffect, useState } from 'react'
-import { MaterialIcon } from './homepage/icon-mapping'
-import { TransactionFlowAnimation } from './homepage/transaction-flow-animation'
-import { TestimonialsSection } from './sections/testimonials-section'
-import { FeaturesGridSection } from './sections/features-grid-section'
-import { TimeSavingsSection } from './sections/time-savings-section'
-import { AccountingSection } from './sections/accounting-section'
-import { IntegrationsSection } from './sections/integrations-section'
-import { PricingSection } from './sections/pricing-section'
-import type { Testimonial } from './sections/testimonials-section'
+import { useTheme } from "next-themes";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { MaterialIcon } from "./homepage/icon-mapping";
+import { TransactionFlowAnimation } from "./homepage/transaction-flow-animation";
+import { AccountingSection } from "./sections/accounting-section";
+import { FeaturesGridSection } from "./sections/features-grid-section";
+import { IntegrationsSection } from "./sections/integrations-section";
+import { PricingSection } from "./sections/pricing-section";
+import { TestimonialsSection } from "./sections/testimonials-section";
+import type { Testimonial } from "./sections/testimonials-section";
+import { TimeSavingsSection } from "./sections/time-savings-section";
 
 export function Transactions() {
-  const router = useRouter()
-  const { resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const router = useRouter();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
-  const isLightMode = mounted && resolvedTheme ? resolvedTheme !== 'dark' : true
+  const isLightMode =
+    mounted && resolvedTheme ? resolvedTheme !== "dark" : true;
 
   const testimonials: Testimonial[] = [
     {
-      name: 'Sarah Chen',
-      title: 'Freelance Designer',
+      name: "Sarah Chen",
+      title: "Freelance Designer",
       content:
-        'Midday transformed how I manage my freelance business. No more scattered receipts or manual invoice tracking. Everything is organized automatically, saving me 3+ hours every week.',
+        "Midday transformed how I manage my freelance business. No more scattered receipts or manual invoice tracking. Everything is organized automatically, saving me 3+ hours every week.",
       fullContent:
-        'Midday transformed how I manage my freelance business. No more scattered receipts or manual invoice tracking. Everything is organized automatically, saving me 3+ hours every week.\n\nAs a freelance designer working with multiple clients, I used to spend hours every week organizing receipts, categorizing expenses, and manually entering data into spreadsheets. It was tedious and error-prone.\n\nWith Midday, everything happens automatically. When I upload a receipt, it\'s instantly categorized and linked to the right project. The AI even extracts vendor information and matches it with my existing contacts. The time I used to spend on admin work, I now spend on actual design work for my clients.\n\nThe search functionality is incredible too. I can type \'office supplies March\' and instantly find all related expenses. It\'s like having a personal assistant who never forgets anything.',
+        "Midday transformed how I manage my freelance business. No more scattered receipts or manual invoice tracking. Everything is organized automatically, saving me 3+ hours every week.\n\nAs a freelance designer working with multiple clients, I used to spend hours every week organizing receipts, categorizing expenses, and manually entering data into spreadsheets. It was tedious and error-prone.\n\nWith Midday, everything happens automatically. When I upload a receipt, it's instantly categorized and linked to the right project. The AI even extracts vendor information and matches it with my existing contacts. The time I used to spend on admin work, I now spend on actual design work for my clients.\n\nThe search functionality is incredible too. I can type 'office supplies March' and instantly find all related expenses. It's like having a personal assistant who never forgets anything.",
     },
     {
-      name: 'Marcus Rodriguez',
-      title: 'Small Business Owner',
+      name: "Marcus Rodriguez",
+      title: "Small Business Owner",
       content:
-        'As a restaurant owner, tracking expenses was a nightmare. Midday\'s AI automatically categorizes everything from ingredient purchases to equipment repairs. Game changer!',
+        "As a restaurant owner, tracking expenses was a nightmare. Midday's AI automatically categorizes everything from ingredient purchases to equipment repairs. Game changer!",
       fullContent:
-        'As a restaurant owner, tracking expenses was a nightmare. Midday\'s AI automatically categorizes everything from ingredient purchases to equipment repairs. Game changer!\n\nRunning a restaurant means dealing with dozens of vendors, daily ingredient purchases, equipment maintenance, and staff expenses. Before Midday, I had boxes of receipts and no clear picture of where my money was going.\n\nNow, every receipt gets scanned and categorized automatically. Food costs, equipment repairs, utilities - everything is organized without me lifting a finger. The insights dashboard shows me exactly where I\'m spending too much and where I can optimize.\n\nLast month, I discovered I was overpaying for produce by 15% because Midday highlighted pricing patterns across different suppliers. That insight alone saved me more than the software costs for the entire year.',
+        "As a restaurant owner, tracking expenses was a nightmare. Midday's AI automatically categorizes everything from ingredient purchases to equipment repairs. Game changer!\n\nRunning a restaurant means dealing with dozens of vendors, daily ingredient purchases, equipment maintenance, and staff expenses. Before Midday, I had boxes of receipts and no clear picture of where my money was going.\n\nNow, every receipt gets scanned and categorized automatically. Food costs, equipment repairs, utilities - everything is organized without me lifting a finger. The insights dashboard shows me exactly where I'm spending too much and where I can optimize.\n\nLast month, I discovered I was overpaying for produce by 15% because Midday highlighted pricing patterns across different suppliers. That insight alone saved me more than the software costs for the entire year.",
     },
     {
-      name: 'Emily Watson',
-      title: 'Startup Founder',
+      name: "Emily Watson",
+      title: "Startup Founder",
       content:
-        'Running a tech startup means juggling countless expenses. Midday\'s smart file organization and automated reconciliation let me focus on building, not bookkeeping.',
+        "Running a tech startup means juggling countless expenses. Midday's smart file organization and automated reconciliation let me focus on building, not bookkeeping.",
       fullContent:
-        'Running a tech startup means juggling countless expenses. Midday\'s smart file organization and automated reconciliation let me focus on building, not bookkeeping.\n\nAs a startup founder, every minute counts. I need to focus on product development, customer acquisition, and fundraising - not sorting through receipts and matching bank transactions.\n\nMidday\'s automated reconciliation is a lifesaver. It connects my bank accounts, credit cards, and expense receipts automatically. When I get back from a business trip, all my expenses are already categorized and ready for reimbursement.\n\nThe reporting features help me prepare for investor meetings too. I can generate clean expense reports by category, track burn rate, and identify cost optimization opportunities. It\'s like having a CFO in my pocket, but for a fraction of the cost.',
+        "Running a tech startup means juggling countless expenses. Midday's smart file organization and automated reconciliation let me focus on building, not bookkeeping.\n\nAs a startup founder, every minute counts. I need to focus on product development, customer acquisition, and fundraising - not sorting through receipts and matching bank transactions.\n\nMidday's automated reconciliation is a lifesaver. It connects my bank accounts, credit cards, and expense receipts automatically. When I get back from a business trip, all my expenses are already categorized and ready for reimbursement.\n\nThe reporting features help me prepare for investor meetings too. I can generate clean expense reports by category, track burn rate, and identify cost optimization opportunities. It's like having a CFO in my pocket, but for a fraction of the cost.",
     },
     {
-      name: 'David Kim',
-      title: 'Consultant',
+      name: "David Kim",
+      title: "Consultant",
       content:
-        'Client work means tons of receipts and invoices. Midday\'s natural language search finds any document instantly. \'Show me Q1 expenses for Client X\' - boom, there it is.',
+        "Client work means tons of receipts and invoices. Midday's natural language search finds any document instantly. 'Show me Q1 expenses for Client X' - boom, there it is.",
       fullContent:
-        'Client work means tons of receipts and invoices. Midday\'s natural language search finds any document instantly. \'Show me Q1 expenses for Client X\' - boom, there it is.\n\nAs an independent consultant working with multiple clients simultaneously, document organization used to be my biggest pain point. Client dinners, travel expenses, software subscriptions - everything needed to be tracked separately for accurate billing.\n\nMidday\'s natural language search is phenomenal. Instead of remembering folder structures or file names, I just describe what I\'m looking for. \'Show me all restaurant expenses for the Johnson project in March\' - and there it is, instantly.\n\nThe client reporting feature automatically generates expense summaries by project. At the end of each month, I can send clean, professional expense reports to my clients with just a few clicks. My clients love the transparency, and I love getting paid faster.',
+        "Client work means tons of receipts and invoices. Midday's natural language search finds any document instantly. 'Show me Q1 expenses for Client X' - boom, there it is.\n\nAs an independent consultant working with multiple clients simultaneously, document organization used to be my biggest pain point. Client dinners, travel expenses, software subscriptions - everything needed to be tracked separately for accurate billing.\n\nMidday's natural language search is phenomenal. Instead of remembering folder structures or file names, I just describe what I'm looking for. 'Show me all restaurant expenses for the Johnson project in March' - and there it is, instantly.\n\nThe client reporting feature automatically generates expense summaries by project. At the end of each month, I can send clean, professional expense reports to my clients with just a few clicks. My clients love the transparency, and I love getting paid faster.",
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <div className="bg-background relative overflow-visible lg:min-h-screen lg:overflow-hidden">
         {/* Grid Pattern Background - Desktop Only */}
-        <div className={`hidden lg:flex absolute inset-0 items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-[15%]'}`}>
+        <div
+          className={`hidden lg:flex absolute inset-0 items-center justify-center pointer-events-none z-0 ${isLightMode ? "opacity-100" : "opacity-[15%]"}`}
+        >
           <Image
-            src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
+            src={
+              isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"
+            }
             alt="Grid Pattern"
             width={1728}
             height={1080}
@@ -79,9 +84,14 @@ export function Transactions() {
         {/* Mobile Layout */}
         <div className="lg:hidden flex flex-col relative pt-32 pb-8 sm:pt-40 sm:pb-8 md:pt-48 overflow-hidden">
           {/* Grid Pattern Background - Mobile/Tablet Only (Limited Height) */}
-          <div className={`absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-[15%]'}`} style={{ height: '600px' }}>
+          <div
+            className={`absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? "opacity-100" : "opacity-[15%]"}`}
+            style={{ height: "600px" }}
+          >
             <Image
-              src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
+              src={
+                isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"
+              }
               alt="Grid Pattern"
               width={1728}
               height={1080}
@@ -92,13 +102,17 @@ export function Transactions() {
           <div className="flex flex-col justify-start items-center space-y-6 z-20 px-3 sm:px-4">
             <div className="space-y-4 text-center max-w-xl px-2 w-full">
               <h1 className="font-serif text-4xl sm:text-4xl md:text-5xl leading-tight">
-                <span className="text-foreground">All transactions together</span>
+                <span className="text-foreground">
+                  All transactions together
+                </span>
               </h1>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto lg:hidden">
                 All money moving in and out of your business, in one place.
               </p>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto hidden lg:block">
-                Every payment in and out of your business is automatically collected, categorized, and kept in one place so nothing gets lost across accounts.
+                Every payment in and out of your business is automatically
+                collected, categorized, and kept in one place so nothing gets
+                lost across accounts.
               </p>
             </div>
 
@@ -122,11 +136,15 @@ export function Transactions() {
             {/* Main Heading */}
             <div className="text-center space-y-8 w-full">
               <h1 className="font-serif text-8xl xl:text-9xl 2xl:text-[12rem] leading-tight text-center">
-                <span className="text-foreground block">All transactions together</span>
+                <span className="text-foreground block">
+                  All transactions together
+                </span>
               </h1>
 
               <p className="text-muted-foreground text-base leading-normal max-w-2xl mx-auto font-sans text-center">
-                Every payment in and out of your business is automatically collected, categorized, and kept in one place so nothing gets lost across accounts.
+                Every payment in and out of your business is automatically
+                collected, categorized, and kept in one place so nothing gets
+                lost across accounts.
               </p>
             </div>
 
@@ -157,16 +175,23 @@ export function Transactions() {
                   All accounts in one place
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                  Connect all your bank accounts and credit cards to see every transaction automatically collected in one unified view.
+                  Connect all your bank accounts and credit cards to see every
+                  transaction automatically collected in one unified view.
                 </p>
               </div>
 
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background">
                 {/* Grid Pattern Background */}
-                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-10'}`}>
+                <div
+                  className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? "opacity-100" : "opacity-10"}`}
+                >
                   <Image
-                    src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
+                    src={
+                      isLightMode
+                        ? "/images/grid-light.svg"
+                        : "/images/grid-dark.svg"
+                    }
                     alt="Grid Pattern"
                     width={1728}
                     height={1080}
@@ -190,16 +215,23 @@ export function Transactions() {
                   Automatically categorized
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                  Every transaction is automatically categorized so you can see where your money is going without manual work.
+                  Every transaction is automatically categorized so you can see
+                  where your money is going without manual work.
                 </p>
               </div>
 
               {/* Right: Animation */}
               <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background lg:order-1">
                 {/* Grid Pattern Background */}
-                <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-10'}`}>
+                <div
+                  className={`absolute inset-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? "opacity-100" : "opacity-10"}`}
+                >
                   <Image
-                    src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
+                    src={
+                      isLightMode
+                        ? "/images/grid-light.svg"
+                        : "/images/grid-dark.svg"
+                    }
                     alt="Grid Pattern"
                     width={1728}
                     height={1080}
@@ -270,6 +302,5 @@ export function Transactions() {
       {/* Pricing Section */}
       <PricingSection />
     </div>
-  )
+  );
 }
-

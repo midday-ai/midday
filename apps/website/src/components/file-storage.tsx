@@ -6,6 +6,11 @@ import { useTheme } from 'next-themes'
 import Image from 'next/image'
 import { MaterialIcon } from './homepage/icon-mapping'
 import { TestimonialsSection } from './sections/testimonials-section'
+import { FeaturesGridSection } from './sections/features-grid-section'
+import { TimeSavingsSection } from './sections/time-savings-section'
+import { AccountingSection } from './sections/accounting-section'
+import { IntegrationsSection } from './sections/integrations-section'
+import { PricingSection } from './sections/pricing-section'
 import type { Testimonial } from './sections/testimonials-section'
 
 export function FileStorage() {
@@ -244,154 +249,29 @@ export function FileStorage() {
         </div>
       </section>
 
-      {/* Time Savings Bento Grid Section */}
-      <section className="bg-background py-12 sm:py-16 lg:py-24">
-        <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
-          <div className="text-center space-y-4 mb-16">
-            <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-              Time savings that add up
-            </h2>
-            <p className="font-sans text-sm text-muted-foreground max-w-2xl mx-auto">
-              Cut out the manual reconciliation, filing, and tracking that eats
-              up your week.
-            </p>
-          </div>
+      {/* Divider */}
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+        <div className="h-px w-full border-t border-border" />
+      </div>
 
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
-              <article className="group relative overflow-hidden bg-background border border-border p-4 sm:p-5 hover-bg hover-border transition-all duration-200 cursor-pointer">
-                <div className="flex items-start gap-3">
-                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center bg-secondary border border-border">
-                    <MaterialIcon name="receipt" className="text-muted-foreground" size={16} />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-xs  tracking-wide text-muted-foreground">
-                      Receipt matching
-                    </p>
-                    <h3 className="mt-1 text-base sm:text-lg text-foreground">
-                      ~1.5 h saved
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Reconciliation powered by agents, no more manual matching.
-                    </p>
-                  </div>
-                </div>
-              </article>
+      {/* Features Grid Section */}
+      <FeaturesGridSection />
 
-              <article className="group relative overflow-hidden bg-background border border-border p-4 sm:p-5 hover-bg hover-border transition-all duration-200 cursor-pointer">
-                <div className="flex items-start gap-3">
-                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center bg-secondary border border-border">
-                    <MaterialIcon name="label" className="text-muted-foreground" size={16} />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-xs  tracking-wide text-muted-foreground">
-                      Transaction tagging
-                    </p>
-                    <h3 className="mt-1 text-base sm:text-lg text-foreground">
-                      ~1 h saved
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Auto‑categorization with explainable rules & insights.
-                    </p>
-                  </div>
-                </div>
-              </article>
+      {/* Divider */}
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+        <div className="h-px w-full border-t border-border" />
+      </div>
 
-              <article className="group relative overflow-hidden bg-background border border-border p-4 sm:p-5 hover-bg hover-border transition-all duration-200 cursor-pointer hidden xl:block">
-                <div className="flex items-start gap-3">
-                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center bg-secondary border border-border">
-                    <MaterialIcon name="request_quote" className="text-muted-foreground" size={16} />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-xs  tracking-wide text-muted-foreground">
-                      Invoices
-                    </p>
-                    <h3 className="mt-1 text-base sm:text-lg text-foreground">
-                      ~1.5–2 h saved
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Fast, connected invoicing—from draft to paid.
-                    </p>
-                  </div>
-                </div>
-              </article>
-            </div>
+      {/* Time Savings Section */}
+      <TimeSavingsSection />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-10 gap-3 sm:gap-4">
-              <article className="group relative overflow-hidden bg-background border border-border p-4 sm:p-5 hover-bg hover-border transition-all duration-200 cursor-pointer xl:col-span-3">
-                <div className="flex items-start gap-3">
-                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center bg-secondary border border-border">
-                    <MaterialIcon name="folder" className="text-muted-foreground" size={16} />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-xs  tracking-wide text-muted-foreground">
-                      Inbox & files
-                    </p>
-                    <h3 className="mt-1 text-base sm:text-lg text-foreground">
-                      ~1–1.5 h saved
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Organized, searchable storage across receipts and docs.
-                    </p>
-                  </div>
-                </div>
-              </article>
+      {/* Divider */}
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+        <div className="h-px w-full border-t border-border" />
+      </div>
 
-              <article className="group relative overflow-hidden bg-background border border-border p-4 sm:p-5 hover-bg hover-border transition-all duration-200 cursor-pointer xl:hidden">
-                <div className="flex items-start gap-3">
-                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center bg-secondary border border-border">
-                    <MaterialIcon name="request_quote" className="text-muted-foreground" size={16} />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-xs  tracking-wide text-muted-foreground">
-                      Invoices
-                    </p>
-                    <h3 className="mt-1 text-base sm:text-lg text-foreground">
-                      ~1.5–2 h saved
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Fast, connected invoicing—from draft to paid.
-                    </p>
-                  </div>
-                </div>
-              </article>
-
-              <article
-                onClick={() => router.push('/login')}
-                className="relative overflow-hidden bg-secondary border border-border p-4 sm:p-5 md:p-5 lg:p-6 transition-all duration-200 cursor-pointer group hidden xl:block xl:col-span-7 hover:border-muted-foreground"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div className="flex-1">
-                    <p className="text-xs tracking-wide/loose text-muted-foreground transition-colors duration-200">
-                      Time savings
-                    </p>
-                    <p className="mt-1 text-base sm:text-lg text-foreground transition-colors duration-200">
-                      Get your time back
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground transition-colors duration-200">
-                      <span className="group-hover:hidden transition-opacity duration-200">
-                        Less admin means fewer late nights and more space for
-                        the work that actually matters.
-                      </span>
-                      <span className="hidden group-hover:inline transition-opacity duration-200">
-                        Meet your assistant and see how it works.
-                      </span>
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <div className="text-4xl sm:text-5xl text-foreground transition-colors duration-200">
-                      4-6h
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1 transition-colors duration-200">
-                      saved per week
-                    </p>
-                  </div>
-                </div>
-              </article>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Accounting Section */}
+      <AccountingSection />
 
       {/* Divider */}
       <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
@@ -404,6 +284,22 @@ export function FileStorage() {
         title="Built with our users, for our users"
         subtitle="Midday helps small teams, solo founders, and small businesses do more with less. Here's what that looks like in practice."
       />
+
+      {/* Divider */}
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+        <div className="h-px w-full border-t border-border" />
+      </div>
+
+      {/* Integrations Section */}
+      <IntegrationsSection />
+
+      {/* Divider */}
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-8">
+        <div className="h-px w-full border-t border-border" />
+      </div>
+
+      {/* Pricing Section */}
+      <PricingSection />
     </div>
   )
 }
