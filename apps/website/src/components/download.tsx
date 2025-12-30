@@ -72,7 +72,7 @@ export function Download() {
                 alt="Mac Dock"
                 width={800}
                 height={200}
-                className="w-full max-w-md h-auto object-contain"
+                className="w-full max-w-lg h-auto object-contain"
                 priority
               />
             </div>
@@ -183,7 +183,7 @@ export function Download() {
             <div className="lg:hidden h-px w-full border-t border-border my-8" />
 
             {/* Right Feature - Universal Search */}
-            <div className="flex flex-col gap-8 lg:gap-12 p-8 lg:p-10 flex-1">
+            <div className="flex flex-col gap-8 lg:gap-12 p-8 lg:p-10 flex-1 lg:justify-between">
               <div className="space-y-2 text-center">
                 <h2 className="font-serif text-xl sm:text-2xl text-foreground">
                   Universal search anywhere
@@ -194,14 +194,14 @@ export function Download() {
               </div>
 
               {/* Keyboard Image */}
-              <div className="flex justify-center lg:justify-end mt-auto">
-                <div className="p-4 lg:p-6 bg-background w-full max-w-lg">
+              <div className="flex justify-center lg:justify-end items-center lg:items-center min-h-[200px]">
+                <div className="p-4 lg:p-6 bg-background w-full max-w-lg flex items-center justify-center">
                   <Image
                     src={isLightMode ? '/images/keyboard-light.png' : '/images/keyboard-dark.png'}
                     alt="Keyboard Shortcut"
                     width={600}
                     height={400}
-                    className="w-full h-auto object-contain"
+                    className="w-full h-auto object-contain max-h-[400px]"
                   />
                 </div>
               </div>
