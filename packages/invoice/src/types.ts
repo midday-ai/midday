@@ -99,8 +99,8 @@ export type Template = {
   includeDecimals: boolean;
   includeUnits: boolean;
   includeQr: boolean;
-  includeLineItemTax: boolean;
-  lineItemTaxLabel: string;
+  includeLineItemTax?: boolean;
+  lineItemTaxLabel?: string;
   taxRate: number;
   vatRate: number;
   size: "a4" | "letter";

@@ -51,7 +51,7 @@ export function PercentInput({ name, className, min = 0, max = 100 }: Props) {
         decimalScale={2}
         thousandSeparator={false}
         className={cn(
-          "p-0 border-0 h-6 text-xs !bg-transparent border-b border-transparent focus:border-border text-center",
+          "p-0 border-0 h-6 text-xs !bg-transparent border-b border-transparent focus:border-border text-left",
           isPlaceholder && "opacity-0",
           className,
         )}
