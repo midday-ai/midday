@@ -119,7 +119,7 @@ export function AIAssistantAnimation({
         elements.push(
           <p
             key={key}
-            className="text-[12px] leading-[16px] md:leading-[18px] text-foreground mb-1 md:mb-1.5"
+            className="text-[11px] md:text-[12px] leading-[15px] md:leading-[18px] text-foreground mb-1 md:mb-1.5"
           >
             {line}
           </p>,

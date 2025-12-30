@@ -263,7 +263,7 @@ export function StartPage() {
         <div className="max-w-[1400px] mx-auto">
           {/* Mobile: Stacked features */}
           <div className="grid grid-cols-1 gap-12 sm:gap-16 lg:hidden">
-            <div className="text-center mb-2">
+            <div className="hidden lg:block text-center mb-2">
               <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
                 Always know what's going on
               </h2>
@@ -271,10 +271,10 @@ export function StartPage() {
             {features.map((feature, index) => (
               <div key={index} className="space-y-6 sm:space-y-8">
                 <div className="space-y-2 text-center">
-                  <h3 className="font-sans text-lg sm:text-xl text-foreground max-w-md mx-auto">
+                  <h2 className="font-serif text-2xl sm:text-2xl text-foreground max-w-md mx-auto">
                     {feature.title}
-                  </h3>
-                  <p className="hidden sm:block font-sans text-base text-muted-foreground leading-normal max-w-md mx-auto">
+                  </h2>
+                  <p className="font-sans text-base text-muted-foreground leading-normal max-w-md mx-auto">
                     {feature.subtitle}
                   </p>
                 </div>
