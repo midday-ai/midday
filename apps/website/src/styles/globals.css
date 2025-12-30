@@ -16,3 +16,26 @@
   --sh-property: #a7a7a7;
   --sh-entity: #a7a7a7;
 }
+
+/* Prevent active state from persisting on touch devices (iOS Safari) */
+@media (hover: none) and (pointer: coarse) {
+  button:active,
+  a:active,
+  [role="button"]:active {
+    color: inherit !important;
+    opacity: 1 !important;
+    background-color: inherit !important;
+  }
+
+  /* Prevent opacity changes on active state for elements with active:opacity classes */
+  .active\:opacity-80:active {
+    opacity: 1 !important;
+  }
+
+  /* Prevent active state on interactive divs and articles */
+  div.cursor-pointer:active,
+  article.cursor-pointer:active {
+    opacity: 1 !important;
+    background-color: inherit !important;
+  }
+}
