@@ -72,7 +72,7 @@ export function Download() {
                 alt="Mac Dock"
                 width={800}
                 height={200}
-                className="w-full max-w-lg h-auto object-contain"
+                className="w-full max-w-md h-auto object-contain"
                 priority
               />
             </div>
@@ -114,7 +114,7 @@ export function Download() {
                 alt="Mac Dock"
                 width={1200}
                 height={300}
-                className="w-full max-w-2xl h-auto object-contain"
+                className="w-full max-w-xl h-auto object-contain"
                 priority
               />
             </div>
