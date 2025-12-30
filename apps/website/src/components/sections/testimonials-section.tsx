@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import type { ReactNode } from 'react'
-import { motion, useMotionValue } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   MorphingDialog,
   MorphingDialogTrigger,
@@ -72,8 +72,12 @@ export function TestimonialsSection({
   showStars = true,
   customHeader,
 }: TestimonialsSectionProps) {
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const dragX = useMotionValue(0)
+  // Start at the center card
+  const initialSlide = Math.floor(testimonials.length / 2)
+  const [currentSlide, setCurrentSlide] = useState(initialSlide)
+  const lastDragDistance = useRef(0)
+  const pointerDownRef = useRef<{ time: number; x: number } | null>(null)
+  const [shouldBlockClick, setShouldBlockClick] = useState(false)
 
   return (
     <section className="bg-background">
@@ -179,35 +183,102 @@ export function TestimonialsSection({
 
           {/* Mobile Carousel */}
           <div className="lg:hidden w-full max-w-sm mx-auto">
-            <div className="relative overflow-hidden mb-4">
+            <div className="relative overflow-visible mb-4 px-4">
               <motion.div
-                className="flex cursor-grab active:cursor-grabbing"
+                className="flex gap-4"
                 drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragMomentum={false}
-                style={{ x: dragX }}
-                animate={{ translateX: `-${currentSlide * 100}%` }}
-                onDragEnd={() => {
-                  const x = dragX.get()
+                dragConstraints={{ 
+                  left: `-${(testimonials.length - 1) * 89}%`, 
+                  right: 0 
+                }}
+                dragElastic={0.2}
+                animate={{ 
+                  x: `-${currentSlide * 89}%`,
+                }}
+                onDragEnd={(_, info) => {
+                  const threshold = 50
+                  const velocity = info.velocity.x
+                  const dragDistance = Math.abs(info.offset.x)
+                  
+                  // Store drag distance to check in click handler
+                  lastDragDistance.current = dragDistance
 
-                  if (x <= -50 && currentSlide < testimonials.length - 1) {
-                    setCurrentSlide(currentSlide + 1)
-                  } else if (x >= 50 && currentSlide > 0) {
-                    setCurrentSlide(currentSlide - 1)
+                  if (velocity < -500 || (info.offset.x < -threshold && currentSlide < testimonials.length - 1)) {
+                    setCurrentSlide(Math.min(currentSlide + 1, testimonials.length - 1))
+                  } else if (velocity > 500 || (info.offset.x > threshold && currentSlide > 0)) {
+                    setCurrentSlide(Math.max(currentSlide - 1, 0))
+                  }
+
+                  // Block clicks if there was significant drag
+                  if (dragDistance > 15) {
+                    setShouldBlockClick(true)
+                    setTimeout(() => {
+                      setShouldBlockClick(false)
+                      lastDragDistance.current = 0
+                    }, 300)
+                  } else {
+                    setTimeout(() => {
+                      lastDragDistance.current = 0
+                    }, 200)
                   }
                 }}
                 transition={{
-                  damping: 18,
-                  stiffness: 90,
                   type: 'spring',
-                  duration: 0.2,
+                  damping: 25,
+                  stiffness: 200,
                 }}
               >
-                {testimonials.map((testimonial, index) => (
-                  <div key={index} className="w-full flex-shrink-0">
-                    <MorphingDialog>
-                      <MorphingDialogTrigger className="w-full">
-                        <div className="bg-background border border-border p-6 flex flex-col gap-4 select-none hover:border-muted-foreground transition-all duration-200">
+                {testimonials.map((testimonial, index) => {
+                  // Calculate rotation based on position relative to center
+                  const centerIndex = Math.floor(testimonials.length / 2)
+                  const offset = index - centerIndex
+                  let rotation = 0
+                  if (offset === -1) rotation = -1
+                  else if (offset === 1) rotation = 1
+                  else if (offset === -2) rotation = -2
+                  else if (offset === 2) rotation = 2
+                  
+                  return (
+                    <div key={index} className="w-[85%] flex-shrink-0">
+                      <MorphingDialog>
+                        <div
+                          onClick={(e) => {
+                            // Block click if there was a drag or if we're blocking clicks
+                            if (shouldBlockClick || lastDragDistance.current > 15) {
+                              e.preventDefault()
+                              e.stopPropagation()
+                            }
+                          }}
+                          onPointerDown={(e) => {
+                            pointerDownRef.current = {
+                              time: Date.now(),
+                              x: e.clientX,
+                            }
+                          }}
+                          onPointerUp={(e) => {
+                            if (pointerDownRef.current) {
+                              const timeDiff = Date.now() - pointerDownRef.current.time
+                              const distance = Math.abs(e.clientX - pointerDownRef.current.x)
+                              
+                              // Block if it was a long press or significant movement
+                              if (timeDiff > 200 || distance > 15) {
+                                setShouldBlockClick(true)
+                                setTimeout(() => {
+                                  setShouldBlockClick(false)
+                                }, 300)
+                              }
+                              pointerDownRef.current = null
+                            }
+                          }}
+                        >
+                          <MorphingDialogTrigger 
+                            className="w-full"
+                            style={{ 
+                              pointerEvents: shouldBlockClick ? 'none' : 'auto',
+                              transform: rotation !== 0 ? `rotate(${rotation}deg)` : undefined
+                            }}
+                          >
+                              <div className="bg-background border border-border p-6 flex flex-col gap-4 select-none hover:border-muted-foreground transition-all duration-200">
                           <div className="flex gap-2 items-center">
                             <div className="w-4 h-4 bg-muted rounded-full"></div>
                             <MorphingDialogTitle className="font-sans text-sm text-foreground">
@@ -224,6 +295,7 @@ export function TestimonialsSection({
                           </div>
                         </div>
                       </MorphingDialogTrigger>
+                        </div>
 
                       <MorphingDialogContainer>
                         <MorphingDialogContent className="bg-background border border-border p-8 max-w-2xl">
@@ -258,7 +330,8 @@ export function TestimonialsSection({
                       </MorphingDialogContainer>
                     </MorphingDialog>
                   </div>
-                ))}
+                  )
+                })}
               </motion.div>
             </div>
           </div>
