@@ -65,7 +65,7 @@ export function Inbox() {
       {/* Hero Section */}
       <div className="bg-background relative overflow-visible lg:min-h-screen lg:overflow-hidden">
         {/* Grid Pattern Background - Desktop Only */}
-        <div className={`hidden lg:flex absolute inset-0 items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-[13%]'}`}>
+        <div className={`hidden lg:flex absolute inset-0 items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-[8%]'}`}>
           <Image
             src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
             alt="Grid Pattern"
@@ -79,7 +79,7 @@ export function Inbox() {
         {/* Mobile Layout */}
         <div className="lg:hidden flex flex-col relative pt-32 pb-8 sm:pt-40 sm:pb-8 md:pt-48 overflow-hidden">
           {/* Grid Pattern Background - Mobile/Tablet Only (Limited Height) */}
-          <div className={`absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-[13%]'}`} style={{ height: '600px' }}>
+          <div className={`absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? 'opacity-100' : 'opacity-[8%]'}`} style={{ height: '600px' }}>
             <Image
               src={isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"}
               alt="Grid Pattern"
