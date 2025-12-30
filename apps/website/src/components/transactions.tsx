@@ -199,7 +199,7 @@ export function Transactions() {
                     priority
                   />
                 </div>
-                <div className="w-full h-[400px] sm:h-[520px] md:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
+                <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
                   <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
                     <TransactionFlowAnimation onComplete={undefined} />
                   </div>
@@ -239,7 +239,7 @@ export function Transactions() {
                     priority
                   />
                 </div>
-                <div className="w-full h-[400px] sm:h-[520px] md:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
+                <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
                   <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
                     <TransactionFlowAnimation onComplete={undefined} />
                   </div>
