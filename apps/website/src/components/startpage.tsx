@@ -32,8 +32,18 @@ export function StartPage() {
     'yearly',
   )
   const [mounted, setMounted] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const dragX = useMotionValue(0)
   const { resolvedTheme } = useTheme()
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
   
   // Prevent hydration mismatch by only using theme after mount
   useEffect(() => {
@@ -75,9 +85,9 @@ export function StartPage() {
     {
       title: 'Stay updated and in control',
       subtitle:
-        'Weekly summaries and questions keep the business up to date without constant checking.',
+        'Weekly summaries and clear explanations keep you up to date without constant checking.',
       mergedText:
-        'Stay updated and in control. Weekly summaries and questions keep the business up to date without constant checking.',
+        'Stay updated and in control. Weekly summaries and clear explanations keep you up to date without constant checking.',
       illustration: 'animation',
     },
   ]
@@ -299,7 +309,7 @@ export function StartPage() {
           <div className="grid grid-cols-1 gap-12 sm:gap-16 lg:hidden">
             <div className="text-center mb-2">
               <h2 className="font-serif text-xl sm:text-2xl text-foreground">
-                How it works, end to end
+                Always know what's going on
               </h2>
             </div>
             {features.map((feature, index) => (
@@ -392,7 +402,7 @@ export function StartPage() {
               <div className="flex flex-col justify-center space-y-4 lg:space-y-5 flex-1">
                 <div className="flex items-center mb-4 lg:mb-6" style={{ minHeight: '3rem' }}>
                   <h2 className="font-serif text-2xl text-foreground">
-                    How it works, end to end
+                    Always know what's going on
                   </h2>
                 </div>
                 {features.map((feature, index) => (
@@ -433,7 +443,7 @@ export function StartPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-center p-6 lg:p-8 border border-border h-full overflow-hidden">
+            <div className="flex items-center justify-center p-6 lg:p-8 border border-border h-full overflow-hidden relative bg-background">
               <motion.div
                 key={activeFeature}
                 initial={{ opacity: 0, scale: 0.9 }}

@@ -147,7 +147,7 @@ export function DashboardAnimation({
   }
 
   return (
-    <div className="w-full h-full bg-background flex flex-col">
+    <div className="w-full h-full flex flex-col relative">
       <div className="px-2 md:px-3 pt-2 md:pt-3 pb-1.5 md:pb-2 border-b border-border">
         <h3 className="text-[11px] md:text-[12px] text-foreground">Category Expenses</h3>
       </div>
