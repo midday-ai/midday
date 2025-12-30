@@ -152,7 +152,7 @@ export function DashboardAnimation({
         <h3 className="text-[11px] md:text-[12px] text-foreground">Category Expenses</h3>
       </div>
 
-      <div className="flex-1 p-2 md:p-3 overflow-y-auto">
+      <div className="flex-1 p-2 md:p-3 overflow-hidden">
         <div className="flex flex-col gap-4 pt-2">
           {/* Chart Section */}
           <motion.div

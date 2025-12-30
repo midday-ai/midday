@@ -90,7 +90,7 @@ export function InvoicePromptAnimation({
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-hidden">
             {showInvoice && (
               <div className="mt-3">
                 <motion.div

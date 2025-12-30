@@ -43,7 +43,7 @@ export function TransactionFlowAnimation({
 
   // Account nodes positioned horizontally at the top, centered
   // Use responsive spacing that adapts via viewBox scaling
-  const topY = 80
+  const topY = isMobile ? 60 : 80
   const nodeSpacing = 90
   const viewBoxWidth = 500
   const totalNodesWidth = nodeSpacing * 3 // Distance from first to last node center
@@ -205,10 +205,10 @@ export function TransactionFlowAnimation({
 
   // Straight line paths from top accounts down to transaction list
   // Lines go straight down from each account node to the table
-  // The SVG viewBox is 500x140 on mobile, 500x200 on desktop
+  // The SVG viewBox is 500x180 on mobile (taller viewBox with smaller container makes lines extend further)
   // Lines end at the bottom of the viewBox to connect to table
-  const transactionListTopY = isMobile ? 140 : 200
-  const viewBoxHeight = isMobile ? 140 : 200
+  const transactionListTopY = isMobile ? 180 : 200
+  const viewBoxHeight = isMobile ? 180 : 200
   
   const arrowPaths = [
     { 
@@ -296,6 +296,7 @@ export function TransactionFlowAnimation({
             className="w-full h-full"
             viewBox={`0 0 500 ${viewBoxHeight}`}
             preserveAspectRatio="xMidYMin meet"
+            style={{ display: 'block' }}
           >
           {/* Account nodes horizontally at the top */}
           {accountNodes.map((node, index) => (

@@ -247,7 +247,7 @@ export function AIAssistantAnimation({
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-hidden">
             {displayedSegments.length === 0 && isTyping && (
               <div className="flex justify-start">
                 <div className="flex flex-col max-w-full w-full">
