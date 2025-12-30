@@ -21,8 +21,10 @@ export function FeaturesGridSection() {
         <div className="flex flex-col gap-8 sm:gap-10 max-w-sm sm:max-w-none mx-auto">
           <div className="grid grid-cols-2 gap-6 sm:flex sm:justify-center sm:gap-20">
             <div 
-              className="flex flex-col items-center w-full sm:w-[150px] cursor-pointer"
+              className="flex flex-col items-center w-full sm:w-[150px] cursor-pointer touch-manipulation"
               onClick={() => router.push('/assistant')}
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+              onTouchEnd={(e) => e.currentTarget.blur()}
             >
               <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover:border-muted-foreground transition-all duration-200">
                 <MaterialIcon name="widgets" className="text-muted-foreground " size={24} />

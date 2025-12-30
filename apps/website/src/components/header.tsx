@@ -47,8 +47,10 @@ export function Header({
         >
           {/* Logo and Brand */}
           <div
-            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity duration-200"
+            className="flex items-center gap-2 cursor-pointer hover:opacity-80 active:opacity-80 transition-opacity duration-200 touch-manipulation"
             onClick={() => router.push("/")}
+            style={{ WebkitTapHighlightColor: 'transparent' }}
+            onTouchEnd={(e) => e.currentTarget.blur()}
           >
             <div className="w-6 h-6">
               <Icons.LogoSmall className="w-full h-full text-foreground" />
@@ -332,7 +334,8 @@ export function Header({
             <button
               type="button"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="transition-colors flex items-center justify-end p-2 min-w-[44px] min-h-[44px] text-foreground hover:text-muted-foreground"
+              className="transition-colors flex items-center justify-end p-2 min-w-[44px] min-h-[44px] text-foreground hover:text-muted-foreground active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               {isMenuOpen ? (
                 <Icons.Close className="w-5 h-5" />
@@ -362,7 +365,8 @@ export function Header({
                     onClick={() =>
                       setIsMobileFeaturesOpen(!isMobileFeaturesOpen)
                     }
-                    className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground flex items-center justify-between"
+                    className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation flex items-center justify-between"
+                    style={{ WebkitTapHighlightColor: 'transparent' }}
                   >
                     <span>Features</span>
                     <Icons.ChevronDown
@@ -388,7 +392,8 @@ export function Header({
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            style={{ WebkitTapHighlightColor: 'transparent' }}
                           >
                             Assistant
                           </button>
@@ -399,7 +404,8 @@ export function Header({
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            style={{ WebkitTapHighlightColor: 'transparent' }}
                           >
                             Insights
                           </button>
@@ -410,7 +416,8 @@ export function Header({
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            style={{ WebkitTapHighlightColor: 'transparent' }}
                           >
                             Transactions
                           </button>
@@ -421,7 +428,8 @@ export function Header({
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            style={{ WebkitTapHighlightColor: 'transparent' }}
                           >
                             Inbox
                           </button>
@@ -432,7 +440,8 @@ export function Header({
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            style={{ WebkitTapHighlightColor: 'transparent' }}
                           >
                             Time tracking
                           </button>
@@ -443,7 +452,8 @@ export function Header({
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            style={{ WebkitTapHighlightColor: 'transparent' }}
                           >
                             Invoicing
                           </button>
@@ -454,7 +464,8 @@ export function Header({
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            style={{ WebkitTapHighlightColor: 'transparent' }}
                           >
                             Customers
                           </button>
@@ -465,7 +476,8 @@ export function Header({
                               setIsMenuOpen(false);
                               setIsMobileFeaturesOpen(false);
                             }}
-                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground transition-colors"
+                            className="text-lg font-sans text-left text-muted-foreground hover:text-foreground active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                            style={{ WebkitTapHighlightColor: 'transparent' }}
                           >
                             Files
                           </button>
@@ -476,29 +488,33 @@ export function Header({
                 </div>
                 <Link
                   href="/pricing"
-                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
+                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
                   onClick={() => setIsMenuOpen(false)}
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Pricing
                 </Link>
                 <Link
                   href="/updates"
-                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
+                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
                   onClick={() => setIsMenuOpen(false)}
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Updates
                 </Link>
                 <Link
                   href="/story"
-                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
+                  className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
                   onClick={() => setIsMenuOpen(false)}
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Story
                 </Link>
                 <Link
                   href="/download"
-                  className="text-2xl font-sans py-2 text-foreground"
+                  className="text-2xl font-sans py-2 text-foreground active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                   onClick={() => setIsMenuOpen(false)}
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Download
                 </Link>
@@ -507,8 +523,9 @@ export function Header({
                 <div className="border-t border-border pt-8 mt-8">
                   <Link
                     href="/login"
-                    className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground"
+                    className="text-2xl font-sans transition-colors py-2 text-foreground hover:text-muted-foreground active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
                     onClick={() => setIsMenuOpen(false)}
+                    style={{ WebkitTapHighlightColor: 'transparent' }}
                   >
                     Sign in
                   </Link>

@@ -91,6 +91,9 @@ export function Invoicing() {
           </div>
           <div className="flex flex-col justify-start items-center space-y-6 z-20 px-3 sm:px-4">
             <div className="space-y-4 text-center max-w-xl px-2 w-full">
+              <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider">
+                Invoicing
+              </p>
               <h1 className="font-serif text-4xl sm:text-4xl md:text-5xl leading-tight">
                 <span className="text-foreground">Get paid faster</span>
               </h1>
@@ -121,6 +124,9 @@ export function Invoicing() {
           <div className="flex-1 flex flex-col justify-start items-center space-y-8 z-20 px-4 pt-16">
             {/* Main Heading */}
             <div className="text-center space-y-8 w-full">
+              <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider">
+                Invoicing
+              </p>
               <h1 className="font-serif text-8xl xl:text-9xl 2xl:text-[12rem] leading-tight text-center">
                 <span className="text-foreground block">Get paid faster</span>
               </h1>
