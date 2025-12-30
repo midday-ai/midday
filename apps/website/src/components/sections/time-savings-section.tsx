@@ -81,7 +81,7 @@ export function TimeSavingsSection() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-10 gap-3 sm:gap-4">
             <article
               onClick={() => router.push('/file-storage')}
-              className="group relative overflow-hidden bg-background border border-border p-4 sm:p-5 hover-bg hover-border transition-all duration-200 cursor-pointer xl:col-span-3 touch-manipulation"
+              className="no-touch-active group relative overflow-hidden bg-background border border-border p-4 sm:p-5 hover-bg hover-border transition-all duration-200 cursor-pointer xl:col-span-3 touch-manipulation"
               style={{ WebkitTapHighlightColor: 'transparent' }}
               onTouchEnd={(e) => e.currentTarget.blur()}
             >
@@ -124,7 +124,7 @@ export function TimeSavingsSection() {
 
             <article
               onClick={() => router.push('/login')}
-              className="relative overflow-hidden bg-secondary border border-border p-4 sm:p-5 md:p-5 lg:p-6 transition-all duration-200 cursor-pointer group hidden xl:block xl:col-span-7 hover:border-muted-foreground touch-manipulation"
+              className="no-touch-active relative overflow-hidden bg-secondary border border-border p-4 sm:p-5 md:p-5 lg:p-6 transition-all duration-200 cursor-pointer group hidden xl:block xl:col-span-7 hover:border-muted-foreground touch-manipulation"
               style={{ WebkitTapHighlightColor: 'transparent' }}
               onTouchEnd={(e) => e.currentTarget.blur()}
             >
@@ -167,7 +167,7 @@ export function TimeSavingsSection() {
           <div className="grid grid-cols-1 gap-3 sm:gap-4 xl:hidden">
             <article
               onClick={() => router.push('/login')}
-              className="relative overflow-hidden bg-secondary border border-border p-4 sm:p-5 md:p-5 lg:p-6 transition-all duration-200 cursor-pointer group hover:border-muted-foreground touch-manipulation"
+              className="no-touch-active relative overflow-hidden bg-secondary border border-border p-4 sm:p-5 md:p-5 lg:p-6 transition-all duration-200 cursor-pointer group hover:border-muted-foreground touch-manipulation"
               style={{ WebkitTapHighlightColor: 'transparent' }}
               onTouchEnd={(e) => e.currentTarget.blur()}
             >

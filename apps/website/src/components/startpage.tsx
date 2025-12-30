@@ -113,7 +113,7 @@ export function StartPage() {
               <div className="flex flex-col gap-3 max-w-sm">
                 <Button
                   onClick={() => router.push('/login')}
-                  className="w-full btn-inverse h-11 px-5 transition-colors"
+                  className="no-touch-active w-full btn-inverse h-11 px-5 transition-colors"
                 >
                   <span className="text-inherit text-sm ">
                     See my business
@@ -192,7 +192,7 @@ export function StartPage() {
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Button
                       onClick={() => router.push('/login')}
-                      className="btn-inverse h-11 px-4 transition-colors"
+                      className="no-touch-active btn-inverse h-11 px-4 transition-colors"
                     >
                       <span className="text-inherit text-sm ">
                         See my business

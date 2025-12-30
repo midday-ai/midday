@@ -17,25 +17,34 @@
   --sh-entity: #a7a7a7;
 }
 
-/* Prevent active state from persisting on touch devices (iOS Safari) */
+/* Disable hover styles on touch devices */
 @media (hover: none) and (pointer: coarse) {
-  button:active,
-  a:active,
-  [role="button"]:active {
+  /* Disable common hover effects on touch devices */
+  .hover\:opacity-80:hover,
+  .hover\:opacity-80:active {
+    opacity: 1 !important;
+  }
+
+  .hover\:text-muted-foreground:hover,
+  .hover\:text-muted-foreground:active {
+    color: inherit !important;
+  }
+
+  .hover\:border-muted-foreground:hover,
+  .hover\:border-muted-foreground:active {
+    border-color: inherit !important;
+  }
+
+  .hover\:bg-secondary:hover,
+  .hover\:bg-secondary:active {
+    background-color: inherit !important;
+  }
+
+  /* Disable active state on touch devices for elements with this class */
+  .no-touch-active:active {
+    background: transparent !important;
+    background-color: inherit !important;
     color: inherit !important;
     opacity: 1 !important;
-    background-color: inherit !important;
-  }
-
-  /* Prevent opacity changes on active state for elements with active:opacity classes */
-  .active\:opacity-80:active {
-    opacity: 1 !important;
-  }
-
-  /* Prevent active state on interactive divs and articles */
-  div.cursor-pointer:active,
-  article.cursor-pointer:active {
-    opacity: 1 !important;
-    background-color: inherit !important;
   }
 }
