@@ -180,6 +180,7 @@ const RAW_CATEGORIES = [
     children: [
       { slug: "uncategorized", name: "Uncategorized" },
       { slug: "other", name: "Other" },
+      { slug: "internal-transfer", name: "Internal Transfer", excluded: true },
     ],
   },
 ] as const;
@@ -198,7 +199,7 @@ function applyColorsToCategories(
       parentSlug: parent.slug, // Automatically add parentSlug
       color: getCategoryColor(child.slug),
       system: true,
-      excluded: false, // Default to not excluded
+      excluded: "excluded" in child ? child.excluded : false, // Respect excluded flag if set
     })),
   }));
 }
