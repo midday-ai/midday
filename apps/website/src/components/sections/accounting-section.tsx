@@ -49,7 +49,8 @@ export function AccountingSection() {
                   <MaterialIcon name="check" className="text-foreground" size={14} />
                 </div>
                 <span className="font-sans text-sm text-foreground">
-                  Transactions from 25,000+ banks are categorized and reconciled automatically
+                  <span className="sm:hidden">Transactions from 25,000+ banks</span>
+                  <span className="hidden sm:inline">Transactions from 25,000+ banks are categorized and reconciled automatically</span>
                 </span>
               </div>
 
@@ -59,7 +60,8 @@ export function AccountingSection() {
                   <MaterialIcon name="check" className="text-foreground" size={14} />
                 </div>
                 <span className="font-sans text-sm text-foreground">
-                  Receipts and invoices are pulled from email and payments, then matched to transactions
+                  <span className="sm:hidden">Receipts pulled from email and uploads</span>
+                  <span className="hidden sm:inline">Receipts and invoices are pulled from email and payments, then matched to transactions</span>
                 </span>
               </div>
 
@@ -79,7 +81,8 @@ export function AccountingSection() {
                   <MaterialIcon name="check" className="text-foreground" size={14} />
                 </div>
                 <span className="font-sans text-sm text-foreground">
-                  Taxes are tracked per transaction
+                  <span className="sm:hidden">Taxes tracked per transaction</span>
+                  <span className="hidden sm:inline">Taxes are tracked per transaction</span>
                 </span>
               </div>
 
@@ -89,7 +92,8 @@ export function AccountingSection() {
                   <MaterialIcon name="check" className="text-foreground" size={14} />
                 </div>
                 <span className="font-sans text-sm text-foreground">
-                  Export-ready for your accounting system
+                  <span className="sm:hidden">Ready to export to your accounting system</span>
+                  <span className="hidden sm:inline">Export-ready for your accounting system</span>
                 </span>
               </div>
             </div>

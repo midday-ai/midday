@@ -26,7 +26,7 @@ export function TimeSavingsSection() {
                   <MaterialIcon name="receipt" className="text-muted-foreground" size={16} />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-xs  tracking-wide text-muted-foreground">
+                  <p className="hidden sm:block text-xs  tracking-wide text-muted-foreground">
                     Chasing receipts
                   </p>
                   <h3 className="mt-1 text-base sm:text-lg text-foreground">
@@ -45,7 +45,7 @@ export function TimeSavingsSection() {
                   <MaterialIcon name="label" className="text-muted-foreground" size={16} />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-xs  tracking-wide text-muted-foreground">
+                  <p className="hidden sm:block text-xs  tracking-wide text-muted-foreground">
                     Cleaning transactions
                   </p>
                   <h3 className="mt-1 text-base sm:text-lg text-foreground">
@@ -64,7 +64,7 @@ export function TimeSavingsSection() {
                   <MaterialIcon name="request_quote" className="text-muted-foreground" size={16} />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-xs  tracking-wide text-muted-foreground">
+                  <p className="hidden sm:block text-xs  tracking-wide text-muted-foreground">
                     Preparing invoices
                   </p>
                   <h3 className="mt-1 text-base sm:text-lg text-foreground">
@@ -89,7 +89,7 @@ export function TimeSavingsSection() {
                   <MaterialIcon name="folder" className="text-muted-foreground" size={16} />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-xs  tracking-wide text-muted-foreground">
+                  <p className="hidden sm:block text-xs  tracking-wide text-muted-foreground">
                     Explaining the numbers
                   </p>
                   <h3 className="mt-1 text-base sm:text-lg text-foreground">
@@ -108,7 +108,7 @@ export function TimeSavingsSection() {
                   <MaterialIcon name="request_quote" className="text-muted-foreground" size={16} />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-xs  tracking-wide text-muted-foreground">
+                  <p className="hidden sm:block text-xs  tracking-wide text-muted-foreground">
                     Preparing invoices
                   </p>
                   <h3 className="mt-1 text-base sm:text-lg text-foreground">
@@ -128,7 +128,7 @@ export function TimeSavingsSection() {
             >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex-1">
-                  <p className="text-xs tracking-wide/loose text-muted-foreground transition-colors duration-200">
+                  <p className="hidden sm:block text-xs tracking-wide/loose text-muted-foreground transition-colors duration-200">
                     <span className="group-hover:hidden transition-opacity duration-200">
                       As things add up
                     </span>
@@ -170,7 +170,7 @@ export function TimeSavingsSection() {
             >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex-1">
-                  <p className="text-xs tracking-wide/loose text-muted-foreground transition-colors duration-200">
+                  <p className="hidden sm:block text-xs tracking-wide/loose text-muted-foreground transition-colors duration-200">
                     <span className="group-hover:hidden transition-opacity duration-200">
                       As things add up
                     </span>
