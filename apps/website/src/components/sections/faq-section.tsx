@@ -76,7 +76,7 @@ export function FAQSection() {
           <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
             Frequently asked questions
           </h2>
-          <p className="font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
+          <p className="hidden sm:block font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
             Everything you need to know before getting started.
           </p>
         </div>
