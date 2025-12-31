@@ -8,7 +8,7 @@ export function Pricing() {
     <div className="min-h-screen">
       {/* Pricing Section */}
       <div className="pt-12 sm:pt-16 lg:pt-20">
-        <PricingSection />
+      <PricingSection />
       </div>
 
       {/* Divider */}
