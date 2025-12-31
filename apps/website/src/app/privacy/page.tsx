@@ -1,12 +1,14 @@
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen py-16 sm:py-24">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <h1 className="font-serif text-xl lg:text-3xl xl:text-3xl 2xl:text-3xl 3xl:text-4xl leading-tight lg:leading-tight xl:leading-[1.3] text-foreground">
-              Privacy Policy
-            </h1>
+    <div className="min-h-screen">
+      <div className="pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-24">
+        <div className="pt-12 sm:pt-16 lg:pt-24">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <h1 className="font-serif text-2xl sm:text-3xl lg:text-3xl xl:text-3xl 2xl:text-3xl 3xl:text-4xl leading-tight lg:leading-tight xl:leading-[1.3] text-foreground">
+                  Privacy Policy
+                </h1>
             <p className="font-sans text-sm text-muted-foreground">
               Last updated: October 26, 2023
             </p>
@@ -419,6 +421,8 @@ export default function PrivacyPage() {
                 By email: <a href="mailto:support@midday.ai" className="text-foreground hover:text-muted-foreground transition-colors">support@midday.ai</a>
               </p>
             </section>
+              </div>
+            </div>
           </div>
         </div>
       </div>
