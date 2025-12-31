@@ -62,7 +62,7 @@ export function FileStorage() {
             alt="Grid Pattern"
             width={1728}
             height={1080}
-            className="w-[1728px] h-screen object-cover opacity-100 dark:opacity-[10%] dark:hidden"
+            className="w-[1728px] h-screen object-cover opacity-100 dark:opacity-[12%] dark:hidden"
             priority
           />
           <Image
@@ -70,7 +70,7 @@ export function FileStorage() {
             alt="Grid Pattern"
             width={1728}
             height={1080}
-            className="w-[1728px] h-screen object-cover opacity-[10%] hidden dark:block"
+            className="w-[1728px] h-screen object-cover opacity-[12%] hidden dark:block"
             priority
           />
         </div>
@@ -84,7 +84,7 @@ export function FileStorage() {
               alt="Grid Pattern"
               width={1728}
               height={1080}
-              className="w-full h-[600px] object-cover opacity-100 dark:opacity-[10%] dark:hidden"
+              className="w-full h-[600px] object-cover opacity-100 dark:opacity-[12%] dark:hidden"
               priority
             />
             <Image
@@ -92,7 +92,7 @@ export function FileStorage() {
               alt="Grid Pattern"
               width={1728}
               height={1080}
-              className="w-full h-[600px] object-cover opacity-[10%] hidden dark:block"
+              className="w-full h-[600px] object-cover opacity-[12%] hidden dark:block"
               priority
             />
           </div>
@@ -160,45 +160,45 @@ export function FileStorage() {
         <div className="max-w-[1400px] mx-auto">
           <div className="space-y-16 sm:space-y-20 lg:space-y-32">
             {/* First Animation - File Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-stretch">
               {/* Left: Title and Subtitle */}
-              <div className="space-y-4 lg:space-y-6 text-center lg:text-left">
-                <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-                  Central file storage
-                </h2>
-                <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                  Store contracts, receipts, invoices, and other documents in one place connected to your business.
-                </p>
+              <div className="flex items-center">
+                <div className="space-y-4 lg:space-y-6 text-center lg:text-left w-full">
+                  <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
+                    Central file storage
+                  </h2>
+                  <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
+                    Store contracts, receipts, invoices, and other documents in one place connected to your business.
+                  </p>
+                </div>
               </div>
 
               {/* Right: Animation */}
-              <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background">
-                <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
-                  <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
-                    <FileGridAnimation onComplete={undefined} />
-                  </div>
+              <div className="flex items-center justify-center p-6 lg:p-8 border border-border overflow-hidden relative bg-background">
+                <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10">
+                  <FileGridAnimation onComplete={undefined} />
                 </div>
               </div>
             </div>
 
             {/* Second Animation - Inbox Match */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-stretch">
               {/* Left: Title and Subtitle */}
-              <div className="space-y-4 lg:space-y-6 lg:order-2 text-center lg:text-left">
-                <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-                  Searchable and findable
-                </h2>
-                <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                  Find files quickly using search across names and details without digging through folders.
-                </p>
+              <div className="flex items-center lg:order-2">
+                <div className="space-y-4 lg:space-y-6 text-center lg:text-left w-full">
+                  <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
+                    Searchable and findable
+                  </h2>
+                  <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
+                    Find files quickly using search across names and details without digging through folders.
+                  </p>
+                </div>
               </div>
 
               {/* Right: Animation */}
-              <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative bg-background lg:order-1">
-                <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
-                  <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
-                    <InboxMatchAnimation onComplete={undefined} />
-                  </div>
+              <div className="flex items-center justify-center p-6 lg:p-8 border border-border overflow-hidden relative bg-background lg:order-1">
+                <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10">
+                  <InboxMatchAnimation onComplete={undefined} />
                 </div>
               </div>
             </div>
