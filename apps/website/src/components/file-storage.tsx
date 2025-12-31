@@ -62,7 +62,7 @@ export function FileStorage() {
             alt="Grid Pattern"
             width={1728}
             height={1080}
-            className="w-[1728px] h-screen object-cover opacity-100 dark:opacity-[8%] dark:hidden"
+            className="w-[1728px] h-screen object-cover opacity-100 dark:opacity-[10%] dark:hidden"
             priority
           />
           <Image
@@ -70,7 +70,7 @@ export function FileStorage() {
             alt="Grid Pattern"
             width={1728}
             height={1080}
-            className="w-[1728px] h-screen object-cover opacity-[8%] hidden dark:block"
+            className="w-[1728px] h-screen object-cover opacity-[10%] hidden dark:block"
             priority
           />
         </div>
@@ -84,7 +84,7 @@ export function FileStorage() {
               alt="Grid Pattern"
               width={1728}
               height={1080}
-              className="w-full h-[600px] object-cover opacity-100 dark:opacity-[8%] dark:hidden"
+              className="w-full h-[600px] object-cover opacity-100 dark:opacity-[10%] dark:hidden"
               priority
             />
             <Image
@@ -92,7 +92,7 @@ export function FileStorage() {
               alt="Grid Pattern"
               width={1728}
               height={1080}
-              className="w-full h-[600px] object-cover opacity-[8%] hidden dark:block"
+              className="w-full h-[600px] object-cover opacity-[10%] hidden dark:block"
               priority
             />
           </div>
