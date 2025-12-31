@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { MaterialIcon } from './homepage/icon-mapping'
 import { DashboardAnimation } from './homepage/dashboard-animation'
 import { TimeTrackingCalendarAnimation } from './time-tracking-calendar-animation'
+import { InvoicePromptAnimation } from './homepage/invoice-prompt-animation'
 import { TestimonialsSection } from './sections/testimonials-section'
 import { FeaturesGridSection } from './sections/features-grid-section'
 import { TimeSavingsSection } from './sections/time-savings-section'
@@ -203,7 +204,7 @@ export function TimeTracking() {
               {/* Right: Animation */}
               <div className="flex items-center justify-center p-6 lg:p-8 border border-border overflow-hidden relative bg-background lg:order-1">
                 <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10">
-                  <DashboardAnimation onComplete={undefined} />
+                  <InvoicePromptAnimation onComplete={undefined} />
                 </div>
               </div>
             </div>
