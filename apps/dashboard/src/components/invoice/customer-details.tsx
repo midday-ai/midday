@@ -34,9 +34,7 @@ export function CustomerDetails() {
   );
 
   const handleLabelSave = (value: string) => {
-    if (templateId) {
-      updateTemplateMutation.mutate({ id: templateId, customerLabel: value });
-    }
+    updateTemplateMutation.mutate({ id: templateId, customerLabel: value });
   };
 
   const handleOnChange = (content?: JSONContent | null) => {

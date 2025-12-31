@@ -38,9 +38,7 @@ export function Logo() {
           shouldDirty: true,
         });
 
-        if (templateId) {
-          updateTemplateMutation.mutate({ id: templateId, logoUrl: url });
-        }
+        updateTemplateMutation.mutate({ id: templateId, logoUrl: url });
       } catch (error) {
         toast({
           title: "Something went wrong, please try again.",
@@ -71,12 +69,10 @@ export function Logo() {
                   shouldValidate: true,
                   shouldDirty: true,
                 });
-                if (templateId) {
-                  updateTemplateMutation.mutate({
-                    id: templateId,
-                    logoUrl: null,
-                  });
-                }
+                updateTemplateMutation.mutate({
+                  id: templateId,
+                  logoUrl: null,
+                });
               }}
             >
               <Icons.Clear className="size-4" />

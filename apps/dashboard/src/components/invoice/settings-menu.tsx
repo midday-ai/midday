@@ -296,12 +296,10 @@ export function SettingsMenu() {
                           shouldValidate: true,
                           shouldDirty: true,
                         });
-                        if (templateId) {
-                          updateTemplateMutation.mutate({
-                            id: templateId,
-                            [item.key]: value,
-                          });
-                        }
+                        updateTemplateMutation.mutate({
+                          id: templateId,
+                          [item.key]: value,
+                        });
                       }}
                     />
                   </DropdownMenuSubContent>
@@ -328,12 +326,10 @@ export function SettingsMenu() {
                             shouldDirty: true,
                           });
 
-                          if (templateId) {
-                            updateTemplateMutation.mutate({
-                              id: templateId,
-                              [item.key]: option.value,
-                            });
-                          }
+                          updateTemplateMutation.mutate({
+                            id: templateId,
+                            [item.key]: option.value,
+                          });
                         }
                       }}
                       onSelect={(event) => event.preventDefault()}

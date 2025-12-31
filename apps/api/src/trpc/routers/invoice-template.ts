@@ -9,6 +9,7 @@ import {
   getInvoiceTemplates,
   setDefaultTemplate,
   updateInvoiceTemplate,
+  upsertInvoiceTemplate,
 } from "@midday/db/queries";
 import { z } from "zod";
 
@@ -43,16 +44,16 @@ export const invoiceTemplateRouter = createTRPCRouter({
       });
     }),
 
-  // Update an existing template (upsert by ID)
+  // Upsert a template - updates by ID if provided, or updates/creates default template
   upsert: protectedProcedure
     .input(
       upsertInvoiceTemplateSchema.extend({
-        id: z.string().uuid(),
+        id: z.string().uuid().optional(), // Optional - if not provided, upserts the default template
         name: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx: { db, teamId }, input }) => {
-      return updateInvoiceTemplate(db, {
+      return upsertInvoiceTemplate(db, {
         ...input,
         teamId: teamId!,
         fromDetails: parseInputValue(input.fromDetails),

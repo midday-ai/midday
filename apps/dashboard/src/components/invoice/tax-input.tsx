@@ -32,8 +32,8 @@ export function TaxInput() {
       }}
       onBlur={() => {
         const currentValue = value ?? 0;
-        // Only save if the value has actually changed and templateId exists
-        if (currentValue !== lastSavedValueRef.current && templateId) {
+        // Only save if the value has actually changed
+        if (currentValue !== lastSavedValueRef.current) {
           lastSavedValueRef.current = currentValue;
           updateTemplateMutation.mutate({
             id: templateId,

@@ -62,12 +62,10 @@ export function InvoiceNo() {
         <LabelInput
           name="template.invoiceNoLabel"
           onSave={(value) => {
-            if (templateId) {
-              updateTemplateMutation.mutate({
-                id: templateId,
-                invoiceNoLabel: value,
-              });
-            }
+            updateTemplateMutation.mutate({
+              id: templateId,
+              invoiceNoLabel: value,
+            });
           }}
           className="truncate"
         />

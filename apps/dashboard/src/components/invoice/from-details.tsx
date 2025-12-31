@@ -22,9 +22,7 @@ export function FromDetails() {
         name="template.fromLabel"
         className="mb-2 block"
         onSave={(value) => {
-          if (templateId) {
-            updateTemplateMutation.mutate({ id: templateId, fromLabel: value });
-          }
+          updateTemplateMutation.mutate({ id: templateId, fromLabel: value });
         }}
       />
 
@@ -38,12 +36,10 @@ export function FromDetails() {
             initialContent={field.value}
             onChange={field.onChange}
             onBlur={(content) => {
-              if (templateId) {
-                updateTemplateMutation.mutate({
-                  id: templateId,
-                  fromDetails: content ? JSON.stringify(content) : null,
-                });
-              }
+              updateTemplateMutation.mutate({
+                id: templateId,
+                fromDetails: content ? JSON.stringify(content) : null,
+              });
             }}
             className="min-h-[90px] [&>div]:min-h-[90px]"
           />

@@ -36,12 +36,10 @@ export function IssueDate() {
         <LabelInput
           name="template.issueDateLabel"
           onSave={(value) => {
-            if (templateId) {
-              updateTemplateMutation.mutate({
-                id: templateId,
-                issueDateLabel: value,
-              });
-            }
+            updateTemplateMutation.mutate({
+              id: templateId,
+              issueDateLabel: value,
+            });
           }}
         />
         <span className="text-[11px] text-[#878787] font-mono">:</span>

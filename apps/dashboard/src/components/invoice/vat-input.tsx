@@ -33,7 +33,7 @@ export function VATInput() {
       onBlur={() => {
         const currentValue = value ?? 0;
         // Only save if the value has actually changed
-        if (currentValue !== lastSavedValueRef.current && templateId) {
+        if (currentValue !== lastSavedValueRef.current) {
           lastSavedValueRef.current = currentValue;
           updateTemplateMutation.mutate({
             id: templateId,

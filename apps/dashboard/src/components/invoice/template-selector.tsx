@@ -34,18 +34,17 @@ export function TemplateSelector() {
     // Set entire template object at once - react-hook-form handles nested objects
     setValue("template", template, { shouldDirty: true });
 
-    // Also update the invoice-level fields that come from the template
-    if (template.fromDetails) {
-      setValue("fromDetails", template.fromDetails, { shouldDirty: true });
-    }
-    if (template.paymentDetails) {
-      setValue("paymentDetails", template.paymentDetails, {
-        shouldDirty: true,
-      });
-    }
-    if (template.noteDetails) {
-      setValue("noteDetails", template.noteDetails, { shouldDirty: true });
-    }
+    // Always update invoice-level fields from the template, even if null/undefined
+    // This ensures switching templates fully replaces the previous template's content
+    setValue("fromDetails", template.fromDetails ?? null, {
+      shouldDirty: true,
+    });
+    setValue("paymentDetails", template.paymentDetails ?? null, {
+      shouldDirty: true,
+    });
+    setValue("noteDetails", template.noteDetails ?? null, {
+      shouldDirty: true,
+    });
   };
 
   const handleTemplateCreated = async (newTemplate: {
@@ -62,9 +61,10 @@ export function TemplateSelector() {
       // Set the full template data
       handleSelectTemplate(fullTemplate);
     } else {
-      // Fallback: just set id and name if template not found
+      // Fallback: just set id, name, and isDefault if template not found
       setValue("template.id", newTemplate.id, { shouldDirty: true });
       setValue("template.name", newTemplate.name, { shouldDirty: true });
+      setValue("template.isDefault", false, { shouldDirty: true });
     }
   };
 

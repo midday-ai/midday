@@ -92,12 +92,10 @@ export function LineItems() {
         <LabelInput
           name="template.descriptionLabel"
           onSave={(value) => {
-            if (templateId) {
-              updateTemplateMutation.mutate({
-                id: templateId,
-                descriptionLabel: value,
-              });
-            }
+            updateTemplateMutation.mutate({
+              id: templateId,
+              descriptionLabel: value,
+            });
           }}
           className="truncate"
         />
@@ -105,12 +103,10 @@ export function LineItems() {
         <LabelInput
           name="template.quantityLabel"
           onSave={(value) => {
-            if (templateId) {
-              updateTemplateMutation.mutate({
-                id: templateId,
-                quantityLabel: value,
-              });
-            }
+            updateTemplateMutation.mutate({
+              id: templateId,
+              quantityLabel: value,
+            });
           }}
           className="truncate"
         />
@@ -118,12 +114,10 @@ export function LineItems() {
         <LabelInput
           name="template.priceLabel"
           onSave={(value) => {
-            if (templateId) {
-              updateTemplateMutation.mutate({
-                id: templateId,
-                priceLabel: value,
-              });
-            }
+            updateTemplateMutation.mutate({
+              id: templateId,
+              priceLabel: value,
+            });
           }}
           className="truncate"
         />
@@ -133,12 +127,10 @@ export function LineItems() {
             name="template.lineItemTaxLabel"
             defaultValue="Tax"
             onSave={(value) => {
-              if (templateId) {
-                updateTemplateMutation.mutate({
-                  id: templateId,
-                  lineItemTaxLabel: value,
-                });
-              }
+              updateTemplateMutation.mutate({
+                id: templateId,
+                lineItemTaxLabel: value,
+              });
             }}
             className="truncate"
           />
@@ -147,12 +139,10 @@ export function LineItems() {
         <LabelInput
           name="template.totalLabel"
           onSave={(value) => {
-            if (templateId) {
-              updateTemplateMutation.mutate({
-                id: templateId,
-                totalLabel: value,
-              });
-            }
+            updateTemplateMutation.mutate({
+              id: templateId,
+              totalLabel: value,
+            });
           }}
           className="text-right truncate"
         />

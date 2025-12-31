@@ -171,7 +171,7 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
     const templateId = watch("template.id");
 
     // Only save create and create_and_send to template, not scheduled
-    if (deliveryType !== "scheduled" && templateId) {
+    if (deliveryType !== "scheduled") {
       updateTemplateMutation.mutate({
         id: templateId,
         deliveryType,

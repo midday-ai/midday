@@ -20,12 +20,10 @@ export function InvoiceTitle() {
       className="text-[21px] font-serif mb-2 w-fit min-w-[100px] !border-none"
       name="template.title"
       onBlur={() => {
-        if (templateId) {
-          updateTemplateMutation.mutate({
-            id: templateId,
-            title: invoiceTitle,
-          });
-        }
+        updateTemplateMutation.mutate({
+          id: templateId,
+          title: invoiceTitle,
+        });
       }}
     />
   );

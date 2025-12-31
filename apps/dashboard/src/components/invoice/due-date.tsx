@@ -37,12 +37,10 @@ export function DueDate() {
         <LabelInput
           name="template.dueDateLabel"
           onSave={(value) => {
-            if (templateId) {
-              updateTemplateMutation.mutate({
-                id: templateId,
-                dueDateLabel: value,
-              });
-            }
+            updateTemplateMutation.mutate({
+              id: templateId,
+              dueDateLabel: value,
+            });
           }}
         />
         <span className="text-[11px] text-[#878787] font-mono">:</span>

@@ -21,9 +21,7 @@ export function NoteDetails() {
       <LabelInput
         name="template.noteLabel"
         onSave={(value) => {
-          if (templateId) {
-            updateTemplateMutation.mutate({ id: templateId, noteLabel: value });
-          }
+          updateTemplateMutation.mutate({ id: templateId, noteLabel: value });
         }}
         className="mb-2 block"
       />
@@ -39,12 +37,10 @@ export function NoteDetails() {
               initialContent={field.value}
               onChange={field.onChange}
               onBlur={(content) => {
-                if (templateId) {
-                  updateTemplateMutation.mutate({
-                    id: templateId,
-                    noteDetails: content ? JSON.stringify(content) : null,
-                  });
-                }
+                updateTemplateMutation.mutate({
+                  id: templateId,
+                  noteDetails: content ? JSON.stringify(content) : null,
+                });
               }}
               className="min-h-[78px]"
             />
