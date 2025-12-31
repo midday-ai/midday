@@ -2,6 +2,7 @@ import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 import { formatRelativeTime } from "@/utils/format";
+import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { useToast } from "@midday/ui/use-toast";
@@ -19,14 +20,13 @@ import { Logo } from "./logo";
 import { Meta } from "./meta";
 import { NoteDetails } from "./note-details";
 import { PaymentDetails } from "./payment-details";
+import { SettingsMenu } from "./settings-menu";
 import { SubmitButton } from "./submit-button";
 import { Summary } from "./summary";
 import { transformFormValuesToDraft } from "./utils";
 
 export function Form() {
   const { invoiceId, setParams } = useInvoiceParams();
-  const [lastUpdated, setLastUpdated] = useState<Date | undefined>();
-  const [lastEditedText, setLastEditedText] = useState("");
 
   const form = useFormContext();
   const token = form.watch("token");
@@ -41,8 +41,6 @@ export function Form() {
         if (!invoiceId && data?.id) {
           setParams({ type: "edit", invoiceId: data.id });
         }
-
-        setLastUpdated(new Date());
 
         queryClient.invalidateQueries({
           queryKey: trpc.invoice.get.infiniteQueryKey(),
@@ -140,22 +138,6 @@ export function Form() {
     }
   }, [debouncedValue, isDirty, invoiceNumberValid]);
 
-  useEffect(() => {
-    const updateLastEditedText = () => {
-      if (!lastUpdated) {
-        setLastEditedText("");
-        return;
-      }
-
-      setLastEditedText(`Edited ${formatRelativeTime(lastUpdated)}`);
-    };
-
-    updateLastEditedText();
-    const intervalId = setInterval(updateLastEditedText, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [lastUpdated]);
-
   // Submit the form and the draft invoice
   const handleSubmit = (values: InvoiceFormValues) => {
     createInvoiceMutation.mutate({
@@ -180,10 +162,10 @@ export function Form() {
       onKeyDown={handleKeyDown}
     >
       <ScrollArea
-        className="h-[calc(100vh-200px)] bg-[#fcfcfc] dark:bg-[#121212]"
+        className="h-[calc(100vh-110px)] p-6 [&>div>div]:h-full"
         hideScrollbar
       >
-        <div className="p-8 pb-4 h-full flex flex-col">
+        <div className="p-8 pb-4 h-full flex flex-col bg-[#fcfcfc] dark:bg-[#0f0f0f]">
           <div className="flex justify-between">
             <Meta />
             <Logo />
@@ -219,9 +201,31 @@ export function Form() {
         </div>
       </ScrollArea>
 
-      <div className="absolute bottom-14 w-full h-9">
-        <div className="flex justify-between items-center mt-auto">
-          <div className="flex space-x-2 items-center text-xs text-[#808080]">
+      <div className="absolute bottom-4 w-full border-t border-border pt-4 px-6">
+        <div className="flex flex-col gap-3">
+          <div className="flex justify-between items-center">
+            <SettingsMenu />
+
+            <div className="flex gap-2">
+              {token && (
+                <OpenURL href={`${getUrl()}/i/${token}`}>
+                  <Button variant="outline" size="icon" type="button">
+                    <Icons.ExternalLink className="size-3" />
+                  </Button>
+                </OpenURL>
+              )}
+
+              <SubmitButton
+                isSubmitting={createInvoiceMutation.isPending}
+                disabled={
+                  createInvoiceMutation.isPending ||
+                  draftInvoiceMutation.isPending
+                }
+              />
+            </div>
+          </div>
+
+          {/* <div className="flex space-x-2 items-center text-xs text-[#808080]">
             {token && (
               <>
                 <OpenURL
@@ -229,7 +233,7 @@ export function Form() {
                   className="flex items-center gap-1"
                 >
                   <Icons.ExternalLink className="size-3" />
-                  <span>Preview invoice</span>
+                  <span>Preview</span>
                 </OpenURL>
 
                 {(draftInvoiceMutation.isPending || lastEditedText) && (
@@ -243,14 +247,7 @@ export function Form() {
                 {draftInvoiceMutation.isPending ? "Saving" : lastEditedText}
               </span>
             )}
-          </div>
-
-          <SubmitButton
-            isSubmitting={createInvoiceMutation.isPending}
-            disabled={
-              createInvoiceMutation.isPending || draftInvoiceMutation.isPending
-            }
-          />
+          </div> */}
         </div>
       </div>
     </form>

@@ -88,12 +88,15 @@ export function HtmlTemplate({ data, width, height }: Props) {
           includeDecimals={template.includeDecimals}
           locale={template.locale}
           includeUnits={template.includeUnits}
+          includeLineItemTax={template.includeLineItemTax}
+          lineItemTaxLabel={template.lineItemTaxLabel}
         />
 
         <div className="mt-10 md:mt-12 flex justify-end mb-6 md:mb-8">
           <Summary
             includeVat={template.includeVat}
             includeTax={template.includeTax}
+            includeLineItemTax={template.includeLineItemTax}
             taxRate={template.taxRate}
             vatRate={template.vatRate}
             currency={currency}

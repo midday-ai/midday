@@ -8,11 +8,13 @@ type Props = {
   required?: boolean;
   className?: string;
   onSave?: (value: string) => void;
+  defaultValue?: string;
 };
 
-export function LabelInput({ name, className, onSave }: Props) {
+export function LabelInput({ name, className, onSave, defaultValue }: Props) {
   const { setValue, watch } = useFormContext();
   const value = watch(name);
+  const displayValue = value ?? defaultValue ?? "";
 
   return (
     <span
@@ -25,15 +27,15 @@ export function LabelInput({ name, className, onSave }: Props) {
       suppressContentEditableWarning
       onBlur={(e) => {
         const newValue = e.currentTarget.textContent || "";
-        setValue(name, newValue, { shouldValidate: true, shouldDirty: true });
 
-        // Only call onSave if the value has changed
-        if (newValue !== value) {
+        // Only call onSave if the value has changed from what was displayed
+        if (newValue !== displayValue) {
+          setValue(name, newValue, { shouldValidate: true, shouldDirty: true });
           onSave?.(newValue);
         }
       }}
     >
-      {value}
+      {displayValue}
     </span>
   );
 }

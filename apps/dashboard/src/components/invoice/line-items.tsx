@@ -10,6 +10,7 @@ import { Reorder, useDragControls } from "framer-motion";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import type { InvoiceFormValues } from "./form-context";
 import { LabelInput } from "./label-input";
+import { PercentInput } from "./percent-input";
 import { ProductAutocomplete } from "./product-autocomplete";
 import { ProductAwareAmountInput } from "./product-aware-amount-input";
 import { ProductAwareUnitInput } from "./product-aware-unit-input";
@@ -34,7 +35,28 @@ export function LineItems() {
     name: "template.includeUnits",
   });
 
+  const includeLineItemTax = useWatch({
+    control,
+    name: "template.includeLineItemTax",
+  });
+
   const maximumFractionDigits = includeDecimals ? 2 : 0;
+
+  // Build grid columns based on settings
+  const getGridCols = () => {
+    if (includeLineItemTax && includeUnits) {
+      return "grid-cols-[1.5fr_12%_20%_12%_15%]";
+    }
+    if (includeLineItemTax) {
+      return "grid-cols-[1.5fr_12%_12%_12%_15%]";
+    }
+    if (includeUnits) {
+      return "grid-cols-[1.5fr_15%_25%_15%]";
+    }
+    return "grid-cols-[1.5fr_15%_15%_15%]";
+  };
+
+  const gridCols = getGridCols();
 
   const { fields, append, remove, swap } = useFieldArray({
     control,
@@ -65,9 +87,7 @@ export function LineItems() {
 
   return (
     <div className="space-y-4">
-      <div
-        className={`grid ${includeUnits ? "grid-cols-[1.5fr_15%25%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end mb-2`}
-      >
+      <div className={`grid ${gridCols} gap-4 items-end mb-2`}>
         <LabelInput
           name="template.descriptionLabel"
           onSave={(value) => {
@@ -98,6 +118,19 @@ export function LineItems() {
           className="truncate"
         />
 
+        {includeLineItemTax && (
+          <LabelInput
+            name="template.lineItemTaxLabel"
+            defaultValue="Tax"
+            onSave={(value) => {
+              updateTemplateMutation.mutate({
+                lineItemTaxLabel: value,
+              });
+            }}
+            className="truncate"
+          />
+        )}
+
         <LabelInput
           name="template.totalLabel"
           onSave={(value) => {
@@ -127,6 +160,8 @@ export function LineItems() {
             currency={currency}
             maximumFractionDigits={maximumFractionDigits}
             includeUnits={includeUnits}
+            includeLineItemTax={includeLineItemTax}
+            gridCols={gridCols}
           />
         ))}
       </Reorder.Group>
@@ -157,6 +192,8 @@ function LineItemRow({
   currency,
   maximumFractionDigits,
   includeUnits,
+  includeLineItemTax,
+  gridCols,
 }: {
   index: number;
   handleRemove: (index: number) => void;
@@ -165,6 +202,8 @@ function LineItemRow({
   currency: string;
   maximumFractionDigits: number;
   includeUnits?: boolean;
+  includeLineItemTax?: boolean;
+  gridCols: string;
 }) {
   const controls = useDragControls();
   const { control, watch, setValue } = useFormContext();
@@ -185,7 +224,7 @@ function LineItemRow({
 
   return (
     <Reorder.Item
-      className={`grid ${includeUnits ? "grid-cols-[1.5fr_15%25%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-start relative group mb-2 w-full`}
+      className={`grid ${gridCols} gap-4 items-start relative group mb-2 w-full`}
       value={item}
       dragListener={false}
       dragControls={controls}
@@ -239,6 +278,10 @@ function LineItemRow({
           />
         )}
       </div>
+
+      {includeLineItemTax && (
+        <PercentInput name={`lineItems.${index}.taxRate`} />
+      )}
 
       <div className="text-right">
         <span className="text-xs text-primary font-mono">

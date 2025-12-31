@@ -158,6 +158,14 @@ export function ProductAutocomplete({
         });
       }
 
+      // Auto-fill tax rate if product has one
+      if (product.taxRate !== null && product.taxRate !== undefined) {
+        setValue(`lineItems.${index}.taxRate`, product.taxRate, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+      }
+
       // Set product reference
       setValue(`lineItems.${index}.productId`, product.id, {
         shouldValidate: true,

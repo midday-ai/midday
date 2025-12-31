@@ -18,9 +18,10 @@ interface SummaryProps {
   includeDiscount: boolean;
   includeVat: boolean;
   includeTax: boolean;
+  includeLineItemTax?: boolean;
   includeDecimals: boolean;
   subtotalLabel: string;
-  lineItems: { price?: number; quantity?: number }[];
+  lineItems: { price?: number; quantity?: number; taxRate?: number }[];
 }
 
 export function Summary({
@@ -39,6 +40,7 @@ export function Summary({
   includeDiscount,
   includeVat,
   includeTax,
+  includeLineItemTax,
   includeDecimals,
   subtotalLabel,
   lineItems,
@@ -46,19 +48,21 @@ export function Summary({
   const maximumFractionDigits = includeDecimals ? 2 : 0;
 
   // Calculate subtotal dynamically from line items (same as HTML template)
-  const { subTotal: calculatedSubtotal } = calculateTotal({
+  const { subTotal: calculatedSubtotal, tax: calculatedTax } = calculateTotal({
     lineItems,
     taxRate: taxRate ?? 0,
     vatRate: vatRate ?? 0,
     discount: discount ?? 0,
     includeVat,
     includeTax,
+    includeLineItemTax,
   });
 
   const displayTotal = amount ?? 0;
   const displaySubtotal = calculatedSubtotal;
   const displayVat = vat ?? 0;
-  const displayTax = tax ?? 0;
+  // Use calculated tax for line item tax mode, otherwise use the passed tax
+  const displayTax = includeLineItemTax ? calculatedTax : (tax ?? 0);
 
   return (
     <View
@@ -115,11 +119,26 @@ export function Summary({
         </View>
       )}
 
-      {includeTax && (
+      {includeTax && !includeLineItemTax && (
         <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
           <Text style={{ fontSize: 9, flex: 1 }}>
             {taxLabel} ({String(taxRate ?? 0)}%)
           </Text>
+          <Text style={{ fontSize: 9, textAlign: "right" }}>
+            {currency &&
+              formatCurrencyForPDF({
+                amount: displayTax,
+                currency,
+                locale,
+                maximumFractionDigits: 2,
+              })}
+          </Text>
+        </View>
+      )}
+
+      {includeLineItemTax && displayTax > 0 && (
+        <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
+          <Text style={{ fontSize: 9, flex: 1 }}>{taxLabel}</Text>
           <Text style={{ fontSize: 9, textAlign: "right" }}>
             {currency &&
               formatCurrencyForPDF({
@@ -152,7 +171,9 @@ export function Summary({
               currency,
               locale,
               maximumFractionDigits:
-                includeTax || includeVat ? 2 : maximumFractionDigits,
+                includeTax || includeVat || includeLineItemTax
+                  ? 2
+                  : maximumFractionDigits,
             })}
         </Text>
       </View>

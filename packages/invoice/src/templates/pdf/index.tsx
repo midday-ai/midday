@@ -157,6 +157,8 @@ export async function PdfTemplate({
           locale={template.locale}
           includeDecimals={template.includeDecimals}
           includeUnits={template.includeUnits}
+          includeLineItemTax={template.includeLineItemTax}
+          lineItemTaxLabel={template.lineItemTaxLabel}
         />
 
         <View
@@ -182,6 +184,7 @@ export async function PdfTemplate({
             includeDiscount={template.includeDiscount}
             includeVat={template.includeVat}
             includeTax={template.includeTax}
+            includeLineItemTax={template.includeLineItemTax}
             includeDecimals={template.includeDecimals}
             subtotalLabel={template.subtotalLabel}
             lineItems={lineItems}

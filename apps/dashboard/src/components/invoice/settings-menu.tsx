@@ -53,6 +53,12 @@ const menuItems = [
     key: "includeTax",
   },
   {
+    icon: Icons.ListAlt,
+    label: "Line item tax",
+    options: booleanOptions,
+    key: "includeLineItemTax",
+  },
+  {
     icon: Icons.Vat,
     label: "Add VAT",
     options: booleanOptions,
@@ -115,8 +121,11 @@ export function SettingsMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button type="button">
-          <Icons.MoreVertical className="size-5" />
+        <button
+          type="button"
+          className="h-9 w-9 flex items-center justify-center border border-border hover:bg-accent transition-colors"
+        >
+          <Icons.Settings className="size-4" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">

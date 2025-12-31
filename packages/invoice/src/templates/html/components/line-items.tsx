@@ -13,6 +13,8 @@ type Props = {
   includeDecimals?: boolean;
   locale: string;
   includeUnits?: boolean;
+  includeLineItemTax?: boolean;
+  lineItemTaxLabel?: string;
 };
 
 export function LineItems({
@@ -24,16 +26,27 @@ export function LineItems({
   totalLabel,
   includeDecimals = false,
   includeUnits = false,
+  includeLineItemTax = false,
+  lineItemTaxLabel = "Tax",
   locale,
 }: Props) {
   const maximumFractionDigits = includeDecimals ? 2 : 0;
 
+  const gridCols = includeLineItemTax
+    ? "grid-cols-[1.5fr_12%_12%_12%_15%]"
+    : "grid-cols-[1.5fr_15%_15%_15%]";
+
   return (
     <div className="mt-5 font-mono">
-      <div className="grid grid-cols-[1.5fr_15%_15%_15%] gap-4 items-end relative group mb-2 w-full pb-1 border-b border-border">
+      <div
+        className={`grid ${gridCols} gap-4 items-end relative group mb-2 w-full pb-1 border-b border-border`}
+      >
         <div className="text-[11px] text-[#878787]">{descriptionLabel}</div>
         <div className="text-[11px] text-[#878787]">{quantityLabel}</div>
         <div className="text-[11px] text-[#878787]">{priceLabel}</div>
+        {includeLineItemTax && (
+          <div className="text-[11px] text-[#878787]">{lineItemTaxLabel}</div>
+        )}
         <div className="text-[11px] text-[#878787] text-right">
           {totalLabel}
         </div>
@@ -42,7 +55,7 @@ export function LineItems({
       {lineItems.map((item, index) => (
         <div
           key={`line-item-${index.toString()}`}
-          className="grid grid-cols-[1.5fr_15%_15%_15%] gap-4 items-start relative group mb-1 w-full py-1"
+          className={`grid ${gridCols} gap-4 items-start relative group mb-1 w-full py-1`}
         >
           <div className="self-start">
             <Description content={item.name} />
@@ -64,6 +77,11 @@ export function LineItems({
                   locale,
                 })}
           </div>
+          {includeLineItemTax && (
+            <div className="text-[11px] self-start">
+              {item.taxRate != null ? `${item.taxRate}%` : "0%"}
+            </div>
+          )}
           <div className="text-[11px] text-right self-start">
             {currency &&
               formatAmount({
