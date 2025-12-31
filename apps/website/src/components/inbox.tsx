@@ -166,7 +166,7 @@ export function Inbox() {
               {/* Left: Title and Subtitle */}
               <div className="flex items-center">
                 <div className="space-y-4 lg:space-y-6 text-center lg:text-left w-full">
-                  <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
+                  <h2 className="font-sans text-2xl sm:text-2xl text-foreground">
                     Receipts and invoices collected
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
@@ -188,7 +188,7 @@ export function Inbox() {
               {/* Left: Title and Subtitle */}
               <div className="flex items-center lg:order-2">
                 <div className="space-y-4 lg:space-y-6 text-center lg:text-left w-full">
-                  <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
+                  <h2 className="font-sans text-2xl sm:text-2xl text-foreground">
                     Matched to transactions
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
