@@ -209,7 +209,7 @@ export function Form() {
             <div className="flex gap-2">
               {token && (
                 <OpenURL href={`${getUrl()}/i/${token}`}>
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" type="button">
                     <Icons.ExternalLink className="size-3" />
                   </Button>
                 </OpenURL>
