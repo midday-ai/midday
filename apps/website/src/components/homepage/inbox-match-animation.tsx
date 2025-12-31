@@ -105,9 +105,6 @@ export function InboxMatchAnimation({
             <button className="w-6 h-6 flex items-center justify-center hover:bg-muted transition-colors">
               <MaterialIcon name="filter_list" className="text-sm text-muted-foreground" size={16} />
             </button>
-            <button className="w-6 h-6 flex items-center justify-center hover:bg-muted transition-colors">
-              <MaterialIcon name="more_vert" className="text-sm text-muted-foreground" size={16} />
-            </button>
           </div>
         </div>
         <div className="relative">

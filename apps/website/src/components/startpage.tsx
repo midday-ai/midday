@@ -301,7 +301,7 @@ export function StartPage() {
                 </div>
                 <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative">
                   <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
-                    <div className="w-full h-full origin-center scale-[0.87] sm:scale-[0.9]">
+                    <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
                       {index === 0 ? (
                         <TransactionFlowAnimation onComplete={undefined} />
                       ) : index === 1 ? (
@@ -426,45 +426,47 @@ export function StartPage() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4, ease: 'easeOut' }}
-                className={`w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 ${
-                  activeFeature === 2 ? 'scale-[0.96] lg:scale-[0.94]' : ''
-                }`}
+                className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center"
                 style={{ transformOrigin: 'center' }}
               >
-                {activeFeature === 0 ? (
-                  <TransactionFlowAnimation
-                    onComplete={() =>
-                      setActiveFeature((prev) => (prev + 1) % features.length)
-                    }
-                  />
-                ) : activeFeature === 1 ? (
-                  <InboxMatchAnimation
-                    onComplete={() =>
-                      setActiveFeature((prev) => (prev + 1) % features.length)
-                    }
-                  />
-                ) : activeFeature === 2 ? (
-                  <DashboardAnimation
-                    onComplete={() =>
-                      setActiveFeature((prev) => (prev + 1) % features.length)
-                    }
-                  />
-                ) : activeFeature === 3 ? (
-                  <AIAssistantAnimation
-                    onComplete={() =>
-                      setActiveFeature((prev) => (prev + 1) % features.length)
-                    }
-                  />
-                ) : (
-                  <Image
-                    src={features[activeFeature].illustration}
-                    alt={features[activeFeature].title}
-                    width={600}
-                    height={450}
-                    className="w-full h-full object-contain"
-                    priority
-                  />
-                )}
+                <div className={`w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95] ${
+                  activeFeature === 2 ? 'lg:scale-[0.94]' : ''
+                }`}>
+                  {activeFeature === 0 ? (
+                    <TransactionFlowAnimation
+                      onComplete={() =>
+                        setActiveFeature((prev) => (prev + 1) % features.length)
+                      }
+                    />
+                  ) : activeFeature === 1 ? (
+                    <InboxMatchAnimation
+                      onComplete={() =>
+                        setActiveFeature((prev) => (prev + 1) % features.length)
+                      }
+                    />
+                  ) : activeFeature === 2 ? (
+                    <DashboardAnimation
+                      onComplete={() =>
+                        setActiveFeature((prev) => (prev + 1) % features.length)
+                      }
+                    />
+                  ) : activeFeature === 3 ? (
+                    <AIAssistantAnimation
+                      onComplete={() =>
+                        setActiveFeature((prev) => (prev + 1) % features.length)
+                      }
+                    />
+                  ) : (
+                    <Image
+                      src={features[activeFeature].illustration}
+                      alt={features[activeFeature].title}
+                      width={600}
+                      height={450}
+                      className="w-full h-full object-contain"
+                      priority
+                    />
+                  )}
+                </div>
               </motion.div>
             </div>
           </div>
