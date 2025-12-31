@@ -113,14 +113,22 @@ export function Invoicing() {
 
             {/* Invoicing Illustration */}
             <div className="flex justify-center w-full">
-              <Image
-                src="/images/file-Storage.svg"
-                alt="Invoicing Interface"
-                width={1200}
-                height={800}
-                className="w-full max-w-6xl h-auto object-contain"
-                priority
-              />
+              <div className="relative w-full max-w-6xl">
+                <div 
+                  className="absolute bottom-0 left-0 right-0 h-[20%] z-10 pointer-events-none"
+                  style={{
+                    background: 'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)'
+                  }}
+                />
+                <Image
+                  src="/images/file-Storage.svg"
+                  alt="Invoicing Interface"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto object-contain relative z-0"
+                  priority
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -144,14 +152,22 @@ export function Invoicing() {
 
             {/* Invoicing Illustration */}
             <div className="flex justify-center w-full">
-              <Image
-                src="/images/file-Storage.svg"
-                alt="Invoicing Interface"
-                width={1200}
-                height={800}
-                className="w-full max-w-6xl h-auto object-contain"
-                priority
-              />
+              <div className="relative w-full max-w-6xl">
+                <div 
+                  className="absolute bottom-0 left-0 right-0 h-[20%] z-10 pointer-events-none"
+                  style={{
+                    background: 'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)'
+                  }}
+                />
+                <Image
+                  src="/images/file-Storage.svg"
+                  alt="Invoicing Interface"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto object-contain relative z-0"
+                  priority
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -165,7 +181,7 @@ export function Invoicing() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-stretch">
               {/* Left: Title and Subtitle */}
               <div className="flex items-center">
-                <div className="space-y-4 lg:space-y-6 text-center lg:text-left w-full">
+                <div className="space-y-3 lg:space-y-5 text-center lg:text-left w-full">
                   <h2 className="font-sans text-2xl sm:text-2xl text-foreground">
                     Flexible invoicing setup
                   </h2>
@@ -189,7 +205,7 @@ export function Invoicing() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-stretch">
               {/* Left: Title and Subtitle */}
               <div className="flex items-center lg:order-2">
-                <div className="space-y-4 lg:space-y-6 text-center lg:text-left w-full">
+                <div className="space-y-3 lg:space-y-5 text-center lg:text-left w-full">
                   <h2 className="font-sans text-2xl sm:text-2xl text-foreground">
                     Connected to your finances
                   </h2>
