@@ -4,7 +4,7 @@ export default function PrivacyPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="space-y-8">
           <div className="space-y-4">
-            <h1 className="font-serif text-2xl sm:text-2xl text-foreground">
+            <h1 className="font-serif text-xl lg:text-3xl xl:text-3xl 2xl:text-3xl 3xl:text-4xl leading-tight lg:leading-tight xl:leading-[1.3] text-foreground">
               Privacy Policy
             </h1>
             <p className="font-sans text-sm text-muted-foreground">
