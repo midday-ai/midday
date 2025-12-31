@@ -194,6 +194,24 @@ export function SettingsMenu() {
     }),
   );
 
+  const duplicateTemplateMutation = useMutation(
+    trpc.invoiceTemplate.create.mutationOptions({
+      onSuccess: (data) => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoiceTemplate.list.queryKey(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoiceTemplate.count.queryKey(),
+        });
+
+        // Switch to the duplicated template
+        if (data) {
+          setValue("template", data, { shouldDirty: true });
+        }
+      },
+    }),
+  );
+
   const handleSetDefault = () => {
     if (templateId) {
       setDefaultMutation.mutate({ id: templateId });
@@ -224,6 +242,25 @@ export function SettingsMenu() {
   const openRenameDialog = () => {
     setNewName(templateName || "");
     setRenameDialogOpen(true);
+  };
+
+  const handleDuplicate = () => {
+    // Get the current template settings from the form
+    const currentTemplate = watch("template");
+    if (!currentTemplate) return;
+
+    // Exclude id and create with new name
+    const {
+      id: _id,
+      isDefault: _isDefault,
+      ...templateSettings
+    } = currentTemplate;
+
+    duplicateTemplateMutation.mutate({
+      ...templateSettings,
+      name: `${templateName || "Template"} (Copy)`,
+      isDefault: false,
+    });
   };
 
   return (
@@ -319,6 +356,17 @@ export function SettingsMenu() {
               >
                 <Icons.Edit className="mr-2 size-4" />
                 Rename template
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onClick={handleDuplicate}
+                className="text-xs cursor-pointer"
+                disabled={duplicateTemplateMutation.isPending}
+              >
+                <Icons.Copy className="mr-2 size-4" />
+                {duplicateTemplateMutation.isPending
+                  ? "Duplicating..."
+                  : "Duplicate template"}
               </DropdownMenuItem>
 
               {!isDefault && (
