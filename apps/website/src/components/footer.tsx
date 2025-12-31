@@ -3,10 +3,8 @@
 import { cn } from "@midday/ui/cn";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export function Footer() {
-  const router = useRouter();
 
   return (
     <footer className="bg-background relative overflow-hidden">
@@ -23,25 +21,11 @@ export function Footer() {
               </h3>
               <div className="space-y-2">
                 <Link
-                  href="/features"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
-                >
-                  Features
-                </Link>
-                <Link
                   href="/pricing"
                   className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Pricing
-                </Link>
-                <Link
-                  href="/story"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
-                >
-                  Story
                 </Link>
                 <Link
                   href="/download"
@@ -50,22 +34,35 @@ export function Footer() {
                 >
                   Download
                 </Link>
-                <button
-                  type="button"
-                  onClick={() => router.push("/coverage")}
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors cursor-pointer text-left"
+                <Link
+                  href="/coverage"
+                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Bank coverage
-                </button>
+                </Link>
               </div>
             </div>
 
             <div className="space-y-2">
               <h3 className="font-sans text-sm text-foreground mb-4">
-                Resources
+                Company
               </h3>
               <div className="space-y-2">
+                <Link
+                  href="/story"
+                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                >
+                  Story
+                </Link>
+                <Link
+                  href="/updates"
+                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                >
+                  Updates
+                </Link>
                 <Link
                   href="/roadmap"
                   className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
@@ -80,8 +77,16 @@ export function Footer() {
                   className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
-                  Github
+                  GitHub
                 </Link>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="font-sans text-sm text-foreground mb-4">
+                Resources
+              </h3>
+              <div className="space-y-2">
                 <Link
                   href="/support"
                   className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
@@ -90,54 +95,18 @@ export function Footer() {
                   Support
                 </Link>
                 <Link
-                  href="/updates"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
-                >
-                  Updates
-                </Link>
-                <Link
                   href="/privacy"
                   className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
-                  Privacy policy
+                  Privacy Policy
                 </Link>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="font-sans text-sm text-foreground mb-4">
-                Solutions
-              </h3>
-              <div className="space-y-2">
                 <Link
-                  href="/self-hosted"
+                  href="/terms"
                   className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
-                  Self hosted
-                </Link>
-                <Link
-                  href="/saas-hosting"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
-                >
-                  Saas hosting
-                </Link>
-                <Link
-                  href="/open-startup"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
-                >
-                  Open startup
-                </Link>
-                <Link
-                  href="/oss-friends"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
-                >
-                  OSS Friends
+                  Terms of Service
                 </Link>
               </div>
             </div>
