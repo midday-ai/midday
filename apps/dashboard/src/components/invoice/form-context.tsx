@@ -7,6 +7,9 @@ import { FormProvider } from "react-hook-form";
 import { z } from "zod/v3";
 
 export const invoiceTemplateSchema = z.object({
+  id: z.string().uuid().optional(),
+  name: z.string().optional(),
+  isDefault: z.boolean().optional(),
   title: z.string().optional(),
   customerLabel: z.string(),
   fromLabel: z.string(),

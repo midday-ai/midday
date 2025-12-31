@@ -5,9 +5,10 @@ import { useRef } from "react";
 import { useController, useFormContext } from "react-hook-form";
 
 export function TaxInput() {
-  const { control } = useFormContext();
+  const { control, watch } = useFormContext();
   const trpc = useTRPC();
   const lastSavedValueRef = useRef<number | undefined>(undefined);
+  const templateId = watch("template.id");
   const updateTemplateMutation = useMutation(
     trpc.invoiceTemplate.upsert.mutationOptions(),
   );
@@ -31,10 +32,13 @@ export function TaxInput() {
       }}
       onBlur={() => {
         const currentValue = value ?? 0;
-        // Only save if the value has actually changed
-        if (currentValue !== lastSavedValueRef.current) {
+        // Only save if the value has actually changed and templateId exists
+        if (currentValue !== lastSavedValueRef.current && templateId) {
           lastSavedValueRef.current = currentValue;
-          updateTemplateMutation.mutate({ taxRate: currentValue });
+          updateTemplateMutation.mutate({
+            id: templateId,
+            taxRate: currentValue,
+          });
         }
       }}
       className="p-0 border-0 h-6 text-xs !bg-transparent flex-shrink-0 w-16 text-[11px] text-[#878787]"

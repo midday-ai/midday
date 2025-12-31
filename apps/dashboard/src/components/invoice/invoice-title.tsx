@@ -8,6 +8,7 @@ import { Input } from "./input";
 export function InvoiceTitle() {
   const { watch } = useFormContext();
   const invoiceTitle = watch("template.title");
+  const templateId = watch("template.id");
 
   const trpc = useTRPC();
   const updateTemplateMutation = useMutation(
@@ -19,7 +20,12 @@ export function InvoiceTitle() {
       className="text-[21px] font-serif mb-2 w-fit min-w-[100px] !border-none"
       name="template.title"
       onBlur={() => {
-        updateTemplateMutation.mutate({ title: invoiceTitle });
+        if (templateId) {
+          updateTemplateMutation.mutate({
+            id: templateId,
+            title: invoiceTitle,
+          });
+        }
       }}
     />
   );

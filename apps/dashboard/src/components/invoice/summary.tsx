@@ -11,12 +11,14 @@ import { TaxInput } from "./tax-input";
 import { VATInput } from "./vat-input";
 
 export function Summary() {
-  const { control, setValue } = useFormContext();
+  const { control, setValue, watch } = useFormContext();
 
   const trpc = useTRPC();
   const updateTemplateMutation = useMutation(
     trpc.invoiceTemplate.upsert.mutationOptions(),
   );
+
+  const templateId = watch("template.id");
 
   const includeDecimals = useWatch({
     control,
@@ -133,7 +135,12 @@ export function Summary() {
           className="flex-shrink-0 min-w-6"
           name="template.subtotalLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({ subtotalLabel: value });
+            if (templateId) {
+              updateTemplateMutation.mutate({
+                id: templateId,
+                subtotalLabel: value,
+              });
+            }
           }}
         />
         <span className="text-right text-[11px] text-[#878787]">
@@ -151,7 +158,12 @@ export function Summary() {
           <LabelInput
             name="template.discountLabel"
             onSave={(value) => {
-              updateTemplateMutation.mutate({ discountLabel: value });
+              if (templateId) {
+                updateTemplateMutation.mutate({
+                  id: templateId,
+                  discountLabel: value,
+                });
+              }
             }}
           />
 
@@ -171,7 +183,12 @@ export function Summary() {
               className="flex-shrink-0 min-w-5"
               name="template.vatLabel"
               onSave={(value) => {
-                updateTemplateMutation.mutate({ vatLabel: value });
+                if (templateId) {
+                  updateTemplateMutation.mutate({
+                    id: templateId,
+                    vatLabel: value,
+                  });
+                }
               }}
             />
 
@@ -196,7 +213,12 @@ export function Summary() {
               className="flex-shrink-0 min-w-5"
               name="template.taxLabel"
               onSave={(value) => {
-                updateTemplateMutation.mutate({ taxLabel: value });
+                if (templateId) {
+                  updateTemplateMutation.mutate({
+                    id: templateId,
+                    taxLabel: value,
+                  });
+                }
               }}
             />
 
@@ -220,7 +242,12 @@ export function Summary() {
             className="flex-shrink-0 min-w-5"
             name="template.taxLabel"
             onSave={(value) => {
-              updateTemplateMutation.mutate({ taxLabel: value });
+              if (templateId) {
+                updateTemplateMutation.mutate({
+                  id: templateId,
+                  taxLabel: value,
+                });
+              }
             }}
           />
 
@@ -239,7 +266,12 @@ export function Summary() {
         <LabelInput
           name="template.totalSummaryLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({ totalSummaryLabel: value });
+            if (templateId) {
+              updateTemplateMutation.mutate({
+                id: templateId,
+                totalSummaryLabel: value,
+              });
+            }
           }}
         />
         <span className="text-right font-medium text-[21px]">

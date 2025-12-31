@@ -12,6 +12,7 @@ export function IssueDate() {
   const { setValue, watch } = useFormContext();
   const issueDate = watch("issueDate");
   const dateFormat = watch("template.dateFormat");
+  const templateId = watch("template.id");
   const [isOpen, setIsOpen] = useState(false);
 
   const trpc = useTRPC();
@@ -35,7 +36,12 @@ export function IssueDate() {
         <LabelInput
           name="template.issueDateLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({ issueDateLabel: value });
+            if (templateId) {
+              updateTemplateMutation.mutate({
+                id: templateId,
+                issueDateLabel: value,
+              });
+            }
           }}
         />
         <span className="text-[11px] text-[#878787] font-mono">:</span>

@@ -17,8 +17,9 @@ import { ProductAwareUnitInput } from "./product-aware-unit-input";
 import { QuantityInput } from "./quantity-input";
 
 export function LineItems() {
-  const { control } = useFormContext();
+  const { control, watch } = useFormContext();
   const currency = useWatch({ control, name: "template.currency" });
+  const templateId = watch("template.id");
 
   const trpc = useTRPC();
   const updateTemplateMutation = useMutation(
@@ -91,9 +92,12 @@ export function LineItems() {
         <LabelInput
           name="template.descriptionLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({
-              descriptionLabel: value,
-            });
+            if (templateId) {
+              updateTemplateMutation.mutate({
+                id: templateId,
+                descriptionLabel: value,
+              });
+            }
           }}
           className="truncate"
         />
@@ -101,9 +105,12 @@ export function LineItems() {
         <LabelInput
           name="template.quantityLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({
-              quantityLabel: value,
-            });
+            if (templateId) {
+              updateTemplateMutation.mutate({
+                id: templateId,
+                quantityLabel: value,
+              });
+            }
           }}
           className="truncate"
         />
@@ -111,9 +118,12 @@ export function LineItems() {
         <LabelInput
           name="template.priceLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({
-              priceLabel: value,
-            });
+            if (templateId) {
+              updateTemplateMutation.mutate({
+                id: templateId,
+                priceLabel: value,
+              });
+            }
           }}
           className="truncate"
         />
@@ -123,9 +133,12 @@ export function LineItems() {
             name="template.lineItemTaxLabel"
             defaultValue="Tax"
             onSave={(value) => {
-              updateTemplateMutation.mutate({
-                lineItemTaxLabel: value,
-              });
+              if (templateId) {
+                updateTemplateMutation.mutate({
+                  id: templateId,
+                  lineItemTaxLabel: value,
+                });
+              }
             }}
             className="truncate"
           />
@@ -134,9 +147,12 @@ export function LineItems() {
         <LabelInput
           name="template.totalLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({
-              totalLabel: value,
-            });
+            if (templateId) {
+              updateTemplateMutation.mutate({
+                id: templateId,
+                totalLabel: value,
+              });
+            }
           }}
           className="text-right truncate"
         />

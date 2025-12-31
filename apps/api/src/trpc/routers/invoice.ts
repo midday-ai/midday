@@ -333,6 +333,9 @@ export const invoiceRouter = createTRPCRouter({
       );
 
       const savedTemplate = {
+        id: template?.id,
+        name: template?.name ?? "Default",
+        isDefault: template?.isDefault ?? true,
         title: template?.title ?? defaultTemplate.title,
         logoUrl,
         currency,

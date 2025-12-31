@@ -1564,6 +1564,8 @@ export const invoiceTemplates = pgTable(
       .defaultNow()
       .notNull(),
     teamId: uuid("team_id").notNull(),
+    name: text().default("Default").notNull(),
+    isDefault: boolean("is_default").default(false),
     customerLabel: text("customer_label"),
     fromLabel: text("from_label"),
     invoiceNoLabel: text("invoice_no_label"),
@@ -1610,7 +1612,7 @@ export const invoiceTemplates = pgTable(
       foreignColumns: [teams.id],
       name: "invoice_settings_team_id_fkey",
     }).onDelete("cascade"),
-    unique("invoice_templates_team_id_key").on(table.teamId),
+    index("idx_invoice_templates_team_id").on(table.teamId),
     pgPolicy("Invoice templates can be handled by a member of the team", {
       as: "permissive",
       for: "all",

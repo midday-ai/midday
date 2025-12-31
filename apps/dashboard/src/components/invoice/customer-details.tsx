@@ -22,6 +22,7 @@ export function CustomerDetails() {
 
   const content = watch("customerDetails");
   const id = watch("id");
+  const templateId = watch("template.id");
 
   const { data: customer } = useQuery(
     trpc.customers.getById.queryOptions(
@@ -33,7 +34,9 @@ export function CustomerDetails() {
   );
 
   const handleLabelSave = (value: string) => {
-    updateTemplateMutation.mutate({ customerLabel: value });
+    if (templateId) {
+      updateTemplateMutation.mutate({ id: templateId, customerLabel: value });
+    }
   };
 
   const handleOnChange = (content?: JSONContent | null) => {

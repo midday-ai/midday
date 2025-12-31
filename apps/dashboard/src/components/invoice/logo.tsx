@@ -12,6 +12,7 @@ import { useFormContext } from "react-hook-form";
 export function Logo() {
   const { watch, setValue } = useFormContext();
   const logoUrl = watch("template.logoUrl");
+  const templateId = watch("template.id");
   const { uploadFile, isLoading } = useUpload();
   const { toast } = useToast();
 
@@ -37,7 +38,9 @@ export function Logo() {
           shouldDirty: true,
         });
 
-        updateTemplateMutation.mutate({ logoUrl: url });
+        if (templateId) {
+          updateTemplateMutation.mutate({ id: templateId, logoUrl: url });
+        }
       } catch (error) {
         toast({
           title: "Something went wrong, please try again.",
@@ -68,7 +71,12 @@ export function Logo() {
                   shouldValidate: true,
                   shouldDirty: true,
                 });
-                updateTemplateMutation.mutate({ logoUrl: null });
+                if (templateId) {
+                  updateTemplateMutation.mutate({
+                    id: templateId,
+                    logoUrl: null,
+                  });
+                }
               }}
             >
               <Icons.Clear className="size-4" />

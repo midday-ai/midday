@@ -12,6 +12,7 @@ export function DueDate() {
   const { setValue, watch } = useFormContext();
   const dueDate = watch("dueDate");
   const dateFormat = watch("template.dateFormat");
+  const templateId = watch("template.id");
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -36,7 +37,12 @@ export function DueDate() {
         <LabelInput
           name="template.dueDateLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({ dueDateLabel: value });
+            if (templateId) {
+              updateTemplateMutation.mutate({
+                id: templateId,
+                dueDateLabel: value,
+              });
+            }
           }}
         />
         <span className="text-[11px] text-[#878787] font-mono">:</span>

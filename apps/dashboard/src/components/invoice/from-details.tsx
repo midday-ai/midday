@@ -9,6 +9,7 @@ import { LabelInput } from "./label-input";
 export function FromDetails() {
   const { control, watch } = useFormContext();
   const id = watch("id");
+  const templateId = watch("template.id");
 
   const trpc = useTRPC();
   const updateTemplateMutation = useMutation(
@@ -21,7 +22,9 @@ export function FromDetails() {
         name="template.fromLabel"
         className="mb-2 block"
         onSave={(value) => {
-          updateTemplateMutation.mutate({ fromLabel: value });
+          if (templateId) {
+            updateTemplateMutation.mutate({ id: templateId, fromLabel: value });
+          }
         }}
       />
 
@@ -35,9 +38,12 @@ export function FromDetails() {
             initialContent={field.value}
             onChange={field.onChange}
             onBlur={(content) => {
-              updateTemplateMutation.mutate({
-                fromDetails: content ? JSON.stringify(content) : null,
-              });
+              if (templateId) {
+                updateTemplateMutation.mutate({
+                  id: templateId,
+                  fromDetails: content ? JSON.stringify(content) : null,
+                });
+              }
             }}
             className="min-h-[90px] [&>div]:min-h-[90px]"
           />

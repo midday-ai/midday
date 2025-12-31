@@ -1,13 +1,12 @@
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
-import { formatRelativeTime } from "@/utils/format";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useDebounceValue } from "usehooks-ts";
 import { OpenURL } from "../open-url";
@@ -23,6 +22,7 @@ import { PaymentDetails } from "./payment-details";
 import { SettingsMenu } from "./settings-menu";
 import { SubmitButton } from "./submit-button";
 import { Summary } from "./summary";
+import { TemplateSelector } from "./template-selector";
 import { transformFormValuesToDraft } from "./utils";
 
 export function Form() {
@@ -204,7 +204,10 @@ export function Form() {
       <div className="absolute bottom-4 w-full border-t border-border pt-4 px-6">
         <div className="flex flex-col gap-3">
           <div className="flex justify-between items-center">
-            <SettingsMenu />
+            <div className="flex gap-2">
+              <SettingsMenu />
+              <TemplateSelector />
+            </div>
 
             <div className="flex gap-2">
               {token && (
@@ -224,30 +227,6 @@ export function Form() {
               />
             </div>
           </div>
-
-          {/* <div className="flex space-x-2 items-center text-xs text-[#808080]">
-            {token && (
-              <>
-                <OpenURL
-                  href={`${getUrl()}/i/${token}`}
-                  className="flex items-center gap-1"
-                >
-                  <Icons.ExternalLink className="size-3" />
-                  <span>Preview</span>
-                </OpenURL>
-
-                {(draftInvoiceMutation.isPending || lastEditedText) && (
-                  <span>-</span>
-                )}
-              </>
-            )}
-
-            {(draftInvoiceMutation.isPending || lastEditedText) && (
-              <span>
-                {draftInvoiceMutation.isPending ? "Saving" : lastEditedText}
-              </span>
-            )}
-          </div> */}
         </div>
       </div>
     </form>
