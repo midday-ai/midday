@@ -187,7 +187,7 @@ export function StartPage() {
               <div className="flex justify-between items-end">
                 <div className="max-w-xl">
                   <div className="space-y-3">
-                    <h1 className="font-serif text-xl lg:text-3xl xl:text-3xl 2xl:text-3xl leading-tight lg:leading-tight xl:leading-[1.3] text-left">
+                    <h1 className="font-serif text-xl lg:text-3xl xl:text-3xl 2xl:text-3xl 3xl:text-4xl leading-tight lg:leading-tight xl:leading-[1.3] text-left">
                       <span className="text-foreground">
                         Know how your business is doing.
                         <br />
