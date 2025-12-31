@@ -166,7 +166,7 @@ export function Download() {
               <div className="flex justify-center mt-auto">
                 <div className="p-10 lg:p-14 bg-background">
                   <Image
-                    src={isLightMode ? '/images/apple-light.svg' : '/images/apple-dark.svg'}
+                    src={isLightMode ? '/images/apple-light.png' : '/images/apple-dark.png'}
                     alt="Apple Logo"
                     width={300}
                     height={300}
