@@ -365,13 +365,19 @@ export async function upsertInvoiceTemplate(
 
 /**
  * Set a template as the default for a team
+<<<<<<< HEAD
  * Uses a transaction to ensure atomicity - verifies the template exists,
  * unsets other defaults, and sets the new default as a single atomic operation.
+=======
+ * Verifies the template exists before unsetting other defaults to prevent
+ * leaving the team in a state with no default template.
+>>>>>>> 8079d869b (wip)
  */
 export async function setDefaultTemplate(
   db: Database,
   params: { id: string; teamId: string },
 ) {
+<<<<<<< HEAD
   return db.transaction(async (tx) => {
     // First, verify the target template exists and belongs to this team
     const [targetTemplate] = await tx
@@ -390,6 +396,43 @@ export async function setDefaultTemplate(
       // Return undefined to signal failure without modifying database state
       return undefined;
     }
+=======
+  // First, verify the target template exists and belongs to this team
+  const [targetTemplate] = await db
+    .select({ id: invoiceTemplates.id })
+    .from(invoiceTemplates)
+    .where(
+      and(
+        eq(invoiceTemplates.id, params.id),
+        eq(invoiceTemplates.teamId, params.teamId),
+      ),
+    )
+    .limit(1);
+
+  if (!targetTemplate) {
+    // Template doesn't exist or doesn't belong to this team
+    // Return undefined to signal failure without modifying database state
+    return undefined;
+  }
+
+  // Now safe to unset all other defaults for this team
+  await db
+    .update(invoiceTemplates)
+    .set({ isDefault: false })
+    .where(eq(invoiceTemplates.teamId, params.teamId));
+
+  // Set the specified template as default
+  const [result] = await db
+    .update(invoiceTemplates)
+    .set({ isDefault: true })
+    .where(
+      and(
+        eq(invoiceTemplates.id, params.id),
+        eq(invoiceTemplates.teamId, params.teamId),
+      ),
+    )
+    .returning(templateSelectFields);
+>>>>>>> 8079d869b (wip)
 
     // Now safe to unset all other defaults for this team
     await tx
