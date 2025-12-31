@@ -129,11 +129,19 @@ export function TimeTracking() {
                   }}
                 />
                 <Image
-                  src="/images/tracker.svg"
+                  src="/images/tracker-light.svg"
                   alt="Time Tracking Interface"
                   width={1200}
                   height={800}
-                  className="w-full h-auto object-contain relative z-0"
+                  className="w-full h-auto object-contain relative z-0 dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/tracker-dark.svg"
+                  alt="Time Tracking Interface"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
                   priority
                 />
               </div>
@@ -172,11 +180,19 @@ export function TimeTracking() {
                   }}
                 />
                 <Image
-                  src="/images/tracker.svg"
+                  src="/images/tracker-light.svg"
                   alt="Time Tracking Interface"
                   width={1200}
                   height={800}
-                  className="w-full h-auto object-contain relative z-0"
+                  className="w-full h-auto object-contain relative z-0 dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/tracker-dark.svg"
+                  alt="Time Tracking Interface"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
                   priority
                 />
               </div>
