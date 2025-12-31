@@ -187,6 +187,16 @@ export function SettingsMenu() {
         // Switch to the new default template
         if (data?.newDefault) {
           setValue("template", data.newDefault, { shouldDirty: true });
+          // Sync invoice-level fields from the new template
+          setValue("fromDetails", data.newDefault.fromDetails ?? null, {
+            shouldDirty: true,
+          });
+          setValue("paymentDetails", data.newDefault.paymentDetails ?? null, {
+            shouldDirty: true,
+          });
+          setValue("noteDetails", data.newDefault.noteDetails ?? null, {
+            shouldDirty: true,
+          });
         }
 
         setDeleteDialogOpen(false);
@@ -207,6 +217,16 @@ export function SettingsMenu() {
         // Switch to the duplicated template
         if (data) {
           setValue("template", data, { shouldDirty: true });
+          // Sync invoice-level fields from the duplicated template
+          setValue("fromDetails", data.fromDetails ?? null, {
+            shouldDirty: true,
+          });
+          setValue("paymentDetails", data.paymentDetails ?? null, {
+            shouldDirty: true,
+          });
+          setValue("noteDetails", data.noteDetails ?? null, {
+            shouldDirty: true,
+          });
         }
       },
     }),

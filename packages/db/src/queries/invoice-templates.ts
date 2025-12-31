@@ -181,6 +181,7 @@ export async function createInvoiceTemplate(
 ) {
   const { teamId, name, isDefault, ...rest } = params;
 
+<<<<<<< HEAD
   return db.transaction(async (tx) => {
     // Check if this is the first template for the team
     const existingTemplates = await tx
@@ -190,6 +191,37 @@ export async function createInvoiceTemplate(
       .limit(1);
 
     const isFirstTemplate = existingTemplates.length === 0;
+=======
+  // Check if this is the first template for the team
+  const existingTemplates = await db
+    .select({ id: invoiceTemplates.id })
+    .from(invoiceTemplates)
+    .where(eq(invoiceTemplates.teamId, teamId))
+    .limit(1);
+
+  const isFirstTemplate = existingTemplates.length === 0;
+
+  // If this is the first template or marked as default, ensure it's the only default
+  if (isDefault || isFirstTemplate) {
+    await db
+      .update(invoiceTemplates)
+      .set({ isDefault: false })
+      .where(eq(invoiceTemplates.teamId, teamId));
+  }
+
+  // First template should always be the default, regardless of isDefault param
+  const shouldBeDefault = isFirstTemplate || (isDefault ?? false);
+
+  const [result] = await db
+    .insert(invoiceTemplates)
+    .values({
+      teamId,
+      name,
+      isDefault: shouldBeDefault,
+      ...rest,
+    })
+    .returning();
+>>>>>>> 6a95e2809 (wip)
 
     // If this is the first template or marked as default, ensure it's the only default
     if (isDefault || isFirstTemplate) {
