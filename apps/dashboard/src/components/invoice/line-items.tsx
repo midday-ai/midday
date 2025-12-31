@@ -51,7 +51,7 @@ export function LineItems() {
       return "grid-cols-[1.5fr_12%_12%_12%_15%]";
     }
     if (includeUnits) {
-      return "grid-cols-[1.5fr_15%25%_15%]";
+      return "grid-cols-[1.5fr_15%_25%_15%]";
     }
     return "grid-cols-[1.5fr_15%_15%_15%]";
   };

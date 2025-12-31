@@ -22,7 +22,7 @@ export function PercentInput({ name, className, min = 0, max = 100 }: Props) {
     control,
   });
 
-  const isPlaceholder = !value && !isFocused;
+  const isPlaceholder = (value === undefined || value === null) && !isFocused;
 
   return (
     <div className="relative font-mono">
