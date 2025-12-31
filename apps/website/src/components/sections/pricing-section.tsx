@@ -19,7 +19,7 @@ export function PricingSection() {
         </div>
 
         {/* Billing Toggle */}
-        <div className="flex justify-center mb-8 sm:mb-16">
+        <div className="flex justify-center mb-8 sm:mb-8 lg:mb-16">
           <div
             className="relative flex items-stretch bg-muted"
             style={{ width: 'fit-content' }}
