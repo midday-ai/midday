@@ -264,8 +264,7 @@ async function handleTextMessage(
     const client = createWhatsAppClient();
     if (!existingConnection) {
       // Send instructions for unconnected users
-      const welcome = formatWelcomeMessage();
-      await client.sendMessage(phoneNumber, welcome.text);
+      await client.sendMessage(phoneNumber, formatWelcomeMessage());
     } else {
       // User is already connected - send helpful message about uploading receipts
       await client.sendMessage(phoneNumber, formatAlreadyConnectedMessage());
@@ -298,21 +297,10 @@ async function handleTextMessage(
     });
 
     const client = createWhatsAppClient();
-    const inboxUrl = "https://app.midday.ai/inbox";
-    const connectionMessage = formatConnectionSuccess(
-      team?.name || "your team",
-      inboxUrl,
+    await client.sendMessage(
+      phoneNumber,
+      formatConnectionSuccess(team?.name || "your team"),
     );
-
-    if (connectionMessage.buttons && connectionMessage.buttons.length > 0) {
-      await client.sendInteractiveButtons(
-        phoneNumber,
-        connectionMessage.text,
-        connectionMessage.buttons,
-      );
-    } else {
-      await client.sendMessage(phoneNumber, connectionMessage.text);
-    }
   } catch (error) {
     if (error instanceof WhatsAppAlreadyConnectedToAnotherTeamError) {
       // User is trying to connect to Team A but already connected to Team B
@@ -380,18 +368,7 @@ async function handleMediaMessage(
       mimeType,
     });
     const client = createWhatsAppClient();
-    const errorMessage = formatUnsupportedFileTypeMessage();
-    // Use list message for better UX showing supported formats
-    if (errorMessage.useList && errorMessage.listSections) {
-      await client.sendListMessage(
-        phoneNumber,
-        errorMessage.text,
-        "Supported Formats",
-        errorMessage.listSections,
-      );
-    } else {
-      await client.sendMessage(phoneNumber, errorMessage.text);
-    }
+    await client.sendMessage(phoneNumber, formatUnsupportedFileTypeMessage());
     return;
   }
 

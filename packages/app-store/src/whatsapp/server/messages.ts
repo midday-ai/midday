@@ -93,13 +93,7 @@ export class MessageBuilder {
 /**
  * Format a connection success message
  */
-export function formatConnectionSuccess(
-  teamName: string,
-  inboxUrl?: string,
-): {
-  text: string;
-  buttons?: Array<{ id: string; title: string }>;
-} {
+export function formatConnectionSuccess(teamName: string): string {
   const builder = new MessageBuilder();
   builder
     .header("Connected Successfully")
@@ -114,23 +108,13 @@ export function formatConnectionSuccess(
     .blank()
     .footer();
 
-  const buttons = inboxUrl
-    ? [{ id: "view_inbox", title: "View Inbox" }]
-    : undefined;
-
-  return {
-    text: builder.build(),
-    buttons,
-  };
+  return builder.build();
 }
 
 /**
  * Format a welcome message for unconnected users
  */
-export function formatWelcomeMessage(): {
-  text: string;
-  buttons?: Array<{ id: string; title: string }>;
-} {
+export function formatWelcomeMessage(): string {
   const builder = new MessageBuilder();
   builder
     .header("Welcome to Midday")
@@ -140,9 +124,7 @@ export function formatWelcomeMessage(): {
     .bullet("Or send your inbox ID")
     .blank();
 
-  return {
-    text: builder.build(),
-  };
+  return builder.build();
 }
 
 /**
@@ -214,11 +196,7 @@ export function formatDocumentProcessedSuccess(params: {
   invoiceNumber?: string;
   taxAmount?: string;
   taxType?: string;
-  inboxUrl?: string;
-}): {
-  text: string;
-  buttons?: Array<{ id: string; title: string }>;
-} {
+}): string {
   const builder = new MessageBuilder();
   builder.header(`${params.documentType} Processed`).blank();
 
@@ -251,23 +229,13 @@ export function formatDocumentProcessedSuccess(params: {
 
   builder.footer();
 
-  const buttons = params.inboxUrl
-    ? [{ id: "view_inbox", title: "View in Midday" }]
-    : undefined;
-
-  return {
-    text: builder.build(),
-    buttons,
-  };
+  return builder.build();
 }
 
 /**
  * Format a document extraction failed message
  */
-export function formatExtractionFailedMessage(): {
-  text: string;
-  buttons?: Array<{ id: string; title: string }>;
-} {
+export function formatExtractionFailedMessage(): string {
   const builder = new MessageBuilder();
   builder
     .header("Extraction Failed")
@@ -277,10 +245,7 @@ export function formatExtractionFailedMessage(): {
     .blank()
     .footer();
 
-  return {
-    text: builder.build(),
-    buttons: [{ id: "upload_manually", title: "Upload Manually" }],
-  };
+  return builder.build();
 }
 
 /**
@@ -302,14 +267,7 @@ export function formatProcessingErrorMessage(): string {
 /**
  * Format an unsupported file type error message
  */
-export function formatUnsupportedFileTypeMessage(): {
-  text: string;
-  useList?: boolean;
-  listSections?: Array<{
-    title: string;
-    rows: Array<{ id: string; title: string; description?: string }>;
-  }>;
-} {
+export function formatUnsupportedFileTypeMessage(): string {
   const builder = new MessageBuilder();
   builder
     .header("Unsupported File Type")
@@ -322,43 +280,7 @@ export function formatUnsupportedFileTypeMessage(): {
     .blank()
     .footer();
 
-  // Return both formatted text and list data for list message option
-  return {
-    text: builder.build(),
-    useList: true,
-    listSections: [
-      {
-        title: "Supported Formats",
-        rows: [
-          {
-            id: "format_jpeg",
-            title: "JPEG",
-            description: "Image format",
-          },
-          {
-            id: "format_png",
-            title: "PNG",
-            description: "Image format",
-          },
-          {
-            id: "format_webp",
-            title: "WebP",
-            description: "Image format",
-          },
-          {
-            id: "format_heic",
-            title: "HEIC",
-            description: "Image format",
-          },
-          {
-            id: "format_pdf",
-            title: "PDF",
-            description: "Document format",
-          },
-        ],
-      },
-    ],
-  };
+  return builder.build();
 }
 
 /**

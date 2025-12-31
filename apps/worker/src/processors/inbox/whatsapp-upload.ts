@@ -216,7 +216,7 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
       // Send extracted info back to WhatsApp
       if (updatedInbox?.amount) {
         try {
-          const formatCurrency = (amount: number | null | undefined) => {
+          const formatCurrencyAmount = (amount: number | null | undefined) => {
             if (!amount || !updatedInbox.currency) return undefined;
             return new Intl.NumberFormat("en-US", {
               style: "currency",
@@ -231,12 +231,10 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
             ? format(new Date(updatedInbox.date), "MMM d, yyyy")
             : undefined;
 
-          const formattedAmount = formatCurrency(updatedInbox.amount);
+          const formattedAmount = formatCurrencyAmount(updatedInbox.amount);
           const formattedTaxAmount = updatedInbox.taxAmount
-            ? formatCurrency(updatedInbox.taxAmount)
+            ? formatCurrencyAmount(updatedInbox.taxAmount)
             : undefined;
-
-          const inboxUrl = `https://app.midday.ai/inbox?inboxId=${updatedInbox.id}`;
 
           // Extract numeric amount and currency separately for the formatter
           const amountValue =
@@ -258,18 +256,9 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
                 : undefined,
             taxAmount: taxAmountValue,
             taxType: updatedInbox.taxType || undefined,
-            inboxUrl,
           });
 
-          if (successMessage.buttons && successMessage.buttons.length > 0) {
-            await whatsappClient.sendInteractiveButtons(
-              phoneNumber,
-              successMessage.text,
-              successMessage.buttons,
-            );
-          } else {
-            await whatsappClient.sendMessage(phoneNumber, successMessage.text);
-          }
+          await whatsappClient.sendMessage(phoneNumber, successMessage);
         } catch (error) {
           this.logger.warn("Failed to send WhatsApp message", {
             error: error instanceof Error ? error.message : "Unknown error",
@@ -362,16 +351,10 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
             status: "pending",
           });
 
-          const failedMessage = formatExtractionFailedMessage();
-          if (failedMessage.buttons && failedMessage.buttons.length > 0) {
-            await whatsappClient.sendInteractiveButtons(
-              phoneNumber,
-              failedMessage.text,
-              failedMessage.buttons,
-            );
-          } else {
-            await whatsappClient.sendMessage(phoneNumber, failedMessage.text);
-          }
+          await whatsappClient.sendMessage(
+            phoneNumber,
+            formatExtractionFailedMessage(),
+          );
         } catch (updateError) {
           this.logger.error("Failed to update inbox status to pending", {
             inboxId: inboxData.id,
