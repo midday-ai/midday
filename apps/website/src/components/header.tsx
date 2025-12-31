@@ -40,7 +40,7 @@ export function Header({
       <div
         className={`fixed left-0 right-0 bottom-0 z-40 transition-opacity duration-150 ${
           isFeaturesOpen
-            ? "opacity-100 visible bg-black/20"
+            ? "opacity-100 visible bg-black/40"
             : "opacity-0 invisible pointer-events-none"
         }`}
         style={{ top: "72px" }}
