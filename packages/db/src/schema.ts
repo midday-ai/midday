@@ -755,6 +755,7 @@ export const invoices = pgTable(
       mode: "string",
     }),
     scheduledJobId: text("scheduled_job_id"),
+    templateId: uuid("template_id"),
   },
   (table) => [
     index("invoices_created_at_idx").using(
@@ -768,6 +769,10 @@ export const invoices = pgTable(
     index("invoices_team_id_idx").using(
       "btree",
       table.teamId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("invoices_template_id_idx").using(
+      "btree",
+      table.templateId.asc().nullsLast().op("uuid_ops"),
     ),
     foreignKey({
       columns: [table.userId],
@@ -784,6 +789,11 @@ export const invoices = pgTable(
       foreignColumns: [teams.id],
       name: "invoices_team_id_fkey",
     }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.templateId],
+      foreignColumns: [invoiceTemplates.id],
+      name: "invoices_template_id_fkey",
+    }).onDelete("set null"),
     unique("invoices_scheduled_job_id_key").on(table.scheduledJobId),
     pgPolicy("Invoices can be handled by a member of the team", {
       as: "permissive",

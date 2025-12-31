@@ -1,30 +1,21 @@
 "use client";
 
 import { Editor } from "@/components/invoice/editor";
-import { useTRPC } from "@/trpc/client";
-import { useMutation } from "@tanstack/react-query";
+import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { Controller, useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
 export function PaymentDetails() {
   const { control, watch } = useFormContext();
   const id = watch("id");
-  const templateId = watch("template.id");
-
-  const trpc = useTRPC();
-  const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
-  );
+  const { updateTemplate } = useTemplateUpdate();
 
   return (
     <div>
       <LabelInput
         name="template.paymentLabel"
         onSave={(value) => {
-          updateTemplateMutation.mutate({
-            id: templateId,
-            paymentLabel: value,
-          });
+          updateTemplate({ paymentLabel: value });
         }}
         className="mb-2 block"
       />
@@ -39,8 +30,7 @@ export function PaymentDetails() {
             initialContent={field.value}
             onChange={field.onChange}
             onBlur={(content) => {
-              updateTemplateMutation.mutate({
-                id: templateId,
+              updateTemplate({
                 paymentDetails: content ? JSON.stringify(content) : null,
               });
             }}

@@ -2,9 +2,10 @@
 
 import { Editor } from "@/components/invoice/editor";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { useTRPC } from "@/trpc/client";
 import { transformCustomerToContent } from "@midday/invoice/utils";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { JSONContent } from "@tiptap/react";
 import { useEffect } from "react";
 import { Controller, useFormContext } from "react-hook-form";
@@ -16,13 +17,10 @@ export function CustomerDetails() {
   const { setParams, selectedCustomerId } = useInvoiceParams();
 
   const trpc = useTRPC();
-  const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
-  );
+  const { updateTemplate } = useTemplateUpdate();
 
   const content = watch("customerDetails");
   const id = watch("id");
-  const templateId = watch("template.id");
 
   const { data: customer } = useQuery(
     trpc.customers.getById.queryOptions(
@@ -34,7 +32,7 @@ export function CustomerDetails() {
   );
 
   const handleLabelSave = (value: string) => {
-    updateTemplateMutation.mutate({ id: templateId, customerLabel: value });
+    updateTemplate({ customerLabel: value });
   };
 
   const handleOnChange = (content?: JSONContent | null) => {

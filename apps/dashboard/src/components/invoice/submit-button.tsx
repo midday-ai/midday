@@ -1,5 +1,6 @@
 "use client";
 
+import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
@@ -156,9 +157,7 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
   const invoiceNumberValid = !formState.errors.invoiceNumber;
 
   const trpc = useTRPC();
-  const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
-  );
+  const { updateTemplate } = useTemplateUpdate();
 
   const cancelScheduleMutation = useMutation(
     trpc.invoice.cancelSchedule.mutationOptions(),
@@ -168,14 +167,10 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
     const deliveryType = value as "create" | "create_and_send" | "scheduled";
     const currentDeliveryType = watch("template.deliveryType");
     const invoiceId = watch("id");
-    const templateId = watch("template.id");
 
     // Only save create and create_and_send to template, not scheduled
     if (deliveryType !== "scheduled") {
-      updateTemplateMutation.mutate({
-        id: templateId,
-        deliveryType,
-      });
+      updateTemplate({ deliveryType });
 
       // If changing from scheduled to another type, cancel the scheduled job
       if (currentDeliveryType === "scheduled" && invoiceId) {

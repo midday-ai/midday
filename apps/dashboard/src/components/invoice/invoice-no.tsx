@@ -1,6 +1,7 @@
 "use client";
 
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import {
@@ -9,7 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { Input } from "./input";
@@ -23,11 +24,8 @@ export function InvoiceNo() {
     formState: { errors },
   } = useFormContext();
   const invoiceNumber = watch("invoiceNumber");
-  const templateId = watch("template.id");
   const trpc = useTRPC();
-  const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
-  );
+  const { updateTemplate } = useTemplateUpdate();
 
   const { type } = useInvoiceParams();
 
@@ -62,10 +60,7 @@ export function InvoiceNo() {
         <LabelInput
           name="template.invoiceNoLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({
-              id: templateId,
-              invoiceNoLabel: value,
-            });
+            updateTemplate({ invoiceNoLabel: value });
           }}
           className="truncate"
         />

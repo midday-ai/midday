@@ -1,6 +1,5 @@
-import { useTRPC } from "@/trpc/client";
+import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { calculateTotal } from "@midday/invoice/calculate";
-import { useMutation } from "@tanstack/react-query";
 import { useCallback, useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { AnimatedNumber } from "../animated-number";
@@ -11,14 +10,8 @@ import { TaxInput } from "./tax-input";
 import { VATInput } from "./vat-input";
 
 export function Summary() {
-  const { control, setValue, watch } = useFormContext();
-
-  const trpc = useTRPC();
-  const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
-  );
-
-  const templateId = watch("template.id");
+  const { control, setValue } = useFormContext();
+  const { updateTemplate } = useTemplateUpdate();
 
   const includeDecimals = useWatch({
     control,
@@ -135,10 +128,7 @@ export function Summary() {
           className="flex-shrink-0 min-w-6"
           name="template.subtotalLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({
-              id: templateId,
-              subtotalLabel: value,
-            });
+            updateTemplate({ subtotalLabel: value });
           }}
         />
         <span className="text-right text-[11px] text-[#878787]">
@@ -156,10 +146,7 @@ export function Summary() {
           <LabelInput
             name="template.discountLabel"
             onSave={(value) => {
-              updateTemplateMutation.mutate({
-                id: templateId,
-                discountLabel: value,
-              });
+              updateTemplate({ discountLabel: value });
             }}
           />
 
@@ -179,10 +166,7 @@ export function Summary() {
               className="flex-shrink-0 min-w-5"
               name="template.vatLabel"
               onSave={(value) => {
-                updateTemplateMutation.mutate({
-                  id: templateId,
-                  vatLabel: value,
-                });
+                updateTemplate({ vatLabel: value });
               }}
             />
 
@@ -207,10 +191,7 @@ export function Summary() {
               className="flex-shrink-0 min-w-5"
               name="template.taxLabel"
               onSave={(value) => {
-                updateTemplateMutation.mutate({
-                  id: templateId,
-                  taxLabel: value,
-                });
+                updateTemplate({ taxLabel: value });
               }}
             />
 
@@ -234,10 +215,7 @@ export function Summary() {
             className="flex-shrink-0 min-w-5"
             name="template.taxLabel"
             onSave={(value) => {
-              updateTemplateMutation.mutate({
-                id: templateId,
-                taxLabel: value,
-              });
+              updateTemplate({ taxLabel: value });
             }}
           />
 
@@ -256,10 +234,7 @@ export function Summary() {
         <LabelInput
           name="template.totalSummaryLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({
-              id: templateId,
-              totalSummaryLabel: value,
-            });
+            updateTemplate({ totalSummaryLabel: value });
           }}
         />
         <span className="text-right font-medium text-[21px]">
