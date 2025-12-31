@@ -9,7 +9,7 @@ export default function StoryPage() {
             <div className="space-y-12">
               {/* Title */}
               <div className="space-y-4">
-                <h1 className="font-serif text-xl lg:text-3xl xl:text-3xl 2xl:text-3xl 3xl:text-4xl leading-tight lg:leading-tight xl:leading-[1.3] text-foreground">
+                <h1 className="font-serif text-2xl sm:text-3xl lg:text-3xl xl:text-3xl 2xl:text-3xl 3xl:text-4xl leading-tight lg:leading-tight xl:leading-[1.3] text-foreground">
                   Why we're building Midday
                 </h1>
               </div>
