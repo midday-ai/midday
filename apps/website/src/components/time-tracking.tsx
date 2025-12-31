@@ -98,10 +98,10 @@ export function TimeTracking() {
                 <span className="text-foreground">See where time goes</span>
               </h1>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto lg:hidden">
-                Track time across projects and see where hours go.
+                Track time as you work across projects and customers and turn hours into accurate invoices, so no billable work is missed.
               </p>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto hidden lg:block">
-                Track time across projects and customers and understand how hours translate into costs, revenue, and margins inside your financial overview.
+                Track time as you work across projects and customers and turn hours into accurate invoices, so no billable work is missed.
               </p>
             </div>
 
@@ -132,7 +132,7 @@ export function TimeTracking() {
               </h1>
 
               <p className="text-muted-foreground text-base leading-normal max-w-2xl mx-auto font-sans text-center">
-                Track time across projects and customers and understand how hours translate into costs, revenue, and margins inside your financial overview.
+                Track time as you work across projects and customers and turn hours into accurate invoices, so no billable work is missed.
               </p>
             </div>
 
@@ -163,7 +163,7 @@ export function TimeTracking() {
                   Time tracked by project
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                  Track time across projects and customers as work happens, with a clear view of how hours are spent.
+                  Logged time, tracked live, can be turned directly into invoices per project or customer without re-entering data.
                 </p>
               </div>
 
