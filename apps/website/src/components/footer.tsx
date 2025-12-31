@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 export function Footer() {
-
   return (
     <footer className="bg-background relative overflow-hidden">
       {/* Top Divider - Full Bleed */}
@@ -23,21 +22,21 @@ export function Footer() {
                 <Link
                   href="/pricing"
                   className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
                 >
                   Pricing
                 </Link>
                 <Link
                   href="/download"
                   className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
                 >
                   Download
                 </Link>
                 <Link
-                  href="/coverage"
+                  href="/bank-coverage/"
                   className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
                 >
                   Bank coverage
                 </Link>
@@ -52,21 +51,21 @@ export function Footer() {
                 <Link
                   href="/story"
                   className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
                 >
                   Story
                 </Link>
                 <Link
                   href="/updates"
                   className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
                 >
                   Updates
                 </Link>
                 <Link
                   href="/roadmap"
                   className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
                 >
                   Roadmap
                 </Link>
@@ -75,7 +74,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
                 >
                   GitHub
                 </Link>
@@ -90,21 +89,21 @@ export function Footer() {
                 <Link
                   href="/support"
                   className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
                 >
                   Support
                 </Link>
                 <Link
                   href="/privacy"
                   className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
                 >
                   Privacy Policy
                 </Link>
                 <Link
                   href="/terms"
                   className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                  style={{ WebkitTapHighlightColor: "transparent" }}
                 >
                   Terms of Service
                 </Link>
