@@ -1,9 +1,7 @@
 "use client";
 
-import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { MaterialIcon } from "./homepage/icon-mapping";
 import { TransactionFlowAnimation } from "./homepage/transaction-flow-animation";
 import { AccountingSection } from "./sections/accounting-section";
@@ -16,15 +14,6 @@ import { TimeSavingsSection } from "./sections/time-savings-section";
 
 export function Transactions() {
   const router = useRouter();
-  const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const isLightMode =
-    mounted && resolvedTheme ? resolvedTheme !== "dark" : true;
 
   const testimonials: Testimonial[] = [
     {
@@ -66,17 +55,21 @@ export function Transactions() {
       {/* Hero Section */}
       <div className="bg-background relative overflow-visible lg:min-h-screen lg:overflow-hidden">
         {/* Grid Pattern Background - Desktop Only */}
-        <div
-          className={`hidden lg:flex absolute inset-0 items-center justify-center pointer-events-none z-0 ${isLightMode ? "opacity-100" : "opacity-[8%]"}`}
-        >
+        <div className="hidden lg:flex absolute inset-0 items-center justify-center pointer-events-none z-0">
           <Image
-            src={
-              isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"
-            }
+            src="/images/grid-light.svg"
             alt="Grid Pattern"
             width={1728}
             height={1080}
-            className="w-[1728px] h-screen object-cover"
+            className="w-[1728px] h-screen object-cover opacity-100 dark:opacity-[8%] dark:hidden"
+            priority
+          />
+          <Image
+            src="/images/grid-dark.svg"
+            alt="Grid Pattern"
+            width={1728}
+            height={1080}
+            className="w-[1728px] h-screen object-cover opacity-[8%] hidden dark:block"
             priority
           />
         </div>
@@ -85,17 +78,23 @@ export function Transactions() {
         <div className="lg:hidden flex flex-col relative pt-32 pb-8 sm:pt-40 sm:pb-8 md:pt-48 overflow-hidden">
           {/* Grid Pattern Background - Mobile/Tablet Only (Limited Height) */}
           <div
-            className={`absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0 ${isLightMode ? "opacity-100" : "opacity-[8%]"}`}
+            className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0"
             style={{ height: "600px" }}
           >
             <Image
-              src={
-                isLightMode ? "/images/grid-light.svg" : "/images/grid-dark.svg"
-              }
+              src="/images/grid-light.svg"
               alt="Grid Pattern"
               width={1728}
               height={1080}
-              className="w-full h-[600px] object-cover"
+              className="w-full h-[600px] object-cover opacity-100 dark:opacity-[8%] dark:hidden"
+              priority
+            />
+            <Image
+              src="/images/grid-dark.svg"
+              alt="Grid Pattern"
+              width={1728}
+              height={1080}
+              className="w-full h-[600px] object-cover opacity-[8%] hidden dark:block"
               priority
             />
           </div>
