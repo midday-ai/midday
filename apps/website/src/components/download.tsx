@@ -194,7 +194,7 @@ export function Download() {
               </div>
 
               {/* Keyboard Image */}
-              <div className="flex justify-center lg:justify-end items-center lg:items-center min-h-[200px]">
+              <div className="flex flex-1 justify-center lg:justify-end items-center lg:items-center min-h-[200px]">
                 <div className="p-4 lg:p-6 bg-background w-full max-w-lg flex items-center justify-center">
                   <Image
                     src={isLightMode ? '/images/keyboard-light.png' : '/images/keyboard-dark.png'}
