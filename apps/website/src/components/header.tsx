@@ -253,12 +253,12 @@ export function Header({
                           <div className="rounded h-full">
                             <div className="grid grid-cols-2 gap-6 h-full">
                               {/* Left Preview */}
-                              <div className="flex flex-col gap-4 h-full">
+                              <div className="flex flex-col gap-6 h-full">
                                 <div className="flex-1 border border-border overflow-hidden">
                                   <HeaderAssistantInputPreview />
                                 </div>
                                 <div className="text-left">
-                                  <h3 className="font-sans text-sm text-foreground mb-2">
+                                  <h3 className="font-sans text-sm text-foreground mb-1">
                                     Assistant
                                   </h3>
                                   <p className="font-sans text-xs text-muted-foreground leading-relaxed">
@@ -269,12 +269,12 @@ export function Header({
                               </div>
 
                               {/* Right Preview */}
-                              <div className="flex flex-col gap-4 h-full">
+                              <div className="flex flex-col gap-6 h-full">
                                 <div className="flex-1 border border-border overflow-hidden">
                                   <HeaderInsightsPreview />
                                 </div>
                                 <div className="text-left">
-                                  <h3 className="font-sans text-sm text-foreground mb-2">
+                                  <h3 className="font-sans text-sm text-foreground mb-1">
                                     Insights
                                   </h3>
                                   <p className="font-sans text-xs text-muted-foreground leading-relaxed">
