@@ -15,7 +15,7 @@ export function InvoiceContent() {
 
   if (type === "success") {
     return (
-      <SheetContent className="bg-white dark:bg-[#0C0C0C] transition-[max-width] duration-300 ease-in-out">
+      <SheetContent className="bg-white dark:bg-[#080808] transition-[max-width] duration-300 ease-in-out">
         <InvoiceSuccess />
       </SheetContent>
     );
@@ -24,7 +24,7 @@ export function InvoiceContent() {
   return (
     <SheetContent
       style={{ maxWidth: size }}
-      className="bg-white dark:bg-[#0C0C0C] transition-[max-width] duration-300 ease-in-out pt-6"
+      className="bg-white dark:bg-[#080808] transition-[max-width] duration-300 ease-in-out p-0"
     >
       <Form />
     </SheetContent>

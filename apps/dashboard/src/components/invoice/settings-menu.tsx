@@ -53,7 +53,7 @@ const menuItems = [
     key: "includeTax",
   },
   {
-    icon: Icons.ReceiptLong,
+    icon: Icons.ListAlt,
     label: "Line item tax",
     options: booleanOptions,
     key: "includeLineItemTax",
