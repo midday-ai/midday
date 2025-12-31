@@ -1,7 +1,5 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useTheme } from 'next-themes'
 import Image from 'next/image'
 import { Button } from '@midday/ui/button'
 import { FeaturesGridSection } from './sections/features-grid-section'
@@ -13,14 +11,6 @@ import { PricingSection } from './sections/pricing-section'
 import type { Testimonial } from './sections/testimonials-section'
 
 export function Download() {
-  const { resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const isLightMode = mounted && resolvedTheme ? resolvedTheme !== 'dark' : true
 
   const testimonials: Testimonial[] = [
     {
@@ -66,13 +56,21 @@ export function Download() {
 
           <div className="flex flex-col justify-start items-center space-y-8 z-20 px-4 sm:px-6">
             {/* Dock Image */}
-            <div className="flex justify-center w-full">
+            <div className="flex justify-center w-full relative">
               <Image
-                src={isLightMode ? '/images/dock-light.png' : '/images/dock-dark.png'}
+                src="/images/dock-light.png"
                 alt="Mac Dock"
                 width={800}
                 height={200}
-                className="w-full max-w-lg h-auto object-contain"
+                className="w-full max-w-lg h-auto object-contain dark:hidden"
+                priority
+              />
+              <Image
+                src="/images/dock-dark.png"
+                alt="Mac Dock"
+                width={800}
+                height={200}
+                className="w-full max-w-lg h-auto object-contain hidden dark:block"
                 priority
               />
             </div>
@@ -108,13 +106,21 @@ export function Download() {
         <div className="hidden lg:flex flex-col min-h-screen relative pt-40 overflow-hidden">
           <div className="flex-1 flex flex-col justify-center items-center space-y-8 z-20 px-4 pb-32">
             {/* Dock Image - Centered */}
-            <div className="flex justify-center w-full">
+            <div className="flex justify-center w-full relative">
               <Image
-                src={isLightMode ? '/images/dock-light.png' : '/images/dock-dark.png'}
+                src="/images/dock-light.png"
                 alt="Mac Dock"
                 width={1200}
                 height={300}
-                className="w-full max-w-xl h-auto object-contain"
+                className="w-full max-w-xl h-auto object-contain dark:hidden"
+                priority
+              />
+              <Image
+                src="/images/dock-dark.png"
+                alt="Mac Dock"
+                width={1200}
+                height={300}
+                className="w-full max-w-xl h-auto object-contain hidden dark:block"
                 priority
               />
             </div>
@@ -164,13 +170,22 @@ export function Download() {
 
               {/* Apple Logo Image */}
               <div className="flex justify-center mt-auto">
-                <div className="p-10 lg:p-14 bg-background">
+                <div className="p-10 lg:p-14 bg-background relative min-h-[160px] min-w-[160px] lg:min-h-[224px] lg:min-w-[224px]">
                   <Image
-                    src={isLightMode ? '/images/apple-light.png' : '/images/apple-dark.png'}
+                    src="/images/apple-light.png"
                     alt="Apple Logo"
                     width={300}
                     height={300}
-                    className="w-40 h-40 lg:w-56 lg:h-56 object-contain"
+                    className="w-40 h-40 lg:w-56 lg:h-56 object-contain dark:hidden"
+                    priority
+                  />
+                  <Image
+                    src="/images/apple-dark.png"
+                    alt="Apple Logo"
+                    width={300}
+                    height={300}
+                    className="w-40 h-40 lg:w-56 lg:h-56 object-contain hidden dark:block"
+                    priority
                   />
                 </div>
               </div>
@@ -195,13 +210,22 @@ export function Download() {
 
               {/* Keyboard Image */}
               <div className="flex flex-1 justify-center lg:justify-end items-center lg:items-center min-h-[200px]">
-                <div className="p-4 lg:p-6 bg-background w-full max-w-lg flex items-center justify-center">
+                <div className="p-4 lg:p-6 bg-background w-full max-w-lg flex items-center justify-center relative aspect-[3/2]">
                   <Image
-                    src={isLightMode ? '/images/keyboard-light.png' : '/images/keyboard-dark.png'}
+                    src="/images/keyboard-light.png"
                     alt="Keyboard Shortcut"
                     width={600}
                     height={400}
-                    className="w-full h-auto object-contain max-h-[400px]"
+                    className="w-full h-full object-contain dark:hidden"
+                    priority
+                  />
+                  <Image
+                    src="/images/keyboard-dark.png"
+                    alt="Keyboard Shortcut"
+                    width={600}
+                    height={400}
+                    className="w-full h-full object-contain hidden dark:block"
+                    priority
                   />
                 </div>
               </div>

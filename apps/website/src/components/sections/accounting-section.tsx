@@ -1,35 +1,28 @@
 'use client'
 
 import Image from 'next/image'
-import { useTheme } from 'next-themes'
-import { useEffect, useState } from 'react'
 import { MaterialIcon } from '../homepage/icon-mapping'
 
 export function AccountingSection() {
-  const { resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-  
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-  
-  const isLightMode = mounted && resolvedTheme ? resolvedTheme !== 'dark' : true
 
   return (
     <section className="bg-background py-12 sm:py-16 lg:py-24">
       <div className="max-w-[1400px] mx-auto">
         <div className="text-center space-y-4 mb-12">
-          <div className="h-[100px] w-28 mx-auto mb-8">
+          <div className="h-[100px] w-28 mx-auto mb-8 relative">
             <Image
-              src={
-                isLightMode
-                  ? '/images/accounting-light.png'
-                  : '/images/accounting-dark.png'
-              }
+              src="/images/accounting-light.png"
               alt="Accounting Icon"
               width={112}
               height={100}
-              className="w-full h-full object-contain rounded-none"
+              className="w-full h-full object-contain rounded-none dark:hidden"
+            />
+            <Image
+              src="/images/accounting-dark.png"
+              alt="Accounting Icon"
+              width={112}
+              height={100}
+              className="w-full h-full object-contain rounded-none hidden dark:block"
             />
           </div>
           <h2 className="font-serif text-2xl sm:text-2xl text-foreground">

@@ -153,15 +153,19 @@ export function StartPage() {
               <div className="absolute inset-0 flex items-center justify-center p-0">
                 <div className="relative scale-[0.95] md:scale-100">
                       <Image
-                        src={
-                          isLightMode
-                            ? '/images/dashboard-light.svg'
-                            : '/images/dashboard-dark.svg'
-                        }
+                        src="/images/dashboard-light.svg"
                         alt="Dashboard illustration"
                         width={1000}
                         height={750}
-                        className="w-full h-auto md:!scale-[1.7] 2xl:!scale-[1.2]"
+                        className="w-full h-auto md:!scale-[1.7] 2xl:!scale-[1.2] dark:hidden"
+                        priority
+                      />
+                      <Image
+                        src="/images/dashboard-dark.svg"
+                        alt="Dashboard illustration"
+                        width={1000}
+                        height={750}
+                        className="w-full h-auto md:!scale-[1.7] 2xl:!scale-[1.2] hidden dark:block"
                         priority
                       />
                 </div>
@@ -238,15 +242,23 @@ export function StartPage() {
               <div className="absolute inset-0 p-4">
                 <div className="h-full flex flex-col items-center justify-center">
                       <Image
-                        src={
-                          isLightMode
-                            ? '/images/dashboard-light.svg'
-                            : '/images/dashboard-dark.svg'
-                        }
+                        src="/images/dashboard-light.svg"
                         alt="Dashboard illustration"
                         width={1600}
                         height={1200}
-                        className="w-full h-auto object-contain max-w-[85%] 2xl:max-w-[66%]"
+                        className="w-full h-auto object-contain max-w-[85%] 2xl:max-w-[66%] dark:hidden"
+                        style={{
+                          transform: 'rotate(-2deg) skew-y-1',
+                          filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.6))',
+                        }}
+                        priority
+                      />
+                      <Image
+                        src="/images/dashboard-dark.svg"
+                        alt="Dashboard illustration"
+                        width={1600}
+                        height={1200}
+                        className="w-full h-auto object-contain max-w-[85%] 2xl:max-w-[66%] hidden dark:block"
                         style={{
                           transform: 'rotate(-2deg) skew-y-1',
                           filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.6))',
