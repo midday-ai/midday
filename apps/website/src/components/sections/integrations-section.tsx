@@ -21,10 +21,10 @@ const defaultIntegrations: Integration[] = [
   { name: 'Google Drive', icon: '/images/gdrive.svg', alt: 'Google Drive' },
   { name: 'Dropbox', icon: '/images/dropbox.svg', alt: 'Dropbox' },
   { name: 'Slack', icon: '/images/slack.svg', alt: 'Slack' },
-  { name: 'Stripe', icon: '/images/stripe.svg', alt: 'Stripe' },
+  { name: 'Stripe', icon: '/images/stripe-light.svg', alt: 'Stripe' },
   { name: 'Xero', icon: '/images/xero.svg', alt: 'Xero' },
   { name: 'QuickBooks', icon: '/images/quickbooks.svg', alt: 'QuickBooks' },
-  { name: 'Fortnox', icon: '/images/fortnox.svg', alt: 'Fortnox' },
+  { name: 'Fortnox', icon: '/images/fortnox-light.svg', alt: 'Fortnox' },
 ]
 
 export function IntegrationsSection({
@@ -44,23 +44,48 @@ export function IntegrationsSection({
           </p>
         </div>
         <div className="flex flex-wrap justify-center gap-2">
-          {integrations.map((integration) => (
-            <div
-              key={integration.name}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background"
-            >
-              <Image
-                src={integration.icon}
-                alt={integration.alt}
-                width={16}
-                height={16}
-                className="object-contain"
-              />
-              <span className="font-sans text-sm text-foreground">
-                {integration.name}
-              </span>
-            </div>
-          ))}
+          {integrations.map((integration) => {
+            const isStripe = integration.name === 'Stripe'
+            const isFortnox = integration.name === 'Fortnox'
+            const hasDarkMode = isStripe || isFortnox
+
+            return (
+              <div
+                key={integration.name}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background"
+              >
+                {hasDarkMode ? (
+                  <>
+                    <Image
+                      src={integration.icon}
+                      alt={integration.alt}
+                      width={16}
+                      height={16}
+                      className="object-contain dark:hidden"
+                    />
+                    <Image
+                      src={integration.icon.replace('-light', '-dark')}
+                      alt={integration.alt}
+                      width={16}
+                      height={16}
+                      className="object-contain hidden dark:block"
+                    />
+                  </>
+                ) : (
+                  <Image
+                    src={integration.icon}
+                    alt={integration.alt}
+                    width={16}
+                    height={16}
+                    className="object-contain"
+                  />
+                )}
+                <span className="font-sans text-sm text-foreground">
+                  {integration.name}
+                </span>
+              </div>
+            )
+          })}
         </div>
       </div>
     </section>
