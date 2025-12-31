@@ -7,7 +7,9 @@ export function Pricing() {
   return (
     <div className="min-h-screen">
       {/* Pricing Section */}
-      <PricingSection />
+      <div className="pt-12 sm:pt-16 lg:pt-20">
+        <PricingSection />
+      </div>
 
       {/* Divider */}
       <div className="max-w-[1400px] mx-auto">
