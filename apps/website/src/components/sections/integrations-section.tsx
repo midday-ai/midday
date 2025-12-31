@@ -50,10 +50,10 @@ export function IntegrationsSection({
             const hasDarkMode = isStripe || isFortnox
 
             return (
-              <div
-                key={integration.name}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background"
-              >
+            <div
+              key={integration.name}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background"
+            >
                 {hasDarkMode ? (
                   <>
                     <Image
@@ -72,18 +72,18 @@ export function IntegrationsSection({
                     />
                   </>
                 ) : (
-                  <Image
-                    src={integration.icon}
-                    alt={integration.alt}
-                    width={16}
-                    height={16}
-                    className="object-contain"
-                  />
+              <Image
+                src={integration.icon}
+                alt={integration.alt}
+                width={16}
+                height={16}
+                className="object-contain"
+              />
                 )}
-                <span className="font-sans text-sm text-foreground">
-                  {integration.name}
-                </span>
-              </div>
+              <span className="font-sans text-sm text-foreground">
+                {integration.name}
+              </span>
+            </div>
             )
           })}
         </div>

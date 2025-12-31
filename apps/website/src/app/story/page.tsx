@@ -98,14 +98,14 @@ export default function StoryPage() {
                   className="w-full h-[350px] sm:h-[450px] object-cover object-center"
                   priority
                 />
-                  <div className="text-left">
-                    <p className="font-sans text-sm text-primary">
-                      Pontus & Viktor
-                    </p>
-                    <p className="font-sans text-sm text-muted-foreground">
-                      Founders, Midday
-                    </p>
-                  </div>
+                <div className="text-left">
+                  <p className="font-sans text-sm text-primary">
+                    Pontus & Viktor
+                  </p>
+                  <p className="font-sans text-sm text-muted-foreground">
+                    Founders, Midday
+                  </p>
+                </div>
               </div>
             </div>
           </div>

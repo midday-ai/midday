@@ -8,6 +8,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { HeaderAssistantInputPreview } from "./header-assistant-input-preview";
+import { HeaderInsightsPreview } from "./header-insights-preview";
 
 interface HeaderProps {
   transparent?: boolean;
@@ -34,6 +36,16 @@ export function Header({
 
   return (
     <>
+      {/* Dark Overlay */}
+      <div
+        className={`fixed left-0 right-0 bottom-0 z-40 transition-opacity duration-150 ${
+          isFeaturesOpen
+            ? "opacity-100 visible bg-black/20"
+            : "opacity-0 invisible pointer-events-none"
+        }`}
+        style={{ top: "72px" }}
+      />
+
       {/* Navigation Bar */}
       <nav className="fixed top-0 left-0 right-0 z-50 w-full">
         <div
@@ -85,6 +97,7 @@ export function Header({
                   Features
                 </button>
 
+
                 {/* Features Dropdown - Full Width */}
                 <div
                   className={`fixed left-0 right-0 bg-background border-t border-b border-border shadow-lg z-50 overflow-hidden transition-opacity duration-150 ${
@@ -98,6 +111,12 @@ export function Header({
                     <div className="grid grid-cols-1 lg:grid-cols-10">
                       {/* Left Column - Features List */}
                       <div className="lg:col-span-3 px-1 sm:px-2 md:px-3 lg:px-4 xl:px-6 2xl:px-8">
+                        {/* Features Eyebrow */}
+                        <div className="mb-2">
+                          <span className="font-sans text-xs uppercase tracking-wider text-muted-foreground">
+                            Features
+                          </span>
+                        </div>
                         <div
                           className="flex items-center py-2 cursor-pointer rounded group"
                           onClick={() => {
@@ -110,7 +129,7 @@ export function Header({
                               Assistant
                             </span>
                             <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Get clear answers
+                              Ask questions and get clear financial answers
                             </span>
                           </div>
                         </div>
@@ -235,46 +254,31 @@ export function Header({
                             <div className="grid grid-cols-2 gap-6 h-full">
                               {/* Left Preview */}
                               <div className="flex flex-col gap-4 h-full">
-                                <div className="flex-1 border border-border p-4 flex items-center justify-center">
-                                  <Image
-                                    src="/illustrations/Search-menu.svg"
-                                    alt="Search Menu Preview"
-                                    width={200}
-                                    height={145}
-                                    className="w-auto h-auto object-contain"
-                                  />
+                                <div className="flex-1 border border-border overflow-hidden">
+                                  <HeaderAssistantInputPreview />
                                 </div>
                                 <div className="text-left">
                                   <h3 className="font-sans text-sm text-foreground mb-2">
-                                    Find anything, instantly
+                                    Assistant
                                   </h3>
                                   <p className="font-sans text-xs text-muted-foreground leading-relaxed">
-                                    No more hunting. Instantly surface anything
-                                    across your entire workspace with natural
-                                    language search.
+                                    Ask questions and get clear financial
+                                    answers
                                   </p>
                                 </div>
                               </div>
 
                               {/* Right Preview */}
                               <div className="flex flex-col gap-4 h-full">
-                                <div className="flex-1 border border-border p-4 flex items-center justify-center">
-                                  <Image
-                                    src="/illustrations/Search-menu.svg"
-                                    alt="Search Menu Preview"
-                                    width={200}
-                                    height={145}
-                                    className="w-auto h-auto object-contain"
-                                  />
+                                <div className="flex-1 border border-border overflow-hidden">
+                                  <HeaderInsightsPreview />
                                 </div>
                                 <div className="text-left">
                                   <h3 className="font-sans text-sm text-foreground mb-2">
-                                    Find anything, instantly
+                                    Insights
                                   </h3>
                                   <p className="font-sans text-xs text-muted-foreground leading-relaxed">
-                                    No more hunting. Instantly surface anything
-                                    across your entire workspace with natural
-                                    language search.
+                                    Weekly summaries that show what changed and why
                                   </p>
                                 </div>
                               </div>
