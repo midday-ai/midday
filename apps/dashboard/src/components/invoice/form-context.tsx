@@ -7,6 +7,9 @@ import { FormProvider } from "react-hook-form";
 import { z } from "zod/v3";
 
 export const invoiceTemplateSchema = z.object({
+  id: z.string().uuid().optional(),
+  name: z.string().optional(),
+  isDefault: z.boolean().optional(),
   title: z.string().optional(),
   customerLabel: z.string(),
   fromLabel: z.string(),
@@ -38,8 +41,8 @@ export const invoiceTemplateSchema = z.object({
   includeQr: z.boolean().optional(),
   includeLineItemTax: z.boolean().optional(),
   lineItemTaxLabel: z.string().optional(),
-  taxRate: z.number().min(0).max(100).optional(),
-  vatRate: z.number().min(0).max(100).optional(),
+  taxRate: z.number().min(0).max(100).optional().nullable(),
+  vatRate: z.number().min(0).max(100).optional().nullable(),
   dateFormat: z.enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd.MM.yyyy"]),
   deliveryType: z.enum(["create", "create_and_send", "scheduled"]),
   locale: z.string().optional(),
@@ -53,7 +56,7 @@ export const lineItemSchema = z.object({
   price: z.number(),
   vat: z.number().min(0, "VAT must be at least 0").optional(),
   tax: z.number().min(0, "Tax must be at least 0").optional(),
-  taxRate: z.number().min(0).max(100).optional(),
+  taxRate: z.number().min(0).max(100).optional().nullable(),
 });
 
 export const invoiceFormSchema = z.object({

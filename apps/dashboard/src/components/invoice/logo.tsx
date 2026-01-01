@@ -1,12 +1,11 @@
 "use client";
 
+import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { useUpload } from "@/hooks/use-upload";
 import { useUserQuery } from "@/hooks/use-user";
-import { useTRPC } from "@/trpc/client";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { useToast } from "@midday/ui/use-toast";
-import { useMutation } from "@tanstack/react-query";
 import { useFormContext } from "react-hook-form";
 
 export function Logo() {
@@ -16,11 +15,7 @@ export function Logo() {
   const { toast } = useToast();
 
   const { data: user } = useUserQuery();
-
-  const trpc = useTRPC();
-  const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
-  );
+  const { updateTemplate } = useTemplateUpdate();
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -37,7 +32,7 @@ export function Logo() {
           shouldDirty: true,
         });
 
-        updateTemplateMutation.mutate({ logoUrl: url });
+        updateTemplate({ logoUrl: url });
       } catch (error) {
         toast({
           title: "Something went wrong, please try again.",
@@ -68,7 +63,7 @@ export function Logo() {
                   shouldValidate: true,
                   shouldDirty: true,
                 });
-                updateTemplateMutation.mutate({ logoUrl: null });
+                updateTemplate({ logoUrl: null });
               }}
             >
               <Icons.Clear className="size-4" />

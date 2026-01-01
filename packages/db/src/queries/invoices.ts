@@ -5,6 +5,7 @@ import {
   customers,
   exchangeRates,
   invoiceStatusEnum,
+  invoiceTemplates,
   invoices,
   teams,
   trackerEntries,
@@ -41,6 +42,9 @@ import { v4 as uuidv4 } from "uuid";
 import { logActivity } from "../utils/log-activity";
 
 export type Template = {
+  id?: string; // Reference to invoice_templates table
+  name?: string; // Template name for display
+  isDefault?: boolean; // Whether this is the default template
   customerLabel: string;
   title: string;
   fromLabel: string;
@@ -291,6 +295,7 @@ export async function getInvoiceById(
       issueDate: invoices.issueDate,
       sentAt: invoices.sentAt,
       template: invoices.template,
+      templateId: invoices.templateId,
       noteDetails: invoices.noteDetails,
       customerName: invoices.customerName,
       token: invoices.token,
@@ -311,10 +316,17 @@ export async function getInvoiceById(
       team: {
         name: teams.name,
       },
+      // Join to get the template name and isDefault from invoice_templates
+      invoiceTemplate: {
+        id: invoiceTemplates.id,
+        name: invoiceTemplates.name,
+        isDefault: invoiceTemplates.isDefault,
+      },
     })
     .from(invoices)
     .leftJoin(customers, eq(invoices.customerId, customers.id))
     .leftJoin(teams, eq(invoices.teamId, teams.id))
+    .leftJoin(invoiceTemplates, eq(invoices.templateId, invoiceTemplates.id))
     .where(
       and(
         eq(invoices.id, id),
@@ -327,11 +339,27 @@ export async function getInvoiceById(
     return null;
   }
 
+  const template = camelcaseKeys(result?.template as Record<string, unknown>, {
+    deep: true,
+  }) as Template;
+
+  // Populate template metadata from the joined invoice_templates table
+  // This ensures correct display even for drafts saved before multi-template feature
+  if (result.invoiceTemplate?.id) {
+    template.id = result.invoiceTemplate.id;
+    template.name = result.invoiceTemplate.name ?? "Default";
+    template.isDefault = result.invoiceTemplate.isDefault ?? false;
+  } else if (result.templateId) {
+    // Fallback: if templateId exists but join failed, at least set the id
+    template.id = result.templateId;
+  }
+
+  // Remove the invoiceTemplate from the result as it's merged into template
+  const { invoiceTemplate: _, ...restResult } = result;
+
   return {
-    ...result,
-    template: camelcaseKeys(result?.template as Record<string, unknown>, {
-      deep: true,
-    }) as Template,
+    ...restResult,
+    template,
     lineItems: result.lineItems as LineItem[],
     paymentDetails: result.paymentDetails as EditorDoc | null,
     customerDetails: result.customerDetails as EditorDoc | null,
@@ -573,8 +601,8 @@ type DraftInvoiceTemplateParams = {
   includeDecimals?: boolean;
   includeUnits?: boolean;
   includeQr?: boolean;
-  taxRate?: number;
-  vatRate?: number;
+  taxRate?: number | null;
+  vatRate?: number | null;
   size?: "a4" | "letter";
   deliveryType?: "create" | "create_and_send" | "scheduled";
   locale?: string;
@@ -583,6 +611,7 @@ type DraftInvoiceTemplateParams = {
 type DraftInvoiceParams = {
   id: string;
   template: DraftInvoiceTemplateParams;
+  templateId?: string | null;
   fromDetails?: string | null;
   customerDetails?: string | null;
   customerId?: string | null;
@@ -613,6 +642,7 @@ export async function draftInvoice(db: Database, params: DraftInvoiceParams) {
     userId,
     token,
     template,
+    templateId,
     paymentDetails,
     fromDetails,
     customerDetails,
@@ -631,6 +661,7 @@ export async function draftInvoice(db: Database, params: DraftInvoiceParams) {
       teamId,
       userId,
       token: useToken,
+      templateId,
       ...restInput,
       currency: template.currency?.toUpperCase(),
       template: restTemplate,
@@ -645,6 +676,7 @@ export async function draftInvoice(db: Database, params: DraftInvoiceParams) {
         teamId,
         userId,
         token: useToken,
+        templateId,
         ...restInput,
         currency: template.currency?.toUpperCase(),
         template: camelcaseKeys(restTemplate, { deep: true }),

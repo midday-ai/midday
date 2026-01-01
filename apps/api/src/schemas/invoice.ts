@@ -105,8 +105,8 @@ const baseInvoiceTemplateSchema = z.object({
   includeQr: z.boolean().optional(),
   includeLineItemTax: z.boolean().optional(),
   lineItemTaxLabel: z.string().optional(),
-  taxRate: z.number().min(0).max(100).optional(),
-  vatRate: z.number().min(0).max(100).optional(),
+  taxRate: z.number().min(0).max(100).optional().nullable(),
+  vatRate: z.number().min(0).max(100).optional().nullable(),
   size: z.enum(["a4", "letter"]).optional(),
   deliveryType: z.enum(["create", "create_and_send", "scheduled"]).optional(),
   locale: z.string().optional(),
@@ -142,7 +142,7 @@ const baseDraftLineItemSchema = z.object({
   price: z.number().optional(),
   vat: z.number().min(0, "VAT must be at least 0").nullable().optional(),
   tax: z.number().min(0, "Tax must be at least 0").nullable().optional(),
-  taxRate: z.number().min(0).max(100).optional(),
+  taxRate: z.number().min(0).max(100).optional().nullable(),
 });
 
 // tRPC-compatible line item schema (uses string for name field)
@@ -181,6 +181,11 @@ const baseDraftInvoiceSchema = z.object({
   id: z.string().uuid().openapi({
     description: "Unique identifier for the draft invoice",
     example: "b3b7e6e2-8c2a-4e2a-9b1a-2e4b5c6d7f8a",
+  }),
+  templateId: z.string().uuid().nullable().optional().openapi({
+    description:
+      "Reference to the invoice template used (for tracking which template was selected)",
+    example: "c4d5e6f7-8901-2345-6789-abcdef012345",
   }),
   customerDetails: z.string().nullable().optional().openapi({
     description: "Customer details in stringified format",

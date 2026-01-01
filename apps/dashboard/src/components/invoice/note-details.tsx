@@ -1,26 +1,22 @@
 "use client";
 
 import { Editor } from "@/components/invoice/editor";
-import { useTRPC } from "@/trpc/client";
-import { useMutation } from "@tanstack/react-query";
+import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { Controller, useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
 export function NoteDetails() {
   const { control, watch } = useFormContext();
   const id = watch("id");
-
-  const trpc = useTRPC();
-  const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
-  );
+  const templateId = watch("template.id");
+  const { updateTemplate } = useTemplateUpdate();
 
   return (
     <div>
       <LabelInput
         name="template.noteLabel"
         onSave={(value) => {
-          updateTemplateMutation.mutate({ noteLabel: value });
+          updateTemplate({ noteLabel: value });
         }}
         className="mb-2 block"
       />
@@ -31,12 +27,13 @@ export function NoteDetails() {
         render={({ field }) => {
           return (
             <Editor
-              // NOTE: This is a workaround to get the new content to render
-              key={id}
+              // NOTE: Key includes both invoice ID and template ID to force remount
+              // when either changes, preventing stale content from being saved
+              key={`${id}-${templateId}`}
               initialContent={field.value}
               onChange={field.onChange}
               onBlur={(content) => {
-                updateTemplateMutation.mutate({
+                updateTemplate({
                   noteDetails: content ? JSON.stringify(content) : null,
                 });
               }}

@@ -1,11 +1,10 @@
 "use client";
 
-import { useTRPC } from "@/trpc/client";
+import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { formatAmount } from "@/utils/format";
 import { calculateLineItemTotal } from "@midday/invoice/calculate";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { useMutation } from "@tanstack/react-query";
 import { Reorder, useDragControls } from "framer-motion";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import type { InvoiceFormValues } from "./form-context";
@@ -19,11 +18,7 @@ import { QuantityInput } from "./quantity-input";
 export function LineItems() {
   const { control } = useFormContext();
   const currency = useWatch({ control, name: "template.currency" });
-
-  const trpc = useTRPC();
-  const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
-  );
+  const { updateTemplate } = useTemplateUpdate();
 
   const includeDecimals = useWatch({
     control,
@@ -91,9 +86,7 @@ export function LineItems() {
         <LabelInput
           name="template.descriptionLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({
-              descriptionLabel: value,
-            });
+            updateTemplate({ descriptionLabel: value });
           }}
           className="truncate"
         />
@@ -101,9 +94,7 @@ export function LineItems() {
         <LabelInput
           name="template.quantityLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({
-              quantityLabel: value,
-            });
+            updateTemplate({ quantityLabel: value });
           }}
           className="truncate"
         />
@@ -111,9 +102,7 @@ export function LineItems() {
         <LabelInput
           name="template.priceLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({
-              priceLabel: value,
-            });
+            updateTemplate({ priceLabel: value });
           }}
           className="truncate"
         />
@@ -123,9 +112,7 @@ export function LineItems() {
             name="template.lineItemTaxLabel"
             defaultValue="Tax"
             onSave={(value) => {
-              updateTemplateMutation.mutate({
-                lineItemTaxLabel: value,
-              });
+              updateTemplate({ lineItemTaxLabel: value });
             }}
             className="truncate"
           />
@@ -134,9 +121,7 @@ export function LineItems() {
         <LabelInput
           name="template.totalLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({
-              totalLabel: value,
-            });
+            updateTemplate({ totalLabel: value });
           }}
           className="text-right truncate"
         />

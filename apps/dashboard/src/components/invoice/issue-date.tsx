@@ -1,8 +1,7 @@
-import { useTRPC } from "@/trpc/client";
+import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { TZDate } from "@date-fns/tz";
 import { Calendar } from "@midday/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
-import { useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
@@ -13,11 +12,7 @@ export function IssueDate() {
   const issueDate = watch("issueDate");
   const dateFormat = watch("template.dateFormat");
   const [isOpen, setIsOpen] = useState(false);
-
-  const trpc = useTRPC();
-  const updateTemplateMutation = useMutation(
-    trpc.invoiceTemplate.upsert.mutationOptions(),
-  );
+  const { updateTemplate } = useTemplateUpdate();
 
   const handleSelect = (date: Date | undefined) => {
     if (date) {
@@ -35,7 +30,7 @@ export function IssueDate() {
         <LabelInput
           name="template.issueDateLabel"
           onSave={(value) => {
-            updateTemplateMutation.mutate({ issueDateLabel: value });
+            updateTemplate({ issueDateLabel: value });
           }}
         />
         <span className="text-[11px] text-[#878787] font-mono">:</span>
