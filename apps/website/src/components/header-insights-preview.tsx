@@ -14,15 +14,15 @@ export function HeaderInsightsPreview() {
       <div className="space-y-2">
         <p className="text-[12px] font-sans leading-relaxed">
           <span className="text-foreground">Revenue </span>
-          <span className="text-foreground font-semibold">$4,200</span>
+          <span className="text-foreground">$4,200</span>
           <span className="text-foreground">, Expenses </span>
-          <span className="text-foreground font-semibold">$1,800</span>
+          <span className="text-foreground">$1,800</span>
           <span className="text-foreground">, Net </span>
-          <span className="text-foreground font-semibold">$2,400</span>
+          <span className="text-foreground">$2,400</span>
           <span className="text-foreground">. </span>
-          <span className="text-foreground font-semibold">3 new customers</span>
+          <span className="text-foreground">3 new customers</span>
           <span className="text-foreground"> onboarded. </span>
-          <span className="text-foreground font-semibold">Strong week!</span>
+          <span className="text-foreground">Strong week!</span>
         </p>
       </div>
 

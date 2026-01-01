@@ -22,7 +22,7 @@ export function HeaderAssistantInputPreview() {
   return (
     <div className="w-full h-full flex flex-col p-4 bg-background">
       {/* Shortcut Suggestions */}
-      <div className="flex-1 overflow-y-auto mb-3 border border-border bg-secondary">
+      <div className="flex-1 overflow-y-auto mb-3 border border-border bg-background">
         <div className="p-1 space-y-0.5">
           {SHORTCUT_SUGGESTIONS.map((suggestion, index) => (
             <div
