@@ -182,6 +182,9 @@ export async function createInvoiceTemplate(
   const { teamId, name, isDefault, ...rest } = params;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 368e1072b (wip)
   return db.transaction(async (tx) => {
     // Check if this is the first template for the team
     const existingTemplates = await tx
@@ -189,6 +192,7 @@ export async function createInvoiceTemplate(
       .from(invoiceTemplates)
       .where(eq(invoiceTemplates.teamId, teamId))
       .limit(1);
+<<<<<<< HEAD
 
     const isFirstTemplate = existingTemplates.length === 0;
 =======
@@ -198,20 +202,23 @@ export async function createInvoiceTemplate(
     .from(invoiceTemplates)
     .where(eq(invoiceTemplates.teamId, teamId))
     .limit(1);
+=======
+>>>>>>> 368e1072b (wip)
 
-  const isFirstTemplate = existingTemplates.length === 0;
+    const isFirstTemplate = existingTemplates.length === 0;
 
-  // If this is the first template or marked as default, ensure it's the only default
-  if (isDefault || isFirstTemplate) {
-    await db
-      .update(invoiceTemplates)
-      .set({ isDefault: false })
-      .where(eq(invoiceTemplates.teamId, teamId));
-  }
+    // If this is the first template or marked as default, ensure it's the only default
+    if (isDefault || isFirstTemplate) {
+      await tx
+        .update(invoiceTemplates)
+        .set({ isDefault: false })
+        .where(eq(invoiceTemplates.teamId, teamId));
+    }
 
-  // First template should always be the default, regardless of isDefault param
-  const shouldBeDefault = isFirstTemplate || (isDefault ?? false);
+    // First template should always be the default, regardless of isDefault param
+    const shouldBeDefault = isFirstTemplate || (isDefault ?? false);
 
+<<<<<<< HEAD
   const [result] = await db
     .insert(invoiceTemplates)
     .values({
@@ -244,6 +251,18 @@ export async function createInvoiceTemplate(
       })
       .returning();
 
+=======
+    const [result] = await tx
+      .insert(invoiceTemplates)
+      .values({
+        teamId,
+        name,
+        isDefault: shouldBeDefault,
+        ...rest,
+      })
+      .returning();
+
+>>>>>>> 368e1072b (wip)
     return result;
   });
 }
@@ -366,18 +385,26 @@ export async function upsertInvoiceTemplate(
 /**
  * Set a template as the default for a team
 <<<<<<< HEAD
+<<<<<<< HEAD
  * Uses a transaction to ensure atomicity - verifies the template exists,
  * unsets other defaults, and sets the new default as a single atomic operation.
 =======
  * Verifies the template exists before unsetting other defaults to prevent
  * leaving the team in a state with no default template.
 >>>>>>> 8079d869b (wip)
+=======
+ * Uses a transaction to ensure atomicity - verifies the template exists,
+ * unsets other defaults, and sets the new default as a single atomic operation.
+>>>>>>> 368e1072b (wip)
  */
 export async function setDefaultTemplate(
   db: Database,
   params: { id: string; teamId: string },
 ) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 368e1072b (wip)
   return db.transaction(async (tx) => {
     // First, verify the target template exists and belongs to this team
     const [targetTemplate] = await tx
@@ -390,6 +417,7 @@ export async function setDefaultTemplate(
         ),
       )
       .limit(1);
+<<<<<<< HEAD
 
     if (!targetTemplate) {
       // Template doesn't exist or doesn't belong to this team
@@ -408,19 +436,22 @@ export async function setDefaultTemplate(
       ),
     )
     .limit(1);
+=======
+>>>>>>> 368e1072b (wip)
 
-  if (!targetTemplate) {
-    // Template doesn't exist or doesn't belong to this team
-    // Return undefined to signal failure without modifying database state
-    return undefined;
-  }
+    if (!targetTemplate) {
+      // Template doesn't exist or doesn't belong to this team
+      // Return undefined to signal failure without modifying database state
+      return undefined;
+    }
 
-  // Now safe to unset all other defaults for this team
-  await db
-    .update(invoiceTemplates)
-    .set({ isDefault: false })
-    .where(eq(invoiceTemplates.teamId, params.teamId));
+    // Now safe to unset all other defaults for this team
+    await tx
+      .update(invoiceTemplates)
+      .set({ isDefault: false })
+      .where(eq(invoiceTemplates.teamId, params.teamId));
 
+<<<<<<< HEAD
   // Set the specified template as default
   const [result] = await db
     .update(invoiceTemplates)
@@ -452,6 +483,20 @@ export async function setDefaultTemplate(
       )
       .returning(templateSelectFields);
 
+=======
+    // Set the specified template as default
+    const [result] = await tx
+      .update(invoiceTemplates)
+      .set({ isDefault: true })
+      .where(
+        and(
+          eq(invoiceTemplates.id, params.id),
+          eq(invoiceTemplates.teamId, params.teamId),
+        ),
+      )
+      .returning(templateSelectFields);
+
+>>>>>>> 368e1072b (wip)
     return result;
   });
 }

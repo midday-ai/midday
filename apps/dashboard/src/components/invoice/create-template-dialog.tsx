@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
+import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFormContext } from "react-hook-form";
 import { z } from "zod/v3";
@@ -128,12 +129,12 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: Props) {
                 >
                   Cancel
                 </Button>
-                <Button
+                <SubmitButton
                   type="submit"
-                  disabled={createTemplateMutation.isPending}
+                  isSubmitting={createTemplateMutation.isPending}
                 >
-                  {createTemplateMutation.isPending ? "Creating..." : "Create"}
-                </Button>
+                  Create
+                </SubmitButton>
               </DialogFooter>
             </form>
           </Form>
