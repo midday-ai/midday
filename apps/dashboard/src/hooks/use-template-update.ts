@@ -17,7 +17,7 @@ import { useFormContext } from "react-hook-form";
  * updateTemplate({ logoUrl: "https://..." });
  */
 export function useTemplateUpdate() {
-  const { watch, setValue } = useFormContext();
+  const { watch, setValue, getValues } = useFormContext();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
@@ -25,16 +25,17 @@ export function useTemplateUpdate() {
 
   const mutation = useMutation(
     trpc.invoiceTemplate.upsert.mutationOptions({
-      onSuccess: (data, variables) => {
+      onSuccess: (data) => {
         queryClient.invalidateQueries({
           queryKey: trpc.invoiceTemplate.list.queryKey(),
         });
 
-        // If a new template was created (id was undefined in request but response has an ID),
-        // update the form to track the newly created template. This ensures that when the
-        // invoice draft is saved via transformFormValuesToDraft, the templateId is correctly
-        // extracted from template.id instead of being null.
-        if (data?.id && !variables.id) {
+        // If a new template was created and the form still doesn't have a template ID,
+        // update the form to track the newly created template. We check the current form
+        // state (via getValues) rather than the mutation variables to avoid overwriting
+        // the user's selection if they switched templates while the mutation was in flight.
+        const currentTemplateId = getValues("template.id");
+        if (data?.id && !currentTemplateId) {
           setValue("template.id", data.id);
           setValue("template.name", data.name);
           setValue("template.isDefault", data.isDefault);

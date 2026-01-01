@@ -100,10 +100,7 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="max-w-[400px]"
-        onOpenAutoFocus={(evt) => evt.preventDefault()}
-      >
+      <DialogContent className="max-w-[400px]">
         <div className="p-4">
           <DialogHeader>
             <DialogTitle>Create New Template</DialogTitle>
