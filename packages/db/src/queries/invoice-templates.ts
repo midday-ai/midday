@@ -52,15 +52,31 @@ export async function updateInvoiceTemplate(
 ) {
   const { teamId, ...rest } = params;
 
+  // Use explicit check instead of onConflictDoUpdate to avoid relying on unique constraint
+  // This allows the same behavior whether or not the constraint exists
+  const [existing] = await db
+    .select({ id: invoiceTemplates.id })
+    .from(invoiceTemplates)
+    .where(eq(invoiceTemplates.teamId, teamId))
+    .limit(1);
+
+  if (existing) {
+    // Update existing template
+    const [result] = await db
+      .update(invoiceTemplates)
+      .set(rest)
+      .where(eq(invoiceTemplates.id, existing.id))
+      .returning();
+
+    return result;
+  }
+
+  // Insert new template
   const [result] = await db
     .insert(invoiceTemplates)
     .values({
-      teamId: teamId,
+      teamId,
       ...rest,
-    })
-    .onConflictDoUpdate({
-      target: invoiceTemplates.teamId,
-      set: rest,
     })
     .returning();
 
