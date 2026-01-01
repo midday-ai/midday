@@ -81,6 +81,8 @@
     "react-markdown": "^10.1.0",
     "react-pdf": "^10.2.0",
     "react-plaid-link": "^4.1.1",
+    "@stripe/react-stripe-js": "^5.4.1",
+    "@stripe/stripe-js": "^8.6.0",
     "react-use-draggable-scroll": "^0.4.7",
     "recharts": "2.15.3",
     "resend": "^6.5.2",

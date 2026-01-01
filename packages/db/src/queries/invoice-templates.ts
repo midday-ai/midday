@@ -96,6 +96,7 @@ const templateSelectFields = {
   includeUnits: invoiceTemplates.includeUnits,
   includePdf: invoiceTemplates.includePdf,
   sendCopy: invoiceTemplates.sendCopy,
+  paymentEnabled: invoiceTemplates.paymentEnabled,
 };
 
 /**

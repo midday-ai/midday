@@ -16,6 +16,7 @@ import { inboxRouter } from "./inbox";
 import { inboxAccountsRouter } from "./inbox-accounts";
 import { institutionsRouter } from "./institutions";
 import { invoiceRouter } from "./invoice";
+import { invoicePaymentsRouter } from "./invoice-payments";
 import { invoiceProductsRouter } from "./invoice-products";
 import { invoiceTemplateRouter } from "./invoice-template";
 import { jobsRouter } from "./jobs";
@@ -54,6 +55,7 @@ export const appRouter = createTRPCRouter({
   inboxAccounts: inboxAccountsRouter,
   institutions: institutionsRouter,
   invoice: invoiceRouter,
+  invoicePayments: invoicePaymentsRouter,
   jobs: jobsRouter,
   invoiceProducts: invoiceProductsRouter,
   invoiceTemplate: invoiceTemplateRouter,

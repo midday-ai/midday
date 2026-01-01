@@ -756,6 +756,7 @@ export const invoices = pgTable(
     }),
     scheduledJobId: text("scheduled_job_id"),
     templateId: uuid("template_id"),
+    paymentIntentId: text("payment_intent_id"),
   },
   (table) => [
     index("invoices_created_at_idx").using(
@@ -1361,6 +1362,8 @@ export const teams = pgTable(
     plan: plansEnum().default("trial").notNull(),
     subscriptionStatus: subscriptionStatusEnum("subscription_status"),
     exportSettings: jsonb("export_settings"),
+    stripeAccountId: text("stripe_account_id"),
+    stripeConnectStatus: text("stripe_connect_status"),
   },
   (table) => [
     unique("teams_inbox_id_key").on(table.inboxId),
@@ -1615,6 +1618,7 @@ export const invoiceTemplates = pgTable(
     sendCopy: boolean("send_copy"),
     includeLineItemTax: boolean("include_line_item_tax").default(false),
     lineItemTaxLabel: text("line_item_tax_label"),
+    paymentEnabled: boolean("payment_enabled").default(false),
   },
   (table) => [
     foreignKey({

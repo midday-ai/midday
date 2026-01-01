@@ -145,6 +145,10 @@ export default async function Page(props: Props) {
       <InvoiceToolbar
         token={invoice.token}
         invoiceNumber={invoice.invoiceNumber || "invoice"}
+        paymentEnabled={invoice.template.paymentEnabled}
+        amount={invoice.amount ?? undefined}
+        currency={invoice.currency ?? undefined}
+        status={invoice.status}
       />
 
       <div className="fixed bottom-4 right-4 hidden md:block">

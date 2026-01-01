@@ -306,6 +306,8 @@ export async function getInvoiceById(
       bottomBlock: invoices.bottomBlock,
       scheduledAt: invoices.scheduledAt,
       scheduledJobId: invoices.scheduledJobId,
+      paymentIntentId: invoices.paymentIntentId,
+      teamId: invoices.teamId,
       customer: {
         id: customers.id,
         name: customers.name,
@@ -946,6 +948,7 @@ export type UpdateInvoiceParams = {
   reminderSentAt?: string | null;
   scheduledAt?: string | null;
   scheduledJobId?: string | null;
+  paymentIntentId?: string | null;
   teamId: string;
   userId?: string;
 };
