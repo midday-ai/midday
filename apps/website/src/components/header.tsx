@@ -248,7 +248,7 @@ export function Header({
                             <div className="grid grid-cols-2 gap-6 h-full">
                               {/* Left Preview */}
                               <div className="flex flex-col gap-6 h-full">
-                                <div className="flex-1 border border-border overflow-hidden">
+                                <div className="flex-1 border border-border overflow-hidden bg-background">
                                   <HeaderAssistantInputPreview />
                                 </div>
                                 <div className="text-left">
