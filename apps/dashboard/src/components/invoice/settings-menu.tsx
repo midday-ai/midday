@@ -34,6 +34,7 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
+import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
@@ -462,12 +463,13 @@ export function SettingsMenu() {
                 >
                   Cancel
                 </Button>
-                <Button
+                <SubmitButton
+                  isSubmitting={updateTemplateMutation.isPending}
                   onClick={handleRename}
                   disabled={!newName.trim() || updateTemplateMutation.isPending}
                 >
-                  {updateTemplateMutation.isPending ? "Saving..." : "Save"}
-                </Button>
+                  Save
+                </SubmitButton>
               </DialogFooter>
             </div>
           </div>
