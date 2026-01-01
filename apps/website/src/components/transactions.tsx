@@ -200,6 +200,40 @@ export function Transactions() {
                     Every payment in and out of your business is automatically
                     collected from connected accounts and kept in a single list.
                   </p>
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Automatic bank syncing</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Unified transaction list</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Manual transactions</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">CSV import</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Filters and search</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <Image src="/images/fortnox-light.svg" alt="Fortnox" width={16} height={16} className="object-contain dark:hidden" />
+                      <Image src="/images/fortnox-dark.svg" alt="Fortnox" width={16} height={16} className="object-contain hidden dark:block" />
+                      <span className="font-sans text-sm text-foreground">Fortnox</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <Image src="/images/xero.svg" alt="Xero" width={16} height={16} className="object-contain" />
+                      <span className="font-sans text-sm text-foreground">Xero</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <Image src="/images/quickbooks.svg" alt="QuickBooks" width={16} height={16} className="object-contain" />
+                      <span className="font-sans text-sm text-foreground">QuickBooks</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <Image src="/images/slack.svg" alt="Slack" width={16} height={16} className="object-contain" />
+                      <span className="font-sans text-sm text-foreground">Slack</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -225,6 +259,26 @@ export function Transactions() {
                     Transactions are continuously categorized so records stay
                     structured without repetitive manual work.
                   </p>
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Automatic categorization</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Custom categories</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Rules and patterns</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">VAT and tax rates</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Expense tags</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Bulk drag and drop receipts</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
