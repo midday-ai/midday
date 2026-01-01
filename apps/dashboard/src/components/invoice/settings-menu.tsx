@@ -270,6 +270,12 @@ export function SettingsMenu() {
     const currentTemplate = watch("template");
     if (!currentTemplate) return;
 
+    // Get the CURRENT invoice-level details (editors modify these, not template.*)
+    // This ensures user's edits are captured, not stale template values
+    const fromDetails = watch("fromDetails");
+    const paymentDetails = watch("paymentDetails");
+    const noteDetails = watch("noteDetails");
+
     // Exclude id and create with new name
     const {
       id: _id,
@@ -279,6 +285,10 @@ export function SettingsMenu() {
 
     duplicateTemplateMutation.mutate({
       ...templateSettings,
+      // Override with current invoice-level values to capture user's edits
+      fromDetails: fromDetails ? JSON.stringify(fromDetails) : null,
+      paymentDetails: paymentDetails ? JSON.stringify(paymentDetails) : null,
+      noteDetails: noteDetails ? JSON.stringify(noteDetails) : null,
       name: `${templateName || "Template"} (Copy)`,
       isDefault: false,
     });

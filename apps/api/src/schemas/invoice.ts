@@ -182,6 +182,11 @@ const baseDraftInvoiceSchema = z.object({
     description: "Unique identifier for the draft invoice",
     example: "b3b7e6e2-8c2a-4e2a-9b1a-2e4b5c6d7f8a",
   }),
+  templateId: z.string().uuid().nullable().optional().openapi({
+    description:
+      "Reference to the invoice template used (for tracking which template was selected)",
+    example: "c4d5e6f7-8901-2345-6789-abcdef012345",
+  }),
   customerDetails: z.string().nullable().optional().openapi({
     description: "Customer details in stringified format",
     example: "John Doe, johndoe@email.com",

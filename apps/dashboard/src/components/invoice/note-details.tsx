@@ -8,6 +8,7 @@ import { LabelInput } from "./label-input";
 export function NoteDetails() {
   const { control, watch } = useFormContext();
   const id = watch("id");
+  const templateId = watch("template.id");
   const { updateTemplate } = useTemplateUpdate();
 
   return (
@@ -26,8 +27,9 @@ export function NoteDetails() {
         render={({ field }) => {
           return (
             <Editor
-              // NOTE: This is a workaround to get the new content to render
-              key={id}
+              // NOTE: Key includes both invoice ID and template ID to force remount
+              // when either changes, preventing stale content from being saved
+              key={`${id}-${templateId}`}
               initialContent={field.value}
               onChange={field.onChange}
               onBlur={(content) => {

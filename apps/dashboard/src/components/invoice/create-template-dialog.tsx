@@ -70,11 +70,21 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: Props) {
     // Get current template settings from invoice form to copy to new template
     const currentTemplate = invoiceForm?.getValues("template");
 
+    // Get the CURRENT invoice-level details (editors modify these, not template.*)
+    // This ensures user's edits are captured, not stale template values
+    const fromDetails = invoiceForm?.getValues("fromDetails");
+    const paymentDetails = invoiceForm?.getValues("paymentDetails");
+    const noteDetails = invoiceForm?.getValues("noteDetails");
+
     // Exclude id from current template since we're creating a new one
     const { id: _id, ...templateSettings } = currentTemplate || {};
 
     createTemplateMutation.mutate({
       ...templateSettings,
+      // Override with current invoice-level values to capture user's edits
+      fromDetails: fromDetails ? JSON.stringify(fromDetails) : null,
+      paymentDetails: paymentDetails ? JSON.stringify(paymentDetails) : null,
+      noteDetails: noteDetails ? JSON.stringify(noteDetails) : null,
       name: values.name,
       isDefault: false,
     });

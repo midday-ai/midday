@@ -36,8 +36,8 @@ type InvoiceTemplateParams = {
   includeQr?: boolean;
   includeLineItemTax?: boolean;
   lineItemTaxLabel?: string;
-  taxRate?: number;
-  vatRate?: number;
+  taxRate?: number | null;
+  vatRate?: number | null;
   size?: "a4" | "letter";
   deliveryType?: "create" | "create_and_send" | "scheduled";
   locale?: string;
@@ -355,8 +355,8 @@ export async function setDefaultTemplate(
 
     if (!targetTemplate) {
       // Template doesn't exist or doesn't belong to this team
-      // Return undefined to signal failure without modifying database state
-      return undefined;
+      // Throw an error to ensure the mutation fails and onSuccess is not called
+      throw new Error("Template not found");
     }
 
     // Now safe to unset all other defaults for this team
