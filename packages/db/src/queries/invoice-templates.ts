@@ -50,12 +50,6 @@ type CreateInvoiceTemplateParams = {
   isDefault?: boolean;
 } & InvoiceTemplateParams;
 
-type UpdateInvoiceTemplateParams = {
-  id: string;
-  teamId: string;
-  name?: string;
-} & InvoiceTemplateParams;
-
 type UpsertInvoiceTemplateParams = {
   id?: string; // Optional - if not provided, will upsert the default template
   teamId: string;
@@ -214,26 +208,6 @@ export async function createInvoiceTemplate(
 
     return result;
   });
-}
-
-/**
- * Update an existing invoice template
- */
-export async function updateInvoiceTemplate(
-  db: Database,
-  params: UpdateInvoiceTemplateParams,
-) {
-  const { id, teamId, ...rest } = params;
-
-  const [result] = await db
-    .update(invoiceTemplates)
-    .set(rest)
-    .where(
-      and(eq(invoiceTemplates.id, id), eq(invoiceTemplates.teamId, teamId)),
-    )
-    .returning();
-
-  return result;
 }
 
 /**

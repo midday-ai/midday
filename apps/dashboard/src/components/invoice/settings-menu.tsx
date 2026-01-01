@@ -35,6 +35,7 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
@@ -139,6 +140,7 @@ export function SettingsMenu() {
   const { watch, setValue } = useFormContext();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [newName, setNewName] = useState("");
@@ -161,6 +163,12 @@ export function SettingsMenu() {
           queryKey: trpc.invoiceTemplate.list.queryKey(),
         });
       },
+      onError: () => {
+        toast({
+          title: "Failed to update template",
+          variant: "error",
+        });
+      },
     }),
   );
 
@@ -170,6 +178,12 @@ export function SettingsMenu() {
         setValue("template.isDefault", true, { shouldDirty: true });
         queryClient.invalidateQueries({
           queryKey: trpc.invoiceTemplate.list.queryKey(),
+        });
+      },
+      onError: () => {
+        toast({
+          title: "Failed to set default template",
+          variant: "error",
         });
       },
     }),
@@ -202,6 +216,12 @@ export function SettingsMenu() {
 
         setDeleteDialogOpen(false);
       },
+      onError: () => {
+        toast({
+          title: "Failed to delete template",
+          variant: "error",
+        });
+      },
     }),
   );
 
@@ -229,6 +249,12 @@ export function SettingsMenu() {
             shouldDirty: true,
           });
         }
+      },
+      onError: () => {
+        toast({
+          title: "Failed to duplicate template",
+          variant: "error",
+        });
       },
     }),
   );

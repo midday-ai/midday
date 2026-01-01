@@ -21,6 +21,7 @@ import {
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
+import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFormContext } from "react-hook-form";
 import { z } from "zod/v3";
@@ -38,6 +39,7 @@ type Props = {
 export function CreateTemplateDialog({ open, onOpenChange, onCreated }: Props) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const invoiceForm = useFormContext();
 
   const form = useZodForm(formSchema, {
@@ -62,6 +64,12 @@ export function CreateTemplateDialog({ open, onOpenChange, onCreated }: Props) {
 
         form.reset();
         onOpenChange(false);
+      },
+      onError: () => {
+        toast({
+          title: "Failed to create template",
+          variant: "error",
+        });
       },
     }),
   );

@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { CreateTemplateDialog } from "./create-template-dialog";
@@ -21,6 +21,7 @@ import { CreateTemplateDialog } from "./create-template-dialog";
 export function TemplateSelector() {
   const { watch, setValue } = useFormContext();
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const { data: templates, refetch } = useQuery(
@@ -51,6 +52,11 @@ export function TemplateSelector() {
     id: string;
     name: string;
   }) => {
+    // Invalidate count query so settings-menu has fresh data
+    queryClient.invalidateQueries({
+      queryKey: trpc.invoiceTemplate.count.queryKey(),
+    });
+
     // Refetch the templates list to get the full new template data
     const { data: updatedTemplates } = await refetch();
 

@@ -8,7 +8,6 @@ import {
   getInvoiceTemplateCount,
   getInvoiceTemplates,
   setDefaultTemplate,
-  updateInvoiceTemplate,
   upsertInvoiceTemplate,
 } from "@midday/db/queries";
 import { z } from "zod";
