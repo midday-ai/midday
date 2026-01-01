@@ -19,7 +19,6 @@ type InvoiceTemplateParams = {
   taxLabel?: string;
   discountLabel?: string;
   sendCopy?: boolean;
-  timezone?: string;
   paymentLabel?: string;
   noteLabel?: string;
   logoUrl?: string | null;
@@ -40,7 +39,6 @@ type InvoiceTemplateParams = {
   vatRate?: number | null;
   size?: "a4" | "letter";
   deliveryType?: "create" | "create_and_send" | "scheduled";
-  locale?: string;
   includePdf?: boolean;
 };
 
