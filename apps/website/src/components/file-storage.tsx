@@ -186,6 +186,28 @@ export function FileStorage() {
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
                     Store contracts, receipts, invoices, and other documents in one place connected to your business.
                   </p>
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Automatic OCR</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Automatic tagging</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Linked to transactions and invoices</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Bulk uploads</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <Image src="/images/dropbox.svg" alt="Dropbox" width={16} height={16} className="object-contain" />
+                      <span className="font-sans text-sm text-foreground">Dropbox</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <Image src="/images/gdrive.svg" alt="Google Drive" width={16} height={16} className="object-contain" />
+                      <span className="font-sans text-sm text-foreground">Google Drive</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -210,6 +232,17 @@ export function FileStorage() {
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
                     Find files quickly using search across names and details without digging through folders.
                   </p>
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Full-text search</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Tags and filters</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Grid and list views</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 

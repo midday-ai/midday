@@ -188,6 +188,20 @@ export function Customers() {
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
                     See revenue, invoices, time, and activity per customer in one place.
                   </p>
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Customer profiles</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Revenue per customer</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Invoice history</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Time tracked</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -212,6 +226,17 @@ export function Customers() {
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
                     Understand how each customer contributes to your business using real financial data.
                   </p>
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Revenue trends</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Period comparisons</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Customer ranking</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 

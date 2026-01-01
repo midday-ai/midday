@@ -188,6 +188,36 @@ export function Inbox() {
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
                     Upload receipts and invoices manually, connect existing folders, or pull them in from connected email accounts.
                   </p>
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Personal Midday inbox email</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Manual uploads</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Bulk uploads</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">OCR scanning</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <Image src="/images/gmail.svg" alt="Gmail" width={16} height={16} className="object-contain" />
+                      <span className="font-sans text-sm text-foreground">Gmail</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <Image src="/images/outlook.svg" alt="Outlook" width={16} height={16} className="object-contain" />
+                      <span className="font-sans text-sm text-foreground">Outlook</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <Image src="/images/whatsapp.svg" alt="WhatsApp" width={16} height={16} className="object-contain" />
+                      <span className="font-sans text-sm text-foreground">WhatsApp</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <Image src="/images/slack.svg" alt="Slack" width={16} height={16} className="object-contain" />
+                      <span className="font-sans text-sm text-foreground">Slack</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -212,6 +242,17 @@ export function Inbox() {
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
                     Documents are matched to the right transactions and surfaced when something is missing so reconciliation stays simple.
                   </p>
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Suggested matches</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Missing receipt detection</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">One-click approval</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 

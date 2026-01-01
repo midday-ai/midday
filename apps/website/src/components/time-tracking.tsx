@@ -221,27 +221,27 @@ export function TimeTracking() {
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                       <span className="font-sans text-sm text-foreground">
-                        Invoice from time
+                        Live time tracking
                       </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                       <span className="font-sans text-sm text-foreground">
-                        Project billing
+                        Manual time entry
                       </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                       <span className="font-sans text-sm text-foreground">
-                        Customer rates
+                        Projects with hourly rates
                       </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                       <span className="font-sans text-sm text-foreground">
-                        Draft invoices
+                        Customers tied to projects
                       </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                       <span className="font-sans text-sm text-foreground">
-                        Reusable entries
+                        Convert time to invoices
                       </span>
                     </div>
                   </div>
@@ -273,7 +273,7 @@ export function TimeTracking() {
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                       <span className="font-sans text-sm text-foreground">
-                        Live time tracking
+                        Live timers
                       </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
@@ -288,12 +288,17 @@ export function TimeTracking() {
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                       <span className="font-sans text-sm text-foreground">
-                        Manual entries
+                        Time entries
                       </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                       <span className="font-sans text-sm text-foreground">
-                        Billable hours
+                        Editable logs
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">
+                        Weekly totals
                       </span>
                     </div>
                   </div>

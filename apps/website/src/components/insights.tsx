@@ -188,6 +188,23 @@ export function Insights() {
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
                     Get automatic weekly summaries showing how revenue, spending, cash, and key metrics changed since the last period.
                   </p>
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Weekly summaries</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Revenue and spending changes</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Cash overview</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Email delivery</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Voice summaries</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -212,6 +229,17 @@ export function Insights() {
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
                     Important movements are highlighted so you understand what's driving changes without reviewing dashboards or reports.
                   </p>
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Change highlights</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Category movements</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Context explanations</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
