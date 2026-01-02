@@ -20,7 +20,7 @@ const initialInvoices: Omit<Invoice, 'status'>[] = [
     amount: '$2,450.50',
     dueDate: 'Mar 19',
     invoiceDate: 'Mar 19',
-    invoiceNo: 'INV-001',
+    invoiceNo: 'INV-015',
   },
   {
     id: '2',
@@ -28,7 +28,7 @@ const initialInvoices: Omit<Invoice, 'status'>[] = [
     amount: '$1,850.00',
     dueDate: 'Mar 18',
     invoiceDate: 'Mar 18',
-    invoiceNo: 'INV-002',
+    invoiceNo: 'INV-014',
   },
   {
     id: '3',
@@ -36,7 +36,7 @@ const initialInvoices: Omit<Invoice, 'status'>[] = [
     amount: '$3,200.75',
     dueDate: 'Mar 16',
     invoiceDate: 'Mar 16',
-    invoiceNo: 'INV-003',
+    invoiceNo: 'INV-013',
   },
   {
     id: '4',
@@ -44,7 +44,7 @@ const initialInvoices: Omit<Invoice, 'status'>[] = [
     amount: '$1,120.25',
     dueDate: 'Mar 15',
     invoiceDate: 'Mar 15',
-    invoiceNo: 'INV-004',
+    invoiceNo: 'INV-012',
   },
   {
     id: '5',
@@ -52,7 +52,7 @@ const initialInvoices: Omit<Invoice, 'status'>[] = [
     amount: '$4,500.00',
     dueDate: 'Mar 14',
     invoiceDate: 'Mar 14',
-    invoiceNo: 'INV-005',
+    invoiceNo: 'INV-011',
   },
   {
     id: '6',
@@ -60,7 +60,7 @@ const initialInvoices: Omit<Invoice, 'status'>[] = [
     amount: '$2,100.25',
     dueDate: 'Mar 13',
     invoiceDate: 'Mar 13',
-    invoiceNo: 'INV-006',
+    invoiceNo: 'INV-010',
   },
   {
     id: '7',
@@ -68,7 +68,7 @@ const initialInvoices: Omit<Invoice, 'status'>[] = [
     amount: '$1,750.50',
     dueDate: 'Mar 12',
     invoiceDate: 'Mar 12',
-    invoiceNo: 'INV-007',
+    invoiceNo: 'INV-009',
   },
   {
     id: '8',
@@ -84,7 +84,7 @@ const initialInvoices: Omit<Invoice, 'status'>[] = [
     amount: '$2,650.00',
     dueDate: 'Mar 10',
     invoiceDate: 'Mar 10',
-    invoiceNo: 'INV-009',
+    invoiceNo: 'INV-007',
   },
   {
     id: '10',
@@ -92,7 +92,7 @@ const initialInvoices: Omit<Invoice, 'status'>[] = [
     amount: '$1,950.75',
     dueDate: 'Mar 09',
     invoiceDate: 'Mar 09',
-    invoiceNo: 'INV-010',
+    invoiceNo: 'INV-006',
   },
   {
     id: '11',
@@ -100,7 +100,7 @@ const initialInvoices: Omit<Invoice, 'status'>[] = [
     amount: '$3,400.50',
     dueDate: 'Mar 08',
     invoiceDate: 'Mar 08',
-    invoiceNo: 'INV-011',
+    invoiceNo: 'INV-005',
   },
   {
     id: '12',
@@ -108,7 +108,7 @@ const initialInvoices: Omit<Invoice, 'status'>[] = [
     amount: '$2,800.25',
     dueDate: 'Mar 07',
     invoiceDate: 'Mar 07',
-    invoiceNo: 'INV-012',
+    invoiceNo: 'INV-004',
   },
   {
     id: '13',
@@ -116,7 +116,7 @@ const initialInvoices: Omit<Invoice, 'status'>[] = [
     amount: '$1,600.00',
     dueDate: 'Mar 06',
     invoiceDate: 'Mar 06',
-    invoiceNo: 'INV-013',
+    invoiceNo: 'INV-003',
   },
   {
     id: '14',
@@ -124,7 +124,7 @@ const initialInvoices: Omit<Invoice, 'status'>[] = [
     amount: '$2,300.50',
     dueDate: 'Mar 05',
     invoiceDate: 'Mar 05',
-    invoiceNo: 'INV-014',
+    invoiceNo: 'INV-002',
   },
   {
     id: '15',
@@ -132,7 +132,7 @@ const initialInvoices: Omit<Invoice, 'status'>[] = [
     amount: '$4,200.75',
     dueDate: 'Mar 04',
     invoiceDate: 'Mar 04',
-    invoiceNo: 'INV-015',
+    invoiceNo: 'INV-001',
   },
 ]
 
@@ -457,13 +457,16 @@ export function InvoicePaymentAnimation({
                   <th className="w-[75px] md:w-[70px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">
                     Due date
                   </th>
-                  <th className="w-[140px] md:w-[180px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">
+                  <th className="w-[140px] md:w-[170px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">
                     Customer
                   </th>
                   <th className="w-[90px] md:w-[100px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">
                     Amount
                   </th>
-                  <th className="w-[100px] md:w-[110px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground">
+                  <th className="hidden md:table-cell lg:hidden w-[90px] md:w-[100px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">
+                    Invoice no.
+                  </th>
+                  <th className="w-[105px] md:w-[110px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground">
                     Status
                   </th>
                 </tr>
@@ -487,7 +490,7 @@ export function InvoicePaymentAnimation({
                     <td className="w-[75px] md:w-[70px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-muted-foreground border-r border-border">
                       {invoice.dueDate}
                     </td>
-                    <td className="w-[140px] md:w-[180px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-foreground border-r border-border">
+                    <td className="w-[140px] md:w-[170px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-foreground border-r border-border">
                       <div className="truncate" title={invoice.customer}>
                         {invoice.customer}
                       </div>
@@ -495,7 +498,10 @@ export function InvoicePaymentAnimation({
                     <td className="w-[90px] md:w-[100px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-foreground border-r border-border">
                       {invoice.amount}
                     </td>
-                    <td className="w-[100px] md:w-[110px] px-1.5 md:px-2">
+                    <td className="hidden md:table-cell lg:hidden w-[90px] md:w-[100px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-foreground border-r border-border">
+                      {invoice.invoiceNo}
+                    </td>
+                    <td className="w-[105px] md:w-[110px] px-1.5 md:px-2">
                       <div className="flex items-center h-full">
                         <AnimatePresence mode="wait">
                         {invoice.status === 'sent' ? (

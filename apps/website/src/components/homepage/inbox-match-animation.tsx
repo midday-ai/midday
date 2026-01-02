@@ -170,7 +170,7 @@ export function InboxMatchAnimation({
                 damping: 24,
                 mass: 0.6,
               }}
-              className="bg-secondary border border-border p-2 md:p-3 transform-gpu will-change-transform absolute bottom-[56px] md:bottom-[68px] left-2 md:left-3 right-2 md:right-3 z-50"
+              className="bg-secondary border border-border p-2 md:p-3 transform-gpu will-change-transform absolute bottom-[48px] md:bottom-[68px] left-2 md:left-3 right-2 md:right-3 z-50"
             >
               <div className="flex items-start gap-1.5 md:gap-2">
                 <span className="inline-flex w-5 h-5 md:w-6 md:h-6 items-center justify-center bg-secondary border border-border flex-shrink-0">
