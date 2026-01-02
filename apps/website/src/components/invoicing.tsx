@@ -252,18 +252,11 @@ export function Invoicing() {
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                       <Image
-                        src="/images/stripe-light.svg"
+                        src="/images/stripe.svg"
                         alt="Stripe"
                         width={16}
                         height={16}
-                        className="object-contain dark:hidden"
-                      />
-                      <Image
-                        src="/images/stripe-dark.svg"
-                        alt="Stripe"
-                        width={16}
-                        height={16}
-                        className="object-contain hidden dark:block"
+                        className="object-contain"
                       />
                       <span className="font-sans text-sm text-foreground">
                         Stripe
