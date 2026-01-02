@@ -1,18 +1,18 @@
-'use client'
+"use client";
 
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
-import { MaterialIcon } from './homepage/icon-mapping'
-import { InvoicePromptAnimation } from './homepage/invoice-prompt-animation'
-import { TestimonialsSection } from './sections/testimonials-section'
-import { FeaturesGridSection } from './sections/features-grid-section'
-import { TimeSavingsSection } from './sections/time-savings-section'
-import { AccountingSection } from './sections/accounting-section'
-import { IntegrationsSection } from './sections/integrations-section'
-import { PricingSection } from './sections/pricing-section'
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { MaterialIcon } from "./homepage/icon-mapping";
+import { InvoicePromptAnimation } from "./homepage/invoice-prompt-animation";
+import { AccountingSection } from "./sections/accounting-section";
+import { FeaturesGridSection } from "./sections/features-grid-section";
+import { IntegrationsSection } from "./sections/integrations-section";
+import { PricingSection } from "./sections/pricing-section";
+import { TestimonialsSection } from "./sections/testimonials-section";
+import { TimeSavingsSection } from "./sections/time-savings-section";
 
 export function Invoicing() {
-  const router = useRouter()
+  const router = useRouter();
 
   return (
     <div className="min-h-screen">
@@ -41,7 +41,10 @@ export function Invoicing() {
         {/* Mobile Layout */}
         <div className="lg:hidden flex flex-col relative pt-32 pb-8 sm:pt-40 sm:pb-8 md:pt-48 overflow-hidden">
           {/* Grid Pattern Background - Mobile/Tablet Only (Limited Height) */}
-          <div className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0" style={{ height: '600px' }}>
+          <div
+            className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0"
+            style={{ height: "600px" }}
+          >
             <Image
               src="/images/grid-light.svg"
               alt="Grid Pattern"
@@ -71,21 +74,23 @@ export function Invoicing() {
                 Create and send invoices and track their status.
               </p>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto hidden lg:block">
-                Create invoices, send them to customers, and track payments while every update flows directly into your financial overview.
+                Create invoices, send them to customers, and track payments
+                while every update flows directly into your financial overview.
               </p>
             </div>
 
             {/* Invoicing Illustration */}
             <div className="flex justify-center w-full">
               <div className="relative w-full max-w-6xl">
-                <div 
+                <div
                   className="absolute bottom-0 left-0 right-0 h-[20%] z-10 pointer-events-none"
                   style={{
-                    background: 'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)'
+                    background:
+                      "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
                 <Image
-                  src="/images/Invoice-light.svg"
+                  src="/images/invoicing-light.svg"
                   alt="Invoicing Interface"
                   width={1200}
                   height={800}
@@ -93,7 +98,7 @@ export function Invoicing() {
                   priority
                 />
                 <Image
-                  src="/images/Invoice-dark.svg"
+                  src="/images/invoicing-dark.svg"
                   alt="Invoicing Interface"
                   width={1200}
                   height={800}
@@ -118,21 +123,23 @@ export function Invoicing() {
               </h1>
 
               <p className="text-muted-foreground text-base leading-normal max-w-2xl mx-auto font-sans text-center">
-                Create invoices, send them to customers, and track payments while every update flows directly into your financial overview.
+                Create invoices, send them to customers, and track payments
+                while every update flows directly into your financial overview.
               </p>
             </div>
 
             {/* Invoicing Illustration */}
             <div className="flex justify-center w-full">
               <div className="relative w-full max-w-6xl">
-                <div 
+                <div
                   className="absolute bottom-0 left-0 right-0 h-[20%] z-10 pointer-events-none"
                   style={{
-                    background: 'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)'
+                    background:
+                      "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
                 <Image
-                  src="/images/Invoice-light.svg"
+                  src="/images/invoicing-light.svg"
                   alt="Invoicing Interface"
                   width={1200}
                   height={800}
@@ -140,7 +147,7 @@ export function Invoicing() {
                   priority
                 />
                 <Image
-                  src="/images/Invoice-dark.svg"
+                  src="/images/invoicing-dark.svg"
                   alt="Invoicing Interface"
                   width={1200}
                   height={800}
@@ -166,23 +173,34 @@ export function Invoicing() {
                     Flexible invoicing setup
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Create one-off, recurring, scheduled, or web invoices depending on how you bill your customers.
+                    Create one-off, recurring, scheduled, or web invoices
+                    depending on how you bill your customers.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">One-off invoices</span>
+                      <span className="font-sans text-sm text-foreground">
+                        One-off invoices
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Recurring invoices</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Recurring invoices
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Scheduled invoices</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Scheduled invoices
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Web invoices</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Web invoices
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Invoice templates</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Invoice templates
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -207,25 +225,48 @@ export function Invoicing() {
                     Connected to your finances
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Invoices stay linked to customers and revenue, with fast online payments built in.
+                    Invoices stay linked to customers and revenue, with fast
+                    online payments built in.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Invoice status tracking</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Invoice status tracking
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Overdue reminders</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Overdue reminders
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Payment tracking</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Payment tracking
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Revenue per customer</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Revenue per customer
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <Image src="/images/stripe-light.svg" alt="Stripe" width={16} height={16} className="object-contain dark:hidden" />
-                      <Image src="/images/stripe-dark.svg" alt="Stripe" width={16} height={16} className="object-contain hidden dark:block" />
-                      <span className="font-sans text-sm text-foreground">Stripe</span>
+                      <Image
+                        src="/images/stripe-light.svg"
+                        alt="Stripe"
+                        width={16}
+                        height={16}
+                        className="object-contain dark:hidden"
+                      />
+                      <Image
+                        src="/images/stripe-dark.svg"
+                        alt="Stripe"
+                        width={16}
+                        height={16}
+                        className="object-contain hidden dark:block"
+                      />
+                      <span className="font-sans text-sm text-foreground">
+                        Stripe
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -292,6 +333,5 @@ export function Invoicing() {
       {/* Pricing Section */}
       <PricingSection />
     </div>
-  )
+  );
 }
-
