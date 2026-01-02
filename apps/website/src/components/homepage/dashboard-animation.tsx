@@ -12,6 +12,7 @@ export function DashboardAnimation({
   const [showChart, setShowChart] = useState(false)
   const [showMetrics, setShowMetrics] = useState(false)
   const [showSummary, setShowSummary] = useState(false)
+  const [segmentProgress, setSegmentProgress] = useState<number[]>([0, 0, 0, 0, 0])
 
   useEffect(() => {
     setShowWidgets(false)
@@ -74,6 +75,31 @@ export function DashboardAnimation({
 
   const total = categoryData.reduce((sum, item) => sum + item.value, 0)
 
+  // Animate chart progress - sequential, one segment after another (faster)
+  useEffect(() => {
+    if (showChart) {
+      setSegmentProgress([0, 0, 0, 0, 0])
+      // Animate each segment sequentially - fast
+      const segmentDuration = 0.18 // Fast duration (180ms per segment)
+      const timeouts: NodeJS.Timeout[] = []
+      categoryData.forEach((_, index) => {
+        const timeout = setTimeout(() => {
+          setSegmentProgress((prev) => {
+            const newProgress = [...prev]
+            newProgress[index] = 1
+            return newProgress
+          })
+        }, index * segmentDuration * 1000)
+        timeouts.push(timeout)
+      })
+      return () => {
+        timeouts.forEach(clearTimeout)
+      }
+    } else {
+      setSegmentProgress([0, 0, 0, 0, 0])
+    }
+  }, [showChart])
+
   // Render pie chart as SVG
   const renderPieChart = () => {
     const size = 200
@@ -91,7 +117,11 @@ export function DashboardAnimation({
             const percentage = (item.value / total) * 100
             const angle = (percentage / 100) * 360
             const startAngle = currentAngle
-            const endAngle = currentAngle + angle
+            
+            // Use individual segment progress for sequential animation
+            const progress = segmentProgress[index] || 0
+            const animatedAngle = angle * progress
+            const endAngle = currentAngle + animatedAngle
 
             // Convert angles to radians
             const startAngleRad = (startAngle * Math.PI) / 180
@@ -110,7 +140,7 @@ export function DashboardAnimation({
             const y4 = centerY + innerRadius * Math.sin(startAngleRad)
 
             // Large arc flag (1 if angle > 180, 0 otherwise)
-            const largeArcFlag = angle > 180 ? 1 : 0
+            const largeArcFlag = animatedAngle > 180 ? 1 : 0
 
             // Create path for segment
             const pathData = [
@@ -124,13 +154,21 @@ export function DashboardAnimation({
             currentAngle += angle
 
             return (
-              <path
+              <motion.path
                 key={index}
                 d={pathData}
                 fill={item.color}
                 opacity={item.opacity ?? 1}
                 stroke="hsl(var(--background))"
                 strokeWidth="2"
+                initial={{ opacity: 0 }}
+                animate={{ 
+                  opacity: showChart && progress > 0 ? (item.opacity ?? 1) : 0
+                }}
+                transition={{
+                  duration: 0.2,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
               />
             )
           })}
