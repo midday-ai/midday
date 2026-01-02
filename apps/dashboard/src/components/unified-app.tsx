@@ -33,7 +33,7 @@ import { MemoizedReactMarkdown } from "./markdown";
 // OAuth app configuration
 const oauthAppConfig: Record<
   string,
-  { endpoint: string; queryKey: "apps" | "inboxAccounts" }
+  { endpoint: string; queryKey: "apps" | "inboxAccounts" | "stripeStatus" }
 > = {
   slack: { endpoint: "/apps/slack/install-url", queryKey: "apps" },
   gmail: { endpoint: "/apps/gmail/install-url", queryKey: "inboxAccounts" },
@@ -41,6 +41,10 @@ const oauthAppConfig: Record<
   xero: { endpoint: "/apps/xero/install-url", queryKey: "apps" },
   quickbooks: { endpoint: "/apps/quickbooks/install-url", queryKey: "apps" },
   fortnox: { endpoint: "/apps/fortnox/install-url", queryKey: "apps" },
+  "stripe-payments": {
+    endpoint: "/invoice-payments/connect-stripe",
+    queryKey: "stripeStatus",
+  },
 };
 
 interface UnifiedAppProps {
@@ -121,11 +125,19 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
   const appOAuth = useAppOAuth({
     installUrlEndpoint: oauthConfig?.endpoint ?? "",
     onSuccess: () => {
-      const queryKey =
-        oauthConfig?.queryKey === "inboxAccounts"
-          ? trpc.inboxAccounts.get.queryKey()
-          : trpc.apps.get.queryKey();
-      queryClient.invalidateQueries({ queryKey });
+      if (oauthConfig?.queryKey === "inboxAccounts") {
+        queryClient.invalidateQueries({
+          queryKey: trpc.inboxAccounts.get.queryKey(),
+        });
+      } else if (oauthConfig?.queryKey === "stripeStatus") {
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoicePayments.stripeStatus.queryKey(),
+        });
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: trpc.apps.get.queryKey(),
+        });
+      }
       setLoading(false);
     },
     onError: () => {
@@ -164,17 +176,35 @@ export function UnifiedAppComponent({ app }: UnifiedAppProps) {
     }),
   );
 
+  // Mutation to disconnect Stripe Payments
+  const disconnectStripeMutation = useMutation(
+    trpc.invoicePayments.disconnectStripe.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoicePayments.stripeStatus.queryKey(),
+        });
+      },
+    }),
+  );
+
   // Computed loading states
   const isInstalling = isLoading || appOAuth.isLoading;
   const isDisconnecting =
     disconnectOfficialAppMutation.isPending ||
     revokeExternalAppMutation.isPending ||
-    disconnectInboxAccountMutation.isPending;
+    disconnectInboxAccountMutation.isPending ||
+    disconnectStripeMutation.isPending;
 
   const handleDisconnect = () => {
     // Gmail and Outlook use inbox_accounts table
     if ((app.id === "gmail" || app.id === "outlook") && app.inboxAccountId) {
       disconnectInboxAccountMutation.mutate({ id: app.inboxAccountId });
+      return;
+    }
+
+    // Stripe Payments uses team.stripeAccountId
+    if (app.id === "stripe-payments") {
+      disconnectStripeMutation.mutate();
       return;
     }
 

@@ -165,7 +165,7 @@ export function SettingsMenu() {
       });
       toast({
         title: "Stripe connected",
-        description: "You can now accept online payments for invoices.",
+        description: "You can now accept payments for invoices.",
       });
     },
     onError: () => {
@@ -187,7 +187,7 @@ export function SettingsMenu() {
         setDisconnectDialogOpen(false);
         toast({
           title: "Stripe disconnected",
-          description: "Online payments have been disabled.",
+          description: "Payments have been disabled.",
         });
       },
       onError: () => {
@@ -449,7 +449,7 @@ export function SettingsMenu() {
             );
           })}
 
-          {/* Online Payments Section */}
+          {/* Accept Payments Section */}
           <DropdownMenuSeparator />
 
           {stripeStatus?.connected ? (
@@ -457,7 +457,7 @@ export function SettingsMenu() {
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
                   <Icons.Tax className="mr-2 size-4" />
-                  <span className="text-xs">Online payments</span>
+                  <span className="text-xs">Accept payments</span>
                 </DropdownMenuSubTrigger>
                 <DropdownMenuSubContent className="p-0">
                   {booleanOptions.map((option, optionIndex) => (
