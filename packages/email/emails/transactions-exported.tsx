@@ -15,7 +15,7 @@ import {
 } from "../components/theme";
 
 interface Props {
-   teamName: string;
+  teamName: string;
   transactionCount: number;
   downloadLink: string;
 }

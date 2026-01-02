@@ -9,6 +9,7 @@
       "@db/*": ["../../packages/db/src/*"],
       "@api/*": ["../../apps/api/src/*"]
     },
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "types": ["bun-types"]
   }
 }
