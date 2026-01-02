@@ -56,11 +56,24 @@ export function InvoiceDetails() {
   const refundMutation = useMutation(
     trpc.invoicePayments.refundPayment.mutationOptions({
       onSuccess: () => {
+        // Invalidate the specific invoice
         queryClient.invalidateQueries({
           queryKey: trpc.invoice.getById.queryKey({ id: invoiceId! }),
         });
+        // Invalidate the invoice table (infinite query for pagination)
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.infiniteQueryKey(),
+        });
+        // Invalidate regular query key as well
         queryClient.invalidateQueries({
           queryKey: trpc.invoice.get.queryKey(),
+        });
+        // Invalidate summary and payment status
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.invoiceSummary.queryKey(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.paymentStatus.queryKey(),
         });
       },
     }),

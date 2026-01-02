@@ -42,12 +42,14 @@ export default function InvoiceToolbar({
     copy(url);
   };
 
-  // Show payment section if payment is enabled and there's an amount (excluding canceled invoices)
-  const showPaymentSection =
+  // Show pay button only when invoice can be paid (not paid, canceled, or refunded)
+  const canPay =
     paymentEnabled &&
     typeof amount === "number" &&
     amount > 0 &&
-    status !== "canceled";
+    !isPaid &&
+    status !== "canceled" &&
+    status !== "refunded";
 
   return (
     <>
@@ -105,14 +107,10 @@ export default function InvoiceToolbar({
             </Tooltip>
           </TooltipProvider>
 
-          {showPaymentSection && (
+          {canPay && (
             <>
               <div className="w-px h-4 bg-border mx-1" />
-              {isPaid ? (
-                <div className="flex items-center gap-1.5 px-3 h-7 text-xs text-green-600 dark:text-green-500">
-                  <span>Paid</span>
-                </div>
-              ) : status === "draft" ? (
+              {status === "draft" ? (
                 <TooltipProvider delayDuration={0}>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -148,7 +146,7 @@ export default function InvoiceToolbar({
         </div>
       </motion.div>
 
-      {showPaymentSection && !isPaid && (
+      {canPay && status !== "draft" && (
         <PaymentModal
           open={paymentModalOpen}
           onOpenChange={setPaymentModalOpen}
