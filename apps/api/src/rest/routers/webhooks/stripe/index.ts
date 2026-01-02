@@ -1,6 +1,7 @@
 import type { Context } from "@api/rest/types";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { updateInvoice } from "@midday/db/queries";
+import { getInvoiceById, updateInvoice } from "@midday/db/queries";
+import { triggerJob } from "@midday/job-client";
 import { logger } from "@midday/logger";
 import { HTTPException } from "hono/http-exception";
 import Stripe from "stripe";
@@ -58,7 +59,11 @@ app.openapi(
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
       const rawBody = await c.req.text();
 
-      event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+      event = await stripe.webhooks.constructEventAsync(
+        rawBody,
+        signature,
+        webhookSecret,
+      );
     } catch (err) {
       logger.error("Stripe webhook signature verification failed", {
         error: err instanceof Error ? err.message : String(err),
@@ -85,12 +90,14 @@ app.openapi(
             break;
           }
 
+          const paidAt = new Date().toISOString();
+
           // Update invoice to paid status
           const updatedInvoice = await updateInvoice(db, {
             id: invoiceId,
             teamId,
             status: "paid",
-            paidAt: new Date().toISOString(),
+            paidAt,
           });
 
           if (updatedInvoice) {
@@ -99,6 +106,30 @@ app.openapi(
               paymentIntentId: paymentIntent.id,
               amount: paymentIntent.amount,
             });
+
+            // Fetch full invoice details for notification
+            const invoice = await getInvoiceById(db, { id: invoiceId });
+
+            if (invoice) {
+              // Trigger notification job
+              await triggerJob(
+                "invoice-notification",
+                {
+                  type: "paid",
+                  invoiceId,
+                  invoiceNumber: invoice.invoiceNumber || "",
+                  teamId,
+                  customerName: invoice.customerName || "",
+                  paidAt,
+                },
+                "invoices",
+              );
+
+              logger.info("Invoice paid notification triggered", {
+                invoiceId,
+                invoiceNumber: invoice.invoiceNumber,
+              });
+            }
           } else {
             logger.warn(
               "Failed to update invoice - not found or unauthorized",
