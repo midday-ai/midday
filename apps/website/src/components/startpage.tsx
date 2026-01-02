@@ -8,6 +8,7 @@ import Image from 'next/image'
 import { Button } from '@midday/ui/button'
 import { AIAssistantAnimation } from './homepage/ai-assistant-animation'
 import { InvoicePromptAnimation } from './homepage/invoice-prompt-animation'
+import { InvoicePaymentAnimation } from './homepage/invoice-payment-animation'
 import { InboxMatchAnimation } from './homepage/inbox-match-animation'
 import { FileGridAnimation } from './homepage/file-grid-animation'
 import { DashboardAnimation } from './homepage/dashboard-animation'
@@ -52,37 +53,46 @@ export function StartPage() {
     {
       title: 'All transactions in one place',
       subtitle:
-        'Every payment in and out of the business is automatically synced from your connected accounts',
+        'Every payment in and out of the business is automatically synced from your connected accounts.',
       mobileSubtitle: 'Every payment in and out is pulled in automatically.',
       mergedText:
-        'All transactions in one place. Every payment in and out of the business is automatically synced from your connected accounts',
+        'All transactions in one place. Every payment in and out of the business is automatically synced from your connected accounts.',
+      illustration: 'animation',
+    },
+    {
+      title: 'Invoices get paid',
+      subtitle:
+        'Customers can pay invoices online, with payments flowing straight into your finances.',
+      mobileSubtitle: 'Customers can pay invoices online with payments flowing straight into your finances.',
+      mergedText:
+        'Invoices get paid. Customers can pay invoices online, with payments flowing straight into your finances.',
       illustration: 'animation',
     },
     {
       title: 'Reconciliation gets handled',
       subtitle:
-        'Receipts, invoices, and transactions are matched so nothing needs manual cleanup.',
+        'Payments, receipts, and transactions are automatically matched so records stay accurate.',
       mobileSubtitle: 'Transactions are categorized and reconciled automatically.',
       mergedText:
-        'Reconciliation gets handled. Receipts, invoices, and transactions are matched so nothing needs manual cleanup.',
+        'Reconciliation gets handled. Payments, receipts, and transactions are automatically matched so records stay accurate.',
       illustration: 'animation',
     },
     {
       title: "Understand what's happening",
       subtitle:
-        'The financial overview and widgets show the current state of the business and why.',
+        'Midday explains changes in cash, revenue, and spending as they happen.',
       mobileSubtitle: "See what's changing and why.",
       mergedText:
-        "Understand what's happening. The financial overview and widgets show the current state of the business and why.",
-      illustration: '/illustrations/Files.svg',
+        "Understand what's happening. Midday explains changes in cash, revenue, and spending as they happen.",
+      illustration: 'animation',
     },
     {
       title: 'Stay updated and in control',
       subtitle:
-        'Weekly summaries and clear explanations keep you up to date without constant checking.',
+        'Weekly summaries and notifications keep you on top without constant checking.',
       mobileSubtitle: 'Weekly summaries keep you up to date.',
       mergedText:
-        'Stay updated and in control. Weekly summaries and clear explanations keep you up to date without constant checking.',
+        'Stay updated and in control. Weekly summaries and notifications keep you on top without constant checking.',
       illustration: 'animation',
     },
   ]
@@ -305,10 +315,12 @@ export function StartPage() {
                       {index === 0 ? (
                         <TransactionFlowAnimation onComplete={undefined} />
                       ) : index === 1 ? (
-                        <InboxMatchAnimation onComplete={undefined} />
+                        <InvoicePaymentAnimation onComplete={undefined} />
                       ) : index === 2 ? (
-                        <DashboardAnimation onComplete={undefined} />
+                        <InboxMatchAnimation onComplete={undefined} />
                       ) : index === 3 ? (
+                        <DashboardAnimation onComplete={undefined} />
+                      ) : index === 4 ? (
                         <AIAssistantAnimation onComplete={undefined} />
                       ) : (
                         <Image
@@ -430,7 +442,7 @@ export function StartPage() {
                 style={{ transformOrigin: 'center' }}
               >
                 <div className={`w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95] ${
-                  activeFeature === 2 ? 'lg:scale-[0.94]' : ''
+                  activeFeature === 3 ? 'lg:scale-[0.94]' : ''
                 }`}>
                   {activeFeature === 0 ? (
                     <TransactionFlowAnimation
@@ -439,18 +451,24 @@ export function StartPage() {
                       }
                     />
                   ) : activeFeature === 1 ? (
-                    <InboxMatchAnimation
+                    <InvoicePaymentAnimation
                       onComplete={() =>
                         setActiveFeature((prev) => (prev + 1) % features.length)
                       }
                     />
                   ) : activeFeature === 2 ? (
-                    <DashboardAnimation
+                    <InboxMatchAnimation
                       onComplete={() =>
                         setActiveFeature((prev) => (prev + 1) % features.length)
                       }
                     />
                   ) : activeFeature === 3 ? (
+                    <DashboardAnimation
+                      onComplete={() =>
+                        setActiveFeature((prev) => (prev + 1) % features.length)
+                      }
+                    />
+                  ) : activeFeature === 4 ? (
                     <AIAssistantAnimation
                       onComplete={() =>
                         setActiveFeature((prev) => (prev + 1) % features.length)
