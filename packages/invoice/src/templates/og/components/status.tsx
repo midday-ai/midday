@@ -1,7 +1,14 @@
 export function Status({
   status,
 }: {
-  status: "draft" | "overdue" | "paid" | "unpaid" | "canceled" | "scheduled" | "refunded";
+  status:
+    | "draft"
+    | "overdue"
+    | "paid"
+    | "unpaid"
+    | "canceled"
+    | "scheduled"
+    | "refunded";
 }) {
   const getStatusStyles = () => {
     if (status === "draft" || status === "canceled") {

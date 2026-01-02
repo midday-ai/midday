@@ -2,6 +2,8 @@
   "name": "@midday/db",
   "private": true,
   "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome format --write .",
     "test": "bun test",
     "test:matching": "bun test src/test/transaction-matching.test.ts",
     "test:performance": "bun test src/test/transaction-matching.performance.test.ts",
@@ -25,9 +27,11 @@
     "./utils/health": "./src/utils/health.ts",
     "./utils/currency": "./src/utils/currency.ts",
     "./utils/tax": "./src/utils/tax.ts",
-    "./utils/blocklist": "./src/utils/blocklist.ts"
+    "./utils/blocklist": "./src/utils/blocklist.ts",
+    "./utils/invoice-recurring": "./src/utils/invoice-recurring.ts"
   },
   "dependencies": {
+    "@date-fns/tz": "^1.4.1",
     "@date-fns/utc": "^2.1.1",
     "@midday/cache": "workspace:*",
     "@midday/categories": "workspace:*",

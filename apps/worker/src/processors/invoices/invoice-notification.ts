@@ -197,6 +197,74 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
         break;
       }
 
+      case "recurring_generated": {
+        const { recurringSequence, recurringTotalCount } = job.data;
+
+        // Create in-app notification for recurring invoice generation
+        // Note: The email is sent via the generate-invoice task, so we only do in-app here
+        this.logger.info("Recurring invoice generated", {
+          invoiceId,
+          invoiceNumber,
+          teamId,
+          sequence: recurringSequence,
+          totalCount: recurringTotalCount,
+        });
+        break;
+      }
+
+      case "recurring_series_completed": {
+        const { recurringId, recurringTotalCount } = job.data;
+
+        // Create in-app notification for series completion
+        await notifications.create(
+          "recurring_invoice_completed",
+          teamId,
+          {
+            invoiceNumber,
+            customerName,
+            totalCount: recurringTotalCount,
+          },
+          {
+            sendEmail: false,
+          },
+        );
+
+        this.logger.info(
+          "Recurring invoice series completed notification created",
+          {
+            recurringId,
+            teamId,
+            totalCount: recurringTotalCount,
+          },
+        );
+        break;
+      }
+
+      case "recurring_series_paused": {
+        const { recurringId } = job.data;
+
+        // Create in-app notification for series paused (due to errors)
+        await notifications.create(
+          "recurring_invoice_paused",
+          teamId,
+          {
+            customerName,
+          },
+          {
+            sendEmail: true, // Alert user about the issue
+          },
+        );
+
+        this.logger.info(
+          "Recurring invoice series paused notification created",
+          {
+            recurringId,
+            teamId,
+          },
+        );
+        break;
+      }
+
       default: {
         this.logger.warn("Unknown invoice notification type", {
           type,
