@@ -484,6 +484,33 @@ app.openapi(
             existingIntent.status === "requires_action" ||
             existingIntent.status === "processing"
           ) {
+            // Check if the invoice amount has changed since the payment intent was created
+            // If so, update the payment intent (only possible for certain statuses)
+            if (existingIntent.amount !== amount) {
+              // Can only update amount if payment is not actively in progress
+              if (
+                existingIntent.status === "requires_payment_method" ||
+                existingIntent.status === "requires_confirmation"
+              ) {
+                const updatedIntent = await stripe.paymentIntents.update(
+                  invoice.paymentIntentId,
+                  { amount },
+                  { stripeAccount: team.stripeAccountId },
+                );
+                return c.json({
+                  clientSecret: updatedIntent.client_secret!,
+                  amount: updatedIntent.amount,
+                  currency: updatedIntent.currency,
+                  stripeAccountId: team.stripeAccountId,
+                });
+              }
+              // For requires_action or processing, the payment is in-flight
+              // (e.g., 3DS authentication in progress or payment being processed)
+              // Allow it to complete at the original amount to avoid disrupting
+              // the customer mid-payment. Any amount discrepancy should be handled
+              // manually by the business after the payment completes.
+            }
+
             return c.json({
               clientSecret: existingIntent.client_secret!,
               amount: existingIntent.amount,

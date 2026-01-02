@@ -136,7 +136,9 @@ export default async function Page(props: Props) {
           amount={invoice.amount ?? undefined}
           currency={invoice.currency ?? undefined}
           initialStatus={invoice.status}
-          customerName={invoice.customerName || (invoice.customer?.name as string)}
+          customerName={
+            invoice.customerName || (invoice.customer?.name as string)
+          }
           customerWebsite={invoice.customer?.website}
         >
           <div className="pb-24 md:pb-0">

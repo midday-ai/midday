@@ -39,7 +39,15 @@ export function InvoiceViewWrapper({
       <CustomerHeader
         name={customerName}
         website={customerWebsite}
-        status={status as "overdue" | "paid" | "unpaid" | "draft" | "canceled" | "scheduled"}
+        status={
+          status as
+            | "overdue"
+            | "paid"
+            | "unpaid"
+            | "draft"
+            | "canceled"
+            | "scheduled"
+        }
       />
 
       {children}
@@ -56,4 +64,3 @@ export function InvoiceViewWrapper({
     </>
   );
 }
-

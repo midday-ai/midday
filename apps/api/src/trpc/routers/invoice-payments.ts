@@ -1,15 +1,20 @@
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import { getTeamById } from "@midday/db/queries";
-import { teams } from "@midday/db/schema";
+import { getTeamById, updateTeamById } from "@midday/db/queries";
 import { logger } from "@midday/logger";
-import { eq } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 import Stripe from "stripe";
-import { z } from "zod";
 
 export const invoicePaymentsRouter = createTRPCRouter({
   // Get Stripe Connect status for the current team
   stripeStatus: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
-    const team = await getTeamById(db, teamId!);
+    if (!teamId) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Team not found",
+      });
+    }
+
+    const team = await getTeamById(db, teamId);
 
     return {
       connected: !!team?.stripeAccountId,
@@ -19,23 +24,38 @@ export const invoicePaymentsRouter = createTRPCRouter({
   }),
 
   // Get Stripe Connect URL for OAuth flow
-  getConnectUrl: protectedProcedure.query(
-    async ({ ctx: { teamId, session } }) => {
-      const clientId = process.env.STRIPE_CONNECT_CLIENT_ID;
-      if (!clientId) {
-        throw new Error("Stripe Connect is not configured");
-      }
+  getConnectUrl: protectedProcedure.query(async ({ ctx: { teamId } }) => {
+    if (!teamId) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Team not found",
+      });
+    }
 
-      // Return the REST endpoint URL that handles the OAuth flow
-      const apiUrl = process.env.MIDDAY_API_URL || "https://api.midday.ai";
-      return `${apiUrl}/invoice-payments/connect-stripe`;
-    },
-  ),
+    const clientId = process.env.STRIPE_CONNECT_CLIENT_ID;
+    if (!clientId) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Stripe Connect is not configured",
+      });
+    }
+
+    // Return the REST endpoint URL that handles the OAuth flow
+    const apiUrl = process.env.MIDDAY_API_URL || "https://api.midday.ai";
+    return `${apiUrl}/invoice-payments/connect-stripe`;
+  }),
 
   // Disconnect Stripe account
   disconnectStripe: protectedProcedure.mutation(
     async ({ ctx: { db, teamId } }) => {
-      const team = await getTeamById(db, teamId!);
+      if (!teamId) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Team not found",
+        });
+      }
+
+      const team = await getTeamById(db, teamId);
 
       if (team?.stripeAccountId) {
         try {
@@ -55,13 +75,13 @@ export const invoicePaymentsRouter = createTRPCRouter({
       }
 
       // Clear Stripe fields from team
-      await db
-        .update(teams)
-        .set({
+      await updateTeamById(db, {
+        id: teamId,
+        data: {
           stripeAccountId: null,
           stripeConnectStatus: null,
-        })
-        .where(eq(teams.id, teamId!));
+        },
+      });
 
       return { success: true };
     },
