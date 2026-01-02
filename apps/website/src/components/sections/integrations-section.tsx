@@ -21,7 +21,7 @@ const defaultIntegrations: Integration[] = [
   { name: 'Google Drive', icon: '/images/gdrive.svg', alt: 'Google Drive' },
   { name: 'Dropbox', icon: '/images/dropbox.svg', alt: 'Dropbox' },
   { name: 'Slack', icon: '/images/slack.svg', alt: 'Slack' },
-  { name: 'Stripe', icon: '/images/stripe-light.svg', alt: 'Stripe' },
+  { name: 'Stripe', icon: '/images/stripe.svg', alt: 'Stripe' },
   { name: 'Xero', icon: '/images/xero.svg', alt: 'Xero' },
   { name: 'QuickBooks', icon: '/images/quickbooks.svg', alt: 'QuickBooks' },
   { name: 'Fortnox', icon: '/images/fortnox-light.svg', alt: 'Fortnox' },
@@ -45,9 +45,8 @@ export function IntegrationsSection({
         </div>
         <div className="flex flex-wrap justify-center gap-2">
           {integrations.map((integration) => {
-            const isStripe = integration.name === 'Stripe'
             const isFortnox = integration.name === 'Fortnox'
-            const hasDarkMode = isStripe || isFortnox
+            const hasDarkMode = isFortnox
 
             return (
             <div
