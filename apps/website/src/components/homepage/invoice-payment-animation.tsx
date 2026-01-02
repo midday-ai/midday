@@ -437,7 +437,7 @@ export function InvoicePaymentAnimation({
                 Payment score
               </div>
               <div className="font-sans text-[9px] md:text-[10px] text-muted-foreground">
-                Seamless payments, right on schedule
+                Right on schedule
               </div>
             </motion.div>
           </div>
