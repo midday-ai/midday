@@ -85,7 +85,7 @@ export function Invoicing() {
                   }}
                 />
                 <Image
-                  src="/images/invoice-light.svg"
+                  src="/images/Invoice-light.svg"
                   alt="Invoicing Interface"
                   width={1200}
                   height={800}
@@ -93,7 +93,7 @@ export function Invoicing() {
                   priority
                 />
                 <Image
-                  src="/images/invoice-dark.svg"
+                  src="/images/Invoice-dark.svg"
                   alt="Invoicing Interface"
                   width={1200}
                   height={800}
@@ -132,7 +132,7 @@ export function Invoicing() {
                   }}
                 />
                 <Image
-                  src="/images/invoice-light.svg"
+                  src="/images/Invoice-light.svg"
                   alt="Invoicing Interface"
                   width={1200}
                   height={800}
@@ -140,7 +140,7 @@ export function Invoicing() {
                   priority
                 />
                 <Image
-                  src="/images/invoice-dark.svg"
+                  src="/images/Invoice-dark.svg"
                   alt="Invoicing Interface"
                   width={1200}
                   height={800}
