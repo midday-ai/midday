@@ -215,25 +215,14 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
       case "recurring_series_completed": {
         const { recurringId, recurringTotalCount } = job.data;
 
-        // Create in-app notification for series completion
-        await notifications.create(
-          "recurring_invoice_completed",
-          teamId,
-          {
-            invoiceNumber,
-            customerName,
-            totalCount: recurringTotalCount,
-          },
-          {
-            sendEmail: false,
-          },
-        );
-
+        // Log series completion (no dedicated notification type yet)
         this.logger.info(
-          "Recurring invoice series completed notification created",
+          "Recurring invoice series completed",
           {
             recurringId,
             teamId,
+            invoiceNumber,
+            customerName,
             totalCount: recurringTotalCount,
           },
         );
@@ -243,20 +232,10 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
       case "recurring_series_paused": {
         const { recurringId } = job.data;
 
-        // Create in-app notification for series paused (due to errors)
-        await notifications.create(
-          "recurring_invoice_paused",
-          teamId,
-          {
-            customerName,
-          },
-          {
-            sendEmail: true, // Alert user about the issue
-          },
-        );
-
-        this.logger.info(
-          "Recurring invoice series paused notification created",
+        // Log series paused (no dedicated notification type yet)
+        // TODO: Add recurring_invoice_paused notification type to @midday/notifications
+        this.logger.warn(
+          "Recurring invoice series paused due to errors",
           {
             recurringId,
             teamId,
