@@ -103,7 +103,9 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
 
           if (customer) {
             const customerContent = transformCustomerToContent(customer);
-            customerDetails = customerContent ? JSON.stringify(customerContent) : null;
+            customerDetails = customerContent
+              ? JSON.stringify(customerContent)
+              : null;
             customerEmail = customer.billingEmail || customer.email;
           }
         }

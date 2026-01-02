@@ -216,16 +216,13 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
         const { recurringId, recurringTotalCount } = job.data;
 
         // Log series completion (no dedicated notification type yet)
-        this.logger.info(
-          "Recurring invoice series completed",
-          {
-            recurringId,
-            teamId,
-            invoiceNumber,
-            customerName,
-            totalCount: recurringTotalCount,
-          },
-        );
+        this.logger.info("Recurring invoice series completed", {
+          recurringId,
+          teamId,
+          invoiceNumber,
+          customerName,
+          totalCount: recurringTotalCount,
+        });
         break;
       }
 
@@ -234,13 +231,10 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
 
         // Log series paused (no dedicated notification type yet)
         // TODO: Add recurring_invoice_paused notification type to @midday/notifications
-        this.logger.warn(
-          "Recurring invoice series paused due to errors",
-          {
-            recurringId,
-            teamId,
-          },
-        );
+        this.logger.warn("Recurring invoice series paused due to errors", {
+          recurringId,
+          teamId,
+        });
         break;
       }
 
