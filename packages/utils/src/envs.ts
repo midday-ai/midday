@@ -19,11 +19,6 @@ export function getAppUrl() {
 }
 
 export function getEmailUrl() {
-  // Allow explicit override via DASHBOARD_URL env var
-  if (process.env.DASHBOARD_URL) {
-    return process.env.DASHBOARD_URL;
-  }
-
   if (process.env.NODE_ENV === "development") {
     return "http://localhost:3000";
   }
