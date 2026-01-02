@@ -77,7 +77,7 @@ export default function InvoiceToolbar({
               </TooltipTrigger>
               <TooltipContent
                 sideOffset={15}
-                className="text-[10px] px-2 py-1 rounded-sm font-medium"
+                className="text-[10px] px-2 py-1 rounded-none font-medium"
               >
                 <p>Download</p>
               </TooltipContent>
@@ -98,7 +98,7 @@ export default function InvoiceToolbar({
               </TooltipTrigger>
               <TooltipContent
                 sideOffset={15}
-                className="text-[10px] px-2 py-1 rounded-sm font-medium"
+                className="text-[10px] px-2 py-1 rounded-none font-medium"
               >
                 <p>Copy link</p>
               </TooltipContent>
@@ -128,7 +128,7 @@ export default function InvoiceToolbar({
                     </TooltipTrigger>
                     <TooltipContent
                       sideOffset={15}
-                      className="text-[10px] px-2 py-1 rounded-sm font-medium"
+                      className="text-[10px] px-2 py-1 rounded-none font-medium"
                     >
                       <p>Invoice must be sent first</p>
                     </TooltipContent>
