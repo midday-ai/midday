@@ -102,7 +102,8 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
           });
 
           if (customer) {
-            customerDetails = transformCustomerToContent(customer);
+            const customerContent = transformCustomerToContent(customer);
+            customerDetails = customerContent ? JSON.stringify(customerContent) : null;
             customerEmail = customer.billingEmail || customer.email;
           }
         }
@@ -210,7 +211,6 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
           teamId: recurring.teamId,
           status: "unpaid",
           sentTo: customerEmail,
-          // @ts-expect-error - These fields exist but types may not be updated yet
           invoiceRecurringId: recurring.id,
           recurringSequence: nextSequence,
         });

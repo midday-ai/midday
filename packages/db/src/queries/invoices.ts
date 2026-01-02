@@ -976,6 +976,9 @@ export type UpdateInvoiceParams = {
   scheduledJobId?: string | null;
   paymentIntentId?: string | null;
   refundedAt?: string | null;
+  sentTo?: string | null;
+  invoiceRecurringId?: string | null;
+  recurringSequence?: number | null;
   teamId: string;
   userId?: string;
 };
