@@ -456,27 +456,32 @@ export function SettingsMenu() {
             <>
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
-                  <Icons.CurrencyOutline className="mr-2 size-4" />
+                  <Icons.Tax className="mr-2 size-4" />
                   <span className="text-xs">Online payments</span>
                 </DropdownMenuSubTrigger>
                 <DropdownMenuSubContent className="p-0">
-                  <DropdownMenuCheckboxItem
-                    className="text-xs"
-                    checked={paymentEnabled === true}
-                    onCheckedChange={(checked) => {
-                      setValue("template.paymentEnabled", checked, {
-                        shouldValidate: true,
-                        shouldDirty: true,
-                      });
-                      updateTemplateMutation.mutate({
-                        id: templateId,
-                        paymentEnabled: checked,
-                      });
-                    }}
-                    onSelect={(event) => event.preventDefault()}
-                  >
-                    Enable for this template
-                  </DropdownMenuCheckboxItem>
+                  {booleanOptions.map((option, optionIndex) => (
+                    <DropdownMenuCheckboxItem
+                      key={optionIndex.toString()}
+                      className="text-xs"
+                      checked={paymentEnabled === option.value}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setValue("template.paymentEnabled", option.value, {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          });
+                          updateTemplateMutation.mutate({
+                            id: templateId,
+                            paymentEnabled: option.value,
+                          });
+                        }
+                      }}
+                      onSelect={(event) => event.preventDefault()}
+                    >
+                      {option.label}
+                    </DropdownMenuCheckboxItem>
+                  ))}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => setDisconnectDialogOpen(true)}

@@ -96,6 +96,7 @@ const defaultTemplate = {
   deliveryType: "create",
   timezone: undefined,
   locale: undefined,
+  paymentEnabled: false,
 };
 
 export const invoiceRouter = createTRPCRouter({
@@ -384,6 +385,8 @@ export const invoiceRouter = createTRPCRouter({
         noteDetails: template?.noteDetails ?? defaultTemplate.noteDetails,
         timezone,
         locale,
+        paymentEnabled:
+          template?.paymentEnabled ?? defaultTemplate.paymentEnabled,
       };
 
       return {

@@ -98,6 +98,7 @@ app.openapi(
             teamId,
             status: "paid",
             paidAt,
+            paymentIntentId: paymentIntent.id,
           });
 
           if (updatedInvoice) {

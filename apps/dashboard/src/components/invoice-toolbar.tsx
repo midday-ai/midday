@@ -40,11 +40,15 @@ export default function InvoiceToolbar({
     copy(url);
   };
 
-  // Show pay button if payment is enabled and there's an amount (excluding canceled invoices)
-  const showPayButton =
-    paymentEnabled && amount && amount > 0 && status !== "canceled";
-  // Only enable the button if the invoice can actually be paid
-  const canPay = showPayButton && !isPaid && status !== "draft";
+  // Show payment section if payment is enabled and there's an amount (excluding canceled invoices)
+  const showPaymentSection =
+    paymentEnabled &&
+    typeof amount === "number" &&
+    amount > 0 &&
+    status !== "canceled";
+
+  // Can pay if not already paid and not a draft
+  const canPay = showPaymentSection && !isPaid && status !== "draft";
 
   return (
     <>
@@ -102,23 +106,50 @@ export default function InvoiceToolbar({
             </Tooltip>
           </TooltipProvider>
 
-          {showPayButton && (
+          {showPaymentSection && (
             <>
               <div className="w-px h-4 bg-border mx-1" />
-              <Button
-                size="sm"
-                className="rounded-full h-7 px-3 text-xs text-secondary"
-                onClick={() => setPaymentModalOpen(true)}
-                disabled={!canPay}
-              >
-                Pay invoice
-              </Button>
+              {isPaid ? (
+                <div className="flex items-center gap-1.5 px-3 h-7 text-xs text-green-600 dark:text-green-500">
+                  <span>Paid</span>
+                </div>
+              ) : status === "draft" ? (
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span>
+                        <Button
+                          size="sm"
+                          className="rounded-full h-7 px-3 text-xs text-secondary"
+                          disabled
+                        >
+                          Pay invoice
+                        </Button>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      sideOffset={15}
+                      className="text-[10px] px-2 py-1 rounded-sm font-medium"
+                    >
+                      <p>Invoice must be sent first</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                <Button
+                  size="sm"
+                  className="rounded-full h-7 px-3 text-xs text-secondary"
+                  onClick={() => setPaymentModalOpen(true)}
+                >
+                  Pay invoice
+                </Button>
+              )}
             </>
           )}
         </div>
       </motion.div>
 
-      {showPayButton && (
+      {showPaymentSection && !isPaid && (
         <PaymentModal
           open={paymentModalOpen}
           onOpenChange={setPaymentModalOpen}
