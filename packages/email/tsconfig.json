@@ -8,6 +8,7 @@
     "moduleResolution": "NodeNext",
     "jsx": "react-jsx",
     "jsxImportSource": "react",
+    "typeRoots": ["./node_modules/@types", "../../types"],
     "types": ["node"]
   }
 }
