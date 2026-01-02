@@ -10,11 +10,7 @@ import {
 } from "@midday/ui/tooltip";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import {
-  MdContentCopy,
-  MdOutlineFileDownload,
-  MdOutlinePayment,
-} from "react-icons/md";
+import { MdContentCopy, MdOutlineFileDownload } from "react-icons/md";
 import { useCopyToClipboard } from "usehooks-ts";
 import { PaymentModal } from "./invoice/payment-modal";
 
@@ -44,8 +40,11 @@ export default function InvoiceToolbar({
     copy(url);
   };
 
-  const canPay =
-    paymentEnabled && amount && amount > 0 && !isPaid && status !== "draft";
+  // Show pay button if payment is enabled and there's an amount (excluding canceled invoices)
+  const showPayButton =
+    paymentEnabled && amount && amount > 0 && status !== "canceled";
+  // Only enable the button if the invoice can actually be paid
+  const canPay = showPayButton && !isPaid && status !== "draft";
 
   return (
     <>
@@ -56,29 +55,6 @@ export default function InvoiceToolbar({
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
       >
         <div className="backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 rounded-full px-2 py-3 h-10 flex items-center justify-center border-[0.5px] border-border gap-1">
-          {canPay && (
-            <TooltipProvider delayDuration={0}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-full size-8"
-                    onClick={() => setPaymentModalOpen(true)}
-                  >
-                    <MdOutlinePayment className="size-[18px]" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent
-                  sideOffset={15}
-                  className="text-[10px] px-2 py-1 rounded-sm font-medium"
-                >
-                  <p>Pay invoice</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -125,10 +101,24 @@ export default function InvoiceToolbar({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
+
+          {showPayButton && (
+            <>
+              <div className="w-px h-4 bg-border mx-1" />
+              <Button
+                size="sm"
+                className="rounded-full h-7 px-3 text-xs text-secondary"
+                onClick={() => setPaymentModalOpen(true)}
+                disabled={!canPay}
+              >
+                Pay invoice
+              </Button>
+            </>
+          )}
         </div>
       </motion.div>
 
-      {canPay && (
+      {showPayButton && (
         <PaymentModal
           open={paymentModalOpen}
           onOpenChange={setPaymentModalOpen}

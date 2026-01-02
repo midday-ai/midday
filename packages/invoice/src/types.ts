@@ -106,6 +106,7 @@ export type Template = {
   size: "a4" | "letter";
   deliveryType: "create" | "create_and_send" | "scheduled";
   locale: string;
+  paymentEnabled?: boolean;
 };
 
 export interface EditorDoc {

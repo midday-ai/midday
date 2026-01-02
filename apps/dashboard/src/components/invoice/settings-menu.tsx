@@ -493,7 +493,7 @@ export function SettingsMenu() {
               className="text-xs cursor-pointer"
               disabled={stripeOAuth.isLoading}
             >
-              <Icons.CurrencyOutline className="mr-2 size-4" />
+              <Icons.Tax className="mr-2 size-4" />
               {stripeOAuth.isLoading ? "Connecting..." : "Connect Stripe"}
             </DropdownMenuItem>
           )}
