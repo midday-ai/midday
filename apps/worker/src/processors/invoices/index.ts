@@ -1,8 +1,10 @@
+import { InvoiceRecurringSchedulerProcessor } from "./generate-recurring";
 import { InvoiceNotificationProcessor } from "./invoice-notification";
 
 /**
  * Export all invoice processors (for type imports)
  */
+export { InvoiceRecurringSchedulerProcessor } from "./generate-recurring";
 export { InvoiceNotificationProcessor } from "./invoice-notification";
 
 /**
@@ -11,4 +13,5 @@ export { InvoiceNotificationProcessor } from "./invoice-notification";
  */
 export const invoiceProcessors = {
   "invoice-notification": new InvoiceNotificationProcessor(),
+  "invoice-recurring-scheduler": new InvoiceRecurringSchedulerProcessor(),
 };

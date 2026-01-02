@@ -115,9 +115,7 @@ describe("Golden Dataset Tests", () => {
         // Verify it matches expected behavior
         expect(amountScore).toBeCloseTo(expectedScores.amountScore, 1);
         expect(currencyScore).toBeCloseTo(expectedScores.currencyScore, 1);
-        console.log(
-          `${goldenCase.id}: Cross-currency match handled correctly`,
-        );
+        console.log(`${goldenCase.id}: Cross-currency match handled correctly`);
       });
     }
   });

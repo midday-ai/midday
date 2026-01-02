@@ -5,7 +5,7 @@
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
-    "format": "biome format --write .",
+    "lint:fix": "biome format --write .",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
@@ -21,7 +21,8 @@
     "./content": "./src/utils/content.ts",
     "./types": "./src/types.ts",
     "./utils": "./src/utils/transform.ts",
-    "./currency": "./src/utils/currency.ts"
+    "./currency": "./src/utils/currency.ts",
+    "./recurring": "./src/utils/recurring.ts"
   },
   "dependencies": {
     "@midday/ui": "workspace:*",
