@@ -22,6 +22,7 @@ export default async function Page() {
     trpc.oauthApplications.list.queryOptions(),
     trpc.oauthApplications.authorized.queryOptions(),
     trpc.inboxAccounts.get.queryOptions(),
+    trpc.invoicePayments.stripeStatus.queryOptions(),
   ]);
 
   return (
