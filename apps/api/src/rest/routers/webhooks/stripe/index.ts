@@ -1,6 +1,11 @@
 import type { Context } from "@api/rest/types";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { getInvoiceById, updateInvoice } from "@midday/db/queries";
+import {
+  getInvoiceById,
+  getTeamByStripeAccountId,
+  updateInvoice,
+  updateTeamById,
+} from "@midday/db/queries";
 import { triggerJob } from "@midday/job-client";
 import { logger } from "@midday/logger";
 import { HTTPException } from "hono/http-exception";
@@ -170,9 +175,43 @@ app.openapi(
             payoutsEnabled: account.payouts_enabled,
           });
 
-          // If account capabilities changed, we could update the team's stripeConnectStatus
-          // This would require finding the team by stripeAccountId
-          // For now, we'll just log it
+          // Find the team associated with this Stripe account
+          const team = await getTeamByStripeAccountId(db, account.id);
+
+          if (team) {
+            // Determine new status based on account capabilities
+            let newStatus: string;
+            if (account.charges_enabled && account.payouts_enabled) {
+              newStatus = "connected";
+            } else if (account.charges_enabled) {
+              // Can accept charges but payouts restricted
+              newStatus = "restricted";
+            } else {
+              // Cannot accept charges - payments will fail
+              newStatus = "disabled";
+            }
+
+            // Only update if status changed
+            if (team.stripeConnectStatus !== newStatus) {
+              await updateTeamById(db, {
+                id: team.id,
+                data: {
+                  stripeConnectStatus: newStatus,
+                },
+              });
+
+              logger.info("Team Stripe status updated", {
+                teamId: team.id,
+                previousStatus: team.stripeConnectStatus,
+                newStatus,
+                accountId: account.id,
+              });
+            }
+          } else {
+            logger.warn("No team found for Stripe account", {
+              accountId: account.id,
+            });
+          }
 
           break;
         }

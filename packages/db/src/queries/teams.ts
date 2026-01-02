@@ -65,6 +65,32 @@ export const getTeamByInboxId = async (db: Database, inboxId: string) => {
   return result;
 };
 
+/**
+ * Get a team by their Stripe Connect account ID.
+ * Used by webhooks to find which team a connected account belongs to.
+ *
+ * @param db - Database instance
+ * @param stripeAccountId - The Stripe connected account ID (acct_xxx)
+ * @returns The team if found, undefined otherwise
+ */
+export const getTeamByStripeAccountId = async (
+  db: Database,
+  stripeAccountId: string,
+) => {
+  const [result] = await db
+    .select({
+      id: teams.id,
+      name: teams.name,
+      stripeAccountId: teams.stripeAccountId,
+      stripeConnectStatus: teams.stripeConnectStatus,
+    })
+    .from(teams)
+    .where(eq(teams.stripeAccountId, stripeAccountId))
+    .limit(1);
+
+  return result;
+};
+
 type UpdateTeamParams = {
   id: string;
   data: Partial<typeof teams.$inferInsert>;

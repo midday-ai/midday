@@ -1,5 +1,6 @@
 "use client";
 
+import { fromStripeAmount } from "@midday/invoice/currency";
 import { Button } from "@midday/ui/button";
 import { Dialog, DialogContent } from "@midday/ui/dialog";
 import { Spinner } from "@midday/ui/spinner";
@@ -13,7 +14,7 @@ import {
 import type { Appearance } from "@stripe/stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 function StripeLogo({ className }: { className?: string }) {
   return (
@@ -88,11 +89,11 @@ function PaymentForm({
     }
   };
 
-  const formatAmount = (amountInCents: number, curr: string) => {
+  const formatAmount = (stripeAmount: number, curr: string) => {
     return new Intl.NumberFormat(undefined, {
       style: "currency",
       currency: curr.toUpperCase(),
-    }).format(amountInCents / 100);
+    }).format(fromStripeAmount(stripeAmount, curr));
   };
 
   return (
@@ -288,11 +289,17 @@ export function PaymentModal({
     onSuccess?.();
   };
 
-  const stripePromise = paymentData
-    ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!, {
-        stripeAccount: paymentData.stripeAccountId,
-      })
-    : null;
+  const stripePromise = useMemo(() => {
+    if (!paymentData) return null;
+    const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+    if (!publishableKey) {
+      console.error("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not configured");
+      return null;
+    }
+    return loadStripe(publishableKey, {
+      stripeAccount: paymentData.stripeAccountId,
+    });
+  }, [paymentData?.stripeAccountId]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>

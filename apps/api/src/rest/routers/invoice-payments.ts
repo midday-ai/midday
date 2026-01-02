@@ -467,6 +467,14 @@ app.openapi(
             { stripeAccount: team.stripeAccountId },
           );
 
+          // If payment already succeeded, reject - prevents double payments
+          // This catches edge case where webhook hasn't updated invoice status yet
+          if (existingIntent.status === "succeeded") {
+            throw new HTTPException(400, {
+              message: "Invoice has already been paid",
+            });
+          }
+
           // If the existing intent is still usable, return it
           // Include requires_action (3DS pending) and processing (payment in progress)
           // to prevent duplicate charges from creating new intents
@@ -483,7 +491,11 @@ app.openapi(
               stripeAccountId: team.stripeAccountId,
             });
           }
-        } catch {
+        } catch (err) {
+          // Re-throw HTTP exceptions (like the "already paid" check above)
+          if (err instanceof HTTPException) {
+            throw err;
+          }
           // Intent doesn't exist or is invalid, create a new one
         }
       }
