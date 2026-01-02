@@ -140,7 +140,7 @@ export function TimeTrackingCalendarAnimation() {
   }
 
   return (
-    <div className="w-full h-full flex flex-col justify-center bg-background m-0 p-0">
+    <div className="w-full h-full flex flex-col bg-background m-0 p-0">
       {/* Month Navigation and Tabs */}
       <div className="flex items-center justify-between mb-3 sm:mb-4 flex-shrink-0">
         {/* Month Navigation Button */}
