@@ -13,6 +13,7 @@ export const invoiceNotificationSchema = z.object({
     "cancelled",
     "scheduled",
     "reminder_sent",
+    "refunded",
   ]),
   invoiceId: z.string().uuid(),
   invoiceNumber: z.string(),
@@ -20,6 +21,7 @@ export const invoiceNotificationSchema = z.object({
   customerName: z.string().optional(),
   paidAt: z.string().optional(),
   scheduledAt: z.string().optional(),
+  refundedAt: z.string().optional(),
 });
 
 export type InvoiceNotificationPayload = z.infer<

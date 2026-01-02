@@ -308,6 +308,7 @@ export async function getInvoiceById(
       scheduledAt: invoices.scheduledAt,
       scheduledJobId: invoices.scheduledJobId,
       paymentIntentId: invoices.paymentIntentId,
+      refundedAt: invoices.refundedAt,
       teamId: invoices.teamId,
       customer: {
         id: customers.id,
@@ -371,6 +372,30 @@ export async function getInvoiceById(
     topBlock: result.topBlock as EditorDoc | null,
     bottomBlock: result.bottomBlock as EditorDoc | null,
   };
+}
+
+/**
+ * Get an invoice by its Stripe payment intent ID.
+ * Used by webhooks to find invoices when processing refunds.
+ */
+export async function getInvoiceByPaymentIntentId(
+  db: Database,
+  paymentIntentId: string,
+) {
+  const [result] = await db
+    .select({
+      id: invoices.id,
+      teamId: invoices.teamId,
+      status: invoices.status,
+      invoiceNumber: invoices.invoiceNumber,
+      customerName: invoices.customerName,
+      paymentIntentId: invoices.paymentIntentId,
+    })
+    .from(invoices)
+    .where(eq(invoices.paymentIntentId, paymentIntentId))
+    .limit(1);
+
+  return result;
 }
 
 type PaymentStatusResult = {
@@ -943,13 +968,14 @@ export async function duplicateInvoice(
 
 export type UpdateInvoiceParams = {
   id: string;
-  status?: "paid" | "canceled" | "unpaid" | "scheduled" | "draft";
+  status?: "paid" | "canceled" | "unpaid" | "scheduled" | "draft" | "refunded";
   paidAt?: string | null;
   internalNote?: string | null;
   reminderSentAt?: string | null;
   scheduledAt?: string | null;
   scheduledJobId?: string | null;
   paymentIntentId?: string | null;
+  refundedAt?: string | null;
   teamId: string;
   userId?: string;
 };

@@ -2,6 +2,7 @@ import type { Context } from "@api/rest/types";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import {
   getInvoiceById,
+  getInvoiceByPaymentIntentId,
   getTeamByStripeAccountId,
   updateInvoice,
   updateTeamById,
@@ -161,6 +162,71 @@ app.openapi(
 
           // Optionally: Send notification to team about failed payment
           // await tasks.trigger("notification", { ... });
+
+          break;
+        }
+
+        case "charge.refunded": {
+          const charge = event.data.object as Stripe.Charge;
+          const paymentIntentId = charge.payment_intent as string;
+
+          if (!paymentIntentId) {
+            logger.warn("Refunded charge missing payment_intent", {
+              chargeId: charge.id,
+            });
+            break;
+          }
+
+          // Find the invoice by payment intent ID
+          const invoice = await getInvoiceByPaymentIntentId(
+            db,
+            paymentIntentId,
+          );
+
+          if (!invoice) {
+            logger.warn("No invoice found for refunded payment intent", {
+              paymentIntentId,
+              chargeId: charge.id,
+            });
+            break;
+          }
+
+          const refundedAt = new Date().toISOString();
+
+          // Update invoice: set status to refunded, keep payment history, set refundedAt
+          const updatedInvoice = await updateInvoice(db, {
+            id: invoice.id,
+            teamId: invoice.teamId,
+            status: "refunded",
+            refundedAt,
+          });
+
+          if (updatedInvoice) {
+            logger.info("Invoice marked as refunded", {
+              invoiceId: invoice.id,
+              invoiceNumber: invoice.invoiceNumber,
+              paymentIntentId,
+            });
+
+            // Trigger refund notification job
+            await triggerJob(
+              "invoice-notification",
+              {
+                type: "refunded",
+                invoiceId: invoice.id,
+                invoiceNumber: invoice.invoiceNumber || "",
+                teamId: invoice.teamId,
+                customerName: invoice.customerName || "",
+                refundedAt,
+              },
+              "invoices",
+            );
+
+            logger.info("Invoice refund notification triggered", {
+              invoiceId: invoice.id,
+              invoiceNumber: invoice.invoiceNumber,
+            });
+          }
 
           break;
         }

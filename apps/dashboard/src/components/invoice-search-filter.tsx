@@ -43,6 +43,7 @@ const allowedStatuses = [
   "unpaid",
   "canceled",
   "scheduled",
+  "refunded",
 ];
 
 export function InvoiceSearchFilter() {
@@ -74,6 +75,7 @@ export function InvoiceSearchFilter() {
             "paid",
             "unpaid",
             "canceled",
+            "refunded",
           ] as const)
         : normalizeString(object.statuses)
           ? validateEnumArray([object.statuses], [
@@ -82,6 +84,7 @@ export function InvoiceSearchFilter() {
               "paid",
               "unpaid",
               "canceled",
+              "refunded",
             ] as const)
           : null;
 

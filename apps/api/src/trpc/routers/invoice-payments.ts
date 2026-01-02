@@ -1,8 +1,13 @@
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import { getTeamById, updateTeamById } from "@midday/db/queries";
+import {
+  getInvoiceById,
+  getTeamById,
+  updateTeamById,
+} from "@midday/db/queries";
 import { logger } from "@midday/logger";
 import { TRPCError } from "@trpc/server";
 import Stripe from "stripe";
+import { z } from "zod";
 
 export const invoicePaymentsRouter = createTRPCRouter({
   // Get Stripe Connect status for the current team
@@ -86,4 +91,92 @@ export const invoicePaymentsRouter = createTRPCRouter({
       return { success: true };
     },
   ),
+
+  // Refund a Stripe payment for an invoice
+  refundPayment: protectedProcedure
+    .input(z.object({ invoiceId: z.string().uuid() }))
+    .mutation(async ({ input, ctx: { db, teamId } }) => {
+      if (!teamId) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Team not found",
+        });
+      }
+
+      // Get the invoice
+      const invoice = await getInvoiceById(db, {
+        id: input.invoiceId,
+        teamId,
+      });
+
+      if (!invoice) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invoice not found",
+        });
+      }
+
+      // Verify invoice is paid and has a payment intent
+      if (invoice.status !== "paid") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invoice is not paid",
+        });
+      }
+
+      if (!invoice.paymentIntentId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invoice was not paid via Stripe",
+        });
+      }
+
+      // Get team's Stripe account
+      const team = await getTeamById(db, teamId);
+
+      if (!team?.stripeAccountId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Stripe is not connected",
+        });
+      }
+
+      try {
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+        // Create refund on the connected account
+        await stripe.refunds.create(
+          { payment_intent: invoice.paymentIntentId },
+          { stripeAccount: team.stripeAccountId },
+        );
+
+        logger.info("Refund created for invoice", {
+          invoiceId: input.invoiceId,
+          paymentIntentId: invoice.paymentIntentId,
+          teamId,
+        });
+
+        return { success: true };
+      } catch (err) {
+        logger.error("Failed to create refund", {
+          error: err instanceof Error ? err.message : String(err),
+          invoiceId: input.invoiceId,
+        });
+
+        // Handle specific Stripe errors
+        if (err instanceof Stripe.errors.StripeError) {
+          if (err.code === "charge_already_refunded") {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "This payment has already been refunded",
+            });
+          }
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to process refund",
+        });
+      }
+    }),
 });

@@ -13,11 +13,23 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@midday/ui/accordion";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@midday/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import { useQuery } from "@tanstack/react-query";
+import { SubmitButton } from "@midday/ui/submit-button";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CopyInput } from "./copy-input";
 import { FormatAmount } from "./format-amount";
@@ -30,6 +42,7 @@ import { OpenURL } from "./open-url";
 
 export function InvoiceDetails() {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { invoiceId } = useInvoiceParams();
   const { data: user } = useUserQuery();
 
@@ -39,6 +52,19 @@ export function InvoiceDetails() {
     ...trpc.invoice.getById.queryOptions({ id: invoiceId! }),
     enabled: isOpen,
   });
+
+  const refundMutation = useMutation(
+    trpc.invoicePayments.refundPayment.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.getById.queryKey({ id: invoiceId! }),
+        });
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.queryKey(),
+        });
+      },
+    }),
+  );
 
   const { url: downloadUrl } = useFileUrl({
     type: "invoice",
@@ -74,6 +100,7 @@ export function InvoiceDetails() {
     customerName,
     scheduledAt,
     paymentIntentId,
+    refundedAt,
   } = data;
 
   return (
@@ -104,7 +131,7 @@ export function InvoiceDetails() {
         <div className="flex flex-col w-full space-y-1">
           <span
             className={cn("text-4xl select-text font-serif", {
-              "line-through": status === "canceled",
+              "line-through": status === "canceled" || status === "refunded",
             })}
           >
             {currency && (
@@ -148,6 +175,14 @@ export function InvoiceDetails() {
             </span>
             <span className="text-xs">
               <span className="text-[#606060]">Marked as canceled</span>
+            </span>
+          </div>
+        )}
+
+        {status === "refunded" && (
+          <div className="mt-8">
+            <span className="text-base font-medium">
+              Refunded on {refundedAt && format(new Date(refundedAt), "MMM dd")}
             </span>
           </div>
         )}
@@ -226,7 +261,50 @@ export function InvoiceDetails() {
               </span>
             </div>
           )}
+
+          {refundedAt && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-[#606060]">Refunded</span>
+              <span className="text-sm">
+                {format(new Date(refundedAt), "MMM dd")}
+              </span>
+            </div>
+          )}
         </div>
+
+        {status === "paid" && paymentIntentId && (
+          <div className="mt-6 border-t border-border pt-6">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <SubmitButton
+                  variant="outline"
+                  className="w-full"
+                  isSubmitting={refundMutation.isPending}
+                >
+                  Refund payment
+                </SubmitButton>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Refund payment</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will issue a full refund for this invoice. The invoice
+                    status will be reverted to unpaid. This action cannot be
+                    undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => refundMutation.mutate({ invoiceId: id })}
+                  >
+                    Refund
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        )}
 
         {customer && (
           <div className="mt-6 flex flex-col space-y-2 border-t border-border pt-6">

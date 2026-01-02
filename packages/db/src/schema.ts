@@ -136,6 +136,7 @@ export const invoiceStatusEnum = pgEnum("invoice_status", [
   "unpaid",
   "canceled",
   "scheduled",
+  "refunded",
 ]);
 
 export const plansEnum = pgEnum("plans", ["trial", "starter", "pro"]);
@@ -757,6 +758,10 @@ export const invoices = pgTable(
     scheduledJobId: text("scheduled_job_id"),
     templateId: uuid("template_id"),
     paymentIntentId: text("payment_intent_id"),
+    refundedAt: timestamp("refunded_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
   },
   (table) => [
     index("invoices_created_at_idx").using(

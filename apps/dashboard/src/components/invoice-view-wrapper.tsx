@@ -47,6 +47,7 @@ export function InvoiceViewWrapper({
             | "draft"
             | "canceled"
             | "scheduled"
+            | "refunded"
         }
       />
 
