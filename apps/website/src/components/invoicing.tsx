@@ -227,7 +227,7 @@ export function Invoicing() {
                     Connected to your finances
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Invoices stay linked to customers and revenue as they're sent, updated, and paid.
+                    Invoices stay linked to customers and revenue, with fast online payments built in.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
