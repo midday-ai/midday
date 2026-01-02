@@ -1,19 +1,23 @@
 import { protectedMiddleware, publicMiddleware } from "@api/rest/middleware";
 import type { Context } from "@api/rest/types";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { getInvoiceById, getTeamById, updateInvoice } from "@midday/db/queries";
-import { teams } from "@midday/db/schema";
-import { decrypt, encrypt } from "@midday/encryption";
+import {
+  getInvoiceById,
+  getTeamById,
+  updateInvoice,
+  updateTeamById,
+} from "@midday/db/queries";
+import { decryptOAuthState, encryptOAuthState } from "@midday/encryption";
+import { toStripeAmount } from "@midday/invoice/currency";
 import { verify as verifyInvoiceToken } from "@midday/invoice/token";
 import { logger } from "@midday/logger";
-import { eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import Stripe from "stripe";
 
 const app = new OpenAPIHono<Context>();
 
 // ============================================================================
-// OAuth State Utilities
+// OAuth State Types
 // ============================================================================
 
 interface InvoicePaymentOAuthState {
@@ -22,43 +26,16 @@ interface InvoicePaymentOAuthState {
   source: "invoice-settings";
 }
 
-function toUrlSafeBase64(base64: string): string {
-  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-function fromUrlSafeBase64(urlSafe: string): string {
-  let base64 = urlSafe.replace(/-/g, "+").replace(/_/g, "/");
-  while (base64.length % 4) {
-    base64 += "=";
-  }
-  return base64;
-}
-
-function encryptOAuthState(payload: InvoicePaymentOAuthState): string {
-  const encrypted = encrypt(JSON.stringify(payload));
-  return toUrlSafeBase64(encrypted);
-}
-
-function decryptOAuthState(
-  encryptedState: string,
-): InvoicePaymentOAuthState | null {
-  try {
-    const standardBase64 = fromUrlSafeBase64(encryptedState);
-    const decrypted = decrypt(standardBase64);
-    const parsed = JSON.parse(decrypted);
-
-    if (
-      typeof parsed.teamId !== "string" ||
-      typeof parsed.userId !== "string" ||
-      parsed.source !== "invoice-settings"
-    ) {
-      return null;
-    }
-
-    return parsed as InvoicePaymentOAuthState;
-  } catch {
-    return null;
-  }
+function isValidOAuthState(
+  parsed: unknown,
+): parsed is InvoicePaymentOAuthState {
+  return (
+    typeof parsed === "object" &&
+    parsed !== null &&
+    typeof (parsed as Record<string, unknown>).teamId === "string" &&
+    typeof (parsed as Record<string, unknown>).userId === "string" &&
+    (parsed as Record<string, unknown>).source === "invoice-settings"
+  );
 }
 
 // ============================================================================
@@ -221,7 +198,7 @@ app.openapi(
     }
 
     // Decrypt and validate state
-    const parsedState = decryptOAuthState(state);
+    const parsedState = decryptOAuthState(state, isValidOAuthState);
 
     if (!parsedState) {
       throw new HTTPException(400, {
@@ -254,13 +231,13 @@ app.openapi(
       }
 
       // Update team with Stripe account info
-      await db
-        .update(teams)
-        .set({
+      await updateTeamById(db, {
+        id: parsedState.teamId,
+        data: {
           stripeAccountId,
           stripeConnectStatus: connectStatus,
-        })
-        .where(eq(teams.id, parsedState.teamId));
+        },
+      });
 
       logger.info("Stripe Connect integration created", {
         teamId: parsedState.teamId,
@@ -344,13 +321,13 @@ app.openapi(
     }
 
     // Clear Stripe fields from team
-    await db
-      .update(teams)
-      .set({
+    await updateTeamById(db, {
+      id: session.teamId,
+      data: {
         stripeAccountId: null,
         stripeConnectStatus: null,
-      })
-      .where(eq(teams.id, session.teamId));
+      },
+    });
 
     return c.json({ success: true });
   },
@@ -471,9 +448,9 @@ app.openapi(
       });
     }
 
-    // Calculate amount in cents
-    const amount = Math.round((invoice.amount || 0) * 100);
+    // Calculate amount in Stripe's smallest currency unit
     const currency = (invoice.currency || "usd").toLowerCase();
+    const amount = toStripeAmount(invoice.amount || 0, currency);
 
     if (amount <= 0) {
       throw new HTTPException(400, { message: "Invalid invoice amount" });
@@ -491,9 +468,13 @@ app.openapi(
           );
 
           // If the existing intent is still usable, return it
+          // Include requires_action (3DS pending) and processing (payment in progress)
+          // to prevent duplicate charges from creating new intents
           if (
             existingIntent.status === "requires_payment_method" ||
-            existingIntent.status === "requires_confirmation"
+            existingIntent.status === "requires_confirmation" ||
+            existingIntent.status === "requires_action" ||
+            existingIntent.status === "processing"
           ) {
             return c.json({
               clientSecret: existingIntent.client_secret!,
@@ -508,6 +489,10 @@ app.openapi(
       }
 
       // Create PaymentIntent on the connected account
+      // Use an idempotency key to prevent race conditions - if two requests
+      // arrive simultaneously for the same invoice, Stripe will only create
+      // one payment intent and return the same result to both requests.
+      const idempotencyKey = `invoice_payment_${invoice.id}_${amount}_${currency}`;
       const paymentIntent = await stripe.paymentIntents.create(
         {
           amount,
@@ -523,6 +508,7 @@ app.openapi(
         },
         {
           stripeAccount: team.stripeAccountId,
+          idempotencyKey,
         },
       );
 

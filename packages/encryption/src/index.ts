@@ -1,6 +1,92 @@
 import crypto from "node:crypto";
 import * as jose from "jose";
 
+// ============================================================================
+// URL-Safe Base64 Utilities
+// ============================================================================
+
+/**
+ * Converts standard base64 to URL-safe base64.
+ * Replaces + with -, / with _, and removes = padding.
+ * This is necessary because some OAuth providers don't properly
+ * encode + characters in query strings, which corrupts standard base64.
+ *
+ * @param base64 - Standard base64 encoded string
+ * @returns URL-safe base64 string
+ */
+export function toUrlSafeBase64(base64: string): string {
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+/**
+ * Converts URL-safe base64 back to standard base64.
+ * Replaces - with +, _ with /, and adds = padding.
+ *
+ * @param urlSafeBase64 - URL-safe base64 string
+ * @returns Standard base64 string
+ */
+export function fromUrlSafeBase64(urlSafeBase64: string): string {
+  let base64 = urlSafeBase64.replace(/-/g, "+").replace(/_/g, "/");
+  // Add padding
+  const padding = base64.length % 4;
+  if (padding) {
+    base64 += "=".repeat(4 - padding);
+  }
+  return base64;
+}
+
+/**
+ * Encrypts an OAuth state payload for use in URL parameters.
+ * Uses AES-256-GCM encryption with URL-safe base64 encoding.
+ *
+ * @param payload - The state object to encrypt (must be JSON-serializable)
+ * @returns Encrypted, URL-safe string
+ *
+ * @example
+ * const state = encryptOAuthState({ teamId: "123", userId: "456", source: "settings" });
+ * // Use in OAuth redirect URL: `?state=${state}`
+ */
+export function encryptOAuthState<T>(payload: T): string {
+  const encrypted = encrypt(JSON.stringify(payload));
+  return toUrlSafeBase64(encrypted);
+}
+
+/**
+ * Decrypts and validates an OAuth state from a callback URL.
+ * Returns null if decryption fails or validation doesn't pass.
+ *
+ * @param encryptedState - The encrypted state string from the OAuth callback
+ * @param validate - Optional validation function to verify the payload structure
+ * @returns The decrypted payload, or null if invalid
+ *
+ * @example
+ * const state = decryptOAuthState(params.state, (parsed) =>
+ *   typeof parsed.teamId === "string" && typeof parsed.userId === "string"
+ * );
+ */
+export function decryptOAuthState<T>(
+  encryptedState: string,
+  validate?: (parsed: unknown) => parsed is T,
+): T | null {
+  try {
+    const standardBase64 = fromUrlSafeBase64(encryptedState);
+    const decrypted = decrypt(standardBase64);
+    const parsed = JSON.parse(decrypted);
+
+    if (validate && !validate(parsed)) {
+      return null;
+    }
+
+    return parsed as T;
+  } catch {
+    return null;
+  }
+}
+
+// ============================================================================
+// Encryption Utilities
+// ============================================================================
+
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 16;
 const AUTH_TAG_LENGTH = 16;
