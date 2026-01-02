@@ -24,6 +24,7 @@ import { invoiceCancelled } from "./types/invoice-cancelled";
 import { invoiceCreated } from "./types/invoice-created";
 import { invoiceOverdue } from "./types/invoice-overdue";
 import { invoicePaid } from "./types/invoice-paid";
+import { invoiceRefunded } from "./types/invoice-refunded";
 import { invoiceReminderSent } from "./types/invoice-reminder-sent";
 import { invoiceScheduled } from "./types/invoice-scheduled";
 import { invoiceSent } from "./types/invoice-sent";
@@ -50,6 +51,7 @@ const handlers = {
   invoice_reminder_sent: invoiceReminderSent,
   invoice_cancelled: invoiceCancelled,
   invoice_created: invoiceCreated,
+  invoice_refunded: invoiceRefunded,
 } as const;
 
 export class Notifications {
@@ -404,6 +406,7 @@ export {
   invoiceReminderSentSchema,
   invoiceCancelledSchema,
   invoiceCreatedSchema,
+  invoiceRefundedSchema,
 } from "./schemas";
 export type { NotificationTypes } from "./schemas";
 

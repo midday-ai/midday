@@ -171,6 +171,32 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
         break;
       }
 
+      case "refunded": {
+        const { refundedAt } = job.data;
+
+        // Create in-app notification for refund
+        await notifications.create(
+          "invoice_refunded",
+          teamId,
+          {
+            invoiceId,
+            invoiceNumber,
+            customerName,
+            refundedAt,
+          },
+          {
+            sendEmail: false,
+          },
+        );
+
+        this.logger.info("Invoice refunded notification created", {
+          invoiceId,
+          invoiceNumber,
+          teamId,
+        });
+        break;
+      }
+
       default: {
         this.logger.warn("Unknown invoice notification type", {
           type,

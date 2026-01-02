@@ -14,6 +14,7 @@ const SUPPORTED_NOTIFICATION_TYPES = [
   "invoice_scheduled",
   "invoice_reminder_sent",
   "invoice_cancelled",
+  "invoice_refunded",
   "transactions_created",
   "inbox_new",
   "inbox_needs_review",
@@ -63,6 +64,7 @@ export function NotificationLink({
         case "invoice_scheduled":
         case "invoice_reminder_sent":
         case "invoice_cancelled":
+        case "invoice_refunded":
           setInvoiceParams({ invoiceId: recordId!, type: "details" });
           break;
 

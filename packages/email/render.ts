@@ -1,8 +1,9 @@
-import { renderToStaticMarkup } from "react-dom/server";
+import { render as reactEmailRender } from "@react-email/render";
 
-// TODO: This is a temporary function to render the component to a string.
-// We should use the render function from react-email instead.
-// renderToPipeableStream is not defined error from react-email
-export const render = (component: React.ReactNode) => {
-  return renderToStaticMarkup(component);
+/**
+ * Render an email template component to HTML string.
+ * Uses @react-email/render which supports async rendering and Suspense.
+ */
+export const render = async (component: React.ReactNode): Promise<string> => {
+  return reactEmailRender(component);
 };
