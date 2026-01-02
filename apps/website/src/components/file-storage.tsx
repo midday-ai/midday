@@ -119,11 +119,19 @@ export function FileStorage() {
                   }}
                 />
                 <Image
-                  src="/images/file-Storage.svg"
+                  src="/images/file-storage-light.svg"
                   alt="File Storage Interface"
                   width={1200}
                   height={800}
-                  className="w-full h-auto object-contain relative z-0"
+                  className="w-full h-auto object-contain relative z-0 dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/file-storage-dark.svg"
+                  alt="File Storage Interface"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
                   priority
                 />
               </div>
@@ -158,11 +166,19 @@ export function FileStorage() {
                   }}
                 />
                 <Image
-                  src="/images/file-Storage.svg"
+                  src="/images/file-storage-light.svg"
                   alt="File Storage Interface"
                   width={1200}
                   height={800}
-                  className="w-full h-auto object-contain relative z-0"
+                  className="w-full h-auto object-contain relative z-0 dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/file-storage-dark.svg"
+                  alt="File Storage Interface"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
                   priority
                 />
               </div>
