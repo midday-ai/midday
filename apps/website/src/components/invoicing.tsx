@@ -121,11 +121,19 @@ export function Invoicing() {
                   }}
                 />
                 <Image
-                  src="/images/file-Storage.svg"
+                  src="/images/invoice-light.svg"
                   alt="Invoicing Interface"
                   width={1200}
                   height={800}
-                  className="w-full h-auto object-contain relative z-0"
+                  className="w-full h-auto object-contain relative z-0 dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/invoice-dark.svg"
+                  alt="Invoicing Interface"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
                   priority
                 />
               </div>
@@ -160,11 +168,19 @@ export function Invoicing() {
                   }}
                 />
                 <Image
-                  src="/images/file-Storage.svg"
+                  src="/images/invoice-light.svg"
                   alt="Invoicing Interface"
                   width={1200}
                   height={800}
-                  className="w-full h-auto object-contain relative z-0"
+                  className="w-full h-auto object-contain relative z-0 dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/invoice-dark.svg"
+                  alt="Invoicing Interface"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
                   priority
                 />
               </div>
