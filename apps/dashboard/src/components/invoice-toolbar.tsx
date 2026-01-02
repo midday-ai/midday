@@ -21,6 +21,7 @@ type Props = {
   amount?: number;
   currency?: string;
   status?: string;
+  onPaymentSuccess?: () => void;
 };
 
 export default function InvoiceToolbar({
@@ -30,6 +31,7 @@ export default function InvoiceToolbar({
   amount,
   currency,
   status,
+  onPaymentSuccess,
 }: Props) {
   const [, copy] = useCopyToClipboard();
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
@@ -46,9 +48,6 @@ export default function InvoiceToolbar({
     typeof amount === "number" &&
     amount > 0 &&
     status !== "canceled";
-
-  // Can pay if not already paid and not a draft
-  const canPay = showPaymentSection && !isPaid && status !== "draft";
 
   return (
     <>
@@ -159,8 +158,7 @@ export default function InvoiceToolbar({
           invoiceNumber={invoiceNumber}
           onSuccess={() => {
             setIsPaid(true);
-            // Reload the page to show updated status
-            window.location.reload();
+            onPaymentSuccess?.();
           }}
         />
       )}

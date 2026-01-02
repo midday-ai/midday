@@ -231,8 +231,29 @@ export function PaymentModal({
           color: isDark ? "#A1A1A1" : "#666666",
         },
         ".Block": {
-          backgroundColor: isDark ? "#1A1A1A" : "#FFFFFF",
+          backgroundColor: "transparent",
+          border: "none",
+          boxShadow: "none",
           padding: "0",
+        },
+        ".CheckboxInput": {
+          backgroundColor: isDark ? "#121212" : "#FFFFFF",
+          border: isDark ? "1px solid #2E2E2E" : "1px solid #E5E5E5",
+        },
+        ".CheckboxInput--checked": {
+          backgroundColor: isDark ? "#FFFFFF" : "#121212",
+          borderColor: isDark ? "#FFFFFF" : "#121212",
+        },
+        ".CheckboxLabel": {
+          color: isDark ? "#A1A1A1" : "#666666",
+        },
+        ".AccordionItem": {
+          backgroundColor: "transparent",
+          border: "none",
+          boxShadow: "none",
+        },
+        ".AccordionItemContent": {
+          backgroundColor: "transparent",
         },
       },
     };
