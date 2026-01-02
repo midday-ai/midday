@@ -289,7 +289,7 @@ export function InvoiceDetails() {
                   <AlertDialogTitle>Refund payment</AlertDialogTitle>
                   <AlertDialogDescription>
                     This will issue a full refund for this invoice. The invoice
-                    status will be reverted to unpaid. This action cannot be
+                    status will be changed to refunded. This action cannot be
                     undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>

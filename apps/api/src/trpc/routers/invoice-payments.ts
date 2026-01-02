@@ -2,6 +2,7 @@ import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
   getInvoiceById,
   getTeamById,
+  updateInvoice,
   updateTeamById,
 } from "@midday/db/queries";
 import { logger } from "@midday/logger";
@@ -145,14 +146,24 @@ export const invoicePaymentsRouter = createTRPCRouter({
         const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
         // Create refund on the connected account
-        await stripe.refunds.create(
+        const refund = await stripe.refunds.create(
           { payment_intent: invoice.paymentIntentId },
           { stripeAccount: team.stripeAccountId },
         );
 
-        logger.info("Refund created for invoice", {
+        // Update invoice status immediately after Stripe confirms refund
+        // The webhook will also fire but will find invoice already updated
+        await updateInvoice(db, {
+          id: input.invoiceId,
+          teamId,
+          status: "refunded",
+          refundedAt: new Date().toISOString(),
+        });
+
+        logger.info("Refund created and invoice updated", {
           invoiceId: input.invoiceId,
           paymentIntentId: invoice.paymentIntentId,
+          refundId: refund.id,
           teamId,
         });
 
