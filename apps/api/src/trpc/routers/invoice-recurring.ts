@@ -23,8 +23,8 @@ import { TRPCError } from "@trpc/server";
 export const invoiceRecurringRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createInvoiceRecurringSchema)
-    .mutation(async ({ input, ctx: { db, teamId, userId } }) => {
-      if (!teamId || !userId) {
+    .mutation(async ({ input, ctx: { db, teamId, session } }) => {
+      if (!teamId || !session?.user?.id) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Team and user context required",
@@ -33,7 +33,7 @@ export const invoiceRecurringRouter = createTRPCRouter({
 
       const result = await createInvoiceRecurring(db, {
         teamId,
-        userId,
+        userId: session.user.id,
         ...input,
       });
 
