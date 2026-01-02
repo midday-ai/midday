@@ -3,7 +3,7 @@ import { Status } from "./status";
 
 type Props = {
   customerName: string | null;
-  status: "draft" | "overdue" | "paid" | "unpaid" | "canceled" | "scheduled";
+  status: "draft" | "overdue" | "paid" | "unpaid" | "canceled" | "scheduled" | "refunded";
   logoUrl?: string | null;
   isValidLogo: boolean;
 };

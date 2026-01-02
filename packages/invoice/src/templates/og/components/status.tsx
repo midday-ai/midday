@@ -1,7 +1,7 @@
 export function Status({
   status,
 }: {
-  status: "draft" | "overdue" | "paid" | "unpaid" | "canceled" | "scheduled";
+  status: "draft" | "overdue" | "paid" | "unpaid" | "canceled" | "scheduled" | "refunded";
 }) {
   const getStatusStyles = () => {
     if (status === "draft" || status === "canceled") {
@@ -18,6 +18,10 @@ export function Status({
 
     if (status === "scheduled") {
       return "text-[#1F6FEB] bg-[#DDEBFF]";
+    }
+
+    if (status === "refunded") {
+      return "text-[#F97316] bg-[#3D2612]";
     }
 
     return "text-[#F5F5F3] bg-[#292928]";
