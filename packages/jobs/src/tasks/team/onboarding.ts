@@ -44,7 +44,7 @@ export const onboardTeam = schemaTask({
       to: user.email,
       subject: "Welcome to Midday",
       from: "Pontus from Midday <pontus@midday.ai>",
-      html: render(
+      html: await render(
         WelcomeEmail({
           fullName: user.full_name,
         }),

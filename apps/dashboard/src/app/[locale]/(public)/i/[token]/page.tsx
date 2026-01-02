@@ -1,5 +1,4 @@
-import CustomerHeader from "@/components/customer-header";
-import InvoiceToolbar from "@/components/invoice-toolbar";
+import { InvoiceViewWrapper } from "@/components/invoice-view-wrapper";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { decrypt } from "@midday/encryption";
 import { HtmlTemplate } from "@midday/invoice/templates/html";
@@ -130,22 +129,25 @@ export default async function Page(props: Props) {
         className="flex flex-col w-full max-w-full py-6"
         style={{ maxWidth: width }}
       >
-        <CustomerHeader
-          name={invoice.customerName || (invoice.customer?.name as string)}
-          website={invoice.customer?.website}
-          status={invoice.status}
-        />
-        <div className="pb-24 md:pb-0">
-          <div className="shadow-[0_24px_48px_-12px_rgba(0,0,0,0.3)] dark:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)]">
-            <HtmlTemplate data={invoice} width={width} height={height} />
+        <InvoiceViewWrapper
+          token={invoice.token}
+          invoiceNumber={invoice.invoiceNumber || "invoice"}
+          paymentEnabled={invoice.template.paymentEnabled}
+          amount={invoice.amount ?? undefined}
+          currency={invoice.currency ?? undefined}
+          initialStatus={invoice.status}
+          customerName={
+            invoice.customerName || (invoice.customer?.name as string)
+          }
+          customerWebsite={invoice.customer?.website}
+        >
+          <div className="pb-24 md:pb-0">
+            <div className="shadow-[0_24px_48px_-12px_rgba(0,0,0,0.3)] dark:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)]">
+              <HtmlTemplate data={invoice} width={width} height={height} />
+            </div>
           </div>
-        </div>
+        </InvoiceViewWrapper>
       </div>
-
-      <InvoiceToolbar
-        token={invoice.token}
-        invoiceNumber={invoice.invoiceNumber || "invoice"}
-      />
 
       <div className="fixed bottom-4 right-4 hidden md:block">
         <a

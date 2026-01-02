@@ -69,7 +69,9 @@ export const columns: ColumnDef<Invoice>[] = [
     cell: ({ row }) => (
       <span
         className={cn("truncate", {
-          "line-through": row.original.status === "canceled",
+          "line-through":
+            row.original.status === "canceled" ||
+            row.original.status === "refunded",
         })}
       >
         {row.getValue("invoiceNumber")}

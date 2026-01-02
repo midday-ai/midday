@@ -26,7 +26,7 @@ export const inviteTeamMembers = schemaTask({
       headers: {
         "X-Entity-Ref-ID": nanoid(),
       },
-      html: render(
+      html: await render(
         InviteEmail({
           invitedByEmail: invite.invitedByEmail,
           invitedByName: invite.invitedByName,

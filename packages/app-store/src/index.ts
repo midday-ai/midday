@@ -11,6 +11,7 @@ import quickBooksApp from "./quick-books/config-client";
 import raycastApp from "./raycast/config";
 // Import client config for dashboard (includes images)
 import slackApp from "./slack/config-client";
+import stripePaymentsApp from "./stripe-payments/config-client";
 import stripeApp from "./stripe/config";
 import whatsappApp from "./whatsapp/config-client";
 import xeroApp from "./xero/config-client";
@@ -22,8 +23,9 @@ export const apps = [
   quickBooksApp,
   xeroApp,
   fortnoxApp,
-  middayDesktopApp,
   whatsappApp,
+  stripePaymentsApp,
+  middayDesktopApp,
   raycastApp,
   googleDriveApp,
   dropboxApp,

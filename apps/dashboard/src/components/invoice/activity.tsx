@@ -111,9 +111,19 @@ export function InvoiceActivity({ data }: Props) {
 
       {data?.status !== "canceled" && (
         <ActivityItem
-          label="Paid"
+          label={data?.paymentIntentId ? "Paid with Stripe" : "Paid"}
           date={data?.paidAt}
           completed={completed}
+          isLast={!data?.refundedAt}
+          timeFormat={user?.timeFormat}
+        />
+      )}
+
+      {data?.refundedAt && (
+        <ActivityItem
+          label="Refunded"
+          date={data?.refundedAt}
+          completed
           isLast
           timeFormat={user?.timeFormat}
         />

@@ -1,33 +1,5 @@
-import { decrypt, encrypt } from "@midday/encryption";
+import { decryptOAuthState, encryptOAuthState } from "@midday/encryption";
 import type { AccountingProviderId, MappedTransaction } from "./types";
-
-// ============================================================================
-// URL-Safe Base64 Utilities
-// ============================================================================
-
-/**
- * Converts standard base64 to URL-safe base64.
- * Replaces + with -, / with _, and removes = padding.
- * This is necessary because some OAuth providers (like Fortnox) don't properly
- * encode + characters in query strings, which corrupts standard base64.
- */
-function toUrlSafeBase64(base64: string): string {
-  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-/**
- * Converts URL-safe base64 back to standard base64.
- * Replaces - with +, _ with /, and adds = padding.
- */
-function fromUrlSafeBase64(urlSafeBase64: string): string {
-  let base64 = urlSafeBase64.replace(/-/g, "+").replace(/_/g, "/");
-  // Add padding
-  const padding = base64.length % 4;
-  if (padding) {
-    base64 += "=".repeat(4 - padding);
-  }
-  return base64;
-}
 
 // ============================================================================
 // OAuth State Utilities
@@ -45,6 +17,26 @@ export interface AccountingOAuthStatePayload {
 }
 
 /**
+ * Type guard to validate accounting OAuth state payload
+ */
+function isValidAccountingOAuthState(
+  parsed: unknown,
+): parsed is AccountingOAuthStatePayload {
+  return (
+    typeof parsed === "object" &&
+    parsed !== null &&
+    typeof (parsed as Record<string, unknown>).teamId === "string" &&
+    typeof (parsed as Record<string, unknown>).userId === "string" &&
+    ["xero", "quickbooks", "fortnox"].includes(
+      (parsed as Record<string, unknown>).provider as string,
+    ) &&
+    ["apps", "settings"].includes(
+      (parsed as Record<string, unknown>).source as string,
+    )
+  );
+}
+
+/**
  * Encrypts OAuth state to prevent tampering.
  * The state contains sensitive info like teamId that must be protected.
  * Uses URL-safe base64 encoding to prevent issues with + characters in URLs.
@@ -55,15 +47,12 @@ export interface AccountingOAuthStatePayload {
 export function encryptAccountingOAuthState(
   payload: AccountingOAuthStatePayload,
 ): string {
-  const encrypted = encrypt(JSON.stringify(payload));
-  // Convert to URL-safe base64 to prevent issues with + characters
-  return toUrlSafeBase64(encrypted);
+  return encryptOAuthState(payload);
 }
 
 /**
  * Decrypts and validates OAuth state from callback.
  * Returns null if state is invalid or tampered with.
- * Handles both URL-safe and standard base64 for backwards compatibility.
  *
  * @param encryptedState - The encrypted state from the OAuth callback
  * @returns Decrypted payload or null if invalid
@@ -71,27 +60,7 @@ export function encryptAccountingOAuthState(
 export function decryptAccountingOAuthState(
   encryptedState: string,
 ): AccountingOAuthStatePayload | null {
-  try {
-    // Convert from URL-safe base64 back to standard base64
-    const standardBase64 = fromUrlSafeBase64(encryptedState);
-    const decrypted = decrypt(standardBase64);
-    const parsed = JSON.parse(decrypted);
-
-    // Validate required fields
-    // Note: Only currently implemented providers are allowed for OAuth
-    if (
-      typeof parsed.teamId !== "string" ||
-      typeof parsed.userId !== "string" ||
-      !["xero", "quickbooks", "fortnox"].includes(parsed.provider) ||
-      !["apps", "settings"].includes(parsed.source)
-    ) {
-      return null;
-    }
-
-    return parsed as AccountingOAuthStatePayload;
-  } catch {
-    return null;
-  }
+  return decryptOAuthState(encryptedState, isValidAccountingOAuthState);
 }
 
 // ============================================================================

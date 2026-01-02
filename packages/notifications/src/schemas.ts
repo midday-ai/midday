@@ -18,6 +18,7 @@ export const createActivitySchema = z.object({
     "invoice_reminder_sent",
     "invoice_cancelled",
     "invoice_created",
+    "invoice_refunded",
     "draft_invoice_created",
     "document_uploaded",
     "document_processed",
@@ -217,6 +218,14 @@ export const invoiceCreatedSchema = z.object({
   currency: z.string().optional(),
 });
 
+export const invoiceRefundedSchema = z.object({
+  users: z.array(userSchema),
+  invoiceId: z.string().uuid(),
+  invoiceNumber: z.string(),
+  customerName: z.string().optional(),
+  refundedAt: z.string().optional(),
+});
+
 export const transactionsCategorizedSchema = z.object({
   users: z.array(userSchema),
   categorySlug: z.string(),
@@ -259,6 +268,7 @@ export type InvoiceReminderSentInput = z.infer<
 >;
 export type InvoiceCancelledInput = z.infer<typeof invoiceCancelledSchema>;
 export type InvoiceCreatedInput = z.infer<typeof invoiceCreatedSchema>;
+export type InvoiceRefundedInput = z.infer<typeof invoiceRefundedSchema>;
 export type TransactionsCategorizedInput = z.infer<
   typeof transactionsCategorizedSchema
 >;
@@ -285,4 +295,5 @@ export type NotificationTypes = {
   invoice_reminder_sent: InvoiceReminderSentInput;
   invoice_cancelled: InvoiceCancelledInput;
   invoice_created: InvoiceCreatedInput;
+  invoice_refunded: InvoiceRefundedInput;
 };

@@ -1,5 +1,6 @@
 "use client";
 
+import { useAppOAuth } from "@/hooks/use-app-oauth";
 import { useTRPC } from "@/trpc/client";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import {
@@ -143,11 +144,60 @@ export function SettingsMenu() {
   const { toast } = useToast();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [disconnectDialogOpen, setDisconnectDialogOpen] = useState(false);
   const [newName, setNewName] = useState("");
 
   const templateId = watch("template.id");
   const templateName = watch("template.name");
   const isDefault = watch("template.isDefault");
+  const paymentEnabled = watch("template.paymentEnabled");
+
+  // Stripe Connect status
+  const { data: stripeStatus } = useQuery(
+    trpc.invoicePayments.stripeStatus.queryOptions(),
+  );
+
+  const stripeOAuth = useAppOAuth({
+    installUrlEndpoint: "/invoice-payments/connect-stripe",
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: trpc.invoicePayments.stripeStatus.queryKey(),
+      });
+      toast({
+        title: "Stripe connected",
+        description: "You can now accept payments for invoices.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Failed to connect Stripe",
+        variant: "error",
+      });
+    },
+  });
+
+  const disconnectStripeMutation = useMutation(
+    trpc.invoicePayments.disconnectStripe.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoicePayments.stripeStatus.queryKey(),
+        });
+        // Disable payment on the current template
+        setValue("template.paymentEnabled", false, { shouldDirty: true });
+        setDisconnectDialogOpen(false);
+        toast({
+          title: "Stripe disconnected",
+          description: "Payments have been disabled.",
+        });
+      },
+      onError: () => {
+        toast({
+          title: "Failed to disconnect Stripe",
+          variant: "error",
+        });
+      },
+    }),
+  );
 
   // Get template count to prevent deleting last template
   const { data: templateCount } = useQuery(
@@ -399,6 +449,60 @@ export function SettingsMenu() {
             );
           })}
 
+          {/* Accept Payments Section */}
+          <DropdownMenuSeparator />
+
+          {stripeStatus?.connected ? (
+            <>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <Icons.Tax className="mr-2 size-4" />
+                  <span className="text-xs">Accept payments</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="p-0">
+                  {booleanOptions.map((option, optionIndex) => (
+                    <DropdownMenuCheckboxItem
+                      key={optionIndex.toString()}
+                      className="text-xs"
+                      checked={paymentEnabled === option.value}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setValue("template.paymentEnabled", option.value, {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          });
+                          updateTemplateMutation.mutate({
+                            id: templateId,
+                            paymentEnabled: option.value,
+                          });
+                        }
+                      }}
+                      onSelect={(event) => event.preventDefault()}
+                    >
+                      {option.label}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => setDisconnectDialogOpen(true)}
+                    className="text-xs cursor-pointer text-destructive focus:text-destructive"
+                  >
+                    Disconnect Stripe
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+            </>
+          ) : (
+            <DropdownMenuItem
+              onClick={() => stripeOAuth.connect()}
+              className="text-xs cursor-pointer"
+              disabled={stripeOAuth.isLoading}
+            >
+              <Icons.Tax className="mr-2 size-4" />
+              {stripeOAuth.isLoading ? "Connecting..." : "Connect Stripe"}
+            </DropdownMenuItem>
+          )}
+
           {templateId && (
             <>
               <DropdownMenuSeparator />
@@ -511,6 +615,32 @@ export function SettingsMenu() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={disconnectDialogOpen}
+        onOpenChange={setDisconnectDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disconnect Stripe</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to disconnect your Stripe account? Online
+              payments will be disabled for all invoices.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => disconnectStripeMutation.mutate()}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {disconnectStripeMutation.isPending
+                ? "Disconnecting..."
+                : "Disconnect"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

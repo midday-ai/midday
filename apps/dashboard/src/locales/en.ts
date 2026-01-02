@@ -171,6 +171,15 @@ export default {
       with_customer: "Invoice {invoiceNumber} created for {customerName}",
       without_customer: "Invoice {invoiceNumber} has been created",
     },
+    invoice_refunded: {
+      name: "Refunded",
+      description: "Get notified when invoice payments are refunded",
+      title: "Invoice refunded",
+      subtitle: "Invoice payment has been refunded",
+      with_customer:
+        "Invoice {invoiceNumber} for {customerName} has been refunded",
+      without_customer: "Invoice {invoiceNumber} has been refunded",
+    },
     inbox_new: {
       name: "New Inbox Items",
       description: "Get notified when new items arrive in your inbox",
@@ -346,6 +355,7 @@ export default {
     unpaid: "Unpaid",
     canceled: "Canceled",
     scheduled: "Scheduled",
+    refunded: "Refunded",
   },
   payment_status: {
     none: "Unknown",

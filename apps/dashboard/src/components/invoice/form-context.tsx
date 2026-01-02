@@ -47,6 +47,7 @@ export const invoiceTemplateSchema = z.object({
   deliveryType: z.enum(["create", "create_and_send", "scheduled"]),
   locale: z.string().optional(),
   timezone: z.string().optional(),
+  paymentEnabled: z.boolean().optional(),
 });
 
 export const lineItemSchema = z.object({

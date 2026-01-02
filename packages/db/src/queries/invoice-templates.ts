@@ -40,6 +40,7 @@ type InvoiceTemplateParams = {
   size?: "a4" | "letter";
   deliveryType?: "create" | "create_and_send" | "scheduled";
   includePdf?: boolean;
+  paymentEnabled?: boolean;
 };
 
 type CreateInvoiceTemplateParams = {
@@ -96,6 +97,7 @@ const templateSelectFields = {
   includeUnits: invoiceTemplates.includeUnits,
   includePdf: invoiceTemplates.includePdf,
   sendCopy: invoiceTemplates.sendCopy,
+  paymentEnabled: invoiceTemplates.paymentEnabled,
 };
 
 /**

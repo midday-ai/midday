@@ -29,6 +29,10 @@ export function Apps() {
         queryClient.invalidateQueries({
           queryKey: trpc.inboxAccounts.get.queryKey(),
         });
+        // Also invalidate Stripe status for Stripe Payments app
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoicePayments.stripeStatus.queryKey(),
+        });
       }
     };
 
@@ -56,6 +60,11 @@ export function Apps() {
     trpc.inboxAccounts.get.queryOptions(),
   );
 
+  // Fetch Stripe status for Stripe Payments app
+  const { data: stripeStatus } = useSuspenseQuery(
+    trpc.invoicePayments.stripeStatus.queryOptions(),
+  );
+
   const searchParams = useSearchParams();
   const isInstalledPage = searchParams.get("tab") === "installed";
   const search = searchParams.get("q");
@@ -70,11 +79,15 @@ export function Apps() {
     // Gmail and Outlook use inbox_accounts for installation status
     const isInboxApp = app.id === "gmail" || app.id === "outlook";
     const inboxAccount = isInboxApp ? getInboxAccount(app.id) : null;
+    // Stripe Payments uses team.stripeAccountId for installation status
+    const isStripePaymentsApp = app.id === "stripe-payments";
     const installed = isInboxApp
       ? !!inboxAccount
-      : (installedOfficialApps?.some(
-          (installed) => installed.app_id === app.id,
-        ) ?? false);
+      : isStripePaymentsApp
+        ? (stripeStatus?.connected ?? false)
+        : (installedOfficialApps?.some(
+            (installed) => installed.app_id === app.id,
+          ) ?? false);
 
     return {
       id: app.id,

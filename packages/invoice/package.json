@@ -20,7 +20,8 @@
     "./format-to-html": "./src/templates/html/format.tsx",
     "./content": "./src/utils/content.ts",
     "./types": "./src/types.ts",
-    "./utils": "./src/utils/transform.ts"
+    "./utils": "./src/utils/transform.ts",
+    "./currency": "./src/utils/currency.ts"
   },
   "dependencies": {
     "@midday/ui": "workspace:*",

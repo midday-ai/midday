@@ -8,10 +8,12 @@ export const invoiceFilterSchema = z.object({
       "The merchant/company name to search for. Only use this if the prompt mentions a specific company or merchant name.",
     ),
   statuses: z
-    .array(z.enum(["draft", "overdue", "paid", "unpaid", "canceled"]))
+    .array(
+      z.enum(["draft", "overdue", "paid", "unpaid", "canceled", "refunded"]),
+    )
     .optional()
     .describe(
-      "Only set this if the prompt explicitly mentions invoice statuses (e.g., 'unpaid invoices', 'draft invoices').",
+      "Only set this if the prompt explicitly mentions invoice statuses (e.g., 'unpaid invoices', 'draft invoices', 'refunded invoices').",
     ),
   start: z.coerce
     .string()

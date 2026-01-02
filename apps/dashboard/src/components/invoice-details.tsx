@@ -13,11 +13,23 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@midday/ui/accordion";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@midday/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import { useQuery } from "@tanstack/react-query";
+import { SubmitButton } from "@midday/ui/submit-button";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CopyInput } from "./copy-input";
 import { FormatAmount } from "./format-amount";
@@ -30,6 +42,7 @@ import { OpenURL } from "./open-url";
 
 export function InvoiceDetails() {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { invoiceId } = useInvoiceParams();
   const { data: user } = useUserQuery();
 
@@ -39,6 +52,32 @@ export function InvoiceDetails() {
     ...trpc.invoice.getById.queryOptions({ id: invoiceId! }),
     enabled: isOpen,
   });
+
+  const refundMutation = useMutation(
+    trpc.invoicePayments.refundPayment.mutationOptions({
+      onSuccess: () => {
+        // Invalidate the specific invoice
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.getById.queryKey({ id: invoiceId! }),
+        });
+        // Invalidate the invoice table (infinite query for pagination)
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.infiniteQueryKey(),
+        });
+        // Invalidate regular query key as well
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.queryKey(),
+        });
+        // Invalidate summary and payment status
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.invoiceSummary.queryKey(),
+        });
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.paymentStatus.queryKey(),
+        });
+      },
+    }),
+  );
 
   const { url: downloadUrl } = useFileUrl({
     type: "invoice",
@@ -73,6 +112,8 @@ export function InvoiceDetails() {
     sentTo,
     customerName,
     scheduledAt,
+    paymentIntentId,
+    refundedAt,
   } = data;
 
   return (
@@ -103,7 +144,7 @@ export function InvoiceDetails() {
         <div className="flex flex-col w-full space-y-1">
           <span
             className={cn("text-4xl select-text font-serif", {
-              "line-through": status === "canceled",
+              "line-through": status === "canceled" || status === "refunded",
             })}
           >
             {currency && (
@@ -133,12 +174,9 @@ export function InvoiceDetails() {
 
       <div className="h-full p-0 pb-[143px] overflow-y-auto scrollbar-hide">
         {status === "paid" && (
-          <div className="mt-8 flex flex-col space-y-1">
+          <div className="mt-8">
             <span className="text-base font-medium">
               Paid on {paidAt && format(new Date(paidAt), "MMM dd")}
-            </span>
-            <span className="text-xs">
-              <span className="text-[#606060]">Marked as paid</span>
             </span>
           </div>
         )}
@@ -150,6 +188,14 @@ export function InvoiceDetails() {
             </span>
             <span className="text-xs">
               <span className="text-[#606060]">Marked as canceled</span>
+            </span>
+          </div>
+        )}
+
+        {status === "refunded" && (
+          <div className="mt-8">
+            <span className="text-base font-medium">
+              Refunded on {refundedAt && format(new Date(refundedAt), "MMM dd")}
             </span>
           </div>
         )}
@@ -204,7 +250,74 @@ export function InvoiceDetails() {
               <span>{invoiceNumber}</span>
             </span>
           </div>
+
+          {status === "paid" && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-[#606060]">Payment</span>
+              <span className="text-sm flex items-center gap-1.5">
+                {paymentIntentId ? (
+                  <svg
+                    width="32"
+                    height="13"
+                    viewBox="0 0 512 214"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-label="Stripe"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M35.982 83.484c0-5.546 4.551-7.68 12.09-7.68 10.808 0 24.461 3.272 35.27 9.103V51.484c-11.804-4.693-23.466-6.542-35.27-6.542-28.872 0-48.072 15.075-48.072 40.248 0 39.254 54.045 32.996 54.045 49.92 0 6.541-5.689 8.675-13.653 8.675-11.804 0-26.88-4.836-38.827-11.378v34.133c13.227 5.689 26.596 8.107 38.827 8.107 29.582 0 49.92-14.648 49.92-40.106-.142-42.382-54.187-35.413-54.187-51.058h-.143zm96.142-66.986l-34.702 7.395v113.92c0 21.049 15.786 36.551 36.835 36.551 11.662 0 20.196-2.133 24.889-4.693v-30.871c-4.551 1.849-27.022 8.391-27.022-12.658V77.653h27.022V47.36h-27.022V16.498zm71.111 41.387l-2.276-10.525h-30.72v124.445h35.556V84.32c8.39-10.951 22.613-8.96 27.022-7.396V47.36c-4.551-1.707-21.191-4.836-29.582 10.524zm38.258-10.524h35.698v124.444h-35.698V47.36zm0-10.809l35.698-7.68V0l-35.698 7.538v28.871h.142-.142zm109.938 10.524c-13.938 0-22.898 6.542-27.876 11.093l-1.849-8.817h-31.289v165.831l35.556-7.538v-40.248c5.12 3.698 12.658 8.96 25.173 8.96 25.458 0 48.64-20.48 48.64-65.564-.142-41.244-23.608-63.717-48.497-63.717h.142zm-8.533 97.991c-8.391 0-13.369-2.987-16.782-6.685V83.484c3.698-4.124 8.818-6.969 16.924-6.969 12.942 0 21.902 14.507 21.902 33.138 0 19.058-8.818 33.28-21.902 33.28l-.142.143zM512 110.08c0-36.409-17.636-65.138-51.342-65.138-33.849 0-54.329 28.729-54.329 64.853 0 42.809 24.178 64.427 58.88 64.427 16.924 0 29.724-3.84 39.395-9.245v-29.44c-9.671 4.835-20.764 7.822-34.844 7.822-13.796 0-26.027-4.835-27.591-21.618h69.547c0-1.849.284-9.244.284-12.658v-.003zm-69.973-13.511c0-16.071 9.813-22.756 18.773-22.756 8.676 0 17.92 6.685 17.92 22.756h-36.693z"
+                    />
+                  </svg>
+                ) : (
+                  <span>Manual</span>
+                )}
+              </span>
+            </div>
+          )}
+
+          {refundedAt && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-[#606060]">Refunded</span>
+              <span className="text-sm">
+                {format(new Date(refundedAt), "MMM dd")}
+              </span>
+            </div>
+          )}
         </div>
+
+        {status === "paid" && paymentIntentId && (
+          <div className="mt-6 border-t border-border pt-6">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <SubmitButton
+                  variant="outline"
+                  className="w-full"
+                  isSubmitting={refundMutation.isPending}
+                >
+                  Refund payment
+                </SubmitButton>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Refund payment</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will issue a full refund for this invoice. The invoice
+                    status will be changed to refunded. This action cannot be
+                    undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => refundMutation.mutate({ invoiceId: id })}
+                  >
+                    Refund
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        )}
 
         {customer && (
           <div className="mt-6 flex flex-col space-y-2 border-t border-border pt-6">

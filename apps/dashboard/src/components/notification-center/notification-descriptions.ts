@@ -268,6 +268,28 @@ const handleInvoiceCreated: NotificationDescriptionHandler = (
   return t("notifications.invoice_created.title");
 };
 
+const handleInvoiceRefunded: NotificationDescriptionHandler = (
+  metadata,
+  user,
+  t,
+) => {
+  const invoiceNumber = metadata?.invoiceNumber;
+  const customerName = metadata?.customerName;
+
+  if (invoiceNumber && customerName) {
+    return t("notifications.invoice_refunded.with_customer", {
+      invoiceNumber,
+      customerName,
+    });
+  }
+  if (invoiceNumber) {
+    return t("notifications.invoice_refunded.without_customer", {
+      invoiceNumber,
+    });
+  }
+  return t("notifications.invoice_refunded.title");
+};
+
 const handleInboxAutoMatched: NotificationDescriptionHandler = (
   metadata,
   user,
@@ -542,6 +564,7 @@ const notificationHandlers: Record<string, NotificationDescriptionHandler> = {
   invoice_reminder_sent: handleInvoiceReminderSent,
   invoice_cancelled: handleInvoiceCancelled,
   invoice_created: handleInvoiceCreated,
+  invoice_refunded: handleInvoiceRefunded,
 };
 
 export function getNotificationDescription(

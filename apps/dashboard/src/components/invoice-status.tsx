@@ -10,7 +10,14 @@ export function InvoiceStatus({
   className,
   textOnly = false,
 }: {
-  status?: "draft" | "overdue" | "paid" | "unpaid" | "canceled" | "scheduled";
+  status?:
+    | "draft"
+    | "overdue"
+    | "paid"
+    | "unpaid"
+    | "canceled"
+    | "scheduled"
+    | "refunded";
   isLoading?: boolean;
   className?: string;
   textOnly?: boolean;
@@ -36,6 +43,7 @@ export function InvoiceStatus({
           status === "paid" && "text-[#00C969] dark:text-[#00C969]",
           status === "unpaid" && "text-[#1D1D1D] dark:text-[#F5F5F3]",
           status === "scheduled" && "text-[#1F6FEB] dark:text-[#1F6FEB]",
+          status === "refunded" && "text-[#F97316] dark:text-[#F97316]",
           className,
         )}
       >
@@ -58,6 +66,8 @@ export function InvoiceStatus({
           "text-[#1D1D1D] bg-[#878787]/10 dark:text-[#F5F5F3] dark:bg-[#F5F5F3]/10",
         status === "scheduled" &&
           "text-[#1F6FEB] bg-[#DDEBFF] dark:text-[#1F6FEB] dark:bg-[#1F6FEB]/10",
+        status === "refunded" &&
+          "text-[#F97316] bg-[#FFEDD5] dark:text-[#F97316] dark:bg-[#F97316]/10",
         className,
       )}
     >

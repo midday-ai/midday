@@ -44,7 +44,7 @@ export type Invoice = {
   vat: number | null;
   tax: number | null;
   filePath: string[] | null;
-  status: "draft" | "overdue" | "paid" | "unpaid" | "canceled" | "scheduled";
+  status: "draft" | "overdue" | "paid" | "unpaid" | "canceled" | "scheduled" | "refunded";
   viewedAt: string | null;
   fromDetails: EditorDoc | null;
   issueDate: string | null;
@@ -106,6 +106,7 @@ export type Template = {
   size: "a4" | "letter";
   deliveryType: "create" | "create_and_send" | "scheduled";
   locale: string;
+  paymentEnabled?: boolean;
 };
 
 export interface EditorDoc {
