@@ -353,7 +353,7 @@ export function InvoicePaymentAnimation({
       <div className="flex-1 relative overflow-hidden flex flex-col z-10">
         {/* Status Cards */}
         {showCards && (
-          <div className="grid grid-cols-2 gap-3 md:gap-4 px-2 md:px-3 pt-4 md:pt-6 pb-4 md:pb-6">
+          <div className="grid grid-cols-2 gap-3 md:gap-4 pt-4 md:pt-6 pb-4 md:pb-6">
             <motion.div
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
