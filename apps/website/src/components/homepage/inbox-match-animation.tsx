@@ -19,36 +19,42 @@ export function InboxMatchAnimation({
       title: 'Google Workspace Invoice.pdf',
       amount: '$12.00',
       date: 'Sep 08',
+      icon: 'pdf',
     },
     {
       id: 2,
       title: 'AWS Receipt.pdf',
       amount: '$54.30',
       date: 'Sep 07',
+      icon: 'receipt',
     },
     {
       id: 3,
       title: 'Figma Receipt.pdf',
       amount: '$24.00',
       date: 'Sep 06',
+      icon: 'receipt_long',
     },
     {
       id: 4,
       title: 'GitHub Receipt.pdf',
       amount: '$9.00',
       date: 'Sep 05',
+      icon: 'pdf',
     },
     {
       id: 5,
       title: 'Notion Receipt.pdf',
       amount: '$16.00',
       date: 'Sep 04',
+      icon: 'receipt',
     },
     {
       id: 6,
       title: 'Slack Receipt.pdf',
       amount: '$8.50',
       date: 'Sep 03',
+      icon: 'receipt_long',
     },
   ]
   const incomingItem = {
@@ -136,7 +142,7 @@ export function InboxMatchAnimation({
             >
               <div className="flex items-start gap-1.5 md:gap-2">
                 <span className="inline-flex w-5 h-5 md:w-6 md:h-6 items-center justify-center bg-secondary border border-border flex-shrink-0">
-                  <MaterialIcon name="receipt_long" className="text-sm text-muted-foreground" size={14} />
+                  <MaterialIcon name={item.icon as 'receipt' | 'receipt_long' | 'pdf'} className="text-sm text-muted-foreground" size={14} />
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1.5 md:gap-2">
