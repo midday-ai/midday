@@ -1,3 +1,5 @@
+'use client'
+
 // Icon mapping for homepage components
 // Maps Material Icons names to react-icons/md components
 

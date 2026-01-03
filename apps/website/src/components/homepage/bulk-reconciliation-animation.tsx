@@ -14,7 +14,7 @@ interface Transaction {
   checked: boolean
 }
 
-const initialTransactions: Omit<Transaction, 'status'>[] = [
+const initialTransactions: Omit<Transaction, 'status' | 'checked'>[] = [
   {
     id: '1',
     date: 'Mar 19',
