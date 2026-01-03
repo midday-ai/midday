@@ -167,23 +167,33 @@ export function PreAccounting() {
       <section id="how-it-works" className="bg-background py-12 sm:py-16 lg:pt-32 lg:pb-24">
         <div className="max-w-[1400px] mx-auto">
 
-          {/* Mobile: Simple list */}
-          <div className="lg:hidden space-y-8">
+          {/* Mobile: Stacked features with animations */}
+          <div className="grid grid-cols-1 gap-12 sm:gap-16 lg:hidden">
             {howItWorksSteps.map((step, index) => (
-              <div key={index} className="space-y-6">
-                <div className="text-center space-y-2">
-                  <h3 className="font-sans text-xl text-foreground">
+              <div key={index} className="space-y-6 sm:space-y-8">
+                <div className="space-y-2 text-center">
+                  <h2 className="font-serif text-2xl sm:text-2xl text-foreground max-w-md mx-auto">
                     {step.title}
-                  </h3>
-                  <p className="font-sans text-base text-muted-foreground leading-normal">
+                  </h2>
+                  <p className="font-sans text-base text-muted-foreground leading-normal max-w-md mx-auto">
                     {step.subtitle}
                   </p>
                 </div>
-                {index < howItWorksSteps.length - 1 && (
-                  <div className="flex justify-center">
-                    <div className="h-px w-16 border-t border-border" />
+                <div className="w-full border border-border overflow-hidden p-1 sm:p-3 relative">
+                  <div className="w-full h-[520px] sm:h-[620px] relative overflow-hidden flex items-center justify-center z-10">
+                    <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
+                      {index === 0 ? (
+                        <TransactionFlowAnimation onComplete={undefined} />
+                      ) : index === 1 ? (
+                        <InboxMatchAnimation onComplete={undefined} />
+                      ) : index === 2 ? (
+                        <TransactionFlowAnimation onComplete={undefined} />
+                      ) : (
+                        <DashboardAnimation onComplete={undefined} />
+                      )}
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
             ))}
           </div>
@@ -315,7 +325,7 @@ export function PreAccounting() {
       {/* Accountant handoff Section */}
       <section className="bg-background py-12 sm:py-16 lg:py-24">
         <div className="max-w-[1400px] mx-auto">
-          <div className="text-center space-y-4 mb-12">
+          <div className="text-center space-y-4 mb-8">
             <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
               Accountant-ready, without the back and forth
             </h2>
@@ -325,47 +335,7 @@ export function PreAccounting() {
           </div>
 
           <div className="max-w-2xl mx-auto">
-            <div className="bg-secondary border border-border p-6 relative">
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
-                    <MaterialIcon name="check" className="text-foreground" size={14} />
-                  </div>
-                  <span className="font-sans text-sm text-foreground">
-                    Transactions and attachments reviewed in one place
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
-                    <MaterialIcon name="check" className="text-foreground" size={14} />
-                  </div>
-                  <span className="font-sans text-sm text-foreground">
-                    Clear "ready for export" state
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
-                    <MaterialIcon name="check" className="text-foreground" size={14} />
-                  </div>
-                  <span className="font-sans text-sm text-foreground">
-                    No loose receipts or missing context
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
-                    <MaterialIcon name="check" className="text-foreground" size={14} />
-                  </div>
-                  <span className="font-sans text-sm text-foreground">
-                    Consistent categories and report codes
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-center mt-8">
-            <p className="font-sans text-xs text-muted-foreground mb-3">Accounting systems</p>
-            <div className="flex flex-wrap gap-3 justify-center">
+            <div className="flex flex-wrap gap-3 justify-center mb-8 pt-2">
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                 <Image
                   src="/images/fortnox-light.svg"
@@ -404,6 +374,42 @@ export function PreAccounting() {
                 <span className="font-sans text-sm text-foreground">QuickBooks</span>
               </div>
             </div>
+            <div className="bg-secondary border border-border p-6 relative">
+              <div className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+                    <MaterialIcon name="check" className="text-foreground" size={14} />
+                  </div>
+                  <span className="font-sans text-sm text-foreground">
+                    Transactions and attachments reviewed in one place
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+                    <MaterialIcon name="check" className="text-foreground" size={14} />
+                  </div>
+                  <span className="font-sans text-sm text-foreground">
+                    Clear "ready for export" state
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+                    <MaterialIcon name="check" className="text-foreground" size={14} />
+                  </div>
+                  <span className="font-sans text-sm text-foreground">
+                    No loose receipts or missing context
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+                    <MaterialIcon name="check" className="text-foreground" size={14} />
+                  </div>
+                  <span className="font-sans text-sm text-foreground">
+                    Consistent categories and report codes
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -423,36 +429,9 @@ export function PreAccounting() {
                   Receipts matched automatically
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                  Invoices and receipts are collected, scanned, and matched to the right transactions so reconciliation doesn't pile up.
+                  Invoices and receipts are collected from email, uploads, or bulk drag-and-drop, scanned with OCR, and matched to the right transactions. Missing receipts are surfaced automatically so reconciliation doesn't pile up.
                 </p>
-                <div className="space-y-3 pt-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <MaterialIcon name="check" className="text-foreground" size={14} />
-                    </div>
-                    <span className="font-sans text-sm text-foreground">
-                      Email, upload, or bulk drag-and-drop
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <MaterialIcon name="check" className="text-foreground" size={14} />
-                    </div>
-                    <span className="font-sans text-sm text-foreground">
-                      OCR scanning and auto-matching
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <MaterialIcon name="check" className="text-foreground" size={14} />
-                    </div>
-                    <span className="font-sans text-sm text-foreground">
-                      Missing receipts surfaced automatically
-                    </span>
-                  </div>
-                </div>
                 <div className="pt-6">
-                  <p className="font-sans text-xs text-muted-foreground mb-3">Works with</p>
                   <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                       <Image
