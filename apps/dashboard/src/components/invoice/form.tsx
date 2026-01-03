@@ -105,6 +105,7 @@ export function Form() {
   const createRecurringInvoiceMutation = useMutation(
     trpc.invoiceRecurring.create.mutationOptions({
       onSuccess: () => {
+        // Invalidate queries - the form will be closed by createInvoiceMutation
         queryClient.invalidateQueries({
           queryKey: trpc.invoice.get.infiniteQueryKey(),
         });
@@ -122,12 +123,7 @@ export function Form() {
           queryKey: trpc.search.global.queryKey(),
         });
 
-        toast({
-          title: "Recurring Invoice Created",
-          description: "Your recurring invoice series has been set up.",
-        });
-
-        setParams(null);
+        // Don't show toast or close form here - createInvoiceMutation will handle that
       },
       onError: (error) => {
         console.log(error);
@@ -137,6 +133,11 @@ export function Form() {
         });
       },
     }),
+  );
+
+  // Mutation to update recurring series template when editing an invoice in a series
+  const updateRecurringTemplateMutation = useMutation(
+    trpc.invoiceRecurring.update.mutationOptions(),
   );
 
   // Only watch the fields that are used in the upsert action
@@ -162,6 +163,7 @@ export function Form() {
       "bottomBlock",
       "scheduledAt",
       "recurringConfig",
+      "invoiceRecurringId",
     ],
   });
 
@@ -176,13 +178,36 @@ export function Form() {
         // @ts-expect-error
         transformFormValuesToDraft(currentFormValues),
       );
+
+      // If invoice is part of a recurring series, also update the series template
+      const invoiceRecurringId = currentFormValues.invoiceRecurringId;
+      if (invoiceRecurringId) {
+        updateRecurringTemplateMutation.mutate({
+          id: invoiceRecurringId,
+          lineItems: currentFormValues.lineItems,
+          template: currentFormValues.template,
+          paymentDetails: currentFormValues.paymentDetails,
+          fromDetails: currentFormValues.fromDetails,
+          noteDetails: currentFormValues.noteDetails,
+          vat: currentFormValues.vat,
+          tax: currentFormValues.tax,
+          discount: currentFormValues.discount,
+          subtotal: currentFormValues.subtotal,
+          topBlock: currentFormValues.topBlock,
+          bottomBlock: currentFormValues.bottomBlock,
+          amount: currentFormValues.amount,
+        });
+      }
     }
   }, [debouncedValue, isDirty, invoiceNumberValid]);
 
   // Submit the form and the draft invoice
-  const handleSubmit = (values: InvoiceFormValues) => {
+  const handleSubmit = async (values: InvoiceFormValues) => {
     // Handle recurring invoices differently
-    if (values.template.deliveryType === "recurring" && values.recurringConfig) {
+    if (
+      values.template.deliveryType === "recurring" &&
+      values.recurringConfig
+    ) {
       const config = values.recurringConfig;
 
       // Calculate due date offset from issue date to due date
@@ -191,37 +216,52 @@ export function Form() {
       const dueDateOffset = differenceInDays(dueDate, issueDate);
 
       // Remove deliveryType from template since recurring is handled differently
-      const { deliveryType: _, ...templateWithoutDeliveryType } = values.template;
+      const { deliveryType: _, ...templateWithoutDeliveryType } =
+        values.template;
 
-      createRecurringInvoiceMutation.mutate({
-        customerId: values.customerId,
-        customerName: values.customerName ?? undefined,
-        frequency: config.frequency,
-        frequencyDay: config.frequencyDay,
-        frequencyWeek: config.frequencyWeek,
-        frequencyInterval: config.frequencyInterval,
-        endType: config.endType,
-        endDate: config.endDate,
-        endCount: config.endCount,
-        timezone: user?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-        dueDateOffset: dueDateOffset > 0 ? dueDateOffset : 30,
-        amount: values.amount,
-        currency: values.template.currency,
-        lineItems: values.lineItems,
-        template: {
-          ...templateWithoutDeliveryType,
-          deliveryType: "create_and_send" as const, // Recurring invoices are sent automatically
-        },
-        paymentDetails: values.paymentDetails,
-        fromDetails: values.fromDetails,
-        noteDetails: values.noteDetails,
-        vat: values.vat,
-        tax: values.tax,
-        discount: values.discount,
-        subtotal: values.subtotal,
-        topBlock: values.topBlock,
-        bottomBlock: values.bottomBlock,
-      });
+      try {
+        // First create the recurring series and link the draft invoice
+        await createRecurringInvoiceMutation.mutateAsync({
+          invoiceId: values.id, // Link the draft invoice to the recurring series
+          customerId: values.customerId,
+          customerName: values.customerName ?? undefined,
+          frequency: config.frequency,
+          frequencyDay: config.frequencyDay,
+          frequencyWeek: config.frequencyWeek,
+          frequencyInterval: config.frequencyInterval,
+          endType: config.endType,
+          endDate: config.endDate,
+          endCount: config.endCount,
+          timezone:
+            user?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+          dueDateOffset: dueDateOffset > 0 ? dueDateOffset : 30,
+          amount: values.amount,
+          currency: values.template.currency,
+          lineItems: values.lineItems,
+          template: {
+            ...templateWithoutDeliveryType,
+            deliveryType: "create_and_send" as const, // Recurring invoices are sent automatically
+          },
+          templateId: values.template.id, // Save the template reference
+          paymentDetails: values.paymentDetails,
+          fromDetails: values.fromDetails,
+          noteDetails: values.noteDetails,
+          vat: values.vat,
+          tax: values.tax,
+          discount: values.discount,
+          subtotal: values.subtotal,
+          topBlock: values.topBlock,
+          bottomBlock: values.bottomBlock,
+        });
+
+        // Then send the first invoice (generate PDF and send email)
+        createInvoiceMutation.mutate({
+          id: values.id,
+          deliveryType: "create_and_send",
+        });
+      } catch (error) {
+        // Error already handled by mutation's onError
+      }
       return;
     }
 
@@ -229,7 +269,8 @@ export function Form() {
     const deliveryType = values.template.deliveryType;
     createInvoiceMutation.mutate({
       id: values.id,
-      deliveryType: deliveryType === "recurring" ? "create" : (deliveryType ?? "create"),
+      deliveryType:
+        deliveryType === "recurring" ? "create" : (deliveryType ?? "create"),
       scheduledAt: values.scheduledAt || undefined,
     });
   };
@@ -306,7 +347,10 @@ export function Form() {
               )}
 
               <SubmitButton
-                isSubmitting={createInvoiceMutation.isPending || createRecurringInvoiceMutation.isPending}
+                isSubmitting={
+                  createInvoiceMutation.isPending ||
+                  createRecurringInvoiceMutation.isPending
+                }
                 disabled={
                   createInvoiceMutation.isPending ||
                   createRecurringInvoiceMutation.isPending ||

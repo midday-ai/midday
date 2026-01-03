@@ -18,7 +18,9 @@ import {
   resumeInvoiceRecurring,
   updateInvoiceRecurring,
 } from "@midday/db/queries";
+import { invoices } from "@midday/db/schema";
 import { TRPCError } from "@trpc/server";
+import { and, eq } from "drizzle-orm";
 
 export const invoiceRecurringRouter = createTRPCRouter({
   create: protectedProcedure
@@ -31,11 +33,33 @@ export const invoiceRecurringRouter = createTRPCRouter({
         });
       }
 
+      const { invoiceId, ...recurringData } = input;
+
+      // Create the recurring series
       const result = await createInvoiceRecurring(db, {
         teamId,
         userId: session.user.id,
-        ...input,
+        ...recurringData,
       });
+
+      // If a draft invoice ID is provided, link it as the first invoice in the series
+      if (invoiceId && result?.id) {
+        // Update the invoice to link it to the recurring series
+        await db
+          .update(invoices)
+          .set({
+            invoiceRecurringId: result.id,
+            recurringSequence: 1,
+          })
+          .where(and(eq(invoices.id, invoiceId), eq(invoices.teamId, teamId)));
+
+        // Update the recurring series to mark one invoice as generated
+        await updateInvoiceRecurring(db, {
+          id: result.id,
+          teamId,
+          invoicesGenerated: 1,
+        });
+      }
 
       return result;
     }),

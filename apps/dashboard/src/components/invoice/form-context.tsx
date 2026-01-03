@@ -95,6 +95,8 @@ export const invoiceFormSchema = z.object({
   token: z.string().optional(),
   scheduledAt: z.string().nullable().optional(),
   recurringConfig: recurringConfigSchema.nullable().optional(),
+  // Recurring series link (set when invoice is part of a recurring series)
+  invoiceRecurringId: z.string().uuid().nullable().optional(),
 });
 
 export type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;

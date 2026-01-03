@@ -30,6 +30,12 @@ export const invoiceRecurringStatusSchema = z.enum([
 
 // Base recurring invoice schema for tRPC
 export const createInvoiceRecurringSchema = z.object({
+  // Optional: Link an existing draft invoice as the first invoice in the series
+  invoiceId: z.string().uuid().optional().openapi({
+    description:
+      "Optional draft invoice ID to convert to the first recurring invoice",
+    example: "d1e2f3a4-b5c6-7890-abcd-ef1234567890",
+  }),
   customerId: z.string().uuid().nullable().optional().openapi({
     description: "Customer ID for the recurring invoice series",
     example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
