@@ -72,7 +72,7 @@ export function PreAccounting() {
               <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl leading-tight text-foreground">
                 Pre-accounting, handled.
               </h1>
-              <p className="text-muted-foreground text-sm sm:text-base leading-normal font-sans text-center mx-auto">
+              <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto">
                 Midday collects, matches, and prepares your financial data so your books are always ready before they reach an accountant.
               </p>
             </div>
@@ -331,7 +331,7 @@ export function PreAccounting() {
             <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
               Accountant-ready, without the back and forth
             </h2>
-            <p className="hidden sm:block font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
+            <p className="font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
               Midday prepares clean, structured records so exporting or syncing to your accounting system takes minutes, not days.
             </p>
           </div>
