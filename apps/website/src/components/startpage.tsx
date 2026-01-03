@@ -125,8 +125,8 @@ export function StartPage() {
               </p>
             </div>
 
-            <div className="space-y-4 text-center">
-              <div className="flex flex-col gap-3 max-w-sm">
+            <div className="space-y-4 text-center w-full">
+              <div className="flex flex-col gap-3 w-full max-w-md mx-auto">
                 <Button
                   onClick={() => router.push('/login')}
                   className="w-full btn-inverse h-11 px-5 transition-colors"
@@ -211,10 +211,10 @@ export function StartPage() {
                 </div>
 
                 <div className="flex flex-col items-end space-y-4">
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                     <Button
                       onClick={() => router.push('/login')}
-                      className="btn-inverse h-11 px-4 transition-colors"
+                      className="btn-inverse h-11 px-4 transition-colors w-full sm:w-auto"
                     >
                       <span className="text-inherit text-sm ">
                         Set up your business
