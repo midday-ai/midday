@@ -187,7 +187,7 @@ export function DashboardAnimation({
   return (
     <div className="w-full h-full flex flex-col relative">
       <div className="px-2 md:px-3 pt-2 md:pt-3 pb-1.5 md:pb-2 border-b border-border">
-        <h3 className="text-[11px] md:text-[12px] text-foreground">Category Expenses</h3>
+        <h3 className="text-[13px] md:text-[14px] text-foreground">Category Expenses</h3>
       </div>
 
       <div className="flex-1 p-2 md:p-3 overflow-hidden">
@@ -261,7 +261,7 @@ export function DashboardAnimation({
             >
               <h3 className="text-[9px] md:text-[10px] text-muted-foreground mb-1.5 md:mb-2">Summary</h3>
               <p className="text-[9px] md:text-[10px] leading-[13px] md:leading-[14px] text-foreground">
-                Marketing and SaaS account for the majority of spending this month. Reduce low-performing ad sets and consolidate overlapping tools to lower recurring costs.
+                Marketing and SaaS account for the majority of spending. Reduce low-performing ad sets and consolidate overlapping tools to lower recurring costs.
               </p>
             </motion.div>
           )}
