@@ -240,7 +240,7 @@ export function PreAccounting() {
               <div className="flex flex-col justify-center space-y-5 lg:space-y-6 flex-1">
                 <div className="flex items-center mb-4 lg:mb-6" style={{ minHeight: '3rem' }}>
                   <h2 className="font-serif text-2xl text-foreground">
-                    How Midday handles pre-accounting
+                    Less time fixing. Less money wasted.
                   </h2>
                 </div>
                 {howItWorksSteps.map((step, index) => (
