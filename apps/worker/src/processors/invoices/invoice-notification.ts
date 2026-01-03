@@ -226,15 +226,31 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
       }
 
       case "recurring_series_completed": {
-        const { recurringId, recurringTotalCount } = job.data;
+        const { recurringId, recurringTotalCount, recurringSequence } =
+          job.data;
 
-        // Log series completion (no dedicated notification type yet)
+        // Create in-app notification for series completion
+        await notifications.create(
+          "recurring_series_completed",
+          teamId,
+          {
+            invoiceId,
+            invoiceNumber,
+            customerName,
+            recurringId: recurringId ?? invoiceId,
+            totalGenerated: recurringTotalCount ?? recurringSequence ?? 0,
+          },
+          {
+            sendEmail: false,
+          },
+        );
+
         this.logger.info("Recurring invoice series completed", {
           recurringId,
           teamId,
           invoiceNumber,
           customerName,
-          totalCount: recurringTotalCount,
+          totalGenerated: recurringTotalCount ?? recurringSequence,
         });
         break;
       }
@@ -242,8 +258,21 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
       case "recurring_series_paused": {
         const { recurringId } = job.data;
 
-        // Log series paused (no dedicated notification type yet)
-        // TODO: Add recurring_invoice_paused notification type to @midday/notifications
+        // Create in-app notification for series paused
+        await notifications.create(
+          "recurring_series_paused",
+          teamId,
+          {
+            recurringId: recurringId ?? invoiceId,
+            customerName,
+            reason: "auto_failure",
+            failureCount: 3,
+          },
+          {
+            sendEmail: false,
+          },
+        );
+
         this.logger.warn("Recurring invoice series paused due to errors", {
           recurringId,
           teamId,

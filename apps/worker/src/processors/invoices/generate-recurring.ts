@@ -232,12 +232,12 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
         );
 
         // Mark the recurring invoice as generated (updates next_scheduled_at and counter)
-        await markInvoiceGenerated(db, {
+        const updatedRecurring = await markInvoiceGenerated(db, {
           id: recurring.id,
           teamId: recurring.teamId,
         });
 
-        // Queue notification
+        // Queue notification for invoice generation
         await invoicesQueue.add(
           "invoice-notification",
           {
@@ -258,6 +258,36 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
             },
           },
         );
+
+        // If series is now completed, queue completion notification
+        if (updatedRecurring?.status === "completed") {
+          await invoicesQueue.add(
+            "invoice-notification",
+            {
+              type: "recurring_series_completed",
+              invoiceId,
+              invoiceNumber,
+              teamId: recurring.teamId,
+              customerName: recurring.customerName ?? undefined,
+              recurringId: recurring.id,
+              recurringSequence: nextSequence,
+              recurringTotalCount: recurring.endCount ?? undefined,
+            },
+            {
+              attempts: 3,
+              backoff: {
+                type: "exponential",
+                delay: 1000,
+              },
+            },
+          );
+
+          this.logger.info("Recurring invoice series completed", {
+            recurringId: recurring.id,
+            teamId: recurring.teamId,
+            totalGenerated: nextSequence,
+          });
+        }
 
         results.push({
           invoiceId,

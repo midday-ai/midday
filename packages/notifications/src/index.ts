@@ -28,6 +28,9 @@ import { invoiceRefunded } from "./types/invoice-refunded";
 import { invoiceReminderSent } from "./types/invoice-reminder-sent";
 import { invoiceScheduled } from "./types/invoice-scheduled";
 import { invoiceSent } from "./types/invoice-sent";
+import { recurringSeriesCompleted } from "./types/recurring-series-completed";
+import { recurringSeriesPaused } from "./types/recurring-series-paused";
+import { recurringSeriesStarted } from "./types/recurring-series-started";
 import { transactionsAssigned } from "./types/transactions-assigned";
 import { transactionsCategorized } from "./types/transactions-categorized";
 import { transactionsCreated } from "./types/transactions-created";
@@ -52,6 +55,9 @@ const handlers = {
   invoice_cancelled: invoiceCancelled,
   invoice_created: invoiceCreated,
   invoice_refunded: invoiceRefunded,
+  recurring_series_completed: recurringSeriesCompleted,
+  recurring_series_started: recurringSeriesStarted,
+  recurring_series_paused: recurringSeriesPaused,
 } as const;
 
 export class Notifications {
@@ -407,6 +413,9 @@ export {
   invoiceCancelledSchema,
   invoiceCreatedSchema,
   invoiceRefundedSchema,
+  recurringSeriesCompletedSchema,
+  recurringSeriesStartedSchema,
+  recurringSeriesPausedSchema,
 } from "./schemas";
 export type { NotificationTypes } from "./schemas";
 

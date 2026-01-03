@@ -186,20 +186,52 @@ export async function updateInvoiceRecurring(
     params.frequencyWeek !== undefined ||
     params.frequencyInterval !== undefined;
 
+  // Check if end type or condition fields are being updated
+  const endConditionsChanged =
+    params.endType !== undefined ||
+    params.endDate !== undefined ||
+    params.endCount !== undefined;
+
   // If explicit nextScheduledAt is provided, use it; otherwise auto-calculate if frequency changed
   let nextScheduledAt: string | undefined = explicitNextScheduledAt;
 
-  if (!nextScheduledAt && frequencyFieldsChanged) {
-    // Get current record to merge with updates
-    const [current] = await db
+  // Fetch current record if we need to merge/validate
+  let current:
+    | (typeof invoiceRecurring.$inferSelect & Record<string, unknown>)
+    | null = null;
+
+  if (frequencyFieldsChanged || endConditionsChanged) {
+    const [fetchedCurrent] = await db
       .select()
       .from(invoiceRecurring)
       .where(
         and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
       );
+    current = fetchedCurrent ?? null;
+  }
 
-    // Only recalculate if the series is active
-    if (current && current.status === "active") {
+  // Validate merged end conditions
+  if (current && endConditionsChanged) {
+    const mergedEndType = params.endType ?? current.endType;
+    const mergedEndDate =
+      params.endDate !== undefined ? params.endDate : current.endDate;
+    const mergedEndCount =
+      params.endCount !== undefined ? params.endCount : current.endCount;
+
+    // Validate: endDate required when endType is 'on_date'
+    if (mergedEndType === "on_date" && !mergedEndDate) {
+      throw new Error("endDate is required when endType is 'on_date'");
+    }
+
+    // Validate: endCount required when endType is 'after_count'
+    if (mergedEndType === "after_count" && !mergedEndCount) {
+      throw new Error("endCount is required when endType is 'after_count'");
+    }
+  }
+
+  // Calculate nextScheduledAt if frequency changed and series is active
+  if (!nextScheduledAt && frequencyFieldsChanged && current) {
+    if (current.status === "active") {
       const recurringParams: RecurringInvoiceParams = {
         frequency: params.frequency ?? current.frequency,
         frequencyDay:
