@@ -1,19 +1,19 @@
-'use client'
+"use client";
 
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
-import { MaterialIcon } from './homepage/icon-mapping'
-import { FileGridAnimation } from './homepage/file-grid-animation'
-import { InboxMatchAnimation } from './homepage/inbox-match-animation'
-import { TestimonialsSection } from './sections/testimonials-section'
-import { FeaturesGridSection } from './sections/features-grid-section'
-import { TimeSavingsSection } from './sections/time-savings-section'
-import { PreAccountingSection } from './sections/pre-accounting-section'
-import { IntegrationsSection } from './sections/integrations-section'
-import { PricingSection } from './sections/pricing-section'
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { CommandPanelAnimation } from "./homepage/command-panel-animation";
+import { FileGridAnimation } from "./homepage/file-grid-animation";
+import { MaterialIcon } from "./homepage/icon-mapping";
+import { FeaturesGridSection } from "./sections/features-grid-section";
+import { IntegrationsSection } from "./sections/integrations-section";
+import { PreAccountingSection } from "./sections/pre-accounting-section";
+import { PricingSection } from "./sections/pricing-section";
+import { TestimonialsSection } from "./sections/testimonials-section";
+import { TimeSavingsSection } from "./sections/time-savings-section";
 
 export function FileStorage() {
-  const router = useRouter()
+  const router = useRouter();
 
   return (
     <div className="min-h-screen">
@@ -42,7 +42,10 @@ export function FileStorage() {
         {/* Mobile Layout */}
         <div className="lg:hidden flex flex-col relative pt-32 pb-8 sm:pt-40 sm:pb-8 md:pt-48 overflow-hidden">
           {/* Grid Pattern Background - Mobile/Tablet Only (Limited Height) */}
-          <div className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0" style={{ height: '600px' }}>
+          <div
+            className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0"
+            style={{ height: "600px" }}
+          >
             <Image
               src="/images/grid-light.svg"
               alt="Grid Pattern"
@@ -76,10 +79,11 @@ export function FileStorage() {
             {/* File Storage Illustration */}
             <div className="flex justify-center w-full">
               <div className="relative w-full max-w-6xl">
-                <div 
+                <div
                   className="absolute bottom-0 left-0 right-0 h-[20%] z-10 pointer-events-none"
                   style={{
-                    background: 'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)'
+                    background:
+                      "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
                 <Image
@@ -112,21 +116,26 @@ export function FileStorage() {
                 Files
               </p>
               <h1 className="font-serif text-8xl xl:text-9xl 2xl:text-[12rem] leading-tight text-center">
-                <span className="text-foreground block">Everything in one place</span>
+                <span className="text-foreground block">
+                  Everything in one place
+                </span>
               </h1>
 
               <p className="text-muted-foreground text-base leading-normal max-w-2xl mx-auto font-sans text-center">
-                Smart storage that automatically organizes and connects files to transactions, invoices, and customers so you can always find what you need.
+                Smart storage that automatically organizes and connects files to
+                transactions, invoices, and customers so you can always find
+                what you need.
               </p>
             </div>
 
             {/* File Storage Illustration */}
             <div className="flex justify-center w-full">
               <div className="relative w-full max-w-6xl">
-                <div 
+                <div
                   className="absolute bottom-0 left-0 right-0 h-[20%] z-10 pointer-events-none"
                   style={{
-                    background: 'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)'
+                    background:
+                      "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
                 <Image
@@ -164,28 +173,53 @@ export function FileStorage() {
                     Central file storage
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Store contracts, receipts, invoices, and other documents in one place connected to your business.
+                    Store contracts, receipts, invoices, and other documents in
+                    one place connected to your business.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Automatic OCR</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Automatic OCR
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Automatic tagging</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Automatic tagging
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Linked to transactions and invoices</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Linked to transactions and invoices
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Bulk uploads</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Bulk uploads
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <Image src="/images/dropbox.svg" alt="Dropbox" width={16} height={16} className="object-contain" />
-                      <span className="font-sans text-sm text-foreground">Dropbox</span>
+                      <Image
+                        src="/images/dropbox.svg"
+                        alt="Dropbox"
+                        width={16}
+                        height={16}
+                        className="object-contain"
+                      />
+                      <span className="font-sans text-sm text-foreground">
+                        Dropbox
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <Image src="/images/gdrive.svg" alt="Google Drive" width={16} height={16} className="object-contain" />
-                      <span className="font-sans text-sm text-foreground">Google Drive</span>
+                      <Image
+                        src="/images/gdrive.svg"
+                        alt="Google Drive"
+                        width={16}
+                        height={16}
+                        className="object-contain"
+                      />
+                      <span className="font-sans text-sm text-foreground">
+                        Google Drive
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -207,30 +241,50 @@ export function FileStorage() {
               <div className="flex items-center lg:order-2">
                 <div className="space-y-3 lg:space-y-5 text-center lg:text-left w-full">
                   <h2 className="font-sans text-2xl sm:text-2xl text-foreground">
-                    Searchable and findable
+                    One search across your entire business
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Find files quickly using search across names and details without digging through folders.
+                    Find invoices, receipts, contracts, transactions, and
+                    documents instantly using a single search with no folders or
+                    manual organization.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Full-text search</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Search transactions, invoices, files
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Tags and filters</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Open and act instantly
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Grid and list views</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Keyboard-first
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">
+                        Context-aware results
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Right: Animation */}
-              <div className="flex items-center justify-center p-1 sm:p-3 lg:p-6 xl:p-8 border border-border overflow-hidden relative bg-background lg:order-1">
+              <div
+                className="flex items-center justify-center p-1 sm:p-3 lg:p-6 xl:p-8 border border-border overflow-hidden relative lg:order-1"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle at 1px 1px, hsl(var(--border)) 0.5px, transparent 0)",
+                  backgroundSize: "6px 6px",
+                }}
+              >
                 <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center">
                   <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
-                    <InboxMatchAnimation onComplete={undefined} />
+                    <CommandPanelAnimation onComplete={undefined} />
                   </div>
                 </div>
               </div>
@@ -287,6 +341,5 @@ export function FileStorage() {
       {/* Pricing Section */}
       <PricingSection />
     </div>
-  )
+  );
 }
-

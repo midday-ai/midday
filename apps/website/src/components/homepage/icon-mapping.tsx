@@ -5,11 +5,16 @@
 
 import {
   MdCheck,
+  MdClose,
   MdIosShare,
   MdOutlineAccountBalance,
   MdOutlineAccountBalanceWallet,
+  MdOutlineArrowDownward,
+  MdOutlineArrowUpward,
+  MdOutlineContentCopy,
   MdOutlineCreditCard,
   MdOutlineDescription,
+  MdOutlineDownload,
   MdOutlineExpandLess,
   MdOutlineExpandMore,
   MdOutlineFilterList,
@@ -30,6 +35,7 @@ import {
   MdOutlineScatterPlot,
   MdOutlineStar,
   MdOutlineStarHalf,
+  MdOutlineSubdirectoryArrowLeft,
   MdOutlineTimer,
   MdOutlineTrendingUp,
   MdOutlineWidgets,
@@ -72,6 +78,14 @@ export const IconMap = {
   send: MdIosShare, // Using share icon as send alternative
   expand_less: MdOutlineExpandLess,
   expand_more: MdOutlineExpandMore,
+  content_copy: MdOutlineContentCopy,
+  download: MdOutlineDownload,
+  arrow_upward: MdOutlineArrowUpward,
+  arrow_downward: MdOutlineArrowDownward,
+  subdirectory_arrow_left: MdOutlineSubdirectoryArrowLeft,
+  broken_image: MdOutlineDescription, // Using description as broken_image alternative
+  docs: MdOutlineDescription, // Using description as docs alternative
+  close: MdClose,
 };
 
 export function MaterialIcon({
