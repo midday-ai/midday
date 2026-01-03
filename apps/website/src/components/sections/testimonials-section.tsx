@@ -18,6 +18,8 @@ import { MaterialIcon } from '../homepage/icon-mapping'
 export interface Testimonial {
   name: string
   title: string
+  company: string
+  country: string
   content: string
   fullContent: string
 }
@@ -34,6 +36,8 @@ const defaultTestimonials: Testimonial[] = [
   {
     name: 'Sarah Chen',
     title: 'Freelance Designer',
+    company: 'Design Studio',
+    country: 'United States',
     content:
       'Midday transformed my freelance business. No more scattered receipts or manual tracking. Everything organized automatically, saving me 3+ hours every week.',
     fullContent:
@@ -42,6 +46,8 @@ const defaultTestimonials: Testimonial[] = [
   {
     name: 'Marcus Rodriguez',
     title: 'Restaurant Owner',
+    company: 'Bella Vista Restaurant',
+    country: 'Spain',
     content:
       'Tracking expenses was a nightmare. Midday\'s AI automatically categorizes everything from ingredients to equipment repairs. Game changer!',
     fullContent:
@@ -50,6 +56,8 @@ const defaultTestimonials: Testimonial[] = [
   {
     name: 'Emily Watson',
     title: 'Startup Founder',
+    company: 'TechFlow Inc',
+    country: 'United Kingdom',
     content:
       'Juggling countless expenses as a startup founder. Midday\'s smart organization and automated reconciliation let me focus on building, not bookkeeping.',
     fullContent:
@@ -58,6 +66,8 @@ const defaultTestimonials: Testimonial[] = [
   {
     name: 'David Kim',
     title: 'Consultant',
+    company: 'Kim Consulting',
+    country: 'South Korea',
     content:
       'Tons of receipts and invoices for client work. Midday\'s natural language search finds any document instantly. \'Show me Q1 expenses for Client X\' - boom, there it is.',
     fullContent:
@@ -113,72 +123,86 @@ export function TestimonialsSection({
 
         {/* Desktop Testimonials Grid */}
         <div className="hidden lg:flex gap-3 w-full max-w-5xl mx-auto justify-center">
-            {testimonials.map((testimonial, index) => (
-              <MorphingDialog key={index}>
-                <MorphingDialogTrigger
-                  className={`flex-shrink-0 group ${
-                    index === 0
-                      ? 'transform -rotate-1'
-                      : index === 1
-                        ? 'transform rotate-1'
-                        : index === 2
-                          ? 'transform rotate-2'
-                          : ''
-                  }`}
-                >
-                  <div className="bg-background border border-border p-6 w-64 flex flex-col gap-4 transition-all duration-200 hover:border-muted-foreground">
-                    <div className="flex gap-2 items-center">
-                      <div className="w-4 h-4 bg-muted rounded-full"></div>
-                      <MorphingDialogTitle className="font-sans text-sm text-foreground">
-                        {testimonial.name}
-                      </MorphingDialogTitle>
-                    </div>
-                    <div className="flex flex-col gap-2 text-left">
-                      <MorphingDialogSubtitle className="font-sans text-xs text-muted-foreground">
-                        {testimonial.title}
-                      </MorphingDialogSubtitle>
-                      <div className="font-sans text-sm text-muted-foreground leading-relaxed">
-                        &quot;{testimonial.content}&quot;
-                      </div>
-                    </div>
-                  </div>
-                </MorphingDialogTrigger>
-
-                <MorphingDialogContainer>
-                  <MorphingDialogContent
-                    className="bg-background border border-border p-8 max-w-2xl"
+            {testimonials.map((testimonial, index) => {
+              const getRotation = () => {
+                if (index === 0) return -1
+                if (index === 1) return 1
+                if (index === 2) return 2
+                return 0
+              }
+              
+              return (
+                <MorphingDialog key={index}>
+                  <MorphingDialogTrigger
+                    className="flex-shrink-0 group"
+                    style={{
+                      transform: `rotate(${getRotation()}deg)`,
+                    }}
                   >
-                    <MorphingDialogClose className="text-muted-foreground hover:text-foreground" />
-
-                    <div className="flex flex-col gap-6">
-                      <div className="flex gap-3 items-center">
-                        <div className="w-6 h-6 bg-muted rounded-full"></div>
-                        <div className="flex flex-col">
+                    <div className="bg-background border border-border p-6 w-64 flex flex-col gap-4 transition-all duration-200 hover:border-muted-foreground">
+                      <div className="flex flex-col gap-3">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider text-left">
+                          {testimonial.country}
+                        </p>
+                        <div className="flex gap-2 items-center">
+                          <div className="w-4 h-4 bg-muted rounded-full"></div>
                           <MorphingDialogTitle className="font-sans text-sm text-foreground">
                             {testimonial.name}
                           </MorphingDialogTitle>
-                          <MorphingDialogSubtitle className="font-sans text-sm text-muted-foreground">
-                            {testimonial.title}
-                          </MorphingDialogSubtitle>
                         </div>
                       </div>
-
-                      <MorphingDialogDescription
-                        disableLayoutAnimation
-                        variants={{
-                          initial: { opacity: 0, scale: 0.8, y: 100 },
-                          animate: { opacity: 1, scale: 1, y: 0 },
-                          exit: { opacity: 0, scale: 0.8, y: 100 },
-                        }}
-                        className="font-sans text-sm text-muted-foreground leading-relaxed whitespace-pre-line"
-                      >
-                        &quot;{testimonial.fullContent}&quot;
-                      </MorphingDialogDescription>
+                      <div className="flex flex-col gap-2 text-left">
+                        <MorphingDialogSubtitle className="font-sans text-sm text-muted-foreground">
+                          {testimonial.company}
+                        </MorphingDialogSubtitle>
+                        <div className="font-sans text-sm text-muted-foreground leading-relaxed">
+                          &quot;{testimonial.content}&quot;
+                        </div>
+                      </div>
                     </div>
-                  </MorphingDialogContent>
-                </MorphingDialogContainer>
-              </MorphingDialog>
-            ))}
+                  </MorphingDialogTrigger>
+
+                  <MorphingDialogContainer>
+                    <MorphingDialogContent
+                      className="bg-background border border-border p-8 max-w-2xl"
+                    >
+                      <MorphingDialogClose />
+
+                      <div className="flex flex-col gap-6">
+                        <div className="flex flex-col gap-3">
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider text-left">
+                            {testimonial.country}
+                          </p>
+                          <div className="flex gap-3 items-center">
+                            <div className="w-6 h-6 bg-muted rounded-full"></div>
+                            <MorphingDialogTitle className="font-sans text-sm text-foreground">
+                              {testimonial.name}
+                            </MorphingDialogTitle>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                          <MorphingDialogSubtitle className="font-sans text-sm text-muted-foreground">
+                            {testimonial.company}
+                          </MorphingDialogSubtitle>
+                          <MorphingDialogDescription
+                            disableLayoutAnimation
+                            variants={{
+                              initial: { opacity: 0, scale: 0.8, y: 100 },
+                              animate: { opacity: 1, scale: 1, y: 0 },
+                              exit: { opacity: 0, scale: 0.8, y: 100 },
+                            }}
+                            className="font-sans text-sm text-muted-foreground leading-relaxed whitespace-pre-line"
+                          >
+                            &quot;{testimonial.fullContent}&quot;
+                          </MorphingDialogDescription>
+                        </div>
+                      </div>
+                    </MorphingDialogContent>
+                  </MorphingDialogContainer>
+                </MorphingDialog>
+              )
+            })}
           </div>
 
           {/* Mobile Carousel */}
@@ -279,15 +303,20 @@ export function TestimonialsSection({
                             }}
                           >
                               <div className="bg-background border border-border p-6 flex flex-col gap-4 select-none hover:border-muted-foreground transition-all duration-200">
-                          <div className="flex gap-2 items-center">
-                            <div className="w-4 h-4 bg-muted rounded-full"></div>
-                            <MorphingDialogTitle className="font-sans text-sm text-foreground">
-                              {testimonial.name}
-                            </MorphingDialogTitle>
+                          <div className="flex flex-col gap-3">
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider text-left">
+                              {testimonial.country}
+                            </p>
+                            <div className="flex gap-2 items-center">
+                              <div className="w-4 h-4 bg-muted rounded-full"></div>
+                              <MorphingDialogTitle className="font-sans text-sm text-foreground">
+                                {testimonial.name}
+                              </MorphingDialogTitle>
+                            </div>
                           </div>
                           <div className="flex flex-col gap-2 text-left">
                             <MorphingDialogSubtitle className="font-sans text-sm text-muted-foreground">
-                              {testimonial.title}
+                              {testimonial.company}
                             </MorphingDialogSubtitle>
                             <div className="font-sans text-sm text-muted-foreground leading-relaxed">
                               &quot;{testimonial.content}&quot;
@@ -299,32 +328,37 @@ export function TestimonialsSection({
 
                       <MorphingDialogContainer>
                         <MorphingDialogContent className="bg-background border border-border p-8 max-w-2xl">
-                          <MorphingDialogClose className="text-muted-foreground hover:text-foreground" />
+                          <MorphingDialogClose />
 
                           <div className="flex flex-col gap-6">
-                            <div className="flex gap-3 items-center">
-                              <div className="w-6 h-6 bg-muted rounded-full"></div>
-                              <div className="flex flex-col">
+                            <div className="flex flex-col gap-3">
+                              <p className="text-[10px] text-muted-foreground uppercase tracking-wider text-left">
+                                {testimonial.country}
+                              </p>
+                              <div className="flex gap-3 items-center">
+                                <div className="w-6 h-6 bg-muted rounded-full"></div>
                                 <MorphingDialogTitle className="font-sans text-sm text-foreground">
                                   {testimonial.name}
                                 </MorphingDialogTitle>
-                                <MorphingDialogSubtitle className="font-sans text-sm text-muted-foreground">
-                                  {testimonial.title}
-                                </MorphingDialogSubtitle>
                               </div>
                             </div>
 
-                            <MorphingDialogDescription
-                              disableLayoutAnimation
-                              variants={{
-                                initial: { opacity: 0, scale: 0.8, y: 100 },
-                                animate: { opacity: 1, scale: 1, y: 0 },
-                                exit: { opacity: 0, scale: 0.8, y: 100 },
-                              }}
-                              className="font-sans text-sm text-muted-foreground leading-relaxed whitespace-pre-line"
-                            >
-                              &quot;{testimonial.fullContent}&quot;
-                            </MorphingDialogDescription>
+                            <div className="flex flex-col gap-2">
+                              <MorphingDialogSubtitle className="font-sans text-sm text-muted-foreground">
+                                {testimonial.company}
+                              </MorphingDialogSubtitle>
+                              <MorphingDialogDescription
+                                disableLayoutAnimation
+                                variants={{
+                                  initial: { opacity: 0, scale: 0.8, y: 100 },
+                                  animate: { opacity: 1, scale: 1, y: 0 },
+                                  exit: { opacity: 0, scale: 0.8, y: 100 },
+                                }}
+                                className="font-sans text-sm text-muted-foreground leading-relaxed whitespace-pre-line"
+                              >
+                                &quot;{testimonial.fullContent}&quot;
+                              </MorphingDialogDescription>
+                            </div>
                           </div>
                         </MorphingDialogContent>
                       </MorphingDialogContainer>

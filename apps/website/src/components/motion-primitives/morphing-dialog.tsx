@@ -64,9 +64,15 @@ function MorphingDialogProvider({
     [isOpen, uniqueId]
   );
 
+  const defaultTransition: Transition = {
+    type: 'spring',
+    stiffness: 200,
+    damping: 24,
+  };
+
   return (
     <MorphingDialogContext.Provider value={contextValue}>
-      <MotionConfig transition={transition}>{children}</MotionConfig>
+      <MotionConfig transition={transition || defaultTransition}>{children}</MotionConfig>
     </MorphingDialogContext.Provider>
   );
 }
@@ -77,9 +83,15 @@ export type MorphingDialogProps = {
 };
 
 function MorphingDialog({ children, transition }: MorphingDialogProps) {
+  const defaultTransition: Transition = {
+    type: 'spring',
+    stiffness: 200,
+    damping: 24,
+  };
+
   return (
     <MorphingDialogProvider>
-      <MotionConfig transition={transition}>{children}</MotionConfig>
+      <MotionConfig transition={transition || defaultTransition}>{children}</MotionConfig>
     </MorphingDialogProvider>
   );
 }
@@ -113,6 +125,34 @@ function MorphingDialogTrigger({
     [isOpen, setIsOpen]
   );
 
+  // Extract rotation from style.transform if it's a string
+  const rotationMatch = typeof style?.transform === 'string' 
+    ? style.transform.match(/rotate\(([^)]+)\)/) 
+    : null;
+  const rotation = rotationMatch?.[1] || null;
+  
+  const transformTemplate = useCallback((transform: string, generatedTransform: string) => {
+    // Preserve rotation from style prop if present
+    // generatedTransform contains the layout animation transform
+    // We need to append our rotation to it
+    if (rotation) {
+      // Remove any existing rotate from generatedTransform to avoid conflicts
+      const cleanedTransform = generatedTransform.replace(/rotate\([^)]+\)/g, '').trim();
+      return cleanedTransform ? `${cleanedTransform} rotate(${rotation})` : `rotate(${rotation})`;
+    }
+    return generatedTransform;
+  }, [rotation]);
+
+  // Remove transform from style since we'll handle it via transformTemplate
+  const mergedStyle = useMemo(() => {
+    if (!style) return undefined;
+    if (typeof style.transform === 'string' && rotation) {
+      const { transform: _, ...restStyle } = style as { transform?: string; [key: string]: any };
+      return restStyle;
+    }
+    return style;
+  }, [style, rotation]);
+
   return (
     <motion.button
       ref={triggerRef}
@@ -120,7 +160,14 @@ function MorphingDialogTrigger({
       className={cn('relative cursor-pointer', className)}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      style={style}
+      style={mergedStyle}
+      layout
+      transformTemplate={rotation ? transformTemplate : undefined}
+      transition={{
+        type: 'spring',
+        stiffness: 200,
+        damping: 24,
+      }}
       aria-haspopup='dialog'
       aria-expanded={isOpen}
       aria-controls={`motion-ui-morphing-dialog-content-${uniqueId}`}
@@ -209,6 +256,12 @@ function MorphingDialogContent({
       layoutId={`dialog-${uniqueId}`}
       className={cn('overflow-hidden relative', className)}
       style={style}
+      layout
+      transition={{
+        type: 'spring',
+        stiffness: 200,
+        damping: 24,
+      }}
       role='dialog'
       aria-modal='true'
       aria-labelledby={`motion-ui-morphing-dialog-title-${uniqueId}`}
@@ -279,6 +332,11 @@ function MorphingDialogTitle({
       className={className}
       style={style}
       layout
+      transition={{
+        type: 'spring',
+        stiffness: 200,
+        damping: 24,
+      }}
     >
       {children}
     </motion.div>
@@ -303,6 +361,12 @@ function MorphingDialogSubtitle({
       layoutId={`dialog-subtitle-container-${uniqueId}`}
       className={className}
       style={style}
+      layout
+      transition={{
+        type: 'spring',
+        stiffness: 200,
+        damping: 24,
+      }}
     >
       {children}
     </motion.div>
@@ -395,7 +459,7 @@ function MorphingDialogClose({
     setIsOpen(false);
   }, [setIsOpen]);
 
-  const buttonContent = children || <Icons.Close className="h-6 w-6" />;
+  const buttonContent = children || <Icons.Close className="h-6 w-6 text-primary" />;
 
   // Always use a regular button - don't use motion.button to avoid layout animation issues
   // If variants are needed, apply them to a wrapper div
@@ -404,7 +468,7 @@ function MorphingDialogClose({
       onClick={handleClose}
       type='button'
       aria-label='Close dialog'
-      className={cn("opacity-70 hover:opacity-100 transition-opacity focus:outline-none", className)}
+      className={cn("focus:outline-none", className)}
       style={{ 
         position: 'absolute',
         top: '1.5rem',
