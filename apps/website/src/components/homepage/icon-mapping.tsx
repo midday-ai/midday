@@ -1,39 +1,40 @@
-'use client'
+"use client";
 
 // Icon mapping for homepage components
 // Maps Material Icons names to react-icons/md components
 
 import {
-  MdPlayArrow,
-  MdTrendingDown,
-  MdOutlineAccountBalanceWallet,
-  MdOutlineSavings,
-  MdOutlineWidgets,
-  MdOutlineTrendingUp,
-  MdOutlineListAlt,
-  MdOutlineInbox,
-  MdOutlineTimer,
-  MdOutlineDescription,
-  MdOutlineScatterPlot,
-  MdOutlineFolderZip,
-  MdOutlineStar,
-  MdOutlineStarHalf,
-  MdOutlineReceipt,
-  MdOutlineLabel,
-  MdOutlineRequestQuote,
-  MdOutlineFolder,
   MdCheck,
-  MdOutlineFilterList,
-  MdOutlineMoreVert,
-  MdSearch,
-  MdOutlineReceiptLong,
-  MdOutlineLink,
-  MdOutlineOpenInNew,
-  MdOutlineInsights,
   MdIosShare,
   MdOutlineAccountBalance,
+  MdOutlineAccountBalanceWallet,
   MdOutlineCreditCard,
-} from 'react-icons/md'
+  MdOutlineDescription,
+  MdOutlineFilterList,
+  MdOutlineFolder,
+  MdOutlineFolderZip,
+  MdOutlineInbox,
+  MdOutlineInsights,
+  MdOutlineLabel,
+  MdOutlineLink,
+  MdOutlineListAlt,
+  MdOutlineMoreVert,
+  MdOutlineOpenInNew,
+  MdOutlinePictureAsPdf,
+  MdOutlineReceipt,
+  MdOutlineReceiptLong,
+  MdOutlineRequestQuote,
+  MdOutlineSavings,
+  MdOutlineScatterPlot,
+  MdOutlineStar,
+  MdOutlineStarHalf,
+  MdOutlineTimer,
+  MdOutlineTrendingUp,
+  MdOutlineWidgets,
+  MdPlayArrow,
+  MdSearch,
+  MdTrendingDown,
+} from "react-icons/md";
 
 export const IconMap = {
   play_arrow: MdPlayArrow,
@@ -54,6 +55,8 @@ export const IconMap = {
   star: MdOutlineStar,
   star_half: MdOutlineStarHalf,
   receipt: MdOutlineReceipt,
+  receipt_long: MdOutlineReceiptLong,
+  pdf: MdOutlinePictureAsPdf,
   label: MdOutlineLabel,
   request_quote: MdOutlineRequestQuote,
   folder: MdOutlineFolder,
@@ -61,27 +64,25 @@ export const IconMap = {
   filter_list: MdOutlineFilterList,
   more_vert: MdOutlineMoreVert,
   search: MdSearch,
-  receipt_long: MdOutlineReceiptLong,
   link: MdOutlineLink,
   open_in_new: MdOutlineOpenInNew,
   arrow_outward: MdOutlineOpenInNew, // Using open_in_new as arrow_outward alternative
   send: MdIosShare, // Using share icon as send alternative
-}
+};
 
 export function MaterialIcon({
   name,
   className,
   size,
 }: {
-  name: keyof typeof IconMap
-  className?: string
-  size?: number | string
+  name: keyof typeof IconMap;
+  className?: string;
+  size?: number | string;
 }) {
-  const IconComponent = IconMap[name]
+  const IconComponent = IconMap[name];
   if (!IconComponent) {
-    console.warn(`Icon "${name}" not found in IconMap`)
-    return null
+    console.warn(`Icon "${name}" not found in IconMap`);
+    return null;
   }
-  return <IconComponent className={className} size={size} />
+  return <IconComponent className={className} size={size} />;
 }
-
