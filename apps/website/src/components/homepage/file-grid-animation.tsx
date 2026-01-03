@@ -178,7 +178,7 @@ export function FileGridAnimation({
                     {f.tags.slice(0, 2).map((tag) => (
                       <div
                         key={tag}
-                        className="inline-flex items-center h-3.5 md:h-4 px-1 md:px-1.5 bg-muted rounded-full"
+                        className="inline-flex items-center h-3.5 md:h-4 px-1 md:px-1.5 bg-muted rounded-full border border-border dark:border-0"
                       >
                         <span className="text-[8px] md:text-[9px] leading-none text-muted-foreground">
                           {tag}
