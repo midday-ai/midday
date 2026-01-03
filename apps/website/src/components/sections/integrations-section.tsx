@@ -29,7 +29,7 @@ const defaultIntegrations: Integration[] = [
 
 export function IntegrationsSection({
   title = 'Works with the tools you already use',
-  subtitle = 'Connect your banks, email, payments, and accounting software in minutes.',
+  subtitle = 'Connect your banks, email, payments and accounting software in minutes.',
   integrations = defaultIntegrations,
 }: IntegrationsSectionProps) {
   return (
