@@ -44,7 +44,7 @@ export function Download() {
               <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl leading-tight text-foreground">
                 Midday for Mac
               </h1>
-              <p className="text-muted-foreground text-sm sm:text-base leading-normal font-sans text-center mx-auto">
+              <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto">
                 Quick access to your financial files in a native Mac experience.
               </p>
             </div>
@@ -127,7 +127,7 @@ export function Download() {
                 <h2 className="font-serif text-xl sm:text-2xl text-foreground">
                   Native performance
                 </h2>
-                <p className="font-sans text-sm text-muted-foreground leading-relaxed">
+                <p className="font-sans text-base text-muted-foreground leading-normal">
                   Midday runs fast and light on Apple silicon, so everything stays responsive and out of your way.
                 </p>
               </div>
@@ -167,7 +167,7 @@ export function Download() {
                 <h2 className="font-serif text-xl sm:text-2xl text-foreground">
                   Universal search anywhere
                 </h2>
-                <p className="font-sans text-sm text-muted-foreground leading-relaxed">
+                <p className="font-sans text-base text-muted-foreground leading-normal">
                   Press <span className="text-foreground font-mono">⇧⌥K</span> to search Midday from anywhere on your Mac. Instantly find receipts, invoices, transactions, customers, and files.
                 </p>
               </div>
