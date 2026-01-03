@@ -162,13 +162,22 @@ export type UpdateInvoiceRecurringParams = {
   templateId?: string | null;
   status?: "active" | "paused" | "completed" | "canceled";
   invoicesGenerated?: number;
+  // Optional explicit scheduling fields (used when linking existing invoice)
+  nextScheduledAt?: string;
+  lastGeneratedAt?: string;
 };
 
 export async function updateInvoiceRecurring(
   db: Database,
   params: UpdateInvoiceRecurringParams,
 ) {
-  const { id, teamId, ...updateData } = params;
+  const {
+    id,
+    teamId,
+    nextScheduledAt: explicitNextScheduledAt,
+    lastGeneratedAt: explicitLastGeneratedAt,
+    ...updateData
+  } = params;
 
   // Check if frequency-related fields are being updated
   const frequencyFieldsChanged =
@@ -177,10 +186,10 @@ export async function updateInvoiceRecurring(
     params.frequencyWeek !== undefined ||
     params.frequencyInterval !== undefined;
 
-  // If frequency changed, we need to recalculate nextScheduledAt
-  let nextScheduledAt: string | undefined;
+  // If explicit nextScheduledAt is provided, use it; otherwise auto-calculate if frequency changed
+  let nextScheduledAt: string | undefined = explicitNextScheduledAt;
 
-  if (frequencyFieldsChanged) {
+  if (!nextScheduledAt && frequencyFieldsChanged) {
     // Get current record to merge with updates
     const [current] = await db
       .select()
@@ -218,6 +227,9 @@ export async function updateInvoiceRecurring(
     .set({
       ...updateData,
       ...(nextScheduledAt && { nextScheduledAt }),
+      ...(explicitLastGeneratedAt && {
+        lastGeneratedAt: explicitLastGeneratedAt,
+      }),
       updatedAt: new Date().toISOString(),
     })
     .where(
@@ -475,6 +487,7 @@ export async function markInvoiceGenerated(
     .update(invoiceRecurring)
     .set({
       invoicesGenerated: newInvoicesGenerated,
+      consecutiveFailures: 0, // Reset failures on successful generation
       lastGeneratedAt: now.toISOString(),
       nextScheduledAt: isCompleted ? null : nextScheduledAt.toISOString(),
       status: isCompleted ? "completed" : "active",
@@ -486,6 +499,55 @@ export async function markInvoiceGenerated(
     .returning();
 
   return result;
+}
+
+/**
+ * Maximum consecutive failures before auto-pausing
+ */
+const MAX_CONSECUTIVE_FAILURES = 3;
+
+/**
+ * Record a failure for a recurring invoice series
+ * Auto-pauses after MAX_CONSECUTIVE_FAILURES
+ * @returns Object with updated record and whether it was auto-paused
+ */
+export async function recordInvoiceGenerationFailure(
+  db: Database,
+  params: { id: string; teamId: string },
+): Promise<{
+  result: typeof invoiceRecurring.$inferSelect | null;
+  autoPaused: boolean;
+}> {
+  const { id, teamId } = params;
+
+  // Get current data
+  const [current] = await db
+    .select()
+    .from(invoiceRecurring)
+    .where(
+      and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
+    );
+
+  if (!current) {
+    return { result: null, autoPaused: false };
+  }
+
+  const newFailureCount = current.consecutiveFailures + 1;
+  const shouldAutoPause = newFailureCount >= MAX_CONSECUTIVE_FAILURES;
+
+  const [result] = await db
+    .update(invoiceRecurring)
+    .set({
+      consecutiveFailures: newFailureCount,
+      status: shouldAutoPause ? "paused" : current.status,
+      updatedAt: new Date().toISOString(),
+    })
+    .where(
+      and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
+    )
+    .returning();
+
+  return { result: result ?? null, autoPaused: shouldAutoPause };
 }
 
 /**
@@ -513,6 +575,7 @@ export async function pauseInvoiceRecurring(
 
 /**
  * Resume a paused recurring invoice series
+ * Validates that the series hasn't already completed before resuming
  */
 export async function resumeInvoiceRecurring(
   db: Database,
@@ -544,10 +607,37 @@ export async function resumeInvoiceRecurring(
 
   const nextScheduledAt = calculateNextScheduledDate(recurringParams, now);
 
+  // Check if series should actually be completed (end conditions may have been met while paused)
+  const isCompleted = shouldMarkCompleted(
+    current.endType,
+    current.endDate ? new Date(current.endDate) : null,
+    current.endCount,
+    current.invoicesGenerated,
+    nextScheduledAt,
+  );
+
+  if (isCompleted) {
+    // Mark as completed instead of resuming
+    const [result] = await db
+      .update(invoiceRecurring)
+      .set({
+        status: "completed",
+        nextScheduledAt: null,
+        updatedAt: now.toISOString(),
+      })
+      .where(
+        and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
+      )
+      .returning();
+
+    return result;
+  }
+
   const [result] = await db
     .update(invoiceRecurring)
     .set({
       status: "active",
+      consecutiveFailures: 0, // Reset failures on resume
       nextScheduledAt: nextScheduledAt.toISOString(),
       updatedAt: now.toISOString(),
     })

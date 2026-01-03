@@ -16,11 +16,11 @@ import {
   getUpcomingInvoices,
   pauseInvoiceRecurring,
   resumeInvoiceRecurring,
+  updateInvoice,
   updateInvoiceRecurring,
 } from "@midday/db/queries";
-import { invoices } from "@midday/db/schema";
+import { calculateNextScheduledDate } from "@midday/db/utils/invoice-recurring";
 import { TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
 
 export const invoiceRecurringRouter = createTRPCRouter({
   create: protectedProcedure
@@ -45,19 +45,32 @@ export const invoiceRecurringRouter = createTRPCRouter({
       // If a draft invoice ID is provided, link it as the first invoice in the series
       if (invoiceId && result?.id) {
         // Update the invoice to link it to the recurring series
-        await db
-          .update(invoices)
-          .set({
-            invoiceRecurringId: result.id,
-            recurringSequence: 1,
-          })
-          .where(and(eq(invoices.id, invoiceId), eq(invoices.teamId, teamId)));
+        await updateInvoice(db, {
+          id: invoiceId,
+          teamId,
+          invoiceRecurringId: result.id,
+          recurringSequence: 1,
+        });
 
-        // Update the recurring series to mark one invoice as generated
+        // Calculate the next scheduled date (since first invoice is already generated)
+        const nextScheduledAt = calculateNextScheduledDate(
+          {
+            frequency: recurringData.frequency,
+            frequencyDay: recurringData.frequencyDay ?? null,
+            frequencyWeek: recurringData.frequencyWeek ?? null,
+            frequencyInterval: recurringData.frequencyInterval ?? null,
+            timezone: recurringData.timezone,
+          },
+          new Date(),
+        );
+
+        // Update the recurring series with correct next date and mark one invoice as generated
         await updateInvoiceRecurring(db, {
           id: result.id,
           teamId,
           invoicesGenerated: 1,
+          nextScheduledAt: nextScheduledAt.toISOString(),
+          lastGeneratedAt: new Date().toISOString(),
         });
       }
 

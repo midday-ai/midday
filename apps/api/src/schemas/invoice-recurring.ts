@@ -29,156 +29,315 @@ export const invoiceRecurringStatusSchema = z.enum([
 ]);
 
 // Base recurring invoice schema for tRPC
-export const createInvoiceRecurringSchema = z.object({
-  // Optional: Link an existing draft invoice as the first invoice in the series
-  invoiceId: z.string().uuid().optional().openapi({
-    description:
-      "Optional draft invoice ID to convert to the first recurring invoice",
-    example: "d1e2f3a4-b5c6-7890-abcd-ef1234567890",
-  }),
-  customerId: z.string().uuid().nullable().optional().openapi({
-    description: "Customer ID for the recurring invoice series",
-    example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  }),
-  customerName: z.string().nullable().optional().openapi({
-    description: "Customer name for display",
-    example: "Acme Corporation",
-  }),
-  // Frequency settings
-  frequency: invoiceRecurringFrequencySchema.openapi({
-    description:
-      "How often invoices should be generated: 'weekly' - every week on a specific day, 'monthly_date' - monthly on a specific date (e.g., 15th), 'monthly_weekday' - monthly on a specific weekday occurrence (e.g., 1st Friday), 'custom' - every X days",
-    example: "monthly_date",
-  }),
-  frequencyDay: z.number().int().min(0).max(31).nullable().optional().openapi({
-    description:
-      "For 'weekly': day of week (0=Sunday, 6=Saturday). For 'monthly_date': day of month (1-31)",
-    example: 15,
-  }),
-  frequencyWeek: z.number().int().min(1).max(5).nullable().optional().openapi({
-    description:
-      "For 'monthly_weekday': which occurrence of the weekday (1=first, 2=second, etc.)",
-    example: 1,
-  }),
-  frequencyInterval: z.number().int().min(1).nullable().optional().openapi({
-    description: "For 'custom': number of days between invoices",
-    example: 14,
-  }),
-  // End conditions
-  endType: invoiceRecurringEndTypeSchema.openapi({
-    description:
-      "When the series should end: 'never' - continues indefinitely, 'on_date' - ends on a specific date, 'after_count' - ends after a specific number of invoices",
-    example: "after_count",
-  }),
-  endDate: z.string().datetime().nullable().optional().openapi({
-    description: "End date for the series (required if endType is 'on_date')",
-    example: "2025-12-31T23:59:59.000Z",
-  }),
-  endCount: z.number().int().min(1).nullable().optional().openapi({
-    description:
-      "Number of invoices to generate (required if endType is 'after_count')",
-    example: 12,
-  }),
-  // Timezone
-  timezone: z.string().openapi({
-    description:
-      "Timezone for scheduling (e.g., 'America/New_York'). Used to determine correct day-of-week for weekly invoices",
-    example: "America/New_York",
-  }),
-  // Payment terms
-  dueDateOffset: z.number().int().min(0).default(30).openapi({
-    description: "Days from issue date to due date",
-    example: 30,
-  }),
-  // Invoice template data
-  amount: z.number().nullable().optional().openapi({
-    description: "Total amount for each invoice",
-    example: 1500.0,
-  }),
-  currency: z.string().nullable().optional().openapi({
-    description: "Currency code (ISO 4217)",
-    example: "USD",
-  }),
-  lineItems: z.array(draftLineItemSchema).nullable().optional().openapi({
-    description: "Line items for the invoice",
-  }),
-  template: upsertInvoiceTemplateSchema.nullable().optional().openapi({
-    description: "Invoice template settings",
-  }),
-  paymentDetails: z.any().nullable().optional().openapi({
-    description: "Payment details in TipTap JSONContent format",
-  }),
-  fromDetails: z.any().nullable().optional().openapi({
-    description: "Sender details in TipTap JSONContent format",
-  }),
-  noteDetails: z.any().nullable().optional().openapi({
-    description: "Note details in TipTap JSONContent format",
-  }),
-  vat: z.number().nullable().optional().openapi({
-    description: "VAT amount",
-    example: 150.0,
-  }),
-  tax: z.number().nullable().optional().openapi({
-    description: "Tax amount",
-    example: 50.0,
-  }),
-  discount: z.number().nullable().optional().openapi({
-    description: "Discount amount",
-    example: 100.0,
-  }),
-  subtotal: z.number().nullable().optional().openapi({
-    description: "Subtotal before taxes and discounts",
-    example: 1400.0,
-  }),
-  topBlock: z.any().nullable().optional().openapi({
-    description: "Custom content block for top of invoice",
-  }),
-  bottomBlock: z.any().nullable().optional().openapi({
-    description: "Custom content block for bottom of invoice",
-  }),
-  templateId: z.string().uuid().nullable().optional().openapi({
-    description: "Reference to invoice template",
-    example: "c4d5e6f7-8901-2345-6789-abcdef012345",
-  }),
-});
+export const createInvoiceRecurringSchema = z
+  .object({
+    // Optional: Link an existing draft invoice as the first invoice in the series
+    invoiceId: z.string().uuid().optional().openapi({
+      description:
+        "Optional draft invoice ID to convert to the first recurring invoice",
+      example: "d1e2f3a4-b5c6-7890-abcd-ef1234567890",
+    }),
+    customerId: z.string().uuid().nullable().optional().openapi({
+      description: "Customer ID for the recurring invoice series",
+      example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    }),
+    customerName: z.string().nullable().optional().openapi({
+      description: "Customer name for display",
+      example: "Acme Corporation",
+    }),
+    // Frequency settings
+    frequency: invoiceRecurringFrequencySchema.openapi({
+      description:
+        "How often invoices should be generated: 'weekly' - every week on a specific day, 'monthly_date' - monthly on a specific date (e.g., 15th), 'monthly_weekday' - monthly on a specific weekday occurrence (e.g., 1st Friday), 'custom' - every X days",
+      example: "monthly_date",
+    }),
+    frequencyDay: z
+      .number()
+      .int()
+      .min(0)
+      .max(31)
+      .nullable()
+      .optional()
+      .openapi({
+        description:
+          "For 'weekly': day of week (0=Sunday, 6=Saturday). For 'monthly_date': day of month (1-31). For 'monthly_weekday': day of week (0=Sunday, 6=Saturday)",
+        example: 15,
+      }),
+    frequencyWeek: z
+      .number()
+      .int()
+      .min(1)
+      .max(5)
+      .nullable()
+      .optional()
+      .openapi({
+        description:
+          "For 'monthly_weekday': which occurrence of the weekday (1=first, 2=second, etc.)",
+        example: 1,
+      }),
+    frequencyInterval: z.number().int().min(1).nullable().optional().openapi({
+      description: "For 'custom': number of days between invoices",
+      example: 14,
+    }),
+    // End conditions
+    endType: invoiceRecurringEndTypeSchema.openapi({
+      description:
+        "When the series should end: 'never' - continues indefinitely, 'on_date' - ends on a specific date, 'after_count' - ends after a specific number of invoices",
+      example: "after_count",
+    }),
+    endDate: z.string().datetime().nullable().optional().openapi({
+      description: "End date for the series (required if endType is 'on_date')",
+      example: "2025-12-31T23:59:59.000Z",
+    }),
+    endCount: z.number().int().min(1).nullable().optional().openapi({
+      description:
+        "Number of invoices to generate (required if endType is 'after_count')",
+      example: 12,
+    }),
+    // Timezone
+    timezone: z.string().openapi({
+      description:
+        "Timezone for scheduling (e.g., 'America/New_York'). Used to determine correct day-of-week for weekly invoices",
+      example: "America/New_York",
+    }),
+    // Payment terms
+    dueDateOffset: z.number().int().min(0).default(30).openapi({
+      description: "Days from issue date to due date",
+      example: 30,
+    }),
+    // Invoice template data
+    amount: z.number().nullable().optional().openapi({
+      description: "Total amount for each invoice",
+      example: 1500.0,
+    }),
+    currency: z.string().nullable().optional().openapi({
+      description: "Currency code (ISO 4217)",
+      example: "USD",
+    }),
+    lineItems: z.array(draftLineItemSchema).nullable().optional().openapi({
+      description: "Line items for the invoice",
+    }),
+    template: upsertInvoiceTemplateSchema.nullable().optional().openapi({
+      description: "Invoice template settings",
+    }),
+    paymentDetails: z.any().nullable().optional().openapi({
+      description: "Payment details in TipTap JSONContent format",
+    }),
+    fromDetails: z.any().nullable().optional().openapi({
+      description: "Sender details in TipTap JSONContent format",
+    }),
+    noteDetails: z.any().nullable().optional().openapi({
+      description: "Note details in TipTap JSONContent format",
+    }),
+    vat: z.number().nullable().optional().openapi({
+      description: "VAT amount",
+      example: 150.0,
+    }),
+    tax: z.number().nullable().optional().openapi({
+      description: "Tax amount",
+      example: 50.0,
+    }),
+    discount: z.number().nullable().optional().openapi({
+      description: "Discount amount",
+      example: 100.0,
+    }),
+    subtotal: z.number().nullable().optional().openapi({
+      description: "Subtotal before taxes and discounts",
+      example: 1400.0,
+    }),
+    topBlock: z.any().nullable().optional().openapi({
+      description: "Custom content block for top of invoice",
+    }),
+    bottomBlock: z.any().nullable().optional().openapi({
+      description: "Custom content block for bottom of invoice",
+    }),
+    templateId: z.string().uuid().nullable().optional().openapi({
+      description: "Reference to invoice template",
+      example: "c4d5e6f7-8901-2345-6789-abcdef012345",
+    }),
+  })
+  .superRefine((data, ctx) => {
+    // Validate frequencyDay based on frequency type
+    if (data.frequencyDay !== null && data.frequencyDay !== undefined) {
+      if (data.frequency === "weekly" && data.frequencyDay > 6) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "For weekly frequency, frequencyDay must be 0-6 (Sunday-Saturday)",
+          path: ["frequencyDay"],
+        });
+      }
+      if (data.frequency === "monthly_weekday" && data.frequencyDay > 6) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "For monthly_weekday frequency, frequencyDay must be 0-6 (Sunday-Saturday)",
+          path: ["frequencyDay"],
+        });
+      }
+      if (
+        data.frequency === "monthly_date" &&
+        (data.frequencyDay < 1 || data.frequencyDay > 31)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "For monthly_date frequency, frequencyDay must be 1-31 (day of month)",
+          path: ["frequencyDay"],
+        });
+      }
+    }
+
+    // Validate endDate is required when endType is 'on_date'
+    if (data.endType === "on_date") {
+      if (data.endDate === null || data.endDate === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "endDate is required when endType is 'on_date'",
+          path: ["endDate"],
+        });
+      }
+    }
+
+    // Validate endCount is required when endType is 'after_count'
+    if (data.endType === "after_count") {
+      if (data.endCount === null || data.endCount === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "endCount is required when endType is 'after_count'",
+          path: ["endCount"],
+        });
+      }
+    }
+
+    // Validate frequencyInterval is required when frequency is 'custom'
+    if (data.frequency === "custom") {
+      if (
+        data.frequencyInterval === null ||
+        data.frequencyInterval === undefined
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "frequencyInterval is required when frequency is 'custom'",
+          path: ["frequencyInterval"],
+        });
+      }
+    }
+  });
 
 // Update schema - extends create with id and allows partial updates
-export const updateInvoiceRecurringSchema = z.object({
-  id: z
-    .string()
-    .uuid()
-    .openapi({
-      description: "Unique identifier for the recurring invoice series",
-      example: "b3b7e6e2-8c2a-4e2a-9b1a-2e4b5c6d7f8a",
-      param: { in: "path", name: "id" },
-    }),
-  customerId: z.string().uuid().nullable().optional(),
-  customerName: z.string().nullable().optional(),
-  frequency: invoiceRecurringFrequencySchema.optional(),
-  frequencyDay: z.number().int().min(0).max(31).nullable().optional(),
-  frequencyWeek: z.number().int().min(1).max(5).nullable().optional(),
-  frequencyInterval: z.number().int().min(1).nullable().optional(),
-  endType: invoiceRecurringEndTypeSchema.optional(),
-  endDate: z.string().datetime().nullable().optional(),
-  endCount: z.number().int().min(1).nullable().optional(),
-  timezone: z.string().optional(),
-  dueDateOffset: z.number().int().min(0).optional(),
-  amount: z.number().nullable().optional(),
-  currency: z.string().nullable().optional(),
-  lineItems: z.array(draftLineItemSchema).nullable().optional(),
-  template: upsertInvoiceTemplateSchema.nullable().optional(),
-  paymentDetails: z.any().nullable().optional(),
-  fromDetails: z.any().nullable().optional(),
-  noteDetails: z.any().nullable().optional(),
-  vat: z.number().nullable().optional(),
-  tax: z.number().nullable().optional(),
-  discount: z.number().nullable().optional(),
-  subtotal: z.number().nullable().optional(),
-  topBlock: z.any().nullable().optional(),
-  bottomBlock: z.any().nullable().optional(),
-  templateId: z.string().uuid().nullable().optional(),
-  status: invoiceRecurringStatusSchema.optional(),
-});
+export const updateInvoiceRecurringSchema = z
+  .object({
+    id: z
+      .string()
+      .uuid()
+      .openapi({
+        description: "Unique identifier for the recurring invoice series",
+        example: "b3b7e6e2-8c2a-4e2a-9b1a-2e4b5c6d7f8a",
+        param: { in: "path", name: "id" },
+      }),
+    customerId: z.string().uuid().nullable().optional(),
+    customerName: z.string().nullable().optional(),
+    frequency: invoiceRecurringFrequencySchema.optional(),
+    frequencyDay: z.number().int().min(0).max(31).nullable().optional(),
+    frequencyWeek: z.number().int().min(1).max(5).nullable().optional(),
+    frequencyInterval: z.number().int().min(1).nullable().optional(),
+    endType: invoiceRecurringEndTypeSchema.optional(),
+    endDate: z.string().datetime().nullable().optional(),
+    endCount: z.number().int().min(1).nullable().optional(),
+    timezone: z.string().optional(),
+    dueDateOffset: z.number().int().min(0).optional(),
+    amount: z.number().nullable().optional(),
+    currency: z.string().nullable().optional(),
+    lineItems: z.array(draftLineItemSchema).nullable().optional(),
+    template: upsertInvoiceTemplateSchema.nullable().optional(),
+    paymentDetails: z.any().nullable().optional(),
+    fromDetails: z.any().nullable().optional(),
+    noteDetails: z.any().nullable().optional(),
+    vat: z.number().nullable().optional(),
+    tax: z.number().nullable().optional(),
+    discount: z.number().nullable().optional(),
+    subtotal: z.number().nullable().optional(),
+    topBlock: z.any().nullable().optional(),
+    bottomBlock: z.any().nullable().optional(),
+    templateId: z.string().uuid().nullable().optional(),
+    status: invoiceRecurringStatusSchema.optional(),
+  })
+  .superRefine((data, ctx) => {
+    // Validate frequencyDay based on frequency type (when both are provided)
+    if (
+      data.frequencyDay !== null &&
+      data.frequencyDay !== undefined &&
+      data.frequency !== undefined
+    ) {
+      if (data.frequency === "weekly" && data.frequencyDay > 6) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "For weekly frequency, frequencyDay must be 0-6 (Sunday-Saturday)",
+          path: ["frequencyDay"],
+        });
+      }
+      if (data.frequency === "monthly_weekday" && data.frequencyDay > 6) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "For monthly_weekday frequency, frequencyDay must be 0-6 (Sunday-Saturday)",
+          path: ["frequencyDay"],
+        });
+      }
+      if (
+        data.frequency === "monthly_date" &&
+        (data.frequencyDay < 1 || data.frequencyDay > 31)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "For monthly_date frequency, frequencyDay must be 1-31 (day of month)",
+          path: ["frequencyDay"],
+        });
+      }
+    }
+
+    // Validate endDate is required when endType is being set to 'on_date'
+    // Only validate when endType is explicitly provided in the update
+    if (data.endType === "on_date") {
+      if (data.endDate === null || data.endDate === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "endDate is required when endType is 'on_date'",
+          path: ["endDate"],
+        });
+      }
+    }
+
+    // Validate endCount is required when endType is being set to 'after_count'
+    // Only validate when endType is explicitly provided in the update
+    if (data.endType === "after_count") {
+      if (data.endCount === null || data.endCount === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "endCount is required when endType is 'after_count'",
+          path: ["endCount"],
+        });
+      }
+    }
+
+    // Validate frequencyInterval is required when frequency is being set to 'custom'
+    // Only validate when frequency is explicitly provided in the update
+    if (data.frequency === "custom") {
+      if (
+        data.frequencyInterval === null ||
+        data.frequencyInterval === undefined
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "frequencyInterval is required when frequency is 'custom'",
+          path: ["frequencyInterval"],
+        });
+      }
+    }
+  });
 
 // Get by ID schema
 export const getInvoiceRecurringByIdSchema = z.object({
