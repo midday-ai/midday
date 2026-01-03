@@ -261,7 +261,8 @@ export function DashboardAnimation({
             >
               <h3 className="text-[9px] md:text-[10px] text-muted-foreground mb-1.5 md:mb-2">Summary</h3>
               <p className="text-[9px] md:text-[10px] leading-[13px] md:leading-[14px] text-foreground">
-                Marketing and SaaS account for the majority of spending. Reduce low-performing ad sets and consolidate overlapping tools to lower recurring costs.
+                <span className="md:hidden">Marketing and SaaS account for most spending. Reduce low-performing ads and consolidate tools to lower costs.</span>
+                <span className="hidden md:inline">Marketing and SaaS account for the majority of spending. Reduce low-performing ad sets and consolidate overlapping tools to lower recurring costs.</span>
               </p>
             </motion.div>
           )}
