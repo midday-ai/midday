@@ -350,7 +350,7 @@ export function BulkReconciliationAnimation({
             <input
               type="text"
               placeholder="Search transactions..."
-              className="w-full bg-background border border-border px-2 md:px-3 py-1 md:py-1.5 text-[10px] md:text-[11px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-border/50 rounded-none pr-6 md:pr-7"
+              className="w-full bg-background border border-border px-2 md:px-3 py-1 md:py-1.5 text-[10px] md:text-[11px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border/50 rounded-none pr-6 md:pr-7"
             />
             <div className="absolute right-1.5 md:right-2 top-0 bottom-0 flex items-center pointer-events-none">
               <MaterialIcon
