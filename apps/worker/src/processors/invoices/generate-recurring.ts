@@ -5,6 +5,7 @@ import {
   getDueInvoiceRecurring,
   getNextInvoiceNumber,
   markInvoiceGenerated,
+  recordInvoiceGenerationFailure,
   updateInvoice,
 } from "@midday/db/queries";
 import { generateToken } from "@midday/invoice/token";
@@ -280,6 +281,43 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
           recurringId: recurring.id,
           error: errorMessage,
         });
+
+        // Track the failure and check if we should auto-pause
+        const { autoPaused } = await recordInvoiceGenerationFailure(db, {
+          id: recurring.id,
+          teamId: recurring.teamId,
+        });
+
+        if (autoPaused) {
+          this.logger.warn(
+            "Auto-paused recurring invoice due to repeated failures",
+            {
+              recurringId: recurring.id,
+              teamId: recurring.teamId,
+            },
+          );
+
+          // Queue notification for auto-pause
+          await invoicesQueue.add(
+            "invoice-notification",
+            {
+              type: "recurring_series_paused",
+              invoiceId: recurring.id, // Use recurring ID as placeholder
+              invoiceNumber: `Recurring-${recurring.id.slice(0, 8)}`,
+              teamId: recurring.teamId,
+              customerName: recurring.customerName ?? undefined,
+              recurringId: recurring.id,
+            },
+            {
+              attempts: 3,
+              backoff: {
+                type: "exponential",
+                delay: 1000,
+              },
+            },
+          );
+        }
+
         errors.push({
           recurringId: recurring.id,
           error: errorMessage,

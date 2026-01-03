@@ -96,7 +96,8 @@ export function calculateNextScheduledDate(
   switch (frequency) {
     case "weekly": {
       // frequencyDay is 0-6 (Sunday-Saturday)
-      const targetDay = frequencyDay ?? 0;
+      // Clamp to valid range as defensive check (schema should enforce this)
+      const targetDay = Math.min(Math.max(frequencyDay ?? 0, 0), 6);
       // Get next occurrence of the target weekday
       nextDate = setDay(addDays(tzCurrentDate, 1), targetDay, {
         weekStartsOn: 0,
@@ -124,8 +125,9 @@ export function calculateNextScheduledDate(
 
     case "monthly_weekday": {
       // frequencyDay is 0-6 (day of week), frequencyWeek is 1-5 (which occurrence)
-      const targetDayOfWeek = frequencyDay ?? 0;
-      const targetWeek = frequencyWeek ?? 1;
+      // Clamp to valid range as defensive check (schema should enforce this)
+      const targetDayOfWeek = Math.min(Math.max(frequencyDay ?? 0, 0), 6);
+      const targetWeek = Math.min(Math.max(frequencyWeek ?? 1, 1), 5);
 
       // Get next month's nth weekday
       const nextMonth = addMonths(tzCurrentDate, 1);

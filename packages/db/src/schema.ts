@@ -741,6 +741,7 @@ export const invoiceRecurring = pgTable(
     // Status tracking
     status: invoiceRecurringStatusEnum().default("active").notNull(),
     invoicesGenerated: integer("invoices_generated").default(0).notNull(),
+    consecutiveFailures: integer("consecutive_failures").default(0).notNull(), // Track failures for auto-pause
     nextScheduledAt: timestamp("next_scheduled_at", {
       withTimezone: true,
       mode: "string",

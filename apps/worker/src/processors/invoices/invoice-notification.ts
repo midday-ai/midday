@@ -202,7 +202,20 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
 
         // Create in-app notification for recurring invoice generation
         // Note: The email is sent via the generate-invoice task, so we only do in-app here
-        this.logger.info("Recurring invoice generated", {
+        await notifications.create(
+          "invoice_created",
+          teamId,
+          {
+            invoiceId,
+            invoiceNumber,
+            customerName,
+          },
+          {
+            sendEmail: false, // Email is handled by generate-invoice task
+          },
+        );
+
+        this.logger.info("Recurring invoice generated notification created", {
           invoiceId,
           invoiceNumber,
           teamId,

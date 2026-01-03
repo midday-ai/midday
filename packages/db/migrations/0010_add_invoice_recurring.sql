@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS invoice_recurring (
   -- Status tracking
   status invoice_recurring_status DEFAULT 'active' NOT NULL,
   invoices_generated INTEGER DEFAULT 0 NOT NULL,
+  consecutive_failures INTEGER DEFAULT 0 NOT NULL, -- Track failures for auto-pause
   next_scheduled_at TIMESTAMPTZ,
   last_generated_at TIMESTAMPTZ,
   timezone TEXT NOT NULL,

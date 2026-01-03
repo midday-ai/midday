@@ -60,15 +60,44 @@ export const lineItemSchema = z.object({
   taxRate: z.number().min(0).max(100).optional().nullable(),
 });
 
-export const recurringConfigSchema = z.object({
-  frequency: z.enum(["weekly", "monthly_date", "monthly_weekday", "custom"]),
-  frequencyDay: z.number().nullable(),
-  frequencyWeek: z.number().nullable(),
-  frequencyInterval: z.number().nullable(),
-  endType: z.enum(["never", "on_date", "after_count"]),
-  endDate: z.string().nullable(),
-  endCount: z.number().nullable(),
-});
+export const recurringConfigSchema = z
+  .object({
+    frequency: z.enum(["weekly", "monthly_date", "monthly_weekday", "custom"]),
+    frequencyDay: z.number().nullable(),
+    frequencyWeek: z.number().nullable(),
+    frequencyInterval: z.number().nullable(),
+    endType: z.enum(["never", "on_date", "after_count"]),
+    endDate: z.string().nullable(),
+    endCount: z.number().nullable(),
+  })
+  .superRefine((data, ctx) => {
+    // Validate endDate is required when endType is 'on_date'
+    if (data.endType === "on_date" && !data.endDate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "End date is required when ending on a specific date",
+        path: ["endDate"],
+      });
+    }
+
+    // Validate endCount is required when endType is 'after_count'
+    if (data.endType === "after_count" && !data.endCount) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invoice count is required when ending after a count",
+        path: ["endCount"],
+      });
+    }
+
+    // Validate frequencyInterval is required when frequency is 'custom'
+    if (data.frequency === "custom" && !data.frequencyInterval) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Day interval is required for custom frequency",
+        path: ["frequencyInterval"],
+      });
+    }
+  });
 
 export const invoiceFormSchema = z.object({
   id: z.string().uuid(),

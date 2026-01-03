@@ -83,7 +83,6 @@ export function Form() {
         setParams({ type: "success", invoiceId: data.id });
       },
       onError: (error) => {
-        console.log(error);
         // Check if this is a scheduling error using the specific error code
         if (error.data?.code === "SERVICE_UNAVAILABLE") {
           toast({
@@ -126,7 +125,6 @@ export function Form() {
         // Don't show toast or close form here - createInvoiceMutation will handle that
       },
       onError: (error) => {
-        console.log(error);
         toast({
           title: "Recurring Invoice Failed",
           description: "An unexpected error occurred. Please try again.",
