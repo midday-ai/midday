@@ -231,6 +231,11 @@ export const activityTypeEnum = pgEnum("activity_type", [
   "inbox_match_confirmed",
   "invoice_refunded",
 
+  // Recurring invoice activities
+  "recurring_series_started",
+  "recurring_series_completed",
+  "recurring_series_paused",
+
   // User actions
   "document_uploaded",
   "document_processed",
