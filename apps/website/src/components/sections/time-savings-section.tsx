@@ -1,7 +1,6 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { MaterialIcon } from '../homepage/icon-mapping'
 
 export function TimeSavingsSection() {
   const router = useRouter()
@@ -22,9 +21,6 @@ export function TimeSavingsSection() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
             <article className="group relative overflow-hidden bg-background border border-border p-4 sm:p-5 hover-bg hover-border transition-all duration-200 cursor-pointer">
               <div className="flex items-start gap-3">
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center bg-secondary border border-border">
-                  <MaterialIcon name="receipt" className="text-muted-foreground" size={16} />
-                </span>
                 <div className="min-w-0">
                   <p className="hidden sm:block text-xs  tracking-wide text-muted-foreground">
                     Chasing receipts
@@ -41,9 +37,6 @@ export function TimeSavingsSection() {
 
             <article className="group relative overflow-hidden bg-background border border-border p-4 sm:p-5 hover-bg hover-border transition-all duration-200 cursor-pointer">
               <div className="flex items-start gap-3">
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center bg-secondary border border-border">
-                  <MaterialIcon name="label" className="text-muted-foreground" size={16} />
-                </span>
                 <div className="min-w-0">
                   <p className="hidden sm:block text-xs  tracking-wide text-muted-foreground">
                     Cleaning transactions
@@ -60,9 +53,6 @@ export function TimeSavingsSection() {
 
             <article className="group relative overflow-hidden bg-background border border-border p-4 sm:p-5 hover-bg hover-border transition-all duration-200 cursor-pointer hidden xl:block">
               <div className="flex items-start gap-3">
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center bg-secondary border border-border">
-                  <MaterialIcon name="request_quote" className="text-muted-foreground" size={16} />
-                </span>
                 <div className="min-w-0">
                   <p className="hidden sm:block text-xs  tracking-wide text-muted-foreground">
                     Preparing invoices
@@ -85,9 +75,6 @@ export function TimeSavingsSection() {
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               <div className="flex items-start gap-3">
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center bg-secondary border border-border">
-                  <MaterialIcon name="folder" className="text-muted-foreground" size={16} />
-                </span>
                 <div className="min-w-0">
                   <p className="hidden sm:block text-xs  tracking-wide text-muted-foreground">
                     Explaining the numbers
@@ -104,9 +91,6 @@ export function TimeSavingsSection() {
 
             <article className="group relative overflow-hidden bg-background border border-border p-4 sm:p-5 hover-bg hover-border transition-all duration-200 cursor-pointer xl:hidden">
               <div className="flex items-start gap-3">
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center bg-secondary border border-border">
-                  <MaterialIcon name="request_quote" className="text-muted-foreground" size={16} />
-                </span>
                 <div className="min-w-0">
                   <p className="hidden sm:block text-xs  tracking-wide text-muted-foreground">
                     Preparing invoices
