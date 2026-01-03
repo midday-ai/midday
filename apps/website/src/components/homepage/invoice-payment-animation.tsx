@@ -10,7 +10,7 @@ interface Invoice {
   dueDate: string
   invoiceDate: string
   invoiceNo: string
-  status: 'sent' | 'paid' | 'overdue' | 'scheduled'
+  status: 'sent' | 'paid' | 'overdue' | 'scheduled' | 'recurring'
 }
 
 const initialInvoices: Omit<Invoice, 'status'>[] = [
@@ -192,9 +192,10 @@ export function InvoicePaymentAnimation({
     // Some invoices become overdue (yellow), scheduled (blue), or paid (green)
     const flipTimers: NodeJS.Timeout[] = []
     const invoiceCount = initialInvoices.length
-    // Make 2 invoices overdue (indices 2 and 7), 2 scheduled (indices 4 and 11), rest paid
+    // Make 2 invoices overdue (indices 2 and 7), 1 scheduled (index 1), 1 recurring (index 4), rest paid
     const overdueIndices = [2, 7]
-    const scheduledIndices = [4, 11]
+    const scheduledIndices = [1]
+    const recurringIndices = [4]
     let paidCount = 0
     let paidTotal = 0
 
@@ -202,12 +203,15 @@ export function InvoicePaymentAnimation({
       const timer = setTimeout(() => {
         const isOverdue = overdueIndices.includes(index)
         const isScheduled = scheduledIndices.includes(index)
-        let newStatus: 'paid' | 'overdue' | 'scheduled'
+        const isRecurring = recurringIndices.includes(index)
+        let newStatus: 'paid' | 'overdue' | 'scheduled' | 'recurring'
         
         if (isOverdue) {
           newStatus = 'overdue'
         } else if (isScheduled) {
           newStatus = 'scheduled'
+        } else if (isRecurring) {
+          newStatus = 'recurring'
         } else {
           newStatus = 'paid'
         }
@@ -221,7 +225,7 @@ export function InvoicePaymentAnimation({
         // Update counts and amounts
         if (isOverdue) {
           setOverdueCount((prev) => prev + 1)
-        } else if (!isScheduled) {
+        } else if (!isScheduled && !isRecurring) {
           paidCount++
           paidTotal += parseFloat(invoice.amount.replace(/[^0-9.]/g, ''))
         }
@@ -270,7 +274,8 @@ export function InvoicePaymentAnimation({
       setTimeout(() => setShowTable(true), 800)
 
       const overdueIndicesLoop = [2, 7]
-      const scheduledIndicesLoop = [4, 11]
+      const scheduledIndicesLoop = [1]
+      const recurringIndicesLoop = [4]
       let paidCountLoop = 0
       let paidTotalLoop = 0
       let overdueTotalLoop = 0
@@ -279,12 +284,15 @@ export function InvoicePaymentAnimation({
         setTimeout(() => {
           const isOverdue = overdueIndicesLoop.includes(index)
           const isScheduled = scheduledIndicesLoop.includes(index)
-          let newStatus: 'paid' | 'overdue' | 'scheduled'
+          const isRecurring = recurringIndicesLoop.includes(index)
+          let newStatus: 'paid' | 'overdue' | 'scheduled' | 'recurring'
           
           if (isOverdue) {
             newStatus = 'overdue'
           } else if (isScheduled) {
             newStatus = 'scheduled'
+          } else if (isRecurring) {
+            newStatus = 'recurring'
           } else {
             newStatus = 'paid'
           }
@@ -297,7 +305,7 @@ export function InvoicePaymentAnimation({
 
           if (isOverdue) {
             overdueTotalLoop += parseFloat(invoice.amount.replace(/[^0-9.]/g, ''))
-          } else if (!isScheduled) {
+          } else if (!isScheduled && !isRecurring) {
             paidCountLoop++
             paidTotalLoop += parseFloat(invoice.amount.replace(/[^0-9.]/g, ''))
           }
@@ -466,7 +474,7 @@ export function InvoicePaymentAnimation({
                   <th className="hidden md:table-cell lg:hidden w-[90px] md:w-[100px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">
                     Invoice no.
                   </th>
-                  <th className="w-[105px] md:w-[110px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground">
+                  <th className="w-[115px] md:w-[110px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground">
                     Status
                   </th>
                 </tr>
@@ -501,7 +509,7 @@ export function InvoicePaymentAnimation({
                     <td className="hidden md:table-cell lg:hidden w-[90px] md:w-[100px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-foreground border-r border-border">
                       {invoice.invoiceNo}
                     </td>
-                    <td className="w-[105px] md:w-[110px] px-1.5 md:px-2">
+                    <td className="w-[115px] md:w-[110px] px-1.5 md:px-2">
                       <div className="flex items-center h-full">
                         <AnimatePresence mode="wait">
                         {invoice.status === 'sent' ? (
@@ -541,6 +549,19 @@ export function InvoicePaymentAnimation({
                           >
                             <span className="font-sans text-[9px] md:text-[10px] text-blue-500">
                               Scheduled
+                            </span>
+                          </motion.div>
+                        ) : invoice.status === 'recurring' ? (
+                          <motion.div
+                            key="recurring"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.2 }}
+                            className="inline-flex items-center px-1.5 py-px rounded-full bg-orange-500/10 border border-orange-500/20"
+                          >
+                            <span className="font-sans text-[9px] md:text-[10px] text-orange-500">
+                              Recurring
                             </span>
                           </motion.div>
                         ) : (

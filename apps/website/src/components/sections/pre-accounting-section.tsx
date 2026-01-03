@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { MaterialIcon } from '../homepage/icon-mapping'
 
-export function AccountingSection() {
+export function PreAccountingSection() {
 
   return (
     <section className="bg-background py-12 sm:py-16 lg:py-24">
@@ -35,7 +35,7 @@ export function AccountingSection() {
         </div>
 
         <div className="max-w-2xl mx-auto">
-          <Link href="/accounting" className="block cursor-pointer hover:opacity-90 transition-opacity">
+          <Link href="/pre-accounting" className="block cursor-pointer hover:opacity-90 transition-opacity">
             <div className="bg-secondary border border-border p-6 relative">
             <div className="space-y-6">
               {/* Section 1 */}
@@ -97,11 +97,10 @@ export function AccountingSection() {
         </div>
         <div className="text-center mt-8">
           <Link
-            href="/accounting"
-            className="font-sans text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
+            href="/pre-accounting"
+            className="font-sans text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
           >
             Learn more about pre-accounting
-            <MaterialIcon name="arrow_forward" className="text-foreground" size={14} />
           </Link>
         </div>
       </div>

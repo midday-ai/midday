@@ -7,7 +7,7 @@ import { InboxMatchAnimation } from './homepage/inbox-match-animation'
 import { TestimonialsSection } from './sections/testimonials-section'
 import { FeaturesGridSection } from './sections/features-grid-section'
 import { TimeSavingsSection } from './sections/time-savings-section'
-import { AccountingSection } from './sections/accounting-section'
+import { PreAccountingSection } from './sections/pre-accounting-section'
 import { IntegrationsSection } from './sections/integrations-section'
 import { PricingSection } from './sections/pricing-section'
 
@@ -255,7 +255,7 @@ export function Inbox() {
       </div>
 
       {/* Accounting Section */}
-      <AccountingSection />
+      <PreAccountingSection />
 
       {/* Divider */}
       <div className="max-w-[1400px] mx-auto">

@@ -16,7 +16,7 @@ import { TransactionFlowAnimation } from './homepage/transaction-flow-animation'
 import { MaterialIcon, IconMap } from './homepage/icon-mapping'
 import { TimeSavingsSection } from './sections/time-savings-section'
 import { TestimonialsSection } from './sections/testimonials-section'
-import { AccountingSection } from './sections/accounting-section'
+import { PreAccountingSection } from './sections/pre-accounting-section'
 import { FeaturesGridSection } from './sections/features-grid-section'
 import { IntegrationsSection } from './sections/integrations-section'
 import { PricingSection } from './sections/pricing-section'
@@ -513,7 +513,7 @@ export function StartPage() {
       </div>
 
       {/* Pre-accounting Features Section */}
-      <AccountingSection />
+      <PreAccountingSection />
 
       {/* Divider */}
       <div className="max-w-[1400px] mx-auto">
