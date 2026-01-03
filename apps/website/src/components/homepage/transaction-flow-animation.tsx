@@ -10,6 +10,7 @@ interface AccountNode {
   y: number
   label: string
   color: string
+  icon: string
 }
 
 interface Transaction {
@@ -50,10 +51,10 @@ export function TransactionFlowAnimation({
   const startX = (viewBoxWidth - totalNodesWidth) / 2 // Center the group
   
   const accountNodes: AccountNode[] = [
-    { id: 1, x: startX, y: topY, label: 'Account', color: 'hsl(var(--muted-foreground))' },
-    { id: 2, x: startX + nodeSpacing, y: topY, label: 'Account', color: 'hsl(var(--muted-foreground))' },
-    { id: 3, x: startX + nodeSpacing * 2, y: topY, label: 'Account', color: 'hsl(var(--muted-foreground))' },
-    { id: 4, x: startX + nodeSpacing * 3, y: topY, label: 'Account', color: 'hsl(var(--muted-foreground))' },
+    { id: 1, x: startX, y: topY, label: 'Account', color: 'hsl(var(--muted-foreground))', icon: 'account_balance' },
+    { id: 2, x: startX + nodeSpacing, y: topY, label: 'Account', color: 'hsl(var(--muted-foreground))', icon: 'credit_card' },
+    { id: 3, x: startX + nodeSpacing * 2, y: topY, label: 'Account', color: 'hsl(var(--muted-foreground))', icon: 'account_balance_wallet' },
+    { id: 4, x: startX + nodeSpacing * 3, y: topY, label: 'Account', color: 'hsl(var(--muted-foreground))', icon: 'savings' },
   ]
 
   // Format amount helper
@@ -339,7 +340,7 @@ export function TransactionFlowAnimation({
                     }}
                   >
                     <MaterialIcon
-                      name="account_balance"
+                      name={node.icon as 'account_balance' | 'account_balance_wallet' | 'credit_card' | 'savings'}
                       size={18}
                     />
                   </div>

@@ -6,8 +6,8 @@
 import {
   MdPlayArrow,
   MdTrendingDown,
-  MdAccountBalanceWallet,
-  MdSavings,
+  MdOutlineAccountBalanceWallet,
+  MdOutlineSavings,
   MdOutlineWidgets,
   MdOutlineTrendingUp,
   MdOutlineListAlt,
@@ -32,15 +32,17 @@ import {
   MdOutlineInsights,
   MdIosShare,
   MdOutlineAccountBalance,
+  MdOutlineCreditCard,
 } from 'react-icons/md'
 
 export const IconMap = {
   play_arrow: MdPlayArrow,
   trending_up: MdOutlineTrendingUp,
   trending_down: MdTrendingDown,
-  account_balance_wallet: MdAccountBalanceWallet,
+  account_balance_wallet: MdOutlineAccountBalanceWallet,
   account_balance: MdOutlineAccountBalance,
-  savings: MdSavings,
+  savings: MdOutlineSavings,
+  credit_card: MdOutlineCreditCard,
   widgets: MdOutlineWidgets,
   insights: MdOutlineInsights,
   list_alt: MdOutlineListAlt,
