@@ -13,6 +13,7 @@ import { DashboardAnimation } from "./homepage/dashboard-animation";
 import { AIAssistantAnimation } from "./homepage/ai-assistant-animation";
 import { BulkReconciliationAnimation } from "./homepage/bulk-reconciliation-animation";
 import { PricingSection } from "./sections/pricing-section";
+import { FeaturesGridSection } from "./sections/features-grid-section";
 
 const howItWorksSteps = [
   {
@@ -515,27 +516,8 @@ export function PreAccounting() {
         <div className="h-px w-full border-t border-border" />
       </div>
 
-      {/* Final CTA Section */}
-      <section className="bg-background py-12 sm:py-16 lg:py-24">
-        <div className="max-w-[1400px] mx-auto">
-          <div className="text-center space-y-6 max-w-2xl mx-auto">
-            <h2 className="font-serif text-2xl sm:text-2xl lg:text-3xl text-foreground">
-              Spend less time preparing, more time running your business
-            </h2>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-              <Button
-                onClick={() => router.push("/login")}
-                size="lg"
-              >
-                Start free trial
-              </Button>
-            </div>
-            <p className="text-muted-foreground text-xs font-sans">
-              Cancel anytime
-            </p>
-          </div>
-        </div>
-      </section>
+      {/* Features Grid Section */}
+      <FeaturesGridSection />
 
       {/* Divider */}
       <div className="max-w-[1400px] mx-auto">
