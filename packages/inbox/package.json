@@ -6,7 +6,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./connector": "./src/connector.ts",
-    "./utils": "./src/utils.ts"
+    "./utils": "./src/utils.ts",
+    "./providers/google-drive": "./src/providers/google-drive.ts"
   },
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
