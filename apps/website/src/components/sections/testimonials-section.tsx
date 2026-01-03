@@ -215,7 +215,7 @@ export function TestimonialsSection({
                   left: `-${(testimonials.length - 1) * 89}%`, 
                   right: 0 
                 }}
-                dragElastic={0.2}
+                dragElastic={currentSlide === 0 || currentSlide === testimonials.length - 1 ? 0 : 0.2}
                 animate={{ 
                   x: `-${currentSlide * 89}%`,
                 }}
@@ -227,10 +227,18 @@ export function TestimonialsSection({
                   // Store drag distance to check in click handler
                   lastDragDistance.current = dragDistance
 
+                  // Prevent swiping beyond boundaries
                   if (velocity < -500 || (info.offset.x < -threshold && currentSlide < testimonials.length - 1)) {
                     setCurrentSlide(Math.min(currentSlide + 1, testimonials.length - 1))
                   } else if (velocity > 500 || (info.offset.x > threshold && currentSlide > 0)) {
                     setCurrentSlide(Math.max(currentSlide - 1, 0))
+                  } else {
+                    // If drag didn't trigger slide change, ensure we stay within bounds
+                    if (currentSlide >= testimonials.length) {
+                      setCurrentSlide(testimonials.length - 1)
+                    } else if (currentSlide < 0) {
+                      setCurrentSlide(0)
+                    }
                   }
 
                   // Block clicks if there was significant drag
