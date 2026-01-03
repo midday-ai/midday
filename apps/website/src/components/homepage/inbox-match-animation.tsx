@@ -117,7 +117,7 @@ export function InboxMatchAnimation({
           <input
             type="text"
             placeholder="Search inbox..."
-            className="w-full bg-background border border-border px-2 md:px-3 py-1.5 md:py-2 text-[11px] md:text-[12px] text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-border/50 rounded-none pr-7 md:pr-8"
+            className="w-full bg-background border border-border px-2 md:px-3 py-1.5 md:py-2 text-[11px] md:text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border/50 rounded-none pr-7 md:pr-8"
           />
           <MaterialIcon
             name="search"
