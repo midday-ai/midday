@@ -7,7 +7,6 @@ import { getDueDateStatus } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
-import { Badge } from "@midday/ui/badge";
 import { Checkbox } from "@midday/ui/checkbox";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -17,6 +16,21 @@ import { formatDate } from "@midday/utils/format";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format, formatDistanceToNow } from "date-fns";
 import type { MouseEvent } from "react";
+
+function getFrequencyLabel(frequency: string): string {
+  switch (frequency) {
+    case "weekly":
+      return "Weekly";
+    case "monthly":
+      return "Monthly";
+    case "quarterly":
+      return "Quarterly";
+    case "yearly":
+      return "Yearly";
+    default:
+      return "Recurring";
+  }
+}
 import { ActionsMenu } from "./actions-menu";
 
 export type Invoice = NonNullable<
@@ -131,57 +145,36 @@ export const columns: ColumnDef<Invoice>[] = [
     maxSize: 200,
     enableResizing: true,
     meta: {
-      skeleton: { type: "badge", width: "w-20" },
+      skeleton: { type: "text", width: "w-20" },
       headerLabel: "Type",
       className: "w-[140px] min-w-[100px]",
     },
     cell: ({ row }) => {
       const recurringId = row.original.invoiceRecurringId;
       const recurring = row.original.recurring;
-      const sequence = row.original.recurringSequence;
 
       if (!recurringId || !recurring) {
-        return <span className="text-muted-foreground text-sm">One-time</span>;
+        return <span className="text-muted-foreground">One-time</span>;
       }
 
-      // Build the recurring label
-      const statusLabel =
-        recurring.status === "active"
-          ? "Active"
-          : recurring.status === "paused"
-            ? "Paused"
-            : "Completed";
-
-      // Show sequence if available (e.g., "2 of 12" or "2")
-      let progressLabel = "";
-      if (sequence) {
-        if (recurring.endType === "count" && recurring.endCount) {
-          progressLabel = `${sequence}/${recurring.endCount}`;
-        } else {
-          progressLabel = `#${sequence}`;
-        }
-      }
+      const frequencyLabel = getFrequencyLabel(recurring.frequency);
+      const nextDate = recurring.nextScheduledAt;
 
       return (
-        <TooltipProvider delayDuration={0}>
-          <Tooltip>
-            <TooltipTrigger>
-              <Badge
-                variant={recurring.status === "active" ? "default" : "secondary"}
-                className="gap-1"
-              >
-                <Icons.Repeat className="size-3" />
-                {progressLabel || "Recurring"}
-              </Badge>
-            </TooltipTrigger>
-            <TooltipContent className="text-xs py-1 px-2" side="right" sideOffset={5}>
-              Recurring ({statusLabel})
-              {recurring.endType === "count" &&
-                recurring.endCount &&
-                ` • ${recurring.invoicesGenerated || 0} of ${recurring.endCount} generated`}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <div className="flex flex-col">
+          <span>{frequencyLabel}</span>
+          {recurring.status === "active" && nextDate && (
+            <span className="text-xs text-muted-foreground">
+              Next on {format(new Date(nextDate), "MMM d")}
+            </span>
+          )}
+          {recurring.status === "paused" && (
+            <span className="text-xs text-muted-foreground">Paused</span>
+          )}
+          {recurring.status === "completed" && (
+            <span className="text-xs text-muted-foreground">Completed</span>
+          )}
+        </div>
       );
     },
   },
