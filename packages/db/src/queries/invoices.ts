@@ -210,6 +210,7 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
         endType: invoiceRecurring.endType,
         endCount: invoiceRecurring.endCount,
         invoicesGenerated: invoiceRecurring.invoicesGenerated,
+        nextScheduledAt: invoiceRecurring.nextScheduledAt,
       },
     })
     .from(invoices)
