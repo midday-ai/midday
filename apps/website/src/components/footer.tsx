@@ -76,15 +76,6 @@ export function Footer() {
                 >
                   Roadmap
                 </Link>
-                <Link
-                  href="https://github.com/midday-ai/midday"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: "transparent" }}
-                >
-                  GitHub
-                </Link>
               </div>
             </div>
 
