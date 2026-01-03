@@ -40,6 +40,13 @@ export function Footer() {
                 >
                   Bank coverage
                 </Link>
+                <Link
+                  href="/pre-accounting"
+                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
+                  style={{ WebkitTapHighlightColor: "transparent" }}
+                >
+                  Pre-accounting
+                </Link>
               </div>
             </div>
 
