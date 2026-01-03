@@ -25,6 +25,7 @@ export const invoiceRecurringStatusSchema = z.enum([
   "active",
   "paused",
   "completed",
+  "canceled",
 ]);
 
 // Base recurring invoice schema for tRPC

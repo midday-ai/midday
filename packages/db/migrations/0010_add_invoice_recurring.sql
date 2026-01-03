@@ -20,7 +20,8 @@ CREATE TYPE invoice_recurring_end_type AS ENUM (
 CREATE TYPE invoice_recurring_status AS ENUM (
   'active',
   'paused',
-  'completed'
+  'completed',
+  'canceled'
 );
 
 -- Create invoice_recurring table
@@ -69,6 +70,8 @@ CREATE TABLE IF NOT EXISTS invoice_recurring (
 CREATE INDEX IF NOT EXISTS invoice_recurring_team_id_idx ON invoice_recurring(team_id);
 CREATE INDEX IF NOT EXISTS invoice_recurring_next_scheduled_at_idx ON invoice_recurring(next_scheduled_at);
 CREATE INDEX IF NOT EXISTS invoice_recurring_status_idx ON invoice_recurring(status);
+-- Compound partial index for scheduler query (WHERE status = 'active' AND next_scheduled_at <= now)
+CREATE INDEX IF NOT EXISTS invoice_recurring_active_scheduled_idx ON invoice_recurring(next_scheduled_at) WHERE status = 'active';
 
 -- Add RLS policy for invoice_recurring
 ALTER TABLE invoice_recurring ENABLE ROW LEVEL SECURITY;
@@ -86,4 +89,7 @@ ALTER TABLE invoices
 
 -- Add index for efficient recurring invoice lookups
 CREATE INDEX IF NOT EXISTS invoices_invoice_recurring_id_idx ON invoices(invoice_recurring_id) WHERE invoice_recurring_id IS NOT NULL;
+
+-- Unique constraint for idempotency (prevents duplicate invoices for same sequence)
+CREATE UNIQUE INDEX IF NOT EXISTS invoices_recurring_sequence_unique_idx ON invoices(invoice_recurring_id, recurring_sequence) WHERE invoice_recurring_id IS NOT NULL;
 

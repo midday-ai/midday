@@ -44,3 +44,26 @@ export const invoiceRecurringSchedulerSchema = z.object({});
 export type InvoiceRecurringSchedulerPayload = z.infer<
   typeof invoiceRecurringSchedulerSchema
 >;
+
+/**
+ * Generate invoice job schema
+ * Handles PDF generation and optionally sending the invoice
+ */
+export const generateInvoiceSchema = z.object({
+  invoiceId: z.string().uuid(),
+  deliveryType: z.enum(["create", "create_and_send"]),
+});
+
+export type GenerateInvoicePayload = z.infer<typeof generateInvoiceSchema>;
+
+/**
+ * Send invoice email job schema
+ * Handles sending the invoice email with optional PDF attachment
+ */
+export const sendInvoiceEmailSchema = z.object({
+  invoiceId: z.string().uuid(),
+  filename: z.string(),
+  fullPath: z.string(),
+});
+
+export type SendInvoiceEmailPayload = z.infer<typeof sendInvoiceEmailSchema>;

@@ -1,4 +1,5 @@
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 import { Button } from "@midday/ui/button";
@@ -6,6 +7,7 @@ import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { differenceInDays } from "date-fns";
 import { useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useDebounceValue } from "usehooks-ts";
@@ -27,6 +29,7 @@ import { transformFormValuesToDraft } from "./utils";
 
 export function Form() {
   const { invoiceId, setParams } = useInvoiceParams();
+  const { data: user } = useUserQuery();
 
   const form = useFormContext();
   const token = form.watch("token");
@@ -99,6 +102,43 @@ export function Form() {
     }),
   );
 
+  const createRecurringInvoiceMutation = useMutation(
+    trpc.invoiceRecurring.create.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoiceRecurring.list.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.invoiceSummary.queryKey(),
+        });
+
+        // Invalidate global search
+        queryClient.invalidateQueries({
+          queryKey: trpc.search.global.queryKey(),
+        });
+
+        toast({
+          title: "Recurring Invoice Created",
+          description: "Your recurring invoice series has been set up.",
+        });
+
+        setParams(null);
+      },
+      onError: (error) => {
+        console.log(error);
+        toast({
+          title: "Recurring Invoice Failed",
+          description: "An unexpected error occurred. Please try again.",
+        });
+      },
+    }),
+  );
+
   // Only watch the fields that are used in the upsert action
   const formValues = useWatch({
     control: form.control,
@@ -121,6 +161,7 @@ export function Form() {
       "topBlock",
       "bottomBlock",
       "scheduledAt",
+      "recurringConfig",
     ],
   });
 
@@ -140,9 +181,55 @@ export function Form() {
 
   // Submit the form and the draft invoice
   const handleSubmit = (values: InvoiceFormValues) => {
+    // Handle recurring invoices differently
+    if (values.template.deliveryType === "recurring" && values.recurringConfig) {
+      const config = values.recurringConfig;
+
+      // Calculate due date offset from issue date to due date
+      const issueDate = new Date(values.issueDate);
+      const dueDate = new Date(values.dueDate);
+      const dueDateOffset = differenceInDays(dueDate, issueDate);
+
+      // Remove deliveryType from template since recurring is handled differently
+      const { deliveryType: _, ...templateWithoutDeliveryType } = values.template;
+
+      createRecurringInvoiceMutation.mutate({
+        customerId: values.customerId,
+        customerName: values.customerName ?? undefined,
+        frequency: config.frequency,
+        frequencyDay: config.frequencyDay,
+        frequencyWeek: config.frequencyWeek,
+        frequencyInterval: config.frequencyInterval,
+        endType: config.endType,
+        endDate: config.endDate,
+        endCount: config.endCount,
+        timezone: user?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+        dueDateOffset: dueDateOffset > 0 ? dueDateOffset : 30,
+        amount: values.amount,
+        currency: values.template.currency,
+        lineItems: values.lineItems,
+        template: {
+          ...templateWithoutDeliveryType,
+          deliveryType: "create_and_send" as const, // Recurring invoices are sent automatically
+        },
+        paymentDetails: values.paymentDetails,
+        fromDetails: values.fromDetails,
+        noteDetails: values.noteDetails,
+        vat: values.vat,
+        tax: values.tax,
+        discount: values.discount,
+        subtotal: values.subtotal,
+        topBlock: values.topBlock,
+        bottomBlock: values.bottomBlock,
+      });
+      return;
+    }
+
+    // Handle regular invoice creation
+    const deliveryType = values.template.deliveryType;
     createInvoiceMutation.mutate({
       id: values.id,
-      deliveryType: values.template.deliveryType ?? "create",
+      deliveryType: deliveryType === "recurring" ? "create" : (deliveryType ?? "create"),
       scheduledAt: values.scheduledAt || undefined,
     });
   };
@@ -219,9 +306,10 @@ export function Form() {
               )}
 
               <SubmitButton
-                isSubmitting={createInvoiceMutation.isPending}
+                isSubmitting={createInvoiceMutation.isPending || createRecurringInvoiceMutation.isPending}
                 disabled={
                   createInvoiceMutation.isPending ||
+                  createRecurringInvoiceMutation.isPending ||
                   draftInvoiceMutation.isPending
                 }
               />

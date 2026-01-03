@@ -7,13 +7,13 @@ import {
   teams,
 } from "@db/schema";
 import {
+  type InvoiceRecurringEndType,
+  type InvoiceRecurringFrequency,
+  type RecurringInvoiceParams,
   calculateFirstScheduledDate,
   calculateNextScheduledDate,
   calculateUpcomingDates,
   shouldMarkCompleted,
-  type InvoiceRecurringEndType,
-  type InvoiceRecurringFrequency,
-  type RecurringInvoiceParams,
 } from "@db/utils/invoice-recurring";
 import { and, desc, eq, inArray, lte, sql } from "drizzle-orm";
 
@@ -160,7 +160,7 @@ export type UpdateInvoiceRecurringParams = {
   topBlock?: unknown;
   bottomBlock?: unknown;
   templateId?: string | null;
-  status?: "active" | "paused" | "completed";
+  status?: "active" | "paused" | "completed" | "canceled";
 };
 
 export async function updateInvoiceRecurring(
@@ -252,7 +252,7 @@ export async function getInvoiceRecurringById(
 
 export type GetInvoiceRecurringListParams = {
   teamId: string;
-  status?: ("active" | "paused" | "completed")[];
+  status?: ("active" | "paused" | "completed" | "canceled")[];
   customerId?: string;
   cursor?: string | null;
   pageSize?: number;
@@ -515,7 +515,7 @@ export async function resumeInvoiceRecurring(
 }
 
 /**
- * Delete a recurring invoice series (soft delete by setting status to completed)
+ * Delete a recurring invoice series (soft delete by setting status to canceled)
  * Generated invoices are kept
  */
 export async function deleteInvoiceRecurring(
@@ -527,7 +527,7 @@ export async function deleteInvoiceRecurring(
   const [result] = await db
     .update(invoiceRecurring)
     .set({
-      status: "completed",
+      status: "canceled",
       nextScheduledAt: null,
       updatedAt: new Date().toISOString(),
     })

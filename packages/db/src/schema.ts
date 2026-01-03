@@ -18,6 +18,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
   varchar,
   vector,
@@ -158,6 +159,7 @@ export const invoiceRecurringStatusEnum = pgEnum("invoice_recurring_status", [
   "active",
   "paused",
   "completed",
+  "canceled",
 ]);
 
 export const plansEnum = pgEnum("plans", ["trial", "starter", "pro"]);
@@ -779,6 +781,13 @@ export const invoiceRecurring = pgTable(
       "btree",
       table.status.asc().nullsLast(),
     ),
+    // Compound partial index for scheduler query
+    index("invoice_recurring_active_scheduled_idx")
+      .using(
+        "btree",
+        table.nextScheduledAt.asc().nullsLast().op("timestamptz_ops"),
+      )
+      .where(sql`status = 'active'`),
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [teams.id],
@@ -929,6 +938,10 @@ export const invoices = pgTable(
       "btree",
       table.invoiceRecurringId.asc().nullsLast().op("uuid_ops"),
     ),
+    // Unique constraint for idempotency (prevents duplicate invoices for same sequence)
+    uniqueIndex("invoices_recurring_sequence_unique_idx")
+      .on(table.invoiceRecurringId, table.recurringSequence)
+      .where(sql`invoice_recurring_id IS NOT NULL`),
     unique("invoices_scheduled_job_id_key").on(table.scheduledJobId),
     pgPolicy("Invoices can be handled by a member of the team", {
       as: "permissive",

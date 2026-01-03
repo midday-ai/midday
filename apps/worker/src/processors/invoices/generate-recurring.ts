@@ -9,15 +9,12 @@ import {
 } from "@midday/db/queries";
 import { generateToken } from "@midday/invoice/token";
 import { transformCustomerToContent } from "@midday/invoice/utils";
-import type { GenerateInvoicePayload } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk";
 import type { Job } from "bullmq";
 import { addDays } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import { invoicesQueue } from "../../queues/invoices";
 import type { InvoiceRecurringSchedulerPayload } from "../../schemas/invoices";
 import { getDb } from "../../utils/db";
-import { isProduction } from "../../utils/env";
 import { BaseProcessor } from "../base";
 
 type GeneratedInvoiceResult = {
@@ -217,13 +214,21 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
           recurringSequence: nextSequence,
         });
 
-        // Trigger invoice generation and sending (only in production or if configured)
-        if (isProduction()) {
-          await tasks.trigger("generate-invoice", {
+        // Trigger invoice generation and sending via BullMQ
+        await invoicesQueue.add(
+          "generate-invoice",
+          {
             invoiceId,
             deliveryType: "create_and_send",
-          } satisfies GenerateInvoicePayload);
-        }
+          },
+          {
+            attempts: 3,
+            backoff: {
+              type: "exponential",
+              delay: 1000,
+            },
+          },
+        );
 
         // Mark the recurring invoice as generated (updates next_scheduled_at and counter)
         await markInvoiceGenerated(db, {

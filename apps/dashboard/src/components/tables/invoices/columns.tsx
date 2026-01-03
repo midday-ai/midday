@@ -6,6 +6,7 @@ import { useCustomerParams } from "@/hooks/use-customer-params";
 import { getDueDateStatus } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { getFrequencyShortLabel } from "@midday/invoice/recurring";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Checkbox } from "@midday/ui/checkbox";
 import { cn } from "@midday/ui/cn";
@@ -16,21 +17,6 @@ import { formatDate } from "@midday/utils/format";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format, formatDistanceToNow } from "date-fns";
 import type { MouseEvent } from "react";
-
-function getFrequencyLabel(frequency: string): string {
-  switch (frequency) {
-    case "weekly":
-      return "Weekly";
-    case "monthly":
-      return "Monthly";
-    case "quarterly":
-      return "Quarterly";
-    case "yearly":
-      return "Yearly";
-    default:
-      return "Recurring";
-  }
-}
 import { ActionsMenu } from "./actions-menu";
 
 export type Invoice = NonNullable<
@@ -135,47 +121,6 @@ export const columns: ColumnDef<Invoice>[] = [
       }
 
       return <InvoiceStatus status={status as any} />;
-    },
-  },
-  {
-    id: "type",
-    header: "Type",
-    size: 140,
-    minSize: 100,
-    maxSize: 200,
-    enableResizing: true,
-    meta: {
-      skeleton: { type: "text", width: "w-20" },
-      headerLabel: "Type",
-      className: "w-[140px] min-w-[100px]",
-    },
-    cell: ({ row }) => {
-      const recurringId = row.original.invoiceRecurringId;
-      const recurring = row.original.recurring;
-
-      if (!recurringId || !recurring) {
-        return <span className="text-muted-foreground">One-time</span>;
-      }
-
-      const frequencyLabel = getFrequencyLabel(recurring.frequency);
-      const nextDate = recurring.nextScheduledAt;
-
-      return (
-        <div className="flex flex-col">
-          <span>{frequencyLabel}</span>
-          {recurring.status === "active" && nextDate && (
-            <span className="text-xs text-muted-foreground">
-              Next on {format(new Date(nextDate), "MMM d")}
-            </span>
-          )}
-          {recurring.status === "paused" && (
-            <span className="text-xs text-muted-foreground">Paused</span>
-          )}
-          {recurring.status === "completed" && (
-            <span className="text-xs text-muted-foreground">Completed</span>
-          )}
-        </div>
-      );
     },
   },
   {
@@ -546,6 +491,47 @@ export const columns: ColumnDef<Invoice>[] = [
         <span className="truncate">
           {date ? formatDate(date, table.options.meta?.dateFormat) : "-"}
         </span>
+      );
+    },
+  },
+  {
+    id: "type",
+    header: "Type",
+    size: 140,
+    minSize: 100,
+    maxSize: 200,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-20" },
+      headerLabel: "Type",
+      className: "w-[140px] min-w-[100px]",
+    },
+    cell: ({ row }) => {
+      const recurringId = row.original.invoiceRecurringId;
+      const recurring = row.original.recurring;
+
+      if (!recurringId || !recurring) {
+        return <span>One-time</span>;
+      }
+
+      const frequencyLabel = getFrequencyShortLabel(recurring.frequency);
+      const nextDate = recurring.nextScheduledAt;
+
+      return (
+        <div className="flex flex-col">
+          <span>{frequencyLabel}</span>
+          {recurring.status === "active" && nextDate && (
+            <span className="text-xs text-muted-foreground">
+              Next on {format(new Date(nextDate), "MMM d")}
+            </span>
+          )}
+          {recurring.status === "paused" && (
+            <span className="text-xs text-muted-foreground">Paused</span>
+          )}
+          {recurring.status === "completed" && (
+            <span className="text-xs text-muted-foreground">Completed</span>
+          )}
+        </div>
       );
     },
   },

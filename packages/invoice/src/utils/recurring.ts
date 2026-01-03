@@ -6,7 +6,7 @@ export type InvoiceRecurringFrequency =
   | "monthly_weekday"
   | "custom";
 
-export type InvoiceRecurringStatus = "active" | "paused" | "completed";
+export type InvoiceRecurringStatus = "active" | "paused" | "completed" | "canceled";
 
 /**
  * Format a date string to day of week abbreviation (e.g., "Fri", "Mon")
