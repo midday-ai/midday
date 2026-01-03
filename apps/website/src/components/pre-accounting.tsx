@@ -78,27 +78,29 @@ export function PreAccounting() {
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-md mx-auto justify-center sm:justify-center">
-              <Button
-                onClick={() => router.push("/login")}
-                className="w-full sm:w-auto h-11 px-6 text-sm font-sans"
-              >
-                Start free trial
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  const element = document.getElementById("how-it-works");
-                  element?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="w-full sm:w-auto h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
-              >
-                See how it works
-              </Button>
+            <div className="space-y-4 text-center w-full">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-md mx-auto justify-center sm:justify-center">
+                <Button
+                  onClick={() => router.push("/login")}
+                  className="w-full sm:w-auto h-11 px-6 text-sm font-sans"
+                >
+                  Start free trial
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const element = document.getElementById("how-it-works");
+                    element?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="w-full sm:w-auto h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
+                >
+                  See how it works
+                </Button>
+              </div>
+              <p className="text-muted-foreground text-xs font-sans">
+                14-day free trial · Cancel anytime
+              </p>
             </div>
-            <p className="text-muted-foreground text-xs font-sans text-center">
-              14-day free trial · Credit card required · Cancel anytime
-            </p>
           </div>
         </div>
 
@@ -157,7 +159,7 @@ export function PreAccounting() {
               </Button>
             </div>
             <p className="text-muted-foreground text-xs font-sans text-center">
-              14-day free trial · Credit card required · Cancel anytime
+              14-day free trial · Cancel anytime
             </p>
           </div>
         </div>
