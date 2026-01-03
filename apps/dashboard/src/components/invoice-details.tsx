@@ -7,6 +7,7 @@ import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 import { getWebsiteLogo } from "@/utils/logos";
+import { getFrequencyShortLabel } from "@midday/invoice/recurring";
 import {
   Accordion,
   AccordionContent,
@@ -114,6 +115,8 @@ export function InvoiceDetails() {
     scheduledAt,
     paymentIntentId,
     refundedAt,
+    invoiceRecurringId,
+    recurring,
   } = data;
 
   return (
@@ -248,6 +251,17 @@ export function InvoiceDetails() {
             <span className="text-sm text-[#606060]">Invoice no.</span>
             <span className="text-sm">
               <span>{invoiceNumber}</span>
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-[#606060]">Type</span>
+            <span className="text-sm">
+              {invoiceRecurringId && recurring ? (
+                <span>{getFrequencyShortLabel(recurring.frequency)}</span>
+              ) : (
+                <span>One-time</span>
+              )}
             </span>
           </div>
 

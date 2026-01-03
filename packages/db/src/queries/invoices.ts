@@ -343,11 +343,27 @@ export async function getInvoiceById(
         name: invoiceTemplates.name,
         isDefault: invoiceTemplates.isDefault,
       },
+      // Recurring invoice data
+      invoiceRecurringId: invoices.invoiceRecurringId,
+      recurringSequence: invoices.recurringSequence,
+      recurring: {
+        id: invoiceRecurring.id,
+        frequency: invoiceRecurring.frequency,
+        status: invoiceRecurring.status,
+        nextScheduledAt: invoiceRecurring.nextScheduledAt,
+        endType: invoiceRecurring.endType,
+        endCount: invoiceRecurring.endCount,
+        invoicesGenerated: invoiceRecurring.invoicesGenerated,
+      },
     })
     .from(invoices)
     .leftJoin(customers, eq(invoices.customerId, customers.id))
     .leftJoin(teams, eq(invoices.teamId, teams.id))
     .leftJoin(invoiceTemplates, eq(invoices.templateId, invoiceTemplates.id))
+    .leftJoin(
+      invoiceRecurring,
+      eq(invoices.invoiceRecurringId, invoiceRecurring.id),
+    )
     .where(
       and(
         eq(invoices.id, id),

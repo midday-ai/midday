@@ -1,16 +1,17 @@
--- Migration: Add support for multiple invoice templates per team (Phase 1)
+-- Migration: Add support for multiple invoice templates per team
 -- Adds name and is_default columns to invoice_templates
--- 
--- This migration is BACKWARDS COMPATIBLE with old code.
--- Safe to run before deploying new code.
+-- Removes unique constraint on team_id to allow multiple templates per team
 
--- Add new columns (old code ignores these)
+-- Add new columns
 ALTER TABLE invoice_templates 
-  ADD COLUMN IF NOT EXISTS name TEXT NOT NULL DEFAULT 'Default',
-  ADD COLUMN IF NOT EXISTS is_default BOOLEAN DEFAULT false;
+  ADD COLUMN name TEXT NOT NULL DEFAULT 'Default',
+  ADD COLUMN is_default BOOLEAN DEFAULT false;
 
--- Set existing templates as default for their respective teams
-UPDATE invoice_templates SET is_default = true WHERE is_default IS NULL OR is_default = false;
+-- Drop the unique constraint on team_id to allow multiple templates
+ALTER TABLE invoice_templates DROP CONSTRAINT IF EXISTS invoice_templates_team_id_key; // inte kört än
 
 -- Add index for efficient team lookups
 CREATE INDEX IF NOT EXISTS idx_invoice_templates_team_id ON invoice_templates(team_id);
+-- Set existing templates as default for their respective teams
+UPDATE invoice_templates SET is_default = true;
+

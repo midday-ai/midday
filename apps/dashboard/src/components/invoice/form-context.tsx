@@ -44,7 +44,7 @@ export const invoiceTemplateSchema = z.object({
   taxRate: z.number().min(0).max(100).optional().nullable(),
   vatRate: z.number().min(0).max(100).optional().nullable(),
   dateFormat: z.enum(["dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "dd.MM.yyyy"]),
-  deliveryType: z.enum(["create", "create_and_send", "scheduled"]),
+  deliveryType: z.enum(["create", "create_and_send", "scheduled", "recurring"]),
   locale: z.string().optional(),
   timezone: z.string().optional(),
   paymentEnabled: z.boolean().optional(),
@@ -58,6 +58,16 @@ export const lineItemSchema = z.object({
   vat: z.number().min(0, "VAT must be at least 0").optional(),
   tax: z.number().min(0, "Tax must be at least 0").optional(),
   taxRate: z.number().min(0).max(100).optional().nullable(),
+});
+
+export const recurringConfigSchema = z.object({
+  frequency: z.enum(["weekly", "monthly_date", "monthly_weekday", "custom"]),
+  frequencyDay: z.number().nullable(),
+  frequencyWeek: z.number().nullable(),
+  frequencyInterval: z.number().nullable(),
+  endType: z.enum(["never", "on_date", "after_count"]),
+  endDate: z.string().nullable(),
+  endCount: z.number().nullable(),
 });
 
 export const invoiceFormSchema = z.object({
@@ -84,6 +94,7 @@ export const invoiceFormSchema = z.object({
   lineItems: z.array(lineItemSchema).min(1),
   token: z.string().optional(),
   scheduledAt: z.string().nullable().optional(),
+  recurringConfig: recurringConfigSchema.nullable().optional(),
 });
 
 export type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;
