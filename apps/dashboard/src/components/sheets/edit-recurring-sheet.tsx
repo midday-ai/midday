@@ -3,7 +3,14 @@
 import { FormatAmount } from "@/components/format-amount";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTRPC } from "@/trpc/client";
-import { formatOrdinal } from "@midday/invoice/recurring";
+import {
+  type RecurringConfig,
+  type RecurringEndType,
+  calculatePreviewDates,
+  formatOrdinal,
+  isValidRecurringConfig,
+  validateRecurringConfig,
+} from "@midday/invoice/recurring";
 import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
 import { Icons } from "@midday/ui/icons";
@@ -42,70 +49,6 @@ type RecurringFrequency =
   | "monthly_date"
   | "monthly_weekday"
   | "custom";
-
-type RecurringEndType = "never" | "on_date" | "after_count";
-
-interface RecurringConfig {
-  frequency: RecurringFrequency;
-  frequencyDay: number | null;
-  frequencyWeek: number | null;
-  frequencyInterval: number | null;
-  endType: RecurringEndType;
-  endDate: string | null;
-  endCount: number | null;
-}
-
-interface UpcomingInvoice {
-  date: Date;
-  amount: number;
-}
-
-function calculatePreviewDates(
-  config: RecurringConfig,
-  startDate: Date,
-  amount: number,
-  limit = 3,
-): UpcomingInvoice[] {
-  const invoices: UpcomingInvoice[] = [];
-  let currentDate = new Date(startDate);
-
-  for (let i = 0; i < limit; i++) {
-    if (config.endType === "on_date" && config.endDate) {
-      if (currentDate > new Date(config.endDate)) break;
-    }
-    if (config.endType === "after_count" && config.endCount !== null) {
-      if (i >= config.endCount) break;
-    }
-
-    invoices.push({
-      date: new Date(currentDate),
-      amount,
-    });
-
-    currentDate = getNextDate(config, currentDate);
-  }
-
-  return invoices;
-}
-
-function getNextDate(config: RecurringConfig, currentDate: Date): Date {
-  const next = new Date(currentDate);
-
-  switch (config.frequency) {
-    case "weekly":
-      next.setDate(next.getDate() + 7);
-      break;
-    case "monthly_date":
-    case "monthly_weekday":
-      next.setMonth(next.getMonth() + 1);
-      break;
-    case "custom":
-      next.setDate(next.getDate() + (config.frequencyInterval ?? 1));
-      break;
-  }
-
-  return next;
-}
 
 function getSmartOptions(referenceDate: Date): Array<{
   value: string;
@@ -190,6 +133,13 @@ export function EditRecurringSheet() {
     }
   }, [recurring]);
 
+  // Validation errors
+  const validationErrors = React.useMemo(
+    () => validateRecurringConfig(config),
+    [config],
+  );
+  const isValid = validationErrors.length === 0;
+
   const updateMutation = useMutation(
     trpc.invoiceRecurring.update.mutationOptions({
       onSuccess: () => {
@@ -214,7 +164,7 @@ export function EditRecurringSheet() {
   );
 
   const handleSave = () => {
-    if (!editRecurringId) return;
+    if (!editRecurringId || !isValid) return;
     updateMutation.mutate({
       id: editRecurringId,
       frequency: config.frequency,
@@ -504,6 +454,11 @@ export function EditRecurringSheet() {
             </ScrollArea>
 
             <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-background">
+              {validationErrors.length > 0 && (
+                <div className="mb-3 text-sm text-destructive">
+                  {validationErrors[0]?.message}
+                </div>
+              )}
               <div className="flex justify-end space-x-4">
                 <Button variant="outline" onClick={handleClose}>
                   Cancel
@@ -511,6 +466,7 @@ export function EditRecurringSheet() {
                 <SubmitButton
                   onClick={handleSave}
                   isSubmitting={updateMutation.isPending}
+                  disabled={!isValid}
                 >
                   Save changes
                 </SubmitButton>

@@ -3,10 +3,13 @@
 import { FormatAmount } from "@/components/format-amount";
 import { useUserQuery } from "@/hooks/use-user";
 import {
+  type RecurringConfig,
+  type RecurringEndType,
+  calculatePreviewDates,
+  calculateSummary,
   formatDayOfWeek,
   formatOrdinal,
   formatShortDate,
-  getFrequencyLabel,
 } from "@midday/invoice/recurring";
 import { Calendar } from "@midday/ui/calendar";
 import { Input } from "@midday/ui/input";
@@ -23,6 +26,14 @@ import {
 import { format, getDate, getDay } from "date-fns";
 import * as React from "react";
 
+// Re-export types for consumers
+export type { RecurringConfig, RecurringEndType };
+export type RecurringFrequency =
+  | "weekly"
+  | "monthly_date"
+  | "monthly_weekday"
+  | "custom";
+
 const DAY_NAMES = [
   "Sunday",
   "Monday",
@@ -35,128 +46,12 @@ const DAY_NAMES = [
 
 const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th"];
 
-export type RecurringFrequency =
-  | "weekly"
-  | "monthly_date"
-  | "monthly_weekday"
-  | "custom";
-
-export type RecurringEndType = "never" | "on_date" | "after_count";
-
-export interface RecurringConfig {
-  frequency: RecurringFrequency;
-  frequencyDay: number | null;
-  frequencyWeek: number | null;
-  frequencyInterval: number | null;
-  endType: RecurringEndType;
-  endDate: string | null;
-  endCount: number | null;
-}
-
 interface RecurringConfigProps {
   issueDate: Date;
   amount: number;
   currency: string;
   config: RecurringConfig;
   onChange: (config: RecurringConfig) => void;
-}
-
-interface UpcomingInvoice {
-  date: Date;
-  amount: number;
-}
-
-/**
- * Calculate upcoming invoice dates for preview (client-side version)
- */
-function calculatePreviewDates(
-  config: RecurringConfig,
-  startDate: Date,
-  amount: number,
-  limit = 3,
-): UpcomingInvoice[] {
-  const invoices: UpcomingInvoice[] = [];
-  let currentDate = new Date(startDate);
-
-  for (let i = 0; i < limit; i++) {
-    // Check end conditions
-    if (config.endType === "on_date" && config.endDate) {
-      if (currentDate > new Date(config.endDate)) break;
-    }
-    if (config.endType === "after_count" && config.endCount !== null) {
-      if (i >= config.endCount) break;
-    }
-
-    invoices.push({
-      date: new Date(currentDate),
-      amount,
-    });
-
-    // Calculate next date based on frequency
-    currentDate = getNextDate(config, currentDate);
-  }
-
-  return invoices;
-}
-
-/**
- * Calculate next date based on frequency
- */
-function getNextDate(config: RecurringConfig, currentDate: Date): Date {
-  const next = new Date(currentDate);
-
-  switch (config.frequency) {
-    case "weekly":
-      next.setDate(next.getDate() + 7);
-      break;
-    case "monthly_date":
-    case "monthly_weekday":
-      next.setMonth(next.getMonth() + 1);
-      break;
-    case "custom":
-      next.setDate(next.getDate() + (config.frequencyInterval ?? 1));
-      break;
-  }
-
-  return next;
-}
-
-/**
- * Calculate total invoices and amount for the series
- */
-function calculateSummary(
-  config: RecurringConfig,
-  startDate: Date,
-  amount: number,
-): { totalCount: number | null; totalAmount: number | null } {
-  if (config.endType === "never") {
-    return { totalCount: null, totalAmount: null };
-  }
-
-  if (config.endType === "after_count" && config.endCount !== null) {
-    return {
-      totalCount: config.endCount,
-      totalAmount: config.endCount * amount,
-    };
-  }
-
-  if (config.endType === "on_date" && config.endDate) {
-    let count = 0;
-    let currentDate = new Date(startDate);
-    const endDate = new Date(config.endDate);
-
-    while (currentDate <= endDate && count < 1000) {
-      count++;
-      currentDate = getNextDate(config, currentDate);
-    }
-
-    return {
-      totalCount: count,
-      totalAmount: count * amount,
-    };
-  }
-
-  return { totalCount: null, totalAmount: null };
 }
 
 /**

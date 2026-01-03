@@ -71,6 +71,80 @@ export const recurringConfigSchema = z
     endCount: z.number().nullable(),
   })
   .superRefine((data, ctx) => {
+    // Validate frequencyDay is required for weekly frequency
+    if (data.frequency === "weekly") {
+      if (data.frequencyDay === null || data.frequencyDay === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Day of week is required for weekly frequency",
+          path: ["frequencyDay"],
+        });
+      } else if (data.frequencyDay < 0 || data.frequencyDay > 6) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Day of week must be 0-6 (Sunday-Saturday)",
+          path: ["frequencyDay"],
+        });
+      }
+    }
+
+    // Validate frequencyDay is required for monthly_date frequency
+    if (data.frequency === "monthly_date") {
+      if (data.frequencyDay === null || data.frequencyDay === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Day of month is required for monthly frequency",
+          path: ["frequencyDay"],
+        });
+      } else if (data.frequencyDay < 1 || data.frequencyDay > 31) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Day of month must be 1-31",
+          path: ["frequencyDay"],
+        });
+      }
+    }
+
+    // Validate frequencyDay and frequencyWeek are required for monthly_weekday frequency
+    if (data.frequency === "monthly_weekday") {
+      if (data.frequencyDay === null || data.frequencyDay === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Day of week is required for monthly weekday frequency",
+          path: ["frequencyDay"],
+        });
+      } else if (data.frequencyDay < 0 || data.frequencyDay > 6) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Day of week must be 0-6 (Sunday-Saturday)",
+          path: ["frequencyDay"],
+        });
+      }
+
+      if (data.frequencyWeek === null || data.frequencyWeek === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Week occurrence is required for monthly weekday frequency",
+          path: ["frequencyWeek"],
+        });
+      } else if (data.frequencyWeek < 1 || data.frequencyWeek > 5) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Week occurrence must be 1-5 (1st through 5th)",
+          path: ["frequencyWeek"],
+        });
+      }
+    }
+
+    // Validate frequencyInterval is required when frequency is 'custom'
+    if (data.frequency === "custom" && !data.frequencyInterval) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Day interval is required for custom frequency",
+        path: ["frequencyInterval"],
+      });
+    }
+
     // Validate endDate is required when endType is 'on_date'
     if (data.endType === "on_date" && !data.endDate) {
       ctx.addIssue({
@@ -86,15 +160,6 @@ export const recurringConfigSchema = z
         code: z.ZodIssueCode.custom,
         message: "Invoice count is required when ending after a count",
         path: ["endCount"],
-      });
-    }
-
-    // Validate frequencyInterval is required when frequency is 'custom'
-    if (data.frequency === "custom" && !data.frequencyInterval) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Day interval is required for custom frequency",
-        path: ["frequencyInterval"],
       });
     }
   });
