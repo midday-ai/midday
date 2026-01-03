@@ -149,34 +149,19 @@ export function TimeSavingsSection() {
           <div className="grid grid-cols-1 gap-3 sm:gap-4 xl:hidden">
             <article
               onClick={() => router.push('/login')}
-              className="relative overflow-hidden bg-secondary border border-border p-4 sm:p-5 md:p-5 lg:p-6 transition-all duration-200 cursor-pointer group hover:border-muted-foreground touch-manipulation"
+              className="relative overflow-hidden bg-secondary border border-border p-4 sm:p-5 md:p-5 lg:p-6 transition-all duration-200 cursor-pointer hover:border-muted-foreground touch-manipulation"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex-1">
                   <p className="hidden sm:block text-xs tracking-wide/loose text-muted-foreground transition-colors duration-200">
-                    <span className="group-hover:hidden transition-opacity duration-200">
-                      As things add up
-                    </span>
-                    <span className="hidden group-hover:inline transition-opacity duration-200">
-                      What changes
-                    </span>
+                    As things add up
                   </p>
                   <p className="mt-1 text-base sm:text-lg text-foreground transition-colors duration-200">
-                    <span className="group-hover:hidden transition-opacity duration-200">
-                      What disappears over time
-                    </span>
-                    <span className="hidden group-hover:inline transition-opacity duration-200">
-                      Get your time back
-                    </span>
+                    What disappears over time
                   </p>
                   <p className="mt-1 text-sm text-muted-foreground transition-colors duration-200">
-                    <span className="group-hover:hidden transition-opacity duration-200">
-                      Manual financial work caused by disconnected tools.
-                    </span>
-                    <span className="hidden group-hover:inline transition-opacity duration-200">
-                      Midday handles the financial busywork so you can focus on running the business.
-                    </span>
+                    Manual financial work caused by disconnected tools.
                   </p>
                 </div>
                 <div className="flex flex-col items-end">
