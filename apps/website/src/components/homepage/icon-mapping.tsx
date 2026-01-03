@@ -10,6 +10,7 @@ import {
   MdOutlineAccountBalance,
   MdOutlineAccountBalanceWallet,
   MdOutlineArrowDownward,
+  MdOutlineArrowOutward,
   MdOutlineArrowUpward,
   MdOutlineContentCopy,
   MdOutlineCreditCard,
@@ -74,7 +75,7 @@ export const IconMap = {
   search: MdSearch,
   link: MdOutlineLink,
   open_in_new: MdOutlineOpenInNew,
-  arrow_outward: MdOutlineOpenInNew, // Using open_in_new as arrow_outward alternative
+  arrow_outward: MdOutlineArrowOutward,
   send: MdIosShare, // Using share icon as send alternative
   expand_less: MdOutlineExpandLess,
   expand_more: MdOutlineExpandMore,
