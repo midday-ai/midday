@@ -331,7 +331,7 @@ export function CommandPanelAnimation({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.3, delay: 0.3 }}
-                    className="flex items-center gap-2 pr-2 md:pr-3 py-1 md:py-1.5 mt-2 text-[11px] md:text-[12px] text-muted-foreground hover:text-foreground cursor-pointer hover:bg-muted transition-colors"
+                    className="flex items-center gap-1 pr-2 md:pr-3 py-1 md:py-1.5 mt-2 text-[11px] md:text-[12px] text-muted-foreground hover:text-foreground cursor-pointer hover:bg-muted transition-colors"
                   >
                     <span>View vault</span>
                     <MaterialIcon
