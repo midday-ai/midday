@@ -4,6 +4,7 @@ import {
   type activityTypeEnum,
   customers,
   exchangeRates,
+  invoiceRecurring,
   invoiceStatusEnum,
   invoiceTemplates,
   invoices,
@@ -199,10 +200,25 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
       team: {
         name: teams.name,
       },
+      // Recurring invoice fields
+      invoiceRecurringId: invoices.invoiceRecurringId,
+      recurringSequence: invoices.recurringSequence,
+      recurring: {
+        id: invoiceRecurring.id,
+        status: invoiceRecurring.status,
+        frequency: invoiceRecurring.frequency,
+        endType: invoiceRecurring.endType,
+        endCount: invoiceRecurring.endCount,
+        invoicesGenerated: invoiceRecurring.invoicesGenerated,
+      },
     })
     .from(invoices)
     .leftJoin(customers, eq(invoices.customerId, customers.id))
     .leftJoin(teams, eq(invoices.teamId, teams.id))
+    .leftJoin(
+      invoiceRecurring,
+      eq(invoices.invoiceRecurringId, invoiceRecurring.id),
+    )
     .where(and(...whereConditions));
 
   // Apply sorting
