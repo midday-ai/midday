@@ -193,7 +193,7 @@ export function StartPage() {
         {/* Desktop Layout */}
         <div className="hidden lg:flex flex-col min-h-screen relative">
           <div className="max-w-[1400px] mx-auto w-full">
-            <div className="pt-56 mb-16">
+            <div className="pt-56 mb-16 3xl:mb-24">
               <div className="flex justify-between items-end">
                 <div className="max-w-xl">
                   <div className="space-y-3">
