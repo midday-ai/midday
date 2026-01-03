@@ -180,6 +180,34 @@ export default {
         "Invoice {invoiceNumber} for {customerName} has been refunded",
       without_customer: "Invoice {invoiceNumber} has been refunded",
     },
+    recurring_series_started: {
+      name: "Recurring Series Started",
+      description: "Get notified when a new recurring invoice series begins",
+      title: "Recurring invoice series started",
+      with_customer_and_count:
+        "Started {frequency} recurring series for {customerName} ({count} invoices)",
+      with_customer: "Started {frequency} recurring series for {customerName}",
+      with_frequency: "Started {frequency} recurring invoice series",
+    },
+    recurring_series_completed: {
+      name: "Recurring Series Completed",
+      description: "Get notified when a recurring invoice series finishes",
+      title: "Recurring invoice series completed",
+      with_customer_and_count:
+        "Recurring series for {customerName} completed ({count} invoices generated)",
+      with_count:
+        "Recurring invoice series completed ({count} invoices generated)",
+    },
+    recurring_series_paused: {
+      name: "Recurring Series Paused",
+      description: "Get notified when a recurring invoice series is paused",
+      title: "Recurring invoice series paused",
+      with_customer: "Recurring series for {customerName} has been paused",
+      auto_failure_with_customer:
+        "Recurring series for {customerName} paused after {failureCount} failed attempts",
+      auto_failure:
+        "Recurring series paused after {failureCount} failed attempts",
+    },
     inbox_new: {
       name: "New Inbox Items",
       description: "Get notified when new items arrive in your inbox",
