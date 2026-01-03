@@ -7,6 +7,7 @@ import { getDueDateStatus } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
+import { Badge } from "@midday/ui/badge";
 import { Checkbox } from "@midday/ui/checkbox";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -120,6 +121,68 @@ export const columns: ColumnDef<Invoice>[] = [
       }
 
       return <InvoiceStatus status={status as any} />;
+    },
+  },
+  {
+    id: "type",
+    header: "Type",
+    size: 140,
+    minSize: 100,
+    maxSize: 200,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "badge", width: "w-20" },
+      headerLabel: "Type",
+      className: "w-[140px] min-w-[100px]",
+    },
+    cell: ({ row }) => {
+      const recurringId = row.original.invoiceRecurringId;
+      const recurring = row.original.recurring;
+      const sequence = row.original.recurringSequence;
+
+      if (!recurringId || !recurring) {
+        return <span className="text-muted-foreground text-sm">One-time</span>;
+      }
+
+      // Build the recurring label
+      const statusLabel =
+        recurring.status === "active"
+          ? "Active"
+          : recurring.status === "paused"
+            ? "Paused"
+            : "Completed";
+
+      // Show sequence if available (e.g., "2 of 12" or "2")
+      let progressLabel = "";
+      if (sequence) {
+        if (recurring.endType === "count" && recurring.endCount) {
+          progressLabel = `${sequence}/${recurring.endCount}`;
+        } else {
+          progressLabel = `#${sequence}`;
+        }
+      }
+
+      return (
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger>
+              <Badge
+                variant={recurring.status === "active" ? "default" : "secondary"}
+                className="gap-1"
+              >
+                <Icons.Repeat className="size-3" />
+                {progressLabel || "Recurring"}
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent className="text-xs py-1 px-2" side="right" sideOffset={5}>
+              Recurring ({statusLabel})
+              {recurring.endType === "count" &&
+                recurring.endCount &&
+                ` • ${recurring.invoicesGenerated || 0} of ${recurring.endCount} generated`}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
     },
   },
   {
