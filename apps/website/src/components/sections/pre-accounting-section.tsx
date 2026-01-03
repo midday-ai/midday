@@ -27,7 +27,7 @@ export function PreAccountingSection() {
             />
           </div>
           <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
-            Pre-accounting, handled
+            Ready for accounting, without extra work
           </h2>
           <p className="hidden sm:block font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
             Receipts, invoices, and transactions stay organized automatically so your books are always ready when you need them.
