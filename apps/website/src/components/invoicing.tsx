@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { MaterialIcon } from "./homepage/icon-mapping";
 import { InvoicePaymentAnimation } from "./homepage/invoice-payment-animation";
 import { InvoicePromptAnimation } from "./homepage/invoice-prompt-animation";
-import { AccountingSection } from "./sections/accounting-section";
 import { FeaturesGridSection } from "./sections/features-grid-section";
 import { IntegrationsSection } from "./sections/integrations-section";
+import { PreAccountingSection } from "./sections/pre-accounting-section";
 import { PricingSection } from "./sections/pricing-section";
 import { TestimonialsSection } from "./sections/testimonials-section";
 import { TimeSavingsSection } from "./sections/time-savings-section";
@@ -301,7 +301,7 @@ export function Invoicing() {
       </div>
 
       {/* Accounting Section */}
-      <AccountingSection />
+      <PreAccountingSection />
 
       {/* Divider */}
       <div className="max-w-[1400px] mx-auto">

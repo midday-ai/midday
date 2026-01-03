@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { MaterialIcon } from "./homepage/icon-mapping";
 import { TransactionFlowAnimation } from "./homepage/transaction-flow-animation";
-import { AccountingSection } from "./sections/accounting-section";
+import { PreAccountingSection } from "./sections/pre-accounting-section";
 import { FeaturesGridSection } from "./sections/features-grid-section";
 import { IntegrationsSection } from "./sections/integrations-section";
 import { PricingSection } from "./sections/pricing-section";
@@ -281,7 +281,7 @@ export function Transactions() {
       </div>
 
       {/* Accounting Section */}
-      <AccountingSection />
+      <PreAccountingSection />
 
       {/* Divider */}
       <div className="max-w-[1400px] mx-auto">

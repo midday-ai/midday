@@ -248,9 +248,13 @@ export function Header({
                             <div className="grid grid-cols-2 gap-6 h-full">
                               {/* Left Preview */}
                               <div className="flex flex-col gap-6 h-full">
-                                <div className="flex-1 border border-border overflow-hidden bg-background">
+                                <Link
+                                  href="/assistant"
+                                  onClick={() => setIsFeaturesOpen(false)}
+                                  className="flex-1 border border-border overflow-hidden bg-background cursor-pointer hover:opacity-90 transition-opacity"
+                                >
                                   <HeaderAssistantInputPreview />
-                                </div>
+                                </Link>
                                 <div className="text-left">
                                   <h3 className="font-sans text-sm text-foreground mb-1">
                                     Assistant
@@ -264,9 +268,13 @@ export function Header({
 
                               {/* Right Preview */}
                               <div className="flex flex-col gap-6 h-full">
-                                <div className="flex-1 border border-border overflow-hidden">
+                                <Link
+                                  href="/insights"
+                                  onClick={() => setIsFeaturesOpen(false)}
+                                  className="flex-1 border border-border overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                                >
                                   <HeaderInsightsPreview />
-                                </div>
+                                </Link>
                                 <div className="text-left">
                                   <h3 className="font-sans text-sm text-foreground mb-1">
                                     Insights
