@@ -20,6 +20,7 @@ import {
   updateInvoiceRecurring,
 } from "@midday/db/queries";
 import { calculateNextScheduledDate } from "@midday/db/utils/invoice-recurring";
+import { Notifications } from "@midday/notifications";
 import { TRPCError } from "@trpc/server";
 
 export const invoiceRecurringRouter = createTRPCRouter({
@@ -72,6 +73,28 @@ export const invoiceRecurringRouter = createTRPCRouter({
           nextScheduledAt: nextScheduledAt.toISOString(),
           lastGeneratedAt: new Date().toISOString(),
         });
+      }
+
+      // Send notification for recurring series started
+      if (result?.id) {
+        const notifications = new Notifications(db);
+        // Fire and forget - don't block the response on notification
+        notifications
+          .create("recurring_series_started", teamId, {
+            recurringId: result.id,
+            invoiceId: invoiceId,
+            customerName: recurringData.customerName ?? undefined,
+            frequency: recurringData.frequency,
+            endType: recurringData.endType,
+            endDate: recurringData.endDate ?? undefined,
+            endCount: recurringData.endCount ?? undefined,
+          })
+          .catch((error) => {
+            console.error(
+              "Failed to send recurring_series_started notification:",
+              error,
+            );
+          });
       }
 
       return result;
