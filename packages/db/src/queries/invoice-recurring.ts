@@ -161,6 +161,7 @@ export type UpdateInvoiceRecurringParams = {
   bottomBlock?: unknown;
   templateId?: string | null;
   status?: "active" | "paused" | "completed" | "canceled";
+  invoicesGenerated?: number;
 };
 
 export async function updateInvoiceRecurring(
@@ -169,10 +170,54 @@ export async function updateInvoiceRecurring(
 ) {
   const { id, teamId, ...updateData } = params;
 
+  // Check if frequency-related fields are being updated
+  const frequencyFieldsChanged =
+    params.frequency !== undefined ||
+    params.frequencyDay !== undefined ||
+    params.frequencyWeek !== undefined ||
+    params.frequencyInterval !== undefined;
+
+  // If frequency changed, we need to recalculate nextScheduledAt
+  let nextScheduledAt: string | undefined;
+
+  if (frequencyFieldsChanged) {
+    // Get current record to merge with updates
+    const [current] = await db
+      .select()
+      .from(invoiceRecurring)
+      .where(
+        and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
+      );
+
+    // Only recalculate if the series is active
+    if (current && current.status === "active") {
+      const recurringParams: RecurringInvoiceParams = {
+        frequency: params.frequency ?? current.frequency,
+        frequencyDay:
+          params.frequencyDay !== undefined
+            ? params.frequencyDay
+            : current.frequencyDay,
+        frequencyWeek:
+          params.frequencyWeek !== undefined
+            ? params.frequencyWeek
+            : current.frequencyWeek,
+        frequencyInterval:
+          params.frequencyInterval !== undefined
+            ? params.frequencyInterval
+            : current.frequencyInterval,
+        timezone: params.timezone ?? current.timezone,
+      };
+
+      const nextDate = calculateNextScheduledDate(recurringParams, new Date());
+      nextScheduledAt = nextDate.toISOString();
+    }
+  }
+
   const [result] = await db
     .update(invoiceRecurring)
     .set({
       ...updateData,
+      ...(nextScheduledAt && { nextScheduledAt }),
       updatedAt: new Date().toISOString(),
     })
     .where(

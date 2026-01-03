@@ -3,6 +3,7 @@
 import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import { getFrequencyLabel } from "@midday/invoice/recurring";
 import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
 import {
@@ -35,11 +36,10 @@ import {
 import * as React from "react";
 import { useFormContext } from "react-hook-form";
 import {
+  type RecurringConfig,
   RecurringConfigPanel,
   getDefaultRecurringConfig,
-  type RecurringConfig,
 } from "./recurring-config";
-import { getFrequencyLabel } from "@midday/invoice/recurring";
 
 type Props = {
   isSubmitting: boolean;
@@ -85,10 +85,16 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
   const issueDate = watch("issueDate");
   const amount = watch("amount") || 0;
   const currency = watch("template.currency") || "USD";
+  const invoiceRecurringId = watch("invoiceRecurringId");
+
+  // Check if invoice is already part of a recurring series
+  const isPartOfRecurringSeries = !!invoiceRecurringId;
 
   // Get recurring config from form state or use default
   const formRecurringConfig = watch("recurringConfig");
-  const recurringConfig = formRecurringConfig || getDefaultRecurringConfig(issueDate ? new Date(issueDate) : new Date());
+  const recurringConfig =
+    formRecurringConfig ||
+    getDefaultRecurringConfig(issueDate ? new Date(issueDate) : new Date());
 
   const setRecurringConfig = (config: RecurringConfig) => {
     setValue("recurringConfig", config, {
@@ -100,10 +106,14 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
   // Initialize recurring config when not set
   React.useEffect(() => {
     if (!formRecurringConfig && issueDate) {
-      setValue("recurringConfig", getDefaultRecurringConfig(new Date(issueDate)), {
-        shouldValidate: false,
-        shouldDirty: false,
-      });
+      setValue(
+        "recurringConfig",
+        getDefaultRecurringConfig(new Date(issueDate)),
+        {
+          shouldValidate: false,
+          shouldDirty: false,
+        },
+      );
     }
   }, [issueDate, formRecurringConfig, setValue]);
 
@@ -118,18 +128,22 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
           formRecurringConfig.frequencyDay !== newDate.getDate());
 
       if (shouldUpdate) {
-        setValue("recurringConfig", {
-          ...formRecurringConfig,
-          frequencyDay:
-            formRecurringConfig.frequency === "weekly"
-              ? newDate.getDay()
-              : formRecurringConfig.frequency === "monthly_date"
-                ? newDate.getDate()
-                : formRecurringConfig.frequencyDay,
-        }, {
-          shouldValidate: true,
-          shouldDirty: true,
-        });
+        setValue(
+          "recurringConfig",
+          {
+            ...formRecurringConfig,
+            frequencyDay:
+              formRecurringConfig.frequency === "weekly"
+                ? newDate.getDay()
+                : formRecurringConfig.frequency === "monthly_date"
+                  ? newDate.getDate()
+                  : formRecurringConfig.frequencyDay,
+          },
+          {
+            shouldValidate: true,
+            shouldDirty: true,
+          },
+        );
       }
     }
   }, [issueDate]);
@@ -211,7 +225,8 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
   };
 
   const selectedOption = watch("template.deliveryType");
-  const canUpdate = watch("status") !== "draft";
+  // Show "Update" instead of "Create" if not a draft OR if part of a recurring series
+  const canUpdate = watch("status") !== "draft" || isPartOfRecurringSeries;
 
   const invoiceNumberValid = !formState.errors.invoiceNumber;
 
@@ -223,7 +238,11 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
   );
 
   const handleOptionChange = (value: string) => {
-    const deliveryType = value as "create" | "create_and_send" | "scheduled" | "recurring";
+    const deliveryType = value as
+      | "create"
+      | "create_and_send"
+      | "scheduled"
+      | "recurring";
     const currentDeliveryType = watch("template.deliveryType");
     const invoiceId = watch("id");
 
@@ -288,7 +307,8 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
 
   const isValid = formState.isValid && invoiceNumberValid;
 
-  const options = [
+  // Build options - hide "Recurring" if invoice is already part of a recurring series
+  const baseOptions = [
     {
       label: canUpdate ? "Update" : "Create",
       value: "create",
@@ -301,11 +321,17 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
       label: canUpdate ? "Update" : "Schedule",
       value: "scheduled",
     },
-    {
-      label: "Recurring",
-      value: "recurring",
-    },
   ];
+
+  const options = isPartOfRecurringSeries
+    ? baseOptions
+    : [
+        ...baseOptions,
+        {
+          label: "Recurring",
+          value: "recurring",
+        },
+      ];
 
   return (
     <div className="flex flex-col gap-4">
@@ -427,7 +453,9 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
                       <DropdownMenuPortal>
                         <DropdownMenuSubContent className="p-4 mb-2">
                           <RecurringConfigPanel
-                            issueDate={issueDate ? new Date(issueDate) : new Date()}
+                            issueDate={
+                              issueDate ? new Date(issueDate) : new Date()
+                            }
                             amount={amount}
                             currency={currency}
                             config={recurringConfig}

@@ -2,14 +2,16 @@
 
 import { FormatAmount } from "@/components/format-amount";
 import { useUserQuery } from "@/hooks/use-user";
+import {
+  formatDayOfWeek,
+  formatOrdinal,
+  formatShortDate,
+  getFrequencyLabel,
+} from "@midday/invoice/recurring";
 import { Calendar } from "@midday/ui/calendar";
 import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@midday/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@midday/ui/radio-group";
 import {
   Select,
@@ -18,12 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
-import {
-  formatOrdinal,
-  getFrequencyLabel,
-  formatShortDate,
-  formatDayOfWeek,
-} from "@midday/invoice/recurring";
 import { format, getDate, getDay } from "date-fns";
 import * as React from "react";
 
@@ -217,7 +213,10 @@ export function RecurringConfigPanel({
   onChange,
 }: RecurringConfigProps) {
   const { data: user } = useUserQuery();
-  const smartOptions = React.useMemo(() => getSmartOptions(issueDate), [issueDate]);
+  const smartOptions = React.useMemo(
+    () => getSmartOptions(issueDate),
+    [issueDate],
+  );
 
   // Find current selected option value
   const currentOptionValue = React.useMemo(() => {
@@ -245,7 +244,9 @@ export function RecurringConfigPanel({
     (config.endType === "after_count" &&
       config.endCount !== null &&
       config.endCount > 3) ||
-    (config.endType === "on_date" && summary.totalCount !== null && summary.totalCount > 3);
+    (config.endType === "on_date" &&
+      summary.totalCount !== null &&
+      summary.totalCount > 3);
 
   const handleFrequencyChange = (value: string) => {
     const option = smartOptions.find((o) => o.value === value);
@@ -264,7 +265,8 @@ export function RecurringConfigPanel({
     onChange({
       ...config,
       endType: value,
-      endDate: value === "on_date" ? getDefaultEndDate(issueDate).toISOString() : null,
+      endDate:
+        value === "on_date" ? getDefaultEndDate(issueDate).toISOString() : null,
       endCount: value === "after_count" ? 12 : null,
     });
   };
@@ -298,7 +300,10 @@ export function RecurringConfigPanel({
       {/* Repeat Section */}
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Repeat</Label>
-        <Select value={currentOptionValue} onValueChange={handleFrequencyChange}>
+        <Select
+          value={currentOptionValue}
+          onValueChange={handleFrequencyChange}
+        >
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
@@ -336,12 +341,16 @@ export function RecurringConfigPanel({
         <Label className="text-xs text-muted-foreground">Ends</Label>
         <RadioGroup
           value={config.endType}
-          onValueChange={(value) => handleEndTypeChange(value as RecurringEndType)}
+          onValueChange={(value) =>
+            handleEndTypeChange(value as RecurringEndType)
+          }
           className="space-y-2"
         >
           <div className="flex items-center gap-2">
             <RadioGroupItem value="on_date" id="on_date" />
-            <Label htmlFor="on_date" className="font-normal">On</Label>
+            <Label htmlFor="on_date" className="font-normal">
+              On
+            </Label>
             <Popover>
               <PopoverTrigger asChild>
                 <button
@@ -358,7 +367,9 @@ export function RecurringConfigPanel({
                 <Calendar
                   mode="single"
                   weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
-                  selected={config.endDate ? new Date(config.endDate) : undefined}
+                  selected={
+                    config.endDate ? new Date(config.endDate) : undefined
+                  }
                   onSelect={handleEndDateChange}
                   disabled={(date) => date < issueDate}
                 />
@@ -367,7 +378,9 @@ export function RecurringConfigPanel({
           </div>
           <div className="flex items-center gap-2">
             <RadioGroupItem value="after_count" id="after_count" />
-            <Label htmlFor="after_count" className="font-normal">After</Label>
+            <Label htmlFor="after_count" className="font-normal">
+              After
+            </Label>
             <Input
               type="number"
               min={1}
@@ -382,7 +395,9 @@ export function RecurringConfigPanel({
           </div>
           <div className="flex items-center gap-2">
             <RadioGroupItem value="never" id="never" />
-            <Label htmlFor="never" className="font-normal">Never</Label>
+            <Label htmlFor="never" className="font-normal">
+              Never
+            </Label>
           </div>
         </RadioGroup>
       </div>
@@ -391,7 +406,7 @@ export function RecurringConfigPanel({
       <div className="border-t border-border pt-3 space-y-2">
         {previewInvoices.map((invoice, index) => (
           <div
-            key={index}
+            key={index.toString()}
             className="flex items-center justify-between text-sm"
           >
             <div className="flex gap-3">
@@ -451,4 +466,3 @@ export function getDefaultRecurringConfig(issueDate: Date): RecurringConfig {
     endCount: null,
   };
 }
-
