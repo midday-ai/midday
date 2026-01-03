@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { MaterialIcon } from './homepage/icon-mapping'
 import { DashboardAnimation } from './homepage/dashboard-animation'
+import { CustomerStatementAnimation } from './homepage/customer-statement-animation'
 import { TestimonialsSection } from './sections/testimonials-section'
 import { FeaturesGridSection } from './sections/features-grid-section'
 import { TimeSavingsSection } from './sections/time-savings-section'
@@ -85,11 +86,19 @@ export function Customers() {
                   }}
                 />
                 <Image
-                  src="/images/file-Storage.svg"
+                  src="/images/customers-light.svg"
                   alt="Customers Interface"
                   width={1200}
                   height={800}
-                  className="w-full h-auto object-contain relative z-0"
+                  className="w-full h-auto object-contain relative z-0 dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/customers-dark.svg"
+                  alt="Customers Interface"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
                   priority
                 />
               </div>
@@ -124,11 +133,19 @@ export function Customers() {
                   }}
                 />
                 <Image
-                  src="/images/file-Storage.svg"
+                  src="/images/customers-light.svg"
                   alt="Customers Interface"
                   width={1200}
                   height={800}
-                  className="w-full h-auto object-contain relative z-0"
+                  className="w-full h-auto object-contain relative z-0 dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/customers-dark.svg"
+                  alt="Customers Interface"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
                   priority
                 />
               </div>
@@ -173,46 +190,12 @@ export function Customers() {
               <div className="flex items-center justify-center p-1 sm:p-3 lg:p-6 xl:p-8 border border-border overflow-hidden relative bg-background">
                 <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center">
                   <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
-                    <DashboardAnimation onComplete={undefined} />
+                    <CustomerStatementAnimation onComplete={undefined} />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Second Animation - Revenue Tracking */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-stretch">
-              {/* Left: Title and Subtitle */}
-              <div className="flex items-center lg:order-2">
-                <div className="space-y-3 lg:space-y-5 text-center lg:text-left w-full">
-                  <h2 className="font-sans text-2xl sm:text-2xl text-foreground">
-                    Profitability over time
-                  </h2>
-                  <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Understand how each customer contributes to your business using real financial data.
-                  </p>
-                  <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Revenue trends</span>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Period comparisons</span>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Customer ranking</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right: Animation */}
-              <div className="flex items-center justify-center p-6 lg:p-8 border border-border overflow-hidden relative bg-background lg:order-1">
-                <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center">
-                  <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
-                    <DashboardAnimation onComplete={undefined} />
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </section>

@@ -10,6 +10,8 @@ import {
   MdOutlineAccountBalanceWallet,
   MdOutlineCreditCard,
   MdOutlineDescription,
+  MdOutlineExpandLess,
+  MdOutlineExpandMore,
   MdOutlineFilterList,
   MdOutlineFolder,
   MdOutlineFolderZip,
@@ -68,6 +70,8 @@ export const IconMap = {
   open_in_new: MdOutlineOpenInNew,
   arrow_outward: MdOutlineOpenInNew, // Using open_in_new as arrow_outward alternative
   send: MdIosShare, // Using share icon as send alternative
+  expand_less: MdOutlineExpandLess,
+  expand_more: MdOutlineExpandMore,
 };
 
 export function MaterialIcon({
