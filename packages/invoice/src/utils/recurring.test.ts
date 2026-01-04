@@ -259,6 +259,117 @@ describe("getNextDate", () => {
     });
   });
 
+  describe("biweekly frequency", () => {
+    test("adds 14 days for biweekly", () => {
+      const config: RecurringConfig = {
+        frequency: "biweekly",
+        frequencyDay: 5, // Friday
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      const currentDate = new Date("2025-01-10"); // Friday
+      const result = getNextDate(config, currentDate);
+
+      expect(result.getDate()).toBe(24); // Jan 24, 2025 (14 days later)
+      expect(result.getDay()).toBe(5); // Still Friday
+    });
+
+    test("maintains weekday across month boundary", () => {
+      const config: RecurringConfig = {
+        frequency: "biweekly",
+        frequencyDay: 5, // Friday
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      const currentDate = new Date("2025-01-24"); // Friday
+      const result = getNextDate(config, currentDate);
+
+      expect(result.getMonth()).toBe(1); // February
+      expect(result.getDate()).toBe(7); // Feb 7, 2025
+      expect(result.getDay()).toBe(5); // Still Friday
+    });
+  });
+
+  describe("monthly_last_day frequency", () => {
+    test("returns last day of next month (31 day month)", () => {
+      const config: RecurringConfig = {
+        frequency: "monthly_last_day",
+        frequencyDay: null,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      // January 31 -> February 28 (non-leap year)
+      const currentDate = new Date("2025-01-31");
+      const result = getNextDate(config, currentDate);
+
+      expect(result.getMonth()).toBe(1); // February
+      expect(result.getDate()).toBe(28); // Last day of Feb 2025
+    });
+
+    test("handles leap year February", () => {
+      const config: RecurringConfig = {
+        frequency: "monthly_last_day",
+        frequencyDay: null,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      // January 31, 2024 -> February 29 (leap year)
+      const currentDate = new Date("2024-01-31");
+      const result = getNextDate(config, currentDate);
+
+      expect(result.getMonth()).toBe(1); // February
+      expect(result.getDate()).toBe(29); // Last day of Feb 2024
+    });
+
+    test("works from any starting date in month", () => {
+      const config: RecurringConfig = {
+        frequency: "monthly_last_day",
+        frequencyDay: null,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      // Starting from Jan 15 -> Feb 28
+      const currentDate = new Date("2025-01-15");
+      const result = getNextDate(config, currentDate);
+
+      expect(result.getMonth()).toBe(1); // February
+      expect(result.getDate()).toBe(28);
+    });
+
+    test("handles 30 day month to 31 day month", () => {
+      const config: RecurringConfig = {
+        frequency: "monthly_last_day",
+        frequencyDay: null,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      // April 30 -> May 31
+      const currentDate = new Date("2025-04-30");
+      const result = getNextDate(config, currentDate);
+
+      expect(result.getMonth()).toBe(4); // May
+      expect(result.getDate()).toBe(31);
+    });
+  });
+
   describe("custom frequency", () => {
     test("adds custom interval days", () => {
       const config: RecurringConfig = {
@@ -614,6 +725,17 @@ describe("formatting utilities", () => {
       expect(getFrequencyLabel("weekly", 0, null)).toBe("Weekly on Sunday");
     });
 
+    test("returns correct label for biweekly", () => {
+      expect(getFrequencyLabel("biweekly", 5, null)).toBe("Bi-weekly on Friday");
+      expect(getFrequencyLabel("biweekly", 1, null)).toBe("Bi-weekly on Monday");
+    });
+
+    test("returns correct label for monthly_last_day", () => {
+      expect(getFrequencyLabel("monthly_last_day", null, null)).toBe(
+        "Monthly on the last day",
+      );
+    });
+
     test("returns correct label for monthly_date", () => {
       expect(getFrequencyLabel("monthly_date", 15, null)).toBe(
         "Monthly on the 15th",
@@ -667,8 +789,10 @@ describe("formatting utilities", () => {
   describe("getFrequencyShortLabel", () => {
     test("returns short labels", () => {
       expect(getFrequencyShortLabel("weekly")).toBe("Weekly");
+      expect(getFrequencyShortLabel("biweekly")).toBe("Bi-weekly");
       expect(getFrequencyShortLabel("monthly_date")).toBe("Monthly");
       expect(getFrequencyShortLabel("monthly_weekday")).toBe("Monthly");
+      expect(getFrequencyShortLabel("monthly_last_day")).toBe("Monthly");
       expect(getFrequencyShortLabel("quarterly")).toBe("Quarterly");
       expect(getFrequencyShortLabel("semi_annual")).toBe("Semi-annual");
       expect(getFrequencyShortLabel("annual")).toBe("Annual");
@@ -731,6 +855,66 @@ describe("validateRecurringConfig", () => {
       const config: RecurringConfig = {
         frequency: "weekly",
         frequencyDay: 5,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      const errors = validateRecurringConfig(config);
+      expect(errors.length).toBe(0);
+    });
+  });
+
+  describe("biweekly frequency", () => {
+    test("requires frequencyDay", () => {
+      const config: RecurringConfig = {
+        frequency: "biweekly",
+        frequencyDay: null,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      const errors = validateRecurringConfig(config);
+      expect(errors.some((e) => e.field === "frequencyDay")).toBe(true);
+    });
+
+    test("validates frequencyDay range (0-6)", () => {
+      const config: RecurringConfig = {
+        frequency: "biweekly",
+        frequencyDay: 7,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      const errors = validateRecurringConfig(config);
+      expect(errors.some((e) => e.field === "frequencyDay")).toBe(true);
+    });
+
+    test("passes with valid frequencyDay", () => {
+      const config: RecurringConfig = {
+        frequency: "biweekly",
+        frequencyDay: 5,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      const errors = validateRecurringConfig(config);
+      expect(errors.length).toBe(0);
+    });
+  });
+
+  describe("monthly_last_day frequency", () => {
+    test("does not require frequencyDay", () => {
+      const config: RecurringConfig = {
+        frequency: "monthly_last_day",
+        frequencyDay: null,
         frequencyWeek: null,
         frequencyInterval: null,
         endType: "never",

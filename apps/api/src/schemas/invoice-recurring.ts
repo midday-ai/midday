@@ -8,8 +8,10 @@ import {
 // Frequency enum schema
 export const invoiceRecurringFrequencySchema = z.enum([
   "weekly",
+  "biweekly",
   "monthly_date",
   "monthly_weekday",
+  "monthly_last_day",
   "quarterly",
   "semi_annual",
   "annual",
@@ -51,7 +53,7 @@ export const createInvoiceRecurringSchema = z
     // Frequency settings
     frequency: invoiceRecurringFrequencySchema.openapi({
       description:
-        "How often invoices should be generated: 'weekly' - every week on a specific day, 'monthly_date' - monthly on a specific date (e.g., 15th), 'monthly_weekday' - monthly on a specific weekday occurrence (e.g., 1st Friday), 'quarterly' - every 3 months, 'semi_annual' - every 6 months, 'annual' - every 12 months, 'custom' - every X days",
+        "How often invoices should be generated: 'weekly' - every week on a specific day, 'biweekly' - every 2 weeks on a specific day, 'monthly_date' - monthly on a specific date (e.g., 15th), 'monthly_weekday' - monthly on a specific weekday occurrence (e.g., 1st Friday), 'monthly_last_day' - monthly on the last day, 'quarterly' - every 3 months, 'semi_annual' - every 6 months, 'annual' - every 12 months, 'custom' - every X days",
       example: "monthly_date",
     }),
     frequencyDay: z
@@ -178,6 +180,27 @@ export const createInvoiceRecurringSchema = z
         });
       }
     }
+
+    // Validate frequencyDay is required and in valid range for biweekly frequency
+    if (data.frequency === "biweekly") {
+      if (data.frequencyDay === null || data.frequencyDay === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "frequencyDay is required for biweekly frequency (0-6, Sunday-Saturday)",
+          path: ["frequencyDay"],
+        });
+      } else if (data.frequencyDay < 0 || data.frequencyDay > 6) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "For biweekly frequency, frequencyDay must be 0-6 (Sunday-Saturday)",
+          path: ["frequencyDay"],
+        });
+      }
+    }
+
+    // monthly_last_day doesn't require frequencyDay
 
     // Validate frequencyDay is required and in valid range for monthly_date frequency
     if (data.frequency === "monthly_date") {
@@ -325,6 +348,14 @@ export const updateInvoiceRecurringSchema = z
           code: z.ZodIssueCode.custom,
           message:
             "For weekly frequency, frequencyDay must be 0-6 (Sunday-Saturday)",
+          path: ["frequencyDay"],
+        });
+      }
+      if (data.frequency === "biweekly" && data.frequencyDay > 6) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "For biweekly frequency, frequencyDay must be 0-6 (Sunday-Saturday)",
           path: ["frequencyDay"],
         });
       }

@@ -38,15 +38,23 @@ export const invoiceRecurringRouter = createTRPCRouter({
 
       // If an invoice ID is provided, check if it's already linked to a recurring series
       // This prevents creating duplicate series if the user retries after a partial failure
+      let existingInvoice: {
+        id: string;
+        invoiceRecurringId: string | null;
+        issueDate: string | null;
+      } | null = null;
+
       if (invoiceId) {
-        const existingInvoice = await db.query.invoices.findFirst({
+        const foundInvoice = await db.query.invoices.findFirst({
           where: (invoices, { eq, and }) =>
             and(eq(invoices.id, invoiceId), eq(invoices.teamId, teamId)),
           columns: {
             id: true,
             invoiceRecurringId: true,
+            issueDate: true,
           },
         });
+        existingInvoice = foundInvoice ?? null;
 
         if (existingInvoice?.invoiceRecurringId) {
           // Invoice is already linked to a series - return the existing series
@@ -89,7 +97,12 @@ export const invoiceRecurringRouter = createTRPCRouter({
             recurringSequence: 1,
           });
 
-          // Calculate the next scheduled date (since first invoice is already generated)
+          // Calculate the next scheduled date from the invoice's issue date
+          // This ensures "Monthly on the 15th" with issue date Jan 15 → next invoice Feb 15
+          const referenceDate = existingInvoice?.issueDate
+            ? new Date(existingInvoice.issueDate)
+            : new Date();
+
           const nextScheduledAt = calculateNextScheduledDate(
             {
               frequency: recurringData.frequency,
@@ -98,17 +111,20 @@ export const invoiceRecurringRouter = createTRPCRouter({
               frequencyInterval: recurringData.frequencyInterval ?? null,
               timezone: recurringData.timezone,
             },
-            new Date(),
+            referenceDate,
           );
 
           // Update the recurring series with correct next date and mark one invoice as generated
-          await updateInvoiceRecurring(tx, {
+          // Return the updated record to ensure the client receives current data
+          const updatedRecurring = await updateInvoiceRecurring(tx, {
             id: recurring.id,
             teamId,
             invoicesGenerated: 1,
             nextScheduledAt: nextScheduledAt.toISOString(),
             lastGeneratedAt: new Date().toISOString(),
           });
+
+          return updatedRecurring ?? recurring;
         }
 
         return recurring;

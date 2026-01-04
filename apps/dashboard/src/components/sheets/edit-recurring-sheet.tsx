@@ -46,8 +46,10 @@ const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th"];
 
 type RecurringFrequency =
   | "weekly"
+  | "biweekly"
   | "monthly_date"
   | "monthly_weekday"
+  | "monthly_last_day"
   | "quarterly"
   | "semi_annual"
   | "annual"
@@ -73,6 +75,13 @@ function getSmartOptions(referenceDate: Date): Array<{
       frequencyWeek: null,
     },
     {
+      value: "biweekly",
+      label: `Bi-weekly on ${DAY_NAMES[dayOfWeek]}`,
+      frequency: "biweekly" as const,
+      frequencyDay: dayOfWeek,
+      frequencyWeek: null,
+    },
+    {
       value: "monthly_date",
       label: `Monthly on the ${formatOrdinal(dayOfMonth)}`,
       frequency: "monthly_date" as const,
@@ -85,6 +94,13 @@ function getSmartOptions(referenceDate: Date): Array<{
       frequency: "monthly_weekday" as const,
       frequencyDay: dayOfWeek,
       frequencyWeek: weekOfMonth,
+    },
+    {
+      value: "monthly_last_day",
+      label: "Monthly on the last day",
+      frequency: "monthly_last_day" as const,
+      frequencyDay: null,
+      frequencyWeek: null,
     },
     {
       value: "quarterly",
@@ -221,8 +237,10 @@ export function EditRecurringSheet() {
   const currentOptionValue = React.useMemo(() => {
     if (config.frequency === "custom") return "custom";
     if (config.frequency === "weekly") return "weekly";
+    if (config.frequency === "biweekly") return "biweekly";
     if (config.frequency === "monthly_date") return "monthly_date";
     if (config.frequency === "monthly_weekday") return "monthly_weekday";
+    if (config.frequency === "monthly_last_day") return "monthly_last_day";
     if (config.frequency === "quarterly") return "quarterly";
     if (config.frequency === "semi_annual") return "semi_annual";
     if (config.frequency === "annual") return "annual";

@@ -10,8 +10,10 @@ import {
 
 export type InvoiceRecurringFrequency =
   | "weekly"
+  | "biweekly"
   | "monthly_date"
   | "monthly_weekday"
+  | "monthly_last_day"
   | "quarterly"
   | "semi_annual"
   | "annual"
@@ -112,6 +114,12 @@ export function calculateNextScheduledDate(
       break;
     }
 
+    case "biweekly": {
+      // Every 2 weeks (14 days) - maintains the same weekday automatically
+      nextDate = addDays(tzCurrentDate, 14);
+      break;
+    }
+
     case "monthly_date": {
       // frequencyDay is 1-31 (day of month)
       const targetDayOfMonth = frequencyDay ?? 1;
@@ -141,6 +149,13 @@ export function calculateNextScheduledDate(
         targetWeek,
         timezone,
       );
+      break;
+    }
+
+    case "monthly_last_day": {
+      // Last day of next month
+      const nextMonthForLastDay = addMonths(tzCurrentDate, 1);
+      nextDate = lastDayOfMonth(nextMonthForLastDay);
       break;
     }
 

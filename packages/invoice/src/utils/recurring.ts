@@ -2,8 +2,10 @@ import { addDays, format, getDay, lastDayOfMonth } from "date-fns";
 
 export type InvoiceRecurringFrequency =
   | "weekly"
+  | "biweekly"
   | "monthly_date"
   | "monthly_weekday"
+  | "monthly_last_day"
   | "quarterly"
   | "semi_annual"
   | "annual"
@@ -53,6 +55,9 @@ export function getFrequencyLabel(
     case "weekly":
       return `Weekly on ${dayNames[frequencyDay ?? 0]}`;
 
+    case "biweekly":
+      return `Bi-weekly on ${dayNames[frequencyDay ?? 0]}`;
+
     case "monthly_date": {
       const day = frequencyDay ?? 1;
       return `Monthly on the ${formatOrdinal(day)}`;
@@ -60,6 +65,9 @@ export function getFrequencyLabel(
 
     case "monthly_weekday":
       return `Monthly on the ${ordinals[(frequencyWeek ?? 1) - 1]} ${dayNames[frequencyDay ?? 0]}`;
+
+    case "monthly_last_day":
+      return "Monthly on the last day";
 
     case "quarterly": {
       const dayQ = frequencyDay ?? 1;
@@ -93,8 +101,11 @@ export function getFrequencyShortLabel(
   switch (frequency) {
     case "weekly":
       return "Weekly";
+    case "biweekly":
+      return "Bi-weekly";
     case "monthly_date":
     case "monthly_weekday":
+    case "monthly_last_day":
       return "Monthly";
     case "quarterly":
       return "Quarterly";
@@ -216,6 +227,12 @@ export function getNextDate(config: RecurringConfig, currentDate: Date): Date {
       next.setDate(next.getDate() + 7);
       return next;
     }
+    case "biweekly": {
+      // Every 2 weeks (14 days) - maintains the same weekday automatically
+      const next = new Date(currentDate);
+      next.setDate(next.getDate() + 14);
+      return next;
+    }
     case "monthly_date": {
       // Get the target day of month (1-31)
       const targetDayOfMonth = config.frequencyDay ?? currentDate.getDate();
@@ -253,6 +270,15 @@ export function getNextDate(config: RecurringConfig, currentDate: Date): Date {
         targetDayOfWeek,
         targetWeek,
       );
+    }
+    case "monthly_last_day": {
+      // Last day of next month
+      const nextMonth = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 1,
+        1,
+      );
+      return lastDayOfMonth(nextMonth);
     }
     case "quarterly": {
       // Every 3 months on the same day
@@ -403,6 +429,23 @@ export function validateRecurringConfig(
       });
     }
   }
+
+  // Validate frequencyDay is required for biweekly frequency
+  if (config.frequency === "biweekly") {
+    if (config.frequencyDay === null || config.frequencyDay === undefined) {
+      errors.push({
+        field: "frequencyDay",
+        message: "Day of week is required for bi-weekly frequency",
+      });
+    } else if (config.frequencyDay < 0 || config.frequencyDay > 6) {
+      errors.push({
+        field: "frequencyDay",
+        message: "Day of week must be 0-6 (Sunday-Saturday)",
+      });
+    }
+  }
+
+  // monthly_last_day doesn't require any additional fields (no frequencyDay needed)
 
   // Validate frequencyDay is required for monthly_date frequency
   if (config.frequency === "monthly_date") {

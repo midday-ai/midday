@@ -338,16 +338,23 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
       label: canUpdate ? "Update & Send" : "Create & Send",
       value: "create_and_send",
     },
-    {
-      label: canUpdate ? "Update" : "Schedule",
-      value: "scheduled",
-    },
   ];
 
-  const options = isPartOfRecurringSeries
+  // Only show schedule option for non-recurring invoices (recurring has its own scheduling)
+  const optionsWithSchedule = isPartOfRecurringSeries
     ? baseOptions
     : [
         ...baseOptions,
+        {
+          label: "Schedule",
+          value: "scheduled",
+        },
+      ];
+
+  const options = isPartOfRecurringSeries
+    ? optionsWithSchedule
+    : [
+        ...optionsWithSchedule,
         {
           label: "Recurring",
           value: "recurring",

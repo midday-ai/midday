@@ -144,8 +144,10 @@ export const invoiceRecurringFrequencyEnum = pgEnum(
   "invoice_recurring_frequency",
   [
     "weekly",
+    "biweekly", // Every 2 weeks on the same weekday
     "monthly_date", // Monthly on specific date (e.g., 15th)
     "monthly_weekday", // Monthly on nth weekday (e.g., 1st Friday)
+    "monthly_last_day", // Monthly on the last day of the month
     "quarterly", // Every 3 months
     "semi_annual", // Every 6 months
     "annual", // Every 12 months

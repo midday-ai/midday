@@ -62,7 +62,17 @@ export const lineItemSchema = z.object({
 
 export const recurringConfigSchema = z
   .object({
-    frequency: z.enum(["weekly", "monthly_date", "monthly_weekday", "custom"]),
+    frequency: z.enum([
+      "weekly",
+      "biweekly",
+      "monthly_date",
+      "monthly_weekday",
+      "monthly_last_day",
+      "quarterly",
+      "semi_annual",
+      "annual",
+      "custom",
+    ]),
     frequencyDay: z.number().nullable(),
     frequencyWeek: z.number().nullable(),
     frequencyInterval: z.number().nullable(),
@@ -87,6 +97,25 @@ export const recurringConfigSchema = z
         });
       }
     }
+
+    // Validate frequencyDay is required for biweekly frequency
+    if (data.frequency === "biweekly") {
+      if (data.frequencyDay === null || data.frequencyDay === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Day of week is required for bi-weekly frequency",
+          path: ["frequencyDay"],
+        });
+      } else if (data.frequencyDay < 0 || data.frequencyDay > 6) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Day of week must be 0-6 (Sunday-Saturday)",
+          path: ["frequencyDay"],
+        });
+      }
+    }
+
+    // monthly_last_day doesn't require frequencyDay
 
     // Validate frequencyDay is required for monthly_date frequency
     if (data.frequency === "monthly_date") {
