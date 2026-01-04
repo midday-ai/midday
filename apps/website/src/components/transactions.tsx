@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { MaterialIcon } from "./homepage/icon-mapping";
 import { TransactionFlowAnimation } from "./homepage/transaction-flow-animation";
+import { BulkReconciliationAnimation } from "./homepage/bulk-reconciliation-animation";
 import { PreAccountingSection } from "./sections/pre-accounting-section";
 import { FeaturesGridSection } from "./sections/features-grid-section";
 import { IntegrationsSection } from "./sections/integrations-section";
@@ -92,11 +93,19 @@ export function Transactions() {
                   }}
                 />
                 <Image
-                  src="/images/file-Storage.svg"
+                  src="/images/transactions-light.svg"
                   alt="Transactions Interface"
                   width={1200}
                   height={800}
-                  className="w-full h-auto object-contain relative z-0"
+                  className="w-full h-auto object-contain relative z-0 dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/transactions-dark.svg"
+                  alt="Transactions Interface"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
                   priority
                 />
               </div>
@@ -135,11 +144,19 @@ export function Transactions() {
                   }}
                 />
                 <Image
-                  src="/images/file-Storage.svg"
+                  src="/images/transactions-light.svg"
                   alt="Transactions Interface"
                   width={1200}
                   height={800}
-                  className="w-full h-auto object-contain relative z-0"
+                  className="w-full h-auto object-contain relative z-0 dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/transactions-dark.svg"
+                  alt="Transactions Interface"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
                   priority
                 />
               </div>
@@ -217,11 +234,10 @@ export function Transactions() {
               <div className="flex items-center lg:order-2">
                 <div className="space-y-3 lg:space-y-5 text-center lg:text-left w-full">
                   <h2 className="font-sans text-2xl sm:text-2xl text-foreground">
-                    Categorized and organized
+                    Categorized and reconciled at scale
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Transactions are continuously categorized so records stay
-                    structured without repetitive manual work.
+                    Transactions are automatically categorized and matched in bulk, so you can review, fix, and export everything in minutes instead of one by one.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
@@ -247,10 +263,10 @@ export function Transactions() {
               </div>
 
               {/* Right: Animation */}
-              <div className="flex items-center justify-center p-6 lg:p-8 border border-border overflow-hidden relative bg-background lg:order-1">
+              <div className="flex items-center justify-center p-1 sm:p-3 lg:p-6 xl:p-8 border border-border overflow-hidden relative bg-background lg:order-1">
                 <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center">
                   <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
-                    <TransactionFlowAnimation onComplete={undefined} />
+                    <BulkReconciliationAnimation onComplete={undefined} />
                   </div>
                 </div>
               </div>
