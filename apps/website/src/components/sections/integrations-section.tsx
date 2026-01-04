@@ -24,7 +24,7 @@ const defaultIntegrations: Integration[] = [
   { name: 'Stripe', icon: '/images/stripe.svg', alt: 'Stripe' },
   { name: 'Xero', icon: '/images/xero.svg', alt: 'Xero' },
   { name: 'QuickBooks', icon: '/images/quickbooks.svg', alt: 'QuickBooks' },
-  { name: 'Fortnox', icon: '/images/fortnox-light.svg', alt: 'Fortnox' },
+  { name: 'Fortnox', icon: '/images/fortnox.svg', alt: 'Fortnox' },
 ]
 
 export function IntegrationsSection({
@@ -45,32 +45,11 @@ export function IntegrationsSection({
         </div>
         <div className="flex flex-wrap justify-center gap-2">
           {integrations.map((integration) => {
-            const isFortnox = integration.name === 'Fortnox'
-            const hasDarkMode = isFortnox
-
             return (
             <div
               key={integration.name}
               className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background"
             >
-                {hasDarkMode ? (
-                  <>
-                    <Image
-                      src={integration.icon}
-                      alt={integration.alt}
-                      width={16}
-                      height={16}
-                      className="object-contain dark:hidden"
-                    />
-                    <Image
-                      src={integration.icon.replace('-light', '-dark')}
-                      alt={integration.alt}
-                      width={16}
-                      height={16}
-                      className="object-contain hidden dark:block"
-                    />
-                  </>
-                ) : (
               <Image
                 src={integration.icon}
                 alt={integration.alt}
@@ -78,7 +57,6 @@ export function IntegrationsSection({
                 height={16}
                 className="object-contain"
               />
-                )}
               <span className="font-sans text-sm text-foreground">
                 {integration.name}
               </span>

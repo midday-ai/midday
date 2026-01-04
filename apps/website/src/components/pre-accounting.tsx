@@ -340,18 +340,11 @@ export function PreAccounting() {
             <div className="flex flex-wrap gap-3 justify-center mb-8 pt-2">
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                 <Image
-                  src="/images/fortnox-light.svg"
+                  src="/images/fortnox.svg"
                   alt="Fortnox"
                   width={16}
                   height={16}
-                  className="object-contain dark:hidden"
-                />
-                <Image
-                  src="/images/fortnox-dark.svg"
-                  alt="Fortnox"
-                  width={16}
-                  height={16}
-                  className="object-contain hidden dark:block"
+                  className="object-contain"
                 />
                 <span className="font-sans text-sm text-foreground">Fortnox</span>
               </div>

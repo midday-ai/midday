@@ -120,18 +120,18 @@ export function FileGridAnimation({
         </div>
         <div className="px-2 md:px-3 pb-1.5 md:pb-2">
           <div className="relative">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search files..."
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search files..."
               className="w-full bg-background border border-border px-2 md:px-3 py-1.5 md:py-2 text-[11px] md:text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-border/50 rounded-none pr-7 md:pr-8"
-            />
-            <MaterialIcon
-              name="search"
+          />
+          <MaterialIcon
+            name="search"
               className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-              size={14}
-            />
+            size={14}
+          />
           </div>
         </div>
       </div>
