@@ -238,7 +238,7 @@ export function Form() {
             timezone:
               user?.timezone ||
               Intl.DateTimeFormat().resolvedOptions().timeZone,
-            dueDateOffset: dueDateOffset > 0 ? dueDateOffset : 30,
+            dueDateOffset: dueDateOffset >= 0 ? dueDateOffset : 30,
             amount: values.amount,
             currency: values.template.currency,
             lineItems: values.lineItems,

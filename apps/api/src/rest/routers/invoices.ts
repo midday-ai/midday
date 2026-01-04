@@ -536,6 +536,12 @@ app.openapi(
         },
       );
 
+      if (!scheduledRun?.id) {
+        throw new HTTPException(500, {
+          message: "Failed to create scheduled job - no job ID returned",
+        });
+      }
+
       // Update the invoice with scheduling information
       const updatedInvoice = await updateInvoice(db, {
         id: result.id,
