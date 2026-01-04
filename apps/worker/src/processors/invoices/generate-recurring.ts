@@ -229,53 +229,50 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
           return { updatedRecurring };
         });
 
-        // Queue jobs AFTER transaction commits successfully
-        // This ensures we only send notifications for invoices that were actually created
+        // Invoice was successfully created in the database at this point.
+        // Record it as processed regardless of job queueing success.
+        results.push({
+          invoiceId,
+          invoiceNumber,
+          recurringId: recurring.id,
+          sequence: nextSequence,
+        });
+        processed++;
 
-        // Trigger invoice generation and sending via BullMQ
-        await invoicesQueue.add(
-          "generate-invoice",
-          {
-            invoiceId,
-            deliveryType: "create_and_send",
-          },
-          {
-            attempts: 3,
-            backoff: {
-              type: "exponential",
-              delay: 1000,
+        this.logger.info("Generated recurring invoice", {
+          invoiceId,
+          invoiceNumber,
+          recurringId: recurring.id,
+          sequence: nextSequence,
+          customerName: recurring.customerName,
+        });
+
+        // Queue jobs AFTER transaction commits successfully.
+        // Job queueing failures are handled separately - the invoice already exists
+        // and will be picked up by idempotency checks on retry, or can be manually
+        // processed via the dashboard.
+        try {
+          // Trigger invoice generation and sending via BullMQ
+          await invoicesQueue.add(
+            "generate-invoice",
+            {
+              invoiceId,
+              deliveryType: "create_and_send",
             },
-          },
-        );
-
-        // Queue notification for invoice generation
-        await invoicesQueue.add(
-          "invoice-notification",
-          {
-            type: "recurring_generated",
-            invoiceId,
-            invoiceNumber,
-            teamId: recurring.teamId,
-            customerName: recurring.customerName ?? undefined,
-            recurringId: recurring.id,
-            recurringSequence: nextSequence,
-            recurringTotalCount: recurring.endCount ?? undefined,
-          },
-          {
-            attempts: 3,
-            backoff: {
-              type: "exponential",
-              delay: 1000,
+            {
+              attempts: 3,
+              backoff: {
+                type: "exponential",
+                delay: 1000,
+              },
             },
-          },
-        );
+          );
 
-        // If series is now completed, queue completion notification
-        if (updatedRecurring?.status === "completed") {
+          // Queue notification for invoice generation
           await invoicesQueue.add(
             "invoice-notification",
             {
-              type: "recurring_series_completed",
+              type: "recurring_generated",
               invoiceId,
               invoiceNumber,
               teamId: recurring.teamId,
@@ -293,28 +290,55 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
             },
           );
 
-          this.logger.info("Recurring invoice series completed", {
-            recurringId: recurring.id,
-            teamId: recurring.teamId,
-            totalGenerated: nextSequence,
-          });
+          // If series is now completed, queue completion notification
+          if (updatedRecurring?.status === "completed") {
+            await invoicesQueue.add(
+              "invoice-notification",
+              {
+                type: "recurring_series_completed",
+                invoiceId,
+                invoiceNumber,
+                teamId: recurring.teamId,
+                customerName: recurring.customerName ?? undefined,
+                recurringId: recurring.id,
+                recurringSequence: nextSequence,
+                recurringTotalCount: recurring.endCount ?? undefined,
+              },
+              {
+                attempts: 3,
+                backoff: {
+                  type: "exponential",
+                  delay: 1000,
+                },
+              },
+            );
+
+            this.logger.info("Recurring invoice series completed", {
+              recurringId: recurring.id,
+              teamId: recurring.teamId,
+              totalGenerated: nextSequence,
+            });
+          }
+        } catch (queueError) {
+          // Job queueing failed, but the invoice was successfully created.
+          // Do NOT call recordInvoiceGenerationFailure here - the invoice exists.
+          // The invoice can be manually sent from the dashboard, or the generate-invoice
+          // job can be retried when the queue recovers.
+          const queueErrorMessage =
+            queueError instanceof Error ? queueError.message : "Unknown error";
+          this.logger.error(
+            "Failed to queue jobs for recurring invoice - invoice was created but delivery pending",
+            {
+              invoiceId,
+              invoiceNumber,
+              recurringId: recurring.id,
+              sequence: nextSequence,
+              error: queueErrorMessage,
+            },
+          );
+          // Note: The invoice exists with status "unpaid" but without a PDF.
+          // It will appear in the dashboard where the user can manually send it.
         }
-
-        results.push({
-          invoiceId,
-          invoiceNumber,
-          recurringId: recurring.id,
-          sequence: nextSequence,
-        });
-        processed++;
-
-        this.logger.info("Generated recurring invoice", {
-          invoiceId,
-          invoiceNumber,
-          recurringId: recurring.id,
-          sequence: nextSequence,
-          customerName: recurring.customerName,
-        });
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";

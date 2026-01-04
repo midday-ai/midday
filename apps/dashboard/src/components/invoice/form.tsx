@@ -180,10 +180,14 @@ export function Form() {
       // If invoice is part of a recurring series, also update the series template
       const invoiceRecurringId = currentFormValues.invoiceRecurringId;
       if (invoiceRecurringId) {
+        // Remove deliveryType from template since "recurring" is not a valid API deliveryType
+        const { deliveryType: _, ...templateWithoutDeliveryType } =
+          currentFormValues.template;
+
         updateRecurringTemplateMutation.mutate({
           id: invoiceRecurringId,
           lineItems: currentFormValues.lineItems,
-          template: currentFormValues.template,
+          template: templateWithoutDeliveryType,
           paymentDetails: currentFormValues.paymentDetails,
           fromDetails: currentFormValues.fromDetails,
           noteDetails: currentFormValues.noteDetails,
