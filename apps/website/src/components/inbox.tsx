@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { MaterialIcon } from './homepage/icon-mapping'
 import { InboxMatchAnimation } from './homepage/inbox-match-animation'
+import { ReceiptAttachmentAnimation } from './homepage/receipt-attachment-animation'
 import { TestimonialsSection } from './sections/testimonials-section'
 import { FeaturesGridSection } from './sections/features-grid-section'
 import { TimeSavingsSection } from './sections/time-savings-section'
@@ -224,7 +225,7 @@ export function Inbox() {
               <div className="flex items-center justify-center p-6 lg:p-8 border border-border overflow-hidden relative bg-background lg:order-1">
                 <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center">
                   <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
-                    <InboxMatchAnimation onComplete={undefined} />
+                    <ReceiptAttachmentAnimation />
                   </div>
                 </div>
               </div>
