@@ -31,9 +31,8 @@ jobs:
       - name: 🪐 Check TypeScript
         run: bun run typecheck
         working-directory: ./apps/dashboard
-      # - name: 🧪 Run unit tests
-      #   run: bun run test
-      #   working-directory: ./apps/dashboard
+      - name: 🧪 Run tests
+        run: bunx turbo run test --filter=@midday/dashboard...
       - name: 📤 Pull Vercel Environment Information
         run: bunx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗 Build Project Artifacts

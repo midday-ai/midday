@@ -7,79 +7,95 @@ import {
 } from "../utils/transaction-matching";
 
 describe("Cross-Currency Matching Algorithm", () => {
+  /**
+   * Tiered Tolerance System (based on avgAmount of baseAmounts):
+   * - Small (<100 base): 4% tolerance with minimum 10 units
+   * - Medium (100-1000 base): 2% tolerance with minimum 15 units
+   * - Large (>=1000 base): 1.5% tolerance with minimum 25 units
+   */
   describe("Tiered Tolerance System", () => {
-    test("should use 8% tolerance for small amounts (<100)", () => {
+    test("should use 4% tolerance (min 10) for small base amounts (<100)", () => {
+      // Small amounts: avgAmount < 100, tolerance = Math.max(10, avgAmount * 0.04)
+      // With avgAmount ~50, tolerance = max(10, 2) = 10, which is 20% effective
       const smallUSD = {
+        amount: 5,
+        currency: "USD",
+        baseAmount: 50,
+        baseCurrency: "SEK",
+      };
+      const smallSEK = {
+        amount: -55, // 10% difference, but within min tolerance of 10
+        currency: "SEK",
+        baseAmount: 55,
+        baseCurrency: "SEK",
+      };
+
+      // avgAmount = 52.5, tolerance = max(10, 52.5 * 0.04) = 10, diff = 5 < 10 ✓
+      expect(isCrossCurrencyMatch(smallUSD, smallSEK)).toBe(true);
+
+      // Should fail when difference exceeds minimum tolerance of 10
+      const tooHighSEK = {
+        ...smallSEK,
+        amount: -62,
+        baseAmount: 62,
+      };
+      // avgAmount = 56, tolerance = 10, diff = 12 > 10 ✗
+      expect(isCrossCurrencyMatch(smallUSD, tooHighSEK)).toBe(false);
+    });
+
+    test("should use 2% tolerance (min 15) for medium base amounts (100-1000)", () => {
+      // Medium amounts: 100 <= avgAmount < 1000, tolerance = Math.max(15, avgAmount * 0.02)
+      const mediumUSD = {
         amount: 50,
         currency: "USD",
         baseAmount: 500,
         baseCurrency: "SEK",
       };
-      const smallSEK = {
-        amount: -520, // 4% difference - within small amount tolerance
-        currency: "SEK",
-        baseAmount: 520,
-        baseCurrency: "SEK",
-      };
-
-      expect(isCrossCurrencyMatch(smallUSD, smallSEK)).toBe(true);
-
-      // Should fail at 6% difference
-      const tooHighSEK = {
-        ...smallSEK,
-        amount: -530,
-        baseAmount: 530,
-      };
-      expect(isCrossCurrencyMatch(smallUSD, tooHighSEK)).toBe(false);
-    });
-
-    test("should use 5% tolerance for medium amounts (100-1000)", () => {
-      const mediumUSD = {
-        amount: 500,
-        currency: "USD",
-        baseAmount: 5000,
-        baseCurrency: "SEK",
-      };
       const mediumSEK = {
-        amount: -5150, // 3% difference - within medium amount tolerance
+        amount: -510, // 2% difference
         currency: "SEK",
-        baseAmount: 5150,
+        baseAmount: 510,
         baseCurrency: "SEK",
       };
 
+      // avgAmount = 505, tolerance = max(15, 505 * 0.02) = 15, diff = 10 < 15 ✓
       expect(isCrossCurrencyMatch(mediumUSD, mediumSEK)).toBe(true);
 
-      // Should fail at 4% difference
+      // Should fail when difference exceeds tolerance
       const tooHighSEK = {
         ...mediumSEK,
-        amount: -5200,
-        baseAmount: 5200,
+        amount: -520,
+        baseAmount: 520,
       };
+      // avgAmount = 510, tolerance = max(15, 10.2) = 15, diff = 20 > 15 ✗
       expect(isCrossCurrencyMatch(mediumUSD, tooHighSEK)).toBe(false);
     });
 
-    test("should use 3% tolerance for large amounts (>1000)", () => {
+    test("should use 1.5% tolerance (min 25) for large base amounts (>=1000)", () => {
+      // Large amounts: avgAmount >= 1000, tolerance = Math.max(25, avgAmount * 0.015)
       const largeUSD = {
-        amount: 2000,
+        amount: 200,
         currency: "USD",
-        baseAmount: 20000,
+        baseAmount: 2000,
         baseCurrency: "SEK",
       };
       const largeSEK = {
-        amount: -20600, // 3% difference
+        amount: -2025, // 1.25% difference
         currency: "SEK",
-        baseAmount: 20600,
+        baseAmount: 2025,
         baseCurrency: "SEK",
       };
 
+      // avgAmount = 2012.5, tolerance = max(25, 30.19) = 30.19, diff = 25 < 30.19 ✓
       expect(isCrossCurrencyMatch(largeUSD, largeSEK)).toBe(true);
 
-      // Should fail at 4% difference
+      // Should fail at 2% difference (above 1.5% tolerance)
       const tooHighSEK = {
         ...largeSEK,
-        amount: -20800,
-        baseAmount: 20800,
+        amount: -2050,
+        baseAmount: 2050,
       };
+      // avgAmount = 2025, tolerance = max(25, 30.375) = 30.375, diff = 50 > 30.375 ✗
       expect(isCrossCurrencyMatch(largeUSD, tooHighSEK)).toBe(false);
     });
   });
