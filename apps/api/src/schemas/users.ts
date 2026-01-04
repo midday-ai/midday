@@ -44,7 +44,8 @@ export const updateUserSchema = z.object({
     })
     .optional()
     .openapi({
-      description: "User's timezone identifier in IANA Time Zone Database format",
+      description:
+        "User's timezone identifier in IANA Time Zone Database format",
       example: "America/New_York",
     }),
   timezoneAutoSync: z.boolean().optional().openapi({
