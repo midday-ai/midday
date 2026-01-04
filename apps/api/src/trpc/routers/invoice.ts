@@ -46,11 +46,7 @@ import {
 } from "@midday/db/queries";
 import { verify } from "@midday/invoice/token";
 import { transformCustomerToContent } from "@midday/invoice/utils";
-import type {
-  GenerateInvoicePayload,
-  SendInvoiceReminderPayload,
-} from "@midday/jobs/schema";
-import { runs, tasks } from "@trigger.dev/sdk";
+import { getQueue, triggerJob } from "@midday/job-client";
 import { TRPCError } from "@trpc/server";
 import { addMonths, format, parseISO } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
@@ -499,33 +495,39 @@ export const invoiceRouter = createTRPCRouter({
         let scheduledJobId: string | null = null;
 
         try {
+          // Calculate delay in milliseconds from now
+          const delayMs = scheduledDate.getTime() - now.getTime();
+
           if (existingInvoice?.scheduledJobId) {
-            // Reschedule the existing job instead of creating a new one
-            await runs.reschedule(existingInvoice.scheduledJobId, {
-              delay: scheduledDate,
-            });
-            scheduledJobId = existingInvoice.scheduledJobId;
-          } else {
-            // Create a new scheduled job
-            const scheduledRun = await tasks.trigger(
-              "schedule-invoice",
-              {
-                invoiceId: input.id,
-                scheduledAt: input.scheduledAt,
-              },
-              {
-                delay: scheduledDate,
-              },
+            // Cancel the existing job and create a new one with BullMQ
+            const queue = getQueue("invoices");
+            const existingJob = await queue.getJob(
+              existingInvoice.scheduledJobId,
             );
-
-            if (!scheduledRun?.id) {
-              throw new Error(
-                "Failed to create scheduled job - no job ID returned",
-              );
+            if (existingJob) {
+              await existingJob.remove();
             }
-
-            scheduledJobId = scheduledRun.id;
           }
+
+          // Create a new scheduled job with delay
+          const scheduledRun = await triggerJob(
+            "schedule-invoice",
+            {
+              invoiceId: input.id,
+            },
+            "invoices",
+            {
+              delay: delayMs,
+            },
+          );
+
+          if (!scheduledRun?.id) {
+            throw new Error(
+              "Failed to create scheduled job - no job ID returned",
+            );
+          }
+
+          scheduledJobId = scheduledRun.id;
         } catch (error) {
           throw new TRPCError({
             code: "SERVICE_UNAVAILABLE",
@@ -556,13 +558,20 @@ export const invoiceRouter = createTRPCRouter({
           });
         }
 
-        tasks.trigger("notification", {
-          type: "invoice_scheduled",
-          teamId: teamId!,
-          invoiceId: input.id,
-          invoiceNumber: data.invoiceNumber,
-          scheduledAt: input.scheduledAt,
-          customerName: data.customerName,
+        // Fire and forget notification - don't block the response
+        triggerJob(
+          "invoice-notification",
+          {
+            type: "scheduled",
+            teamId: teamId!,
+            invoiceId: input.id,
+            invoiceNumber: data.invoiceNumber!,
+            scheduledAt: input.scheduledAt,
+            customerName: data.customerName ?? undefined,
+          },
+          "invoices",
+        ).catch(() => {
+          // Ignore notification errors - invoice was scheduled successfully
         });
 
         return data;
@@ -582,10 +591,14 @@ export const invoiceRouter = createTRPCRouter({
         });
       }
 
-      await tasks.trigger("generate-invoice", {
-        invoiceId: data.id,
-        deliveryType: input.deliveryType,
-      } satisfies GenerateInvoicePayload);
+      await triggerJob(
+        "generate-invoice",
+        {
+          invoiceId: data.id,
+          deliveryType: input.deliveryType,
+        },
+        "invoices",
+      );
 
       return data;
     }),
@@ -593,9 +606,13 @@ export const invoiceRouter = createTRPCRouter({
   remind: protectedProcedure
     .input(remindInvoiceSchema)
     .mutation(async ({ input, ctx: { db, teamId } }) => {
-      await tasks.trigger("send-invoice-reminder", {
-        invoiceId: input.id,
-      } satisfies SendInvoiceReminderPayload);
+      await triggerJob(
+        "send-invoice-reminder",
+        {
+          invoiceId: input.id,
+        },
+        "invoices",
+      );
 
       return updateInvoice(db, {
         id: input.id,
@@ -644,15 +661,33 @@ export const invoiceRouter = createTRPCRouter({
         });
       }
 
-      // Reschedule the existing job with the new date
-      await runs.reschedule(invoice.scheduledJobId, {
-        delay: scheduledDate,
-      });
+      // Cancel the existing job and create a new one with the new delay
+      const queue = getQueue("invoices");
+      const existingJob = await queue.getJob(invoice.scheduledJobId);
+      if (existingJob) {
+        await existingJob.remove();
+      }
 
-      // Update the scheduled date in the database
+      // Calculate new delay
+      const delayMs = scheduledDate.getTime() - now.getTime();
+
+      // Create new scheduled job
+      const scheduledRun = await triggerJob(
+        "schedule-invoice",
+        {
+          invoiceId: input.id,
+        },
+        "invoices",
+        {
+          delay: delayMs,
+        },
+      );
+
+      // Update the scheduled date and job ID in the database
       const updatedInvoice = await updateInvoice(db, {
         id: input.id,
         scheduledAt: input.scheduledAt,
+        scheduledJobId: scheduledRun.id,
         teamId: teamId!,
       });
 
@@ -676,8 +711,12 @@ export const invoiceRouter = createTRPCRouter({
       }
 
       if (invoice.scheduledJobId) {
-        // Cancel the scheduled job
-        await runs.cancel(invoice.scheduledJobId);
+        // Cancel the scheduled job by removing it from the queue
+        const queue = getQueue("invoices");
+        const job = await queue.getJob(invoice.scheduledJobId);
+        if (job) {
+          await job.remove();
+        }
       }
 
       // Update the invoice status back to draft and clear scheduling fields

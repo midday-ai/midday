@@ -30,8 +30,7 @@ import {
 } from "@midday/db/queries";
 import { calculateTotal } from "@midday/invoice/calculate";
 import { transformCustomerToContent } from "@midday/invoice/utils";
-import type { GenerateInvoicePayload } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk";
+import { triggerJob } from "@midday/job-client";
 import { addMonths } from "date-fns";
 import { HTTPException } from "hono/http-exception";
 import { v4 as uuidv4 } from "uuid";
@@ -496,10 +495,14 @@ app.openapi(
       }
 
       // Trigger invoice generation (and sending if create_and_send)
-      await tasks.trigger("generate-invoice", {
-        invoiceId: result.id,
-        deliveryType: input.deliveryType,
-      } satisfies GenerateInvoicePayload);
+      await triggerJob(
+        "generate-invoice",
+        {
+          invoiceId: result.id,
+          deliveryType: input.deliveryType,
+        },
+        "invoices",
+      );
     } else if (input.deliveryType === "scheduled") {
       // Handle scheduled invoices
       if (!input.scheduledAt) {
@@ -518,15 +521,18 @@ app.openapi(
         });
       }
 
-      // Create a scheduled job
-      const scheduledRun = await tasks.trigger(
+      // Calculate delay in milliseconds from now
+      const delayMs = scheduledDate.getTime() - now.getTime();
+
+      // Create a scheduled job with delay
+      const scheduledRun = await triggerJob(
         "schedule-invoice",
         {
           invoiceId: result.id,
-          scheduledAt: input.scheduledAt,
         },
+        "invoices",
         {
-          delay: scheduledDate,
+          delay: delayMs,
         },
       );
 
@@ -544,14 +550,20 @@ app.openapi(
         finalResult = updatedInvoice;
       }
 
-      // Send notification
-      await tasks.trigger("notification", {
-        type: "invoice_scheduled",
-        teamId,
-        invoiceId: result.id,
-        invoiceNumber: finalResult.invoiceNumber,
-        scheduledAt: input.scheduledAt,
-        customerName: finalResult.customerName,
+      // Send notification (fire and forget)
+      triggerJob(
+        "invoice-notification",
+        {
+          type: "scheduled",
+          teamId,
+          invoiceId: result.id,
+          invoiceNumber: finalResult.invoiceNumber!,
+          scheduledAt: input.scheduledAt,
+          customerName: finalResult.customerName ?? undefined,
+        },
+        "invoices",
+      ).catch(() => {
+        // Ignore notification errors - invoice was scheduled successfully
       });
     }
 

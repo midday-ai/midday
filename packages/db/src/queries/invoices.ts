@@ -11,6 +11,7 @@ import {
   teams,
   trackerEntries,
   trackerProjects,
+  users,
 } from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { generateToken } from "@midday/invoice/token";
@@ -332,10 +333,17 @@ export async function getInvoiceById(
         name: customers.name,
         website: customers.website,
         email: customers.email,
+        billingEmail: customers.billingEmail,
       },
       customerId: invoices.customerId,
       team: {
         name: teams.name,
+        email: teams.email,
+      },
+      user: {
+        email: users.email,
+        timezone: users.timezone,
+        locale: users.locale,
       },
       // Join to get the template name and isDefault from invoice_templates
       invoiceTemplate: {
@@ -359,6 +367,7 @@ export async function getInvoiceById(
     .from(invoices)
     .leftJoin(customers, eq(invoices.customerId, customers.id))
     .leftJoin(teams, eq(invoices.teamId, teams.id))
+    .leftJoin(users, eq(invoices.userId, users.id))
     .leftJoin(invoiceTemplates, eq(invoices.templateId, invoiceTemplates.id))
     .leftJoin(
       invoiceRecurring,
@@ -1013,6 +1022,9 @@ export type UpdateInvoiceParams = {
   paymentIntentId?: string | null;
   refundedAt?: string | null;
   sentTo?: string | null;
+  sentAt?: string | null;
+  filePath?: string[] | null;
+  fileSize?: number | null;
   invoiceRecurringId?: string | null;
   recurringSequence?: number | null;
   teamId: string;

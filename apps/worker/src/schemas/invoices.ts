@@ -67,3 +67,25 @@ export const sendInvoiceEmailSchema = z.object({
 });
 
 export type SendInvoiceEmailPayload = z.infer<typeof sendInvoiceEmailSchema>;
+
+/**
+ * Send invoice reminder job schema
+ * Handles sending reminder emails for unpaid/overdue invoices
+ */
+export const sendInvoiceReminderSchema = z.object({
+  invoiceId: z.string().uuid(),
+});
+
+export type SendInvoiceReminderPayload = z.infer<
+  typeof sendInvoiceReminderSchema
+>;
+
+/**
+ * Schedule invoice job schema
+ * Handles executing scheduled invoices when their scheduled time arrives
+ */
+export const scheduleInvoiceSchema = z.object({
+  invoiceId: z.string().uuid(),
+});
+
+export type ScheduleInvoicePayload = z.infer<typeof scheduleInvoiceSchema>;

@@ -1,7 +1,9 @@
 import { GenerateInvoiceProcessor } from "./generate-invoice";
 import { InvoiceRecurringSchedulerProcessor } from "./generate-recurring";
 import { InvoiceNotificationProcessor } from "./invoice-notification";
+import { ScheduleInvoiceProcessor } from "./schedule-invoice";
 import { SendInvoiceEmailProcessor } from "./send-invoice-email";
+import { SendInvoiceReminderProcessor } from "./send-invoice-reminder";
 
 /**
  * Export all invoice processors (for type imports)
@@ -9,7 +11,9 @@ import { SendInvoiceEmailProcessor } from "./send-invoice-email";
 export { GenerateInvoiceProcessor } from "./generate-invoice";
 export { InvoiceRecurringSchedulerProcessor } from "./generate-recurring";
 export { InvoiceNotificationProcessor } from "./invoice-notification";
+export { ScheduleInvoiceProcessor } from "./schedule-invoice";
 export { SendInvoiceEmailProcessor } from "./send-invoice-email";
+export { SendInvoiceReminderProcessor } from "./send-invoice-reminder";
 
 /**
  * Invoice processor registry
@@ -20,4 +24,6 @@ export const invoiceProcessors = {
   "invoice-recurring-scheduler": new InvoiceRecurringSchedulerProcessor(),
   "generate-invoice": new GenerateInvoiceProcessor(),
   "send-invoice-email": new SendInvoiceEmailProcessor(),
+  "send-invoice-reminder": new SendInvoiceReminderProcessor(),
+  "schedule-invoice": new ScheduleInvoiceProcessor(),
 };

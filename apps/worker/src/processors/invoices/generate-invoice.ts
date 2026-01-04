@@ -1,10 +1,11 @@
+import { getInvoiceById, updateInvoice } from "@midday/db/queries";
 import { PdfTemplate, renderToBuffer } from "@midday/invoice";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
-import camelcaseKeys from "camelcase-keys";
 import { documentsQueue } from "../../queues/documents";
 import { invoicesQueue } from "../../queues/invoices";
 import type { GenerateInvoicePayload } from "../../schemas/invoices";
+import { getDb } from "../../utils/db";
 import { BaseProcessor } from "../base";
 
 /**
@@ -15,6 +16,8 @@ import { BaseProcessor } from "../base";
 export class GenerateInvoiceProcessor extends BaseProcessor<GenerateInvoicePayload> {
   async process(job: Job<GenerateInvoicePayload>): Promise<void> {
     const { invoiceId, deliveryType } = job.data;
+    const db = getDb();
+    // Supabase client is needed for storage operations only
     const supabase = createClient();
 
     this.logger.info("Starting invoice generation", {
@@ -24,35 +27,23 @@ export class GenerateInvoiceProcessor extends BaseProcessor<GenerateInvoicePaylo
     });
 
     // Fetch invoice data
-    const { data: invoiceData, error } = await supabase
-      .from("invoices")
-      .select(
-        "*, team_id, customer:customer_id(name), user:user_id(timezone, locale)",
-      )
-      .eq("id", invoiceId)
-      .single();
+    const invoiceData = await getInvoiceById(db, { id: invoiceId });
 
-    if (error || !invoiceData) {
-      this.logger.error("Failed to fetch invoice", {
-        invoiceId,
-        error: error?.message,
-      });
+    if (!invoiceData) {
+      this.logger.error("Failed to fetch invoice", { invoiceId });
       throw new Error(`Invoice not found: ${invoiceId}`);
     }
 
     const { user, ...invoice } = invoiceData;
 
-    // Convert snake_case to camelCase for PdfTemplate
-    const camelCaseInvoice = camelcaseKeys(invoice, { deep: true });
-
     this.logger.debug("Generating PDF", { invoiceId });
 
     // Generate PDF buffer
-    // @ts-expect-error - Template JSONB while EditorDoc in components
-    const buffer = await renderToBuffer(await PdfTemplate(camelCaseInvoice));
+    // @ts-ignore - Template JSONB type differs from EditorDoc in components
+    const buffer = await renderToBuffer(await PdfTemplate(invoice));
 
-    const filename = `${invoiceData.invoice_number}.pdf`;
-    const fullPath = `${invoiceData.team_id}/invoices/${filename}`;
+    const filename = `${invoiceData.invoiceNumber}.pdf`;
+    const fullPath = `${invoiceData.teamId}/invoices/${filename}`;
 
     this.logger.debug("Uploading PDF to storage", {
       invoiceId,
@@ -60,7 +51,7 @@ export class GenerateInvoiceProcessor extends BaseProcessor<GenerateInvoicePaylo
       fileSize: buffer.length,
     });
 
-    // Upload to Supabase storage
+    // Upload to Supabase storage (storage SDK is still needed)
     const { error: uploadError } = await supabase.storage
       .from("vault")
       .upload(fullPath, buffer, {
@@ -78,21 +69,19 @@ export class GenerateInvoiceProcessor extends BaseProcessor<GenerateInvoicePaylo
 
     this.logger.debug("PDF uploaded to storage", { invoiceId, fullPath });
 
-    // Update invoice with file path and size
-    const { error: updateError } = await supabase
-      .from("invoices")
-      .update({
-        file_path: [invoiceData.team_id, "invoices", filename],
-        file_size: buffer.length,
-      })
-      .eq("id", invoiceId);
+    // Update invoice with file path and size using Drizzle
+    const updated = await updateInvoice(db, {
+      id: invoiceId,
+      teamId: invoiceData.teamId,
+      filePath: [invoiceData.teamId, "invoices", filename],
+      fileSize: buffer.length,
+    });
 
-    if (updateError) {
+    if (!updated) {
       this.logger.error("Failed to update invoice with file info", {
         invoiceId,
-        error: updateError.message,
       });
-      throw new Error(`Failed to update invoice: ${updateError.message}`);
+      throw new Error("Failed to update invoice with file info");
     }
 
     // Queue email sending if delivery type is create_and_send
@@ -120,9 +109,9 @@ export class GenerateInvoiceProcessor extends BaseProcessor<GenerateInvoicePaylo
     await documentsQueue.add(
       "process-document",
       {
-        filePath: [invoiceData.team_id, "invoices", filename],
+        filePath: [invoiceData.teamId, "invoices", filename],
         mimetype: "application/pdf",
-        teamId: invoiceData.team_id,
+        teamId: invoiceData.teamId,
       },
       {
         attempts: 3,

@@ -226,11 +226,12 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
             customerName: recurring.customerName ?? undefined,
           });
 
-          // Update invoice with recurring reference, status, and sentTo
+          // Update invoice with recurring reference
+          // Note: Status remains "draft" until send-invoice-email.ts successfully sends the email
+          // This prevents data inconsistency where status="unpaid" but sent_at=null if delivery fails
           await updateInvoice(tx, {
             id: invoiceId,
             teamId: recurring.teamId,
-            status: "unpaid",
             sentTo: customerEmail,
             invoiceRecurringId: recurring.id,
             recurringSequence: nextSequence,
@@ -352,8 +353,8 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
               error: queueErrorMessage,
             },
           );
-          // Note: The invoice exists with status "unpaid" but without a PDF.
-          // It will appear in the dashboard where the user can manually send it.
+          // Note: The invoice exists with status "draft" and without a PDF.
+          // It will appear in the dashboard where the user can manually generate and send it.
         }
       } catch (error) {
         const errorMessage =

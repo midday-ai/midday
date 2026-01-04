@@ -6,11 +6,7 @@ import { inboxProviderQueue, inboxQueue } from "../queues/inbox";
 import { invoicesQueue } from "../queues/invoices";
 import { ratesQueue } from "../queues/rates";
 import { transactionsQueue } from "../queues/transactions";
-import type {
-  DynamicSchedulerTemplate,
-  RegisterDynamicSchedulerParams,
-  StaticSchedulerConfig,
-} from "../types/scheduler-config";
+import type { RegisterDynamicSchedulerParams } from "../types/scheduler-config";
 import { dynamicSchedulerTemplates, staticSchedulerConfigs } from "./index";
 
 const logger = createLoggerWithContext("scheduler");
