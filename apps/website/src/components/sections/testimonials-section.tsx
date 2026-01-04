@@ -231,7 +231,7 @@ export function TestimonialsSection({
         </div>
 
         {/* Mobile Carousel */}
-        <div className="lg:hidden w-screen -mx-4 sm:-mx-6 md:-mx-8">
+        <div className="lg:hidden w-screen -mx-4 sm:-mx-6 md:-mx-8 pl-4">
           <div
             ref={scrollContainerRef}
             className="relative overflow-x-auto overflow-y-visible scroll-smooth snap-x snap-mandatory py-3 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
@@ -253,13 +253,18 @@ export function TestimonialsSection({
               lastDragDistance.current = e.currentTarget.scrollLeft;
             }}
           >
-            <div className="flex gap-4 px-4" style={{ width: "max-content" }}>
+            <div
+              className="flex gap-4 pl-4 pr-4"
+              style={{ width: "max-content" }}
+            >
               {testimonials.map((testimonial, index) => {
                 // Calculate rotation based on position relative to center
                 const centerIndex = Math.floor(testimonials.length / 2);
                 const offset = index - centerIndex;
                 let rotation = 0;
-                if (offset === -1) rotation = -1;
+                if (index === 0)
+                  rotation = 0; // No rotation for first card
+                else if (offset === -1) rotation = -1;
                 else if (offset === 1) rotation = 1;
                 else if (offset === -2) rotation = -2;
                 else if (offset === 2) rotation = 2;
