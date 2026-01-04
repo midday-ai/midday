@@ -11,6 +11,7 @@ import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
   createInvoiceRecurring,
   deleteInvoiceRecurring,
+  getCustomerById,
   getInvoiceRecurringById,
   getInvoiceRecurringList,
   getUpcomingInvoices,
@@ -67,6 +68,31 @@ export const invoiceRecurringRouter = createTRPCRouter({
           if (existingSeries) {
             return existingSeries;
           }
+        }
+      }
+
+      // Validate that the customer has an email address for sending invoices
+      // Recurring invoices auto-send, so we need a valid email destination
+      if (recurringData.customerId) {
+        const customer = await getCustomerById(db, {
+          id: recurringData.customerId,
+          teamId,
+        });
+
+        if (!customer) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Customer not found",
+          });
+        }
+
+        const customerEmail = customer.billingEmail || customer.email;
+        if (!customerEmail) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Customer must have an email address to receive recurring invoices. Please add an email to the customer profile.",
+          });
         }
       }
 
@@ -199,6 +225,7 @@ export const invoiceRecurringRouter = createTRPCRouter({
         ) {
           if (
             (effectiveFrequency === "weekly" ||
+              effectiveFrequency === "biweekly" ||
               effectiveFrequency === "monthly_weekday") &&
             effectiveFrequencyDay > 6
           ) {

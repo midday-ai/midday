@@ -174,7 +174,8 @@ export interface RecurringConfig {
   frequencyDay: number | null;
   frequencyWeek: number | null;
   frequencyInterval: number | null;
-  endType: RecurringEndType;
+  /** null means user hasn't selected yet - used for requiring explicit selection */
+  endType: RecurringEndType | null;
   endDate: string | null;
   endCount: number | null;
 }

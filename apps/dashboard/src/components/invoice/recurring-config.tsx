@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@midday/ui/select";
 import { format, getDate, getDay } from "date-fns";
+import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
 
 // Re-export types for consumers
@@ -57,6 +58,8 @@ interface RecurringConfigProps {
   currency: string;
   config: RecurringConfig;
   onChange: (config: RecurringConfig) => void;
+  /** Called when user selects an end type - use this to confirm the recurring selection */
+  onSelect?: () => void;
 }
 
 /**
@@ -146,12 +149,16 @@ export function RecurringConfigPanel({
   currency,
   config,
   onChange,
+  onSelect,
 }: RecurringConfigProps) {
   const { data: user } = useUserQuery();
   const smartOptions = React.useMemo(
     () => getSmartOptions(issueDate),
     [issueDate],
   );
+
+  // Track if preview was already visible on mount (to skip animation on dropdown reopen)
+  const wasVisibleOnMountRef = React.useRef(config.endType !== null);
 
   // Find current selected option value
   const currentOptionValue = React.useMemo(() => {
@@ -209,6 +216,8 @@ export function RecurringConfigPanel({
         value === "on_date" ? getDefaultEndDate(issueDate).toISOString() : null,
       endCount: value === "after_count" ? 12 : null,
     });
+    // Confirm the recurring selection when user selects an end type
+    onSelect?.();
   };
 
   const handleEndDateChange = (date: Date | undefined) => {
@@ -280,15 +289,19 @@ export function RecurringConfigPanel({
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Ends</Label>
         <RadioGroup
-          value={config.endType}
+          value={config.endType ?? undefined}
           onValueChange={(value) =>
             handleEndTypeChange(value as RecurringEndType)
           }
           className="space-y-2"
         >
           <div className="flex items-center gap-2">
-            <RadioGroupItem value="on_date" id="on_date" />
-            <Label htmlFor="on_date" className="font-normal">
+            <RadioGroupItem
+              value="on_date"
+              id="on_date"
+              className="rounded-none data-[state=checked]:bg-[#F2F1EF] data-[state=checked]:dark:bg-[#1d1d1d] border-border"
+            />
+            <Label htmlFor="on_date" className="font-normal text-sm">
               On
             </Label>
             <Popover>
@@ -317,8 +330,12 @@ export function RecurringConfigPanel({
             </Popover>
           </div>
           <div className="flex items-center gap-2">
-            <RadioGroupItem value="after_count" id="after_count" />
-            <Label htmlFor="after_count" className="font-normal">
+            <RadioGroupItem
+              value="after_count"
+              id="after_count"
+              className="rounded-none data-[state=checked]:bg-[#F2F1EF] data-[state=checked]:dark:bg-[#1d1d1d] border-border"
+            />
+            <Label htmlFor="after_count" className="font-normal text-sm">
               After
             </Label>
             <Input
@@ -334,49 +351,68 @@ export function RecurringConfigPanel({
             <span className="text-sm">invoices</span>
           </div>
           <div className="flex items-center gap-2">
-            <RadioGroupItem value="never" id="never" />
-            <Label htmlFor="never" className="font-normal">
+            <RadioGroupItem
+              value="never"
+              id="never"
+              className="rounded-none data-[state=checked]:bg-[#F2F1EF] data-[state=checked]:dark:bg-[#1d1d1d] border-border"
+            />
+            <Label htmlFor="never" className="font-normal text-sm">
               Never
             </Label>
           </div>
         </RadioGroup>
       </div>
 
-      {/* Preview Section */}
-      <div className="border-t border-border pt-3 space-y-2">
-        {previewInvoices.map((invoice, index) => (
-          <div
-            key={index.toString()}
-            className="flex items-center justify-between text-sm"
+      {/* Preview Section - only shown when endType is selected */}
+      <AnimatePresence initial={!wasVisibleOnMountRef.current}>
+        {config.endType && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="overflow-hidden"
           >
-            <div className="flex gap-3">
-              <span>{formatShortDate(invoice.date)}</span>
-              <span className="text-muted-foreground">
-                {formatDayOfWeek(invoice.date)}
-              </span>
+            <div className="border-t border-border pt-3 space-y-2">
+              {previewInvoices.map((invoice, index) => (
+                <div
+                  key={index.toString()}
+                  className="flex items-center justify-between text-sm"
+                >
+                  <div className="flex gap-3">
+                    <span>{formatShortDate(invoice.date)}</span>
+                    <span className="text-muted-foreground">
+                      {formatDayOfWeek(invoice.date)}
+                    </span>
+                  </div>
+                  <FormatAmount amount={invoice.amount} currency={currency} />
+                </div>
+              ))}
+              {hasMoreInvoices && (
+                <div className="text-center text-muted-foreground">...</div>
+              )}
             </div>
-            <FormatAmount amount={invoice.amount} currency={currency} />
-          </div>
-        ))}
-        {hasMoreInvoices && (
-          <div className="text-center text-muted-foreground">...</div>
-        )}
-      </div>
 
-      {/* Summary Footer */}
-      <div className="border-t border-border pt-3 flex items-center justify-between text-sm">
-        {summary.totalCount !== null && summary.totalAmount !== null ? (
-          <>
-            <span>{summary.totalCount} invoices total</span>
-            <FormatAmount amount={summary.totalAmount} currency={currency} />
-          </>
-        ) : (
-          <>
-            <span>No end date</span>
-            <span className="text-lg">∞</span>
-          </>
+            {/* Summary Footer */}
+            <div className="border-t border-border pt-3 flex items-center justify-between text-sm">
+              {summary.totalCount !== null && summary.totalAmount !== null ? (
+                <>
+                  <span>{summary.totalCount} invoices total</span>
+                  <FormatAmount
+                    amount={summary.totalAmount}
+                    currency={currency}
+                  />
+                </>
+              ) : (
+                <>
+                  <span>No end date</span>
+                  <span className="text-lg">∞</span>
+                </>
+              )}
+            </div>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
     </div>
   );
 }
@@ -401,7 +437,7 @@ export function getDefaultRecurringConfig(issueDate: Date): RecurringConfig {
     frequencyDay: dayOfMonth,
     frequencyWeek: null,
     frequencyInterval: null,
-    endType: "never",
+    endType: null, // User must explicitly select to confirm recurring
     endDate: null,
     endCount: null,
   };

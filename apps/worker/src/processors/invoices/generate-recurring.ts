@@ -128,6 +128,14 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
           }
         }
 
+        // Validate that we have an email to send the invoice to
+        // If no email exists, fail this generation to trigger failure tracking
+        if (!customerEmail) {
+          throw new Error(
+            `Cannot generate recurring invoice: Customer ${recurring.customerName || recurring.customerId || "unknown"} has no email address. Please update the customer profile with an email address.`,
+          );
+        }
+
         // Generate new invoice ID and number
         const invoiceId = uuidv4();
         const invoiceNumber = await getNextInvoiceNumber(db, recurring.teamId);

@@ -328,7 +328,11 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
 
   const isValid = formState.isValid && invoiceNumberValid;
 
-  // Build options - hide "Recurring" if invoice is already part of a recurring series
+  // Build options based on invoice state
+  // - Hide "Recurring" if invoice is already part of a recurring series
+  // - Hide "Recurring" if invoice is scheduled (can't convert scheduled to recurring)
+  // - Hide "Schedule" if invoice is already part of a recurring series
+  const isScheduledInvoice = selectedOption === "scheduled";
   const baseOptions = [
     {
       label: canUpdate ? "Update" : "Create",
@@ -351,15 +355,19 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
         },
       ];
 
-  const options = isPartOfRecurringSeries
-    ? optionsWithSchedule
-    : [
-        ...optionsWithSchedule,
-        {
-          label: "Recurring",
-          value: "recurring",
-        },
-      ];
+  // Hide "Recurring" option if:
+  // 1. Invoice is already part of a recurring series, OR
+  // 2. Invoice is currently scheduled (can't convert scheduled to recurring)
+  const options =
+    isPartOfRecurringSeries || isScheduledInvoice
+      ? optionsWithSchedule
+      : [
+          ...optionsWithSchedule,
+          {
+            label: "Recurring",
+            value: "recurring",
+          },
+        ];
 
   return (
     <div className="flex flex-col gap-4">
@@ -493,10 +501,8 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
                             amount={amount}
                             currency={currency}
                             config={recurringConfig}
-                            onChange={(config) => {
-                              setRecurringConfig(config);
-                              handleOptionChange("recurring");
-                            }}
+                            onChange={setRecurringConfig}
+                            onSelect={() => handleOptionChange("recurring")}
                           />
                         </DropdownMenuSubContent>
                       </DropdownMenuPortal>
