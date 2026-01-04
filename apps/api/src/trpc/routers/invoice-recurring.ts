@@ -115,6 +115,14 @@ export const invoiceRecurringRouter = createTRPCRouter({
 
         // If a draft invoice ID is provided, link it as the first invoice in the series
         if (invoiceId) {
+          // Verify the invoice exists and belongs to this team
+          if (!existingInvoice) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Invoice not found or does not belong to this team",
+            });
+          }
+
           // Update the invoice to link it to the recurring series
           await updateInvoice(tx, {
             id: invoiceId,
@@ -125,7 +133,7 @@ export const invoiceRecurringRouter = createTRPCRouter({
 
           // Calculate the next scheduled date from the invoice's issue date
           // This ensures "Monthly on the 15th" with issue date Jan 15 → next invoice Feb 15
-          const referenceDate = existingInvoice?.issueDate
+          const referenceDate = existingInvoice.issueDate
             ? new Date(existingInvoice.issueDate)
             : new Date();
 
