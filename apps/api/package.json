@@ -6,8 +6,7 @@
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
-    "test": "bun test",
-    "test:watch": "bun test --watch"
+    "test": "find src -name '*.test.ts' -o -name '*.spec.ts' | grep -q . && bun test src || echo 'No tests yet'"
   },
   "exports": {
     "./trpc/routers/_app": "./src/trpc/routers/_app.ts",

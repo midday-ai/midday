@@ -45,14 +45,14 @@ jobs:
         run: bun install
       - name: 🏗 Build @midday/engine
         run: bunx turbo run build --filter=@midday/engine...
+      - name: 🧪 Run tests
+        run: bunx turbo run test --filter=@midday/worker...
       - name: 🔦 Run linter
         run: bun run lint
         working-directory: ./apps/worker
       - name: 🪐 Check TypeScript
         run: bun run typecheck
         working-directory: ./apps/worker
-      - name: 🧪 Run tests
-        run: bunx turbo run test --filter=@midday/worker...
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: flyctl deploy --remote-only --dockerfile apps/worker/Dockerfile --config apps/worker/fly.toml
         env:

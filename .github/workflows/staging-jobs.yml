@@ -18,11 +18,11 @@ jobs:
         run: bun install
       - name: 🏗 Build @midday/engine
         run: bunx turbo run build --filter=@midday/engine...
+      - name: 🧪 Run tests
+        run: bunx turbo run test --filter=@midday/jobs...
       - name: 🪐 Check TypeScript
         run: bun run typecheck
         working-directory: ./packages/jobs
-      - name: 🧪 Run tests
-        run: bunx turbo run test --filter=@midday/jobs...
       - name: 🔄 Deploy Background Jobs
         env:
           TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
