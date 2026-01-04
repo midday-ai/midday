@@ -137,34 +137,40 @@ export function buildInvoiceTemplateFromRecurring(
   return {
     // Labels with defaults
     customerLabel:
-      (template.customerLabel as string) ?? DEFAULT_TEMPLATE_LABELS.customerLabel,
+      (template.customerLabel as string) ??
+      DEFAULT_TEMPLATE_LABELS.customerLabel,
     title: (template.title as string) ?? DEFAULT_TEMPLATE_LABELS.title,
     fromLabel:
       (template.fromLabel as string) ?? DEFAULT_TEMPLATE_LABELS.fromLabel,
     invoiceNoLabel:
-      (template.invoiceNoLabel as string) ?? DEFAULT_TEMPLATE_LABELS.invoiceNoLabel,
+      (template.invoiceNoLabel as string) ??
+      DEFAULT_TEMPLATE_LABELS.invoiceNoLabel,
     issueDateLabel:
-      (template.issueDateLabel as string) ?? DEFAULT_TEMPLATE_LABELS.issueDateLabel,
+      (template.issueDateLabel as string) ??
+      DEFAULT_TEMPLATE_LABELS.issueDateLabel,
     dueDateLabel:
       (template.dueDateLabel as string) ?? DEFAULT_TEMPLATE_LABELS.dueDateLabel,
     descriptionLabel:
-      (template.descriptionLabel as string) ?? DEFAULT_TEMPLATE_LABELS.descriptionLabel,
+      (template.descriptionLabel as string) ??
+      DEFAULT_TEMPLATE_LABELS.descriptionLabel,
     priceLabel:
       (template.priceLabel as string) ?? DEFAULT_TEMPLATE_LABELS.priceLabel,
     quantityLabel:
-      (template.quantityLabel as string) ?? DEFAULT_TEMPLATE_LABELS.quantityLabel,
+      (template.quantityLabel as string) ??
+      DEFAULT_TEMPLATE_LABELS.quantityLabel,
     totalLabel:
       (template.totalLabel as string) ?? DEFAULT_TEMPLATE_LABELS.totalLabel,
     totalSummaryLabel:
-      (template.totalSummaryLabel as string) ?? DEFAULT_TEMPLATE_LABELS.totalSummaryLabel,
-    vatLabel:
-      (template.vatLabel as string) ?? DEFAULT_TEMPLATE_LABELS.vatLabel,
+      (template.totalSummaryLabel as string) ??
+      DEFAULT_TEMPLATE_LABELS.totalSummaryLabel,
+    vatLabel: (template.vatLabel as string) ?? DEFAULT_TEMPLATE_LABELS.vatLabel,
     subtotalLabel:
-      (template.subtotalLabel as string) ?? DEFAULT_TEMPLATE_LABELS.subtotalLabel,
-    taxLabel:
-      (template.taxLabel as string) ?? DEFAULT_TEMPLATE_LABELS.taxLabel,
+      (template.subtotalLabel as string) ??
+      DEFAULT_TEMPLATE_LABELS.subtotalLabel,
+    taxLabel: (template.taxLabel as string) ?? DEFAULT_TEMPLATE_LABELS.taxLabel,
     discountLabel:
-      (template.discountLabel as string) ?? DEFAULT_TEMPLATE_LABELS.discountLabel,
+      (template.discountLabel as string) ??
+      DEFAULT_TEMPLATE_LABELS.discountLabel,
     paymentLabel:
       (template.paymentLabel as string) ?? DEFAULT_TEMPLATE_LABELS.paymentLabel,
     noteLabel:
@@ -179,8 +185,7 @@ export function buildInvoiceTemplateFromRecurring(
     dateFormat:
       (template.dateFormat as string) ?? DEFAULT_TEMPLATE_SETTINGS.dateFormat,
     locale: (template.locale as string) ?? DEFAULT_TEMPLATE_SETTINGS.locale,
-    size:
-      (template.size as "a4" | "letter") ?? DEFAULT_TEMPLATE_SETTINGS.size,
+    size: (template.size as "a4" | "letter") ?? DEFAULT_TEMPLATE_SETTINGS.size,
 
     // Boolean settings with defaults
     includeVat:
@@ -188,11 +193,14 @@ export function buildInvoiceTemplateFromRecurring(
     includeTax:
       (template.includeTax as boolean) ?? DEFAULT_TEMPLATE_SETTINGS.includeTax,
     includeDiscount:
-      (template.includeDiscount as boolean) ?? DEFAULT_TEMPLATE_SETTINGS.includeDiscount,
+      (template.includeDiscount as boolean) ??
+      DEFAULT_TEMPLATE_SETTINGS.includeDiscount,
     includeDecimals:
-      (template.includeDecimals as boolean) ?? DEFAULT_TEMPLATE_SETTINGS.includeDecimals,
+      (template.includeDecimals as boolean) ??
+      DEFAULT_TEMPLATE_SETTINGS.includeDecimals,
     includeUnits:
-      (template.includeUnits as boolean) ?? DEFAULT_TEMPLATE_SETTINGS.includeUnits,
+      (template.includeUnits as boolean) ??
+      DEFAULT_TEMPLATE_SETTINGS.includeUnits,
     includeQr:
       (template.includeQr as boolean) ?? DEFAULT_TEMPLATE_SETTINGS.includeQr,
 
