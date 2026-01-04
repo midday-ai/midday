@@ -203,12 +203,25 @@ export const invoiceRecurringRouter = createTRPCRouter({
       // individual field constraints; this validates cross-field dependencies that
       // require fetching existing data.
 
-      // Frequencies that require a non-null frequencyDay value
-      const frequenciesRequiringDay = [
+      // Frequencies that require frequencyDay as day of week (0-6)
+      const dayOfWeekFrequencies = [
         "weekly",
         "biweekly",
-        "monthly_date",
         "monthly_weekday",
+      ] as const;
+
+      // Frequencies that require frequencyDay as day of month (1-31)
+      const dayOfMonthFrequencies = [
+        "monthly_date",
+        "quarterly",
+        "semi_annual",
+        "annual",
+      ] as const;
+
+      // All frequencies that require a non-null frequencyDay value
+      const frequenciesRequiringDay = [
+        ...dayOfWeekFrequencies,
+        ...dayOfMonthFrequencies,
       ] as const;
 
       // Validate frequency/frequencyDay cross-field constraints
@@ -264,10 +277,11 @@ export const invoiceRecurringRouter = createTRPCRouter({
           effectiveFrequencyDay !== null &&
           effectiveFrequencyDay !== undefined
         ) {
+          // Validate day-of-week frequencies (0-6)
           if (
-            (effectiveFrequency === "weekly" ||
-              effectiveFrequency === "biweekly" ||
-              effectiveFrequency === "monthly_weekday") &&
+            dayOfWeekFrequencies.includes(
+              effectiveFrequency as (typeof dayOfWeekFrequencies)[number],
+            ) &&
             effectiveFrequencyDay > 6
           ) {
             throw new TRPCError({
@@ -276,14 +290,16 @@ export const invoiceRecurringRouter = createTRPCRouter({
             });
           }
 
+          // Validate day-of-month frequencies (1-31)
           if (
-            effectiveFrequency === "monthly_date" &&
+            dayOfMonthFrequencies.includes(
+              effectiveFrequency as (typeof dayOfMonthFrequencies)[number],
+            ) &&
             (effectiveFrequencyDay < 1 || effectiveFrequencyDay > 31)
           ) {
             throw new TRPCError({
               code: "BAD_REQUEST",
-              message:
-                "For monthly_date frequency, frequencyDay must be 1-31 (day of month)",
+              message: `For ${effectiveFrequency} frequency, frequencyDay must be 1-31 (day of month)`,
             });
           }
         }
