@@ -1,11 +1,11 @@
-import type { Database } from "@db/client";
+import type { DatabaseOrTransaction } from "@db/client";
 import { createActivity } from "../queries/activities";
 import type { activityTypeEnum } from "../schema";
 
 type ActivityType = (typeof activityTypeEnum.enumValues)[number];
 
 interface LogActivityOptions {
-  db: Database;
+  db: DatabaseOrTransaction;
   teamId: string;
   userId: string;
   type: ActivityType;

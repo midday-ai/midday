@@ -1,5 +1,5 @@
 import { UTCDate } from "@date-fns/utc";
-import type { Database } from "@db/client";
+import type { Database, DatabaseOrTransaction } from "@db/client";
 import {
   type activityTypeEnum,
   customers,
@@ -696,7 +696,10 @@ type DraftInvoiceParams = {
   userId: string;
 };
 
-export async function draftInvoice(db: Database, params: DraftInvoiceParams) {
+export async function draftInvoice(
+  db: DatabaseOrTransaction,
+  params: DraftInvoiceParams,
+) {
   const {
     id,
     teamId,
@@ -1016,7 +1019,10 @@ export type UpdateInvoiceParams = {
   userId?: string;
 };
 
-export async function updateInvoice(db: Database, params: UpdateInvoiceParams) {
+export async function updateInvoice(
+  db: DatabaseOrTransaction,
+  params: UpdateInvoiceParams,
+) {
   const { id, teamId, userId, ...rest } = params;
 
   const [result] = await db

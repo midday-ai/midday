@@ -122,29 +122,37 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
   React.useEffect(() => {
     if (issueDate && formRecurringConfig) {
       const newDate = new Date(issueDate);
+      const dayOfWeek = newDate.getDay();
+      const dayOfMonth = newDate.getDate();
+      const weekOfMonth = Math.ceil(dayOfMonth / 7);
+
       const shouldUpdate =
         (formRecurringConfig.frequency === "weekly" &&
-          formRecurringConfig.frequencyDay !== newDate.getDay()) ||
+          formRecurringConfig.frequencyDay !== dayOfWeek) ||
         (formRecurringConfig.frequency === "monthly_date" &&
-          formRecurringConfig.frequencyDay !== newDate.getDate());
+          formRecurringConfig.frequencyDay !== dayOfMonth) ||
+        (formRecurringConfig.frequency === "monthly_weekday" &&
+          (formRecurringConfig.frequencyDay !== dayOfWeek ||
+            formRecurringConfig.frequencyWeek !== weekOfMonth));
 
       if (shouldUpdate) {
-        setValue(
-          "recurringConfig",
-          {
-            ...formRecurringConfig,
-            frequencyDay:
-              formRecurringConfig.frequency === "weekly"
-                ? newDate.getDay()
-                : formRecurringConfig.frequency === "monthly_date"
-                  ? newDate.getDate()
-                  : formRecurringConfig.frequencyDay,
-          },
-          {
-            shouldValidate: true,
-            shouldDirty: true,
-          },
-        );
+        const updatedConfig =
+          formRecurringConfig.frequency === "weekly"
+            ? { ...formRecurringConfig, frequencyDay: dayOfWeek }
+            : formRecurringConfig.frequency === "monthly_date"
+              ? { ...formRecurringConfig, frequencyDay: dayOfMonth }
+              : formRecurringConfig.frequency === "monthly_weekday"
+                ? {
+                    ...formRecurringConfig,
+                    frequencyDay: dayOfWeek,
+                    frequencyWeek: weekOfMonth,
+                  }
+                : formRecurringConfig;
+
+        setValue("recurringConfig", updatedConfig, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
       }
     }
   }, [issueDate]);

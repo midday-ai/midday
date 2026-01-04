@@ -306,7 +306,11 @@ export const updateInvoiceRecurringSchema = z
     status: invoiceRecurringStatusSchema.optional(),
   })
   .superRefine((data, ctx) => {
-    // Validate frequencyDay based on frequency type (when both are provided)
+    // Validate frequencyDay based on frequency type (when both are provided in the update).
+    // NOTE: When only frequencyDay is provided without frequency, validation against the
+    // existing frequency is performed in the tRPC router (invoice-recurring.ts) after
+    // fetching the existing record. This prevents invalid states like frequencyDay: 0
+    // for monthly_date invoices.
     if (
       data.frequencyDay !== null &&
       data.frequencyDay !== undefined &&
