@@ -232,7 +232,7 @@ export function Form() {
             frequencyDay: config.frequencyDay,
             frequencyWeek: config.frequencyWeek,
             frequencyInterval: config.frequencyInterval,
-            endType: config.endType,
+            endType: config.endType ?? "never",
             endDate: config.endDate,
             endCount: config.endCount,
             timezone:
