@@ -139,7 +139,8 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
       const weekOfMonth = Math.ceil(dayOfMonth / 7);
 
       const shouldUpdate =
-        (formRecurringConfig.frequency === "weekly" &&
+        ((formRecurringConfig.frequency === "weekly" ||
+          formRecurringConfig.frequency === "biweekly") &&
           formRecurringConfig.frequencyDay !== dayOfWeek) ||
         (formRecurringConfig.frequency === "monthly_date" &&
           formRecurringConfig.frequencyDay !== dayOfMonth) ||
@@ -149,7 +150,8 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
 
       if (shouldUpdate) {
         const updatedConfig =
-          formRecurringConfig.frequency === "weekly"
+          formRecurringConfig.frequency === "weekly" ||
+          formRecurringConfig.frequency === "biweekly"
             ? { ...formRecurringConfig, frequencyDay: dayOfWeek }
             : formRecurringConfig.frequency === "monthly_date"
               ? { ...formRecurringConfig, frequencyDay: dayOfMonth }

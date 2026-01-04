@@ -92,7 +92,7 @@ const baseInvoiceTemplateSchema = z.object({
   discountLabel: z.string().optional(),
   timezone: z
     .string()
-    .refine((tz) => !tz || isValidTimezone(tz), {
+    .refine(isValidTimezone, {
       message:
         "Invalid timezone. Use IANA timezone format (e.g., 'America/New_York', 'UTC')",
     })
