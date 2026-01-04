@@ -110,15 +110,15 @@ export function Header({
                   <div className="pt-4 pb-8">
                     <div className="grid grid-cols-1 lg:grid-cols-10">
                       {/* Left Column - Features List */}
-                      <div className="lg:col-span-3 px-1 sm:px-2 md:px-3 lg:px-4 xl:px-6 2xl:px-8">
+                      <div className="lg:col-span-3 pr-1 sm:pr-2 md:pr-3 lg:pr-4 xl:pr-6 2xl:pr-8 pl-4 sm:pl-4 md:pl-4 lg:pl-4 xl:pl-6 2xl:pl-8">
                         <div
-                          className="flex items-center py-2 cursor-pointer rounded group"
+                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
                           onClick={() => {
                             setIsFeaturesOpen(false);
                             router.push("/assistant");
                           }}
                         >
-                          <div className="flex flex-col">
+                          <div className="flex flex-col pl-2">
                             <span className="font-sans text-base text-foreground mb-1">
                               Assistant
                             </span>
@@ -128,13 +128,13 @@ export function Header({
                           </div>
                         </div>
                         <div
-                          className="flex items-center py-2 cursor-pointer rounded group"
+                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
                           onClick={() => {
                             setIsFeaturesOpen(false);
                             router.push("/insights");
                           }}
                         >
-                          <div className="flex flex-col">
+                          <div className="flex flex-col pl-2">
                             <span className="font-sans text-base text-foreground mb-1">
                               Insights
                             </span>
@@ -144,13 +144,13 @@ export function Header({
                           </div>
                         </div>
                         <div
-                          className="flex items-center py-2 cursor-pointer rounded group"
+                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
                           onClick={() => {
                             setIsFeaturesOpen(false);
                             router.push("/transactions");
                           }}
                         >
-                          <div className="flex flex-col">
+                          <div className="flex flex-col pl-2">
                             <span className="font-sans text-base text-foreground mb-1">
                               Transactions
                             </span>
@@ -160,13 +160,13 @@ export function Header({
                           </div>
                         </div>
                         <div
-                          className="flex items-center py-2 cursor-pointer rounded group"
+                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
                           onClick={() => {
                             setIsFeaturesOpen(false);
                             router.push("/inbox");
                           }}
                         >
-                          <div className="flex flex-col">
+                          <div className="flex flex-col pl-2">
                             <span className="font-sans text-base text-foreground mb-1">
                               Inbox
                             </span>
@@ -176,13 +176,13 @@ export function Header({
                           </div>
                         </div>
                         <div
-                          className="flex items-center py-2 cursor-pointer rounded group"
+                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
                           onClick={() => {
                             setIsFeaturesOpen(false);
                             router.push("/time-tracking");
                           }}
                         >
-                          <div className="flex flex-col">
+                          <div className="flex flex-col pl-2">
                             <span className="font-sans text-base text-foreground mb-1">
                               Time tracking
                             </span>
@@ -192,13 +192,13 @@ export function Header({
                           </div>
                         </div>
                         <div
-                          className="flex items-center py-2 cursor-pointer rounded group"
+                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
                           onClick={() => {
                             setIsFeaturesOpen(false);
                             router.push("/invoicing");
                           }}
                         >
-                          <div className="flex flex-col">
+                          <div className="flex flex-col pl-2">
                             <span className="font-sans text-base text-foreground mb-1">
                               Invoicing
                             </span>
@@ -208,13 +208,13 @@ export function Header({
                           </div>
                         </div>
                         <div
-                          className="flex items-center py-2 cursor-pointer group rounded"
+                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
                           onClick={() => {
                             setIsFeaturesOpen(false);
                             router.push("/customers");
                           }}
                         >
-                          <div className="flex flex-col">
+                          <div className="flex flex-col pl-2">
                             <span className="font-sans text-base text-foreground mb-1">
                               Customers
                             </span>
@@ -224,13 +224,13 @@ export function Header({
                           </div>
                         </div>
                         <div
-                          className="flex items-center py-2 cursor-pointer group rounded"
+                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
                           onClick={() => {
                             setIsFeaturesOpen(false);
                             router.push("/file-storage");
                           }}
                         >
-                          <div className="flex flex-col">
+                          <div className="flex flex-col pl-2">
                             <span className="font-sans text-base text-foreground mb-1">
                               Files
                             </span>
@@ -279,8 +279,7 @@ export function Header({
                                     Assistant
                                   </h3>
                                   <p className="font-sans text-xs text-muted-foreground leading-relaxed">
-                                    Ask questions and get clear financial
-                                    answers
+                                    Answers grounded in your actual numbers, not assumptions
                                   </p>
                                 </div>
                               </div>

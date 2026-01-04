@@ -182,11 +182,8 @@ export function ReceiptAttachmentAnimation() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <button className="hidden md:flex items-center gap-1 px-2 md:px-3 py-1 md:py-1.5 bg-muted hover:bg-muted/80 transition-colors border border-border">
-                <span className="font-sans text-[10px] md:text-[11px] text-foreground">
-                  Decline
-                </span>
-                <MaterialIcon name="close" className="text-foreground" size={14} />
+              <button className="hidden md:flex items-center justify-center h-7 md:h-8 px-2 md:px-3 bg-transparent border border-border text-[11px] md:text-[12px] text-foreground hover:bg-muted transition-colors flex-shrink-0">
+                Decline
               </button>
               <button className="flex items-center gap-1 px-2 md:px-3 py-1 md:py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors border border-primary">
                 <span className="font-sans text-[10px] md:text-[11px]">
