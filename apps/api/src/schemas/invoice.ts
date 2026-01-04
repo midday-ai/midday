@@ -644,7 +644,7 @@ export const deleteInvoiceSchema = z.object({
 export const createInvoiceSchema = z.object({
   id: z.string().uuid(),
   deliveryType: z.enum(["create", "create_and_send", "scheduled"]),
-  scheduledAt: z.string().datetime().optional(),
+  scheduledAt: z.string().datetime({ offset: true }).optional(),
 });
 
 export const remindInvoiceSchema = z.object({
@@ -662,7 +662,7 @@ export const remindInvoiceSchema = z.object({
 
 export const updateScheduledInvoiceSchema = z.object({
   id: z.string().uuid(),
-  scheduledAt: z.string().datetime(),
+  scheduledAt: z.string().datetime({ offset: true }),
 });
 
 export const cancelScheduledInvoiceSchema = z.object({
@@ -799,9 +799,9 @@ export const createInvoiceRequestSchema = z
         "How the invoice should be processed: 'create' - finalize immediately, 'create_and_send' - finalize and send to customer, 'scheduled' - schedule for automatic processing at specified date",
       example: "create",
     }),
-    scheduledAt: z.string().datetime().optional().openapi({
+    scheduledAt: z.string().datetime({ offset: true }).optional().openapi({
       description:
-        "Scheduled date of the invoice in ISO 8601 format. Required when deliveryType is 'scheduled'. Must be in the future.",
+        "Scheduled date of the invoice in ISO 8601 format with timezone offset (e.g., Z or +00:00). Required when deliveryType is 'scheduled'. Must be in the future.",
       example: "2024-06-30T23:59:59.000Z",
     }),
   })

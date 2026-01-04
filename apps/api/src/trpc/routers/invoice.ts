@@ -498,18 +498,7 @@ export const invoiceRouter = createTRPCRouter({
           // Calculate delay in milliseconds from now
           const delayMs = scheduledDate.getTime() - now.getTime();
 
-          if (existingInvoice?.scheduledJobId) {
-            // Cancel the existing job and create a new one with BullMQ
-            const queue = getQueue("invoices");
-            const existingJob = await queue.getJob(
-              existingInvoice.scheduledJobId,
-            );
-            if (existingJob) {
-              await existingJob.remove();
-            }
-          }
-
-          // Create a new scheduled job with delay
+          // Create the new scheduled job FIRST to ensure we don't lose the job if creation fails
           const scheduledRun = await triggerJob(
             "schedule-invoice",
             {
@@ -528,6 +517,22 @@ export const invoiceRouter = createTRPCRouter({
           }
 
           scheduledJobId = scheduledRun.id;
+
+          // Only remove the old job AFTER successfully creating the new one
+          // This ensures we never lose the scheduled job even if there are transient failures
+          if (existingInvoice?.scheduledJobId) {
+            const queue = getQueue("invoices");
+            const existingJob = await queue.getJob(
+              existingInvoice.scheduledJobId,
+            );
+            if (existingJob) {
+              await existingJob.remove().catch((err) => {
+                // Log but don't fail - the old job will eventually be cleaned up or run (harmlessly)
+                // since we've already created the new job and will update the invoice
+                console.error("Failed to remove old scheduled job:", err);
+              });
+            }
+          }
         } catch (error) {
           throw new TRPCError({
             code: "SERVICE_UNAVAILABLE",
@@ -661,17 +666,10 @@ export const invoiceRouter = createTRPCRouter({
         });
       }
 
-      // Cancel the existing job and create a new one with the new delay
-      const queue = getQueue("invoices");
-      const existingJob = await queue.getJob(invoice.scheduledJobId);
-      if (existingJob) {
-        await existingJob.remove();
-      }
-
       // Calculate new delay
       const delayMs = scheduledDate.getTime() - now.getTime();
 
-      // Create new scheduled job
+      // Create new scheduled job FIRST to ensure we don't lose the job if creation fails
       const scheduledRun = await triggerJob(
         "schedule-invoice",
         {
@@ -683,6 +681,13 @@ export const invoiceRouter = createTRPCRouter({
         },
       );
 
+      if (!scheduledRun?.id) {
+        throw new TRPCError({
+          code: "SERVICE_UNAVAILABLE",
+          message: "Failed to create scheduled job",
+        });
+      }
+
       // Update the scheduled date and job ID in the database
       const updatedInvoice = await updateInvoice(db, {
         id: input.id,
@@ -690,6 +695,18 @@ export const invoiceRouter = createTRPCRouter({
         scheduledJobId: scheduledRun.id,
         teamId: teamId!,
       });
+
+      // Only remove the old job AFTER successfully creating the new one and updating the database
+      // This ensures we never lose the scheduled job even if there are transient failures
+      const queue = getQueue("invoices");
+      const existingJob = await queue.getJob(invoice.scheduledJobId);
+      if (existingJob) {
+        await existingJob.remove().catch((err) => {
+          // Log but don't fail - the old job will eventually be cleaned up or run (harmlessly)
+          // since the invoice status and job ID have already been updated
+          console.error("Failed to remove old scheduled job:", err);
+        });
+      }
 
       return updatedInvoice;
     }),
