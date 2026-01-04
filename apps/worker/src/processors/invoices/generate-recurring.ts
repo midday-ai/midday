@@ -35,7 +35,11 @@ type ProcessResult = {
 
 /**
  * Scheduled processor that generates invoices from recurring invoice series
- * Runs every 6 hours to find and process due recurring invoices
+ * Runs every 2 hours to find and process due recurring invoices
+ *
+ * Duplicate processing is prevented by:
+ * 1. BullMQ's upsertJobScheduler (ensures only one scheduler job exists)
+ * 2. Idempotency check via checkInvoiceExists (prevents duplicate invoices)
  *
  * Kill switch: Set DISABLE_RECURRING_INVOICES=true to disable processing
  */

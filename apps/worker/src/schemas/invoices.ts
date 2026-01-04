@@ -89,3 +89,14 @@ export const scheduleInvoiceSchema = z.object({
 });
 
 export type ScheduleInvoicePayload = z.infer<typeof scheduleInvoiceSchema>;
+
+/**
+ * Invoice upcoming notification job schema
+ * This is a scheduled job that runs periodically to send notifications
+ * about upcoming recurring invoices (24 hours before generation)
+ */
+export const invoiceUpcomingNotificationSchema = z.object({});
+
+export type InvoiceUpcomingNotificationPayload = z.infer<
+  typeof invoiceUpcomingNotificationSchema
+>;

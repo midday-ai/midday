@@ -380,6 +380,75 @@ const handleRecurringSeriesPaused: NotificationDescriptionHandler = (
   return t("notifications.recurring_series_paused.title");
 };
 
+const handleRecurringInvoiceUpcoming: NotificationDescriptionHandler = (
+  metadata,
+  user,
+  t,
+) => {
+  const customerName = metadata?.customerName;
+  const amount = metadata?.amount;
+  const currency = metadata?.currency;
+  const scheduledAt = metadata?.scheduledAt;
+
+  if (customerName && amount && currency && scheduledAt) {
+    const formattedAmount =
+      formatAmount({
+        currency: currency,
+        amount: amount,
+        locale: user?.locale || "en-US",
+      }) ||
+      new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: currency,
+      }).format(amount);
+
+    const scheduledDate = new Date(scheduledAt);
+    const formattedTime = format(scheduledDate, "HH:mm");
+
+    return t(
+      "notifications.recurring_invoice_upcoming.with_customer_and_amount",
+      {
+        customerName,
+        amount: formattedAmount,
+        time: formattedTime,
+      },
+    );
+  }
+
+  if (customerName && scheduledAt) {
+    const scheduledDate = new Date(scheduledAt);
+    const formattedTime = format(scheduledDate, "HH:mm");
+
+    return t("notifications.recurring_invoice_upcoming.with_customer", {
+      customerName,
+      time: formattedTime,
+    });
+  }
+
+  if (amount && currency && scheduledAt) {
+    const formattedAmount =
+      formatAmount({
+        currency: currency,
+        amount: amount,
+        locale: user?.locale || "en-US",
+      }) ||
+      new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: currency,
+      }).format(amount);
+
+    const scheduledDate = new Date(scheduledAt);
+    const formattedTime = format(scheduledDate, "HH:mm");
+
+    return t("notifications.recurring_invoice_upcoming.with_amount", {
+      amount: formattedAmount,
+      time: formattedTime,
+    });
+  }
+
+  return t("notifications.recurring_invoice_upcoming.simple");
+};
+
 const handleInboxAutoMatched: NotificationDescriptionHandler = (
   metadata,
   user,
@@ -658,6 +727,7 @@ const notificationHandlers: Record<string, NotificationDescriptionHandler> = {
   recurring_series_started: handleRecurringSeriesStarted,
   recurring_series_completed: handleRecurringSeriesCompleted,
   recurring_series_paused: handleRecurringSeriesPaused,
+  recurring_invoice_upcoming: handleRecurringInvoiceUpcoming,
 };
 
 export function getNotificationDescription(

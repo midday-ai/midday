@@ -8,8 +8,20 @@ export const invoicesStaticSchedulers: StaticSchedulerConfig[] = [
   {
     name: "invoice-recurring-scheduler",
     queue: "invoices",
-    cron: "0 0,6,12,18 * * *", // Every 6 hours at 0:00, 6:00, 12:00, 18:00 UTC
+    cron: "0 */2 * * *", // Every 2 hours (0:00, 2:00, 4:00, ..., 22:00 UTC)
     jobName: "invoice-recurring-scheduler",
+    payload: {},
+    options: {
+      tz: "UTC",
+    },
+  },
+  {
+    name: "invoice-upcoming-notification",
+    queue: "invoices",
+    // Run every 2 hours, offset by 1 hour from the recurring scheduler
+    // This ensures notifications go out before invoices are generated
+    cron: "0 1,3,5,7,9,11,13,15,17,19,21,23 * * *", // Odd hours UTC
+    jobName: "invoice-upcoming-notification",
     payload: {},
     options: {
       tz: "UTC",

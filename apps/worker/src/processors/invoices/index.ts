@@ -4,6 +4,7 @@ import { InvoiceNotificationProcessor } from "./invoice-notification";
 import { ScheduleInvoiceProcessor } from "./schedule-invoice";
 import { SendInvoiceEmailProcessor } from "./send-invoice-email";
 import { SendInvoiceReminderProcessor } from "./send-invoice-reminder";
+import { InvoiceUpcomingNotificationProcessor } from "./upcoming-notification";
 
 /**
  * Export all invoice processors (for type imports)
@@ -14,6 +15,7 @@ export { InvoiceNotificationProcessor } from "./invoice-notification";
 export { ScheduleInvoiceProcessor } from "./schedule-invoice";
 export { SendInvoiceEmailProcessor } from "./send-invoice-email";
 export { SendInvoiceReminderProcessor } from "./send-invoice-reminder";
+export { InvoiceUpcomingNotificationProcessor } from "./upcoming-notification";
 
 /**
  * Invoice processor registry
@@ -22,6 +24,7 @@ export { SendInvoiceReminderProcessor } from "./send-invoice-reminder";
 export const invoiceProcessors = {
   "invoice-notification": new InvoiceNotificationProcessor(),
   "invoice-recurring-scheduler": new InvoiceRecurringSchedulerProcessor(),
+  "invoice-upcoming-notification": new InvoiceUpcomingNotificationProcessor(),
   "generate-invoice": new GenerateInvoiceProcessor(),
   "send-invoice-email": new SendInvoiceEmailProcessor(),
   "send-invoice-reminder": new SendInvoiceReminderProcessor(),

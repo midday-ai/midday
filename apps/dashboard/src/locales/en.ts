@@ -208,6 +208,18 @@ export default {
       auto_failure:
         "Recurring series paused after {failureCount} failed attempts",
     },
+    recurring_invoice_upcoming: {
+      name: "Upcoming Recurring Invoice",
+      description:
+        "Get notified 24 hours before a recurring invoice is generated",
+      title: "Upcoming invoice generation",
+      with_customer_and_amount:
+        "A {amount} invoice for {customerName} is scheduled for tomorrow at {time}",
+      with_customer:
+        "An invoice for {customerName} is scheduled for tomorrow at {time}",
+      with_amount: "A {amount} invoice is scheduled for tomorrow at {time}",
+      simple: "A recurring invoice is scheduled for tomorrow",
+    },
     inbox_new: {
       name: "New Inbox Items",
       description: "Get notified when new items arrive in your inbox",

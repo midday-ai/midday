@@ -773,6 +773,11 @@ export const invoiceRecurring = pgTable(
     topBlock: jsonb("top_block"),
     bottomBlock: jsonb("bottom_block"),
     templateId: uuid("template_id"),
+    // Notification tracking
+    upcomingNotificationSentAt: timestamp("upcoming_notification_sent_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
   },
   (table) => [
     index("invoice_recurring_team_id_idx").using(

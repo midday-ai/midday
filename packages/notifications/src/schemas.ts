@@ -34,6 +34,7 @@ export const createActivitySchema = z.object({
     "recurring_series_completed",
     "recurring_series_started",
     "recurring_series_paused",
+    "recurring_invoice_upcoming",
   ]),
   source: z.enum(["system", "user"]).default("system"),
   priority: z.number().int().min(1).max(10).default(5),
@@ -258,6 +259,16 @@ export const recurringSeriesPausedSchema = z.object({
   failureCount: z.number().optional(),
 });
 
+export const recurringInvoiceUpcomingSchema = z.object({
+  users: z.array(userSchema),
+  recurringId: z.string().uuid(),
+  customerName: z.string().optional(),
+  amount: z.number().optional(),
+  currency: z.string().optional(),
+  scheduledAt: z.string(), // ISO date when invoice will be generated
+  frequency: z.string(), // e.g., "weekly", "monthly_date"
+});
+
 export const transactionsCategorizedSchema = z.object({
   users: z.array(userSchema),
   categorySlug: z.string(),
@@ -310,6 +321,9 @@ export type RecurringSeriesStartedInput = z.infer<
 export type RecurringSeriesPausedInput = z.infer<
   typeof recurringSeriesPausedSchema
 >;
+export type RecurringInvoiceUpcomingInput = z.infer<
+  typeof recurringInvoiceUpcomingSchema
+>;
 export type TransactionsCategorizedInput = z.infer<
   typeof transactionsCategorizedSchema
 >;
@@ -340,4 +354,5 @@ export type NotificationTypes = {
   recurring_series_completed: RecurringSeriesCompletedInput;
   recurring_series_started: RecurringSeriesStartedInput;
   recurring_series_paused: RecurringSeriesPausedInput;
+  recurring_invoice_upcoming: RecurringInvoiceUpcomingInput;
 };

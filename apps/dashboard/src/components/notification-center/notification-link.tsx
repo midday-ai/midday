@@ -20,6 +20,7 @@ const SUPPORTED_NOTIFICATION_TYPES = [
   "inbox_needs_review",
   "inbox_auto_matched",
   "inbox_cross_currency_matched",
+  "recurring_invoice_upcoming",
 ];
 
 export function isNotificationClickable(activityType: string): boolean {
@@ -91,6 +92,13 @@ export function NotificationLink({
           } else {
             // Fallback to inbox page if no inboxId
             router.push("/inbox");
+          }
+          break;
+
+        case "recurring_invoice_upcoming":
+          // Open the edit recurring sheet to let user review/modify the series
+          if (recordId) {
+            setInvoiceParams({ editRecurringId: recordId, type: "edit" });
           }
           break;
 

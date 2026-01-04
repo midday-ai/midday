@@ -15,7 +15,7 @@ import {
   calculateUpcomingDates,
   shouldMarkCompleted,
 } from "@db/utils/invoice-recurring";
-import { and, desc, eq, inArray, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 
 export type CreateInvoiceRecurringParams = {
   teamId: string;
@@ -825,4 +825,75 @@ export async function getInvoiceRecurringInfo(
     nextScheduledAt: recurring.nextScheduledAt,
     status: recurring.status,
   };
+}
+
+/**
+ * Get recurring invoices that are upcoming within the specified hours
+ * and haven't had their upcoming notification sent yet
+ * Used by the scheduler to send 24-hour advance notifications
+ */
+export async function getUpcomingDueRecurring(db: Database, hoursAhead = 24) {
+  const now = new Date();
+  const futureDate = new Date(now.getTime() + hoursAhead * 60 * 60 * 1000);
+
+  // Find active series due within hoursAhead that haven't had notification sent
+  // for this specific upcoming cycle
+  const data = await db
+    .select({
+      id: invoiceRecurring.id,
+      teamId: invoiceRecurring.teamId,
+      userId: invoiceRecurring.userId,
+      customerId: invoiceRecurring.customerId,
+      customerName: invoiceRecurring.customerName,
+      frequency: invoiceRecurring.frequency,
+      nextScheduledAt: invoiceRecurring.nextScheduledAt,
+      amount: invoiceRecurring.amount,
+      currency: invoiceRecurring.currency,
+      upcomingNotificationSentAt: invoiceRecurring.upcomingNotificationSentAt,
+    })
+    .from(invoiceRecurring)
+    .where(
+      and(
+        eq(invoiceRecurring.status, "active"),
+        // Due within the look-ahead window
+        gt(invoiceRecurring.nextScheduledAt, now.toISOString()),
+        lte(invoiceRecurring.nextScheduledAt, futureDate.toISOString()),
+        // Notification not sent yet, or was sent for a previous cycle
+        // (upcomingNotificationSentAt < nextScheduledAt - 24h means it was for a previous cycle)
+        or(
+          isNull(invoiceRecurring.upcomingNotificationSentAt),
+          lte(
+            invoiceRecurring.upcomingNotificationSentAt,
+            // If notification was sent more than hoursAhead before current nextScheduledAt,
+            // it was for a previous cycle
+            sql`${invoiceRecurring.nextScheduledAt}::timestamptz - interval '${sql.raw(String(hoursAhead + 1))} hours'`,
+          ),
+        ),
+      ),
+    );
+
+  return data;
+}
+
+/**
+ * Mark that the upcoming notification has been sent for a recurring invoice series
+ */
+export async function markUpcomingNotificationSent(
+  db: Database,
+  params: { id: string; teamId: string },
+) {
+  const { id, teamId } = params;
+
+  const [result] = await db
+    .update(invoiceRecurring)
+    .set({
+      upcomingNotificationSentAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    })
+    .where(
+      and(eq(invoiceRecurring.id, id), eq(invoiceRecurring.teamId, teamId)),
+    )
+    .returning();
+
+  return result;
 }

@@ -34,7 +34,7 @@ export function NotificationItem({
   const metadata = getMetadata(activity);
 
   const getNotificationIcon = (activityType: string) => {
-    if (activityType.startsWith("recurring_series"))
+    if (activityType.startsWith("recurring_"))
       return <Icons.Repeat className="size-4" />;
     if (activityType.startsWith("invoice_"))
       return <Icons.Invoice className="size-4" />;
