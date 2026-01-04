@@ -239,13 +239,22 @@ export function EditRecurringSheet() {
 
   const previewDates = React.useMemo(() => {
     if (!recurring?.nextScheduledAt) return [];
+
+    // Calculate remaining invoices, ensuring limit is never negative
+    // (e.g., when user sets endCount lower than already generated invoices)
+    const remainingInvoices =
+      config.endType === "after_count" && config.endCount
+        ? Math.max(0, config.endCount - (recurring.invoicesGenerated ?? 0))
+        : null;
+
+    const limit =
+      remainingInvoices !== null ? Math.min(remainingInvoices, 5) : 3;
+
     return calculatePreviewDates(
       config,
       new Date(recurring.nextScheduledAt),
       recurring.amount ?? 0,
-      config.endType === "after_count" && config.endCount
-        ? Math.min(config.endCount - (recurring.invoicesGenerated ?? 0), 5)
-        : 3,
+      limit,
     );
   }, [config, recurring]);
 

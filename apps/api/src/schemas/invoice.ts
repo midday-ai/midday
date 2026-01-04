@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+import { isValidTimezone } from "@midday/location/timezones";
 
 // TipTap JSONContent schema for editor fields
 export const tiptapContentSchema: z.ZodType<any> = z
@@ -89,7 +90,13 @@ const baseInvoiceTemplateSchema = z.object({
   subtotalLabel: z.string().optional(),
   taxLabel: z.string().optional(),
   discountLabel: z.string().optional(),
-  timezone: z.string().optional(),
+  timezone: z
+    .string()
+    .refine((tz) => !tz || isValidTimezone(tz), {
+      message:
+        "Invalid timezone. Use IANA timezone format (e.g., 'America/New_York', 'UTC')",
+    })
+    .optional(),
   paymentLabel: z.string().optional(),
   noteLabel: z.string().optional(),
   logoUrl: z.string().optional().nullable(),

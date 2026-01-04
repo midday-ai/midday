@@ -1,5 +1,6 @@
 import type { UIChatMessage } from "@api/ai/types";
 import { z } from "@hono/zod-openapi";
+import { isValidTimezone } from "@midday/location/timezones";
 
 // Create a Zod schema that validates UIChatMessage structure
 const messageSchema = z
@@ -60,10 +61,17 @@ export const chatRequestSchema = z.object({
     description: "User's city",
     example: "San Francisco",
   }),
-  timezone: z.string().optional().openapi({
-    description: "User's timezone",
-    example: "America/New_York",
-  }),
+  timezone: z
+    .string()
+    .refine((tz) => !tz || isValidTimezone(tz), {
+      message:
+        "Invalid timezone. Use IANA timezone format (e.g., 'America/New_York', 'UTC')",
+    })
+    .optional()
+    .openapi({
+      description: "User's timezone",
+      example: "America/New_York",
+    }),
   agentChoice: z.string().optional().openapi({
     description: "Agent choice",
     example: "general",

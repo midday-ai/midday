@@ -4,11 +4,23 @@ import {
   RECURRING_FREQUENCIES,
   RECURRING_STATUSES,
 } from "@midday/invoice/recurring";
-import {
-  draftLineItemSchema,
-  editorFieldSchema,
-  upsertInvoiceTemplateSchema,
-} from "./invoice";
+import { isValidTimezone } from "@midday/location/timezones";
+import { draftLineItemSchema, upsertInvoiceTemplateSchema } from "./invoice";
+
+/**
+ * Zod schema for timezone validation
+ */
+const timezoneSchema = z
+  .string()
+  .refine(isValidTimezone, {
+    message:
+      "Invalid timezone. Use IANA timezone format (e.g., 'America/New_York', 'Europe/London', 'UTC')",
+  })
+  .openapi({
+    description:
+      "Timezone for scheduling (e.g., 'America/New_York'). Must be a valid IANA timezone identifier.",
+    example: "America/New_York",
+  });
 
 // Frequency enum schema - derived from canonical constants
 export const invoiceRecurringFrequencySchema = z.enum(RECURRING_FREQUENCIES);
@@ -87,11 +99,7 @@ export const createInvoiceRecurringSchema = z
       example: 12,
     }),
     // Timezone
-    timezone: z.string().openapi({
-      description:
-        "Timezone for scheduling (e.g., 'America/New_York'). Used to determine correct day-of-week for weekly invoices",
-      example: "America/New_York",
-    }),
+    timezone: timezoneSchema,
     // Payment terms
     dueDateOffset: z.number().int().min(0).default(30).openapi({
       description: "Days from issue date to due date",
@@ -189,20 +197,30 @@ export const createInvoiceRecurringSchema = z
 
     // monthly_last_day doesn't require frequencyDay
 
-    // Validate frequencyDay is required and in valid range for monthly_date frequency
-    if (data.frequency === "monthly_date") {
+    // Frequencies that require frequencyDay as day of month (1-31)
+    const dayOfMonthFrequencies = [
+      "monthly_date",
+      "quarterly",
+      "semi_annual",
+      "annual",
+    ] as const;
+
+    // Validate frequencyDay is required and in valid range for day-of-month frequencies
+    if (
+      dayOfMonthFrequencies.includes(
+        data.frequency as (typeof dayOfMonthFrequencies)[number],
+      )
+    ) {
       if (data.frequencyDay === null || data.frequencyDay === undefined) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message:
-            "frequencyDay is required for monthly_date frequency (1-31, day of month)",
+          message: `frequencyDay is required for ${data.frequency} frequency (1-31, day of month)`,
           path: ["frequencyDay"],
         });
       } else if (data.frequencyDay < 1 || data.frequencyDay > 31) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message:
-            "For monthly_date frequency, frequencyDay must be 1-31 (day of month)",
+          message: `For ${data.frequency} frequency, frequencyDay must be 1-31 (day of month)`,
           path: ["frequencyDay"],
         });
       }
@@ -300,7 +318,7 @@ export const updateInvoiceRecurringSchema = z
     endType: invoiceRecurringEndTypeSchema.optional(),
     endDate: z.string().datetime().nullable().optional(),
     endCount: z.number().int().min(1).nullable().optional(),
-    timezone: z.string().optional(),
+    timezone: timezoneSchema.optional(),
     dueDateOffset: z.number().int().min(0).optional(),
     amount: z.number().nullable().optional(),
     currency: z.string().nullable().optional(),
@@ -319,12 +337,25 @@ export const updateInvoiceRecurringSchema = z
     status: invoiceRecurringStatusSchema.optional(),
   })
   .superRefine((data, ctx) => {
-    // Frequencies that require a non-null frequencyDay value
-    const frequenciesRequiringDay = [
+    // Frequencies that require a non-null frequencyDay value (day of week: 0-6)
+    const dayOfWeekFrequencies = [
       "weekly",
       "biweekly",
-      "monthly_date",
       "monthly_weekday",
+    ] as const;
+
+    // Frequencies that require a non-null frequencyDay value (day of month: 1-31)
+    const dayOfMonthFrequencies = [
+      "monthly_date",
+      "quarterly",
+      "semi_annual",
+      "annual",
+    ] as const;
+
+    // All frequencies that require frequencyDay
+    const frequenciesRequiringDay = [
+      ...dayOfWeekFrequencies,
+      ...dayOfMonthFrequencies,
     ] as const;
 
     // Validate that frequencyDay is not null when frequency requires it
@@ -354,38 +385,30 @@ export const updateInvoiceRecurringSchema = z
       data.frequencyDay !== undefined &&
       data.frequency !== undefined
     ) {
-      if (data.frequency === "weekly" && data.frequencyDay > 6) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            "For weekly frequency, frequencyDay must be 0-6 (Sunday-Saturday)",
-          path: ["frequencyDay"],
-        });
-      }
-      if (data.frequency === "biweekly" && data.frequencyDay > 6) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            "For biweekly frequency, frequencyDay must be 0-6 (Sunday-Saturday)",
-          path: ["frequencyDay"],
-        });
-      }
-      if (data.frequency === "monthly_weekday" && data.frequencyDay > 6) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            "For monthly_weekday frequency, frequencyDay must be 0-6 (Sunday-Saturday)",
-          path: ["frequencyDay"],
-        });
-      }
+      // Validate day-of-week frequencies (0-6)
       if (
-        data.frequency === "monthly_date" &&
+        dayOfWeekFrequencies.includes(
+          data.frequency as (typeof dayOfWeekFrequencies)[number],
+        ) &&
+        data.frequencyDay > 6
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `For ${data.frequency} frequency, frequencyDay must be 0-6 (Sunday-Saturday)`,
+          path: ["frequencyDay"],
+        });
+      }
+
+      // Validate day-of-month frequencies (1-31)
+      if (
+        dayOfMonthFrequencies.includes(
+          data.frequency as (typeof dayOfMonthFrequencies)[number],
+        ) &&
         (data.frequencyDay < 1 || data.frequencyDay > 31)
       ) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message:
-            "For monthly_date frequency, frequencyDay must be 1-31 (day of month)",
+          message: `For ${data.frequency} frequency, frequencyDay must be 1-31 (day of month)`,
           path: ["frequencyDay"],
         });
       }
