@@ -204,7 +204,7 @@ export function EditRecurringSheet() {
   );
 
   const handleSave = () => {
-    if (!editRecurringId || !isValid) return;
+    if (!editRecurringId || !isValid || !config.endType) return;
     updateMutation.mutate({
       id: editRecurringId,
       frequency: config.frequency,
