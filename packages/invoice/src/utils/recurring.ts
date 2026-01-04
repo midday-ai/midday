@@ -4,6 +4,9 @@ export type InvoiceRecurringFrequency =
   | "weekly"
   | "monthly_date"
   | "monthly_weekday"
+  | "quarterly"
+  | "semi_annual"
+  | "annual"
   | "custom";
 
 export type InvoiceRecurringStatus =
@@ -58,6 +61,21 @@ export function getFrequencyLabel(
     case "monthly_weekday":
       return `Monthly on the ${ordinals[(frequencyWeek ?? 1) - 1]} ${dayNames[frequencyDay ?? 0]}`;
 
+    case "quarterly": {
+      const dayQ = frequencyDay ?? 1;
+      return `Quarterly on the ${formatOrdinal(dayQ)}`;
+    }
+
+    case "semi_annual": {
+      const dayS = frequencyDay ?? 1;
+      return `Semi-annually on the ${formatOrdinal(dayS)}`;
+    }
+
+    case "annual": {
+      const dayA = frequencyDay ?? 1;
+      return `Annually on the ${formatOrdinal(dayA)}`;
+    }
+
     case "custom":
       return "Custom";
 
@@ -78,6 +96,12 @@ export function getFrequencyShortLabel(
     case "monthly_date":
     case "monthly_weekday":
       return "Monthly";
+    case "quarterly":
+      return "Quarterly";
+    case "semi_annual":
+      return "Semi-annual";
+    case "annual":
+      return "Annual";
     case "custom":
       return "Custom";
     default:
@@ -230,6 +254,42 @@ export function getNextDate(config: RecurringConfig, currentDate: Date): Date {
         targetWeek,
       );
     }
+    case "quarterly": {
+      // Every 3 months on the same day
+      const targetDayQ = config.frequencyDay ?? currentDate.getDate();
+      const nextQuarter = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 3,
+        1,
+      );
+      const lastDayQ = lastDayOfMonth(nextQuarter).getDate();
+      nextQuarter.setDate(Math.min(targetDayQ, lastDayQ));
+      return nextQuarter;
+    }
+    case "semi_annual": {
+      // Every 6 months on the same day
+      const targetDayS = config.frequencyDay ?? currentDate.getDate();
+      const nextSemiAnnual = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 6,
+        1,
+      );
+      const lastDayS = lastDayOfMonth(nextSemiAnnual).getDate();
+      nextSemiAnnual.setDate(Math.min(targetDayS, lastDayS));
+      return nextSemiAnnual;
+    }
+    case "annual": {
+      // Every 12 months on the same day
+      const targetDayA = config.frequencyDay ?? currentDate.getDate();
+      const nextAnnual = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 12,
+        1,
+      );
+      const lastDayA = lastDayOfMonth(nextAnnual).getDate();
+      nextAnnual.setDate(Math.min(targetDayA, lastDayA));
+      return nextAnnual;
+    }
     case "custom": {
       const next = new Date(currentDate);
       next.setDate(next.getDate() + (config.frequencyInterval ?? 1));
@@ -350,6 +410,51 @@ export function validateRecurringConfig(
       errors.push({
         field: "frequencyDay",
         message: "Day of month is required for monthly frequency",
+      });
+    } else if (config.frequencyDay < 1 || config.frequencyDay > 31) {
+      errors.push({
+        field: "frequencyDay",
+        message: "Day of month must be 1-31",
+      });
+    }
+  }
+
+  // Validate frequencyDay is required for quarterly frequency
+  if (config.frequency === "quarterly") {
+    if (config.frequencyDay === null || config.frequencyDay === undefined) {
+      errors.push({
+        field: "frequencyDay",
+        message: "Day of month is required for quarterly frequency",
+      });
+    } else if (config.frequencyDay < 1 || config.frequencyDay > 31) {
+      errors.push({
+        field: "frequencyDay",
+        message: "Day of month must be 1-31",
+      });
+    }
+  }
+
+  // Validate frequencyDay is required for semi_annual frequency
+  if (config.frequency === "semi_annual") {
+    if (config.frequencyDay === null || config.frequencyDay === undefined) {
+      errors.push({
+        field: "frequencyDay",
+        message: "Day of month is required for semi-annual frequency",
+      });
+    } else if (config.frequencyDay < 1 || config.frequencyDay > 31) {
+      errors.push({
+        field: "frequencyDay",
+        message: "Day of month must be 1-31",
+      });
+    }
+  }
+
+  // Validate frequencyDay is required for annual frequency
+  if (config.frequency === "annual") {
+    if (config.frequencyDay === null || config.frequencyDay === undefined) {
+      errors.push({
+        field: "frequencyDay",
+        message: "Day of month is required for annual frequency",
       });
     } else if (config.frequencyDay < 1 || config.frequencyDay > 31) {
       errors.push({

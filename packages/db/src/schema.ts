@@ -146,6 +146,9 @@ export const invoiceRecurringFrequencyEnum = pgEnum(
     "weekly",
     "monthly_date", // Monthly on specific date (e.g., 15th)
     "monthly_weekday", // Monthly on nth weekday (e.g., 1st Friday)
+    "quarterly", // Every 3 months
+    "semi_annual", // Every 6 months
+    "annual", // Every 12 months
     "custom", // Every X days
   ],
 );
@@ -235,6 +238,7 @@ export const activityTypeEnum = pgEnum("activity_type", [
   "recurring_series_started",
   "recurring_series_completed",
   "recurring_series_paused",
+  "recurring_invoice_upcoming",
 
   // User actions
   "document_uploaded",

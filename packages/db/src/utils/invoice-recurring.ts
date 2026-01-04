@@ -12,6 +12,9 @@ export type InvoiceRecurringFrequency =
   | "weekly"
   | "monthly_date"
   | "monthly_weekday"
+  | "quarterly"
+  | "semi_annual"
+  | "annual"
   | "custom";
 
 export type InvoiceRecurringEndType = "never" | "on_date" | "after_count";
@@ -138,6 +141,45 @@ export function calculateNextScheduledDate(
         targetWeek,
         timezone,
       );
+      break;
+    }
+
+    case "quarterly": {
+      // Every 3 months on the same day of month
+      const targetDayOfMonthQ = frequencyDay ?? tzCurrentDate.getDate();
+      const nextQuarter = addMonths(tzCurrentDate, 3);
+
+      // Handle edge cases for months with fewer days
+      const lastDayQ = lastDayOfMonth(nextQuarter).getDate();
+      const actualDayQ = Math.min(targetDayOfMonthQ, lastDayQ);
+
+      nextDate = setDate(nextQuarter, actualDayQ);
+      break;
+    }
+
+    case "semi_annual": {
+      // Every 6 months on the same day of month
+      const targetDayOfMonthS = frequencyDay ?? tzCurrentDate.getDate();
+      const nextSemiAnnual = addMonths(tzCurrentDate, 6);
+
+      // Handle edge cases for months with fewer days
+      const lastDayS = lastDayOfMonth(nextSemiAnnual).getDate();
+      const actualDayS = Math.min(targetDayOfMonthS, lastDayS);
+
+      nextDate = setDate(nextSemiAnnual, actualDayS);
+      break;
+    }
+
+    case "annual": {
+      // Every 12 months on the same day of month
+      const targetDayOfMonthA = frequencyDay ?? tzCurrentDate.getDate();
+      const nextAnnual = addMonths(tzCurrentDate, 12);
+
+      // Handle edge cases for months with fewer days (e.g., Feb 29 -> Feb 28)
+      const lastDayA = lastDayOfMonth(nextAnnual).getDate();
+      const actualDayA = Math.min(targetDayOfMonthA, lastDayA);
+
+      nextDate = setDate(nextAnnual, actualDayA);
       break;
     }
 

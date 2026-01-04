@@ -293,6 +293,120 @@ describe("getNextDate", () => {
       expect(result.getDate()).toBe(2);
     });
   });
+
+  describe("quarterly frequency", () => {
+    test("adds 3 months", () => {
+      const config: RecurringConfig = {
+        frequency: "quarterly",
+        frequencyDay: 15,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      const currentDate = new Date("2025-01-15");
+      const result = getNextDate(config, currentDate);
+
+      expect(result.getMonth()).toBe(3); // April
+      expect(result.getDate()).toBe(15);
+    });
+
+    test("handles month-end edge cases", () => {
+      const config: RecurringConfig = {
+        frequency: "quarterly",
+        frequencyDay: 31,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      // January 31 -> April (30 days)
+      const currentDate = new Date("2025-01-31");
+      const result = getNextDate(config, currentDate);
+
+      expect(result.getMonth()).toBe(3); // April
+      expect(result.getDate()).toBe(30);
+    });
+  });
+
+  describe("semi_annual frequency", () => {
+    test("adds 6 months", () => {
+      const config: RecurringConfig = {
+        frequency: "semi_annual",
+        frequencyDay: 15,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      const currentDate = new Date("2025-01-15");
+      const result = getNextDate(config, currentDate);
+
+      expect(result.getMonth()).toBe(6); // July
+      expect(result.getDate()).toBe(15);
+    });
+
+    test("handles February edge case", () => {
+      const config: RecurringConfig = {
+        frequency: "semi_annual",
+        frequencyDay: 31,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      // August 31 -> February (28 days in 2026)
+      const currentDate = new Date("2025-08-31");
+      const result = getNextDate(config, currentDate);
+
+      expect(result.getMonth()).toBe(1); // February
+      expect(result.getDate()).toBe(28);
+      expect(result.getFullYear()).toBe(2026);
+    });
+  });
+
+  describe("annual frequency", () => {
+    test("adds 12 months", () => {
+      const config: RecurringConfig = {
+        frequency: "annual",
+        frequencyDay: 15,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      const currentDate = new Date("2025-01-15");
+      const result = getNextDate(config, currentDate);
+
+      expect(result.getFullYear()).toBe(2026);
+      expect(result.getMonth()).toBe(0); // January
+      expect(result.getDate()).toBe(15);
+    });
+
+    test("handles leap year to non-leap year (Feb 29)", () => {
+      const config: RecurringConfig = {
+        frequency: "annual",
+        frequencyDay: 29,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      // Feb 29, 2024 (leap year) -> Feb 2025 (non-leap)
+      const currentDate = new Date("2024-02-29");
+      const result = getNextDate(config, currentDate);
+
+      expect(result.getFullYear()).toBe(2025);
+      expect(result.getMonth()).toBe(1); // February
+      expect(result.getDate()).toBe(28);
+    });
+  });
 });
 
 describe("calculatePreviewDates", () => {
@@ -524,6 +638,27 @@ describe("formatting utilities", () => {
       );
     });
 
+    test("returns correct label for quarterly", () => {
+      expect(getFrequencyLabel("quarterly", 15, null)).toBe(
+        "Quarterly on the 15th",
+      );
+      expect(getFrequencyLabel("quarterly", 1, null)).toBe(
+        "Quarterly on the 1st",
+      );
+    });
+
+    test("returns correct label for semi_annual", () => {
+      expect(getFrequencyLabel("semi_annual", 15, null)).toBe(
+        "Semi-annually on the 15th",
+      );
+    });
+
+    test("returns correct label for annual", () => {
+      expect(getFrequencyLabel("annual", 15, null)).toBe(
+        "Annually on the 15th",
+      );
+    });
+
     test("returns Custom for custom frequency", () => {
       expect(getFrequencyLabel("custom", null, null)).toBe("Custom");
     });
@@ -534,6 +669,9 @@ describe("formatting utilities", () => {
       expect(getFrequencyShortLabel("weekly")).toBe("Weekly");
       expect(getFrequencyShortLabel("monthly_date")).toBe("Monthly");
       expect(getFrequencyShortLabel("monthly_weekday")).toBe("Monthly");
+      expect(getFrequencyShortLabel("quarterly")).toBe("Quarterly");
+      expect(getFrequencyShortLabel("semi_annual")).toBe("Semi-annual");
+      expect(getFrequencyShortLabel("annual")).toBe("Annual");
       expect(getFrequencyShortLabel("custom")).toBe("Custom");
     });
   });
@@ -683,6 +821,96 @@ describe("validateRecurringConfig", () => {
         frequency: "monthly_weekday",
         frequencyDay: 5,
         frequencyWeek: 2,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      const errors = validateRecurringConfig(config);
+      expect(errors.length).toBe(0);
+    });
+  });
+
+  describe("quarterly frequency", () => {
+    test("requires frequencyDay", () => {
+      const config: RecurringConfig = {
+        frequency: "quarterly",
+        frequencyDay: null,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      const errors = validateRecurringConfig(config);
+      expect(errors.some((e) => e.field === "frequencyDay")).toBe(true);
+    });
+
+    test("passes with valid frequencyDay", () => {
+      const config: RecurringConfig = {
+        frequency: "quarterly",
+        frequencyDay: 15,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      const errors = validateRecurringConfig(config);
+      expect(errors.length).toBe(0);
+    });
+  });
+
+  describe("semi_annual frequency", () => {
+    test("requires frequencyDay", () => {
+      const config: RecurringConfig = {
+        frequency: "semi_annual",
+        frequencyDay: null,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      const errors = validateRecurringConfig(config);
+      expect(errors.some((e) => e.field === "frequencyDay")).toBe(true);
+    });
+
+    test("passes with valid frequencyDay", () => {
+      const config: RecurringConfig = {
+        frequency: "semi_annual",
+        frequencyDay: 1,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      const errors = validateRecurringConfig(config);
+      expect(errors.length).toBe(0);
+    });
+  });
+
+  describe("annual frequency", () => {
+    test("requires frequencyDay", () => {
+      const config: RecurringConfig = {
+        frequency: "annual",
+        frequencyDay: null,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        endType: "never",
+        endDate: null,
+        endCount: null,
+      };
+      const errors = validateRecurringConfig(config);
+      expect(errors.some((e) => e.field === "frequencyDay")).toBe(true);
+    });
+
+    test("passes with valid frequencyDay", () => {
+      const config: RecurringConfig = {
+        frequency: "annual",
+        frequencyDay: 31,
+        frequencyWeek: null,
         frequencyInterval: null,
         endType: "never",
         endDate: null,

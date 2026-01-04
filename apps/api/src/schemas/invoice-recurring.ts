@@ -10,6 +10,9 @@ export const invoiceRecurringFrequencySchema = z.enum([
   "weekly",
   "monthly_date",
   "monthly_weekday",
+  "quarterly",
+  "semi_annual",
+  "annual",
   "custom",
 ]);
 
@@ -48,7 +51,7 @@ export const createInvoiceRecurringSchema = z
     // Frequency settings
     frequency: invoiceRecurringFrequencySchema.openapi({
       description:
-        "How often invoices should be generated: 'weekly' - every week on a specific day, 'monthly_date' - monthly on a specific date (e.g., 15th), 'monthly_weekday' - monthly on a specific weekday occurrence (e.g., 1st Friday), 'custom' - every X days",
+        "How often invoices should be generated: 'weekly' - every week on a specific day, 'monthly_date' - monthly on a specific date (e.g., 15th), 'monthly_weekday' - monthly on a specific weekday occurrence (e.g., 1st Friday), 'quarterly' - every 3 months, 'semi_annual' - every 6 months, 'annual' - every 12 months, 'custom' - every X days",
       example: "monthly_date",
     }),
     frequencyDay: z

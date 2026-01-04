@@ -210,6 +210,160 @@ describe("calculateNextScheduledDate", () => {
       expect(result.getDate()).toBe(2); // January 2
     });
   });
+
+  describe("quarterly frequency", () => {
+    test("returns same date 3 months later", () => {
+      // January 15, 2025
+      const currentDate = new Date("2025-01-15T12:00:00.000Z");
+      const params: RecurringInvoiceParams = {
+        frequency: "quarterly",
+        frequencyDay: 15,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        timezone: "UTC",
+      };
+
+      const result = calculateNextScheduledDate(params, currentDate);
+
+      // Should be April 15, 2025
+      expect(result.getMonth()).toBe(3); // April (0-indexed)
+      expect(result.getDate()).toBe(15);
+    });
+
+    test("handles 31st in month with 30 days", () => {
+      // January 31, 2025 -> April has 30 days
+      const currentDate = new Date("2025-01-31T12:00:00.000Z");
+      const params: RecurringInvoiceParams = {
+        frequency: "quarterly",
+        frequencyDay: 31,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        timezone: "UTC",
+      };
+
+      const result = calculateNextScheduledDate(params, currentDate);
+
+      // April has 30 days, should be April 30
+      expect(result.getMonth()).toBe(3); // April (0-indexed)
+      expect(result.getDate()).toBe(30);
+    });
+
+    test("handles February edge case", () => {
+      // November 30, 2024 -> February 2025 has 28 days
+      const currentDate = new Date("2024-11-30T12:00:00.000Z");
+      const params: RecurringInvoiceParams = {
+        frequency: "quarterly",
+        frequencyDay: 30,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        timezone: "UTC",
+      };
+
+      const result = calculateNextScheduledDate(params, currentDate);
+
+      // February 2025 has 28 days (non-leap year)
+      expect(result.getMonth()).toBe(1); // February (0-indexed)
+      expect(result.getDate()).toBe(28);
+    });
+  });
+
+  describe("semi_annual frequency", () => {
+    test("returns same date 6 months later", () => {
+      // January 15, 2025
+      const currentDate = new Date("2025-01-15T12:00:00.000Z");
+      const params: RecurringInvoiceParams = {
+        frequency: "semi_annual",
+        frequencyDay: 15,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        timezone: "UTC",
+      };
+
+      const result = calculateNextScheduledDate(params, currentDate);
+
+      // Should be July 15, 2025
+      expect(result.getMonth()).toBe(6); // July (0-indexed)
+      expect(result.getDate()).toBe(15);
+    });
+
+    test("handles month length differences", () => {
+      // August 31, 2025 -> February 2026 has 28 days
+      const currentDate = new Date("2025-08-31T12:00:00.000Z");
+      const params: RecurringInvoiceParams = {
+        frequency: "semi_annual",
+        frequencyDay: 31,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        timezone: "UTC",
+      };
+
+      const result = calculateNextScheduledDate(params, currentDate);
+
+      // February 2026 has 28 days
+      expect(result.getMonth()).toBe(1); // February (0-indexed)
+      expect(result.getDate()).toBe(28);
+      expect(result.getFullYear()).toBe(2026);
+    });
+  });
+
+  describe("annual frequency", () => {
+    test("returns same date 12 months later", () => {
+      // January 15, 2025
+      const currentDate = new Date("2025-01-15T12:00:00.000Z");
+      const params: RecurringInvoiceParams = {
+        frequency: "annual",
+        frequencyDay: 15,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        timezone: "UTC",
+      };
+
+      const result = calculateNextScheduledDate(params, currentDate);
+
+      // Should be January 15, 2026
+      expect(result.getFullYear()).toBe(2026);
+      expect(result.getMonth()).toBe(0); // January (0-indexed)
+      expect(result.getDate()).toBe(15);
+    });
+
+    test("handles leap year to non-leap year (Feb 29)", () => {
+      // February 29, 2024 (leap year) -> 2025 (non-leap year)
+      const currentDate = new Date("2024-02-29T12:00:00.000Z");
+      const params: RecurringInvoiceParams = {
+        frequency: "annual",
+        frequencyDay: 29,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        timezone: "UTC",
+      };
+
+      const result = calculateNextScheduledDate(params, currentDate);
+
+      // February 2025 has only 28 days
+      expect(result.getFullYear()).toBe(2025);
+      expect(result.getMonth()).toBe(1); // February (0-indexed)
+      expect(result.getDate()).toBe(28);
+    });
+
+    test("handles non-leap year to leap year (Feb 28)", () => {
+      // February 28, 2023 (non-leap year) -> 2024 (leap year)
+      const currentDate = new Date("2023-02-28T12:00:00.000Z");
+      const params: RecurringInvoiceParams = {
+        frequency: "annual",
+        frequencyDay: 28,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        timezone: "UTC",
+      };
+
+      const result = calculateNextScheduledDate(params, currentDate);
+
+      // February 2024 has 29 days, but we keep the same day (28)
+      expect(result.getFullYear()).toBe(2024);
+      expect(result.getMonth()).toBe(1); // February (0-indexed)
+      expect(result.getDate()).toBe(28);
+    });
+  });
 });
 
 describe("shouldMarkCompleted", () => {

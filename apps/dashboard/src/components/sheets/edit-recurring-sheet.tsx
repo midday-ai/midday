@@ -48,6 +48,9 @@ type RecurringFrequency =
   | "weekly"
   | "monthly_date"
   | "monthly_weekday"
+  | "quarterly"
+  | "semi_annual"
+  | "annual"
   | "custom";
 
 function getSmartOptions(referenceDate: Date): Array<{
@@ -82,6 +85,27 @@ function getSmartOptions(referenceDate: Date): Array<{
       frequency: "monthly_weekday" as const,
       frequencyDay: dayOfWeek,
       frequencyWeek: weekOfMonth,
+    },
+    {
+      value: "quarterly",
+      label: `Quarterly on the ${formatOrdinal(dayOfMonth)}`,
+      frequency: "quarterly" as const,
+      frequencyDay: dayOfMonth,
+      frequencyWeek: null,
+    },
+    {
+      value: "semi_annual",
+      label: `Semi-annually on the ${formatOrdinal(dayOfMonth)}`,
+      frequency: "semi_annual" as const,
+      frequencyDay: dayOfMonth,
+      frequencyWeek: null,
+    },
+    {
+      value: "annual",
+      label: `Annually on the ${formatOrdinal(dayOfMonth)}`,
+      frequency: "annual" as const,
+      frequencyDay: dayOfMonth,
+      frequencyWeek: null,
     },
     {
       value: "custom",
@@ -199,6 +223,9 @@ export function EditRecurringSheet() {
     if (config.frequency === "weekly") return "weekly";
     if (config.frequency === "monthly_date") return "monthly_date";
     if (config.frequency === "monthly_weekday") return "monthly_weekday";
+    if (config.frequency === "quarterly") return "quarterly";
+    if (config.frequency === "semi_annual") return "semi_annual";
+    if (config.frequency === "annual") return "annual";
     return "weekly";
   }, [config.frequency]);
 

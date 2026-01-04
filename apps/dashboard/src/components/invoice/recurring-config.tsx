@@ -32,6 +32,9 @@ export type RecurringFrequency =
   | "weekly"
   | "monthly_date"
   | "monthly_weekday"
+  | "quarterly"
+  | "semi_annual"
+  | "annual"
   | "custom";
 
 const DAY_NAMES = [
@@ -91,6 +94,27 @@ function getSmartOptions(issueDate: Date): Array<{
       frequencyWeek: weekOfMonth,
     },
     {
+      value: "quarterly",
+      label: `Quarterly on the ${formatOrdinal(dayOfMonth)}`,
+      frequency: "quarterly" as const,
+      frequencyDay: dayOfMonth,
+      frequencyWeek: null,
+    },
+    {
+      value: "semi_annual",
+      label: `Semi-annually on the ${formatOrdinal(dayOfMonth)}`,
+      frequency: "semi_annual" as const,
+      frequencyDay: dayOfMonth,
+      frequencyWeek: null,
+    },
+    {
+      value: "annual",
+      label: `Annually on the ${formatOrdinal(dayOfMonth)}`,
+      frequency: "annual" as const,
+      frequencyDay: dayOfMonth,
+      frequencyWeek: null,
+    },
+    {
       value: "custom",
       label: "Custom",
       frequency: "custom" as const,
@@ -119,6 +143,9 @@ export function RecurringConfigPanel({
     if (config.frequency === "weekly") return "weekly";
     if (config.frequency === "monthly_date") return "monthly_date";
     if (config.frequency === "monthly_weekday") return "monthly_weekday";
+    if (config.frequency === "quarterly") return "quarterly";
+    if (config.frequency === "semi_annual") return "semi_annual";
+    if (config.frequency === "annual") return "annual";
     return "weekly";
   }, [config.frequency]);
 
