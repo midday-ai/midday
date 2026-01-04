@@ -1,4 +1,5 @@
 import { createLoggerWithContext } from "@midday/logger";
+import * as Sentry from "@sentry/bun";
 import type { Job } from "bullmq";
 import type { ZodSchema } from "zod";
 import {
@@ -179,6 +180,23 @@ export abstract class BaseProcessor<TData = unknown> {
         suggestedRetryDelay: getRetryDelay(error),
         suggestedMaxRetries: getMaxRetries(error),
         stack: errorStack,
+      });
+
+      // Send error to Sentry with context
+      Sentry.captureException(error, {
+        tags: {
+          jobName: job.name,
+          errorCategory: classified.category,
+          retryable: String(shouldRetry),
+        },
+        extra: {
+          jobId: job.id,
+          attempt: job.attemptsMade + 1,
+          maxAttempts: job.opts.attempts,
+          remainingAttempts,
+          duration: `${duration}ms`,
+          payload: JSON.stringify(job.data),
+        },
       });
 
       // For non-retryable errors, remove the job from retry queue

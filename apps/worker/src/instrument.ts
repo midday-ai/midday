@@ -6,6 +6,11 @@ if (process.env.NODE_ENV === "production" && process.env.SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
 
+    integrations: [
+      // Send console.error calls as logs to Sentry
+      Sentry.consoleLoggingIntegration({ levels: ["error"] }),
+    ],
+
     // Adds request headers and IP for users, for more info visit:
     // https://docs.sentry.io/platforms/javascript/guides/bun/configuration/options/#sendDefaultPii
     sendDefaultPii: true,

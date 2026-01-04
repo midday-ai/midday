@@ -36,11 +36,27 @@ type ProcessResult = {
 /**
  * Scheduled processor that generates invoices from recurring invoice series
  * Runs every 6 hours to find and process due recurring invoices
+ *
+ * Kill switch: Set DISABLE_RECURRING_INVOICES=true to disable processing
  */
 export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRecurringSchedulerPayload> {
   async process(
     job: Job<InvoiceRecurringSchedulerPayload>,
   ): Promise<ProcessResult> {
+    // Kill switch - can be toggled without deploy via environment variable
+    if (process.env.DISABLE_RECURRING_INVOICES === "true") {
+      this.logger.warn(
+        "Recurring invoice scheduler disabled via DISABLE_RECURRING_INVOICES",
+      );
+      return {
+        processed: 0,
+        skipped: 0,
+        failed: 0,
+        results: [],
+        errors: [],
+      };
+    }
+
     const db = getDb();
 
     this.logger.info("Starting recurring invoice scheduler");

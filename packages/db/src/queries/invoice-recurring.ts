@@ -48,7 +48,7 @@ export type CreateInvoiceRecurringParams = {
 };
 
 export async function createInvoiceRecurring(
-  db: Database,
+  db: DatabaseOrTransaction,
   params: CreateInvoiceRecurringParams,
 ) {
   const {
@@ -168,7 +168,7 @@ export type UpdateInvoiceRecurringParams = {
 };
 
 export async function updateInvoiceRecurring(
-  db: Database,
+  db: DatabaseOrTransaction,
   params: UpdateInvoiceRecurringParams,
 ) {
   const {

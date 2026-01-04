@@ -62,44 +62,57 @@ export const invoiceRecurringRouter = createTRPCRouter({
         }
       }
 
-      // Create the recurring series
-      const result = await createInvoiceRecurring(db, {
-        teamId,
-        userId: session.user.id,
-        ...recurringData,
+      // Use a transaction to ensure atomicity of all operations
+      // This prevents orphaned recurring series if invoice linking fails
+      const result = await db.transaction(async (tx) => {
+        // Create the recurring series
+        const recurring = await createInvoiceRecurring(tx, {
+          teamId,
+          userId: session.user.id,
+          ...recurringData,
+        });
+
+        if (!recurring?.id) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to create recurring invoice series",
+          });
+        }
+
+        // If a draft invoice ID is provided, link it as the first invoice in the series
+        if (invoiceId) {
+          // Update the invoice to link it to the recurring series
+          await updateInvoice(tx, {
+            id: invoiceId,
+            teamId,
+            invoiceRecurringId: recurring.id,
+            recurringSequence: 1,
+          });
+
+          // Calculate the next scheduled date (since first invoice is already generated)
+          const nextScheduledAt = calculateNextScheduledDate(
+            {
+              frequency: recurringData.frequency,
+              frequencyDay: recurringData.frequencyDay ?? null,
+              frequencyWeek: recurringData.frequencyWeek ?? null,
+              frequencyInterval: recurringData.frequencyInterval ?? null,
+              timezone: recurringData.timezone,
+            },
+            new Date(),
+          );
+
+          // Update the recurring series with correct next date and mark one invoice as generated
+          await updateInvoiceRecurring(tx, {
+            id: recurring.id,
+            teamId,
+            invoicesGenerated: 1,
+            nextScheduledAt: nextScheduledAt.toISOString(),
+            lastGeneratedAt: new Date().toISOString(),
+          });
+        }
+
+        return recurring;
       });
-
-      // If a draft invoice ID is provided, link it as the first invoice in the series
-      if (invoiceId && result?.id) {
-        // Update the invoice to link it to the recurring series
-        await updateInvoice(db, {
-          id: invoiceId,
-          teamId,
-          invoiceRecurringId: result.id,
-          recurringSequence: 1,
-        });
-
-        // Calculate the next scheduled date (since first invoice is already generated)
-        const nextScheduledAt = calculateNextScheduledDate(
-          {
-            frequency: recurringData.frequency,
-            frequencyDay: recurringData.frequencyDay ?? null,
-            frequencyWeek: recurringData.frequencyWeek ?? null,
-            frequencyInterval: recurringData.frequencyInterval ?? null,
-            timezone: recurringData.timezone,
-          },
-          new Date(),
-        );
-
-        // Update the recurring series with correct next date and mark one invoice as generated
-        await updateInvoiceRecurring(db, {
-          id: result.id,
-          teamId,
-          invoicesGenerated: 1,
-          nextScheduledAt: nextScheduledAt.toISOString(),
-          lastGeneratedAt: new Date().toISOString(),
-        });
-      }
 
       // Send notification for recurring series started
       if (result?.id) {

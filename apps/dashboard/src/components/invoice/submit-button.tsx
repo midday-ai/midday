@@ -4,6 +4,7 @@ import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { getFrequencyLabel } from "@midday/invoice/recurring";
+import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
 import {
@@ -104,6 +105,9 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
     });
   };
 
+  // Track previous issue date to detect actual changes
+  const prevIssueDateRef = React.useRef(issueDate);
+
   // Initialize recurring config when not set
   React.useEffect(() => {
     if (!formRecurringConfig && issueDate) {
@@ -120,6 +124,14 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
 
   // Update recurring config when issue date changes (for smart defaults)
   React.useEffect(() => {
+    const prevIssueDate = prevIssueDateRef.current;
+    prevIssueDateRef.current = issueDate;
+
+    // Only run when issueDate actually changed (not when formRecurringConfig changed)
+    if (prevIssueDate === issueDate) {
+      return;
+    }
+
     if (issueDate && formRecurringConfig) {
       const newDate = new Date(issueDate);
       const dayOfWeek = newDate.getDay();
@@ -155,7 +167,7 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
         });
       }
     }
-  }, [issueDate]);
+  }, [issueDate, formRecurringConfig, setValue]);
 
   // Sync with form scheduledAt changes (for when invoice data is loaded)
   React.useEffect(() => {
@@ -455,8 +467,14 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
                   return (
                     <DropdownMenuSub key={option.value}>
                       <DropdownMenuSubTrigger>
-                        <div className="flex items-center pl-2">
+                        <div className="flex items-center gap-2 pl-2">
                           {option.label}
+                          <Badge
+                            variant="tag"
+                            className="text-[10px] px-1.5 py-0 h-4 font-medium"
+                          >
+                            Beta
+                          </Badge>
                         </div>
                       </DropdownMenuSubTrigger>
                       <DropdownMenuPortal>

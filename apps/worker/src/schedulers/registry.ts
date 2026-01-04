@@ -3,6 +3,7 @@ import type { Queue } from "bullmq";
 import { accountingQueue } from "../queues/accounting";
 import { documentsQueue } from "../queues/documents";
 import { inboxProviderQueue, inboxQueue } from "../queues/inbox";
+import { invoicesQueue } from "../queues/invoices";
 import { ratesQueue } from "../queues/rates";
 import { transactionsQueue } from "../queues/transactions";
 import type {
@@ -31,6 +32,8 @@ function getQueueByName(queueName: string): Queue {
       return ratesQueue;
     case "accounting":
       return accountingQueue;
+    case "invoices":
+      return invoicesQueue;
     default:
       throw new Error(`Unknown queue: ${queueName}`);
   }
