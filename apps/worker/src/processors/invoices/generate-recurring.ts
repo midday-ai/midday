@@ -121,99 +121,116 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
         // Build template from recurring data
         const template = (recurring.template as Record<string, unknown>) || {};
 
-        // Create draft invoice
-        await draftInvoice(db, {
-          id: invoiceId,
-          teamId: recurring.teamId,
-          userId: recurring.userId,
-          token,
-          template: {
-            customerLabel: (template.customerLabel as string) ?? "To",
-            title: (template.title as string) ?? "Invoice",
-            fromLabel: (template.fromLabel as string) ?? "From",
-            invoiceNoLabel: (template.invoiceNoLabel as string) ?? "Invoice No",
-            issueDateLabel: (template.issueDateLabel as string) ?? "Issue Date",
-            dueDateLabel: (template.dueDateLabel as string) ?? "Due Date",
-            descriptionLabel:
-              (template.descriptionLabel as string) ?? "Description",
-            priceLabel: (template.priceLabel as string) ?? "Price",
-            quantityLabel: (template.quantityLabel as string) ?? "Quantity",
-            totalLabel: (template.totalLabel as string) ?? "Total",
-            totalSummaryLabel:
-              (template.totalSummaryLabel as string) ?? "Total",
-            vatLabel: (template.vatLabel as string) ?? "VAT",
-            subtotalLabel: (template.subtotalLabel as string) ?? "Subtotal",
-            taxLabel: (template.taxLabel as string) ?? "Tax",
-            discountLabel: (template.discountLabel as string) ?? "Discount",
-            timezone: recurring.timezone,
-            paymentLabel:
-              (template.paymentLabel as string) ?? "Payment Details",
-            noteLabel: (template.noteLabel as string) ?? "Note",
-            logoUrl: (template.logoUrl as string | null) ?? null,
-            currency: recurring.currency ?? "USD",
-            dateFormat: (template.dateFormat as string) ?? "dd/MM/yyyy",
-            includeVat: (template.includeVat as boolean) ?? false,
-            includeTax: (template.includeTax as boolean) ?? false,
-            includeDiscount: (template.includeDiscount as boolean) ?? false,
-            includeDecimals: (template.includeDecimals as boolean) ?? false,
-            includeUnits: (template.includeUnits as boolean) ?? false,
-            includeQr: (template.includeQr as boolean) ?? true,
-            taxRate: (template.taxRate as number) ?? 0,
-            vatRate: (template.vatRate as number) ?? 0,
-            size: (template.size as "a4" | "letter") ?? "a4",
-            deliveryType: "create_and_send" as const,
-            locale: (template.locale as string) ?? "en-US",
-          },
-          templateId: recurring.templateId ?? undefined,
-          paymentDetails: recurring.paymentDetails
-            ? JSON.stringify(recurring.paymentDetails)
-            : null,
-          fromDetails: recurring.fromDetails
-            ? JSON.stringify(recurring.fromDetails)
-            : null,
-          customerDetails,
-          noteDetails: recurring.noteDetails
-            ? JSON.stringify(recurring.noteDetails)
-            : null,
-          dueDate,
-          issueDate,
-          invoiceNumber,
-          vat: recurring.vat ?? undefined,
-          tax: recurring.tax ?? undefined,
-          discount: recurring.discount ?? undefined,
-          subtotal: recurring.subtotal ?? undefined,
-          topBlock: recurring.topBlock
-            ? JSON.stringify(recurring.topBlock)
-            : null,
-          bottomBlock: recurring.bottomBlock
-            ? JSON.stringify(recurring.bottomBlock)
-            : null,
-          amount: recurring.amount ?? undefined,
-          lineItems: recurring.lineItems as
-            | Array<{
-                name?: string | null;
-                quantity?: number;
-                unit?: string | null;
-                price?: number;
-                vat?: number | null;
-                tax?: number | null;
-                taxRate?: number | null;
-                productId?: string;
-              }>
-            | undefined,
-          customerId: recurring.customerId ?? undefined,
-          customerName: recurring.customerName ?? undefined,
+        // Use transaction to ensure atomicity of invoice creation and recurring series update
+        // This prevents partial state where invoice is created but recurring counter isn't updated
+        const { updatedRecurring } = await db.transaction(async (tx) => {
+          // Create draft invoice
+          await draftInvoice(tx, {
+            id: invoiceId,
+            teamId: recurring.teamId,
+            userId: recurring.userId,
+            token,
+            template: {
+              customerLabel: (template.customerLabel as string) ?? "To",
+              title: (template.title as string) ?? "Invoice",
+              fromLabel: (template.fromLabel as string) ?? "From",
+              invoiceNoLabel:
+                (template.invoiceNoLabel as string) ?? "Invoice No",
+              issueDateLabel:
+                (template.issueDateLabel as string) ?? "Issue Date",
+              dueDateLabel: (template.dueDateLabel as string) ?? "Due Date",
+              descriptionLabel:
+                (template.descriptionLabel as string) ?? "Description",
+              priceLabel: (template.priceLabel as string) ?? "Price",
+              quantityLabel: (template.quantityLabel as string) ?? "Quantity",
+              totalLabel: (template.totalLabel as string) ?? "Total",
+              totalSummaryLabel:
+                (template.totalSummaryLabel as string) ?? "Total",
+              vatLabel: (template.vatLabel as string) ?? "VAT",
+              subtotalLabel: (template.subtotalLabel as string) ?? "Subtotal",
+              taxLabel: (template.taxLabel as string) ?? "Tax",
+              discountLabel: (template.discountLabel as string) ?? "Discount",
+              timezone: recurring.timezone,
+              paymentLabel:
+                (template.paymentLabel as string) ?? "Payment Details",
+              noteLabel: (template.noteLabel as string) ?? "Note",
+              logoUrl: (template.logoUrl as string | null) ?? null,
+              currency: recurring.currency ?? "USD",
+              dateFormat: (template.dateFormat as string) ?? "dd/MM/yyyy",
+              includeVat: (template.includeVat as boolean) ?? false,
+              includeTax: (template.includeTax as boolean) ?? false,
+              includeDiscount: (template.includeDiscount as boolean) ?? false,
+              includeDecimals: (template.includeDecimals as boolean) ?? false,
+              includeUnits: (template.includeUnits as boolean) ?? false,
+              includeQr: (template.includeQr as boolean) ?? true,
+              taxRate: (template.taxRate as number) ?? 0,
+              vatRate: (template.vatRate as number) ?? 0,
+              size: (template.size as "a4" | "letter") ?? "a4",
+              deliveryType: "create_and_send" as const,
+              locale: (template.locale as string) ?? "en-US",
+            },
+            templateId: recurring.templateId ?? undefined,
+            paymentDetails: recurring.paymentDetails
+              ? JSON.stringify(recurring.paymentDetails)
+              : null,
+            fromDetails: recurring.fromDetails
+              ? JSON.stringify(recurring.fromDetails)
+              : null,
+            customerDetails,
+            noteDetails: recurring.noteDetails
+              ? JSON.stringify(recurring.noteDetails)
+              : null,
+            dueDate,
+            issueDate,
+            invoiceNumber,
+            vat: recurring.vat ?? undefined,
+            tax: recurring.tax ?? undefined,
+            discount: recurring.discount ?? undefined,
+            subtotal: recurring.subtotal ?? undefined,
+            topBlock: recurring.topBlock
+              ? JSON.stringify(recurring.topBlock)
+              : null,
+            bottomBlock: recurring.bottomBlock
+              ? JSON.stringify(recurring.bottomBlock)
+              : null,
+            amount: recurring.amount ?? undefined,
+            lineItems: recurring.lineItems as
+              | Array<{
+                  name?: string | null;
+                  quantity?: number;
+                  unit?: string | null;
+                  price?: number;
+                  vat?: number | null;
+                  tax?: number | null;
+                  taxRate?: number | null;
+                  productId?: string;
+                }>
+              | undefined,
+            customerId: recurring.customerId ?? undefined,
+            customerName: recurring.customerName ?? undefined,
+          });
+
+          // Update invoice with recurring reference, status, and sentTo
+          await updateInvoice(tx, {
+            id: invoiceId,
+            teamId: recurring.teamId,
+            status: "unpaid",
+            sentTo: customerEmail,
+            invoiceRecurringId: recurring.id,
+            recurringSequence: nextSequence,
+          });
+
+          // Mark the recurring invoice as generated (updates next_scheduled_at and counter)
+          const updatedRecurring = await markInvoiceGenerated(tx, {
+            id: recurring.id,
+            teamId: recurring.teamId,
+          });
+
+          return { updatedRecurring };
         });
 
-        // Update invoice with recurring reference, status, and sentTo
-        await updateInvoice(db, {
-          id: invoiceId,
-          teamId: recurring.teamId,
-          status: "unpaid",
-          sentTo: customerEmail,
-          invoiceRecurringId: recurring.id,
-          recurringSequence: nextSequence,
-        });
+        // Queue jobs AFTER transaction commits successfully
+        // This ensures we only send notifications for invoices that were actually created
 
         // Trigger invoice generation and sending via BullMQ
         await invoicesQueue.add(
@@ -230,12 +247,6 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
             },
           },
         );
-
-        // Mark the recurring invoice as generated (updates next_scheduled_at and counter)
-        const updatedRecurring = await markInvoiceGenerated(db, {
-          id: recurring.id,
-          teamId: recurring.teamId,
-        });
 
         // Queue notification for invoice generation
         await invoicesQueue.add(

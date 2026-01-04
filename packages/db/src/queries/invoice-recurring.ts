@@ -1,4 +1,4 @@
-import type { Database } from "@db/client";
+import type { Database, DatabaseOrTransaction } from "@db/client";
 import {
   customers,
   invoiceRecurring,
@@ -475,7 +475,7 @@ export type MarkInvoiceGeneratedParams = {
 };
 
 export async function markInvoiceGenerated(
-  db: Database,
+  db: DatabaseOrTransaction,
   params: MarkInvoiceGeneratedParams,
 ) {
   const { id, teamId } = params;

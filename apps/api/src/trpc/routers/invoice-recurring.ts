@@ -110,6 +110,50 @@ export const invoiceRecurringRouter = createTRPCRouter({
         });
       }
 
+      // When frequencyDay is being updated without frequency, validate against existing frequency
+      if (
+        input.frequencyDay !== undefined &&
+        input.frequencyDay !== null &&
+        input.frequency === undefined
+      ) {
+        const existing = await getInvoiceRecurringById(db, {
+          id: input.id,
+          teamId,
+        });
+
+        if (!existing) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Recurring invoice series not found",
+          });
+        }
+
+        // Validate frequencyDay against the existing frequency
+        const existingFrequency = existing.frequency;
+
+        if (
+          (existingFrequency === "weekly" ||
+            existingFrequency === "monthly_weekday") &&
+          input.frequencyDay > 6
+        ) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `For ${existingFrequency} frequency, frequencyDay must be 0-6 (Sunday-Saturday)`,
+          });
+        }
+
+        if (
+          existingFrequency === "monthly_date" &&
+          (input.frequencyDay < 1 || input.frequencyDay > 31)
+        ) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "For monthly_date frequency, frequencyDay must be 1-31 (day of month)",
+          });
+        }
+      }
+
       const result = await updateInvoiceRecurring(db, {
         ...input,
         teamId,
