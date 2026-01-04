@@ -71,29 +71,27 @@ export const invoiceRecurringRouter = createTRPCRouter({
         }
       }
 
-      // Validate that the customer has an email address for sending invoices
-      // Recurring invoices auto-send, so we need a valid email destination
-      if (recurringData.customerId) {
-        const customer = await getCustomerById(db, {
-          id: recurringData.customerId,
-          teamId,
+      // Validate that the customer exists and has an email address for sending invoices
+      // Recurring invoices auto-send, so we need a valid customer with email
+      const customer = await getCustomerById(db, {
+        id: recurringData.customerId,
+        teamId,
+      });
+
+      if (!customer) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Customer not found",
         });
+      }
 
-        if (!customer) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Customer not found",
-          });
-        }
-
-        const customerEmail = customer.billingEmail || customer.email;
-        if (!customerEmail) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message:
-              "Customer must have an email address to receive recurring invoices. Please add an email to the customer profile.",
-          });
-        }
+      const customerEmail = customer.billingEmail || customer.email;
+      if (!customerEmail) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "Customer must have an email address to receive recurring invoices. Please add an email to the customer profile.",
+        });
       }
 
       // Use a transaction to ensure atomicity of all operations
@@ -199,14 +197,34 @@ export const invoiceRecurringRouter = createTRPCRouter({
         });
       }
 
+      // Cross-field validation for partial updates
+      // NOTE: This validation cannot be done in the Zod schema because partial updates
+      // need to validate against existing database values. The schema validates
+      // individual field constraints; this validates cross-field dependencies that
+      // require fetching existing data.
+
+      // Frequencies that require a non-null frequencyDay value
+      const frequenciesRequiringDay = [
+        "weekly",
+        "biweekly",
+        "monthly_date",
+        "monthly_weekday",
+      ] as const;
+
       // Validate frequency/frequencyDay cross-field constraints
       // Case 1: frequencyDay is being updated without frequency - validate against existing frequency
       // Case 2: frequency is being updated without frequencyDay - validate against existing frequencyDay
+      // Case 3: frequency requires frequencyDay but frequencyDay is explicitly null - validate against existing
       const needsCrossFieldValidation =
         (input.frequencyDay !== undefined &&
           input.frequencyDay !== null &&
           input.frequency === undefined) ||
-        (input.frequency !== undefined && input.frequencyDay === undefined);
+        (input.frequency !== undefined && input.frequencyDay === undefined) ||
+        (input.frequency !== undefined &&
+          frequenciesRequiringDay.includes(
+            input.frequency as (typeof frequenciesRequiringDay)[number],
+          ) &&
+          input.frequencyDay === null);
 
       if (needsCrossFieldValidation) {
         const existing = await getInvoiceRecurringById(db, {
@@ -224,9 +242,24 @@ export const invoiceRecurringRouter = createTRPCRouter({
         // Determine effective frequency and frequencyDay for validation
         const effectiveFrequency = input.frequency ?? existing.frequency;
         const effectiveFrequencyDay =
-          input.frequencyDay ?? existing.frequencyDay;
+          input.frequencyDay === undefined
+            ? existing.frequencyDay
+            : input.frequencyDay;
 
-        // Only validate if we have a frequencyDay to check
+        // Validate that frequencyDay is not being set to null when frequency requires it
+        if (
+          input.frequencyDay === null &&
+          frequenciesRequiringDay.includes(
+            effectiveFrequency as (typeof frequenciesRequiringDay)[number],
+          )
+        ) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `frequencyDay is required for ${effectiveFrequency} frequency and cannot be null`,
+          });
+        }
+
+        // Validate frequencyDay range based on frequency type
         if (
           effectiveFrequencyDay !== null &&
           effectiveFrequencyDay !== undefined
@@ -253,6 +286,31 @@ export const invoiceRecurringRouter = createTRPCRouter({
                 "For monthly_date frequency, frequencyDay must be 1-31 (day of month)",
             });
           }
+        }
+      }
+
+      // If customerId is being updated, validate the new customer has an email
+      // Recurring invoices auto-send, so we need a valid email destination
+      if (input.customerId !== undefined) {
+        const customer = await getCustomerById(db, {
+          id: input.customerId,
+          teamId,
+        });
+
+        if (!customer) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Customer not found",
+          });
+        }
+
+        const customerEmail = customer.billingEmail || customer.email;
+        if (!customerEmail) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Customer must have an email address to receive recurring invoices. Please add an email to the customer profile.",
+          });
         }
       }
 

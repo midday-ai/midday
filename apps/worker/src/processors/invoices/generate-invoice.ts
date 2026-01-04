@@ -2,6 +2,7 @@ import { getInvoiceById, updateInvoice } from "@midday/db/queries";
 import { PdfTemplate, renderToBuffer } from "@midday/invoice";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
+import { DEFAULT_JOB_OPTIONS } from "../../config/job-options";
 import { documentsQueue } from "../../queues/documents";
 import { invoicesQueue } from "../../queues/invoices";
 import type { GenerateInvoicePayload } from "../../schemas/invoices";
@@ -93,13 +94,7 @@ export class GenerateInvoiceProcessor extends BaseProcessor<GenerateInvoicePaylo
           filename,
           fullPath,
         },
-        {
-          attempts: 3,
-          backoff: {
-            type: "exponential",
-            delay: 1000,
-          },
-        },
+        DEFAULT_JOB_OPTIONS,
       );
 
       this.logger.debug("Queued send-invoice-email job", { invoiceId });
@@ -113,13 +108,7 @@ export class GenerateInvoiceProcessor extends BaseProcessor<GenerateInvoicePaylo
         mimetype: "application/pdf",
         teamId: invoiceData.teamId,
       },
-      {
-        attempts: 3,
-        backoff: {
-          type: "exponential",
-          delay: 1000,
-        },
-      },
+      DEFAULT_JOB_OPTIONS,
     );
 
     this.logger.info("Invoice generation completed", {

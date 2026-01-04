@@ -1,37 +1,23 @@
 import { z } from "@hono/zod-openapi";
 import {
+  RECURRING_END_TYPES,
+  RECURRING_FREQUENCIES,
+  RECURRING_STATUSES,
+} from "@midday/invoice/recurring";
+import {
   draftLineItemSchema,
   editorFieldSchema,
   upsertInvoiceTemplateSchema,
 } from "./invoice";
 
-// Frequency enum schema
-export const invoiceRecurringFrequencySchema = z.enum([
-  "weekly",
-  "biweekly",
-  "monthly_date",
-  "monthly_weekday",
-  "monthly_last_day",
-  "quarterly",
-  "semi_annual",
-  "annual",
-  "custom",
-]);
+// Frequency enum schema - derived from canonical constants
+export const invoiceRecurringFrequencySchema = z.enum(RECURRING_FREQUENCIES);
 
-// End type enum schema
-export const invoiceRecurringEndTypeSchema = z.enum([
-  "never",
-  "on_date",
-  "after_count",
-]);
+// End type enum schema - derived from canonical constants
+export const invoiceRecurringEndTypeSchema = z.enum(RECURRING_END_TYPES);
 
-// Status enum schema
-export const invoiceRecurringStatusSchema = z.enum([
-  "active",
-  "paused",
-  "completed",
-  "canceled",
-]);
+// Status enum schema - derived from canonical constants
+export const invoiceRecurringStatusSchema = z.enum(RECURRING_STATUSES);
 
 // Base recurring invoice schema for tRPC
 export const createInvoiceRecurringSchema = z
@@ -42,8 +28,9 @@ export const createInvoiceRecurringSchema = z
         "Optional draft invoice ID to convert to the first recurring invoice",
       example: "d1e2f3a4-b5c6-7890-abcd-ef1234567890",
     }),
-    customerId: z.string().uuid().nullable().optional().openapi({
-      description: "Customer ID for the recurring invoice series",
+    customerId: z.string().uuid().openapi({
+      description:
+        "Customer ID for the recurring invoice series (required - recurring invoices auto-send)",
       example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     }),
     customerName: z.string().nullable().optional().openapi({
@@ -304,7 +291,7 @@ export const updateInvoiceRecurringSchema = z
         example: "b3b7e6e2-8c2a-4e2a-9b1a-2e4b5c6d7f8a",
         param: { in: "path", name: "id" },
       }),
-    customerId: z.string().uuid().nullable().optional(),
+    customerId: z.string().uuid().optional(),
     customerName: z.string().nullable().optional(),
     frequency: invoiceRecurringFrequencySchema.optional(),
     frequencyDay: z.number().int().min(0).max(31).nullable().optional(),
@@ -332,6 +319,30 @@ export const updateInvoiceRecurringSchema = z
     status: invoiceRecurringStatusSchema.optional(),
   })
   .superRefine((data, ctx) => {
+    // Frequencies that require a non-null frequencyDay value
+    const frequenciesRequiringDay = [
+      "weekly",
+      "biweekly",
+      "monthly_date",
+      "monthly_weekday",
+    ] as const;
+
+    // Validate that frequencyDay is not null when frequency requires it
+    // This prevents invalid API calls like { frequency: "weekly", frequencyDay: null }
+    if (
+      data.frequency !== undefined &&
+      frequenciesRequiringDay.includes(
+        data.frequency as (typeof frequenciesRequiringDay)[number],
+      ) &&
+      data.frequencyDay === null
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `frequencyDay is required for ${data.frequency} frequency and cannot be null`,
+        path: ["frequencyDay"],
+      });
+    }
+
     // Validate frequencyDay based on frequency type (when both are provided in the update).
     // NOTE: When only one of frequency/frequencyDay is provided, validation against the
     // existing value is performed in the tRPC router (invoice-recurring.ts) after

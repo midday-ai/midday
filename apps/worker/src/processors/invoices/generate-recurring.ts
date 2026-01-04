@@ -13,9 +13,20 @@ import { transformCustomerToContent } from "@midday/invoice/utils";
 import type { Job } from "bullmq";
 import { addDays } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
+import { DEFAULT_JOB_OPTIONS } from "../../config/job-options";
+import {
+  RecurringInvoiceError,
+  RecurringInvoiceErrors,
+} from "../../errors/invoice-errors";
 import { invoicesQueue } from "../../queues/invoices";
 import type { InvoiceRecurringSchedulerPayload } from "../../schemas/invoices";
 import { getDb } from "../../utils/db";
+import {
+  buildInvoiceTemplateFromRecurring,
+  parseLineItems,
+  stringifyJsonField,
+  validateRecurringDataIntegrity,
+} from "../../utils/invoice-template-builder";
 import { BaseProcessor } from "../base";
 
 type GeneratedInvoiceResult = {
@@ -109,6 +120,16 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
           continue;
         }
 
+        // Defensive check: Validate recurring data integrity
+        const validation = validateRecurringDataIntegrity(recurring);
+        if (!validation.isValid) {
+          throw RecurringInvoiceErrors.templateInvalid(
+            recurring.id,
+            validation.errors.join(", "),
+            recurring.teamId,
+          );
+        }
+
         // Get fresh customer details if customer exists
         let customerDetails: string | null = null;
         let customerEmail: string | null = null;
@@ -119,20 +140,36 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
             teamId: recurring.teamId,
           });
 
-          if (customer) {
-            const customerContent = transformCustomerToContent(customer);
-            customerDetails = customerContent
-              ? JSON.stringify(customerContent)
-              : null;
-            customerEmail = customer.billingEmail || customer.email;
+          // Defensive check: Customer was deleted after series creation
+          if (!customer) {
+            throw RecurringInvoiceErrors.customerNotFound(
+              recurring.id,
+              recurring.customerId,
+              recurring.teamId,
+            );
           }
-        }
 
-        // Validate that we have an email to send the invoice to
-        // If no email exists, fail this generation to trigger failure tracking
-        if (!customerEmail) {
-          throw new Error(
-            `Cannot generate recurring invoice: Customer ${recurring.customerName || recurring.customerId || "unknown"} has no email address. Please update the customer profile with an email address.`,
+          const customerContent = transformCustomerToContent(customer);
+          customerDetails = customerContent
+            ? JSON.stringify(customerContent)
+            : null;
+          customerEmail = customer.billingEmail || customer.email;
+
+          // Defensive check: Customer exists but has no email
+          if (!customerEmail) {
+            throw RecurringInvoiceErrors.customerNoEmail(
+              recurring.id,
+              recurring.customerName || customer.name,
+              recurring.teamId,
+            );
+          }
+        } else {
+          // No customer ID assigned - this shouldn't happen if API validation is correct
+          // but handle it gracefully
+          throw RecurringInvoiceErrors.customerNoEmail(
+            recurring.id,
+            recurring.customerName,
+            recurring.teamId,
           );
         }
 
@@ -146,8 +183,8 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
         const issueDate = now.toISOString();
         const dueDate = addDays(now, recurring.dueDateOffset).toISOString();
 
-        // Build template from recurring data
-        const template = (recurring.template as Record<string, unknown>) || {};
+        // Build template from recurring data using shared utility
+        const template = buildInvoiceTemplateFromRecurring(recurring);
 
         // Use transaction to ensure atomicity of invoice creation and recurring series update
         // This prevents partial state where invoice is created but recurring counter isn't updated
@@ -158,56 +195,12 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
             teamId: recurring.teamId,
             userId: recurring.userId,
             token,
-            template: {
-              customerLabel: (template.customerLabel as string) ?? "To",
-              title: (template.title as string) ?? "Invoice",
-              fromLabel: (template.fromLabel as string) ?? "From",
-              invoiceNoLabel:
-                (template.invoiceNoLabel as string) ?? "Invoice No",
-              issueDateLabel:
-                (template.issueDateLabel as string) ?? "Issue Date",
-              dueDateLabel: (template.dueDateLabel as string) ?? "Due Date",
-              descriptionLabel:
-                (template.descriptionLabel as string) ?? "Description",
-              priceLabel: (template.priceLabel as string) ?? "Price",
-              quantityLabel: (template.quantityLabel as string) ?? "Quantity",
-              totalLabel: (template.totalLabel as string) ?? "Total",
-              totalSummaryLabel:
-                (template.totalSummaryLabel as string) ?? "Total",
-              vatLabel: (template.vatLabel as string) ?? "VAT",
-              subtotalLabel: (template.subtotalLabel as string) ?? "Subtotal",
-              taxLabel: (template.taxLabel as string) ?? "Tax",
-              discountLabel: (template.discountLabel as string) ?? "Discount",
-              timezone: recurring.timezone,
-              paymentLabel:
-                (template.paymentLabel as string) ?? "Payment Details",
-              noteLabel: (template.noteLabel as string) ?? "Note",
-              logoUrl: (template.logoUrl as string | null) ?? null,
-              currency: recurring.currency ?? "USD",
-              dateFormat: (template.dateFormat as string) ?? "dd/MM/yyyy",
-              includeVat: (template.includeVat as boolean) ?? false,
-              includeTax: (template.includeTax as boolean) ?? false,
-              includeDiscount: (template.includeDiscount as boolean) ?? false,
-              includeDecimals: (template.includeDecimals as boolean) ?? false,
-              includeUnits: (template.includeUnits as boolean) ?? false,
-              includeQr: (template.includeQr as boolean) ?? true,
-              taxRate: (template.taxRate as number) ?? 0,
-              vatRate: (template.vatRate as number) ?? 0,
-              size: (template.size as "a4" | "letter") ?? "a4",
-              deliveryType: "create_and_send" as const,
-              locale: (template.locale as string) ?? "en-US",
-            },
+            template,
             templateId: recurring.templateId ?? undefined,
-            paymentDetails: recurring.paymentDetails
-              ? JSON.stringify(recurring.paymentDetails)
-              : null,
-            fromDetails: recurring.fromDetails
-              ? JSON.stringify(recurring.fromDetails)
-              : null,
+            paymentDetails: stringifyJsonField(recurring.paymentDetails),
+            fromDetails: stringifyJsonField(recurring.fromDetails),
             customerDetails,
-            noteDetails: recurring.noteDetails
-              ? JSON.stringify(recurring.noteDetails)
-              : null,
+            noteDetails: stringifyJsonField(recurring.noteDetails),
             dueDate,
             issueDate,
             invoiceNumber,
@@ -215,25 +208,10 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
             tax: recurring.tax ?? undefined,
             discount: recurring.discount ?? undefined,
             subtotal: recurring.subtotal ?? undefined,
-            topBlock: recurring.topBlock
-              ? JSON.stringify(recurring.topBlock)
-              : null,
-            bottomBlock: recurring.bottomBlock
-              ? JSON.stringify(recurring.bottomBlock)
-              : null,
+            topBlock: stringifyJsonField(recurring.topBlock),
+            bottomBlock: stringifyJsonField(recurring.bottomBlock),
             amount: recurring.amount ?? undefined,
-            lineItems: recurring.lineItems as
-              | Array<{
-                  name?: string | null;
-                  quantity?: number;
-                  unit?: string | null;
-                  price?: number;
-                  vat?: number | null;
-                  tax?: number | null;
-                  taxRate?: number | null;
-                  productId?: string;
-                }>
-              | undefined,
+            lineItems: parseLineItems(recurring.lineItems),
             customerId: recurring.customerId ?? undefined,
             customerName: recurring.customerName ?? undefined,
           });
@@ -288,13 +266,7 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
               invoiceId,
               deliveryType: "create_and_send",
             },
-            {
-              attempts: 3,
-              backoff: {
-                type: "exponential",
-                delay: 1000,
-              },
-            },
+            DEFAULT_JOB_OPTIONS,
           );
 
           // Queue notification for invoice generation
@@ -310,13 +282,7 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
               recurringSequence: nextSequence,
               recurringTotalCount: recurring.endCount ?? undefined,
             },
-            {
-              attempts: 3,
-              backoff: {
-                type: "exponential",
-                delay: 1000,
-              },
-            },
+            DEFAULT_JOB_OPTIONS,
           );
 
           // If series is now completed, queue completion notification
@@ -333,13 +299,7 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
                 recurringSequence: nextSequence,
                 recurringTotalCount: recurring.endCount ?? undefined,
               },
-              {
-                attempts: 3,
-                backoff: {
-                  type: "exponential",
-                  delay: 1000,
-                },
-              },
+              DEFAULT_JOB_OPTIONS,
             );
 
             this.logger.info("Recurring invoice series completed", {
@@ -369,11 +329,19 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
           // It will appear in the dashboard where the user can manually generate and send it.
         }
       } catch (error) {
+        // Handle typed RecurringInvoiceError with structured logging
+        const isRecurringError = error instanceof RecurringInvoiceError;
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";
+        const errorCode = isRecurringError ? error.code : "UNKNOWN";
+
         this.logger.error("Failed to generate recurring invoice", {
           recurringId: recurring.id,
+          errorCode,
           error: errorMessage,
+          requiresUserAction: isRecurringError
+            ? error.requiresUserAction
+            : undefined,
         });
 
         // Track the failure and check if we should auto-pause
@@ -388,6 +356,7 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
             {
               recurringId: recurring.id,
               teamId: recurring.teamId,
+              errorCode,
             },
           );
 
@@ -402,19 +371,13 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
               customerName: recurring.customerName ?? undefined,
               recurringId: recurring.id,
             },
-            {
-              attempts: 3,
-              backoff: {
-                type: "exponential",
-                delay: 1000,
-              },
-            },
+            DEFAULT_JOB_OPTIONS,
           );
         }
 
         errors.push({
           recurringId: recurring.id,
-          error: errorMessage,
+          error: isRecurringError ? error.getUserMessage() : errorMessage,
         });
         failed++;
       }

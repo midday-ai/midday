@@ -3,8 +3,9 @@
 import { FormatAmount } from "@/components/format-amount";
 import { useUserQuery } from "@/hooks/use-user";
 import {
+  type InvoiceRecurringEndType,
+  type InvoiceRecurringFrequency,
   type RecurringConfig,
-  type RecurringEndType,
   calculatePreviewDates,
   calculateSummary,
   formatDayOfWeek,
@@ -27,18 +28,8 @@ import { format, getDate, getDay } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
 
-// Re-export types for consumers
-export type { RecurringConfig, RecurringEndType };
-export type RecurringFrequency =
-  | "weekly"
-  | "biweekly"
-  | "monthly_date"
-  | "monthly_weekday"
-  | "monthly_last_day"
-  | "quarterly"
-  | "semi_annual"
-  | "annual"
-  | "custom";
+// Re-export canonical types for consumers
+export type { RecurringConfig };
 
 const DAY_NAMES = [
   "Sunday",
@@ -68,7 +59,7 @@ interface RecurringConfigProps {
 function getSmartOptions(issueDate: Date): Array<{
   value: string;
   label: string;
-  frequency: RecurringFrequency;
+  frequency: InvoiceRecurringFrequency;
   frequencyDay: number | null;
   frequencyWeek: number | null;
 }> {
@@ -208,7 +199,7 @@ export function RecurringConfigPanel({
     }
   };
 
-  const handleEndTypeChange = (value: RecurringEndType) => {
+  const handleEndTypeChange = (value: InvoiceRecurringEndType) => {
     onChange({
       ...config,
       endType: value,
@@ -291,17 +282,16 @@ export function RecurringConfigPanel({
         <RadioGroup
           value={config.endType ?? undefined}
           onValueChange={(value) =>
-            handleEndTypeChange(value as RecurringEndType)
+            handleEndTypeChange(value as InvoiceRecurringEndType)
           }
-          className="space-y-2"
+          className="space-y-3"
         >
           <div className="flex items-center gap-2">
-            <RadioGroupItem
-              value="on_date"
-              id="on_date"
-              className="rounded-none data-[state=checked]:bg-[#F2F1EF] data-[state=checked]:dark:bg-[#1d1d1d] border-border"
-            />
-            <Label htmlFor="on_date" className="font-normal text-sm">
+            <RadioGroupItem value="on_date" id="on_date" />
+            <Label
+              htmlFor="on_date"
+              className="font-normal text-sm text-primary"
+            >
               On
             </Label>
             <Popover>
@@ -309,7 +299,7 @@ export function RecurringConfigPanel({
                 <button
                   type="button"
                   disabled={config.endType !== "on_date"}
-                  className="h-9 px-3 border border-border bg-transparent text-sm disabled:opacity-50"
+                  className="h-9 px-3 border border-border bg-transparent text-sm text-primary disabled:opacity-50"
                 >
                   {config.endDate
                     ? format(new Date(config.endDate), "MMM d, yyyy")
@@ -330,12 +320,11 @@ export function RecurringConfigPanel({
             </Popover>
           </div>
           <div className="flex items-center gap-2">
-            <RadioGroupItem
-              value="after_count"
-              id="after_count"
-              className="rounded-none data-[state=checked]:bg-[#F2F1EF] data-[state=checked]:dark:bg-[#1d1d1d] border-border"
-            />
-            <Label htmlFor="after_count" className="font-normal text-sm">
+            <RadioGroupItem value="after_count" id="after_count" />
+            <Label
+              htmlFor="after_count"
+              className="font-normal text-sm text-primary"
+            >
               After
             </Label>
             <Input
@@ -348,15 +337,11 @@ export function RecurringConfigPanel({
               disabled={config.endType !== "after_count"}
               className="w-16"
             />
-            <span className="text-sm">invoices</span>
+            <span className="text-sm text-primary">invoices</span>
           </div>
           <div className="flex items-center gap-2">
-            <RadioGroupItem
-              value="never"
-              id="never"
-              className="rounded-none data-[state=checked]:bg-[#F2F1EF] data-[state=checked]:dark:bg-[#1d1d1d] border-border"
-            />
-            <Label htmlFor="never" className="font-normal text-sm">
+            <RadioGroupItem value="never" id="never" />
+            <Label htmlFor="never" className="font-normal text-sm text-primary">
               Never
             </Label>
           </div>

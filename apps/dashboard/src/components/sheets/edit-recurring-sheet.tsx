@@ -4,8 +4,9 @@ import { FormatAmount } from "@/components/format-amount";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTRPC } from "@/trpc/client";
 import {
+  type InvoiceRecurringEndType,
+  type InvoiceRecurringFrequency,
   type RecurringConfig,
-  type RecurringEndType,
   calculatePreviewDates,
   formatOrdinal,
   isValidRecurringConfig,
@@ -44,21 +45,10 @@ const DAY_NAMES = [
 
 const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th"];
 
-type RecurringFrequency =
-  | "weekly"
-  | "biweekly"
-  | "monthly_date"
-  | "monthly_weekday"
-  | "monthly_last_day"
-  | "quarterly"
-  | "semi_annual"
-  | "annual"
-  | "custom";
-
 function getSmartOptions(referenceDate: Date): Array<{
   value: string;
   label: string;
-  frequency: RecurringFrequency;
+  frequency: InvoiceRecurringFrequency;
   frequencyDay: number | null;
   frequencyWeek: number | null;
 }> {
@@ -162,11 +152,11 @@ export function EditRecurringSheet() {
     if (recurring) {
       setConfig({
         frequency:
-          (recurring.frequency as RecurringFrequency) || "monthly_date",
+          (recurring.frequency as InvoiceRecurringFrequency) || "monthly_date",
         frequencyDay: recurring.frequencyDay ?? null,
         frequencyWeek: recurring.frequencyWeek ?? null,
         frequencyInterval: recurring.frequencyInterval ?? null,
-        endType: (recurring.endType as RecurringEndType) || "never",
+        endType: (recurring.endType as InvoiceRecurringEndType) || "never",
         endDate: recurring.endDate ?? null,
         endCount: recurring.endCount ?? null,
       });
@@ -276,7 +266,7 @@ export function EditRecurringSheet() {
   const handleEndTypeChange = (value: string) => {
     setConfig((prev) => ({
       ...prev,
-      endType: value as RecurringEndType,
+      endType: value as InvoiceRecurringEndType,
       endDate: value === "on_date" ? prev.endDate : null,
       endCount: value === "after_count" ? prev.endCount || 12 : null,
     }));

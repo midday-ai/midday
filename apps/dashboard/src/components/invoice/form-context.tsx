@@ -76,7 +76,7 @@ export const recurringConfigSchema = z
     frequencyDay: z.number().nullable(),
     frequencyWeek: z.number().nullable(),
     frequencyInterval: z.number().nullable(),
-    endType: z.enum(["never", "on_date", "after_count"]),
+    endType: z.enum(["never", "on_date", "after_count"]).nullable(),
     endDate: z.string().nullable(),
     endCount: z.number().nullable(),
   })

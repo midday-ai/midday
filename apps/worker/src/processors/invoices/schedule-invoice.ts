@@ -1,5 +1,6 @@
 import { getInvoiceById, updateInvoice } from "@midday/db/queries";
 import type { Job } from "bullmq";
+import { DEFAULT_JOB_OPTIONS } from "../../config/job-options";
 import { invoicesQueue } from "../../queues/invoices";
 import type { ScheduleInvoicePayload } from "../../schemas/invoices";
 import { getDb } from "../../utils/db";
@@ -59,13 +60,7 @@ export class ScheduleInvoiceProcessor extends BaseProcessor<ScheduleInvoicePaylo
         invoiceId,
         deliveryType: "create_and_send",
       },
-      {
-        attempts: 3,
-        backoff: {
-          type: "exponential",
-          delay: 1000,
-        },
-      },
+      DEFAULT_JOB_OPTIONS,
     );
 
     this.logger.info("Scheduled invoice queued for generation", {

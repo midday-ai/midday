@@ -1,21 +1,51 @@
 import { addDays, format, getDay, lastDayOfMonth } from "date-fns";
 
-export type InvoiceRecurringFrequency =
-  | "weekly"
-  | "biweekly"
-  | "monthly_date"
-  | "monthly_weekday"
-  | "monthly_last_day"
-  | "quarterly"
-  | "semi_annual"
-  | "annual"
-  | "custom";
+// ============================================================================
+// Canonical Type Definitions - Single Source of Truth
+// These constants and types should be used across all packages
+// ============================================================================
 
-export type InvoiceRecurringStatus =
-  | "active"
-  | "paused"
-  | "completed"
-  | "canceled";
+/**
+ * All valid recurring invoice frequencies.
+ * Used to derive both TypeScript types and Zod schemas.
+ */
+export const RECURRING_FREQUENCIES = [
+  "weekly",
+  "biweekly",
+  "monthly_date",
+  "monthly_weekday",
+  "monthly_last_day",
+  "quarterly",
+  "semi_annual",
+  "annual",
+  "custom",
+] as const;
+
+/**
+ * All valid recurring invoice statuses.
+ * Used to derive both TypeScript types and Zod schemas.
+ */
+export const RECURRING_STATUSES = [
+  "active",
+  "paused",
+  "completed",
+  "canceled",
+] as const;
+
+/**
+ * All valid recurring invoice end types.
+ * Used to derive both TypeScript types and Zod schemas.
+ */
+export const RECURRING_END_TYPES = ["never", "on_date", "after_count"] as const;
+
+/** Invoice recurring frequency type derived from RECURRING_FREQUENCIES constant */
+export type InvoiceRecurringFrequency = (typeof RECURRING_FREQUENCIES)[number];
+
+/** Invoice recurring status type derived from RECURRING_STATUSES constant */
+export type InvoiceRecurringStatus = (typeof RECURRING_STATUSES)[number];
+
+/** Invoice recurring end type derived from RECURRING_END_TYPES constant */
+export type InvoiceRecurringEndType = (typeof RECURRING_END_TYPES)[number];
 
 /**
  * Format a date string to day of week abbreviation (e.g., "Fri", "Mon")
@@ -164,10 +194,26 @@ export function formatNextScheduled(
 }
 
 // ============================================================================
-// Date Calculation Utilities (Client-side preview)
+// Date Calculation Utilities (Client-Side Preview)
 // ============================================================================
-
-export type RecurringEndType = "never" | "on_date" | "after_count";
+//
+// These date calculation functions are for UI preview purposes only.
+// They provide approximate next invoice dates for display in the dashboard.
+//
+// IMPORTANT: These are simplified calculations without timezone support.
+// The server-side calculations in @midday/db/utils/invoice-recurring use
+// proper timezone handling via @date-fns/tz and are the authoritative source
+// for actual invoice scheduling.
+//
+// Use these for:
+// - Showing preview dates in the recurring invoice configuration UI
+// - Displaying upcoming invoice calendars
+// - Client-side summary calculations
+//
+// Do NOT use these for:
+// - Actual invoice scheduling (use server-side calculateNextScheduledDate)
+// - Any operation where timezone accuracy matters
+// ============================================================================
 
 export interface RecurringConfig {
   frequency: InvoiceRecurringFrequency;
@@ -175,7 +221,7 @@ export interface RecurringConfig {
   frequencyWeek: number | null;
   frequencyInterval: number | null;
   /** null means user hasn't selected yet - used for requiring explicit selection */
-  endType: RecurringEndType | null;
+  endType: InvoiceRecurringEndType | null;
   endDate: string | null;
   endCount: number | null;
 }
@@ -217,9 +263,21 @@ export function getNthWeekdayOfMonth(
 }
 
 /**
- * Calculate next date based on frequency (client-side preview version)
- * Note: This is a simplified version without timezone support for preview purposes.
- * Server-side uses calculateNextScheduledDate from @midday/db for actual scheduling.
+ * Calculate next date based on frequency (client-side preview version).
+ *
+ * **Client-Side Only - For UI Preview**
+ *
+ * This is a simplified version without timezone support, intended only for:
+ * - Showing approximate upcoming dates in the UI
+ * - Preview calendars in the recurring invoice configuration
+ *
+ * For actual invoice scheduling, the server uses `calculateNextScheduledDate`
+ * from `@midday/db/utils/invoice-recurring`, which includes proper timezone
+ * handling via `@date-fns/tz`.
+ *
+ * @param config - The recurring configuration
+ * @param currentDate - The reference date to calculate from
+ * @returns The next scheduled date (approximate, no timezone adjustment)
  */
 export function getNextDate(config: RecurringConfig, currentDate: Date): Date {
   switch (config.frequency) {
@@ -399,7 +457,17 @@ export function calculateSummary(
 }
 
 // ============================================================================
-// Validation Utilities
+// Validation Utilities (Client-Side)
+// ============================================================================
+//
+// These validation functions are for immediate UI feedback only.
+// They mirror the server-side Zod schema validation but run locally
+// to provide instant feedback without a network round-trip.
+//
+// IMPORTANT: The server (API schema) is the single source of truth for validation.
+// These client-side checks should match the schema validation, but the server
+// validation is authoritative and will reject invalid data even if client
+// validation is bypassed or outdated.
 // ============================================================================
 
 export interface RecurringConfigValidationError {
@@ -408,7 +476,11 @@ export interface RecurringConfigValidationError {
 }
 
 /**
- * Validate a recurring config and return any errors
+ * Validate a recurring config and return any errors.
+ *
+ * NOTE: This is client-side validation for immediate UI feedback.
+ * The API schema performs the authoritative validation server-side.
+ *
  * @returns Array of validation errors (empty if valid)
  */
 export function validateRecurringConfig(

@@ -8,18 +8,25 @@ import {
   setDay,
 } from "date-fns";
 
-export type InvoiceRecurringFrequency =
-  | "weekly"
-  | "biweekly"
-  | "monthly_date"
-  | "monthly_weekday"
-  | "monthly_last_day"
-  | "quarterly"
-  | "semi_annual"
-  | "annual"
-  | "custom";
+// Re-export canonical types from @midday/invoice
+// This ensures a single source of truth for recurring invoice types
+export type {
+  InvoiceRecurringFrequency,
+  InvoiceRecurringEndType,
+  InvoiceRecurringStatus,
+} from "@midday/invoice/recurring";
 
-export type InvoiceRecurringEndType = "never" | "on_date" | "after_count";
+export {
+  RECURRING_FREQUENCIES,
+  RECURRING_END_TYPES,
+  RECURRING_STATUSES,
+} from "@midday/invoice/recurring";
+
+// Import types for local use
+import type {
+  InvoiceRecurringEndType,
+  InvoiceRecurringFrequency,
+} from "@midday/invoice/recurring";
 
 export interface RecurringInvoiceParams {
   frequency: InvoiceRecurringFrequency;
@@ -76,10 +83,31 @@ function getNthWeekdayOfMonth(
 }
 
 /**
- * Calculate the next scheduled date for a recurring invoice
- * @param params - Recurring invoice parameters
+ * Calculate the next scheduled date for a recurring invoice.
+ * 
+ * **Server-Side - Authoritative for Scheduling**
+ * 
+ * This function handles proper timezone-aware date calculations using `@date-fns/tz`.
+ * It should be used for all actual invoice scheduling operations.
+ * 
+ * Note: There is a similar `getNextDate` function in `@midday/invoice/recurring`
+ * that provides simplified client-side calculations for UI preview purposes only.
+ * That version does NOT handle timezones and should not be used for scheduling.
+ * 
+ * @param params - Recurring invoice parameters including frequency and timezone
  * @param currentDate - The current/reference date (in UTC)
- * @returns The next scheduled date in UTC
+ * @returns The next scheduled date in UTC, adjusted for the user's timezone
+ * 
+ * @example
+ * ```ts
+ * const nextDate = calculateNextScheduledDate({
+ *   frequency: "monthly_date",
+ *   frequencyDay: 15,
+ *   frequencyWeek: null,
+ *   frequencyInterval: null,
+ *   timezone: "America/New_York"
+ * }, new Date());
+ * ```
  */
 export function calculateNextScheduledDate(
   params: RecurringInvoiceParams,
