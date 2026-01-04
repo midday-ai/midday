@@ -219,38 +219,46 @@ export function Form() {
 
       try {
         // First create the recurring series and link the draft invoice
-        await createRecurringInvoiceMutation.mutateAsync({
-          invoiceId: values.id, // Link the draft invoice to the recurring series
-          customerId: values.customerId,
-          customerName: values.customerName ?? undefined,
-          frequency: config.frequency,
-          frequencyDay: config.frequencyDay,
-          frequencyWeek: config.frequencyWeek,
-          frequencyInterval: config.frequencyInterval,
-          endType: config.endType,
-          endDate: config.endDate,
-          endCount: config.endCount,
-          timezone:
-            user?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-          dueDateOffset: dueDateOffset > 0 ? dueDateOffset : 30,
-          amount: values.amount,
-          currency: values.template.currency,
-          lineItems: values.lineItems,
-          template: {
-            ...templateWithoutDeliveryType,
-            deliveryType: "create_and_send" as const, // Recurring invoices are sent automatically
-          },
-          templateId: values.template.id, // Save the template reference
-          paymentDetails: values.paymentDetails,
-          fromDetails: values.fromDetails,
-          noteDetails: values.noteDetails,
-          vat: values.vat,
-          tax: values.tax,
-          discount: values.discount,
-          subtotal: values.subtotal,
-          topBlock: values.topBlock,
-          bottomBlock: values.bottomBlock,
-        });
+        const recurringResult =
+          await createRecurringInvoiceMutation.mutateAsync({
+            invoiceId: values.id, // Link the draft invoice to the recurring series
+            customerId: values.customerId,
+            customerName: values.customerName ?? undefined,
+            frequency: config.frequency,
+            frequencyDay: config.frequencyDay,
+            frequencyWeek: config.frequencyWeek,
+            frequencyInterval: config.frequencyInterval,
+            endType: config.endType,
+            endDate: config.endDate,
+            endCount: config.endCount,
+            timezone:
+              user?.timezone ||
+              Intl.DateTimeFormat().resolvedOptions().timeZone,
+            dueDateOffset: dueDateOffset > 0 ? dueDateOffset : 30,
+            amount: values.amount,
+            currency: values.template.currency,
+            lineItems: values.lineItems,
+            template: {
+              ...templateWithoutDeliveryType,
+              deliveryType: "create_and_send" as const, // Recurring invoices are sent automatically
+            },
+            templateId: values.template.id, // Save the template reference
+            paymentDetails: values.paymentDetails,
+            fromDetails: values.fromDetails,
+            noteDetails: values.noteDetails,
+            vat: values.vat,
+            tax: values.tax,
+            discount: values.discount,
+            subtotal: values.subtotal,
+            topBlock: values.topBlock,
+            bottomBlock: values.bottomBlock,
+          });
+
+        // Update form state with the recurring series ID to prevent duplicate series
+        // if the send fails and user retries
+        if (recurringResult?.id) {
+          form.setValue("invoiceRecurringId", recurringResult.id);
+        }
 
         // Then send the first invoice (generate PDF and send email)
         createInvoiceMutation.mutate({

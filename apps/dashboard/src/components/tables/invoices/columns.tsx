@@ -531,6 +531,9 @@ export const columns: ColumnDef<Invoice>[] = [
           {recurring.status === "completed" && (
             <span className="text-xs text-muted-foreground">Completed</span>
           )}
+          {recurring.status === "canceled" && (
+            <span className="text-xs text-muted-foreground">Canceled</span>
+          )}
         </div>
       );
     },

@@ -36,6 +36,32 @@ export const invoiceRecurringRouter = createTRPCRouter({
 
       const { invoiceId, ...recurringData } = input;
 
+      // If an invoice ID is provided, check if it's already linked to a recurring series
+      // This prevents creating duplicate series if the user retries after a partial failure
+      if (invoiceId) {
+        const existingInvoice = await db.query.invoices.findFirst({
+          where: (invoices, { eq, and }) =>
+            and(eq(invoices.id, invoiceId), eq(invoices.teamId, teamId)),
+          columns: {
+            id: true,
+            invoiceRecurringId: true,
+          },
+        });
+
+        if (existingInvoice?.invoiceRecurringId) {
+          // Invoice is already linked to a series - return the existing series
+          // This makes the operation idempotent
+          const existingSeries = await getInvoiceRecurringById(db, {
+            id: existingInvoice.invoiceRecurringId,
+            teamId,
+          });
+
+          if (existingSeries) {
+            return existingSeries;
+          }
+        }
+      }
+
       // Create the recurring series
       const result = await createInvoiceRecurring(db, {
         teamId,
@@ -110,12 +136,16 @@ export const invoiceRecurringRouter = createTRPCRouter({
         });
       }
 
-      // When frequencyDay is being updated without frequency, validate against existing frequency
-      if (
-        input.frequencyDay !== undefined &&
-        input.frequencyDay !== null &&
-        input.frequency === undefined
-      ) {
+      // Validate frequency/frequencyDay cross-field constraints
+      // Case 1: frequencyDay is being updated without frequency - validate against existing frequency
+      // Case 2: frequency is being updated without frequencyDay - validate against existing frequencyDay
+      const needsCrossFieldValidation =
+        (input.frequencyDay !== undefined &&
+          input.frequencyDay !== null &&
+          input.frequency === undefined) ||
+        (input.frequency !== undefined && input.frequencyDay === undefined);
+
+      if (needsCrossFieldValidation) {
         const existing = await getInvoiceRecurringById(db, {
           id: input.id,
           teamId,
@@ -128,29 +158,37 @@ export const invoiceRecurringRouter = createTRPCRouter({
           });
         }
 
-        // Validate frequencyDay against the existing frequency
-        const existingFrequency = existing.frequency;
+        // Determine effective frequency and frequencyDay for validation
+        const effectiveFrequency = input.frequency ?? existing.frequency;
+        const effectiveFrequencyDay =
+          input.frequencyDay ?? existing.frequencyDay;
 
+        // Only validate if we have a frequencyDay to check
         if (
-          (existingFrequency === "weekly" ||
-            existingFrequency === "monthly_weekday") &&
-          input.frequencyDay > 6
+          effectiveFrequencyDay !== null &&
+          effectiveFrequencyDay !== undefined
         ) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: `For ${existingFrequency} frequency, frequencyDay must be 0-6 (Sunday-Saturday)`,
-          });
-        }
+          if (
+            (effectiveFrequency === "weekly" ||
+              effectiveFrequency === "monthly_weekday") &&
+            effectiveFrequencyDay > 6
+          ) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: `For ${effectiveFrequency} frequency, frequencyDay must be 0-6 (Sunday-Saturday)`,
+            });
+          }
 
-        if (
-          existingFrequency === "monthly_date" &&
-          (input.frequencyDay < 1 || input.frequencyDay > 31)
-        ) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message:
-              "For monthly_date frequency, frequencyDay must be 1-31 (day of month)",
-          });
+          if (
+            effectiveFrequency === "monthly_date" &&
+            (effectiveFrequencyDay < 1 || effectiveFrequencyDay > 31)
+          ) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message:
+                "For monthly_date frequency, frequencyDay must be 1-31 (day of month)",
+            });
+          }
         }
       }
 
