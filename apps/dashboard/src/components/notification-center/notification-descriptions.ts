@@ -290,6 +290,96 @@ const handleInvoiceRefunded: NotificationDescriptionHandler = (
   return t("notifications.invoice_refunded.title");
 };
 
+const handleRecurringSeriesStarted: NotificationDescriptionHandler = (
+  metadata,
+  user,
+  t,
+) => {
+  const customerName = metadata?.customerName;
+  const frequency = metadata?.frequency;
+  const endType = metadata?.endType;
+  const endCount = metadata?.endCount;
+
+  if (customerName && frequency) {
+    if (endType === "after_count" && endCount) {
+      return t(
+        "notifications.recurring_series_started.with_customer_and_count",
+        {
+          customerName,
+          frequency,
+          count: endCount,
+        },
+      );
+    }
+    return t("notifications.recurring_series_started.with_customer", {
+      customerName,
+      frequency,
+    });
+  }
+  if (frequency) {
+    return t("notifications.recurring_series_started.with_frequency", {
+      frequency,
+    });
+  }
+  return t("notifications.recurring_series_started.title");
+};
+
+const handleRecurringSeriesCompleted: NotificationDescriptionHandler = (
+  metadata,
+  user,
+  t,
+) => {
+  const customerName = metadata?.customerName;
+  const totalGenerated = metadata?.totalGenerated;
+
+  if (customerName && totalGenerated) {
+    return t(
+      "notifications.recurring_series_completed.with_customer_and_count",
+      {
+        customerName,
+        count: totalGenerated,
+      },
+    );
+  }
+  if (totalGenerated) {
+    return t("notifications.recurring_series_completed.with_count", {
+      count: totalGenerated,
+    });
+  }
+  return t("notifications.recurring_series_completed.title");
+};
+
+const handleRecurringSeriesPaused: NotificationDescriptionHandler = (
+  metadata,
+  user,
+  t,
+) => {
+  const customerName = metadata?.customerName;
+  const reason = metadata?.reason;
+  const failureCount = metadata?.failureCount;
+
+  if (reason === "auto_failure" && failureCount) {
+    if (customerName) {
+      return t(
+        "notifications.recurring_series_paused.auto_failure_with_customer",
+        {
+          customerName,
+          failureCount,
+        },
+      );
+    }
+    return t("notifications.recurring_series_paused.auto_failure", {
+      failureCount,
+    });
+  }
+  if (customerName) {
+    return t("notifications.recurring_series_paused.with_customer", {
+      customerName,
+    });
+  }
+  return t("notifications.recurring_series_paused.title");
+};
+
 const handleInboxAutoMatched: NotificationDescriptionHandler = (
   metadata,
   user,
@@ -565,6 +655,9 @@ const notificationHandlers: Record<string, NotificationDescriptionHandler> = {
   invoice_cancelled: handleInvoiceCancelled,
   invoice_created: handleInvoiceCreated,
   invoice_refunded: handleInvoiceRefunded,
+  recurring_series_started: handleRecurringSeriesStarted,
+  recurring_series_completed: handleRecurringSeriesCompleted,
+  recurring_series_paused: handleRecurringSeriesPaused,
 };
 
 export function getNotificationDescription(

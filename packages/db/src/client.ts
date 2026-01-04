@@ -1,4 +1,7 @@
+import type { ExtractTablesWithRelations } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
+import type { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
+import type { PgTransaction } from "drizzle-orm/pg-core";
 import { Pool } from "pg";
 import { withReplicas } from "./replicas";
 import * as schema from "./schema";
@@ -86,6 +89,15 @@ export const connectDb = async () => {
 };
 
 export type Database = Awaited<ReturnType<typeof connectDb>>;
+
+export type TransactionClient = PgTransaction<
+  NodePgQueryResultHKT,
+  typeof schema,
+  ExtractTablesWithRelations<typeof schema>
+>;
+
+/** Use in query functions that should work both standalone and within transactions */
+export type DatabaseOrTransaction = Database | TransactionClient;
 
 export type DatabaseWithPrimary = Database & {
   $primary?: Database;

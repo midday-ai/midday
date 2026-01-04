@@ -152,4 +152,3 @@ export function fromStripeAmount(
   const multiplier = getCurrencyMultiplier(currency);
   return stripeAmount / multiplier;
 }
-

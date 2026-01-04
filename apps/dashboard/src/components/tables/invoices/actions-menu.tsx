@@ -6,12 +6,23 @@ import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@midday/ui/alert-dialog";
 import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -20,6 +31,7 @@ import {
 import { useToast } from "@midday/ui/use-toast";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { useCopyToClipboard } from "usehooks-ts";
 import type { Invoice } from "./columns";
 
@@ -34,6 +46,18 @@ export function ActionsMenu({ row }: Props) {
   const { setParams } = useInvoiceParams();
   const { toast } = useToast();
   const [, copy] = useCopyToClipboard();
+  const [cancelSeriesOpen, setCancelSeriesOpen] = useState(false);
+
+  const canCancelSeries =
+    row.invoiceRecurringId &&
+    (row.recurring?.status === "active" || row.recurring?.status === "paused");
+  const canPauseSeries =
+    row.invoiceRecurringId && row.recurring?.status === "active";
+  const canResumeSeries =
+    row.invoiceRecurringId && row.recurring?.status === "paused";
+  const canEditSeries =
+    row.invoiceRecurringId &&
+    (row.recurring?.status === "active" || row.recurring?.status === "paused");
 
   const deleteInvoiceMutation = useMutation(
     trpc.invoice.delete.mutationOptions({
@@ -136,6 +160,64 @@ export function ActionsMenu({ row }: Props) {
 
         queryClient.invalidateQueries({
           queryKey: trpc.invoice.paymentStatus.queryKey(),
+        });
+      },
+    }),
+  );
+
+  const cancelSeriesMutation = useMutation(
+    trpc.invoiceRecurring.delete.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.getById.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoiceRecurring.list.queryKey(),
+        });
+      },
+    }),
+  );
+
+  const pauseSeriesMutation = useMutation(
+    trpc.invoiceRecurring.pause.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoiceRecurring.list.queryKey(),
+        });
+      },
+    }),
+  );
+
+  const resumeSeriesMutation = useMutation(
+    trpc.invoiceRecurring.resume.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoiceRecurring.list.queryKey(),
         });
       },
     }),
@@ -294,8 +376,84 @@ export function ActionsMenu({ row }: Props) {
               Delete
             </DropdownMenuItem>
           )}
+
+          {(canEditSeries ||
+            canPauseSeries ||
+            canResumeSeries ||
+            canCancelSeries) && (
+            <>
+              <DropdownMenuSeparator />
+              {canEditSeries && (
+                <DropdownMenuItem
+                  onClick={() =>
+                    setParams({ editRecurringId: row.invoiceRecurringId })
+                  }
+                >
+                  Edit series
+                </DropdownMenuItem>
+              )}
+              {canPauseSeries && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    if (row.invoiceRecurringId) {
+                      pauseSeriesMutation.mutate({
+                        id: row.invoiceRecurringId,
+                      });
+                    }
+                  }}
+                >
+                  Pause series
+                </DropdownMenuItem>
+              )}
+              {canResumeSeries && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    if (row.invoiceRecurringId) {
+                      resumeSeriesMutation.mutate({
+                        id: row.invoiceRecurringId,
+                      });
+                    }
+                  }}
+                >
+                  Resume series
+                </DropdownMenuItem>
+              )}
+              {canCancelSeries && (
+                <DropdownMenuItem
+                  onClick={() => setCancelSeriesOpen(true)}
+                  className="text-[#FF3638]"
+                >
+                  Cancel series
+                </DropdownMenuItem>
+              )}
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <AlertDialog open={cancelSeriesOpen} onOpenChange={setCancelSeriesOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel recurring series</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will stop all future invoices in this recurring series.
+              Invoices that have already been sent will not be affected.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep series</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (row.invoiceRecurringId) {
+                  cancelSeriesMutation.mutate({ id: row.invoiceRecurringId });
+                }
+              }}
+            >
+              Cancel series
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

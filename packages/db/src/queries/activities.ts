@@ -1,4 +1,4 @@
-import type { Database } from "@db/client";
+import type { Database, DatabaseOrTransaction } from "@db/client";
 import { activities } from "@db/schema";
 import type { activityStatusEnum, activityTypeEnum } from "@db/schema";
 import { and, desc, eq, gte, inArray, lte, ne, sql } from "drizzle-orm";
@@ -22,7 +22,7 @@ type CreateActivityParams = {
 };
 
 export async function createActivity(
-  db: Database,
+  db: DatabaseOrTransaction,
   params: CreateActivityParams,
 ) {
   const [result] = await db

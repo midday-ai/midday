@@ -10,6 +10,7 @@ import { CustomerCreateSheet } from "@/components/sheets/customer-create-sheet";
 import { CustomerDetailsSheet } from "@/components/sheets/customer-details-sheet";
 import { CustomerEditSheet } from "@/components/sheets/customer-edit-sheet";
 import { DocumentSheet } from "@/components/sheets/document-sheet";
+import { EditRecurringSheet } from "@/components/sheets/edit-recurring-sheet";
 import { InboxDetailsSheet } from "@/components/sheets/inbox-details-sheet";
 import { InvoiceDetailsSheet } from "@/components/sheets/invoice-details-sheet";
 import { InvoiceSheet } from "@/components/sheets/invoice-sheet";
@@ -55,6 +56,7 @@ export function GlobalSheets() {
 
       <InvoiceDetailsSheet />
       <InvoiceSheet />
+      <EditRecurringSheet />
     </>
   );
 }

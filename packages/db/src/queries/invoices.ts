@@ -1,9 +1,10 @@
 import { UTCDate } from "@date-fns/utc";
-import type { Database } from "@db/client";
+import type { Database, DatabaseOrTransaction } from "@db/client";
 import {
   type activityTypeEnum,
   customers,
   exchangeRates,
+  invoiceRecurring,
   invoiceStatusEnum,
   invoiceTemplates,
   invoices,
@@ -199,10 +200,26 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
       team: {
         name: teams.name,
       },
+      // Recurring invoice fields
+      invoiceRecurringId: invoices.invoiceRecurringId,
+      recurringSequence: invoices.recurringSequence,
+      recurring: {
+        id: invoiceRecurring.id,
+        status: invoiceRecurring.status,
+        frequency: invoiceRecurring.frequency,
+        endType: invoiceRecurring.endType,
+        endCount: invoiceRecurring.endCount,
+        invoicesGenerated: invoiceRecurring.invoicesGenerated,
+        nextScheduledAt: invoiceRecurring.nextScheduledAt,
+      },
     })
     .from(invoices)
     .leftJoin(customers, eq(invoices.customerId, customers.id))
     .leftJoin(teams, eq(invoices.teamId, teams.id))
+    .leftJoin(
+      invoiceRecurring,
+      eq(invoices.invoiceRecurringId, invoiceRecurring.id),
+    )
     .where(and(...whereConditions));
 
   // Apply sorting
@@ -326,11 +343,27 @@ export async function getInvoiceById(
         name: invoiceTemplates.name,
         isDefault: invoiceTemplates.isDefault,
       },
+      // Recurring invoice data
+      invoiceRecurringId: invoices.invoiceRecurringId,
+      recurringSequence: invoices.recurringSequence,
+      recurring: {
+        id: invoiceRecurring.id,
+        frequency: invoiceRecurring.frequency,
+        status: invoiceRecurring.status,
+        nextScheduledAt: invoiceRecurring.nextScheduledAt,
+        endType: invoiceRecurring.endType,
+        endCount: invoiceRecurring.endCount,
+        invoicesGenerated: invoiceRecurring.invoicesGenerated,
+      },
     })
     .from(invoices)
     .leftJoin(customers, eq(invoices.customerId, customers.id))
     .leftJoin(teams, eq(invoices.teamId, teams.id))
     .leftJoin(invoiceTemplates, eq(invoices.templateId, invoiceTemplates.id))
+    .leftJoin(
+      invoiceRecurring,
+      eq(invoices.invoiceRecurringId, invoiceRecurring.id),
+    )
     .where(
       and(
         eq(invoices.id, id),
@@ -663,7 +696,10 @@ type DraftInvoiceParams = {
   userId: string;
 };
 
-export async function draftInvoice(db: Database, params: DraftInvoiceParams) {
+export async function draftInvoice(
+  db: DatabaseOrTransaction,
+  params: DraftInvoiceParams,
+) {
   const {
     id,
     teamId,
@@ -976,11 +1012,17 @@ export type UpdateInvoiceParams = {
   scheduledJobId?: string | null;
   paymentIntentId?: string | null;
   refundedAt?: string | null;
+  sentTo?: string | null;
+  invoiceRecurringId?: string | null;
+  recurringSequence?: number | null;
   teamId: string;
   userId?: string;
 };
 
-export async function updateInvoice(db: Database, params: UpdateInvoiceParams) {
+export async function updateInvoice(
+  db: DatabaseOrTransaction,
+  params: UpdateInvoiceParams,
+) {
   const { id, teamId, userId, ...rest } = params;
 
   const [result] = await db

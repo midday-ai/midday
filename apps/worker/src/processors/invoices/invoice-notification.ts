@@ -197,6 +197,89 @@ export class InvoiceNotificationProcessor extends BaseProcessor<InvoiceNotificat
         break;
       }
 
+      case "recurring_generated": {
+        const { recurringSequence, recurringTotalCount } = job.data;
+
+        // Create in-app notification for recurring invoice generation
+        // Note: The email is sent via the generate-invoice task, so we only do in-app here
+        await notifications.create(
+          "invoice_created",
+          teamId,
+          {
+            invoiceId,
+            invoiceNumber,
+            customerName,
+          },
+          {
+            sendEmail: false, // Email is handled by generate-invoice task
+          },
+        );
+
+        this.logger.info("Recurring invoice generated notification created", {
+          invoiceId,
+          invoiceNumber,
+          teamId,
+          sequence: recurringSequence,
+          totalCount: recurringTotalCount,
+        });
+        break;
+      }
+
+      case "recurring_series_completed": {
+        const { recurringId, recurringTotalCount, recurringSequence } =
+          job.data;
+
+        // Create in-app notification for series completion
+        await notifications.create(
+          "recurring_series_completed",
+          teamId,
+          {
+            invoiceId,
+            invoiceNumber,
+            customerName,
+            recurringId: recurringId ?? invoiceId,
+            totalGenerated: recurringTotalCount ?? recurringSequence ?? 0,
+          },
+          {
+            sendEmail: false,
+          },
+        );
+
+        this.logger.info("Recurring invoice series completed", {
+          recurringId,
+          teamId,
+          invoiceNumber,
+          customerName,
+          totalGenerated: recurringTotalCount ?? recurringSequence,
+        });
+        break;
+      }
+
+      case "recurring_series_paused": {
+        const { recurringId } = job.data;
+
+        // Create in-app notification for series paused
+        await notifications.create(
+          "recurring_series_paused",
+          teamId,
+          {
+            recurringId: recurringId ?? invoiceId,
+            customerName,
+            reason: "auto_failure",
+            failureCount: 3,
+          },
+          {
+            sendEmail: false,
+          },
+        );
+
+        this.logger.warn("Recurring invoice series paused due to errors", {
+          recurringId,
+          teamId,
+        });
+        break;
+      }
+
       default: {
         this.logger.warn("Unknown invoice notification type", {
           type,
