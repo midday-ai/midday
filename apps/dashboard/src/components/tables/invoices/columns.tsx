@@ -24,10 +24,7 @@ import { ActionsMenu } from "./actions-menu";
  * Format a date stored as UTC midnight (e.g., "2024-01-15T00:00:00.000Z") to display
  * the correct date regardless of user's timezone.
  */
-function formatDateUTC(
-  date: string,
-  dateFormat?: string | null,
-): string {
+function formatDateUTC(date: string, dateFormat?: string | null): string {
   const tzDate = new TZDate(date, "UTC");
   // Check if same year for short format
   const now = new Date();

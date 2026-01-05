@@ -43,7 +43,7 @@ export function Meta({
           </Text>
           <Text style={{ fontSize: 9 }}>
             {issueDate
-              ? format(new TZDate(issueDate, timezone), dateFormat)
+              ? format(new TZDate(issueDate, "UTC"), dateFormat)
               : ""}
           </Text>
         </View>
@@ -52,7 +52,7 @@ export function Meta({
             {dueDateLabel ? `${dueDateLabel}:` : ""}
           </Text>
           <Text style={{ fontSize: 9 }}>
-            {dueDate ? format(new TZDate(dueDate, timezone), dateFormat) : ""}
+            {dueDate ? format(new TZDate(dueDate, "UTC"), dateFormat) : ""}
           </Text>
         </View>
       </View>

@@ -11,6 +11,7 @@ import {
   generateStatementPdf,
   generateStatementPdfBlob,
 } from "@/utils/statement-to-pdf";
+import { TZDate } from "@date-fns/tz";
 import {
   Accordion,
   AccordionContent,
@@ -38,9 +39,6 @@ import {
   TableRow,
 } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
-import { TZDate } from "@date-fns/tz";
-import { format } from "date-fns";
-import { formatDate } from "@midday/utils/format";
 import {
   keepPreviousData,
   useInfiniteQuery,
@@ -48,6 +46,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import Link from "next/link";
@@ -1228,12 +1227,18 @@ export function CustomerDetails() {
                           </TableCell>
                           <TableCell className="text-[12px] whitespace-nowrap">
                             {invoice.issueDate
-                              ? format(new TZDate(invoice.issueDate, "UTC"), "MMM d")
+                              ? format(
+                                  new TZDate(invoice.issueDate, "UTC"),
+                                  "MMM d",
+                                )
                               : "-"}
                           </TableCell>
                           <TableCell className="text-[12px] whitespace-nowrap">
                             {invoice.dueDate
-                              ? format(new TZDate(invoice.dueDate, "UTC"), "MMM d")
+                              ? format(
+                                  new TZDate(invoice.dueDate, "UTC"),
+                                  "MMM d",
+                                )
                               : "-"}
                           </TableCell>
                           <TableCell className="text-[12px] whitespace-nowrap">

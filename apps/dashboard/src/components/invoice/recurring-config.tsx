@@ -2,6 +2,7 @@
 
 import { FormatAmount } from "@/components/format-amount";
 import { useUserQuery } from "@/hooks/use-user";
+import { TZDate } from "@date-fns/tz";
 import {
   type InvoiceRecurringEndType,
   type InvoiceRecurringFrequency,
@@ -25,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
-import { TZDate } from "@date-fns/tz";
 import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
