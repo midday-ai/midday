@@ -437,7 +437,8 @@ app.openapi(
     // Set default dates if not provided
     const issueDate = input.issueDate || new Date().toISOString();
     const dueDate =
-      input.dueDate || addDays(new Date(), paymentTermsDays).toISOString();
+      input.dueDate ||
+      addDays(new Date(issueDate), paymentTermsDays).toISOString();
 
     // Fetch customer and generate customerDetails
     const customer = await getCustomerById(db, {

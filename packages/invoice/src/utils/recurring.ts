@@ -5,6 +5,56 @@ import { addDays, format, getDay, lastDayOfMonth } from "date-fns";
 // These constants and types should be used across all packages
 // ============================================================================
 
+// ============================================================================
+// UTC Date Comparison Utilities
+// These ensure consistent date comparisons across frontend and backend
+// by using UTC instead of local timezone
+// ============================================================================
+
+/**
+ * Get the start of day in UTC for a given date.
+ * This normalizes the date to midnight UTC, useful for day-level comparisons.
+ *
+ * @param date - The date to normalize
+ * @returns A new Date object set to 00:00:00.000 UTC on the same UTC day
+ */
+export function getStartOfDayUTC(date: Date): Date {
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
+}
+
+/**
+ * Check if a date is in the future compared to now, at the day level in UTC.
+ *
+ * This compares only the date portion (year, month, day) in UTC, ignoring time.
+ * A date is considered "in the future" if its UTC day is strictly after today's UTC day.
+ *
+ * Use this instead of direct `date > new Date()` comparisons to ensure consistent
+ * behavior between frontend and backend, regardless of server timezone.
+ *
+ * @param date - The date to check
+ * @param now - Optional reference date (defaults to current time)
+ * @returns true if date's UTC day is after now's UTC day
+ *
+ * @example
+ * ```ts
+ * // Issue date is tomorrow
+ * isDateInFutureUTC(new Date('2026-01-06'), new Date('2026-01-05T23:59:59Z')) // true
+ *
+ * // Issue date is today (even if hours differ)
+ * isDateInFutureUTC(new Date('2026-01-05T00:00:00Z'), new Date('2026-01-05T23:59:59Z')) // false
+ *
+ * // Issue date is in the past
+ * isDateInFutureUTC(new Date('2026-01-04'), new Date('2026-01-05T00:00:00Z')) // false
+ * ```
+ */
+export function isDateInFutureUTC(date: Date, now: Date = new Date()): boolean {
+  const dateStartUTC = getStartOfDayUTC(date);
+  const nowStartUTC = getStartOfDayUTC(now);
+  return dateStartUTC.getTime() > nowStartUTC.getTime();
+}
+
 /**
  * All valid recurring invoice frequencies.
  * Used to derive both TypeScript types and Zod schemas.

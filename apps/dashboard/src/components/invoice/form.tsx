@@ -2,6 +2,7 @@ import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
+import { isDateInFutureUTC } from "@midday/invoice/recurring";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
@@ -269,9 +270,10 @@ export function Form() {
           form.setValue("invoiceRecurringId", recurringResult.id);
         }
 
-        // Check if issue date is in the future
+        // Check if issue date is in the future (at the UTC day level)
         // If so, don't send the invoice immediately - the scheduler will handle it
-        const isIssueDateFuture = issueDate > new Date();
+        // Using isDateInFutureUTC ensures consistent behavior with the backend
+        const isIssueDateFuture = isDateInFutureUTC(issueDate);
 
         if (isIssueDateFuture) {
           // Future-dated recurring invoice:

@@ -21,6 +21,7 @@ import {
   updateInvoiceRecurring,
 } from "@midday/db/queries";
 import { calculateNextScheduledDate } from "@midday/db/utils/invoice-recurring";
+import { isDateInFutureUTC } from "@midday/invoice/recurring";
 import { Notifications } from "@midday/notifications";
 import { TRPCError } from "@trpc/server";
 
@@ -126,14 +127,11 @@ export const invoiceRecurringRouter = createTRPCRouter({
             });
           }
 
-          // Determine if the issue date is in the future
+          // Determine if the issue date is in the future (at the UTC day level)
+          // Using isDateInFutureUTC ensures consistent behavior with the frontend
           const now = new Date();
           const issueDateParsed = issueDate ? new Date(issueDate) : now;
-          const nowStart = new Date(now);
-          nowStart.setHours(0, 0, 0, 0);
-          const issueDateStart = new Date(issueDateParsed);
-          issueDateStart.setHours(0, 0, 0, 0);
-          const isIssueDateFuture = issueDateStart > nowStart;
+          const isIssueDateFuture = isDateInFutureUTC(issueDateParsed, now);
 
           // Update the invoice to link it to the recurring series
           await updateInvoice(tx, {

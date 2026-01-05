@@ -20,12 +20,14 @@ export {
   RECURRING_FREQUENCIES,
   RECURRING_END_TYPES,
   RECURRING_STATUSES,
+  isDateInFutureUTC,
 } from "@midday/invoice/recurring";
 
-// Import types for local use
-import type {
-  InvoiceRecurringEndType,
-  InvoiceRecurringFrequency,
+// Import types and utilities for local use
+import {
+  type InvoiceRecurringEndType,
+  type InvoiceRecurringFrequency,
+  isDateInFutureUTC,
 } from "@midday/invoice/recurring";
 
 export interface RecurringInvoiceParams {
@@ -248,6 +250,9 @@ export function calculateNextScheduledDate(
  * - If issueDate is in the future: Schedule for that date
  * - If issueDate is today or in the past: Generate immediately (return now)
  *
+ * Uses isDateInFutureUTC for consistent UTC day-level comparison across
+ * frontend and backend, avoiding timezone-related edge cases.
+ *
  * @param params - Recurring invoice parameters (unused currently, but available for future patterns)
  * @param issueDate - The issue date set by the user for the first invoice
  * @param now - The current date (defaults to new Date())
@@ -269,16 +274,9 @@ export function calculateFirstScheduledDate(
   issueDate: Date,
   now: Date = new Date(),
 ): Date {
-  // Compare dates at day level to handle timezone edge cases
-  // Use start of day comparison to determine if issue date is "today" or in the future
-  const issueDateStart = new Date(issueDate);
-  issueDateStart.setHours(0, 0, 0, 0);
-
-  const nowStart = new Date(now);
-  nowStart.setHours(0, 0, 0, 0);
-
-  // If issue date is in the future, schedule for that date
-  if (issueDateStart > nowStart) {
+  // If issue date is in the future (at the UTC day level), schedule for that date
+  // Using isDateInFutureUTC ensures consistent behavior with frontend and API
+  if (isDateInFutureUTC(issueDate, now)) {
     return issueDate;
   }
 

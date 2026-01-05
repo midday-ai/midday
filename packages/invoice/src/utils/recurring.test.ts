@@ -12,9 +12,173 @@ import {
   getFrequencyShortLabel,
   getNextDate,
   getNthWeekdayOfMonth,
+  getStartOfDayUTC,
+  isDateInFutureUTC,
   isValidRecurringConfig,
   validateRecurringConfig,
 } from "./recurring";
+
+// ============================================================================
+// UTC Date Comparison Utilities Tests
+// These ensure consistent date comparisons across frontend and backend
+// ============================================================================
+
+describe("getStartOfDayUTC", () => {
+  test("normalizes time to midnight UTC", () => {
+    const date = new Date("2025-01-05T15:30:45.123Z");
+    const result = getStartOfDayUTC(date);
+
+    expect(result.getUTCHours()).toBe(0);
+    expect(result.getUTCMinutes()).toBe(0);
+    expect(result.getUTCSeconds()).toBe(0);
+    expect(result.getUTCMilliseconds()).toBe(0);
+  });
+
+  test("preserves the UTC date", () => {
+    const date = new Date("2025-01-05T23:59:59.999Z");
+    const result = getStartOfDayUTC(date);
+
+    expect(result.getUTCFullYear()).toBe(2025);
+    expect(result.getUTCMonth()).toBe(0); // January
+    expect(result.getUTCDate()).toBe(5);
+  });
+
+  test("handles midnight UTC correctly", () => {
+    const date = new Date("2025-01-05T00:00:00.000Z");
+    const result = getStartOfDayUTC(date);
+
+    expect(result.getTime()).toBe(date.getTime());
+  });
+
+  test("handles dates near day boundaries correctly", () => {
+    // One millisecond before midnight UTC on Jan 6
+    const date = new Date("2025-01-05T23:59:59.999Z");
+    const result = getStartOfDayUTC(date);
+
+    expect(result.getUTCDate()).toBe(5);
+    expect(result.toISOString()).toBe("2025-01-05T00:00:00.000Z");
+  });
+});
+
+describe("isDateInFutureUTC", () => {
+  describe("basic comparisons", () => {
+    test("returns true when date is tomorrow", () => {
+      const tomorrow = new Date("2025-01-06T00:00:00.000Z");
+      const today = new Date("2025-01-05T12:00:00.000Z");
+
+      expect(isDateInFutureUTC(tomorrow, today)).toBe(true);
+    });
+
+    test("returns false when date is today (same UTC day)", () => {
+      const sameDay = new Date("2025-01-05T00:00:00.000Z");
+      const laterSameDay = new Date("2025-01-05T23:59:59.999Z");
+
+      expect(isDateInFutureUTC(sameDay, laterSameDay)).toBe(false);
+    });
+
+    test("returns false when date is in the past", () => {
+      const yesterday = new Date("2025-01-04T12:00:00.000Z");
+      const today = new Date("2025-01-05T00:00:00.000Z");
+
+      expect(isDateInFutureUTC(yesterday, today)).toBe(false);
+    });
+  });
+
+  describe("time-of-day independence", () => {
+    test("time of day does not affect comparison (early date, late now)", () => {
+      // Issue date is early in the day
+      const issueDate = new Date("2025-01-05T00:00:00.000Z");
+      // Current time is late in the same day
+      const now = new Date("2025-01-05T23:59:59.999Z");
+
+      // Same UTC day, so should return false
+      expect(isDateInFutureUTC(issueDate, now)).toBe(false);
+    });
+
+    test("time of day does not affect comparison (late date, early now)", () => {
+      // Issue date is late in the day
+      const issueDate = new Date("2025-01-05T23:59:59.999Z");
+      // Current time is early the same day
+      const now = new Date("2025-01-05T00:00:00.001Z");
+
+      // Same UTC day, so should return false (not in the future)
+      expect(isDateInFutureUTC(issueDate, now)).toBe(false);
+    });
+
+    test("correctly identifies future date regardless of time", () => {
+      // Issue date is early tomorrow
+      const issueDate = new Date("2025-01-06T00:00:01.000Z");
+      // Current time is late today
+      const now = new Date("2025-01-05T23:59:59.999Z");
+
+      expect(isDateInFutureUTC(issueDate, now)).toBe(true);
+    });
+  });
+
+  describe("edge cases", () => {
+    test("handles year boundary correctly", () => {
+      const newYear = new Date("2026-01-01T00:00:00.000Z");
+      const newYearsEve = new Date("2025-12-31T23:59:59.999Z");
+
+      expect(isDateInFutureUTC(newYear, newYearsEve)).toBe(true);
+    });
+
+    test("handles leap year correctly", () => {
+      const march1 = new Date("2024-03-01T00:00:00.000Z");
+      const feb29 = new Date("2024-02-29T23:59:59.999Z");
+
+      expect(isDateInFutureUTC(march1, feb29)).toBe(true);
+    });
+
+    test("uses current time when now is not provided", () => {
+      // Create a date far in the future
+      const futureDate = new Date("2099-01-01T00:00:00.000Z");
+
+      expect(isDateInFutureUTC(futureDate)).toBe(true);
+    });
+
+    test("returns false for date equal to now (at day level)", () => {
+      const date = new Date("2025-01-05T12:00:00.000Z");
+      const now = new Date("2025-01-05T12:00:00.000Z");
+
+      expect(isDateInFutureUTC(date, now)).toBe(false);
+    });
+  });
+
+  describe("timezone consistency (simulated scenarios)", () => {
+    // These tests verify that using UTC prevents timezone-related issues
+    // that could occur with local midnight comparison
+
+    test("midnight UTC comparison is consistent regardless of interpretation", () => {
+      // This simulates a scenario where:
+      // - User in EST sets issue date to Jan 5, 2025 midnight EST
+      // - Server in UTC receives this as Jan 5, 2025 05:00:00 UTC
+      // - Current time is Jan 5, 2025 02:00:00 UTC
+      // With local midnight comparison, this could be inconsistent
+      // With UTC day comparison, it's always consistent
+
+      const issueDateReceivedByServer = new Date("2025-01-05T05:00:00.000Z");
+      const serverCurrentTime = new Date("2025-01-05T02:00:00.000Z");
+
+      // Both are on the same UTC day (Jan 5), so NOT in future
+      expect(isDateInFutureUTC(issueDateReceivedByServer, serverCurrentTime)).toBe(
+        false,
+      );
+    });
+
+    test("different UTC days are correctly identified", () => {
+      // User sets issue date to Jan 6, 2025
+      // Server receives this, current time is late Jan 5 UTC
+      const issueDateReceivedByServer = new Date("2025-01-06T00:00:00.000Z");
+      const serverCurrentTime = new Date("2025-01-05T23:59:59.999Z");
+
+      // Different UTC days, so IS in future
+      expect(isDateInFutureUTC(issueDateReceivedByServer, serverCurrentTime)).toBe(
+        true,
+      );
+    });
+  });
+});
 
 describe("getNthWeekdayOfMonth", () => {
   describe("finding first occurrence", () => {
