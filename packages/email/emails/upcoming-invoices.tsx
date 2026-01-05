@@ -26,6 +26,8 @@ export const UpcomingInvoicesEmail = ({
   teamName = "Your Team",
   link = "https://app.midday.ai/invoices",
 }: Props) => {
+  // Link to invoices filtered to show only recurring invoices
+  const viewLink = `${link}?recurring=true`;
   const text =
     count === 1
       ? "You have 1 invoice scheduled for tomorrow"
@@ -83,7 +85,7 @@ export const UpcomingInvoicesEmail = ({
           </Text>
 
           <Section className="text-center mt-[50px] mb-[50px]">
-            <Button href={link}>View invoices</Button>
+            <Button href={viewLink}>View invoices</Button>
           </Section>
 
           <br />

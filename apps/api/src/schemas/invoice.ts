@@ -594,6 +594,35 @@ export const getInvoicesSchema = z.object({
       param: { in: "query" },
       example: ["customer-uuid-1", "customer-uuid-2"],
     }),
+  ids: z
+    .array(z.string())
+    .nullable()
+    .optional()
+    .openapi({
+      description: "List of invoice IDs to filter by.",
+      param: { in: "query" },
+      example: ["invoice-uuid-1", "invoice-uuid-2"],
+    }),
+  recurringIds: z
+    .array(z.string())
+    .nullable()
+    .optional()
+    .openapi({
+      description:
+        "List of recurring series IDs to filter invoices by (shows all invoices from these series).",
+      param: { in: "query" },
+      example: ["recurring-uuid-1", "recurring-uuid-2"],
+    }),
+  recurring: z
+    .boolean()
+    .nullable()
+    .optional()
+    .openapi({
+      description:
+        "Filter by recurring status. true = only recurring invoices, false = only non-recurring invoices.",
+      param: { in: "query" },
+      example: true,
+    }),
 });
 
 export const getInvoiceByIdSchema = z.object({

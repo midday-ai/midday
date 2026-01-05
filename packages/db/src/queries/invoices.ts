@@ -35,6 +35,7 @@ import {
   ilike,
   inArray,
   isNotNull,
+  isNull,
   lte,
   or,
   sql,
@@ -96,6 +97,9 @@ export type GetInvoicesParams = {
   start?: string | null;
   end?: string | null;
   sort?: string[] | null;
+  ids?: string[] | null;
+  recurringIds?: string[] | null;
+  recurring?: boolean | null;
 };
 
 export async function getInvoices(db: Database, params: GetInvoicesParams) {
@@ -109,9 +113,29 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
     start,
     end,
     customers: customerIds,
+    ids,
+    recurringIds,
+    recurring,
   } = params;
 
   const whereConditions: SQL[] = [eq(invoices.teamId, teamId)];
+
+  // Apply IDs filter
+  if (ids && ids.length > 0) {
+    whereConditions.push(inArray(invoices.id, ids));
+  }
+
+  // Apply recurring series IDs filter (shows all invoices from these recurring series)
+  if (recurringIds && recurringIds.length > 0) {
+    whereConditions.push(inArray(invoices.invoiceRecurringId, recurringIds));
+  }
+
+  // Apply recurring filter (shows all invoices that are/aren't part of a recurring series)
+  if (recurring === true) {
+    whereConditions.push(isNotNull(invoices.invoiceRecurringId));
+  } else if (recurring === false) {
+    whereConditions.push(isNull(invoices.invoiceRecurringId));
+  }
 
   // Apply status filter
   if (statuses && statuses.length > 0) {

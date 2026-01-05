@@ -327,6 +327,43 @@ export function InvoiceSearchFilter() {
             </DropdownMenuPortal>
           </DropdownMenuSub>
         </DropdownMenuGroup>
+
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Icons.Repeat className="mr-2 h-4 w-4" />
+              <span>Type</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent
+                sideOffset={14}
+                alignOffset={-4}
+                className="p-0"
+              >
+                <DropdownMenuCheckboxItem
+                  checked={filter?.recurring === true}
+                  onCheckedChange={(checked) => {
+                    setFilter({
+                      recurring: checked ? true : null,
+                    });
+                  }}
+                >
+                  Recurring
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={filter?.recurring === false}
+                  onCheckedChange={(checked) => {
+                    setFilter({
+                      recurring: checked ? false : null,
+                    });
+                  }}
+                >
+                  One-time
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
