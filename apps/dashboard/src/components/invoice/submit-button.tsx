@@ -138,30 +138,37 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
       const dayOfMonth = newDate.getDate();
       const weekOfMonth = Math.ceil(dayOfMonth / 7);
 
+      // Frequencies that use day of week
+      const usesWeekday =
+        formRecurringConfig.frequency === "weekly" ||
+        formRecurringConfig.frequency === "biweekly";
+
+      // Frequencies that use day of month (quarterly, semi_annual, annual work like monthly_date)
+      const usesDayOfMonth =
+        formRecurringConfig.frequency === "monthly_date" ||
+        formRecurringConfig.frequency === "quarterly" ||
+        formRecurringConfig.frequency === "semi_annual" ||
+        formRecurringConfig.frequency === "annual";
+
       const shouldUpdate =
-        ((formRecurringConfig.frequency === "weekly" ||
-          formRecurringConfig.frequency === "biweekly") &&
-          formRecurringConfig.frequencyDay !== dayOfWeek) ||
-        (formRecurringConfig.frequency === "monthly_date" &&
-          formRecurringConfig.frequencyDay !== dayOfMonth) ||
+        (usesWeekday && formRecurringConfig.frequencyDay !== dayOfWeek) ||
+        (usesDayOfMonth && formRecurringConfig.frequencyDay !== dayOfMonth) ||
         (formRecurringConfig.frequency === "monthly_weekday" &&
           (formRecurringConfig.frequencyDay !== dayOfWeek ||
             formRecurringConfig.frequencyWeek !== weekOfMonth));
 
       if (shouldUpdate) {
-        const updatedConfig =
-          formRecurringConfig.frequency === "weekly" ||
-          formRecurringConfig.frequency === "biweekly"
-            ? { ...formRecurringConfig, frequencyDay: dayOfWeek }
-            : formRecurringConfig.frequency === "monthly_date"
-              ? { ...formRecurringConfig, frequencyDay: dayOfMonth }
-              : formRecurringConfig.frequency === "monthly_weekday"
-                ? {
-                    ...formRecurringConfig,
-                    frequencyDay: dayOfWeek,
-                    frequencyWeek: weekOfMonth,
-                  }
-                : formRecurringConfig;
+        const updatedConfig = usesWeekday
+          ? { ...formRecurringConfig, frequencyDay: dayOfWeek }
+          : usesDayOfMonth
+            ? { ...formRecurringConfig, frequencyDay: dayOfMonth }
+            : formRecurringConfig.frequency === "monthly_weekday"
+              ? {
+                  ...formRecurringConfig,
+                  frequencyDay: dayOfWeek,
+                  frequencyWeek: weekOfMonth,
+                }
+              : formRecurringConfig;
 
         setValue("recurringConfig", updatedConfig, {
           shouldValidate: true,
