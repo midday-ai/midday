@@ -364,6 +364,10 @@ export async function getInvoiceById(
       team: {
         name: teams.name,
         email: teams.email,
+        stripeConnected:
+          sql<boolean>`${teams.stripeAccountId} IS NOT NULL AND ${teams.stripeConnectStatus} = 'connected'`.as(
+            "stripe_connected",
+          ),
       },
       user: {
         email: users.email,

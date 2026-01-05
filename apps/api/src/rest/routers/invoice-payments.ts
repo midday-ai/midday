@@ -536,9 +536,7 @@ app.openapi(
         {
           amount,
           currency,
-          automatic_payment_methods: {
-            enabled: true,
-          },
+          payment_method_types: ["card"],
           metadata: {
             invoice_id: invoice.id,
             invoice_number: invoice.invoiceNumber || "",

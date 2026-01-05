@@ -123,6 +123,10 @@ export default async function Page(props: Props) {
   const width = invoice.template.size === "letter" ? 750 : 595;
   const height = invoice.template.size === "letter" ? 1056 : 842;
 
+  // Payment is only enabled if: template has it enabled AND team has Stripe connected
+  const paymentEnabled =
+    invoice.template.paymentEnabled && invoice.team?.stripeConnected === true;
+
   return (
     <div className="flex flex-col justify-center items-center min-h-screen dotted-bg p-4 sm:p-6 md:p-0">
       <div
@@ -132,7 +136,7 @@ export default async function Page(props: Props) {
         <InvoiceViewWrapper
           token={invoice.token}
           invoiceNumber={invoice.invoiceNumber || "invoice"}
-          paymentEnabled={invoice.template.paymentEnabled}
+          paymentEnabled={paymentEnabled}
           amount={invoice.amount ?? undefined}
           currency={invoice.currency ?? undefined}
           initialStatus={invoice.status}
