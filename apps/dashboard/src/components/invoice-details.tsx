@@ -369,6 +369,23 @@ export function InvoiceDetails() {
                     currency={currency ?? "USD"}
                   />
                 </>
+              ) : recurring.endType === "on_date" ? (
+                <>
+                  <span className="text-muted-foreground">Ends on date</span>
+                  <span className="text-muted-foreground">
+                    {recurring.invoicesGenerated} generated
+                  </span>
+                </>
+              ) : recurring.endType === "after_count" && recurring.endCount ? (
+                <>
+                  <span className="text-muted-foreground">
+                    {recurring.invoicesGenerated} of {recurring.endCount}{" "}
+                    invoices
+                  </span>
+                  <span className="text-muted-foreground">
+                    {recurring.endCount - recurring.invoicesGenerated} remaining
+                  </span>
+                </>
               ) : (
                 <>
                   <span className="text-muted-foreground">No end date</span>
