@@ -1,7 +1,9 @@
 import { useTemplateUpdate } from "@/hooks/use-template-update";
+import { TZDate } from "@date-fns/tz";
+import { localDateToUTCMidnight } from "@midday/invoice/recurring";
 import { Calendar } from "@midday/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
-import { format, parseISO, startOfDay } from "date-fns";
+import { format } from "date-fns";
 import { useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
@@ -13,18 +15,16 @@ export function IssueDate() {
   const [isOpen, setIsOpen] = useState(false);
   const { updateTemplate } = useTemplateUpdate();
 
-  // Parse the ISO date string to a local Date for calendar display
-  // This ensures the calendar shows the same date as the display text
+  // Parse the ISO date string using TZDate to interpret it in UTC
+  // This ensures the calendar shows the same date as stored (e.g., "2024-01-15T00:00:00.000Z" shows Jan 15)
   const selectedDate = useMemo(() => {
     if (!issueDate) return undefined;
-    // Parse ISO string and get just the date part in local time
-    const parsed = parseISO(issueDate);
-    return startOfDay(parsed);
+    return new TZDate(issueDate, "UTC");
   }, [issueDate]);
 
   const handleSelect = (date: Date | undefined) => {
     if (date) {
-      setValue("issueDate", date.toISOString(), {
+      setValue("issueDate", localDateToUTCMidnight(date), {
         shouldValidate: true,
         shouldDirty: true,
       });

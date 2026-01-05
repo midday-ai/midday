@@ -3,7 +3,10 @@
 import { useTemplateUpdate } from "@/hooks/use-template-update";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
-import { getFrequencyLabel } from "@midday/invoice/recurring";
+import {
+  getFrequencyLabel,
+  localDateToUTCMidnight,
+} from "@midday/invoice/recurring";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
@@ -219,13 +222,14 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
         issueDateTime,
       );
 
-      // Set issue date to the scheduled date (at start of day for consistency)
-      const newIssueDate = startOfDay(date);
+      // Set issue date to the scheduled date (normalize to UTC midnight)
+      const newIssueDateStr = localDateToUTCMidnight(date);
+      const newIssueDate = new Date(newIssueDateStr);
 
       // Set due date to maintain the same payment period
       const newDueDate = addMilliseconds(newIssueDate, paymentPeriodMs);
 
-      setValue("issueDate", newIssueDate.toISOString(), {
+      setValue("issueDate", newIssueDateStr, {
         shouldValidate: true,
         shouldDirty: true,
       });
@@ -313,10 +317,12 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
 
       // Reset issue date to today and due date to 1 month from today when switching away from scheduled
       if (currentDeliveryType === "scheduled") {
-        const today = startOfDay(new Date());
+        const now = new Date();
+        const todayStr = localDateToUTCMidnight(now);
+        const today = new Date(todayStr);
         const nextMonth = addMonths(today, 1);
 
-        setValue("issueDate", today.toISOString(), {
+        setValue("issueDate", todayStr, {
           shouldValidate: true,
           shouldDirty: true,
         });

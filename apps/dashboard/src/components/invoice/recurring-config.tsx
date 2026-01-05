@@ -11,6 +11,7 @@ import {
   formatDayOfWeek,
   formatOrdinal,
   formatShortDate,
+  localDateToUTCMidnight,
 } from "@midday/invoice/recurring";
 import { Calendar } from "@midday/ui/calendar";
 import { Input } from "@midday/ui/input";
@@ -24,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
+import { TZDate } from "@date-fns/tz";
 import { format, getDate, getDay } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
@@ -215,7 +217,7 @@ export function RecurringConfigPanel({
     if (date) {
       onChange({
         ...config,
-        endDate: date.toISOString(),
+        endDate: localDateToUTCMidnight(date),
       });
     }
   };
@@ -302,7 +304,7 @@ export function RecurringConfigPanel({
                   className="h-9 px-3 border border-border bg-transparent text-sm text-primary disabled:opacity-50"
                 >
                   {config.endDate
-                    ? format(new Date(config.endDate), "MMM d, yyyy")
+                    ? format(new TZDate(config.endDate, "UTC"), "MMM d, yyyy")
                     : format(getDefaultEndDate(issueDate), "MMM d, yyyy")}
                 </button>
               </PopoverTrigger>
@@ -311,11 +313,13 @@ export function RecurringConfigPanel({
                   mode="single"
                   weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
                   selected={
-                    config.endDate ? new Date(config.endDate) : undefined
+                    config.endDate
+                      ? new TZDate(config.endDate, "UTC")
+                      : undefined
                   }
                   defaultMonth={
                     config.endDate
-                      ? new Date(config.endDate)
+                      ? new TZDate(config.endDate, "UTC")
                       : getDefaultEndDate(issueDate)
                   }
                   onSelect={handleEndDateChange}

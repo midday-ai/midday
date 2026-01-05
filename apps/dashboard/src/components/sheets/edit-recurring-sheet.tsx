@@ -3,13 +3,14 @@
 import { FormatAmount } from "@/components/format-amount";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useTRPC } from "@/trpc/client";
+import { TZDate } from "@date-fns/tz";
 import {
   type InvoiceRecurringEndType,
   type InvoiceRecurringFrequency,
   type RecurringConfig,
   calculatePreviewDates,
   formatOrdinal,
-  isValidRecurringConfig,
+  localDateToUTCMidnight,
   validateRecurringConfig,
 } from "@midday/invoice/recurring";
 import { Button } from "@midday/ui/button";
@@ -379,7 +380,7 @@ export function EditRecurringSheet() {
                             >
                               {config.endDate
                                 ? format(
-                                    new Date(config.endDate),
+                                    new TZDate(config.endDate, "UTC"),
                                     "MMM d, yyyy",
                                   )
                                 : "Select date"}
@@ -390,15 +391,17 @@ export function EditRecurringSheet() {
                               mode="single"
                               selected={
                                 config.endDate
-                                  ? new Date(config.endDate)
+                                  ? new TZDate(config.endDate, "UTC")
                                   : undefined
                               }
-                              onSelect={(date) =>
+                              onSelect={(date) => {
                                 setConfig((prev) => ({
                                   ...prev,
-                                  endDate: date ? date.toISOString() : null,
-                                }))
-                              }
+                                  endDate: date
+                                    ? localDateToUTCMidnight(date)
+                                    : null,
+                                }));
+                              }}
                               disabled={(date) => date < new Date()}
                               initialFocus
                             />

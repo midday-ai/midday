@@ -25,6 +25,39 @@ export function getStartOfDayUTC(date: Date): Date {
 }
 
 /**
+ * Convert a local date selection to UTC midnight.
+ *
+ * This is different from getStartOfDayUTC which preserves the UTC date.
+ * This function preserves the LOCAL date components (year, month, day)
+ * and creates a UTC midnight timestamp for that local date.
+ *
+ * Use case: When a user selects a date in a calendar/date picker, the browser
+ * returns a Date object representing local midnight. If we want to store this
+ * as a timezone-agnostic "date-only" value, we need to convert it to UTC midnight
+ * using the local date components.
+ *
+ * @example
+ * // User in EST (UTC-5) selects January 15 in a date picker
+ * const localSelection = new Date(2024, 0, 15); // Local midnight = 2024-01-15T05:00:00.000Z
+ *
+ * // getStartOfDayUTC preserves the UTC date (January 15 at UTC midnight)
+ * getStartOfDayUTC(localSelection); // 2024-01-15T00:00:00.000Z ✓ (same since UTC date is still Jan 15)
+ *
+ * // BUT for a user in UTC+14 selecting January 15:
+ * const utcPlus14Selection = new Date(2024, 0, 15); // Local midnight = 2024-01-14T10:00:00.000Z
+ * getStartOfDayUTC(utcPlus14Selection); // 2024-01-14T00:00:00.000Z ✗ (wrong! shows Jan 14)
+ * localDateToUTCMidnight(utcPlus14Selection); // 2024-01-15T00:00:00.000Z ✓ (correct! shows Jan 15)
+ *
+ * @param date - A Date object from local date selection (e.g., from a date picker)
+ * @returns ISO string representing UTC midnight for the selected local date
+ */
+export function localDateToUTCMidnight(date: Date): string {
+  return new Date(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
+  ).toISOString();
+}
+
+/**
  * Check if a date is in the future compared to now, at the day level in UTC.
  *
  * This compares only the date portion (year, month, day) in UTC, ignoring time.
