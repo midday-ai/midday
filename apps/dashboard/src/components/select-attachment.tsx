@@ -1,10 +1,12 @@
 import { useDocumentParams } from "@/hooks/use-document-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
+import { TZDate } from "@date-fns/tz";
 import { Badge } from "@midday/ui/badge";
 import { Combobox } from "@midday/ui/combobox";
 import { Icons } from "@midday/ui/icons";
 import { formatDate } from "@midday/utils/format";
+import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
@@ -81,7 +83,9 @@ export function SelectAttachment({
           const parts: string[] = [];
           if (item.customerName) parts.push(item.customerName);
           if (item.dueDate) {
-            parts.push(formatDate(item.dueDate, user?.dateFormat, true));
+            // Use TZDate for invoice dates (stored as UTC midnight)
+            const tzDate = new TZDate(item.dueDate, "UTC");
+            parts.push(format(tzDate, user?.dateFormat ?? "MMM d"));
           }
           secondaryText = parts.length > 0 ? parts.join(" • ") : undefined;
         } else {

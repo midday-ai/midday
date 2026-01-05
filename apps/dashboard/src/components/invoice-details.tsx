@@ -7,6 +7,7 @@ import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 import { getWebsiteLogo } from "@/utils/logos";
+import { TZDate } from "@date-fns/tz";
 import { getFrequencyShortLabel } from "@midday/invoice/recurring";
 import {
   Accordion,
@@ -20,7 +21,7 @@ import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { CopyInput } from "./copy-input";
 import { FormatAmount } from "./format-amount";
 import { InvoiceActions } from "./invoice-actions";
@@ -184,13 +185,17 @@ export function InvoiceDetails() {
           <div className="flex justify-between items-center">
             <span className="text-sm text-[#606060]">Due date</span>
             <span className="text-sm">
-              <span>{dueDate && format(parseISO(dueDate), "MMM dd")}</span>
+              <span>
+                {dueDate && format(new TZDate(dueDate, "UTC"), "MMM dd")}
+              </span>
             </span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-[#606060]">Issue date</span>
             <span className="text-sm">
-              <span>{issueDate && format(parseISO(issueDate), "MMM dd")}</span>
+              <span>
+                {issueDate && format(new TZDate(issueDate, "UTC"), "MMM dd")}
+              </span>
             </span>
           </div>
 
@@ -327,10 +332,13 @@ export function InvoiceDetails() {
                           >
                             <div className="flex items-center gap-2">
                               <span className="w-[100px]">
-                                {format(new Date(invoice.date), "MMM d, yyyy")}
+                                {format(
+                                  new TZDate(invoice.date, "UTC"),
+                                  "MMM d, yyyy",
+                                )}
                               </span>
                               <span className="text-muted-foreground">
-                                {format(new Date(invoice.date), "EEE")}
+                                {format(new TZDate(invoice.date, "UTC"), "EEE")}
                               </span>
                               {isCurrentScheduledInvoice && (
                                 <span className="text-xs text-muted-foreground">

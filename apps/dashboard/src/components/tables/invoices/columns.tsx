@@ -6,6 +6,7 @@ import { useCustomerParams } from "@/hooks/use-customer-params";
 import { getDueDateStatus } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { TZDate } from "@date-fns/tz";
 import { getFrequencyShortLabel } from "@midday/invoice/recurring";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Checkbox } from "@midday/ui/checkbox";
@@ -18,6 +19,23 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { format, formatDistanceToNow } from "date-fns";
 import type { MouseEvent } from "react";
 import { ActionsMenu } from "./actions-menu";
+
+/**
+ * Format a date stored as UTC midnight (e.g., "2024-01-15T00:00:00.000Z") to display
+ * the correct date regardless of user's timezone.
+ */
+function formatDateUTC(
+  date: string,
+  dateFormat?: string | null,
+): string {
+  const tzDate = new TZDate(date, "UTC");
+  // Check if same year for short format
+  const now = new Date();
+  if (tzDate.getUTCFullYear() === now.getUTCFullYear()) {
+    return format(tzDate, "MMM d");
+  }
+  return format(tzDate, dateFormat ?? "P");
+}
 
 export type Invoice = NonNullable<
   RouterOutputs["invoice"]["get"]["data"]
@@ -146,7 +164,7 @@ export const columns: ColumnDef<Invoice>[] = [
       return (
         <div className="flex flex-col space-y-1">
           <span className="truncate">
-            {date ? formatDate(date, table.options.meta?.dateFormat) : "-"}
+            {date ? formatDateUTC(date, table.options.meta?.dateFormat) : "-"}
           </span>
           {showDate && (
             <span className="text-xs text-muted-foreground truncate">
@@ -489,7 +507,7 @@ export const columns: ColumnDef<Invoice>[] = [
       const date = row.original.issueDate;
       return (
         <span className="truncate">
-          {date ? formatDate(date, table.options.meta?.dateFormat) : "-"}
+          {date ? formatDateUTC(date, table.options.meta?.dateFormat) : "-"}
         </span>
       );
     },
@@ -531,7 +549,7 @@ export const columns: ColumnDef<Invoice>[] = [
           {recurring.status === "active" && nextDate && (
             <span className="text-xs text-muted-foreground">
               {isFirstScheduled ? "Sends on" : "Next on"}{" "}
-              {format(new Date(nextDate), "MMM d")}
+              {format(new TZDate(nextDate, "UTC"), "MMM d")}
             </span>
           )}
           {recurring.status === "paused" && (

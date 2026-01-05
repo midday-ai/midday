@@ -1,9 +1,8 @@
-import type { TZDate } from "@date-fns/tz";
+import { TZDate } from "@date-fns/tz";
 import {
   differenceInDays,
   differenceInMonths,
   format,
-  parseISO,
   startOfDay,
 } from "date-fns";
 import { normalizeCurrencyCode } from "./currency";
@@ -141,11 +140,15 @@ export function formatDateRange(dates: TZDate[]): string {
 }
 
 export function getDueDateStatus(dueDate: string): string {
-  const now = new Date();
-  const due = parseISO(dueDate);
+  // Parse due date as UTC (it's stored as UTC midnight)
+  const due = new TZDate(dueDate, "UTC");
 
-  // Set both dates to the start of their respective days
-  const nowDay = startOfDay(now);
+  // Get current date in UTC for consistent comparison
+  const now = new Date();
+  const nowUTC = new TZDate(now.toISOString(), "UTC");
+
+  // Compare at the day level in UTC
+  const nowDay = startOfDay(nowUTC);
   const dueDay = startOfDay(due);
 
   const diffDays = differenceInDays(dueDay, nowDay);

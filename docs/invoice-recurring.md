@@ -403,6 +403,32 @@ When the scheduler generates invoices, dates are calculated in the **user's conf
 2. Date calculations (next invoice date, due date) respect this timezone
 3. Generated invoice dates are stored as UTC midnight
 
+### Date Comparison (Due Date Status)
+
+The `getDueDateStatus()` function in `apps/dashboard/src/utils/format.ts` compares due dates to the current date:
+
+```typescript
+// Parse due date as UTC (it's stored as UTC midnight)
+const due = new TZDate(dueDate, "UTC");
+
+// Get current date in UTC for consistent comparison
+const now = new Date();
+const nowUTC = new TZDate(now.toISOString(), "UTC");
+
+// Compare at the day level in UTC
+const diffDays = differenceInDays(startOfDay(due), startOfDay(nowUTC));
+```
+
+### Recurring Config Date Calculations
+
+When determining recurring patterns from the issue date, we use UTC methods:
+
+```typescript
+// Use UTC methods since issue date is stored as UTC midnight
+const dayOfWeek = issueDate.getUTCDay();
+const dayOfMonth = issueDate.getUTCDate();
+```
+
 ### Files Implementing Date Handling
 
 | File | Purpose |
@@ -410,7 +436,16 @@ When the scheduler generates invoices, dates are calculated in the **user's conf
 | [`packages/invoice/src/utils/recurring.ts`](../packages/invoice/src/utils/recurring.ts) | `localDateToUTCMidnight()`, `getStartOfDayUTC()` utilities |
 | [`apps/dashboard/src/components/invoice/due-date.tsx`](../apps/dashboard/src/components/invoice/due-date.tsx) | Due date picker with correct display/storage |
 | [`apps/dashboard/src/components/invoice/issue-date.tsx`](../apps/dashboard/src/components/invoice/issue-date.tsx) | Issue date picker with correct display/storage |
-| [`apps/dashboard/src/components/invoice/recurring-config.tsx`](../apps/dashboard/src/components/invoice/recurring-config.tsx) | End date picker for recurring series |
+| [`apps/dashboard/src/components/invoice/recurring-config.tsx`](../apps/dashboard/src/components/invoice/recurring-config.tsx) | End date picker for recurring series + UTC day calculations |
+| [`apps/dashboard/src/components/invoice/submit-button.tsx`](../apps/dashboard/src/components/invoice/submit-button.tsx) | Schedule date handling with `localDateToUTCMidnight()` |
+| [`apps/dashboard/src/components/sheets/edit-recurring-sheet.tsx`](../apps/dashboard/src/components/sheets/edit-recurring-sheet.tsx) | Edit recurring end date with `TZDate` display |
+| [`apps/dashboard/src/components/invoice-details.tsx`](../apps/dashboard/src/components/invoice-details.tsx) | Invoice details display with `TZDate` |
+| [`apps/dashboard/src/components/invoice-success.tsx`](../apps/dashboard/src/components/invoice-success.tsx) | Invoice success display with `TZDate` |
+| [`apps/dashboard/src/components/tables/invoices/columns.tsx`](../apps/dashboard/src/components/tables/invoices/columns.tsx) | Invoice table columns with `formatDateUTC()` helper |
+| [`apps/dashboard/src/components/customer-details.tsx`](../apps/dashboard/src/components/customer-details.tsx) | Customer invoice list with `TZDate` |
+| [`apps/dashboard/src/components/select-attachment.tsx`](../apps/dashboard/src/components/select-attachment.tsx) | Invoice attachment display with `TZDate` |
+| [`apps/dashboard/src/utils/format.ts`](../apps/dashboard/src/utils/format.ts) | `getDueDateStatus()` with UTC comparison |
+| [`apps/worker/src/processors/invoices/generate-recurring.ts`](../apps/worker/src/processors/invoices/generate-recurring.ts) | Server-side generation using `getStartOfDayUTC()` |
 
 ## Design Decisions
 

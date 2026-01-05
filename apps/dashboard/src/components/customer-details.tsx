@@ -38,6 +38,8 @@ import {
   TableRow,
 } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
+import { TZDate } from "@date-fns/tz";
+import { format } from "date-fns";
 import { formatDate } from "@midday/utils/format";
 import {
   keepPreviousData,
@@ -1226,12 +1228,12 @@ export function CustomerDetails() {
                           </TableCell>
                           <TableCell className="text-[12px] whitespace-nowrap">
                             {invoice.issueDate
-                              ? formatDate(invoice.issueDate, "MMM d")
+                              ? format(new TZDate(invoice.issueDate, "UTC"), "MMM d")
                               : "-"}
                           </TableCell>
                           <TableCell className="text-[12px] whitespace-nowrap">
                             {invoice.dueDate
-                              ? formatDate(invoice.dueDate, "MMM d")
+                              ? format(new TZDate(invoice.dueDate, "UTC"), "MMM d")
                               : "-"}
                           </TableCell>
                           <TableCell className="text-[12px] whitespace-nowrap">

@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@midday/ui/select";
 import { TZDate } from "@date-fns/tz";
-import { format, getDate, getDay } from "date-fns";
+import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
 
@@ -65,8 +65,9 @@ function getSmartOptions(issueDate: Date): Array<{
   frequencyDay: number | null;
   frequencyWeek: number | null;
 }> {
-  const dayOfWeek = getDay(issueDate);
-  const dayOfMonth = getDate(issueDate);
+  // Use UTC methods since issue date is stored as UTC midnight
+  const dayOfWeek = issueDate.getUTCDay();
+  const dayOfMonth = issueDate.getUTCDate();
   const weekOfMonth = Math.ceil(dayOfMonth / 7);
 
   return [
@@ -424,7 +425,8 @@ function getDefaultEndDate(issueDate: Date): Date {
  * Get default recurring config based on issue date
  */
 export function getDefaultRecurringConfig(issueDate: Date): RecurringConfig {
-  const dayOfMonth = getDate(issueDate);
+  // Use UTC method since issue date is stored as UTC midnight
+  const dayOfMonth = issueDate.getUTCDate();
 
   return {
     frequency: "monthly_date",

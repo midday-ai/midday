@@ -457,7 +457,7 @@ export function EditRecurringSheet() {
                         </span>
                         <span>
                           {format(
-                            new Date(recurring.nextScheduledAt),
+                            new TZDate(recurring.nextScheduledAt, "UTC"),
                             "MMM d, yyyy",
                           )}
                         </span>
@@ -478,10 +478,13 @@ export function EditRecurringSheet() {
                       >
                         <div className="flex">
                           <span className="w-[100px]">
-                            {format(invoice.date, "MMM d, yyyy")}
+                            {format(
+                              new TZDate(invoice.date, "UTC"),
+                              "MMM d, yyyy",
+                            )}
                           </span>
                           <span className="text-muted-foreground">
-                            {format(invoice.date, "EEE")}
+                            {format(new TZDate(invoice.date, "UTC"), "EEE")}
                           </span>
                         </div>
                         <FormatAmount

@@ -46,7 +46,7 @@ export function DueDate() {
       </div>
       <Popover open={isOpen} onOpenChange={setIsOpen} modal>
         <PopoverTrigger className="text-primary text-[11px] whitespace-nowrap flex">
-          {dueDate && format(dueDate, dateFormat)}
+          {selectedDate && format(selectedDate, dateFormat)}
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0">
           <Calendar

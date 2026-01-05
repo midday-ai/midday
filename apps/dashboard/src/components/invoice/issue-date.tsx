@@ -46,7 +46,7 @@ export function IssueDate() {
 
       <Popover open={isOpen} onOpenChange={setIsOpen} modal>
         <PopoverTrigger className="text-primary text-[11px] whitespace-nowrap flex">
-          {issueDate && format(issueDate, dateFormat)}
+          {selectedDate && format(selectedDate, dateFormat)}
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0">
           <Calendar

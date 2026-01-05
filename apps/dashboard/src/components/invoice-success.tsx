@@ -9,6 +9,7 @@ import { formatEditorContent } from "@midday/invoice/format-to-html";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
+import { TZDate } from "@date-fns/tz";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { CopyInput } from "./copy-input";
@@ -73,7 +74,7 @@ export function InvoiceSuccess() {
 
               <span className="text-[11px]">
                 {format(
-                  new Date(invoice.dueDate!),
+                  new TZDate(invoice.dueDate!, "UTC"),
                   invoice.template.dateFormat,
                 )}
               </span>
