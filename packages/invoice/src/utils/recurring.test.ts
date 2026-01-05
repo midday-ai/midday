@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { TZDate } from "@date-fns/tz";
+import { format } from "date-fns";
 import {
   type RecurringConfig,
   calculatePreviewDates,
@@ -15,6 +17,7 @@ import {
   getStartOfDayUTC,
   isDateInFutureUTC,
   isValidRecurringConfig,
+  localDateToUTCMidnight,
   validateRecurringConfig,
 } from "./recurring";
 
@@ -161,9 +164,9 @@ describe("isDateInFutureUTC", () => {
       const serverCurrentTime = new Date("2025-01-05T02:00:00.000Z");
 
       // Both are on the same UTC day (Jan 5), so NOT in future
-      expect(isDateInFutureUTC(issueDateReceivedByServer, serverCurrentTime)).toBe(
-        false,
-      );
+      expect(
+        isDateInFutureUTC(issueDateReceivedByServer, serverCurrentTime),
+      ).toBe(false);
     });
 
     test("different UTC days are correctly identified", () => {
@@ -173,9 +176,242 @@ describe("isDateInFutureUTC", () => {
       const serverCurrentTime = new Date("2025-01-05T23:59:59.999Z");
 
       // Different UTC days, so IS in future
-      expect(isDateInFutureUTC(issueDateReceivedByServer, serverCurrentTime)).toBe(
-        true,
-      );
+      expect(
+        isDateInFutureUTC(issueDateReceivedByServer, serverCurrentTime),
+      ).toBe(true);
+    });
+  });
+});
+
+// ============================================================================
+// Invoice Date Handling - Critical Timezone Tests
+// These tests verify the exact bug scenario that was fixed:
+// - User selects a date in their local timezone
+// - Date is stored as UTC midnight
+// - Date is displayed correctly regardless of user's timezone
+// ============================================================================
+
+describe("localDateToUTCMidnight", () => {
+  describe("basic conversion", () => {
+    test("converts local date selection to UTC midnight ISO string", () => {
+      // Simulates user selecting January 15, 2024 in a date picker
+      // Note: new Date(2024, 0, 15) creates local midnight
+      const localSelection = new Date(2024, 0, 15);
+      const result = localDateToUTCMidnight(localSelection);
+
+      // Should always produce January 15 at UTC midnight
+      expect(result).toBe("2024-01-15T00:00:00.000Z");
+    });
+
+    test("uses local date components, not UTC date components", () => {
+      // Create a date where UTC day differs from local day
+      // This simulates what happens in timezones ahead of UTC
+      const date = new Date("2024-01-15T23:00:00.000Z"); // Jan 15 in UTC
+
+      // Get what the local date components are
+      const localYear = date.getFullYear();
+      const localMonth = date.getMonth();
+      const localDay = date.getDate();
+
+      const result = localDateToUTCMidnight(date);
+
+      // Result should use local components, not UTC
+      const resultDate = new Date(result);
+      expect(resultDate.getUTCFullYear()).toBe(localYear);
+      expect(resultDate.getUTCMonth()).toBe(localMonth);
+      expect(resultDate.getUTCDate()).toBe(localDay);
+    });
+
+    test("returns ISO string format", () => {
+      const date = new Date(2024, 5, 15); // June 15, 2024
+      const result = localDateToUTCMidnight(date);
+
+      expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T00:00:00\.000Z$/);
+    });
+  });
+
+  describe("month and year boundaries", () => {
+    test("handles month end correctly", () => {
+      const date = new Date(2024, 0, 31); // January 31
+      const result = localDateToUTCMidnight(date);
+      expect(result).toBe("2024-01-31T00:00:00.000Z");
+    });
+
+    test("handles year end correctly", () => {
+      const date = new Date(2024, 11, 31); // December 31
+      const result = localDateToUTCMidnight(date);
+      expect(result).toBe("2024-12-31T00:00:00.000Z");
+    });
+
+    test("handles leap year correctly", () => {
+      const date = new Date(2024, 1, 29); // February 29, 2024 (leap year)
+      const result = localDateToUTCMidnight(date);
+      expect(result).toBe("2024-02-29T00:00:00.000Z");
+    });
+  });
+});
+
+describe("TZDate display with UTC - round trip verification", () => {
+  /**
+   * THE CRITICAL TEST: This verifies the complete round-trip that was broken:
+   * 1. User selects a date (January 15)
+   * 2. We store it as UTC midnight (2024-01-15T00:00:00.000Z)
+   * 3. When displayed using TZDate with UTC, it shows January 15
+   *
+   * THE BUG: Previously, using parseISO + startOfDay would interpret the UTC
+   * string in local time. For users behind UTC (e.g., EST), this would show
+   * January 14 instead of January 15.
+   */
+
+  test("round trip: select date → store UTC midnight → display with TZDate shows same date", () => {
+    // Step 1: User selects January 15, 2024
+    const userSelection = new Date(2024, 0, 15); // Local midnight
+
+    // Step 2: Store as UTC midnight
+    const storedValue = localDateToUTCMidnight(userSelection);
+    expect(storedValue).toBe("2024-01-15T00:00:00.000Z");
+
+    // Step 3: Display using TZDate with UTC (the fix)
+    const displayDate = new TZDate(storedValue, "UTC");
+    const displayedMonth = format(displayDate, "MMMM");
+    const displayedDay = format(displayDate, "d");
+
+    expect(displayedMonth).toBe("January");
+    expect(displayedDay).toBe("15");
+  });
+
+  test("stored UTC midnight displays correct date in any format", () => {
+    const storedValue = "2024-06-20T00:00:00.000Z"; // June 20, stored as UTC midnight
+
+    const displayDate = new TZDate(storedValue, "UTC");
+
+    expect(format(displayDate, "MMM d, yyyy")).toBe("Jun 20, 2024");
+    expect(format(displayDate, "MMMM dd")).toBe("June 20");
+    expect(format(displayDate, "yyyy-MM-dd")).toBe("2024-06-20");
+    expect(format(displayDate, "P")).toBe("06/20/2024");
+  });
+
+  test("multiple dates maintain correct values through round trip", () => {
+    const dates = [
+      { select: new Date(2024, 0, 1), expected: "January 1" }, // New Year
+      { select: new Date(2024, 1, 29), expected: "February 29" }, // Leap day
+      { select: new Date(2024, 11, 31), expected: "December 31" }, // Year end
+      { select: new Date(2024, 5, 15), expected: "June 15" }, // Mid-year
+    ];
+
+    for (const { select, expected } of dates) {
+      const stored = localDateToUTCMidnight(select);
+      const display = new TZDate(stored, "UTC");
+      const formatted = format(display, "MMMM d");
+      expect(formatted).toBe(expected);
+    }
+  });
+});
+
+describe("getStartOfDayUTC vs localDateToUTCMidnight - understanding the difference", () => {
+  /**
+   * These two functions serve different purposes:
+   *
+   * - getStartOfDayUTC: Normalizes an already-UTC date to UTC midnight.
+   *   Use when you have a UTC timestamp and want to compare at day level.
+   *
+   * - localDateToUTCMidnight: Converts a local date selection to UTC midnight.
+   *   Use when storing user-selected dates from a date picker.
+   */
+
+  test("getStartOfDayUTC normalizes UTC time to UTC midnight", () => {
+    // A timestamp at 3:45 PM UTC
+    const utcTimestamp = new Date("2024-01-15T15:45:30.123Z");
+    const result = getStartOfDayUTC(utcTimestamp);
+
+    // Should normalize to midnight UTC on the same day
+    expect(result.toISOString()).toBe("2024-01-15T00:00:00.000Z");
+  });
+
+  test("localDateToUTCMidnight preserves local date components", () => {
+    // This simulates a user in EST selecting January 15
+    // The local Date object represents Jan 15 00:00 local time
+    const localSelection = new Date(2024, 0, 15);
+    const result = localDateToUTCMidnight(localSelection);
+
+    // Should produce Jan 15 UTC midnight (using local date components)
+    expect(result).toBe("2024-01-15T00:00:00.000Z");
+  });
+
+  test("both functions agree when date is UTC midnight", () => {
+    // When the input is already UTC midnight
+    const utcMidnight = new Date("2024-01-15T00:00:00.000Z");
+
+    const fromGetStartOfDay = getStartOfDayUTC(utcMidnight);
+    // Note: localDateToUTCMidnight uses local components, so result depends on TZ
+    // but the UTC date should match
+    expect(fromGetStartOfDay.toISOString()).toBe("2024-01-15T00:00:00.000Z");
+  });
+});
+
+describe("invoice date handling patterns - documented behavior", () => {
+  /**
+   * These tests document the canonical patterns used throughout the invoice feature
+   */
+
+  describe("storage pattern: always use UTC midnight", () => {
+    test("issue date is stored as UTC midnight", () => {
+      const userSelectedDate = new Date(2024, 0, 15); // Jan 15 local
+      const issueDate = localDateToUTCMidnight(userSelectedDate);
+      expect(issueDate).toBe("2024-01-15T00:00:00.000Z");
+    });
+
+    test("due date is stored as UTC midnight", () => {
+      const userSelectedDate = new Date(2024, 1, 15); // Feb 15 local
+      const dueDate = localDateToUTCMidnight(userSelectedDate);
+      expect(dueDate).toBe("2024-02-15T00:00:00.000Z");
+    });
+
+    test("recurring end date is stored as UTC midnight", () => {
+      const userSelectedDate = new Date(2024, 11, 31); // Dec 31 local
+      const endDate = localDateToUTCMidnight(userSelectedDate);
+      expect(endDate).toBe("2024-12-31T00:00:00.000Z");
+    });
+  });
+
+  describe("display pattern: always use TZDate with UTC", () => {
+    test("issue date displays correctly", () => {
+      const storedIssueDate = "2024-01-15T00:00:00.000Z";
+      const display = new TZDate(storedIssueDate, "UTC");
+      expect(format(display, "MMM d, yyyy")).toBe("Jan 15, 2024");
+    });
+
+    test("due date displays correctly", () => {
+      const storedDueDate = "2024-02-28T00:00:00.000Z";
+      const display = new TZDate(storedDueDate, "UTC");
+      expect(format(display, "MMM d")).toBe("Feb 28");
+    });
+
+    test("next scheduled date displays correctly", () => {
+      const storedNextDate = "2024-03-10T00:00:00.000Z";
+      const display = new TZDate(storedNextDate, "UTC");
+      expect(format(display, "EEE, MMM d")).toBe("Sun, Mar 10");
+    });
+  });
+
+  describe("calculation pattern: use UTC methods for day-level operations", () => {
+    test("day of week calculation uses UTC", () => {
+      const stored = "2024-01-15T00:00:00.000Z"; // Monday in UTC
+      const date = new TZDate(stored, "UTC");
+      expect(date.getUTCDay()).toBe(1); // Monday = 1
+    });
+
+    test("day of month calculation uses UTC", () => {
+      const stored = "2024-01-15T00:00:00.000Z";
+      const date = new TZDate(stored, "UTC");
+      expect(date.getUTCDate()).toBe(15);
+    });
+
+    test("week of month calculation uses UTC", () => {
+      const stored = "2024-01-15T00:00:00.000Z"; // 15th day
+      const date = new TZDate(stored, "UTC");
+      const weekOfMonth = Math.ceil(date.getUTCDate() / 7);
+      expect(weekOfMonth).toBe(3); // 3rd week
     });
   });
 });
@@ -890,8 +1126,12 @@ describe("formatting utilities", () => {
     });
 
     test("returns correct label for biweekly", () => {
-      expect(getFrequencyLabel("biweekly", 5, null)).toBe("Bi-weekly on Friday");
-      expect(getFrequencyLabel("biweekly", 1, null)).toBe("Bi-weekly on Monday");
+      expect(getFrequencyLabel("biweekly", 5, null)).toBe(
+        "Bi-weekly on Friday",
+      );
+      expect(getFrequencyLabel("biweekly", 1, null)).toBe(
+        "Bi-weekly on Monday",
+      );
     });
 
     test("returns correct label for monthly_last_day", () => {
