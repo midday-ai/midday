@@ -139,8 +139,9 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
 
     if (issueDate && formRecurringConfig) {
       const newDate = new Date(issueDate);
-      const dayOfWeek = newDate.getDay();
-      const dayOfMonth = newDate.getDate();
+      // Use UTC methods since issueDate is stored as UTC midnight
+      const dayOfWeek = newDate.getUTCDay();
+      const dayOfMonth = newDate.getUTCDate();
       const weekOfMonth = Math.ceil(dayOfMonth / 7);
 
       // Frequencies that use day of week
