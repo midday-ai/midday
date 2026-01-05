@@ -138,6 +138,11 @@ export function Form() {
     trpc.invoiceRecurring.update.mutationOptions(),
   );
 
+  // Mutation to update invoice status (used for scheduling future-dated recurring invoices)
+  const updateInvoiceMutation = useMutation(
+    trpc.invoice.update.mutationOptions(),
+  );
+
   // Only watch the fields that are used in the upsert action
   const formValues = useWatch({
     control: form.control,
@@ -264,11 +269,36 @@ export function Form() {
           form.setValue("invoiceRecurringId", recurringResult.id);
         }
 
-        // Then send the first invoice (generate PDF and send email)
-        createInvoiceMutation.mutate({
-          id: values.id,
-          deliveryType: "create_and_send",
-        });
+        // Check if issue date is in the future
+        // If so, don't send the invoice immediately - the scheduler will handle it
+        const isIssueDateFuture = issueDate > new Date();
+
+        if (isIssueDateFuture) {
+          // Future-dated recurring invoice:
+          // - Set status to "scheduled" so user understands it will be sent later
+          // - Set scheduledAt to the issue date for consistency with the status tooltip
+          // - The scheduler will send it on the issue date
+          // - Navigate to success page
+          await updateInvoiceMutation.mutateAsync({
+            id: values.id,
+            status: "scheduled",
+            scheduledAt: issueDate.toISOString(),
+          });
+
+          queryClient.invalidateQueries({
+            queryKey: trpc.invoice.get.infiniteQueryKey(),
+          });
+          queryClient.invalidateQueries({
+            queryKey: trpc.invoice.invoiceSummary.queryKey(),
+          });
+          setParams({ type: "success", invoiceId: values.id });
+        } else {
+          // Issue date is today or in the past - send immediately
+          createInvoiceMutation.mutate({
+            id: values.id,
+            deliveryType: "create_and_send",
+          });
+        }
       } catch (error) {
         // Error already handled by mutation's onError
       }

@@ -97,11 +97,16 @@ export const invoiceRecurringRouter = createTRPCRouter({
       // Use a transaction to ensure atomicity of all operations
       // This prevents orphaned recurring series if invoice linking fails
       const result = await db.transaction(async (tx) => {
-        // Create the recurring series
+        // Determine the issue date from the existing invoice (if provided)
+        const issueDate = existingInvoice?.issueDate ?? null;
+
+        // Create the recurring series with the issue date
+        // This allows the series to schedule the first invoice for a future date
         const recurring = await createInvoiceRecurring(tx, {
           teamId,
           userId: session.user.id,
           ...recurringData,
+          issueDate,
         });
 
         if (!recurring?.id) {
@@ -121,6 +126,15 @@ export const invoiceRecurringRouter = createTRPCRouter({
             });
           }
 
+          // Determine if the issue date is in the future
+          const now = new Date();
+          const issueDateParsed = issueDate ? new Date(issueDate) : now;
+          const nowStart = new Date(now);
+          nowStart.setHours(0, 0, 0, 0);
+          const issueDateStart = new Date(issueDateParsed);
+          issueDateStart.setHours(0, 0, 0, 0);
+          const isIssueDateFuture = issueDateStart > nowStart;
+
           // Update the invoice to link it to the recurring series
           await updateInvoice(tx, {
             id: invoiceId,
@@ -129,12 +143,19 @@ export const invoiceRecurringRouter = createTRPCRouter({
             recurringSequence: 1,
           });
 
+          if (isIssueDateFuture) {
+            // Issue date is in the future:
+            // - The invoice is linked but not yet "generated" by the scheduler
+            // - nextScheduledAt is already set to the issue date by createInvoiceRecurring
+            // - invoicesGenerated stays at 0
+            // - When the scheduler runs on/after issue date, it will process this invoice
+            // No need to update the recurring series - it's already configured correctly
+            return recurring;
+          }
+
+          // Issue date is today or in the past:
           // Calculate the next scheduled date from the invoice's issue date
           // This ensures "Monthly on the 15th" with issue date Jan 15 → next invoice Feb 15
-          const referenceDate = existingInvoice.issueDate
-            ? new Date(existingInvoice.issueDate)
-            : new Date();
-
           const nextScheduledAt = calculateNextScheduledDate(
             {
               frequency: recurringData.frequency,
@@ -143,7 +164,7 @@ export const invoiceRecurringRouter = createTRPCRouter({
               frequencyInterval: recurringData.frequencyInterval ?? null,
               timezone: recurringData.timezone,
             },
-            referenceDate,
+            issueDateParsed,
           );
 
           // Update the recurring series with correct next date and mark one invoice as generated
@@ -399,17 +420,45 @@ export const invoiceRecurringRouter = createTRPCRouter({
         });
       }
 
-      const result = await deleteInvoiceRecurring(db, {
-        id: input.id,
-        teamId,
-      });
-
-      if (!result) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Recurring invoice series not found",
+      // Use a transaction to ensure both operations succeed or fail together
+      const result = await db.transaction(async (tx) => {
+        // Cancel the recurring series
+        const recurring = await deleteInvoiceRecurring(tx, {
+          id: input.id,
+          teamId,
         });
-      }
+
+        if (!recurring) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Recurring invoice series not found",
+          });
+        }
+
+        // Find and update scheduled invoices linked to this series
+        // This reverts any "scheduled" invoices back to "draft"
+        const scheduledInvoices = await tx.query.invoices.findMany({
+          where: (invoices, { eq, and }) =>
+            and(
+              eq(invoices.invoiceRecurringId, input.id),
+              eq(invoices.teamId, teamId),
+              eq(invoices.status, "scheduled"),
+            ),
+          columns: { id: true },
+        });
+
+        // Revert each scheduled invoice to draft
+        for (const invoice of scheduledInvoices) {
+          await updateInvoice(tx, {
+            id: invoice.id,
+            teamId,
+            status: "draft",
+            scheduledAt: null,
+          });
+        }
+
+        return recurring;
+      });
 
       return { id: result.id };
     }),
@@ -424,17 +473,43 @@ export const invoiceRecurringRouter = createTRPCRouter({
         });
       }
 
-      const result = await pauseInvoiceRecurring(db, {
-        id: input.id,
-        teamId,
-      });
-
-      if (!result) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Recurring invoice series not found",
+      // Use a transaction to ensure both operations succeed or fail together
+      const result = await db.transaction(async (tx) => {
+        const recurring = await pauseInvoiceRecurring(tx, {
+          id: input.id,
+          teamId,
         });
-      }
+
+        if (!recurring) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Recurring invoice series not found",
+          });
+        }
+
+        // Revert any "scheduled" invoices back to "draft"
+        // This prevents sending invoices while the series is paused
+        const scheduledInvoices = await tx.query.invoices.findMany({
+          where: (invoices, { eq, and }) =>
+            and(
+              eq(invoices.invoiceRecurringId, input.id),
+              eq(invoices.teamId, teamId),
+              eq(invoices.status, "scheduled"),
+            ),
+          columns: { id: true },
+        });
+
+        for (const invoice of scheduledInvoices) {
+          await updateInvoice(tx, {
+            id: invoice.id,
+            teamId,
+            status: "draft",
+            scheduledAt: null,
+          });
+        }
+
+        return recurring;
+      });
 
       return result;
     }),

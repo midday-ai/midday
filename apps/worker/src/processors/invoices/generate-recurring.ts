@@ -105,17 +105,85 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
         // Calculate the next sequence number
         const nextSequence = recurring.invoicesGenerated + 1;
 
-        // Idempotency check: Skip if invoice already exists for this sequence
-        const alreadyExists = await checkInvoiceExists(db, {
+        // Check if an invoice already exists for this sequence
+        const existingInvoice = await checkInvoiceExists(db, {
           invoiceRecurringId: recurring.id,
           recurringSequence: nextSequence,
         });
 
-        if (alreadyExists) {
-          this.logger.info("Invoice already exists for sequence, skipping", {
-            recurringId: recurring.id,
-            sequence: nextSequence,
-          });
+        // Handle existing invoice cases
+        if (existingInvoice) {
+          // If the existing invoice is a draft or scheduled, send it now
+          // This happens when user creates a future-dated recurring invoice
+          // - "draft" = legacy behavior or edge case
+          // - "scheduled" = future-dated recurring invoice waiting to be sent
+          if (
+            existingInvoice.status === "draft" ||
+            existingInvoice.status === "scheduled"
+          ) {
+            this.logger.info(
+              "Found existing invoice for sequence, sending it",
+              {
+                recurringId: recurring.id,
+                sequence: nextSequence,
+                invoiceId: existingInvoice.id,
+                status: existingInvoice.status,
+              },
+            );
+
+            // Mark the recurring series as having generated this invoice
+            await markInvoiceGenerated(db, {
+              id: recurring.id,
+              teamId: recurring.teamId,
+            });
+
+            // Queue the existing invoice for generation and sending
+            await invoicesQueue.add(
+              "generate-invoice",
+              {
+                invoiceId: existingInvoice.id,
+                deliveryType: "create_and_send",
+              },
+              DEFAULT_JOB_OPTIONS,
+            );
+
+            // Queue notification
+            const invoiceNumber =
+              existingInvoice.invoiceNumber ?? `REC-${nextSequence}`;
+            await invoicesQueue.add(
+              "invoice-notification",
+              {
+                type: "recurring_generated",
+                invoiceId: existingInvoice.id,
+                invoiceNumber,
+                teamId: recurring.teamId,
+                customerName: recurring.customerName ?? undefined,
+                recurringId: recurring.id,
+                recurringSequence: nextSequence,
+                recurringTotalCount: recurring.endCount ?? undefined,
+              },
+              DEFAULT_JOB_OPTIONS,
+            );
+
+            results.push({
+              invoiceId: existingInvoice.id,
+              invoiceNumber,
+              recurringId: recurring.id,
+              sequence: nextSequence,
+            });
+            processed++;
+            continue;
+          }
+
+          // Invoice exists and is already sent/paid - skip entirely
+          this.logger.info(
+            "Invoice already exists and was already sent, skipping",
+            {
+              recurringId: recurring.id,
+              sequence: nextSequence,
+              status: existingInvoice.status,
+            },
+          );
           skipped++;
           continue;
         }

@@ -292,7 +292,7 @@ export function ActionsMenu({ row }: Props) {
             Duplicate
           </DropdownMenuItem>
 
-          {row.status === "scheduled" && (
+          {row.status === "scheduled" && row.scheduledJobId && (
             <DropdownMenuItem
               onClick={() => cancelScheduleMutation.mutate({ id: row.id })}
               className="text-[#FF3638]"

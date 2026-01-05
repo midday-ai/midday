@@ -45,6 +45,12 @@ export type CreateInvoiceRecurringParams = {
   topBlock?: unknown;
   bottomBlock?: unknown;
   templateId?: string | null;
+  /**
+   * Optional issue date for the first invoice.
+   * If provided and in the future, the first invoice will be scheduled for this date.
+   * If not provided or in the past, the first invoice is generated immediately.
+   */
+  issueDate?: string | null;
 };
 
 export async function createInvoiceRecurring(
@@ -79,9 +85,11 @@ export async function createInvoiceRecurring(
     topBlock,
     bottomBlock,
     templateId,
+    issueDate,
   } = params;
 
-  // Calculate the first scheduled date (now - first invoice is immediate)
+  // Calculate the first scheduled date based on issue date
+  // If issue date is in the future, schedule for that date; otherwise generate immediately
   const now = new Date();
   const recurringParams: RecurringInvoiceParams = {
     frequency,
@@ -91,7 +99,13 @@ export async function createInvoiceRecurring(
     timezone,
   };
 
-  const firstScheduledAt = calculateFirstScheduledDate(recurringParams, now);
+  // Use provided issue date or default to now
+  const issueDateParsed = issueDate ? new Date(issueDate) : now;
+  const firstScheduledAt = calculateFirstScheduledDate(
+    recurringParams,
+    issueDateParsed,
+    now,
+  );
 
   const [result] = await db
     .insert(invoiceRecurring)
@@ -586,7 +600,7 @@ export async function recordInvoiceGenerationFailure(
  * Pause a recurring invoice series
  */
 export async function pauseInvoiceRecurring(
-  db: Database,
+  db: DatabaseOrTransaction,
   params: { id: string; teamId: string },
 ) {
   const { id, teamId } = params;
@@ -686,7 +700,7 @@ export async function resumeInvoiceRecurring(
  * Generated invoices are kept
  */
 export async function deleteInvoiceRecurring(
-  db: Database,
+  db: DatabaseOrTransaction,
   params: { id: string; teamId: string },
 ) {
   const { id, teamId } = params;
@@ -755,6 +769,15 @@ export async function getUpcomingInvoices(
 /**
  * Check if an invoice already exists for a recurring series and sequence number
  * Used for idempotency
+ *
+ * Returns:
+ * - null if no invoice exists for this sequence
+ * - { id, status, invoiceNumber } if an invoice exists
+ *
+ * This allows the caller to decide whether to:
+ * - Create a new invoice (if null)
+ * - Send an existing draft (if status is 'draft')
+ * - Skip entirely (if already sent/paid)
  */
 export async function checkInvoiceExists(
   db: Database,
@@ -763,7 +786,11 @@ export async function checkInvoiceExists(
   const { invoiceRecurringId, recurringSequence } = params;
 
   const [result] = await db
-    .select({ id: invoices.id })
+    .select({
+      id: invoices.id,
+      status: invoices.status,
+      invoiceNumber: invoices.invoiceNumber,
+    })
     .from(invoices)
     .where(
       and(
@@ -773,7 +800,7 @@ export async function checkInvoiceExists(
     )
     .limit(1);
 
-  return !!result;
+  return result ?? null;
 }
 
 /**

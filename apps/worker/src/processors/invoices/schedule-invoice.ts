@@ -40,6 +40,19 @@ export class ScheduleInvoiceProcessor extends BaseProcessor<ScheduleInvoicePaylo
       return;
     }
 
+    // Skip if this is a recurring invoice - those are handled by the recurring scheduler
+    // This is a defensive check since recurring invoices shouldn't have scheduled jobs
+    if (invoice.invoiceRecurringId && !invoice.scheduledJobId) {
+      this.logger.info(
+        "Invoice is part of recurring series without scheduledJobId, skipping",
+        {
+          invoiceId,
+          invoiceRecurringId: invoice.invoiceRecurringId,
+        },
+      );
+      return;
+    }
+
     // Verify this job is the currently scheduled one for this invoice
     // This prevents stale jobs from processing if a reschedule failed to remove the old job
     // Note: scheduledJobId is stored as a composite ID (e.g., "invoices:123")

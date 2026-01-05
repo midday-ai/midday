@@ -84,20 +84,20 @@ function getNthWeekdayOfMonth(
 
 /**
  * Calculate the next scheduled date for a recurring invoice.
- * 
+ *
  * **Server-Side - Authoritative for Scheduling**
- * 
+ *
  * This function handles proper timezone-aware date calculations using `@date-fns/tz`.
  * It should be used for all actual invoice scheduling operations.
- * 
+ *
  * Note: There is a similar `getNextDate` function in `@midday/invoice/recurring`
  * that provides simplified client-side calculations for UI preview purposes only.
  * That version does NOT handle timezones and should not be used for scheduling.
- * 
+ *
  * @param params - Recurring invoice parameters including frequency and timezone
  * @param currentDate - The current/reference date (in UTC)
  * @returns The next scheduled date in UTC, adjusted for the user's timezone
- * 
+ *
  * @example
  * ```ts
  * const nextDate = calculateNextScheduledDate({
@@ -242,19 +242,48 @@ export function calculateNextScheduledDate(
 }
 
 /**
- * Calculate the first scheduled date for a new recurring invoice
- * This calculates when the first invoice should be generated (immediately = today)
- * @param params - Recurring invoice parameters
- * @param startDate - The start date (typically now)
+ * Calculate the first scheduled date for a new recurring invoice.
+ *
+ * This determines when the first invoice in a recurring series should be generated:
+ * - If issueDate is in the future: Schedule for that date
+ * - If issueDate is today or in the past: Generate immediately (return now)
+ *
+ * @param params - Recurring invoice parameters (unused currently, but available for future patterns)
+ * @param issueDate - The issue date set by the user for the first invoice
+ * @param now - The current date (defaults to new Date())
  * @returns The first scheduled date in UTC
+ *
+ * @example
+ * ```ts
+ * // Issue date is Jan 31 (future) - schedule for Jan 31
+ * const firstDate = calculateFirstScheduledDate(params, new Date('2026-01-31'), new Date('2026-01-15'));
+ * // Returns: 2026-01-31
+ *
+ * // Issue date is today - generate immediately
+ * const firstDate = calculateFirstScheduledDate(params, new Date('2026-01-15'), new Date('2026-01-15'));
+ * // Returns: 2026-01-15 (now)
+ * ```
  */
 export function calculateFirstScheduledDate(
-  params: RecurringInvoiceParams,
-  startDate: Date,
+  _params: RecurringInvoiceParams,
+  issueDate: Date,
+  now: Date = new Date(),
 ): Date {
-  // For the first invoice, we return the start date (now)
-  // The next invoice will be calculated after the first one is generated
-  return startDate;
+  // Compare dates at day level to handle timezone edge cases
+  // Use start of day comparison to determine if issue date is "today" or in the future
+  const issueDateStart = new Date(issueDate);
+  issueDateStart.setHours(0, 0, 0, 0);
+
+  const nowStart = new Date(now);
+  nowStart.setHours(0, 0, 0, 0);
+
+  // If issue date is in the future, schedule for that date
+  if (issueDateStart > nowStart) {
+    return issueDate;
+  }
+
+  // Issue date is today or in the past - generate immediately
+  return now;
 }
 
 /**

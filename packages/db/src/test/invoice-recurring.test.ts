@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+  calculateFirstScheduledDate,
   calculateNextScheduledDate,
   calculateUpcomingDates,
   shouldMarkCompleted,
@@ -599,5 +600,136 @@ describe("calculateUpcomingDates", () => {
       expect(new Date(invoice.date).toISOString()).toBe(invoice.date);
       expect(invoice.amount).toBe(100);
     }
+  });
+});
+
+describe("calculateFirstScheduledDate", () => {
+  const baseParams: RecurringInvoiceParams = {
+    frequency: "monthly_last_day",
+    frequencyDay: null,
+    frequencyWeek: null,
+    frequencyInterval: null,
+    timezone: "UTC",
+  };
+
+  describe("issue date in the future", () => {
+    test("returns the issue date when it is in the future", () => {
+      // Issue date: January 31, 2025 (future)
+      // Now: January 15, 2025
+      const issueDate = new Date("2025-01-31T12:00:00.000Z");
+      const now = new Date("2025-01-15T12:00:00.000Z");
+
+      const result = calculateFirstScheduledDate(baseParams, issueDate, now);
+
+      // Should schedule for the issue date (January 31)
+      expect(result.toISOString()).toBe(issueDate.toISOString());
+    });
+
+    test("returns future issue date for different frequencies", () => {
+      const monthlyDateParams: RecurringInvoiceParams = {
+        frequency: "monthly_date",
+        frequencyDay: 15,
+        frequencyWeek: null,
+        frequencyInterval: null,
+        timezone: "UTC",
+      };
+
+      // Issue date: February 15, 2025 (future)
+      // Now: January 10, 2025
+      const issueDate = new Date("2025-02-15T12:00:00.000Z");
+      const now = new Date("2025-01-10T12:00:00.000Z");
+
+      const result = calculateFirstScheduledDate(
+        monthlyDateParams,
+        issueDate,
+        now,
+      );
+
+      expect(result.toISOString()).toBe(issueDate.toISOString());
+    });
+  });
+
+  describe("issue date is today", () => {
+    test("returns now when issue date is today", () => {
+      // Issue date and now: both January 15, 2025 but at different times
+      const issueDate = new Date("2025-01-15T09:00:00.000Z");
+      const now = new Date("2025-01-15T14:30:00.000Z");
+
+      const result = calculateFirstScheduledDate(baseParams, issueDate, now);
+
+      // Should return now (generate immediately)
+      expect(result.toISOString()).toBe(now.toISOString());
+    });
+
+    test("returns now when issue date is same day at start", () => {
+      // Issue date at start of day, now in the afternoon
+      const issueDate = new Date("2025-01-15T00:00:00.000Z");
+      const now = new Date("2025-01-15T18:00:00.000Z");
+
+      const result = calculateFirstScheduledDate(baseParams, issueDate, now);
+
+      expect(result.toISOString()).toBe(now.toISOString());
+    });
+  });
+
+  describe("issue date in the past", () => {
+    test("returns now when issue date is in the past", () => {
+      // Issue date: January 10, 2025 (past)
+      // Now: January 15, 2025
+      const issueDate = new Date("2025-01-10T12:00:00.000Z");
+      const now = new Date("2025-01-15T12:00:00.000Z");
+
+      const result = calculateFirstScheduledDate(baseParams, issueDate, now);
+
+      // Should return now (generate immediately)
+      expect(result.toISOString()).toBe(now.toISOString());
+    });
+
+    test("returns now when issue date is far in the past", () => {
+      // Issue date: December 2024 (past)
+      // Now: January 2025
+      const issueDate = new Date("2024-12-01T12:00:00.000Z");
+      const now = new Date("2025-01-15T12:00:00.000Z");
+
+      const result = calculateFirstScheduledDate(baseParams, issueDate, now);
+
+      expect(result.toISOString()).toBe(now.toISOString());
+    });
+  });
+
+  describe("edge cases", () => {
+    test("handles issue date just one day in the future", () => {
+      // Issue date: tomorrow
+      const issueDate = new Date("2025-01-16T12:00:00.000Z");
+      const now = new Date("2025-01-15T12:00:00.000Z");
+
+      const result = calculateFirstScheduledDate(baseParams, issueDate, now);
+
+      // Tomorrow is in the future, so should return issue date
+      expect(result.toISOString()).toBe(issueDate.toISOString());
+    });
+
+    test("handles issue date at midnight boundary", () => {
+      // Issue date: January 16 at midnight
+      // Now: January 15 at 11:59 PM
+      const issueDate = new Date("2025-01-16T00:00:00.000Z");
+      const now = new Date("2025-01-15T23:59:59.000Z");
+
+      const result = calculateFirstScheduledDate(baseParams, issueDate, now);
+
+      // January 16 is after January 15, so it's in the future
+      expect(result.toISOString()).toBe(issueDate.toISOString());
+    });
+
+    test("uses default now when not provided", () => {
+      // Issue date far in the future - should definitely return issue date
+      const futureDate = new Date();
+      futureDate.setFullYear(futureDate.getFullYear() + 1);
+
+      const result = calculateFirstScheduledDate(baseParams, futureDate);
+
+      // Should return the future issue date
+      expect(result.toISOString()).toBe(futureDate.toISOString());
+    });
   });
 });

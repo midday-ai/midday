@@ -309,25 +309,42 @@ export function InvoiceDetails() {
                       (
                         invoice: { date: string; amount: number },
                         index: number,
-                      ) => (
-                        <div
-                          key={index.toString()}
-                          className="flex items-center justify-between text-sm"
-                        >
-                          <div className="flex">
-                            <span className="w-[100px]">
-                              {format(new Date(invoice.date), "MMM d, yyyy")}
-                            </span>
-                            <span className="text-muted-foreground">
-                              {format(new Date(invoice.date), "EEE")}
-                            </span>
+                      ) => {
+                        // Check if this is the first invoice in the series and it's scheduled
+                        const isCurrentScheduledInvoice =
+                          index === 0 &&
+                          status === "scheduled" &&
+                          recurring.invoicesGenerated === 0;
+
+                        return (
+                          <div
+                            key={index.toString()}
+                            className={cn(
+                              "flex items-center justify-between text-sm",
+                              isCurrentScheduledInvoice &&
+                                "bg-muted/50 -mx-2 px-2 py-1 rounded",
+                            )}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="w-[100px]">
+                                {format(new Date(invoice.date), "MMM d, yyyy")}
+                              </span>
+                              <span className="text-muted-foreground">
+                                {format(new Date(invoice.date), "EEE")}
+                              </span>
+                              {isCurrentScheduledInvoice && (
+                                <span className="text-xs text-muted-foreground">
+                                  (this invoice)
+                                </span>
+                              )}
+                            </div>
+                            <FormatAmount
+                              amount={invoice.amount}
+                              currency={currency ?? "USD"}
+                            />
                           </div>
-                          <FormatAmount
-                            amount={invoice.amount}
-                            currency={currency ?? "USD"}
-                          />
-                        </div>
-                      ),
+                        );
+                      },
                     )}
                   {/* Show ellipsis if there are more invoices */}
                   {((recurring.endCount &&

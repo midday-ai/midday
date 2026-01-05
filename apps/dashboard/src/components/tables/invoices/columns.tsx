@@ -518,12 +518,20 @@ export const columns: ColumnDef<Invoice>[] = [
       const frequencyLabel = getFrequencyShortLabel(recurring.frequency);
       const nextDate = recurring.nextScheduledAt;
 
+      // For scheduled invoices that are the first in the series,
+      // show "Sends on" instead of "Next on" since THIS invoice is the scheduled one
+      const isFirstScheduled =
+        row.original.status === "scheduled" &&
+        row.original.recurringSequence === 1 &&
+        recurring.invoicesGenerated === 0;
+
       return (
         <div className="flex flex-col">
           <span>{frequencyLabel}</span>
           {recurring.status === "active" && nextDate && (
             <span className="text-xs text-muted-foreground">
-              Next on {format(new Date(nextDate), "MMM d")}
+              {isFirstScheduled ? "Sends on" : "Next on"}{" "}
+              {format(new Date(nextDate), "MMM d")}
             </span>
           )}
           {recurring.status === "paused" && (
