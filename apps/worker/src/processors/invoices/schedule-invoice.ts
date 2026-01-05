@@ -39,6 +39,18 @@ export class ScheduleInvoiceProcessor extends BaseProcessor<ScheduleInvoicePaylo
       return;
     }
 
+    // Verify this job is the currently scheduled one for this invoice
+    // This prevents stale jobs from processing if a reschedule failed to remove the old job
+    if (invoice.scheduledJobId !== job.id) {
+      this.logger.info("Stale scheduled job detected, skipping", {
+        invoiceId,
+        currentJobId: job.id,
+        expectedJobId: invoice.scheduledJobId,
+      });
+      // Don't throw - this is expected if invoice was rescheduled
+      return;
+    }
+
     // Update invoice status to unpaid before generating
     const updated = await updateInvoice(db, {
       id: invoiceId,

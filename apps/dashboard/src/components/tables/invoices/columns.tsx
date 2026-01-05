@@ -497,6 +497,7 @@ export const columns: ColumnDef<Invoice>[] = [
   {
     id: "type",
     header: "Type",
+    accessorKey: "invoiceRecurringId",
     size: 140,
     minSize: 100,
     maxSize: 200,

@@ -46,7 +46,7 @@ import {
 } from "@midday/db/queries";
 import { verify } from "@midday/invoice/token";
 import { transformCustomerToContent } from "@midday/invoice/utils";
-import { getQueue, triggerJob } from "@midday/job-client";
+import { decodeJobId, getQueue, triggerJob } from "@midday/job-client";
 import { TRPCError } from "@trpc/server";
 import { addMonths, format, parseISO } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
@@ -522,9 +522,11 @@ export const invoiceRouter = createTRPCRouter({
           // This ensures we never lose the scheduled job even if there are transient failures
           if (existingInvoice?.scheduledJobId) {
             const queue = getQueue("invoices");
-            const existingJob = await queue.getJob(
+            // Decode composite ID (format: "invoices:123") to get raw job ID for BullMQ
+            const { jobId: rawJobId } = decodeJobId(
               existingInvoice.scheduledJobId,
             );
+            const existingJob = await queue.getJob(rawJobId);
             if (existingJob) {
               await existingJob.remove().catch((err) => {
                 // Log but don't fail - the old job will eventually be cleaned up or run (harmlessly)
@@ -699,11 +701,13 @@ export const invoiceRouter = createTRPCRouter({
       // Only remove the old job AFTER successfully creating the new one and updating the database
       // This ensures we never lose the scheduled job even if there are transient failures
       const queue = getQueue("invoices");
-      const existingJob = await queue.getJob(invoice.scheduledJobId);
+      // Decode composite ID (format: "invoices:123") to get raw job ID for BullMQ
+      const { jobId: rawJobId } = decodeJobId(invoice.scheduledJobId);
+      const existingJob = await queue.getJob(rawJobId);
       if (existingJob) {
         await existingJob.remove().catch((err) => {
-          // Log but don't fail - the old job will eventually be cleaned up or run (harmlessly)
-          // since the invoice status and job ID have already been updated
+          // Log but don't fail - the old job will be detected as stale by the processor
+          // since it verifies job.id matches invoice.scheduledJobId before processing
           console.error("Failed to remove old scheduled job:", err);
         });
       }
@@ -730,7 +734,9 @@ export const invoiceRouter = createTRPCRouter({
       if (invoice.scheduledJobId) {
         // Cancel the scheduled job by removing it from the queue
         const queue = getQueue("invoices");
-        const job = await queue.getJob(invoice.scheduledJobId);
+        // Decode composite ID (format: "invoices:123") to get raw job ID for BullMQ
+        const { jobId: rawJobId } = decodeJobId(invoice.scheduledJobId);
+        const job = await queue.getJob(rawJobId);
         if (job) {
           await job.remove();
         }

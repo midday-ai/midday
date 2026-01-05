@@ -51,6 +51,7 @@ import { useTheme } from "next-themes";
 import Link from "next/link";
 import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
+import { CustomerDetailsSkeleton } from "./customer-details.loading";
 import { FormatAmount } from "./format-amount";
 import { InvoiceStatus } from "./invoice-status";
 
@@ -285,34 +286,7 @@ export function CustomerDetails() {
   };
 
   if (isLoadingCustomer) {
-    return (
-      <div className="h-full px-6 pt-6 pb-6">
-        {/* Header skeleton matching actual layout */}
-        <div className="flex items-start gap-4 mb-6">
-          <Skeleton className="size-12 rounded-full flex-shrink-0" />
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-7 w-48" />
-            <Skeleton className="h-4 w-full max-w-[300px]" />
-            <div className="flex gap-2">
-              <Skeleton className="h-5 w-16 rounded-full" />
-              <Skeleton className="h-5 w-20 rounded-full" />
-            </div>
-          </div>
-        </div>
-        {/* Content skeleton */}
-        <div className="space-y-4">
-          <Skeleton className="h-10 w-full" />
-          <div className="grid grid-cols-2 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i.toString()} className="space-y-1">
-                <Skeleton className="h-3 w-20" />
-                <Skeleton className="h-5 w-28" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <CustomerDetailsSkeleton />;
   }
 
   if (!customer) {
