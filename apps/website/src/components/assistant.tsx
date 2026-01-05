@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { MaterialIcon } from './homepage/icon-mapping'
 import { AIAssistantAnimation } from './homepage/ai-assistant-animation'
+import { AssistantQuestionAnimation } from './homepage/assistant-question-animation'
 import { DashboardAnimation } from './homepage/dashboard-animation'
 import { TestimonialsSection } from './sections/testimonials-section'
 import { FeaturesGridSection } from './sections/features-grid-section'
@@ -177,7 +178,7 @@ export function Assistant() {
               <div className="flex items-center justify-center p-1 sm:p-3 lg:p-6 xl:p-8 border border-border overflow-hidden relative bg-background">
                 <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center">
                   <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
-                    <AIAssistantAnimation onComplete={undefined} />
+                    <AssistantQuestionAnimation onComplete={undefined} />
                   </div>
                 </div>
               </div>

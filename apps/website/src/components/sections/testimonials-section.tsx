@@ -159,7 +159,7 @@ export function TestimonialsSection({
             };
 
             return (
-              <MorphingDialog key={index}>
+              <MorphingDialog key={`testimonial-${testimonial.name}-${index}`}>
                 <MorphingDialogTrigger
                   className="flex-shrink-0 group"
                   style={{
@@ -172,7 +172,7 @@ export function TestimonialsSection({
                         {testimonial.country}
                       </p>
                       <div className="flex gap-2 items-center">
-                        <div className="w-4 h-4 bg-muted rounded-full"></div>
+                        <div className="w-4 h-4 bg-muted rounded-full" />
                         <MorphingDialogTitle className="font-sans text-sm text-foreground">
                           {testimonial.name}
                         </MorphingDialogTitle>
@@ -199,7 +199,7 @@ export function TestimonialsSection({
                           {testimonial.country}
                         </p>
                         <div className="flex gap-3 items-center">
-                          <div className="w-6 h-6 bg-muted rounded-full"></div>
+                          <div className="w-6 h-6 bg-muted rounded-full" />
                           <MorphingDialogTitle className="font-sans text-sm text-foreground">
                             {testimonial.name}
                           </MorphingDialogTitle>
@@ -271,7 +271,7 @@ export function TestimonialsSection({
 
                 return (
                   <div
-                    key={index}
+                    key={`testimonial-mobile-${testimonial.name}-${index}`}
                     className="w-[280px] flex-shrink-0 snap-start"
                   >
                     <MorphingDialog>
@@ -327,7 +327,7 @@ export function TestimonialsSection({
                                 {testimonial.country}
                               </p>
                               <div className="flex gap-2 items-center">
-                                <div className="w-4 h-4 bg-muted rounded-full"></div>
+                                <div className="w-4 h-4 bg-muted rounded-full" />
                                 <MorphingDialogTitle className="font-sans text-sm text-foreground">
                                   {testimonial.name}
                                 </MorphingDialogTitle>
@@ -355,7 +355,7 @@ export function TestimonialsSection({
                                 {testimonial.country}
                               </p>
                               <div className="flex gap-3 items-center">
-                                <div className="w-6 h-6 bg-muted rounded-full"></div>
+                                <div className="w-6 h-6 bg-muted rounded-full" />
                                 <MorphingDialogTitle className="font-sans text-sm text-foreground">
                                   {testimonial.name}
                                 </MorphingDialogTitle>
