@@ -175,15 +175,24 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
             continue;
           }
 
-          // Invoice exists and is already sent/paid - skip entirely
+          // Invoice exists and is already sent/paid - update series but don't re-send
+          // This handles the case where user manually sent the invoice before scheduled date
           this.logger.info(
-            "Invoice already exists and was already sent, skipping",
+            "Invoice already exists and was already sent, updating series",
             {
               recurringId: recurring.id,
               sequence: nextSequence,
               status: existingInvoice.status,
             },
           );
+
+          // Still mark the series as having generated this invoice
+          // This ensures the series moves forward to the next scheduled date
+          await markInvoiceGenerated(db, {
+            id: recurring.id,
+            teamId: recurring.teamId,
+          });
+
           skipped++;
           continue;
         }
