@@ -1,9 +1,8 @@
 import { useTemplateUpdate } from "@/hooks/use-template-update";
-import { TZDate } from "@date-fns/tz";
 import { Calendar } from "@midday/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
-import { format } from "date-fns";
-import { useState } from "react";
+import { format, parseISO, startOfDay } from "date-fns";
+import { useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
@@ -14,6 +13,15 @@ export function DueDate() {
 
   const [isOpen, setIsOpen] = useState(false);
   const { updateTemplate } = useTemplateUpdate();
+
+  // Parse the ISO date string to a local Date for calendar display
+  // This ensures the calendar shows the same date as the display text
+  const selectedDate = useMemo(() => {
+    if (!dueDate) return undefined;
+    // Parse ISO string and get just the date part in local time
+    const parsed = parseISO(dueDate);
+    return startOfDay(parsed);
+  }, [dueDate]);
 
   const handleSelect = (date: Date | undefined) => {
     if (date) {
@@ -43,7 +51,8 @@ export function DueDate() {
         <PopoverContent className="w-auto p-0">
           <Calendar
             mode="single"
-            selected={dueDate ? new TZDate(dueDate, "UTC") : undefined}
+            month={selectedDate}
+            selected={selectedDate}
             onSelect={handleSelect}
             initialFocus
           />

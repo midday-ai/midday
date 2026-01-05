@@ -141,7 +141,15 @@ export function Form() {
 
   // Mutation to update invoice status (used for scheduling future-dated recurring invoices)
   const updateInvoiceMutation = useMutation(
-    trpc.invoice.update.mutationOptions(),
+    trpc.invoice.update.mutationOptions({
+      onError: () => {
+        toast({
+          title: "Scheduling Failed",
+          description:
+            "The recurring series was created, but the invoice could not be scheduled. Please try again.",
+        });
+      },
+    }),
   );
 
   // Only watch the fields that are used in the upsert action
@@ -301,8 +309,10 @@ export function Form() {
             deliveryType: "create_and_send",
           });
         }
-      } catch (error) {
-        // Error already handled by mutation's onError
+      } catch {
+        // Errors are handled by each mutation's onError handler
+        // - createRecurringInvoiceMutation.onError shows "Recurring Invoice Failed"
+        // - updateInvoiceMutation.onError shows "Scheduling Failed"
       }
       return;
     }
