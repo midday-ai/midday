@@ -243,6 +243,42 @@ DISABLE_RECURRING_INVOICES=true
 
 When set, the scheduler returns immediately without processing any series.
 
+## Notifications
+
+### Upcoming Invoice Notification
+
+A separate scheduler runs every 2 hours (offset from the main scheduler) to send 24-hour advance notifications:
+
+```mermaid
+sequenceDiagram
+    participant Cron as Cron (odd hours)
+    participant Worker as UpcomingNotification
+    participant DB as Database
+    participant Email as Email Service
+    
+    Cron->>Worker: Trigger job
+    Worker->>DB: Find series due within 24h
+    Note over DB: WHERE next_scheduled_at <= now + 24h<br/>AND upcoming_notification_sent_at IS NULL
+    
+    loop For each series
+        Worker->>Email: Send upcoming invoice email
+        Worker->>DB: Set upcoming_notification_sent_at
+    end
+```
+
+The `upcoming_notification_sent_at` field prevents duplicate notifications and is reset when a new invoice is generated.
+
+### Activity Notifications
+
+The system creates in-app activity notifications for:
+
+| Event | Activity Type | Priority |
+|-------|---------------|----------|
+| Series created | `recurring_series_started` | 3 |
+| Series completed | `recurring_series_completed` | 3 |
+| Series auto-paused | `recurring_series_paused` | 4 (higher) |
+| Upcoming invoice | `recurring_invoice_upcoming` | 3 |
+
 ## API Endpoints
 
 The `invoice-recurring` tRPC router exposes these procedures:
@@ -274,12 +310,107 @@ When creating a recurring series from a draft invoice:
 |------|---------|
 | [`apps/dashboard/src/components/invoice/recurring-config.tsx`](../apps/dashboard/src/components/invoice/recurring-config.tsx) | UI panel for configuring frequency, end conditions, and preview |
 | [`apps/dashboard/src/components/invoice/submit-button.tsx`](../apps/dashboard/src/components/invoice/submit-button.tsx) | Invoice form submission with recurring option |
+| [`apps/dashboard/src/components/sheets/edit-recurring-sheet.tsx`](../apps/dashboard/src/components/sheets/edit-recurring-sheet.tsx) | Sheet for editing existing recurring series |
 | [`apps/api/src/trpc/routers/invoice-recurring.ts`](../apps/api/src/trpc/routers/invoice-recurring.ts) | tRPC router with all API endpoints |
 | [`apps/api/src/schemas/invoice-recurring.ts`](../apps/api/src/schemas/invoice-recurring.ts) | Zod validation schemas |
 | [`apps/worker/src/processors/invoices/generate-recurring.ts`](../apps/worker/src/processors/invoices/generate-recurring.ts) | Scheduled job that generates invoices |
+| [`apps/worker/src/processors/invoices/upcoming-notification.ts`](../apps/worker/src/processors/invoices/upcoming-notification.ts) | 24-hour advance notification scheduler |
 | [`packages/db/src/queries/invoice-recurring.ts`](../packages/db/src/queries/invoice-recurring.ts) | Database queries (CRUD, state transitions) |
 | [`packages/db/src/utils/invoice-recurring.ts`](../packages/db/src/utils/invoice-recurring.ts) | Date calculation utilities |
-| [`packages/invoice/src/utils/recurring.ts`](../packages/invoice/src/utils/recurring.ts) | Shared utilities (labels, preview calculations) |
+| [`packages/invoice/src/utils/recurring.ts`](../packages/invoice/src/utils/recurring.ts) | Shared utilities (labels, preview calculations, date handling) |
+
+## Date Handling and Timezone Considerations
+
+### Storage Format
+
+All date-only fields (issue date, due date, end date) are stored as **UTC midnight timestamps** in `TIMESTAMPTZ` columns. For example, "January 15, 2024" is stored as `2024-01-15T00:00:00.000Z`.
+
+This approach provides a canonical, timezone-agnostic representation while working with the existing database schema.
+
+### The Timezone Problem
+
+When a user in a timezone behind UTC (e.g., EST = UTC-5) has a date stored as UTC midnight:
+
+```
+Stored: 2024-01-15T00:00:00.000Z (January 15 at midnight UTC)
+```
+
+If we naively convert this to local time:
+- In EST (UTC-5): This becomes `2024-01-14T19:00:00` (January 14!)
+- The calendar would show the wrong date
+
+### Solution: TZDate for Display
+
+We use `TZDate` from `@date-fns/tz` to interpret stored UTC dates correctly:
+
+```typescript
+import { TZDate } from "@date-fns/tz";
+
+// Display: Interpret the stored UTC date for calendar display
+const selectedDate = new TZDate(dueDate, "UTC");
+// "2024-01-15T00:00:00.000Z" → Shows January 15 in calendar ✓
+```
+
+### Solution: localDateToUTCMidnight for Storage
+
+When a user selects a date in a calendar picker, the browser returns a `Date` object at local midnight. We convert this to UTC midnight using the **local** date components:
+
+```typescript
+import { localDateToUTCMidnight } from "@midday/invoice/recurring";
+
+// Storage: Convert local date selection to UTC midnight
+const handleSelect = (date: Date) => {
+  setValue("dueDate", localDateToUTCMidnight(date));
+};
+```
+
+**How it works:**
+
+```typescript
+export function localDateToUTCMidnight(date: Date): string {
+  return new Date(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
+  ).toISOString();
+}
+```
+
+This extracts the **local** year/month/day and creates UTC midnight for that date.
+
+### Why Not Use getStartOfDayUTC?
+
+The codebase has two similar-looking functions with different purposes:
+
+| Function | Purpose | Uses |
+|----------|---------|------|
+| `getStartOfDayUTC(date)` | Normalize UTC date to UTC midnight | `date.getUTCFullYear()`, `date.getUTCMonth()`, `date.getUTCDate()` |
+| `localDateToUTCMidnight(date)` | Convert local selection to UTC midnight | `date.getFullYear()`, `date.getMonth()`, `date.getDate()` |
+
+**Example showing the difference:**
+
+```
+User in UTC+14 selects January 15
+Calendar returns: new Date(2024, 0, 15) → 2024-01-14T10:00:00.000Z (UTC)
+
+getStartOfDayUTC():       2024-01-14T00:00:00.000Z ✗ (wrong date!)
+localDateToUTCMidnight(): 2024-01-15T00:00:00.000Z ✓ (correct!)
+```
+
+### Timezone Handling in Invoice Generation
+
+When the scheduler generates invoices, dates are calculated in the **user's configured timezone**:
+
+1. The `timezone` field on `invoice_recurring` stores the user's IANA timezone (e.g., `America/New_York`)
+2. Date calculations (next invoice date, due date) respect this timezone
+3. Generated invoice dates are stored as UTC midnight
+
+### Files Implementing Date Handling
+
+| File | Purpose |
+|------|---------|
+| [`packages/invoice/src/utils/recurring.ts`](../packages/invoice/src/utils/recurring.ts) | `localDateToUTCMidnight()`, `getStartOfDayUTC()` utilities |
+| [`apps/dashboard/src/components/invoice/due-date.tsx`](../apps/dashboard/src/components/invoice/due-date.tsx) | Due date picker with correct display/storage |
+| [`apps/dashboard/src/components/invoice/issue-date.tsx`](../apps/dashboard/src/components/invoice/issue-date.tsx) | Issue date picker with correct display/storage |
+| [`apps/dashboard/src/components/invoice/recurring-config.tsx`](../apps/dashboard/src/components/invoice/recurring-config.tsx) | End date picker for recurring series |
 
 ## Design Decisions
 
