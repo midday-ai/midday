@@ -374,6 +374,17 @@ export const updateInvoiceRecurringSchema = z
       });
     }
 
+    // Validate that frequencyWeek is not null when frequency is monthly_weekday
+    // This prevents invalid API calls like { frequency: "monthly_weekday", frequencyWeek: null }
+    if (data.frequency === "monthly_weekday" && data.frequencyWeek === null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "frequencyWeek is required for monthly_weekday frequency and cannot be null",
+        path: ["frequencyWeek"],
+      });
+    }
+
     // Validate frequencyDay based on frequency type (when both are provided in the update).
     // NOTE: When only one of frequency/frequencyDay is provided, validation against the
     // existing value is performed in the tRPC router (invoice-recurring.ts) after
@@ -410,6 +421,25 @@ export const updateInvoiceRecurringSchema = z
           code: z.ZodIssueCode.custom,
           message: `For ${data.frequency} frequency, frequencyDay must be 1-31 (day of month)`,
           path: ["frequencyDay"],
+        });
+      }
+    }
+
+    // Validate frequencyWeek range when both frequency and frequencyWeek are provided
+    // NOTE: When only one is provided, validation against the existing value is
+    // performed in the tRPC router after fetching the existing record.
+    if (
+      data.frequencyWeek !== null &&
+      data.frequencyWeek !== undefined &&
+      data.frequency !== undefined &&
+      data.frequency === "monthly_weekday"
+    ) {
+      if (data.frequencyWeek < 1 || data.frequencyWeek > 5) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "For monthly_weekday frequency, frequencyWeek must be 1-5 (1st through 5th occurrence)",
+          path: ["frequencyWeek"],
         });
       }
     }

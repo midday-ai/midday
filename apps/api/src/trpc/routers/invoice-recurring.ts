@@ -245,10 +245,13 @@ export const invoiceRecurringRouter = createTRPCRouter({
         ...dayOfMonthFrequencies,
       ] as const;
 
-      // Validate frequency/frequencyDay cross-field constraints
+      // Validate frequency/frequencyDay/frequencyWeek cross-field constraints
       // Case 1: frequencyDay is being updated without frequency - validate against existing frequency
       // Case 2: frequency is being updated without frequencyDay - validate against existing frequencyDay
       // Case 3: frequency requires frequencyDay but frequencyDay is explicitly null - validate against existing
+      // Case 4: frequencyWeek is being updated without frequency - validate against existing frequency
+      // Case 5: frequency is being updated to monthly_weekday without frequencyWeek - validate against existing
+      // Case 6: frequencyWeek is being set to null when frequency is monthly_weekday
       const needsCrossFieldValidation =
         (input.frequencyDay !== undefined &&
           input.frequencyDay !== null &&
@@ -258,7 +261,14 @@ export const invoiceRecurringRouter = createTRPCRouter({
           frequenciesRequiringDay.includes(
             input.frequency as (typeof frequenciesRequiringDay)[number],
           ) &&
-          input.frequencyDay === null);
+          input.frequencyDay === null) ||
+        // frequencyWeek validation cases
+        (input.frequencyWeek !== undefined &&
+          input.frequencyWeek !== null &&
+          input.frequency === undefined) ||
+        (input.frequency === "monthly_weekday" &&
+          input.frequencyWeek === undefined) ||
+        (input.frequencyWeek === null && input.frequency === undefined);
 
       if (needsCrossFieldValidation) {
         const existing = await getInvoiceRecurringById(db, {
@@ -273,12 +283,16 @@ export const invoiceRecurringRouter = createTRPCRouter({
           });
         }
 
-        // Determine effective frequency and frequencyDay for validation
+        // Determine effective frequency, frequencyDay, and frequencyWeek for validation
         const effectiveFrequency = input.frequency ?? existing.frequency;
         const effectiveFrequencyDay =
           input.frequencyDay === undefined
             ? existing.frequencyDay
             : input.frequencyDay;
+        const effectiveFrequencyWeek =
+          input.frequencyWeek === undefined
+            ? existing.frequencyWeek
+            : input.frequencyWeek;
 
         // Validate that frequencyDay is not being set to null when frequency requires it
         if (
@@ -290,6 +304,18 @@ export const invoiceRecurringRouter = createTRPCRouter({
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: `frequencyDay is required for ${effectiveFrequency} frequency and cannot be null`,
+          });
+        }
+
+        // Validate that frequencyWeek is not null when frequency is monthly_weekday
+        if (
+          effectiveFrequency === "monthly_weekday" &&
+          effectiveFrequencyWeek === null
+        ) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "frequencyWeek is required for monthly_weekday frequency and cannot be null",
           });
         }
 
@@ -323,6 +349,20 @@ export const invoiceRecurringRouter = createTRPCRouter({
               message: `For ${effectiveFrequency} frequency, frequencyDay must be 1-31 (day of month)`,
             });
           }
+        }
+
+        // Validate frequencyWeek range when frequency is monthly_weekday
+        if (
+          effectiveFrequency === "monthly_weekday" &&
+          effectiveFrequencyWeek !== null &&
+          effectiveFrequencyWeek !== undefined &&
+          (effectiveFrequencyWeek < 1 || effectiveFrequencyWeek > 5)
+        ) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "For monthly_weekday frequency, frequencyWeek must be 1-5 (1st through 5th occurrence)",
+          });
         }
       }
 
