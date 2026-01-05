@@ -1,4 +1,5 @@
 import { getInvoiceById, updateInvoice } from "@midday/db/queries";
+import { decodeJobId } from "@midday/job-client";
 import type { Job } from "bullmq";
 import { DEFAULT_JOB_OPTIONS } from "../../config/job-options";
 import { invoicesQueue } from "../../queues/invoices";
@@ -41,14 +42,31 @@ export class ScheduleInvoiceProcessor extends BaseProcessor<ScheduleInvoicePaylo
 
     // Verify this job is the currently scheduled one for this invoice
     // This prevents stale jobs from processing if a reschedule failed to remove the old job
-    if (invoice.scheduledJobId !== job.id) {
-      this.logger.info("Stale scheduled job detected, skipping", {
-        invoiceId,
-        currentJobId: job.id,
-        expectedJobId: invoice.scheduledJobId,
-      });
-      // Don't throw - this is expected if invoice was rescheduled
-      return;
+    // Note: scheduledJobId is stored as a composite ID (e.g., "invoices:123")
+    // but job.id is the raw BullMQ ID (e.g., "123"), so we need to decode
+    if (invoice.scheduledJobId) {
+      try {
+        const { jobId: expectedRawJobId } = decodeJobId(invoice.scheduledJobId);
+        if (expectedRawJobId !== job.id) {
+          this.logger.info("Stale scheduled job detected, skipping", {
+            invoiceId,
+            currentJobId: job.id,
+            expectedJobId: expectedRawJobId,
+            storedCompositeId: invoice.scheduledJobId,
+          });
+          // Don't throw - this is expected if invoice was rescheduled
+          return;
+        }
+      } catch {
+        // If decoding fails, the stored ID is in an unexpected format
+        // Log and skip to be safe
+        this.logger.warn("Failed to decode scheduledJobId, skipping", {
+          invoiceId,
+          scheduledJobId: invoice.scheduledJobId,
+          currentJobId: job.id,
+        });
+        return;
+      }
     }
 
     // Update invoice status to unpaid before generating
