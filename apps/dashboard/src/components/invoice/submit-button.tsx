@@ -52,25 +52,27 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
   const { watch, setValue, formState } = useFormContext();
   const { data: user } = useUserQuery();
 
-  // Get next day date/time rounded to nearest hour
+  // Get default schedule date/time: today, rounded up to the next hour + 1 hour buffer
   const getDefaultScheduleDateTime = () => {
     const now = new Date();
     const minutes = getMinutes(now);
-    const shouldRoundUp = minutes >= 30;
 
-    // Start with tomorrow at midnight, then set the rounded hour
-    const tomorrow = startOfTomorrow();
-    const baseHour = setHours(tomorrow, getHours(now));
+    // Round up to the next hour, add 1 more hour for buffer
+    const nextHour = addHours(setMinutes(now, 0), minutes > 0 ? 2 : 1);
 
-    return shouldRoundUp ? addHours(baseHour, 1) : baseHour;
+    return nextHour;
   };
 
   const [scheduleDate, setScheduleDate] = React.useState<Date | undefined>(
     () => {
       const existingScheduledAt = watch("scheduledAt");
-      return existingScheduledAt
-        ? new Date(existingScheduledAt)
-        : getDefaultScheduleDateTime();
+      if (existingScheduledAt) {
+        // Parse and normalize to start of day for calendar display
+        const parsed = new Date(existingScheduledAt);
+        return startOfDay(parsed);
+      }
+      // Use start of day for calendar display
+      return startOfDay(getDefaultScheduleDateTime());
     },
   );
 
@@ -183,7 +185,8 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
     const currentScheduledAt = watch("scheduledAt");
     if (currentScheduledAt) {
       const scheduledDateTime = new Date(currentScheduledAt);
-      setScheduleDate(scheduledDateTime);
+      // Normalize to start of day for calendar display
+      setScheduleDate(startOfDay(scheduledDateTime));
       // Use date-fns format for consistent time formatting
       setScheduleTime(format(scheduledDateTime, "HH:mm"));
     }
@@ -413,8 +416,8 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
                     defaultMonth={scheduleDate}
                     onSelect={handleDateChange}
                     disabled={(date) => {
-                      const today = new Date();
-                      today.setHours(0, 0, 0, 0);
+                      // Allow selecting today or later (time validation happens on submit)
+                      const today = startOfDay(new Date());
                       return date < today;
                     }}
                     className="!p-0"
@@ -464,8 +467,8 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
                               defaultMonth={scheduleDate}
                               onSelect={handleDateChange}
                               disabled={(date) => {
-                                const today = new Date();
-                                today.setHours(0, 0, 0, 0);
+                                // Allow selecting today or later (time validation happens on submit)
+                                const today = startOfDay(new Date());
                                 return date < today;
                               }}
                               className="!p-0"

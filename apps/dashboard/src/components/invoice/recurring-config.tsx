@@ -313,6 +313,11 @@ export function RecurringConfigPanel({
                   selected={
                     config.endDate ? new Date(config.endDate) : undefined
                   }
+                  defaultMonth={
+                    config.endDate
+                      ? new Date(config.endDate)
+                      : getDefaultEndDate(issueDate)
+                  }
                   onSelect={handleEndDateChange}
                   disabled={(date) => date < issueDate}
                 />
