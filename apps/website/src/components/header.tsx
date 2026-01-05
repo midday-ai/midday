@@ -562,7 +562,7 @@ export function Header({
               </Link>
 
               {/* Sign in */}
-              <div className="pt-8 mt-8">
+              <div className="border-t border-border pt-8 mt-8">
                 <Link
                   href="/login"
                   onTouchEnd={(e) => {
