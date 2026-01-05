@@ -213,12 +213,11 @@ export default {
       description:
         "Get notified 24 hours before a recurring invoice is generated",
       title: "Upcoming invoice generation",
-      with_customer_and_amount:
-        "A {amount} invoice for {customerName} is scheduled for tomorrow at {time}",
-      with_customer:
-        "An invoice for {customerName} is scheduled for tomorrow at {time}",
-      with_amount: "A {amount} invoice is scheduled for tomorrow at {time}",
-      simple: "A recurring invoice is scheduled for tomorrow",
+      batch: "You have {count} invoice(s) scheduled for tomorrow",
+      single_with_details:
+        "A {amount} invoice for {customerName} is scheduled for tomorrow",
+      single_with_customer:
+        "An invoice for {customerName} is scheduled for tomorrow",
     },
     inbox_new: {
       name: "New Inbox Items",

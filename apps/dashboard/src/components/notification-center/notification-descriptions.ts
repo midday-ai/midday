@@ -391,68 +391,47 @@ const handleRecurringInvoiceUpcoming: NotificationDescriptionHandler = (
   user,
   t,
 ) => {
-  const customerName = metadata?.customerName;
-  const amount = metadata?.amount;
-  const currency = metadata?.currency;
-  const scheduledAt = metadata?.scheduledAt;
+  const count = metadata?.count ?? 1;
+  const invoices = metadata?.invoices as
+    | Array<{
+        customerName?: string;
+        amount?: number;
+        currency?: string;
+      }>
+    | undefined;
 
-  if (customerName && amount && currency && scheduledAt) {
-    const formattedAmount =
-      formatAmount({
-        currency: currency,
-        amount: amount,
-        locale: user?.locale || "en-US",
-      }) ||
-      new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: currency,
-      }).format(amount);
+  // Single invoice with details
+  if (count === 1 && invoices?.[0]) {
+    const invoice = invoices[0];
+    if (invoice.customerName && invoice.amount && invoice.currency) {
+      const formattedAmount =
+        formatAmount({
+          currency: invoice.currency,
+          amount: invoice.amount,
+          locale: user?.locale || "en-US",
+        }) ||
+        new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: invoice.currency,
+        }).format(invoice.amount);
 
-    const scheduledDate = new Date(scheduledAt);
-    const formattedTime = format(scheduledDate, "HH:mm");
-
-    return t(
-      "notifications.recurring_invoice_upcoming.with_customer_and_amount",
-      {
-        customerName,
+      return t("notifications.recurring_invoice_upcoming.single_with_details", {
+        customerName: invoice.customerName,
         amount: formattedAmount,
-        time: formattedTime,
-      },
-    );
+      });
+    }
+    if (invoice.customerName) {
+      return t(
+        "notifications.recurring_invoice_upcoming.single_with_customer",
+        {
+          customerName: invoice.customerName,
+        },
+      );
+    }
   }
 
-  if (customerName && scheduledAt) {
-    const scheduledDate = new Date(scheduledAt);
-    const formattedTime = format(scheduledDate, "HH:mm");
-
-    return t("notifications.recurring_invoice_upcoming.with_customer", {
-      customerName,
-      time: formattedTime,
-    });
-  }
-
-  if (amount && currency && scheduledAt) {
-    const formattedAmount =
-      formatAmount({
-        currency: currency,
-        amount: amount,
-        locale: user?.locale || "en-US",
-      }) ||
-      new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: currency,
-      }).format(amount);
-
-    const scheduledDate = new Date(scheduledAt);
-    const formattedTime = format(scheduledDate, "HH:mm");
-
-    return t("notifications.recurring_invoice_upcoming.with_amount", {
-      amount: formattedAmount,
-      time: formattedTime,
-    });
-  }
-
-  return t("notifications.recurring_invoice_upcoming.simple");
+  // Multiple invoices or single without details
+  return t("notifications.recurring_invoice_upcoming.batch", { count });
 };
 
 const handleInboxAutoMatched: NotificationDescriptionHandler = (

@@ -12,7 +12,7 @@ type ProcessResult = {
   processed: number;
   skipped: number;
   failed: number;
-  errors: Array<{ recurringId: string; error: string }>;
+  errors: Array<{ teamId: string; error: string }>;
 };
 
 /**
@@ -24,6 +24,9 @@ type ProcessResult = {
  * - Review the recurring series settings
  * - Pause the series if needed
  * - Update details before the invoice goes out
+ *
+ * Notifications are batched per team - if a team has multiple recurring invoices
+ * due on the same day, they receive a single summary notification.
  */
 export class InvoiceUpcomingNotificationProcessor extends BaseProcessor<InvoiceUpcomingNotificationPayload> {
   async process(
@@ -64,77 +67,113 @@ export class InvoiceUpcomingNotificationProcessor extends BaseProcessor<InvoiceU
       `Found ${upcomingRecurring.length} upcoming invoices to notify about`,
     );
 
-    const errors: Array<{ recurringId: string; error: string }> = [];
+    // Filter out invoices that have already been notified for this cycle
+    const eligibleInvoices = upcomingRecurring.filter((recurring) => {
+      if (recurring.upcomingNotificationSentAt && recurring.nextScheduledAt) {
+        const notificationSentAt = new Date(
+          recurring.upcomingNotificationSentAt,
+        );
+        const nextScheduled = new Date(recurring.nextScheduledAt);
+        // If notification was sent within 25 hours of nextScheduled, it's for this cycle
+        const hoursDiff =
+          (nextScheduled.getTime() - notificationSentAt.getTime()) /
+          (1000 * 60 * 60);
+        if (hoursDiff <= 25) {
+          this.logger.info(
+            "Notification already sent for this cycle, skipping",
+            {
+              recurringId: recurring.id,
+              upcomingNotificationSentAt: recurring.upcomingNotificationSentAt,
+              nextScheduledAt: recurring.nextScheduledAt,
+            },
+          );
+          return false;
+        }
+      }
+      return true;
+    });
+
+    const skipped = upcomingRecurring.length - eligibleInvoices.length;
+
+    if (eligibleInvoices.length === 0) {
+      this.logger.info("All upcoming invoices already notified");
+      return {
+        processed: 0,
+        skipped,
+        failed: 0,
+        errors: [],
+      };
+    }
+
+    // Group invoices by teamId for batched notifications
+    const invoicesByTeam = new Map<string, typeof eligibleInvoices>();
+
+    for (const invoice of eligibleInvoices) {
+      const existing = invoicesByTeam.get(invoice.teamId) || [];
+      existing.push(invoice);
+      invoicesByTeam.set(invoice.teamId, existing);
+    }
+
+    this.logger.info(
+      `Grouped ${eligibleInvoices.length} invoices into ${invoicesByTeam.size} teams`,
+    );
+
+    const errors: Array<{ teamId: string; error: string }> = [];
     let processed = 0;
-    let skipped = 0;
     let failed = 0;
 
-    for (const recurring of upcomingRecurring) {
+    // Process each team's batch
+    for (const [teamId, teamInvoices] of invoicesByTeam.entries()) {
       try {
-        // Double-check we haven't already sent notification for this cycle
-        // This handles race conditions if the processor runs twice quickly
-        if (recurring.upcomingNotificationSentAt && recurring.nextScheduledAt) {
-          const notificationSentAt = new Date(
-            recurring.upcomingNotificationSentAt,
-          );
-          const nextScheduled = new Date(recurring.nextScheduledAt);
-          // If notification was sent within 25 hours of nextScheduled, it's for this cycle
-          const hoursDiff =
-            (nextScheduled.getTime() - notificationSentAt.getTime()) /
-            (1000 * 60 * 60);
-          if (hoursDiff <= 25) {
-            this.logger.info(
-              "Notification already sent for this cycle, skipping",
-              {
-                recurringId: recurring.id,
-                upcomingNotificationSentAt:
-                  recurring.upcomingNotificationSentAt,
-                nextScheduledAt: recurring.nextScheduledAt,
-              },
-            );
-            skipped++;
-            continue;
-          }
-        }
-
-        // Create the notification
+        // Create batched notification for the team
         await notifications.create(
           "recurring_invoice_upcoming",
-          recurring.teamId,
+          teamId,
           {
-            recurringId: recurring.id,
-            customerName: recurring.customerName ?? undefined,
-            amount: recurring.amount ?? undefined,
-            currency: recurring.currency ?? undefined,
-            scheduledAt: recurring.nextScheduledAt!,
-            frequency: recurring.frequency,
+            invoices: teamInvoices.map((inv) => ({
+              recurringId: inv.id,
+              customerName: inv.customerName ?? undefined,
+              amount: inv.amount ?? undefined,
+              currency: inv.currency ?? undefined,
+              scheduledAt: inv.nextScheduledAt!,
+              frequency: inv.frequency,
+            })),
+            count: teamInvoices.length,
           },
+          { sendEmail: true },
         );
 
-        // Mark notification as sent
-        await markUpcomingNotificationSent(db, {
-          id: recurring.id,
-          teamId: recurring.teamId,
-        });
+        // Mark all invoices in this batch as notified
+        for (const invoice of teamInvoices) {
+          await markUpcomingNotificationSent(db, {
+            id: invoice.id,
+            teamId: invoice.teamId,
+          });
+        }
 
-        this.logger.info("Sent upcoming invoice notification", {
-          recurringId: recurring.id,
-          teamId: recurring.teamId,
-          customerName: recurring.customerName,
-          nextScheduledAt: recurring.nextScheduledAt,
+        this.logger.info("Sent batched upcoming invoice notification", {
+          teamId,
+          invoiceCount: teamInvoices.length,
+          customerNames: teamInvoices
+            .map((inv) => inv.customerName)
+            .filter(Boolean),
         });
 
         processed++;
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";
-        this.logger.error("Failed to send upcoming invoice notification", {
-          recurringId: recurring.id,
-          error: errorMessage,
-        });
+        this.logger.error(
+          "Failed to send batched upcoming invoice notification",
+          {
+            teamId,
+            invoiceCount: teamInvoices.length,
+            error: errorMessage,
+          },
+        );
 
         errors.push({
-          recurringId: recurring.id,
+          teamId,
           error: errorMessage,
         });
         failed++;
@@ -142,10 +181,10 @@ export class InvoiceUpcomingNotificationProcessor extends BaseProcessor<InvoiceU
     }
 
     this.logger.info("Upcoming invoice notification processor completed", {
-      processed,
-      skipped,
-      failed,
-      total: upcomingRecurring.length,
+      teamsProcessed: processed,
+      teamsFailed: failed,
+      invoicesSkipped: skipped,
+      totalInvoices: upcomingRecurring.length,
     });
 
     return {

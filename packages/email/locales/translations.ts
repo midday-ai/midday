@@ -59,6 +59,10 @@ export function translations(locale: string, params?: TranslationParams) {
         "invoice.paid.subject": `Invoice #${params?.invoiceNumber} has been paid`,
         "invoice.sent.subject": `${params?.teamName} sent you an invoice`,
         "invoice.reminder.subject": `Reminder: Payment for ${params?.invoiceNumber}`,
+        "invoice.upcoming.subject":
+          params?.count === 1
+            ? "You have 1 invoice scheduled for tomorrow"
+            : `You have ${params?.count} invoices scheduled for tomorrow`,
       };
     case "sv":
       return {
@@ -117,6 +121,10 @@ export function translations(locale: string, params?: TranslationParams) {
         "invoice.paid.subject": `Faktura #${params?.invoiceNumber} har betalats`,
         "invoice.sent.subject": `${params?.teamName} har skickat dig en faktura`,
         "invoice.reminder.subject": `Påminnelse: Betalning för ${params?.invoiceNumber}`,
+        "invoice.upcoming.subject":
+          params?.count === 1
+            ? "Du har 1 faktura schemalagd för imorgon"
+            : `Du har ${params?.count} fakturor schemalagda för imorgon`,
       };
 
     default:

@@ -130,7 +130,7 @@ export const allNotificationTypes: NotificationType[] = [
   },
   {
     type: "recurring_invoice_upcoming",
-    channels: ["in_app"],
+    channels: ["in_app", "email"],
     showInSettings: true,
     category: "invoices",
     order: 1,

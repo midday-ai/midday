@@ -259,14 +259,20 @@ export const recurringSeriesPausedSchema = z.object({
   failureCount: z.number().optional(),
 });
 
-export const recurringInvoiceUpcomingSchema = z.object({
-  users: z.array(userSchema),
+// Schema for individual invoice in the batch
+export const upcomingInvoiceItemSchema = z.object({
   recurringId: z.string().uuid(),
   customerName: z.string().optional(),
   amount: z.number().optional(),
   currency: z.string().optional(),
   scheduledAt: z.string(), // ISO date when invoice will be generated
   frequency: z.string(), // e.g., "weekly", "monthly_date"
+});
+
+export const recurringInvoiceUpcomingSchema = z.object({
+  users: z.array(userSchema),
+  invoices: z.array(upcomingInvoiceItemSchema),
+  count: z.number(),
 });
 
 export const transactionsCategorizedSchema = z.object({
@@ -321,6 +327,7 @@ export type RecurringSeriesStartedInput = z.infer<
 export type RecurringSeriesPausedInput = z.infer<
   typeof recurringSeriesPausedSchema
 >;
+export type UpcomingInvoiceItem = z.infer<typeof upcomingInvoiceItemSchema>;
 export type RecurringInvoiceUpcomingInput = z.infer<
   typeof recurringInvoiceUpcomingSchema
 >;
