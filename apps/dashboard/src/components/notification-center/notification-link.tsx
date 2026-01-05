@@ -108,21 +108,21 @@ export function NotificationLink({
             });
           } else if (recordId) {
             // Fallback: open the edit recurring sheet
-            setInvoiceParams({ editRecurringId: recordId, type: "edit" });
+            setInvoiceParams({ editRecurringId: recordId });
           }
           break;
 
         case "recurring_series_paused":
           // Open the edit recurring sheet to let user resume/review the series
           if (recordId) {
-            setInvoiceParams({ editRecurringId: recordId, type: "edit" });
+            setInvoiceParams({ editRecurringId: recordId });
           }
           break;
 
         case "recurring_invoice_upcoming":
           // Open the edit recurring sheet to let user review/modify the series
           if (recordId) {
-            setInvoiceParams({ editRecurringId: recordId, type: "edit" });
+            setInvoiceParams({ editRecurringId: recordId });
           }
           break;
 
