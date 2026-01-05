@@ -8,6 +8,7 @@ import {
   recordInvoiceGenerationFailure,
   updateInvoice,
 } from "@midday/db/queries";
+import { getStartOfDayUTC } from "@midday/invoice/recurring";
 import { generateToken } from "@midday/invoice/token";
 import { transformCustomerToContent } from "@midday/invoice/utils";
 import type { Job } from "bullmq";
@@ -255,10 +256,19 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
         const invoiceNumber = await getNextInvoiceNumber(db, recurring.teamId);
         const token = await generateToken(invoiceId);
 
-        // Calculate dates
-        const now = new Date();
-        const issueDate = now.toISOString();
-        const dueDate = addDays(now, recurring.dueDateOffset).toISOString();
+        // Calculate dates using the scheduled date, normalized to UTC midnight
+        // This ensures consistency with manually created invoices
+        // Use getStartOfDayUTC (not localDateToUTCMidnight) because this runs on the server
+        // and we want to preserve the UTC date, not the server's local date
+        const scheduledDate = recurring.nextScheduledAt
+          ? new Date(recurring.nextScheduledAt)
+          : new Date();
+        const issueDateUTC = getStartOfDayUTC(scheduledDate);
+        const issueDate = issueDateUTC.toISOString();
+        const dueDate = addDays(
+          issueDateUTC,
+          recurring.dueDateOffset,
+        ).toISOString();
 
         // Build template from recurring data using shared utility
         const template = buildInvoiceTemplateFromRecurring(recurring);
