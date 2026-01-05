@@ -59,6 +59,29 @@ const booleanOptions = [
   { value: false, label: "No" },
 ];
 
+const paymentTermsOptions = [
+  { value: 0, label: "Due on Receipt" },
+  { value: 7, label: "Net 7" },
+  { value: 10, label: "Net 10" },
+  { value: 15, label: "Net 15" },
+  { value: 30, label: "Net 30" },
+  { value: 45, label: "Net 45" },
+  { value: 60, label: "Net 60" },
+  { value: 90, label: "Net 90" },
+];
+
+function getPaymentTermsLabel(days: number | undefined): string {
+  if (days === undefined || days === null) return "Net 30";
+  const preset = paymentTermsOptions.find((opt) => opt.value === days);
+  if (preset) return preset.label;
+  return `${days} days`;
+}
+
+function isCustomPaymentTerms(days: number | undefined): boolean {
+  if (days === undefined || days === null) return false;
+  return !paymentTermsOptions.some((opt) => opt.value === days);
+}
+
 const menuItems = [
   {
     icon: Icons.DateFormat,
@@ -146,11 +169,13 @@ export function SettingsMenu() {
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [disconnectDialogOpen, setDisconnectDialogOpen] = useState(false);
   const [newName, setNewName] = useState("");
+  const [customPaymentDays, setCustomPaymentDays] = useState("");
 
   const templateId = watch("template.id");
   const templateName = watch("template.name");
   const isDefault = watch("template.isDefault");
   const paymentEnabled = watch("template.paymentEnabled");
+  const paymentTermsDays = watch("template.paymentTermsDays");
 
   // Stripe Connect status
   const { data: stripeStatus } = useQuery(
@@ -341,6 +366,25 @@ export function SettingsMenu() {
     setRenameDialogOpen(true);
   };
 
+  const handlePaymentTermsChange = (days: number) => {
+    setValue("template.paymentTermsDays", days, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+    updateTemplateMutation.mutate({
+      id: templateId,
+      paymentTermsDays: days,
+    });
+  };
+
+  const handleCustomPaymentTermsSubmit = () => {
+    const days = Number.parseInt(customPaymentDays, 10);
+    if (!Number.isNaN(days) && days >= 0 && days <= 365) {
+      handlePaymentTermsChange(days);
+      setCustomPaymentDays("");
+    }
+  };
+
   const handleDuplicate = () => {
     // Get the current template settings from the form
     const currentTemplate = watch("template");
@@ -448,6 +492,77 @@ export function SettingsMenu() {
               </DropdownMenuSub>
             );
           })}
+
+          {/* Payment Terms */}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Icons.CalendarMonth className="mr-2 size-4" />
+              <span className="text-xs">Payment terms</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent
+              className="p-0 max-h-[300px] overflow-y-auto"
+              sideOffset={2}
+              alignOffset={-5}
+              collisionPadding={8}
+            >
+              {paymentTermsOptions.map((option) => (
+                <DropdownMenuCheckboxItem
+                  key={option.value}
+                  className="text-xs"
+                  checked={paymentTermsDays === option.value}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      handlePaymentTermsChange(option.value);
+                    }
+                  }}
+                  onSelect={(event) => event.preventDefault()}
+                >
+                  {option.label}
+                </DropdownMenuCheckboxItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger className="text-xs">
+                  {isCustomPaymentTerms(paymentTermsDays)
+                    ? `Custom (${paymentTermsDays} days)`
+                    : "Custom"}
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="p-2">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min={0}
+                      max={365}
+                      value={customPaymentDays}
+                      onChange={(e) => setCustomPaymentDays(e.target.value)}
+                      placeholder={String(paymentTermsDays ?? 30)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleCustomPaymentTermsSubmit();
+                        }
+                        e.stopPropagation();
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-16 h-7 text-xs"
+                    />
+                    <span className="text-xs text-muted-foreground">days</span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2 text-xs"
+                      onClick={handleCustomPaymentTermsSubmit}
+                      disabled={
+                        !customPaymentDays ||
+                        Number.isNaN(Number.parseInt(customPaymentDays, 10))
+                      }
+                    >
+                      Set
+                    </Button>
+                  </div>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
 
           {/* Accept Payments Section */}
           <DropdownMenuSeparator />

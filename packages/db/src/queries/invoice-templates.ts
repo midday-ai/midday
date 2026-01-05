@@ -41,6 +41,7 @@ type InvoiceTemplateParams = {
   deliveryType?: "create" | "create_and_send" | "scheduled";
   includePdf?: boolean;
   paymentEnabled?: boolean;
+  paymentTermsDays?: number;
 };
 
 type CreateInvoiceTemplateParams = {
@@ -98,6 +99,7 @@ const templateSelectFields = {
   includePdf: invoiceTemplates.includePdf,
   sendCopy: invoiceTemplates.sendCopy,
   paymentEnabled: invoiceTemplates.paymentEnabled,
+  paymentTermsDays: invoiceTemplates.paymentTermsDays,
 };
 
 /**

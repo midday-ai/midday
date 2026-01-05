@@ -118,6 +118,7 @@ const baseInvoiceTemplateSchema = z.object({
   deliveryType: z.enum(["create", "create_and_send", "scheduled"]).optional(),
   locale: z.string().optional(),
   paymentEnabled: z.boolean().optional(),
+  paymentTermsDays: z.number().min(0).max(365).optional(),
 });
 
 // tRPC-compatible template schema (uses z.any() for editor fields)

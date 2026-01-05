@@ -1826,6 +1826,7 @@ export const invoiceTemplates = pgTable(
     includeLineItemTax: boolean("include_line_item_tax").default(false),
     lineItemTaxLabel: text("line_item_tax_label"),
     paymentEnabled: boolean("payment_enabled").default(false),
+    paymentTermsDays: integer("payment_terms_days").default(30),
   },
   (table) => [
     foreignKey({

@@ -48,7 +48,7 @@ import { verify } from "@midday/invoice/token";
 import { transformCustomerToContent } from "@midday/invoice/utils";
 import { decodeJobId, getQueue, triggerJob } from "@midday/job-client";
 import { TRPCError } from "@trpc/server";
-import { addMonths, format, parseISO } from "date-fns";
+import { addDays, format, parseISO } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 
@@ -283,7 +283,10 @@ export const invoiceRouter = createTRPCRouter({
           },
         ],
         issueDate: new Date().toISOString(),
-        dueDate: addMonths(new Date(), 1).toISOString(),
+        dueDate: addDays(
+          new Date(),
+          template?.paymentTermsDays ?? 30,
+        ).toISOString(),
         template: templateData,
         fromDetails: (template?.fromDetails || null) as string | null,
         paymentDetails: (template?.paymentDetails || null) as string | null,
@@ -383,7 +386,11 @@ export const invoiceRouter = createTRPCRouter({
         locale,
         paymentEnabled:
           template?.paymentEnabled ?? defaultTemplate.paymentEnabled,
+        paymentTermsDays: template?.paymentTermsDays ?? 30,
       };
+
+      // Calculate due date based on payment terms (default 30 days)
+      const paymentTermsDays = savedTemplate.paymentTermsDays ?? 30;
 
       return {
         // Default values first
@@ -408,7 +415,7 @@ export const invoiceRouter = createTRPCRouter({
         noteDetails: savedTemplate.noteDetails,
         customerId: undefined,
         issueDate: new UTCDate().toISOString(),
-        dueDate: addMonths(new UTCDate(), 1).toISOString(),
+        dueDate: addDays(new UTCDate(), paymentTermsDays).toISOString(),
         lineItems: [{ name: "", quantity: 0, price: 0, vat: 0 }],
         tax: undefined,
         token: undefined,

@@ -9,6 +9,7 @@
 export type RecurringInvoiceErrorCode =
   | "CUSTOMER_NO_EMAIL"
   | "CUSTOMER_NOT_FOUND"
+  | "CUSTOMER_DELETED"
   | "TEMPLATE_INVALID"
   | "INVOICE_EXISTS"
   | "DATABASE_ERROR"
@@ -56,6 +57,7 @@ export class RecurringInvoiceError extends Error {
     return (
       this.code === "CUSTOMER_NO_EMAIL" ||
       this.code === "CUSTOMER_NOT_FOUND" ||
+      this.code === "CUSTOMER_DELETED" ||
       this.code === "TEMPLATE_INVALID"
     );
   }
@@ -69,6 +71,8 @@ export class RecurringInvoiceError extends Error {
         return "The customer associated with this recurring invoice series does not have an email address. Please update the customer profile.";
       case "CUSTOMER_NOT_FOUND":
         return "The customer associated with this recurring invoice series was not found. They may have been deleted.";
+      case "CUSTOMER_DELETED":
+        return "The customer associated with this recurring invoice series has been deleted. Please assign a new customer or cancel the series.";
       case "TEMPLATE_INVALID":
         return "The invoice template data is invalid or corrupted. Please recreate the recurring invoice series.";
       case "INVOICE_EXISTS":
@@ -127,6 +131,19 @@ export const RecurringInvoiceErrors = {
       recurringId,
       `Cannot generate recurring invoice: Customer ${customerId} not found. They may have been deleted.`,
       { teamId, customerId },
+    );
+  },
+
+  customerDeleted(
+    recurringId: string,
+    customerName: string | null,
+    teamId?: string,
+  ): RecurringInvoiceError {
+    return new RecurringInvoiceError(
+      "CUSTOMER_DELETED",
+      recurringId,
+      `Cannot generate recurring invoice: The customer${customerName ? ` "${customerName}"` : ""} has been deleted. Please assign a new customer or cancel the series.`,
+      { teamId },
     );
   },
 

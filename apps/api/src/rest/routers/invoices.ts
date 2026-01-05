@@ -22,6 +22,7 @@ import {
   getCustomerById,
   getInvoiceById,
   getInvoiceSummary,
+  getInvoiceTemplate,
   getInvoices,
   getNextInvoiceNumber,
   getPaymentStatus,
@@ -31,7 +32,7 @@ import {
 import { calculateTotal } from "@midday/invoice/calculate";
 import { transformCustomerToContent } from "@midday/invoice/utils";
 import { triggerJob } from "@midday/job-client";
-import { addMonths } from "date-fns";
+import { addDays } from "date-fns";
 import { HTTPException } from "hono/http-exception";
 import { v4 as uuidv4 } from "uuid";
 import { withRequiredScope } from "../middleware";
@@ -429,9 +430,14 @@ app.openapi(
       }
     }
 
+    // Get template for default payment terms
+    const template = await getInvoiceTemplate(db, teamId);
+    const paymentTermsDays = template?.paymentTermsDays ?? 30;
+
     // Set default dates if not provided
     const issueDate = input.issueDate || new Date().toISOString();
-    const dueDate = input.dueDate || addMonths(new Date(), 1).toISOString();
+    const dueDate =
+      input.dueDate || addDays(new Date(), paymentTermsDays).toISOString();
 
     // Fetch customer and generate customerDetails
     const customer = await getCustomerById(db, {

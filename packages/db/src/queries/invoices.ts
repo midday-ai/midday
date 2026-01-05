@@ -83,6 +83,7 @@ export type Template = {
   deliveryType: "create" | "create_and_send" | "scheduled";
   locale: string;
   paymentEnabled?: boolean;
+  paymentTermsDays?: number;
 };
 
 export type GetInvoicesParams = {

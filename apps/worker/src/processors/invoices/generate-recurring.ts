@@ -164,9 +164,9 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
             );
           }
         } else {
-          // No customer ID assigned - this shouldn't happen if API validation is correct
-          // but handle it gracefully
-          throw RecurringInvoiceErrors.customerNoEmail(
+          // No customer ID - customer was deleted (ON DELETE SET NULL in FK constraint)
+          // The customerName field preserves the original name for better error messages
+          throw RecurringInvoiceErrors.customerDeleted(
             recurring.id,
             recurring.customerName,
             recurring.teamId,

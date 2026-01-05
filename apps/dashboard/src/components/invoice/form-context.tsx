@@ -48,6 +48,7 @@ export const invoiceTemplateSchema = z.object({
   locale: z.string().optional(),
   timezone: z.string().optional(),
   paymentEnabled: z.boolean().optional(),
+  paymentTermsDays: z.number().min(0).max(365).optional(),
 });
 
 export const lineItemSchema = z.object({
