@@ -121,6 +121,22 @@ export default function TermsPage() {
               <p className="text-muted-foreground leading-relaxed">
                 Midday Labs AB accepts no liability for any consequences, losses, or penalties resulting from your use of the Service for financial or tax purposes.
               </p>
+
+              <h3 className="font-sans text-sm text-foreground mt-6 mb-3">
+                6.1 Invoices and Payments
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                The Service may allow you to create, send, and manage invoices and to enable payment through third-party payment providers. Midday Labs AB does not verify the legal, tax, or regulatory correctness of any invoice or payment request.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                You acknowledge and agree that:
+              </p>
+              <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                <li>You are solely responsible for the accuracy, legality, and compliance of all invoices you create or send using the Service;</li>
+                <li>You are responsible for ensuring invoices meet all applicable legal, tax, and accounting requirements in your jurisdiction;</li>
+                <li>Midday Labs AB is not responsible for payment disputes, failed payments, chargebacks, or customer disagreements;</li>
+                <li>Use of third-party payment providers is subject to their own terms and policies, and Midday Labs AB assumes no liability for their actions or availability.</li>
+              </ul>
             </section>
 
             <section className="space-y-4">
@@ -139,6 +155,22 @@ export default function TermsPage() {
                 <li>You are solely responsible for verifying all information before using it for decisions or reporting;</li>
                 <li>Midday Labs AB shall not be liable for any loss, damage, or liability arising from the use of such data, including errors, omissions, delays, misinterpretations, or disruptions;</li>
                 <li>Your reliance on third-party data or user-submitted content is entirely at your own risk.</li>
+              </ul>
+
+              <h3 className="font-sans text-sm text-foreground mt-6 mb-3">
+                7.1 Accounting and ERP Integrations
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                The Service may allow you to export financial data, transactions, attachments, and related information to third-party accounting or ERP systems, including but not limited to Fortnox, Xero, and QuickBooks.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                You acknowledge and agree that:
+              </p>
+              <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                <li>Midday Labs AB acts solely as a technical facilitator of data transfer and does not control, verify, or validate how third-party accounting systems process, interpret, or apply exported data;</li>
+                <li>You are solely responsible for reviewing, approving, and verifying all exported data before it is used for bookkeeping, reporting, tax filings, or compliance purposes;</li>
+                <li>Midday Labs AB is not responsible for errors, omissions, misclassifications, tax treatments, or reporting outcomes resulting from exported data or third-party system behavior;</li>
+                <li>Any reliance on accounting or ERP integrations is at your own risk.</li>
               </ul>
             </section>
 
