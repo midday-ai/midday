@@ -20,15 +20,24 @@ import { memo, useCallback } from "react";
 export type Customer = RouterOutputs["customers"]["get"]["data"][number];
 
 const NameCell = memo(
-  ({ name, website }: { name: string | null; website: string | null }) => {
+  ({
+    name,
+    website,
+  }: {
+    name: string | null;
+    website: string | null;
+  }) => {
     if (!name) return "-";
+
+    // Logo from logo.dev based on website domain
+    const imageSrc = website ? getWebsiteLogo(website) : null;
 
     return (
       <div className="flex items-center space-x-2">
         <Avatar className="size-5">
-          {website && (
+          {imageSrc && (
             <AvatarImageNext
-              src={getWebsiteLogo(website)}
+              src={imageSrc}
               alt={`${name} logo`}
               width={20}
               height={20}
@@ -130,7 +139,10 @@ export const columns: ColumnDef<Customer>[] = [
         "w-[320px] min-w-[240px] md:sticky md:left-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-20",
     },
     cell: ({ row }) => (
-      <NameCell name={row.original.name} website={row.original.website} />
+      <NameCell
+        name={row.original.name}
+        website={row.original.website}
+      />
     ),
   },
   {

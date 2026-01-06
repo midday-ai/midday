@@ -249,6 +249,20 @@ export const deleteCustomerSchema = z.object({
   }),
 });
 
+export const enrichCustomerSchema = z.object({
+  id: z.string().uuid().openapi({
+    description: "Unique identifier of the customer to enrich",
+    example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
+  }),
+});
+
+export const enrichCustomerResponseSchema = z.object({
+  queued: z.boolean().openapi({
+    description: "Whether the enrichment job was successfully queued",
+    example: true,
+  }),
+});
+
 export const upsertCustomerSchema = z.object({
   id: z.string().uuid().optional().openapi({
     description:

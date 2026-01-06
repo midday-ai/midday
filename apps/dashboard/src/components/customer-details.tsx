@@ -2,6 +2,7 @@
 
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useRealtime } from "@/hooks/use-realtime";
 import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
@@ -34,18 +35,41 @@ import {
   TableHeader,
   TableRow,
 } from "@midday/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
+import { cn } from "@midday/ui/cn";
 import { formatDate } from "@midday/utils/format";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { type RefObject, useMemo, useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
 import { FormatAmount } from "./format-amount";
 import { InvoiceStatus } from "./invoice-status";
+import { getWebsiteLogo } from "@/utils/logos";
+
+// LinkedIn icon with brand color
+function LinkedInIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="#0A66C2"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+    </svg>
+  );
+}
 
 export function CustomerDetails() {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { data: user } = useUserQuery();
   const { customerId, setParams } = useCustomerParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
@@ -56,9 +80,62 @@ export function CustomerDetails() {
 
   const isOpen = customerId !== null;
 
-  const { data: customer, isLoading: isLoadingCustomer } = useQuery({
+  const { data: customer, isLoading: isLoadingCustomer, refetch } = useQuery({
     ...trpc.customers.getById.queryOptions({ id: customerId! }),
     enabled: isOpen,
+  });
+
+  // Mutation for re-enriching customer
+  const enrichMutation = useMutation({
+    ...trpc.customers.enrich.mutationOptions(),
+    onSuccess: () => {
+      // Refetch to get the processing status - no toast needed
+      refetch();
+    },
+    onError: (error) => {
+      toast({
+        duration: 3000,
+        variant: "destructive",
+        title: "Enrichment failed",
+        description: error.message,
+      });
+    },
+  });
+
+  // Mutation for cancelling enrichment
+  const cancelEnrichmentMutation = useMutation({
+    ...trpc.customers.cancelEnrichment.mutationOptions(),
+    onSuccess: () => {
+      refetch();
+    },
+  });
+
+  const handleReEnrich = () => {
+    if (customerId) {
+      enrichMutation.mutate({ id: customerId });
+    }
+  };
+
+  const handleCancelEnrich = () => {
+    if (customerId) {
+      cancelEnrichmentMutation.mutate({ id: customerId });
+    }
+  };
+
+  const isEnriching = customer?.enrichmentStatus === "processing" || enrichMutation.isPending;
+
+  // Subscribe to realtime updates for this customer
+  useRealtime({
+    channelName: `customer-${customerId}`,
+    event: "UPDATE",
+    table: "customers",
+    filter: customerId ? `id=eq.${customerId}` : undefined,
+    onEvent: (payload) => {
+      // Refetch customer data when enrichment status changes
+      if (payload.new && "enrichment_status" in payload.new) {
+        refetch();
+      }
+    },
   });
 
   const infiniteQueryOptions = trpc.invoice.get.infiniteQueryOptions(
@@ -112,9 +189,30 @@ export function CustomerDetails() {
   if (isLoadingCustomer) {
     return (
       <div className="h-full px-6 pt-6 pb-6">
-        <Skeleton className="h-6 w-48 mb-6" />
-        <Skeleton className="h-4 w-32 mb-4" />
-        <Skeleton className="h-4 w-32 mb-4" />
+        {/* Header skeleton matching actual layout */}
+        <div className="flex items-start gap-4 mb-6">
+          <Skeleton className="size-12 rounded-full flex-shrink-0" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-7 w-48" />
+            <Skeleton className="h-4 w-full max-w-[300px]" />
+            <div className="flex gap-2">
+              <Skeleton className="h-5 w-16 rounded-full" />
+              <Skeleton className="h-5 w-20 rounded-full" />
+            </div>
+          </div>
+        </div>
+        {/* Content skeleton */}
+        <div className="space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <div className="grid grid-cols-2 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="space-y-1">
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-5 w-28" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -183,21 +281,126 @@ export function CustomerDetails() {
     }
   };
 
+  // Check if customer has any enrichment data
+  const hasEnrichmentData = customer?.description || customer?.industry || customer?.companyType;
+
   return (
     <div className="h-full flex flex-col min-h-0 -mx-6">
       {/* Content */}
       <div className="flex-1 overflow-y-auto scrollbar-hide min-h-0">
-        {/* Sticky Customer Header */}
+        {/* Sticky Customer Header - Enhanced with logo and enrichment */}
         <div className="sticky top-0 z-10 bg-background border-b border-border px-6 py-4">
-          <div className="text-[24px] font-serif leading-normal">
-            {customer.name}
+          <div className="flex items-start gap-4">
+            {/* Logo from logo.dev */}
+            {isEnriching ? (
+              <Skeleton className="size-12 rounded-full flex-shrink-0" />
+            ) : customer.website ? (
+              <img
+                src={getWebsiteLogo(customer.website)}
+                alt={`${customer.name} logo`}
+                className="size-12 rounded-full object-cover flex-shrink-0 bg-muted"
+                onError={(e) => {
+                  // Fallback to initials on error
+                  e.currentTarget.style.display = "none";
+                  const fallback = e.currentTarget.nextElementSibling;
+                  if (fallback) fallback.classList.remove("hidden");
+                }}
+              />
+            ) : null}
+            <div
+              className={cn(
+                "size-12 rounded-full flex items-center justify-center bg-muted text-muted-foreground font-medium text-lg flex-shrink-0",
+                customer.website && "hidden"
+              )}
+            >
+              {customer.name.charAt(0).toUpperCase()}
+            </div>
+
+            {/* Name, description, and badges */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-[24px] font-serif leading-normal truncate">
+                  {customer.name}
+                </div>
+                {/* Re-enrich / Cancel button */}
+                {customer.website && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        {isEnriching ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs flex-shrink-0"
+                            onClick={handleCancelEnrich}
+                          >
+                            <Icons.Close className="size-3 mr-1" />
+                            Cancel
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="p-0 h-6 w-6 flex-shrink-0"
+                            onClick={handleReEnrich}
+                          >
+                            <Icons.RefreshOutline className="size-4 text-muted-foreground" />
+                          </Button>
+                        )}
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {isEnriching ? "Cancel enrichment" : "Refresh company data"}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
+
+              {/* Description */}
+              {isEnriching ? (
+                <div className="mt-1 space-y-1">
+                  <Skeleton className="h-4 w-full max-w-[280px]" />
+                  <Skeleton className="h-4 w-3/4" />
+                </div>
+              ) : customer.description ? (
+                <p className="text-[13px] text-[#606060] mt-1 line-clamp-2">
+                  {customer.description}
+                </p>
+              ) : null}
+
+              {/* Badges */}
+              {(customer.industry || customer.companyType || customer.employeeCount || customer.fundingStage) && (
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  {customer.industry && (
+                    <Badge variant="secondary" className="text-[11px] font-normal">
+                      {customer.industry}
+                    </Badge>
+                  )}
+                  {customer.companyType && (
+                    <Badge variant="secondary" className="text-[11px] font-normal">
+                      {customer.companyType}
+                    </Badge>
+                  )}
+                  {customer.employeeCount && (
+                    <Badge variant="secondary" className="text-[11px] font-normal">
+                      {customer.employeeCount} employees
+                    </Badge>
+                  )}
+                  {customer.fundingStage && (
+                    <Badge variant="secondary" className="text-[11px] font-normal">
+                      {customer.fundingStage}
+                    </Badge>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         <div className="px-6 pb-4">
           <Accordion
             type="multiple"
-            defaultValue={["general"]}
+            defaultValue={["general", ...(hasEnrichmentData ? ["intelligence"] : [])]}
             className="space-y-0"
           >
             {/* General Section */}
@@ -250,6 +453,140 @@ export function CustomerDetails() {
                 </div>
               </AccordionContent>
             </AccordionItem>
+
+            {/* Company Intelligence Section - Only show if we have enrichment data or it's processing */}
+            {(hasEnrichmentData || isEnriching || customer.enrichmentStatus === "completed") && (
+              <AccordionItem value="intelligence" className="border-b border-border">
+                <AccordionTrigger className="text-[16px] font-medium py-4">
+                  Company Intelligence
+                </AccordionTrigger>
+                <AccordionContent>
+                  {isEnriching ? (
+                    <div className="grid grid-cols-2 gap-4 pt-0">
+                      {[...Array(6)].map((_, i) => (
+                        <div key={i} className="space-y-2">
+                          <Skeleton className="h-3 w-20" />
+                          <Skeleton className="h-5 w-28" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-4 pt-0">
+                      {customer.industry && (
+                        <div>
+                          <div className="text-[12px] mb-2 text-[#606060]">Industry</div>
+                          <div className="text-[14px]">{customer.industry}</div>
+                        </div>
+                      )}
+                      {customer.companyType && (
+                        <div>
+                          <div className="text-[12px] mb-2 text-[#606060]">Company Type</div>
+                          <div className="text-[14px]">{customer.companyType}</div>
+                        </div>
+                      )}
+                      {customer.employeeCount && (
+                        <div>
+                          <div className="text-[12px] mb-2 text-[#606060]">Employees</div>
+                          <div className="text-[14px]">{customer.employeeCount}</div>
+                        </div>
+                      )}
+                      {customer.foundedYear && (
+                        <div>
+                          <div className="text-[12px] mb-2 text-[#606060]">Founded</div>
+                          <div className="text-[14px]">{customer.foundedYear}</div>
+                        </div>
+                      )}
+                      {customer.estimatedRevenue && (
+                        <div>
+                          <div className="text-[12px] mb-2 text-[#606060]">Est. Revenue</div>
+                          <div className="text-[14px]">{customer.estimatedRevenue}</div>
+                        </div>
+                      )}
+                      {(customer.fundingStage || customer.totalFunding) && (
+                        <div>
+                          <div className="text-[12px] mb-2 text-[#606060]">Funding</div>
+                          <div className="text-[14px]">
+                            {customer.fundingStage}
+                            {customer.totalFunding && ` (${customer.totalFunding})`}
+                          </div>
+                        </div>
+                      )}
+                      {customer.headquartersLocation && (
+                        <div>
+                          <div className="text-[12px] mb-2 text-[#606060]">Headquarters</div>
+                          <div className="text-[14px]">{customer.headquartersLocation}</div>
+                        </div>
+                      )}
+                      {customer.timezone && (
+                        <div>
+                          <div className="text-[12px] mb-2 text-[#606060]">Timezone</div>
+                          <div className="text-[14px]">{customer.timezone}</div>
+                        </div>
+                      )}
+                      {/* Social Links */}
+                      {(customer.linkedinUrl || customer.twitterUrl || customer.website) && (
+                        <div className="col-span-2">
+                          <div className="text-[12px] mb-2 text-[#606060]">Links</div>
+                          <div className="flex items-center gap-3">
+                            {customer.linkedinUrl && (
+                              <a
+                                href={customer.linkedinUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                <LinkedInIcon className="size-4" />
+                              </a>
+                            )}
+                            {customer.twitterUrl && (
+                              <a
+                                href={customer.twitterUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                <Icons.X className="size-4" />
+                              </a>
+                            )}
+                            {customer.website && (
+                              <a
+                                href={customer.website.startsWith("http") ? customer.website : `https://${customer.website}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                <Icons.Globle className="size-4" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {/* Show enrichment status if not completed and no data */}
+                      {!hasEnrichmentData && customer.enrichmentStatus === "completed" && (
+                        <div className="col-span-2 text-[14px] text-[#606060]">
+                          No company information found.
+                          {customer.website && " Try refreshing the data."}
+                        </div>
+                      )}
+                      {customer.enrichmentStatus === "failed" && (
+                        <div className="col-span-2 text-[14px] text-[#606060]">
+                          Failed to fetch company information.
+                          {customer.website && (
+                            <Button
+                              variant="link"
+                              className="p-0 h-auto text-[14px] ml-1"
+                              onClick={handleReEnrich}
+                            >
+                              Try again
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </AccordionContent>
+              </AccordionItem>
+            )}
 
             {/* Details Section */}
             <AccordionItem value="details" className="border-b border-border">

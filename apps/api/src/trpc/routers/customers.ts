@@ -1,5 +1,6 @@
 import {
   deleteCustomerSchema,
+  enrichCustomerSchema,
   getCustomerByIdSchema,
   getCustomerInvoiceSummarySchema,
   getCustomersSchema,
@@ -11,8 +12,11 @@ import {
   getCustomerById,
   getCustomerInvoiceSummary,
   getCustomers,
+  updateCustomerEnrichmentStatus,
   upsertCustomer,
 } from "@midday/db/queries";
+import { triggerJob } from "@midday/job-client";
+import { TRPCError } from "@trpc/server";
 
 export const customersRouter = createTRPCRouter({
   get: protectedProcedure
@@ -45,11 +49,32 @@ export const customersRouter = createTRPCRouter({
   upsert: protectedProcedure
     .input(upsertCustomerSchema)
     .mutation(async ({ ctx: { db, teamId, session }, input }) => {
-      return upsertCustomer(db, {
+      const isNewCustomer = !input.id;
+
+      const customer = await upsertCustomer(db, {
         ...input,
         teamId: teamId!,
         userId: session.user.id,
       });
+
+      // Auto-trigger enrichment for new customers with a website
+      if (isNewCustomer && customer?.website && customer?.id) {
+        try {
+          await triggerJob(
+            "enrich-customer",
+            {
+              customerId: customer.id,
+              teamId: teamId!,
+            },
+            "customers",
+          );
+        } catch (error) {
+          // Log but don't fail the customer creation
+          console.error("Failed to trigger customer enrichment:", error);
+        }
+      }
+
+      return customer;
     }),
 
   getInvoiceSummary: protectedProcedure
@@ -59,5 +84,69 @@ export const customersRouter = createTRPCRouter({
         customerId: input.id,
         teamId: teamId!,
       });
+    }),
+
+  enrich: protectedProcedure
+    .input(enrichCustomerSchema)
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      const customer = await getCustomerById(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
+
+      if (!customer) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Customer not found",
+        });
+      }
+
+      if (!customer.website) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Customer has no website - enrichment requires a website",
+        });
+      }
+
+      // Mark as pending and trigger enrichment
+      await updateCustomerEnrichmentStatus(db, {
+        customerId: customer.id,
+        status: "pending",
+      });
+
+      await triggerJob(
+        "enrich-customer",
+        {
+          customerId: customer.id,
+          teamId: teamId!,
+        },
+        "customers",
+      );
+
+      return { queued: true };
+    }),
+
+  cancelEnrichment: protectedProcedure
+    .input(enrichCustomerSchema)
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      const customer = await getCustomerById(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
+
+      if (!customer) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Customer not found",
+        });
+      }
+
+      // Reset status to pending (job may still complete in background but status won't show as processing)
+      await updateCustomerEnrichmentStatus(db, {
+        customerId: customer.id,
+        status: "pending",
+      });
+
+      return { cancelled: true };
     }),
 });
