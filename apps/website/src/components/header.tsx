@@ -253,26 +253,7 @@ export function Header({
                         <div className="w-full max-w-4xl h-full">
                           <div className="rounded h-full">
                             <div className="grid grid-cols-2 gap-6 h-full">
-                              {/* Left Preview */}
-                              <div className="flex flex-col gap-6 h-full">
-                                <Link
-                                  href="/insights"
-                                  onClick={() => setIsFeaturesOpen(false)}
-                                  className="flex-1 border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200"
-                                >
-                                  <HeaderInsightsPreview />
-                                </Link>
-                                <div className="text-left">
-                                  <h3 className="font-sans text-sm text-foreground mb-1">
-                                    Insights
-                                  </h3>
-                                  <p className="font-sans text-xs text-muted-foreground leading-relaxed">
-                                    Weekly summaries that show what changed and why
-                                  </p>
-                                </div>
-                              </div>
-
-                              {/* Right Preview */}
+                              {/* Left Preview - Pre-accounting */}
                               <div className="flex flex-col gap-6 h-full">
                                 <Link
                                   href="/pre-accounting"
@@ -302,6 +283,25 @@ export function Header({
                                   </h3>
                                   <p className="font-sans text-xs text-muted-foreground leading-relaxed">
                                     Clean records ready for your accountant
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Right Preview - Assistant */}
+                              <div className="flex flex-col gap-6 h-full">
+                                <Link
+                                  href="/assistant"
+                                  onClick={() => setIsFeaturesOpen(false)}
+                                  className="flex-1 border border-border overflow-hidden bg-background cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200"
+                                >
+                                  <HeaderAssistantInputPreview />
+                                </Link>
+                                <div className="text-left">
+                                  <h3 className="font-sans text-sm text-foreground mb-1">
+                                    Assistant
+                                  </h3>
+                                  <p className="font-sans text-xs text-muted-foreground leading-relaxed">
+                                    Answers grounded in your actual numbers, not assumptions
                                   </p>
                                 </div>
                               </div>
