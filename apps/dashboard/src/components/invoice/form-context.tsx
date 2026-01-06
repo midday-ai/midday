@@ -118,12 +118,24 @@ export const recurringConfigSchema = z
 
     // monthly_last_day doesn't require frequencyDay
 
-    // Validate frequencyDay is required for monthly_date frequency
-    if (data.frequency === "monthly_date") {
+    // Frequencies that require frequencyDay as day of month (1-31)
+    const dayOfMonthFrequencies = [
+      "monthly_date",
+      "quarterly",
+      "semi_annual",
+      "annual",
+    ] as const;
+
+    // Validate frequencyDay is required for day-of-month frequencies
+    if (
+      dayOfMonthFrequencies.includes(
+        data.frequency as (typeof dayOfMonthFrequencies)[number],
+      )
+    ) {
       if (data.frequencyDay === null || data.frequencyDay === undefined) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Day of month is required for monthly frequency",
+          message: "Day of month is required for this frequency",
           path: ["frequencyDay"],
         });
       } else if (data.frequencyDay < 1 || data.frequencyDay > 31) {

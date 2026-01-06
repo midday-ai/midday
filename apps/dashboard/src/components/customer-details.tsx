@@ -50,7 +50,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
@@ -104,10 +104,10 @@ export function CustomerDetails() {
   const { data: user } = useUserQuery();
   const { customerId, setParams } = useCustomerParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
-  const { resolvedTheme } = useTheme();
   const { toast } = useToast();
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const dropdownContainerRef = useRef<HTMLDivElement>(null!);
+  const { resolvedTheme } = useTheme();
 
   // Track enrichment animation - use a key that changes when enrichment completes
   const [enrichmentAnimationKey, setEnrichmentAnimationKey] = useState(0);
@@ -1127,51 +1127,37 @@ export function CustomerDetails() {
             </div>
 
             {/* Portal URL - Only shown when enabled */}
-            {customer.portalEnabled && customer.portalId && (
-              <div className="mb-6 relative">
-                <CopyInput
-                  value={`${window.location.origin}/p/${customer.portalId}`}
-                  className="font-mono text-xs pr-14"
-                />
-                <div className="absolute right-10 top-2.5 border-r border-border pr-2 text-base">
-                  <OpenURL
-                    href={`${window.location.origin}/p/${customer.portalId}`}
-                  >
-                    <Icons.OpenInNew />
-                  </OpenURL>
-                </div>
-              </div>
-            )}
+            <AnimatePresence>
+              {customer.portalEnabled && customer.portalId && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  className="overflow-hidden"
+                >
+                  <div className="mb-6 relative">
+                    <CopyInput
+                      value={`${window.location.origin}/p/${customer.portalId}`}
+                      className="font-mono text-xs pr-14"
+                    />
+                    <div className="absolute right-10 top-2.5 border-r border-border pr-2 text-base">
+                      <OpenURL
+                        href={`${window.location.origin}/p/${customer.portalId}`}
+                      >
+                        <Icons.OpenInNew />
+                      </OpenURL>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Statement Section */}
             <div className="pt-4">
               {/* Statement Header */}
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-[16px] font-medium">Statement</h3>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="p-0 h-6 w-6">
-                      <Icons.MoreVertical
-                        size={15}
-                        className="text-muted-foreground"
-                      />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="z-[100]">
-                    <DropdownMenuItem
-                      onClick={handleShareStatement}
-                      className="text-xs"
-                    >
-                      Share
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={handleDownloadStatement}
-                      className="text-xs"
-                    >
-                      Download
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </div>
 
               {/* Statement Content */}
