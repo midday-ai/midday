@@ -486,16 +486,15 @@ export const invoiceRecurringRouter = createTRPCRouter({
           columns: { id: true, scheduledJobId: true },
         });
 
-        // Remove scheduled jobs from the queue and revert invoices to draft
-        const queue = getQueue("invoices");
+        // Collect job IDs to remove AFTER transaction commits
+        const jobIdsToRemove: string[] = [];
+
+        // First, update all invoices within the transaction
         for (const invoice of scheduledInvoices) {
-          // Remove the job from BullMQ queue if it exists
+          // Collect job ID for removal after transaction
           if (invoice.scheduledJobId) {
             const { jobId: rawJobId } = decodeJobId(invoice.scheduledJobId);
-            const job = await queue.getJob(rawJobId);
-            if (job) {
-              await job.remove();
-            }
+            jobIdsToRemove.push(rawJobId);
           }
 
           // Revert the invoice to draft
@@ -508,10 +507,20 @@ export const invoiceRecurringRouter = createTRPCRouter({
           });
         }
 
-        return recurring;
+        return { recurring, jobIdsToRemove };
       });
 
-      return { id: result.id };
+      // Remove BullMQ jobs AFTER the transaction has committed successfully
+      // This ensures we don't remove jobs if the database update fails
+      const queue = getQueue("invoices");
+      for (const jobId of result.jobIdsToRemove) {
+        const job = await queue.getJob(jobId);
+        if (job) {
+          await job.remove();
+        }
+      }
+
+      return { id: result.recurring.id };
     }),
 
   pause: protectedProcedure
@@ -550,16 +559,15 @@ export const invoiceRecurringRouter = createTRPCRouter({
           columns: { id: true, scheduledJobId: true },
         });
 
-        // Remove scheduled jobs from the queue and revert invoices to draft
-        const queue = getQueue("invoices");
+        // Collect job IDs to remove AFTER transaction commits
+        const jobIdsToRemove: string[] = [];
+
+        // First, update all invoices within the transaction
         for (const invoice of scheduledInvoices) {
-          // Remove the job from BullMQ queue if it exists
+          // Collect job ID for removal after transaction
           if (invoice.scheduledJobId) {
             const { jobId: rawJobId } = decodeJobId(invoice.scheduledJobId);
-            const job = await queue.getJob(rawJobId);
-            if (job) {
-              await job.remove();
-            }
+            jobIdsToRemove.push(rawJobId);
           }
 
           // Revert the invoice to draft
@@ -572,10 +580,20 @@ export const invoiceRecurringRouter = createTRPCRouter({
           });
         }
 
-        return recurring;
+        return { recurring, jobIdsToRemove };
       });
 
-      return result;
+      // Remove BullMQ jobs AFTER the transaction has committed successfully
+      // This ensures we don't remove jobs if the database update fails
+      const queue = getQueue("invoices");
+      for (const jobId of result.jobIdsToRemove) {
+        const job = await queue.getJob(jobId);
+        if (job) {
+          await job.remove();
+        }
+      }
+
+      return result.recurring;
     }),
 
   resume: protectedProcedure
