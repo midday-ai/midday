@@ -167,7 +167,7 @@ export function Customers() {
                     Customer revenue and activity
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    See revenue, invoices, time, and activity per customer in one place and share a live customer portal when needed.
+                    See revenue, invoices, time, and activity per customer in one place, with automatically enriched company details and a shareable customer portal when needed.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
@@ -184,6 +184,9 @@ export function Customers() {
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                       <span className="font-sans text-sm text-foreground">Time tracked</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Company insights</span>
                     </div>
                   </div>
                 </div>

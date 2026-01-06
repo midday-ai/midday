@@ -66,7 +66,7 @@ export function Inbox() {
                 Inbox
               </p>
               <h1 className="font-serif text-4xl sm:text-4xl md:text-5xl leading-tight">
-                <span className="text-foreground">Receipts handled automatically</span>
+                <span className="text-foreground">Receipts matched</span>
               </h1>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto lg:hidden">
                 Receipts and invoices are matched automatically to transactions.
@@ -115,7 +115,7 @@ export function Inbox() {
                 Inbox
               </p>
               <h1 className="font-serif text-8xl xl:text-9xl 2xl:text-[12rem] leading-tight text-center">
-                <span className="text-foreground block">Receipts handled automatically</span>
+                <span className="text-foreground block">Receipts matched</span>
               </h1>
 
               <p className="text-muted-foreground text-base leading-normal max-w-2xl mx-auto font-sans text-center">
