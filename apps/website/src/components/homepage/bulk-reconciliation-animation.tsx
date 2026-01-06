@@ -535,7 +535,7 @@ export function BulkReconciliationAnimation({
                   width={12}
                   height={12}
                   className="w-[10px] h-[10px] md:w-[12px] md:h-[12px] object-contain"
-                />
+                  />
               </button>
             </motion.div>
           )}

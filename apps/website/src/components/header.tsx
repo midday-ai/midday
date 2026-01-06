@@ -258,7 +258,7 @@ export function Header({
                                 <Link
                                   href="/insights"
                                   onClick={() => setIsFeaturesOpen(false)}
-                                  className="flex-1 border border-border overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="flex-1 border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200"
                                 >
                                   <HeaderInsightsPreview />
                                 </Link>
@@ -275,18 +275,33 @@ export function Header({
                               {/* Right Preview */}
                               <div className="flex flex-col gap-6 h-full">
                                 <Link
-                                  href="/assistant"
+                                  href="/pre-accounting"
                                   onClick={() => setIsFeaturesOpen(false)}
-                                  className="flex-1 border border-border overflow-hidden bg-background cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="flex-1 border border-border overflow-hidden bg-background cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200"
                                 >
-                                  <HeaderAssistantInputPreview />
+                                  <div className="w-full h-full flex items-center justify-center bg-background p-4">
+                                    <Image
+                                      src="/images/accounting-light.png"
+                                      alt="Pre-accounting"
+                                      width={112}
+                                      height={400}
+                                      className="h-[30%] w-auto object-contain dark:hidden"
+                                    />
+                                    <Image
+                                      src="/images/accounting-dark.png"
+                                      alt="Pre-accounting"
+                                      width={112}
+                                      height={400}
+                                      className="h-[30%] w-auto object-contain hidden dark:block"
+                                    />
+                                  </div>
                                 </Link>
                                 <div className="text-left">
                                   <h3 className="font-sans text-sm text-foreground mb-1">
-                                    Assistant
+                                    Pre-accounting
                                   </h3>
                                   <p className="font-sans text-xs text-muted-foreground leading-relaxed">
-                                    Answers grounded in your actual numbers, not assumptions
+                                    Clean records ready for your accountant
                                   </p>
                                 </div>
                               </div>
@@ -413,7 +428,7 @@ export function Header({
                                 <Link
                                   href="/download"
                                   onClick={() => setIsAppsOpen(false)}
-                                  className="flex-1 border border-border overflow-hidden cursor-pointer hover:opacity-90 transition-opacity min-h-[280px]"
+                                  className="flex-1 border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 min-h-[280px]"
                                 >
                                   <HeaderIntegrationsPreview />
                                 </Link>
@@ -432,7 +447,7 @@ export function Header({
                                 <Link
                                   href="/download"
                                   onClick={() => setIsAppsOpen(false)}
-                                  className="flex-1 border border-border overflow-hidden cursor-pointer hover:opacity-90 transition-opacity min-h-[280px]"
+                                  className="flex-1 border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 min-h-[280px]"
                                 >
                                   <div className="w-full h-full flex items-center justify-center bg-background p-4">
                                     <Image
