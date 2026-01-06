@@ -86,11 +86,19 @@ export function Inbox() {
                   }}
                 />
                 <Image
-                  src="/images/file-Storage.svg"
+                  src="/images/inbox-light.svg"
                   alt="Inbox Interface"
                   width={1200}
                   height={800}
-                  className="w-full h-auto object-contain relative z-0"
+                  className="w-full h-auto object-contain relative z-0 dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/inbox-dark.svg"
+                  alt="Inbox Interface"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
                   priority
                 />
               </div>
@@ -125,11 +133,19 @@ export function Inbox() {
                   }}
                 />
                 <Image
-                  src="/images/file-Storage.svg"
+                  src="/images/inbox-light.svg"
                   alt="Inbox Interface"
                   width={1200}
                   height={800}
-                  className="w-full h-auto object-contain relative z-0"
+                  className="w-full h-auto object-contain relative z-0 dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/inbox-dark.svg"
+                  alt="Inbox Interface"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
                   priority
                 />
               </div>
