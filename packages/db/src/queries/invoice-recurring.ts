@@ -429,12 +429,27 @@ export async function getInvoiceRecurringList(
 }
 
 /**
- * Get all recurring invoices that are due for generation
- * Used by the scheduler to find invoices that need to be generated
+ * Default batch size for processing recurring invoices
+ * Prevents overwhelming the system when many invoices are due at once
  */
-export async function getDueInvoiceRecurring(db: Database) {
-  const now = new Date().toISOString();
+const DEFAULT_BATCH_SIZE = 50;
 
+/**
+ * Get recurring invoices that are due for generation
+ * Used by the scheduler to find invoices that need to be generated
+ *
+ * @param db - Database instance
+ * @param options.limit - Maximum number of records to return (default: 50)
+ * @returns Object with data array and hasMore flag for pagination awareness
+ */
+export async function getDueInvoiceRecurring(
+  db: Database,
+  options?: { limit?: number },
+) {
+  const now = new Date().toISOString();
+  const limit = options?.limit ?? DEFAULT_BATCH_SIZE;
+
+  // Fetch limit + 1 to check if there are more records
   const data = await db
     .select({
       id: invoiceRecurring.id,
@@ -474,9 +489,18 @@ export async function getDueInvoiceRecurring(db: Database) {
         eq(invoiceRecurring.status, "active"),
         lte(invoiceRecurring.nextScheduledAt, now),
       ),
-    );
+    )
+    // Order by nextScheduledAt to process oldest first (fairness)
+    .orderBy(invoiceRecurring.nextScheduledAt)
+    .limit(limit + 1);
 
-  return data;
+  const hasMore = data.length > limit;
+  const records = hasMore ? data.slice(0, limit) : data;
+
+  return {
+    data: records,
+    hasMore,
+  };
 }
 
 /**
@@ -858,10 +882,20 @@ export async function getInvoiceRecurringInfo(
  * Get recurring invoices that are upcoming within the specified hours
  * and haven't had their upcoming notification sent yet
  * Used by the scheduler to send 24-hour advance notifications
+ *
+ * @param db - Database instance
+ * @param hoursAhead - Hours to look ahead (default: 24)
+ * @param options.limit - Maximum number of records to return (default: 100)
+ * @returns Object with data array and hasMore flag
  */
-export async function getUpcomingDueRecurring(db: Database, hoursAhead = 24) {
+export async function getUpcomingDueRecurring(
+  db: Database,
+  hoursAhead = 24,
+  options?: { limit?: number },
+) {
   const now = new Date();
   const futureDate = new Date(now.getTime() + hoursAhead * 60 * 60 * 1000);
+  const limit = options?.limit ?? 100;
 
   // Find active series due within hoursAhead that haven't had notification sent
   // for this specific upcoming cycle
@@ -897,9 +931,17 @@ export async function getUpcomingDueRecurring(db: Database, hoursAhead = 24) {
           ),
         ),
       ),
-    );
+    )
+    .orderBy(invoiceRecurring.nextScheduledAt)
+    .limit(limit + 1);
 
-  return data;
+  const hasMore = data.length > limit;
+  const records = hasMore ? data.slice(0, limit) : data;
+
+  return {
+    data: records,
+    hasMore,
+  };
 }
 
 /**

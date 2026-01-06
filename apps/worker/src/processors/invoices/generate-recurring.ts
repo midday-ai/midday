@@ -43,6 +43,7 @@ type ProcessResult = {
   failed: number;
   results: GeneratedInvoiceResult[];
   errors: Array<{ recurringId: string; error: string }>;
+  hasMore: boolean;
 };
 
 /**
@@ -70,6 +71,7 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
         failed: 0,
         results: [],
         errors: [],
+        hasMore: false,
       };
     }
 
@@ -77,8 +79,8 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
 
     this.logger.info("Starting recurring invoice scheduler");
 
-    // Get all due recurring invoices
-    const dueRecurring = await getDueInvoiceRecurring(db);
+    // Get due recurring invoices (batched for safety, default limit: 50)
+    const { data: dueRecurring, hasMore } = await getDueInvoiceRecurring(db);
 
     if (dueRecurring.length === 0) {
       this.logger.info("No recurring invoices due for generation");
@@ -88,11 +90,13 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
         failed: 0,
         results: [],
         errors: [],
+        hasMore: false,
       };
     }
 
     this.logger.info(
-      `Found ${dueRecurring.length} recurring invoices to process`,
+      `Found ${dueRecurring.length} recurring invoices to process${hasMore ? " (more pending)" : ""}`,
+      { count: dueRecurring.length, hasMore },
     );
 
     const results: GeneratedInvoiceResult[] = [];
@@ -475,7 +479,14 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
       skipped,
       failed,
       total: dueRecurring.length,
+      hasMore,
     });
+
+    if (hasMore) {
+      this.logger.info(
+        "More recurring invoices pending - will be processed in next scheduler run",
+      );
+    }
 
     return {
       processed,
@@ -483,6 +494,7 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
       failed,
       results,
       errors,
+      hasMore,
     };
   }
 }

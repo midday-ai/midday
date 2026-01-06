@@ -243,6 +243,21 @@ DISABLE_RECURRING_INVOICES=true
 
 When set, the scheduler returns immediately without processing any series.
 
+### Batch Limits
+
+To prevent overwhelming the system when many invoices are due at once, processing is batched:
+
+| Processor | Batch Size | Description |
+|-----------|------------|-------------|
+| Recurring invoice generation | 50 | Max invoices generated per scheduler run |
+| Upcoming notifications | 100 | Max notifications sent per scheduler run |
+
+**Design rationale:**
+- Prevents memory pressure from processing thousands of series at once
+- Distributes load over time (scheduler runs every 2 hours)
+- Older due invoices are processed first (ordered by `nextScheduledAt`)
+- Jobs return `hasMore: true` when additional items remain for the next run
+
 ## Notifications
 
 ### Upcoming Invoice Notification

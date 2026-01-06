@@ -13,6 +13,7 @@ type ProcessResult = {
   skipped: number;
   failed: number;
   errors: Array<{ teamId: string; error: string }>;
+  hasMore: boolean;
 };
 
 /**
@@ -42,6 +43,7 @@ export class InvoiceUpcomingNotificationProcessor extends BaseProcessor<InvoiceU
         skipped: 0,
         failed: 0,
         errors: [],
+        hasMore: false,
       };
     }
 
@@ -50,8 +52,11 @@ export class InvoiceUpcomingNotificationProcessor extends BaseProcessor<InvoiceU
 
     this.logger.info("Starting upcoming invoice notification processor");
 
-    // Get all recurring invoices due within 24 hours that haven't been notified
-    const upcomingRecurring = await getUpcomingDueRecurring(db, 24);
+    // Get recurring invoices due within 24 hours that haven't been notified (batched, default limit: 100)
+    const { data: upcomingRecurring, hasMore } = await getUpcomingDueRecurring(
+      db,
+      24,
+    );
 
     if (upcomingRecurring.length === 0) {
       this.logger.info("No upcoming invoices to notify about");
@@ -60,11 +65,13 @@ export class InvoiceUpcomingNotificationProcessor extends BaseProcessor<InvoiceU
         skipped: 0,
         failed: 0,
         errors: [],
+        hasMore: false,
       };
     }
 
     this.logger.info(
-      `Found ${upcomingRecurring.length} upcoming invoices to notify about`,
+      `Found ${upcomingRecurring.length} upcoming invoices to notify about${hasMore ? " (more pending)" : ""}`,
+      { count: upcomingRecurring.length, hasMore },
     );
 
     // Filter out invoices that have already been notified for this cycle
@@ -102,6 +109,7 @@ export class InvoiceUpcomingNotificationProcessor extends BaseProcessor<InvoiceU
         skipped,
         failed: 0,
         errors: [],
+        hasMore,
       };
     }
 
@@ -185,13 +193,21 @@ export class InvoiceUpcomingNotificationProcessor extends BaseProcessor<InvoiceU
       teamsFailed: failed,
       invoicesSkipped: skipped,
       totalInvoices: upcomingRecurring.length,
+      hasMore,
     });
+
+    if (hasMore) {
+      this.logger.info(
+        "More upcoming invoices pending - will be processed in next scheduler run",
+      );
+    }
 
     return {
       processed,
       skipped,
       failed,
       errors,
+      hasMore,
     };
   }
 }
