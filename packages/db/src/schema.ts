@@ -1031,6 +1031,10 @@ export const customers = pgTable(
       mode: "string",
     }),
 
+    // Portal fields
+    portalEnabled: boolean("portal_enabled").default(false),
+    portalId: text("portal_id"),
+
     fts: tsvector("fts")
       .notNull()
       .generatedAlwaysAs(

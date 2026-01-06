@@ -1,5 +1,7 @@
 "use client";
 
+import { CopyInput } from "@/components/copy-input";
+import { OpenURL } from "@/components/open-url";
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useRealtime } from "@/hooks/use-realtime";
@@ -30,6 +32,7 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { SheetFooter, SheetHeader } from "@midday/ui/sheet";
 import { Skeleton } from "@midday/ui/skeleton";
+import { Switch } from "@midday/ui/switch";
 import {
   Table,
   TableBody,
@@ -111,6 +114,25 @@ export function CustomerDetails() {
   const prevEnrichmentStatusRef = useRef<string | null>(null);
 
   const isOpen = customerId !== null;
+
+  // Toggle portal mutation
+  const togglePortalMutation = useMutation(
+    trpc.customers.togglePortal.mutationOptions({
+      onSuccess: () => {
+        // Invalidate customer query to refresh portal data
+        queryClient.invalidateQueries({
+          queryKey: trpc.customers.getById.queryKey({ id: customerId! }),
+        });
+      },
+      onError: () => {
+        toast({
+          title: "Failed to update customer portal",
+          description: "Please try again.",
+          duration: 2500,
+        });
+      },
+    }),
+  );
 
   const {
     data: customer,
@@ -1082,265 +1104,305 @@ export function CustomerDetails() {
             </AccordionItem>
           </Accordion>
 
-          {/* Statement Section */}
+          {/* Customer Portal Section */}
           <div className="border-t border-border pt-6 mt-6">
-            {/* Statement Header */}
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[16px] font-medium">Statement</h3>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="p-0 h-6 w-6">
-                    <Icons.MoreVertical
-                      size={15}
-                      className="text-muted-foreground"
-                    />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="z-[100]">
-                  <DropdownMenuItem
-                    onClick={handleShareStatement}
-                    className="text-xs"
-                  >
-                    Share
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={handleDownloadStatement}
-                    className="text-xs"
-                  >
-                    Download
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            {/* Portal Header */}
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-[16px] font-medium">Customer Portal</h3>
+                <p className="text-[12px] text-[#606060] mt-1">
+                  Allow this customer to view their invoices
+                </p>
+              </div>
+              <Switch
+                checked={customer.portalEnabled ?? false}
+                onCheckedChange={(checked) => {
+                  togglePortalMutation.mutate({
+                    customerId: customer.id,
+                    enabled: checked,
+                  });
+                }}
+                disabled={togglePortalMutation.isPending}
+              />
             </div>
 
-            {/* Statement Content */}
-            <div data-statement-content>
-              {/* Company Title - Only visible in PDF */}
-              <div
-                className="hidden text-[32px] font-serif leading-normal mb-8"
-                data-show-in-pdf="true"
-              >
-                {customer.name}
-              </div>
-
-              {/* Summary Stats */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="border border-border px-4 py-3">
-                  <div className="text-[12px] text-[#606060] mb-2">
-                    Total Amount
-                  </div>
-                  <div className="text-[18px] font-medium">
-                    {summary?.currency ? (
-                      <FormatAmount
-                        amount={summary.totalAmount}
-                        currency={summary.currency}
-                      />
-                    ) : (
-                      "-"
-                    )}
-                  </div>
-                </div>
-                <div className="border border-border px-4 py-3">
-                  <div className="text-[12px] text-[#606060] mb-2">Paid</div>
-                  <div className="text-[18px] font-medium">
-                    {summary?.currency ? (
-                      <FormatAmount
-                        amount={summary.paidAmount}
-                        currency={summary.currency}
-                      />
-                    ) : (
-                      "-"
-                    )}
-                  </div>
-                </div>
-                <div className="border border-border px-4 py-3">
-                  <div className="text-[12px] text-[#606060] mb-2">
-                    Outstanding
-                  </div>
-                  <div className="text-[18px] font-medium">
-                    {summary?.currency ? (
-                      <FormatAmount
-                        amount={summary.outstandingAmount}
-                        currency={summary.currency}
-                      />
-                    ) : (
-                      "-"
-                    )}
-                  </div>
-                </div>
-                <div className="border border-border px-4 py-3">
-                  <div className="text-[12px] text-[#606060] mb-2">
-                    Invoices
-                  </div>
-                  <div className="text-[18px] font-medium">
-                    {summary?.invoiceCount ?? 0}
-                  </div>
+            {/* Portal URL - Only shown when enabled */}
+            {customer.portalEnabled && customer.portalId && (
+              <div className="mb-6 relative">
+                <CopyInput
+                  value={`${window.location.origin}/p/${customer.portalId}`}
+                  className="font-mono text-xs pr-14"
+                />
+                <div className="absolute right-10 top-2.5 border-r border-border pr-2 text-base">
+                  <OpenURL
+                    href={`${window.location.origin}/p/${customer.portalId}`}
+                  >
+                    <Icons.OpenInNew />
+                  </OpenURL>
                 </div>
               </div>
+            )}
 
-              {/* Invoice Table */}
-              {invoices.length > 0 ? (
-                <div ref={dropdownContainerRef}>
-                  <Table>
-                    <TableHeader className="bg-muted/50">
-                      <TableRow>
-                        <TableHead className="text-[12px] font-medium text-[#606060]">
-                          Invoice
-                        </TableHead>
-                        <TableHead className="text-[12px] font-medium text-[#606060]">
-                          Date
-                        </TableHead>
-                        <TableHead className="text-[12px] font-medium text-[#606060]">
-                          Due Date
-                        </TableHead>
-                        <TableHead className="text-[12px] font-medium text-[#606060]">
-                          Amount
-                        </TableHead>
-                        <TableHead className="text-[12px] font-medium text-[#606060]">
-                          Status
-                        </TableHead>
-                        <TableHead
-                          className="text-[12px] font-medium text-[#606060] text-center w-[60px]"
-                          data-hide-in-pdf="true"
-                        >
-                          Actions
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {invoices.map((invoice) => (
-                        <TableRow
-                          key={invoice.id}
-                          className="cursor-pointer hover:bg-muted/50"
-                          onClick={() => {
-                            // Close customer details sheet
-                            setParams({ customerId: null, details: null });
-                            // Open invoice details
-                            setInvoiceParams({
-                              invoiceId: invoice.id,
-                              type: "details",
-                            });
-                          }}
-                        >
-                          <TableCell className="text-[12px] whitespace-nowrap min-w-[100px]">
-                            {invoice.invoiceNumber || "Draft"}
-                          </TableCell>
-                          <TableCell className="text-[12px] whitespace-nowrap">
-                            {invoice.issueDate
-                              ? format(
-                                  new TZDate(invoice.issueDate, "UTC"),
-                                  "MMM d",
-                                )
-                              : "-"}
-                          </TableCell>
-                          <TableCell className="text-[12px] whitespace-nowrap">
-                            {invoice.dueDate
-                              ? format(
-                                  new TZDate(invoice.dueDate, "UTC"),
-                                  "MMM d",
-                                )
-                              : "-"}
-                          </TableCell>
-                          <TableCell className="text-[12px] whitespace-nowrap">
-                            {invoice.amount != null && invoice.currency ? (
-                              <FormatAmount
-                                amount={invoice.amount}
-                                currency={invoice.currency}
-                              />
-                            ) : (
-                              "-"
-                            )}
-                          </TableCell>
-                          <TableCell className="text-[12px] whitespace-nowrap">
-                            <InvoiceStatus
-                              status={invoice.status as any}
-                              className="text-xs"
-                              textOnly
-                            />
-                          </TableCell>
-                          <TableCell
-                            className="text-center w-[60px]"
+            {/* Statement Section */}
+            <div className="pt-4">
+              {/* Statement Header */}
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-[16px] font-medium">Statement</h3>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="p-0 h-6 w-6">
+                      <Icons.MoreVertical
+                        size={15}
+                        className="text-muted-foreground"
+                      />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="z-[100]">
+                    <DropdownMenuItem
+                      onClick={handleShareStatement}
+                      className="text-xs"
+                    >
+                      Share
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={handleDownloadStatement}
+                      className="text-xs"
+                    >
+                      Download
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {/* Statement Content */}
+              <div data-statement-content>
+                {/* Company Title - Only visible in PDF */}
+                <div
+                  className="hidden text-[32px] font-serif leading-normal mb-8"
+                  data-show-in-pdf="true"
+                >
+                  {customer.name}
+                </div>
+
+                {/* Summary Stats */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="border border-border px-4 py-3">
+                    <div className="text-[12px] text-[#606060] mb-2">
+                      Total Amount
+                    </div>
+                    <div className="text-[18px] font-medium">
+                      {summary?.currency ? (
+                        <FormatAmount
+                          amount={summary.totalAmount}
+                          currency={summary.currency}
+                        />
+                      ) : (
+                        "-"
+                      )}
+                    </div>
+                  </div>
+                  <div className="border border-border px-4 py-3">
+                    <div className="text-[12px] text-[#606060] mb-2">Paid</div>
+                    <div className="text-[18px] font-medium">
+                      {summary?.currency ? (
+                        <FormatAmount
+                          amount={summary.paidAmount}
+                          currency={summary.currency}
+                        />
+                      ) : (
+                        "-"
+                      )}
+                    </div>
+                  </div>
+                  <div className="border border-border px-4 py-3">
+                    <div className="text-[12px] text-[#606060] mb-2">
+                      Outstanding
+                    </div>
+                    <div className="text-[18px] font-medium">
+                      {summary?.currency ? (
+                        <FormatAmount
+                          amount={summary.outstandingAmount}
+                          currency={summary.currency}
+                        />
+                      ) : (
+                        "-"
+                      )}
+                    </div>
+                  </div>
+                  <div className="border border-border px-4 py-3">
+                    <div className="text-[12px] text-[#606060] mb-2">
+                      Invoices
+                    </div>
+                    <div className="text-[18px] font-medium">
+                      {summary?.invoiceCount ?? 0}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Invoice Table */}
+                {invoices.length > 0 ? (
+                  <div ref={dropdownContainerRef}>
+                    <Table>
+                      <TableHeader className="bg-muted/50">
+                        <TableRow>
+                          <TableHead className="text-[12px] font-medium text-[#606060]">
+                            Invoice
+                          </TableHead>
+                          <TableHead className="text-[12px] font-medium text-[#606060]">
+                            Date
+                          </TableHead>
+                          <TableHead className="text-[12px] font-medium text-[#606060]">
+                            Due Date
+                          </TableHead>
+                          <TableHead className="text-[12px] font-medium text-[#606060]">
+                            Amount
+                          </TableHead>
+                          <TableHead className="text-[12px] font-medium text-[#606060]">
+                            Status
+                          </TableHead>
+                          <TableHead
+                            className="text-[12px] font-medium text-[#606060] text-center w-[60px]"
                             data-hide-in-pdf="true"
                           >
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <button
-                                  type="button"
-                                  className="text-[#606060] hover:text-foreground transition-colors"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                  }}
-                                >
-                                  <Icons.MoreHoriz className="size-4" />
-                                </button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent
-                                align="end"
-                                className="z-[100]"
-                              >
-                                {invoice.status !== "draft" ? (
-                                  <DropdownMenuItem
+                            Actions
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {invoices.map((invoice) => (
+                          <TableRow
+                            key={invoice.id}
+                            className="cursor-pointer hover:bg-muted/50"
+                            onClick={() => {
+                              // Close customer details sheet
+                              setParams({ customerId: null, details: null });
+                              // Open invoice details
+                              setInvoiceParams({
+                                invoiceId: invoice.id,
+                                type: "details",
+                              });
+                            }}
+                          >
+                            <TableCell className="text-[12px] whitespace-nowrap min-w-[100px]">
+                              {invoice.invoiceNumber || "Draft"}
+                            </TableCell>
+                            <TableCell className="text-[12px] whitespace-nowrap">
+                              {invoice.issueDate
+                                ? format(
+                                    new TZDate(invoice.issueDate, "UTC"),
+                                    "MMM d",
+                                  )
+                                : "-"}
+                            </TableCell>
+                            <TableCell className="text-[12px] whitespace-nowrap">
+                              {invoice.dueDate
+                                ? format(
+                                    new TZDate(invoice.dueDate, "UTC"),
+                                    "MMM d",
+                                  )
+                                : "-"}
+                            </TableCell>
+                            <TableCell className="text-[12px] whitespace-nowrap">
+                              {invoice.amount != null && invoice.currency ? (
+                                <FormatAmount
+                                  amount={invoice.amount}
+                                  currency={invoice.currency}
+                                />
+                              ) : (
+                                "-"
+                              )}
+                            </TableCell>
+                            <TableCell className="text-[12px] whitespace-nowrap">
+                              <InvoiceStatus
+                                status={invoice.status as any}
+                                className="text-xs"
+                                textOnly
+                              />
+                            </TableCell>
+                            <TableCell
+                              className="text-center w-[60px]"
+                              data-hide-in-pdf="true"
+                            >
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <button
+                                    type="button"
+                                    className="text-[#606060] hover:text-foreground transition-colors"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      handleDownloadInvoice(invoice.id);
                                     }}
                                   >
-                                    Download
-                                  </DropdownMenuItem>
-                                ) : (
-                                  <DropdownMenuItem disabled>
-                                    No actions available
-                                  </DropdownMenuItem>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center py-12">
-                  <div className="flex flex-col items-center">
-                    <div className="text-center mb-6 space-y-2">
-                      <h2 className="font-medium text-sm">No invoices</h2>
-                      <p className="text-[#606060] text-xs">
-                        This customer doesn't have any invoices yet. <br />
-                        Create your first invoice for them.
-                      </p>
-                    </div>
-
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        // Close customer details sheet
-                        setParams({ customerId: null, details: null });
-                        // Open invoice creation with customer pre-selected
-                        setInvoiceParams({
-                          type: "create",
-                          selectedCustomerId: customerId!,
-                        });
-                      }}
-                    >
-                      Create Invoice
-                    </Button>
+                                    <Icons.MoreHoriz className="size-4" />
+                                  </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                  align="end"
+                                  className="z-[100]"
+                                >
+                                  {invoice.status !== "draft" ? (
+                                    <DropdownMenuItem
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDownloadInvoice(invoice.id);
+                                      }}
+                                    >
+                                      Download
+                                    </DropdownMenuItem>
+                                  ) : (
+                                    <DropdownMenuItem disabled>
+                                      No actions available
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="flex flex-col items-center">
+                      <div className="text-center mb-6 space-y-2">
+                        <h2 className="font-medium text-sm">No invoices</h2>
+                        <p className="text-[#606060] text-xs">
+                          This customer doesn't have any invoices yet. <br />
+                          Create your first invoice for them.
+                        </p>
+                      </div>
 
-              {/* Load More Button */}
-              {hasNextPage && (
-                <Button
-                  variant="outline"
-                  className="w-full mt-4 rounded-none"
-                  onClick={handleLoadMore}
-                  disabled={isFetchingNextPage}
-                  data-hide-in-pdf="true"
-                >
-                  {isFetchingNextPage ? "Loading..." : "Load More"}
-                </Button>
-              )}
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          // Close customer details sheet
+                          setParams({ customerId: null, details: null });
+                          // Open invoice creation with customer pre-selected
+                          setInvoiceParams({
+                            type: "create",
+                            selectedCustomerId: customerId!,
+                          });
+                        }}
+                      >
+                        Create Invoice
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Load More Button */}
+                {hasNextPage && (
+                  <Button
+                    variant="outline"
+                    className="w-full mt-4 rounded-none"
+                    onClick={handleLoadMore}
+                    disabled={isFetchingNextPage}
+                    data-hide-in-pdf="true"
+                  >
+                    {isFetchingNextPage ? "Loading..." : "Load More"}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>

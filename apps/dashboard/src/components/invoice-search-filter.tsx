@@ -270,7 +270,7 @@ export function InvoiceSearchFilter() {
               <DropdownMenuSubContent
                 sideOffset={14}
                 alignOffset={-4}
-                className="p-0"
+                className="p-0 max-h-[300px] overflow-auto"
               >
                 {customersData?.data?.map((customer) => (
                   <DropdownMenuCheckboxItem

@@ -39,6 +39,7 @@ export async function middleware(request: NextRequest) {
     !session &&
     newUrl.pathname !== "/login" &&
     !newUrl.pathname.includes("/i/") &&
+    !newUrl.pathname.includes("/p/") &&
     !newUrl.pathname.includes("/s/") &&
     !newUrl.pathname.includes("/r/") &&
     !newUrl.pathname.includes("/verify") &&

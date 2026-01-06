@@ -492,6 +492,7 @@ export const invoiceRecurringRouter = createTRPCRouter({
             teamId,
             status: "draft",
             scheduledAt: null,
+            scheduledJobId: null,
           });
         }
 
@@ -543,6 +544,7 @@ export const invoiceRecurringRouter = createTRPCRouter({
             teamId,
             status: "draft",
             scheduledAt: null,
+            scheduledJobId: null,
           });
         }
 
