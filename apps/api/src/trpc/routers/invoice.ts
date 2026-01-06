@@ -705,6 +705,23 @@ export const invoiceRouter = createTRPCRouter({
         teamId: teamId!,
       });
 
+      if (!updatedInvoice) {
+        // Database update failed - clean up the newly created job to avoid orphans
+        const queue = getQueue("invoices");
+        const { jobId: newRawJobId } = decodeJobId(scheduledRun.id);
+        const newJob = await queue.getJob(newRawJobId);
+        if (newJob) {
+          await newJob.remove().catch((err) => {
+            console.error("Failed to clean up orphaned scheduled job:", err);
+          });
+        }
+
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invoice not found or update failed",
+        });
+      }
+
       // Only remove the old job AFTER successfully creating the new one and updating the database
       // This ensures we never lose the scheduled job even if there are transient failures
       const queue = getQueue("invoices");
