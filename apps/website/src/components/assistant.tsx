@@ -87,11 +87,19 @@ export function Assistant() {
                   }}
                 />
                 <Image
-                  src="/images/file-Storage.svg"
+                  src="/images/assistant-light.svg"
                   alt="Assistant Interface"
                   width={1200}
                   height={800}
-                  className="w-full h-auto object-contain relative z-0"
+                  className="w-full h-auto object-contain relative z-0 dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/assistant-dark.svg"
+                  alt="Assistant Interface"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
                   priority
                 />
               </div>
@@ -126,11 +134,19 @@ export function Assistant() {
                   }}
                 />
                 <Image
-                  src="/images/file-Storage.svg"
+                  src="/images/assistant-light.svg"
                   alt="Assistant Interface"
                   width={1200}
                   height={800}
-                  className="w-full h-auto object-contain relative z-0"
+                  className="w-full h-auto object-contain relative z-0 dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/assistant-dark.svg"
+                  alt="Assistant Interface"
+                  width={1200}
+                  height={800}
+                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
                   priority
                 />
               </div>
