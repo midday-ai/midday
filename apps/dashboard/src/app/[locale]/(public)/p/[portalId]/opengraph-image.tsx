@@ -69,7 +69,7 @@ export default async function Image({ params }: Props) {
 
           <div tw="flex flex-col mr-16">
             <span tw="text-[#606060] text-lg mb-1">Paid</span>
-            <span tw="text-[#68D391] text-3xl">
+            <span tw="text-white text-3xl">
               {formatAmount({
                 amount: summary.paidAmount,
                 currency: summary.currency,
@@ -79,7 +79,7 @@ export default async function Image({ params }: Props) {
 
           <div tw="flex flex-col mr-16">
             <span tw="text-[#606060] text-lg mb-1">Outstanding</span>
-            <span tw="text-[#F6AD55] text-3xl">
+            <span tw="text-white text-3xl">
               {formatAmount({
                 amount: summary.outstandingAmount,
                 currency: summary.currency,
@@ -92,13 +92,6 @@ export default async function Image({ params }: Props) {
             <span tw="text-white text-3xl">{summary.invoiceCount}</span>
           </div>
         </div>
-      </div>
-
-      {/* Footer */}
-      <div tw="flex items-center justify-end mt-12">
-        <span tw="text-[#606060] text-lg">
-          Powered by <span tw="text-white">midday</span>
-        </span>
       </div>
     </div>,
     {
