@@ -10,4 +10,3 @@ export const customersQueue = new Queue(
   "customers",
   customersQueueConfig.queueOptions,
 );
-

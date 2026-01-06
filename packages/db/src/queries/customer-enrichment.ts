@@ -33,6 +33,8 @@ export type CustomerEnrichmentUpdateData = {
   timezone?: string | null;
   linkedinUrl?: string | null;
   twitterUrl?: string | null;
+  instagramUrl?: string | null;
+  facebookUrl?: string | null;
 };
 
 export type UpdateCustomerEnrichmentParams = {

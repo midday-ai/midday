@@ -12,6 +12,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
+import { Icons } from "@midday/ui/icons";
+import { Spinner } from "@midday/ui/spinner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
@@ -122,6 +130,139 @@ const ActionsCell = memo(
 
 ActionsCell.displayName = "ActionsCell";
 
+/**
+ * Reusable enriching cell - shows spinner + "Enriching" with tooltip
+ * Used consistently across all enrichment-powered columns
+ */
+const EnrichingCell = memo(() => (
+  <TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="flex items-center space-x-2 cursor-help">
+          <Spinner size={14} className="stroke-primary" />
+          <span className="text-[#878787] text-sm">Enriching</span>
+        </div>
+      </TooltipTrigger>
+      <TooltipContent
+        className="px-3 py-1.5 text-xs max-w-[280px]"
+        side="top"
+        sideOffset={5}
+      >
+        Analyzing company details to enrich customer data.
+      </TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
+));
+
+EnrichingCell.displayName = "EnrichingCell";
+
+// Website link cell
+const WebsiteCell = memo(({ website }: { website: string | null }) => {
+  if (!website) return "-";
+
+  // Clean up URL for display
+  const displayUrl = website.replace(/^https?:\/\//, "").replace(/\/$/, "");
+
+  return (
+    <a
+      href={website.startsWith("http") ? website : `https://${website}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-primary hover:underline truncate block"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {displayUrl}
+    </a>
+  );
+});
+
+WebsiteCell.displayName = "WebsiteCell";
+
+// LinkedIn icon with brand color (blue background, white text)
+function LinkedInIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 72 72"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect width="72" height="72" rx="8" fill="#0077B7" />
+      <path
+        fill="#fff"
+        d="M20.5 29h8v28.5h-8zM24.5 17c2.7 0 4.9 2.2 4.9 4.9s-2.2 4.9-4.9 4.9-4.9-2.2-4.9-4.9 2.2-4.9 4.9-4.9M33.5 29h7.7v3.9h.1c1.1-2 3.7-4.1 7.6-4.1 8.1 0 9.6 5.3 9.6 12.3v14.4h-8V43.2c0-3.4-.1-7.8-4.8-7.8-4.8 0-5.5 3.7-5.5 7.6v14.5h-8V29z"
+      />
+    </svg>
+  );
+}
+
+// Social links cell - combined LinkedIn/Twitter/Instagram/Facebook icons
+const SocialLinksCell = memo(
+  ({
+    linkedinUrl,
+    twitterUrl,
+    instagramUrl,
+    facebookUrl,
+  }: {
+    linkedinUrl: string | null;
+    twitterUrl: string | null;
+    instagramUrl: string | null;
+    facebookUrl: string | null;
+  }) => {
+    const hasAnyLink = linkedinUrl || twitterUrl || instagramUrl || facebookUrl;
+    if (!hasAnyLink) return "-";
+
+    return (
+      <div
+        className="flex items-center gap-2"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {linkedinUrl && (
+          <a
+            href={linkedinUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:opacity-70 transition-opacity"
+          >
+            <LinkedInIcon className="size-4" />
+          </a>
+        )}
+        {twitterUrl && (
+          <a
+            href={twitterUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <Icons.X className="size-4" />
+          </a>
+        )}
+        {instagramUrl && (
+          <a
+            href={instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <Icons.Instagram className="size-4" />
+          </a>
+        )}
+        {facebookUrl && (
+          <a
+            href={facebookUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <Icons.Facebook className="size-4" />
+          </a>
+        )}
+      </div>
+    );
+  },
+);
+
+SocialLinksCell.displayName = "SocialLinksCell";
+
 export const columns: ColumnDef<Customer>[] = [
   {
     id: "name",
@@ -139,10 +280,7 @@ export const columns: ColumnDef<Customer>[] = [
         "w-[320px] min-w-[240px] md:sticky md:left-0 bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-20",
     },
     cell: ({ row }) => (
-      <NameCell
-        name={row.original.name}
-        website={row.original.website}
-      />
+      <NameCell name={row.original.name} website={row.original.website} />
     ),
   },
   {
@@ -223,6 +361,143 @@ export const columns: ColumnDef<Customer>[] = [
       }
 
       return "-";
+    },
+  },
+  {
+    id: "industry",
+    accessorKey: "industry",
+    header: "Industry",
+    size: 150,
+    minSize: 120,
+    maxSize: 250,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-20" },
+      headerLabel: "Industry",
+      className: "w-[150px] min-w-[120px]",
+    },
+    cell: ({ row }) => {
+      if (row.original.enrichmentStatus === "processing") {
+        return <EnrichingCell />;
+      }
+      if (!row.original.industry) return "-";
+      return (
+        <Badge variant="tag" className="whitespace-nowrap">
+          {row.original.industry}
+        </Badge>
+      );
+    },
+  },
+  {
+    id: "companyType",
+    accessorKey: "companyType",
+    header: "Type",
+    size: 120,
+    minSize: 100,
+    maxSize: 180,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-16" },
+      headerLabel: "Type",
+      className: "w-[120px] min-w-[100px]",
+    },
+    cell: ({ row }) => {
+      if (row.original.enrichmentStatus === "processing") {
+        return <EnrichingCell />;
+      }
+      if (!row.original.companyType) return "-";
+      return (
+        <Badge variant="tag" className="whitespace-nowrap">
+          {row.original.companyType}
+        </Badge>
+      );
+    },
+  },
+  {
+    id: "employeeCount",
+    accessorKey: "employeeCount",
+    header: "Employees",
+    size: 130,
+    minSize: 100,
+    maxSize: 180,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-12" },
+      headerLabel: "Employees",
+      className: "w-[130px] min-w-[100px]",
+    },
+    cell: ({ row }) => {
+      if (row.original.enrichmentStatus === "processing") {
+        return <EnrichingCell />;
+      }
+      return row.original.employeeCount ?? "-";
+    },
+  },
+  {
+    id: "location",
+    accessorKey: "headquartersLocation",
+    header: "Location",
+    size: 180,
+    minSize: 140,
+    maxSize: 300,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-24" },
+      headerLabel: "Location",
+      className: "w-[180px] min-w-[140px]",
+    },
+    cell: ({ row }) => {
+      if (row.original.enrichmentStatus === "processing") {
+        return <EnrichingCell />;
+      }
+      return (
+        <span className="truncate block">
+          {row.original.headquartersLocation ?? "-"}
+        </span>
+      );
+    },
+  },
+  {
+    id: "website",
+    accessorKey: "website",
+    header: "Website",
+    size: 180,
+    minSize: 140,
+    maxSize: 300,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-28" },
+      headerLabel: "Website",
+      className: "w-[180px] min-w-[140px]",
+    },
+    cell: ({ row }) => <WebsiteCell website={row.original.website} />,
+  },
+  {
+    id: "socialLinks",
+    accessorKey: "linkedinUrl",
+    header: "Social",
+    size: 120,
+    minSize: 100,
+    maxSize: 160,
+    enableResizing: true,
+    enableSorting: false,
+    meta: {
+      skeleton: { type: "icon" },
+      headerLabel: "Social",
+      className: "w-[120px] min-w-[100px]",
+    },
+    cell: ({ row }) => {
+      if (row.original.enrichmentStatus === "processing") {
+        return <EnrichingCell />;
+      }
+      return (
+        <SocialLinksCell
+          linkedinUrl={row.original.linkedinUrl}
+          twitterUrl={row.original.twitterUrl}
+          instagramUrl={row.original.instagramUrl}
+          facebookUrl={row.original.facebookUrl}
+        />
+      );
     },
   },
   {

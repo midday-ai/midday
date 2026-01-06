@@ -73,23 +73,23 @@ export const customerEnrichmentSchema = z.object({
     .string()
     .nullable()
     .describe(
-      "Description from the company's own website ONLY. Return null if not from their site.",
+      "1-2 sentence description of what the company does. Extract from their website or summarize based on their products/services.",
     ),
 
   industry: z
     .enum(industryOptions)
     .nullable()
-    .describe("Primary industry if obvious from their website. Return null if unsure."),
+    .describe("Primary industry based on what the company does."),
 
   companyType: z
     .enum(companyTypeOptions)
     .nullable()
-    .describe("Business model if obvious from their website. Return null if unsure."),
+    .describe("Business model - B2B, SaaS, Agency, etc."),
 
   employeeCount: z
     .enum(employeeCountOptions)
     .nullable()
-    .describe("Only from their official LinkedIn page. Return null otherwise."),
+    .describe("Employee count range from LinkedIn or website."),
 
   foundedYear: z
     .number()
@@ -97,44 +97,58 @@ export const customerEnrichmentSchema = z.object({
     .min(1800)
     .max(2030)
     .nullable()
-    .describe("Only if on their website or LinkedIn. Return null if any doubt."),
+    .describe("Year the company was founded."),
 
   estimatedRevenue: z
     .enum(revenueOptions)
     .nullable()
-    .describe("Return null - rarely disclosed publicly."),
+    .describe("Estimated revenue if publicly available."),
 
   fundingStage: z
     .enum(fundingStageOptions)
     .nullable()
-    .describe("Only if verified for THIS specific company. Return null if any doubt."),
+    .describe("Funding stage if known."),
 
   totalFunding: z
     .string()
     .nullable()
-    .describe("Only if verified for THIS specific company. Return null if any doubt."),
+    .describe("Total funding raised if known (e.g. '$10M')."),
 
   headquartersLocation: z
     .string()
     .nullable()
-    .describe("Only from their own website or LinkedIn. Return null otherwise."),
+    .describe("City and country of headquarters (e.g. 'Stockholm, Sweden')."),
 
   timezone: z
     .string()
     .nullable()
-    .describe("Only if HQ is verified. Return null if HQ is null."),
+    .describe("IANA timezone based on HQ location (e.g. 'Europe/Stockholm')."),
 
   linkedinUrl: z
     .string()
     .url()
     .nullable()
-    .describe("Official company LinkedIn that links to their domain. Return null if not verified."),
+    .describe(
+      "LinkedIn company page URL (e.g. 'https://linkedin.com/company/example').",
+    ),
 
   twitterUrl: z
     .string()
     .url()
     .nullable()
-    .describe("Official company Twitter that links to their domain. Return null if not verified."),
+    .describe("Twitter/X company URL (e.g. 'https://twitter.com/example')."),
+
+  instagramUrl: z
+    .string()
+    .url()
+    .nullable()
+    .describe("Instagram company URL (e.g. 'https://instagram.com/example')."),
+
+  facebookUrl: z
+    .string()
+    .url()
+    .nullable()
+    .describe("Facebook company page URL (e.g. 'https://facebook.com/example')."),
 });
 
 export type CustomerEnrichmentResult = z.infer<typeof customerEnrichmentSchema>;
@@ -156,4 +170,6 @@ export type VerifiedEnrichmentData = {
   timezone: string | null;
   linkedinUrl: string | null;
   twitterUrl: string | null;
+  instagramUrl: string | null;
+  facebookUrl: string | null;
 };

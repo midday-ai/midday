@@ -44,6 +44,8 @@ ALTER TABLE customers ADD COLUMN IF NOT EXISTS timezone TEXT;
 -- Social links
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS linkedin_url TEXT;
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS twitter_url TEXT;
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS instagram_url TEXT;
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS facebook_url TEXT;
 
 -- Enrichment metadata
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS enrichment_status TEXT DEFAULT 'pending';

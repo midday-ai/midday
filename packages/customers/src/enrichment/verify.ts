@@ -46,43 +46,145 @@ async function verifyUrlExists(
 }
 
 /**
- * Verify LinkedIn URL format and existence.
- * Must be linkedin.com/company/* format AND return 200.
+ * Verify LinkedIn URL format.
+ * Must be linkedin.com/company/* format.
+ * NOTE: We only verify format, not existence - LinkedIn blocks HEAD requests.
  */
 export async function verifyLinkedInUrl(
   url: string | null,
-  options?: VerifyOptions,
+  _options?: VerifyOptions,
 ): Promise<string | null> {
   if (!url) return null;
 
+  // Normalize URL
+  let normalizedUrl = url.trim();
+
+  // Add https if missing
+  if (!normalizedUrl.startsWith("http")) {
+    normalizedUrl = `https://${normalizedUrl}`;
+  }
+
   // Check format: must be linkedin.com/company/
-  if (!url.match(/^https?:\/\/(www\.)?linkedin\.com\/company\//i)) {
+  const match = normalizedUrl.match(
+    /^https?:\/\/(www\.)?linkedin\.com\/company\/[\w-]+\/?$/i,
+  );
+
+  if (!match) {
+    console.log("[verifyLinkedInUrl] Invalid format:", url);
     return null;
   }
 
-  // Verify URL actually exists
-  const exists = await verifyUrlExists(url, options);
-  return exists ? url : null;
+  // Remove trailing slash for consistency
+  normalizedUrl = normalizedUrl.replace(/\/$/, "");
+
+  console.log("[verifyLinkedInUrl] Valid:", normalizedUrl);
+  return normalizedUrl;
 }
 
 /**
- * Verify Twitter/X URL format and existence.
- * Must be twitter.com/* or x.com/* format AND return 200.
+ * Verify Twitter/X URL format.
+ * Must be twitter.com/* or x.com/* format.
+ * NOTE: We only verify format, not existence.
  */
 export async function verifyTwitterUrl(
   url: string | null,
-  options?: VerifyOptions,
+  _options?: VerifyOptions,
 ): Promise<string | null> {
   if (!url) return null;
 
-  // Check format: must be twitter.com or x.com
-  if (!url.match(/^https?:\/\/(www\.)?(twitter\.com|x\.com)\//i)) {
+  // Normalize URL
+  let normalizedUrl = url.trim();
+
+  // Add https if missing
+  if (!normalizedUrl.startsWith("http")) {
+    normalizedUrl = `https://${normalizedUrl}`;
+  }
+
+  // Check format: must be twitter.com or x.com with a handle
+  const match = normalizedUrl.match(
+    /^https?:\/\/(www\.)?(twitter\.com|x\.com)\/[\w]+\/?$/i,
+  );
+
+  if (!match) {
+    console.log("[verifyTwitterUrl] Invalid format:", url);
     return null;
   }
 
-  // Verify URL actually exists
-  const exists = await verifyUrlExists(url, options);
-  return exists ? url : null;
+  // Remove trailing slash for consistency
+  normalizedUrl = normalizedUrl.replace(/\/$/, "");
+
+  console.log("[verifyTwitterUrl] Valid:", normalizedUrl);
+  return normalizedUrl;
+}
+
+/**
+ * Verify Instagram URL format.
+ * Must be instagram.com/* format.
+ */
+export async function verifyInstagramUrl(
+  url: string | null,
+  _options?: VerifyOptions,
+): Promise<string | null> {
+  if (!url) return null;
+
+  // Normalize URL
+  let normalizedUrl = url.trim();
+
+  // Add https if missing
+  if (!normalizedUrl.startsWith("http")) {
+    normalizedUrl = `https://${normalizedUrl}`;
+  }
+
+  // Check format: must be instagram.com with a handle
+  const match = normalizedUrl.match(
+    /^https?:\/\/(www\.)?instagram\.com\/[\w.]+\/?$/i,
+  );
+
+  if (!match) {
+    console.log("[verifyInstagramUrl] Invalid format:", url);
+    return null;
+  }
+
+  // Remove trailing slash for consistency
+  normalizedUrl = normalizedUrl.replace(/\/$/, "");
+
+  console.log("[verifyInstagramUrl] Valid:", normalizedUrl);
+  return normalizedUrl;
+}
+
+/**
+ * Verify Facebook URL format.
+ * Must be facebook.com/* format.
+ */
+export async function verifyFacebookUrl(
+  url: string | null,
+  _options?: VerifyOptions,
+): Promise<string | null> {
+  if (!url) return null;
+
+  // Normalize URL
+  let normalizedUrl = url.trim();
+
+  // Add https if missing
+  if (!normalizedUrl.startsWith("http")) {
+    normalizedUrl = `https://${normalizedUrl}`;
+  }
+
+  // Check format: must be facebook.com with a page/handle
+  const match = normalizedUrl.match(
+    /^https?:\/\/(www\.)?facebook\.com\/[\w.]+\/?$/i,
+  );
+
+  if (!match) {
+    console.log("[verifyFacebookUrl] Invalid format:", url);
+    return null;
+  }
+
+  // Remove trailing slash for consistency
+  normalizedUrl = normalizedUrl.replace(/\/$/, "");
+
+  console.log("[verifyFacebookUrl] Valid:", normalizedUrl);
+  return normalizedUrl;
 }
 
 /**
@@ -153,10 +255,13 @@ export async function verifyEnrichmentData(
   }
 
   // Verify URLs in parallel (these are the slow operations)
-  const [linkedinUrl, twitterUrl] = await Promise.all([
-    verifyLinkedInUrl(rawData.linkedinUrl, options),
-    verifyTwitterUrl(rawData.twitterUrl, options),
-  ]);
+  const [linkedinUrl, twitterUrl, instagramUrl, facebookUrl] =
+    await Promise.all([
+      verifyLinkedInUrl(rawData.linkedinUrl, options),
+      verifyTwitterUrl(rawData.twitterUrl, options),
+      verifyInstagramUrl(rawData.instagramUrl, options),
+      verifyFacebookUrl(rawData.facebookUrl, options),
+    ]);
 
   // Validate all other fields synchronously
   return {
@@ -172,5 +277,7 @@ export async function verifyEnrichmentData(
     timezone: validateTimezone(rawData.timezone),
     linkedinUrl,
     twitterUrl,
+    instagramUrl,
+    facebookUrl,
   };
 }

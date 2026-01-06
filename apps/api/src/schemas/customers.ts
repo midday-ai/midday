@@ -164,6 +164,71 @@ export const customerResponseSchema = z.object({
         { id: "f1b2c3d4-5678-4e7a-9c1a-2b7c1e24c2a4", name: "Enterprise" },
       ],
     }),
+  // Enrichment fields
+  description: z.string().nullable().openapi({
+    description: "AI-generated description of what the company does",
+    example: "A cloud-based project management platform for remote teams.",
+  }),
+  industry: z.string().nullable().openapi({
+    description: "Primary industry of the company",
+    example: "Software",
+  }),
+  companyType: z.string().nullable().openapi({
+    description: "Business model type",
+    example: "SaaS",
+  }),
+  employeeCount: z.string().nullable().openapi({
+    description: "Estimated number of employees",
+    example: "51-200",
+  }),
+  foundedYear: z.number().nullable().openapi({
+    description: "Year the company was founded",
+    example: 2018,
+  }),
+  estimatedRevenue: z.string().nullable().openapi({
+    description: "Estimated annual revenue range",
+    example: "$10M-$50M",
+  }),
+  fundingStage: z.string().nullable().openapi({
+    description: "Current funding stage",
+    example: "Series A",
+  }),
+  totalFunding: z.string().nullable().openapi({
+    description: "Total funding raised",
+    example: "$15M",
+  }),
+  headquartersLocation: z.string().nullable().openapi({
+    description: "Company headquarters location",
+    example: "San Francisco, CA",
+  }),
+  timezone: z.string().nullable().openapi({
+    description: "IANA timezone of the company headquarters",
+    example: "America/Los_Angeles",
+  }),
+  linkedinUrl: z.string().nullable().openapi({
+    description: "LinkedIn company page URL",
+    example: "https://linkedin.com/company/acme",
+  }),
+  twitterUrl: z.string().nullable().openapi({
+    description: "Twitter/X profile URL",
+    example: "https://twitter.com/acme",
+  }),
+  instagramUrl: z.string().nullable().openapi({
+    description: "Instagram profile URL",
+    example: "https://instagram.com/acme",
+  }),
+  facebookUrl: z.string().nullable().openapi({
+    description: "Facebook page URL",
+    example: "https://facebook.com/acme",
+  }),
+  enrichmentStatus: z.string().nullable().openapi({
+    description: "Status of the enrichment process",
+    example: "completed",
+  }),
+  enrichedAt: z.string().nullable().openapi({
+    description: "When the customer was last enriched",
+    example: "2024-05-01T12:34:56.789Z",
+  }),
 });
 
 export const customersResponseSchema = z.object({

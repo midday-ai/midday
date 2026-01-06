@@ -1,16 +1,16 @@
+import { enrichCustomer } from "@midday/customers";
 import {
   getCustomerForEnrichment,
   markCustomerEnrichmentFailed,
   updateCustomerEnrichment,
   updateCustomerEnrichmentStatus,
 } from "@midday/db/queries";
-import { enrichCustomer } from "@midday/customers";
 import type { Job } from "bullmq";
 import type { EnrichCustomerPayload } from "../../schemas/customers";
 import { getDb } from "../../utils/db";
 import { BaseProcessor } from "../base";
 
-// Enrichment timeout (60 seconds for multi-step agentic pipeline)
+// Enrichment timeout (60 seconds - faster with parallel execution)
 const ENRICHMENT_TIMEOUT_MS = 60_000;
 
 /**
@@ -107,10 +107,10 @@ export class EnrichCustomerProcessor extends BaseProcessor<EnrichCustomerPayload
         customerId,
         teamId,
         verifiedFields: result.verifiedFieldCount,
-        stepsUsed: result.metrics.stepsUsed,
+        durationMs: result.metrics.durationMs,
         websiteReadSuccess: result.metrics.websiteReadSuccess,
+        searchSuccess: result.metrics.searchSuccess,
         linkedinFound: result.metrics.linkedinFound,
-        fundingSearched: result.metrics.fundingSearched,
       });
 
       return {

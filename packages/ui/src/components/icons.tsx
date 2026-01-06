@@ -1,5 +1,5 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
-import { FaXTwitter } from "react-icons/fa6";
+import { FaFacebook, FaInstagram, FaXTwitter } from "react-icons/fa6";
 import { FiGithub } from "react-icons/fi";
 import type { IconType as BaseIconType } from "react-icons/lib";
 import {
@@ -704,6 +704,8 @@ export const Icons = {
       />
     </SVGIcon>
   ),
+  Instagram: (props: SVGIconProps) => <FaInstagram {...props} />,
+  Facebook: (props: SVGIconProps) => <FaFacebook {...props} />,
   Xero: ({ className }: { className?: string }) => (
     <svg
       className={className}

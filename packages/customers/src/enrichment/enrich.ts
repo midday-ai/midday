@@ -39,7 +39,8 @@ export type EnrichmentMetrics = {
   stepsUsed: number;
   websiteReadSuccess: boolean;
   linkedinFound: boolean;
-  fundingSearched: boolean;
+  searchSuccess: boolean;
+  durationMs: number;
 };
 
 export type EnrichCustomerResult = {
@@ -103,12 +104,17 @@ function buildContextSection(params: EnrichCustomerParams): string {
 }
 
 /**
- * Enriches customer data using ToolLoopAgent with URL Context.
+ * Enriches customer data using ToolLoopAgent.
+ *
+ * Pipeline:
+ * Step 0: PARALLEL - readWebsite + searchCompany (both tools available)
+ * Step 1: extractData
  */
 export async function enrichCustomer(
   params: EnrichCustomerParams,
   options: EnrichCustomerOptions = {},
 ): Promise<EnrichCustomerResult> {
+  const startTime = Date.now();
   const { timeoutMs = DEFAULT_TIMEOUT_MS, signal: externalSignal } = options;
 
   const timeoutController = new AbortController();
@@ -129,22 +135,22 @@ export async function enrichCustomer(
       ? params.website
       : `https://${params.website}`;
 
-    // Closure to collect data from tools
+    // Closure to collect data
     let websiteData: string | null = null;
-    let linkedinData: string | null = null;
+    let searchData: string | null = null;
+    let generatedDescription: string | null = null;
 
     console.log("[Enrichment] Starting agent for", params.companyName, domain);
 
-    // Create ToolLoopAgent with URL Context tools
+    // Create ToolLoopAgent
     const agent = new ToolLoopAgent({
       model: google("gemini-2.5-flash"),
       tools: {
-        // Tool 1: Read company website
+        // Tool 1: Read website using URL Context
         readWebsite: tool({
-          description:
-            "Read a company website to extract information about the company",
+          description: "Read company website to extract information",
           inputSchema: z.object({
-            url: z.string().describe("The website URL to read"),
+            url: z.string().describe("Website URL"),
           }),
           execute: async ({ url }: { url: string }) => {
             console.log("[Tool:readWebsite] Reading:", url);
@@ -158,8 +164,18 @@ export async function enrichCustomer(
                       {
                         type: "text",
                         text: `Extract company information from this website.
-Look for: company description, industry, team size, headquarters location, year founded, LinkedIn URL, Twitter URL.
-Be factual - only report what you can see on the website.`,
+
+IMPORTANT - Find these specific items:
+1. DESCRIPTION: What does this company do? Write 1-2 sentences summarizing their business.
+2. INDUSTRY: What industry are they in?
+3. TEAM SIZE: How many employees? Check About/Team page.
+4. LOCATION: Where is their headquarters?
+5. FOUNDED: When was the company founded?
+6. LINKEDIN: Find their LinkedIn company page URL (usually in footer or contact page)
+7. TWITTER: Find their Twitter/X URL (usually in footer)
+8. FUNDING: Any funding information mentioned?
+
+Check the About page, Team page, Contact page, and Footer for this information.`,
                         providerOptions: {
                           google: { urlContext: url },
                         },
@@ -175,128 +191,334 @@ Be factual - only report what you can see on the website.`,
                 result.text.length,
                 "chars",
               );
+              // Log if social links found
+              const hasLinkedIn = result.text
+                .toLowerCase()
+                .includes("linkedin");
+              const hasTwitter =
+                result.text.toLowerCase().includes("twitter") ||
+                result.text.toLowerCase().includes("x.com");
+              console.log(
+                "[Tool:readWebsite] Found LinkedIn:",
+                hasLinkedIn,
+                "Twitter:",
+                hasTwitter,
+              );
+              if (hasLinkedIn) {
+                // Try to extract URL
+                const linkedInMatch = result.text.match(
+                  /linkedin\.com\/company\/[\w-]+/i,
+                );
+                if (linkedInMatch)
+                  console.log(
+                    "[Tool:readWebsite] LinkedIn URL:",
+                    linkedInMatch[0],
+                  );
+              }
               return { success: true, data: result.text };
             } catch (error) {
               console.error("[Tool:readWebsite] Error:", error);
-              return {
-                success: false,
-                error: error instanceof Error ? error.message : "Failed",
-              };
+              return { success: false, error: String(error) };
             }
           },
         }),
 
-        // Tool 2: Read LinkedIn page if found
-        readLinkedIn: tool({
-          description:
-            "Read a LinkedIn company page to get employee count and details",
+        // Tool 2: Search using Google (faster model)
+        searchCompany: tool({
+          description: "Search web for company info like LinkedIn, funding",
           inputSchema: z.object({
-            linkedinUrl: z.string().describe("The LinkedIn company page URL"),
+            query: z.string().describe("Company name and domain"),
           }),
-          execute: async ({ linkedinUrl }: { linkedinUrl: string }) => {
-            console.log("[Tool:readLinkedIn] Reading:", linkedinUrl);
+          execute: async ({ query }: { query: string }) => {
+            console.log("[Tool:searchCompany] Searching:", query);
             try {
               const result = await generateText({
-                model: google("gemini-2.5-flash"),
-                messages: [
-                  {
-                    role: "user",
-                    content: [
-                      {
-                        type: "text",
-                        text: `Extract company information from this LinkedIn page.
-Look for: company description, employee count, headquarters, industry, founded year.`,
-                        providerOptions: {
-                          google: { urlContext: linkedinUrl },
-                        },
-                      },
-                    ],
-                  },
-                ],
+                model: google("gemini-2.5-flash-lite"), // Faster model
+                tools: {
+                  google_search: google.tools.googleSearch({}),
+                },
+                prompt: `Search for "${params.companyName}" company LinkedIn page and social media.
+
+SEARCH QUERIES TO USE:
+- "${params.companyName}" LinkedIn company page
+- "${domain}" site:linkedin.com/company
+- "${params.companyName}" Twitter OR X account
+
+FIND AND REPORT:
+1. LinkedIn company page: Find the URL like linkedin.com/company/companyname
+2. Twitter/X account: Find @handle or twitter.com/handle
+3. Employee count
+4. Headquarters city
+5. Year founded
+
+OUTPUT FORMAT:
+LinkedIn: https://linkedin.com/company/[exact-slug]
+Twitter: https://twitter.com/[exact-handle]
+Employees: [number or range]
+HQ: [city, country]
+Founded: [year]`,
                 temperature: 0,
               });
-              linkedinData = result.text;
+              searchData = result.text;
               console.log(
-                "[Tool:readLinkedIn] Success:",
+                "[Tool:searchCompany] Success:",
                 result.text.length,
                 "chars",
               );
+              // Log if we found LinkedIn/Twitter in search results
+              const hasLinkedIn = result.text
+                .toLowerCase()
+                .includes("linkedin");
+              const hasTwitter =
+                result.text.toLowerCase().includes("twitter") ||
+                result.text.toLowerCase().includes("x.com");
+              console.log(
+                "[Tool:searchCompany] Found LinkedIn:",
+                hasLinkedIn,
+                "Twitter:",
+                hasTwitter,
+              );
               return { success: true, data: result.text };
             } catch (error) {
-              console.error("[Tool:readLinkedIn] Error:", error);
+              console.error("[Tool:searchCompany] Error:", error);
+              return { success: false, error: String(error) };
+            }
+          },
+        }),
+
+        // Tool 3: Dedicated social links finder (more aggressive)
+        findSocialLinks: tool({
+          description: "Find social media links using targeted searches",
+          inputSchema: z.object({
+            companyName: z.string().describe("Company name"),
+          }),
+          execute: async ({ companyName }: { companyName: string }) => {
+            console.log("[Tool:findSocialLinks] Searching for:", companyName);
+            const results: {
+              linkedin: string | null;
+              twitter: string | null;
+              instagram: string | null;
+              facebook: string | null;
+            } = {
+              linkedin: null,
+              twitter: null,
+              instagram: null,
+              facebook: null,
+            };
+
+            try {
+              // Search for all social links in one call (more efficient)
+              const socialSearch = await generateText({
+                model: google("gemini-2.5-flash-lite"),
+                tools: { google_search: google.tools.googleSearch({}) },
+                prompt: `Find official social media pages for "${companyName}" (website: ${domain}).
+
+Search for:
+1. site:linkedin.com/company "${companyName}"
+2. site:twitter.com "${companyName}" OR site:x.com "${companyName}"
+3. site:instagram.com "${companyName}"
+4. site:facebook.com "${companyName}"
+
+For each social network found, output the URL in this EXACT format:
+LinkedIn: https://linkedin.com/company/[slug]
+Twitter: https://twitter.com/[handle]
+Instagram: https://instagram.com/[handle]
+Facebook: https://facebook.com/[page]
+
+IMPORTANT:
+- Only include URLs that are clearly for this specific company at ${domain}
+- If a social link is not found, omit that line
+- Output ONLY the URLs in the format above, nothing else`,
+                temperature: 0,
+              });
+
+              const text = socialSearch.text;
+
+              // Extract LinkedIn
+              const linkedInMatch = text.match(
+                /https?:\/\/(www\.)?linkedin\.com\/company\/[\w-]+/i,
+              );
+              if (linkedInMatch) {
+                results.linkedin = linkedInMatch[0].replace("www.", "");
+                console.log(
+                  "[Tool:findSocialLinks] Found LinkedIn:",
+                  results.linkedin,
+                );
+              }
+
+              // Extract Twitter/X
+              const twitterMatch = text.match(
+                /https?:\/\/(www\.)?(twitter\.com|x\.com)\/[\w]+/i,
+              );
+              if (twitterMatch) {
+                results.twitter = twitterMatch[0].replace("www.", "");
+                console.log(
+                  "[Tool:findSocialLinks] Found Twitter:",
+                  results.twitter,
+                );
+              }
+
+              // Extract Instagram
+              const instagramMatch = text.match(
+                /https?:\/\/(www\.)?instagram\.com\/[\w.]+/i,
+              );
+              if (instagramMatch) {
+                results.instagram = instagramMatch[0].replace("www.", "");
+                console.log(
+                  "[Tool:findSocialLinks] Found Instagram:",
+                  results.instagram,
+                );
+              }
+
+              // Extract Facebook
+              const facebookMatch = text.match(
+                /https?:\/\/(www\.)?facebook\.com\/[\w.]+/i,
+              );
+              if (facebookMatch) {
+                results.facebook = facebookMatch[0].replace("www.", "");
+                console.log(
+                  "[Tool:findSocialLinks] Found Facebook:",
+                  results.facebook,
+                );
+              }
+
+              // Store in shared state for extraction
+              const foundLinks = [
+                results.linkedin && `LinkedIn: ${results.linkedin}`,
+                results.twitter && `Twitter: ${results.twitter}`,
+                results.instagram && `Instagram: ${results.instagram}`,
+                results.facebook && `Facebook: ${results.facebook}`,
+              ].filter(Boolean);
+
+              if (foundLinks.length > 0) {
+                searchData = `${searchData || ""}\n\nSOCIAL LINKS FOUND:\n${foundLinks.join("\n")}`;
+              }
+
+              return { success: true, ...results };
+            } catch (error) {
+              console.error("[Tool:findSocialLinks] Error:", error);
               return {
                 success: false,
-                error: error instanceof Error ? error.message : "Failed",
+                linkedin: null,
+                twitter: null,
+                instagram: null,
+                facebook: null,
               };
             }
           },
         }),
 
-        // Tool 3: Extract structured data
-        extractData: tool({
+        // Tool 4: Generate company description
+        generateDescription: tool({
           description:
-            "Extract structured company data from gathered information",
+            "Write a compelling description of what the company does",
           inputSchema: z.object({
-            websiteInfo: z
+            websiteInfo: z.string().nullable().describe("Website data"),
+          }),
+          execute: async ({ websiteInfo }: { websiteInfo: string | null }) => {
+            console.log("[Tool:generateDescription] Generating");
+            try {
+              const result = await generateText({
+                model: google("gemini-2.5-flash"),
+                prompt: `Based on the following website information, write a clear and compelling 1-2 sentence description of what "${params.companyName}" does.
+
+WEBSITE INFORMATION:
+${websiteInfo || websiteData || "Not available"}
+
+Write a description that:
+- Clearly explains what the company does
+- Is professional and concise
+- Is 1-2 sentences maximum
+- Does not start with "The company" or "${params.companyName} is"
+
+Just output the description, nothing else.`,
+                temperature: 0.3, // Slightly creative
+              });
+              const description = result.text.trim();
+              generatedDescription = description;
+              console.log(
+                "[Tool:generateDescription] Success:",
+                description.length,
+                "chars",
+              );
+              return { success: true, description };
+            } catch (error) {
+              console.error("[Tool:generateDescription] Error:", error);
+              return { success: false, error: String(error) };
+            }
+          },
+        }),
+
+        // Tool 4: Extract structured data
+        extractData: tool({
+          description: "Extract structured data from gathered info",
+          inputSchema: z.object({
+            websiteInfo: z.string().nullable().describe("Website data"),
+            searchInfo: z.string().nullable().describe("Search data"),
+            description: z
               .string()
               .nullable()
-              .describe("Information from the website"),
-            linkedinInfo: z
-              .string()
-              .nullable()
-              .describe("Information from LinkedIn"),
+              .describe("Generated description"),
           }),
           execute: async ({
             websiteInfo,
-            linkedinInfo,
+            searchInfo,
+            description,
           }: {
             websiteInfo: string | null;
-            linkedinInfo: string | null;
+            searchInfo: string | null;
+            description: string | null;
           }) => {
-            console.log("[Tool:extractData] Extracting structured data");
+            console.log("[Tool:extractData] Extracting");
             try {
               const result = await generateObject({
                 model: google("gemini-2.5-flash"),
                 schema: customerEnrichmentSchema,
                 prompt: `Extract structured data for "${params.companyName}" (${domain}).
 
-=== WEBSITE DATA ===
+=== COMPANY DESCRIPTION (use this) ===
+${description || "Generate from website data below"}
+
+=== DATA FROM WEBSITE ===
 ${websiteInfo || websiteData || "Not available"}
 
-=== LINKEDIN DATA ===
-${linkedinInfo || linkedinData || "Not available"}
+=== DATA FROM SEARCH ===
+${searchInfo || searchData || "Not available"}
 
-=== CONTEXT ===
+=== KNOWN CONTEXT ===
 ${contextSection || "None"}
 
-RULES:
-- Prefer website data over other sources
-- Return null if unsure about any field
-- Missing data is better than wrong data`,
+INSTRUCTIONS:
+- Use the provided description if available
+- Extract LinkedIn URL format: https://linkedin.com/company/[slug]
+- Extract Twitter URL format: https://twitter.com/[handle]
+- Extract all other available fields`,
                 temperature: 0,
               });
               console.log("[Tool:extractData] Success");
               return { success: true, extractedData: result.object };
             } catch (error) {
               console.error("[Tool:extractData] Error:", error);
-              return {
-                success: false,
-                error: error instanceof Error ? error.message : "Failed",
-              };
+              return { success: false, error: String(error) };
             }
           },
         }),
       },
-      stopWhen: stepCountIs(5),
-      // Force workflow: step 0 = readWebsite, step 1+ = extractData
+      stopWhen: stepCountIs(4),
       prepareStep: async ({ stepNumber }) => {
         if (stepNumber === 0) {
+          // Step 0: Read website and search in parallel
           return {
-            activeTools: ["readWebsite"],
-            toolChoice: { type: "tool", toolName: "readWebsite" },
+            activeTools: ["readWebsite", "searchCompany"],
           };
         }
-        // After reading website, force extraction
+        if (stepNumber === 1) {
+          // Step 1: Find social links (dedicated search) + generate description
+          return {
+            activeTools: ["findSocialLinks", "generateDescription"],
+          };
+        }
+        // Step 2+: Extract structured data
         return {
           activeTools: ["extractData"],
           toolChoice: { type: "tool", toolName: "extractData" },
@@ -304,79 +526,82 @@ RULES:
       },
     });
 
-    // Run the agent
+    // Run agent
     const result = await agent.generate({
       prompt: `Research "${params.companyName}" at ${fullUrl}.
 
-WORKFLOW:
-1. Use readWebsite to read ${fullUrl}
-2. If you find a LinkedIn company page URL on the website, use readLinkedIn to read it
-3. Use extractData with all gathered information to create structured output
+Step 1: Call BOTH tools:
+- readWebsite with url="${fullUrl}"
+- searchCompany with query="${params.companyName} ${domain}"
 
-Start by calling readWebsite with url="${fullUrl}"`,
+Step 2: Call findSocialLinks AND generateDescription to find social media and write description
+
+Step 3: Call extractData to create the final structured output`,
     });
 
-    console.log(
-      "[Enrichment] Agent done. Steps:",
-      result.steps?.length,
-      "ToolResults:",
-      result.toolResults?.length,
-    );
+    console.log("[Enrichment] Agent done. Steps:", result.steps?.length);
 
     if (signal.aborted) throw new Error("Enrichment cancelled");
 
-    // Get extracted data from tool results
+    // Get extracted data
     let extractedData: CustomerEnrichmentResult | null = null;
-
     for (const tr of result.toolResults || []) {
       const output = tr.output as Record<string, unknown>;
       if (tr.toolName === "extractData" && output?.success) {
         extractedData = output.extractedData as CustomerEnrichmentResult;
+        console.log("[Enrichment] Raw extracted data:", {
+          description: extractedData?.description?.substring(0, 50),
+          linkedinUrl: extractedData?.linkedinUrl,
+          twitterUrl: extractedData?.twitterUrl,
+          industry: extractedData?.industry,
+        });
       }
     }
 
-    // Fallback: if agent didn't call extractData, do it ourselves
+    // Fallback
     if (!extractedData) {
-      console.log("[Enrichment] Fallback: calling generateObject manually");
-      console.log(
-        "[Enrichment] websiteData:",
-        String(websiteData || "").substring(0, 200),
-      );
-      console.log(
-        "[Enrichment] linkedinData:",
-        String(linkedinData || "").substring(0, 200),
-      );
-      const fallbackResult = await generateObject({
+      console.log("[Enrichment] Fallback extraction");
+      const fallback = await generateObject({
         model: google("gemini-2.5-flash"),
         schema: customerEnrichmentSchema,
         prompt: `Extract structured data for "${params.companyName}" (${domain}).
 
+=== COMPANY DESCRIPTION (use this) ===
+${generatedDescription || "Generate from website data below"}
+
 === WEBSITE DATA ===
 ${websiteData || "Not available"}
 
-=== LINKEDIN DATA ===
-${linkedinData || "Not available"}
+=== SEARCH DATA ===
+${searchData || "Not available"}
 
 === CONTEXT ===
 ${contextSection || "None"}
 
-RULES:
-- Prefer website data over other sources
-- Return null if unsure about any field
-- Missing data is better than wrong data`,
+INSTRUCTIONS:
+- Use the provided description if available
+- Extract LinkedIn URL format: https://linkedin.com/company/[slug]
+- Extract Twitter URL format: https://twitter.com/[handle]
+- Extract all other available fields.`,
         temperature: 0,
       });
-      extractedData = fallbackResult.object;
+      extractedData = fallback.object;
     }
 
-    // Verify the data
+    // Verify
     const verified = await verifyEnrichmentData(extractedData, { signal });
-
     const verifiedFieldCount = DATA_FIELDS.filter(
-      (field) => verified[field] !== null,
+      (f) => verified[f] !== null,
     ).length;
 
-    console.log("[Enrichment] Complete. Verified fields:", verifiedFieldCount);
+    const durationMs = Date.now() - startTime;
+    console.log(
+      "[Enrichment] Complete. Fields:",
+      verifiedFieldCount,
+      "Duration:",
+      durationMs,
+      "ms",
+    );
 
     return {
       raw: extractedData,
@@ -386,7 +611,8 @@ RULES:
         stepsUsed: result.steps?.length || 0,
         websiteReadSuccess: websiteData !== null,
         linkedinFound: verified.linkedinUrl !== null,
-        fundingSearched: linkedinData !== null,
+        searchSuccess: searchData !== null,
+        durationMs,
       },
     };
   } finally {
@@ -396,17 +622,14 @@ RULES:
 
 function combineAbortSignals(...signals: AbortSignal[]): AbortSignal {
   const controller = new AbortController();
-
   for (const signal of signals) {
     if (signal.aborted) {
       controller.abort(signal.reason);
       return controller.signal;
     }
-
     signal.addEventListener("abort", () => controller.abort(signal.reason), {
       once: true,
     });
   }
-
   return controller.signal;
 }

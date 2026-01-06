@@ -52,6 +52,8 @@ export const SORT_FIELD_MAPS: Record<TableId, Record<string, string>> = {
     email: "email",
     invoices: "invoices",
     projects: "projects",
+    industry: "industry",
+    location: "headquarters_location",
     tags: "tags",
   },
   vault: {}, // Vault doesn't have sorting

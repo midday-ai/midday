@@ -12,4 +12,3 @@ export { EnrichCustomerProcessor } from "./enrich-customer";
 export const customerProcessors = {
   "enrich-customer": new EnrichCustomerProcessor(),
 };
-

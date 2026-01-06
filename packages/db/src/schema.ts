@@ -858,6 +858,8 @@ export const customers = pgTable(
     timezone: text(), // IANA timezone
     linkedinUrl: text("linkedin_url"),
     twitterUrl: text("twitter_url"),
+    instagramUrl: text("instagram_url"),
+    facebookUrl: text("facebook_url"),
 
     // Enrichment metadata
     enrichmentStatus: text("enrichment_status").default("pending"), // pending, processing, completed, failed

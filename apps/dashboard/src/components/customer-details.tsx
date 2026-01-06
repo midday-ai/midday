@@ -6,6 +6,7 @@ import { useRealtime } from "@/hooks/use-realtime";
 import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
+import { getWebsiteLogo } from "@/utils/logos";
 import {
   generateStatementPdf,
   generateStatementPdfBlob,
@@ -18,6 +19,7 @@ import {
 } from "@midday/ui/accordion";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,29 +44,143 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
-import { cn } from "@midday/ui/cn";
 import { formatDate } from "@midday/utils/format";
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { type RefObject, useMemo, useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
 import { FormatAmount } from "./format-amount";
 import { InvoiceStatus } from "./invoice-status";
-import { getWebsiteLogo } from "@/utils/logos";
 
-// LinkedIn icon with brand color
-function LinkedInIcon({ className }: { className?: string }) {
+// X (Twitter) icon with brand color (black)
+function XIcon({ className }: { className?: string }) {
   return (
     <svg
       className={className}
       viewBox="0 0 24 24"
-      fill="#0A66C2"
+      fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
     </svg>
   );
+}
+
+// LinkedIn icon with brand color (blue background, white text)
+function LinkedInIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 72 72"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Blue background */}
+      <rect width="72" height="72" rx="8" fill="#0077B7" />
+      {/* White "in" and icon */}
+      <path
+        fill="#fff"
+        d="M20.5 29h8v28.5h-8zM24.5 17c2.7 0 4.9 2.2 4.9 4.9s-2.2 4.9-4.9 4.9-4.9-2.2-4.9-4.9 2.2-4.9 4.9-4.9M33.5 29h7.7v3.9h.1c1.1-2 3.7-4.1 7.6-4.1 8.1 0 9.6 5.3 9.6 12.3v14.4h-8V43.2c0-3.4-.1-7.8-4.8-7.8-4.8 0-5.5 3.7-5.5 7.6v14.5h-8V29z"
+      />
+    </svg>
+  );
+}
+
+// Instagram icon with gradient
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <linearGradient
+          id="instagram-gradient"
+          x1="0%"
+          y1="100%"
+          x2="100%"
+          y2="0%"
+        >
+          <stop offset="0%" stopColor="#FFDC80" />
+          <stop offset="25%" stopColor="#F77737" />
+          <stop offset="50%" stopColor="#E1306C" />
+          <stop offset="75%" stopColor="#C13584" />
+          <stop offset="100%" stopColor="#833AB4" />
+        </linearGradient>
+      </defs>
+      <path
+        fill="url(#instagram-gradient)"
+        d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
+      />
+    </svg>
+  );
+}
+
+// Facebook icon with brand color
+function FacebookIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="#1877F2"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+    </svg>
+  );
+}
+
+// Format timezone with local time and relative difference
+function formatTimezoneWithLocalTime(timezone: string): {
+  localTime: string;
+  relative: string;
+  isOffHours: boolean;
+} {
+  try {
+    const now = new Date();
+
+    // Get the local time in the customer's timezone using user's locale
+    const customerTime = new Intl.DateTimeFormat(undefined, {
+      timeZone: timezone,
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(now);
+
+    // Calculate hour difference
+    const customerDate = new Date(
+      now.toLocaleString("en-US", { timeZone: timezone }),
+    );
+    const userDate = new Date(now.toLocaleString("en-US"));
+    const diffMs = customerDate.getTime() - userDate.getTime();
+    const diffHours = Math.round(diffMs / (1000 * 60 * 60));
+
+    // Format relative time
+    let relative: string;
+    if (diffHours === 0) {
+      relative = "same time";
+    } else if (diffHours > 0) {
+      relative = `${diffHours}h ahead`;
+    } else {
+      relative = `${Math.abs(diffHours)}h behind`;
+    }
+
+    // Check if it's off-hours (before 8am or after 8pm)
+    const customerHour = new Date(
+      now.toLocaleString("en-US", { timeZone: timezone }),
+    ).getHours();
+    const isOffHours = customerHour < 8 || customerHour >= 20;
+
+    return { localTime: customerTime, relative, isOffHours };
+  } catch {
+    return { localTime: "", relative: "", isOffHours: false };
+  }
 }
 
 export function CustomerDetails() {
@@ -80,9 +196,15 @@ export function CustomerDetails() {
 
   const isOpen = customerId !== null;
 
-  const { data: customer, isLoading: isLoadingCustomer, refetch } = useQuery({
+  const {
+    data: customer,
+    isLoading: isLoadingCustomer,
+    refetch,
+  } = useQuery({
     ...trpc.customers.getById.queryOptions({ id: customerId! }),
     enabled: isOpen,
+    placeholderData: keepPreviousData,
+    staleTime: 0, // Always refetch when component mounts
   });
 
   // Mutation for re-enriching customer
@@ -122,7 +244,8 @@ export function CustomerDetails() {
     }
   };
 
-  const isEnriching = customer?.enrichmentStatus === "processing" || enrichMutation.isPending;
+  const isEnriching =
+    customer?.enrichmentStatus === "processing" || enrichMutation.isPending;
 
   // Subscribe to realtime updates for this customer
   useRealtime({
@@ -206,7 +329,7 @@ export function CustomerDetails() {
           <Skeleton className="h-10 w-full" />
           <div className="grid grid-cols-2 gap-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="space-y-1">
+              <div key={i.toString()} className="space-y-1">
                 <Skeleton className="h-3 w-20" />
                 <Skeleton className="h-5 w-28" />
               </div>
@@ -282,7 +405,8 @@ export function CustomerDetails() {
   };
 
   // Check if customer has any enrichment data
-  const hasEnrichmentData = customer?.description || customer?.industry || customer?.companyType;
+  const hasEnrichmentData =
+    customer?.description || customer?.industry || customer?.companyType;
 
   return (
     <div className="h-full flex flex-col min-h-0 -mx-6">
@@ -310,7 +434,7 @@ export function CustomerDetails() {
             <div
               className={cn(
                 "size-12 rounded-full flex items-center justify-center bg-muted text-muted-foreground font-medium text-lg flex-shrink-0",
-                customer.website && "hidden"
+                customer.website && "hidden",
               )}
             >
               {customer.name.charAt(0).toUpperCase()}
@@ -349,7 +473,9 @@ export function CustomerDetails() {
                         )}
                       </TooltipTrigger>
                       <TooltipContent>
-                        {isEnriching ? "Cancel enrichment" : "Refresh company data"}
+                        {isEnriching
+                          ? "Cancel enrichment"
+                          : "Refresh company data"}
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -369,27 +495,24 @@ export function CustomerDetails() {
               ) : null}
 
               {/* Badges */}
-              {(customer.industry || customer.companyType || customer.employeeCount || customer.fundingStage) && (
+              {(customer.industry ||
+                customer.companyType ||
+                customer.employeeCount ||
+                customer.fundingStage) && (
                 <div className="flex items-center gap-2 mt-2 flex-wrap">
                   {customer.industry && (
-                    <Badge variant="secondary" className="text-[11px] font-normal">
-                      {customer.industry}
-                    </Badge>
+                    <Badge variant="tag-rounded">{customer.industry}</Badge>
                   )}
                   {customer.companyType && (
-                    <Badge variant="secondary" className="text-[11px] font-normal">
-                      {customer.companyType}
-                    </Badge>
+                    <Badge variant="tag-rounded">{customer.companyType}</Badge>
                   )}
                   {customer.employeeCount && (
-                    <Badge variant="secondary" className="text-[11px] font-normal">
+                    <Badge variant="tag-rounded">
                       {customer.employeeCount} employees
                     </Badge>
                   )}
                   {customer.fundingStage && (
-                    <Badge variant="secondary" className="text-[11px] font-normal">
-                      {customer.fundingStage}
-                    </Badge>
+                    <Badge variant="tag-rounded">{customer.fundingStage}</Badge>
                   )}
                 </div>
               )}
@@ -400,7 +523,10 @@ export function CustomerDetails() {
         <div className="px-6 pb-4">
           <Accordion
             type="multiple"
-            defaultValue={["general", ...(hasEnrichmentData ? ["intelligence"] : [])]}
+            defaultValue={[
+              "general",
+              ...(hasEnrichmentData ? ["intelligence"] : []),
+            ]}
             className="space-y-0"
           >
             {/* General Section */}
@@ -454,17 +580,25 @@ export function CustomerDetails() {
               </AccordionContent>
             </AccordionItem>
 
-            {/* Company Intelligence Section - Only show if we have enrichment data or it's processing */}
-            {(hasEnrichmentData || isEnriching || customer.enrichmentStatus === "completed") && (
-              <AccordionItem value="intelligence" className="border-b border-border">
+            {/* Company Profile Section - Only show if we have enrichment data or it's processing */}
+            {(hasEnrichmentData ||
+              isEnriching ||
+              customer.enrichmentStatus === "completed") && (
+              <AccordionItem
+                value="intelligence"
+                className="border-b border-border"
+              >
                 <AccordionTrigger className="text-[16px] font-medium py-4">
-                  Company Intelligence
+                  Company Profile
                 </AccordionTrigger>
                 <AccordionContent>
                   {isEnriching ? (
                     <div className="grid grid-cols-2 gap-4 pt-0">
                       {[...Array(6)].map((_, i) => (
-                        <div key={i} className="space-y-2">
+                        <div
+                          key={`skeleton-${i.toString()}`}
+                          className="space-y-2"
+                        >
                           <Skeleton className="h-3 w-20" />
                           <Skeleton className="h-5 w-28" />
                         </div>
@@ -474,66 +608,111 @@ export function CustomerDetails() {
                     <div className="grid grid-cols-2 gap-4 pt-0">
                       {customer.industry && (
                         <div>
-                          <div className="text-[12px] mb-2 text-[#606060]">Industry</div>
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Industry
+                          </div>
                           <div className="text-[14px]">{customer.industry}</div>
                         </div>
                       )}
                       {customer.companyType && (
                         <div>
-                          <div className="text-[12px] mb-2 text-[#606060]">Company Type</div>
-                          <div className="text-[14px]">{customer.companyType}</div>
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Company Type
+                          </div>
+                          <div className="text-[14px]">
+                            {customer.companyType}
+                          </div>
                         </div>
                       )}
                       {customer.employeeCount && (
                         <div>
-                          <div className="text-[12px] mb-2 text-[#606060]">Employees</div>
-                          <div className="text-[14px]">{customer.employeeCount}</div>
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Employees
+                          </div>
+                          <div className="text-[14px]">
+                            {customer.employeeCount}
+                          </div>
                         </div>
                       )}
                       {customer.foundedYear && (
                         <div>
-                          <div className="text-[12px] mb-2 text-[#606060]">Founded</div>
-                          <div className="text-[14px]">{customer.foundedYear}</div>
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Founded
+                          </div>
+                          <div className="text-[14px]">
+                            {customer.foundedYear}
+                          </div>
                         </div>
                       )}
                       {customer.estimatedRevenue && (
                         <div>
-                          <div className="text-[12px] mb-2 text-[#606060]">Est. Revenue</div>
-                          <div className="text-[14px]">{customer.estimatedRevenue}</div>
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Est. Revenue
+                          </div>
+                          <div className="text-[14px]">
+                            {customer.estimatedRevenue}
+                          </div>
                         </div>
                       )}
                       {(customer.fundingStage || customer.totalFunding) && (
                         <div>
-                          <div className="text-[12px] mb-2 text-[#606060]">Funding</div>
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Funding
+                          </div>
                           <div className="text-[14px]">
                             {customer.fundingStage}
-                            {customer.totalFunding && ` (${customer.totalFunding})`}
+                            {customer.totalFunding &&
+                              ` (${customer.totalFunding})`}
                           </div>
                         </div>
                       )}
                       {customer.headquartersLocation && (
                         <div>
-                          <div className="text-[12px] mb-2 text-[#606060]">Headquarters</div>
-                          <div className="text-[14px]">{customer.headquartersLocation}</div>
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Headquarters
+                          </div>
+                          <div className="text-[14px]">
+                            {customer.headquartersLocation}
+                          </div>
                         </div>
                       )}
-                      {customer.timezone && (
-                        <div>
-                          <div className="text-[12px] mb-2 text-[#606060]">Timezone</div>
-                          <div className="text-[14px]">{customer.timezone}</div>
-                        </div>
-                      )}
+                      {customer.timezone &&
+                        (() => {
+                          const tz = formatTimezoneWithLocalTime(
+                            customer.timezone,
+                          );
+                          return (
+                            <div>
+                              <div className="text-[12px] mb-2 text-[#606060]">
+                                Local Time
+                              </div>
+                              <div className="text-[14px] flex items-center gap-1.5">
+                                {tz.isOffHours && <span>🌙</span>}
+                                <span>{tz.localTime}</span>
+                                <span className="text-[#878787]">
+                                  ({tz.relative})
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       {/* Social Links */}
-                      {(customer.linkedinUrl || customer.twitterUrl || customer.website) && (
+                      {(customer.linkedinUrl ||
+                        customer.twitterUrl ||
+                        customer.instagramUrl ||
+                        customer.facebookUrl ||
+                        customer.website) && (
                         <div className="col-span-2">
-                          <div className="text-[12px] mb-2 text-[#606060]">Links</div>
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Links
+                          </div>
                           <div className="flex items-center gap-3">
                             {customer.linkedinUrl && (
                               <a
                                 href={customer.linkedinUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-foreground transition-colors"
+                                className="hover:opacity-70 transition-opacity"
                               >
                                 <LinkedInIcon className="size-4" />
                               </a>
@@ -543,14 +722,38 @@ export function CustomerDetails() {
                                 href={customer.twitterUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-foreground transition-colors"
+                                className="text-foreground hover:opacity-70 transition-opacity"
                               >
-                                <Icons.X className="size-4" />
+                                <XIcon className="size-4" />
+                              </a>
+                            )}
+                            {customer.instagramUrl && (
+                              <a
+                                href={customer.instagramUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:opacity-70 transition-opacity"
+                              >
+                                <InstagramIcon className="size-4" />
+                              </a>
+                            )}
+                            {customer.facebookUrl && (
+                              <a
+                                href={customer.facebookUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:opacity-70 transition-opacity"
+                              >
+                                <FacebookIcon className="size-4" />
                               </a>
                             )}
                             {customer.website && (
                               <a
-                                href={customer.website.startsWith("http") ? customer.website : `https://${customer.website}`}
+                                href={
+                                  customer.website.startsWith("http")
+                                    ? customer.website
+                                    : `https://${customer.website}`
+                                }
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-muted-foreground hover:text-foreground transition-colors"
@@ -562,12 +765,13 @@ export function CustomerDetails() {
                         </div>
                       )}
                       {/* Show enrichment status if not completed and no data */}
-                      {!hasEnrichmentData && customer.enrichmentStatus === "completed" && (
-                        <div className="col-span-2 text-[14px] text-[#606060]">
-                          No company information found.
-                          {customer.website && " Try refreshing the data."}
-                        </div>
-                      )}
+                      {!hasEnrichmentData &&
+                        customer.enrichmentStatus === "completed" && (
+                          <div className="col-span-2 text-[14px] text-[#606060]">
+                            No company information found.
+                            {customer.website && " Try refreshing the data."}
+                          </div>
+                        )}
                       {customer.enrichmentStatus === "failed" && (
                         <div className="col-span-2 text-[14px] text-[#606060]">
                           Failed to fetch company information.

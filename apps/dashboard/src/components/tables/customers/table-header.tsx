@@ -258,6 +258,12 @@ function getHeaderLabel(columnId: string): string {
     email: "Email",
     invoices: "Invoices",
     projects: "Projects",
+    industry: "Industry",
+    companyType: "Type",
+    employeeCount: "Employees",
+    location: "Location",
+    website: "Website",
+    socialLinks: "Social",
     tags: "Tags",
     actions: "Actions",
   };

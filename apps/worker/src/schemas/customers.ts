@@ -10,4 +10,3 @@ export const enrichCustomerSchema = z.object({
 });
 
 export type EnrichCustomerPayload = z.infer<typeof enrichCustomerSchema>;
-

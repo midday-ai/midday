@@ -65,6 +65,8 @@ export const getCustomerById = async (
       timezone: customers.timezone,
       linkedinUrl: customers.linkedinUrl,
       twitterUrl: customers.twitterUrl,
+      instagramUrl: customers.instagramUrl,
+      facebookUrl: customers.facebookUrl,
       enrichmentStatus: customers.enrichmentStatus,
       enrichedAt: customers.enrichedAt,
       invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
@@ -153,11 +155,25 @@ export const getCustomers = async (
       countryCode: customers.countryCode,
       token: customers.token,
       contact: customers.contact,
-      // Key enrichment fields for list view
+      // Customer relationship fields
       status: customers.status,
       isArchived: customers.isArchived,
+      // Enrichment fields for list view
       logoUrl: customers.logoUrl,
+      description: customers.description,
       industry: customers.industry,
+      companyType: customers.companyType,
+      employeeCount: customers.employeeCount,
+      foundedYear: customers.foundedYear,
+      estimatedRevenue: customers.estimatedRevenue,
+      fundingStage: customers.fundingStage,
+      totalFunding: customers.totalFunding,
+      headquartersLocation: customers.headquartersLocation,
+      timezone: customers.timezone,
+      linkedinUrl: customers.linkedinUrl,
+      twitterUrl: customers.twitterUrl,
+      instagramUrl: customers.instagramUrl,
+      facebookUrl: customers.facebookUrl,
       enrichmentStatus: customers.enrichmentStatus,
       invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
       projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
@@ -217,8 +233,15 @@ export const getCustomers = async (
       isAscending
         ? query.orderBy(asc(sql`min(${tags.name})`))
         : query.orderBy(desc(sql`min(${tags.name})`));
+    } else if (column === "industry") {
+      isAscending
+        ? query.orderBy(asc(customers.industry))
+        : query.orderBy(desc(customers.industry));
+    } else if (column === "headquarters_location") {
+      isAscending
+        ? query.orderBy(asc(customers.headquartersLocation))
+        : query.orderBy(desc(customers.headquartersLocation));
     }
-    // Add other sorting options as needed
   } else {
     // Default sort by created_at descending
     query.orderBy(desc(customers.createdAt));
