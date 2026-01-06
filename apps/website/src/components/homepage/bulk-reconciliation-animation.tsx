@@ -529,21 +529,13 @@ export function BulkReconciliationAnimation({
                 <span className="font-sans text-[10px] md:text-[11px]">
                   Export
                 </span>
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="text-primary-foreground"
-                >
-                  <path
-                    d="M7 17L17 7M7 7h10v10"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <Image
+                  src="/images/xero.svg"
+                  alt="Xero"
+                  width={12}
+                  height={12}
+                  className="w-[10px] h-[10px] md:w-[12px] md:h-[12px] object-contain"
+                />
               </button>
             </motion.div>
           )}
