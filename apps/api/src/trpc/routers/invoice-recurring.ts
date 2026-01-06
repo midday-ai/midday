@@ -22,6 +22,7 @@ import {
 } from "@midday/db/queries";
 import { calculateNextScheduledDate } from "@midday/db/utils/invoice-recurring";
 import { isDateInFutureUTC } from "@midday/invoice/recurring";
+import { decodeJobId, getQueue } from "@midday/job-client";
 import { Notifications } from "@midday/notifications";
 import { TRPCError } from "@trpc/server";
 
@@ -482,11 +483,22 @@ export const invoiceRecurringRouter = createTRPCRouter({
               eq(invoices.teamId, teamId),
               eq(invoices.status, "scheduled"),
             ),
-          columns: { id: true },
+          columns: { id: true, scheduledJobId: true },
         });
 
-        // Revert each scheduled invoice to draft
+        // Remove scheduled jobs from the queue and revert invoices to draft
+        const queue = getQueue("invoices");
         for (const invoice of scheduledInvoices) {
+          // Remove the job from BullMQ queue if it exists
+          if (invoice.scheduledJobId) {
+            const { jobId: rawJobId } = decodeJobId(invoice.scheduledJobId);
+            const job = await queue.getJob(rawJobId);
+            if (job) {
+              await job.remove();
+            }
+          }
+
+          // Revert the invoice to draft
           await updateInvoice(tx, {
             id: invoice.id,
             teamId,
@@ -535,10 +547,22 @@ export const invoiceRecurringRouter = createTRPCRouter({
               eq(invoices.teamId, teamId),
               eq(invoices.status, "scheduled"),
             ),
-          columns: { id: true },
+          columns: { id: true, scheduledJobId: true },
         });
 
+        // Remove scheduled jobs from the queue and revert invoices to draft
+        const queue = getQueue("invoices");
         for (const invoice of scheduledInvoices) {
+          // Remove the job from BullMQ queue if it exists
+          if (invoice.scheduledJobId) {
+            const { jobId: rawJobId } = decodeJobId(invoice.scheduledJobId);
+            const job = await queue.getJob(rawJobId);
+            if (job) {
+              await job.remove();
+            }
+          }
+
+          // Revert the invoice to draft
           await updateInvoice(tx, {
             id: invoice.id,
             teamId,
