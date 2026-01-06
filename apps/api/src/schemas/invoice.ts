@@ -788,24 +788,16 @@ export const createInvoiceRequestSchema = z
         ],
       },
     }),
-    dueDate: z
-      .string()
-      .datetime({ offset: true })
-      .optional()
-      .openapi({
-        description:
-          "Due date of the invoice in ISO 8601 format. Defaults to issue date + payment terms (30 days) if not provided.",
-        example: "2024-06-30T23:59:59.000Z",
-      }),
-    issueDate: z
-      .string()
-      .datetime({ offset: true })
-      .optional()
-      .openapi({
-        description:
-          "Issue date of the invoice in ISO 8601 format. Defaults to current date if not provided.",
-        example: "2024-06-01T00:00:00.000Z",
-      }),
+    dueDate: z.string().datetime({ offset: true }).optional().openapi({
+      description:
+        "Due date of the invoice in ISO 8601 format. Defaults to issue date + payment terms (30 days) if not provided.",
+      example: "2024-06-30T23:59:59.000Z",
+    }),
+    issueDate: z.string().datetime({ offset: true }).optional().openapi({
+      description:
+        "Issue date of the invoice in ISO 8601 format. Defaults to current date if not provided.",
+      example: "2024-06-01T00:00:00.000Z",
+    }),
     invoiceNumber: z.string().optional().openapi({
       description:
         "Invoice number as shown to the customer (auto-generated if not provided)",
