@@ -1,187 +1,163 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
+import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false)
-  const [isTablet, setIsTablet] = useState(false)
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
 
   useEffect(() => {
     const checkSize = () => {
-      const width = window.innerWidth
-      setIsMobile(width < 640)
-      setIsTablet(width >= 640 && width < 768)
-    }
-    checkSize()
-    window.addEventListener('resize', checkSize)
-    return () => window.removeEventListener('resize', checkSize)
-  }, [])
+      const width = window.innerWidth;
+      setIsMobile(width < 640);
+      setIsTablet(width >= 640 && width < 768);
+    };
+    checkSize();
+    window.addEventListener("resize", checkSize);
+    return () => window.removeEventListener("resize", checkSize);
+  }, []);
 
-  return { isMobile, isTablet }
+  return { isMobile, isTablet };
 }
 
 export function BurnrateAnimation({
   onComplete,
 }: {
-  onComplete?: () => void
+  onComplete?: () => void;
 }) {
-  const { isMobile, isTablet } = useIsMobile()
-  const [showGraph, setShowGraph] = useState(false)
-  const [showMetrics, setShowMetrics] = useState(false)
-  const [showSummary, setShowSummary] = useState(false)
-  const [pathLength, setPathLength] = useState(0)
-  const [areaOpacity, setAreaOpacity] = useState(0)
-  const [showAverageLine, setShowAverageLine] = useState(false)
-  const intervalTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const { isMobile, isTablet } = useIsMobile();
+  const [showGraph, setShowGraph] = useState(false);
+  const [showMetrics, setShowMetrics] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
+  const [pathLength, setPathLength] = useState(0);
+  const [areaOpacity, setAreaOpacity] = useState(0);
+  const [showAverageLine, setShowAverageLine] = useState(false);
 
+  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
+    () => {
+      // Callback triggered when element becomes visible
+    },
+    { threshold: 0.5 },
+  );
+
+  // Start animation only when shouldPlay is true
   useEffect(() => {
-    setShowGraph(false)
-    setShowMetrics(false)
-    setShowSummary(false)
-    setPathLength(0)
-    setAreaOpacity(0)
-    setShowAverageLine(false)
+    if (!shouldPlay) return;
 
-    const graphTimer = setTimeout(() => setShowGraph(true), 300)
+    const graphTimer = setTimeout(() => setShowGraph(true), 300);
 
-    let done: NodeJS.Timeout | undefined
-    if (onComplete) {
-      done = setTimeout(() => {
-        onComplete()
-      }, 10000)
-    }
+    const doneTimer = onComplete
+      ? setTimeout(() => {
+          onComplete();
+        }, 10000)
+      : undefined;
 
     return () => {
-      clearTimeout(graphTimer)
-      if (done) clearTimeout(done)
-    }
-  }, [onComplete])
-
-  useEffect(() => {
-    if (!onComplete) {
-      const interval = setInterval(() => {
-        // Clear any pending timeout from previous interval
-        if (intervalTimeoutRef.current) {
-          clearTimeout(intervalTimeoutRef.current)
-        }
-        
-        setShowGraph(false)
-        setShowMetrics(false)
-        setShowSummary(false)
-        setPathLength(0)
-        setAreaOpacity(0)
-        setShowAverageLine(false)
-        
-        intervalTimeoutRef.current = setTimeout(() => {
-          setShowGraph(true)
-          intervalTimeoutRef.current = null
-        }, 300)
-      }, 10000)
-      return () => {
-        clearInterval(interval)
-        if (intervalTimeoutRef.current) {
-          clearTimeout(intervalTimeoutRef.current)
-        }
-      }
-    }
-  }, [onComplete])
+      clearTimeout(graphTimer);
+      if (doneTimer) clearTimeout(doneTimer);
+    };
+  }, [shouldPlay, onComplete]);
 
   // Sequential reveal
   useEffect(() => {
     if (showGraph) {
       // Show graph immediately without animation
-      setPathLength(1)
-      setAreaOpacity(1)
+      setPathLength(1);
+      setAreaOpacity(1);
       // Animate average line
       setTimeout(() => {
-        setShowAverageLine(true)
-      }, 300)
+        setShowAverageLine(true);
+      }, 300);
 
-      const metricsTimer = setTimeout(() => setShowMetrics(true), 1200)
-      const summaryTimer = setTimeout(() => setShowSummary(true), 1800)
+      const metricsTimer = setTimeout(() => setShowMetrics(true), 1200);
+      const summaryTimer = setTimeout(() => setShowSummary(true), 1800);
       return () => {
-        clearTimeout(metricsTimer)
-        clearTimeout(summaryTimer)
-      }
+        clearTimeout(metricsTimer);
+        clearTimeout(summaryTimer);
+      };
     }
-  }, [showGraph])
+  }, [showGraph]);
 
   // Burn rate data points (Oct to Apr) - values in thousands with moderate variation and one big dip
   const dataPoints = [
-    { month: 'Oct', value: 5.0 },
-    { month: 'Nov', value: 6.2 },
-    { month: 'Dec', value: 3.5 },
-    { month: 'Jan', value: 6.8 },
-    { month: 'Feb', value: 6.0 },
-    { month: 'Mar', value: 7.2 },
-    { month: 'Apr', value: 6.5 },
-  ]
+    { month: "Oct", value: 5.0 },
+    { month: "Nov", value: 6.2 },
+    { month: "Dec", value: 3.5 },
+    { month: "Jan", value: 6.8 },
+    { month: "Feb", value: 6.0 },
+    { month: "Mar", value: 7.2 },
+    { month: "Apr", value: 6.5 },
+  ];
 
-  const maxValue = 15
-  const averageValue = 6
-  const graphWidth = 500
+  const maxValue = 15;
+  const averageValue = 6;
+  const graphWidth = 500;
   // Graph height matches container height to fill it properly
-  const graphHeight = isMobile ? 180 : isTablet ? 240 : 280
-  const paddingLeft = 30
-  const paddingRight = 30
-  const paddingTop = isMobile ? 20 : 30
-  const paddingBottom = isMobile ? 20 : 30
-  const chartWidth = graphWidth - paddingLeft - paddingRight
-  const chartHeight = graphHeight - paddingTop - paddingBottom
+  const graphHeight = isMobile ? 180 : isTablet ? 240 : 280;
+  const paddingLeft = 30;
+  const paddingRight = 30;
+  const paddingTop = isMobile ? 20 : 30;
+  const paddingBottom = isMobile ? 20 : 30;
+  const chartWidth = graphWidth - paddingLeft - paddingRight;
+  const chartHeight = graphHeight - paddingTop - paddingBottom;
 
   // Convert data points to SVG coordinates
   const points = dataPoints.map((point, idx) => {
-    const divisor = dataPoints.length > 1 ? dataPoints.length - 1 : 1
-    const x = paddingLeft + (idx / divisor) * chartWidth
-    const y = paddingTop + chartHeight - (point.value / maxValue) * chartHeight
-    return { x, y, month: point.month, value: point.value }
-  })
+    const divisor = dataPoints.length > 1 ? dataPoints.length - 1 : 1;
+    const x = paddingLeft + (idx / divisor) * chartWidth;
+    const y = paddingTop + chartHeight - (point.value / maxValue) * chartHeight;
+    return { x, y, month: point.month, value: point.value };
+  });
 
   // Create path for line with sharp, angular curves
   const pathData = points.reduce((path, p, idx) => {
     if (idx === 0) {
-      return `M ${p.x} ${p.y}`
+      return `M ${p.x} ${p.y}`;
     }
-    const prevPoint = points[idx - 1]
+    const prevPoint = points[idx - 1];
     // Check if this is the big dip (Dec - index 2) or transitions to/from it
-    const isDipPoint = idx === 2 // Dec is index 2
-    const isBeforeDip = idx === 1 // Nov is before dip
-    const isAfterDip = idx === 3 // Jan is after dip
-    
+    const isDipPoint = idx === 2; // Dec is index 2
+    const isBeforeDip = idx === 1; // Nov is before dip
+    const isAfterDip = idx === 3; // Jan is after dip
+
     // Use straight lines for dip transitions, curves for others
     if (isDipPoint || isBeforeDip || isAfterDip) {
       // Sharp corner - straight line for dip area
-      return `${path} L ${p.x} ${p.y}`
-    } else {
-      // Sharp angular curve using quadratic bezier
-      const controlX = (prevPoint.x + p.x) / 2
-      const controlY = prevPoint.y < p.y 
-        ? prevPoint.y + (p.y - prevPoint.y) * 0.3
-        : prevPoint.y - (prevPoint.y - p.y) * 0.3
-      return `${path} Q ${controlX} ${controlY}, ${p.x} ${p.y}`
+      return `${path} L ${p.x} ${p.y}`;
     }
-  }, '')
+    // Sharp angular curve using quadratic bezier
+    if (!prevPoint) {
+      return path;
+    }
+    const controlX = (prevPoint.x + p.x) / 2;
+    const controlY =
+      prevPoint.y < p.y
+        ? prevPoint.y + (p.y - prevPoint.y) * 0.3
+        : prevPoint.y - (prevPoint.y - p.y) * 0.3;
+    return `${path} Q ${controlX} ${controlY}, ${p.x} ${p.y}`;
+  }, "");
 
   // Create area path (line + bottom)
-  const lastPoint = points[points.length - 1]
-  const firstPoint = points[0]
+  const lastPoint = points[points.length - 1];
+  const firstPoint = points[0];
   const areaPath =
     lastPoint && firstPoint
       ? `${pathData} L ${lastPoint.x} ${paddingTop + chartHeight} L ${firstPoint.x} ${paddingTop + chartHeight} Z`
-      : ''
+      : "";
 
   const averageY =
-    paddingTop + chartHeight - (averageValue / maxValue) * chartHeight
+    paddingTop + chartHeight - (averageValue / maxValue) * chartHeight;
 
   // Grid lines
   const gridLines = [0, 3, 6, 9, 12, 15].map((value) => {
-    const y = paddingTop + chartHeight - (value / maxValue) * chartHeight
-    return { y, value }
-  })
+    const y = paddingTop + chartHeight - (value / maxValue) * chartHeight;
+    return { y, value };
+  });
 
   return (
-    <div className="w-full h-full flex flex-col relative">
+    <div ref={containerRef} className="w-full h-full flex flex-col relative">
       {/* Header */}
       <div className="px-2 md:px-3 pt-2 md:pt-3 pb-1.5 md:pb-2 border-b border-border">
         <div className="flex items-center justify-between">
@@ -192,7 +168,7 @@ export function BurnrateAnimation({
             <div className="flex items-center gap-1.5 md:gap-2">
               <div
                 className="w-2 h-2 bg-foreground"
-                style={{ borderRadius: '0' }}
+                style={{ borderRadius: "0" }}
               />
               <span className="text-[8px] md:text-[9px] font-sans text-muted-foreground">
                 Current
@@ -256,9 +232,9 @@ export function BurnrateAnimation({
                 </defs>
 
                 {/* Background grid - Horizontal lines */}
-                {gridLines.map((grid, idx) => (
+                {gridLines.map((grid) => (
                   <line
-                    key={`grid-h-${idx}`}
+                    key={`grid-h-${grid.value}`}
                     x1={paddingLeft}
                     y1={grid.y}
                     x2={graphWidth - paddingRight}
@@ -269,11 +245,11 @@ export function BurnrateAnimation({
                     opacity="0.3"
                   />
                 ))}
-                
+
                 {/* Background grid - Vertical lines */}
-                {points.map((point, idx) => (
+                {points.map((point) => (
                   <line
-                    key={`grid-v-${idx}`}
+                    key={`grid-v-${point.month}`}
                     x1={point.x}
                     y1={paddingTop}
                     x2={point.x}
@@ -310,16 +286,15 @@ export function BurnrateAnimation({
                   />
                 )}
 
-                        {/* Line with sharp angular curves */}
-                        <path
-                          d={pathData}
-                          fill="none"
-                          stroke="hsl(var(--foreground))"
-                          strokeWidth="2"
-                          strokeLinecap="square"
-                          strokeLinejoin="miter"
-                        />
-
+                {/* Line with sharp angular curves */}
+                <path
+                  d={pathData}
+                  fill="none"
+                  stroke="hsl(var(--foreground))"
+                  strokeWidth="2"
+                  strokeLinecap="square"
+                  strokeLinejoin="miter"
+                />
               </svg>
             </motion.div>
           </div>
@@ -401,6 +376,5 @@ export function BurnrateAnimation({
         </div>
       </div>
     </div>
-  )
+  );
 }
-

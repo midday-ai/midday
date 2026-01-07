@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { Icons } from "@midday/ui/icons";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
@@ -76,13 +77,15 @@ export function CommandPanelAnimation({
     },
   ];
 
+  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
+    () => {
+      // Callback triggered when element becomes visible
+    },
+    { threshold: 0.5 },
+  );
+
   useEffect(() => {
-    setDisplayedQuery("");
-    setShowResults(false);
-    setShowTransaction(false);
-    setShowInvoice(false);
-    setShowReceipts(false);
-    setShowFiles(false);
+    if (!shouldPlay) return;
 
     // Start typing the search query
     let charIndex = 0;
@@ -111,62 +114,23 @@ export function CommandPanelAnimation({
       }
     }, 80);
 
-    let done: NodeJS.Timeout | undefined;
-    if (onComplete) {
-      done = setTimeout(() => {
-        onComplete();
-      }, 12000);
-    }
+    const doneTimer = onComplete
+      ? setTimeout(() => {
+          onComplete();
+        }, 12000)
+      : undefined;
 
     return () => {
       clearInterval(typingInterval);
-      if (done) clearTimeout(done);
+      if (doneTimer) clearTimeout(doneTimer);
     };
-  }, [onComplete]);
-
-  useEffect(() => {
-    if (!onComplete) {
-      const interval = setInterval(() => {
-        setDisplayedQuery("");
-        setShowResults(false);
-        setShowTransaction(false);
-        setShowInvoice(false);
-        setShowReceipts(false);
-        setShowFiles(false);
-
-        // Restart typing animation
-        let charIndex = 0;
-        const typingInterval = setInterval(() => {
-          if (charIndex < transactionSearch.length) {
-            setDisplayedQuery(transactionSearch.slice(0, charIndex + 1));
-            charIndex++;
-          } else {
-            clearInterval(typingInterval);
-            setTimeout(() => {
-              setShowResults(true);
-              setTimeout(() => {
-                setShowTransaction(true);
-                setTimeout(() => {
-                  setShowInvoice(true);
-                  setTimeout(() => {
-                    setShowReceipts(true);
-                    setTimeout(() => {
-                      setShowFiles(true);
-                    }, 100);
-                  }, 100);
-                }, 100);
-              }, 200);
-            }, 400);
-          }
-        }, 80);
-      }, 12000);
-
-      return () => clearInterval(interval);
-    }
-  }, [onComplete]);
+  }, [shouldPlay, onComplete, transactionSearch]);
 
   return (
-    <div className="w-full h-full flex items-center justify-center p-2 md:p-3">
+    <div
+      ref={containerRef}
+      className="w-full h-full flex items-center justify-center p-2 md:p-3"
+    >
       {/* Command Panel Container */}
       <div className="w-full max-w-[400px] h-full max-h-[500px] border border-border bg-background flex flex-col relative">
         {/* Search Bar */}

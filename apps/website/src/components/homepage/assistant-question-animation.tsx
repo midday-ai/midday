@@ -8,6 +8,7 @@ import type { ReactElement } from "react";
 import { type IconMap, MaterialIcon } from "./icon-mapping";
 import { Icons } from "@midday/ui/icons";
 import { cn } from "@midday/ui/cn";
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 
 export function AssistantQuestionAnimation({
   onComplete,
@@ -131,24 +132,12 @@ export function AssistantQuestionAnimation({
     return elements;
   };
 
+  const [containerRef, shouldPlay] = usePlayOnceOnVisible(() => {
+    // Callback triggered when element becomes visible
+  }, { threshold: 0.5 });
+
   useEffect(() => {
-    const startAnimation = () => {
-      setShowUserMessage(false);
-      setDisplayedSegments([]);
-      setActiveToolCall(null);
-      setIsTyping(false);
-      setShowCards(false);
-      setCardsVisible([]);
-
-      setTimeout(() => {
-        setShowUserMessage(true);
-      }, 500);
-
-      setTimeout(() => {
-        setIsTyping(true);
-        processSegments();
-      }, 1000);
-    };
+    if (!shouldPlay) return;
 
     const processSegments = () => {
       let segmentIndex = 0;
@@ -213,18 +202,25 @@ export function AssistantQuestionAnimation({
       processNextSegment();
     };
 
-    startAnimation();
+    setTimeout(() => {
+      setShowUserMessage(true);
+    }, 500);
 
-    const completionTimer = setInterval(() => {
-      onComplete?.();
-    }, 12000);
-    const interval = setInterval(startAnimation, 12000);
+    setTimeout(() => {
+      setIsTyping(true);
+      processSegments();
+    }, 1000);
+
+    const doneTimer = onComplete
+      ? setTimeout(() => {
+          onComplete();
+        }, 12000)
+      : undefined;
 
     return () => {
-      clearInterval(interval);
-      clearInterval(completionTimer);
+      if (doneTimer) clearTimeout(doneTimer);
     };
-  }, [onComplete]);
+  }, [shouldPlay, onComplete]);
 
   useEffect(() => {
     if (
@@ -242,7 +238,7 @@ export function AssistantQuestionAnimation({
   }, [displayedSegments]);
 
   return (
-    <div className="w-full h-full flex flex-col relative">
+    <div ref={containerRef} className="w-full h-full flex flex-col relative">
       <div className="flex-1 px-2 md:px-3 py-2 md:py-3 overflow-hidden">
         <div className="space-y-2 md:space-y-4 h-full flex flex-col">
           <div className="flex justify-end">

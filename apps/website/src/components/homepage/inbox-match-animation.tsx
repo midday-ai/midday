@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -64,46 +65,36 @@ export function InboxMatchAnimation({
     date: "Sep 10",
   };
 
+  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
+    () => {
+      // Callback triggered when element becomes visible
+    },
+    { threshold: 0.5 },
+  );
+
   useEffect(() => {
-    setShowSuggestBar(false);
-    setShowItems(false);
-    setShowIncoming(false);
+    if (!shouldPlay) return;
+
     const itemsTimer = setTimeout(() => setShowItems(true), 300);
     const incomingTimer = setTimeout(() => setShowIncoming(true), 1400);
     const barTimer = setTimeout(() => setShowSuggestBar(true), 1800);
 
-    let done: NodeJS.Timeout | undefined;
-    if (onComplete) {
-      done = setTimeout(() => {
-        onComplete();
-      }, 12000);
-    }
+    const doneTimer = onComplete
+      ? setTimeout(() => {
+          onComplete();
+        }, 12000)
+      : undefined;
 
     return () => {
       clearTimeout(itemsTimer);
       clearTimeout(incomingTimer);
       clearTimeout(barTimer);
-      if (done) clearTimeout(done);
+      if (doneTimer) clearTimeout(doneTimer);
     };
-  }, [onComplete]);
-
-  useEffect(() => {
-    if (!onComplete) {
-      const interval = setInterval(() => {
-        setShowSuggestBar(false);
-        setShowItems(false);
-        setShowIncoming(false);
-        const itemsTimer = setTimeout(() => setShowItems(true), 300);
-        const incomingTimer = setTimeout(() => setShowIncoming(true), 1400);
-        const barTimer = setTimeout(() => setShowSuggestBar(true), 1800);
-      }, 12000);
-
-      return () => clearInterval(interval);
-    }
-  }, [onComplete]);
+  }, [shouldPlay, onComplete]);
 
   return (
-    <div className="w-full h-full flex flex-col relative">
+    <div ref={containerRef} className="w-full h-full flex flex-col relative">
       <div className="px-2 md:px-3 pt-2 md:pt-3 pb-1">
         <div className="flex items-center justify-between mb-2 md:mb-3">
           <h3 className="text-[13px] md:text-[14px] text-foreground">Inbox</h3>

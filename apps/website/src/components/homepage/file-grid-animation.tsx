@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -16,29 +17,31 @@ export function FileGridAnimation({
   const [firstCardLoaded, setFirstCardLoaded] = useState(false);
   const [showCards, setShowCards] = useState(false);
 
+  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
+    () => {
+      // Callback triggered when element becomes visible
+    },
+    { threshold: 0.5 },
+  );
+
   useEffect(() => {
-    setFirstCardLoaded(false);
-    setShowCards(false);
+    if (!shouldPlay) return;
+
     const cardsTimer = setTimeout(() => setShowCards(true), 300);
     const contentTimer = setTimeout(() => setFirstCardLoaded(true), 1500);
+
+    const doneTimer = onComplete
+      ? setTimeout(() => {
+          onComplete();
+        }, 12000)
+      : undefined;
+
     return () => {
       clearTimeout(cardsTimer);
       clearTimeout(contentTimer);
+      if (doneTimer) clearTimeout(doneTimer);
     };
-  }, [onComplete]);
-
-  useEffect(() => {
-    if (!onComplete) {
-      const interval = setInterval(() => {
-        setFirstCardLoaded(false);
-        setShowCards(false);
-        const cardsTimer = setTimeout(() => setShowCards(true), 300);
-        const contentTimer = setTimeout(() => setFirstCardLoaded(true), 1500);
-      }, 12000);
-
-      return () => clearInterval(interval);
-    }
-  }, [onComplete]);
+  }, [shouldPlay, onComplete]);
 
   const files = [
     {
@@ -108,7 +111,7 @@ export function FileGridAnimation({
   });
 
   return (
-    <div className="w-full h-full flex flex-col relative">
+    <div ref={containerRef} className="w-full h-full flex flex-col relative">
       <div>
         <div className="flex items-center justify-between mb-2 md:mb-3 px-2 md:px-3 pt-2 md:pt-3">
           <h3 className="text-[13px] md:text-[14px] text-foreground">Files</h3>

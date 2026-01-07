@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
@@ -16,41 +17,32 @@ export function DashboardAnimation({
     0, 0, 0, 0, 0,
   ]);
 
+  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
+    () => {
+      // Callback triggered when element becomes visible
+      // Animation will start via useEffect below
+    },
+    { threshold: 0.5 },
+  );
+
+  // Start animation only when shouldPlay is true
   useEffect(() => {
-    setShowWidgets(false);
-    setShowChart(false);
-    setShowMetrics(false);
-    setShowSummary(false);
+    if (!shouldPlay) return;
+
     const timer = setTimeout(() => setShowWidgets(true), 300);
 
-    let done: NodeJS.Timeout | undefined;
-    if (onComplete) {
-      done = setTimeout(() => {
-        onComplete();
-      }, 10000);
-    }
+    // Call onComplete after animation duration
+    const doneTimer = onComplete
+      ? setTimeout(() => {
+          onComplete();
+        }, 10000)
+      : undefined;
 
     return () => {
       clearTimeout(timer);
-      if (done) clearTimeout(done);
+      if (doneTimer) clearTimeout(doneTimer);
     };
-  }, [onComplete]);
-
-  useEffect(() => {
-    if (!onComplete) {
-      const interval = setInterval(() => {
-        setShowWidgets(false);
-        setShowChart(false);
-        setShowMetrics(false);
-        setShowSummary(false);
-        const timer = setTimeout(() => {
-          setShowWidgets(true);
-        }, 300);
-        return () => clearTimeout(timer);
-      }, 10000);
-      return () => clearInterval(interval);
-    }
-  }, [onComplete]);
+  }, [shouldPlay, onComplete]);
 
   // Sequential reveal
   useEffect(() => {
@@ -222,7 +214,7 @@ export function DashboardAnimation({
   };
 
   return (
-    <div className="w-full h-full flex flex-col relative">
+    <div ref={containerRef} className="w-full h-full flex flex-col relative">
       <div className="px-2 md:px-3 pt-2 md:pt-3 pb-1.5 md:pb-2 border-b border-border">
         <h3 className="text-[13px] md:text-[14px] text-foreground">
           Category Expenses

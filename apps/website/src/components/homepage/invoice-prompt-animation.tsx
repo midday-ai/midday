@@ -1,87 +1,76 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import Image from 'next/image'
-import { MaterialIcon } from './icon-mapping'
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { MaterialIcon } from "./icon-mapping";
 
 export function InvoicePromptAnimation({
   onComplete,
 }: {
-  onComplete?: () => void
+  onComplete?: () => void;
 }) {
-  const [showUserMessage, setShowUserMessage] = useState(false)
-  const [showInvoice, setShowInvoice] = useState(false)
-  const [visibleSections, setVisibleSections] = useState<number[]>([])
+  const [showUserMessage, setShowUserMessage] = useState(false);
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [visibleSections, setVisibleSections] = useState<number[]>([]);
 
   const userPrompt =
-    'Create an invoice to Acme for 20 development hours and 10 design hours'
+    "Create an invoice to Acme for 20 development hours and 10 design hours";
 
-  const developmentRate = 100
-  const designRate = 100
-  const developmentQty = 20
-  const designQty = 10
+  const developmentRate = 100;
+  const designRate = 100;
+  const developmentQty = 20;
+  const designQty = 10;
 
-  const subtotal =
-    developmentQty * developmentRate + designQty * designRate
-  const tax = subtotal * 0.1
-  const total = subtotal + tax
+  const subtotal = developmentQty * developmentRate + designQty * designRate;
+  const tax = subtotal * 0.1;
+  const total = subtotal + tax;
+
+  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
+    () => {
+      // Callback triggered when element becomes visible
+    },
+    { threshold: 0.5 },
+  );
 
   useEffect(() => {
-    setShowUserMessage(false)
-    setShowInvoice(false)
-    setVisibleSections([])
+    if (!shouldPlay) return;
 
-    const t1 = setTimeout(() => setShowUserMessage(true), 500)
+    const t1 = setTimeout(() => setShowUserMessage(true), 500);
 
     const t2 = setTimeout(() => {
-      setShowInvoice(true)
-      const order = [0, 1, 2, 3, 4]
+      setShowInvoice(true);
+      const order = [0, 1, 2, 3, 4];
       order.forEach((sec, idx) => {
         setTimeout(
           () => setVisibleSections((prev) => [...prev, sec]),
           200 + idx * 160,
-        )
-      })
-    }, 1000)
+        );
+      });
+    }, 1000);
 
-    const done = setTimeout(() => {
-      onComplete?.()
-    }, 12000)
-
-    const loop = setInterval(() => {
-      setShowUserMessage(false)
-      setShowInvoice(false)
-      setVisibleSections([])
-      setTimeout(() => setShowUserMessage(true), 500)
-      setTimeout(() => {
-        setShowInvoice(true)
-        const order2 = [0, 1, 2, 3, 4]
-        order2.forEach((sec, idx) => {
-          setTimeout(
-            () => setVisibleSections((prev) => [...prev, sec]),
-            200 + idx * 160,
-          )
-        })
-      }, 1000)
-    }, 12000)
+    const doneTimer = onComplete
+      ? setTimeout(() => {
+          onComplete();
+        }, 12000)
+      : undefined;
 
     return () => {
-      clearTimeout(t1)
-      clearTimeout(t2)
-      clearInterval(loop)
-      clearTimeout(done)
-    }
-  }, [onComplete])
+      clearTimeout(t1);
+      clearTimeout(t2);
+      if (doneTimer) clearTimeout(doneTimer);
+    };
+  }, [shouldPlay, onComplete]);
 
   return (
-    <div className="w-full h-full flex flex-col relative">
+    <div ref={containerRef} className="w-full h-full flex flex-col relative">
       <div className="flex-1 px-2 md:px-3 py-2 md:py-3 overflow-hidden">
         <div className="space-y-2 md:space-y-3 h-full flex flex-col">
           <div className="flex justify-end">
             <div
               className={`pl-1.5 pr-2 py-1 max-w-[85%] md:max-w-xs rounded-bl-[100px] rounded-tl-[100px] bg-secondary transition-opacity duration-75 ${
-                showUserMessage ? 'opacity-100' : 'opacity-0'
+                showUserMessage ? "opacity-100" : "opacity-0"
               }`}
             >
               <p className="text-[11px] md:text-[12px] text-right text-foreground">
@@ -132,7 +121,9 @@ export function InvoicePromptAnimation({
                       <div className="text-[11px] md:text-[12px] text-muted-foreground">
                         To
                       </div>
-                      <div className="text-[11px] md:text-[12px] text-foreground">Acme</div>
+                      <div className="text-[11px] md:text-[12px] text-foreground">
+                        Acme
+                      </div>
                       <div className="text-[11px] md:text-[12px] text-muted-foreground break-all">
                         billing@acme.com
                       </div>
@@ -148,7 +139,9 @@ export function InvoicePromptAnimation({
                     <div className="text-[11px] md:text-[12px] text-muted-foreground text-right">
                       Due in
                     </div>
-                    <div className="text-[11px] md:text-[12px] text-foreground">INV-001</div>
+                    <div className="text-[11px] md:text-[12px] text-foreground">
+                      INV-001
+                    </div>
                     <div className="text-[11px] md:text-[12px] text-foreground">
                       Sep 29, 2025
                     </div>
@@ -271,10 +264,15 @@ export function InvoicePromptAnimation({
             <div className="text-[11px] md:text-[12px] text-foreground break-words">
               Bank: Example Bank, IBAN: XX00 0000 0000 0000 0000
             </div>
-            <div className="text-[11px] md:text-[12px] text-foreground">Reference: INV-001</div>
+            <div className="text-[11px] md:text-[12px] text-foreground">
+              Reference: INV-001
+            </div>
           </div>
           <div className="mt-1.5 md:mt-2 flex items-end justify-between">
-            <button className="flex items-center gap-1 text-[11px] md:text-[12px] leading-[15px] md:leading-[16px] text-muted-foreground hover:text-foreground">
+            <button
+              type="button"
+              className="flex items-center gap-1 text-[11px] md:text-[12px] leading-[15px] md:leading-[16px] text-muted-foreground hover:text-foreground"
+            >
               <MaterialIcon name="open_in_new" className="" size={11} />
               <span>Preview invoice</span>
             </button>
@@ -282,6 +280,5 @@ export function InvoicePromptAnimation({
         </motion.div>
       </div>
     </div>
-  )
+  );
 }
-

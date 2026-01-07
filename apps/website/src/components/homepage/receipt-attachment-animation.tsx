@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -9,7 +10,16 @@ export function ReceiptAttachmentAnimation() {
   const [showReceipt, setShowReceipt] = useState(false);
   const [showBar, setShowBar] = useState(false);
 
+  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
+    () => {
+      // Callback triggered when element becomes visible
+    },
+    { threshold: 0.5 },
+  );
+
   useEffect(() => {
+    if (!shouldPlay) return;
+
     // Show receipt after initial delay
     const receiptTimer = setTimeout(() => {
       setShowReceipt(true);
@@ -24,10 +34,13 @@ export function ReceiptAttachmentAnimation() {
       clearTimeout(receiptTimer);
       clearTimeout(barTimer);
     };
-  }, []);
+  }, [shouldPlay]);
 
   return (
-    <div className="w-full h-full bg-background border border-border overflow-hidden relative">
+    <div
+      ref={containerRef}
+      className="w-full h-full bg-background border border-border overflow-hidden relative"
+    >
       {/* Receipt View */}
       <AnimatePresence>
         {showReceipt && (

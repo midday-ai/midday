@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { MaterialIcon } from './icon-mapping'
+import { usePlayOnceOnVisible } from '@/hooks/use-play-once-on-visible'
 
 interface Invoice {
   id: string
@@ -77,14 +78,12 @@ export function CustomerStatementAnimation({
   const [showTable, setShowTable] = useState(false)
   const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices)
 
+  const [containerRef, shouldPlay] = usePlayOnceOnVisible(() => {
+    // Callback triggered when element becomes visible
+  }, { threshold: 0.5 })
+
   useEffect(() => {
-    setShowHeader(false)
-    setShowGeneral(false)
-    setShowDetails(false)
-    setShowStatement(false)
-    setShowCards(false)
-    setShowTable(false)
-    setInvoices(initialInvoices)
+    if (!shouldPlay) return
 
     const headerTimer = setTimeout(() => setShowHeader(true), 300)
     const generalTimer = setTimeout(() => setShowGeneral(true), 600)
@@ -92,12 +91,11 @@ export function CustomerStatementAnimation({
     const cardsTimer = setTimeout(() => setShowCards(true), 1200)
     const tableTimer = setTimeout(() => setShowTable(true), 1500)
 
-    let done: NodeJS.Timeout | undefined
-    if (onComplete) {
-      done = setTimeout(() => {
-        onComplete()
-      }, 10000)
-    }
+    const doneTimer = onComplete
+      ? setTimeout(() => {
+          onComplete()
+        }, 10000)
+      : undefined
 
     return () => {
       clearTimeout(headerTimer)
@@ -105,31 +103,9 @@ export function CustomerStatementAnimation({
       clearTimeout(statementTimer)
       clearTimeout(cardsTimer)
       clearTimeout(tableTimer)
-      if (done) clearTimeout(done)
+      if (doneTimer) clearTimeout(doneTimer)
     }
-  }, [onComplete])
-
-  useEffect(() => {
-    if (!onComplete) {
-      const interval = setInterval(() => {
-        setShowHeader(false)
-        setShowGeneral(false)
-        setShowDetails(false)
-        setShowStatement(false)
-        setShowCards(false)
-        setShowTable(false)
-        setInvoices(initialInvoices)
-
-        setTimeout(() => setShowHeader(true), 300)
-        setTimeout(() => setShowGeneral(true), 600)
-        setTimeout(() => setShowStatement(true), 900)
-        setTimeout(() => setShowCards(true), 1200)
-        setTimeout(() => setShowTable(true), 1500)
-      }, 10000)
-
-      return () => clearInterval(interval)
-    }
-  }, [onComplete])
+  }, [shouldPlay, onComplete])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -143,7 +119,7 @@ export function CustomerStatementAnimation({
   }
 
   return (
-    <div className="w-full h-full flex flex-col relative bg-background min-h-0">
+    <div ref={containerRef} className="w-full h-full flex flex-col relative bg-background min-h-0">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0 }}

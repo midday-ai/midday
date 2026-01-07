@@ -1,5 +1,6 @@
 "use client";
 
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
@@ -162,14 +163,15 @@ export function InvoicePaymentAnimation({
     filled: i < 8, // First 8 bars are filled
   }));
 
+  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
+    () => {
+      // Callback triggered when element becomes visible
+    },
+    { threshold: 0.5 },
+  );
+
   useEffect(() => {
-    setShowCards(false);
-    setShowTable(false);
-    setShowPaymentScore(false);
-    setVisibleBars([]);
-    setInvoices((prev) =>
-      prev.map((inv) => ({ ...inv, status: "sent" as const })),
-    );
+    if (!shouldPlay) return;
 
     // Show cards first
     const cardsTimer = setTimeout(() => setShowCards(true), 300);
@@ -253,120 +255,26 @@ export function InvoicePaymentAnimation({
       flipTimers.push(timer);
     });
 
-    const done = setTimeout(() => {
-      onComplete?.();
-    }, 15000);
-
-    const loop = setInterval(() => {
-      setShowCards(false);
-      setShowTable(false);
-      setShowPaymentScore(false);
-      setVisibleBars([]);
-      setInvoices((prev) =>
-        prev.map((inv) => ({ ...inv, status: "sent" as const })),
-      );
-      setPaidCount(10);
-      setPaidAmount("$126,500.75");
-      setOverdueCount(12);
-      setOverdueAmount("$12,500.50");
-
-      setTimeout(() => setShowCards(true), 300);
-      setTimeout(() => {
-        setShowPaymentScore(true);
-        paymentScoreBars.forEach((_, index) => {
-          setTimeout(
-            () => {
-              setVisibleBars((prev) => [...prev, index]);
-            },
-            1200 + index * 50,
-          );
-        });
-      }, 1000);
-      setTimeout(() => setShowTable(true), 800);
-
-      const overdueIndicesLoop = [2, 7];
-      const scheduledIndicesLoop = [1];
-      const recurringIndicesLoop = [4];
-      let paidCountLoop = 0;
-      let paidTotalLoop = 0;
-      let overdueTotalLoop = 0;
-
-      initialInvoices.forEach((invoice, index) => {
-        setTimeout(
-          () => {
-            const isOverdue = overdueIndicesLoop.includes(index);
-            const isScheduled = scheduledIndicesLoop.includes(index);
-            const isRecurring = recurringIndicesLoop.includes(index);
-            let newStatus: "paid" | "overdue" | "scheduled" | "recurring";
-
-            if (isOverdue) {
-              newStatus = "overdue";
-            } else if (isScheduled) {
-              newStatus = "scheduled";
-            } else if (isRecurring) {
-              newStatus = "recurring";
-            } else {
-              newStatus = "paid";
-            }
-
-            setInvoices((prev) =>
-              prev.map((inv, idx) =>
-                idx === index ? { ...inv, status: newStatus } : inv,
-              ),
-            );
-
-            if (isOverdue) {
-              overdueTotalLoop += Number.parseFloat(
-                invoice.amount.replace(/[^0-9.]/g, ""),
-              );
-            } else if (!isScheduled && !isRecurring) {
-              paidCountLoop++;
-              paidTotalLoop += Number.parseFloat(
-                invoice.amount.replace(/[^0-9.]/g, ""),
-              );
-            }
-
-            if (index === invoiceCount - 1) {
-              setPaidCount((prev) => prev + paidCountLoop);
-              setPaidAmount((prev) => {
-                const current = Number.parseFloat(prev.replace(/[^0-9.]/g, ""));
-                return `$${(current + paidTotalLoop).toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}`;
-              });
-              setOverdueCount((prev) => prev + overdueIndicesLoop.length);
-              setOverdueAmount((prev) => {
-                const current = Number.parseFloat(prev.replace(/[^0-9.]/g, ""));
-                return `$${(current + overdueTotalLoop).toLocaleString(
-                  "en-US",
-                  {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  },
-                )}`;
-              });
-            }
-          },
-          2000 + index * 400,
-        );
-      });
-    }, 15000);
+    const doneTimer = onComplete
+      ? setTimeout(() => {
+          onComplete();
+        }, 15000)
+      : undefined;
 
     return () => {
       clearTimeout(cardsTimer);
       clearTimeout(scoreTimer);
       clearTimeout(tableTimer);
-      for (const timer of flipTimers) {
-        clearTimeout(timer);
-      }
-      clearInterval(loop);
-      clearTimeout(done);
+      flipTimers.forEach(clearTimeout);
+      if (doneTimer) clearTimeout(doneTimer);
     };
-  }, [onComplete]);
+  }, [shouldPlay, onComplete]);
 
   return (
-    <div className="w-full h-full flex flex-col relative overflow-hidden">
+    <div
+      ref={containerRef}
+      className="w-full h-full flex flex-col relative overflow-hidden"
+    >
       {/* Header */}
       <div className="px-2 md:px-3 pt-3 md:pt-4 pb-2 md:pb-3 border-b border-border relative z-10">
         <h3 className="text-[13px] md:text-[14px] text-foreground">Invoices</h3>
