@@ -80,6 +80,7 @@ export function WidgetsAnimation({
   const [isWiggling, setIsWiggling] = useState(false)
   const [movingCardId, setMovingCardId] = useState<string | null>(null)
   const [cardOrder, setCardOrder] = useState<string[]>(widgets.map(w => w.id))
+  const [isDragging, setIsDragging] = useState<string | null>(null)
 
   useEffect(() => {
     setShowWidgets(false)
@@ -174,6 +175,12 @@ export function WidgetsAnimation({
     }
   }, [onComplete])
 
+  const handleDrag = (widgetId: string, info: { x: number; y: number }) => {
+    // Only allow manual dragging when not in animation mode
+    if (!movingCardId && !isWiggling) {
+      setIsDragging(widgetId)
+    }
+  }
 
   const renderBarChart = () => {
     // Vertical bar chart for Profit & Loss - pairs of bars
@@ -291,7 +298,12 @@ export function WidgetsAnimation({
           return (
             <motion.div
               key={widgetId}
-              drag={false}
+              drag={!isWiggling && !isMoving}
+              dragMomentum={false}
+              dragElastic={0}
+              onDrag={(_, info) => handleDrag(widgetId, info)}
+              onDragStart={() => !isWiggling && !isMoving && setIsDragging(widgetId)}
+              onDragEnd={() => setIsDragging(null)}
               initial={{ opacity: 0, y: 12 }}
               animate={{ 
                 opacity: showWidgets ? (isMoving ? 0.7 : 1) : 0, 
@@ -321,7 +333,7 @@ export function WidgetsAnimation({
               }}
               layout
               className={`bg-secondary border border-border p-2 md:p-3 lg:p-4 flex flex-col h-full ${
-                isMoving ? 'cursor-default' : 'cursor-default'
+                isDragging === widgetId ? 'z-50 cursor-grabbing' : (isMoving ? 'cursor-default' : 'cursor-grab')
               }`}
             >
               {/* Title with icon */}
