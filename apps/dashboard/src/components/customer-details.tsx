@@ -771,7 +771,7 @@ export function CustomerDetails() {
                             {customer.financeContactEmail && (
                               <a
                                 href={`mailto:${customer.financeContactEmail}`}
-                                className="text-[#606060] hover:text-foreground transition-colors"
+                                className="hover:text-[#606060] transition-colors"
                               >
                                 {customer.financeContactEmail}
                               </a>
