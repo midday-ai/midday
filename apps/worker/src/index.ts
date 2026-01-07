@@ -9,17 +9,9 @@ import { Worker } from "bullmq";
 import { Hono } from "hono";
 import { basicAuth } from "hono/basic-auth";
 import { serveStatic } from "hono/bun";
-import { getRedisConnection } from "./config";
 import { getProcessor } from "./processors/registry";
 import { getAllQueues, queueConfigs } from "./queues";
 import { registerStaticSchedulers } from "./schedulers/registry";
-
-const redisConnection = getRedisConnection();
-
-// Wait for connection to be ready before starting workers
-redisConnection.once("ready", () => {
-  console.log("[Redis Queue] Connection ready, workers can start processing");
-});
 
 /**
  * Create workers dynamically from queue configurations
@@ -36,6 +28,12 @@ const workers = queueConfigs.map((config) => {
     },
     config.workerOptions,
   );
+
+  // Always attach error handler to prevent unhandled errors
+  // See: https://docs.bullmq.io/guide/going-to-production#log-errors
+  worker.on("error", (err) => {
+    console.error(`[Worker:${config.name}] Error:`, err);
+  });
 
   // Register event handlers if provided
   if (config.eventHandlers) {
@@ -190,3 +188,17 @@ const shutdown = async (signal: string) => {
 
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("SIGINT", () => shutdown("SIGINT"));
+
+/**
+ * Unhandled exception and rejection handlers
+ * See: https://docs.bullmq.io/guide/going-to-production#unhandled-exceptions-and-rejections
+ */
+process.on("uncaughtException", (err) => {
+  console.error("[Worker] Uncaught exception:", err);
+  // Don't exit - let the process manager (Fly.io) handle restarts
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("[Worker] Unhandled rejection at:", promise, "reason:", reason);
+  // Don't exit - let the process manager handle restarts
+});

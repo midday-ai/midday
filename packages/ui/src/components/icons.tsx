@@ -1,5 +1,4 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
-import { FaFacebook, FaInstagram, FaXTwitter } from "react-icons/fa6";
 import { FiGithub } from "react-icons/fi";
 import type { IconType as BaseIconType } from "react-icons/lib";
 import {
@@ -590,7 +589,11 @@ export const Icons = {
   Overview: MdOutlineWidgets,
   Inbox: ArchiveIcon,
   Close: MdClose,
-  X: FaXTwitter,
+  X: (props: SVGIconProps) => (
+    <SVGIcon {...props} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </SVGIcon>
+  ),
   Discord: PiDiscordLogo,
   PdfOutline: MdOutlinePictureAsPdf,
   Amount: MdOutlineEqualizer,
@@ -697,15 +700,49 @@ export const Icons = {
     </SVGIcon>
   ),
   LinkedIn: (props: SVGIconProps) => (
-    <SVGIcon {...props} viewBox="0 0 24 24">
+    <SVGIcon {...props} viewBox="0 0 72 72">
+      <rect width="72" height="72" rx="8" fill="#0077B7" />
       <path
-        fill="#0A66C2"
-        d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+        fill="#fff"
+        d="M20.5 29h8v28.5h-8zM24.5 17c2.7 0 4.9 2.2 4.9 4.9s-2.2 4.9-4.9 4.9-4.9-2.2-4.9-4.9 2.2-4.9 4.9-4.9M33.5 29h7.7v3.9h.1c1.1-2 3.7-4.1 7.6-4.1 8.1 0 9.6 5.3 9.6 12.3v14.4h-8V43.2c0-3.4-.1-7.8-4.8-7.8-4.8 0-5.5 3.7-5.5 7.6v14.5h-8V29z"
       />
     </SVGIcon>
   ),
-  Instagram: (props: SVGIconProps) => <FaInstagram {...props} />,
-  Facebook: (props: SVGIconProps) => <FaFacebook {...props} />,
+  Instagram: (props: SVGIconProps) => (
+    <SVGIcon {...props} viewBox="0 0 24 24">
+      <defs>
+        <linearGradient id="instagram-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#FEDA77" />
+          <stop offset="25%" stopColor="#FA7E1E" />
+          <stop offset="50%" stopColor="#D62976" />
+          <stop offset="75%" stopColor="#962FBF" />
+          <stop offset="100%" stopColor="#4F5BD5" />
+        </linearGradient>
+      </defs>
+      <rect width="24" height="24" rx="6" fill="url(#instagram-gradient)" />
+      <rect
+        x="4"
+        y="4"
+        width="16"
+        height="16"
+        rx="4"
+        stroke="#fff"
+        strokeWidth="2"
+        fill="none"
+      />
+      <circle cx="12" cy="12" r="3.5" stroke="#fff" strokeWidth="2" fill="none" />
+      <circle cx="17" cy="7" r="1.5" fill="#fff" />
+    </SVGIcon>
+  ),
+  Facebook: (props: SVGIconProps) => (
+    <SVGIcon {...props} viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="12" fill="#1877F2" />
+      <path
+        fill="#fff"
+        d="M16.671 15.469l.547-3.469h-3.343v-2.25c0-.949.478-1.875 2.016-1.875h1.559V5.156S16.045 5 14.703 5c-2.804 0-4.637 1.653-4.637 4.641V12H7.078v3.469h2.988v8.385a12.158 12.158 0 003.672 0v-8.385h2.933z"
+      />
+    </SVGIcon>
+  ),
   Xero: ({ className }: { className?: string }) => (
     <svg
       className={className}

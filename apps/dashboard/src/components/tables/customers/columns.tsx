@@ -70,10 +70,7 @@ const TagsCell = memo(
       <div className="flex items-center space-x-2 overflow-x-auto scrollbar-hide">
         {tags?.map((tag) => (
           <Link href={`/transactions?tags=${tag.id}`} key={tag.id}>
-            <Badge
-              variant="tag-rounded"
-              className="whitespace-nowrap flex-shrink-0"
-            >
+            <Badge variant="tag" className="whitespace-nowrap flex-shrink-0">
               {tag.name}
             </Badge>
           </Link>
@@ -178,23 +175,6 @@ const WebsiteCell = memo(({ website }: { website: string | null }) => {
 
 WebsiteCell.displayName = "WebsiteCell";
 
-// LinkedIn icon with brand color (blue background, white text)
-function LinkedInIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 72 72"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <rect width="72" height="72" rx="8" fill="#0077B7" />
-      <path
-        fill="#fff"
-        d="M20.5 29h8v28.5h-8zM24.5 17c2.7 0 4.9 2.2 4.9 4.9s-2.2 4.9-4.9 4.9-4.9-2.2-4.9-4.9 2.2-4.9 4.9-4.9M33.5 29h7.7v3.9h.1c1.1-2 3.7-4.1 7.6-4.1 8.1 0 9.6 5.3 9.6 12.3v14.4h-8V43.2c0-3.4-.1-7.8-4.8-7.8-4.8 0-5.5 3.7-5.5 7.6v14.5h-8V29z"
-      />
-    </svg>
-  );
-}
-
 // Social links cell - combined LinkedIn/Twitter/Instagram/Facebook icons
 const SocialLinksCell = memo(
   ({
@@ -223,7 +203,7 @@ const SocialLinksCell = memo(
             rel="noopener noreferrer"
             className="hover:opacity-70 transition-opacity"
           >
-            <LinkedInIcon className="size-4" />
+            <Icons.LinkedIn className="size-4" />
           </a>
         )}
         {twitterUrl && (
@@ -231,7 +211,7 @@ const SocialLinksCell = memo(
             href={twitterUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-foreground"
+            className="hover:opacity-70 transition-opacity"
           >
             <Icons.X className="size-4" />
           </a>
@@ -241,7 +221,7 @@ const SocialLinksCell = memo(
             href={instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-foreground"
+            className="hover:opacity-70 transition-opacity"
           >
             <Icons.Instagram className="size-4" />
           </a>
@@ -251,7 +231,7 @@ const SocialLinksCell = memo(
             href={facebookUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-foreground"
+            className="hover:opacity-70 transition-opacity"
           >
             <Icons.Facebook className="size-4" />
           </a>
@@ -377,7 +357,10 @@ export const columns: ColumnDef<Customer>[] = [
       className: "w-[150px] min-w-[120px]",
     },
     cell: ({ row }) => {
-      if (row.original.enrichmentStatus === "processing") {
+      if (
+        row.original.enrichmentStatus === "processing" ||
+        row.original.enrichmentStatus === "pending"
+      ) {
         return <EnrichingCell />;
       }
       if (!row.original.industry) return "-";
@@ -402,7 +385,10 @@ export const columns: ColumnDef<Customer>[] = [
       className: "w-[120px] min-w-[100px]",
     },
     cell: ({ row }) => {
-      if (row.original.enrichmentStatus === "processing") {
+      if (
+        row.original.enrichmentStatus === "processing" ||
+        row.original.enrichmentStatus === "pending"
+      ) {
         return <EnrichingCell />;
       }
       if (!row.original.companyType) return "-";
@@ -427,7 +413,10 @@ export const columns: ColumnDef<Customer>[] = [
       className: "w-[130px] min-w-[100px]",
     },
     cell: ({ row }) => {
-      if (row.original.enrichmentStatus === "processing") {
+      if (
+        row.original.enrichmentStatus === "processing" ||
+        row.original.enrichmentStatus === "pending"
+      ) {
         return <EnrichingCell />;
       }
       return row.original.employeeCount ?? "-";
@@ -447,7 +436,10 @@ export const columns: ColumnDef<Customer>[] = [
       className: "w-[180px] min-w-[140px]",
     },
     cell: ({ row }) => {
-      if (row.original.enrichmentStatus === "processing") {
+      if (
+        row.original.enrichmentStatus === "processing" ||
+        row.original.enrichmentStatus === "pending"
+      ) {
         return <EnrichingCell />;
       }
       return (
@@ -487,7 +479,10 @@ export const columns: ColumnDef<Customer>[] = [
       className: "w-[120px] min-w-[100px]",
     },
     cell: ({ row }) => {
-      if (row.original.enrichmentStatus === "processing") {
+      if (
+        row.original.enrichmentStatus === "processing" ||
+        row.original.enrichmentStatus === "pending"
+      ) {
         return <EnrichingCell />;
       }
       return (

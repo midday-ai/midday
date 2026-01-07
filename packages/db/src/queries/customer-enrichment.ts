@@ -35,6 +35,7 @@ export type CustomerEnrichmentUpdateData = {
   twitterUrl?: string | null;
   instagramUrl?: string | null;
   facebookUrl?: string | null;
+  ceoName?: string | null;
 };
 
 export type UpdateCustomerEnrichmentParams = {
@@ -87,7 +88,7 @@ export async function updateCustomerEnrichmentStatus(
   db: Database,
   params: {
     customerId: string;
-    status: "pending" | "processing" | "completed" | "failed";
+    status: "pending" | "processing" | "completed" | "failed" | null;
   },
 ): Promise<void> {
   await db

@@ -860,6 +860,7 @@ export const customers = pgTable(
     twitterUrl: text("twitter_url"),
     instagramUrl: text("instagram_url"),
     facebookUrl: text("facebook_url"),
+    ceoName: text("ceo_name"), // CEO or founder name
 
     // Enrichment metadata
     enrichmentStatus: text("enrichment_status").default("pending"), // pending, processing, completed, failed

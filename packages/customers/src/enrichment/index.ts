@@ -1,10 +1,7 @@
-export {
-  enrichCustomer,
-  type EnrichCustomerParams,
-  type EnrichCustomerOptions,
-  type EnrichCustomerResult,
-  type EnrichmentMetrics,
-} from "./enrich";
+// Main enrichment function
+export { enrichCustomer } from "./enrich";
+
+// Schema, types, and options
 export {
   customerEnrichmentSchema,
   industryOptions,
@@ -14,7 +11,13 @@ export {
   fundingStageOptions,
   type CustomerEnrichmentResult,
   type VerifiedEnrichmentData,
+  type EnrichCustomerParams,
+  type EnrichCustomerOptions,
+  type EnrichCustomerResult,
+  type EnrichmentMetrics,
 } from "./schema";
+
+// Verification utilities
 export {
   verifyEnrichmentData,
   verifyLinkedInUrl,
@@ -25,13 +28,22 @@ export {
   validateDescription,
   type VerifyOptions,
 } from "./verify";
+
+// Tools (for direct use or custom pipelines)
 export {
   readWebsiteTool,
-  searchLinkedInTool,
-  searchFundingTool,
-  verifyAndExtractTool,
+  searchCompanyTool,
+  extractDataTool,
+  executeReadWebsite,
+  executeSearchCompany,
+  executeExtractData,
+  type ReadWebsiteInput,
+  type SearchCompanyInput,
+  type ExtractDataInput,
   type ReadWebsiteResult,
-  type SearchLinkedInResult,
-  type SearchFundingResult,
-  type VerifyAndExtractResult,
+  type SearchCompanyResult,
+  type ExtractDataResult,
 } from "./tools";
+
+// Country detection
+export { buildRegistrySearchHint, detectCountryCode } from "./registries";

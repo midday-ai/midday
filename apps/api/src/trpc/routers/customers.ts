@@ -141,10 +141,11 @@ export const customersRouter = createTRPCRouter({
         });
       }
 
-      // Reset status to pending (job may still complete in background but status won't show as processing)
+      // Reset status to null (no enrichment in progress)
+      // The job may still complete in background but UI won't show as processing
       await updateCustomerEnrichmentStatus(db, {
         customerId: customer.id,
-        status: "pending",
+        status: null,
       });
 
       return { cancelled: true };

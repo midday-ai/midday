@@ -59,89 +59,10 @@ import { useOnClickOutside } from "usehooks-ts";
 import { FormatAmount } from "./format-amount";
 import { InvoiceStatus } from "./invoice-status";
 
-// X (Twitter) icon with brand color (black)
-function XIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-    </svg>
-  );
-}
-
-// LinkedIn icon with brand color (blue background, white text)
-function LinkedInIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 72 72"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Blue background */}
-      <rect width="72" height="72" rx="8" fill="#0077B7" />
-      {/* White "in" and icon */}
-      <path
-        fill="#fff"
-        d="M20.5 29h8v28.5h-8zM24.5 17c2.7 0 4.9 2.2 4.9 4.9s-2.2 4.9-4.9 4.9-4.9-2.2-4.9-4.9 2.2-4.9 4.9-4.9M33.5 29h7.7v3.9h.1c1.1-2 3.7-4.1 7.6-4.1 8.1 0 9.6 5.3 9.6 12.3v14.4h-8V43.2c0-3.4-.1-7.8-4.8-7.8-4.8 0-5.5 3.7-5.5 7.6v14.5h-8V29z"
-      />
-    </svg>
-  );
-}
-
-// Instagram icon with gradient
-function InstagramIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <defs>
-        <linearGradient
-          id="instagram-gradient"
-          x1="0%"
-          y1="100%"
-          x2="100%"
-          y2="0%"
-        >
-          <stop offset="0%" stopColor="#FFDC80" />
-          <stop offset="25%" stopColor="#F77737" />
-          <stop offset="50%" stopColor="#E1306C" />
-          <stop offset="75%" stopColor="#C13584" />
-          <stop offset="100%" stopColor="#833AB4" />
-        </linearGradient>
-      </defs>
-      <path
-        fill="url(#instagram-gradient)"
-        d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
-      />
-    </svg>
-  );
-}
-
-// Facebook icon with brand color
-function FacebookIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="#1877F2"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-    </svg>
-  );
-}
-
 // Format timezone with local time and relative difference
 function formatTimezoneWithLocalTime(timezone: string): {
   localTime: string;
   relative: string;
-  isOffHours: boolean;
 } {
   try {
     const now = new Date();
@@ -171,15 +92,9 @@ function formatTimezoneWithLocalTime(timezone: string): {
       relative = `${Math.abs(diffHours)}h behind`;
     }
 
-    // Check if it's off-hours (before 8am or after 8pm)
-    const customerHour = new Date(
-      now.toLocaleString("en-US", { timeZone: timezone }),
-    ).getHours();
-    const isOffHours = customerHour < 8 || customerHour >= 20;
-
-    return { localTime: customerTime, relative, isOffHours };
+    return { localTime: customerTime, relative };
   } catch {
-    return { localTime: "", relative: "", isOffHours: false };
+    return { localTime: "", relative: "" };
   }
 }
 
@@ -211,7 +126,6 @@ export function CustomerDetails() {
   const enrichMutation = useMutation({
     ...trpc.customers.enrich.mutationOptions(),
     onSuccess: () => {
-      // Refetch to get the processing status - no toast needed
       refetch();
     },
     onError: (error) => {
@@ -501,18 +415,18 @@ export function CustomerDetails() {
                 customer.fundingStage) && (
                 <div className="flex items-center gap-2 mt-2 flex-wrap">
                   {customer.industry && (
-                    <Badge variant="tag-rounded">{customer.industry}</Badge>
+                    <Badge variant="tag">{customer.industry}</Badge>
                   )}
                   {customer.companyType && (
-                    <Badge variant="tag-rounded">{customer.companyType}</Badge>
+                    <Badge variant="tag">{customer.companyType}</Badge>
                   )}
                   {customer.employeeCount && (
-                    <Badge variant="tag-rounded">
+                    <Badge variant="tag">
                       {customer.employeeCount} employees
                     </Badge>
                   )}
                   {customer.fundingStage && (
-                    <Badge variant="tag-rounded">{customer.fundingStage}</Badge>
+                    <Badge variant="tag">{customer.fundingStage}</Badge>
                   )}
                 </div>
               )}
@@ -580,10 +494,11 @@ export function CustomerDetails() {
               </AccordionContent>
             </AccordionItem>
 
-            {/* Company Profile Section - Only show if we have enrichment data or it's processing */}
+            {/* Company Profile Section - Only show if we have enrichment data, it's processing, or failed */}
             {(hasEnrichmentData ||
               isEnriching ||
-              customer.enrichmentStatus === "completed") && (
+              customer.enrichmentStatus === "completed" ||
+              customer.enrichmentStatus === "failed") && (
               <AccordionItem
                 value="intelligence"
                 className="border-b border-border"
@@ -676,6 +591,14 @@ export function CustomerDetails() {
                           </div>
                         </div>
                       )}
+                      {customer.ceoName && (
+                        <div>
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            CEO / Founder
+                          </div>
+                          <div className="text-[14px]">{customer.ceoName}</div>
+                        </div>
+                      )}
                       {customer.timezone &&
                         (() => {
                           const tz = formatTimezoneWithLocalTime(
@@ -687,7 +610,6 @@ export function CustomerDetails() {
                                 Local Time
                               </div>
                               <div className="text-[14px] flex items-center gap-1.5">
-                                {tz.isOffHours && <span>🌙</span>}
                                 <span>{tz.localTime}</span>
                                 <span className="text-[#878787]">
                                   ({tz.relative})
@@ -714,7 +636,7 @@ export function CustomerDetails() {
                                 rel="noopener noreferrer"
                                 className="hover:opacity-70 transition-opacity"
                               >
-                                <LinkedInIcon className="size-4" />
+                                <Icons.LinkedIn className="size-4" />
                               </a>
                             )}
                             {customer.twitterUrl && (
@@ -724,7 +646,7 @@ export function CustomerDetails() {
                                 rel="noopener noreferrer"
                                 className="text-foreground hover:opacity-70 transition-opacity"
                               >
-                                <XIcon className="size-4" />
+                                <Icons.X className="size-4" />
                               </a>
                             )}
                             {customer.instagramUrl && (
@@ -734,7 +656,7 @@ export function CustomerDetails() {
                                 rel="noopener noreferrer"
                                 className="hover:opacity-70 transition-opacity"
                               >
-                                <InstagramIcon className="size-4" />
+                                <Icons.Instagram className="size-4" />
                               </a>
                             )}
                             {customer.facebookUrl && (
@@ -744,7 +666,7 @@ export function CustomerDetails() {
                                 rel="noopener noreferrer"
                                 className="hover:opacity-70 transition-opacity"
                               >
-                                <FacebookIcon className="size-4" />
+                                <Icons.Facebook className="size-4" />
                               </a>
                             )}
                             {customer.website && (
@@ -758,7 +680,7 @@ export function CustomerDetails() {
                                 rel="noopener noreferrer"
                                 className="text-muted-foreground hover:text-foreground transition-colors"
                               >
-                                <Icons.Globle className="size-4" />
+                                <Icons.Globle className="size-5" />
                               </a>
                             )}
                           </div>
@@ -912,15 +834,15 @@ export function CustomerDetails() {
                       <div className="text-[12px] mb-2 text-[#606060]">
                         Tags
                       </div>
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center space-x-2 flex-wrap">
                         {customer.tags.map((tag) => (
                           <Link
                             href={`/transactions?tags=${tag.id}`}
                             key={tag.id}
                           >
                             <Badge
-                              variant="tag-rounded"
-                              className="whitespace-nowrap"
+                              variant="tag"
+                              className="whitespace-nowrap flex-shrink-0"
                             >
                               {tag.name}
                             </Badge>

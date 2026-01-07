@@ -148,7 +148,16 @@ export const customerEnrichmentSchema = z.object({
     .string()
     .url()
     .nullable()
-    .describe("Facebook company page URL (e.g. 'https://facebook.com/example')."),
+    .describe(
+      "Facebook company page URL (e.g. 'https://facebook.com/example').",
+    ),
+
+  ceoName: z
+    .string()
+    .nullable()
+    .describe(
+      "Name of the CEO, founder, or primary executive. Look for this on About/Team pages or LinkedIn.",
+    ),
 });
 
 export type CustomerEnrichmentResult = z.infer<typeof customerEnrichmentSchema>;
@@ -172,4 +181,57 @@ export type VerifiedEnrichmentData = {
   twitterUrl: string | null;
   instagramUrl: string | null;
   facebookUrl: string | null;
+  ceoName: string | null;
+};
+
+// ============================================================================
+// Enrichment Input/Output Types
+// ============================================================================
+
+/**
+ * Input parameters for customer enrichment
+ */
+export type EnrichCustomerParams = {
+  website: string;
+  companyName: string;
+  email?: string | null;
+  country?: string | null;
+  countryCode?: string | null;
+  city?: string | null;
+  state?: string | null;
+  address?: string | null;
+  phone?: string | null;
+  vatNumber?: string | null;
+  note?: string | null;
+  contactName?: string | null;
+};
+
+/**
+ * Options for enrichment execution
+ */
+export type EnrichCustomerOptions = {
+  timeoutMs?: number;
+  signal?: AbortSignal;
+};
+
+/**
+ * Metrics collected during enrichment
+ */
+export type EnrichmentMetrics = {
+  stepsUsed: number;
+  websiteReadSuccess: boolean;
+  linkedinFound: boolean;
+  searchSuccess: boolean;
+  countryDetected: string | null;
+  durationMs: number;
+};
+
+/**
+ * Complete result from enrichment
+ */
+export type EnrichCustomerResult = {
+  raw: CustomerEnrichmentResult;
+  verified: VerifiedEnrichmentData;
+  verifiedFieldCount: number;
+  metrics: EnrichmentMetrics;
 };
