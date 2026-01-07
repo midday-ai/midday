@@ -1,5 +1,8 @@
 "use client";
 
+import { Icons } from "@midday/ui/icons";
+import Hls from "hls.js";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { MaterialIcon } from "../homepage/icon-mapping";
@@ -21,6 +24,9 @@ export interface Testimonial {
   country: string;
   content: string;
   fullContent: string;
+  image?: string;
+  video?: string;
+  videoPoster?: string;
 }
 
 interface TestimonialsSectionProps {
@@ -31,46 +37,394 @@ interface TestimonialsSectionProps {
   customHeader?: ReactNode;
 }
 
+function renderStructuredContent(content: string) {
+  const sections = content.split("\n\n");
+  const structured: { label: string; text: string }[] = [];
+
+  for (let i = 0; i < sections.length; i++) {
+    const section = sections[i]?.trim();
+    if (!section) continue;
+
+    // Check if this section starts with a label (like "Company", "Challenge", etc.)
+    // Labels are typically single words or short phrases followed by a newline
+    const lines = section.split("\n");
+    const firstLine = lines[0]?.trim();
+
+    if (!firstLine) continue;
+
+    // Check if first line looks like a label (capitalized, no punctuation, short)
+    if (
+      firstLine.length < 30 &&
+      /^[A-Z][a-z\s]+$/.test(firstLine) &&
+      lines.length > 1
+    ) {
+      structured.push({
+        label: firstLine,
+        text: lines.slice(1).join("\n").trim(),
+      });
+    } else {
+      // If no label, treat as continuation of previous section
+      if (structured.length > 0) {
+        const lastSection = structured[structured.length - 1];
+        if (lastSection) {
+          lastSection.text = `${lastSection.text}\n\n${section}`;
+        }
+      } else {
+        structured.push({ label: "", text: section });
+      }
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      {structured.map((section) => (
+        <div
+          key={section.label || section.text.slice(0, 20)}
+          className="flex flex-col gap-2"
+        >
+          {section.label && (
+            <p className="font-sans text-sm text-foreground">{section.label}</p>
+          )}
+          <p className="font-sans text-sm text-muted-foreground leading-relaxed">
+            {section.text}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function HLSVideo({
+  src,
+  poster,
+}: {
+  src: string | undefined;
+  poster?: string;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !src) return;
+
+    if (Hls.isSupported()) {
+      // Use hls.js for browsers that don't support HLS natively
+      const hls = new Hls();
+      hlsRef.current = hls;
+      hls.loadSource(src);
+      hls.attachMedia(video);
+
+      return () => {
+        if (hlsRef.current) {
+          hlsRef.current.destroy();
+        }
+      };
+    }
+    if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      // Native HLS support (Safari)
+      video.src = src;
+    }
+  }, [src]);
+
+  return (
+    <video
+      ref={videoRef}
+      className="w-full h-auto"
+      controls
+      playsInline
+      preload="metadata"
+      poster={poster}
+      style={{ filter: "grayscale(100%)" }}
+    >
+      <track kind="captions" />
+      Your browser does not support the video tag.
+    </video>
+  );
+}
+
+function VideoTestimonialCard({
+  testimonial,
+  index,
+  rotation,
+}: {
+  testimonial: Testimonial;
+  index: number;
+  rotation: number;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className="flex-shrink-0 group cursor-pointer"
+        style={{
+          transform: `rotate(${rotation}deg)`,
+        }}
+      >
+        <div className="bg-background border border-border p-6 w-64 flex flex-col gap-4 transition-all duration-200 hover:border-muted-foreground relative">
+          <div className="absolute top-4 right-4 w-7 h-7 bg-muted flex items-center justify-center">
+            <MaterialIcon
+              name="play_arrow"
+              className="text-muted-foreground"
+              size={16}
+            />
+          </div>
+          <div className="flex flex-col gap-3">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider text-left">
+              {testimonial.country}
+            </p>
+            <div className="flex gap-2 items-center">
+              {testimonial.image ? (
+                <Image
+                  src={testimonial.image}
+                  alt={testimonial.name}
+                  width={16}
+                  height={16}
+                  className="w-4 h-4 rounded-full object-cover"
+                  style={{ filter: "grayscale(100%)" }}
+                />
+              ) : (
+                <div className="w-4 h-4 bg-muted rounded-full" />
+              )}
+              <span className="font-sans text-sm text-foreground">
+                {testimonial.name}
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 text-left">
+            <span className="font-sans text-sm text-muted-foreground">
+              {testimonial.company}
+            </span>
+            <div className="font-sans text-sm text-muted-foreground leading-relaxed">
+              &quot;{testimonial.content}&quot;
+            </div>
+          </div>
+        </div>
+      </button>
+
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="fixed inset-0 bg-white/40 backdrop-blur-xs dark:bg-black/40"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="relative bg-background border border-border p-8 max-w-2xl w-[90vw] max-h-[90vh] overflow-y-auto z-50">
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="absolute top-6 right-6"
+              aria-label="Close dialog"
+            >
+              <Icons.Close className="h-6 w-6 text-primary" />
+            </button>
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-3">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider text-left">
+                  {testimonial.country}
+                </p>
+                <div className="flex gap-3 items-center">
+                  {testimonial.image ? (
+                    <Image
+                      src={testimonial.image}
+                      alt={testimonial.name}
+                      width={24}
+                      height={24}
+                      className="w-6 h-6 rounded-full object-cover"
+                      style={{ filter: "grayscale(100%)" }}
+                    />
+                  ) : (
+                    <div className="w-6 h-6 bg-muted rounded-full" />
+                  )}
+                  <span className="font-sans text-sm text-foreground">
+                    {testimonial.name}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-6">
+                <div className="w-full overflow-hidden bg-muted">
+                  <HLSVideo
+                    src={testimonial.video}
+                    poster={testimonial.videoPoster}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function VideoTestimonialCardMobile({
+  testimonial,
+  index,
+  rotation,
+}: {
+  testimonial: Testimonial;
+  index: number;
+  rotation: number;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div
+      key={`testimonial-mobile-${testimonial.name}-${index}`}
+      className="w-[280px] flex-shrink-0 snap-start"
+    >
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className="w-full cursor-pointer"
+        style={{
+          transform: rotation !== 0 ? `rotate(${rotation}deg)` : undefined,
+        }}
+      >
+        <div className="bg-background border border-border p-8 sm:p-6 flex flex-col gap-4 select-none hover:border-muted-foreground transition-all duration-200 min-h-[240px] sm:min-h-0 relative">
+          <div className="absolute top-4 right-4 w-7 h-7 bg-muted flex items-center justify-center">
+            <MaterialIcon
+              name="play_arrow"
+              className="text-muted-foreground"
+              size={16}
+            />
+          </div>
+          <div className="flex flex-col gap-3">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider text-left">
+              {testimonial.country}
+            </p>
+            <div className="flex gap-2 items-center">
+              {testimonial.image ? (
+                <Image
+                  src={testimonial.image}
+                  alt={testimonial.name}
+                  width={16}
+                  height={16}
+                  className="w-4 h-4 rounded-full object-cover"
+                  style={{ filter: "grayscale(100%)" }}
+                />
+              ) : (
+                <div className="w-4 h-4 bg-muted rounded-full" />
+              )}
+              <span className="font-sans text-sm text-foreground">
+                {testimonial.name}
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 text-left">
+            <span className="font-sans text-sm text-muted-foreground">
+              {testimonial.company}
+            </span>
+            <div className="font-sans text-sm text-muted-foreground leading-relaxed">
+              &quot;{testimonial.content}&quot;
+            </div>
+          </div>
+        </div>
+      </button>
+
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="fixed inset-0 bg-white/40 backdrop-blur-xs dark:bg-black/40"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="relative bg-background border border-border p-8 max-w-2xl w-[90vw] max-h-[90vh] overflow-y-auto z-50">
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="absolute top-6 right-6"
+              aria-label="Close dialog"
+            >
+              <Icons.Close className="h-6 w-6 text-primary" />
+            </button>
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-3">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider text-left">
+                  {testimonial.country}
+                </p>
+                <div className="flex gap-3 items-center">
+                  {testimonial.image ? (
+                    <Image
+                      src={testimonial.image}
+                      alt={testimonial.name}
+                      width={24}
+                      height={24}
+                      className="w-6 h-6 rounded-full object-cover"
+                      style={{ filter: "grayscale(100%)" }}
+                    />
+                  ) : (
+                    <div className="w-6 h-6 bg-muted rounded-full" />
+                  )}
+                  <span className="font-sans text-sm text-foreground">
+                    {testimonial.name}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-6">
+                <div className="w-full overflow-hidden bg-muted">
+                  <HLSVideo
+                    src={testimonial.video}
+                    poster={testimonial.videoPoster}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const defaultTestimonials: Testimonial[] = [
   {
-    name: "Sarah Chen",
-    title: "Freelance Designer",
-    company: "Design Studio",
-    country: "United States",
+    name: "Paweł Michalski",
+    title: "",
+    company: "VC Leaders",
+    country: "Poland",
+    image: "/stories/pawel.jpeg",
     content:
-      "Midday transformed my freelance business. No more scattered receipts or manual tracking. Everything organized automatically, saving me 3+ hours every week.",
+      "Invoice reconciliation used to take a full day each month and was always stressful. With Midday, that work is mostly gone and we finally have a clear financial overview.",
     fullContent:
-      "Midday transformed how I manage my freelance business. No more scattered receipts or manual invoice tracking. Everything is organized automatically, saving me 3+ hours every week.\n\nAs a freelance designer working with multiple clients, I used to spend hours every week organizing receipts, categorizing expenses, and manually entering data into spreadsheets. It was tedious and error-prone.\n\nWith Midday, everything happens automatically. When I upload a receipt, it's instantly categorized and linked to the right project. The AI even extracts vendor information and matches it with my existing contacts. The time I used to spend on admin work, I now spend on actual design work for my clients.\n\nThe search functionality is incredible too. I can type 'office supplies March' and instantly find all related expenses. It's like having a personal assistant who never forgets anything.",
+      "Company\nVC Leaders is an educational platform helping venture capitalists build better VC firms.\n\nChallenge\nMonthly invoice reconciliation was slow and painful. Missing invoices, manual checks, and no time left to properly categorize or analyze spending. The process regularly took more than a full day.\n\nImpact\nMidday reduced invoice reconciliation time by 1–2 man-days per month and made financial visibility much clearer through dashboards.\n\nFavorite features\nClear financial overview, accounts payable tracking, invoice reconciliation, and a clean, intuitive interface.",
   },
   {
-    name: "Marcus Rodriguez",
-    title: "Restaurant Owner",
-    company: "Bella Vista Restaurant",
-    country: "Spain",
+    name: "Facu Montanaro",
+    title: "",
+    company: "Kundo Studio",
+    country: "Argentina",
+    image: "/stories/facu.jpeg",
     content:
-      "Tracking expenses was a nightmare. Midday's AI automatically categorizes everything from ingredients to equipment repairs. Game changer!",
+      "Managing invoicing, projects, and finances across tools slowed my daily work. Midday brought everything into one place and made my workflow much simpler.",
     fullContent:
-      "As a restaurant owner, tracking expenses was a nightmare. Midday's AI automatically categorizes everything from ingredient purchases to equipment repairs. Game changer!\n\nRunning a restaurant means dealing with dozens of vendors, daily ingredient purchases, equipment maintenance, and staff expenses. Before Midday, I had boxes of receipts and no clear picture of where my money was going.\n\nNow, every receipt gets scanned and categorized automatically. Food costs, equipment repairs, utilities - everything is organized without me lifting a finger. The insights dashboard shows me exactly where I'm spending too much and where I can optimize.\n\nLast month, I discovered I was overpaying for produce by 15% because Midday highlighted pricing patterns across different suppliers. That insight alone saved me more than the software costs for the entire year.",
+      "Company\nKundo Studio helps startups and founders with fundraising, product launches, and growth through design and meaningful experiences.\n\nChallenge\nManaging invoicing, projects, and finances across multiple tools made daily work slower and more complex. Existing tools felt fragmented and hard to use.\n\nImpact\nMidday centralized invoicing, time tracking, and project information into one place, significantly simplifying day-to-day operations.\n\nFavorite features\nInvoicing and time tracking. Both became core parts of Facu's daily workflow and replaced multiple separate tools.",
   },
   {
-    name: "Emily Watson",
-    title: "Startup Founder",
-    company: "TechFlow Inc",
+    name: "Richard Poelderl",
+    title: "",
+    company: "Conduct.bln",
+    country: "Germany",
+    image: "/stories/richard.jpeg",
+    content:
+      "My previous accounting setup was fragmented and didn't support my bank. Midday made invoicing easier and sharing clean data with my tax advisor straightforward.",
+    fullContent:
+      "Company\nRichard works with companies that want to focus product development on building great products while outsourcing growth and marketing execution.\n\nChallenge\nHis accounting tool didn't support his bank, required manual formatting of exports, and forced him to juggle multiple financial tools.\n\nImpact\nMidday replaced bank invoicing and made it easier to work with his tax advisor by exporting clean CSV files that integrate with accounting software. This significantly reduced friction while keeping control in one system.\n\nFavorite features\nInvoicing, CSV exports for tax advisors, and bank sync to track subscriptions and expenses.",
+  },
+  {
+    name: "Guy Solan",
+    title: "",
+    company: "Thetis Medical",
     country: "United Kingdom",
+    image: "/stories/guy.jpeg",
     content:
-      "Juggling countless expenses as a startup founder. Midday's smart organization and automated reconciliation let me focus on building, not bookkeeping.",
+      "Without Midday, I had no real visibility into our cash and relied entirely on my accountant. It gave me clarity without having to learn complex accounting tools.",
     fullContent:
-      "Running a tech startup means juggling countless expenses. Midday's smart file organization and automated reconciliation let me focus on building, not bookkeeping.\n\nAs a startup founder, every minute counts. I need to focus on product development, customer acquisition, and fundraising - not sorting through receipts and matching bank transactions.\n\nMidday's automated reconciliation is a lifesaver. It connects my bank accounts, credit cards, and expense receipts automatically. When I get back from a business trip, all my expenses are already categorized and ready for reimbursement.\n\nThe reporting features help me prepare for investor meetings too. I can generate clean expense reports by category, track burn rate, and identify cost optimization opportunities. It's like having a CFO in my pocket, but for a fraction of the cost.",
-  },
-  {
-    name: "David Kim",
-    title: "Consultant",
-    company: "Kim Consulting",
-    country: "South Korea",
-    content:
-      "Tons of receipts and invoices for client work. Midday's natural language search finds any document instantly. 'Show me Q1 expenses for Client X' - boom, there it is.",
-    fullContent:
-      "Client work means tons of receipts and invoices. Midday's natural language search finds any document instantly. 'Show me Q1 expenses for Client X' - boom, there it is.\n\nAs an independent consultant working with multiple clients simultaneously, document organization used to be my biggest pain point. Client dinners, travel expenses, software subscriptions - everything needed to be tracked separately for accurate billing.\n\nMidday's natural language search is phenomenal. Instead of remembering folder structures or file names, I just describe what I'm looking for. 'Show me all restaurant expenses for the Johnson project in March' - and there it is, instantly.\n\nThe client reporting feature automatically generates expense summaries by project. At the end of each month, I can send clean, professional expense reports to my clients with just a few clicks. My clients love the transparency, and I love getting paid faster.",
+      "Company\nThetis Medical is a medical device company.\n\nChallenge\nWithout Midday, I had no real visibility into our cash and relied entirely on my accountant.\n\nImpact\nMidday gave me clarity without having to learn complex accounting tools.\n\nFavorite features\nFinancial visibility and cash flow tracking.",
+    video:
+      "https://customer-oh6t55xltlgrfayh.cloudflarestream.com/5b86803383964d52ee6834fd289f4f4e/manifest/video.m3u8",
+    videoPoster: "https://cdn.midday.ai/guy-cover.png",
   },
 ];
 
@@ -155,9 +509,23 @@ export function TestimonialsSection({
               if (index === 0) return -1;
               if (index === 1) return 1;
               if (index === 2) return 2;
+              if (index === 3) return -2;
               return 0;
             };
 
+            // Simple modal for video testimonials (no morphing)
+            if (testimonial.video) {
+              return (
+                <VideoTestimonialCard
+                  key={`testimonial-${testimonial.name}-${index}`}
+                  testimonial={testimonial}
+                  index={index}
+                  rotation={getRotation()}
+                />
+              );
+            }
+
+            // Morphing dialog for regular testimonials
             return (
               <MorphingDialog key={`testimonial-${testimonial.name}-${index}`}>
                 <MorphingDialogTrigger
@@ -172,7 +540,18 @@ export function TestimonialsSection({
                         {testimonial.country}
                       </p>
                       <div className="flex gap-2 items-center">
-                        <div className="w-4 h-4 bg-muted rounded-full" />
+                        {testimonial.image ? (
+                          <Image
+                            src={testimonial.image}
+                            alt={testimonial.name}
+                            width={16}
+                            height={16}
+                            className="w-4 h-4 rounded-full object-cover"
+                            style={{ filter: "grayscale(100%)" }}
+                          />
+                        ) : (
+                          <div className="w-4 h-4 bg-muted rounded-full" />
+                        )}
                         <MorphingDialogTitle className="font-sans text-sm text-foreground">
                           {testimonial.name}
                         </MorphingDialogTitle>
@@ -199,14 +578,25 @@ export function TestimonialsSection({
                           {testimonial.country}
                         </p>
                         <div className="flex gap-3 items-center">
-                          <div className="w-6 h-6 bg-muted rounded-full" />
+                          {testimonial.image ? (
+                            <Image
+                              src={testimonial.image}
+                              alt={testimonial.name}
+                              width={24}
+                              height={24}
+                              className="w-6 h-6 rounded-full object-cover"
+                              style={{ filter: "grayscale(100%)" }}
+                            />
+                          ) : (
+                            <div className="w-6 h-6 bg-muted rounded-full" />
+                          )}
                           <MorphingDialogTitle className="font-sans text-sm text-foreground">
                             {testimonial.name}
                           </MorphingDialogTitle>
                         </div>
                       </div>
 
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-6">
                         <MorphingDialogSubtitle className="font-sans text-sm text-muted-foreground">
                           {testimonial.company}
                         </MorphingDialogSubtitle>
@@ -217,9 +607,9 @@ export function TestimonialsSection({
                             animate: { opacity: 1, scale: 1, y: 0 },
                             exit: { opacity: 0, scale: 0.8, y: 100 },
                           }}
-                          className="font-sans text-sm text-muted-foreground leading-relaxed whitespace-pre-line"
+                          className="font-sans text-sm text-muted-foreground"
                         >
-                          &quot;{testimonial.fullContent}&quot;
+                          {renderStructuredContent(testimonial.fullContent)}
                         </MorphingDialogDescription>
                       </div>
                     </div>
@@ -268,6 +658,18 @@ export function TestimonialsSection({
                 else if (offset === 1) rotation = 1;
                 else if (offset === -2) rotation = -2;
                 else if (offset === 2) rotation = 2;
+
+                // Simple modal for video testimonials (no morphing)
+                if (testimonial.video) {
+                  return (
+                    <VideoTestimonialCardMobile
+                      key={`testimonial-mobile-${testimonial.name}-${index}`}
+                      testimonial={testimonial}
+                      index={index}
+                      rotation={rotation}
+                    />
+                  );
+                }
 
                 return (
                   <div
@@ -327,7 +729,18 @@ export function TestimonialsSection({
                                 {testimonial.country}
                               </p>
                               <div className="flex gap-2 items-center">
-                                <div className="w-4 h-4 bg-muted rounded-full" />
+                                {testimonial.image ? (
+                                  <Image
+                                    src={testimonial.image}
+                                    alt={testimonial.name}
+                                    width={16}
+                                    height={16}
+                                    className="w-4 h-4 rounded-full object-cover"
+                                    style={{ filter: "grayscale(100%)" }}
+                                  />
+                                ) : (
+                                  <div className="w-4 h-4 bg-muted rounded-full" />
+                                )}
                                 <MorphingDialogTitle className="font-sans text-sm text-foreground">
                                   {testimonial.name}
                                 </MorphingDialogTitle>
@@ -355,28 +768,57 @@ export function TestimonialsSection({
                                 {testimonial.country}
                               </p>
                               <div className="flex gap-3 items-center">
-                                <div className="w-6 h-6 bg-muted rounded-full" />
+                                {testimonial.image ? (
+                                  <Image
+                                    src={testimonial.image}
+                                    alt={testimonial.name}
+                                    width={24}
+                                    height={24}
+                                    className="w-6 h-6 rounded-full object-cover"
+                                    style={{ filter: "grayscale(100%)" }}
+                                  />
+                                ) : (
+                                  <div className="w-6 h-6 bg-muted rounded-full" />
+                                )}
                                 <MorphingDialogTitle className="font-sans text-sm text-foreground">
                                   {testimonial.name}
                                 </MorphingDialogTitle>
                               </div>
                             </div>
 
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-6">
                               <MorphingDialogSubtitle className="font-sans text-sm text-muted-foreground">
                                 {testimonial.company}
                               </MorphingDialogSubtitle>
-                              <MorphingDialogDescription
-                                disableLayoutAnimation
-                                variants={{
-                                  initial: { opacity: 0, scale: 0.8, y: 100 },
-                                  animate: { opacity: 1, scale: 1, y: 0 },
-                                  exit: { opacity: 0, scale: 0.8, y: 100 },
-                                }}
-                                className="font-sans text-sm text-muted-foreground leading-relaxed whitespace-pre-line"
-                              >
-                                &quot;{testimonial.fullContent}&quot;
-                              </MorphingDialogDescription>
+                              {testimonial.video ? (
+                                <div className="w-full overflow-hidden bg-muted">
+                                  <video
+                                    className="w-full h-auto"
+                                    controls
+                                    playsInline
+                                    preload="metadata"
+                                    poster={testimonial.videoPoster}
+                                  >
+                                    <source src={testimonial.video} />
+                                    <track kind="captions" />
+                                    Your browser does not support the video tag.
+                                  </video>
+                                </div>
+                              ) : (
+                                <MorphingDialogDescription
+                                  disableLayoutAnimation
+                                  variants={{
+                                    initial: { opacity: 0, scale: 0.8, y: 100 },
+                                    animate: { opacity: 1, scale: 1, y: 0 },
+                                    exit: { opacity: 0, scale: 0.8, y: 100 },
+                                  }}
+                                  className="font-sans text-sm text-muted-foreground"
+                                >
+                                  {renderStructuredContent(
+                                    testimonial.fullContent,
+                                  )}
+                                </MorphingDialogDescription>
+                              )}
                             </div>
                           </div>
                         </MorphingDialogContent>

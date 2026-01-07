@@ -16,6 +16,7 @@
     "@openpanel/nextjs": "^1.1.1",
     "@openstatus/react": "^0.0.3",
     "framer-motion": "^12.23.25",
+    "hls.js": "^1.6.15",
     "motion": "^12.23.26",
     "next": "16.0.10",
     "next-mdx-remote": "^5.0.0",
