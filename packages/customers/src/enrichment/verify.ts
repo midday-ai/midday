@@ -251,6 +251,8 @@ export async function verifyEnrichmentData(
     facebookUrl,
     ceoName: rawData.ceoName?.trim() || null,
     financeContact: rawData.financeContact?.trim() || null,
+    financeContactEmail:
+      rawData.financeContactEmail?.trim()?.toLowerCase() || null,
     primaryLanguage: rawData.primaryLanguage?.trim() || null,
     fiscalYearEnd: rawData.fiscalYearEnd?.trim() || null,
     vatNumber: rawData.vatNumber?.trim()?.toUpperCase() || null,
