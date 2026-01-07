@@ -291,7 +291,7 @@ export function Insights() {
       </div>
 
       {/* Audio Summary Section */}
-      <AudioSummarySection />
+      <AudioSummarySection audioUrl="https://cdn.midday.ai/weekly-speech.mp3" />
 
       {/* Divider */}
       <div className="max-w-[1400px] mx-auto">

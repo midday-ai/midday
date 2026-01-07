@@ -19,6 +19,7 @@ export type LiveWaveformProps = HTMLAttributes<HTMLDivElement> & {
   fftSize?: number
   updateRate?: number
   mode?: "scrolling" | "static"
+  onAudioContextReady?: (context: AudioContext) => void
 }
 
 export const LiveWaveform = ({
@@ -37,6 +38,7 @@ export const LiveWaveform = ({
   fftSize = 256,
   updateRate = 30,
   mode = "static",
+  onAudioContextReady,
   className,
   ...props
 }: LiveWaveformProps) => {
@@ -44,6 +46,8 @@ export const LiveWaveform = ({
   const containerRef = useRef<HTMLDivElement>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
+  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null)
+  const audioElementRef = useRef<HTMLAudioElement | null>(null)
   const animationRef = useRef<number>(0)
   const lastUpdateRef = useRef<number>(0)
   const staticBarsRef = useRef<number[]>([])
@@ -92,14 +96,9 @@ export const LiveWaveform = ({
     return () => resizeObserver.disconnect()
   }, [])
 
-  // Setup audio context for audio element
+  // Setup audio context for audio element (set up even when not active so it's ready)
   useEffect(() => {
-    if (!active || !audioElement) {
-      if (audioContextRef.current && audioContextRef.current.state !== "closed") {
-        audioContextRef.current.close()
-        audioContextRef.current = null
-      }
-      analyserRef.current = null
+    if (!audioElement) {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current)
         animationRef.current = 0
@@ -109,46 +108,136 @@ export const LiveWaveform = ({
 
     const setupAudioContext = async () => {
       try {
-        const AudioContextConstructor =
-          window.AudioContext ||
-          (window as unknown as { webkitAudioContext: typeof AudioContext })
-            .webkitAudioContext
-        const audioContext = new AudioContextConstructor()
-        
-        // Resume context if suspended
-        if (audioContext.state === "suspended") {
-          await audioContext.resume()
+        // Reuse existing audio context if available
+        let audioContext = audioContextRef.current
+        if (!audioContext || audioContext.state === "closed") {
+          const AudioContextConstructor =
+            window.AudioContext ||
+            (window as unknown as { webkitAudioContext: typeof AudioContext })
+              .webkitAudioContext
+          audioContext = new AudioContextConstructor()
+          audioContextRef.current = audioContext
         }
         
-        const analyser = audioContext.createAnalyser()
-        analyser.fftSize = fftSize
-        analyser.smoothingTimeConstant = smoothingTimeConstant
-
-        const source = audioContext.createMediaElementSource(audioElement)
-        source.connect(analyser)
-        analyser.connect(audioContext.destination)
-
-        audioContextRef.current = audioContext
-        analyserRef.current = analyser
+        // Resume context if suspended (required for user interaction)
+        if (audioContext.state === "suspended") {
+          try {
+            await audioContext.resume()
+          } catch (error) {
+            console.error("Error resuming audio context:", error)
+          }
+        }
+        
+        // Only create source if it doesn't exist for this audio element
+        const isNewAudioElement = audioElementRef.current !== audioElement
+        
+        if (isNewAudioElement) {
+          // Reset refs when audio element changes
+          sourceRef.current = null
+          analyserRef.current = null
+          audioElementRef.current = audioElement
+        }
+        
+        // Only create source if it doesn't exist
+        if (!sourceRef.current) {
+          try {
+            const source = audioContext.createMediaElementSource(audioElement)
+            sourceRef.current = source
+            
+            // Create analyser
+            const analyser = audioContext.createAnalyser()
+            analyser.fftSize = fftSize
+            analyser.smoothingTimeConstant = smoothingTimeConstant
+            analyserRef.current = analyser
+            
+            // Connect source to analyser, and analyser to destination
+            // IMPORTANT: When you create a MediaElementSource, it disconnects the audio element
+            // from its default output. Audio will ONLY play through the audio context destination.
+            source.connect(analyser)
+            analyser.connect(audioContext.destination)
+            
+            // Ensure audio context is running
+            if (audioContext.state === "suspended") {
+              audioContext.resume().catch(console.error)
+            }
+            
+            // Notify parent that audio context is ready
+            console.log("LiveWaveform: Notifying parent of audio context, state:", audioContext.state)
+            onAudioContextReady?.(audioContext)
+            
+            // Ensure context is running before notifying again
+            if (audioContext.state === "suspended") {
+              audioContext.resume().then(() => {
+                console.log("LiveWaveform: Audio context resumed, notifying parent again")
+                onAudioContextReady?.(audioContext)
+              }).catch(console.error)
+            }
+          } catch (error) {
+            // If source already exists, handle gracefully
+            if (error instanceof Error && error.message.includes("already connected")) {
+              // Audio element already has a source, just create analyser if needed
+              if (!analyserRef.current) {
+                const analyser = audioContext.createAnalyser()
+                analyser.fftSize = fftSize
+                analyser.smoothingTimeConstant = smoothingTimeConstant
+                analyserRef.current = analyser
+                analyser.connect(audioContext.destination)
+              }
+            } else {
+              console.error("Error setting up audio context:", error)
+            }
+          }
+        } else if (analyserRef.current) {
+          // Source and analyser exist, ensure analyser is connected
+          if (analyserRef.current.numberOfInputs === 0) {
+            analyserRef.current.connect(audioContext.destination)
+          }
+          // Notify parent that audio context is ready (even if already set up)
+          onAudioContextReady?.(audioContext)
+        } else {
+          // No source or analyser, but context exists - notify anyway
+          onAudioContextReady?.(audioContext)
+        }
+        
+        // Always notify that context is ready (even if source setup failed)
+        onAudioContextReady?.(audioContext)
       } catch (error) {
         console.error("Error setting up audio context:", error)
+        // Even if there's an error, notify if we have a context
+        if (audioContextRef.current) {
+          onAudioContextReady?.(audioContextRef.current)
+        }
       }
     }
 
-    setupAudioContext()
-
-    return () => {
-      if (audioContextRef.current && audioContextRef.current.state !== "closed") {
-        audioContextRef.current.close()
-        audioContextRef.current = null
+    // Setup audio context - try immediately, and also wait for audio to be ready
+    // Try immediately first
+    setupAudioContext().then(() => {
+      // Ensure callback is called after setup
+      if (audioContextRef.current && onAudioContextReady) {
+        onAudioContextReady(audioContextRef.current)
       }
-      analyserRef.current = null
+    })
+    
+    // Also set up listeners in case audio isn't ready yet
+    const onCanPlay = () => {
+      setupAudioContext()
+    }
+    const onLoadedMetadata = () => {
+      setupAudioContext()
+    }
+    audioElement.addEventListener("canplay", onCanPlay)
+    audioElement.addEventListener("loadedmetadata", onLoadedMetadata)
+    
+    return () => {
+      audioElement.removeEventListener("canplay", onCanPlay)
+      audioElement.removeEventListener("loadedmetadata", onLoadedMetadata)
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current)
         animationRef.current = 0
       }
     }
-  }, [active, audioElement, fftSize, smoothingTimeConstant])
+  }, [audioElement, fftSize, smoothingTimeConstant])
 
   // Animation loop
   useEffect(() => {
@@ -198,13 +287,16 @@ export const LiveWaveform = ({
         }
       }
 
-      // Only redraw if needed
-      if (!needsRedrawRef.current && !active) {
+      // Always redraw when active, or when needsRedraw is true
+      if (!active && !needsRedrawRef.current) {
         rafId = requestAnimationFrame(animate)
         return
       }
 
-      needsRedrawRef.current = false
+      // Reset needsRedraw flag after checking
+      if (needsRedrawRef.current) {
+        needsRedrawRef.current = false
+      }
       ctx.clearRect(0, 0, rect.width, rect.height)
 
       // Get color from CSS variable or use provided color (cached)

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { MaterialIcon } from '../homepage/icon-mapping'
-import { LiveWaveform } from '../ui/live-waveform'
 
 interface AudioSummarySectionProps {
   audioUrl?: string
@@ -13,6 +12,8 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const audioRef = useRef<HTMLAudioElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const animationRef = useRef<number>()
 
   useEffect(() => {
     const audio = audioRef.current
@@ -20,28 +21,147 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
 
     const updateTime = () => setCurrentTime(audio.currentTime)
     const updateDuration = () => setDuration(audio.duration)
+    const handlePlay = () => setIsPlaying(true)
+    const handlePause = () => setIsPlaying(false)
     
     audio.addEventListener('timeupdate', updateTime)
     audio.addEventListener('loadedmetadata', updateDuration)
     audio.addEventListener('ended', () => setIsPlaying(false))
+    audio.addEventListener('play', handlePlay)
+    audio.addEventListener('pause', handlePause)
 
     return () => {
       audio.removeEventListener('timeupdate', updateTime)
       audio.removeEventListener('loadedmetadata', updateDuration)
       audio.removeEventListener('ended', () => setIsPlaying(false))
+      audio.removeEventListener('play', handlePlay)
+      audio.removeEventListener('pause', handlePause)
     }
   }, [])
 
-  const togglePlay = () => {
+  // Simple animated waveform - no Web Audio API needed
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const resizeCanvas = () => {
+      const rect = canvas.getBoundingClientRect()
+      const dpr = window.devicePixelRatio || 1
+      canvas.width = rect.width * dpr
+      canvas.height = rect.height * dpr
+      canvas.style.width = `${rect.width}px`
+      canvas.style.height = `${rect.height}px`
+      ctx.scale(dpr, dpr)
+    }
+
+    resizeCanvas()
+    window.addEventListener('resize', resizeCanvas)
+
+    let time = 0
+    const barWidth = 3
+    const barGap = 1
+    const step = barWidth + barGap
+    
+    // Animation speed control - lower = slower
+    const animationSpeed = 0.004
+    
+    // Generate static pattern once for idle state (no random to avoid glitches)
+    const generateStaticPattern = (barCount: number): number[] => {
+      const pattern: number[] = []
+      const halfCount = Math.floor(barCount / 2)
+      
+      for (let i = 0; i < halfCount; i++) {
+        const normalizedPos = i / halfCount
+        const wave1 = Math.sin(normalizedPos * Math.PI * 3) * 0.3
+        const wave2 = Math.sin(normalizedPos * Math.PI * 7) * 0.15
+        const wave3 = Math.cos(normalizedPos * Math.PI * 11) * 0.1
+        const value = Math.max(0.15, 0.3 + wave1 + wave2 + wave3)
+        pattern.push(value)
+      }
+      
+      // Mirror the pattern
+      const mirroredPattern = [...pattern].reverse()
+      return [...mirroredPattern, ...pattern]
+    }
+    
+    let staticPattern: number[] = []
+
+    const animate = () => {
+      const rect = canvas.getBoundingClientRect()
+      const width = rect.width
+      const height = rect.height
+      const centerY = height / 2
+
+      // Calculate bar count based on actual width to fill entire space
+      const barCount = Math.floor(width / step)
+      
+      // Generate static pattern if not playing and pattern doesn't match bar count
+      if (!isPlaying && (staticPattern.length !== barCount)) {
+        staticPattern = generateStaticPattern(barCount)
+      }
+
+      ctx.clearRect(0, 0, width, height)
+
+      // Get color
+      const style = getComputedStyle(canvas)
+      const primaryColor = style.getPropertyValue('--primary').trim() || '220 14% 96%'
+      const barColor = `hsl(${primaryColor})`
+
+      for (let i = 0; i < barCount; i++) {
+        const x = i * step
+        const normalizedPos = (i - barCount / 2) / (barCount / 2)
+        
+        let barHeight: number
+        if (isPlaying) {
+          // Animated waveform when playing
+          time += animationSpeed
+          const wave1 = Math.sin(time * 0.5 + normalizedPos * 3) * 0.3
+          const wave2 = Math.sin(time * 0.35 - normalizedPos * 2) * 0.2
+          const wave3 = Math.cos(time * 0.7 + normalizedPos) * 0.15
+          const combinedWave = wave1 + wave2 + wave3
+          const value = Math.max(0.15, 0.3 + combinedWave)
+          barHeight = Math.max(4, value * height * 0.6)
+        } else {
+          // Use pre-generated static pattern (no random = no glitches)
+          const value = staticPattern[i] || 0.15
+          barHeight = Math.max(4, value * height * 0.6)
+        }
+
+        const y = centerY - barHeight / 2
+        ctx.fillStyle = barColor
+        ctx.globalAlpha = isPlaying ? 0.4 + (barHeight / height) * 0.6 : 0.3 + (barHeight / height) * 0.3
+        ctx.fillRect(x, y, barWidth, barHeight)
+      }
+
+      animationRef.current = requestAnimationFrame(animate)
+    }
+
+    animate()
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas)
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+    }
+  }, [isPlaying])
+
+  const togglePlay = async () => {
     const audio = audioRef.current
     if (!audio) return
 
     if (isPlaying) {
       audio.pause()
     } else {
-      audio.play()
+      try {
+        await audio.play()
+      } catch (error) {
+        console.error("Error playing audio:", error)
+      }
     }
-    setIsPlaying(!isPlaying)
   }
 
   const formatTime = (seconds: number) => {
@@ -79,21 +199,10 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
             
             {/* Waveform Canvas */}
             <div className="mb-4 h-[64px] w-full cursor-pointer" onClick={handleSeek}>
-              <LiveWaveform
-                active={isPlaying}
-                audioElement={audioRef.current}
-                barWidth={3}
-                barGap={1}
-                barRadius={0}
-                height={64}
-                sensitivity={1.2}
-                smoothingTimeConstant={0.8}
-                fftSize={256}
-                updateRate={30}
-                mode="static"
-                fadeEdges={true}
-                fadeWidth={24}
-                barColor="hsl(var(--primary))"
+              <canvas
+                ref={canvasRef}
+                className="w-full h-full"
+                style={{ imageRendering: 'crisp-edges' }}
               />
             </div>
 
@@ -143,4 +252,3 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
     </section>
   )
 }
-
