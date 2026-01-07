@@ -17,27 +17,53 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
 
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !audioUrl) return;
 
-    const updateTime = () => setCurrentTime(audio.currentTime);
-    const updateDuration = () => setDuration(audio.duration);
+    const updateTime = () => {
+      if (audio.currentTime !== undefined && !Number.isNaN(audio.currentTime)) {
+        setCurrentTime(audio.currentTime);
+      }
+    };
+
+    const updateDuration = () => {
+      if (
+        audio.duration !== undefined &&
+        !Number.isNaN(audio.duration) &&
+        audio.duration > 0
+      ) {
+        setDuration(audio.duration);
+      }
+    };
+
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
+    const handleLoadedData = () => {
+      updateDuration();
+    };
 
     audio.addEventListener("timeupdate", updateTime);
     audio.addEventListener("loadedmetadata", updateDuration);
+    audio.addEventListener("loadeddata", handleLoadedData);
+    audio.addEventListener("durationchange", updateDuration);
     audio.addEventListener("ended", () => setIsPlaying(false));
     audio.addEventListener("play", handlePlay);
     audio.addEventListener("pause", handlePause);
 
+    // Try to get duration if already loaded
+    if (audio.readyState >= 1) {
+      updateDuration();
+    }
+
     return () => {
       audio.removeEventListener("timeupdate", updateTime);
       audio.removeEventListener("loadedmetadata", updateDuration);
+      audio.removeEventListener("loadeddata", handleLoadedData);
+      audio.removeEventListener("durationchange", updateDuration);
       audio.removeEventListener("ended", () => setIsPlaying(false));
       audio.removeEventListener("play", handlePlay);
       audio.removeEventListener("pause", handlePause);
     };
-  }, []);
+  }, [audioUrl]);
 
   // Simple animated waveform - no Web Audio API needed
   useEffect(() => {
@@ -236,25 +262,22 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
                 </span>
 
                 {/* Progress Bar */}
-                <div
-                  className="flex-1 h-1 bg-muted cursor-pointer relative group"
-                  onClick={handleSeek}
-                >
+                <div className="flex-1 h-1 bg-muted relative overflow-hidden rounded-full">
                   <div
-                    className="h-full bg-primary transition-all"
+                    className="h-full rounded-full transition-all duration-100"
                     style={{
-                      width: duration
-                        ? `${(currentTime / duration) * 100}%`
-                        : "0%",
-                    }}
-                  />
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-primary rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{
-                      left: duration
-                        ? `${(currentTime / duration) * 100}%`
-                        : "0%",
-                      marginLeft: "-6px",
+                      width:
+                        duration && !Number.isNaN(duration) && duration > 0
+                          ? `${Math.min((currentTime / duration) * 100, 100)}%`
+                          : "0%",
+                      backgroundColor: "hsl(var(--primary))",
+                      minWidth:
+                        duration &&
+                        !Number.isNaN(duration) &&
+                        duration > 0 &&
+                        currentTime > 0
+                          ? "2px"
+                          : "0px",
                     }}
                   />
                 </div>
