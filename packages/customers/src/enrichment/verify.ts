@@ -213,6 +213,50 @@ export function validateDescription(description: string | null): string | null {
 }
 
 /**
+ * Clean and format funding amount to whole numbers.
+ * Converts "kr3.97M" → "$4M", "$2.5M" → "$3M", etc.
+ * Returns null if fundingStage is "Bootstrapped" (bootstrapped = no external funding).
+ */
+export function validateTotalFunding(
+  totalFunding: string | null,
+  fundingStage: string | null,
+): string | null {
+  // Bootstrapped companies have no external funding
+  if (fundingStage === "Bootstrapped") {
+    return null;
+  }
+
+  if (!totalFunding) return null;
+
+  const trimmed = totalFunding.trim();
+  if (!trimmed) return null;
+
+  // Extract numeric value and suffix (M, B, K)
+  // Matches patterns like: $10M, €2.5M, kr3.97M, 10M, $1.2B
+  const match = trimmed.match(/^([^0-9]*)(\d+(?:\.\d+)?)\s*(K|M|B|k|m|b)?$/i);
+
+  if (!match) {
+    // If can't parse, return as-is but trimmed
+    return trimmed;
+  }
+
+  const [, prefix, numStr, suffix] = match;
+  if (!numStr) return trimmed;
+
+  const num = Number.parseFloat(numStr);
+  if (Number.isNaN(num)) return trimmed;
+
+  // Round to nearest whole number
+  const rounded = Math.round(num);
+
+  // Reconstruct the amount
+  const normalizedSuffix = (suffix || "").toUpperCase();
+  const currencyPrefix = prefix || "$"; // Default to $ if no prefix
+
+  return `${currencyPrefix}${rounded}${normalizedSuffix}`;
+}
+
+/**
  * Verify and validate all enrichment data.
  * - Social URLs are validated for correct format (no HTTP verification - social networks block automated requests)
  * - Data fields are validated against allowed values
@@ -233,6 +277,9 @@ export async function verifyEnrichmentData(
   const instagramUrl = verifyInstagramUrl(rawData.instagramUrl);
   const facebookUrl = verifyFacebookUrl(rawData.facebookUrl);
 
+  // Validate funding stage first (needed for totalFunding validation)
+  const fundingStage = validateEnum(rawData.fundingStage, fundingStageOptions);
+
   // Validate all other fields synchronously
   return {
     description: validateDescription(rawData.description),
@@ -241,8 +288,8 @@ export async function verifyEnrichmentData(
     employeeCount: validateEnum(rawData.employeeCount, employeeCountOptions),
     foundedYear: validateFoundedYear(rawData.foundedYear),
     estimatedRevenue: validateEnum(rawData.estimatedRevenue, revenueOptions),
-    fundingStage: validateEnum(rawData.fundingStage, fundingStageOptions),
-    totalFunding: rawData.totalFunding?.trim() || null,
+    fundingStage,
+    totalFunding: validateTotalFunding(rawData.totalFunding, fundingStage),
     headquartersLocation: rawData.headquartersLocation?.trim() || null,
     timezone: validateTimezone(rawData.timezone),
     linkedinUrl,

@@ -26,6 +26,7 @@ export {
   validateTimezone,
   validateEnum,
   validateDescription,
+  validateTotalFunding,
   type VerifyOptions,
 } from "./verify";
 

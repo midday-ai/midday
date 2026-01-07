@@ -46,7 +46,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
@@ -1078,7 +1078,7 @@ export function CustomerDetails() {
                       <div className="text-[12px] mb-2 text-[#606060]">
                         Tags
                       </div>
-                      <div className="flex items-center space-x-2 flex-wrap">
+                      <div className="flex items-center gap-2 flex-wrap">
                         {customer.tags.map((tag) => (
                           <Link
                             href={`/transactions?tags=${tag.id}`}

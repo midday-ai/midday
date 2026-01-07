@@ -256,7 +256,9 @@ ${searchData || "Not available"}
 === CONTEXT ===
 ${contextSection || "None"}
 
-Extract all available fields. Return null for fields without clear evidence.`,
+Extract all available fields. Return null for fields without clear evidence.
+For funding amounts, use whole numbers (no decimals) and keep the original currency.
+If fundingStage is "Bootstrapped", totalFunding must be null.`,
         temperature: 0,
       });
       extractedData = fallback.object;

@@ -89,7 +89,7 @@ export async function executeReadWebsite(
 8. FUNDING STAGE: Look for "backed by", "raised", "Series X", "funded by" mentions
    Options: Bootstrapped, Pre-seed, Seed, Series A, Series B, Series C+, Public, Acquired
 9. TOTAL FUNDING: Amount raised - look for "$Xm raised", "secured $X funding"
-10. REVENUE: If mentioned in press/about (<$1M, $1M-$10M, $10M-$50M, $50M-$100M, $100M+)
+10. REVENUE: If mentioned in press/about (<1M, 1M-10M, 10M-50M, 50M-100M, 100M+)
 
 === SOCIAL LINKS (check Footer, Contact, About pages) ===
 11. LINKEDIN: Look for linkedin.com/company/[slug] - must be company page not personal
@@ -203,7 +203,7 @@ COMPANY DETAILS:
 - Industry: Software, Healthcare, Finance, etc.
 - Company type: B2B, SaaS, Agency, E-commerce, etc.
 - CEO/Founder: Full name
-- Revenue: <$1M, $1M-$10M, $10M-$50M, $50M-$100M, $100M+ (if public)
+- Revenue: <1M, 1M-10M, 10M-50M, 50M-100M, 100M+ (if public)
 - VAT/Tax ID/Org number
 
 CRITICAL: Only report data that is CLEARLY about ${input.domain}. Verify social accounts belong to this company. Say "Not found" for anything uncertain.`;
@@ -295,10 +295,15 @@ FUNDING (extract carefully from Crunchbase, news, or company announcements):
   * "Series A/B/C" → Series A/B/C+
   * Stock ticker or "IPO" → Public
   * "Acquired by" → Acquired
-- totalFunding: Format as "$XM" or "$XB" (e.g., "$10M", "$2.5M", "$150M", "$1.2B")
+- totalFunding: EXTERNAL FUNDING ONLY - money raised from investors
+  * IMPORTANT: If fundingStage is "Bootstrapped", totalFunding MUST be null (bootstrapped = no external funding)
+  * Format with WHOLE NUMBERS (no decimals): "$10M", "€150M", "£1B" (NOT "$3.97M")
+  * Round to nearest whole number: 3.97M → 4M, 2.3M → 2M, 1.7B → 2B
+  * Keep the original currency symbol from the source
   * Look for: "raised $X", "total funding", "funding to date"
-  * Sum multiple rounds if listed separately
-- estimatedRevenue: One of: <$1M, $1M-$10M, $10M-$50M, $50M-$100M, $100M+ (only if explicitly mentioned or can be derived from public financials)
+  * DO NOT confuse revenue/turnover with funding - these are different!
+- estimatedRevenue: One of: <$1M, $1M-10M, $10M-50M, $50M-100M, $100M+ (only if explicitly mentioned or can be derived from public financials)
+  * This is REVENUE/TURNOVER, not funding - different from totalFunding
 
 SOCIAL LINKS (verify company ownership):
 - linkedinUrl: Must be linkedin.com/company/[slug] format. Verify it's the official company page.

@@ -45,11 +45,11 @@ export const employeeCountOptions = [
 ] as const;
 
 export const revenueOptions = [
-  "<$1M",
-  "$1M-$10M",
-  "$10M-$50M",
-  "$50M-$100M",
-  "$100M+",
+  "<1M",
+  "1M-10M",
+  "10M-50M",
+  "50M-100M",
+  "100M+",
 ] as const;
 
 export const fundingStageOptions = [
