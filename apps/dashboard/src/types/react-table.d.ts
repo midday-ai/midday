@@ -38,6 +38,7 @@ declare module "@tanstack/table-core" {
 
     // Customers table meta
     deleteCustomer?: (id: string) => void;
+    enrichCustomer?: (id: string) => void;
 
     // Products table meta
     onEdit?: (id: string) => void;

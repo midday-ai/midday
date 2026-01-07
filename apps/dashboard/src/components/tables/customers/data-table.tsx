@@ -88,11 +88,26 @@ export function DataTable({ initialSettings }: Props) {
     }),
   );
 
+  const enrichCustomerMutation = useMutation(
+    trpc.customers.enrich.mutationOptions({
+      onSuccess: () => {
+        refetch();
+      },
+    }),
+  );
+
   const handleDeleteCustomer = useCallback(
     (id: string) => {
       deleteCustomerMutation.mutate({ id });
     },
     [deleteCustomerMutation],
+  );
+
+  const handleEnrichCustomer = useCallback(
+    (id: string) => {
+      enrichCustomerMutation.mutate({ id });
+    },
+    [enrichCustomerMutation],
   );
 
   const tableData = useMemo(() => {
@@ -113,8 +128,9 @@ export function DataTable({ initialSettings }: Props) {
   const tableMeta = useMemo(
     () => ({
       deleteCustomer: handleDeleteCustomer,
+      enrichCustomer: handleEnrichCustomer,
     }),
-    [handleDeleteCustomer],
+    [handleDeleteCustomer, handleEnrichCustomer],
   );
 
   const table = useReactTable({

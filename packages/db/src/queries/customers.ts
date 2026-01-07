@@ -68,6 +68,10 @@ export const getCustomerById = async (
       instagramUrl: customers.instagramUrl,
       facebookUrl: customers.facebookUrl,
       ceoName: customers.ceoName,
+      financeContact: customers.financeContact,
+      financeContactEmail: customers.financeContactEmail,
+      primaryLanguage: customers.primaryLanguage,
+      fiscalYearEnd: customers.fiscalYearEnd,
       enrichmentStatus: customers.enrichmentStatus,
       enrichedAt: customers.enrichedAt,
       invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
@@ -176,9 +180,20 @@ export const getCustomers = async (
       instagramUrl: customers.instagramUrl,
       facebookUrl: customers.facebookUrl,
       ceoName: customers.ceoName,
+      financeContact: customers.financeContact,
+      financeContactEmail: customers.financeContactEmail,
+      primaryLanguage: customers.primaryLanguage,
+      fiscalYearEnd: customers.fiscalYearEnd,
       enrichmentStatus: customers.enrichmentStatus,
       invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
       projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
+      // Financial metrics
+      totalRevenue: sql<number>`coalesce(sum(case when ${invoices.status} = 'paid' then ${invoices.amount} else 0 end), 0)`,
+      outstandingAmount: sql<number>`coalesce(sum(case when ${invoices.status} in ('unpaid', 'overdue') then ${invoices.amount} else 0 end), 0)`,
+      lastInvoiceDate: sql<string | null>`max(${invoices.issueDate})`,
+      invoiceCurrency: sql<
+        string | null
+      >`(array_agg(${invoices.currency}) filter (where ${invoices.currency} is not null))[1]`,
       tags: sql<CustomerTag[]>`
         coalesce(
           json_agg(
@@ -239,10 +254,38 @@ export const getCustomers = async (
       isAscending
         ? query.orderBy(asc(customers.industry))
         : query.orderBy(desc(customers.industry));
-    } else if (column === "headquarters_location") {
+    } else if (column === "country") {
       isAscending
-        ? query.orderBy(asc(customers.headquartersLocation))
-        : query.orderBy(desc(customers.headquartersLocation));
+        ? query.orderBy(asc(customers.country))
+        : query.orderBy(desc(customers.country));
+    } else if (column === "total_revenue") {
+      isAscending
+        ? query.orderBy(
+            asc(
+              sql`coalesce(sum(case when ${invoices.status} = 'paid' then ${invoices.amount} else 0 end), 0)`,
+            ),
+          )
+        : query.orderBy(
+            desc(
+              sql`coalesce(sum(case when ${invoices.status} = 'paid' then ${invoices.amount} else 0 end), 0)`,
+            ),
+          );
+    } else if (column === "outstanding") {
+      isAscending
+        ? query.orderBy(
+            asc(
+              sql`coalesce(sum(case when ${invoices.status} in ('unpaid', 'overdue') then ${invoices.amount} else 0 end), 0)`,
+            ),
+          )
+        : query.orderBy(
+            desc(
+              sql`coalesce(sum(case when ${invoices.status} in ('unpaid', 'overdue') then ${invoices.amount} else 0 end), 0)`,
+            ),
+          );
+    } else if (column === "last_invoice") {
+      isAscending
+        ? query.orderBy(asc(sql`max(${invoices.issueDate})`))
+        : query.orderBy(desc(sql`max(${invoices.issueDate})`));
     }
   } else {
     // Default sort by created_at descending

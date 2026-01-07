@@ -36,6 +36,11 @@ export type CustomerEnrichmentUpdateData = {
   instagramUrl?: string | null;
   facebookUrl?: string | null;
   ceoName?: string | null;
+  financeContact?: string | null;
+  financeContactEmail?: string | null;
+  primaryLanguage?: string | null;
+  fiscalYearEnd?: string | null;
+  vatNumber?: string | null;
 };
 
 export type UpdateCustomerEnrichmentParams = {
@@ -177,4 +182,44 @@ export async function getCustomersNeedingEnrichment(
       ),
     )
     .limit(params.limit ?? 50);
+}
+
+/**
+ * Clear all enrichment data for a customer
+ */
+export async function clearCustomerEnrichment(
+  db: Database,
+  params: { customerId: string; teamId: string },
+): Promise<void> {
+  await db
+    .update(customers)
+    .set({
+      description: null,
+      industry: null,
+      companyType: null,
+      employeeCount: null,
+      foundedYear: null,
+      estimatedRevenue: null,
+      fundingStage: null,
+      totalFunding: null,
+      headquartersLocation: null,
+      timezone: null,
+      linkedinUrl: null,
+      twitterUrl: null,
+      instagramUrl: null,
+      facebookUrl: null,
+      ceoName: null,
+      financeContact: null,
+      financeContactEmail: null,
+      primaryLanguage: null,
+      fiscalYearEnd: null,
+      enrichmentStatus: null,
+      enrichedAt: null,
+    })
+    .where(
+      and(
+        eq(customers.id, params.customerId),
+        eq(customers.teamId, params.teamId),
+      ),
+    );
 }

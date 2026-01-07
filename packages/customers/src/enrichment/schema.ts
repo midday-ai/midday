@@ -158,6 +158,42 @@ export const customerEnrichmentSchema = z.object({
     .describe(
       "Name of the CEO, founder, or primary executive. Look for this on About/Team pages or LinkedIn.",
     ),
+
+  financeContact: z
+    .string()
+    .nullable()
+    .describe(
+      "Name of the finance, accounting, or accounts payable contact. Look on Contact or Team pages.",
+    ),
+
+  financeContactEmail: z
+    .string()
+    .email()
+    .nullable()
+    .describe(
+      "Email for finance/accounting/AP department (e.g. 'finance@company.com', 'ap@company.com', 'accounting@company.com').",
+    ),
+
+  primaryLanguage: z
+    .string()
+    .nullable()
+    .describe(
+      "Primary business language as full name (e.g. 'English', 'Swedish', 'German', 'French', 'Spanish', 'Dutch', 'Danish', 'Norwegian', 'Finnish', 'Japanese', 'Chinese'). Infer from website content or country.",
+    ),
+
+  fiscalYearEnd: z
+    .string()
+    .nullable()
+    .describe(
+      "Fiscal year end month (e.g. 'December', 'March', 'June'). Found in annual reports or registry filings.",
+    ),
+
+  vatNumber: z
+    .string()
+    .nullable()
+    .describe(
+      "VAT number, tax ID, or organization number (e.g. 'SE556703748501', 'GB123456789'). Found on business registries, invoices, or website footer/legal pages.",
+    ),
 });
 
 export type CustomerEnrichmentResult = z.infer<typeof customerEnrichmentSchema>;
@@ -182,6 +218,11 @@ export type VerifiedEnrichmentData = {
   instagramUrl: string | null;
   facebookUrl: string | null;
   ceoName: string | null;
+  financeContact: string | null;
+  financeContactEmail: string | null;
+  primaryLanguage: string | null;
+  fiscalYearEnd: string | null;
+  vatNumber: string | null;
 };
 
 // ============================================================================

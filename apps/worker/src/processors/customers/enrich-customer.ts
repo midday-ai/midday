@@ -96,11 +96,16 @@ export class EnrichCustomerProcessor extends BaseProcessor<EnrichCustomerPayload
         },
       );
 
-      // Store verified data
+      // Store verified data (only update vatNumber if not already set)
+      const { vatNumber: _, ...dataWithoutVat } = result.verified;
+      const dataToUpdate = customer.vatNumber
+        ? dataWithoutVat
+        : result.verified;
+
       await updateCustomerEnrichment(db, {
         customerId,
         teamId,
-        data: result.verified,
+        data: dataToUpdate,
       });
 
       this.logger.info("Customer enriched successfully", {

@@ -8,6 +8,7 @@ import {
 } from "@api/schemas/customers";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
+  clearCustomerEnrichment,
   deleteCustomer,
   getCustomerById,
   getCustomerInvoiceSummary,
@@ -149,5 +150,28 @@ export const customersRouter = createTRPCRouter({
       });
 
       return { cancelled: true };
+    }),
+
+  clearEnrichment: protectedProcedure
+    .input(enrichCustomerSchema)
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      const customer = await getCustomerById(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
+
+      if (!customer) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Customer not found",
+        });
+      }
+
+      await clearCustomerEnrichment(db, {
+        customerId: customer.id,
+        teamId: teamId!,
+      });
+
+      return { cleared: true };
     }),
 });

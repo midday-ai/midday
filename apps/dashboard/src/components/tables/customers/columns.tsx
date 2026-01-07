@@ -1,5 +1,6 @@
 "use client";
 
+import { FormatAmount } from "@/components/format-amount";
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { getWebsiteLogo } from "@/utils/logos";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
@@ -22,6 +23,7 @@ import {
 } from "@midday/ui/tooltip";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
+import { formatDistanceToNowStrict } from "date-fns";
 import Link from "next/link";
 import { memo, useCallback } from "react";
 
@@ -86,10 +88,16 @@ TagsCell.displayName = "TagsCell";
 const ActionsCell = memo(
   ({
     customerId,
+    hasWebsite,
+    enrichmentStatus,
     onDelete,
+    onEnrich,
   }: {
     customerId: string;
+    hasWebsite: boolean;
+    enrichmentStatus: string | null;
     onDelete?: (id: string) => void;
+    onEnrich?: (id: string) => void;
   }) => {
     const { setParams } = useCustomerParams();
 
@@ -100,6 +108,13 @@ const ActionsCell = memo(
     const handleDelete = useCallback(() => {
       onDelete?.(customerId);
     }, [customerId, onDelete]);
+
+    const handleEnrich = useCallback(() => {
+      onEnrich?.(customerId);
+    }, [customerId, onEnrich]);
+
+    const isEnriching =
+      enrichmentStatus === "pending" || enrichmentStatus === "processing";
 
     return (
       <div className="flex items-center justify-center w-full">
@@ -114,6 +129,12 @@ const ActionsCell = memo(
             <DropdownMenuItem onClick={handleEdit}>
               Edit customer
             </DropdownMenuItem>
+
+            {hasWebsite && !isEnriching && (
+              <DropdownMenuItem onClick={handleEnrich}>
+                Enrich company
+              </DropdownMenuItem>
+            )}
 
             <DropdownMenuItem onClick={handleDelete} className="text-[#FF3638]">
               Delete
@@ -174,74 +195,6 @@ const WebsiteCell = memo(({ website }: { website: string | null }) => {
 });
 
 WebsiteCell.displayName = "WebsiteCell";
-
-// Social links cell - combined LinkedIn/Twitter/Instagram/Facebook icons
-const SocialLinksCell = memo(
-  ({
-    linkedinUrl,
-    twitterUrl,
-    instagramUrl,
-    facebookUrl,
-  }: {
-    linkedinUrl: string | null;
-    twitterUrl: string | null;
-    instagramUrl: string | null;
-    facebookUrl: string | null;
-  }) => {
-    const hasAnyLink = linkedinUrl || twitterUrl || instagramUrl || facebookUrl;
-    if (!hasAnyLink) return "-";
-
-    return (
-      <div
-        className="flex items-center gap-2"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {linkedinUrl && (
-          <a
-            href={linkedinUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:opacity-70 transition-opacity"
-          >
-            <Icons.LinkedIn className="size-4" />
-          </a>
-        )}
-        {twitterUrl && (
-          <a
-            href={twitterUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:opacity-70 transition-opacity"
-          >
-            <Icons.X className="size-4" />
-          </a>
-        )}
-        {instagramUrl && (
-          <a
-            href={instagramUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:opacity-70 transition-opacity"
-          >
-            <Icons.Instagram className="size-4" />
-          </a>
-        )}
-        {facebookUrl && (
-          <a
-            href={facebookUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:opacity-70 transition-opacity"
-          >
-            <Icons.Facebook className="size-4" />
-          </a>
-        )}
-      </div>
-    );
-  },
-);
-
-SocialLinksCell.displayName = "SocialLinksCell";
 
 export const columns: ColumnDef<Customer>[] = [
   {
@@ -372,16 +325,70 @@ export const columns: ColumnDef<Customer>[] = [
     },
   },
   {
-    id: "companyType",
-    accessorKey: "companyType",
-    header: "Type",
-    size: 120,
+    id: "country",
+    accessorKey: "country",
+    header: "Country",
+    size: 130,
     minSize: 100,
     maxSize: 180,
     enableResizing: true,
     meta: {
       skeleton: { type: "text", width: "w-16" },
-      headerLabel: "Type",
+      headerLabel: "Country",
+      sortField: "country",
+      className: "w-[130px] min-w-[100px]",
+    },
+    cell: ({ row }) => {
+      const country = row.original.country;
+      const countryCode = row.original.countryCode;
+      if (!country && !countryCode) return "-";
+      return countryCode?.toUpperCase() || country || "-";
+    },
+  },
+  {
+    id: "financeEmail",
+    accessorKey: "financeContactEmail",
+    header: "Finance Email",
+    size: 220,
+    minSize: 180,
+    maxSize: 320,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-32" },
+      headerLabel: "Finance Email",
+      className: "w-[220px] min-w-[180px]",
+    },
+    cell: ({ row }) => {
+      if (
+        row.original.enrichmentStatus === "processing" ||
+        row.original.enrichmentStatus === "pending"
+      ) {
+        return <EnrichingCell />;
+      }
+      const email = row.original.financeContactEmail;
+      if (!email) return "-";
+      return (
+        <a
+          href={`mailto:${email}`}
+          className="text-primary hover:underline truncate block"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {email}
+        </a>
+      );
+    },
+  },
+  {
+    id: "language",
+    accessorKey: "primaryLanguage",
+    header: "Language",
+    size: 120,
+    minSize: 100,
+    maxSize: 150,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-10" },
+      headerLabel: "Language",
       className: "w-[120px] min-w-[100px]",
     },
     cell: ({ row }) => {
@@ -391,62 +398,71 @@ export const columns: ColumnDef<Customer>[] = [
       ) {
         return <EnrichingCell />;
       }
-      if (!row.original.companyType) return "-";
-      return (
-        <Badge variant="tag" className="whitespace-nowrap">
-          {row.original.companyType}
-        </Badge>
-      );
+      const lang = row.original.primaryLanguage;
+      if (!lang) return "-";
+      return <span>{lang}</span>;
     },
   },
   {
-    id: "employeeCount",
-    accessorKey: "employeeCount",
-    header: "Employees",
+    id: "totalRevenue",
+    accessorKey: "totalRevenue",
+    header: "Revenue",
     size: 130,
     minSize: 100,
     maxSize: 180,
     enableResizing: true,
     meta: {
-      skeleton: { type: "text", width: "w-12" },
-      headerLabel: "Employees",
+      skeleton: { type: "text", width: "w-16" },
+      headerLabel: "Revenue",
+      sortField: "total_revenue",
       className: "w-[130px] min-w-[100px]",
     },
     cell: ({ row }) => {
-      if (
-        row.original.enrichmentStatus === "processing" ||
-        row.original.enrichmentStatus === "pending"
-      ) {
-        return <EnrichingCell />;
-      }
-      return row.original.employeeCount ?? "-";
+      const amount = Number(row.original.totalRevenue);
+      const currency = row.original.invoiceCurrency;
+      if (!amount || amount <= 0) return "-";
+      return <FormatAmount amount={amount} currency={currency || "USD"} />;
     },
   },
   {
-    id: "location",
-    accessorKey: "headquartersLocation",
-    header: "Location",
-    size: 180,
-    minSize: 140,
-    maxSize: 300,
+    id: "outstanding",
+    accessorKey: "outstandingAmount",
+    header: "Outstanding",
+    size: 150,
+    minSize: 120,
+    maxSize: 200,
     enableResizing: true,
     meta: {
-      skeleton: { type: "text", width: "w-24" },
-      headerLabel: "Location",
-      className: "w-[180px] min-w-[140px]",
+      skeleton: { type: "text", width: "w-20" },
+      headerLabel: "Outstanding",
+      sortField: "outstanding",
+      className: "w-[150px] min-w-[120px]",
     },
     cell: ({ row }) => {
-      if (
-        row.original.enrichmentStatus === "processing" ||
-        row.original.enrichmentStatus === "pending"
-      ) {
-        return <EnrichingCell />;
-      }
-      return (
-        <span className="truncate block">
-          {row.original.headquartersLocation ?? "-"}
-        </span>
-      );
+      const amount = Number(row.original.outstandingAmount);
+      const currency = row.original.invoiceCurrency;
+      if (!amount || amount <= 0) return "-";
+      return <FormatAmount amount={amount} currency={currency || "USD"} />;
+    },
+  },
+  {
+    id: "lastInvoice",
+    accessorKey: "lastInvoiceDate",
+    header: "Last Invoice",
+    size: 130,
+    minSize: 100,
+    maxSize: 180,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-20" },
+      headerLabel: "Last Invoice",
+      sortField: "last_invoice",
+      className: "w-[130px] min-w-[100px]",
+    },
+    cell: ({ row }) => {
+      const date = row.original.lastInvoiceDate;
+      if (!date) return "-";
+      return formatDistanceToNowStrict(new Date(date), { addSuffix: true });
     },
   },
   {
@@ -463,37 +479,6 @@ export const columns: ColumnDef<Customer>[] = [
       className: "w-[180px] min-w-[140px]",
     },
     cell: ({ row }) => <WebsiteCell website={row.original.website} />,
-  },
-  {
-    id: "socialLinks",
-    accessorKey: "linkedinUrl",
-    header: "Social",
-    size: 120,
-    minSize: 100,
-    maxSize: 160,
-    enableResizing: true,
-    enableSorting: false,
-    meta: {
-      skeleton: { type: "icon" },
-      headerLabel: "Social",
-      className: "w-[120px] min-w-[100px]",
-    },
-    cell: ({ row }) => {
-      if (
-        row.original.enrichmentStatus === "processing" ||
-        row.original.enrichmentStatus === "pending"
-      ) {
-        return <EnrichingCell />;
-      }
-      return (
-        <SocialLinksCell
-          linkedinUrl={row.original.linkedinUrl}
-          twitterUrl={row.original.twitterUrl}
-          instagramUrl={row.original.instagramUrl}
-          facebookUrl={row.original.facebookUrl}
-        />
-      );
-    },
   },
   {
     id: "tags",
@@ -529,7 +514,10 @@ export const columns: ColumnDef<Customer>[] = [
     cell: ({ row, table }) => (
       <ActionsCell
         customerId={row.original.id}
+        hasWebsite={Boolean(row.original.website)}
+        enrichmentStatus={row.original.enrichmentStatus}
         onDelete={table.options.meta?.deleteCustomer}
+        onEnrich={table.options.meta?.enrichCustomer}
       />
     ),
   },

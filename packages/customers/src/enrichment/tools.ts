@@ -72,22 +72,45 @@ export async function executeReadWebsite(
           content: [
             {
               type: "text",
-              text: `Extract company information from this website.
+              text: `Extract company information from this website. Report ONLY what you find - use "Not found" for missing items.
 
-FIND THESE ITEMS:
-1. DESCRIPTION: What does this company do? (1-2 sentences)
-2. INDUSTRY: What industry are they in?
-3. EMPLOYEES: Team size from About/Team page
-4. LOCATION: Headquarters location
-5. FOUNDED: Year founded
-6. CEO/FOUNDER: Name of CEO or founder from About/Team/Leadership page
-7. LINKEDIN: Company LinkedIn URL (usually in footer)
-8. TWITTER: Company Twitter/X URL (usually in footer)
-9. INSTAGRAM: Company Instagram URL (if present)
-10. FACEBOOK: Company Facebook URL (if present)
+=== BASIC INFO ===
+1. DESCRIPTION: 1-2 sentence summary of what the company does
+2. INDUSTRY: Software, Healthcare, Finance, E-commerce, Manufacturing, Education, Real Estate, Media, Consulting, Legal, Marketing, Logistics, Energy, Hospitality, Retail, or Other
+3. COMPANY TYPE: B2B, B2C, B2B2C, SaaS, Agency, Consultancy, E-commerce, Marketplace, Enterprise, SMB, Startup, or Other
+4. FOUNDED YEAR: 4-digit year (check About page, footer, or press releases)
 
-Check About, Team, Leadership, Contact pages and Footer for this information.
-Only report what you can actually find on the website.`,
+=== LOCATION & SIZE ===
+5. HEADQUARTERS: City, Country (e.g., "Stockholm, Sweden") - check Contact, About, Footer
+6. EMPLOYEES: Team size (1-10, 11-50, 51-200, 201-500, 501-1000, 1000+) - check About, Team, Careers pages
+7. CEO/FOUNDER: Full name from Leadership, About, or Team page
+
+=== FUNDING (check Investors, Press, News, About pages) ===
+8. FUNDING STAGE: Look for "backed by", "raised", "Series X", "funded by" mentions
+   Options: Bootstrapped, Pre-seed, Seed, Series A, Series B, Series C+, Public, Acquired
+9. TOTAL FUNDING: Amount raised - look for "$Xm raised", "secured $X funding"
+10. REVENUE: If mentioned in press/about (<$1M, $1M-$10M, $10M-$50M, $50M-$100M, $100M+)
+
+=== SOCIAL LINKS (check Footer, Contact, About pages) ===
+11. LINKEDIN: Look for linkedin.com/company/[slug] - must be company page not personal
+12. TWITTER/X: Look for twitter.com/[handle] or x.com/[handle]
+13. INSTAGRAM: Look for instagram.com/[handle]
+14. FACEBOOK: Look for facebook.com/[page]
+
+=== FINANCE CONTACT (check Contact, Team, About pages) ===
+15. FINANCE CONTACT: Name of CFO, Finance Director, Controller, or AP Manager
+16. FINANCE EMAIL: Look for these patterns in order of preference:
+    - ap@, accounts.payable@, payable@
+    - invoices@, billing@
+    - finance@, accounting@
+    - ar@ (accounts receivable sometimes handles both)
+
+=== COMPLIANCE ===
+17. VAT/TAX NUMBER: Check footer, legal pages, terms, imprint (often near copyright)
+18. PRIMARY LANGUAGE: Full language name based on website content (English, Swedish, German, French, Spanish, Dutch, etc.)
+19. FISCAL YEAR END: Month name if mentioned in annual reports or investor pages
+
+PAGES TO CHECK: Homepage, About, Team, Leadership, Contact, Careers, Investors, Press, News, Legal, Footer, Imprint.`,
               providerOptions: {
                 google: { urlContext: fullUrl },
               },
@@ -126,29 +149,64 @@ export async function executeSearchCompany(
       ? buildRegistrySearchHint(input.countryCode, input.companyName)
       : null;
 
-    const searchPrompt = `Search for "${input.companyName}" company information.
+    const searchPrompt = `Search for "${input.companyName}" (${input.domain}) company information.
 
-SEARCH FOR:
-1. LinkedIn company page: site:linkedin.com/company "${input.companyName}"
-2. Twitter/X account: site:twitter.com OR site:x.com "${input.companyName}"
-3. Instagram: site:instagram.com "${input.companyName}"
-4. Facebook: site:facebook.com "${input.companyName}"
-${registryHint ? `\nCOUNTRY-SPECIFIC SOURCES:\n${registryHint}` : ""}
+=== SOCIAL MEDIA SEARCHES (run each separately) ===
+1. site:linkedin.com/company "${input.companyName}"
+   - Find the OFFICIAL company page (not personal profiles)
+   - Verify: company name matches, domain in website field if shown
+   
+2. site:twitter.com OR site:x.com "${input.companyName}"
+   - Look for verified/official accounts
+   - Check bio mentions domain or matches company description
+   
+3. site:instagram.com "${input.companyName}"
+   - Look for business accounts with company branding
+   
+4. site:facebook.com "${input.companyName}" company OR business
+   - Find official company page (not groups)
 
-FIND AND REPORT:
-- LinkedIn URL: https://linkedin.com/company/[slug]
-- Twitter URL: https://twitter.com/[handle] or https://x.com/[handle]
+=== FUNDING SEARCHES ===
+5. site:crunchbase.com "${input.companyName}"
+   - Crunchbase has authoritative funding data
+   
+6. site:techcrunch.com OR site:pitchbook.com "${input.companyName}" funding
+   - News about funding rounds
+   
+7. "${input.companyName}" "raised" OR "funding round" OR "series" OR "backed by"
+   - Look for: "raised $Xm", "Series A/B/C", "seed round", "backed by [investors]"
+   - Patterns: "raised $5 million", "$10M Series A", "secured $2.5M seed funding"
+
+=== COMPANY INFO SEARCHES ===
+8. "${input.companyName}" ${input.domain} employees OR "team of" OR headcount
+9. "${input.companyName}" headquarters OR "based in" OR founded
+10. "${input.companyName}" revenue OR ARR (if public info available)
+${registryHint ? `\n=== COUNTRY-SPECIFIC REGISTRY ===\n${registryHint}` : ""}
+
+=== EXTRACT AND REPORT ===
+SOCIAL LINKS (verify domain connection):
+- LinkedIn URL: https://linkedin.com/company/[exact-slug]
+- Twitter/X URL: https://x.com/[handle] or https://twitter.com/[handle]
 - Instagram URL: https://instagram.com/[handle]
-- Facebook URL: https://facebook.com/[page]
-- Employee count
-- Headquarters location
-- Year founded
-- Industry
-- CEO/Founder name
+- Facebook URL: https://facebook.com/[page-name]
 
-IMPORTANT:
-- Only include URLs that are clearly for the company at ${input.domain}
-- If not found, say "Not found" for that item`;
+FUNDING (be specific about sources):
+- Funding stage: Bootstrapped, Pre-seed, Seed, Series A, Series B, Series C+, Public, Acquired
+- Total funding: Exact amount if found (e.g., "$10M", "$2.5M")
+- Latest round: Most recent round details
+- Key investors: Notable investors if mentioned
+
+COMPANY DETAILS:
+- Employee count: 1-10, 11-50, 51-200, 201-500, 501-1000, 1000+
+- Headquarters: City, Country
+- Founded year: YYYY
+- Industry: Software, Healthcare, Finance, etc.
+- Company type: B2B, SaaS, Agency, E-commerce, etc.
+- CEO/Founder: Full name
+- Revenue: <$1M, $1M-$10M, $10M-$50M, $50M-$100M, $100M+ (if public)
+- VAT/Tax ID/Org number
+
+CRITICAL: Only report data that is CLEARLY about ${input.domain}. Verify social accounts belong to this company. Say "Not found" for anything uncertain.`;
 
     const result = await generateText({
       model: google("gemini-2.5-flash-lite"),
@@ -193,23 +251,71 @@ ${input.searchData || "Not available"}
 === KNOWN CONTEXT ===
 ${input.context || "None"}
 
-EXTRACTION RULES:
-1. PREFER data from the company's own website - it's most reliable
-2. Only use search data if verified to be about ${input.domain}
-3. If sources conflict: website > LinkedIn > other
-4. Return null for any field without clear evidence
+=== DATA PRIORITY ===
+1. Website data (most authoritative)
+2. Crunchbase/LinkedIn data
+3. Other search results
+Return null if uncertain or conflicting.
 
-FIELD RULES:
-- description: From company's website, 1-2 sentences
-- industry/companyType: Infer from what they do
-- employeeCount: Only from LinkedIn or website
-- foundedYear: Only if explicitly stated
-- estimatedRevenue: Usually null (rarely public)
-- linkedinUrl: Must be linkedin.com/company/[slug] format
-- twitterUrl: Must be twitter.com/[handle] or x.com/[handle] format
-- ceoName: From About/Team page or LinkedIn
+=== FIELD EXTRACTION RULES ===
 
-When in doubt, return null. Missing data is better than wrong data.`,
+BASIC INFO:
+- description: 1-2 sentences describing what the company does. Use website copy.
+- industry: One of: Software, Healthcare, Finance, E-commerce, Manufacturing, Education, Real Estate, Media, Consulting, Legal, Marketing, Logistics, Energy, Hospitality, Retail, Other
+- companyType: One of: B2B, B2C, B2B2C, SaaS, Agency, Consultancy, E-commerce, Marketplace, Enterprise, SMB, Startup, Other
+- foundedYear: 4-digit year (1900-2030)
+
+LOCATION (derive timezone from HQ):
+- headquartersLocation: "City, Country" format (e.g., "Stockholm, Sweden", "San Francisco, USA")
+- timezone: IANA timezone based on headquarters location. Common mappings:
+  * Stockholm/Sweden → Europe/Stockholm
+  * London/UK → Europe/London
+  * San Francisco/California → America/Los_Angeles
+  * New York → America/New_York
+  * Berlin/Germany → Europe/Berlin
+  * Paris/France → Europe/Paris
+  * Amsterdam/Netherlands → Europe/Amsterdam
+  * Sydney/Australia → Australia/Sydney
+  * Singapore → Asia/Singapore
+  * Tokyo/Japan → Asia/Tokyo
+
+TEAM:
+- employeeCount: One of: 1-10, 11-50, 51-200, 201-500, 501-1000, 1000+
+- ceoName: Full name of CEO, founder, or managing director
+
+FUNDING (extract carefully from Crunchbase, news, or company announcements):
+- fundingStage: One of: Bootstrapped, Pre-seed, Seed, Series A, Series B, Series C+, Public, Acquired
+  * "Bootstrap" or no funding mentions → Bootstrapped
+  * "Pre-seed" or "angel" → Pre-seed
+  * "Seed round" → Seed
+  * "Series A/B/C" → Series A/B/C+
+  * Stock ticker or "IPO" → Public
+  * "Acquired by" → Acquired
+- totalFunding: Format as "$XM" or "$XB" (e.g., "$10M", "$2.5M", "$150M", "$1.2B")
+  * Look for: "raised $X", "total funding", "funding to date"
+  * Sum multiple rounds if listed separately
+- estimatedRevenue: One of: <$1M, $1M-$10M, $10M-$50M, $50M-$100M, $100M+ (only if explicitly mentioned or can be derived from public financials)
+
+SOCIAL LINKS (verify company ownership):
+- linkedinUrl: Must be linkedin.com/company/[slug] format. Verify it's the official company page.
+- twitterUrl: Must be twitter.com/[handle] or x.com/[handle]. Check bio references the domain.
+- instagramUrl: Must be instagram.com/[handle]. Verify company branding.
+- facebookUrl: Must be facebook.com/[page]. Must be official company page, not group.
+
+FINANCE CONTACT (prioritize department emails over personal):
+- financeContact: Name of CFO, Finance Director, Controller, or AP Manager
+- financeContactEmail: Email in priority order:
+  1. ap@, accounts.payable@, payable@${input.domain}
+  2. invoices@, billing@${input.domain}
+  3. finance@, accounting@${input.domain}
+  4. Specific person's email if they handle finance
+
+COMPLIANCE:
+- vatNumber: Uppercase, no spaces. Format: [COUNTRY_CODE][NUMBER] (e.g., SE556703748501, GB123456789, DE123456789)
+- primaryLanguage: Full language name (English, Swedish, German, French, Spanish, Dutch, Danish, Norwegian, Finnish, Japanese, Chinese, etc.)
+- fiscalYearEnd: Month name (January, February, ..., December). Most companies use December unless stated otherwise.
+
+Return null for ANY field without clear, verified evidence. Do not guess.`,
       temperature: 0,
     });
 

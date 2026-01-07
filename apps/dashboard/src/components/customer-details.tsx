@@ -27,7 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { SheetFooter } from "@midday/ui/sheet";
+import { SheetFooter, SheetHeader } from "@midday/ui/sheet";
 import { Skeleton } from "@midday/ui/skeleton";
 import {
   Table,
@@ -37,12 +37,6 @@ import {
   TableHeader,
   TableRow,
 } from "@midday/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import { formatDate } from "@midday/utils/format";
 import {
@@ -52,9 +46,10 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-import { type RefObject, useMemo, useRef, useState } from "react";
+import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
 import { FormatAmount } from "./format-amount";
 import { InvoiceStatus } from "./invoice-status";
@@ -109,6 +104,10 @@ export function CustomerDetails() {
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const dropdownContainerRef = useRef<HTMLDivElement>(null!);
 
+  // Track enrichment animation - use a key that changes when enrichment completes
+  const [enrichmentAnimationKey, setEnrichmentAnimationKey] = useState(0);
+  const prevEnrichmentStatusRef = useRef<string | null>(null);
+
   const isOpen = customerId !== null;
 
   const {
@@ -123,20 +122,35 @@ export function CustomerDetails() {
   });
 
   // Mutation for re-enriching customer
-  const enrichMutation = useMutation({
-    ...trpc.customers.enrich.mutationOptions(),
-    onSuccess: () => {
-      refetch();
-    },
-    onError: (error) => {
-      toast({
-        duration: 3000,
-        variant: "destructive",
-        title: "Enrichment failed",
-        description: error.message,
-      });
-    },
-  });
+  const enrichMutation = useMutation(
+    trpc.customers.enrich.mutationOptions({
+      onMutate: async () => {
+        // Cancel outgoing refetches
+        await queryClient.cancelQueries({
+          queryKey: trpc.customers.getById.queryKey({ id: customerId! }),
+        });
+
+        // Optimistically update to pending status
+        queryClient.setQueryData(
+          trpc.customers.getById.queryKey({ id: customerId! }),
+          (old: typeof customer) =>
+            old ? { ...old, enrichmentStatus: "pending" as const } : old,
+        );
+      },
+      onError: (error) => {
+        toast({
+          duration: 3000,
+          variant: "destructive",
+          title: "Enrichment failed",
+          description: error.message,
+        });
+      },
+      onSettled: () => {
+        // Refetch after mutation settles
+        refetch();
+      },
+    }),
+  );
 
   // Mutation for cancelling enrichment
   const cancelEnrichmentMutation = useMutation({
@@ -146,7 +160,23 @@ export function CustomerDetails() {
     },
   });
 
-  const handleReEnrich = () => {
+  // Mutation for clearing enrichment data
+  const clearEnrichmentMutation = useMutation({
+    ...trpc.customers.clearEnrichment.mutationOptions(),
+    onSuccess: () => {
+      refetch();
+    },
+    onError: (error) => {
+      toast({
+        duration: 3000,
+        variant: "destructive",
+        title: "Failed to clear data",
+        description: error.message,
+      });
+    },
+  });
+
+  const handleStartEnrich = () => {
     if (customerId) {
       enrichMutation.mutate({ id: customerId });
     }
@@ -158,8 +188,39 @@ export function CustomerDetails() {
     }
   };
 
+  const handleClearEnrichment = () => {
+    if (customerId) {
+      clearEnrichmentMutation.mutate({ id: customerId });
+    }
+  };
+
   const isEnriching =
-    customer?.enrichmentStatus === "processing" || enrichMutation.isPending;
+    customer?.enrichmentStatus === "pending" ||
+    customer?.enrichmentStatus === "processing" ||
+    enrichMutation.isPending;
+
+  // Track enrichment status changes to trigger animation only when transitioning from loading to complete
+  useEffect(() => {
+    const prevStatus = prevEnrichmentStatusRef.current;
+    const currentStatus = customer?.enrichmentStatus;
+
+    // Increment key to trigger animation when transitioning from pending/processing to completed
+    if (
+      (prevStatus === "pending" || prevStatus === "processing") &&
+      currentStatus === "completed"
+    ) {
+      setEnrichmentAnimationKey((k) => k + 1);
+    }
+
+    prevEnrichmentStatusRef.current = currentStatus ?? null;
+  }, [customer?.enrichmentStatus]);
+
+  // Reset animation state when sheet closes
+  useEffect(() => {
+    if (!isOpen) {
+      prevEnrichmentStatusRef.current = null;
+    }
+  }, [isOpen]);
 
   // Subscribe to realtime updates for this customer
   useRealtime({
@@ -326,17 +387,17 @@ export function CustomerDetails() {
     <div className="h-full flex flex-col min-h-0 -mx-6">
       {/* Content */}
       <div className="flex-1 overflow-y-auto scrollbar-hide min-h-0">
-        {/* Sticky Customer Header - Enhanced with logo and enrichment */}
-        <div className="sticky top-0 z-10 bg-background border-b border-border px-6 py-4">
-          <div className="flex items-start gap-4">
+        {/* Sheet Header - matches other sheets */}
+        <SheetHeader className="flex justify-between items-center flex-row px-6 mb-4">
+          <div className="min-w-0 flex-1 flex items-center gap-3">
             {/* Logo from logo.dev */}
             {isEnriching ? (
-              <Skeleton className="size-12 rounded-full flex-shrink-0" />
+              <Skeleton className="size-9 rounded-full flex-shrink-0" />
             ) : customer.website ? (
               <img
                 src={getWebsiteLogo(customer.website)}
                 alt={`${customer.name} logo`}
-                className="size-12 rounded-full object-cover flex-shrink-0 bg-muted"
+                className="size-9 rounded-full object-cover flex-shrink-0 bg-muted"
                 onError={(e) => {
                   // Fallback to initials on error
                   e.currentTarget.style.display = "none";
@@ -347,100 +408,104 @@ export function CustomerDetails() {
             ) : null}
             <div
               className={cn(
-                "size-12 rounded-full flex items-center justify-center bg-muted text-muted-foreground font-medium text-lg flex-shrink-0",
+                "size-9 rounded-full flex items-center justify-center bg-muted text-muted-foreground font-medium flex-shrink-0",
                 customer.website && "hidden",
               )}
             >
               {customer.name.charAt(0).toUpperCase()}
             </div>
+            <h2 className="text-lg font-serif truncate">{customer.name}</h2>
+          </div>
 
-            {/* Name, description, and badges */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-2">
-                <div className="text-[24px] font-serif leading-normal truncate">
-                  {customer.name}
-                </div>
-                {/* Re-enrich / Cancel button */}
-                {customer.website && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        {isEnriching ? (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 px-2 text-xs flex-shrink-0"
-                            onClick={handleCancelEnrich}
-                          >
-                            <Icons.Close className="size-3 mr-1" />
-                            Cancel
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="p-0 h-6 w-6 flex-shrink-0"
-                            onClick={handleReEnrich}
-                          >
-                            <Icons.RefreshOutline className="size-4 text-muted-foreground" />
-                          </Button>
-                        )}
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {isEnriching
-                          ? "Cancel enrichment"
-                          : "Refresh company data"}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+          {/* Actions menu */}
+          {customer.website && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="size-8">
+                  <Icons.MoreVertical className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {isEnriching ? (
+                  <DropdownMenuItem onClick={handleCancelEnrich}>
+                    <Icons.Close className="size-4 mr-2" />
+                    Cancel enrichment
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem onClick={handleStartEnrich}>
+                    <Icons.RefreshOutline className="size-4 mr-2" />
+                    {hasEnrichmentData ? "Refresh data" : "Enrich company"}
+                  </DropdownMenuItem>
+                )}
+                {hasEnrichmentData && !isEnriching && (
+                  <DropdownMenuItem
+                    onClick={handleClearEnrichment}
+                    className="text-destructive"
+                  >
+                    <Icons.Delete className="size-4 mr-2" />
+                    Clear enrichment
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </SheetHeader>
+
+        {/* Company info section */}
+        {(customer.description ||
+          customer.industry ||
+          customer.companyType ||
+          customer.employeeCount ||
+          customer.fundingStage ||
+          isEnriching) && (
+          <div className="px-6 pb-4 border-b border-border">
+            {/* Description */}
+            {isEnriching ? (
+              <div className="space-y-1.5">
+                <Skeleton className="h-[13px] w-full" />
+                <Skeleton className="h-[13px] w-4/5" />
+              </div>
+            ) : customer.description ? (
+              <p className="text-[13px] text-[#606060] line-clamp-2">
+                {customer.description}
+              </p>
+            ) : null}
+
+            {/* Badges */}
+            {isEnriching ? (
+              <div className="flex items-center gap-2 mt-3">
+                <Skeleton className="h-5 w-16" />
+                <Skeleton className="h-5 w-20" />
+                <Skeleton className="h-5 w-24" />
+              </div>
+            ) : customer.industry ||
+              customer.companyType ||
+              customer.employeeCount ||
+              customer.fundingStage ? (
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                {customer.industry && (
+                  <Badge variant="tag">{customer.industry}</Badge>
+                )}
+                {customer.companyType && (
+                  <Badge variant="tag">{customer.companyType}</Badge>
+                )}
+                {customer.employeeCount && (
+                  <Badge variant="tag">
+                    {customer.employeeCount} employees
+                  </Badge>
+                )}
+                {customer.fundingStage && (
+                  <Badge variant="tag">{customer.fundingStage}</Badge>
                 )}
               </div>
-
-              {/* Description */}
-              {isEnriching ? (
-                <div className="mt-1 space-y-1">
-                  <Skeleton className="h-4 w-full max-w-[280px]" />
-                  <Skeleton className="h-4 w-3/4" />
-                </div>
-              ) : customer.description ? (
-                <p className="text-[13px] text-[#606060] mt-1 line-clamp-2">
-                  {customer.description}
-                </p>
-              ) : null}
-
-              {/* Badges */}
-              {(customer.industry ||
-                customer.companyType ||
-                customer.employeeCount ||
-                customer.fundingStage) && (
-                <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  {customer.industry && (
-                    <Badge variant="tag">{customer.industry}</Badge>
-                  )}
-                  {customer.companyType && (
-                    <Badge variant="tag">{customer.companyType}</Badge>
-                  )}
-                  {customer.employeeCount && (
-                    <Badge variant="tag">
-                      {customer.employeeCount} employees
-                    </Badge>
-                  )}
-                  {customer.fundingStage && (
-                    <Badge variant="tag">{customer.fundingStage}</Badge>
-                  )}
-                </div>
-              )}
-            </div>
+            ) : null}
           </div>
-        </div>
+        )}
 
         <div className="px-6 pb-4">
           <Accordion
             type="multiple"
-            defaultValue={[
-              "general",
-              ...(hasEnrichmentData ? ["intelligence"] : []),
-            ]}
+            defaultValue={["general", "profile"]}
             className="space-y-0"
           >
             {/* General Section */}
@@ -499,10 +564,7 @@ export function CustomerDetails() {
               isEnriching ||
               customer.enrichmentStatus === "completed" ||
               customer.enrichmentStatus === "failed") && (
-              <AccordionItem
-                value="intelligence"
-                className="border-b border-border"
-              >
+              <AccordionItem value="profile" className="border-b border-border">
                 <AccordionTrigger className="text-[16px] font-medium py-4">
                   Company Profile
                 </AccordionTrigger>
@@ -520,57 +582,127 @@ export function CustomerDetails() {
                       ))}
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-4 pt-0">
+                    <motion.div
+                      key={enrichmentAnimationKey}
+                      className="grid grid-cols-2 gap-4 pt-0"
+                      initial={enrichmentAnimationKey > 0 ? "hidden" : false}
+                      animate="visible"
+                      variants={{
+                        hidden: { opacity: 0 },
+                        visible: {
+                          opacity: 1,
+                          transition: {
+                            staggerChildren:
+                              enrichmentAnimationKey > 0 ? 0.02 : 0,
+                            delayChildren: 0,
+                          },
+                        },
+                      }}
+                    >
                       {customer.industry && (
-                        <div>
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
                           <div className="text-[12px] mb-2 text-[#606060]">
                             Industry
                           </div>
                           <div className="text-[14px]">{customer.industry}</div>
-                        </div>
+                        </motion.div>
                       )}
                       {customer.companyType && (
-                        <div>
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
                           <div className="text-[12px] mb-2 text-[#606060]">
                             Company Type
                           </div>
                           <div className="text-[14px]">
                             {customer.companyType}
                           </div>
-                        </div>
+                        </motion.div>
                       )}
                       {customer.employeeCount && (
-                        <div>
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
                           <div className="text-[12px] mb-2 text-[#606060]">
                             Employees
                           </div>
                           <div className="text-[14px]">
                             {customer.employeeCount}
                           </div>
-                        </div>
+                        </motion.div>
                       )}
                       {customer.foundedYear && (
-                        <div>
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
                           <div className="text-[12px] mb-2 text-[#606060]">
                             Founded
                           </div>
                           <div className="text-[14px]">
                             {customer.foundedYear}
                           </div>
-                        </div>
+                        </motion.div>
                       )}
                       {customer.estimatedRevenue && (
-                        <div>
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
                           <div className="text-[12px] mb-2 text-[#606060]">
                             Est. Revenue
                           </div>
                           <div className="text-[14px]">
                             {customer.estimatedRevenue}
                           </div>
-                        </div>
+                        </motion.div>
                       )}
                       {(customer.fundingStage || customer.totalFunding) && (
-                        <div>
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
                           <div className="text-[12px] mb-2 text-[#606060]">
                             Funding
                           </div>
@@ -579,25 +711,111 @@ export function CustomerDetails() {
                             {customer.totalFunding &&
                               ` (${customer.totalFunding})`}
                           </div>
-                        </div>
+                        </motion.div>
                       )}
                       {customer.headquartersLocation && (
-                        <div>
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
                           <div className="text-[12px] mb-2 text-[#606060]">
                             Headquarters
                           </div>
                           <div className="text-[14px]">
                             {customer.headquartersLocation}
                           </div>
-                        </div>
+                        </motion.div>
                       )}
                       {customer.ceoName && (
-                        <div>
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
                           <div className="text-[12px] mb-2 text-[#606060]">
                             CEO / Founder
                           </div>
                           <div className="text-[14px]">{customer.ceoName}</div>
-                        </div>
+                        </motion.div>
+                      )}
+                      {(customer.financeContact ||
+                        customer.financeContactEmail) && (
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Finance Contact
+                          </div>
+                          <div className="text-[14px]">
+                            {customer.financeContact && (
+                              <div>{customer.financeContact}</div>
+                            )}
+                            {customer.financeContactEmail && (
+                              <a
+                                href={`mailto:${customer.financeContactEmail}`}
+                                className="text-[#606060] hover:text-foreground transition-colors"
+                              >
+                                {customer.financeContactEmail}
+                              </a>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                      {customer.primaryLanguage && (
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Language
+                          </div>
+                          <div className="text-[14px]">
+                            {customer.primaryLanguage}
+                          </div>
+                        </motion.div>
+                      )}
+                      {customer.fiscalYearEnd && (
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Fiscal Year End
+                          </div>
+                          <div className="text-[14px]">
+                            {customer.fiscalYearEnd}
+                          </div>
+                        </motion.div>
                       )}
                       {customer.timezone &&
                         (() => {
@@ -605,7 +823,20 @@ export function CustomerDetails() {
                             customer.timezone,
                           );
                           return (
-                            <div>
+                            <motion.div
+                              variants={{
+                                hidden: { opacity: 0, y: 10, scale: 0.95 },
+                                visible: {
+                                  opacity: 1,
+                                  y: 0,
+                                  scale: 1,
+                                  transition: {
+                                    duration: 0.3,
+                                    ease: "easeOut",
+                                  },
+                                },
+                              }}
+                            >
                               <div className="text-[12px] mb-2 text-[#606060]">
                                 Local Time
                               </div>
@@ -615,7 +846,7 @@ export function CustomerDetails() {
                                   ({tz.relative})
                                 </span>
                               </div>
-                            </div>
+                            </motion.div>
                           );
                         })()}
                       {/* Social Links */}
@@ -624,7 +855,17 @@ export function CustomerDetails() {
                         customer.instagramUrl ||
                         customer.facebookUrl ||
                         customer.website) && (
-                        <div className="col-span-2">
+                        <motion.div
+                          className="col-span-2"
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
                           <div className="text-[12px] mb-2 text-[#606060]">
                             Links
                           </div>
@@ -684,31 +925,43 @@ export function CustomerDetails() {
                               </a>
                             )}
                           </div>
-                        </div>
+                        </motion.div>
                       )}
                       {/* Show enrichment status if not completed and no data */}
                       {!hasEnrichmentData &&
                         customer.enrichmentStatus === "completed" && (
-                          <div className="col-span-2 text-[14px] text-[#606060]">
+                          <motion.div
+                            className="col-span-2 text-[14px] text-[#606060]"
+                            variants={{
+                              hidden: { opacity: 0 },
+                              visible: { opacity: 1 },
+                            }}
+                          >
                             No company information found.
                             {customer.website && " Try refreshing the data."}
-                          </div>
+                          </motion.div>
                         )}
                       {customer.enrichmentStatus === "failed" && (
-                        <div className="col-span-2 text-[14px] text-[#606060]">
+                        <motion.div
+                          className="col-span-2 text-[14px] text-[#606060]"
+                          variants={{
+                            hidden: { opacity: 0 },
+                            visible: { opacity: 1 },
+                          }}
+                        >
                           Failed to fetch company information.
                           {customer.website && (
                             <Button
                               variant="link"
                               className="p-0 h-auto text-[14px] ml-1"
-                              onClick={handleReEnrich}
+                              onClick={handleStartEnrich}
                             >
                               Try again
                             </Button>
                           )}
-                        </div>
+                        </motion.div>
                       )}
-                    </div>
+                    </motion.div>
                   )}
                 </AccordionContent>
               </AccordionItem>

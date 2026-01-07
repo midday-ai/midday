@@ -861,6 +861,10 @@ export const customers = pgTable(
     instagramUrl: text("instagram_url"),
     facebookUrl: text("facebook_url"),
     ceoName: text("ceo_name"), // CEO or founder name
+    financeContact: text("finance_contact"), // Finance/AP contact name for invoicing
+    financeContactEmail: text("finance_contact_email"), // Finance/AP contact email
+    primaryLanguage: text("primary_language"), // Primary business language (e.g., "en", "sv", "de")
+    fiscalYearEnd: text("fiscal_year_end"), // Fiscal year end month (e.g., "December", "March")
 
     // Enrichment metadata
     enrichmentStatus: text("enrichment_status").default("pending"), // pending, processing, completed, failed
