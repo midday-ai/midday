@@ -336,7 +336,7 @@ export function Header({
                       </div>
 
                       {/* Column 3 - Pre-accounting Preview */}
-                      <div className="flex items-start">
+                      <div className="flex items-start justify-end">
                         <Link
                           ref={preAccountingRef}
                           href="/pre-accounting"
@@ -513,7 +513,7 @@ export function Header({
                       </div>
 
                       {/* Column 2 - Mac App Preview */}
-                      <div className="flex items-start">
+                      <div className="flex items-start justify-end">
                         <Link
                           ref={macAppRef}
                           href="/download"
@@ -548,7 +548,7 @@ export function Header({
                       </div>
 
                       {/* Column 3 - Integrations Preview */}
-                      <div className="flex items-start">
+                      <div className="flex items-start justify-end">
                         <Link
                           ref={integrationsAppRef}
                           href="/download"
