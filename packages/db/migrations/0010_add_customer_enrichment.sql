@@ -47,8 +47,8 @@ ALTER TABLE customers ADD COLUMN IF NOT EXISTS twitter_url TEXT;
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS instagram_url TEXT;
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS facebook_url TEXT;
 
--- Enrichment metadata
-ALTER TABLE customers ADD COLUMN IF NOT EXISTS enrichment_status TEXT DEFAULT 'pending';
+-- Enrichment metadata (null = not attempted, pending, processing, completed, failed)
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS enrichment_status TEXT;
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS enriched_at TIMESTAMP WITH TIME ZONE;
 
 -- ===========================================

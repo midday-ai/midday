@@ -867,7 +867,7 @@ export const customers = pgTable(
     fiscalYearEnd: text("fiscal_year_end"), // Fiscal year end month (e.g., "December", "March")
 
     // Enrichment metadata
-    enrichmentStatus: text("enrichment_status").default("pending"), // pending, processing, completed, failed
+    enrichmentStatus: text("enrichment_status"), // null = not attempted, pending, processing, completed, failed
     enrichedAt: timestamp("enriched_at", {
       withTimezone: true,
       mode: "string",

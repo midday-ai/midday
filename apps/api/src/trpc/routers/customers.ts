@@ -61,8 +61,15 @@ export const customersRouter = createTRPCRouter({
       // Auto-trigger enrichment for new customers with a website
       if (isNewCustomer && customer?.website && customer?.id) {
         try {
-          // Trigger job first - only update status if job is successfully queued
-          // This prevents customers being stuck in "pending" if job trigger fails
+          // Set status to pending first, then trigger job
+          // This ensures the customer record is fully committed before the job runs
+          await updateCustomerEnrichmentStatus(db, {
+            customerId: customer.id,
+            status: "pending",
+          });
+
+          // Trigger job with a small delay to ensure database commits are fully propagated
+          // This prevents race conditions where the worker reads stale data
           await triggerJob(
             "enrich-customer",
             {
@@ -70,17 +77,16 @@ export const customersRouter = createTRPCRouter({
               teamId: teamId!,
             },
             "customers",
+            { delay: 2000 }, // 2 second delay
           );
-
-          // Job queued successfully, now update status
-          await updateCustomerEnrichmentStatus(db, {
-            customerId: customer.id,
-            status: "pending",
-          });
         } catch (error) {
           // Log but don't fail the customer creation
-          // Status remains null/default since job wasn't queued
           console.error("Failed to trigger customer enrichment:", error);
+          // Reset status since job wasn't queued
+          await updateCustomerEnrichmentStatus(db, {
+            customerId: customer.id,
+            status: null,
+          }).catch(() => {}); // Ignore errors on cleanup
         }
       }
 
@@ -118,8 +124,13 @@ export const customersRouter = createTRPCRouter({
         });
       }
 
-      // Trigger job first - only update status if job is successfully queued
-      // This prevents customers being stuck in "pending" if job trigger fails
+      // Set status to pending first, then trigger job
+      await updateCustomerEnrichmentStatus(db, {
+        customerId: customer.id,
+        status: "pending",
+      });
+
+      // Trigger job with a small delay
       await triggerJob(
         "enrich-customer",
         {
@@ -127,13 +138,8 @@ export const customersRouter = createTRPCRouter({
           teamId: teamId!,
         },
         "customers",
+        { delay: 1000 }, // 1 second delay for manual enrichment
       );
-
-      // Job queued successfully, now update status
-      await updateCustomerEnrichmentStatus(db, {
-        customerId: customer.id,
-        status: "pending",
-      });
 
       return { queued: true };
     }),
