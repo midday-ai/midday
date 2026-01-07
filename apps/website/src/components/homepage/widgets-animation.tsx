@@ -85,7 +85,8 @@ export function WidgetsAnimation({
     setShowWidgets(false)
     setIsWiggling(false)
     setMovingCardId(null)
-    setCardOrder(widgets.map(w => w.id))
+    const initialOrder = widgets.map(w => w.id)
+    setCardOrder(initialOrder)
     
     const timer = setTimeout(() => setShowWidgets(true), 300)
     
@@ -97,17 +98,19 @@ export function WidgetsAnimation({
     // Start moving animation while wiggling continues
     const moveTimer = setTimeout(() => {
       // Select a random card to move (not the first one, pick one from middle)
-      const cardToMove = cardOrder[2] // Pick the 3rd card
+      const cardToMove = initialOrder[2] // Pick the 3rd card
       setMovingCardId(cardToMove)
       
       // Rearrange: move the selected card to a new position
       setTimeout(() => {
-        const newOrder = [...cardOrder]
-        const currentIndex = newOrder.indexOf(cardToMove)
-        const newIndex = currentIndex === 2 ? 4 : 2 // Move to position 4 or back to 2
-        newOrder.splice(currentIndex, 1)
-        newOrder.splice(newIndex, 0, cardToMove)
-        setCardOrder(newOrder)
+        setCardOrder((currentOrder) => {
+          const newOrder = [...currentOrder]
+          const currentIndex = newOrder.indexOf(cardToMove)
+          const newIndex = currentIndex === 2 ? 4 : 2 // Move to position 4 or back to 2
+          newOrder.splice(currentIndex, 1)
+          newOrder.splice(newIndex, 0, cardToMove)
+          return newOrder
+        })
         
         // Put card down and stop wiggling after rearrangement
         setTimeout(() => {
@@ -138,7 +141,8 @@ export function WidgetsAnimation({
         setShowWidgets(false)
         setIsWiggling(false)
         setMovingCardId(null)
-        setCardOrder(widgets.map(w => w.id))
+        const initialOrder = widgets.map(w => w.id)
+        setCardOrder(initialOrder)
         
         const timer = setTimeout(() => setShowWidgets(true), 300)
         const wiggleTimer = setTimeout(() => {
@@ -146,16 +150,18 @@ export function WidgetsAnimation({
         }, 800)
         
         const moveTimer = setTimeout(() => {
-          const cardToMove = cardOrder[2]
+          const cardToMove = initialOrder[2]
           setMovingCardId(cardToMove)
           
           setTimeout(() => {
-            const newOrder = [...cardOrder]
-            const currentIndex = newOrder.indexOf(cardToMove)
-            const newIndex = currentIndex === 2 ? 4 : 2
-            newOrder.splice(currentIndex, 1)
-            newOrder.splice(newIndex, 0, cardToMove)
-            setCardOrder(newOrder)
+            setCardOrder((currentOrder) => {
+              const newOrder = [...currentOrder]
+              const currentIndex = newOrder.indexOf(cardToMove)
+              const newIndex = currentIndex === 2 ? 4 : 2
+              newOrder.splice(currentIndex, 1)
+              newOrder.splice(newIndex, 0, cardToMove)
+              return newOrder
+            })
             
             setTimeout(() => {
               setMovingCardId(null)

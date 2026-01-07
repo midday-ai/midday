@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 
 function useIsMobile() {
@@ -30,6 +30,7 @@ export function BurnrateAnimation({
   const [pathLength, setPathLength] = useState(0)
   const [areaOpacity, setAreaOpacity] = useState(0)
   const [showAverageLine, setShowAverageLine] = useState(false)
+  const intervalTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     setShowGraph(false)
@@ -57,18 +58,29 @@ export function BurnrateAnimation({
   useEffect(() => {
     if (!onComplete) {
       const interval = setInterval(() => {
+        // Clear any pending timeout from previous interval
+        if (intervalTimeoutRef.current) {
+          clearTimeout(intervalTimeoutRef.current)
+        }
+        
         setShowGraph(false)
         setShowMetrics(false)
         setShowSummary(false)
         setPathLength(0)
         setAreaOpacity(0)
         setShowAverageLine(false)
-        const graphTimer = setTimeout(() => setShowGraph(true), 300)
-        return () => {
-          clearTimeout(graphTimer)
-        }
+        
+        intervalTimeoutRef.current = setTimeout(() => {
+          setShowGraph(true)
+          intervalTimeoutRef.current = null
+        }, 300)
       }, 10000)
-      return () => clearInterval(interval)
+      return () => {
+        clearInterval(interval)
+        if (intervalTimeoutRef.current) {
+          clearTimeout(intervalTimeoutRef.current)
+        }
+      }
     }
   }, [onComplete])
 
@@ -106,11 +118,12 @@ export function BurnrateAnimation({
   const maxValue = 15
   const averageValue = 6
   const graphWidth = 500
+  // Graph height matches container height to fill it properly
   const graphHeight = isMobile ? 180 : 280
-  const paddingLeft = 40
-  const paddingRight = 25
-  const paddingTop = 10
-  const paddingBottom = 25
+  const paddingLeft = 30
+  const paddingRight = 30
+  const paddingTop = isMobile ? 20 : 30
+  const paddingBottom = isMobile ? 20 : 30
   const chartWidth = graphWidth - paddingLeft - paddingRight
   const chartHeight = graphHeight - paddingTop - paddingBottom
 
@@ -182,8 +195,8 @@ export function BurnrateAnimation({
         </div>
       </div>
 
-      <div className="flex-1 p-2 md:p-3 overflow-hidden flex flex-col">
-        <div className="flex flex-col gap-4 pt-2">
+      <div className="flex-1 px-2 md:px-3 pt-2 md:pt-3 pb-0 md:pb-1 overflow-hidden flex flex-col">
+        <div className="flex flex-col gap-4 pt-2 md:pt-4">
           {/* Graph Section */}
           <div className="bg-background border border-border px-2 md:px-4 flex flex-col h-[180px] md:h-[280px] relative">
             <motion.div
@@ -196,7 +209,7 @@ export function BurnrateAnimation({
                 width="100%"
                 height="100%"
                 viewBox={`0 0 ${graphWidth} ${graphHeight}`}
-                preserveAspectRatio="xMidYMid meet"
+                preserveAspectRatio="none"
                 className="overflow-visible"
               >
                 {/* Pattern definition for striped area */}
@@ -219,9 +232,9 @@ export function BurnrateAnimation({
                   </pattern>
                 </defs>
 
-                {/* Grid lines */}
+                {/* Background grid - Horizontal lines */}
                 {gridLines.map((grid, idx) => (
-                  <motion.line
+                  <line
                     key={`grid-h-${idx}`}
                     x1={paddingLeft}
                     y1={grid.y}
@@ -230,36 +243,23 @@ export function BurnrateAnimation({
                     stroke="hsl(var(--border))"
                     strokeWidth="1"
                     strokeDasharray="3 3"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: showGraph ? 0.3 : 0 }}
-                    transition={{ duration: 0.3, delay: 0.2 }}
+                    opacity="0.3"
                   />
                 ))}
-
-                {/* Y-axis labels */}
-                {gridLines.map((grid, idx) => (
-                  <text
-                    key={`y-label-${idx}`}
-                    x={paddingLeft - 8}
-                    y={grid.y + 3}
-                    className="text-[8px] md:text-[9px] font-sans fill-muted-foreground"
-                    textAnchor="end"
-                  >
-                    ${grid.value}k
-                  </text>
-                ))}
-
-                {/* X-axis labels */}
+                
+                {/* Background grid - Vertical lines */}
                 {points.map((point, idx) => (
-                  <text
-                    key={`x-label-${idx}`}
-                    x={point.x}
-                    y={graphHeight - paddingBottom + 15}
-                    className="text-[8px] md:text-[9px] font-sans fill-muted-foreground"
-                    textAnchor="middle"
-                  >
-                    {point.month}
-                  </text>
+                  <line
+                    key={`grid-v-${idx}`}
+                    x1={point.x}
+                    y1={paddingTop}
+                    x2={point.x}
+                    y2={graphHeight - paddingBottom}
+                    stroke="hsl(var(--border))"
+                    strokeWidth="1"
+                    strokeDasharray="3 3"
+                    opacity="0.3"
+                  />
                 ))}
 
                 {/* Average line (dashed) */}
