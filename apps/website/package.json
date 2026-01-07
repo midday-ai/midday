@@ -17,6 +17,7 @@
     "@openstatus/react": "^0.0.3",
     "framer-motion": "^12.23.25",
     "motion": "^12.23.26",
+    "motion-dom": "^12.23.26",
     "next": "16.0.10",
     "next-mdx-remote": "^5.0.0",
     "react": "19.2.3",
