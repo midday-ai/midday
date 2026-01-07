@@ -143,6 +143,25 @@ export const customerResponseSchema = z.object({
     description: "Total number of projects associated with this customer",
     example: 3,
   }),
+  // Financial metrics (calculated from invoices)
+  totalRevenue: z.number().openapi({
+    description:
+      "Total revenue from paid invoices for this customer (in invoice currency)",
+    example: 15000.5,
+  }),
+  outstandingAmount: z.number().openapi({
+    description:
+      "Total outstanding amount from unpaid/overdue invoices (in invoice currency)",
+    example: 2500.0,
+  }),
+  lastInvoiceDate: z.string().nullable().openapi({
+    description: "Date of the most recent invoice in ISO 8601 format",
+    example: "2024-04-15",
+  }),
+  invoiceCurrency: z.string().nullable().openapi({
+    description: "Primary currency used in invoices for this customer",
+    example: "USD",
+  }),
   tags: z
     .array(
       z.object({
@@ -220,6 +239,30 @@ export const customerResponseSchema = z.object({
   facebookUrl: z.string().nullable().openapi({
     description: "Facebook page URL",
     example: "https://facebook.com/acme",
+  }),
+  logoUrl: z.string().nullable().openapi({
+    description: "URL to the company logo",
+    example: "https://example.com/logo.png",
+  }),
+  ceoName: z.string().nullable().openapi({
+    description: "Name of the CEO or founder",
+    example: "Jane Smith",
+  }),
+  financeContact: z.string().nullable().openapi({
+    description: "Name of the finance/AP contact for invoicing",
+    example: "John Doe",
+  }),
+  financeContactEmail: z.string().nullable().openapi({
+    description: "Email of the finance/AP contact",
+    example: "finance@acme.com",
+  }),
+  primaryLanguage: z.string().nullable().openapi({
+    description: "Primary business language (ISO 639-1 code)",
+    example: "en",
+  }),
+  fiscalYearEnd: z.string().nullable().openapi({
+    description: "Month when the fiscal year ends",
+    example: "December",
   }),
   enrichmentStatus: z.string().nullable().openapi({
     description: "Status of the enrichment process",
