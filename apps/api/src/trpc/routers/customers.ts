@@ -61,12 +61,8 @@ export const customersRouter = createTRPCRouter({
       // Auto-trigger enrichment for new customers with a website
       if (isNewCustomer && customer?.website && customer?.id) {
         try {
-          // Mark as pending first so UI shows enriching indicator immediately
-          await updateCustomerEnrichmentStatus(db, {
-            customerId: customer.id,
-            status: "pending",
-          });
-
+          // Trigger job first - only update status if job is successfully queued
+          // This prevents customers being stuck in "pending" if job trigger fails
           await triggerJob(
             "enrich-customer",
             {
@@ -75,8 +71,15 @@ export const customersRouter = createTRPCRouter({
             },
             "customers",
           );
+
+          // Job queued successfully, now update status
+          await updateCustomerEnrichmentStatus(db, {
+            customerId: customer.id,
+            status: "pending",
+          });
         } catch (error) {
           // Log but don't fail the customer creation
+          // Status remains null/default since job wasn't queued
           console.error("Failed to trigger customer enrichment:", error);
         }
       }
@@ -115,12 +118,8 @@ export const customersRouter = createTRPCRouter({
         });
       }
 
-      // Mark as pending and trigger enrichment
-      await updateCustomerEnrichmentStatus(db, {
-        customerId: customer.id,
-        status: "pending",
-      });
-
+      // Trigger job first - only update status if job is successfully queued
+      // This prevents customers being stuck in "pending" if job trigger fails
       await triggerJob(
         "enrich-customer",
         {
@@ -129,6 +128,12 @@ export const customersRouter = createTRPCRouter({
         },
         "customers",
       );
+
+      // Job queued successfully, now update status
+      await updateCustomerEnrichmentStatus(db, {
+        customerId: customer.id,
+        status: "pending",
+      });
 
       return { queued: true };
     }),

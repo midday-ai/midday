@@ -1,13 +1,3 @@
-/**
- * Connection state tracking
- */
-let connectionState:
-  | "connecting"
-  | "connected"
-  | "ready"
-  | "reconnecting"
-  | "disconnected" = "disconnected";
-
 const isProduction =
   process.env.NODE_ENV === "production" || process.env.FLY_APP_NAME;
 
@@ -68,20 +58,4 @@ export function getRedisConnection() {
 export function getFlowRedisConnection() {
   // Same options - BullMQ will create a separate connection
   return getRedisConnection();
-}
-
-/**
- * Get current connection state (for health checks)
- */
-export function getConnectionState() {
-  return connectionState;
-}
-
-/**
- * Update connection state (called by worker event handlers)
- */
-export function setConnectionState(
-  state: "connecting" | "connected" | "ready" | "reconnecting" | "disconnected",
-) {
-  connectionState = state;
 }

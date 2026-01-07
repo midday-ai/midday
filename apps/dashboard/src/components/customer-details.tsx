@@ -381,7 +381,11 @@ export function CustomerDetails() {
 
   // Check if customer has any enrichment data
   const hasEnrichmentData =
-    customer?.description || customer?.industry || customer?.companyType;
+    customer?.description ||
+    customer?.industry ||
+    customer?.companyType ||
+    customer?.employeeCount ||
+    customer?.fundingStage;
 
   return (
     <div className="h-full flex flex-col min-h-0 -mx-6">
