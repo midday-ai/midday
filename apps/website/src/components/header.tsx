@@ -194,9 +194,9 @@ export function Header({
                   style={{ top: "100%" }}
                 >
                   <div className="p-6 xl:p-8 2xl:p-10">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
                       {/* Column 1 & 2 - Features List (2 columns) */}
-                      <div className="lg:col-span-2" ref={featuresListRef}>
+                      <div className="lg:col-span-2 2xl:max-w-2xl" ref={featuresListRef}>
                         <div className="grid grid-cols-2 gap-x-6">
                           {/* Column 1 */}
                           <div>
@@ -459,9 +459,9 @@ export function Header({
                   }}
                 >
                   <div className="p-6 xl:p-8 2xl:p-10 h-full">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full">
                       {/* Column 1 - Apps List */}
-                      <div ref={appsListRef}>
+                      <div ref={appsListRef} className="2xl:max-w-sm">
                         <div
                           className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
                           onClick={() => {
