@@ -13,6 +13,7 @@ import { TimeSavingsSection } from './sections/time-savings-section'
 import { PreAccountingSection } from './sections/pre-accounting-section'
 import { IntegrationsSection } from './sections/integrations-section'
 import { PricingSection } from './sections/pricing-section'
+import { AudioSummarySection } from './sections/audio-summary-section'
 
 export function Insights() {
   const router = useRouter()
@@ -283,6 +284,14 @@ export function Insights() {
           </div>
         </div>
       </section>
+
+      {/* Divider */}
+      <div className="max-w-[1400px] mx-auto">
+        <div className="h-px w-full border-t border-border" />
+      </div>
+
+      {/* Audio Summary Section */}
+      <AudioSummarySection />
 
       {/* Divider */}
       <div className="max-w-[1400px] mx-auto">

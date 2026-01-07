@@ -41,12 +41,14 @@ import {
   MdOutlineTimer,
   MdOutlineTrendingUp,
   MdOutlineWidgets,
+  MdPause,
   MdPlayArrow,
   MdSearch,
   MdTrendingDown,
 } from "react-icons/md";
 
 export const IconMap = {
+  pause: MdPause,
   play_arrow: MdPlayArrow,
   trending_up: MdOutlineTrendingUp,
   trending_down: MdTrendingDown,
