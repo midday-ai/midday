@@ -143,23 +143,25 @@ export const customerResponseSchema = z.object({
     description: "Total number of projects associated with this customer",
     example: 3,
   }),
-  // Financial metrics (calculated from invoices)
-  totalRevenue: z.number().openapi({
+  // Financial metrics (calculated from invoices, only returned in list queries)
+  totalRevenue: z.number().optional().openapi({
     description:
-      "Total revenue from paid invoices for this customer (in invoice currency)",
+      "Total revenue from paid invoices for this customer (in invoice currency). Only returned in list queries.",
     example: 15000.5,
   }),
-  outstandingAmount: z.number().openapi({
+  outstandingAmount: z.number().optional().openapi({
     description:
-      "Total outstanding amount from unpaid/overdue invoices (in invoice currency)",
+      "Total outstanding amount from unpaid/overdue invoices (in invoice currency). Only returned in list queries.",
     example: 2500.0,
   }),
-  lastInvoiceDate: z.string().nullable().openapi({
-    description: "Date of the most recent invoice in ISO 8601 format",
+  lastInvoiceDate: z.string().nullable().optional().openapi({
+    description:
+      "Date of the most recent invoice in ISO 8601 format. Only returned in list queries.",
     example: "2024-04-15",
   }),
-  invoiceCurrency: z.string().nullable().openapi({
-    description: "Primary currency used in invoices for this customer",
+  invoiceCurrency: z.string().nullable().optional().openapi({
+    description:
+      "Primary currency used in invoices for this customer. Only returned in list queries.",
     example: "USD",
   }),
   tags: z
