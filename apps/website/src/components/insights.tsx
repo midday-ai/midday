@@ -88,11 +88,19 @@ export function Insights() {
                   }}
                 />
                 <Image
-                  src="/images/file-Storage.svg"
-                  alt="Insights Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-contain relative z-0"
+                  src="/images/dashboard-light.svg"
+                  alt="Dashboard illustration"
+                  width={1000}
+                  height={750}
+                  className="w-full h-auto object-contain relative z-0 dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/dashboard-dark.svg"
+                  alt="Dashboard illustration"
+                  width={1000}
+                  height={750}
+                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
                   priority
                 />
               </div>
@@ -127,11 +135,19 @@ export function Insights() {
                   }}
                 />
                 <Image
-                  src="/images/file-Storage.svg"
-                  alt="Insights Interface"
-                  width={1200}
-                  height={800}
-                  className="w-full h-auto object-contain relative z-0"
+                  src="/images/dashboard-light.svg"
+                  alt="Dashboard illustration"
+                  width={1000}
+                  height={750}
+                  className="w-full h-auto object-contain relative z-0 dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/dashboard-dark.svg"
+                  alt="Dashboard illustration"
+                  width={1000}
+                  height={750}
+                  className="w-full h-auto object-contain relative z-0 hidden dark:block"
                   priority
                 />
               </div>

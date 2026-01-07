@@ -315,9 +315,10 @@ export function BurnrateAnimation({
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
+              drag={false}
               className="grid grid-cols-2 gap-2 md:gap-3"
             >
-              <div className="bg-background border border-border p-2 md:p-3">
+              <div className="bg-background border border-border p-2 md:p-3 select-none">
                 <div className="text-[8px] md:text-[9px] font-sans text-muted-foreground mb-1">
                   Current Monthly Burn
                 </div>
@@ -328,7 +329,7 @@ export function BurnrateAnimation({
                   +5.6% vs last month
                 </div>
               </div>
-              <div className="bg-background border border-border p-2 md:p-3">
+              <div className="bg-background border border-border p-2 md:p-3 select-none">
                 <div className="text-[8px] md:text-[9px] font-sans text-muted-foreground mb-1">
                   Runway Remaining
                 </div>
@@ -339,7 +340,7 @@ export function BurnrateAnimation({
                   Below recommended 12+ months
                 </div>
               </div>
-              <div className="bg-background border border-border p-2 md:p-3">
+              <div className="bg-background border border-border p-2 md:p-3 select-none">
                 <div className="text-[8px] md:text-[9px] font-sans text-muted-foreground mb-1">
                   Average Burn Rate
                 </div>
@@ -350,7 +351,7 @@ export function BurnrateAnimation({
                   Over last 6 months
                 </div>
               </div>
-              <div className="bg-background border border-border p-2 md:p-3">
+              <div className="bg-background border border-border p-2 md:p-3 select-none">
                 <div className="text-[8px] md:text-[9px] font-sans text-muted-foreground mb-1">
                   Personnel Costs
                 </div>
@@ -370,7 +371,8 @@ export function BurnrateAnimation({
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="bg-background border border-border p-2 md:p-3"
+              drag={false}
+              className="bg-background border border-border p-2 md:p-3 select-none"
             >
               <h3 className="text-[9px] md:text-[10px] font-sans text-muted-foreground mb-1.5 md:mb-2">
                 Summary
