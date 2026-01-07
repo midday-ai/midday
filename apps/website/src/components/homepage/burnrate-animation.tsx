@@ -5,17 +5,20 @@ import { motion } from 'framer-motion'
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false)
+  const [isTablet, setIsTablet] = useState(false)
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+    const checkSize = () => {
+      const width = window.innerWidth
+      setIsMobile(width < 640)
+      setIsTablet(width >= 640 && width < 768)
     }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+    checkSize()
+    window.addEventListener('resize', checkSize)
+    return () => window.removeEventListener('resize', checkSize)
   }, [])
 
-  return isMobile
+  return { isMobile, isTablet }
 }
 
 export function BurnrateAnimation({
@@ -23,7 +26,7 @@ export function BurnrateAnimation({
 }: {
   onComplete?: () => void
 }) {
-  const isMobile = useIsMobile()
+  const { isMobile, isTablet } = useIsMobile()
   const [showGraph, setShowGraph] = useState(false)
   const [showMetrics, setShowMetrics] = useState(false)
   const [showSummary, setShowSummary] = useState(false)
@@ -104,22 +107,22 @@ export function BurnrateAnimation({
     }
   }, [showGraph])
 
-  // Burn rate data points (Oct to Apr) - values in thousands
+  // Burn rate data points (Oct to Apr) - values in thousands with moderate variation and one big dip
   const dataPoints = [
-    { month: 'Oct', value: 4.5 },
-    { month: 'Nov', value: 5.0 },
-    { month: 'Dec', value: 5.8 },
-    { month: 'Jan', value: 6.3 },
-    { month: 'Feb', value: 6.8 },
+    { month: 'Oct', value: 5.0 },
+    { month: 'Nov', value: 6.2 },
+    { month: 'Dec', value: 3.5 },
+    { month: 'Jan', value: 6.8 },
+    { month: 'Feb', value: 6.0 },
     { month: 'Mar', value: 7.2 },
-    { month: 'Apr', value: 7.5 },
+    { month: 'Apr', value: 6.5 },
   ]
 
   const maxValue = 15
   const averageValue = 6
   const graphWidth = 500
   // Graph height matches container height to fill it properly
-  const graphHeight = isMobile ? 180 : 280
+  const graphHeight = isMobile ? 180 : isTablet ? 240 : 280
   const paddingLeft = 30
   const paddingRight = 30
   const paddingTop = isMobile ? 20 : 30
@@ -135,10 +138,30 @@ export function BurnrateAnimation({
     return { x, y, month: point.month, value: point.value }
   })
 
-  // Create path for line
-  const pathData = points
-    .map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`)
-    .join(' ')
+  // Create path for line with sharp, angular curves
+  const pathData = points.reduce((path, p, idx) => {
+    if (idx === 0) {
+      return `M ${p.x} ${p.y}`
+    }
+    const prevPoint = points[idx - 1]
+    // Check if this is the big dip (Dec - index 2) or transitions to/from it
+    const isDipPoint = idx === 2 // Dec is index 2
+    const isBeforeDip = idx === 1 // Nov is before dip
+    const isAfterDip = idx === 3 // Jan is after dip
+    
+    // Use straight lines for dip transitions, curves for others
+    if (isDipPoint || isBeforeDip || isAfterDip) {
+      // Sharp corner - straight line for dip area
+      return `${path} L ${p.x} ${p.y}`
+    } else {
+      // Sharp angular curve using quadratic bezier
+      const controlX = (prevPoint.x + p.x) / 2
+      const controlY = prevPoint.y < p.y 
+        ? prevPoint.y + (p.y - prevPoint.y) * 0.3
+        : prevPoint.y - (prevPoint.y - p.y) * 0.3
+      return `${path} Q ${controlX} ${controlY}, ${p.x} ${p.y}`
+    }
+  }, '')
 
   // Create area path (line + bottom)
   const lastPoint = points[points.length - 1]
@@ -198,7 +221,7 @@ export function BurnrateAnimation({
       <div className="flex-1 px-2 md:px-3 pt-2 md:pt-3 pb-0 md:pb-1 overflow-hidden flex flex-col">
         <div className="flex flex-col gap-4 pt-2 md:pt-4">
           {/* Graph Section */}
-          <div className="bg-background border border-border px-2 md:px-4 flex flex-col h-[180px] md:h-[280px] relative">
+          <div className="bg-background border border-border px-2 md:px-4 flex flex-col h-[180px] sm:h-[240px] md:h-[280px] relative">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: showGraph ? 1 : 0 }}
@@ -287,24 +310,16 @@ export function BurnrateAnimation({
                   />
                 )}
 
-                {/* Line */}
-                <path
-                  d={pathData}
-                  fill="none"
-                  stroke="hsl(var(--foreground))"
-                  strokeWidth="2"
-                />
+                        {/* Line with sharp angular curves */}
+                        <path
+                          d={pathData}
+                          fill="none"
+                          stroke="hsl(var(--foreground))"
+                          strokeWidth="2"
+                          strokeLinecap="square"
+                          strokeLinejoin="miter"
+                        />
 
-                {/* Data points (circles) */}
-                {points.map((point, idx) => (
-                  <circle
-                    key={`circle-${idx}`}
-                    cx={point.x}
-                    cy={point.y}
-                    r="3"
-                    fill="hsl(var(--foreground))"
-                  />
-                ))}
               </svg>
             </motion.div>
           </div>

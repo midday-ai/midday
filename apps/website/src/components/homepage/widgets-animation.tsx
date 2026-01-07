@@ -30,7 +30,7 @@ const widgets: Widget[] = [
     title: 'Cash Flow',
     icon: 'account_balance',
     subtitle: 'Net cash position · Fiscal year',
-    value: '+370 064 kr',
+    value: '+$47,283',
     action: 'View cash flow analysis',
     type: 'metric',
   },
@@ -39,7 +39,7 @@ const widgets: Widget[] = [
     title: 'Account Balances',
     icon: 'account_balance',
     subtitle: 'Combined balance from 2 accounts',
-    value: '619 072 kr',
+    value: '$78,642',
     action: 'View account balances',
     type: 'metric',
   },
@@ -47,7 +47,7 @@ const widgets: Widget[] = [
     id: 'profit-loss',
     title: 'Profit & Loss',
     icon: 'timer',
-    subtitle: '370 064 kr · Fiscal year · Net',
+    subtitle: '$43,156 · Fiscal year · Net',
     action: 'See detailed analysis',
     type: 'bar-chart',
   },
@@ -56,7 +56,7 @@ const widgets: Widget[] = [
     title: 'Revenue Summary',
     icon: 'trending_up',
     subtitle: 'Net revenue · Fiscal year',
-    value: '962 607,19 kr',
+    value: '$124,789',
     action: 'View revenue trends',
     type: 'metric',
   },
@@ -65,7 +65,7 @@ const widgets: Widget[] = [
     title: 'Outstanding Invoices',
     icon: 'description',
     subtitle: '',
-    content: 'You currently have 2 unpaid and 3 550,00 kr in outstanding invoices',
+    content: 'You currently have 2 unpaid and $4,237 in outstanding invoices',
     action: 'View all invoices',
     type: 'metric',
   },
@@ -330,7 +330,7 @@ export function WidgetsAnimation({
               <div className="flex-1 flex flex-col justify-between">
                 {widget.value && (
                   <div className="mb-2 md:mb-3">
-                    <div className="text-[16px] md:text-[20px] lg:text-[24px] text-foreground font-normal leading-tight">
+                    <div className="text-[14px] md:text-[18px] lg:text-[22px] text-foreground font-normal leading-tight">
                       {widget.value}
                     </div>
                   </div>

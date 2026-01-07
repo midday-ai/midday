@@ -71,7 +71,7 @@ export function Insights() {
                 <span className="text-foreground">See what's changing</span>
               </h1>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto lg:hidden">
-                Weekly summaries that show what changed and what matters.
+                Understand how your business is evolving over time.
               </p>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto hidden lg:block">
                 Understand how your business is evolving over time with live widgets, summaries, and explanations that highlight what's moving, what's stable, and where attention is needed.
