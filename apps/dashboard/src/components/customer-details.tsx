@@ -2,9 +2,11 @@
 
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useRealtime } from "@/hooks/use-realtime";
 import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
+import { getWebsiteLogo } from "@/utils/logos";
 import {
   generateStatementPdf,
   generateStatementPdfBlob,
@@ -17,6 +19,7 @@ import {
 } from "@midday/ui/accordion";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { SheetFooter } from "@midday/ui/sheet";
+import { SheetFooter, SheetHeader } from "@midday/ui/sheet";
 import { Skeleton } from "@midday/ui/skeleton";
 import {
   Table,
@@ -36,16 +39,63 @@ import {
 } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import { formatDate } from "@midday/utils/format";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-import { type RefObject, useMemo, useRef, useState } from "react";
+import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
 import { FormatAmount } from "./format-amount";
 import { InvoiceStatus } from "./invoice-status";
 
+// Format timezone with local time and relative difference
+function formatTimezoneWithLocalTime(timezone: string): {
+  localTime: string;
+  relative: string;
+} {
+  try {
+    const now = new Date();
+
+    // Get the local time in the customer's timezone using user's locale
+    const customerTime = new Intl.DateTimeFormat(undefined, {
+      timeZone: timezone,
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(now);
+
+    // Calculate hour difference
+    const customerDate = new Date(
+      now.toLocaleString("en-US", { timeZone: timezone }),
+    );
+    const userDate = new Date(now.toLocaleString("en-US"));
+    const diffMs = customerDate.getTime() - userDate.getTime();
+    const diffHours = Math.round(diffMs / (1000 * 60 * 60));
+
+    // Format relative time
+    let relative: string;
+    if (diffHours === 0) {
+      relative = "same time";
+    } else if (diffHours > 0) {
+      relative = `${diffHours}h ahead`;
+    } else {
+      relative = `${Math.abs(diffHours)}h behind`;
+    }
+
+    return { localTime: customerTime, relative };
+  } catch {
+    return { localTime: "", relative: "" };
+  }
+}
+
 export function CustomerDetails() {
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const { data: user } = useUserQuery();
   const { customerId, setParams } = useCustomerParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
@@ -54,11 +104,136 @@ export function CustomerDetails() {
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const dropdownContainerRef = useRef<HTMLDivElement>(null!);
 
+  // Track enrichment animation - use a key that changes when enrichment completes
+  const [enrichmentAnimationKey, setEnrichmentAnimationKey] = useState(0);
+  const prevEnrichmentStatusRef = useRef<string | null>(null);
+
   const isOpen = customerId !== null;
 
-  const { data: customer, isLoading: isLoadingCustomer } = useQuery({
+  const {
+    data: customer,
+    isLoading: isLoadingCustomer,
+    refetch,
+  } = useQuery({
     ...trpc.customers.getById.queryOptions({ id: customerId! }),
     enabled: isOpen,
+    placeholderData: keepPreviousData,
+    staleTime: 0, // Always refetch when component mounts
+  });
+
+  // Mutation for re-enriching customer
+  const enrichMutation = useMutation(
+    trpc.customers.enrich.mutationOptions({
+      onMutate: async () => {
+        // Cancel outgoing refetches
+        await queryClient.cancelQueries({
+          queryKey: trpc.customers.getById.queryKey({ id: customerId! }),
+        });
+
+        // Optimistically update to pending status
+        queryClient.setQueryData(
+          trpc.customers.getById.queryKey({ id: customerId! }),
+          (old: typeof customer) =>
+            old ? { ...old, enrichmentStatus: "pending" as const } : old,
+        );
+      },
+      onError: (error) => {
+        toast({
+          duration: 3000,
+          variant: "destructive",
+          title: "Enrichment failed",
+          description: error.message,
+        });
+      },
+      onSettled: () => {
+        // Refetch after mutation settles
+        refetch();
+      },
+    }),
+  );
+
+  // Mutation for cancelling enrichment
+  const cancelEnrichmentMutation = useMutation({
+    ...trpc.customers.cancelEnrichment.mutationOptions(),
+    onSuccess: () => {
+      refetch();
+    },
+  });
+
+  // Mutation for clearing enrichment data
+  const clearEnrichmentMutation = useMutation({
+    ...trpc.customers.clearEnrichment.mutationOptions(),
+    onSuccess: () => {
+      refetch();
+    },
+    onError: (error) => {
+      toast({
+        duration: 3000,
+        variant: "destructive",
+        title: "Failed to clear data",
+        description: error.message,
+      });
+    },
+  });
+
+  const handleStartEnrich = () => {
+    if (customerId) {
+      enrichMutation.mutate({ id: customerId });
+    }
+  };
+
+  const handleCancelEnrich = () => {
+    if (customerId) {
+      cancelEnrichmentMutation.mutate({ id: customerId });
+    }
+  };
+
+  const handleClearEnrichment = () => {
+    if (customerId) {
+      clearEnrichmentMutation.mutate({ id: customerId });
+    }
+  };
+
+  const isEnriching =
+    customer?.enrichmentStatus === "pending" ||
+    customer?.enrichmentStatus === "processing" ||
+    enrichMutation.isPending;
+
+  // Track enrichment status changes to trigger animation only when transitioning from loading to complete
+  useEffect(() => {
+    const prevStatus = prevEnrichmentStatusRef.current;
+    const currentStatus = customer?.enrichmentStatus;
+
+    // Increment key to trigger animation when transitioning from pending/processing to completed
+    if (
+      (prevStatus === "pending" || prevStatus === "processing") &&
+      currentStatus === "completed"
+    ) {
+      setEnrichmentAnimationKey((k) => k + 1);
+    }
+
+    prevEnrichmentStatusRef.current = currentStatus ?? null;
+  }, [customer?.enrichmentStatus]);
+
+  // Reset animation state when sheet closes
+  useEffect(() => {
+    if (!isOpen) {
+      prevEnrichmentStatusRef.current = null;
+    }
+  }, [isOpen]);
+
+  // Subscribe to realtime updates for this customer
+  useRealtime({
+    channelName: `customer-${customerId}`,
+    event: "UPDATE",
+    table: "customers",
+    filter: customerId ? `id=eq.${customerId}` : undefined,
+    onEvent: (payload) => {
+      // Refetch customer data when enrichment status changes
+      if (payload.new && "enrichment_status" in payload.new) {
+        refetch();
+      }
+    },
   });
 
   const infiniteQueryOptions = trpc.invoice.get.infiniteQueryOptions(
@@ -112,9 +287,30 @@ export function CustomerDetails() {
   if (isLoadingCustomer) {
     return (
       <div className="h-full px-6 pt-6 pb-6">
-        <Skeleton className="h-6 w-48 mb-6" />
-        <Skeleton className="h-4 w-32 mb-4" />
-        <Skeleton className="h-4 w-32 mb-4" />
+        {/* Header skeleton matching actual layout */}
+        <div className="flex items-start gap-4 mb-6">
+          <Skeleton className="size-12 rounded-full flex-shrink-0" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-7 w-48" />
+            <Skeleton className="h-4 w-full max-w-[300px]" />
+            <div className="flex gap-2">
+              <Skeleton className="h-5 w-16 rounded-full" />
+              <Skeleton className="h-5 w-20 rounded-full" />
+            </div>
+          </div>
+        </div>
+        {/* Content skeleton */}
+        <div className="space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <div className="grid grid-cols-2 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i.toString()} className="space-y-1">
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-5 w-28" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -183,21 +379,137 @@ export function CustomerDetails() {
     }
   };
 
+  // Check if customer has any enrichment data
+  const hasEnrichmentData =
+    customer?.description ||
+    customer?.industry ||
+    customer?.companyType ||
+    customer?.employeeCount ||
+    customer?.fundingStage;
+
   return (
     <div className="h-full flex flex-col min-h-0 -mx-6">
       {/* Content */}
       <div className="flex-1 overflow-y-auto scrollbar-hide min-h-0">
-        {/* Sticky Customer Header */}
-        <div className="sticky top-0 z-10 bg-background border-b border-border px-6 py-4">
-          <div className="text-[24px] font-serif leading-normal">
-            {customer.name}
+        {/* Sheet Header - matches other sheets */}
+        <SheetHeader className="flex justify-between items-center flex-row px-6 mb-4">
+          <div className="min-w-0 flex-1 flex items-center gap-3">
+            {/* Logo from logo.dev */}
+            {isEnriching ? (
+              <Skeleton className="size-9 rounded-full flex-shrink-0" />
+            ) : customer.website ? (
+              <img
+                src={getWebsiteLogo(customer.website)}
+                alt={`${customer.name} logo`}
+                className="size-9 rounded-full object-cover flex-shrink-0 bg-muted"
+                onError={(e) => {
+                  // Fallback to initials on error
+                  e.currentTarget.style.display = "none";
+                  const fallback = e.currentTarget.nextElementSibling;
+                  if (fallback) fallback.classList.remove("hidden");
+                }}
+              />
+            ) : null}
+            <div
+              className={cn(
+                "size-9 rounded-full flex items-center justify-center bg-muted text-muted-foreground font-medium flex-shrink-0",
+                customer.website && "hidden",
+              )}
+            >
+              {customer.name.charAt(0).toUpperCase()}
+            </div>
+            <h2 className="text-lg font-serif truncate">{customer.name}</h2>
           </div>
-        </div>
+
+          {/* Actions menu */}
+          {customer.website && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="size-8">
+                  <Icons.MoreVertical className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {isEnriching ? (
+                  <DropdownMenuItem onClick={handleCancelEnrich}>
+                    <Icons.Close className="size-4 mr-2" />
+                    Cancel enrichment
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem onClick={handleStartEnrich}>
+                    <Icons.RefreshOutline className="size-4 mr-2" />
+                    {hasEnrichmentData ? "Refresh data" : "Enrich company"}
+                  </DropdownMenuItem>
+                )}
+                {hasEnrichmentData && !isEnriching && (
+                  <DropdownMenuItem
+                    onClick={handleClearEnrichment}
+                    className="text-destructive"
+                  >
+                    <Icons.Delete className="size-4 mr-2" />
+                    Clear enrichment
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </SheetHeader>
+
+        {/* Company info section */}
+        {(customer.description ||
+          customer.industry ||
+          customer.companyType ||
+          customer.employeeCount ||
+          customer.fundingStage ||
+          isEnriching) && (
+          <div className="px-6 pb-4 border-b border-border">
+            {/* Description */}
+            {isEnriching ? (
+              <div className="space-y-1.5">
+                <Skeleton className="h-[13px] w-full" />
+                <Skeleton className="h-[13px] w-4/5" />
+              </div>
+            ) : customer.description ? (
+              <p className="text-[13px] text-[#606060] line-clamp-2">
+                {customer.description}
+              </p>
+            ) : null}
+
+            {/* Badges */}
+            {isEnriching ? (
+              <div className="flex items-center gap-2 mt-3">
+                <Skeleton className="h-5 w-16" />
+                <Skeleton className="h-5 w-20" />
+                <Skeleton className="h-5 w-24" />
+              </div>
+            ) : customer.industry ||
+              customer.companyType ||
+              customer.employeeCount ||
+              customer.fundingStage ? (
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                {customer.industry && (
+                  <Badge variant="tag">{customer.industry}</Badge>
+                )}
+                {customer.companyType && (
+                  <Badge variant="tag">{customer.companyType}</Badge>
+                )}
+                {customer.employeeCount && (
+                  <Badge variant="tag">
+                    {customer.employeeCount} employees
+                  </Badge>
+                )}
+                {customer.fundingStage && (
+                  <Badge variant="tag">{customer.fundingStage}</Badge>
+                )}
+              </div>
+            ) : null}
+          </div>
+        )}
 
         <div className="px-6 pb-4">
           <Accordion
             type="multiple"
-            defaultValue={["general"]}
+            defaultValue={["general", "profile"]}
             className="space-y-0"
           >
             {/* General Section */}
@@ -250,6 +562,401 @@ export function CustomerDetails() {
                 </div>
               </AccordionContent>
             </AccordionItem>
+
+            {/* Company Profile Section - Only show if we have enrichment data, it's processing, or failed */}
+            {(hasEnrichmentData ||
+              isEnriching ||
+              customer.enrichmentStatus === "completed" ||
+              customer.enrichmentStatus === "failed") && (
+              <AccordionItem value="profile" className="border-b border-border">
+                <AccordionTrigger className="text-[16px] font-medium py-4">
+                  Company Profile
+                </AccordionTrigger>
+                <AccordionContent>
+                  {isEnriching ? (
+                    <div className="grid grid-cols-2 gap-4 pt-0">
+                      {[...Array(6)].map((_, i) => (
+                        <div
+                          key={`skeleton-${i.toString()}`}
+                          className="space-y-2"
+                        >
+                          <Skeleton className="h-3 w-20" />
+                          <Skeleton className="h-5 w-28" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <motion.div
+                      key={enrichmentAnimationKey}
+                      className="grid grid-cols-2 gap-4 pt-0"
+                      initial={enrichmentAnimationKey > 0 ? "hidden" : false}
+                      animate="visible"
+                      variants={{
+                        hidden: { opacity: 0 },
+                        visible: {
+                          opacity: 1,
+                          transition: {
+                            staggerChildren:
+                              enrichmentAnimationKey > 0 ? 0.02 : 0,
+                            delayChildren: 0,
+                          },
+                        },
+                      }}
+                    >
+                      {customer.industry && (
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Industry
+                          </div>
+                          <div className="text-[14px]">{customer.industry}</div>
+                        </motion.div>
+                      )}
+                      {customer.companyType && (
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Company Type
+                          </div>
+                          <div className="text-[14px]">
+                            {customer.companyType}
+                          </div>
+                        </motion.div>
+                      )}
+                      {customer.employeeCount && (
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Employees
+                          </div>
+                          <div className="text-[14px]">
+                            {customer.employeeCount}
+                          </div>
+                        </motion.div>
+                      )}
+                      {customer.foundedYear && (
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Founded
+                          </div>
+                          <div className="text-[14px]">
+                            {customer.foundedYear}
+                          </div>
+                        </motion.div>
+                      )}
+                      {customer.estimatedRevenue && (
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Est. Revenue
+                          </div>
+                          <div className="text-[14px]">
+                            {customer.estimatedRevenue}
+                          </div>
+                        </motion.div>
+                      )}
+                      {(customer.fundingStage || customer.totalFunding) && (
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Funding
+                          </div>
+                          <div className="text-[14px]">
+                            {customer.fundingStage}
+                            {customer.totalFunding &&
+                              ` (${customer.totalFunding})`}
+                          </div>
+                        </motion.div>
+                      )}
+                      {customer.headquartersLocation && (
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Headquarters
+                          </div>
+                          <div className="text-[14px]">
+                            {customer.headquartersLocation}
+                          </div>
+                        </motion.div>
+                      )}
+                      {customer.ceoName && (
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            CEO / Founder
+                          </div>
+                          <div className="text-[14px]">{customer.ceoName}</div>
+                        </motion.div>
+                      )}
+                      {(customer.financeContact ||
+                        customer.financeContactEmail) && (
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Finance Contact
+                          </div>
+                          <div className="text-[14px]">
+                            {customer.financeContact && (
+                              <div>{customer.financeContact}</div>
+                            )}
+                            {customer.financeContactEmail && (
+                              <a
+                                href={`mailto:${customer.financeContactEmail}`}
+                                className="hover:text-[#606060] transition-colors"
+                              >
+                                {customer.financeContactEmail}
+                              </a>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                      {customer.primaryLanguage && (
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Language
+                          </div>
+                          <div className="text-[14px]">
+                            {customer.primaryLanguage}
+                          </div>
+                        </motion.div>
+                      )}
+                      {customer.fiscalYearEnd && (
+                        <motion.div
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Fiscal Year End
+                          </div>
+                          <div className="text-[14px]">
+                            {customer.fiscalYearEnd}
+                          </div>
+                        </motion.div>
+                      )}
+                      {customer.timezone &&
+                        (() => {
+                          const tz = formatTimezoneWithLocalTime(
+                            customer.timezone,
+                          );
+                          return (
+                            <motion.div
+                              variants={{
+                                hidden: { opacity: 0, y: 10, scale: 0.95 },
+                                visible: {
+                                  opacity: 1,
+                                  y: 0,
+                                  scale: 1,
+                                  transition: {
+                                    duration: 0.3,
+                                    ease: "easeOut",
+                                  },
+                                },
+                              }}
+                            >
+                              <div className="text-[12px] mb-2 text-[#606060]">
+                                Local Time
+                              </div>
+                              <div className="text-[14px] flex items-center gap-1.5">
+                                <span>{tz.localTime}</span>
+                                <span className="text-[#878787]">
+                                  ({tz.relative})
+                                </span>
+                              </div>
+                            </motion.div>
+                          );
+                        })()}
+                      {/* Social Links */}
+                      {(customer.linkedinUrl ||
+                        customer.twitterUrl ||
+                        customer.instagramUrl ||
+                        customer.facebookUrl ||
+                        customer.website) && (
+                        <motion.div
+                          className="col-span-2"
+                          variants={{
+                            hidden: { opacity: 0, y: 8 },
+                            visible: {
+                              opacity: 1,
+                              y: 0,
+                              transition: { duration: 0.15, ease: "easeOut" },
+                            },
+                          }}
+                        >
+                          <div className="text-[12px] mb-2 text-[#606060]">
+                            Links
+                          </div>
+                          <div className="flex items-center gap-3">
+                            {customer.linkedinUrl && (
+                              <a
+                                href={customer.linkedinUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:opacity-70 transition-opacity"
+                              >
+                                <Icons.LinkedIn className="size-4" />
+                              </a>
+                            )}
+                            {customer.twitterUrl && (
+                              <a
+                                href={customer.twitterUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-foreground hover:opacity-70 transition-opacity"
+                              >
+                                <Icons.X className="size-4" />
+                              </a>
+                            )}
+                            {customer.instagramUrl && (
+                              <a
+                                href={customer.instagramUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:opacity-70 transition-opacity"
+                              >
+                                <Icons.Instagram className="size-4" />
+                              </a>
+                            )}
+                            {customer.facebookUrl && (
+                              <a
+                                href={customer.facebookUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:opacity-70 transition-opacity"
+                              >
+                                <Icons.Facebook className="size-4" />
+                              </a>
+                            )}
+                            {customer.website && (
+                              <a
+                                href={
+                                  customer.website.startsWith("http")
+                                    ? customer.website
+                                    : `https://${customer.website}`
+                                }
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                <Icons.Globle className="size-5" />
+                              </a>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {customer.enrichmentStatus === "failed" && (
+                        <motion.div
+                          className="col-span-2 text-[14px] text-[#606060]"
+                          variants={{
+                            hidden: { opacity: 0 },
+                            visible: { opacity: 1 },
+                          }}
+                        >
+                          Failed to fetch company information.
+                          {customer.website && (
+                            <Button
+                              variant="link"
+                              className="p-0 h-auto text-[14px] ml-1"
+                              onClick={handleStartEnrich}
+                            >
+                              Try again
+                            </Button>
+                          )}
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  )}
+                </AccordionContent>
+              </AccordionItem>
+            )}
 
             {/* Details Section */}
             <AccordionItem value="details" className="border-b border-border">
@@ -378,8 +1085,8 @@ export function CustomerDetails() {
                             key={tag.id}
                           >
                             <Badge
-                              variant="tag-rounded"
-                              className="whitespace-nowrap"
+                              variant="tag"
+                              className="whitespace-nowrap flex-shrink-0"
                             >
                               {tag.name}
                             </Badge>

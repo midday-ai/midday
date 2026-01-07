@@ -44,6 +44,36 @@ export const getCustomerById = async (
       countryCode: customers.countryCode,
       token: customers.token,
       contact: customers.contact,
+      // Customer relationship fields
+      status: customers.status,
+      preferredCurrency: customers.preferredCurrency,
+      defaultPaymentTerms: customers.defaultPaymentTerms,
+      isArchived: customers.isArchived,
+      source: customers.source,
+      externalId: customers.externalId,
+      // Enrichment fields
+      logoUrl: customers.logoUrl,
+      description: customers.description,
+      industry: customers.industry,
+      companyType: customers.companyType,
+      employeeCount: customers.employeeCount,
+      foundedYear: customers.foundedYear,
+      estimatedRevenue: customers.estimatedRevenue,
+      fundingStage: customers.fundingStage,
+      totalFunding: customers.totalFunding,
+      headquartersLocation: customers.headquartersLocation,
+      timezone: customers.timezone,
+      linkedinUrl: customers.linkedinUrl,
+      twitterUrl: customers.twitterUrl,
+      instagramUrl: customers.instagramUrl,
+      facebookUrl: customers.facebookUrl,
+      ceoName: customers.ceoName,
+      financeContact: customers.financeContact,
+      financeContactEmail: customers.financeContactEmail,
+      primaryLanguage: customers.primaryLanguage,
+      fiscalYearEnd: customers.fiscalYearEnd,
+      enrichmentStatus: customers.enrichmentStatus,
+      enrichedAt: customers.enrichedAt,
       invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
       projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
       tags: sql<CustomerTag[]>`
@@ -130,8 +160,40 @@ export const getCustomers = async (
       countryCode: customers.countryCode,
       token: customers.token,
       contact: customers.contact,
+      // Customer relationship fields
+      status: customers.status,
+      isArchived: customers.isArchived,
+      // Enrichment fields for list view
+      logoUrl: customers.logoUrl,
+      description: customers.description,
+      industry: customers.industry,
+      companyType: customers.companyType,
+      employeeCount: customers.employeeCount,
+      foundedYear: customers.foundedYear,
+      estimatedRevenue: customers.estimatedRevenue,
+      fundingStage: customers.fundingStage,
+      totalFunding: customers.totalFunding,
+      headquartersLocation: customers.headquartersLocation,
+      timezone: customers.timezone,
+      linkedinUrl: customers.linkedinUrl,
+      twitterUrl: customers.twitterUrl,
+      instagramUrl: customers.instagramUrl,
+      facebookUrl: customers.facebookUrl,
+      ceoName: customers.ceoName,
+      financeContact: customers.financeContact,
+      financeContactEmail: customers.financeContactEmail,
+      primaryLanguage: customers.primaryLanguage,
+      fiscalYearEnd: customers.fiscalYearEnd,
+      enrichmentStatus: customers.enrichmentStatus,
       invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
       projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
+      // Financial metrics
+      totalRevenue: sql<number>`coalesce(sum(case when ${invoices.status} = 'paid' then ${invoices.amount} else 0 end), 0)`,
+      outstandingAmount: sql<number>`coalesce(sum(case when ${invoices.status} in ('unpaid', 'overdue') then ${invoices.amount} else 0 end), 0)`,
+      lastInvoiceDate: sql<string | null>`max(${invoices.issueDate})`,
+      invoiceCurrency: sql<
+        string | null
+      >`(array_agg(${invoices.currency}) filter (where ${invoices.currency} is not null))[1]`,
       tags: sql<CustomerTag[]>`
         coalesce(
           json_agg(
@@ -188,8 +250,43 @@ export const getCustomers = async (
       isAscending
         ? query.orderBy(asc(sql`min(${tags.name})`))
         : query.orderBy(desc(sql`min(${tags.name})`));
+    } else if (column === "industry") {
+      isAscending
+        ? query.orderBy(asc(customers.industry))
+        : query.orderBy(desc(customers.industry));
+    } else if (column === "country") {
+      isAscending
+        ? query.orderBy(asc(customers.country))
+        : query.orderBy(desc(customers.country));
+    } else if (column === "total_revenue") {
+      isAscending
+        ? query.orderBy(
+            asc(
+              sql`coalesce(sum(case when ${invoices.status} = 'paid' then ${invoices.amount} else 0 end), 0)`,
+            ),
+          )
+        : query.orderBy(
+            desc(
+              sql`coalesce(sum(case when ${invoices.status} = 'paid' then ${invoices.amount} else 0 end), 0)`,
+            ),
+          );
+    } else if (column === "outstanding") {
+      isAscending
+        ? query.orderBy(
+            asc(
+              sql`coalesce(sum(case when ${invoices.status} in ('unpaid', 'overdue') then ${invoices.amount} else 0 end), 0)`,
+            ),
+          )
+        : query.orderBy(
+            desc(
+              sql`coalesce(sum(case when ${invoices.status} in ('unpaid', 'overdue') then ${invoices.amount} else 0 end), 0)`,
+            ),
+          );
+    } else if (column === "last_invoice") {
+      isAscending
+        ? query.orderBy(asc(sql`max(${invoices.issueDate})`))
+        : query.orderBy(desc(sql`max(${invoices.issueDate})`));
     }
-    // Add other sorting options as needed
   } else {
     // Default sort by created_at descending
     query.orderBy(desc(customers.createdAt));

@@ -10,8 +10,7 @@
   },
   "dependencies": {
     "@midday/logger": "workspace:*",
-    "bullmq": "^5.65.1",
-    "ioredis": "^5.8.2"
+    "bullmq": "^5.65.1"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",

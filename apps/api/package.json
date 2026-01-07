@@ -46,7 +46,7 @@
     "@midday/app-store": "workspace:*",
     "@polar-sh/sdk": "^0.41.5",
     "@scalar/hono-api-reference": "^0.9.26",
-    "@sentry/bun": "^10.29.0",
+    "@sentry/bun": "^10.32.1",
     "@sindresorhus/slugify": "^3.0.0",
     "@trigger.dev/sdk": "4.1.1",
     "@trpc/server": "^11.7.2",

@@ -835,6 +835,44 @@ export const customers = pgTable(
     countryCode: text("country_code"),
     token: text().default("").notNull(),
     contact: text(),
+
+    // Customer relationship fields
+    status: text().default("active"), // active, inactive, prospect, churned
+    preferredCurrency: text("preferred_currency"),
+    defaultPaymentTerms: integer("default_payment_terms"), // days (30, 60, etc.)
+    isArchived: boolean("is_archived").default(false),
+    source: text().default("manual"), // manual, import, quickbooks, xero, etc.
+    externalId: text("external_id"), // for external system sync
+
+    // Enrichment fields (from Gemini + Google Search grounding)
+    logoUrl: text("logo_url"),
+    description: text(), // AI-generated company description
+    industry: text(), // Software, Healthcare, Finance, etc.
+    companyType: text("company_type"), // B2B, B2C, SaaS, Agency, etc.
+    employeeCount: text("employee_count"), // 1-10, 11-50, 51-200, etc.
+    foundedYear: integer("founded_year"),
+    estimatedRevenue: text("estimated_revenue"), // <$1M, $1-10M, etc.
+    fundingStage: text("funding_stage"), // Bootstrapped, Seed, Series A, etc.
+    totalFunding: text("total_funding"), // e.g., "$25M"
+    headquartersLocation: text("headquarters_location"), // City, Country
+    timezone: text(), // IANA timezone
+    linkedinUrl: text("linkedin_url"),
+    twitterUrl: text("twitter_url"),
+    instagramUrl: text("instagram_url"),
+    facebookUrl: text("facebook_url"),
+    ceoName: text("ceo_name"), // CEO or founder name
+    financeContact: text("finance_contact"), // Finance/AP contact name for invoicing
+    financeContactEmail: text("finance_contact_email"), // Finance/AP contact email
+    primaryLanguage: text("primary_language"), // Primary business language (e.g., "en", "sv", "de")
+    fiscalYearEnd: text("fiscal_year_end"), // Fiscal year end month (e.g., "December", "March")
+
+    // Enrichment metadata
+    enrichmentStatus: text("enrichment_status"), // null = not attempted, pending, processing, completed, failed
+    enrichedAt: timestamp("enriched_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+
     fts: tsvector("fts")
       .notNull()
       .generatedAlwaysAs(
@@ -860,6 +898,11 @@ export const customers = pgTable(
       "gin",
       table.fts.asc().nullsLast().op("tsvector_ops"),
     ),
+    index("idx_customers_status").on(table.status),
+    index("idx_customers_is_archived").on(table.isArchived),
+    index("idx_customers_enrichment_status").on(table.enrichmentStatus),
+    index("idx_customers_website").on(table.website),
+    index("idx_customers_industry").on(table.industry),
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [teams.id],

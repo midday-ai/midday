@@ -4,12 +4,15 @@ import { VirtualRow } from "@/components/tables/core";
 import { useCustomerFilterParams } from "@/hooks/use-customer-filter-params";
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
+import { useRealtime } from "@/hooks/use-realtime";
 import { useScrollHeader } from "@/hooks/use-scroll-header";
 import { useSortParams } from "@/hooks/use-sort-params";
 import { useStickyColumns } from "@/hooks/use-sticky-columns";
 import { useTableDnd } from "@/hooks/use-table-dnd";
 import { useTableScroll } from "@/hooks/use-table-scroll";
 import { useTableSettings } from "@/hooks/use-table-settings";
+import { useUserQuery } from "@/hooks/use-user";
+import { useCustomersStore } from "@/store/customers";
 import { useTRPC } from "@/trpc/client";
 import { STICKY_COLUMNS, SUMMARY_GRID_HEIGHTS } from "@/utils/table-configs";
 import type { TableSettings } from "@/utils/table-settings";
@@ -18,7 +21,13 @@ import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { useMutation, useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { type VirtualItem, useVirtualizer } from "@tanstack/react-virtual";
-import { useCallback, useDeferredValue, useMemo, useRef } from "react";
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import { columns } from "./columns";
 import { EmptyState, NoResults } from "./empty-states";
 import { DataTableHeader } from "./table-header";
@@ -32,10 +41,12 @@ type Props = {
 
 export function DataTable({ initialSettings }: Props) {
   const trpc = useTRPC();
+  const { data: user } = useUserQuery();
   const { setParams } = useCustomerParams();
   const { filter, hasFilters } = useCustomerFilterParams();
   const { params } = useSortParams();
   const parentRef = useRef<HTMLDivElement>(null);
+  const { setColumns } = useCustomersStore();
 
   const deferredSearch = useDeferredValue(filter.q);
 
@@ -77,11 +88,26 @@ export function DataTable({ initialSettings }: Props) {
     }),
   );
 
+  const enrichCustomerMutation = useMutation(
+    trpc.customers.enrich.mutationOptions({
+      onSuccess: () => {
+        refetch();
+      },
+    }),
+  );
+
   const handleDeleteCustomer = useCallback(
     (id: string) => {
       deleteCustomerMutation.mutate({ id });
     },
     [deleteCustomerMutation],
+  );
+
+  const handleEnrichCustomer = useCallback(
+    (id: string) => {
+      enrichCustomerMutation.mutate({ id });
+    },
+    [enrichCustomerMutation],
   );
 
   const tableData = useMemo(() => {
@@ -102,8 +128,9 @@ export function DataTable({ initialSettings }: Props) {
   const tableMeta = useMemo(
     () => ({
       deleteCustomer: handleDeleteCustomer,
+      enrichCustomer: handleEnrichCustomer,
     }),
-    [handleDeleteCustomer],
+    [handleDeleteCustomer, handleEnrichCustomer],
   );
 
   const table = useReactTable({
@@ -126,6 +153,11 @@ export function DataTable({ initialSettings }: Props) {
 
   // DnD for column reordering
   const { sensors, handleDragEnd } = useTableDnd(table);
+
+  // Sync columns to store for column visibility toggle
+  useEffect(() => {
+    setColumns(table.getAllLeafColumns());
+  }, [table, setColumns, columnVisibility]);
 
   // Use the reusable sticky columns hook
   const { getStickyStyle, getStickyClassName } = useStickyColumns({
@@ -159,6 +191,18 @@ export function DataTable({ initialSettings }: Props) {
     isFetchingNextPage,
     fetchNextPage,
     threshold: 50,
+  });
+
+  // Realtime subscription for customer updates (enrichment status, etc.)
+  useRealtime({
+    channelName: "realtime_customers",
+    table: "customers",
+    filter: user?.teamId ? `team_id=eq.${user.teamId}` : undefined,
+    onEvent: (payload) => {
+      if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
+        refetch();
+      }
+    },
   });
 
   if (!tableData.length && hasFilters) {

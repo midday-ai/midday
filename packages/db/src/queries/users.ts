@@ -26,6 +26,7 @@ export const getUserById = async (db: Database, id: string) => {
         createdAt: teams.createdAt,
         countryCode: teams.countryCode,
         canceledAt: teams.canceledAt,
+        baseCurrency: teams.baseCurrency,
       },
     })
     .from(users)

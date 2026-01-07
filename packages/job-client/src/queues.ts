@@ -1,79 +1,50 @@
 import { createLoggerWithContext } from "@midday/logger";
 import type { QueueOptions } from "bullmq";
 import { Queue } from "bullmq";
-import Redis from "ioredis";
 
 const queues: Map<string, Queue> = new Map();
-let redisConnection: Redis | null = null;
 
-// Create logger for Redis connection events
-const redisLogger = createLoggerWithContext("job-client-redis");
+// Create logger for queue events
+const logger = createLoggerWithContext("job-client");
 
 /**
- * Get or create Redis connection for BullMQ
- * Uses REDIS_QUEUE_URL (separate from cache Redis)
+ * Parse Redis URL into connection options for BullMQ
+ * BullMQ will create and manage its own Redis connection
  */
-function getRedisConnection(): Redis {
-  if (redisConnection) {
-    return redisConnection;
-  }
-
+function getConnectionOptions() {
   const redisUrl = process.env.REDIS_QUEUE_URL;
 
   if (!redisUrl) {
     throw new Error("REDIS_QUEUE_URL environment variable is required");
   }
 
+  const url = new URL(redisUrl);
   const isProduction =
     process.env.NODE_ENV === "production" || process.env.FLY_APP_NAME;
 
-  redisConnection = new Redis(redisUrl, {
-    maxRetriesPerRequest: null, // Required for BullMQ
-    enableReadyCheck: false, // BullMQ handles this
-    // Connect eagerly for immediate availability - jobs can be enqueued without waiting for connection
-    lazyConnect: false,
+  return {
+    host: url.hostname,
+    port: Number(url.port) || 6379,
+    password: url.password || undefined,
+    username: url.username || undefined,
+    // BullMQ required settings
+    maxRetriesPerRequest: null,
+    enableReadyCheck: false,
+    // Network settings
     family: isProduction ? 6 : 4, // IPv6 for Fly.io production, IPv4 for local
-    keepAlive: 30000, // Keep connection alive with 30s keepAlive to prevent idle timeouts
-    ...(isProduction && {
-      // Production settings for Upstash/Fly.io
-      connectTimeout: 15000, // Longer timeout for Upstash
-      retryStrategy: (times) => {
-        // Always return a number to ensure infinite retries
-        // Exponential backoff: 50ms, 100ms, 150ms... up to 2000ms max
-        const delay = Math.min(times * 50, 2000);
-        return delay;
-      },
-      enableOfflineQueue: false, // Don't queue commands when offline
+    keepAlive: 30000,
+    lazyConnect: false,
+    // TLS for production (rediss://)
+    ...(url.protocol === "rediss:" && {
+      tls: {},
     }),
-  });
-
-  redisConnection.on("error", (err) => {
-    redisLogger.error("Redis connection error", {
-      error: err instanceof Error ? err.message : String(err),
-    });
-  });
-
-  redisConnection.on("connect", () => {
-    redisLogger.info("Redis connected");
-  });
-
-  redisConnection.on("ready", () => {
-    redisLogger.info("Redis ready");
-  });
-
-  redisConnection.on("reconnecting", (delay: number) => {
-    redisLogger.info("Redis reconnecting", { delay });
-  });
-
-  redisConnection.on("close", () => {
-    redisLogger.info("Redis connection closed");
-  });
-
-  redisConnection.on("end", () => {
-    redisLogger.info("Redis connection ended");
-  });
-
-  return redisConnection;
+    // Production settings
+    ...(isProduction && {
+      connectTimeout: 15000,
+      retryStrategy: (times: number) => Math.min(times * 50, 2000),
+      enableOfflineQueue: false,
+    }),
+  };
 }
 
 /**
@@ -85,7 +56,7 @@ export function getQueue(queueName: string): Queue {
   }
 
   const queueOptions: QueueOptions = {
-    connection: getRedisConnection(),
+    connection: getConnectionOptions(),
     defaultJobOptions: {
       attempts: 3,
       backoff: {
@@ -103,7 +74,15 @@ export function getQueue(queueName: string): Queue {
   };
 
   const queue = new Queue(queueName, queueOptions);
+
+  // Always attach error handler to prevent unhandled errors
+  // See: https://docs.bullmq.io/guide/going-to-production#log-errors
+  queue.on("error", (err) => {
+    logger.error("Queue error", { queueName, error: err.message });
+  });
+
   queues.set(queueName, queue);
+  logger.info("Queue created", { queueName });
 
   return queue;
 }
@@ -114,3 +93,8 @@ export function getQueue(queueName: string): Queue {
 export function getQueueNames(): string[] {
   return Array.from(queues.keys());
 }
+
+/**
+ * Export connection options for use by workers
+ */
+export { getConnectionOptions };

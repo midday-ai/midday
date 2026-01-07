@@ -143,6 +143,27 @@ export const customerResponseSchema = z.object({
     description: "Total number of projects associated with this customer",
     example: 3,
   }),
+  // Financial metrics (calculated from invoices, only returned in list queries)
+  totalRevenue: z.number().optional().openapi({
+    description:
+      "Total revenue from paid invoices for this customer (in invoice currency). Only returned in list queries.",
+    example: 15000.5,
+  }),
+  outstandingAmount: z.number().optional().openapi({
+    description:
+      "Total outstanding amount from unpaid/overdue invoices (in invoice currency). Only returned in list queries.",
+    example: 2500.0,
+  }),
+  lastInvoiceDate: z.string().nullable().optional().openapi({
+    description:
+      "Date of the most recent invoice in ISO 8601 format. Only returned in list queries.",
+    example: "2024-04-15",
+  }),
+  invoiceCurrency: z.string().nullable().optional().openapi({
+    description:
+      "Primary currency used in invoices for this customer. Only returned in list queries.",
+    example: "USD",
+  }),
   tags: z
     .array(
       z.object({
@@ -164,6 +185,95 @@ export const customerResponseSchema = z.object({
         { id: "f1b2c3d4-5678-4e7a-9c1a-2b7c1e24c2a4", name: "Enterprise" },
       ],
     }),
+  // Enrichment fields
+  description: z.string().nullable().openapi({
+    description: "AI-generated description of what the company does",
+    example: "A cloud-based project management platform for remote teams.",
+  }),
+  industry: z.string().nullable().openapi({
+    description: "Primary industry of the company",
+    example: "Software",
+  }),
+  companyType: z.string().nullable().openapi({
+    description: "Business model type",
+    example: "SaaS",
+  }),
+  employeeCount: z.string().nullable().openapi({
+    description: "Estimated number of employees",
+    example: "51-200",
+  }),
+  foundedYear: z.number().nullable().openapi({
+    description: "Year the company was founded",
+    example: 2018,
+  }),
+  estimatedRevenue: z.string().nullable().openapi({
+    description: "Estimated annual revenue range",
+    example: "$10M-$50M",
+  }),
+  fundingStage: z.string().nullable().openapi({
+    description: "Current funding stage",
+    example: "Series A",
+  }),
+  totalFunding: z.string().nullable().openapi({
+    description: "Total funding raised",
+    example: "$15M",
+  }),
+  headquartersLocation: z.string().nullable().openapi({
+    description: "Company headquarters location",
+    example: "San Francisco, CA",
+  }),
+  timezone: z.string().nullable().openapi({
+    description: "IANA timezone of the company headquarters",
+    example: "America/Los_Angeles",
+  }),
+  linkedinUrl: z.string().nullable().openapi({
+    description: "LinkedIn company page URL",
+    example: "https://linkedin.com/company/acme",
+  }),
+  twitterUrl: z.string().nullable().openapi({
+    description: "Twitter/X profile URL",
+    example: "https://twitter.com/acme",
+  }),
+  instagramUrl: z.string().nullable().openapi({
+    description: "Instagram profile URL",
+    example: "https://instagram.com/acme",
+  }),
+  facebookUrl: z.string().nullable().openapi({
+    description: "Facebook page URL",
+    example: "https://facebook.com/acme",
+  }),
+  logoUrl: z.string().nullable().openapi({
+    description: "URL to the company logo",
+    example: "https://example.com/logo.png",
+  }),
+  ceoName: z.string().nullable().openapi({
+    description: "Name of the CEO or founder",
+    example: "Jane Smith",
+  }),
+  financeContact: z.string().nullable().openapi({
+    description: "Name of the finance/AP contact for invoicing",
+    example: "John Doe",
+  }),
+  financeContactEmail: z.string().nullable().openapi({
+    description: "Email of the finance/AP contact",
+    example: "finance@acme.com",
+  }),
+  primaryLanguage: z.string().nullable().openapi({
+    description: "Primary business language (ISO 639-1 code)",
+    example: "en",
+  }),
+  fiscalYearEnd: z.string().nullable().openapi({
+    description: "Month when the fiscal year ends",
+    example: "December",
+  }),
+  enrichmentStatus: z.string().nullable().openapi({
+    description: "Status of the enrichment process",
+    example: "completed",
+  }),
+  enrichedAt: z.string().nullable().openapi({
+    description: "When the customer was last enriched",
+    example: "2024-05-01T12:34:56.789Z",
+  }),
 });
 
 export const customersResponseSchema = z.object({
@@ -246,6 +356,20 @@ export const deleteCustomerSchema = z.object({
       in: "path",
       name: "id",
     },
+  }),
+});
+
+export const enrichCustomerSchema = z.object({
+  id: z.string().uuid().openapi({
+    description: "Unique identifier of the customer to enrich",
+    example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
+  }),
+});
+
+export const enrichCustomerResponseSchema = z.object({
+  queued: z.boolean().openapi({
+    description: "Whether the enrichment job was successfully queued",
+    example: true,
   }),
 });
 

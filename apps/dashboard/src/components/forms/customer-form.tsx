@@ -192,6 +192,15 @@ export function CustomerForm({ data }: Props) {
   };
 
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
+    // Extract domain from email if website is not set (handles Enter key submission)
+    let website = data.website || null;
+    if (!website && data.email) {
+      const domain = data.email.split("@").at(1);
+      if (domain && !excludedDomains.includes(domain)) {
+        website = domain;
+      }
+    }
+
     const formattedData = {
       ...data,
       id: data.id || undefined,
@@ -203,7 +212,7 @@ export function CustomerForm({ data }: Props) {
       country: data.country || null,
       contact: data.contact || null,
       note: data.note || null,
-      website: data.website || null,
+      website,
       phone: data.phone || null,
       zip: data.zip || null,
       vatNumber: data.vatNumber || null,
