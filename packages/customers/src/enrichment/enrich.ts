@@ -144,7 +144,7 @@ export async function enrichCustomer(
 
     // Create agent with tools that call our execute functions
     const agent = new ToolLoopAgent({
-      model: google("gemini-2.5-flash"),
+      model: google("gemini-3-flash"),
       tools: {
         readWebsite: tool({
           description: "Read company website to extract information",
@@ -243,7 +243,7 @@ Step 2: Call extractData with companyName="${params.companyName}", domain="${dom
     if (!extractedData) {
       console.log("[Enrichment] Fallback extraction");
       const fallback = await generateObject({
-        model: google("gemini-2.5-flash"),
+        model: google("gemini-3-flash"),
         schema: customerEnrichmentSchema,
         prompt: `Extract structured data for "${params.companyName}" (${domain}).
 
