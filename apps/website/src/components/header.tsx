@@ -27,8 +27,86 @@ export function Header({
   const [isAppsOpen, setIsAppsOpen] = useState(false);
   const [isMobileFeaturesOpen, setIsMobileFeaturesOpen] = useState(false);
   const [isMobileAppsOpen, setIsMobileAppsOpen] = useState(false);
+  const [visibleIntegrations, setVisibleIntegrations] = useState<Array<{ id: number; key: string }>>([]);
+  const [featuresDropdownHeight, setFeaturesDropdownHeight] = useState<number | null>(null);
   const featuresTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const appsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const integrationKeyCounterRef = useRef(0);
+  const featuresListRef = useRef<HTMLDivElement>(null);
+  const preAccountingRef = useRef<HTMLAnchorElement>(null);
+  const appsListRef = useRef<HTMLDivElement>(null);
+  const macAppRef = useRef<HTMLAnchorElement>(null);
+  const integrationsAppRef = useRef<HTMLAnchorElement>(null);
+
+  // All non-ERP integrations
+  const allIntegrations = [
+    { src: "/images/gmail.svg", alt: "Gmail" },
+    { src: "/images/slack.svg", alt: "Slack" },
+    { src: "/images/stripe.svg", alt: "Stripe" },
+    { src: "/images/gdrive.svg", alt: "Google Drive" },
+    { src: "/images/outlook.svg", alt: "Outlook" },
+    { src: "/images/whatsapp.svg", alt: "WhatsApp" },
+    { src: "/images/dropbox.svg", alt: "Dropbox" },
+  ];
+
+  // Initialize with 4 random integrations
+  useEffect(() => {
+    if (isAppsOpen && visibleIntegrations.length === 0) {
+      const shuffled = [...allIntegrations.keys()].sort(() => Math.random() - 0.5);
+      setVisibleIntegrations(
+        shuffled.slice(0, 4).map((idx) => ({
+          id: idx,
+          key: `init-${integrationKeyCounterRef.current++}`,
+        }))
+      );
+    }
+  }, [isAppsOpen]);
+
+  // Randomly fade in/out individual logos
+  useEffect(() => {
+    if (!isAppsOpen || visibleIntegrations.length === 0) return;
+
+    const interval = setInterval(() => {
+      setVisibleIntegrations((current) => {
+        // Randomly decide to replace one logo (70% chance)
+        if (Math.random() < 0.7 && current.length === 4) {
+          const indexToReplace = Math.floor(Math.random() * 4);
+          const availableIndices = allIntegrations
+            .map((_, i) => i)
+            .filter((i) => !current.some((item) => item.id === i));
+          
+          if (availableIndices.length > 0) {
+            const newIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+            const newVisible = [...current];
+            newVisible[indexToReplace] = {
+              id: newIndex,
+              key: `change-${integrationKeyCounterRef.current++}`,
+            };
+            return newVisible;
+          }
+        }
+        return current;
+      });
+    }, 1500 + Math.random() * 1000); // Random interval between 1.5-2.5 seconds
+
+    return () => clearInterval(interval);
+  }, [isAppsOpen, visibleIntegrations.length]);
+
+  // Match Pre-accounting container height to features list and store height for apps dropdown
+  useEffect(() => {
+    if (isFeaturesOpen && featuresListRef.current) {
+      // Get the full dropdown height including padding
+      const featuresDropdown = featuresListRef.current.closest('[data-features-dropdown]') as HTMLElement;
+      const featuresHeight = featuresDropdown ? featuresDropdown.offsetHeight : featuresListRef.current.offsetHeight;
+      setFeaturesDropdownHeight(featuresHeight);
+      
+      if (preAccountingRef.current) {
+        preAccountingRef.current.style.height = `${featuresListRef.current.offsetHeight}px`;
+      }
+    }
+  }, [isFeaturesOpen]);
+
+  // Apps dropdown height matches Features dropdown (image containers are fixed at 442x277)
 
   useEffect(() => {
     return () => {
@@ -107,6 +185,7 @@ export function Header({
 
                 {/* Features Dropdown - Full Width */}
                 <div
+                  data-features-dropdown
                   className={`fixed left-0 right-0 bg-background border-t border-b border-border shadow-lg z-50 overflow-hidden transition-opacity duration-150 ${
                     isFeaturesOpen
                       ? "opacity-100 visible"
@@ -114,200 +193,212 @@ export function Header({
                   }`}
                   style={{ top: "100%" }}
                 >
-                  <div className="pt-4 pb-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-10">
-                      {/* Left Column - Features List */}
-                      <div className="lg:col-span-3 pr-1 sm:pr-2 md:pr-3 lg:pr-4 xl:pr-6 2xl:pr-8 pl-4 sm:pl-4 md:pl-4 lg:pl-4 xl:pl-6 2xl:pl-8">
-                        <div
-                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                          onClick={() => {
-                            setIsFeaturesOpen(false);
-                            router.push("/assistant");
-                          }}
-                        >
-                          <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Assistant
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Ask questions and get clear financial answers
-                            </span>
-                          </div>
-                        </div>
-                        <div
-                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                          onClick={() => {
-                            setIsFeaturesOpen(false);
-                            router.push("/insights");
-                          }}
-                        >
-                          <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Insights
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              See what's changing
-                            </span>
-                          </div>
-                        </div>
-                        <div
-                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                          onClick={() => {
-                            setIsFeaturesOpen(false);
-                            router.push("/transactions");
-                          }}
-                        >
-                          <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Transactions
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              All transactions together
-                            </span>
-                          </div>
-                        </div>
-                        <div
-                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                          onClick={() => {
-                            setIsFeaturesOpen(false);
-                            router.push("/inbox");
-                          }}
-                        >
-                          <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Inbox
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Receipts handled automatically
-                            </span>
-                          </div>
-                        </div>
-                        <div
-                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                          onClick={() => {
-                            setIsFeaturesOpen(false);
-                            router.push("/time-tracking");
-                          }}
-                        >
-                          <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Time tracking
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              See where time goes
-                            </span>
-                          </div>
-                        </div>
-                        <div
-                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                          onClick={() => {
-                            setIsFeaturesOpen(false);
-                            router.push("/invoicing");
-                          }}
-                        >
-                          <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Invoicing
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Get paid faster
-                            </span>
-                          </div>
-                        </div>
-                        <div
-                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                          onClick={() => {
-                            setIsFeaturesOpen(false);
-                            router.push("/customers");
-                          }}
-                        >
-                          <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Customers
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Know your customers
-                            </span>
-                          </div>
-                        </div>
-                        <div
-                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                          onClick={() => {
-                            setIsFeaturesOpen(false);
-                            router.push("/file-storage");
-                          }}
-                        >
-                          <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Files
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Everything in one place
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Right Column - Preview */}
-                      <div className="lg:col-span-7 flex items-start justify-center lg:pl-8 lg:pt-6">
-                        <div className="w-full max-w-4xl h-full">
-                          <div className="rounded h-full">
-                            <div className="grid grid-cols-2 gap-6 h-full">
-                              {/* Left Preview - Pre-accounting */}
-                              <div className="flex flex-col gap-6 h-full">
-                                <Link
-                                  href="/pre-accounting"
-                                  onClick={() => setIsFeaturesOpen(false)}
-                                  className="flex-1 border border-border overflow-hidden bg-background cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200"
-                                >
-                                  <div className="w-full h-full flex items-center justify-center bg-background p-4">
-                                    <Image
-                                      src="/images/accounting-light.png"
-                                      alt="Pre-accounting"
-                                      width={112}
-                                      height={400}
-                                      className="h-[30%] w-auto object-contain dark:hidden"
-                                    />
-                                    <Image
-                                      src="/images/accounting-dark.png"
-                                      alt="Pre-accounting"
-                                      width={112}
-                                      height={400}
-                                      className="h-[30%] w-auto object-contain hidden dark:block"
-                                    />
-                                  </div>
-                                </Link>
-                                <div className="text-left">
-                                  <h3 className="font-sans text-sm text-foreground mb-1">
-                                    Pre-accounting
-                                  </h3>
-                                  <p className="font-sans text-xs text-muted-foreground leading-relaxed">
-                                    Clean records ready for your accountant
-                                  </p>
-                                </div>
+                  <div className="p-6 xl:p-8 2xl:p-10">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                      {/* Column 1 & 2 - Features List (2 columns) */}
+                      <div className="lg:col-span-2" ref={featuresListRef}>
+                        <div className="grid grid-cols-2 gap-x-6">
+                          {/* Column 1 */}
+                          <div>
+                            <div
+                              className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
+                              onClick={() => {
+                                setIsFeaturesOpen(false);
+                                router.push("/assistant");
+                              }}
+                            >
+                              <div className="flex flex-col pl-2">
+                                <span className="font-sans text-base text-foreground mb-1">
+                                  Assistant
+                                </span>
+                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                  Ask questions and get clear financial answers
+                                </span>
                               </div>
-
-                              {/* Right Preview - Assistant */}
-                              <div className="flex flex-col gap-6 h-full">
-                                <Link
-                                  href="/assistant"
-                                  onClick={() => setIsFeaturesOpen(false)}
-                                  className="flex-1 border border-border overflow-hidden bg-background cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200"
-                                >
-                                  <HeaderAssistantInputPreview />
-                                </Link>
-                                <div className="text-left">
-                                  <h3 className="font-sans text-sm text-foreground mb-1">
-                                    Assistant
-                                  </h3>
-                                  <p className="font-sans text-xs text-muted-foreground leading-relaxed">
-                                    Answers grounded in your actual numbers, not assumptions
-                                  </p>
-                                </div>
+                            </div>
+                            <div
+                              className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
+                              onClick={() => {
+                                setIsFeaturesOpen(false);
+                                router.push("/insights");
+                              }}
+                            >
+                              <div className="flex flex-col pl-2">
+                                <span className="font-sans text-base text-foreground mb-1">
+                                  Insights
+                                </span>
+                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                  See what's changing
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
+                              onClick={() => {
+                                setIsFeaturesOpen(false);
+                                router.push("/transactions");
+                              }}
+                            >
+                              <div className="flex flex-col pl-2">
+                                <span className="font-sans text-base text-foreground mb-1">
+                                  Transactions
+                                </span>
+                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                  All transactions together
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
+                              onClick={() => {
+                                setIsFeaturesOpen(false);
+                                router.push("/inbox");
+                              }}
+                            >
+                              <div className="flex flex-col pl-2">
+                                <span className="font-sans text-base text-foreground mb-1">
+                                  Inbox
+                                </span>
+                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                  Receipts handled automatically
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          {/* Column 2 */}
+                          <div>
+                            <div
+                              className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
+                              onClick={() => {
+                                setIsFeaturesOpen(false);
+                                router.push("/time-tracking");
+                              }}
+                            >
+                              <div className="flex flex-col pl-2">
+                                <span className="font-sans text-base text-foreground mb-1">
+                                  Time tracking
+                                </span>
+                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                  See where time goes
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
+                              onClick={() => {
+                                setIsFeaturesOpen(false);
+                                router.push("/invoicing");
+                              }}
+                            >
+                              <div className="flex flex-col pl-2">
+                                <span className="font-sans text-base text-foreground mb-1">
+                                  Invoicing
+                                </span>
+                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                  Get paid faster
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
+                              onClick={() => {
+                                setIsFeaturesOpen(false);
+                                router.push("/customers");
+                              }}
+                            >
+                              <div className="flex flex-col pl-2">
+                                <span className="font-sans text-base text-foreground mb-1">
+                                  Customers
+                                </span>
+                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                  Know your customers
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
+                              onClick={() => {
+                                setIsFeaturesOpen(false);
+                                router.push("/file-storage");
+                              }}
+                            >
+                              <div className="flex flex-col pl-2">
+                                <span className="font-sans text-base text-foreground mb-1">
+                                  Files
+                                </span>
+                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                  Everything in one place
+                                </span>
                               </div>
                             </div>
                           </div>
                         </div>
+                      </div>
+
+                      {/* Column 3 - Pre-accounting Preview */}
+                      <div className="flex items-start">
+                        <Link
+                          ref={preAccountingRef}
+                          href="/pre-accounting"
+                          onClick={() => setIsFeaturesOpen(false)}
+                          className="w-[442px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col"
+                        >
+                          <div className="flex-1 flex items-center justify-center bg-background p-4">
+                            <Image
+                              src="/images/accounting-light.png"
+                              alt="Pre-accounting"
+                              width={112}
+                              height={400}
+                              className="h-auto w-auto max-h-[80px] object-contain dark:hidden"
+                            />
+                            <Image
+                              src="/images/accounting-dark.png"
+                              alt="Pre-accounting"
+                              width={112}
+                              height={400}
+                              className="h-auto w-auto max-h-[80px] object-contain hidden dark:block"
+                            />
+                          </div>
+                          <div className="bg-background border-t border-border p-2.5 flex items-center justify-between gap-4">
+                            <div className="flex-1">
+                              <span className="font-sans text-xs text-foreground block">
+                                Pre-accounting
+                              </span>
+                              <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                Clean records ready for your accountant
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                              <div className="w-6 h-6 border border-border flex items-center justify-center bg-background">
+                                <Image
+                                  src="/images/xero.svg"
+                                  alt="Xero"
+                                  width={14}
+                                  height={14}
+                                  className="object-contain opacity-70"
+                                />
+                              </div>
+                              <div className="w-6 h-6 border border-border flex items-center justify-center bg-background">
+                                <Image
+                                  src="/images/quickbooks.svg"
+                                  alt="QuickBooks"
+                                  width={14}
+                                  height={14}
+                                  className="object-contain opacity-70"
+                                />
+                              </div>
+                              <div className="w-6 h-6 border border-border flex items-center justify-center bg-background">
+                                <Image
+                                  src="/images/fortnox.svg"
+                                  alt="Fortnox"
+                                  width={14}
+                                  height={14}
+                                  className="object-contain opacity-70"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -362,14 +453,17 @@ export function Header({
                       ? "opacity-100 visible"
                       : "opacity-0 invisible"
                   }`}
-                  style={{ top: "100%" }}
+                  style={{ 
+                    top: "100%",
+                    height: featuresDropdownHeight !== null ? `${featuresDropdownHeight}px` : 'auto'
+                  }}
                 >
-                  <div className="pt-4 pb-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-10">
-                      {/* Left Column - Apps List */}
-                      <div className="lg:col-span-3 pr-1 sm:pr-2 md:pr-3 lg:pr-4 xl:pr-6 2xl:pr-8 pl-4 sm:pl-4 md:pl-4 lg:pl-4 xl:pl-6 2xl:pl-8">
+                  <div className="p-6 xl:p-8 2xl:p-10 h-full">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+                      {/* Column 1 - Apps List */}
+                      <div ref={appsListRef}>
                         <div
-                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
+                          className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
                           onClick={() => {
                             setIsAppsOpen(false);
                             router.push("/download");
@@ -385,7 +479,7 @@ export function Header({
                           </div>
                         </div>
                         <div
-                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
+                          className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
                           onClick={() => {
                             setIsAppsOpen(false);
                             router.push("/download");
@@ -401,7 +495,7 @@ export function Header({
                           </div>
                         </div>
                         <div
-                          className="flex items-center py-2 cursor-pointer group hover:bg-secondary transition-colors duration-200"
+                          className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
                           onClick={() => {
                             setIsAppsOpen(false);
                             router.push("/docs");
@@ -418,66 +512,86 @@ export function Header({
                         </div>
                       </div>
 
-                      {/* Right Column - Mac App Preview */}
-                      <div className="lg:col-span-7 flex items-start justify-center lg:pl-8 lg:pt-6">
-                        <div className="w-full max-w-4xl h-full">
-                          <div className="rounded h-full">
-                            <div className="grid grid-cols-2 gap-6 h-full">
-                              {/* Integrations Preview - Left */}
-                              <div className="flex flex-col gap-6 h-full">
-              <Link
-                href="/download"
-                                  onClick={() => setIsAppsOpen(false)}
-                                  className="flex-1 border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 min-h-[280px]"
-              >
-                                  <HeaderIntegrationsPreview />
-              </Link>
-                                <div className="text-left">
-                                  <h3 className="font-sans text-sm text-foreground mb-1">
-                                    Integrations
-                                  </h3>
-                                  <p className="font-sans text-xs text-muted-foreground leading-relaxed">
-                                    Connect Midday with the tools you already use.
-                                  </p>
-                                </div>
-                              </div>
-                              
-                              {/* Mac App Preview - Right */}
-                              <div className="flex flex-col gap-6 h-full">
-                                <Link
-                                  href="/download"
-                                  onClick={() => setIsAppsOpen(false)}
-                                  className="flex-1 border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 min-h-[280px]"
-                                >
-                                  <div className="w-full h-full flex items-center justify-center bg-background p-4">
+                      {/* Column 2 - Mac App Preview */}
+                      <div className="flex items-start">
+                        <Link
+                          ref={macAppRef}
+                          href="/download"
+                          onClick={() => setIsAppsOpen(false)}
+                          className="w-[442px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col"
+                        >
+                          <div className="flex-1 flex items-center justify-center bg-background p-4">
+                            <Image
+                              src="/images/header-dock-light.png"
+                              alt="Mac Dock"
+                              width={1200}
+                              height={300}
+                              className="w-3/4 h-auto object-contain dark:hidden"
+                            />
+                            <Image
+                              src="/images/header-dock-dark.png"
+                              alt="Mac Dock"
+                              width={1200}
+                              height={300}
+                              className="w-3/4 h-auto object-contain hidden dark:block"
+                            />
+                          </div>
+                          <div className="bg-background border-t border-border p-2.5">
+                            <span className="font-sans text-xs text-foreground block">
+                              Mac app
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              Native desktop app for faster access and live tracking.
+                            </span>
+                          </div>
+                        </Link>
+                      </div>
+
+                      {/* Column 3 - Integrations Preview */}
+                      <div className="flex items-start">
+                        <Link
+                          ref={integrationsAppRef}
+                          href="/download"
+                          onClick={() => setIsAppsOpen(false)}
+                          className="w-[442px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col"
+                        >
+                          <div className="flex-1">
+                            <HeaderIntegrationsPreview />
+                          </div>
+                          <div className="bg-background border-t border-border p-2.5 flex items-center justify-between gap-4">
+                            <div className="flex-1">
+                              <span className="font-sans text-xs text-foreground block">
+                                Integrations
+                              </span>
+                              <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                Connect Midday with the tools you already use.
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 flex-shrink-0 relative h-6">
+                              <AnimatePresence mode="popLayout">
+                                {visibleIntegrations.map((item) => (
+                                  <motion.div
+                                    key={item.key}
+                                    layout
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.8 }}
+                                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                                    className="w-6 h-6 border border-border flex items-center justify-center bg-background"
+                                  >
                                     <Image
-                                      src="/images/header-dock-light.png"
-                                      alt="Mac Dock"
-                                      width={1200}
-                                      height={300}
-                                      className="w-3/4 h-auto object-contain dark:hidden"
+                                      src={allIntegrations[item.id].src}
+                                      alt={allIntegrations[item.id].alt}
+                                      width={14}
+                                      height={14}
+                                      className="object-contain opacity-70"
                                     />
-                                    <Image
-                                      src="/images/header-dock-dark.png"
-                                      alt="Mac Dock"
-                                      width={1200}
-                                      height={300}
-                                      className="w-3/4 h-auto object-contain hidden dark:block"
-                                    />
-                                  </div>
-                                </Link>
-                                <div className="text-left">
-                                  <h3 className="font-sans text-sm text-foreground mb-1">
-                                    Mac app
-                                  </h3>
-                                  <p className="font-sans text-xs text-muted-foreground leading-relaxed">
-                                    Native desktop app for faster access and live tracking.
-                                  </p>
-                                </div>
-                              </div>
+                                  </motion.div>
+                                ))}
+                              </AnimatePresence>
                             </div>
                           </div>
-                        </div>
+                        </Link>
                       </div>
                     </div>
                   </div>

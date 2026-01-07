@@ -217,7 +217,7 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
           <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
             Understand your week, hands-free
           </h2>
-          <p className="hidden sm:block font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
+          <p className="font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
             A quick audio overview of how your business performed last week,
             designed for busy moments.
           </p>
