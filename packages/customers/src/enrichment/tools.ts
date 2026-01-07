@@ -265,8 +265,12 @@ BASIC INFO:
 - companyType: One of: B2B, B2C, B2B2C, SaaS, Agency, Consultancy, E-commerce, Marketplace, Enterprise, SMB, Startup, Other
 - foundedYear: 4-digit year (1900-2030)
 
-LOCATION (derive timezone from HQ):
+LOCATION (derive timezone from HQ, use context as fallback):
 - headquartersLocation: "City, Country" format (e.g., "Stockholm, Sweden", "San Francisco, USA")
+- If headquartersLocation not found but countryCode is in KNOWN CONTEXT, derive full country name:
+  * SE → Sweden, US → United States, GB/UK → United Kingdom, DE → Germany, FR → France
+  * NL → Netherlands, NO → Norway, DK → Denmark, FI → Finland, ES → Spain, IT → Italy
+  * JP → Japan, CN → China, AU → Australia, CA → Canada, BR → Brazil, IN → India
 - timezone: IANA timezone based on headquarters location. Common mappings:
   * Stockholm/Sweden → Europe/Stockholm
   * London/UK → Europe/London

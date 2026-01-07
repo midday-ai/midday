@@ -340,9 +340,8 @@ export const columns: ColumnDef<Customer>[] = [
     },
     cell: ({ row }) => {
       const country = row.original.country;
-      const countryCode = row.original.countryCode;
-      if (!country && !countryCode) return "-";
-      return countryCode?.toUpperCase() || country || "-";
+      if (!country) return "-";
+      return country;
     },
   },
   {

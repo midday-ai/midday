@@ -56,14 +56,11 @@ function buildContextSection(params: EnrichCustomerParams): string {
   }
 
   // Location
-  const location = [
-    params.city,
-    params.state,
-    params.country || params.countryCode,
-  ]
+  const location = [params.city, params.state, params.country]
     .filter(Boolean)
     .join(", ");
   if (location) parts.push(`Location: ${location}`);
+  if (params.countryCode) parts.push(`Country code: ${params.countryCode}`);
 
   // Other context
   if (params.address) parts.push(`Address: ${params.address}`);

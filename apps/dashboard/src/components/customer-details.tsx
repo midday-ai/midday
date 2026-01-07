@@ -927,20 +927,7 @@ export function CustomerDetails() {
                           </div>
                         </motion.div>
                       )}
-                      {/* Show enrichment status if not completed and no data */}
-                      {!hasEnrichmentData &&
-                        customer.enrichmentStatus === "completed" && (
-                          <motion.div
-                            className="col-span-2 text-[14px] text-[#606060]"
-                            variants={{
-                              hidden: { opacity: 0 },
-                              visible: { opacity: 1 },
-                            }}
-                          >
-                            No company information found.
-                            {customer.website && " Try refreshing the data."}
-                          </motion.div>
-                        )}
+
                       {customer.enrichmentStatus === "failed" && (
                         <motion.div
                           className="col-span-2 text-[14px] text-[#606060]"

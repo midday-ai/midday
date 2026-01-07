@@ -166,14 +166,6 @@ export const customerEnrichmentSchema = z.object({
       "Name of the finance, accounting, or accounts payable contact. Look on Contact or Team pages.",
     ),
 
-  financeContactEmail: z
-    .string()
-    .email()
-    .nullable()
-    .describe(
-      "Email for finance/accounting/AP department (e.g. 'finance@company.com', 'ap@company.com', 'accounting@company.com').",
-    ),
-
   primaryLanguage: z
     .string()
     .nullable()

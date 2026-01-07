@@ -130,8 +130,6 @@ export class EnrichCustomerProcessor extends BaseProcessor<EnrichCustomerPayload
       const isCancelled =
         error instanceof Error && error.message.includes("cancelled");
 
-      await markCustomerEnrichmentFailed(db, customerId);
-
       this.logger.error("Failed to enrich customer", {
         customerId,
         teamId,
@@ -139,6 +137,20 @@ export class EnrichCustomerProcessor extends BaseProcessor<EnrichCustomerPayload
         isTimeout,
         isCancelled,
       });
+
+      // Attempt to mark as failed, but don't let this mask the original error
+      try {
+        await markCustomerEnrichmentFailed(db, customerId);
+      } catch (statusError) {
+        this.logger.error("Failed to mark customer enrichment as failed", {
+          customerId,
+          teamId,
+          statusError:
+            statusError instanceof Error
+              ? statusError.message
+              : "Unknown error",
+        });
+      }
 
       throw error;
     }

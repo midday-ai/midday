@@ -61,6 +61,12 @@ export const customersRouter = createTRPCRouter({
       // Auto-trigger enrichment for new customers with a website
       if (isNewCustomer && customer?.website && customer?.id) {
         try {
+          // Mark as pending first so UI shows enriching indicator immediately
+          await updateCustomerEnrichmentStatus(db, {
+            customerId: customer.id,
+            status: "pending",
+          });
+
           await triggerJob(
             "enrich-customer",
             {
