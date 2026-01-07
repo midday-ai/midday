@@ -1,169 +1,169 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Icons } from '@midday/ui/icons'
-import { MaterialIcon } from './icon-mapping'
+import { Icons } from "@midday/ui/icons";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { MaterialIcon } from "./icon-mapping";
 
 export function CommandPanelAnimation({
   onComplete,
 }: {
-  onComplete?: () => void
+  onComplete?: () => void;
 }) {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [showResults, setShowResults] = useState(false)
-  const [showTransaction, setShowTransaction] = useState(false)
-  const [showInvoice, setShowInvoice] = useState(false)
-  const [showReceipts, setShowReceipts] = useState(false)
-  const [showFiles, setShowFiles] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showResults, setShowResults] = useState(false);
+  const [showTransaction, setShowTransaction] = useState(false);
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [showReceipts, setShowReceipts] = useState(false);
+  const [showFiles, setShowFiles] = useState(false);
 
-  const transactionSearch = 'Acme'
-  const [displayedQuery, setDisplayedQuery] = useState('')
+  const transactionSearch = "Acme";
+  const [displayedQuery, setDisplayedQuery] = useState("");
 
   const transaction = {
     id: 1,
-    name: 'Acme Corporation',
-    amount: '$3,500.00',
-    date: 'Jan 15, 2025',
-  }
+    name: "Acme Corporation",
+    amount: "$3,500.00",
+    date: "Jan 15, 2025",
+  };
 
   const invoices = [
     {
       id: 1,
-      name: 'Invoice #INV-2025-001',
-      amount: '$3,500.00',
-      date: 'Jan 15, 2025',
+      name: "Invoice #INV-2025-001",
+      amount: "$3,500.00",
+      date: "Jan 15, 2025",
     },
     {
       id: 2,
-      name: 'Invoice #INV-2024-089',
-      amount: '$2,200.00',
-      date: 'Dec 20, 2024',
+      name: "Invoice #INV-2024-089",
+      amount: "$2,200.00",
+      date: "Dec 20, 2024",
     },
-  ]
+  ];
 
   const receipts = [
     {
       id: 1,
-      name: 'Receipt - Acme Services',
-      amount: '$450.00',
-      date: 'Jan 10, 2025',
+      name: "Receipt - Acme Services",
+      amount: "$450.00",
+      date: "Jan 10, 2025",
     },
     {
       id: 2,
-      name: 'Receipt - Acme Subscription',
-      amount: '$299.00',
-      date: 'Jan 5, 2025',
+      name: "Receipt - Acme Subscription",
+      amount: "$299.00",
+      date: "Jan 5, 2025",
     },
-  ]
+  ];
 
   const files = [
     {
       id: 1,
-      name: 'Acme_Contract_Q1_2025.pdf',
+      name: "Acme_Contract_Q1_2025.pdf",
     },
     {
       id: 2,
-      name: 'Invoice_Acme_2025-001.pdf',
+      name: "Invoice_Acme_2025-001.pdf",
     },
     {
       id: 3,
-      name: 'Receipt_Office_Supplies_Jan_2025.pdf',
+      name: "Receipt_Office_Supplies_Jan_2025.pdf",
     },
     {
       id: 4,
-      name: 'Acme_Payment_Confirmation.pdf',
+      name: "Acme_Payment_Confirmation.pdf",
     },
-  ]
+  ];
 
   useEffect(() => {
-    setDisplayedQuery('')
-    setShowResults(false)
-    setShowTransaction(false)
-    setShowInvoice(false)
-    setShowReceipts(false)
-    setShowFiles(false)
+    setDisplayedQuery("");
+    setShowResults(false);
+    setShowTransaction(false);
+    setShowInvoice(false);
+    setShowReceipts(false);
+    setShowFiles(false);
 
     // Start typing the search query
-    let charIndex = 0
+    let charIndex = 0;
     const typingInterval = setInterval(() => {
       if (charIndex < transactionSearch.length) {
-        setDisplayedQuery(transactionSearch.slice(0, charIndex + 1))
-        charIndex++
+        setDisplayedQuery(transactionSearch.slice(0, charIndex + 1));
+        charIndex++;
       } else {
-        clearInterval(typingInterval)
+        clearInterval(typingInterval);
         // After typing completes, show results with staggered timing
         setTimeout(() => {
-          setShowResults(true)
+          setShowResults(true);
           setTimeout(() => {
-            setShowTransaction(true)
+            setShowTransaction(true);
             setTimeout(() => {
-              setShowInvoice(true)
+              setShowInvoice(true);
               setTimeout(() => {
-                setShowReceipts(true)
+                setShowReceipts(true);
                 setTimeout(() => {
-                  setShowFiles(true)
-                }, 100)
-              }, 100)
-            }, 100)
-          }, 200)
-        }, 400)
+                  setShowFiles(true);
+                }, 100);
+              }, 100);
+            }, 100);
+          }, 200);
+        }, 400);
       }
-    }, 80)
+    }, 80);
 
-    let done: NodeJS.Timeout | undefined
+    let done: NodeJS.Timeout | undefined;
     if (onComplete) {
       done = setTimeout(() => {
-        onComplete()
-      }, 12000)
+        onComplete();
+      }, 12000);
     }
 
     return () => {
-      clearInterval(typingInterval)
-      if (done) clearTimeout(done)
-    }
-  }, [onComplete])
+      clearInterval(typingInterval);
+      if (done) clearTimeout(done);
+    };
+  }, [onComplete]);
 
   useEffect(() => {
     if (!onComplete) {
       const interval = setInterval(() => {
-        setDisplayedQuery('')
-        setShowResults(false)
-        setShowTransaction(false)
-        setShowInvoice(false)
-        setShowReceipts(false)
-        setShowFiles(false)
+        setDisplayedQuery("");
+        setShowResults(false);
+        setShowTransaction(false);
+        setShowInvoice(false);
+        setShowReceipts(false);
+        setShowFiles(false);
 
         // Restart typing animation
-        let charIndex = 0
+        let charIndex = 0;
         const typingInterval = setInterval(() => {
           if (charIndex < transactionSearch.length) {
-            setDisplayedQuery(transactionSearch.slice(0, charIndex + 1))
-            charIndex++
+            setDisplayedQuery(transactionSearch.slice(0, charIndex + 1));
+            charIndex++;
           } else {
-            clearInterval(typingInterval)
+            clearInterval(typingInterval);
             setTimeout(() => {
-              setShowResults(true)
+              setShowResults(true);
               setTimeout(() => {
-                setShowTransaction(true)
+                setShowTransaction(true);
                 setTimeout(() => {
-                  setShowInvoice(true)
+                  setShowInvoice(true);
                   setTimeout(() => {
-                    setShowReceipts(true)
+                    setShowReceipts(true);
                     setTimeout(() => {
-                      setShowFiles(true)
-                    }, 100)
-                  }, 100)
-                }, 100)
-              }, 200)
-            }, 400)
+                      setShowFiles(true);
+                    }, 100);
+                  }, 100);
+                }, 100);
+              }, 200);
+            }, 400);
           }
-        }, 80)
-      }, 12000)
+        }, 80);
+      }, 12000);
 
-      return () => clearInterval(interval)
+      return () => clearInterval(interval);
     }
-  }, [onComplete])
+  }, [onComplete]);
 
   return (
     <div className="w-full h-full flex items-center justify-center p-2 md:p-3">
@@ -196,7 +196,7 @@ export function CommandPanelAnimation({
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
                   className="mb-3 md:mb-4"
                 >
                   <div className="text-[10px] md:text-[11px] text-muted-foreground uppercase tracking-wider mb-1.5 md:mb-2 px-1">
@@ -205,7 +205,7 @@ export function CommandPanelAnimation({
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.08, ease: 'easeOut' }}
+                    transition={{ duration: 0.3, delay: 0.08, ease: "easeOut" }}
                     className="flex items-center gap-2 md:gap-3 pr-2 md:pr-3 py-1 md:py-1.5 cursor-pointer hover:bg-muted transition-colors"
                   >
                     <MaterialIcon
@@ -227,7 +227,7 @@ export function CommandPanelAnimation({
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
                   className="mb-3 md:mb-4"
                 >
                   <div className="text-[10px] md:text-[11px] text-muted-foreground uppercase tracking-wider mb-1.5 md:mb-2 px-1">
@@ -239,7 +239,11 @@ export function CommandPanelAnimation({
                         key={invoice.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.08, ease: 'easeOut' }}
+                        transition={{
+                          duration: 0.3,
+                          delay: index * 0.08,
+                          ease: "easeOut",
+                        }}
                         className="flex items-center gap-2 md:gap-3 pr-2 md:pr-3 py-1 md:py-1.5 cursor-pointer hover:bg-muted transition-colors"
                       >
                         <MaterialIcon
@@ -263,7 +267,7 @@ export function CommandPanelAnimation({
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
                   className="mb-3 md:mb-4"
                 >
                   <div className="text-[10px] md:text-[11px] text-muted-foreground uppercase tracking-wider mb-1.5 md:mb-2 px-1">
@@ -275,7 +279,11 @@ export function CommandPanelAnimation({
                         key={receipt.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.08, ease: 'easeOut' }}
+                        transition={{
+                          duration: 0.3,
+                          delay: index * 0.08,
+                          ease: "easeOut",
+                        }}
                         className="flex items-center gap-2 md:gap-3 pr-2 md:pr-3 py-1 md:py-1.5 cursor-pointer hover:bg-muted transition-colors"
                       >
                         <MaterialIcon
@@ -299,7 +307,7 @@ export function CommandPanelAnimation({
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
                   className="mb-3 md:mb-4"
                 >
                   <div className="text-[10px] md:text-[11px] text-muted-foreground uppercase tracking-wider mb-1.5 md:mb-2 px-1">
@@ -311,7 +319,11 @@ export function CommandPanelAnimation({
                         key={file.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.08, ease: 'easeOut' }}
+                        transition={{
+                          duration: 0.3,
+                          delay: index * 0.08,
+                          ease: "easeOut",
+                        }}
                         className="flex items-center gap-2 md:gap-3 pr-2 md:pr-3 py-1 md:py-1.5 cursor-pointer hover:bg-muted transition-colors"
                       >
                         <MaterialIcon
@@ -357,21 +369,30 @@ export function CommandPanelAnimation({
             <Icons.LogoSmall className="w-4 h-4 text-muted-foreground" />
           </div>
           <div className="flex items-center gap-1">
-            <button className="w-5 h-5 flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors">
+            <button
+              type="button"
+              className="w-5 h-5 flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors"
+            >
               <MaterialIcon
                 name="arrow_upward"
                 className="text-muted-foreground"
                 size={12}
               />
             </button>
-            <button className="w-5 h-5 flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors">
+            <button
+              type="button"
+              className="w-5 h-5 flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors"
+            >
               <MaterialIcon
                 name="arrow_downward"
                 className="text-muted-foreground"
                 size={12}
               />
             </button>
-            <button className="w-5 h-5 flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors">
+            <button
+              type="button"
+              className="w-5 h-5 flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors"
+            >
               <MaterialIcon
                 name="subdirectory_arrow_left"
                 className="text-muted-foreground"
@@ -382,5 +403,5 @@ export function CommandPanelAnimation({
         </motion.div>
       </div>
     </div>
-  )
+  );
 }

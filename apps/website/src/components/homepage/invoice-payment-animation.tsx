@@ -1,346 +1,369 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 interface Invoice {
-  id: string
-  customer: string
-  amount: string
-  dueDate: string
-  invoiceDate: string
-  invoiceNo: string
-  status: 'sent' | 'paid' | 'overdue' | 'scheduled' | 'recurring'
+  id: string;
+  customer: string;
+  amount: string;
+  dueDate: string;
+  invoiceDate: string;
+  invoiceNo: string;
+  status: "sent" | "paid" | "overdue" | "scheduled" | "recurring";
 }
 
-const initialInvoices: Omit<Invoice, 'status'>[] = [
+const initialInvoices: Omit<Invoice, "status">[] = [
   {
-    id: '1',
-    customer: 'Acme Corp',
-    amount: '$2,450.50',
-    dueDate: 'Mar 19',
-    invoiceDate: 'Mar 19',
-    invoiceNo: 'INV-015',
+    id: "1",
+    customer: "Acme Corp",
+    amount: "$2,450.50",
+    dueDate: "Mar 19",
+    invoiceDate: "Mar 19",
+    invoiceNo: "INV-015",
   },
   {
-    id: '2',
-    customer: 'TechFlow Inc',
-    amount: '$1,850.00',
-    dueDate: 'Mar 18',
-    invoiceDate: 'Mar 18',
-    invoiceNo: 'INV-014',
+    id: "2",
+    customer: "TechFlow Inc",
+    amount: "$1,850.00",
+    dueDate: "Mar 18",
+    invoiceDate: "Mar 18",
+    invoiceNo: "INV-014",
   },
   {
-    id: '3',
-    customer: 'Design Studio',
-    amount: '$3,200.75',
-    dueDate: 'Mar 16',
-    invoiceDate: 'Mar 16',
-    invoiceNo: 'INV-013',
+    id: "3",
+    customer: "Design Studio",
+    amount: "$3,200.75",
+    dueDate: "Mar 16",
+    invoiceDate: "Mar 16",
+    invoiceNo: "INV-013",
   },
   {
-    id: '4',
-    customer: 'Cloud Services',
-    amount: '$1,120.25',
-    dueDate: 'Mar 15',
-    invoiceDate: 'Mar 15',
-    invoiceNo: 'INV-012',
+    id: "4",
+    customer: "Cloud Services",
+    amount: "$1,120.25",
+    dueDate: "Mar 15",
+    invoiceDate: "Mar 15",
+    invoiceNo: "INV-012",
   },
   {
-    id: '5',
-    customer: 'Data Systems',
-    amount: '$4,500.00',
-    dueDate: 'Mar 14',
-    invoiceDate: 'Mar 14',
-    invoiceNo: 'INV-011',
+    id: "5",
+    customer: "Data Systems",
+    amount: "$4,500.00",
+    dueDate: "Mar 14",
+    invoiceDate: "Mar 14",
+    invoiceNo: "INV-011",
   },
   {
-    id: '6',
-    customer: 'Media Works',
-    amount: '$2,100.25',
-    dueDate: 'Mar 13',
-    invoiceDate: 'Mar 13',
-    invoiceNo: 'INV-010',
+    id: "6",
+    customer: "Media Works",
+    amount: "$2,100.25",
+    dueDate: "Mar 13",
+    invoiceDate: "Mar 13",
+    invoiceNo: "INV-010",
   },
   {
-    id: '7',
-    customer: 'Creative Labs',
-    amount: '$1,750.50',
-    dueDate: 'Mar 12',
-    invoiceDate: 'Mar 12',
-    invoiceNo: 'INV-009',
+    id: "7",
+    customer: "Creative Labs",
+    amount: "$1,750.50",
+    dueDate: "Mar 12",
+    invoiceDate: "Mar 12",
+    invoiceNo: "INV-009",
   },
   {
-    id: '8',
-    customer: 'Digital Solutions',
-    amount: '$3,800.00',
-    dueDate: 'Mar 11',
-    invoiceDate: 'Mar 11',
-    invoiceNo: 'INV-008',
+    id: "8",
+    customer: "Digital Solutions",
+    amount: "$3,800.00",
+    dueDate: "Mar 11",
+    invoiceDate: "Mar 11",
+    invoiceNo: "INV-008",
   },
   {
-    id: '9',
-    customer: 'Innovation Hub',
-    amount: '$2,650.00',
-    dueDate: 'Mar 10',
-    invoiceDate: 'Mar 10',
-    invoiceNo: 'INV-007',
+    id: "9",
+    customer: "Innovation Hub",
+    amount: "$2,650.00",
+    dueDate: "Mar 10",
+    invoiceDate: "Mar 10",
+    invoiceNo: "INV-007",
   },
   {
-    id: '10',
-    customer: 'Tech Ventures',
-    amount: '$1,950.75',
-    dueDate: 'Mar 09',
-    invoiceDate: 'Mar 09',
-    invoiceNo: 'INV-006',
+    id: "10",
+    customer: "Tech Ventures",
+    amount: "$1,950.75",
+    dueDate: "Mar 09",
+    invoiceDate: "Mar 09",
+    invoiceNo: "INV-006",
   },
   {
-    id: '11',
-    customer: 'Studio Alpha',
-    amount: '$3,400.50',
-    dueDate: 'Mar 08',
-    invoiceDate: 'Mar 08',
-    invoiceNo: 'INV-005',
+    id: "11",
+    customer: "Studio Alpha",
+    amount: "$3,400.50",
+    dueDate: "Mar 08",
+    invoiceDate: "Mar 08",
+    invoiceNo: "INV-005",
   },
   {
-    id: '12',
-    customer: 'Global Networks',
-    amount: '$2,800.25',
-    dueDate: 'Mar 07',
-    invoiceDate: 'Mar 07',
-    invoiceNo: 'INV-004',
+    id: "12",
+    customer: "Global Networks",
+    amount: "$2,800.25",
+    dueDate: "Mar 07",
+    invoiceDate: "Mar 07",
+    invoiceNo: "INV-004",
   },
   {
-    id: '13',
-    customer: 'Future Systems',
-    amount: '$1,600.00',
-    dueDate: 'Mar 06',
-    invoiceDate: 'Mar 06',
-    invoiceNo: 'INV-003',
+    id: "13",
+    customer: "Future Systems",
+    amount: "$1,600.00",
+    dueDate: "Mar 06",
+    invoiceDate: "Mar 06",
+    invoiceNo: "INV-003",
   },
   {
-    id: '14',
-    customer: 'Pixel Perfect',
-    amount: '$2,300.50',
-    dueDate: 'Mar 05',
-    invoiceDate: 'Mar 05',
-    invoiceNo: 'INV-002',
+    id: "14",
+    customer: "Pixel Perfect",
+    amount: "$2,300.50",
+    dueDate: "Mar 05",
+    invoiceDate: "Mar 05",
+    invoiceNo: "INV-002",
   },
   {
-    id: '15',
-    customer: 'Code Masters',
-    amount: '$4,200.75',
-    dueDate: 'Mar 04',
-    invoiceDate: 'Mar 04',
-    invoiceNo: 'INV-001',
+    id: "15",
+    customer: "Code Masters",
+    amount: "$4,200.75",
+    dueDate: "Mar 04",
+    invoiceDate: "Mar 04",
+    invoiceNo: "INV-001",
   },
-]
+];
 
 export function InvoicePaymentAnimation({
   onComplete,
 }: {
-  onComplete?: () => void
+  onComplete?: () => void;
 }) {
-  const [showCards, setShowCards] = useState(false)
-  const [showTable, setShowTable] = useState(false)
+  const [showCards, setShowCards] = useState(false);
+  const [showTable, setShowTable] = useState(false);
   const [invoices, setInvoices] = useState<Invoice[]>(
-    initialInvoices.map((inv) => ({ ...inv, status: 'sent' as const })),
-  )
-  const [showPaymentScore, setShowPaymentScore] = useState(false)
-  const [visibleBars, setVisibleBars] = useState<number[]>([])
+    initialInvoices.map((inv) => ({ ...inv, status: "sent" as const })),
+  );
+  const [showPaymentScore, setShowPaymentScore] = useState(false);
+  const [visibleBars, setVisibleBars] = useState<number[]>([]);
 
-  const [openAmount] = useState('$36,500.75')
-  const [overdueAmount, setOverdueAmount] = useState('$12,500.50')
-  const [paidAmount, setPaidAmount] = useState('$126,500.75')
-  const [openCount] = useState(6)
-  const [overdueCount, setOverdueCount] = useState(12)
-  const [paidCount, setPaidCount] = useState(10)
+  const [openAmount] = useState("$36,500.75");
+  const [overdueAmount, setOverdueAmount] = useState("$12,500.50");
+  const [paidAmount, setPaidAmount] = useState("$126,500.75");
+  const [openCount] = useState(6);
+  const [overdueCount, setOverdueCount] = useState(12);
+  const [paidCount, setPaidCount] = useState(10);
 
   // Payment score bars: 10 bars total, 8 filled (white), 2 unfilled (gray)
   const paymentScoreBars = Array.from({ length: 10 }, (_, i) => ({
     id: i,
     filled: i < 8, // First 8 bars are filled
-  }))
+  }));
 
   useEffect(() => {
-    setShowCards(false)
-    setShowTable(false)
-    setShowPaymentScore(false)
-    setVisibleBars([])
+    setShowCards(false);
+    setShowTable(false);
+    setShowPaymentScore(false);
+    setVisibleBars([]);
     setInvoices((prev) =>
-      prev.map((inv) => ({ ...inv, status: 'sent' as const })),
-    )
+      prev.map((inv) => ({ ...inv, status: "sent" as const })),
+    );
 
     // Show cards first
-    const cardsTimer = setTimeout(() => setShowCards(true), 300)
+    const cardsTimer = setTimeout(() => setShowCards(true), 300);
 
     // Show payment score bar
     const scoreTimer = setTimeout(() => {
-      setShowPaymentScore(true)
+      setShowPaymentScore(true);
       // Animate bars appearing one by one
       paymentScoreBars.forEach((_, index) => {
-        setTimeout(() => {
-          setVisibleBars((prev) => [...prev, index])
-        }, 1200 + index * 50)
-      })
-    }, 1000)
+        setTimeout(
+          () => {
+            setVisibleBars((prev) => [...prev, index]);
+          },
+          1200 + index * 50,
+        );
+      });
+    }, 1000);
 
     // Show table
-    const tableTimer = setTimeout(() => setShowTable(true), 800)
+    const tableTimer = setTimeout(() => setShowTable(true), 800);
 
     // Start flipping status tags one by one
     // Some invoices become overdue (yellow), scheduled (blue), or paid (green)
-    const flipTimers: NodeJS.Timeout[] = []
-    const invoiceCount = initialInvoices.length
+    const flipTimers: NodeJS.Timeout[] = [];
+    const invoiceCount = initialInvoices.length;
     // Make 2 invoices overdue (indices 2 and 7), 1 scheduled (index 1), 1 recurring (index 4), rest paid
-    const overdueIndices = [2, 7]
-    const scheduledIndices = [1]
-    const recurringIndices = [4]
-    let paidCount = 0
-    let paidTotal = 0
+    const overdueIndices = [2, 7];
+    const scheduledIndices = [1];
+    const recurringIndices = [4];
+    let paidCount = 0;
+    let paidTotal = 0;
 
     initialInvoices.forEach((invoice, index) => {
-      const timer = setTimeout(() => {
-        const isOverdue = overdueIndices.includes(index)
-        const isScheduled = scheduledIndices.includes(index)
-        const isRecurring = recurringIndices.includes(index)
-        let newStatus: 'paid' | 'overdue' | 'scheduled' | 'recurring'
-        
-        if (isOverdue) {
-          newStatus = 'overdue'
-        } else if (isScheduled) {
-          newStatus = 'scheduled'
-        } else if (isRecurring) {
-          newStatus = 'recurring'
-        } else {
-          newStatus = 'paid'
-        }
-        
-        setInvoices((prev) =>
-          prev.map((inv, idx) =>
-            idx === index ? { ...inv, status: newStatus } : inv,
-          ),
-        )
+      const timer = setTimeout(
+        () => {
+          const isOverdue = overdueIndices.includes(index);
+          const isScheduled = scheduledIndices.includes(index);
+          const isRecurring = recurringIndices.includes(index);
+          let newStatus: "paid" | "overdue" | "scheduled" | "recurring";
 
-        // Update counts and amounts
-        if (isOverdue) {
-          setOverdueCount((prev) => prev + 1)
-        } else if (!isScheduled && !isRecurring) {
-          paidCount++
-          paidTotal += parseFloat(invoice.amount.replace(/[^0-9.]/g, ''))
-        }
-
-        // Update paid count and amount when all invoices are processed
-        if (index === invoiceCount - 1) {
-          setPaidCount((prev) => prev + paidCount)
-          setPaidAmount((prev) => {
-            const current = parseFloat(prev.replace(/[^0-9.]/g, ''))
-            return `$${(current + paidTotal).toLocaleString('en-US', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}`
-          })
-        }
-      }, 2000 + index * 400)
-      flipTimers.push(timer)
-    })
-
-    const done = setTimeout(() => {
-      onComplete?.()
-    }, 15000)
-
-    const loop = setInterval(() => {
-      setShowCards(false)
-      setShowTable(false)
-      setShowPaymentScore(false)
-      setVisibleBars([])
-      setInvoices((prev) =>
-        prev.map((inv) => ({ ...inv, status: 'sent' as const })),
-      )
-      setPaidCount(10)
-      setPaidAmount('$126,500.75')
-      setOverdueCount(12)
-      setOverdueAmount('$12,500.50')
-
-      setTimeout(() => setShowCards(true), 300)
-      setTimeout(() => {
-        setShowPaymentScore(true)
-        paymentScoreBars.forEach((_, index) => {
-          setTimeout(() => {
-            setVisibleBars((prev) => [...prev, index])
-          }, 1200 + index * 50)
-        })
-      }, 1000)
-      setTimeout(() => setShowTable(true), 800)
-
-      const overdueIndicesLoop = [2, 7]
-      const scheduledIndicesLoop = [1]
-      const recurringIndicesLoop = [4]
-      let paidCountLoop = 0
-      let paidTotalLoop = 0
-      let overdueTotalLoop = 0
-
-      initialInvoices.forEach((invoice, index) => {
-        setTimeout(() => {
-          const isOverdue = overdueIndicesLoop.includes(index)
-          const isScheduled = scheduledIndicesLoop.includes(index)
-          const isRecurring = recurringIndicesLoop.includes(index)
-          let newStatus: 'paid' | 'overdue' | 'scheduled' | 'recurring'
-          
           if (isOverdue) {
-            newStatus = 'overdue'
+            newStatus = "overdue";
           } else if (isScheduled) {
-            newStatus = 'scheduled'
+            newStatus = "scheduled";
           } else if (isRecurring) {
-            newStatus = 'recurring'
+            newStatus = "recurring";
           } else {
-            newStatus = 'paid'
+            newStatus = "paid";
           }
-          
+
           setInvoices((prev) =>
             prev.map((inv, idx) =>
               idx === index ? { ...inv, status: newStatus } : inv,
             ),
-          )
+          );
 
+          // Update counts and amounts
           if (isOverdue) {
-            overdueTotalLoop += parseFloat(invoice.amount.replace(/[^0-9.]/g, ''))
+            setOverdueCount((prev) => prev + 1);
           } else if (!isScheduled && !isRecurring) {
-            paidCountLoop++
-            paidTotalLoop += parseFloat(invoice.amount.replace(/[^0-9.]/g, ''))
+            paidCount++;
+            paidTotal += Number.parseFloat(
+              invoice.amount.replace(/[^0-9.]/g, ""),
+            );
           }
 
+          // Update paid count and amount when all invoices are processed
           if (index === invoiceCount - 1) {
-            setPaidCount((prev) => prev + paidCountLoop)
+            setPaidCount((prev) => prev + paidCount);
             setPaidAmount((prev) => {
-              const current = parseFloat(prev.replace(/[^0-9.]/g, ''))
-              return `$${(current + paidTotalLoop).toLocaleString('en-US', {
+              const current = Number.parseFloat(prev.replace(/[^0-9.]/g, ""));
+              return `$${(current + paidTotal).toLocaleString("en-US", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
-              })}`
-            })
-            setOverdueCount((prev) => prev + overdueIndicesLoop.length)
-            setOverdueAmount((prev) => {
-              const current = parseFloat(prev.replace(/[^0-9.]/g, ''))
-              return `$${(current + overdueTotalLoop).toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}`
-            })
+              })}`;
+            });
           }
-        }, 2000 + index * 400)
-      })
-    }, 15000)
+        },
+        2000 + index * 400,
+      );
+      flipTimers.push(timer);
+    });
+
+    const done = setTimeout(() => {
+      onComplete?.();
+    }, 15000);
+
+    const loop = setInterval(() => {
+      setShowCards(false);
+      setShowTable(false);
+      setShowPaymentScore(false);
+      setVisibleBars([]);
+      setInvoices((prev) =>
+        prev.map((inv) => ({ ...inv, status: "sent" as const })),
+      );
+      setPaidCount(10);
+      setPaidAmount("$126,500.75");
+      setOverdueCount(12);
+      setOverdueAmount("$12,500.50");
+
+      setTimeout(() => setShowCards(true), 300);
+      setTimeout(() => {
+        setShowPaymentScore(true);
+        paymentScoreBars.forEach((_, index) => {
+          setTimeout(
+            () => {
+              setVisibleBars((prev) => [...prev, index]);
+            },
+            1200 + index * 50,
+          );
+        });
+      }, 1000);
+      setTimeout(() => setShowTable(true), 800);
+
+      const overdueIndicesLoop = [2, 7];
+      const scheduledIndicesLoop = [1];
+      const recurringIndicesLoop = [4];
+      let paidCountLoop = 0;
+      let paidTotalLoop = 0;
+      let overdueTotalLoop = 0;
+
+      initialInvoices.forEach((invoice, index) => {
+        setTimeout(
+          () => {
+            const isOverdue = overdueIndicesLoop.includes(index);
+            const isScheduled = scheduledIndicesLoop.includes(index);
+            const isRecurring = recurringIndicesLoop.includes(index);
+            let newStatus: "paid" | "overdue" | "scheduled" | "recurring";
+
+            if (isOverdue) {
+              newStatus = "overdue";
+            } else if (isScheduled) {
+              newStatus = "scheduled";
+            } else if (isRecurring) {
+              newStatus = "recurring";
+            } else {
+              newStatus = "paid";
+            }
+
+            setInvoices((prev) =>
+              prev.map((inv, idx) =>
+                idx === index ? { ...inv, status: newStatus } : inv,
+              ),
+            );
+
+            if (isOverdue) {
+              overdueTotalLoop += Number.parseFloat(
+                invoice.amount.replace(/[^0-9.]/g, ""),
+              );
+            } else if (!isScheduled && !isRecurring) {
+              paidCountLoop++;
+              paidTotalLoop += Number.parseFloat(
+                invoice.amount.replace(/[^0-9.]/g, ""),
+              );
+            }
+
+            if (index === invoiceCount - 1) {
+              setPaidCount((prev) => prev + paidCountLoop);
+              setPaidAmount((prev) => {
+                const current = Number.parseFloat(prev.replace(/[^0-9.]/g, ""));
+                return `$${(current + paidTotalLoop).toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}`;
+              });
+              setOverdueCount((prev) => prev + overdueIndicesLoop.length);
+              setOverdueAmount((prev) => {
+                const current = Number.parseFloat(prev.replace(/[^0-9.]/g, ""));
+                return `$${(current + overdueTotalLoop).toLocaleString(
+                  "en-US",
+                  {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  },
+                )}`;
+              });
+            }
+          },
+          2000 + index * 400,
+        );
+      });
+    }, 15000);
 
     return () => {
-      clearTimeout(cardsTimer)
-      clearTimeout(scoreTimer)
-      clearTimeout(tableTimer)
-      flipTimers.forEach((timer) => clearTimeout(timer))
-      clearInterval(loop)
-      clearTimeout(done)
-    }
-  }, [onComplete])
+      clearTimeout(cardsTimer);
+      clearTimeout(scoreTimer);
+      clearTimeout(tableTimer);
+      for (const timer of flipTimers) {
+        clearTimeout(timer);
+      }
+      clearInterval(loop);
+      clearTimeout(done);
+    };
+  }, [onComplete]);
 
   return (
     <div className="w-full h-full flex flex-col relative overflow-hidden">
@@ -422,20 +445,18 @@ export function InvoicePaymentAnimation({
                         key={bar.id}
                         initial={{ height: 0, opacity: 0 }}
                         animate={{
-                          height: visibleBars.includes(index) ? '18px' : 0,
+                          height: visibleBars.includes(index) ? "18px" : 0,
                           opacity: visibleBars.includes(index) ? 1 : 0,
                         }}
                         transition={{
                           duration: 0.2,
                           delay: index * 0.05,
-                          ease: 'easeOut',
+                          ease: "easeOut",
                         }}
                         className={`w-[2px] md:w-[3px] ${
-                          bar.filled
-                            ? 'bg-foreground'
-                            : 'bg-muted-foreground'
+                          bar.filled ? "bg-foreground" : "bg-muted-foreground"
                         }`}
-                        style={{ minHeight: '18px' }}
+                        style={{ minHeight: "18px" }}
                       />
                     ))}
                   </div>
@@ -459,7 +480,10 @@ export function InvoicePaymentAnimation({
             transition={{ duration: 0.3, delay: 0.4 }}
             className="flex-1 min-h-0 overflow-hidden border border-border bg-background"
           >
-            <table className="w-full border-collapse" style={{ borderSpacing: 0 }}>
+            <table
+              className="w-full border-collapse"
+              style={{ borderSpacing: 0 }}
+            >
               <thead className="sticky top-0 z-10 bg-secondary border-b border-border">
                 <tr className="h-[28px] md:h-[32px]">
                   <th className="w-[75px] md:w-[70px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">
@@ -491,7 +515,7 @@ export function InvoicePaymentAnimation({
                     transition={{
                       duration: 0.3,
                       delay: 0.5 + index * 0.08,
-                      ease: 'easeOut',
+                      ease: "easeOut",
                     }}
                     className="h-[28px] md:h-[32px] border-b border-border bg-background hover:bg-secondary transition-colors"
                   >
@@ -512,72 +536,72 @@ export function InvoicePaymentAnimation({
                     <td className="w-[115px] md:w-[110px] px-1.5 md:px-2">
                       <div className="flex items-center h-full">
                         <AnimatePresence mode="wait">
-                        {invoice.status === 'sent' ? (
-                          <motion.div
-                            key="sent"
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            transition={{ duration: 0.2 }}
-                            className="inline-flex items-center px-1.5 py-px rounded-full bg-secondary border border-border"
-                          >
-                            <span className="font-sans text-[9px] md:text-[10px] text-foreground">
-                              Sent
-                            </span>
-                          </motion.div>
-                        ) : invoice.status === 'overdue' ? (
-                          <motion.div
-                            key="overdue"
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            transition={{ duration: 0.2 }}
-                            className="inline-flex items-center px-1.5 py-px rounded-full bg-yellow-500/10 border border-yellow-500/20"
-                          >
-                            <span className="font-sans text-[9px] md:text-[10px] text-yellow-500">
-                              Overdue
-                            </span>
-                          </motion.div>
-                        ) : invoice.status === 'scheduled' ? (
-                          <motion.div
-                            key="scheduled"
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            transition={{ duration: 0.2 }}
-                            className="inline-flex items-center px-1.5 py-px rounded-full bg-blue-500/10 border border-blue-500/20"
-                          >
-                            <span className="font-sans text-[9px] md:text-[10px] text-blue-500">
-                              Scheduled
-                            </span>
-                          </motion.div>
-                        ) : invoice.status === 'recurring' ? (
-                          <motion.div
-                            key="recurring"
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            transition={{ duration: 0.2 }}
-                            className="inline-flex items-center px-1.5 py-px rounded-full bg-orange-500/10 border border-orange-500/20"
-                          >
-                            <span className="font-sans text-[9px] md:text-[10px] text-orange-500">
-                              Recurring
-                            </span>
-                          </motion.div>
-                        ) : (
-                          <motion.div
-                            key="paid"
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            transition={{ duration: 0.2 }}
-                            className="inline-flex items-center px-1.5 py-px rounded-full bg-green-500/10 border border-green-500/20"
-                          >
-                            <span className="font-sans text-[9px] md:text-[10px] text-green-500">
-                              Paid
-                            </span>
-                          </motion.div>
-                        )}
+                          {invoice.status === "sent" ? (
+                            <motion.div
+                              key="sent"
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.9 }}
+                              transition={{ duration: 0.2 }}
+                              className="inline-flex items-center px-1.5 py-px rounded-full bg-secondary border border-border"
+                            >
+                              <span className="font-sans text-[9px] md:text-[10px] text-foreground">
+                                Sent
+                              </span>
+                            </motion.div>
+                          ) : invoice.status === "overdue" ? (
+                            <motion.div
+                              key="overdue"
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.9 }}
+                              transition={{ duration: 0.2 }}
+                              className="inline-flex items-center px-1.5 py-px rounded-full bg-yellow-500/10 border border-yellow-500/20"
+                            >
+                              <span className="font-sans text-[9px] md:text-[10px] text-yellow-500">
+                                Overdue
+                              </span>
+                            </motion.div>
+                          ) : invoice.status === "scheduled" ? (
+                            <motion.div
+                              key="scheduled"
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.9 }}
+                              transition={{ duration: 0.2 }}
+                              className="inline-flex items-center px-1.5 py-px rounded-full bg-blue-500/10 border border-blue-500/20"
+                            >
+                              <span className="font-sans text-[9px] md:text-[10px] text-blue-500">
+                                Scheduled
+                              </span>
+                            </motion.div>
+                          ) : invoice.status === "recurring" ? (
+                            <motion.div
+                              key="recurring"
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.9 }}
+                              transition={{ duration: 0.2 }}
+                              className="inline-flex items-center px-1.5 py-px rounded-full bg-orange-500/10 border border-orange-500/20"
+                            >
+                              <span className="font-sans text-[9px] md:text-[10px] text-orange-500">
+                                Recurring
+                              </span>
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              key="paid"
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.9 }}
+                              transition={{ duration: 0.2 }}
+                              className="inline-flex items-center px-1.5 py-px rounded-full bg-green-500/10 border border-green-500/20"
+                            >
+                              <span className="font-sans text-[9px] md:text-[10px] text-green-500">
+                                Paid
+                              </span>
+                            </motion.div>
+                          )}
                         </AnimatePresence>
                       </div>
                     </td>
@@ -589,5 +613,5 @@ export function InvoicePaymentAnimation({
         )}
       </div>
     </div>
-  )
+  );
 }

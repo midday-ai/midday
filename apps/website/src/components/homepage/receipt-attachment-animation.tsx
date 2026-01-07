@@ -1,30 +1,30 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import Image from 'next/image'
-import { MaterialIcon } from './icon-mapping'
+import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { MaterialIcon } from "./icon-mapping";
 
 export function ReceiptAttachmentAnimation() {
-  const [showReceipt, setShowReceipt] = useState(false)
-  const [showBar, setShowBar] = useState(false)
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [showBar, setShowBar] = useState(false);
 
   useEffect(() => {
     // Show receipt after initial delay
     const receiptTimer = setTimeout(() => {
-      setShowReceipt(true)
-    }, 500)
+      setShowReceipt(true);
+    }, 500);
 
     // Show bar after receipt is shown
     const barTimer = setTimeout(() => {
-      setShowBar(true)
-    }, 2000)
+      setShowBar(true);
+    }, 2000);
 
     return () => {
-      clearTimeout(receiptTimer)
-      clearTimeout(barTimer)
-    }
-  }, [])
+      clearTimeout(receiptTimer);
+      clearTimeout(barTimer);
+    };
+  }, []);
 
   return (
     <div className="w-full h-full bg-background border border-border overflow-hidden relative">
@@ -41,7 +41,11 @@ export function ReceiptAttachmentAnimation() {
             {/* Header */}
             <div className="flex items-center justify-between px-2 md:px-3 py-1.5 md:py-2 border-b border-border">
               <div className="flex items-center gap-1.5">
-                <MaterialIcon name="delete" className="text-muted-foreground" size={14} />
+                <MaterialIcon
+                  name="delete"
+                  className="text-muted-foreground"
+                  size={14}
+                />
               </div>
               <div className="flex items-center gap-2">
                 <Image
@@ -51,7 +55,11 @@ export function ReceiptAttachmentAnimation() {
                   height={14}
                   className="object-contain w-3 h-3 md:w-3.5 md:h-3.5"
                 />
-                <MaterialIcon name="more_vert" className="text-muted-foreground" size={14} />
+                <MaterialIcon
+                  name="more_vert"
+                  className="text-muted-foreground"
+                  size={14}
+                />
               </div>
             </div>
 
@@ -61,7 +69,9 @@ export function ReceiptAttachmentAnimation() {
                 {/* Sender Info */}
                 <div className="flex items-start gap-2 md:gap-2.5">
                   <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                    <span className="text-[10px] md:text-[11px] font-sans font-medium text-foreground">C</span>
+                    <span className="text-[10px] md:text-[11px] font-sans font-medium text-foreground">
+                      C
+                    </span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-sans text-[11px] md:text-[12px] text-foreground font-medium">
@@ -103,12 +113,20 @@ export function ReceiptAttachmentAnimation() {
                     <div className="space-y-1.5 md:space-y-2 flex-1">
                       <div className="flex justify-between items-start gap-2">
                         <div className="flex-1 min-w-0">
-                          <p className="font-sans text-[9px] md:text-[10px] text-muted-foreground">Date:</p>
-                          <p className="font-sans text-[11px] md:text-[12px] text-foreground">June 15, 2025</p>
+                          <p className="font-sans text-[9px] md:text-[10px] text-muted-foreground">
+                            Date:
+                          </p>
+                          <p className="font-sans text-[11px] md:text-[12px] text-foreground">
+                            June 15, 2025
+                          </p>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="font-sans text-[9px] md:text-[10px] text-muted-foreground">Billing Period:</p>
-                          <p className="font-sans text-[11px] md:text-[12px] text-foreground">Jun 1 - Jun 30</p>
+                          <p className="font-sans text-[9px] md:text-[10px] text-muted-foreground">
+                            Billing Period:
+                          </p>
+                          <p className="font-sans text-[11px] md:text-[12px] text-foreground">
+                            Jun 1 - Jun 30
+                          </p>
                         </div>
                       </div>
 
@@ -134,16 +152,28 @@ export function ReceiptAttachmentAnimation() {
                       {/* Totals */}
                       <div className="border-t border-border pt-1.5 md:pt-2 mt-auto space-y-1">
                         <div className="flex justify-between">
-                          <p className="font-sans text-[9px] md:text-[10px] text-muted-foreground">Subtotal:</p>
-                          <p className="font-sans text-[9px] md:text-[10px] text-foreground">$49.00</p>
+                          <p className="font-sans text-[9px] md:text-[10px] text-muted-foreground">
+                            Subtotal:
+                          </p>
+                          <p className="font-sans text-[9px] md:text-[10px] text-foreground">
+                            $49.00
+                          </p>
                         </div>
                         <div className="flex justify-between">
-                          <p className="font-sans text-[9px] md:text-[10px] text-muted-foreground">Tax (Sales Tax 8.5%):</p>
-                          <p className="font-sans text-[9px] md:text-[10px] text-foreground">$4.17</p>
+                          <p className="font-sans text-[9px] md:text-[10px] text-muted-foreground">
+                            Tax (Sales Tax 8.5%):
+                          </p>
+                          <p className="font-sans text-[9px] md:text-[10px] text-foreground">
+                            $4.17
+                          </p>
                         </div>
                         <div className="flex justify-between border-t border-border pt-1 md:pt-1.5 mt-1">
-                          <p className="font-sans text-[11px] md:text-[12px] text-foreground font-medium">Total:</p>
-                          <p className="font-sans text-[11px] md:text-[12px] text-foreground font-medium">$53.17</p>
+                          <p className="font-sans text-[11px] md:text-[12px] text-foreground font-medium">
+                            Total:
+                          </p>
+                          <p className="font-sans text-[11px] md:text-[12px] text-foreground font-medium">
+                            $53.17
+                          </p>
                         </div>
                       </div>
 
@@ -174,7 +204,7 @@ export function ReceiptAttachmentAnimation() {
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.3 }}
             className="absolute bottom-2 left-2 right-2 bg-background/95 backdrop-blur-[7px] border border-border p-1.5 md:p-2 flex items-center gap-2 z-30 shadow-lg pointer-events-auto"
-            style={{ transform: 'scale(0.9)' }}
+            style={{ transform: "scale(0.9)" }}
           >
             <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
               <span className="font-sans text-[10px] md:text-[11px] text-muted-foreground pl-2 md:pl-3">
@@ -182,20 +212,29 @@ export function ReceiptAttachmentAnimation() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <button className="hidden md:flex items-center justify-center h-7 md:h-8 px-2 md:px-3 bg-transparent border border-border text-[11px] md:text-[12px] text-foreground hover:bg-muted transition-colors flex-shrink-0">
+              <button
+                type="button"
+                className="hidden md:flex items-center justify-center h-7 md:h-8 px-2 md:px-3 bg-transparent border border-border text-[11px] md:text-[12px] text-foreground hover:bg-muted transition-colors flex-shrink-0"
+              >
                 Decline
               </button>
-              <button className="flex items-center gap-1 px-2 md:px-3 py-1 md:py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors border border-primary">
+              <button
+                type="button"
+                className="flex items-center gap-1 px-2 md:px-3 py-1 md:py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors border border-primary"
+              >
                 <span className="font-sans text-[10px] md:text-[11px]">
                   Confirm
                 </span>
-                <MaterialIcon name="check" className="text-primary-foreground" size={14} />
+                <MaterialIcon
+                  name="check"
+                  className="text-primary-foreground"
+                  size={14}
+                />
               </button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
-  )
+  );
 }
-

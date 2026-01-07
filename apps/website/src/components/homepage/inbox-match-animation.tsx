@@ -1,106 +1,106 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import Image from 'next/image'
-import { MaterialIcon } from './icon-mapping'
+import { motion } from "framer-motion";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { MaterialIcon } from "./icon-mapping";
 
 export function InboxMatchAnimation({
   onComplete,
 }: {
-  onComplete?: () => void
+  onComplete?: () => void;
 }) {
-  const [showIncoming, setShowIncoming] = useState(false)
-  const [showSuggestBar, setShowSuggestBar] = useState(false)
-  const [showItems, setShowItems] = useState(false)
+  const [showIncoming, setShowIncoming] = useState(false);
+  const [showSuggestBar, setShowSuggestBar] = useState(false);
+  const [showItems, setShowItems] = useState(false);
   const items = [
     {
       id: 1,
-      title: 'Google Workspace Invoice.pdf',
-      amount: '$12.00',
-      date: 'Sep 08',
-      icon: 'pdf',
+      title: "Google Workspace Invoice.pdf",
+      amount: "$12.00",
+      date: "Sep 08",
+      icon: "pdf",
     },
     {
       id: 2,
-      title: 'AWS Receipt.pdf',
-      amount: '$54.30',
-      date: 'Sep 07',
-      icon: 'receipt',
+      title: "AWS Receipt.pdf",
+      amount: "$54.30",
+      date: "Sep 07",
+      icon: "receipt",
     },
     {
       id: 3,
-      title: 'Figma Receipt.pdf',
-      amount: '$24.00',
-      date: 'Sep 06',
-      icon: 'receipt_long',
+      title: "Figma Receipt.pdf",
+      amount: "$24.00",
+      date: "Sep 06",
+      icon: "receipt_long",
     },
     {
       id: 4,
-      title: 'GitHub Receipt.pdf',
-      amount: '$9.00',
-      date: 'Sep 05',
-      icon: 'pdf',
+      title: "GitHub Receipt.pdf",
+      amount: "$9.00",
+      date: "Sep 05",
+      icon: "pdf",
     },
     {
       id: 5,
-      title: 'Notion Receipt.pdf',
-      amount: '$16.00',
-      date: 'Sep 04',
-      icon: 'receipt',
+      title: "Notion Receipt.pdf",
+      amount: "$16.00",
+      date: "Sep 04",
+      icon: "receipt",
     },
     {
       id: 6,
-      title: 'Slack Receipt.pdf',
-      amount: '$8.50',
-      date: 'Sep 03',
-      icon: 'receipt_long',
+      title: "Slack Receipt.pdf",
+      amount: "$8.50",
+      date: "Sep 03",
+      icon: "receipt_long",
     },
-  ]
+  ];
   const incomingItem = {
     id: 999,
-    title: 'Stripe, Inc Receipt.pdf',
-    amount: '$89.00',
-    date: 'Sep 10',
-  }
+    title: "Stripe, Inc Receipt.pdf",
+    amount: "$89.00",
+    date: "Sep 10",
+  };
 
   useEffect(() => {
-    setShowSuggestBar(false)
-    setShowItems(false)
-    setShowIncoming(false)
-    const itemsTimer = setTimeout(() => setShowItems(true), 300)
-    const incomingTimer = setTimeout(() => setShowIncoming(true), 1400)
-    const barTimer = setTimeout(() => setShowSuggestBar(true), 1800)
+    setShowSuggestBar(false);
+    setShowItems(false);
+    setShowIncoming(false);
+    const itemsTimer = setTimeout(() => setShowItems(true), 300);
+    const incomingTimer = setTimeout(() => setShowIncoming(true), 1400);
+    const barTimer = setTimeout(() => setShowSuggestBar(true), 1800);
 
-    let done: NodeJS.Timeout | undefined
+    let done: NodeJS.Timeout | undefined;
     if (onComplete) {
       done = setTimeout(() => {
-        onComplete()
-      }, 12000)
+        onComplete();
+      }, 12000);
     }
 
     return () => {
-      clearTimeout(itemsTimer)
-      clearTimeout(incomingTimer)
-      clearTimeout(barTimer)
-      if (done) clearTimeout(done)
-    }
-  }, [onComplete])
+      clearTimeout(itemsTimer);
+      clearTimeout(incomingTimer);
+      clearTimeout(barTimer);
+      if (done) clearTimeout(done);
+    };
+  }, [onComplete]);
 
   useEffect(() => {
     if (!onComplete) {
       const interval = setInterval(() => {
-        setShowSuggestBar(false)
-        setShowItems(false)
-        setShowIncoming(false)
-        const itemsTimer = setTimeout(() => setShowItems(true), 300)
-        const incomingTimer = setTimeout(() => setShowIncoming(true), 1400)
-        const barTimer = setTimeout(() => setShowSuggestBar(true), 1800)
-      }, 12000)
+        setShowSuggestBar(false);
+        setShowItems(false);
+        setShowIncoming(false);
+        const itemsTimer = setTimeout(() => setShowItems(true), 300);
+        const incomingTimer = setTimeout(() => setShowIncoming(true), 1400);
+        const barTimer = setTimeout(() => setShowSuggestBar(true), 1800);
+      }, 12000);
 
-      return () => clearInterval(interval)
+      return () => clearInterval(interval);
     }
-  }, [onComplete])
+  }, [onComplete]);
 
   return (
     <div className="w-full h-full flex flex-col relative">
@@ -108,8 +108,15 @@ export function InboxMatchAnimation({
         <div className="flex items-center justify-between mb-2 md:mb-3">
           <h3 className="text-[13px] md:text-[14px] text-foreground">Inbox</h3>
           <div className="flex items-center gap-2">
-            <button className="w-6 h-6 flex items-center justify-center hover:bg-muted transition-colors">
-              <MaterialIcon name="filter_list" className="text-sm text-muted-foreground" size={16} />
+            <button
+              type="button"
+              className="w-6 h-6 flex items-center justify-center hover:bg-muted transition-colors"
+            >
+              <MaterialIcon
+                name="filter_list"
+                className="text-sm text-muted-foreground"
+                size={16}
+              />
             </button>
           </div>
         </div>
@@ -142,7 +149,11 @@ export function InboxMatchAnimation({
             >
               <div className="flex items-start gap-1.5 md:gap-2">
                 <span className="inline-flex w-5 h-5 md:w-6 md:h-6 items-center justify-center bg-secondary border border-border flex-shrink-0">
-                  <MaterialIcon name={item.icon as 'receipt' | 'receipt_long' | 'pdf'} className="text-sm text-muted-foreground" size={14} />
+                  <MaterialIcon
+                    name={item.icon as "receipt" | "receipt_long" | "pdf"}
+                    className="text-sm text-muted-foreground"
+                    size={14}
+                  />
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1.5 md:gap-2">
@@ -171,7 +182,7 @@ export function InboxMatchAnimation({
               initial={{ opacity: 0, y: 48 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
-                type: 'spring',
+                type: "spring",
                 stiffness: 250,
                 damping: 24,
                 mass: 0.6,
@@ -214,13 +225,20 @@ export function InboxMatchAnimation({
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: showSuggestBar ? 1 : 0, y: showSuggestBar ? 0 : 10 }}
+        animate={{
+          opacity: showSuggestBar ? 1 : 0,
+          y: showSuggestBar ? 0 : 10,
+        }}
         transition={{ duration: 0.25 }}
         className="px-2 md:px-3 pt-2 md:pt-3 pb-2 md:pb-3 relative z-40"
       >
         <div className="w-full bg-secondary border border-border px-2 md:px-3 py-2 md:py-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
-            <MaterialIcon name="link" className="text-sm text-muted-foreground flex-shrink-0" size={14} />
+            <MaterialIcon
+              name="link"
+              className="text-sm text-muted-foreground flex-shrink-0"
+              size={14}
+            />
             <div className="min-w-0 flex-1">
               <div className="text-[11px] md:text-[12px] text-foreground truncate">
                 Suggested match
@@ -230,12 +248,14 @@ export function InboxMatchAnimation({
               </div>
             </div>
           </div>
-          <button className="ml-2 md:ml-3 flex items-center justify-center h-7 md:h-8 px-2 md:px-3 bg-transparent border border-border text-[11px] md:text-[12px] text-foreground hover:bg-muted transition-colors flex-shrink-0">
+          <button
+            type="button"
+            className="ml-2 md:ml-3 flex items-center justify-center h-7 md:h-8 px-2 md:px-3 bg-transparent border border-border text-[11px] md:text-[12px] text-foreground hover:bg-muted transition-colors flex-shrink-0"
+          >
             Review
           </button>
         </div>
       </motion.div>
     </div>
-  )
+  );
 }
-

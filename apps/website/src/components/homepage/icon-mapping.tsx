@@ -6,6 +6,7 @@
 import {
   MdCheck,
   MdClose,
+  MdDeleteOutline,
   MdIosShare,
   MdOutlineAccountBalance,
   MdOutlineAccountBalanceWallet,
@@ -87,6 +88,7 @@ export const IconMap = {
   broken_image: MdOutlineDescription, // Using description as broken_image alternative
   docs: MdOutlineDescription, // Using description as docs alternative
   close: MdClose,
+  delete: MdDeleteOutline,
 };
 
 export function MaterialIcon({

@@ -315,7 +315,6 @@ export function BurnrateAnimation({
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              drag={false}
               className="grid grid-cols-2 gap-2 md:gap-3"
             >
               <div className="bg-background border border-border p-2 md:p-3 select-none">
@@ -371,7 +370,6 @@ export function BurnrateAnimation({
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              drag={false}
               className="bg-background border border-border p-2 md:p-3 select-none"
             >
               <h3 className="text-[9px] md:text-[10px] font-sans text-muted-foreground mb-1.5 md:mb-2">

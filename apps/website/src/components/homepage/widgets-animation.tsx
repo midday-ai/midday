@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { MaterialIcon, IconMap } from './icon-mapping'
 
@@ -78,105 +78,102 @@ export function WidgetsAnimation({
 }) {
   const [showWidgets, setShowWidgets] = useState(false)
   const [isWiggling, setIsWiggling] = useState(false)
-  const [movingCardId, setMovingCardId] = useState<string | null>(null)
   const [cardOrder, setCardOrder] = useState<string[]>(widgets.map(w => w.id))
+  
+  const timeoutRefs = useRef<NodeJS.Timeout[]>([])
+  const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined)
+
+  const clearAllTimeouts = () => {
+    timeoutRefs.current.forEach(clearTimeout)
+    timeoutRefs.current = []
+  }
+
+  // Simple shuffle function to rearrange cards
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    return shuffled
+  }
 
   useEffect(() => {
     setShowWidgets(false)
     setIsWiggling(false)
-    setMovingCardId(null)
     const initialOrder = widgets.map(w => w.id)
     setCardOrder(initialOrder)
+    clearAllTimeouts()
     
     const timer = setTimeout(() => setShowWidgets(true), 300)
+    timeoutRefs.current.push(timer)
     
     // Start wiggling after cards appear
     const wiggleTimer = setTimeout(() => {
       setIsWiggling(true)
     }, 800)
+    timeoutRefs.current.push(wiggleTimer)
     
-    // Start moving animation while wiggling continues
-    const moveTimer = setTimeout(() => {
-      // Select a random card to move (not the first one, pick one from middle)
-      const cardToMove = initialOrder[2] // Pick the 3rd card
-      setMovingCardId(cardToMove)
+    // Shuffle cards while wiggling
+    const shuffleTimer = setTimeout(() => {
+      setCardOrder(shuffleArray(initialOrder))
       
-      // Rearrange: move the selected card to a new position
-      setTimeout(() => {
-        setCardOrder((currentOrder) => {
-          const newOrder = [...currentOrder]
-          const currentIndex = newOrder.indexOf(cardToMove)
-          const newIndex = currentIndex === 2 ? 4 : 2 // Move to position 4 or back to 2
-          newOrder.splice(currentIndex, 1)
-          newOrder.splice(newIndex, 0, cardToMove)
-          return newOrder
-        })
-        
-        // Put card down and stop wiggling after rearrangement
-        setTimeout(() => {
-          setMovingCardId(null)
-          setIsWiggling(false)
-        }, 600)
-      }, 800)
+      // Stop wiggling after shuffle completes
+      const stopTimer = setTimeout(() => {
+        setIsWiggling(false)
+      }, 600)
+      timeoutRefs.current.push(stopTimer)
     }, 2000)
+    timeoutRefs.current.push(shuffleTimer)
     
     let done: NodeJS.Timeout | undefined
     if (onComplete) {
       done = setTimeout(() => {
         onComplete()
       }, 10000)
+      timeoutRefs.current.push(done)
     }
     
     return () => {
-      clearTimeout(timer)
-      clearTimeout(wiggleTimer)
-      clearTimeout(moveTimer)
+      clearAllTimeouts()
       if (done) clearTimeout(done)
     }
   }, [onComplete])
 
   useEffect(() => {
     if (!onComplete) {
-      const interval = setInterval(() => {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+      
+      intervalRef.current = setInterval(() => {
         setShowWidgets(false)
         setIsWiggling(false)
-        setMovingCardId(null)
         const initialOrder = widgets.map(w => w.id)
         setCardOrder(initialOrder)
+        clearAllTimeouts()
         
         const timer = setTimeout(() => setShowWidgets(true), 300)
+        timeoutRefs.current.push(timer)
+        
         const wiggleTimer = setTimeout(() => {
           setIsWiggling(true)
         }, 800)
+        timeoutRefs.current.push(wiggleTimer)
         
-        const moveTimer = setTimeout(() => {
-          const cardToMove = initialOrder[2]
-          setMovingCardId(cardToMove)
+        const shuffleTimer = setTimeout(() => {
+          setCardOrder(shuffleArray(initialOrder))
           
-          setTimeout(() => {
-            setCardOrder((currentOrder) => {
-              const newOrder = [...currentOrder]
-              const currentIndex = newOrder.indexOf(cardToMove)
-              const newIndex = currentIndex === 2 ? 4 : 2
-              newOrder.splice(currentIndex, 1)
-              newOrder.splice(newIndex, 0, cardToMove)
-              return newOrder
-            })
-            
-            setTimeout(() => {
-              setMovingCardId(null)
-              setIsWiggling(false)
-            }, 600)
-          }, 800)
+          const stopTimer = setTimeout(() => {
+            setIsWiggling(false)
+          }, 600)
+          timeoutRefs.current.push(stopTimer)
         }, 2000)
-        
-        return () => {
-          clearTimeout(timer)
-          clearTimeout(wiggleTimer)
-          clearTimeout(moveTimer)
-        }
+        timeoutRefs.current.push(shuffleTimer)
       }, 10000)
-      return () => clearInterval(interval)
+      
+      return () => {
+        if (intervalRef.current) clearInterval(intervalRef.current)
+        clearAllTimeouts()
+      }
     }
   }, [onComplete])
 
@@ -286,47 +283,35 @@ export function WidgetsAnimation({
         {cardOrder.map((widgetId, displayIdx) => {
           const widget = widgets.find(w => w.id === widgetId)!
           const originalIdx = widgets.findIndex(w => w.id === widgetId)
-          const isMoving = movingCardId === widgetId
-          const isLifted = isMoving
-          
-          // Calculate grid position based on display index
-          const gridRow = Math.floor(displayIdx / 2)
-          const gridCol = displayIdx % 2
           
           return (
             <motion.div
               key={widgetId}
               initial={{ opacity: 0, y: 12 }}
               animate={{ 
-                opacity: showWidgets ? (isMoving ? 0.7 : 1) : 0, 
-                y: showWidgets ? (isLifted ? -8 : 0) : 12,
-                x: 0,
-                rotate: isWiggling && !isMoving ? [0, -1, 1, -1, 1, 0] : 0,
-                scale: isLifted ? 1.05 : 1,
-                zIndex: isMoving ? 50 : 1,
+                opacity: showWidgets ? 1 : 0, 
+                y: showWidgets ? 0 : 12,
+                rotate: isWiggling ? [0, -1, 1, -1, 1, 0] : 0,
               }}
               transition={{ 
                 opacity: { duration: 0.3, delay: originalIdx * 0.05 },
                 y: { 
-                  duration: isMoving ? 0.4 : 0.3,
-                  delay: isMoving ? 0 : originalIdx * 0.05,
-                  ease: isMoving ? 'easeInOut' : 'easeOut'
+                  duration: 0.3,
+                  delay: originalIdx * 0.05,
+                  ease: 'easeOut'
                 },
-                rotate: isWiggling && !isMoving ? {
+                rotate: isWiggling ? {
                   duration: 0.5,
                   repeat: Infinity,
                   ease: 'easeInOut'
                 } : { duration: 0.3 },
-                scale: { duration: 0.3 },
                 layout: {
                   duration: 0.6,
                   ease: 'easeInOut'
                 }
               }}
               layout
-              className={`bg-secondary border border-border p-2 md:p-3 lg:p-4 flex flex-col h-full ${
-                isMoving ? 'cursor-default' : 'cursor-default'
-              }`}
+              className="bg-secondary border border-border p-2 md:p-3 lg:p-4 flex flex-col h-full"
             >
               {/* Title with icon */}
               <div className="flex items-center gap-1 md:gap-1.5 mb-1 md:mb-2">
@@ -379,4 +364,3 @@ export function WidgetsAnimation({
     </div>
   )
 }
-
