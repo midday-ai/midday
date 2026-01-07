@@ -5,6 +5,8 @@ import Image from 'next/image'
 import { MaterialIcon } from './homepage/icon-mapping'
 import { DashboardAnimation } from './homepage/dashboard-animation'
 import { AIAssistantAnimation } from './homepage/ai-assistant-animation'
+import { WidgetsAnimation } from './homepage/widgets-animation'
+import { BurnrateAnimation } from './homepage/burnrate-animation'
 import { TestimonialsSection } from './sections/testimonials-section'
 import { FeaturesGridSection } from './sections/features-grid-section'
 import { TimeSavingsSection } from './sections/time-savings-section'
@@ -72,7 +74,7 @@ export function Insights() {
                 Weekly summaries that show what changed and what matters.
               </p>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto hidden lg:block">
-                Understand how your business is evolving over time with trends and summaries that highlight what's moving, what's stable, and where attention is needed.
+                Understand how your business is evolving over time with live widgets, summaries, and explanations that highlight what's moving, what's stable, and where attention is needed.
               </p>
             </div>
 
@@ -111,7 +113,7 @@ export function Insights() {
               </h1>
 
               <p className="text-muted-foreground text-base leading-normal max-w-2xl mx-auto font-sans text-center">
-                Understand how your business is evolving over time with trends and summaries that highlight what's moving, what's stable, and where attention is needed.
+                Understand how your business is evolving over time with live widgets, summaries, and explanations that highlight what's moving, what's stable, and where attention is needed.
               </p>
             </div>
 
@@ -142,16 +144,57 @@ export function Insights() {
       <section className="bg-background py-12 sm:py-16 lg:pt-32 lg:pb-24">
         <div className="max-w-[1400px] mx-auto">
           <div className="space-y-16 sm:space-y-20 lg:space-y-32">
-            {/* First Animation - Dashboard */}
+            {/* First Animation - Your business, at a glance */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-stretch">
               {/* Left: Title and Subtitle */}
               <div className="flex items-center">
                 <div className="space-y-3 lg:space-y-5 text-center lg:text-left w-full">
                   <h2 className="font-sans text-2xl sm:text-2xl text-foreground">
+                    Your business, at a glance
+                  </h2>
+                  <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
+                    Key financial widgets give you a live view of revenue, cash, spending, and performance, all customizable to what matters most right now.
+                  </p>
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Customizable widgets</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Revenue and cash</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Spending breakdowns</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Time filters</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Multi-currency</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: Animation */}
+              <div className="flex items-center justify-center p-1 sm:p-3 lg:p-6 xl:p-8 border border-border overflow-hidden relative bg-background">
+                <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center">
+                  <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
+                    <WidgetsAnimation onComplete={undefined} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Second Animation - Weekly financial updates */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-stretch">
+              {/* Left: Title and Subtitle */}
+              <div className="flex items-center lg:order-2">
+                <div className="space-y-3 lg:space-y-5 text-center lg:text-left w-full">
+                  <h2 className="font-sans text-2xl sm:text-2xl text-foreground">
                     Weekly financial updates
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Get automatic weekly summaries showing how revenue, spending, cash, and key metrics changed since the last period.
+                    Get automatic weekly summaries based on your widgets, showing how revenue, spending, cash, and key metrics changed since the last period.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
@@ -174,7 +217,7 @@ export function Insights() {
               </div>
 
               {/* Right: Animation */}
-              <div className="flex items-center justify-center p-1 sm:p-3 lg:p-6 xl:p-8 border border-border overflow-hidden relative bg-background">
+              <div className="flex items-center justify-center p-6 lg:p-8 border border-border overflow-hidden relative bg-background lg:order-1">
                 <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center">
                   <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
                     <AIAssistantAnimation onComplete={undefined} />
@@ -183,16 +226,16 @@ export function Insights() {
               </div>
             </div>
 
-            {/* Second Animation - Dashboard Insights */}
+            {/* Third Animation - What Changed and Why */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-stretch">
               {/* Left: Title and Subtitle */}
-              <div className="flex items-center lg:order-2">
+              <div className="flex items-center">
                 <div className="space-y-3 lg:space-y-5 text-center lg:text-left w-full">
                   <h2 className="font-sans text-2xl sm:text-2xl text-foreground">
                     What changed and why
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Important movements are highlighted so you understand what's driving changes without reviewing dashboards or reports.
+                    Important movements across widgets and categories are highlighted and explained so you understand what's driving change without digging through data.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
@@ -204,19 +247,23 @@ export function Insights() {
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                       <span className="font-sans text-sm text-foreground">Context explanations</span>
                     </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Period comparisons</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Right: Animation */}
-              <div className="flex items-center justify-center p-6 lg:p-8 border border-border overflow-hidden relative bg-background lg:order-1">
+              <div className="flex items-center justify-center p-1 sm:p-3 lg:p-6 xl:p-8 border border-border overflow-hidden relative bg-background">
                 <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center">
                   <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
-                    <DashboardAnimation onComplete={undefined} />
+                    <BurnrateAnimation onComplete={undefined} />
                   </div>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </section>

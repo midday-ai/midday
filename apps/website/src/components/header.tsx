@@ -425,13 +425,13 @@ export function Header({
                             <div className="grid grid-cols-2 gap-6 h-full">
                               {/* Integrations Preview - Left */}
                               <div className="flex flex-col gap-6 h-full">
-                                <Link
-                                  href="/download"
+              <Link
+                href="/download"
                                   onClick={() => setIsAppsOpen(false)}
                                   className="flex-1 border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 min-h-[280px]"
-                                >
+              >
                                   <HeaderIntegrationsPreview />
-                                </Link>
+              </Link>
                                 <div className="text-left">
                                   <h3 className="font-sans text-sm text-foreground mb-1">
                                     Integrations
@@ -786,12 +786,12 @@ export function Header({
                             setIsMenuOpen(false);
                             setIsMobileAppsOpen(false);
                           }}
-                          onTouchEnd={(e) => {
-                            e.currentTarget.blur();
-                          }}
+                onTouchEnd={(e) => {
+                  e.currentTarget.blur();
+                }}
                           className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                          style={{ WebkitTapHighlightColor: "transparent" }}
-                        >
+                style={{ WebkitTapHighlightColor: "transparent" }}
+              >
                           Developer & API
                         </button>
                       </div>
