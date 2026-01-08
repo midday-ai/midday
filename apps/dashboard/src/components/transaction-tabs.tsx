@@ -1,18 +1,14 @@
 "use client";
 
+import { useReviewTransactions } from "@/hooks/use-review-transactions";
 import { useTransactionTab } from "@/hooks/use-transaction-tab";
-import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import { Tabs, TabsList, TabsTrigger } from "@midday/ui/tabs";
-import { useQuery } from "@tanstack/react-query";
 
 export function TransactionTabs() {
   const { tab, setTab } = useTransactionTab();
-  const trpc = useTRPC();
-
-  const { data: reviewCount } = useQuery(
-    trpc.transactions.getReviewCount.queryOptions(),
-  );
+  const { transactionIds } = useReviewTransactions();
+  const reviewCount = transactionIds.length;
 
   const handleValueChange = (value: string) => {
     if (value === "all" || value === "review") {
@@ -43,7 +39,7 @@ export function TransactionTabs() {
             )}
           >
             Review
-            {typeof reviewCount === "number" && reviewCount > 0 && (
+            {reviewCount > 0 && (
               <span className="ml-1 text-xs text-[#878787]">
                 ({reviewCount})
               </span>

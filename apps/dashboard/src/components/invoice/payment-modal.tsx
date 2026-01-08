@@ -102,8 +102,8 @@ function PaymentForm({
   const [isReady, setIsReady] = useState(false);
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col h-full">
-      <div className="flex-1 space-y-6 overflow-y-auto">
+    <form onSubmit={handleSubmit} className="flex flex-col h-full min-h-0">
+      <div className="flex-1 overflow-y-auto space-y-6 min-h-0">
         {/* Amount - animates in first */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -112,9 +112,7 @@ function PaymentForm({
           className="bg-muted/50 rounded-lg p-4 text-center"
         >
           <p className="text-sm text-muted-foreground mb-1">Amount due</p>
-          <p className="text-2xl font-semibold">
-            {formatAmount(amount, currency)}
-          </p>
+          <p className="text-2xl">{formatAmount(amount, currency)}</p>
         </motion.div>
 
         {/* Payment form skeleton - shows while loading */}
@@ -162,8 +160,8 @@ function PaymentForm({
         )}
       </div>
 
-      {/* Buttons - always visible, disabled until ready */}
-      <div className="flex flex-col gap-3 pt-6 mt-6 pb-4 border-t border-border">
+      {/* Buttons - fixed at bottom */}
+      <div className="flex flex-col gap-3 pt-6 mt-6 border-t border-border">
         <SubmitButton
           isSubmitting={isProcessing}
           disabled={!stripe || !elements || isProcessing || !isReady}
@@ -245,24 +243,44 @@ export function PaymentModal({
           border: isDark ? "1px solid #404040" : "1px solid #121212",
           boxShadow: "none",
         },
+        ".TabList": {
+          border: "none",
+          boxShadow: "none",
+        },
         ".Tab": {
-          backgroundColor: isDark ? "#0C0C0C" : "#F0F0EE",
+          backgroundColor: "transparent",
           border: isDark ? "1px solid #2E2E2E" : "1px solid #E5E5E5",
+          boxShadow: "none",
+          outline: "none",
           color: isDark ? "#A1A1A1" : "#666666",
           padding: "10px 12px",
         },
         ".Tab:hover": {
-          backgroundColor: isDark ? "#1A1A1A" : "#F6F6F3",
+          backgroundColor: "transparent",
+          border: isDark ? "1px solid #404040" : "1px solid #CCCCCC",
+          boxShadow: "none",
           color: isDark ? "#FFFFFF" : "#121212",
         },
+        ".Tab:focus": {
+          boxShadow: "none",
+          outline: "none",
+        },
         ".Tab--selected": {
-          backgroundColor: isDark ? "#1A1A1A" : "#F6F6F3",
-          border: isDark ? "1px solid #404040" : "1px solid #121212",
+          backgroundColor: "transparent",
+          border: isDark ? "1px solid #FFFFFF" : "1px solid #121212",
+          boxShadow: "none",
+          outline: "none",
           color: isDark ? "#FFFFFF" : "#121212",
         },
         ".Tab--selected:hover": {
-          backgroundColor: isDark ? "#1A1A1A" : "#F6F6F3",
+          backgroundColor: "transparent",
+          border: isDark ? "1px solid #FFFFFF" : "1px solid #121212",
+          boxShadow: "none",
           color: isDark ? "#FFFFFF" : "#121212",
+        },
+        ".Tab--selected:focus": {
+          boxShadow: "none",
+          outline: "none",
         },
         ".Tab--selected .TabIcon": {
           fill: isDark ? "#FFFFFF" : "#121212",
@@ -376,10 +394,7 @@ export function PaymentModal({
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent
-        title="Pay invoice"
-        className="flex flex-col overflow-hidden relative pb-2"
-      >
+      <SheetContent title="Pay invoice" className="flex flex-col">
         {/* Error state */}
         {error && !hasPaymentData && (
           <div className="flex-1 flex items-center justify-center">
