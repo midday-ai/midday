@@ -170,20 +170,11 @@ export const teamRouter = createTRPCRouter({
         teamId: input.teamId,
       });
 
-      // Delete the team
-      const data = await deleteTeam(db, {
-        teamId: input.teamId,
-        userId: session.user.id,
-      });
-
-      if (!data) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to delete team",
-        });
-      }
-
-      // Trigger cleanup job with captured data
+      // Trigger cleanup job BEFORE deleting team from database.
+      // This ensures that if job triggering fails (Redis down, queue unavailable),
+      // the team remains intact and the user can retry. The cleanup job will handle
+      // subscription cancellation and bank connection deletion even if the team
+      // record is deleted by the time the job runs.
       await triggerJob(
         "delete-team",
         {
@@ -197,6 +188,19 @@ export const teamRouter = createTRPCRouter({
         },
         "teams",
       );
+
+      // Delete the team from database after cleanup job is enqueued
+      const data = await deleteTeam(db, {
+        teamId: input.teamId,
+        userId: session.user.id,
+      });
+
+      if (!data) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to delete team",
+        });
+      }
     }),
 
   deleteMember: protectedProcedure

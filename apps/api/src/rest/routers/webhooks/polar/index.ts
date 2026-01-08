@@ -36,6 +36,9 @@ app.openapi(
       400: {
         description: "Invalid webhook signature or payload",
       },
+      500: {
+        description: "Failed to process webhook event (will trigger retry)",
+      },
     },
   }),
   async (c) => {
@@ -170,6 +173,10 @@ app.openapi(
       logger.error("Error processing Polar webhook", {
         error: err instanceof Error ? err.message : String(err),
         eventType: event.type,
+      });
+      // Re-throw to return 5xx, allowing Polar to retry on transient failures
+      throw new HTTPException(500, {
+        message: "Failed to process webhook event",
       });
     }
 
