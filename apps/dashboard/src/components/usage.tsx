@@ -1,4 +1,4 @@
-import { getPlanLimits } from "@/utils/plans";
+import { getPlanLimits } from "@midday/plans";
 import { Card } from "@midday/ui/card";
 import { Skeleton } from "@midday/ui/skeleton";
 

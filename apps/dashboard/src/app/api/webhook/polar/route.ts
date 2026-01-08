@@ -1,4 +1,4 @@
-import { getPlanByProductId } from "@/utils/plans";
+import { getPlanByProductId } from "@midday/plans";
 import { updateTeamPlan } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
 import { Webhooks } from "@polar-sh/nextjs";

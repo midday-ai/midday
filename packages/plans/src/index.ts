@@ -1,4 +1,6 @@
-const POLAR_ENVIRONMENT = process.env.POLAR_ENVIRONMENT;
+const POLAR_ENVIRONMENT = process.env.POLAR_ENVIRONMENT as
+  | "production"
+  | "sandbox";
 
 export const PLANS = {
   production: {
@@ -25,7 +27,7 @@ export const PLANS = {
       key: "pro",
     },
   },
-};
+} as const;
 
 export const DISCOUNTS = {
   production: {
@@ -40,7 +42,10 @@ export const DISCOUNTS = {
       name: "Public Beta",
     },
   },
-};
+} as const;
+
+export type PlanKey = "starter" | "pro";
+export type PlanEnvironment = "production" | "sandbox";
 
 export const getDiscount = (planType?: string | null) => {
   // Starter plan doesn't have a discount
@@ -48,27 +53,36 @@ export const getDiscount = (planType?: string | null) => {
     return null;
   }
 
-  const discounts = DISCOUNTS[POLAR_ENVIRONMENT as keyof typeof DISCOUNTS];
+  const discounts = DISCOUNTS[POLAR_ENVIRONMENT];
 
   // Change this to null after the public beta
   return discounts.public_beta;
 };
 
 export const getPlans = () => {
-  return PLANS[POLAR_ENVIRONMENT as keyof typeof PLANS];
+  return PLANS[POLAR_ENVIRONMENT];
 };
 
-export function getPlanByProductId(productId: string) {
-  const plan = Object.values(getPlans()).find((plan) => plan.id === productId);
+export function getPlanByProductId(productId: string): PlanKey {
+  const plans = getPlans();
+  const plan = Object.values(plans).find((p) => p.id === productId);
 
   if (!plan) {
     throw new Error("Plan not found");
   }
 
-  return plan.key;
+  return plan.key as PlanKey;
 }
 
-export function getPlanLimits(plan: string) {
+export type PlanLimits = {
+  users: number;
+  bankConnections: number;
+  storage: number;
+  inbox: number;
+  invoices: number;
+};
+
+export function getPlanLimits(plan: string): PlanLimits {
   switch (plan) {
     case "starter":
       return {
@@ -83,7 +97,7 @@ export function getPlanLimits(plan: string) {
       return {
         users: 10,
         bankConnections: 10,
-        storage: 100, // 100GB in bytes
+        storage: 100 * 1024 * 1024 * 1024, // 100GB in bytes
         inbox: 500,
         invoices: 30,
       };

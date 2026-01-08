@@ -29,6 +29,7 @@
     "@midday/notifications": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/utils": "workspace:*",
+    "@polar-sh/sdk": "^0.41.5",
     "@ai-sdk/openai": "2.0.62",
     "@sentry/bun": "^10.32.1",
     "@types/archiver": "^7.0.0",

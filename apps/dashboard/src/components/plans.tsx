@@ -11,7 +11,7 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
@@ -56,22 +56,19 @@ export function Plans() {
     }
   }, [isPollingForPlan, user?.team?.plan]);
 
+  const createCheckoutMutation = useMutation(
+    trpc.billing.createCheckout.mutationOptions(),
+  );
+
   const handleCheckout = async (plan: "starter" | "pro", planType: string) => {
     try {
       setIsSubmitting(plan === "starter" ? 1 : 2);
 
-      // Fetch checkout URL from API
-      const checkoutUrl = new URL("/api/checkout", window.location.origin);
-      checkoutUrl.searchParams.set("plan", plan);
-      checkoutUrl.searchParams.set("teamId", user?.team?.id || "");
-      checkoutUrl.searchParams.set("planType", planType);
-
-      const response = await fetch(checkoutUrl.toString());
-      if (!response.ok) {
-        throw new Error("Failed to create checkout");
-      }
-
-      const { url } = await response.json();
+      const { url } = await createCheckoutMutation.mutateAsync({
+        plan,
+        planType,
+        embedOrigin: window.location.origin,
+      });
 
       const checkout = await PolarEmbedCheckout.create(url, theme);
       checkoutInstanceRef.current = checkout;

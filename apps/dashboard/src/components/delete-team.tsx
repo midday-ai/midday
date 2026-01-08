@@ -34,6 +34,9 @@ export function DeleteTeam() {
   const { data: user } = useUserQuery();
   const router = useRouter();
 
+  const hasPaidPlan =
+    user?.team?.plan === "starter" || user?.team?.plan === "pro";
+
   const deleteTeamMutation = useMutation(
     trpc.team.delete.mutationOptions({
       onSuccess: async () => {
@@ -71,6 +74,8 @@ export function DeleteTeam() {
               <AlertDialogDescription>
                 This action cannot be undone. This will permanently delete your
                 team and remove your data from our servers.
+                {hasPaidPlan &&
+                  " Your active subscription will be cancelled automatically."}
               </AlertDialogDescription>
             </AlertDialogHeader>
 

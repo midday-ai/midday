@@ -41,6 +41,7 @@
         "@midday/location": "workspace:*",
         "@midday/logger": "workspace:*",
         "@midday/notifications": "workspace:*",
+        "@midday/plans": "workspace:*",
         "@midday/supabase": "workspace:*",
         "@midday/utils": "workspace:*",
         "@polar-sh/sdk": "^0.41.5",
@@ -94,6 +95,7 @@
         "@midday/inbox": "workspace:*",
         "@midday/invoice": "workspace:*",
         "@midday/location": "workspace:*",
+        "@midday/plans": "workspace:*",
         "@midday/supabase": "workspace:*",
         "@midday/ui": "workspace:*",
         "@midday/utils": "workspace:*",
@@ -269,6 +271,7 @@
         "@midday/notifications": "workspace:*",
         "@midday/supabase": "workspace:*",
         "@midday/utils": "workspace:*",
+        "@polar-sh/sdk": "^0.41.5",
         "@sentry/bun": "^10.32.1",
         "@types/archiver": "^7.0.0",
         "archiver": "^7.0.1",
@@ -560,6 +563,13 @@
       },
       "devDependencies": {
         "@midday/tsconfig": "workspace:*",
+        "typescript": "^5.9.3",
+      },
+    },
+    "packages/plans": {
+      "name": "@midday/plans",
+      "version": "1.0.0",
+      "devDependencies": {
         "typescript": "^5.9.3",
       },
     },
@@ -1175,6 +1185,8 @@
     "@midday/logger": ["@midday/logger@workspace:packages/logger"],
 
     "@midday/notifications": ["@midday/notifications@workspace:packages/notifications"],
+
+    "@midday/plans": ["@midday/plans@workspace:packages/plans"],
 
     "@midday/supabase": ["@midday/supabase@workspace:packages/supabase"],
 

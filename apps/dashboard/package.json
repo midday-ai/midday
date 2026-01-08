@@ -35,6 +35,7 @@
     "@midday/inbox": "workspace:*",
     "@midday/invoice": "workspace:*",
     "@midday/location": "workspace:*",
+    "@midday/plans": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
     "@midday/utils": "workspace:*",
