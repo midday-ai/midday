@@ -202,17 +202,8 @@ export function Customers() {
 
             {/* Second Animation - Company Enrichment */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-stretch">
-              {/* Left: Animation */}
-              <div className="flex items-center justify-center p-1 sm:p-3 lg:p-6 xl:p-8 border border-border overflow-hidden relative bg-background">
-                <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center">
-                  <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
-                    <CompanyEnrichmentAnimation onComplete={undefined} />
-                  </div>
-                </div>
-              </div>
-
-              {/* Right: Title and Subtitle */}
-              <div className="flex items-center">
+              {/* Title and Subtitle */}
+              <div className="flex items-center order-1 lg:order-2">
                 <div className="space-y-3 lg:space-y-5 text-center lg:text-left w-full">
                   <h2 className="font-sans text-2xl sm:text-2xl text-foreground">
                     Customer context, built in
@@ -236,6 +227,15 @@ export function Customers() {
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                       <span className="font-sans text-sm text-foreground">Web and social presence</span>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Animation */}
+              <div className="flex items-center justify-center p-1 sm:p-3 lg:p-6 xl:p-8 border border-border overflow-hidden relative bg-background order-2 lg:order-1">
+                <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center">
+                  <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
+                    <CompanyEnrichmentAnimation onComplete={undefined} />
                   </div>
                 </div>
               </div>
