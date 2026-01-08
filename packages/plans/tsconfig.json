@@ -1,7 +1,8 @@
 {
   "extends": "@midday/tsconfig/base.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "typeRoots": ["../../node_modules/@types"]
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }

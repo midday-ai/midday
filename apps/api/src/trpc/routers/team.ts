@@ -173,13 +173,12 @@ export const teamRouter = createTRPCRouter({
       // Trigger cleanup job BEFORE deleting team from database.
       // This ensures that if job triggering fails (Redis down, queue unavailable),
       // the team remains intact and the user can retry. The cleanup job will handle
-      // subscription cancellation and bank connection deletion even if the team
-      // record is deleted by the time the job runs.
+      // bank connection deletion. Subscription cancellation should be done manually
+      // by the user via the customer portal before deleting the team.
       await triggerJob(
         "delete-team",
         {
           teamId: input.teamId!,
-          plan: team.plan,
           connections: bankConnections.map((c) => ({
             referenceId: c.referenceId,
             provider: c.provider,

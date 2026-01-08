@@ -12,7 +12,6 @@ const bankConnectionSchema = z.object({
 
 export const deleteTeamSchema = z.object({
   teamId: z.string().uuid(),
-  plan: z.enum(["trial", "starter", "pro"]),
   connections: z.array(bankConnectionSchema),
 });
 

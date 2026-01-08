@@ -1,12 +1,15 @@
 "use client";
 
+import { useTeamQuery } from "@/hooks/use-team";
 import { useTRPC } from "@/trpc/client";
+import { getPlanName } from "@midday/plans";
 import { Card } from "@midday/ui/card";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation } from "@tanstack/react-query";
 
 export function ManageSubscription() {
   const trpc = useTRPC();
+  const { data: team } = useTeamQuery();
 
   const getPortalUrlMutation = useMutation(
     trpc.billing.getPortalUrl.mutationOptions({
@@ -25,7 +28,7 @@ export function ManageSubscription() {
       <Card className="flex justify-between p-4">
         <div className="flex flex-col gap-1">
           <p className="text-sm text-muted-foreground">Current plan</p>
-          <p className="text-lg font-medium">Pro</p>
+          <p className="text-lg font-medium">{getPlanName(team?.plan)}</p>
         </div>
 
         <div className="mt-auto">

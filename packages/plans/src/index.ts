@@ -74,6 +74,19 @@ export function getPlanByProductId(productId: string): PlanKey {
   return plan.key as PlanKey;
 }
 
+export function getPlanName(plan: string | null | undefined): string {
+  switch (plan) {
+    case "starter":
+      return "Starter";
+    case "pro":
+      return "Pro";
+    case "trial":
+      return "Trial";
+    default:
+      return "Free";
+  }
+}
+
 export type PlanLimits = {
   users: number;
   bankConnections: number;
