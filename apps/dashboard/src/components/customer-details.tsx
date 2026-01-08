@@ -9,10 +9,6 @@ import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { getWebsiteLogo } from "@/utils/logos";
-import {
-  generateStatementPdf,
-  generateStatementPdfBlob,
-} from "@/utils/statement-to-pdf";
 import { TZDate } from "@date-fns/tz";
 import {
   Accordion,
@@ -51,7 +47,6 @@ import {
 } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
-import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CustomerDetailsSkeleton } from "./customer-details.loading";
@@ -105,7 +100,6 @@ export function CustomerDetails() {
   const { setParams: setInvoiceParams } = useInvoiceParams();
   const { toast } = useToast();
   const dropdownContainerRef = useRef<HTMLDivElement>(null!);
-  const { resolvedTheme } = useTheme();
 
   // Track enrichment animation - use a key that changes when enrichment completes
   const [enrichmentAnimationKey, setEnrichmentAnimationKey] = useState(0);
@@ -317,56 +311,6 @@ export function CustomerDetails() {
 
   const handleEdit = () => {
     setParams({ customerId: customerId!, details: null });
-  };
-
-  const filename = customer
-    ? `${customer.name.toLowerCase().replace(/\s+/g, "-")}-statement.pdf`
-    : "statement.pdf";
-
-  const handleDownloadStatement = async () => {
-    try {
-      await generateStatementPdf({
-        filename,
-        theme: resolvedTheme,
-      });
-    } catch {}
-  };
-
-  const handleShareStatement = async () => {
-    try {
-      // Check if Web Share API is available
-      if (!navigator.share) {
-        // Fallback to download if Web Share API is not supported
-        await handleDownloadStatement();
-        return;
-      }
-
-      // Generate PDF blob silently
-      const blob = await generateStatementPdfBlob({
-        filename,
-        theme: resolvedTheme,
-      });
-
-      // Create File object from blob
-      const file = new File([blob], filename, {
-        type: "application/pdf",
-      });
-
-      // Share using Web Share API
-      await navigator.share({
-        title: `${customer?.name} Statement`,
-        files: [file],
-      });
-    } catch (error) {
-      // User cancelled or error occurred
-      if (error instanceof Error && error.name !== "AbortError") {
-        toast({
-          duration: 2500,
-          title: "Failed to share statement",
-          description: "Please try downloading the statement instead.",
-        });
-      }
-    }
   };
 
   // Check if customer has any enrichment data

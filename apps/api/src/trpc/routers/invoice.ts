@@ -566,6 +566,18 @@ export const invoiceRouter = createTRPCRouter({
         });
 
         if (!data) {
+          // Clean up the orphaned job before throwing
+          try {
+            const queue = getQueue("invoices");
+            const { jobId: rawJobId } = decodeJobId(scheduledJobId);
+            const job = await queue.getJob(rawJobId);
+            if (job) {
+              await job.remove();
+            }
+          } catch (err) {
+            console.error("Failed to clean up orphaned scheduled job:", err);
+          }
+
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Invoice not found",

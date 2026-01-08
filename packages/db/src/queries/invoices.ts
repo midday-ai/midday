@@ -24,11 +24,11 @@ import {
   format,
   parseISO,
   startOfMonth,
-  subMonths,
 } from "date-fns";
 import {
   and,
   asc,
+  count,
   desc,
   eq,
   gte,
@@ -624,19 +624,71 @@ export async function searchInvoiceNumber(
   return result ?? null;
 }
 
+/**
+ * Generate the next invoice number for a team.
+ * Format: INV-XXXX (e.g., INV-0001, INV-0042)
+ *
+ * Logic:
+ * 1. Find the highest numeric suffix from existing invoice numbers
+ * 2. If found, increment by 1
+ * 3. If not found, count total invoices + 1
+ * 4. Pad to 4 digits with leading zeros
+ */
 export async function getNextInvoiceNumber(
-  db: Database,
+  db: DatabaseOrTransaction,
   teamId: string,
 ): Promise<string> {
-  const [row] = await db.executeOnReplica(
-    sql`SELECT get_next_invoice_number(${teamId}) AS next_invoice_number`,
-  );
+  const PREFIX = "INV-";
+  const PAD_LENGTH = 4;
 
-  if (!row) {
-    throw new Error("Failed to fetch next invoice number");
+  // Find the highest invoice number with a numeric suffix for this team
+  // Using raw SQL for the regex extraction since Drizzle doesn't support it natively
+  const maxInvoiceResult = await db
+    .select({ invoiceNumber: invoices.invoiceNumber })
+    .from(invoices)
+    .where(
+      and(
+        eq(invoices.teamId, teamId),
+        sql`${invoices.invoiceNumber} ~ '[0-9]+$'`,
+      ),
+    )
+    .orderBy(
+      sql`CAST(SUBSTRING(${invoices.invoiceNumber} FROM '[0-9]+$') AS INTEGER) DESC`,
+    )
+    .limit(1);
+
+  let nextNumber: number;
+
+  if (maxInvoiceResult.length > 0 && maxInvoiceResult[0]?.invoiceNumber) {
+    // Extract the numeric part from the invoice number
+    const match = maxInvoiceResult[0].invoiceNumber.match(/(\d+)$/);
+
+    if (match?.[1]) {
+      // Increment the numeric part
+      nextNumber = Number.parseInt(match[1], 10) + 1;
+    } else {
+      // Fallback: count total invoices + 1
+      const countResult = await db
+        .select({ count: count() })
+        .from(invoices)
+        .where(eq(invoices.teamId, teamId));
+
+      nextNumber = (countResult[0]?.count ?? 0) + 1;
+    }
+  } else {
+    // No invoices with numeric suffix found, count total invoices + 1
+    const countResult = await db
+      .select({ count: count() })
+      .from(invoices)
+      .where(eq(invoices.teamId, teamId));
+
+    nextNumber = (countResult[0]?.count ?? 0) + 1;
   }
 
-  return row.next_invoice_number as string;
+  // Pad with leading zeros
+  const paddedNumber = nextNumber.toString().padStart(PAD_LENGTH, "0");
+
+  return `${PREFIX}${paddedNumber}`;
 }
 
 export async function isInvoiceNumberUsed(
