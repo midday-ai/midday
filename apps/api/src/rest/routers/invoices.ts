@@ -31,7 +31,7 @@ import {
 } from "@midday/db/queries";
 import { calculateTotal } from "@midday/invoice/calculate";
 import { transformCustomerToContent } from "@midday/invoice/utils";
-import { triggerJob } from "@midday/job-client";
+import { decodeJobId, getQueue, triggerJob } from "@midday/job-client";
 import { addDays } from "date-fns";
 import { HTTPException } from "hono/http-exception";
 import { v4 as uuidv4 } from "uuid";
@@ -559,9 +559,29 @@ app.openapi(
         userId,
       });
 
-      if (updatedInvoice) {
-        finalResult = updatedInvoice;
+      if (!updatedInvoice) {
+        // Clean up the orphaned job before throwing
+        try {
+          const queue = getQueue("invoices");
+          const { jobId: rawJobId } = decodeJobId(scheduledRun.id);
+          const job = await queue.getJob(rawJobId);
+          if (job) {
+            await job.remove();
+          }
+        } catch {
+          // Best effort cleanup - log but don't fail on cleanup errors
+          console.error(
+            "Failed to clean up orphaned scheduled job:",
+            scheduledRun.id,
+          );
+        }
+
+        throw new HTTPException(404, {
+          message: "Invoice not found",
+        });
       }
+
+      finalResult = updatedInvoice;
 
       // Send notification (fire and forget)
       triggerJob(
