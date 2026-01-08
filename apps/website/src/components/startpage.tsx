@@ -167,7 +167,7 @@ export function StartPage() {
                         alt="Dashboard illustration"
                         width={1000}
                         height={750}
-                        className="w-full h-auto md:!scale-[1.7] 2xl:!scale-[1.2] dark:hidden"
+                        className="w-full h-auto md:!scale-[0.85] dark:hidden"
                         priority
                       />
                       <Image
@@ -175,7 +175,7 @@ export function StartPage() {
                         alt="Dashboard illustration"
                         width={1000}
                         height={750}
-                        className="w-full h-auto md:!scale-[1.7] 2xl:!scale-[1.2] hidden dark:block"
+                        className="w-full h-auto md:!scale-[0.85] hidden dark:block"
                         priority
                       />
                 </div>
@@ -232,7 +232,7 @@ export function StartPage() {
             </div>
           </div>
 
-          <div className="w-full mb-4 relative" ref={videoContainerRef}>
+          <div className="w-full mb-4 3xl:mb-8 relative" ref={videoContainerRef}>
             <div className="relative overflow-hidden">
               <video
                 className="w-full h-[800px] xl:h-[900px] object-cover block"
