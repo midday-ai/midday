@@ -13,6 +13,7 @@ import {
   MdOutlineArrowDownward,
   MdOutlineArrowOutward,
   MdOutlineArrowUpward,
+  MdOutlineCloud,
   MdOutlineContentCopy,
   MdOutlineCreditCard,
   MdOutlineDescription,
@@ -91,6 +92,7 @@ export const IconMap = {
   docs: MdOutlineDescription, // Using description as docs alternative
   close: MdClose,
   delete: MdDeleteOutline,
+  cloud: MdOutlineCloud,
 };
 
 export function MaterialIcon({

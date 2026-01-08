@@ -8,6 +8,7 @@ import { MaterialIcon } from "./icon-mapping";
 
 export function ReceiptAttachmentAnimation() {
   const [showReceipt, setShowReceipt] = useState(false);
+  const [showLogo, setShowLogo] = useState(false);
   const [showBar, setShowBar] = useState(false);
 
   const [containerRef, shouldPlay] = usePlayOnceOnVisible(
@@ -23,6 +24,7 @@ export function ReceiptAttachmentAnimation() {
     // Show receipt after initial delay
     const receiptTimer = setTimeout(() => {
       setShowReceipt(true);
+      setShowLogo(true);
     }, 500);
 
     // Show bar after receipt is shown
@@ -81,14 +83,23 @@ export function ReceiptAttachmentAnimation() {
               <div className="space-y-2 md:space-y-2.5 h-full flex flex-col">
                 {/* Sender Info */}
                 <div className="flex items-start gap-2 md:gap-2.5">
-                  <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                    <span className="text-[10px] md:text-[11px] font-sans font-medium text-foreground">
-                      C
-                    </span>
-                  </div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: showLogo ? 1 : 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-foreground/5 border border-border flex items-center justify-center flex-shrink-0 overflow-hidden"
+                  >
+                    <Image
+                      src="/images/supabase.png"
+                      alt="Supabase"
+                      width={16}
+                      height={16}
+                      className="w-full h-full object-contain"
+                    />
+                  </motion.div>
                   <div className="flex-1 min-w-0">
                     <p className="font-sans text-[11px] md:text-[12px] text-foreground font-medium">
-                      CloudSync
+                      Supabase
                     </p>
                     <p className="font-sans text-[9px] md:text-[10px] text-muted-foreground mt-0.5">
                       Receipt-2025-0847.pdf
@@ -112,7 +123,7 @@ export function ReceiptAttachmentAnimation() {
                     {/* Company Info */}
                     <div className="space-y-0.5">
                       <p className="font-sans text-[11px] md:text-[12px] text-foreground font-medium">
-                        CloudSync Technologies Inc.
+                        Supabase Inc.
                       </p>
                       <p className="font-sans text-[9px] md:text-[10px] text-muted-foreground">
                         123 Innovation Drive, Suite 400
@@ -221,7 +232,7 @@ export function ReceiptAttachmentAnimation() {
           >
             <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
               <span className="font-sans text-[10px] md:text-[11px] text-muted-foreground pl-2 md:pl-3">
-                CloudSync • $53.17 • Jun 15, 2025
+                Supabase • $53.17 • Jun 15, 2025
               </span>
             </div>
             <div className="flex items-center gap-2">

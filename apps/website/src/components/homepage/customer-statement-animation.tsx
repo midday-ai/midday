@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import { MaterialIcon } from './icon-mapping'
 import { usePlayOnceOnVisible } from '@/hooks/use-play-once-on-visible'
 
@@ -132,45 +133,22 @@ export function CustomerStatementAnimation({
         className="pt-2 md:pt-3 pb-2 md:pb-3 border-b border-border flex items-center justify-between px-2 md:px-3"
       >
         <div className="flex items-center gap-2 md:gap-3">
-          {/* Logo - Monochrome with geometric design */}
+          {/* Logo - Supabase */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: showLogo ? 1 : 0 }}
             transition={{ duration: 0.25 }}
-            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center flex-shrink-0 bg-foreground/5 border border-border"
+            className="w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center flex-shrink-0 bg-foreground/5 border border-border overflow-hidden"
           >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="text-foreground"
-              >
-                <path
-                  d="M12 2L2 7L12 12L22 7L12 2Z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M2 17L12 22L22 17"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M2 12L12 17L22 12"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+            <Image
+              src="/images/supabase.png"
+              alt="Supabase"
+              width={20}
+              height={20}
+              className="w-full h-full object-contain"
+            />
           </motion.div>
-          <h2 className="text-[16px] md:text-[18px] font-serif text-foreground">Nexus Technologies</h2>
+          <h2 className="text-[16px] md:text-[18px] font-serif text-foreground">Supabase</h2>
         </div>
         <MaterialIcon name="more_vert" className="text-sm text-muted-foreground" size={16} />
       </motion.div>
@@ -189,13 +167,13 @@ export function CustomerStatementAnimation({
         {showGeneral && (
           <div className="pt-0 pb-3 md:pb-4 space-y-2.5 md:space-y-3 px-2 md:px-3">
             <div className="text-[10px] md:text-[11px] text-muted-foreground">
-              <span className="text-foreground">Contact person:</span> Emma Chen
+              <span className="text-foreground">Contact person:</span> Michael Thompson
             </div>
             <div className="text-[10px] md:text-[11px] text-muted-foreground">
-              <span className="text-foreground">Email:</span> finance@nexustech.io
+              <span className="text-foreground">Email:</span> finance@supabase.com
             </div>
             <div className="text-[10px] md:text-[11px] text-muted-foreground">
-              <span className="text-foreground">Website:</span> nexustech.io
+              <span className="text-foreground">Website:</span> supabase.com
             </div>
           </div>
         )}

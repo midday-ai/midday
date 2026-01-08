@@ -17,42 +17,42 @@ export function InboxMatchAnimation({
   const items = [
     {
       id: 1,
-      title: "Google Workspace Invoice.pdf",
+      title: "Google-invoice.pdf",
       amount: "$12.00",
       date: "Sep 08",
       icon: "pdf",
     },
     {
       id: 2,
-      title: "AWS Receipt.pdf",
+      title: "AWS-receipt.pdf",
       amount: "$54.30",
       date: "Sep 07",
       icon: "receipt",
     },
     {
       id: 3,
-      title: "Figma Receipt.pdf",
+      title: "Figma-receipt.pdf",
       amount: "$24.00",
       date: "Sep 06",
       icon: "receipt_long",
     },
     {
       id: 4,
-      title: "GitHub Receipt.pdf",
+      title: "GitHub-receipt.pdf",
       amount: "$9.00",
       date: "Sep 05",
       icon: "pdf",
     },
     {
       id: 5,
-      title: "Notion Receipt.pdf",
+      title: "Notion-receipt.pdf",
       amount: "$16.00",
       date: "Sep 04",
       icon: "receipt",
     },
     {
       id: 6,
-      title: "Slack Receipt.pdf",
+      title: "Slack-receipt.pdf",
       amount: "$8.50",
       date: "Sep 03",
       icon: "receipt_long",
@@ -60,7 +60,7 @@ export function InboxMatchAnimation({
   ];
   const incomingItem = {
     id: 999,
-    title: "Stripe, Inc Receipt.pdf",
+    title: "Stripe-receipt.pdf",
     amount: "$89.00",
     date: "Sep 10",
   };
@@ -235,7 +235,7 @@ export function InboxMatchAnimation({
                 Suggested match
               </div>
               <div className="text-[10px] md:text-[12px] text-muted-foreground truncate">
-                Transaction • Stripe, Inc • $89.00 • Sep 10
+                Transaction • Stripe • $89.00 • Sep 10
               </div>
             </div>
           </div>
