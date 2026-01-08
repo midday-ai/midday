@@ -1,6 +1,7 @@
 // Import Sentry instrumentation first, before any other modules
 import "./instrument";
 
+import * as Sentry from "@sentry/bun";
 import { createBullBoard } from "@bull-board/api";
 import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 import { HonoAdapter } from "@bull-board/hono";
@@ -33,6 +34,32 @@ const workers = queueConfigs.map((config) => {
   // See: https://docs.bullmq.io/guide/going-to-production#log-errors
   worker.on("error", (err) => {
     console.error(`[Worker:${config.name}] Error:`, err);
+    Sentry.captureException(err, {
+      tags: { workerName: config.name, errorType: "worker_error" },
+    });
+  });
+
+  // Centralized failed handler that captures to Sentry
+  // Note: BaseProcessor already captures in-process failures with full context
+  // This catches failures that bypass the processor (e.g., no processor registered)
+  worker.on("failed", (job, err) => {
+    console.error(`[Worker:${config.name}] Job failed: ${job?.name} (${job?.id})`, err);
+    Sentry.captureException(err, {
+      tags: {
+        workerName: config.name,
+        jobName: job?.name ?? "unknown",
+        errorType: "job_failed",
+      },
+      extra: {
+        jobId: job?.id,
+        attemptsMade: job?.attemptsMade,
+      },
+    });
+
+    // Call custom onFailed handler if provided
+    if (config.eventHandlers?.onFailed) {
+      config.eventHandlers.onFailed(job ?? null, err);
+    }
   });
 
   // Register event handlers if provided
@@ -43,12 +70,6 @@ const workers = queueConfigs.map((config) => {
           name: job.name,
           id: job.id,
         });
-      });
-    }
-
-    if (config.eventHandlers.onFailed) {
-      worker.on("failed", (job, err) => {
-        config.eventHandlers!.onFailed!(job ?? null, err);
       });
     }
   }
@@ -195,10 +216,19 @@ process.on("SIGINT", () => shutdown("SIGINT"));
  */
 process.on("uncaughtException", (err) => {
   console.error("[Worker] Uncaught exception:", err);
+  Sentry.captureException(err, {
+    tags: { errorType: "uncaught_exception" },
+  });
   // Don't exit - let the process manager (Fly.io) handle restarts
 });
 
 process.on("unhandledRejection", (reason, promise) => {
   console.error("[Worker] Unhandled rejection at:", promise, "reason:", reason);
+  Sentry.captureException(
+    reason instanceof Error ? reason : new Error(String(reason)),
+    {
+      tags: { errorType: "unhandled_rejection" },
+    },
+  );
   // Don't exit - let the process manager handle restarts
 });
