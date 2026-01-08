@@ -194,10 +194,10 @@ export function Header({
                   style={{ top: "100%" }}
                 >
                   <div className="p-6 xl:p-8 2xl:p-10">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
                       {/* Column 1 & 2 - Features List (2 columns) */}
-                      <div className="lg:col-span-2 2xl:max-w-2xl" ref={featuresListRef}>
-                        <div className="grid grid-cols-2 gap-x-6">
+                      <div className="lg:col-span-2 2xl:max-w-xl" ref={featuresListRef}>
+                        <div className="grid grid-cols-2 gap-x-4">
                           {/* Column 1 */}
                           <div>
                             <div
@@ -335,13 +335,13 @@ export function Header({
                         </div>
                       </div>
 
-                      {/* Column 3 - Pre-accounting Preview */}
-                      <div className="flex items-start justify-end">
+                      {/* Column 3 & 4 - Pre-accounting Preview */}
+                      <div className="lg:col-span-2 flex items-start justify-end">
                         <Link
                           ref={preAccountingRef}
                           href="/pre-accounting"
                           onClick={() => setIsFeaturesOpen(false)}
-                          className="w-[442px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col"
+                          className="w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col"
                         >
                           <div className="flex-1 flex items-center justify-center bg-background p-4">
                             <Image
@@ -459,9 +459,9 @@ export function Header({
                   }}
                 >
                   <div className="p-6 xl:p-8 2xl:p-10 h-full">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full">
-                      {/* Column 1 - Apps List */}
-                      <div ref={appsListRef} className="2xl:max-w-sm">
+                    <div className="grid grid-cols-1 lg:grid-cols-6 gap-0 h-full">
+                      {/* Column 1 & 2 - Apps List */}
+                      <div ref={appsListRef} className="lg:col-span-2 2xl:max-w-xs lg:pr-4">
                         <div
                           className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
                           onClick={() => {
@@ -474,7 +474,7 @@ export function Header({
                               Mac app
                             </span>
                             <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Native desktop app for faster access and live tracking.
+                              Your finances, always one click away.
                             </span>
                           </div>
                         </div>
@@ -490,7 +490,7 @@ export function Header({
                               Integrations
                             </span>
                             <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Connect Midday with the tools you already use.
+                              Connect your existing tools.
                             </span>
                           </div>
                         </div>
@@ -512,48 +512,14 @@ export function Header({
                         </div>
                       </div>
 
-                      {/* Column 2 - Mac App Preview */}
-                      <div className="flex items-start justify-end">
-                        <Link
-                          ref={macAppRef}
-                          href="/download"
-                          onClick={() => setIsAppsOpen(false)}
-                          className="w-[442px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col"
-                        >
-                          <div className="flex-1 flex items-center justify-center bg-background p-4">
-                            <Image
-                              src="/images/header-dock-light.png"
-                              alt="Mac Dock"
-                              width={1200}
-                              height={300}
-                              className="w-3/4 h-auto object-contain dark:hidden"
-                            />
-                            <Image
-                              src="/images/header-dock-dark.png"
-                              alt="Mac Dock"
-                              width={1200}
-                              height={300}
-                              className="w-3/4 h-auto object-contain hidden dark:block"
-                            />
-                          </div>
-                          <div className="bg-background border-t border-border p-2.5">
-                            <span className="font-sans text-xs text-foreground block">
-                              Mac app
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Native desktop app for faster access and live tracking.
-                            </span>
-                          </div>
-                        </Link>
-                      </div>
-
-                      {/* Column 3 - Integrations Preview */}
-                      <div className="flex items-start justify-end">
+                      {/* Columns 3-6 - Image Previews Container */}
+                      <div className="lg:col-span-4 flex items-start justify-end gap-4">
+                        {/* Integrations Preview */}
                         <Link
                           ref={integrationsAppRef}
                           href="/download"
                           onClick={() => setIsAppsOpen(false)}
-                          className="w-[442px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col"
+                          className="w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col flex-shrink-0"
                         >
                           <div className="flex-1">
                             <HeaderIntegrationsPreview />
@@ -564,7 +530,7 @@ export function Header({
                                 Integrations
                               </span>
                               <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                Connect Midday with the tools you already use.
+                                Connect your existing tools.
                               </span>
                             </div>
                             <div className="flex items-center gap-1.5 flex-shrink-0 relative h-6">
@@ -590,6 +556,39 @@ export function Header({
                                 ))}
                               </AnimatePresence>
                             </div>
+                          </div>
+                        </Link>
+
+                        {/* Mac App Preview */}
+                        <Link
+                          ref={macAppRef}
+                          href="/download"
+                          onClick={() => setIsAppsOpen(false)}
+                          className="w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col flex-shrink-0"
+                        >
+                          <div className="flex-1 flex items-center justify-center bg-background p-4">
+                            <Image
+                              src="/images/header-dock-light.png"
+                              alt="Mac Dock"
+                              width={1200}
+                              height={300}
+                              className="w-3/4 h-auto object-contain dark:hidden"
+                            />
+                            <Image
+                              src="/images/header-dock-dark.png"
+                              alt="Mac Dock"
+                              width={1200}
+                              height={300}
+                              className="w-3/4 h-auto object-contain hidden dark:block"
+                            />
+                          </div>
+                          <div className="bg-background border-t border-border p-2.5">
+                            <span className="font-sans text-xs text-foreground block">
+                              Mac app
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              Your finances, always one click away.
+                            </span>
                           </div>
                         </Link>
                       </div>
