@@ -20,6 +20,7 @@ import { PreAccountingSection } from './sections/pre-accounting-section'
 import { FeaturesGridSection } from './sections/features-grid-section'
 import { IntegrationsSection } from './sections/integrations-section'
 import { PricingSection } from './sections/pricing-section'
+import { WeeklyAudioSection } from './sections/weekly-audio-section'
 
 export function StartPage() {
   const router = useRouter()
@@ -506,6 +507,14 @@ export function StartPage() {
 
       {/* Time Savings Bento Grid Section */}
       <TimeSavingsSection />
+
+      {/* Divider */}
+      <div className="max-w-[1400px] mx-auto">
+        <div className="h-px w-full border-t border-border" />
+      </div>
+
+      {/* Weekly Audio Section */}
+      <WeeklyAudioSection audioUrl="https://cdn.midday.ai/weekly-speech.mp3" />
 
       {/* Divider */}
       <div className="max-w-[1400px] mx-auto">

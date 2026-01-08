@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { MaterialIcon } from "../homepage/icon-mapping";
 
-interface AudioSummarySectionProps {
+interface WeeklyAudioSectionProps {
   audioUrl?: string;
 }
 
-export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
+export function WeeklyAudioSection({ audioUrl }: WeeklyAudioSectionProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -218,8 +218,8 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
             Understand your week, hands-free
           </h2>
           <p className="font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
-            Your weekly summary is also available as a short audio overview you
-            can listen to instead of reading.
+            A quick audio overview of how your business performed last week,
+            designed for busy moments.
           </p>
         </div>
 
@@ -293,3 +293,4 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
     </section>
   );
 }
+
