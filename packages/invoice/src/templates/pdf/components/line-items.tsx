@@ -78,7 +78,7 @@ export function LineItems({
             alignItems: "flex-start",
           }}
         >
-          <View style={{ flex: 3 }}>
+          <View style={{ flex: 3, paddingRight: 20 }}>
             <Description content={item.name} />
           </View>
 
