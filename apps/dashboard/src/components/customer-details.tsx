@@ -53,8 +53,7 @@ import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
-import { useOnClickOutside } from "usehooks-ts";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CustomerDetailsSkeleton } from "./customer-details.loading";
 import { FormatAmount } from "./format-amount";
 import { InvoiceStatus } from "./invoice-status";
@@ -105,7 +104,6 @@ export function CustomerDetails() {
   const { customerId, setParams } = useCustomerParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
   const { toast } = useToast();
-  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const dropdownContainerRef = useRef<HTMLDivElement>(null!);
   const { resolvedTheme } = useTheme();
 
@@ -290,10 +288,6 @@ export function CustomerDetails() {
     enabled: isOpen && Boolean(customerId),
   });
 
-  useOnClickOutside(dropdownContainerRef as RefObject<HTMLElement>, () => {
-    setOpenDropdownId(null);
-  });
-
   const handleDownloadInvoice = (invoiceId: string) => {
     if (!user?.fileKey) {
       console.error("File key not available");
@@ -305,7 +299,6 @@ export function CustomerDetails() {
     url.searchParams.set("id", invoiceId);
     url.searchParams.set("fk", user.fileKey);
     downloadFile(url.toString(), "invoice.pdf");
-    setOpenDropdownId(null);
   };
 
   if (isLoadingCustomer) {
