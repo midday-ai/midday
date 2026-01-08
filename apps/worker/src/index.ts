@@ -1,11 +1,11 @@
 // Import Sentry instrumentation first, before any other modules
 import "./instrument";
 
-import * as Sentry from "@sentry/bun";
 import { createBullBoard } from "@bull-board/api";
 import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 import { HonoAdapter } from "@bull-board/hono";
 import { closeWorkerDb } from "@midday/db/worker-client";
+import * as Sentry from "@sentry/bun";
 import { Worker } from "bullmq";
 import { Hono } from "hono";
 import { basicAuth } from "hono/basic-auth";
@@ -43,7 +43,10 @@ const workers = queueConfigs.map((config) => {
   // Note: BaseProcessor already captures in-process failures with full context
   // This catches failures that bypass the processor (e.g., no processor registered)
   worker.on("failed", (job, err) => {
-    console.error(`[Worker:${config.name}] Job failed: ${job?.name} (${job?.id})`, err);
+    console.error(
+      `[Worker:${config.name}] Job failed: ${job?.name} (${job?.id})`,
+      err,
+    );
     Sentry.captureException(err, {
       tags: {
         workerName: config.name,
