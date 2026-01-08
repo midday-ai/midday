@@ -666,7 +666,6 @@ export const updateInvoiceSchema = z.object({
     .enum(["paid", "canceled", "unpaid", "scheduled", "draft"])
     .optional(),
   paidAt: z.string().nullable().optional(),
-  scheduledAt: z.string().nullable().optional(),
   internalNote: z.string().nullable().optional(),
 });
 
