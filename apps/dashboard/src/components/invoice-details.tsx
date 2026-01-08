@@ -89,6 +89,7 @@ export function InvoiceDetails() {
     refundedAt,
     invoiceRecurringId,
     recurring,
+    recurringSequence,
   } = data;
 
   return (
@@ -240,7 +241,15 @@ export function InvoiceDetails() {
             <span className="text-sm text-[#606060]">Type</span>
             <span className="text-sm">
               {invoiceRecurringId && recurring ? (
-                <span>{getFrequencyShortLabel(recurring.frequency)}</span>
+                <span>
+                  {getFrequencyShortLabel(
+                    recurring.frequency,
+                    recurring.frequencyInterval,
+                  )}
+                  {recurringSequence && recurring.endCount
+                    ? ` (${recurringSequence} of ${recurring.endCount})`
+                    : ""}
+                </span>
               ) : (
                 <span>One-time</span>
               )}

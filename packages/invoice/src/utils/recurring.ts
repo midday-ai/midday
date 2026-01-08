@@ -207,9 +207,12 @@ export function getFrequencyLabel(
 
 /**
  * Get short frequency label (e.g., "Weekly", "Monthly")
+ * @param frequency - The recurring frequency
+ * @param frequencyInterval - Optional interval for custom frequency (shows "Every X days")
  */
 export function getFrequencyShortLabel(
   frequency: InvoiceRecurringFrequency,
+  frequencyInterval?: number | null,
 ): string {
   switch (frequency) {
     case "weekly":
@@ -227,6 +230,10 @@ export function getFrequencyShortLabel(
     case "annual":
       return "Annual";
     case "custom":
+      // Show the actual interval for custom frequency
+      if (frequencyInterval) {
+        return `Every ${frequencyInterval} days`;
+      }
       return "Custom";
     default:
       return "Unknown";

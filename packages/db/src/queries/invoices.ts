@@ -233,6 +233,7 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
         id: invoiceRecurring.id,
         status: invoiceRecurring.status,
         frequency: invoiceRecurring.frequency,
+        frequencyInterval: invoiceRecurring.frequencyInterval,
         endType: invoiceRecurring.endType,
         endCount: invoiceRecurring.endCount,
         invoicesGenerated: invoiceRecurring.invoicesGenerated,
@@ -386,6 +387,7 @@ export async function getInvoiceById(
       recurring: {
         id: invoiceRecurring.id,
         frequency: invoiceRecurring.frequency,
+        frequencyInterval: invoiceRecurring.frequencyInterval,
         status: invoiceRecurring.status,
         nextScheduledAt: invoiceRecurring.nextScheduledAt,
         endType: invoiceRecurring.endType,

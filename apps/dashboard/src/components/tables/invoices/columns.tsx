@@ -525,38 +525,54 @@ export const columns: ColumnDef<Invoice>[] = [
     cell: ({ row }) => {
       const recurringId = row.original.invoiceRecurringId;
       const recurring = row.original.recurring;
+      const invoiceStatus = row.original.status;
+      const sequence = row.original.recurringSequence;
 
       if (!recurringId || !recurring) {
         return <span>One-time</span>;
       }
 
-      const frequencyLabel = getFrequencyShortLabel(recurring.frequency);
+      const frequencyLabel = getFrequencyShortLabel(
+        recurring.frequency,
+        recurring.frequencyInterval,
+      );
       const nextDate = recurring.nextScheduledAt;
+      const endCount = recurring.endCount;
 
       // For scheduled invoices that are the first in the series,
       // show "Sends on" instead of "Next on" since THIS invoice is the scheduled one
       const isFirstScheduled =
-        row.original.status === "scheduled" &&
-        row.original.recurringSequence === 1 &&
+        invoiceStatus === "scheduled" &&
+        sequence === 1 &&
         recurring.invoicesGenerated === 0;
+
+      // For sent/paid invoices, show the sequence info instead of "Next on"
+      const isAlreadySent = ["unpaid", "paid", "overdue"].includes(
+        invoiceStatus,
+      );
+
+      // Build the subtitle based on context
+      let subtitle: string | null = null;
+      if (isAlreadySent && sequence) {
+        // Show sequence info for sent invoices
+        subtitle = endCount ? `${sequence} of ${endCount}` : `${sequence}`;
+      } else if (recurring.status === "active" && nextDate) {
+        subtitle = isFirstScheduled
+          ? `Sends on ${format(new TZDate(nextDate, "UTC"), "MMM d")}`
+          : `Next on ${format(new TZDate(nextDate, "UTC"), "MMM d")}`;
+      } else if (recurring.status === "paused") {
+        subtitle = "Paused";
+      } else if (recurring.status === "completed") {
+        subtitle = "Completed";
+      } else if (recurring.status === "canceled") {
+        subtitle = "Canceled";
+      }
 
       return (
         <div className="flex flex-col">
           <span>{frequencyLabel}</span>
-          {recurring.status === "active" && nextDate && (
-            <span className="text-xs text-muted-foreground">
-              {isFirstScheduled ? "Sends on" : "Next on"}{" "}
-              {format(new TZDate(nextDate, "UTC"), "MMM d")}
-            </span>
-          )}
-          {recurring.status === "paused" && (
-            <span className="text-xs text-muted-foreground">Paused</span>
-          )}
-          {recurring.status === "completed" && (
-            <span className="text-xs text-muted-foreground">Completed</span>
-          )}
-          {recurring.status === "canceled" && (
-            <span className="text-xs text-muted-foreground">Canceled</span>
+          {subtitle && (
+            <span className="text-xs text-muted-foreground">{subtitle}</span>
           )}
         </div>
       );
