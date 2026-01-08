@@ -44,6 +44,7 @@ import {
   searchInvoiceNumber,
   updateInvoice,
 } from "@midday/db/queries";
+import { DEFAULT_TEMPLATE } from "@midday/invoice";
 import { verify } from "@midday/invoice/token";
 import { transformCustomerToContent } from "@midday/invoice/utils";
 import { decodeJobId, getQueue, triggerJob } from "@midday/job-client";
@@ -52,48 +53,8 @@ import { addDays, format, parseISO } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 
-const defaultTemplate = {
-  title: "Invoice",
-  customerLabel: "To",
-  fromLabel: "From",
-  invoiceNoLabel: "Invoice No",
-  issueDateLabel: "Issue Date",
-  dueDateLabel: "Due Date",
-  descriptionLabel: "Description",
-  priceLabel: "Price",
-  quantityLabel: "Quantity",
-  totalLabel: "Total",
-  totalSummaryLabel: "Total",
-  subtotalLabel: "Subtotal",
-  vatLabel: "VAT",
-  taxLabel: "Tax",
-  paymentLabel: "Payment Details",
-  paymentDetails: undefined,
-  noteLabel: "Note",
-  noteDetails: undefined,
-  logoUrl: undefined,
-  currency: "USD",
-  fromDetails: undefined,
-  size: "a4",
-  includeVat: true,
-  includeTax: true,
-  discountLabel: "Discount",
-  includeDiscount: false,
-  includeUnits: false,
-  includeDecimals: false,
-  includePdf: false,
-  sendCopy: false,
-  includeQr: true,
-  includeLineItemTax: false,
-  lineItemTaxLabel: "Tax",
-  dateFormat: "dd/MM/yyyy",
-  taxRate: 0,
-  vatRate: 0,
-  deliveryType: "create",
-  timezone: undefined,
-  locale: undefined,
-  paymentEnabled: false,
-};
+// Use the shared default template from @midday/invoice
+const defaultTemplate = DEFAULT_TEMPLATE;
 
 export const invoiceRouter = createTRPCRouter({
   get: protectedProcedure

@@ -3,46 +3,10 @@
  * Centralizes template construction logic for consistency and maintainability.
  */
 
-/**
- * Default values for invoice template labels
- */
-export const DEFAULT_TEMPLATE_LABELS = {
-  customerLabel: "To",
-  title: "Invoice",
-  fromLabel: "From",
-  invoiceNoLabel: "Invoice No",
-  issueDateLabel: "Issue Date",
-  dueDateLabel: "Due Date",
-  descriptionLabel: "Description",
-  priceLabel: "Price",
-  quantityLabel: "Quantity",
-  totalLabel: "Total",
-  totalSummaryLabel: "Total",
-  vatLabel: "VAT",
-  subtotalLabel: "Subtotal",
-  taxLabel: "Tax",
-  discountLabel: "Discount",
-  paymentLabel: "Payment Details",
-  noteLabel: "Note",
-} as const;
-
-/**
- * Default values for invoice template settings
- */
-export const DEFAULT_TEMPLATE_SETTINGS = {
-  dateFormat: "dd/MM/yyyy",
-  currency: "USD",
-  locale: "en-US",
-  size: "a4" as const,
-  includeVat: false,
-  includeTax: false,
-  includeDiscount: false,
-  includeDecimals: false,
-  includeUnits: false,
-  includeQr: true,
-  taxRate: 0,
-  vatRate: 0,
-};
+import {
+  DEFAULT_TEMPLATE_LABELS,
+  DEFAULT_TEMPLATE_SETTINGS,
+} from "@midday/invoice";
 
 /**
  * Invoice line item type
@@ -115,6 +79,12 @@ export interface BuiltInvoiceTemplate {
   includeDecimals: boolean;
   includeUnits: boolean;
   includeQr: boolean;
+  includePdf: boolean;
+  includeLineItemTax: boolean;
+  lineItemTaxLabel?: string;
+  sendCopy: boolean;
+  paymentEnabled: boolean;
+  paymentTermsDays?: number;
   taxRate: number;
   vatRate: number;
   size: "a4" | "letter";
@@ -203,6 +173,22 @@ export function buildInvoiceTemplateFromRecurring(
       DEFAULT_TEMPLATE_SETTINGS.includeUnits,
     includeQr:
       (template.includeQr as boolean) ?? DEFAULT_TEMPLATE_SETTINGS.includeQr,
+    includePdf:
+      (template.includePdf as boolean) ?? DEFAULT_TEMPLATE_SETTINGS.includePdf,
+    includeLineItemTax:
+      (template.includeLineItemTax as boolean) ??
+      DEFAULT_TEMPLATE_SETTINGS.includeLineItemTax,
+    lineItemTaxLabel:
+      (template.lineItemTaxLabel as string) ??
+      DEFAULT_TEMPLATE_LABELS.lineItemTaxLabel,
+    sendCopy:
+      (template.sendCopy as boolean) ?? DEFAULT_TEMPLATE_SETTINGS.sendCopy,
+    paymentEnabled:
+      (template.paymentEnabled as boolean) ??
+      DEFAULT_TEMPLATE_SETTINGS.paymentEnabled,
+    paymentTermsDays:
+      (template.paymentTermsDays as number) ??
+      DEFAULT_TEMPLATE_SETTINGS.paymentTermsDays,
 
     // Numeric settings with defaults
     taxRate: (template.taxRate as number) ?? DEFAULT_TEMPLATE_SETTINGS.taxRate,
