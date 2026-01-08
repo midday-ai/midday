@@ -71,6 +71,7 @@ export function CustomerStatementAnimation({
   onComplete?: () => void
 }) {
   const [showHeader, setShowHeader] = useState(false)
+  const [showLogo, setShowLogo] = useState(false)
   const [showGeneral, setShowGeneral] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
   const [showStatement, setShowStatement] = useState(false)
@@ -85,7 +86,10 @@ export function CustomerStatementAnimation({
   useEffect(() => {
     if (!shouldPlay) return
 
-    const headerTimer = setTimeout(() => setShowHeader(true), 300)
+    const headerTimer = setTimeout(() => {
+      setShowHeader(true)
+      setShowLogo(true)
+    }, 300)
     const generalTimer = setTimeout(() => setShowGeneral(true), 600)
     const statementTimer = setTimeout(() => setShowStatement(true), 900)
     const cardsTimer = setTimeout(() => setShowCards(true), 1200)
@@ -125,9 +129,50 @@ export function CustomerStatementAnimation({
         initial={{ opacity: 0 }}
         animate={{ opacity: showHeader ? 1 : 0 }}
         transition={{ duration: 0.25 }}
-        className="pt-2 md:pt-3 pb-2 md:pb-3 border-b border-border"
+        className="pt-2 md:pt-3 pb-2 md:pb-3 border-b border-border flex items-center justify-between px-2 md:px-3"
       >
-        <h2 className="text-[16px] md:text-[18px] font-serif text-foreground">Acme Digital Solutions</h2>
+        <div className="flex items-center gap-2 md:gap-3">
+          {/* Logo - Monochrome with geometric design */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: showLogo ? 1 : 0 }}
+            transition={{ duration: 0.25 }}
+            className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center flex-shrink-0 bg-foreground/5 border border-border"
+          >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="text-foreground"
+              >
+                <path
+                  d="M12 2L2 7L12 12L22 7L12 2Z"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M2 17L12 22L22 17"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M2 12L12 17L22 12"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+          </motion.div>
+          <h2 className="text-[16px] md:text-[18px] font-serif text-foreground">Nexus Technologies</h2>
+        </div>
+        <MaterialIcon name="more_vert" className="text-sm text-muted-foreground" size={16} />
       </motion.div>
 
       {/* General Section */}
@@ -135,22 +180,22 @@ export function CustomerStatementAnimation({
         initial={{ opacity: 0 }}
         animate={{ opacity: showGeneral ? 1 : 0 }}
         transition={{ duration: 0.25 }}
-        className="border-b border-border"
+        className="border-b border-border md:mt-2"
       >
-        <div className="py-3 md:py-4 flex items-center justify-between">
+        <div className="pt-2 md:pt-3 pb-3 md:py-5 flex items-center justify-between px-2 md:px-3">
           <h3 className="text-[11px] md:text-[12px] text-foreground">General</h3>
           <MaterialIcon name="expand_less" className="text-sm text-muted-foreground" size={16} />
         </div>
         {showGeneral && (
-          <div className="pb-3 md:pb-4 space-y-1.5 md:space-y-2">
+          <div className="pt-0 pb-3 md:pb-4 space-y-2.5 md:space-y-3 px-2 md:px-3">
             <div className="text-[10px] md:text-[11px] text-muted-foreground">
-              <span className="text-foreground">Contact person:</span> Sarah Martinez
+              <span className="text-foreground">Contact person:</span> Emma Chen
             </div>
             <div className="text-[10px] md:text-[11px] text-muted-foreground">
-              <span className="text-foreground">Email:</span> finance@acmedigital.com
+              <span className="text-foreground">Email:</span> finance@nexustech.io
             </div>
             <div className="text-[10px] md:text-[11px] text-muted-foreground">
-              <span className="text-foreground">Website:</span> acmedigital.com
+              <span className="text-foreground">Website:</span> nexustech.io
             </div>
           </div>
         )}
@@ -163,7 +208,7 @@ export function CustomerStatementAnimation({
         transition={{ duration: 0.25 }}
         className="border-b border-border"
       >
-        <div className="py-3 md:py-4 flex items-center justify-between">
+        <div className="py-2.5 md:py-3.5 flex items-center justify-between px-2 md:px-3">
           <h3 className="text-[11px] md:text-[12px] text-foreground">Details</h3>
           <MaterialIcon name="expand_more" className="text-sm text-muted-foreground" size={16} />
         </div>
@@ -176,7 +221,7 @@ export function CustomerStatementAnimation({
         transition={{ duration: 0.25 }}
         className="flex-1 flex flex-col min-h-0 overflow-hidden"
       >
-        <div className="pt-3 md:pt-4 pb-3 md:pb-4 flex items-center justify-between border-b border-border flex-shrink-0">
+        <div className="py-2.5 md:py-3.5 flex items-center justify-between border-b border-border flex-shrink-0 px-2 md:px-3">
           <h3 className="text-[11px] md:text-[12px] text-foreground">Statement</h3>
           <MaterialIcon name="more_vert" className="text-sm text-muted-foreground" size={16} />
         </div>

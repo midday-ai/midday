@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { MaterialIcon } from './homepage/icon-mapping'
 import { DashboardAnimation } from './homepage/dashboard-animation'
 import { CustomerStatementAnimation } from './homepage/customer-statement-animation'
+import { CompanyEnrichmentAnimation } from './homepage/company-enrichment-animation'
 import { TestimonialsSection } from './sections/testimonials-section'
 import { FeaturesGridSection } from './sections/features-grid-section'
 import { TimeSavingsSection } from './sections/time-savings-section'
@@ -174,19 +175,16 @@ export function Customers() {
                       <span className="font-sans text-sm text-foreground">Customer profiles</span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Customer portal</span>
+                      <span className="font-sans text-sm text-foreground">Revenue per customer</span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Revenue per customer</span>
+                      <span className="font-sans text-sm text-foreground">Customer portal</span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                       <span className="font-sans text-sm text-foreground">Invoice history</span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                       <span className="font-sans text-sm text-foreground">Time tracked</span>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Company insights</span>
                     </div>
                   </div>
                 </div>
@@ -197,6 +195,47 @@ export function Customers() {
                 <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center">
                   <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
                     <CustomerStatementAnimation onComplete={undefined} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Second Animation - Company Enrichment */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-stretch">
+              {/* Left: Animation */}
+              <div className="flex items-center justify-center p-1 sm:p-3 lg:p-6 xl:p-8 border border-border overflow-hidden relative bg-background">
+                <div className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center">
+                  <div className="w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95]">
+                    <CompanyEnrichmentAnimation onComplete={undefined} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: Title and Subtitle */}
+              <div className="flex items-center">
+                <div className="space-y-3 lg:space-y-5 text-center lg:text-left w-full">
+                  <h2 className="font-sans text-2xl sm:text-2xl text-foreground">
+                    Customer context, built in
+                  </h2>
+                  <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
+                    Automatically enriched company profiles give you instant context on customers, without manual research or switching tools.
+                  </p>
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Company profiles</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Industry and size</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Location and local time</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Funding and ownership</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                      <span className="font-sans text-sm text-foreground">Web and social presence</span>
+                    </div>
                   </div>
                 </div>
               </div>
