@@ -25,7 +25,7 @@ export function UserMenu({ onlySignOut }: Props) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className="rounded-full w-8 h-8 cursor-pointer">
+        <Avatar className="rounded-full w-8 h-8 cursor-pointer bg-accent">
           {user?.avatarUrl && (
             <AvatarImageNext
               src={user?.avatarUrl}

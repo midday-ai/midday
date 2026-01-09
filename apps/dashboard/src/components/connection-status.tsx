@@ -56,12 +56,13 @@ export function ConnectionStatus() {
     );
   }
 
-  // NOTE: No connections with expire_at (Only GoCardLess and Enable Banking)
-  if (data?.find((bank) => bank.expiresAt === null)) {
+  // Only show expiration UI if at least one connection has an expiration date
+  // (Only GoCardLess and Enable Banking have expiration dates)
+  if (!data?.some((bank) => bank.expiresAt !== null)) {
     return null;
   }
 
-  const { warning, error, show } = getConnectionsStatus(data);
+  const { warning, error, expired, show } = getConnectionsStatus(data);
 
   if (!show) {
     return null;
@@ -80,8 +81,8 @@ export function ConnectionStatus() {
               <Icons.Error
                 size={16}
                 className={cn(
-                  error && "text-[#FF3638]",
-                  warning && "text-[#FFD02B]",
+                  (error || expired) && "text-[#FF3638]",
+                  warning && !error && !expired && "text-[#FFD02B]",
                 )}
               />
             </Button>
@@ -92,7 +93,9 @@ export function ConnectionStatus() {
           className="px-3 py-1.5 text-xs max-w-[230px]"
           sideOffset={10}
         >
-          The connection is expiring soon, update your connection.
+          {expired
+            ? "A bank connection has expired, please reconnect."
+            : "The connection is expiring soon, update your connection."}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
