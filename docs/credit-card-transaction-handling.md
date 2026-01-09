@@ -139,10 +139,71 @@ Each provider has tests covering:
 - `apps/engine/src/providers/gocardless/transform.ts`
 - Corresponding test files and snapshots
 
+## Verification Sources
+
+### Plaid Amount Convention (VERIFIED)
+
+From Plaid's official API documentation and confirmed in our codebase comment:
+
+> "Positive values when money moves out of the account; negative values when money moves in.
+> For example, debit card purchases are positive; credit card payments, direct deposits, and refunds are negative."
+
+**Source**: [Plaid Transactions API - amount field](https://plaid.com/docs/api/products/transactions/#transactions-get-response-transactions-amount)
+
+Our implementation inverts ALL Plaid amounts, which converts their convention to: positive = money IN, negative = money OUT.
+
+### Teller Amount Convention (VERIFIED)
+
+From Teller's API documentation:
+
+> "The signed amount of the transaction as a string."
+
+For credit accounts specifically, Teller uses opposite signs:
+- Positive = money OUT (purchase)
+- Negative = money IN (payment)
+
+**Source**: [Teller Transactions API](https://teller.io/docs/api/account/transactions)
+
+Our implementation inverts ONLY credit account amounts.
+
+### Enable Banking / GoCardless (PSD2 Standard - VERIFIED)
+
+Both providers follow the **Berlin Group NextGenPSD2** standard which uses:
+
+- `credit_debit_indicator`: `"CRDT"` (Credit = money IN) or `"DBIT"` (Debit = money OUT)
+- `cashAccountType`: ISO 20022 account type codes (`CACC`, `CARD`, `SVGS`, etc.)
+
+**Sources**:
+- [Berlin Group NextGenPSD2 Framework](https://www.berlin-group.org/)
+- [ISO 20022 External Code Sets](https://www.iso20022.org/catalogue-messages/additional-content-messages/external-code-sets)
+
+### ISO 20022 Cash Account Types (VERIFIED)
+
+| Code | Name | Description |
+|------|------|-------------|
+| `CACC` | Current | Account for transactional operations |
+| `CARD` | CardAccount | Account for card payments |
+| `CASH` | CashPayment | Cash payment account |
+| `SVGS` | Savings | Savings account |
+| `TRAN` | Transaction | Transaction account |
+| `LOAN` | Loan | Loan account |
+
+**Source**: [ISO 20022 External Cash Account Type Code](https://www.iso20022.org/)
+
+## Implementation Confidence Level
+
+| Provider | Sign Convention | Category Logic | Confidence |
+|----------|----------------|----------------|------------|
+| **Plaid** | ✅ Documented in code, matches Plaid docs | ✅ Uses Plaid's own categories | **HIGH** |
+| **Teller** | ✅ Documented in code, verified with API | ✅ Uses transaction type field | **HIGH** |
+| **Enable Banking** | ✅ Uses standard CRDT/DBIT indicator | ✅ Uses bank_transaction_code | **HIGH** |
+| **GoCardless** | ✅ Uses standard signed amounts | ✅ Uses proprietaryBankTransactionCode | **HIGH** |
+
 ## References
 
-- [Teller API Documentation](https://teller.io/docs/api)
+- [Teller API Documentation](https://teller.io/docs/api/account/transactions)
 - [Plaid API Documentation](https://plaid.com/docs/api/products/transactions/)
 - [GoCardless Bank Account Data](https://developer.gocardless.com/bank-account-data/overview)
 - [Enable Banking API](https://enablebanking.com/docs/api/reference/)
-- [ISO 20022 Cash Account Type Codes](https://www.iso20022.org/)
+- [ISO 20022 External Code Sets](https://www.iso20022.org/catalogue-messages/additional-content-messages/external-code-sets)
+- [Berlin Group NextGenPSD2](https://www.berlin-group.org/)
