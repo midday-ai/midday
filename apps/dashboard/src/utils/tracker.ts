@@ -331,9 +331,7 @@ export const updateEventTime = (
 
 // Date range utilities
 export function sortDates(dates: string[]) {
-  return dates.sort(
-    (a, b) => parseISO(a).getTime() - parseISO(b).getTime(),
-  );
+  return dates.sort((a, b) => parseISO(a).getTime() - parseISO(b).getTime());
 }
 
 export function getTrackerDates(
