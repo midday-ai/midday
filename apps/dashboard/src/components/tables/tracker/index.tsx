@@ -19,7 +19,9 @@ export function DataTable() {
   const trpc = useTRPC();
   const { ref, inView } = useInView();
   const { data: user } = useUserQuery();
-  const { latestProjectId, setLatestProjectId } = useLatestProjectId(user?.teamId);
+  const { latestProjectId, setLatestProjectId } = useLatestProjectId(
+    user?.teamId,
+  );
   const { params } = useSortParams();
   const { hasFilters, filter } = useTrackerFilterParams();
   const deferredSearch = useDeferredValue(filter.q);
