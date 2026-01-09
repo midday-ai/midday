@@ -58,7 +58,12 @@ export class EnableBankingProvider implements Provider {
     params: GetTransactionsRequest,
   ): Promise<GetTransactionsResponse> {
     const response = await this.#api.getTransactions(params);
-    return response.transactions.map(transformTransaction);
+    return response.transactions.map((transaction) =>
+      transformTransaction({
+        transaction,
+        accountType: params.accountType,
+      }),
+    );
   }
 
   async getConnectionStatus({ id }: GetConnectionStatusRequest) {

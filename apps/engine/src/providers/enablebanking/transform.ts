@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import type { AccountType } from "@engine/utils/account";
 import { getLogoURL } from "@engine/utils/logo";
 import { capitalCase } from "change-case";
 import type { Account, Balance, ConnectionStatus, Transaction } from "../types";
@@ -42,6 +43,25 @@ function getAccountName(account: GetAccountDetailsResponse) {
   return "Account";
 }
 
+/**
+ * Maps Enable Banking cash_account_type (ISO 20022) to Midday AccountType
+ * - CACC: Current account → depository
+ * - CARD: Card account → credit
+ * - SVGS: Savings account → depository
+ * - LOAN: Loan account → loan (mapped to other_asset for now)
+ * - CASH: Cash account → depository
+ */
+function getAccountType(cashAccountType?: string): AccountType {
+  switch (cashAccountType) {
+    case "CARD":
+      return "credit";
+    case "LOAN":
+      return "loan";
+    default:
+      return "depository";
+  }
+}
+
 export const transformAccount = (
   account: GetAccountDetailsResponse,
 ): Account => {
@@ -49,7 +69,7 @@ export const transformAccount = (
     id: account.uid,
     name: getAccountName(account),
     currency: account.currency,
-    type: "depository",
+    type: getAccountType(account.cash_account_type),
     institution: {
       id: hashInstitutionId(
         account.institution.name,
@@ -133,12 +153,30 @@ export const transformTransactionName = (
   return "No information";
 };
 
-export const transformTransactionCategory = (transaction: GetTransaction) => {
-  // Income
-  if (
-    transaction.credit_debit_indicator === "CRDT" &&
-    +transaction.transaction_amount.amount > 0
-  ) {
+type TransformTransactionCategory = {
+  transaction: GetTransaction;
+  accountType: AccountType;
+};
+
+export const transformTransactionCategory = ({
+  transaction,
+  accountType,
+}: TransformTransactionCategory) => {
+  const amount = +transaction.transaction_amount.amount;
+  const isCredit = transaction.credit_debit_indicator === "CRDT";
+
+  // For credit (money IN)
+  if (isCredit && amount > 0) {
+    // For credit card accounts, money IN is usually a payment, not income
+    if (accountType === "credit") {
+      // Check if it's a transfer/payment type
+      const description = transaction.bank_transaction_code?.description;
+      if (description === "Transfer" || description === "Payment") {
+        return "credit-card-payment";
+      }
+      // Otherwise it's likely a refund - don't auto-categorize
+      return null;
+    }
     return "income";
   }
 
@@ -207,9 +245,15 @@ const transformCounterpartyName = (transaction: GetTransaction) => {
   return null;
 };
 
-export const transformTransaction = (
-  transaction: GetTransaction,
-): Transaction => {
+type TransformTransactionPayload = {
+  transaction: GetTransaction;
+  accountType: AccountType;
+};
+
+export const transformTransaction = ({
+  transaction,
+  accountType,
+}: TransformTransactionPayload): Transaction => {
   const name = capitalCase(transformTransactionName(transaction));
   const description = transformDescription({ transaction, name });
 
@@ -222,7 +266,7 @@ export const transformTransaction = (
     balance: transaction.balance_after_transaction
       ? Number.parseFloat(transaction.balance_after_transaction.amount)
       : null,
-    category: transformTransactionCategory(transaction),
+    category: transformTransactionCategory({ transaction, accountType }),
     counterparty_name: transformCounterpartyName(transaction),
     merchant_name: null,
     method: transformTransactionMethod(transaction),

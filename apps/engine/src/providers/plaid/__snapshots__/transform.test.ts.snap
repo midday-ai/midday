@@ -85,3 +85,41 @@ exports[`Transform account balance 1`] = `
   "currency": "USD",
 }
 `;
+
+exports[`Transform credit card payment - should be credit-card-payment not income 1`] = `
+{
+  "amount": 500,
+  "balance": null,
+  "category": "credit-card-payment",
+  "counterparty_name": null,
+  "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-02-24",
+  "description": null,
+  "id": "payment123",
+  "merchant_name": null,
+  "method": "payment",
+  "name": "Credit Card Payment",
+  "status": "posted",
+}
+`;
+
+exports[`Transform credit card refund - should have no category 1`] = `
+{
+  "amount": 50,
+  "balance": null,
+  "category": null,
+  "counterparty_name": "Amazon",
+  "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-02-24",
+  "description": "Amazon",
+  "id": "refund123",
+  "merchant_name": "Amazon",
+  "method": "other",
+  "name": "Amazon Refund",
+  "status": "posted",
+}
+`;

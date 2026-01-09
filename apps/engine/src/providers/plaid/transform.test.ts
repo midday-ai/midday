@@ -261,3 +261,132 @@ test("Transform account balance", () => {
     }),
   ).toMatchSnapshot();
 });
+
+test("Transform credit card payment - should be credit-card-payment not income", () => {
+  expect(
+    transformTransaction({
+      accountType: "credit",
+      transaction: {
+        account_id: "AG7EkLW7DRSVaN8Z75jMT1DJN51QpWc9LKB7w",
+        account_owner: null,
+        amount: -500, // Negative in Plaid = money IN to credit card
+        authorized_date: "2024-02-23",
+        authorized_datetime: null,
+        category: ["Payment", "Credit Card"],
+        category_id: "16001000",
+        check_number: null,
+        counterparties: [],
+        date: "2024-02-24",
+        datetime: null,
+        iso_currency_code: "USD",
+        location: {
+          address: null,
+          city: null,
+          country: null,
+          lat: null,
+          lon: null,
+          postal_code: null,
+          region: null,
+          store_number: null,
+        },
+        logo_url: null,
+        merchant_entity_id: null,
+        merchant_name: null,
+        name: "Credit Card Payment",
+        payment_channel: TransactionPaymentChannelEnum.Other,
+        payment_meta: {
+          by_order_of: null,
+          payee: null,
+          payer: null,
+          payment_method: null,
+          payment_processor: null,
+          ppd_id: null,
+          reason: null,
+          reference_number: null,
+        },
+        pending: false,
+        pending_transaction_id: null,
+        personal_finance_category: {
+          confidence_level: "VERY_HIGH",
+          detailed: "LOAN_PAYMENTS_CREDIT_CARD_PAYMENT",
+          primary: "LOAN_PAYMENTS",
+        },
+        personal_finance_category_icon_url: null,
+        transaction_code: TransactionCode.BillPayment,
+        transaction_id: "payment123",
+        transaction_type: TransactionTransactionTypeEnum.Special,
+        unofficial_currency_code: null,
+        website: null,
+      },
+    }),
+  ).toMatchSnapshot();
+});
+
+test("Transform credit card refund - should have no category", () => {
+  expect(
+    transformTransaction({
+      accountType: "credit",
+      transaction: {
+        account_id: "AG7EkLW7DRSVaN8Z75jMT1DJN51QpWc9LKB7w",
+        account_owner: null,
+        amount: -50, // Negative in Plaid = money IN (refund)
+        authorized_date: "2024-02-23",
+        authorized_datetime: null,
+        category: ["Shops", "Computers and Electronics"],
+        category_id: "19013000",
+        check_number: null,
+        counterparties: [
+          {
+            confidence_level: "VERY_HIGH",
+            entity_id: "amazon123",
+            logo_url: "https://plaid-merchant-logos.plaid.com/amazon.png",
+            name: "Amazon",
+            type: CounterpartyType.Merchant,
+            website: "amazon.com",
+          },
+        ],
+        date: "2024-02-24",
+        datetime: null,
+        iso_currency_code: "USD",
+        location: {
+          address: null,
+          city: null,
+          country: null,
+          lat: null,
+          lon: null,
+          postal_code: null,
+          region: null,
+          store_number: null,
+        },
+        logo_url: "https://plaid-merchant-logos.plaid.com/amazon.png",
+        merchant_entity_id: "amazon123",
+        merchant_name: "Amazon",
+        name: "Amazon Refund",
+        payment_channel: TransactionPaymentChannelEnum.Online,
+        payment_meta: {
+          by_order_of: null,
+          payee: null,
+          payer: null,
+          payment_method: null,
+          payment_processor: null,
+          ppd_id: null,
+          reason: null,
+          reference_number: null,
+        },
+        pending: false,
+        pending_transaction_id: null,
+        personal_finance_category: {
+          confidence_level: "VERY_HIGH",
+          detailed: "GENERAL_MERCHANDISE_ELECTRONICS",
+          primary: "GENERAL_MERCHANDISE",
+        },
+        personal_finance_category_icon_url: null,
+        transaction_code: null,
+        transaction_id: "refund123",
+        transaction_type: TransactionTransactionTypeEnum.Special,
+        unofficial_currency_code: null,
+        website: "amazon.com",
+      },
+    }),
+  ).toMatchSnapshot();
+});

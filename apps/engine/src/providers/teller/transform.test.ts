@@ -35,7 +35,7 @@ test("Transform pending transaction", () => {
   ).toMatchSnapshot();
 });
 
-test("Transform pending transaction", () => {
+test("Transform credit card purchase transaction", () => {
   expect(
     transformTransaction({
       accountType: "credit",
@@ -59,6 +59,100 @@ test("Transform pending transaction", () => {
         description: "Technology",
         date: "2024-03-05",
         amount: "29",
+        account_id: "acc_os41qe3a66ks2djhss000",
+      },
+    }),
+  ).toMatchSnapshot();
+});
+
+test("Transform credit card payment received - should be credit-card-payment not income", () => {
+  // When paying off a credit card, Teller reports negative amount (money coming IN to card)
+  // This should NOT be categorized as income - it's a credit card payment
+  expect(
+    transformTransaction({
+      accountType: "credit",
+      transaction: {
+        type: "payment",
+        status: "posted",
+        running_balance: "500.00",
+        links: {
+          self: "https://api.teller.io/accounts/acc_os41qe3a66ks2djhss000/transactions/txn_os41r5u90e29shubl3000",
+          account: "https://api.teller.io/accounts/acc_os41qe3a66ks2djhss000",
+        },
+        id: "txn_os41r5u90e29shubl3000",
+        details: {
+          processing_status: "complete",
+          counterparty: {
+            type: "organization",
+            name: "BANK PAYMENT",
+          },
+          category: "general",
+        },
+        description: "Payment Thank You",
+        date: "2024-03-05",
+        amount: "-200.00",
+        account_id: "acc_os41qe3a66ks2djhss000",
+      },
+    }),
+  ).toMatchSnapshot();
+});
+
+test("Transform credit card refund - should have no category", () => {
+  // A refund on a credit card should not be auto-categorized
+  expect(
+    transformTransaction({
+      accountType: "credit",
+      transaction: {
+        type: "card_payment", // refunds often come through as card_payment type
+        status: "posted",
+        running_balance: "500.00",
+        links: {
+          self: "https://api.teller.io/accounts/acc_os41qe3a66ks2djhss000/transactions/txn_os41r5u90e29shubl4000",
+          account: "https://api.teller.io/accounts/acc_os41qe3a66ks2djhss000",
+        },
+        id: "txn_os41r5u90e29shubl4000",
+        details: {
+          processing_status: "complete",
+          counterparty: {
+            type: "organization",
+            name: "AMAZON REFUND",
+          },
+          category: "shopping",
+        },
+        description: "Amazon Refund",
+        date: "2024-03-05",
+        amount: "-50.00",
+        account_id: "acc_os41qe3a66ks2djhss000",
+      },
+    }),
+  ).toMatchSnapshot();
+});
+
+test("Transform credit card cashback - should be income", () => {
+  // Cashback/rewards marked as income by Teller should stay as income
+  expect(
+    transformTransaction({
+      accountType: "credit",
+      transaction: {
+        type: "other",
+        status: "posted",
+        running_balance: "500.00",
+        links: {
+          self: "https://api.teller.io/accounts/acc_os41qe3a66ks2djhss000/transactions/txn_os41r5u90e29shubl5000",
+          account: "https://api.teller.io/accounts/acc_os41qe3a66ks2djhss000",
+        },
+        id: "txn_os41r5u90e29shubl5000",
+        details: {
+          processing_status: "complete",
+          counterparty: {
+            type: "organization",
+            name: "REWARDS",
+          },
+          category: "income",
+        },
+        description: "Cash Back Rewards",
+        date: "2024-03-05",
+        amount: "-25.00",
         account_id: "acc_os41qe3a66ks2djhss000",
       },
     }),

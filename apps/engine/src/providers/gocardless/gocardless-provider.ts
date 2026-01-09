@@ -29,13 +29,22 @@ export class GoCardLessProvider implements Provider {
     return this.#api.getHealthCheck();
   }
 
-  async getTransactions({ accountId, latest }: GetTransactionsRequest) {
+  async getTransactions({
+    accountId,
+    latest,
+    accountType,
+  }: GetTransactionsRequest) {
     const response = await this.#api.getTransactions({
       latest,
       accountId,
     });
 
-    return (response ?? []).map(transformTransaction);
+    return (response ?? []).map((transaction) =>
+      transformTransaction({
+        transaction,
+        accountType,
+      }),
+    );
   }
 
   async getAccounts({ id }: GetAccountsRequest) {

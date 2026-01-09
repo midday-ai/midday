@@ -37,17 +37,41 @@ export const mapTransactionMethod = (type?: TransactionCode | null) => {
 type MapTransactionCategory = {
   transaction: Transaction;
   amount: number;
+  accountType: string;
 };
 
 export const mapTransactionCategory = ({
   transaction,
   amount,
+  accountType,
 }: MapTransactionCategory) => {
+  // Check Plaid's category first - they have good categorization
   if (transaction.personal_finance_category?.primary === "INCOME") {
     return "income";
   }
 
+  // Plaid categorizes credit card payments as LOAN_PAYMENTS
+  if (
+    transaction.personal_finance_category?.primary === "LOAN_PAYMENTS" ||
+    transaction.personal_finance_category?.detailed ===
+      "LOAN_PAYMENTS_CREDIT_CARD_PAYMENT"
+  ) {
+    return "credit-card-payment";
+  }
+
   if (amount > 0) {
+    // For credit accounts, positive amount means money came IN (payment, refund, cashback)
+    if (accountType === "credit") {
+      // Check if it's a transfer type
+      if (
+        transaction.personal_finance_category?.primary === "TRANSFER_IN" ||
+        transaction.transaction_code === "bill payment"
+      ) {
+        return "credit-card-payment";
+      }
+      // Otherwise it's likely a refund - don't auto-categorize
+      return null;
+    }
     return "income";
   }
 
@@ -187,6 +211,7 @@ const transformDescription = (transaction: Transaction) => {
 
 export const transformTransaction = ({
   transaction,
+  accountType,
 }: TransformTransactionPayload): BaseTransaction => {
   const method = mapTransactionMethod(transaction?.transaction_code);
   const amount = formatAmout(transaction.amount);
@@ -205,7 +230,7 @@ export const transformTransaction = ({
       transaction?.iso_currency_code?.toUpperCase() ||
       transaction?.unofficial_currency_code?.toUpperCase() ||
       "USD",
-    category: mapTransactionCategory({ transaction, amount }),
+    category: mapTransactionCategory({ transaction, amount, accountType }),
     counterparty_name: transaction?.counterparties?.[0]?.name
       ? capitalCase(transaction.counterparties[0].name)
       : null,

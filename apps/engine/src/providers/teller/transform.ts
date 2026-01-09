@@ -46,17 +46,39 @@ export const mapTransactionMethod = (type?: string) => {
 type MapTransactionCategory = {
   transaction: Transaction;
   amount: number;
+  accountType: string;
 };
 
 export const mapTransactionCategory = ({
   transaction,
   amount,
+  accountType,
 }: MapTransactionCategory) => {
   if (transaction.type === "fee") {
     return "fees";
   }
 
   if (amount > 0) {
+    // For credit accounts, positive amount after transformation means money came IN
+    // (e.g., payment, refund, cashback). Determine category based on transaction type/category.
+    if (accountType === "credit") {
+      // If Teller categorizes it as income, it might be cashback/rewards
+      if (transaction.details?.category === "income") {
+        return "income";
+      }
+      // Payment types indicate a credit card payment
+      if (
+        transaction.type === "payment" ||
+        transaction.type === "bill_payment" ||
+        transaction.type === "digital_payment" ||
+        transaction.type === "ach" ||
+        transaction.type === "transfer"
+      ) {
+        return "credit-card-payment";
+      }
+      // Otherwise it's likely a refund - don't auto-categorize, let user decide
+      return null;
+    }
     return "income";
   }
 
@@ -148,7 +170,7 @@ export const transformTransaction = ({
     method,
     amount,
     currency: "USD",
-    category: mapTransactionCategory({ transaction, amount }),
+    category: mapTransactionCategory({ transaction, amount, accountType }),
     balance: transaction?.running_balance ? +transaction.running_balance : null,
     counterparty_name: transaction?.details?.counterparty?.name
       ? capitalCase(transaction.details.counterparty.name)

@@ -38,6 +38,25 @@ exports[`Transform expense transaction 1`] = `
 }
 `;
 
+exports[`Transform credit card payment - should be credit-card-payment 1`] = `
+{
+  "amount": 5000,
+  "balance": null,
+  "category": "credit-card-payment",
+  "counterparty_name": "Bank Payment",
+  "currency": "SEK",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-04-04",
+  "description": null,
+  "id": "payment123",
+  "merchant_name": null,
+  "method": "payment",
+  "name": "Credit Card Payment",
+  "status": "posted",
+}
+`;
+
 exports[`Transform account 1`] = `
 {
   "balance": {

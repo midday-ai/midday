@@ -5,21 +5,85 @@ import {
   transformTransaction,
 } from "./transform";
 
-test("Transform income transaction", () => {
+test("Transform expense transaction (depository)", () => {
   expect(
     transformTransaction({
-      transactionId:
-        "8wwecA0PsWWCLPLazQzht2oOcxSIQ5UlWPHaNBpC3tjYtc002faJcjWzRpyO4sjz66kRpb7_5rA",
-      entryReference: "5490990006",
-      bookingDate: "2024-02-23",
-      valueDate: "2024-02-23",
-      transactionAmount: {
-        amount: "-38000.00",
-        currency: "SEK",
+      accountType: "depository",
+      transaction: {
+        transactionId:
+          "8wwecA0PsWWCLPLazQzht2oOcxSIQ5UlWPHaNBpC3tjYtc002faJcjWzRpyO4sjz66kRpb7_5rA",
+        entryReference: "5490990006",
+        bookingDate: "2024-02-23",
+        valueDate: "2024-02-23",
+        transactionAmount: {
+          amount: "-38000.00",
+          currency: "SEK",
+        },
+        additionalInformation: "LÖN         160434262327",
+        proprietaryBankTransactionCode: "Transfer",
+        internalTransactionId: "86b1bc36e6a6d2a5dee8ff7138920255",
       },
-      additionalInformation: "LÖN         160434262327",
-      proprietaryBankTransactionCode: "Transfer",
-      internalTransactionId: "86b1bc36e6a6d2a5dee8ff7138920255",
+    }),
+  ).toMatchSnapshot();
+});
+
+test("Transform income transaction (depository)", () => {
+  expect(
+    transformTransaction({
+      accountType: "depository",
+      transaction: {
+        transactionId: "income-test-123",
+        bookingDate: "2024-02-23",
+        transactionAmount: {
+          amount: "5000.00",
+          currency: "SEK",
+        },
+        additionalInformation: "Salary deposit",
+        proprietaryBankTransactionCode: "Transfer",
+        internalTransactionId: "income-internal-123",
+      },
+    }),
+  ).toMatchSnapshot();
+});
+
+test("Transform credit card payment - should be credit-card-payment not income", () => {
+  // When paying off a credit card, the amount is positive (money coming INTO the card)
+  // This should NOT be categorized as income
+  expect(
+    transformTransaction({
+      accountType: "credit",
+      transaction: {
+        transactionId: "cc-payment-123",
+        bookingDate: "2024-02-23",
+        transactionAmount: {
+          amount: "500.00",
+          currency: "SEK",
+        },
+        additionalInformation: "Credit card payment",
+        proprietaryBankTransactionCode: "Transfer",
+        internalTransactionId: "cc-payment-internal-123",
+      },
+    }),
+  ).toMatchSnapshot();
+});
+
+test("Transform credit card refund - should be null (user categorizes)", () => {
+  // A refund on a credit card also has positive amount but is not a payment
+  expect(
+    transformTransaction({
+      accountType: "credit",
+      transaction: {
+        transactionId: "cc-refund-123",
+        bookingDate: "2024-02-23",
+        transactionAmount: {
+          amount: "75.00",
+          currency: "SEK",
+        },
+        creditorName: "Some Merchant",
+        additionalInformation: "Refund",
+        proprietaryBankTransactionCode: "Card purchase",
+        internalTransactionId: "cc-refund-internal-123",
+      },
     }),
   ).toMatchSnapshot();
 });
@@ -59,6 +123,46 @@ test("Transform accounts", () => {
 
   // Create a stable version of the account for snapshot testing
   // by replacing the dynamic expires_at date with a fixed string
+  const stableAccount = {
+    ...transformedAccount,
+    expires_at: "FIXED_DATE_FOR_TESTING",
+  };
+
+  expect(stableAccount).toMatchSnapshot();
+});
+
+test("Transform credit card account (CARD type)", () => {
+  const transformedAccount = transformAccount({
+    id: "credit-card-account-123",
+    created: "2024-02-23T13:29:47.314568Z",
+    last_accessed: "2024-03-06T16:34:16.782598Z",
+    iban: "4444",
+    institution_id: "BANK_CREDIT",
+    status: "READY",
+    owner_name: "John Doe",
+    account: {
+      resourceId: "4444",
+      currency: "EUR",
+      name: "Credit Card",
+      product: "Visa Gold",
+      cashAccountType: "CARD",
+      iban: "4444",
+      ownerName: "John Doe",
+    },
+    balance: {
+      currency: "EUR",
+      amount: "-1500.00",
+    },
+    institution: {
+      id: "BANK_CREDIT",
+      name: "Test Bank",
+      bic: "TESTBIC",
+      transaction_total_days: "90",
+      countries: ["DE"],
+      logo: "https://example.com/logo.png",
+    },
+  });
+
   const stableAccount = {
     ...transformedAccount,
     expires_at: "FIXED_DATE_FOR_TESTING",

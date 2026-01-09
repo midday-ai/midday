@@ -1,4 +1,5 @@
 import { Providers } from "@engine/common/schema";
+import type { AccountType } from "@engine/utils/account";
 import { getFileExtension, getLogoURL } from "@engine/utils/logo";
 import { capitalCase } from "change-case";
 import { addDays } from "date-fns";
@@ -17,12 +18,51 @@ import type {
   TransformAccountBalance,
   TransformAccountName,
   TransformInstitution,
-  TransformTransaction,
 } from "./types";
 import { getAccessValidForDays } from "./utils";
 
-export const mapTransactionCategory = (transaction: Transaction) => {
-  if (+transaction.transactionAmount.amount > 0) {
+/**
+ * Maps GoCardless cashAccountType (ISO 20022) to Midday AccountType
+ * - CACC: Current account → depository
+ * - CARD: Card account → credit
+ * - SVGS: Savings account → depository
+ * - TRAN: Transaction account → depository
+ * - LOAN: Loan account → loan (mapped to other_asset for now)
+ */
+const getAccountType = (cashAccountType?: string): AccountType => {
+  switch (cashAccountType) {
+    case "CARD":
+      return "credit";
+    case "LOAN":
+      return "other_asset";
+    default:
+      // CACC, SVGS, TRAN, CASH, and others default to depository
+      return "depository";
+  }
+};
+
+type MapTransactionCategory = {
+  transaction: Transaction;
+  accountType: AccountType;
+};
+
+export const mapTransactionCategory = ({
+  transaction,
+  accountType,
+}: MapTransactionCategory) => {
+  const amount = +transaction.transactionAmount.amount;
+
+  if (amount > 0) {
+    // For credit accounts, positive amount means money came IN (payment, refund, cashback)
+    if (accountType === "credit") {
+      // Check if it's a transfer/payment type
+      const method = transaction.proprietaryBankTransactionCode;
+      if (method === "Transfer" || method === "Payment") {
+        return "credit-card-payment";
+      }
+      // Otherwise it's likely a refund - don't auto-categorize
+      return null;
+    }
     return "income";
   }
 
@@ -123,9 +163,15 @@ const transformCounterpartyName = (transaction: Transaction) => {
   return null;
 };
 
-export const transformTransaction = (
-  transaction: TransformTransaction,
-): BaseTransaction => {
+type TransformTransactionPayload = {
+  transaction: Transaction;
+  accountType: AccountType;
+};
+
+export const transformTransaction = ({
+  transaction,
+  accountType,
+}: TransformTransactionPayload): BaseTransaction => {
   const method = mapTransactionMethod(
     transaction?.proprietaryBankTransactionCode,
   );
@@ -162,7 +208,7 @@ export const transformTransaction = (
     method,
     amount: +transaction.transactionAmount.amount,
     currency: transaction.transactionAmount.currency,
-    category: mapTransactionCategory(transaction),
+    category: mapTransactionCategory({ transaction, accountType }),
     currency_rate: currencyExchange?.rate || null,
     currency_source: currencyExchange?.currency?.toUpperCase() || null,
     balance,
@@ -201,7 +247,7 @@ export const transformAccount = ({
 }: TransformAccount): BaseAccount => {
   return {
     id,
-    type: "depository",
+    type: getAccountType(account.cashAccountType),
     name: transformAccountName({
       name: account.name,
       product: account.product,

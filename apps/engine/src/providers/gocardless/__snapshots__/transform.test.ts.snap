@@ -1,6 +1,6 @@
 // Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
-exports[`Transform income transaction 1`] = `
+exports[`Transform expense transaction (depository) 1`] = `
 {
   "amount": -38000,
   "balance": null,
@@ -15,6 +15,63 @@ exports[`Transform income transaction 1`] = `
   "merchant_name": null,
   "method": "transfer",
   "name": "Lön 160434262327",
+  "status": "posted",
+}
+`;
+
+exports[`Transform income transaction (depository) 1`] = `
+{
+  "amount": 5000,
+  "balance": null,
+  "category": "income",
+  "counterparty_name": null,
+  "currency": "SEK",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-02-23",
+  "description": null,
+  "id": "income-internal-123",
+  "merchant_name": null,
+  "method": "transfer",
+  "name": "Salary Deposit",
+  "status": "posted",
+}
+`;
+
+exports[`Transform credit card payment - should be credit-card-payment not income 1`] = `
+{
+  "amount": 500,
+  "balance": null,
+  "category": "credit-card-payment",
+  "counterparty_name": null,
+  "currency": "SEK",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-02-23",
+  "description": null,
+  "id": "cc-payment-internal-123",
+  "merchant_name": null,
+  "method": "transfer",
+  "name": "Credit Card Payment",
+  "status": "posted",
+}
+`;
+
+exports[`Transform credit card refund - should be null (user categorizes) 1`] = `
+{
+  "amount": 75,
+  "balance": null,
+  "category": null,
+  "counterparty_name": "Some Merchant",
+  "currency": "SEK",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-02-23",
+  "description": "Refund",
+  "id": "cc-refund-internal-123",
+  "merchant_name": null,
+  "method": "card_purchase",
+  "name": "Some Merchant",
   "status": "posted",
 }
 `;
@@ -38,6 +95,28 @@ exports[`Transform accounts 1`] = `
   "name": "Pleo Account",
   "resource_id": "3133",
   "type": "depository",
+}
+`;
+
+exports[`Transform credit card account (CARD type) 1`] = `
+{
+  "balance": {
+    "amount": -1500,
+    "currency": "EUR",
+  },
+  "currency": "EUR",
+  "enrollment_id": null,
+  "expires_at": "FIXED_DATE_FOR_TESTING",
+  "id": "credit-card-account-123",
+  "institution": {
+    "id": "BANK_CREDIT",
+    "logo": "https://cdn-engine.midday.ai/BANK_CREDIT.png",
+    "name": "Test Bank",
+    "provider": "gocardless",
+  },
+  "name": "Credit Card",
+  "resource_id": "4444",
+  "type": "credit",
 }
 `;
 
