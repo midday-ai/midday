@@ -15,32 +15,6 @@ const webhookResponseSchema = z.object({
   received: z.boolean(),
 });
 
-const webhookRequestSchema = z.object({
-  type: z.enum([
-    "subscription.active",
-    "subscription.canceled",
-    "subscription.past_due",
-    "subscription.revoked",
-  ]),
-  timestamp: z.string().datetime(),
-  data: z.object({
-    id: z.string(),
-    status: z.string(),
-    productId: z.string(),
-    metadata: z
-      .object({
-        teamId: z.string().optional(),
-        companyName: z.string().optional(),
-      })
-      .optional(),
-    customer: z.object({
-      id: z.string(),
-      email: z.string().nullable(),
-      externalId: z.string().nullable().optional(),
-    }),
-  }),
-});
-
 app.openapi(
   createRoute({
     method: "post",
@@ -50,16 +24,6 @@ app.openapi(
     description:
       "Handles Polar webhook events for subscription changes. Verifies webhook signature and processes subscription events.",
     tags: ["Webhooks"],
-    request: {
-      body: {
-        content: {
-          "application/json": {
-            schema: webhookRequestSchema,
-          },
-        },
-        description: "Polar webhook payload",
-      },
-    },
     responses: {
       200: {
         description: "Webhook processed successfully",
