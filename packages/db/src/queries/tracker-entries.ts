@@ -567,6 +567,9 @@ export async function stopTimer(db: Database, params: StopTimerParams) {
       duration,
       project: projectInfo,
       trackerProject: projectInfo,
+      start: entry.start,
+      stop: entry.stop,
+      description: entry.description,
     };
   }
 
