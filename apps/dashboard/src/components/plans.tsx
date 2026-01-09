@@ -36,7 +36,9 @@ export function Plans() {
       if (!isPollingForPlan) return false;
 
       // Plan updated - stop polling
-      if (query.state.data?.team?.plan !== "trial") {
+      // Must explicitly check plan exists to avoid false positives when query returns undefined
+      const plan = query.state.data?.team?.plan;
+      if (plan && plan !== "trial") {
         return false;
       }
 
@@ -75,7 +77,9 @@ export function Plans() {
     const isTimedOut =
       pollingStartedAtRef.current &&
       Date.now() - pollingStartedAtRef.current > POLLING_TIMEOUT_MS;
-    const planUpdated = user?.team?.plan !== "trial";
+    // Must explicitly check plan exists to avoid false positives when user data is undefined
+    const plan = user?.team?.plan;
+    const planUpdated = plan != null && plan !== "trial";
 
     if (planUpdated || isTimedOut) {
       pollingStartedAtRef.current = null;
