@@ -15,6 +15,32 @@ const webhookResponseSchema = z.object({
   received: z.boolean(),
 });
 
+const webhookRequestSchema = z.object({
+  type: z.enum([
+    "subscription.active",
+    "subscription.canceled",
+    "subscription.past_due",
+    "subscription.revoked",
+  ]),
+  timestamp: z.string().datetime(),
+  data: z.object({
+    id: z.string(),
+    status: z.string(),
+    productId: z.string(),
+    metadata: z
+      .object({
+        teamId: z.string().optional(),
+        companyName: z.string().optional(),
+      })
+      .optional(),
+    customer: z.object({
+      id: z.string(),
+      email: z.string().nullable(),
+      externalId: z.string().nullable().optional(),
+    }),
+  }),
+});
+
 app.openapi(
   createRoute({
     method: "post",
@@ -24,6 +50,16 @@ app.openapi(
     description:
       "Handles Polar webhook events for subscription changes. Verifies webhook signature and processes subscription events.",
     tags: ["Webhooks"],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: webhookRequestSchema,
+          },
+        },
+        description: "Polar webhook payload",
+      },
+    },
     responses: {
       200: {
         description: "Webhook processed successfully",
@@ -126,6 +162,29 @@ app.openapi(
           break;
         }
 
+        // @ts-expect-error - subscription.past_due is a new Polar event not yet in SDK types
+        // See: https://polar.sh/docs/api-reference/webhooks/subscription.past_due
+        case "subscription.past_due": {
+          // @ts-expect-error - data is not typed
+          const teamId = event.data.metadata?.teamId as string | undefined;
+
+          if (!teamId) {
+            logger.warn("Subscription past_due event missing teamId metadata");
+            break;
+          }
+
+          // Payment failed but recoverable - mark as past_due
+          await updateTeamById(db, {
+            id: teamId,
+            data: {
+              subscriptionStatus: "past_due",
+            },
+          });
+
+          logger.info("Team subscription past due", { teamId });
+          break;
+        }
+
         case "subscription.revoked": {
           const teamId = event.data.metadata?.teamId as string | undefined;
 
@@ -134,33 +193,19 @@ app.openapi(
             break;
           }
 
-          // Check if this is a past_due status (payment pending) vs actual revocation
-          if (event.data.status === "past_due") {
-            // Keep the plan active but mark subscription as past_due
-            await updateTeamById(db, {
-              id: teamId,
-              data: {
-                subscriptionStatus: "past_due",
-              },
-            });
+          // Payment retries exhausted - downgrade to trial
+          await updateTeamById(db, {
+            id: teamId,
+            data: {
+              plan: "trial",
+              canceledAt: new Date().toISOString(),
+              subscriptionStatus: null,
+            },
+          });
 
-            logger.info("Team subscription past due", { teamId });
-          } else {
-            // Actual revocation - downgrade to trial
-            await updateTeamById(db, {
-              id: teamId,
-              data: {
-                plan: "trial",
-                canceledAt: new Date().toISOString(),
-                subscriptionStatus: null,
-              },
-            });
-
-            logger.info("Team subscription revoked, downgraded to trial", {
-              teamId,
-            });
-          }
-
+          logger.info("Team subscription revoked, downgraded to trial", {
+            teamId,
+          });
           break;
         }
 
