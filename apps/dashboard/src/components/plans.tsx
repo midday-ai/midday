@@ -16,10 +16,14 @@ import { Check } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 
+// Maximum polling attempts (20 * 1500ms = 30 seconds)
+const MAX_POLL_RETRIES = 20;
+
 export function Plans() {
   const [isSubmitting, setIsSubmitting] = useState(0);
   const [isPollingForPlan, setIsPollingForPlan] = useState(false);
   const isPollingRef = useRef(false); // Ref to track polling state for event handlers
+  const pollCountRef = useRef(0); // Track number of poll attempts
   const trpc = useTRPC();
   const checkoutInstanceRef = useRef<Awaited<
     ReturnType<typeof PolarEmbedCheckout.create>
@@ -49,9 +53,26 @@ export function Plans() {
 
   // Watch for plan change after checkout - then revalidate and redirect
   useEffect(() => {
-    if (isPollingForPlan && user?.team?.plan !== "trial") {
+    if (!isPollingForPlan) return;
+
+    pollCountRef.current += 1;
+
+    // Plan updated successfully
+    if (user?.team?.plan !== "trial") {
+      pollCountRef.current = 0;
       setIsPollingForPlan(false);
       isPollingRef.current = false;
+      revalidateAfterCheckout();
+      return;
+    }
+
+    // Timeout: max retries exceeded - proceed anyway to avoid infinite polling
+    if (pollCountRef.current >= MAX_POLL_RETRIES) {
+      pollCountRef.current = 0;
+      setIsPollingForPlan(false);
+      isPollingRef.current = false;
+      setIsSubmitting(0);
+      // Revalidate anyway - the webhook may have succeeded but cache is stale
       revalidateAfterCheckout();
     }
   }, [isPollingForPlan, user?.team?.plan]);
@@ -77,7 +98,8 @@ export function Plans() {
       checkout.addEventListener("success", (event: any) => {
         // Prevent Polar's automatic redirect
         event.preventDefault();
-        // Start polling for plan update
+        // Reset poll count and start polling for plan update
+        pollCountRef.current = 0;
         isPollingRef.current = true;
         setIsPollingForPlan(true);
       });
