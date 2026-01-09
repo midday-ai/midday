@@ -319,7 +319,7 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
                     type="button"
                     className="w-5 h-5 flex items-center justify-center transition-colors text-muted-foreground hover:text-foreground"
                   >
-                    <Icons.Time size={16} />
+                    <Icons.History size={16} />
                   </button>
                 </div>
                 <div className="flex items-end gap-3">
