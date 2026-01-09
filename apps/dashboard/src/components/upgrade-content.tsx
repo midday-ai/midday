@@ -91,7 +91,9 @@ export function UpgradeContent({ user }: UpgradeContentProps) {
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => deleteUserMutation.mutate()}
-                  disabled={deleteValue !== "DELETE"}
+                  disabled={
+                    deleteValue !== "DELETE" || deleteUserMutation.isPending
+                  }
                 >
                   {deleteUserMutation.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
