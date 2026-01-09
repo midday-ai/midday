@@ -667,6 +667,7 @@ export const updateInvoiceSchema = z.object({
     .optional(),
   paidAt: z.string().nullable().optional(),
   internalNote: z.string().nullable().optional(),
+  scheduledAt: z.string().nullable().optional(),
 });
 
 export const deleteInvoiceSchema = z.object({
