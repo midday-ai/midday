@@ -26,7 +26,7 @@ import { ToastAction } from "@midday/ui/toast";
 import { toast } from "@midday/ui/use-toast";
 import { getTaxTypeLabel } from "@midday/utils/tax";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { AssignUser } from "./assign-user";
 import { FormatAmount } from "./format-amount";
 import { Note } from "./note";
@@ -260,7 +260,7 @@ export function TransactionDetails() {
                 />
               )}
               <span className="text-[#606060] text-xs select-text">
-                {data?.date && format(new Date(data.date), "MMM d, y")}
+                {data?.date && format(parseISO(data.date), "MMM d, y")}
               </span>
             </div>
           )}

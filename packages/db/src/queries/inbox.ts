@@ -10,6 +10,7 @@ import {
   transactions,
 } from "@db/schema";
 import { createLoggerWithContext } from "@midday/logger";
+import { parseISO } from "date-fns";
 
 const logger = createLoggerWithContext("inbox");
 import {
@@ -65,8 +66,8 @@ function calculateDateScore(
   inboxDate: string,
   transactionDate: string,
 ): number {
-  const inboxDateObj = new Date(inboxDate);
-  const transactionDateObj = new Date(transactionDate);
+  const inboxDateObj = parseISO(inboxDate);
+  const transactionDateObj = parseISO(transactionDate);
   const diffTime = Math.abs(
     transactionDateObj.getTime() - inboxDateObj.getTime(),
   );

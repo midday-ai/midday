@@ -63,14 +63,14 @@ export function RevenueForecastCard({
 
     return [
       ...historical.map((item, index) => ({
-        month: format(new Date(item.date), "MMM"),
+        month: format(parseISO(item.date), "MMM"),
         actual: item.value,
         // Set forecasted value on the last historical point to same as actual to connect the lines
         forecasted: index === historical.length - 1 ? item.value : null,
         date: item.date,
       })),
       ...forecast.map((item) => ({
-        month: format(new Date(item.date), "MMM"),
+        month: format(parseISO(item.date), "MMM"),
         actual: null,
         forecasted: item.value,
         date: item.date,

@@ -1,4 +1,4 @@
-import { format, parse } from "date-fns";
+import { format, parse, parseISO } from "date-fns";
 
 /**
  * Maps chart type identifiers to natural language names
@@ -33,9 +33,9 @@ export function getChartTypeName(chartId: string): string {
  * Parses a date string (could be ISO string, month name, etc.) and returns a Date object
  */
 function parseDate(dateStr: string): Date | null {
-  // Try ISO string first
+  // Try ISO string first (use parseISO for correct timezone handling)
   if (dateStr.includes("T") || dateStr.includes("-")) {
-    const parsed = new Date(dateStr);
+    const parsed = parseISO(dateStr);
     if (!Number.isNaN(parsed.getTime())) {
       return parsed;
     }

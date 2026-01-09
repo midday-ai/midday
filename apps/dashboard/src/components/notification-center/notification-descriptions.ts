@@ -1,6 +1,6 @@
 import type { useI18n } from "@/locales/client";
 import { formatAmount } from "@midday/utils/format";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 type UseI18nReturn = ReturnType<typeof useI18n>;
 
@@ -37,7 +37,7 @@ const handleTransactionsCreated: NotificationDescriptionHandler = (
       }) || `${transaction.amount} ${transaction.currency}`;
 
     const userDateFormat = user?.dateFormat || "dd/MM/yyyy";
-    const formattedDate = format(new Date(transaction.date), userDateFormat);
+    const formattedDate = format(parseISO(transaction.date), userDateFormat);
 
     return t("notifications.transactions_created.single_transaction", {
       name: transaction.name,

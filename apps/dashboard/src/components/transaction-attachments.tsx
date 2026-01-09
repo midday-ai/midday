@@ -1,5 +1,6 @@
 "use client";
 
+import { parseISO } from "date-fns";
 import { useUpload } from "@/hooks/use-upload";
 import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
@@ -232,7 +233,7 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
         }
 
         // Convert transaction date (ISO date string) to ISO datetime for paidAt
-        const transactionDate = new Date(transactionData.date).toISOString();
+        const transactionDate = parseISO(transactionData.date).toISOString();
 
         // Update invoice status to paid
         await updateInvoiceMutation.mutateAsync({

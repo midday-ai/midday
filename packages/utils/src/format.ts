@@ -1,4 +1,4 @@
-import { format, isSameYear } from "date-fns";
+import { format, isSameYear, parseISO } from "date-fns";
 
 type FormatAmountParams = {
   currency: string;
@@ -32,11 +32,12 @@ export function formatDate(
   dateFormat?: string | null,
   checkYear = true,
 ) {
-  if (checkYear && isSameYear(new Date(), new Date(date))) {
-    return format(new Date(date), "MMM d");
+  const parsedDate = parseISO(date);
+  if (checkYear && isSameYear(new Date(), parsedDate)) {
+    return format(parsedDate, "MMM d");
   }
 
-  return format(new Date(date), dateFormat ?? "P");
+  return format(parsedDate, dateFormat ?? "P");
 }
 
 export function getInitials(value: string) {

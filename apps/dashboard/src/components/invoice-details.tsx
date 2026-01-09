@@ -30,7 +30,7 @@ import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { CopyInput } from "./copy-input";
 import { FormatAmount } from "./format-amount";
 import { InvoiceActions } from "./invoice-actions";
@@ -204,13 +204,13 @@ export function InvoiceDetails() {
           <div className="flex justify-between items-center">
             <span className="text-sm text-[#606060]">Due date</span>
             <span className="text-sm">
-              <span>{dueDate && format(new Date(dueDate), "MMM dd")}</span>
+              <span>{dueDate && format(parseISO(dueDate), "MMM dd")}</span>
             </span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-[#606060]">Issue date</span>
             <span className="text-sm">
-              <span>{issueDate && format(new Date(issueDate), "MMM dd")}</span>
+              <span>{issueDate && format(parseISO(issueDate), "MMM dd")}</span>
             </span>
           </div>
 

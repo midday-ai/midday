@@ -1314,7 +1314,7 @@ export async function getInvoicePaymentAnalysis(
         invoice.issueDate || invoice.createdAt || invoice.dueDate;
       if (issueDate) {
         const daysToPay =
-          (new Date(invoice.paidAt).getTime() - new Date(issueDate).getTime()) /
+          (new Date(invoice.paidAt).getTime() - parseISO(issueDate).getTime()) /
           (1000 * 60 * 60 * 24);
         if (daysToPay >= 0) {
           totalDaysToPay += daysToPay;
@@ -1373,7 +1373,7 @@ export async function getInvoicePaymentAnalysis(
     const monthInvoices = allInvoices.filter((inv) => {
       const invDate = inv.createdAt || inv.issueDate;
       if (!invDate) return false;
-      const invDateObj = new Date(invDate);
+      const invDateObj = parseISO(invDate);
       return invDateObj >= monthStart && invDateObj <= monthEnd;
     });
 
@@ -1388,7 +1388,7 @@ export async function getInvoicePaymentAnalysis(
         if (issueDate) {
           const daysToPay =
             (new Date(invoice.paidAt).getTime() -
-              new Date(issueDate).getTime()) /
+              parseISO(issueDate).getTime()) /
             (1000 * 60 * 60 * 24);
           if (daysToPay >= 0) {
             monthTotalDays += daysToPay;
