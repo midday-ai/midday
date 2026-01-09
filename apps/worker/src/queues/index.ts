@@ -14,6 +14,8 @@ import { invoicesQueue } from "./invoices";
 import { invoicesQueueConfig } from "./invoices.config";
 import { ratesQueue } from "./rates";
 import { ratesQueueConfig } from "./rates.config";
+import { teamsQueue } from "./teams";
+import { teamsQueueConfig } from "./teams.config";
 import { transactionsQueue } from "./transactions";
 import { transactionsQueueConfig } from "./transactions.config";
 
@@ -31,6 +33,7 @@ export const queueConfigs: QueueConfig[] = [
   accountingQueueConfig,
   invoicesQueueConfig,
   customersQueueConfig,
+  teamsQueueConfig,
 ];
 
 /**
@@ -48,5 +51,6 @@ export function getAllQueues(): Queue[] {
     accountingQueue,
     invoicesQueue,
     customersQueue,
+    teamsQueue,
   ];
 }

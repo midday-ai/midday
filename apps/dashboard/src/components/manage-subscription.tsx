@@ -1,15 +1,23 @@
 "use client";
 
-import { useUserQuery } from "@/hooks/use-user";
+import { useTeamQuery } from "@/hooks/use-team";
+import { useTRPC } from "@/trpc/client";
+import { getPlanName } from "@midday/plans";
 import { Card } from "@midday/ui/card";
 import { SubmitButton } from "@midday/ui/submit-button";
-import Link from "next/link";
-import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 
 export function ManageSubscription() {
-  const [isLoading, setIsLoading] = useState(false);
+  const trpc = useTRPC();
+  const { data: team } = useTeamQuery();
 
-  const { data: user } = useUserQuery();
+  const getPortalUrlMutation = useMutation(
+    trpc.billing.getPortalUrl.mutationOptions({
+      onSuccess: ({ url }) => {
+        window.location.href = url;
+      },
+    }),
+  );
 
   return (
     <div>
@@ -20,24 +28,18 @@ export function ManageSubscription() {
       <Card className="flex justify-between p-4">
         <div className="flex flex-col gap-1">
           <p className="text-sm text-muted-foreground">Current plan</p>
-          <p className="text-lg font-medium">Pro</p>
+          <p className="text-lg font-medium">{getPlanName(team?.plan)}</p>
         </div>
 
         <div className="mt-auto">
-          <Link
-            href={`/api/portal?id=${user?.team?.id}`}
-            className="text-sm text-muted-foreground hover:text-primary"
-            onClick={() => setIsLoading(true)}
-            prefetch={false}
+          <SubmitButton
+            variant="secondary"
+            className="h-9 hover:bg-primary hover:text-secondary"
+            isSubmitting={getPortalUrlMutation.isPending}
+            onClick={() => getPortalUrlMutation.mutate()}
           >
-            <SubmitButton
-              variant="secondary"
-              className="h-9 hover:bg-primary hover:text-secondary"
-              isSubmitting={isLoading}
-            >
-              Manage subscription
-            </SubmitButton>
-          </Link>
+            Manage subscription
+          </SubmitButton>
         </div>
       </Card>
     </div>

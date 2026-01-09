@@ -1,8 +1,7 @@
 "use client";
 
-import { useUserQuery } from "@/hooks/use-user";
+import { revalidateAfterCheckout } from "@/actions/revalidate-action";
 import { useTRPC } from "@/trpc/client";
-import { isDesktopApp } from "@midday/desktop-client/platform";
 import { cn } from "@midday/ui/cn";
 import { SubmitButton } from "@midday/ui/submit-button";
 import {
@@ -12,22 +11,48 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+// Polling timeout in milliseconds (30 seconds)
+const POLLING_TIMEOUT_MS = 30_000;
+
 export function Plans() {
-  const isDesktop = isDesktopApp();
   const [isSubmitting, setIsSubmitting] = useState(0);
+  const [isPollingForPlan, setIsPollingForPlan] = useState(false);
+  const isPollingRef = useRef(false); // Ref to track polling state for event handlers
+  const pollingStartedAtRef = useRef<number | null>(null);
   const trpc = useTRPC();
-  const router = useRouter();
   const checkoutInstanceRef = useRef<Awaited<
     ReturnType<typeof PolarEmbedCheckout.create>
   > | null>(null);
 
-  const { data: user } = useUserQuery();
+  // Poll for plan update after checkout success
+  const { data: user } = useQuery({
+    ...trpc.user.me.queryOptions(),
+    refetchInterval: (query) => {
+      if (!isPollingForPlan) return false;
+
+      // Plan updated - stop polling
+      // Must explicitly check plan exists to avoid false positives when query returns undefined
+      const plan = query.state.data?.team?.plan;
+      if (plan && plan !== "trial") {
+        return false;
+      }
+
+      // Timeout exceeded - stop polling
+      if (
+        pollingStartedAtRef.current &&
+        Date.now() - pollingStartedAtRef.current > POLLING_TIMEOUT_MS
+      ) {
+        return false;
+      }
+
+      return 1500;
+    },
+  });
   const { data, isLoading } = useQuery(trpc.team.availablePlans.queryOptions());
   const theme = useTheme().resolvedTheme === "dark" ? "dark" : "light";
 
@@ -45,24 +70,44 @@ export function Plans() {
     };
   }, []);
 
+  // Handle polling completion (success or timeout)
+  useEffect(() => {
+    if (!isPollingForPlan) return;
+
+    const isTimedOut =
+      pollingStartedAtRef.current &&
+      Date.now() - pollingStartedAtRef.current > POLLING_TIMEOUT_MS;
+    // Must explicitly check plan exists to avoid false positives when user data is undefined
+    const plan = user?.team?.plan;
+    const planUpdated = plan != null && plan !== "trial";
+
+    if (planUpdated || isTimedOut) {
+      pollingStartedAtRef.current = null;
+      setIsPollingForPlan(false);
+      isPollingRef.current = false;
+
+      if (isTimedOut && !planUpdated) {
+        setIsSubmitting(0);
+      }
+
+      // Revalidate in both cases - webhook may have succeeded but cache is stale
+      revalidateAfterCheckout();
+    }
+  }, [isPollingForPlan, user?.team?.plan]);
+
+  const createCheckoutMutation = useMutation(
+    trpc.billing.createCheckout.mutationOptions(),
+  );
+
   const handleCheckout = async (plan: "starter" | "pro", planType: string) => {
     try {
       setIsSubmitting(plan === "starter" ? 1 : 2);
 
-      // Fetch checkout URL from API
-      const checkoutUrl = new URL("/api/checkout", window.location.origin);
-      checkoutUrl.searchParams.set("plan", plan);
-      checkoutUrl.searchParams.set("teamId", user?.team?.id || "");
-      checkoutUrl.searchParams.set("isDesktop", String(isDesktop));
-      checkoutUrl.searchParams.set("planType", planType);
-      checkoutUrl.searchParams.set("embedOrigin", "true");
-
-      const response = await fetch(checkoutUrl.toString());
-      if (!response.ok) {
-        throw new Error("Failed to create checkout");
-      }
-
-      const { url } = await response.json();
+      const { url } = await createCheckoutMutation.mutateAsync({
+        plan,
+        planType,
+        embedOrigin: window.location.origin,
+      });
 
       const checkout = await PolarEmbedCheckout.create(url, theme);
       checkoutInstanceRef.current = checkout;
@@ -71,13 +116,18 @@ export function Plans() {
       checkout.addEventListener("success", (event: any) => {
         // Prevent Polar's automatic redirect
         event.preventDefault();
-        // Refresh the page to show updated plan status
-        router.refresh();
+        // Start polling for plan update with timestamp for timeout
+        pollingStartedAtRef.current = Date.now();
+        isPollingRef.current = true;
+        setIsPollingForPlan(true);
       });
 
       checkout.addEventListener("close", () => {
         checkoutInstanceRef.current = null;
-        setIsSubmitting(0);
+        // Only reset spinner if not polling for plan update
+        if (!isPollingRef.current) {
+          setIsSubmitting(0);
+        }
       });
 
       checkout.addEventListener("confirmed", () => {

@@ -21,7 +21,7 @@ export function isTrialExpired(createdAt: string): boolean {
   return getTrialDaysLeft(createdAt) <= 0;
 }
 
-const EXCLUDED_PATHS = ["/upgrade", "/settings", "/support"];
+const EXCLUDED_PATHS = ["/upgrade"];
 
 export function shouldShowUpgradeContent(
   plan: string | null | undefined,

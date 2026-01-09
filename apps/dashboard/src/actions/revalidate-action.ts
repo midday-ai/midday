@@ -16,3 +16,8 @@ export async function revalidateAfterTeamChange() {
 export async function revalidateInbox() {
   revalidatePath("/inbox");
 }
+
+export async function revalidateAfterCheckout() {
+  revalidatePath("/", "layout");
+  redirect("/");
+}

@@ -12,7 +12,7 @@ import {
   updateTeamMemberSchema,
 } from "@api/schemas/team";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import type { DeleteTeamPayload, InviteTeamMembersPayload } from "@jobs/schema";
+import type { InviteTeamMembersPayload } from "@jobs/schema";
 import {
   acceptTeamInvite,
   createTeam,
@@ -28,6 +28,7 @@ import {
   getTeamInvites,
   getTeamMembersByTeamId,
   getTeamsByUserId,
+  hasTeamAccess,
   leaveTeam,
   updateTeamById,
   updateTeamMember,
@@ -145,6 +146,49 @@ export const teamRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(deleteTeamSchema)
     .mutation(async ({ ctx: { db, session }, input }) => {
+      // Check if the user has access to the team before deleting
+      const canAccess = await hasTeamAccess(db, input.teamId, session.user.id);
+
+      if (!canAccess) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have access to this team",
+        });
+      }
+
+      // Fetch team data BEFORE deleting (for cleanup job)
+      const team = await getTeamById(db, input.teamId);
+
+      if (!team) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Team not found",
+        });
+      }
+
+      const bankConnections = await getBankConnections(db, {
+        teamId: input.teamId,
+      });
+
+      // Trigger cleanup job BEFORE deleting team from database.
+      // This ensures that if job triggering fails (Redis down, queue unavailable),
+      // the team remains intact and the user can retry. The cleanup job will handle
+      // bank connection deletion. Subscription cancellation should be done manually
+      // by the user via the customer portal before deleting the team.
+      await triggerJob(
+        "delete-team",
+        {
+          teamId: input.teamId!,
+          connections: bankConnections.map((c) => ({
+            referenceId: c.referenceId,
+            provider: c.provider,
+            accessToken: c.accessToken,
+          })),
+        },
+        "teams",
+      );
+
+      // Delete the team from database after cleanup job is enqueued
       const data = await deleteTeam(db, {
         teamId: input.teamId,
         userId: session.user.id,
@@ -153,23 +197,8 @@ export const teamRouter = createTRPCRouter({
       if (!data) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Team not found",
+          message: "Failed to delete team",
         });
-      }
-
-      const bankConnections = await getBankConnections(db, {
-        teamId: data.id,
-      });
-
-      if (bankConnections.length > 0) {
-        await tasks.trigger("delete-team", {
-          teamId: input.teamId!,
-          connections: bankConnections.map((connection) => ({
-            accessToken: connection.accessToken,
-            provider: connection.provider,
-            referenceId: connection.referenceId,
-          })),
-        } satisfies DeleteTeamPayload);
       }
     }),
 
