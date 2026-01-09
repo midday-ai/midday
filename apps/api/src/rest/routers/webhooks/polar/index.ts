@@ -157,19 +157,37 @@ app.openapi(
             break;
           }
 
-          // Payment retries exhausted - downgrade to trial
-          await updateTeamById(db, {
-            id: teamId,
-            data: {
-              plan: "trial",
-              canceledAt: new Date().toISOString(),
-              subscriptionStatus: null,
-            },
-          });
+          // Check if this is a past_due status (payment pending) vs actual revocation
+          // Polar may send subscription.revoked events with status === "past_due" for
+          // backward compatibility, even though there's now a dedicated subscription.past_due event
+          if (event.data.status === "past_due") {
+            // Keep the plan active but mark subscription as past_due
+            // User keeps access while they fix their payment method
+            await updateTeamById(db, {
+              id: teamId,
+              data: {
+                subscriptionStatus: "past_due",
+              },
+            });
 
-          logger.info("Team subscription revoked, downgraded to trial", {
-            teamId,
-          });
+            logger.info("Team subscription past due (via revoked event)", {
+              teamId,
+            });
+          } else {
+            // Payment retries exhausted - downgrade to trial
+            await updateTeamById(db, {
+              id: teamId,
+              data: {
+                plan: "trial",
+                canceledAt: new Date().toISOString(),
+                subscriptionStatus: null,
+              },
+            });
+
+            logger.info("Team subscription revoked, downgraded to trial", {
+              teamId,
+            });
+          }
           break;
         }
 
