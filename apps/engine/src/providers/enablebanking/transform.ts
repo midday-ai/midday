@@ -48,7 +48,7 @@ function getAccountName(account: GetAccountDetailsResponse) {
  * - CACC: Current account → depository
  * - CARD: Card account → credit
  * - SVGS: Savings account → depository
- * - LOAN: Loan account → loan (mapped to other_asset for now)
+ * - LOAN: Loan account → other_asset
  * - CASH: Cash account → depository
  */
 function getAccountType(cashAccountType?: string): AccountType {
@@ -56,7 +56,7 @@ function getAccountType(cashAccountType?: string): AccountType {
     case "CARD":
       return "credit";
     case "LOAN":
-      return "loan";
+      return "other_asset";
     default:
       return "depository";
   }

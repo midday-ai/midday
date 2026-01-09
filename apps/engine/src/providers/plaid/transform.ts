@@ -50,11 +50,10 @@ export const mapTransactionCategory = ({
     return "income";
   }
 
-  // Plaid categorizes credit card payments as LOAN_PAYMENTS
+  // Plaid categorizes credit card payments under the detailed category
   if (
-    transaction.personal_finance_category?.primary === "LOAN_PAYMENTS" ||
     transaction.personal_finance_category?.detailed ===
-      "LOAN_PAYMENTS_CREDIT_CARD_PAYMENT"
+    "LOAN_PAYMENTS_CREDIT_CARD_PAYMENT"
   ) {
     return "credit-card-payment";
   }
