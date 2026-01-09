@@ -572,7 +572,7 @@ export function TrackerSchedule() {
     eventId,
     setParams,
   } = useTrackerParams();
-  const { latestProjectId } = useLatestProjectId();
+  const { latestProjectId } = useLatestProjectId(user?.teamId);
   const scrollRef = useRef<HTMLDivElement>(null);
   const trpc = useTRPC();
 

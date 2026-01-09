@@ -33,7 +33,7 @@ export function TrackerUpdateSheet() {
   const { data: team } = useTeamQuery();
   const defaultCurrency = team?.baseCurrency || "USD";
   const { setParams, update, projectId } = useTrackerParams();
-  const { latestProjectId, setLatestProjectId } = useLatestProjectId();
+  const { latestProjectId, setLatestProjectId } = useLatestProjectId(team?.id);
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 

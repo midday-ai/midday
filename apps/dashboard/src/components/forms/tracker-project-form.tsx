@@ -5,6 +5,7 @@ import { SelectTags } from "@/components/select-tags";
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useLatestProjectId } from "@/hooks/use-latest-project-id";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useUserQuery } from "@/hooks/use-user";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
@@ -65,9 +66,10 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
   const isEdit = !!data;
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const { data: user } = useUserQuery();
   const { setParams: setTrackerParams } = useTrackerParams();
   const { setParams: setCustomerParams } = useCustomerParams();
-  const { setLatestProjectId } = useLatestProjectId();
+  const { setLatestProjectId } = useLatestProjectId(user?.teamId);
 
   const upsertTrackerProjectMutation = useMutation(
     trpc.trackerProjects.upsert.mutationOptions({
