@@ -16,14 +16,14 @@ import { Check } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 
-// Maximum polling attempts (20 * 1500ms = 30 seconds)
-const MAX_POLL_RETRIES = 20;
+// Polling timeout in milliseconds (30 seconds)
+const POLLING_TIMEOUT_MS = 30_000;
 
 export function Plans() {
   const [isSubmitting, setIsSubmitting] = useState(0);
   const [isPollingForPlan, setIsPollingForPlan] = useState(false);
   const isPollingRef = useRef(false); // Ref to track polling state for event handlers
-  const pollCountRef = useRef(0); // Track number of poll attempts
+  const pollingStartedAtRef = useRef<number | null>(null);
   const trpc = useTRPC();
   const checkoutInstanceRef = useRef<Awaited<
     ReturnType<typeof PolarEmbedCheckout.create>
@@ -32,7 +32,24 @@ export function Plans() {
   // Poll for plan update after checkout success
   const { data: user } = useQuery({
     ...trpc.user.me.queryOptions(),
-    refetchInterval: isPollingForPlan ? 1500 : false,
+    refetchInterval: (query) => {
+      if (!isPollingForPlan) return false;
+
+      // Plan updated - stop polling
+      if (query.state.data?.team?.plan !== "trial") {
+        return false;
+      }
+
+      // Timeout exceeded - stop polling
+      if (
+        pollingStartedAtRef.current &&
+        Date.now() - pollingStartedAtRef.current > POLLING_TIMEOUT_MS
+      ) {
+        return false;
+      }
+
+      return 1500;
+    },
   });
   const { data, isLoading } = useQuery(trpc.team.availablePlans.queryOptions());
   const theme = useTheme().resolvedTheme === "dark" ? "dark" : "light";
@@ -51,28 +68,25 @@ export function Plans() {
     };
   }, []);
 
-  // Watch for plan change after checkout - then revalidate and redirect
+  // Handle polling completion (success or timeout)
   useEffect(() => {
     if (!isPollingForPlan) return;
 
-    pollCountRef.current += 1;
+    const isTimedOut =
+      pollingStartedAtRef.current &&
+      Date.now() - pollingStartedAtRef.current > POLLING_TIMEOUT_MS;
+    const planUpdated = user?.team?.plan !== "trial";
 
-    // Plan updated successfully
-    if (user?.team?.plan !== "trial") {
-      pollCountRef.current = 0;
+    if (planUpdated || isTimedOut) {
+      pollingStartedAtRef.current = null;
       setIsPollingForPlan(false);
       isPollingRef.current = false;
-      revalidateAfterCheckout();
-      return;
-    }
 
-    // Timeout: max retries exceeded - proceed anyway to avoid infinite polling
-    if (pollCountRef.current >= MAX_POLL_RETRIES) {
-      pollCountRef.current = 0;
-      setIsPollingForPlan(false);
-      isPollingRef.current = false;
-      setIsSubmitting(0);
-      // Revalidate anyway - the webhook may have succeeded but cache is stale
+      if (isTimedOut && !planUpdated) {
+        setIsSubmitting(0);
+      }
+
+      // Revalidate in both cases - webhook may have succeeded but cache is stale
       revalidateAfterCheckout();
     }
   }, [isPollingForPlan, user?.team?.plan]);
@@ -98,8 +112,8 @@ export function Plans() {
       checkout.addEventListener("success", (event: any) => {
         // Prevent Polar's automatic redirect
         event.preventDefault();
-        // Reset poll count and start polling for plan update
-        pollCountRef.current = 0;
+        // Start polling for plan update with timestamp for timeout
+        pollingStartedAtRef.current = Date.now();
         isPollingRef.current = true;
         setIsPollingForPlan(true);
       });
