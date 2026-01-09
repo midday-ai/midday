@@ -83,7 +83,7 @@ function ConnectionState({
     );
   }
 
-  if (show) {
+  if (show && !expired) {
     return (
       <>
         <div className="text-xs font-normal flex items-center space-x-1 text-[#FFD02B]">
