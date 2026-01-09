@@ -166,9 +166,11 @@ export async function PdfTemplate({
             flex: 1,
             flexDirection: "column",
             justifyContent: "flex-end",
+            marginTop: 20,
           }}
         >
-          <Summary
+          <View wrap={false}>
+            <Summary
             amount={amount}
             tax={tax}
             vat={vat}
@@ -189,8 +191,9 @@ export async function PdfTemplate({
             subtotalLabel={template.subtotalLabel}
             lineItems={lineItems}
           />
+          </View>
 
-          <View style={{ flexDirection: "row", marginTop: 20 }}>
+          <View wrap={false} style={{ flexDirection: "row", marginTop: 20 }}>
             <View style={{ flex: 1, marginRight: 10 }}>
               <PaymentDetails
                 content={paymentDetails}
