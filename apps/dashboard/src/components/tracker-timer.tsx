@@ -1,6 +1,7 @@
 "use client";
 
 import { useGlobalTimerStatus } from "@/hooks/use-global-timer-status";
+import { useTimerStore } from "@/store/timer";
 import { useTRPC } from "@/trpc/client";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
@@ -32,6 +33,7 @@ export function TrackerTimer({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const setTimerStatus = useTimerStore((state) => state.setTimerStatus);
 
   // Use global timer status to avoid duplicate intervals
   const { isRunning: globalIsRunning, elapsedTime: globalElapsedTime } =
@@ -88,7 +90,7 @@ export function TrackerTimer({
           queryKey: trpc.trackerEntries.getTimerStatus.queryKey(),
         });
 
-        // Optimistically update to the new value
+        // Optimistically update React Query cache (include project name for GlobalTimerProvider)
         queryClient.setQueryData(
           trpc.trackerEntries.getTimerStatus.queryKey(),
           (old: any) => ({
@@ -97,10 +99,22 @@ export function TrackerTimer({
             currentEntry: {
               ...old?.currentEntry,
               projectId: variables.projectId,
+              trackerProject: {
+                ...old?.currentEntry?.trackerProject,
+                name: projectName,
+              },
             },
             elapsedTime: 0,
           }),
         );
+
+        // Immediately update Zustand store for instant UI feedback
+        setTimerStatus({
+          isRunning: true,
+          elapsedTime: 0,
+          projectName,
+          projectId: variables.projectId,
+        });
       },
       onSuccess: () => {
         // Invalidate queries to sync with server
@@ -127,7 +141,7 @@ export function TrackerTimer({
         const currentElapsedTime = totalElapsedSeconds;
         const currentProjectName = projectName;
 
-        // Optimistically update to stop the timer
+        // Optimistically update React Query cache
         queryClient.setQueryData(
           trpc.trackerEntries.getTimerStatus.queryKey(),
           (old: any) => ({
@@ -138,9 +152,17 @@ export function TrackerTimer({
           }),
         );
 
+        // Immediately update Zustand store to stop interval and reset UI
+        setTimerStatus({
+          isRunning: false,
+          elapsedTime: 0,
+          projectName: null,
+          projectId: null,
+        });
+
         return { currentElapsedTime, currentProjectName };
       },
-      onSuccess: (_, __, context) => {
+      onSuccess: (data, __, context) => {
         // Invalidate queries to sync with server
         queryClient.invalidateQueries({
           queryKey: trpc.trackerEntries.getTimerStatus.queryKey(),
@@ -158,11 +180,19 @@ export function TrackerTimer({
           queryKey: trpc.trackerProjects.get.infiniteQueryKey(),
         });
 
-        toast({
-          title: "Timer stopped",
-          description: `${secondsToHoursAndMinutes(context?.currentElapsedTime ?? 0)} added to ${context?.currentProjectName}`,
-          variant: "success",
-        });
+        // Check if the entry was discarded due to short duration
+        if (data?.discarded) {
+          toast({
+            title: "Timer discarded",
+            description: "Entry was under 1 minute and was not saved",
+          });
+        } else {
+          toast({
+            title: "Timer stopped",
+            description: `${secondsToHoursAndMinutes(context?.currentElapsedTime ?? 0)} added to ${context?.currentProjectName}`,
+            variant: "success",
+          });
+        }
       },
     }),
   );

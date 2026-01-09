@@ -1,6 +1,7 @@
 "use client";
 
 import { useLatestProjectId } from "@/hooks/use-latest-project-id";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { Combobox } from "@midday/ui/combobox";
 import { useToast } from "@midday/ui/use-toast";
@@ -26,8 +27,10 @@ export function TrackerSelectProject({
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { data: user } = useUserQuery();
   const [value, setValue] = useState<Option | undefined>();
-  const { setLatestProjectId } = useLatestProjectId();
+  const [isOpen, setIsOpen] = useState(false);
+  const { setLatestProjectId } = useLatestProjectId(user?.teamId);
 
   const { data, isLoading, refetch } = useQuery(
     trpc.trackerProjects.get.queryOptions({
@@ -86,6 +89,20 @@ export function TrackerSelectProject({
       setLatestProjectId(selected?.id);
       setValue(selected);
       onSelect(selected);
+      setIsOpen(false); // Close dropdown after selection
+    }
+  };
+
+  const handleClear = () => {
+    setLatestProjectId(null);
+    setValue(undefined);
+  };
+
+  const handleValueChange = (inputValue: string) => {
+    // If input is cleared, remove the selection but keep dropdown open
+    if (!inputValue && value) {
+      handleClear();
+      setIsOpen(true);
     }
   };
 
@@ -93,12 +110,16 @@ export function TrackerSelectProject({
     <Combobox
       key={value?.id}
       placeholder="Search or create project"
-      classNameList="-top-[4px] border-t-0 rounded-none rounded-b-md"
+      classNameList="top-full mt-1 max-h-[162px] overflow-y-auto"
       className="w-full bg-transparent px-12 border py-3"
       onSelect={handleSelect}
+      onValueChange={handleValueChange}
       options={options}
       value={value}
       isLoading={isLoading}
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      onFocus={() => !value && setIsOpen(true)}
       onCreate={(name) => {
         if (name) {
           upsertTrackerProjectMutation.mutate({ name });

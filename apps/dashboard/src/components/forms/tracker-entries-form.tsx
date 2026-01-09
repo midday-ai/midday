@@ -54,8 +54,8 @@ export function TrackerEntriesForm({
   onTimeChange,
 }: Props) {
   const { projectId: selectedProjectId } = useTrackerParams();
-  const { latestProjectId } = useLatestProjectId();
   const { data: user } = useUserQuery();
+  const { latestProjectId } = useLatestProjectId(user?.teamId);
 
   // Helper to get user timezone with fallback
   const getUserTimezone = () => user?.timezone || "UTC";
