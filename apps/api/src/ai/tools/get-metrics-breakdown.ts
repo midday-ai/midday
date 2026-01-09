@@ -391,7 +391,7 @@ export const getMetricsBreakdownTool = tool({
 
               return {
                 id: tx.id,
-                date: format(new Date(tx.date), "MMM d, yyyy"),
+                date: format(parseISO(tx.date), "MMM d, yyyy"),
                 name: tx.name,
                 amount: txAmount,
                 formattedAmount:
@@ -431,7 +431,7 @@ export const getMetricsBreakdownTool = tool({
           totalTransactionCount += transactionCount;
 
           // Store monthly data for comparison
-          const monthLabel = format(new Date(monthFrom), "MMM yyyy");
+          const monthLabel = format(parseISO(monthFrom), "MMM yyyy");
           allMonthlyData.push({
             monthKey,
             monthLabel,
@@ -632,7 +632,7 @@ Provide a concise analysis (3-4 sentences) highlighting key insights, trends, an
           messages: [
             {
               role: "user",
-              content: `Analyze this multi-month financial breakdown for ${appContext.companyName || "the business"} from ${format(new Date(finalFrom), "MMM d, yyyy")} to ${format(new Date(finalTo), "MMM d, yyyy")}:
+              content: `Analyze this multi-month financial breakdown for ${appContext.companyName || "the business"} from ${format(parseISO(finalFrom), "MMM d, yyyy")} to ${format(parseISO(finalTo), "MMM d, yyyy")}:
 
 Total Period Summary:
 - Revenue: ${formatAmount({ amount: totalRevenue, currency: targetCurrency, locale })}
@@ -686,7 +686,7 @@ Write it as natural, flowing text.`,
           locale,
         });
 
-        let responseText = `Financial breakdown for ${format(new Date(finalFrom), "MMM d, yyyy")} to ${format(new Date(finalTo), "MMM d, yyyy")}: ${formattedRevenue} in revenue, ${formattedExpenses} in expenses, resulting in ${formattedProfit} profit across ${monthlyPeriods.length} month${monthlyPeriods.length > 1 ? "s" : ""}.\n\n`;
+        let responseText = `Financial breakdown for ${format(parseISO(finalFrom), "MMM d, yyyy")} to ${format(parseISO(finalTo), "MMM d, yyyy")}: ${formattedRevenue} in revenue, ${formattedExpenses} in expenses, resulting in ${formattedProfit} profit across ${monthlyPeriods.length} month${monthlyPeriods.length > 1 ? "s" : ""}.\n\n`;
         responseText += `${summaryText}\n\n`;
         responseText +=
           "Detailed monthly breakdowns are available for each month.";
@@ -699,7 +699,7 @@ Write it as natural, flowing text.`,
         const formattedAggregatedTransactions = aggregatedTransactions.map(
           (tx) => ({
             id: `aggregated-${tx.name}-${tx.category}`, // Synthetic ID for aggregated transactions
-            date: `${format(new Date(finalFrom), "MMM d")} - ${format(new Date(finalTo), "MMM d, yyyy")}`, // Date range
+            date: `${format(parseISO(finalFrom), "MMM d")} - ${format(parseISO(finalTo), "MMM d, yyyy")}`, // Date range
             name: tx.name,
             amount: tx.amount,
             formattedAmount: tx.formattedAmount,
@@ -887,7 +887,7 @@ Write it as natural, flowing text.`,
 
           return {
             id: tx.id,
-            date: format(new Date(tx.date), "MMM d, yyyy"),
+            date: format(parseISO(tx.date), "MMM d, yyyy"),
             name: tx.name,
             amount: txAmount,
             formattedAmount:
@@ -953,7 +953,7 @@ Write it as natural, flowing text.`,
         messages: [
           {
             role: "user",
-            content: `Analyze this financial breakdown for ${appContext.companyName || "the business"} from ${format(new Date(finalFrom), "MMM d, yyyy")} to ${format(new Date(finalTo), "MMM d, yyyy")}:
+            content: `Analyze this financial breakdown for ${appContext.companyName || "the business"} from ${format(parseISO(finalFrom), "MMM d, yyyy")} to ${format(parseISO(finalTo), "MMM d, yyyy")}:
 
 Revenue: ${formatAmount({ amount: revenue, currency: targetCurrency, locale })}
 Expenses: ${formatAmount({ amount: expenses, currency: targetCurrency, locale })}
@@ -1017,7 +1017,7 @@ Provide a concise analysis (3-4 sentences) highlighting key insights, trends, an
 
       if (showCanvas) {
         // Simplified text-focused response when canvas is shown
-        responseText = `Financial breakdown for ${format(new Date(finalFrom), "MMM d, yyyy")} to ${format(new Date(finalTo), "MMM d, yyyy")}: ${formattedRevenue} in revenue, ${formattedExpenses} in expenses, resulting in ${formattedProfit} profit.`;
+        responseText = `Financial breakdown for ${format(parseISO(finalFrom), "MMM d, yyyy")} to ${format(parseISO(finalTo), "MMM d, yyyy")}: ${formattedRevenue} in revenue, ${formattedExpenses} in expenses, resulting in ${formattedProfit} profit.`;
         responseText +=
           "\n\nA detailed visual breakdown with transactions, categories, and analysis is available.";
       } else {

@@ -27,6 +27,7 @@ import {
   format,
   getHours,
   getMinutes,
+  parseISO,
   setHours,
   setMinutes,
   startOfDay,
@@ -104,8 +105,8 @@ export function SubmitButton({ isSubmitting, disabled }: Props) {
     const currentDueDate = watch("dueDate");
 
     if (currentIssueDate && currentDueDate) {
-      const issueDateTime = new Date(currentIssueDate);
-      const dueDateTime = new Date(currentDueDate);
+      const issueDateTime = parseISO(currentIssueDate);
+      const dueDateTime = parseISO(currentDueDate);
 
       // Calculate the payment period
       const paymentPeriodMs = differenceInMilliseconds(

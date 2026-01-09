@@ -1300,7 +1300,7 @@ export async function getInvoicePaymentAnalysis(
       (inv.status === "overdue" ||
         (inv.status === "unpaid" &&
           inv.dueDate &&
-          new Date(inv.dueDate) < new Date())) &&
+          parseISO(inv.dueDate) < new Date())) &&
       !inv.paidAt,
   );
 
@@ -1419,7 +1419,7 @@ export async function getInvoicePaymentAnalysis(
   for (const invoice of overdueInvoices) {
     if (invoice.dueDate) {
       const daysOverdue =
-        (now.getTime() - new Date(invoice.dueDate).getTime()) /
+        (now.getTime() - parseISO(invoice.dueDate).getTime()) /
         (1000 * 60 * 60 * 24);
       oldestDays = Math.max(oldestDays, Math.round(daysOverdue));
     }

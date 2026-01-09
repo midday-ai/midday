@@ -1,7 +1,7 @@
 import { getAppByAppId } from "@midday/db/queries";
 import { getWorkerDb } from "@midday/db/worker-client";
 import { createLoggerWithContext } from "@midday/logger";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { createSlackWebClient, ensureBotInChannel } from "../client";
 
 const logger = createLoggerWithContext("slack:match-notification");
@@ -86,10 +86,10 @@ export async function sendSlackMatchNotification({
 
   // Format dates
   const formattedDocumentDate = documentDate
-    ? format(new Date(documentDate), "MMM d, yyyy")
+    ? format(parseISO(documentDate), "MMM d, yyyy")
     : "N/A";
   const formattedTransactionDate = transactionDate
-    ? format(new Date(transactionDate), "MMM d, yyyy")
+    ? format(parseISO(transactionDate), "MMM d, yyyy")
     : "N/A";
 
   try {

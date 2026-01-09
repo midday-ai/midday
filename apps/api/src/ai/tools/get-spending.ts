@@ -11,7 +11,7 @@ import { getTransactions } from "@midday/db/queries";
 import { formatAmount, formatDate } from "@midday/utils/format";
 import { generateText } from "ai";
 import { tool } from "ai";
-import { endOfMonth, startOfMonth } from "date-fns";
+import { endOfMonth, parseISO, startOfMonth } from "date-fns";
 import { z } from "zod";
 
 const getSpendingSchema = z.object({
@@ -130,8 +130,8 @@ export const getSpendingTool = tool({
         .slice(0, 10); // Take top 10
 
       // Calculate average monthly spending
-      const fromDate = new Date(finalFrom);
-      const toDate = new Date(finalTo);
+      const fromDate = parseISO(finalFrom);
+      const toDate = parseISO(finalTo);
       const monthsDiff =
         (toDate.getFullYear() - fromDate.getFullYear()) * 12 +
         (toDate.getMonth() - fromDate.getMonth()) +

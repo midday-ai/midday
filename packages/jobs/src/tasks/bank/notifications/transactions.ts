@@ -2,6 +2,7 @@ import { getDb } from "@jobs/init";
 import { Notifications } from "@midday/notifications";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk";
+import { parseISO } from "date-fns";
 import { z } from "zod";
 
 export const transactionNotifications = schemaTask({
@@ -27,7 +28,7 @@ export const transactionNotifications = schemaTask({
         .throwOnError();
 
       const sortedTransactions = transactionsData?.sort((a, b) => {
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
+        return parseISO(b.date).getTime() - parseISO(a.date).getTime();
       });
 
       if (sortedTransactions && sortedTransactions.length > 0) {

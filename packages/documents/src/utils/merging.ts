@@ -1,3 +1,4 @@
+import { parseISO } from "date-fns";
 import type { z } from "zod/v4";
 import type { invoiceSchema, receiptSchema } from "../schema";
 import {
@@ -108,8 +109,8 @@ const invoiceMergeRules: Record<string, (primary: any, secondary: any) => any> =
       if (!primary) return secondary;
       if (!secondary) return primary;
       // If both exist, prefer the one that's more recent (likely more accurate)
-      const primaryDate = new Date(primary);
-      const secondaryDate = new Date(secondary);
+      const primaryDate = parseISO(primary);
+      const secondaryDate = parseISO(secondary);
       return primaryDate >= secondaryDate ? primary : secondary;
     },
 
@@ -167,8 +168,8 @@ const receiptMergeRules: Record<string, (primary: any, secondary: any) => any> =
       if (!primary && !secondary) return null;
       if (!primary) return secondary;
       if (!secondary) return primary;
-      const primaryDate = new Date(primary);
-      const secondaryDate = new Date(secondary);
+      const primaryDate = parseISO(primary);
+      const secondaryDate = parseISO(secondary);
       return primaryDate >= secondaryDate ? primary : secondary;
     },
   };

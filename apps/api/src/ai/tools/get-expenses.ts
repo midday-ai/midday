@@ -10,6 +10,7 @@ import { getSpending, getSpendingForPeriod } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
 import { generateText } from "ai";
 import { tool } from "ai";
+import { parseISO } from "date-fns";
 import { z } from "zod";
 
 const getExpensesSchema = z.object({
@@ -105,8 +106,8 @@ export const getExpensesTool = tool({
       }));
 
       // Calculate average monthly expenses
-      const fromDate = new Date(finalFrom);
-      const toDate = new Date(finalTo);
+      const fromDate = parseISO(finalFrom);
+      const toDate = parseISO(finalTo);
       const monthsDiff =
         (toDate.getFullYear() - fromDate.getFullYear()) * 12 +
         (toDate.getMonth() - fromDate.getMonth()) +

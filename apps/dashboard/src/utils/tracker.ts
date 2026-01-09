@@ -331,7 +331,9 @@ export const updateEventTime = (
 
 // Date range utilities
 export function sortDates(dates: string[]) {
-  return dates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+  return dates.sort(
+    (a, b) => parseISO(a).getTime() - parseISO(b).getTime(),
+  );
 }
 
 export function getTrackerDates(
@@ -339,11 +341,11 @@ export function getTrackerDates(
   selectedDate: string | null,
 ): Date[] {
   if (range) {
-    return sortDates(range).map((dateString) => new Date(dateString));
+    return sortDates(range).map((dateString) => parseISO(dateString));
   }
 
   if (selectedDate) {
-    return [new Date(selectedDate)];
+    return [parseISO(selectedDate)];
   }
 
   return [new Date()];

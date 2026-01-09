@@ -1,7 +1,7 @@
 import { getChartDisplayName } from "@/components/metrics/utils/chart-types";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { isValidLogoUrl } from "@midday/invoice";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { notFound } from "next/navigation";
 import { ImageResponse } from "next/og";
 
@@ -41,8 +41,8 @@ export default async function Image({ params }: Props) {
   ).then((res) => res.arrayBuffer());
 
   const chartName = getChartDisplayName(report.type as any);
-  const fromDate = new Date(report.from!);
-  const toDate = new Date(report.to!);
+  const fromDate = parseISO(report.from!);
+  const toDate = parseISO(report.to!);
   const dateRangeDisplay = `${format(fromDate, "MMM d")} - ${format(
     toDate,
     "MMM d, yyyy",

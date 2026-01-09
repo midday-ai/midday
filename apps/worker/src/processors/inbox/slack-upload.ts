@@ -16,7 +16,7 @@ import { createClient } from "@midday/supabase/job";
 import { getExtensionFromMimeType } from "@midday/utils";
 import { generateText } from "ai";
 import type { Job } from "bullmq";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import type { SlackUploadPayload } from "../../schemas/inbox";
 import { getDb } from "../../utils/db";
 import { TIMEOUTS, withTimeout } from "../../utils/timeout";
@@ -360,7 +360,7 @@ Focus on what was purchased (e.g., "office supplies", "software subscription", "
           if (updatedInbox.date) {
             detailFields.push({
               type: "mrkdwn",
-              text: `*Date*\n${format(new Date(updatedInbox.date), "MMM d, yyyy")}`,
+              text: `*Date*\n${format(parseISO(updatedInbox.date), "MMM d, yyyy")}`,
             });
           }
 

@@ -1989,7 +1989,7 @@ export async function getOverdueInvoicesAlert(
   let daysOverdue = 0;
   if (oldestDueDate) {
     const now = new Date();
-    const dueDate = new Date(oldestDueDate);
+    const dueDate = parseISO(oldestDueDate);
     daysOverdue = Math.floor(
       (now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24),
     );
@@ -2544,7 +2544,7 @@ export async function getRevenueForecast(
     // Calculate same-month-last-year comparison
     const currentMonthIndex = new Date().getMonth();
     const lastYearSameMonth = historical.find((item) => {
-      const itemMonth = new Date(item.date).getMonth();
+      const itemMonth = parseISO(item.date).getMonth();
       return itemMonth === currentMonthIndex;
     });
 

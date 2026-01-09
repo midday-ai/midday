@@ -1,3 +1,4 @@
+import { parseISO } from "date-fns";
 import { createWhatsAppClient } from "../client";
 import { formatMatchNotification } from "../messages";
 
@@ -33,7 +34,7 @@ function formatDate(dateString?: string): string | undefined {
       month: "short",
       day: "numeric",
       year: "numeric",
-    }).format(new Date(dateString));
+    }).format(parseISO(dateString));
   } catch {
     return undefined;
   }

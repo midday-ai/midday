@@ -3,7 +3,7 @@ import { PublicMetricView } from "@/components/public-metric-view";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -73,8 +73,8 @@ export default async function Page({ params }: Props) {
   }
 
   const chartName = getChartDisplayName(report.type as any);
-  const fromDate = new Date(report.from!);
-  const toDate = new Date(report.to!);
+  const fromDate = parseISO(report.from!);
+  const toDate = parseISO(report.to!);
   const dateRangeDisplay = `${format(fromDate, "MMM d")} - ${format(
     toDate,
     "MMM d, yyyy",

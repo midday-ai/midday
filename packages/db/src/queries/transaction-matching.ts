@@ -8,6 +8,7 @@ import {
   transactions,
 } from "@db/schema";
 import { createLoggerWithContext } from "@midday/logger";
+import { parseISO } from "date-fns";
 
 const logger = createLoggerWithContext("matching");
 import {
@@ -1053,10 +1054,10 @@ export async function findMatches(
     // 2. If both are perfect or both are imperfect, sort by date proximity
     if (inboxItem.date) {
       const aDateDiff = Math.abs(
-        new Date(a.date).getTime() - new Date(inboxItem.date).getTime(),
+        parseISO(a.date).getTime() - parseISO(inboxItem.date).getTime(),
       );
       const bDateDiff = Math.abs(
-        new Date(b.date).getTime() - new Date(inboxItem.date).getTime(),
+        parseISO(b.date).getTime() - parseISO(inboxItem.date).getTime(),
       );
       const dateDiffThreshold = 24 * 60 * 60 * 1000; // 1 day in milliseconds
 
@@ -1099,7 +1100,7 @@ export async function findMatches(
               0.01;
           const dateDiff = inboxItem.date
             ? Math.abs(
-                new Date(c.date).getTime() - new Date(inboxItem.date).getTime(),
+                parseISO(c.date).getTime() - parseISO(inboxItem.date).getTime(),
               ) /
               (24 * 60 * 60 * 1000)
             : null;

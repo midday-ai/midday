@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { parseAsInteger, useQueryState } from "nuqs";
 
 function getBalanceSheetTooltip(item: string): string {
@@ -60,7 +60,7 @@ export function BalanceSheetCanvas() {
   const metrics = data?.metrics;
   const currency = data?.currency || "USD";
   const asOf = data?.asOf
-    ? format(new Date(data.asOf), "MMMM dd, yyyy")
+    ? format(parseISO(data.asOf), "MMMM dd, yyyy")
     : undefined;
 
   // Format financial ratios for display

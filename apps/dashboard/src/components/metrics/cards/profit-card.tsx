@@ -65,7 +65,7 @@ export function ProfitCard({
       currentValues.reduce((sum, val) => sum + val, 0) / currentValues.length;
 
     return profitData.result.map((item) => ({
-      month: format(new Date(item.current.date), "MMM"),
+      month: format(parseISO(item.current.date), "MMM"),
       profit: item.current.value,
       lastYearProfit: item.previous.value,
       average,

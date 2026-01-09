@@ -1,5 +1,6 @@
 import type { Database } from "@db/client";
 import { customers, invoiceStatusEnum, invoices } from "@db/schema";
+import { parseISO } from "date-fns";
 import { and, eq, gte, inArray, lte, sql } from "drizzle-orm";
 
 export type GetTopRevenueClientParams = {
@@ -132,8 +133,8 @@ export async function getCustomerLifetimeValue(
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
   const customersWithMetrics = customerValues.map((customer) => {
-    const lastInvoice = new Date(customer.lastInvoiceDate);
-    const firstInvoice = new Date(customer.firstInvoiceDate);
+    const lastInvoice = parseISO(customer.lastInvoiceDate);
+    const firstInvoice = parseISO(customer.firstInvoiceDate);
 
     // Calculate lifespan (from first invoice to last invoice or now)
     const lifespanMs = lastInvoice.getTime() - firstInvoice.getTime();
