@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
-import { format, formatISO } from "date-fns";
+import { format, formatISO, parseISO } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { type PresetOption, getPresetOptions } from "../utils/date-presets";
@@ -38,8 +38,8 @@ export function MetricsDatePicker({
     if (!from || !to) return undefined;
     try {
       return {
-        from: new Date(from),
-        to: new Date(to),
+        from: parseISO(from),
+        to: parseISO(to),
       };
     } catch {
       return undefined;

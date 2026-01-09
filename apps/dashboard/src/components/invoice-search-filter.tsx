@@ -31,7 +31,7 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useQuery } from "@tanstack/react-query";
-import { formatISO } from "date-fns";
+import { formatISO, parseISO } from "date-fns";
 import { useCallback, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FilterList } from "./filter-list";
@@ -241,8 +241,8 @@ export function InvoiceSearchFilter() {
                   mode="range"
                   initialFocus
                   selected={{
-                    from: filter?.start ? new Date(filter.start) : undefined,
-                    to: filter?.end ? new Date(filter.end) : undefined,
+                    from: filter?.start ? parseISO(filter.start) : undefined,
+                    to: filter?.end ? parseISO(filter.end) : undefined,
                   }}
                   onSelect={(range) => {
                     setFilter({

@@ -2,7 +2,7 @@ import { formatAccountName } from "@/utils/format";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { formatDateRange } from "little-date";
 
 type FilterKey =
@@ -79,12 +79,12 @@ export function FilterList({
       case "start": {
         const startValue = value as FilterValue["start"];
         if (startValue && filters.end) {
-          return formatDateRange(new Date(startValue), new Date(filters.end), {
+          return formatDateRange(parseISO(startValue), parseISO(filters.end), {
             includeTime: false,
           });
         }
 
-        return startValue && format(new Date(startValue), "MMM d, yyyy");
+        return startValue && format(parseISO(startValue), "MMM d, yyyy");
       }
 
       case "amount_range": {

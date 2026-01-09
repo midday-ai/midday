@@ -1,5 +1,5 @@
 import { getFiscalYearDates } from "@midday/utils";
-import { format, formatISO, subMonths, subYears } from "date-fns";
+import { format, formatISO, parseISO, subMonths, subYears } from "date-fns";
 
 export type PeriodOption =
   | "3-months"
@@ -33,8 +33,8 @@ export function getPeriodLabel(
       return "Fiscal year";
     case "custom":
       if (from && to) {
-        const fromDate = new Date(from);
-        const toDate = new Date(to);
+        const fromDate = parseISO(from);
+        const toDate = parseISO(to);
         return `${format(fromDate, "MMM d")} - ${format(toDate, "MMM d, yyyy")}`;
       }
       return "Custom";
