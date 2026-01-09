@@ -12,17 +12,17 @@ import {
 } from "date-fns";
 import type { DateRange } from "react-day-picker";
 
-export type TransactionPresetOption = {
+export type DatePresetOption = {
   label: string;
   value: string;
   dateRange: DateRange;
 };
 
 /**
- * Get accounting-focused date presets for transaction filtering.
+ * Get accounting-focused date presets for filtering.
  * Optimized for bookkeeping and reconciliation workflows.
  */
-export function getTransactionDatePresets(): TransactionPresetOption[] {
+export function getDatePresets(): DatePresetOption[] {
   const now = new Date();
 
   return [

@@ -2,6 +2,7 @@
 
 import { FormatAmount } from "@/components/format-amount";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { TZDate } from "@date-fns/tz";
 import {
@@ -128,6 +129,7 @@ export function EditRecurringSheet() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { editRecurringId, setParams } = useInvoiceParams();
+  const { data: user } = useUserQuery();
 
   const isOpen = Boolean(editRecurringId);
 
@@ -389,6 +391,7 @@ export function EditRecurringSheet() {
                           <PopoverContent className="w-auto p-0" align="start">
                             <Calendar
                               mode="single"
+                              weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
                               selected={
                                 config.endDate
                                   ? new TZDate(config.endDate, "UTC")

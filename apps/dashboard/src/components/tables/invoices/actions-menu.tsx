@@ -322,6 +322,7 @@ export function ActionsMenu({ row }: Props) {
                 <DropdownMenuSubContent>
                   <Calendar
                     mode="single"
+                    weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
                     toDate={new Date()}
                     selected={new Date()}
                     onSelect={(date) => {

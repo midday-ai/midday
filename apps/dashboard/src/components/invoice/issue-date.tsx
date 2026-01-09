@@ -1,4 +1,5 @@
 import { useTemplateUpdate } from "@/hooks/use-template-update";
+import { useUserQuery } from "@/hooks/use-user";
 import { TZDate } from "@date-fns/tz";
 import { localDateToUTCMidnight } from "@midday/invoice/recurring";
 import { Calendar } from "@midday/ui/calendar";
@@ -10,6 +11,7 @@ import { LabelInput } from "./label-input";
 
 export function IssueDate() {
   const { setValue, watch } = useFormContext();
+  const { data: user } = useUserQuery();
   const issueDate = watch("issueDate");
   const dateFormat = watch("template.dateFormat");
   const [isOpen, setIsOpen] = useState(false);
@@ -51,6 +53,7 @@ export function IssueDate() {
         <PopoverContent className="w-auto p-0">
           <Calendar
             mode="single"
+            weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
             defaultMonth={selectedDate}
             selected={selectedDate}
             onSelect={handleSelect}

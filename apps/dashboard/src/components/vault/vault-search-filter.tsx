@@ -8,6 +8,7 @@ import type { VaultFilterSchema } from "@/app/api/ai/filters/vault/schema";
 import { FilterList } from "@/components/filter-list";
 import { normalizeString, useAIFilter } from "@/hooks/use-ai-filter";
 import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
@@ -35,6 +36,7 @@ export function VaultSearchFilter() {
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const trpc = useTRPC();
+  const { data: user } = useUserQuery();
 
   const { filter, setFilter } = useDocumentFilterParams();
   const [input, setInput] = useState(filter.q ?? "");
@@ -184,6 +186,7 @@ export function VaultSearchFilter() {
                 <Calendar
                   mode="range"
                   initialFocus
+                  weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
                   toDate={new Date()}
                   selected={
                     filter.start || filter.end

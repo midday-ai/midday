@@ -1,6 +1,7 @@
 "use client";
 
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
@@ -49,6 +50,7 @@ export function InvoiceActions({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { setParams } = useInvoiceParams();
+  const { data: user } = useUserQuery();
   const [cancelSeriesOpen, setCancelSeriesOpen] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
 
@@ -429,6 +431,7 @@ export function InvoiceActions({
                   <DropdownMenuSubContent>
                     <Calendar
                       mode="single"
+                      weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
                       toDate={new Date()}
                       selected={new Date()}
                       onSelect={(date) => {

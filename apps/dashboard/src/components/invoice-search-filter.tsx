@@ -14,7 +14,6 @@ import {
 import { useInvoiceFilterParams } from "@/hooks/use-invoice-filter-params";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
-import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
@@ -31,9 +30,10 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useQuery } from "@tanstack/react-query";
-import { formatISO, parseISO } from "date-fns";
+import { formatISO } from "date-fns";
 import { useCallback, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import { DateRangeFilter } from "./date-range-filter";
 import { FilterList } from "./filter-list";
 
 const allowedStatuses = [
@@ -237,23 +237,10 @@ export function InvoiceSearchFilter() {
                 alignOffset={-4}
                 className="p-0"
               >
-                <Calendar
-                  mode="range"
-                  initialFocus
-                  selected={{
-                    from: filter?.start ? parseISO(filter.start) : undefined,
-                    to: filter?.end ? parseISO(filter.end) : undefined,
-                  }}
-                  onSelect={(range) => {
-                    setFilter({
-                      start: range?.from
-                        ? formatISO(range.from, { representation: "date" })
-                        : null,
-                      end: range?.to
-                        ? formatISO(range.to, { representation: "date" })
-                        : null,
-                    });
-                  }}
+                <DateRangeFilter
+                  start={filter?.start}
+                  end={filter?.end}
+                  onSelect={setFilter}
                 />
               </DropdownMenuSubContent>
             </DropdownMenuPortal>

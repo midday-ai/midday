@@ -12,6 +12,7 @@ import {
   validateEnumArray,
 } from "@/hooks/use-ai-filter";
 import { useTrackerFilterParams } from "@/hooks/use-tracker-filter-params";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
@@ -46,6 +47,7 @@ export function TrackerSearchFilter() {
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const trpc = useTRPC();
+  const { data: user } = useUserQuery();
 
   const { filter, setFilter } = useTrackerFilterParams();
 
@@ -248,6 +250,7 @@ export function TrackerSearchFilter() {
                 <Calendar
                   mode="range"
                   initialFocus
+                  weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
                   toDate={new Date()}
                   selected={
                     filter.start || filter.end
