@@ -1,3 +1,4 @@
+import { parseISO } from "date-fns";
 import type { z } from "zod/v4";
 import type { invoiceSchema, receiptSchema } from "../schema";
 
@@ -23,7 +24,7 @@ export function isValidDateFormat(date: string | null | undefined): boolean {
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
   if (!dateRegex.test(date)) return false;
 
-  const parsed = new Date(date);
+  const parsed = parseISO(date);
   // Check if date is valid and not invalid date
   return !Number.isNaN(parsed.getTime());
 }
@@ -36,7 +37,7 @@ export function isDateInReasonableRange(
 ): boolean {
   if (!date || !isValidDateFormat(date)) return false;
 
-  const parsed = new Date(date);
+  const parsed = parseISO(date);
   const now = new Date();
   const tenYearsAgo = new Date(
     now.getFullYear() - 10,

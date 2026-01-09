@@ -3,6 +3,7 @@ import {
   differenceInDays,
   differenceInMonths,
   format,
+  parseISO,
   startOfDay,
 } from "date-fns";
 import { normalizeCurrencyCode } from "./currency";
@@ -141,7 +142,7 @@ export function formatDateRange(dates: TZDate[]): string {
 
 export function getDueDateStatus(dueDate: string): string {
   const now = new Date();
-  const due = new Date(dueDate);
+  const due = parseISO(dueDate);
 
   // Set both dates to the start of their respective days
   const nowDay = startOfDay(now);

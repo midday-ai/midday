@@ -4,7 +4,7 @@
 import { useUserQuery } from "@/hooks/use-user";
 import { formatAmount } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import {
   Bar,
   CartesianGrid,
@@ -91,7 +91,7 @@ export function StackedBarChart({
     recurring: item.recurring,
     total: item.total,
     meta: data.meta,
-    date: format(new Date(item.date), "MMM"),
+    date: format(parseISO(item.date), "MMM"),
   }));
 
   // Calculate margin using the utility hook

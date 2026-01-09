@@ -10,6 +10,7 @@ import { useToast } from "@midday/ui/use-toast";
 import { stripSpecialCharacters } from "@midday/utils";
 import { getTaxTypeLabel } from "@midday/utils/tax";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { parseISO } from "date-fns";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { type Attachment, AttachmentItem } from "./attachment-item";
@@ -232,7 +233,7 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
         }
 
         // Convert transaction date (ISO date string) to ISO datetime for paidAt
-        const transactionDate = new Date(transactionData.date).toISOString();
+        const transactionDate = parseISO(transactionData.date).toISOString();
 
         // Update invoice status to paid
         await updateInvoiceMutation.mutateAsync({

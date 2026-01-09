@@ -72,13 +72,14 @@ export function LineItems({
       {lineItems.map((item, index) => (
         <View
           key={`line-item-${index.toString()}`}
+          wrap={false}
           style={{
             flexDirection: "row",
             paddingVertical: 5,
             alignItems: "flex-start",
           }}
         >
-          <View style={{ flex: 3 }}>
+          <View style={{ flex: 3, paddingRight: 20 }}>
             <Description content={item.name} />
           </View>
 

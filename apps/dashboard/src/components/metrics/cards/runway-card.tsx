@@ -11,7 +11,7 @@ import { generateChartSelectionMessage } from "@/utils/chart-selection-message";
 import { cn } from "@midday/ui/cn";
 import NumberFlow from "@number-flow/react";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ShareMetricButton } from "../components/share-metric-button";
 
@@ -164,8 +164,8 @@ export function RunwayCard({ from, to, currency, locale }: RunwayCardProps) {
 
   const dateRangeDisplay = useMemo(() => {
     try {
-      const fromDate = new Date(from);
-      const toDate = new Date(to);
+      const fromDate = parseISO(from);
+      const toDate = parseISO(to);
       return `${format(fromDate, "MMM d")} - ${format(toDate, "MMM d, yyyy")}`;
     } catch {
       return "";

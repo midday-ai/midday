@@ -1,7 +1,7 @@
 "use client";
 
 import { formatAmount } from "@/utils/format";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { useMemo } from "react";
 import {
   CartesianGrid,
@@ -68,7 +68,7 @@ const CustomTooltip = ({
 
     // Extract year from date if available, otherwise use current year
     const year = data?.date
-      ? format(new Date(data.date), "yyyy")
+      ? format(parseISO(data.date), "yyyy")
       : new Date().getFullYear();
 
     // Format currency using formatAmount utility

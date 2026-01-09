@@ -11,7 +11,7 @@ import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
 import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { useMemo } from "react";
 import { ShareMetricButton } from "../components/share-metric-button";
 
@@ -74,8 +74,8 @@ export function CategoryExpensesCard({
 
   const dateRangeDisplay = useMemo(() => {
     try {
-      const fromDate = new Date(from);
-      const toDate = new Date(to);
+      const fromDate = parseISO(from);
+      const toDate = parseISO(to);
       return `${format(fromDate, "MMM d")} - ${format(toDate, "MMM d, yyyy")}`;
     } catch {
       return "";

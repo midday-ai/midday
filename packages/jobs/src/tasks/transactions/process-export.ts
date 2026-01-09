@@ -97,7 +97,7 @@ export const processExport = schemaTask({
     );
 
     const rows = transactionsData
-      ?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      ?.sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime())
       .map((transaction) => {
         const { taxAmount, taxRate, taxType } = resolveTaxValues({
           transactionAmount: transaction.amount,

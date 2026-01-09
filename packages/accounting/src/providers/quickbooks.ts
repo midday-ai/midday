@@ -1,5 +1,6 @@
 /// <reference path="../../../../types/intuit-oauth.d.ts" />
 import { logger } from "@midday/logger";
+import { parseISO } from "date-fns";
 import OAuthClient from "intuit-oauth";
 import { BaseAccountingProvider } from "../provider";
 import {
@@ -855,7 +856,7 @@ export class QuickBooksProvider extends BaseAccountingProvider {
     // Sort by date ascending for consistent ordering
     // This ensures transactions appear in chronological order in QuickBooks
     const sortedTransactions = [...transactions].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      (a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime(),
     );
 
     logger.info("Starting QuickBooks transaction sync", {

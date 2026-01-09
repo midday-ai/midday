@@ -16,7 +16,7 @@ import { triggerJob, triggerJobAndWait } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import { getExtensionFromMimeType } from "@midday/utils";
 import type { Job } from "bullmq";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { nanoid } from "nanoid";
 import type { WhatsAppUploadPayload } from "../../schemas/inbox";
 import { getDb } from "../../utils/db";
@@ -228,7 +228,7 @@ export class WhatsAppUploadProcessor extends BaseProcessor<WhatsAppUploadPayload
             updatedInbox.type === "invoice" ? "Invoice" : "Receipt";
 
           const formattedDate = updatedInbox.date
-            ? format(new Date(updatedInbox.date), "MMM d, yyyy")
+            ? format(parseISO(updatedInbox.date), "MMM d, yyyy")
             : undefined;
 
           const formattedAmount = formatCurrencyAmount(updatedInbox.amount);

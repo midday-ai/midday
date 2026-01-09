@@ -10,7 +10,7 @@ import { getRevenueForecast } from "@midday/db/queries";
 import { formatAmount, formatDate } from "@midday/utils/format";
 import { generateText } from "ai";
 import { tool } from "ai";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { z } from "zod";
 
 const getForecastSchema = z.object({
@@ -110,13 +110,13 @@ export const getForecastTool = tool({
         ...forecastResult.forecast.map((item) => item.date),
       ];
       const years = new Set(
-        allDates.map((date) => new Date(date).getFullYear()),
+        allDates.map((date) => parseISO(date).getFullYear()),
       );
       const spansMultipleYears = years.size > 1;
 
       // Add historical months with actual values only
       for (const [index, item] of forecastResult.historical.entries()) {
-        const date = new Date(item.date);
+        const date = parseISO(item.date);
         const month = spansMultipleYears
           ? format(date, "MMM ''yy")
           : format(date, "MMM");
@@ -133,7 +133,7 @@ export const getForecastTool = tool({
 
       // Add forecast months with forecasted values only
       for (const item of forecastResult.forecast) {
-        const date = new Date(item.date);
+        const date = parseISO(item.date);
         const month = spansMultipleYears
           ? format(date, "MMM ''yy")
           : format(date, "MMM");
@@ -172,7 +172,7 @@ export const getForecastTool = tool({
       const summary = forecastResult.summary;
       const metrics = {
         peakMonth: {
-          month: format(new Date(summary.peakMonth.date), "MMM"),
+          month: format(parseISO(summary.peakMonth.date), "MMM"),
           value: summary.peakMonth.value,
         },
         growthRate: summary.avgMonthlyGrowthRate,

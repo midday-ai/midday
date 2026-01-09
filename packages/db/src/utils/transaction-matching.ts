@@ -1,4 +1,5 @@
 import { createLoggerWithContext } from "@midday/logger";
+import { parseISO } from "date-fns";
 
 const logger = createLoggerWithContext("matching");
 
@@ -319,8 +320,8 @@ export function calculateDateScore(
   transactionDate: string,
   inboxType?: string | null,
 ): number {
-  const inboxDateObj = new Date(inboxDate);
-  const transactionDateObj = new Date(transactionDate);
+  const inboxDateObj = parseISO(inboxDate);
+  const transactionDateObj = parseISO(transactionDate);
 
   const diffDays = Math.abs(
     (inboxDateObj.getTime() - transactionDateObj.getTime()) /

@@ -10,7 +10,7 @@ import { useTRPC } from "@/trpc/client";
 import { generateChartSelectionMessage } from "@/utils/chart-selection-message";
 import { cn } from "@midday/ui/cn";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { useMemo, useState } from "react";
 import { ShareMetricButton } from "../components/share-metric-button";
 
@@ -63,14 +63,14 @@ export function RevenueForecastCard({
 
     return [
       ...historical.map((item, index) => ({
-        month: format(new Date(item.date), "MMM"),
+        month: format(parseISO(item.date), "MMM"),
         actual: item.value,
         // Set forecasted value on the last historical point to same as actual to connect the lines
         forecasted: index === historical.length - 1 ? item.value : null,
         date: item.date,
       })),
       ...forecast.map((item) => ({
-        month: format(new Date(item.date), "MMM"),
+        month: format(parseISO(item.date), "MMM"),
         actual: null,
         forecasted: item.value,
         date: item.date,
@@ -89,8 +89,8 @@ export function RevenueForecastCard({
 
   const dateRangeDisplay = useMemo(() => {
     try {
-      const fromDate = new Date(from);
-      const toDate = new Date(to);
+      const fromDate = parseISO(from);
+      const toDate = parseISO(to);
       return `${format(fromDate, "MMM d")} - ${format(toDate, "MMM d, yyyy")}`;
     } catch {
       return "";

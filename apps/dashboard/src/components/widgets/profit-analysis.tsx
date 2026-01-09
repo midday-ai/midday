@@ -9,7 +9,7 @@ import { getPeriodLabel } from "@/utils/metrics-date-utils";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import {
   Bar,
   Cell,
@@ -90,7 +90,7 @@ export function ProfitAnalysisWidget() {
 
   // Prepare data for chart
   const chartData = (data?.result || []).slice(-12).map((item, index) => ({
-    month: format(new Date(item.date), "MMM"),
+    month: format(parseISO(item.date), "MMM"),
     profit: item.current.value,
     fill:
       index % 2 === 0

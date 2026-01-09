@@ -3,6 +3,7 @@
  */
 
 import { formatAmount } from "@/utils/format";
+import { parseISO } from "date-fns";
 
 // Tailwind classes for chart styling
 export const chartClasses = {
@@ -193,7 +194,7 @@ export function getDateFromDataIndex(
   }
 
   if (typeof dateValue === "string") {
-    const parsed = new Date(dateValue);
+    const parsed = parseISO(dateValue);
     if (!Number.isNaN(parsed.getTime())) {
       return parsed;
     }

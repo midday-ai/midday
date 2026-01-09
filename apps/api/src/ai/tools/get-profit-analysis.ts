@@ -8,7 +8,7 @@ import { db } from "@midday/db/client";
 import { getReports } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
 import { tool } from "ai";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { z } from "zod";
 
 const getProfitAnalysisSchema = z.object({
@@ -166,7 +166,7 @@ export const getProfitAnalysisTool = tool({
         const lastYearExpenses = lastYearRevenue - lastYearProfit;
 
         return {
-          month: format(new Date(item.date), "MMM"),
+          month: format(parseISO(item.date), "MMM"),
           profit,
           lastYearProfit,
           average: averageProfit,
@@ -318,7 +318,7 @@ export const getProfitAnalysisTool = tool({
         responseText += "|-------|--------|-------------------------|\n";
 
         for (const item of monthlyData.slice(-12)) {
-          const monthLabel = format(new Date(item.date), "MMM yyyy");
+          const monthLabel = format(parseISO(item.date), "MMM yyyy");
           const profitValue = formatAmount({
             amount: Math.abs(item.current.value),
             currency: targetCurrency,

@@ -14,6 +14,7 @@ import {
   eachMonthOfInterval,
   endOfMonth,
   format,
+  parseISO,
   startOfMonth,
 } from "date-fns";
 import { z } from "zod";
@@ -197,8 +198,8 @@ export const getBurnRateTool = tool({
       const burnRateChangePeriod = `${burnRateData.length} months`;
 
       // Generate monthly chart data
-      const fromDate = startOfMonth(new Date(finalFrom));
-      const toDate = endOfMonth(new Date(finalTo));
+      const fromDate = startOfMonth(parseISO(finalFrom));
+      const toDate = endOfMonth(parseISO(finalTo));
       const monthSeries = eachMonthOfInterval({
         start: fromDate,
         end: toDate,

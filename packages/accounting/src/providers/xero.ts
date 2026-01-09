@@ -1,4 +1,5 @@
 import { logger } from "@midday/logger";
+import { parseISO } from "date-fns";
 import {
   Account,
   AccountType,
@@ -685,7 +686,7 @@ export class XeroProvider extends BaseAccountingProvider {
     // Sort by date ascending for clean transaction ordering in Xero
     // This ensures transactions appear in chronological order (better for auditing)
     const sortedTransactions = [...transactions].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      (a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime(),
     );
 
     logger.info("Starting Xero transaction sync", {

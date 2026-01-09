@@ -24,7 +24,7 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { CheckIcon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
-import { format, formatISO } from "date-fns";
+import { format, formatISO, parseISO } from "date-fns";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 
@@ -79,8 +79,8 @@ export function MetricsFilter() {
   const dateRange: DateRange | undefined =
     from && to
       ? {
-          from: new Date(from),
-          to: new Date(to),
+          from: parseISO(from),
+          to: parseISO(to),
         }
       : undefined;
 

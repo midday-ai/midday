@@ -7,7 +7,13 @@ import { extractTextFromValue } from "@midday/invoice";
 import type { InvoiceProduct } from "@midday/invoice/types";
 import { cn } from "@midday/ui/cn";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { useFormContext } from "react-hook-form";
 
 type Props = {
@@ -29,11 +35,25 @@ export function ProductAutocomplete({
   const [isFocused, setIsFocused] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [hoveredIndex, setHoveredIndex] = useState(-1);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { setValue, watch } = useFormContext();
+
+  // Auto-resize textarea
+  const adjustTextareaHeight = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  }, []);
 
   // Extract text content from value (handles JSON, TipTap content, etc.)
   const parsedValue = extractTextFromValue(value);
+
+  // Adjust height on mount and when value changes
+  useLayoutEffect(() => {
+    adjustTextareaHeight();
+  }, [parsedValue, adjustTextareaHeight]);
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -132,8 +152,18 @@ export function ProductAutocomplete({
       if (isFocused) {
         setShowSuggestions(true);
       }
+
+      // Adjust textarea height after value change
+      requestAnimationFrame(adjustTextareaHeight);
     },
-    [onChange, isFocused, currentProductId, setValue, index],
+    [
+      onChange,
+      isFocused,
+      currentProductId,
+      setValue,
+      index,
+      adjustTextareaHeight,
+    ],
   );
 
   const handleProductSelect = useCallback(
@@ -230,8 +260,8 @@ export function ProductAutocomplete({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
+        textareaRef.current &&
+        !textareaRef.current.contains(event.target as Node)
       ) {
         setShowSuggestions(false);
         setSelectedIndex(-1);
@@ -289,7 +319,7 @@ export function ProductAutocomplete({
             e.stopPropagation();
             setShowSuggestions(false);
             setSelectedIndex(-1);
-            inputRef.current?.blur();
+            textareaRef.current?.blur();
             return;
         }
       }
@@ -308,15 +338,15 @@ export function ProductAutocomplete({
 
   return (
     <div>
-      <input
-        ref={inputRef}
-        type="text"
+      <textarea
+        ref={textareaRef}
         value={parsedValue}
         onChange={(e) => handleInputChange(e.target.value)}
         onFocus={handleFocus}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         disabled={disabled}
+        rows={1}
         placeholder={
           isFocused && !parsedValue ? "Search or create product..." : ""
         }
@@ -331,7 +361,7 @@ export function ProductAutocomplete({
         className={cn(
           "border-0 p-0 min-h-6 border-b border-transparent focus:border-border text-xs pt-1",
           "transition-colors duration-200 bg-transparent outline-none resize-none w-full",
-          "text-primary leading-[18px] invoice-editor",
+          "text-primary leading-[18px] invoice-editor overflow-hidden",
           "placeholder:font-sans placeholder:text-muted-foreground",
           showPlaceholder &&
             "bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,transparent_1px,transparent_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,transparent_1px,transparent_5px)]",

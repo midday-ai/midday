@@ -8,7 +8,7 @@ import { db } from "@midday/db/client";
 import { getReports } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
 import { tool } from "ai";
-import { endOfMonth, format, startOfMonth } from "date-fns";
+import { endOfMonth, format, parseISO, startOfMonth } from "date-fns";
 import { z } from "zod";
 
 const getRevenueSummarySchema = z.object({
@@ -163,7 +163,7 @@ export const getRevenueSummaryTool = tool({
         responseText += "|-------|---------|-------------------------|\n";
 
         for (const item of monthlyData.slice(-12)) {
-          const monthLabel = format(new Date(item.date), "MMM yyyy");
+          const monthLabel = format(parseISO(item.date), "MMM yyyy");
           const revenueValue = formatAmount({
             amount: Math.abs(item.current.value),
             currency: targetCurrency,
@@ -206,7 +206,7 @@ export const getRevenueSummaryTool = tool({
 
       // Prepare chart data for artifact
       const chartData = last12Months.map((item) => ({
-        month: format(new Date(item.date), "MMM"),
+        month: format(parseISO(item.date), "MMM"),
         revenue: item.current.value,
         lastYearRevenue: item.previous.value,
         average: averageMonthlyRevenue,
