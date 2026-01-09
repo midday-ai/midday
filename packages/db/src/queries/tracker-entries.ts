@@ -1,5 +1,5 @@
 import type { Database } from "@db/client";
-import { teams, trackerEntries } from "@db/schema";
+import { teams, trackerEntries, trackerProjects } from "@db/schema";
 import {
   endOfMonth,
   endOfWeek,
@@ -544,6 +544,32 @@ export async function stopTimer(db: Database, params: StopTimerParams) {
   const stopTime_ms = new Date(stopTime).getTime();
   const duration = Math.floor((stopTime_ms - startTime) / 1000);
 
+  // Minimum duration threshold (60 seconds)
+  const MIN_DURATION_SECONDS = 60;
+
+  // If duration is too short, delete the entry instead of saving
+  if (duration < MIN_DURATION_SECONDS) {
+    // Get project info before deleting for the response
+    const projectInfo = await db.query.trackerProjects.findFirst({
+      where: eq(trackerProjects.id, entry.projectId!),
+      columns: {
+        id: true,
+        name: true,
+      },
+    });
+
+    // Delete the entry
+    await db.delete(trackerEntries).where(eq(trackerEntries.id, targetEntryId));
+
+    return {
+      id: targetEntryId,
+      discarded: true,
+      duration,
+      project: projectInfo,
+      trackerProject: projectInfo,
+    };
+  }
+
   // Update the entry with stop time and duration
   await db
     .update(trackerEntries)
@@ -584,6 +610,7 @@ export async function stopTimer(db: Database, params: StopTimerParams) {
 
   return {
     ...result,
+    discarded: false,
     project: result.trackerProject,
   };
 }
