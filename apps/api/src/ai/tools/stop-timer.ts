@@ -37,6 +37,18 @@ export const stopTimerTool = tool({
         assignedId: userId,
       });
 
+      // Handle discarded entries (under 60 seconds)
+      if (result.discarded) {
+        yield {
+          text: `Timer discarded - entry was under 1 minute and was not saved.\n\n**Project:** ${result.project?.name || "Unknown"}`,
+          link: {
+            text: "View tracker",
+            url: `${getAppUrl()}/tracker`,
+          },
+        };
+        return;
+      }
+
       const duration = result.duration ? Number(result.duration) : 0;
       const start = new Date(0);
       const end = new Date(duration * 1000);
