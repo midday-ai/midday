@@ -5,6 +5,7 @@ import Hls from "hls.js";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { MaterialIcon } from "../homepage/icon-mapping";
 import {
   MorphingDialog,
@@ -269,6 +270,78 @@ function VideoTestimonialCardMobile({
   rotation: number;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const modalContent = isOpen ? (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center"
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+      }}
+    >
+      <div
+        className="fixed inset-0 bg-white/40 backdrop-blur-xs dark:bg-black/40"
+        onClick={() => setIsOpen(false)}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}
+      />
+      <div className="relative bg-background border border-border p-8 max-w-2xl w-[90vw] max-h-[90vh] overflow-y-auto z-[10000]">
+        <button
+          type="button"
+          onClick={() => setIsOpen(false)}
+          className="absolute top-6 right-6"
+          aria-label="Close dialog"
+        >
+          <Icons.Close className="h-6 w-6 text-primary" />
+        </button>
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-3">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider text-left">
+              {testimonial.country}
+            </p>
+            <div className="flex gap-3 items-center">
+              {testimonial.image ? (
+                <Image
+                  src={testimonial.image}
+                  alt={testimonial.name}
+                  width={24}
+                  height={24}
+                  className="w-6 h-6 rounded-full object-cover"
+                  style={{ filter: "grayscale(100%)" }}
+                />
+              ) : (
+                <div className="w-6 h-6 bg-muted rounded-full" />
+              )}
+              <span className="font-sans text-sm text-foreground">
+                {testimonial.name}
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-col gap-6">
+            <div className="w-full overflow-hidden bg-muted">
+              <HLSVideo
+                src={testimonial.video}
+                poster={testimonial.videoPoster}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  ) : null;
 
   return (
     <div
@@ -324,56 +397,9 @@ function VideoTestimonialCardMobile({
         </div>
       </button>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="fixed inset-0 bg-white/40 backdrop-blur-xs dark:bg-black/40"
-            onClick={() => setIsOpen(false)}
-          />
-          <div className="relative bg-background border border-border p-8 max-w-2xl w-[90vw] max-h-[90vh] overflow-y-auto z-50">
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              className="absolute top-6 right-6"
-              aria-label="Close dialog"
-            >
-              <Icons.Close className="h-6 w-6 text-primary" />
-            </button>
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-3">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider text-left">
-                  {testimonial.country}
-                </p>
-                <div className="flex gap-3 items-center">
-                  {testimonial.image ? (
-                    <Image
-                      src={testimonial.image}
-                      alt={testimonial.name}
-                      width={24}
-                      height={24}
-                      className="w-6 h-6 rounded-full object-cover"
-                      style={{ filter: "grayscale(100%)" }}
-                    />
-                  ) : (
-                    <div className="w-6 h-6 bg-muted rounded-full" />
-                  )}
-                  <span className="font-sans text-sm text-foreground">
-                    {testimonial.name}
-                  </span>
-                </div>
-              </div>
-              <div className="flex flex-col gap-6">
-                <div className="w-full overflow-hidden bg-muted">
-                  <HLSVideo
-                    src={testimonial.video}
-                    poster={testimonial.videoPoster}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {mounted &&
+        typeof document !== "undefined" &&
+        createPortal(modalContent, document.body)}
     </div>
   );
 }
