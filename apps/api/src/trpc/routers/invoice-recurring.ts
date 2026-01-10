@@ -244,13 +244,18 @@ export const invoiceRecurringRouter = createTRPCRouter({
         ...dayOfMonthFrequencies,
       ] as const;
 
-      // Validate frequency/frequencyDay/frequencyWeek cross-field constraints
+      // Validate cross-field constraints that require fetching existing data
+      // Frequency-related cases:
       // Case 1: frequencyDay is being updated without frequency - validate against existing frequency
       // Case 2: frequency is being updated without frequencyDay - validate against existing frequencyDay
       // Case 3: frequency requires frequencyDay but frequencyDay is explicitly null - validate against existing
       // Case 4: frequencyWeek is being updated without frequency - validate against existing frequency
       // Case 5: frequency is being updated to monthly_weekday without frequencyWeek - validate against existing
       // Case 6: frequencyWeek is being set to null when frequency is monthly_weekday
+      // Case 7: frequencyInterval is being set to null without frequency - validate against existing frequency
+      // End type-related cases:
+      // Case 8: endDate is being set to null without endType - validate against existing endType
+      // Case 9: endCount is being set to null without endType - validate against existing endType
       const needsCrossFieldValidation =
         (input.frequencyDay !== undefined &&
           input.frequencyDay !== null &&
@@ -267,7 +272,12 @@ export const invoiceRecurringRouter = createTRPCRouter({
           input.frequency === undefined) ||
         (input.frequency === "monthly_weekday" &&
           input.frequencyWeek === undefined) ||
-        (input.frequencyWeek === null && input.frequency === undefined);
+        (input.frequencyWeek === null && input.frequency === undefined) ||
+        // frequencyInterval validation case - setting to null without changing frequency
+        (input.frequencyInterval === null && input.frequency === undefined) ||
+        // endDate/endCount validation cases - setting to null without changing endType
+        (input.endDate === null && input.endType === undefined) ||
+        (input.endCount === null && input.endType === undefined);
 
       if (needsCrossFieldValidation) {
         const existing = await getInvoiceRecurringById(db, {
@@ -361,6 +371,39 @@ export const invoiceRecurringRouter = createTRPCRouter({
             code: "BAD_REQUEST",
             message:
               "For monthly_weekday frequency, frequencyWeek must be 1-5 (1st through 5th occurrence)",
+          });
+        }
+
+        // Validate frequencyInterval is not being set to null when frequency is 'custom'
+        if (
+          input.frequencyInterval === null &&
+          effectiveFrequency === "custom"
+        ) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "frequencyInterval is required for custom frequency and cannot be null",
+          });
+        }
+
+        // Determine effective endType for validation
+        const effectiveEndType = input.endType ?? existing.endType;
+
+        // Validate endDate is not being set to null when endType is 'on_date'
+        if (input.endDate === null && effectiveEndType === "on_date") {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "endDate is required when endType is 'on_date' and cannot be null",
+          });
+        }
+
+        // Validate endCount is not being set to null when endType is 'after_count'
+        if (input.endCount === null && effectiveEndType === "after_count") {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "endCount is required when endType is 'after_count' and cannot be null",
           });
         }
       }
