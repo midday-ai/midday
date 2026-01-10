@@ -169,7 +169,7 @@ exports[`Transform accounts 1`] = `
     "provider": "teller",
   },
   "name": "Platinum Card",
-  "resource_id": null,
+  "resource_id": "6587",
   "type": "credit",
 }
 `;

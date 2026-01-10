@@ -27,14 +27,14 @@ import { getAccessValidForDays } from "./utils";
  * - CARD: Card account → credit
  * - SVGS: Savings account → depository
  * - TRAN: Transaction account → depository
- * - LOAN: Loan account → other_asset
+ * - LOAN: Loan account → loan
  */
 const getAccountType = (cashAccountType?: string): AccountType => {
   switch (cashAccountType) {
     case "CARD":
       return "credit";
     case "LOAN":
-      return "other_asset";
+      return "loan";
     default:
       // CACC, SVGS, TRAN, CASH, and others default to depository
       return "depository";

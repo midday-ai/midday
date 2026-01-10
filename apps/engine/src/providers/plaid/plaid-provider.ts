@@ -1,3 +1,4 @@
+import { getType } from "@engine/utils/account";
 import type { Provider } from "../interface";
 import type {
   DeleteAccountsRequest,
@@ -78,7 +79,14 @@ export class PlaidProvider implements Provider {
       accountId,
     });
 
-    return transformAccountBalance(response);
+    if (!response) return undefined;
+
+    // Use account type from Plaid response - no need to pass it from caller
+    const accountType = getType(response.type);
+    return transformAccountBalance({
+      balances: response.balances,
+      accountType,
+    });
   }
 
   async getInstitutions({ countryCode }: GetInstitutionsRequest) {

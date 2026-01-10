@@ -27,6 +27,7 @@ type Props = {
   referenceId?: string | null;
   accessToken: string | null;
   onManualSync: () => void;
+  onReconnect?: () => void;
   variant?: "button" | "icon";
 };
 
@@ -38,6 +39,7 @@ export function ReconnectProvider({
   referenceId,
   accessToken,
   onManualSync,
+  onReconnect,
   variant,
 }: Props) {
   const { toast } = useToast();
@@ -111,7 +113,13 @@ export function ReconnectProvider({
       enrollmentId,
       appearance: theme,
       onSuccess: () => {
-        onManualSync();
+        // Trigger reconnect flow to update account IDs if they changed
+        // Account IDs may change after reconnect, but last_four remains stable
+        if (onReconnect) {
+          onReconnect();
+        } else {
+          onManualSync();
+        }
       },
       onFailure: () => {},
     });

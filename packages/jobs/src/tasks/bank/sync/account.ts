@@ -50,6 +50,7 @@ export const syncAccount = schemaTask({
           provider,
           id: accountId,
           accessToken,
+          accountType,
         },
       });
 
@@ -59,11 +60,11 @@ export const syncAccount = schemaTask({
 
       const { data: balanceData } = await balanceResponse.json();
 
-      // Only update the balance if it's greater than 0
-      const balance = balanceData?.amount ?? 0;
+      const balance = balanceData?.amount ?? null;
 
-      if (balance > 0) {
-        // Reset error details and retries if we successfully got the balance
+      // Update balance (including zero/negative for overdrafts) and reset errors
+      // Only skip update if balance is null (provider didn't return a balance)
+      if (balance !== null) {
         await supabase
           .from("bank_accounts")
           .update({
@@ -73,7 +74,7 @@ export const syncAccount = schemaTask({
           })
           .eq("id", id);
       } else {
-        // Reset error details and retries if we successfully got the balance
+        // Reset error details and retries even if balance is null
         await supabase
           .from("bank_accounts")
           .update({

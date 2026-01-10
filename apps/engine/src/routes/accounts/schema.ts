@@ -120,6 +120,18 @@ export const AccountBalanceParamsSchema = z
         },
         example: "test_token_ky6igyqi3qxa4",
       }),
+    accountType: z
+      .enum(["credit", "depository", "other_asset", "loan", "other_liability"])
+      .optional()
+      .openapi({
+        description:
+          "Account type for correct balance handling (credit cards use current, depository uses available)",
+        param: {
+          name: "accountType",
+          in: "query",
+        },
+        example: "depository",
+      }),
   })
   .openapi("AccountBalanceParamsSchema");
 

@@ -79,9 +79,16 @@ exports[`Transform accounts 1`] = `
 }
 `;
 
-exports[`Transform account balance 1`] = `
+exports[`Transform account balance - depository uses available 1`] = `
 {
   "amount": 2000,
+  "currency": "USD",
+}
+`;
+
+exports[`Transform account balance - credit uses current (amount owed) 1`] = `
+{
+  "amount": 1000,
   "currency": "USD",
 }
 `;

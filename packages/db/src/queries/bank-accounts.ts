@@ -201,9 +201,14 @@ export async function getCombinedAccountBalance(
     baseCurrency = team[0]?.baseCurrency || "USD";
   }
 
-  // Get all enabled bank accounts with their balances
+  // Get only depository accounts (checking/savings) - actual cash on hand
+  // Credit cards, loans, and other liabilities are not included in "balance"
   const accounts = await db.query.bankAccounts.findMany({
-    where: and(eq(bankAccounts.teamId, teamId), eq(bankAccounts.enabled, true)),
+    where: and(
+      eq(bankAccounts.teamId, teamId),
+      eq(bankAccounts.enabled, true),
+      eq(bankAccounts.type, "depository"),
+    ),
     columns: {
       id: true,
       name: true,

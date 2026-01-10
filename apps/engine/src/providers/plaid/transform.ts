@@ -246,6 +246,7 @@ export const transformAccount = ({
   institution,
   type,
 }: TransformAccount): BaseAccount => {
+  const accountType = getType(type);
   return {
     id: account_id,
     name,
@@ -253,9 +254,9 @@ export const transformAccount = ({
       balances?.iso_currency_code?.toUpperCase() ||
       balances?.unofficial_currency_code?.toUpperCase() ||
       "USD",
-    type: getType(type),
+    type: accountType,
     enrollment_id: null,
-    balance: transformAccountBalance(balances),
+    balance: transformAccountBalance({ balances, accountType }),
     institution: {
       id: institution.id,
       name: institution.name,
@@ -267,15 +268,31 @@ export const transformAccount = ({
   };
 };
 
-export const transformAccountBalance = (
-  balances?: TransformAccountBalance,
-): BaseBalance => ({
-  currency:
-    balances?.iso_currency_code?.toUpperCase() ||
-    balances?.unofficial_currency_code?.toUpperCase() ||
-    "USD",
-  amount: balances?.available ?? 0,
-});
+type TransformAccountBalanceParams = {
+  balances?: TransformAccountBalance;
+  accountType?: string;
+};
+
+export const transformAccountBalance = ({
+  balances,
+  accountType,
+}: TransformAccountBalanceParams): BaseBalance => {
+  // For credit cards, use `current` (amount owed), not `available` (available credit)
+  // Example: $5000 limit, $1000 owed → available=$4000, current=$1000
+  // We want to show $1000 (current), not $4000 (available)
+  const amount =
+    accountType === "credit"
+      ? (balances?.current ?? 0)
+      : (balances?.available ?? balances?.current ?? 0);
+
+  return {
+    currency:
+      balances?.iso_currency_code?.toUpperCase() ||
+      balances?.unofficial_currency_code?.toUpperCase() ||
+      "USD",
+    amount,
+  };
+};
 
 export const transformInstitution = (institution: TransformInstitution) => ({
   id: institution.institution_id,

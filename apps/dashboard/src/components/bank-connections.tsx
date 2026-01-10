@@ -270,6 +270,17 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
     });
   };
 
+  const handleReconnect = () => {
+    reconnectConnection.execute({
+      connectionId: connection.id,
+      provider: connection.provider as
+        | "gocardless"
+        | "plaid"
+        | "teller"
+        | "enablebanking",
+    });
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center">
@@ -310,6 +321,7 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
                 institutionId={connection.institutionId}
                 accessToken={connection.accessToken}
                 onManualSync={handleManualSync}
+                onReconnect={handleReconnect}
                 referenceId={connection.referenceId}
               />
               <DeleteConnection connectionId={connection.id} />
@@ -323,6 +335,7 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
                 institutionId={connection.institutionId}
                 accessToken={connection.accessToken}
                 onManualSync={handleManualSync}
+                onReconnect={handleReconnect}
                 referenceId={connection.referenceId}
               />
               <SyncTransactions

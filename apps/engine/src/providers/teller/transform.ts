@@ -188,6 +188,7 @@ export const transformAccount = ({
   type,
   institution,
   balance,
+  last_four,
 }: TransformAccount): BaseAccount => {
   return {
     id,
@@ -197,7 +198,8 @@ export const transformAccount = ({
     institution: transformInstitution(institution),
     type: getType(type),
     balance: transformAccountBalance(balance),
-    resource_id: null,
+    // Use last_four as stable identifier for account matching during reconnect
+    resource_id: last_four,
     expires_at: null,
   };
 };

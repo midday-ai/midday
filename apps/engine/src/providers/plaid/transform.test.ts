@@ -250,14 +250,35 @@ test("Transform accounts", () => {
   ).toMatchSnapshot();
 });
 
-test("Transform account balance", () => {
+test("Transform account balance - depository uses available", () => {
   expect(
     transformAccountBalance({
-      available: 2000,
-      current: 0,
-      iso_currency_code: "USD",
-      limit: null,
-      unofficial_currency_code: null,
+      balances: {
+        available: 2000,
+        current: 1500,
+        iso_currency_code: "USD",
+        limit: null,
+        unofficial_currency_code: null,
+      },
+      accountType: "depository",
+    }),
+  ).toMatchSnapshot();
+});
+
+test("Transform account balance - credit uses current (amount owed)", () => {
+  // Credit card with $5000 limit, $1000 owed
+  // available = $4000 (available credit), current = $1000 (debt)
+  // We should show $1000 (current), not $4000 (available)
+  expect(
+    transformAccountBalance({
+      balances: {
+        available: 4000,
+        current: 1000,
+        iso_currency_code: "USD",
+        limit: 5000,
+        unofficial_currency_code: null,
+      },
+      accountType: "credit",
     }),
   ).toMatchSnapshot();
 });

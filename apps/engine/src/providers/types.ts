@@ -79,6 +79,7 @@ export type GetAccountsRequest = {
 export type GetAccountBalanceRequest = {
   accountId: string;
   accessToken?: string; // Teller & Plaid
+  accountType?: string; // For correct balance handling (credit cards use current, depository uses available)
 };
 
 export type GetAccountBalanceResponse = {
