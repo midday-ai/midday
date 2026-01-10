@@ -8,6 +8,7 @@ import {
 import { getAccountBalancesTool } from "@api/ai/tools/get-account-balances";
 import { getBusinessHealthScoreTool } from "@api/ai/tools/get-business-health-score";
 import { getCashFlowTool } from "@api/ai/tools/get-cash-flow";
+import { getNetPositionTool } from "@api/ai/tools/get-net-position";
 import { getRunwayTool } from "@api/ai/tools/get-runway";
 import { webSearchTool } from "@api/ai/tools/web-search";
 import { operationsAgent } from "./operations";
@@ -88,6 +89,7 @@ Prioritized list (most important first):
   tools: {
     webSearch: webSearchTool,
     getAccountBalances: getAccountBalancesTool,
+    getNetPosition: getNetPositionTool,
     getCashFlow: getCashFlowTool,
     getRunway: getRunwayTool,
     getBusinessHealthScore: getBusinessHealthScoreTool,

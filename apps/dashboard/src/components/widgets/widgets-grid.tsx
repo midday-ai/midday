@@ -37,6 +37,7 @@ import { InboxWidget } from "./inbox";
 // import { Insights } from "./insights";
 import { InvoicePaymentScoreWidget } from "./invoice-payment-score";
 import { MonthlySpendingWidget } from "./monthly-spending";
+import { NetPositionWidget } from "./net-position";
 import { OutstandingInvoicesWidget } from "./outstanding-invoices";
 import { OverdueInvoicesAlertWidget } from "./overdue-invoices-alert";
 import { ProfitAnalysisWidget } from "./profit-analysis";
@@ -123,6 +124,7 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
   "time-tracker": TimeTrackerWidget,
   vault: VaultWidget,
   "account-balances": AccountBalancesWidget,
+  "net-position": NetPositionWidget,
   "monthly-spending": MonthlySpendingWidget,
   "invoice-payment-score": InvoicePaymentScoreWidget,
   "recurring-expenses": RecurringExpensesWidget,

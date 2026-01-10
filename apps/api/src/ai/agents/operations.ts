@@ -10,6 +10,7 @@ import { getCustomersTool } from "@api/ai/tools/get-customers";
 import { getDocumentsTool } from "@api/ai/tools/get-documents";
 import { getInboxTool } from "@api/ai/tools/get-inbox";
 import { getInvoicesTool } from "@api/ai/tools/get-invoices";
+import { getNetPositionTool } from "@api/ai/tools/get-net-position";
 import { getTransactionsTool } from "@api/ai/tools/get-transactions";
 
 export const operationsAgent = createAgent({
@@ -31,6 +32,7 @@ ${COMMON_AGENT_RULES}
 </guidelines>`,
   tools: {
     getAccountBalances: getAccountBalancesTool,
+    getNetPosition: getNetPositionTool,
     getBankAccounts: getBankAccountsTool,
     getTransactions: getTransactionsTool,
     getInvoices: getInvoicesTool,

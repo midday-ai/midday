@@ -7,6 +7,7 @@ import {
   getGrowthRateSchema,
   getInboxStatsSchema,
   getMonthlySpendingSchema,
+  getNetPositionSchema,
   getOutstandingInvoicesSchema,
   getOverdueInvoicesAlertSchema,
   getProfitMarginSchema,
@@ -27,6 +28,7 @@ import {
   getCustomerLifetimeValue,
   getGrowthRate,
   getInboxStats,
+  getNetPosition,
   getOutstandingInvoices,
   getOverdueInvoicesAlert,
   getProfitMargin,
@@ -247,6 +249,19 @@ export const widgetsRouter = createTRPCRouter({
 
       return {
         result: accountBalances,
+      };
+    }),
+
+  getNetPosition: protectedProcedure
+    .input(getNetPositionSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      const netPosition = await getNetPosition(db, {
+        teamId: teamId!,
+        currency: input.currency,
+      });
+
+      return {
+        result: netPosition,
       };
     }),
 

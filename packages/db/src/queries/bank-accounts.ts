@@ -280,3 +280,108 @@ export async function getCombinedAccountBalance(
     accountBreakdown,
   };
 }
+
+export type GetNetPositionParams = {
+  teamId: string;
+  currency?: string;
+};
+
+export async function getNetPosition(
+  db: Database,
+  params: GetNetPositionParams,
+) {
+  const { teamId, currency: targetCurrency } = params;
+
+  // Get team's base currency if no target currency specified
+  let baseCurrency = targetCurrency;
+  if (!baseCurrency) {
+    const team = await db
+      .select({ baseCurrency: teams.baseCurrency })
+      .from(teams)
+      .where(eq(teams.id, teamId))
+      .limit(1);
+
+    baseCurrency = team[0]?.baseCurrency || "USD";
+  }
+
+  // Get depository accounts (cash)
+  const depositoryAccounts = await db.query.bankAccounts.findMany({
+    where: and(
+      eq(bankAccounts.teamId, teamId),
+      eq(bankAccounts.enabled, true),
+      eq(bankAccounts.type, "depository"),
+    ),
+    columns: {
+      id: true,
+      name: true,
+      currency: true,
+      balance: true,
+      baseCurrency: true,
+      baseBalance: true,
+    },
+  });
+
+  // Get credit accounts (debt)
+  const creditAccounts = await db.query.bankAccounts.findMany({
+    where: and(
+      eq(bankAccounts.teamId, teamId),
+      eq(bankAccounts.enabled, true),
+      eq(bankAccounts.type, "credit"),
+    ),
+    columns: {
+      id: true,
+      name: true,
+      currency: true,
+      balance: true,
+      baseCurrency: true,
+      baseBalance: true,
+    },
+  });
+
+  // Calculate cash total
+  let cashTotal = 0;
+  for (const account of depositoryAccounts) {
+    const balance = Number(account.balance) || 0;
+    const accountCurrency: string = account.currency || baseCurrency;
+
+    let convertedBalance = balance;
+    if (
+      accountCurrency !== baseCurrency &&
+      account.baseBalance &&
+      account.baseCurrency === baseCurrency
+    ) {
+      convertedBalance = Number(account.baseBalance);
+    }
+
+    cashTotal += convertedBalance;
+  }
+
+  // Calculate credit debt total (balances are stored as positive amounts owed)
+  let creditDebt = 0;
+  for (const account of creditAccounts) {
+    const balance = Number(account.balance) || 0;
+    const accountCurrency: string = account.currency || baseCurrency;
+
+    let convertedBalance = balance;
+    if (
+      accountCurrency !== baseCurrency &&
+      account.baseBalance &&
+      account.baseCurrency === baseCurrency
+    ) {
+      convertedBalance = Number(account.baseBalance);
+    }
+
+    creditDebt += convertedBalance;
+  }
+
+  const netPosition = cashTotal - creditDebt;
+
+  return {
+    cash: Math.round(cashTotal * 100) / 100,
+    creditDebt: Math.round(creditDebt * 100) / 100,
+    netPosition: Math.round(netPosition * 100) / 100,
+    currency: baseCurrency,
+    depositoryAccountCount: depositoryAccounts.length,
+    creditAccountCount: creditAccounts.length,
+  };
+}
