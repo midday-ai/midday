@@ -1,0 +1,346 @@
+import type { JobStatus } from "@/core/types";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { api } from "./api";
+
+/** Type for dashboard config returned by the API */
+export type WorkbenchConfig = Awaited<ReturnType<typeof api.getConfig>>;
+
+// Query keys factory for consistent cache management
+export const queryKeys = {
+  config: ["config"] as const,
+  overview: ["overview"] as const,
+  queues: ["queues"] as const,
+  queue: (name: string) => ["queue", name] as const,
+  jobs: (queueName: string, status?: JobStatus, sort?: string) =>
+    ["jobs", queueName, status, sort] as const,
+  jobsAll: (queueName: string) => ["jobs", queueName] as const, // For invalidation
+  job: (queueName: string, jobId: string) => ["job", queueName, jobId] as const,
+  runs: (sort?: string) => ["runs", sort] as const,
+  runsAll: ["runs"] as const, // For invalidation
+  schedulers: {
+    repeatable: (sort?: string) => ["schedulers", "repeatable", sort] as const,
+    delayed: (sort?: string) => ["schedulers", "delayed", sort] as const,
+    all: ["schedulers"] as const, // For invalidation
+  },
+  search: (query: string) => ["search", query] as const,
+  tagValues: (field: string) => ["tagValues", field] as const,
+  metrics: ["metrics"] as const,
+};
+
+/**
+ * Hook for fetching dashboard config
+ */
+export function useConfig() {
+  return useQuery({
+    queryKey: queryKeys.config,
+    queryFn: () => api.getConfig(),
+    staleTime: Number.POSITIVE_INFINITY, // Config rarely changes
+  });
+}
+
+/**
+ * Hook for fetching overview stats
+ */
+export function useOverview() {
+  return useQuery({
+    queryKey: queryKeys.overview,
+    queryFn: () => api.getOverview(),
+    refetchInterval: 5000,
+  });
+}
+
+/**
+ * Hook for fetching queues
+ */
+export function useQueues() {
+  return useQuery({
+    queryKey: queryKeys.queues,
+    queryFn: () => api.getQueues(),
+    refetchInterval: 5000,
+  });
+}
+
+/**
+ * Hook for fetching 24-hour metrics
+ */
+export function useMetrics() {
+  return useQuery({
+    queryKey: queryKeys.metrics,
+    queryFn: () => api.getMetrics(),
+    refetchInterval: 30000, // Refresh every 30 seconds (metrics are compute-heavy)
+  });
+}
+
+/**
+ * Hook for fetching jobs with pagination and sorting
+ */
+export function useJobs(queueName: string, status?: JobStatus, sort?: string) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.jobs(queueName, status, sort),
+    queryFn: ({ pageParam }) =>
+      api.getJobs(queueName, { status, limit: 50, cursor: pageParam, sort }),
+    getNextPageParam: (lastPage) => lastPage.cursor,
+    initialPageParam: undefined as string | undefined,
+    refetchInterval: 5000,
+  });
+}
+
+/**
+ * Hook for fetching a single job
+ */
+export function useJob(queueName: string, jobId: string) {
+  return useQuery({
+    queryKey: queryKeys.job(queueName, jobId),
+    queryFn: () => api.getJob(queueName, jobId),
+    refetchInterval: 5000,
+  });
+}
+
+/**
+ * Hook for fetching all runs with sorting
+ */
+export function useRuns(sort?: string) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.runs(sort),
+    queryFn: ({ pageParam }) =>
+      api.getRuns({ limit: 50, cursor: pageParam, sort }),
+    getNextPageParam: (lastPage) => lastPage.cursor,
+    initialPageParam: undefined as string | undefined,
+    refetchInterval: 5000,
+  });
+}
+
+/**
+ * Hook for fetching repeatable schedulers with sorting
+ */
+export function useRepeatableSchedulers(sort?: string) {
+  return useQuery({
+    queryKey: queryKeys.schedulers.repeatable(sort),
+    queryFn: () => api.getRepeatableSchedulers(sort),
+    refetchInterval: 5000,
+  });
+}
+
+/**
+ * Hook for fetching delayed schedulers with sorting
+ */
+export function useDelayedSchedulers(sort?: string) {
+  return useQuery({
+    queryKey: queryKeys.schedulers.delayed(sort),
+    queryFn: () => api.getDelayedSchedulers(sort),
+    refetchInterval: 5000,
+  });
+}
+
+/**
+ * Hook for search
+ */
+export function useSearch(query: string) {
+  return useQuery({
+    queryKey: queryKeys.search(query),
+    queryFn: () => api.search(query),
+    enabled: query.trim().length > 0,
+    staleTime: 1000 * 30, // Cache search results for 30 seconds
+  });
+}
+
+/**
+ * Hook for fetching unique values for a tag field
+ */
+export function useTagValues(field: string, enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.tagValues(field),
+    queryFn: () => api.getTagValues(field),
+    enabled: enabled && field.length > 0,
+    staleTime: 1000 * 60, // Cache tag values for 1 minute
+  });
+}
+
+// Mutations
+
+/**
+ * Hook for retrying a job
+ */
+export function useRetryJob() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ queueName, jobId }: { queueName: string; jobId: string }) =>
+      api.retryJob(queueName, jobId),
+    onSuccess: (_, { queueName, jobId }) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.job(queueName, jobId),
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.jobsAll(queueName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.runsAll });
+    },
+  });
+}
+
+/**
+ * Hook for removing a job
+ */
+export function useRemoveJob() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ queueName, jobId }: { queueName: string; jobId: string }) =>
+      api.removeJob(queueName, jobId),
+    onSuccess: (_, { queueName }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.jobsAll(queueName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.runsAll });
+      queryClient.invalidateQueries({ queryKey: queryKeys.queues });
+    },
+  });
+}
+
+/**
+ * Hook for promoting a delayed job
+ */
+export function usePromoteJob() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ queueName, jobId }: { queueName: string; jobId: string }) =>
+      api.promoteJob(queueName, jobId),
+    onSuccess: (_, { queueName, jobId }) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.job(queueName, jobId),
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.jobsAll(queueName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.runsAll });
+      queryClient.invalidateQueries({ queryKey: queryKeys.schedulers.all });
+    },
+  });
+}
+
+/**
+ * Hook for testing a job
+ */
+export function useTestJob() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (params: {
+      queueName: string;
+      name: string;
+      data: unknown;
+      delay?: number;
+    }) => api.testJob(params),
+    onSuccess: (_, { queueName }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.jobsAll(queueName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.runsAll });
+      queryClient.invalidateQueries({ queryKey: queryKeys.queues });
+    },
+  });
+}
+
+/**
+ * Hook for cleaning queue jobs
+ */
+export function useCleanQueue() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      queueName,
+      status,
+    }: { queueName: string; status: JobStatus }) =>
+      api.cleanQueue(queueName, status),
+    onSuccess: (_, { queueName }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.jobsAll(queueName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.runsAll });
+      queryClient.invalidateQueries({ queryKey: queryKeys.queues });
+    },
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Bulk Operations
+// ─────────────────────────────────────────────────────────────────────────────
+
+type BulkJobParams = { jobs: { queueName: string; jobId: string }[] };
+type BulkResult = { success: number; failed: number };
+
+/**
+ * Hook for bulk retrying jobs
+ */
+export function useBulkRetry() {
+  const queryClient = useQueryClient();
+
+  return useMutation<BulkResult, Error, BulkJobParams>({
+    mutationFn: ({ jobs }) => api.bulkRetry(jobs),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.runsAll });
+      queryClient.invalidateQueries({ queryKey: queryKeys.queues });
+    },
+  });
+}
+
+/**
+ * Hook for bulk deleting jobs
+ */
+export function useBulkDelete() {
+  const queryClient = useQueryClient();
+
+  return useMutation<BulkResult, Error, BulkJobParams>({
+    mutationFn: ({ jobs }) => api.bulkDelete(jobs),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.runsAll });
+      queryClient.invalidateQueries({ queryKey: queryKeys.queues });
+    },
+  });
+}
+
+/**
+ * Hook for bulk promoting delayed jobs
+ */
+export function useBulkPromote() {
+  const queryClient = useQueryClient();
+
+  return useMutation<BulkResult, Error, BulkJobParams>({
+    mutationFn: ({ jobs }) => api.bulkPromote(jobs),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.runsAll });
+      queryClient.invalidateQueries({ queryKey: queryKeys.queues });
+      queryClient.invalidateQueries({ queryKey: queryKeys.schedulers.all });
+    },
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Queue Control (Pause/Resume)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Hook for pausing a queue
+ */
+export function usePauseQueue() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (queueName: string) => api.pauseQueue(queueName),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.queues });
+    },
+  });
+}
+
+/**
+ * Hook for resuming a queue
+ */
+export function useResumeQueue() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (queueName: string) => api.resumeQueue(queueName),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.queues });
+    },
+  });
+}

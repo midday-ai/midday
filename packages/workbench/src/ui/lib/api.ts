@@ -1,0 +1,326 @@
+import type {
+  DelayedJobInfo,
+  JobInfo,
+  JobStatus,
+  MetricsResponse,
+  OverviewStats,
+  PaginatedResponse,
+  QueueInfo,
+  RunInfo,
+  SchedulerInfo,
+  SearchResult,
+} from "@/core/types";
+
+const API_BASE = "./api";
+
+async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export const api = {
+  /**
+   * Get dashboard overview stats
+   */
+  async getOverview(): Promise<OverviewStats> {
+    return fetchJson(`${API_BASE}/overview`);
+  },
+
+  /**
+   * Get all queues
+   */
+  async getQueues(): Promise<QueueInfo[]> {
+    return fetchJson(`${API_BASE}/queues`);
+  },
+
+  /**
+   * Get 24-hour metrics
+   */
+  async getMetrics(): Promise<MetricsResponse> {
+    return fetchJson(`${API_BASE}/metrics`);
+  },
+
+  /**
+   * Get jobs for a queue
+   */
+  async getJobs(
+    queueName: string,
+    options?: {
+      status?: JobStatus;
+      limit?: number;
+      cursor?: string;
+      sort?: string; // format: "field:direction"
+    },
+  ): Promise<PaginatedResponse<JobInfo>> {
+    const params = new URLSearchParams();
+    if (options?.status) params.set("status", options.status);
+    if (options?.limit) params.set("limit", String(options.limit));
+    if (options?.cursor) params.set("cursor", options.cursor);
+    if (options?.sort) params.set("sort", options.sort);
+
+    const query = params.toString();
+    return fetchJson(
+      `${API_BASE}/queues/${encodeURIComponent(queueName)}/jobs${query ? `?${query}` : ""}`,
+    );
+  },
+
+  /**
+   * Get a single job
+   */
+  async getJob(queueName: string, jobId: string): Promise<JobInfo> {
+    return fetchJson(
+      `${API_BASE}/jobs/${encodeURIComponent(queueName)}/${encodeURIComponent(jobId)}`,
+    );
+  },
+
+  /**
+   * Retry a job
+   */
+  async retryJob(queueName: string, jobId: string): Promise<void> {
+    await fetchJson(
+      `${API_BASE}/jobs/${encodeURIComponent(queueName)}/${encodeURIComponent(jobId)}/retry`,
+      { method: "POST" },
+    );
+  },
+
+  /**
+   * Remove a job
+   */
+  async removeJob(queueName: string, jobId: string): Promise<void> {
+    await fetchJson(
+      `${API_BASE}/jobs/${encodeURIComponent(queueName)}/${encodeURIComponent(jobId)}/remove`,
+      { method: "POST" },
+    );
+  },
+
+  /**
+   * Promote a delayed job
+   */
+  async promoteJob(queueName: string, jobId: string): Promise<void> {
+    await fetchJson(
+      `${API_BASE}/jobs/${encodeURIComponent(queueName)}/${encodeURIComponent(jobId)}/promote`,
+      { method: "POST" },
+    );
+  },
+
+  /**
+   * Search jobs
+   */
+  async search(
+    query: string,
+    limit?: number,
+  ): Promise<{ results: SearchResult[] }> {
+    const params = new URLSearchParams({ q: query });
+    if (limit) params.set("limit", String(limit));
+    return fetchJson(`${API_BASE}/search?${params.toString()}`);
+  },
+
+  /**
+   * Clean jobs from a queue
+   */
+  async cleanJobs(
+    queueName: string,
+    status: "completed" | "failed",
+    grace?: number,
+  ): Promise<{ removed: number }> {
+    return fetchJson(
+      `${API_BASE}/queues/${encodeURIComponent(queueName)}/clean`,
+      {
+        method: "POST",
+        body: JSON.stringify({ status, grace }),
+      },
+    );
+  },
+
+  /**
+   * Get dashboard config
+   */
+  async getConfig(): Promise<{
+    title: string;
+    logo?: string;
+    readonly: boolean;
+    queues: string[];
+    tags: string[];
+  }> {
+    return fetchJson("./config");
+  },
+
+  /**
+   * Get unique values for a tag field
+   */
+  async getTagValues(
+    field: string,
+    limit?: number,
+  ): Promise<{ field: string; values: { value: string; count: number }[] }> {
+    const params = new URLSearchParams();
+    if (limit) params.set("limit", String(limit));
+    const query = params.toString();
+    return fetchJson(
+      `${API_BASE}/tags/${encodeURIComponent(field)}/values${query ? `?${query}` : ""}`,
+    );
+  },
+
+  /**
+   * Get all runs (jobs across all queues)
+   */
+  async getRuns(options?: {
+    limit?: number;
+    cursor?: string;
+    sort?: string; // format: "field:direction"
+  }): Promise<PaginatedResponse<RunInfo>> {
+    const params = new URLSearchParams();
+    if (options?.limit) params.set("limit", String(options.limit));
+    if (options?.cursor) params.set("cursor", options.cursor);
+    if (options?.sort) params.set("sort", options.sort);
+
+    const query = params.toString();
+    return fetchJson(`${API_BASE}/runs${query ? `?${query}` : ""}`);
+  },
+
+  /**
+   * Get schedulers (repeatable and delayed jobs)
+   */
+  async getSchedulers(options?: {
+    repeatableSort?: string; // format: "field:direction"
+    delayedSort?: string; // format: "field:direction"
+  }): Promise<{
+    repeatable: SchedulerInfo[];
+    delayed: DelayedJobInfo[];
+  }> {
+    const params = new URLSearchParams();
+    if (options?.repeatableSort)
+      params.set("repeatableSort", options.repeatableSort);
+    if (options?.delayedSort) params.set("delayedSort", options.delayedSort);
+
+    const query = params.toString();
+    return fetchJson(`${API_BASE}/schedulers${query ? `?${query}` : ""}`);
+  },
+
+  /**
+   * Get repeatable schedulers
+   */
+  async getRepeatableSchedulers(sort?: string): Promise<SchedulerInfo[]> {
+    const { repeatable } = await this.getSchedulers({ repeatableSort: sort });
+    return repeatable;
+  },
+
+  /**
+   * Get delayed schedulers
+   */
+  async getDelayedSchedulers(sort?: string): Promise<DelayedJobInfo[]> {
+    const { delayed } = await this.getSchedulers({ delayedSort: sort });
+    return delayed;
+  },
+
+  /**
+   * Enqueue a test job
+   */
+  async testJob(request: {
+    queueName: string;
+    name: string;
+    data: unknown;
+    delay?: number;
+  }): Promise<{ id: string }> {
+    return fetchJson(`${API_BASE}/test`, {
+      method: "POST",
+      body: JSON.stringify(request),
+    });
+  },
+
+  /**
+   * Clean queue jobs by status
+   */
+  async cleanQueue(
+    queueName: string,
+    status: JobStatus,
+    grace?: number,
+  ): Promise<{ removed: number }> {
+    return fetchJson(
+      `${API_BASE}/queues/${encodeURIComponent(queueName)}/clean`,
+      {
+        method: "POST",
+        body: JSON.stringify({ status, grace }),
+      },
+    );
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Bulk Operations
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Retry multiple jobs
+   */
+  async bulkRetry(
+    jobs: { queueName: string; jobId: string }[],
+  ): Promise<{ success: number; failed: number }> {
+    return fetchJson(`${API_BASE}/bulk/retry`, {
+      method: "POST",
+      body: JSON.stringify({ jobs }),
+    });
+  },
+
+  /**
+   * Delete multiple jobs
+   */
+  async bulkDelete(
+    jobs: { queueName: string; jobId: string }[],
+  ): Promise<{ success: number; failed: number }> {
+    return fetchJson(`${API_BASE}/bulk/delete`, {
+      method: "POST",
+      body: JSON.stringify({ jobs }),
+    });
+  },
+
+  /**
+   * Promote multiple delayed jobs
+   */
+  async bulkPromote(
+    jobs: { queueName: string; jobId: string }[],
+  ): Promise<{ success: number; failed: number }> {
+    return fetchJson(`${API_BASE}/bulk/promote`, {
+      method: "POST",
+      body: JSON.stringify({ jobs }),
+    });
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Queue Control (Pause/Resume)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Pause a queue
+   */
+  async pauseQueue(
+    queueName: string,
+  ): Promise<{ success: boolean; paused: boolean }> {
+    return fetchJson(
+      `${API_BASE}/queues/${encodeURIComponent(queueName)}/pause`,
+      { method: "POST" },
+    );
+  },
+
+  /**
+   * Resume a queue
+   */
+  async resumeQueue(
+    queueName: string,
+  ): Promise<{ success: boolean; paused: boolean }> {
+    return fetchJson(
+      `${API_BASE}/queues/${encodeURIComponent(queueName)}/resume`,
+      { method: "POST" },
+    );
+  },
+};

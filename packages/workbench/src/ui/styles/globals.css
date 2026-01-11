@@ -1,0 +1,202 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* Vercel-inspired light theme */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 0%;
+
+    /* Status colors - Vercel style */
+    --status-success: 142 76% 36%;
+    --status-error: 0 84% 60%;
+    --status-warning: 38 92% 50%;
+    --status-pending: 0 0% 45%;
+    --status-active: 217 91% 60%;
+
+    /* Chart colors - Beam exact palette (light mode) */
+    --chart-1: 217 91% 60%;
+    --chart-2: 263 90% 66%;
+    --chart-3: 142 69% 48%;
+    --chart-4: 47 96% 53%;
+    --chart-5: 142 69% 48%;
+    --chart-success: 142 69% 48%;
+    --chart-error: 0 72% 51%;
+
+    --radius: 0.375rem;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-border: 0 0% 90%;
+  }
+
+  .dark {
+    /* Vercel-inspired dark theme */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 10%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 100%;
+
+    /* Status colors - Vercel style (dark) */
+    --status-success: 142 71% 45%;
+    --status-error: 0 84% 60%;
+    --status-warning: 38 92% 50%;
+    --status-pending: 0 0% 50%;
+    --status-active: 217 91% 60%;
+
+    /* Chart colors - Beam exact palette (dark mode) */
+    --chart-1: 217 91% 68%;
+    --chart-2: 263 90% 76%;
+    --chart-3: 142 69% 58%;
+    --chart-4: 47 96% 58%;
+    --chart-5: 142 69% 58%;
+    --chart-success: 142 69% 58%;
+    --chart-error: 0 84% 65%;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 15%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Oxygen, Ubuntu, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Remove focus ring outlines from Recharts elements */
+  .recharts-wrapper,
+  .recharts-wrapper *,
+  .recharts-surface,
+  .recharts-layer,
+  .recharts-dot,
+  .recharts-active-dot,
+  .recharts-legend-item,
+  .recharts-sector,
+  .recharts-bar-rectangle,
+  .recharts-area,
+  .recharts-curve {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  .recharts-wrapper:focus,
+  .recharts-wrapper *:focus,
+  .recharts-surface:focus,
+  .recharts-layer:focus,
+  .recharts-dot:focus,
+  .recharts-active-dot:focus,
+  .recharts-sector:focus,
+  .recharts-bar-rectangle:focus,
+  .recharts-area:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Remove default stroke on active dots */
+  .recharts-active-dot circle {
+    stroke: none !important;
+  }
+
+  /* Prevent focus visible styles on chart elements */
+  .recharts-wrapper:focus-visible,
+  .recharts-wrapper *:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+}
+
+@theme inline {
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, sans-serif;
+  --font-serif: "Hedvig Letters Serif", Georgia, "Times New Roman", serif;
+  --font-mono: "Geist Mono", "SF Mono", Monaco, "Cascadia Code", "Roboto Mono",
+    Menlo, monospace;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-status-success: hsl(var(--status-success));
+  --color-status-error: hsl(var(--status-error));
+  --color-status-warning: hsl(var(--status-warning));
+  --color-status-pending: hsl(var(--status-pending));
+  --color-status-active: hsl(var(--status-active));
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+  --color-chart-success: hsl(var(--chart-success));
+  --color-chart-error: hsl(var(--chart-error));
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+}

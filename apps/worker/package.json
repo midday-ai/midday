@@ -10,8 +10,7 @@
     "lint:fix": "biome check --write ."
   },
   "dependencies": {
-    "@bull-board/api": "^6.16.2",
-    "@bull-board/hono": "^6.16.2",
+    "workbench": "workspace:*",
     "@fast-csv/format": "5.0.5",
     "@hono/node-server": "^1.19.7",
     "@midday/accounting": "workspace:*",

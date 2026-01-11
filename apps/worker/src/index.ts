@@ -1,15 +1,11 @@
 // Import Sentry instrumentation first, before any other modules
 import "./instrument";
 
-import { createBullBoard } from "@bull-board/api";
-import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
-import { HonoAdapter } from "@bull-board/hono";
 import { closeWorkerDb } from "@midday/db/worker-client";
 import * as Sentry from "@sentry/bun";
 import { Worker } from "bullmq";
 import { Hono } from "hono";
-import { basicAuth } from "hono/basic-auth";
-import { serveStatic } from "hono/bun";
+import { workbench } from "workbench/hono";
 import { getProcessor } from "./processors/registry";
 import { getAllQueues, queueConfigs } from "./queues";
 import { registerStaticSchedulers } from "./schedulers/registry";
@@ -91,52 +87,41 @@ const app = new Hono();
 
 const basePath = "/admin";
 
-// Authentication middleware for BullBoard
-if (process.env.BOARD_USERNAME && process.env.BOARD_PASSWORD) {
-  app.use(
-    basePath,
-    basicAuth({
-      username: process.env.BOARD_USERNAME,
-      password: process.env.BOARD_PASSWORD,
-    }),
-  );
-
-  app.use(
-    `${basePath}/*`,
-    basicAuth({
-      username: process.env.BOARD_USERNAME,
-      password: process.env.BOARD_PASSWORD,
-    }),
-  );
-}
-
-// Initialize BullBoard
-function initializeBullBoard() {
+// Initialize Workbench dashboard
+function initializeWorkbench() {
   const queues = getAllQueues();
 
   if (queues.length === 0) {
-    console.warn("No queues found when initializing BullBoard");
+    console.warn("No queues found when initializing Workbench");
     return;
   }
 
-  const serverAdapter = new HonoAdapter(serveStatic);
-  serverAdapter.setBasePath(basePath);
-
-  createBullBoard({
-    queues: queues.map((queue) => new BullMQAdapter(queue)),
-    serverAdapter,
-  });
-
-  app.route(basePath, serverAdapter.registerPlugin());
+  // Mount workbench with optional auth
+  app.route(
+    basePath,
+    workbench({
+      queues,
+      auth:
+        process.env.BOARD_USERNAME && process.env.BOARD_PASSWORD
+          ? {
+              username: process.env.BOARD_USERNAME,
+              password: process.env.BOARD_PASSWORD,
+            }
+          : undefined,
+      title: "Midday Jobs",
+      // Configure which job.data fields to extract as filterable tags
+      tags: ["teamId"],
+    }),
+  );
 
   console.log(
-    `BullBoard initialized with ${queues.length} queues:`,
+    `Workbench initialized with ${queues.length} queues:`,
     queues.map((q) => q.name),
   );
 }
 
-// Initialize BullBoard on startup
-initializeBullBoard();
+// Initialize Workbench on startup
+initializeWorkbench();
 
 // Health check endpoint - verifies service is running
 app.get("/", (c) => {
