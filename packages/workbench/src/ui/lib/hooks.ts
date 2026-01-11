@@ -15,6 +15,7 @@ export type WorkbenchConfig = Awaited<ReturnType<typeof api.getConfig>>;
 export const queryKeys = {
   config: ["config"] as const,
   overview: ["overview"] as const,
+  queueNames: ["queue-names"] as const,
   queues: ["queues"] as const,
   queue: (name: string) => ["queue", name] as const,
   jobs: (queueName: string, status?: JobStatus, sort?: string) =>
@@ -80,7 +81,19 @@ export function useCounts() {
 }
 
 /**
- * Hook for fetching queues
+ * Hook for fetching just queue names (fast, no counts)
+ * Used for sidebar initial render
+ */
+export function useQueueNames() {
+  return useQuery({
+    queryKey: queryKeys.queueNames,
+    queryFn: ({ signal }) => api.getQueueNames(signal),
+    staleTime: 60000, // Queue names rarely change, cache for 1 minute
+  });
+}
+
+/**
+ * Hook for fetching full queue info with counts
  */
 export function useQueues() {
   return useQuery({
@@ -88,6 +101,18 @@ export function useQueues() {
     queryFn: ({ signal }) => api.getQueues(signal),
     refetchInterval: 5000,
   });
+}
+
+/**
+ * Hook to get a single queue's info from the cached queues data
+ * Returns undefined if not yet loaded
+ */
+export function useQueueInfo(queueName: string) {
+  const { data: queues } = useQueues();
+  return React.useMemo(
+    () => queues?.find((q) => q.name === queueName),
+    [queues, queueName],
+  );
 }
 
 /**

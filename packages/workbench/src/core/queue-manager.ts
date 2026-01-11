@@ -289,7 +289,8 @@ export class QueueManager {
   }
 
   /**
-   * Get all queue names
+   * Get just queue names (very fast, no Redis calls)
+   * Used for sidebar initial render
    */
   getQueueNames(): string[] {
     return Array.from(this.queues.keys());

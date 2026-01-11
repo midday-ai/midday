@@ -73,7 +73,7 @@ export function BulkBottomBar({
             <div className="relative pointer-events-auto min-w-[400px] h-12">
               {/* Backdrop blur layer */}
               <motion.div
-                className="absolute inset-0 backdrop-blur-xl bg-background/70 shadow-lg"
+                className="absolute inset-0 backdrop-blur-xl bg-background/70 shadow-lg border border-border/50"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

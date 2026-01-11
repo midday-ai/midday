@@ -22,7 +22,44 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useQueueInfo } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
+
+// Lazy-loaded queue counts component
+function QueueCounts({ queueName }: { queueName: string }) {
+  const queueInfo = useQueueInfo(queueName);
+
+  if (!queueInfo) {
+    return (
+      <div className="flex gap-2 text-[9px] text-muted-foreground">
+        <span>Loading...</span>
+      </div>
+    );
+  }
+
+  const { counts } = queueInfo;
+  const total =
+    counts.waiting +
+    counts.active +
+    counts.completed +
+    counts.failed +
+    counts.delayed;
+
+  return (
+    <div className="flex gap-2 text-[9px]">
+      {counts.active > 0 && (
+        <span className="text-chart-2">{counts.active} active</span>
+      )}
+      {counts.waiting > 0 && (
+        <span className="text-muted-foreground">{counts.waiting} waiting</span>
+      )}
+      {counts.failed > 0 && (
+        <span className="text-chart-3">{counts.failed} failed</span>
+      )}
+      {total === 0 && <span className="text-muted-foreground">empty</span>}
+    </div>
+  );
+}
 
 // Custom Workbench logo icon
 function WorkbenchIcon({ className }: { className?: string }) {
@@ -184,16 +221,19 @@ export function AppSidebar({
                       type="button"
                       onClick={() => onQueueSelect(queue)}
                       className={cn(
-                        "flex w-full items-center justify-between gap-2 px-2 py-1.5 font-mono text-[11px] transition-colors",
+                        "flex w-full flex-col items-start gap-0.5 px-2 py-1.5 transition-colors",
                         activeQueue === queue
                           ? "text-foreground"
                           : "text-muted-foreground hover:text-foreground",
                       )}
                     >
-                      <span>{queue}</span>
-                      {pausedQueues.has(queue) && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" />
-                      )}
+                      <div className="flex w-full items-center justify-between gap-2">
+                        <span className="font-mono text-[11px]">{queue}</span>
+                        {pausedQueues.has(queue) && (
+                          <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" />
+                        )}
+                      </div>
+                      <QueueCounts queueName={queue} />
                     </button>
                   ))}
                 </div>

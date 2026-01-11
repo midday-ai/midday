@@ -124,7 +124,14 @@ export const api = {
   },
 
   /**
-   * Get all queues
+   * Get just queue names (fast, no counts)
+   */
+  async getQueueNames(signal?: AbortSignal): Promise<string[]> {
+    return fetchJson(`${API_BASE}/queue-names`, { signal });
+  },
+
+  /**
+   * Get all queues with counts
    */
   async getQueues(signal?: AbortSignal): Promise<QueueInfo[]> {
     return fetchJson(`${API_BASE}/queues`, { signal });

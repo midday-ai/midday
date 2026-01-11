@@ -154,7 +154,13 @@ export function createApiRoutes(core: WorkbenchCore): Hono {
     }
   });
 
-  // GET /api/queues - List all queues
+  // GET /api/queue-names - List just queue names (fast, no counts)
+  app.get("/queue-names", (c) => {
+    const names = qm.getQueueNames();
+    return c.json(names);
+  });
+
+  // GET /api/queues - List all queues with counts
   app.get("/queues", async (c) => {
     const queues = await qm.getQueues();
     return c.json(queues);
