@@ -2,6 +2,14 @@ import { AppSidebar, type NavItem } from "@/components/app-sidebar";
 import { CommandPalette } from "@/components/layout/command-palette";
 import { HeaderSearch } from "@/components/layout/header-search";
 import { useConfig, useQueueNames, useQueues } from "@/lib/hooks";
+import { FlowPage } from "@/pages/flow";
+import { FlowsPage } from "@/pages/flows";
+import { JobPage } from "@/pages/job";
+import { MetricsPage } from "@/pages/metrics";
+import { QueuePage } from "@/pages/queue";
+import { RunsPage } from "@/pages/runs";
+import { SchedulersPage } from "@/pages/schedulers";
+import { TestPage } from "@/pages/test";
 import {
   Outlet,
   createRootRoute,
@@ -14,64 +22,6 @@ import {
 } from "@tanstack/react-router";
 import * as React from "react";
 import { z } from "zod";
-
-// Page imports - stored for both lazy loading and preloading
-const pageModules = {
-  runs: () => import("@/pages/runs"),
-  metrics: () => import("@/pages/metrics"),
-  schedulers: () => import("@/pages/schedulers"),
-  flows: () => import("@/pages/flows"),
-  flow: () => import("@/pages/flow"),
-  queue: () => import("@/pages/queue"),
-  job: () => import("@/pages/job"),
-  test: () => import("@/pages/test"),
-};
-
-// Lazy components with code splitting
-const RunsPage = React.lazy(() =>
-  pageModules.runs().then((m) => ({ default: m.RunsPage })),
-);
-const MetricsPage = React.lazy(() =>
-  pageModules.metrics().then((m) => ({ default: m.MetricsPage })),
-);
-const SchedulersPage = React.lazy(() =>
-  pageModules.schedulers().then((m) => ({ default: m.SchedulersPage })),
-);
-const FlowsPage = React.lazy(() =>
-  pageModules.flows().then((m) => ({ default: m.FlowsPage })),
-);
-const FlowPage = React.lazy(() =>
-  pageModules.flow().then((m) => ({ default: m.FlowPage })),
-);
-const QueuePage = React.lazy(() =>
-  pageModules.queue().then((m) => ({ default: m.QueuePage })),
-);
-const JobPage = React.lazy(() =>
-  pageModules.job().then((m) => ({ default: m.JobPage })),
-);
-const TestPage = React.lazy(() =>
-  pageModules.test().then((m) => ({ default: m.TestPage })),
-);
-
-// Preload all pages immediately after initial render (no waiting for idle)
-let preloaded = false;
-function preloadAllPages() {
-  if (preloaded) return;
-  preloaded = true;
-  // Trigger all imports in parallel immediately
-  for (const importFn of Object.values(pageModules)) {
-    importFn();
-  }
-}
-
-// Minimal loading fallback - shown briefly while chunks load
-function PageLoader() {
-  return (
-    <div className="flex h-full items-center justify-center">
-      <div className="h-5 w-5 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-foreground" />
-    </div>
-  );
-}
 
 // Context for sharing search state across routes
 interface SearchContextValue {
@@ -221,11 +171,6 @@ function RootLayout() {
     });
   }, [isDark]);
 
-  // Preload all lazy pages immediately for instant navigation
-  React.useEffect(() => {
-    preloadAllPages();
-  }, []);
-
   // Keyboard shortcuts
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -371,37 +316,35 @@ function PageLayout({
   );
 }
 
-// Route components with Suspense for lazy-loaded pages
+// Route components - all pages eagerly loaded for instant navigation
 function RunsRoute() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/" });
 
   return (
     <PageLayout title="Runs">
-      <React.Suspense fallback={<PageLoader />}>
-        <RunsPage
-          search={search}
-          onSearchChange={(newSearch) => {
-            navigate({
-              to: "/",
-              search: newSearch,
-              replace: true,
-            });
-          }}
-          onJobSelect={(queueName, jobId) =>
-            navigate({
-              to: "/queues/$queueName/jobs/$jobId",
-              params: { queueName, jobId },
-            })
-          }
-          onQueueSelect={(queueName) =>
-            navigate({
-              to: "/queues/$queueName",
-              params: { queueName },
-            })
-          }
-        />
-      </React.Suspense>
+      <RunsPage
+        search={search}
+        onSearchChange={(newSearch) => {
+          navigate({
+            to: "/",
+            search: newSearch,
+            replace: true,
+          });
+        }}
+        onJobSelect={(queueName, jobId) =>
+          navigate({
+            to: "/queues/$queueName/jobs/$jobId",
+            params: { queueName, jobId },
+          })
+        }
+        onQueueSelect={(queueName) =>
+          navigate({
+            to: "/queues/$queueName",
+            params: { queueName },
+          })
+        }
+      />
     </PageLayout>
   );
 }
@@ -412,18 +355,16 @@ function SchedulersRoute() {
 
   return (
     <PageLayout title="Schedulers">
-      <React.Suspense fallback={<PageLoader />}>
-        <SchedulersPage
-          search={search}
-          onSearchChange={(newSearch: SchedulersSearch) => {
-            navigate({
-              to: "/schedulers",
-              search: newSearch,
-              replace: true,
-            });
-          }}
-        />
-      </React.Suspense>
+      <SchedulersPage
+        search={search}
+        onSearchChange={(newSearch: SchedulersSearch) => {
+          navigate({
+            to: "/schedulers",
+            search: newSearch,
+            replace: true,
+          });
+        }}
+      />
     </PageLayout>
   );
 }
@@ -431,9 +372,7 @@ function SchedulersRoute() {
 function MetricsRoute() {
   return (
     <PageLayout title="Metrics">
-      <React.Suspense fallback={<PageLoader />}>
-        <MetricsPage />
-      </React.Suspense>
+      <MetricsPage />
     </PageLayout>
   );
 }
@@ -442,16 +381,14 @@ function FlowsRoute() {
   const navigate = useNavigate();
   return (
     <PageLayout title="Flows">
-      <React.Suspense fallback={<PageLoader />}>
-        <FlowsPage
-          onFlowSelect={(queueName, jobId) =>
-            navigate({
-              to: "/flows/$queueName/$jobId",
-              params: { queueName, jobId },
-            })
-          }
-        />
-      </React.Suspense>
+      <FlowsPage
+        onFlowSelect={(queueName, jobId) =>
+          navigate({
+            to: "/flows/$queueName/$jobId",
+            params: { queueName, jobId },
+          })
+        }
+      />
     </PageLayout>
   );
 }
@@ -460,9 +397,7 @@ function FlowDetailRoute() {
   const { queueName, jobId } = useParams({ from: "/flows/$queueName/$jobId" });
   return (
     <PageLayout title="Flow Details" subtitle={jobId}>
-      <React.Suspense fallback={<PageLoader />}>
-        <FlowPage queueName={queueName} jobId={jobId} />
-      </React.Suspense>
+      <FlowPage queueName={queueName} jobId={jobId} />
     </PageLayout>
   );
 }
@@ -472,13 +407,11 @@ function TestRoute() {
   const search = useSearch({ from: "/test" });
   return (
     <PageLayout title="Test">
-      <React.Suspense fallback={<PageLoader />}>
-        <TestPage
-          queues={config?.queues || []}
-          readonly={config?.readonly}
-          prefill={search}
-        />
-      </React.Suspense>
+      <TestPage
+        queues={config?.queues || []}
+        readonly={config?.readonly}
+        prefill={search}
+      />
     </PageLayout>
   );
 }
@@ -490,26 +423,24 @@ function QueueRoute() {
 
   return (
     <PageLayout title={queueName}>
-      <React.Suspense fallback={<PageLoader />}>
-        <QueuePage
-          queueName={queueName}
-          search={search}
-          onSearchChange={(newSearch) => {
-            navigate({
-              to: "/queues/$queueName",
-              params: { queueName },
-              search: newSearch,
-              replace: true,
-            });
-          }}
-          onJobSelect={(jobId) =>
-            navigate({
-              to: "/queues/$queueName/jobs/$jobId",
-              params: { queueName, jobId },
-            })
-          }
-        />
-      </React.Suspense>
+      <QueuePage
+        queueName={queueName}
+        search={search}
+        onSearchChange={(newSearch) => {
+          navigate({
+            to: "/queues/$queueName",
+            params: { queueName },
+            search: newSearch,
+            replace: true,
+          });
+        }}
+        onJobSelect={(jobId) =>
+          navigate({
+            to: "/queues/$queueName/jobs/$jobId",
+            params: { queueName, jobId },
+          })
+        }
+      />
     </PageLayout>
   );
 }
@@ -524,31 +455,29 @@ function JobRoute() {
 
   return (
     <PageLayout title="Job Details" subtitle={jobId}>
-      <React.Suspense fallback={<PageLoader />}>
-        <JobPage
-          queueName={queueName}
-          jobId={jobId}
-          readonly={config?.readonly}
-          search={search}
-          onSearchChange={(newSearch) => {
-            navigate({
-              to: "/queues/$queueName/jobs/$jobId",
-              params: { queueName, jobId },
-              search: newSearch,
-              replace: true,
-            });
-          }}
-          onBack={() =>
-            navigate({ to: "/queues/$queueName", params: { queueName } })
-          }
-          onClone={(queue, jobName, payload) =>
-            navigate({
-              to: "/test",
-              search: { queue, jobName, payload },
-            })
-          }
-        />
-      </React.Suspense>
+      <JobPage
+        queueName={queueName}
+        jobId={jobId}
+        readonly={config?.readonly}
+        search={search}
+        onSearchChange={(newSearch) => {
+          navigate({
+            to: "/queues/$queueName/jobs/$jobId",
+            params: { queueName, jobId },
+            search: newSearch,
+            replace: true,
+          });
+        }}
+        onBack={() =>
+          navigate({ to: "/queues/$queueName", params: { queueName } })
+        }
+        onClone={(queue, jobName, payload) =>
+          navigate({
+            to: "/test",
+            search: { queue, jobName, payload },
+          })
+        }
+      />
     </PageLayout>
   );
 }
