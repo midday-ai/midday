@@ -82,7 +82,6 @@ export function FlowPage({ queueName, jobId }: FlowPageProps) {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <Network className="h-5 w-5 text-muted-foreground" />
-            <h2 className="text-lg font-semibold">{flow.job.name}</h2>
             <StatusBadge status={flow.job.status} />
           </div>
         </div>

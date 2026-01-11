@@ -94,11 +94,7 @@ export function TestPage({ queues, readonly, prefill }: TestPageProps) {
   return (
     <div className="max-w-2xl">
       <div className="mb-6">
-        <h2 className="flex items-center gap-2 text-lg font-medium">
-          <FlaskConical className="h-5 w-5" />
-          Test Job
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Manually enqueue a job for testing purposes
         </p>
       </div>

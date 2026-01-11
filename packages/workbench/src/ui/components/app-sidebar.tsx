@@ -119,7 +119,7 @@ export function AppSidebar({
             </div>
           </button>
         </TooltipTrigger>
-        <TooltipContent side="right" sideOffset={10}>
+        <TooltipContent side="right" sideOffset={16}>
           <span className="flex items-center gap-2">
             {label}
             {isPaused && <span className="text-amber-500">(paused)</span>}
@@ -219,7 +219,7 @@ export function AppSidebar({
               )}
             </button>
           </TooltipTrigger>
-          <TooltipContent side="right" sideOffset={10}>
+          <TooltipContent side="right" sideOffset={16}>
             {isDark ? "Light mode" : "Dark mode"}
           </TooltipContent>
         </Tooltip>

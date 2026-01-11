@@ -382,7 +382,7 @@ export function JobPage({
         </TabsContent>
 
         {job.failedReason && (
-          <TabsContent value="error" className="mt-4">
+          <TabsContent value="error" className="mt-4 flex flex-col" style={{ maxHeight: 'calc(100vh - 480px)', minHeight: '200px' }}>
             <ErrorDisplay
               error={job.failedReason}
               stacktrace={job.stacktrace}
@@ -466,8 +466,8 @@ function ErrorDisplay({
   };
 
   return (
-    <div className="overflow-hidden  border border-status-error/30 bg-status-error/5">
-      <div className="flex items-center justify-between border-b border-status-error/30 px-4 py-2">
+    <div className="flex flex-col h-full overflow-hidden border border-status-error/30 bg-status-error/5">
+      <div className="flex items-center justify-between border-b border-status-error/30 px-4 py-2 shrink-0">
         <span className="font-medium text-status-error">{error}</span>
         <div className="flex items-center gap-2">
           <button
@@ -521,7 +521,7 @@ function ErrorDisplay({
         </div>
       </div>
       {expanded && stacktrace && stacktrace.length > 0 && (
-        <div className="max-h-64 overflow-auto p-4">
+        <div className="flex-1 overflow-auto p-4 min-h-0">
           <pre className="font-mono text-xs text-muted-foreground">
             {stacktrace.join("\n")}
           </pre>

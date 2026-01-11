@@ -126,12 +126,6 @@ export function SchedulersPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium">Schedulers</h2>
-        <Button variant="outline" size="icon" onClick={refresh}>
-          <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
-        </Button>
-      </div>
 
       <Tabs
         value={search.tab || "repeatable"}

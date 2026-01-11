@@ -1,5 +1,6 @@
 import { AppSidebar, type NavItem } from "@/components/app-sidebar";
 import { CommandPalette } from "@/components/layout/command-palette";
+import { HeaderSearch } from "@/components/layout/header-search";
 import { useConfig, useQueues } from "@/lib/hooks";
 import { FlowPage } from "@/pages/flow";
 import { FlowsPage } from "@/pages/flows";
@@ -21,6 +22,23 @@ import {
 } from "@tanstack/react-router";
 import * as React from "react";
 import { z } from "zod";
+
+// Context for sharing search state across routes
+interface SearchContextValue {
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  setCommandOpen: (open: boolean) => void;
+}
+
+const SearchContext = React.createContext<SearchContextValue | null>(null);
+
+export function useSearchContext() {
+  const context = React.useContext(SearchContext);
+  if (!context) {
+    throw new Error("useSearchContext must be used within SearchContextProvider");
+  }
+  return context;
+}
 
 // Search params schema for the Runs page
 // sort format: "field:direction" e.g. "timestamp:desc"
@@ -100,6 +118,7 @@ function RootLayout() {
   }, [queuesData]);
   const location = useLocation();
   const [commandOpen, setCommandOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState("");
   const [isDark, setIsDark] = React.useState(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("workbench:theme");
@@ -147,18 +166,32 @@ function RootLayout() {
     });
   }, [isDark]);
 
-  // Keyboard shortcut for command palette
+  // Keyboard shortcuts
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Command palette shortcut
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         setCommandOpen(true);
+        return;
+      }
+      // Don't handle other shortcuts when command palette is open (let cmdk handle them)
+      if (commandOpen) return;
+      // Refresh shortcut
+      if (e.key === "r" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        window.location.reload();
+      }
+      // Theme toggle shortcut
+      if (e.key === "t" && (e.metaKey || e.ctrlKey) && e.shiftKey) {
+        e.preventDefault();
+        setIsDark(!isDark);
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [commandOpen, isDark]);
 
   if (loading || !config) {
     return (
@@ -209,13 +242,19 @@ function RootLayout() {
       />
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <Outlet />
+        <SearchContext.Provider value={{ searchQuery, setSearchQuery, setCommandOpen }}>
+          <Outlet />
+        </SearchContext.Provider>
       </div>
 
       <CommandPalette
         open={commandOpen}
         onOpenChange={setCommandOpen}
         queues={config.queues}
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
+        isDark={isDark}
+        onToggleTheme={() => setIsDark(!isDark)}
         onSelectQueue={(queue) => {
           navigate({ to: "/queues/$queueName", params: { queueName: queue } });
           setCommandOpen(false);
@@ -225,6 +264,10 @@ function RootLayout() {
             to: "/queues/$queueName/jobs/$jobId",
             params: { queueName: queue, jobId },
           });
+          setCommandOpen(false);
+        }}
+        onNavigate={(path) => {
+          navigate({ to: path });
           setCommandOpen(false);
         }}
       />
@@ -242,9 +285,11 @@ function PageLayout({
   subtitle?: string;
   children: React.ReactNode;
 }) {
+  const context = useSearchContext();
+
   return (
     <>
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-6">
+      <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border px-6">
         <div className="flex items-center gap-2">
           <h1 className="text-lg font-semibold">{title}</h1>
           {subtitle && (
@@ -253,6 +298,11 @@ function PageLayout({
             </span>
           )}
         </div>
+        <HeaderSearch
+          value={context.searchQuery}
+          onValueChange={context.setSearchQuery}
+          onFocus={() => context.setCommandOpen(true)}
+        />
       </header>
       <main className="flex-1 overflow-auto p-6">{children}</main>
     </>
@@ -313,7 +363,11 @@ function SchedulersRoute() {
 }
 
 function MetricsRoute() {
-  return <MetricsPage />;
+  return (
+    <PageLayout title="Metrics">
+      <MetricsPage />
+    </PageLayout>
+  );
 }
 
 function FlowsRoute() {

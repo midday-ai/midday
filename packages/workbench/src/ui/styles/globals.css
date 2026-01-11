@@ -122,6 +122,16 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
+  /* Apply serif font to all headings */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-serif);
+  }
+
   /* Film grain texture overlay */
   body::after {
     content: "";
@@ -220,6 +230,7 @@
 @theme inline {
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen, Ubuntu, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
   --font-mono: "Geist Mono", "SF Mono", Monaco, "Cascadia Code", "Roboto Mono",
     Menlo, monospace;
 

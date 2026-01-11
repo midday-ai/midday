@@ -231,9 +231,6 @@ export function QueuePage({
             )}
           </Button>
 
-          <Button variant="outline" size="icon" onClick={refresh}>
-            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
-          </Button>
         </div>
       </div>
 

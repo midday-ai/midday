@@ -49,7 +49,6 @@ export function useNotifications() {
       maxPriority: 3, // Only fetch notifications (priority <= 3)
       pageSize: 20,
       status: ["unread", "read"], // Exclude archived notifications from query
-      createdAfter: get24HoursAgo(), // Only fetch last 24 hours
     }),
   );
 
@@ -60,7 +59,6 @@ export function useNotifications() {
         maxPriority: 3,
         pageSize: 20,
         status: "archived", // Only archived notifications
-        createdAfter: get24HoursAgo(), // Only fetch last 24 hours
       }),
     );
 

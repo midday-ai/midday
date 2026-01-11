@@ -69,7 +69,7 @@ function formatPercentage(value: number): string {
 
 interface ChartTooltipProps {
   active?: boolean;
-  payload?: Array<{ name: string; value: number; color: string }>;
+  payload?: Array<{ name: string; value: number; color: string; dataKey?: string }>;
   label?: number;
 }
 
@@ -253,33 +253,17 @@ export function MetricsPage() {
   const { data: metrics, isLoading, error } = useMetrics();
 
   if (isLoading) {
-    return (
-      <div className="h-full">
-        <header className="flex h-14 items-center justify-between border-b px-6">
-          <h1 className="text-lg font-semibold">Metrics</h1>
-        </header>
-        <div className="p-6">
-          <LoadingSkeleton />
-        </div>
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   if (error || !metrics) {
     return (
-      <div className="h-full">
-        <header className="flex h-14 items-center justify-between border-b px-6">
-          <h1 className="text-lg font-semibold">Metrics</h1>
-        </header>
-        <div className="p-6">
-          <div className=" border border-destructive/50 bg-destructive/10 p-4">
-            <p className="text-destructive">
-              {error instanceof Error
-                ? error.message
-                : "Failed to load metrics"}
-            </p>
-          </div>
-        </div>
+      <div className=" border border-destructive/50 bg-destructive/10 p-4">
+        <p className="text-destructive">
+          {error instanceof Error
+            ? error.message
+            : "Failed to load metrics"}
+        </p>
       </div>
     );
   }
@@ -322,16 +306,7 @@ export function MetricsPage() {
   const waitTimeSparkline = buckets.map((b) => b.avgWaitTime);
 
   return (
-    <div className="h-full flex flex-col">
-      <header className="flex h-14 items-center justify-between border-b px-6 shrink-0">
-        <h1 className="text-lg font-semibold">Metrics</h1>
-        <span className="text-xs text-muted-foreground">
-          Last 24 hours • Updated{" "}
-          {new Date(metrics.computedAt).toLocaleTimeString()}
-        </span>
-      </header>
-
-      <div className="flex-1 overflow-auto p-6 space-y-6">
+    <div className="space-y-6">
         {/* Summary Cards */}
         <div className="grid grid-cols-4 gap-4">
           <SummaryCard
@@ -626,7 +601,6 @@ export function MetricsPage() {
             <FailingJobsTable jobs={mostFailingTypes} />
           </div>
         </div>
-      </div>
     </div>
   );
 }
