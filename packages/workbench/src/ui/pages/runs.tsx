@@ -114,8 +114,6 @@ export function RunsPage({
     [data],
   );
 
-  const total = data?.pages[0]?.total ?? 0;
-
   // No client-side filtering needed - server handles it
   const filteredRuns = runs;
 
@@ -312,7 +310,6 @@ export function RunsPage({
           <SmartSearch
             value={search.q ?? ""}
             status={search.status}
-            totalCount={total}
             onChange={handleSearchChange}
           />
         </div>
@@ -453,7 +450,7 @@ export function RunsPage({
 
           {/* Footer */}
           <div className="px-6 py-3 text-xs text-muted-foreground">
-            Showing {filteredRuns.length} of {total} runs
+            Showing {filteredRuns.length} runs
           </div>
         </>
       )}

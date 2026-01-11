@@ -164,7 +164,7 @@ export function useJob(queueName: string, jobId: string) {
 
 /**
  * Hook for fetching all runs with sorting and filtering
- * Uses smart polling - only refetches when needed
+ * Optimized for fast initial load with reasonable polling
  */
 export function useRuns(
   sort?: string,
@@ -175,34 +175,14 @@ export function useRuns(
     timeRange?: { start: number; end: number };
   },
 ) {
-  // Track the last known counts to detect changes
-  const { data: counts } = useCounts();
-  const lastCountRef = React.useRef<number | undefined>(undefined);
-
-  // Determine if we should refetch based on count changes
-  const shouldRefetch = React.useMemo(() => {
-    if (!counts) return true;
-    const currentTotal = counts.total;
-    if (lastCountRef.current === undefined) {
-      lastCountRef.current = currentTotal;
-      return true;
-    }
-    const changed = currentTotal !== lastCountRef.current;
-    if (changed) {
-      lastCountRef.current = currentTotal;
-    }
-    return changed;
-  }, [counts]);
-
   return useInfiniteQuery({
     queryKey: queryKeys.runs(sort, filters),
     queryFn: ({ pageParam, signal }) =>
-      api.getRuns({ limit: 20, cursor: pageParam, sort, ...filters }, signal),
+      api.getRuns({ limit: 30, cursor: pageParam, sort, ...filters }, signal),
     getNextPageParam: (lastPage) => lastPage.cursor,
     initialPageParam: undefined as string | undefined,
-    // Smart polling: refetch every 10s normally, but count changes trigger immediate refetch
-    refetchInterval: shouldRefetch ? 1000 : 10000,
-    staleTime: 2000, // Consider data stale after 2 seconds
+    refetchInterval: 5000, // Poll every 5 seconds
+    staleTime: 3000, // Consider data stale after 3 seconds
   });
 }
 

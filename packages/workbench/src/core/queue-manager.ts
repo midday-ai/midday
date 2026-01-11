@@ -1228,8 +1228,88 @@ export class QueueManager {
   }
 
   /**
-   * Get all runs (jobs) across all queues with sorting
-   * Optimized to fetch only what's needed and defer expensive conversions
+   * FAST PATH: Get latest runs without filters
+   * Optimized for the common case of viewing newest jobs (timestamp desc, no filters)
+   * - Single getJobs call per queue (not per status type)
+   * - No count checks needed
+   * - Minimal Redis round-trips
+   */
+  private async getLatestRuns(
+    limit: number,
+    start: number,
+  ): Promise<PaginatedResponse<RunInfoList>> {
+    const queueEntries = Array.from(this.queues.entries());
+    const numQueues = queueEntries.length;
+
+    if (numQueues === 0) {
+      return { data: [], total: -1, hasMore: false, cursor: undefined };
+    }
+
+    // Fetch a small number of recent jobs from each queue
+    // We need enough to fill the page after sorting by timestamp
+    const perQueueFetch = Math.max(5, Math.ceil((limit + 10) / numQueues) + 2);
+
+    // Fetch from all queues in parallel - single call per queue with all types
+    const allTypes: JobStatus[] = [
+      "waiting",
+      "active",
+      "completed",
+      "failed",
+      "delayed",
+    ];
+
+    const results = await Promise.all(
+      queueEntries.map(async ([queueName, queue]) => {
+        // Single getJobs call with all types - much faster than 5 separate calls
+        const jobs = await queue.getJobs(allTypes as any, 0, perQueueFetch);
+        return jobs.map((job) => ({ job, queueName }));
+      }),
+    );
+
+    // Flatten and sort by timestamp desc
+    const allJobs = results.flat();
+    allJobs.sort((a, b) => {
+      const timeDiff = (b.job.timestamp || 0) - (a.job.timestamp || 0);
+      if (timeDiff !== 0) return timeDiff;
+      // Secondary sort for stability
+      return a.queueName.localeCompare(b.queueName);
+    });
+
+    // Apply pagination
+    const jobsToConvert = allJobs.slice(start, start + limit);
+
+    // Convert to RunInfoList - infer state from job properties
+    const runInfos = await Promise.all(
+      jobsToConvert.map(async ({ job, queueName }) => {
+        // Infer state from job properties to avoid getState() Redis call
+        let state: JobStatus = "waiting";
+        if (job.finishedOn) {
+          state = job.failedReason ? "failed" : "completed";
+        } else if (job.processedOn) {
+          state = "active";
+        } else if (job.delay && job.delay > 0) {
+          state = "delayed";
+        }
+
+        const info = await this.jobToInfo(job, "list", state);
+        return { ...info, queueName } as RunInfoList;
+      }),
+    );
+
+    // Determine if there are more results
+    const hasMore = allJobs.length > start + limit;
+
+    return {
+      data: runInfos,
+      total: -1, // Don't calculate total for fast path - not needed for UI
+      hasMore,
+      cursor: hasMore ? String(start + runInfos.length) : undefined,
+    };
+  }
+
+  /**
+   * Get all runs (jobs) across all queues with sorting and filtering
+   * Uses fast path for common case (no filters, timestamp desc)
    */
   async getAllRuns(
     limit = 50,
@@ -1242,49 +1322,34 @@ export class QueueManager {
       timeRange?: { start: number; end: number };
     },
   ): Promise<PaginatedResponse<RunInfoList>> {
-    const queueEntries = Array.from(this.queues.entries());
     const sortField = sort?.field ?? "timestamp";
     const sortDir = sort?.direction === "asc" ? 1 : -1;
+    const hasFilters = !!(
+      filters?.status ||
+      filters?.tags ||
+      filters?.text ||
+      filters?.timeRange
+    );
+    const isTimestampSort = sortField === "timestamp";
+
+    // FAST PATH: No filters, timestamp desc = just get newest jobs
+    // This is the most common use case and should be instant
+    if (!hasFilters && isTimestampSort && sortDir === -1) {
+      return this.getLatestRuns(limit, start);
+    }
+
+    // FILTERED PATH: More complex queries need full filtering logic
+    const queueEntries = Array.from(this.queues.entries());
 
     // Determine which job types to fetch based on status filter
     const types = filters?.status
       ? [filters.status]
       : ["waiting", "active", "completed", "failed", "delayed"];
 
-    // For timestamp sorting, we can use Redis sorted sets more efficiently
-    const isTimestampSort = sortField === "timestamp";
     const hasTimeRange = !!filters?.timeRange;
+    const numQueues = Math.max(queueEntries.length, 1);
 
-    // Fetch counts first to skip empty queues entirely
-    const queueChecks = await Promise.all(
-      queueEntries.map(async ([queueName, queue]) => {
-        const counts = await this.getCachedJobCounts(queue);
-        const queueTotal =
-          (counts.waiting || 0) +
-          (counts.active || 0) +
-          (counts.completed || 0) +
-          (counts.failed || 0) +
-          (counts.delayed || 0);
-        return { queueName, queue, queueTotal, hasJobs: queueTotal > 0 };
-      }),
-    );
-
-    // Only process queues with jobs
-    const queuesWithJobs = queueChecks.filter((q) => q.hasJobs);
-
-    // OPTIMIZATION: Calculate smart fetch limit based on number of queues
-    // Instead of fetching 100+ per queue, fetch only what we need distributed across queues
-    const numQueues = Math.max(queuesWithJobs.length, 1);
-    const targetJobs = start + limit + 10; // What we actually need + small buffer
-    const perQueueLimit = Math.ceil(targetJobs / numQueues) + 5; // Distribute across queues
-    const fetchLimit = hasTimeRange
-      ? Math.min(perQueueLimit * 2, 50) // More for time range filtering
-      : isTimestampSort
-        ? Math.min(perQueueLimit, 30) // Minimal for timestamp sort (already ordered)
-        : Math.min(perQueueLimit + 10, 50); // Slightly more for other sorts
-    const total = queueChecks.reduce((sum, q) => sum + q.queueTotal, 0);
-
-    if (queuesWithJobs.length === 0) {
+    if (queueEntries.length === 0) {
       return {
         data: [],
         total: 0,
@@ -1293,9 +1358,13 @@ export class QueueManager {
       };
     }
 
-    // OPTIMIZATION: Two-phase fetch to ensure we get the latest jobs
-    // Phase 1: Fetch a small sample from ALL queues (ensures we see newest jobs everywhere)
-    // Phase 2: Only fetch more if we need additional jobs after sorting
+    // For filtered queries, fetch enough to likely fill one page after filtering
+    // Reduced from 50 to be smarter about distribution
+    const baseFetchPerQueue = Math.max(
+      Math.ceil((limit * 2) / numQueues) + 3,
+      5,
+    );
+
     let allJobs: { job: Job; queueName: string; state: JobStatus }[] = [];
 
     // Helper function to fetch from a single queue
@@ -1361,6 +1430,17 @@ export class QueueManager {
           state,
         }));
       }
+
+      // For status filter, only fetch that type
+      if (filters?.status) {
+        const jobs = await queue.getJobs(filters.status as any, 0, fetchCount);
+        return jobs.map((job) => ({
+          job,
+          queueName,
+          state: filters.status as JobStatus,
+        }));
+      }
+
       // Regular fetching for all types - track state for each type
       const jobArrays = await Promise.all(
         types.map(async (type) => {
@@ -1373,43 +1453,42 @@ export class QueueManager {
         .map(({ job, state }) => ({ job, queueName, state }));
     };
 
-    // Fetch from ALL queues in parallel to ensure we see the newest jobs
-    // For pagination: we need start + limit jobs, distributed across queues
-    const targetTotal = start + limit + 10; // What we need total + small buffer
-    const fetchPerQueue = Math.max(
-      5, // Minimum 5 per queue to catch recent jobs
-      Math.ceil(targetTotal / numQueues) + 3, // Distribute across queues + buffer
-    );
+    // Fetch from ALL queues in parallel
     const results = await Promise.all(
-      queuesWithJobs.map(({ queueName, queue }) =>
-        fetchFromQueue(queueName, queue, fetchPerQueue),
+      queueEntries.map(([queueName, queue]) =>
+        fetchFromQueue(queueName, queue, baseFetchPerQueue),
       ),
     );
     allJobs = results.flat();
 
-    // Apply filters BEFORE conversion (cheaper filtering on raw jobs)
+    // Apply filters BEFORE sorting and pagination
     if (filters) {
       allJobs = allJobs.filter(({ job }) =>
         this.jobMatchesAllFilters(job, filters),
       );
     }
 
-    // For timestamp sorting, sort jobs before converting (cheaper)
+    // Sort all filtered jobs to ensure consistent ordering
     // sortDir: 1 = asc (oldest first), -1 = desc (newest first, default)
     if (isTimestampSort) {
       allJobs.sort((a, b) => {
         const aTime = a.job.timestamp || 0;
         const bTime = b.job.timestamp || 0;
-        // For desc (-1): bTime - aTime puts newest first
-        // For asc (1): aTime - bTime puts oldest first
-        return sortDir === -1 ? bTime - aTime : aTime - bTime;
+        // Primary sort by timestamp
+        const timeDiff = sortDir === -1 ? bTime - aTime : aTime - bTime;
+        if (timeDiff !== 0) return timeDiff;
+        // Secondary sort by queueName for stability
+        const queueDiff = a.queueName.localeCompare(b.queueName);
+        if (queueDiff !== 0) return queueDiff;
+        // Tertiary sort by job ID for complete stability
+        return (a.job.id || "").localeCompare(b.job.id || "");
       });
     }
 
-    // Only convert jobs that we'll actually return (lazy conversion)
-    // Use "list" fields for lightweight list view
-    // Pass known state to skip expensive getState() Redis calls
+    // Apply pagination
     const jobsToConvert = allJobs.slice(start, start + limit);
+
+    // Convert only the jobs we'll return
     const runInfos = await Promise.all(
       jobsToConvert.map(async ({ job, queueName, state }) => {
         const info = await this.jobToInfo(job, "list", state);
@@ -1428,14 +1507,14 @@ export class QueueManager {
       });
     }
 
-    // Calculate total based on filtered results
-    const filteredTotal = filters ? allJobs.length : total;
+    // Build cursor for next page
+    const hasMore = allJobs.length > start + limit;
 
     return {
       data: runInfos,
-      total: filteredTotal,
-      hasMore: start + limit < filteredTotal,
-      cursor: start + limit < filteredTotal ? String(start + limit) : undefined,
+      total: -1, // Don't calculate total - not needed for UI
+      hasMore,
+      cursor: hasMore ? String(start + runInfos.length) : undefined,
     };
   }
 

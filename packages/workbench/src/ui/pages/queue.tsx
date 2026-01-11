@@ -376,9 +376,7 @@ export function QueuePage({
 
           {/* Footer */}
           <div className="flex items-center justify-between pt-2 text-sm text-muted-foreground">
-            <span>
-              Showing {jobs.length} of {total} jobs
-            </span>
+            <span>Showing {jobs.length} jobs</span>
           </div>
         </>
       )}

@@ -15,37 +15,60 @@ import {
 import * as React from "react";
 import { z } from "zod";
 
-// Lazy-loaded page components for code splitting
+// Page imports - stored for both lazy loading and preloading
+const pageModules = {
+  runs: () => import("@/pages/runs"),
+  metrics: () => import("@/pages/metrics"),
+  schedulers: () => import("@/pages/schedulers"),
+  flows: () => import("@/pages/flows"),
+  flow: () => import("@/pages/flow"),
+  queue: () => import("@/pages/queue"),
+  job: () => import("@/pages/job"),
+  test: () => import("@/pages/test"),
+};
+
+// Lazy components with code splitting
 const RunsPage = React.lazy(() =>
-  import("@/pages/runs").then((m) => ({ default: m.RunsPage })),
+  pageModules.runs().then((m) => ({ default: m.RunsPage })),
 );
 const MetricsPage = React.lazy(() =>
-  import("@/pages/metrics").then((m) => ({ default: m.MetricsPage })),
+  pageModules.metrics().then((m) => ({ default: m.MetricsPage })),
 );
 const SchedulersPage = React.lazy(() =>
-  import("@/pages/schedulers").then((m) => ({ default: m.SchedulersPage })),
+  pageModules.schedulers().then((m) => ({ default: m.SchedulersPage })),
 );
 const FlowsPage = React.lazy(() =>
-  import("@/pages/flows").then((m) => ({ default: m.FlowsPage })),
+  pageModules.flows().then((m) => ({ default: m.FlowsPage })),
 );
 const FlowPage = React.lazy(() =>
-  import("@/pages/flow").then((m) => ({ default: m.FlowPage })),
+  pageModules.flow().then((m) => ({ default: m.FlowPage })),
 );
 const QueuePage = React.lazy(() =>
-  import("@/pages/queue").then((m) => ({ default: m.QueuePage })),
+  pageModules.queue().then((m) => ({ default: m.QueuePage })),
 );
 const JobPage = React.lazy(() =>
-  import("@/pages/job").then((m) => ({ default: m.JobPage })),
+  pageModules.job().then((m) => ({ default: m.JobPage })),
 );
 const TestPage = React.lazy(() =>
-  import("@/pages/test").then((m) => ({ default: m.TestPage })),
+  pageModules.test().then((m) => ({ default: m.TestPage })),
 );
 
-// Loading fallback for lazy-loaded pages
+// Preload all pages immediately after initial render (no waiting for idle)
+let preloaded = false;
+function preloadAllPages() {
+  if (preloaded) return;
+  preloaded = true;
+  // Trigger all imports in parallel immediately
+  for (const importFn of Object.values(pageModules)) {
+    importFn();
+  }
+}
+
+// Minimal loading fallback - shown briefly while chunks load
 function PageLoader() {
   return (
     <div className="flex h-full items-center justify-center">
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+      <div className="h-5 w-5 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-foreground" />
     </div>
   );
 }
@@ -197,6 +220,11 @@ function RootLayout() {
       });
     });
   }, [isDark]);
+
+  // Preload all lazy pages immediately for instant navigation
+  React.useEffect(() => {
+    preloadAllPages();
+  }, []);
 
   // Keyboard shortcuts
   React.useEffect(() => {
