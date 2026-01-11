@@ -71,7 +71,7 @@ export const getInsightsTool = tool({
 
       // Good news section (relief-first)
       if (insight.content?.goodNews) {
-        responseText += `### ✨ Good News\n${insight.content.goodNews}\n\n`;
+        responseText += `### Good News\n${insight.content.goodNews}\n\n`;
       }
 
       // Key Metrics Grid (4 metrics)
@@ -96,7 +96,7 @@ export const getInsightsTool = tool({
       // Upcoming invoices section
       if (insight.activity?.upcomingInvoices && insight.activity.upcomingInvoices.count > 0) {
         const upcoming = insight.activity.upcomingInvoices;
-        responseText += "### 📅 Upcoming Invoices\n";
+        responseText += "### Upcoming Invoices\n";
         responseText += `You have **${upcoming.count}** recurring invoice${upcoming.count > 1 ? "s" : ""} scheduled in the next 7 days`;
         if (upcoming.totalAmount > 0) {
           responseText += ` totaling **${formatMetricValue(upcoming.totalAmount, "currency", currency, locale)}**`;
@@ -121,7 +121,7 @@ export const getInsightsTool = tool({
 
       // Overdue invoices alert
       if (insight.activity?.invoicesOverdue && insight.activity.invoicesOverdue > 0) {
-        responseText += "### ⚠️ Needs Attention\n";
+        responseText += "### Needs Attention\n";
         responseText += `You have **${insight.activity.invoicesOverdue}** overdue invoice${insight.activity.invoicesOverdue > 1 ? "s" : ""}`;
         if (insight.activity.overdueAmount) {
           responseText += ` totaling **${formatMetricValue(insight.activity.overdueAmount, "currency", currency, locale)}**`;
@@ -140,7 +140,7 @@ export const getInsightsTool = tool({
 
       // Celebration (if any)
       if (insight.content?.celebration) {
-        responseText += `### 🎉 Celebration\n${insight.content.celebration}\n\n`;
+        responseText += `### Celebration\n${insight.content.celebration}\n\n`;
       }
 
       // Anomalies (notable changes)
@@ -151,8 +151,7 @@ export const getInsightsTool = tool({
         if (significantAnomalies.length > 0) {
           responseText += "### Notable Changes\n";
           for (const anomaly of significantAnomalies) {
-            const icon = anomaly.severity === "alert" ? "⚠️" : "📊";
-            responseText += `${icon} ${anomaly.message}\n`;
+            responseText += `- ${anomaly.message}\n`;
           }
           responseText += "\n";
         }
