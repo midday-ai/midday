@@ -1,10 +1,11 @@
-import type { JobStatus } from "@/core/types";
+import type { JobStatus, RunInfoList } from "@/core/types";
 import {
   useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import * as React from "react";
 import { api } from "./api";
 
 /** Type for dashboard config returned by the API */
@@ -14,13 +15,22 @@ export type WorkbenchConfig = Awaited<ReturnType<typeof api.getConfig>>;
 export const queryKeys = {
   config: ["config"] as const,
   overview: ["overview"] as const,
+  queueNames: ["queue-names"] as const,
   queues: ["queues"] as const,
   queue: (name: string) => ["queue", name] as const,
   jobs: (queueName: string, status?: JobStatus, sort?: string) =>
     ["jobs", queueName, status, sort] as const,
   jobsAll: (queueName: string) => ["jobs", queueName] as const, // For invalidation
   job: (queueName: string, jobId: string) => ["job", queueName, jobId] as const,
-  runs: (sort?: string) => ["runs", sort] as const,
+  runs: (
+    sort?: string,
+    filters?: {
+      status?: JobStatus;
+      tags?: Record<string, string>;
+      text?: string;
+      timeRange?: { start: number; end: number };
+    },
+  ) => ["runs", sort, filters] as const,
   runsAll: ["runs"] as const, // For invalidation
   schedulers: {
     repeatable: (sort?: string) => ["schedulers", "repeatable", sort] as const,
@@ -59,7 +69,31 @@ export function useOverview() {
 }
 
 /**
- * Hook for fetching queues
+ * Hook for fetching quick job counts (lightweight, for smart polling)
+ */
+export function useCounts() {
+  return useQuery({
+    queryKey: ["counts"],
+    queryFn: ({ signal }) => api.getCounts(signal),
+    refetchInterval: 2000, // Poll counts frequently (very cheap)
+    staleTime: 1000, // Consider data stale after 1 second
+  });
+}
+
+/**
+ * Hook for fetching just queue names (fast, no counts)
+ * Used for sidebar initial render
+ */
+export function useQueueNames() {
+  return useQuery({
+    queryKey: queryKeys.queueNames,
+    queryFn: ({ signal }) => api.getQueueNames(signal),
+    staleTime: 60000, // Queue names rarely change, cache for 1 minute
+  });
+}
+
+/**
+ * Hook for fetching full queue info with counts
  */
 export function useQueues() {
   return useQuery({
@@ -67,6 +101,18 @@ export function useQueues() {
     queryFn: ({ signal }) => api.getQueues(signal),
     refetchInterval: 5000,
   });
+}
+
+/**
+ * Hook to get a single queue's info from the cached queues data
+ * Returns undefined if not yet loaded
+ */
+export function useQueueInfo(queueName: string) {
+  const { data: queues } = useQueues();
+  return React.useMemo(
+    () => queues?.find((q) => q.name === queueName),
+    [queues, queueName],
+  );
 }
 
 /**
@@ -117,16 +163,26 @@ export function useJob(queueName: string, jobId: string) {
 }
 
 /**
- * Hook for fetching all runs with sorting
+ * Hook for fetching all runs with sorting and filtering
+ * Optimized for fast initial load with reasonable polling
  */
-export function useRuns(sort?: string) {
+export function useRuns(
+  sort?: string,
+  filters?: {
+    status?: JobStatus;
+    tags?: Record<string, string>;
+    text?: string;
+    timeRange?: { start: number; end: number };
+  },
+) {
   return useInfiniteQuery({
-    queryKey: queryKeys.runs(sort),
+    queryKey: queryKeys.runs(sort, filters),
     queryFn: ({ pageParam, signal }) =>
-      api.getRuns({ limit: 100, cursor: pageParam, sort }, signal),
+      api.getRuns({ limit: 30, cursor: pageParam, sort, ...filters }, signal),
     getNextPageParam: (lastPage) => lastPage.cursor,
     initialPageParam: undefined as string | undefined,
-    refetchInterval: 5000,
+    refetchInterval: 5000, // Poll every 5 seconds
+    staleTime: 3000, // Consider data stale after 3 seconds
   });
 }
 

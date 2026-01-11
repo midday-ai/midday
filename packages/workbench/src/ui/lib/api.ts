@@ -11,6 +11,7 @@ import type {
   PaginatedResponse,
   QueueInfo,
   RunInfo,
+  RunInfoList,
   SchedulerInfo,
   SearchResult,
 } from "@/core/types";
@@ -108,7 +109,29 @@ export const api = {
   },
 
   /**
-   * Get all queues
+   * Get quick job counts for smart polling (lightweight, cached)
+   */
+  async getCounts(signal?: AbortSignal): Promise<{
+    waiting: number;
+    active: number;
+    completed: number;
+    failed: number;
+    delayed: number;
+    total: number;
+    timestamp: number;
+  }> {
+    return fetchJson(`${API_BASE}/counts`, { signal });
+  },
+
+  /**
+   * Get just queue names (fast, no counts)
+   */
+  async getQueueNames(signal?: AbortSignal): Promise<string[]> {
+    return fetchJson(`${API_BASE}/queue-names`, { signal });
+  },
+
+  /**
+   * Get all queues with counts
    */
   async getQueues(signal?: AbortSignal): Promise<QueueInfo[]> {
     return fetchJson(`${API_BASE}/queues`, { signal });
@@ -262,13 +285,26 @@ export const api = {
       limit?: number;
       cursor?: string;
       sort?: string; // format: "field:direction"
+      status?: JobStatus;
+      tags?: Record<string, string>;
+      text?: string;
+      timeRange?: { start: number; end: number };
     },
     signal?: AbortSignal,
-  ): Promise<PaginatedResponse<RunInfo>> {
+  ): Promise<PaginatedResponse<RunInfoList>> {
     const params = new URLSearchParams();
     if (options?.limit) params.set("limit", String(options.limit));
     if (options?.cursor) params.set("cursor", options.cursor);
     if (options?.sort) params.set("sort", options.sort);
+    if (options?.status) params.set("status", options.status);
+    if (options?.tags && Object.keys(options.tags).length > 0) {
+      params.set("tags", JSON.stringify(options.tags));
+    }
+    if (options?.text) params.set("q", options.text);
+    if (options?.timeRange) {
+      params.set("from", String(options.timeRange.start));
+      params.set("to", String(options.timeRange.end));
+    }
 
     const query = params.toString();
     return fetchJson(`${API_BASE}/runs${query ? `?${query}` : ""}`, {

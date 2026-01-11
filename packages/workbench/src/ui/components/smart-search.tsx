@@ -12,7 +12,6 @@ export interface ParsedFilters {
 interface SmartSearchProps {
   value: string;
   status?: string;
-  totalCount?: number;
   onChange: (value: string, status?: string) => void;
   className?: string;
 }
@@ -99,7 +98,6 @@ export function buildSearchQuery(filters: ParsedFilters): string {
 export function SmartSearch({
   value,
   status,
-  totalCount,
   onChange,
   className,
 }: SmartSearchProps) {
@@ -112,11 +110,7 @@ export function SmartSearch({
 
   const tagFields = config?.tags ?? [];
 
-  // Dynamic placeholder with total count
-  const placeholder =
-    totalCount !== undefined
-      ? `${totalCount.toLocaleString()} total runs found...`
-      : "Search runs...";
+  const placeholder = "Search runs...";
 
   // Parse current input to determine what suggestions to show
   const { currentToken, tokenType, tokenPrefix } = React.useMemo(() => {

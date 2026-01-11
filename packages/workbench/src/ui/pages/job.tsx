@@ -382,7 +382,11 @@ export function JobPage({
         </TabsContent>
 
         {job.failedReason && (
-          <TabsContent value="error" className="mt-4 flex flex-col" style={{ maxHeight: 'calc(100vh - 480px)', minHeight: '200px' }}>
+          <TabsContent
+            value="error"
+            className="mt-4 flex flex-col"
+            style={{ maxHeight: "calc(100vh - 480px)", minHeight: "200px" }}
+          >
             <ErrorDisplay
               error={job.failedReason}
               stacktrace={job.stacktrace}
@@ -682,7 +686,7 @@ function Timeline({ job }: TimelineProps) {
       const relativePosition = ((timestamp - start) / duration) * 100;
       labels.push({
         position: relativePosition,
-        label: formatDuration((timestamp - start)),
+        label: formatDuration(timestamp - start),
       });
     }
 
@@ -796,8 +800,13 @@ function Timeline({ job }: TimelineProps) {
     <div className="flex flex-col border bg-card overflow-hidden h-full">
       {/* Header with time axis */}
       <div className="flex border-b bg-muted/30 shrink-0">
-        <div className="w-[45%] shrink-0 flex items-center py-2 pr-4" style={{ paddingLeft: '12px' }}>
-          <span className="text-xs font-medium text-muted-foreground">Span</span>
+        <div
+          className="w-[45%] shrink-0 flex items-center py-2 pr-4"
+          style={{ paddingLeft: "12px" }}
+        >
+          <span className="text-xs font-medium text-muted-foreground">
+            Span
+          </span>
         </div>
         <div className="relative flex-1 py-2 pr-4 flex items-center">
           {timeLabels.map((label, i) => (

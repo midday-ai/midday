@@ -1,7 +1,7 @@
-import type { FlowSummary } from "@/core/types";
 import { EmptyState } from "@/components/shared/empty-state";
 import { RelativeTime } from "@/components/shared/relative-time";
 import { StatusBadge } from "@/components/shared/status-badge";
+import type { FlowSummary } from "@/core/types";
 import { useFlows } from "@/lib/hooks";
 import { useNavigate } from "@tanstack/react-router";
 import {
@@ -165,14 +165,20 @@ function FlowRow({ flow, onClick, onQueueClick }: FlowRowProps) {
         <div className="flex items-center gap-2 text-sm">
           <div className="flex items-center gap-1">
             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span className="text-muted-foreground tabular-nums">{flow.completedJobs}</span>
+            <span className="text-muted-foreground tabular-nums">
+              {flow.completedJobs}
+            </span>
           </div>
           <span className="text-muted-foreground">/</span>
-          <span className="text-muted-foreground tabular-nums">{flow.totalJobs}</span>
+          <span className="text-muted-foreground tabular-nums">
+            {flow.totalJobs}
+          </span>
           {flow.failedJobs > 0 && (
             <div className="flex items-center gap-1 ml-2">
               <XCircle className="h-3.5 w-3.5 text-destructive" />
-              <span className="text-destructive tabular-nums">{flow.failedJobs}</span>
+              <span className="text-destructive tabular-nums">
+                {flow.failedJobs}
+              </span>
             </div>
           )}
         </div>

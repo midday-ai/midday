@@ -1,7 +1,7 @@
 import { AppSidebar, type NavItem } from "@/components/app-sidebar";
 import { CommandPalette } from "@/components/layout/command-palette";
 import { HeaderSearch } from "@/components/layout/header-search";
-import { useConfig, useQueues } from "@/lib/hooks";
+import { useConfig, useQueueNames, useQueues } from "@/lib/hooks";
 import { FlowPage } from "@/pages/flow";
 import { FlowsPage } from "@/pages/flows";
 import { JobPage } from "@/pages/job";
@@ -35,7 +35,9 @@ const SearchContext = React.createContext<SearchContextValue | null>(null);
 export function useSearchContext() {
   const context = React.useContext(SearchContext);
   if (!context) {
-    throw new Error("useSearchContext must be used within SearchContextProvider");
+    throw new Error(
+      "useSearchContext must be used within SearchContextProvider",
+    );
   }
   return context;
 }
@@ -109,10 +111,13 @@ export function createSort(field: string, direction: "asc" | "desc"): string {
 // Root layout component
 function RootLayout() {
   const { data: config, isLoading: loading } = useConfig();
+  // Use fast queue names for sidebar (no counts, instant)
+  const { data: queueNames = [] } = useQueueNames();
+  // Lazy load full queue info for paused state (loads in background)
   const { data: queuesData = [] } = useQueues();
   const navigate = useNavigate();
 
-  // Derive paused queues set
+  // Derive paused queues set (from lazy-loaded full queue data)
   const pausedQueues = React.useMemo(() => {
     return new Set(queuesData.filter((q) => q.isPaused).map((q) => q.name));
   }, [queuesData]);
@@ -242,7 +247,9 @@ function RootLayout() {
       />
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <SearchContext.Provider value={{ searchQuery, setSearchQuery, setCommandOpen }}>
+        <SearchContext.Provider
+          value={{ searchQuery, setSearchQuery, setCommandOpen }}
+        >
           <Outlet />
         </SearchContext.Provider>
       </div>
@@ -309,7 +316,7 @@ function PageLayout({
   );
 }
 
-// Route components
+// Route components - all pages eagerly loaded for instant navigation
 function RunsRoute() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/" });

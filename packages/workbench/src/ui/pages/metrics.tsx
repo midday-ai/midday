@@ -69,7 +69,12 @@ function formatPercentage(value: number): string {
 
 interface ChartTooltipProps {
   active?: boolean;
-  payload?: Array<{ name: string; value: number; color: string; dataKey?: string }>;
+  payload?: Array<{
+    name: string;
+    value: number;
+    color: string;
+    dataKey?: string;
+  }>;
   label?: number;
 }
 
@@ -260,9 +265,7 @@ export function MetricsPage() {
     return (
       <div className=" border border-destructive/50 bg-destructive/10 p-4">
         <p className="text-destructive">
-          {error instanceof Error
-            ? error.message
-            : "Failed to load metrics"}
+          {error instanceof Error ? error.message : "Failed to load metrics"}
         </p>
       </div>
     );
@@ -307,300 +310,269 @@ export function MetricsPage() {
 
   return (
     <div className="space-y-6">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-4 gap-4">
-          <SummaryCard
-            title="Throughput"
-            value={summary.throughputPerHour.toLocaleString()}
-            subtitle="jobs/hour avg"
-            sparklineData={throughputSparkline}
-            sparklineColor="default"
-            trend={{
-              current: secondHalfCompleted + secondHalfFailed,
-              previous: firstHalfCompleted + firstHalfFailed,
-              higherIsBetter: true,
-            }}
-            icon={<TrendingUp className="h-4 w-4" />}
-          />
-          <SummaryCard
-            title="Error Rate"
-            value={formatPercentage(summary.errorRate)}
-            subtitle={`${summary.totalFailed} failed`}
-            sparklineData={errorSparkline}
-            sparklineColor={summary.errorRate > 0.1 ? "danger" : "success"}
-            trend={{
-              current: secondHalfFailed,
-              previous: firstHalfFailed,
-              higherIsBetter: false,
-            }}
-            icon={<AlertTriangle className="h-4 w-4" />}
-          />
-          <SummaryCard
-            title="Avg Duration"
-            value={formatDuration(summary.avgDuration)}
-            subtitle="processing time"
-            sparklineData={durationSparkline}
-            sparklineColor="default"
-            icon={<Zap className="h-4 w-4" />}
-          />
-          <SummaryCard
-            title="Avg Wait Time"
-            value={formatDuration(summary.avgWaitTime)}
-            subtitle="queue delay"
-            sparklineData={waitTimeSparkline}
-            sparklineColor={summary.avgWaitTime > 60000 ? "warning" : "default"}
-            icon={<Hourglass className="h-4 w-4" />}
-          />
-        </div>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-4 gap-4">
+        <SummaryCard
+          title="Throughput"
+          value={summary.throughputPerHour.toLocaleString()}
+          subtitle="jobs/hour avg"
+          sparklineData={throughputSparkline}
+          sparklineColor="default"
+          trend={{
+            current: secondHalfCompleted + secondHalfFailed,
+            previous: firstHalfCompleted + firstHalfFailed,
+            higherIsBetter: true,
+          }}
+          icon={<TrendingUp className="h-4 w-4" />}
+        />
+        <SummaryCard
+          title="Error Rate"
+          value={formatPercentage(summary.errorRate)}
+          subtitle={`${summary.totalFailed} failed`}
+          sparklineData={errorSparkline}
+          sparklineColor={summary.errorRate > 0.1 ? "danger" : "success"}
+          trend={{
+            current: secondHalfFailed,
+            previous: firstHalfFailed,
+            higherIsBetter: false,
+          }}
+          icon={<AlertTriangle className="h-4 w-4" />}
+        />
+        <SummaryCard
+          title="Avg Duration"
+          value={formatDuration(summary.avgDuration)}
+          subtitle="processing time"
+          sparklineData={durationSparkline}
+          sparklineColor="default"
+          icon={<Zap className="h-4 w-4" />}
+        />
+        <SummaryCard
+          title="Avg Wait Time"
+          value={formatDuration(summary.avgWaitTime)}
+          subtitle="queue delay"
+          sparklineData={waitTimeSparkline}
+          sparklineColor={summary.avgWaitTime > 60000 ? "warning" : "default"}
+          icon={<Hourglass className="h-4 w-4" />}
+        />
+      </div>
 
-        {/* Charts */}
-        <div className="grid grid-cols-2 gap-4">
-          {/* Throughput Chart */}
-          <div className="border border-dashed bg-card p-4">
-            <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
-              <Activity className="h-4 w-4 text-muted-foreground" />
-              Job Throughput
-            </h3>
-            <ChartContainer
-              config={throughputChartConfig}
-              className="h-52 w-full"
-            >
-              <AreaChart data={throughputData}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="hsl(var(--border))"
-                  strokeOpacity={0.5}
-                />
-                <XAxis
-                  dataKey="hour"
-                  tickFormatter={formatHourShort}
-                  tick={{
-                    fontSize: 11,
-                    fill: "hsl(var(--muted-foreground))",
-                  }}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  tick={{
-                    fontSize: 11,
-                    fill: "hsl(var(--muted-foreground))",
-                  }}
-                  tickLine={false}
-                  axisLine={false}
-                  width={32}
-                />
-                <Tooltip content={<ChartTooltip />} />
-                <Legend
-                  verticalAlign="top"
-                  height={32}
-                  iconType="square"
-                  iconSize={8}
-                  wrapperStyle={{ fontSize: 12 }}
-                />
-                <defs>
-                  <linearGradient
-                    id="completedGradient"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop
-                      offset="0%"
-                      stopColor="var(--color-completed)"
-                      stopOpacity={0.5}
-                    />
-                    <stop
-                      offset="100%"
-                      stopColor="var(--color-completed)"
-                      stopOpacity={0.05}
-                    />
-                  </linearGradient>
-                  {/* Diagonal hatching pattern for failed jobs */}
-                  <pattern
-                    id="failedPattern"
-                    x="0"
-                    y="0"
+      {/* Charts */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Throughput Chart */}
+        <div className="border border-dashed bg-card p-4">
+          <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
+            <Activity className="h-4 w-4 text-muted-foreground" />
+            Job Throughput
+          </h3>
+          <ChartContainer
+            config={throughputChartConfig}
+            className="h-52 w-full"
+          >
+            <AreaChart data={throughputData}>
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="hsl(var(--border))"
+                strokeOpacity={0.5}
+              />
+              <XAxis
+                dataKey="hour"
+                tickFormatter={formatHourShort}
+                tick={{
+                  fontSize: 11,
+                  fill: "hsl(var(--muted-foreground))",
+                }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis
+                tick={{
+                  fontSize: 11,
+                  fill: "hsl(var(--muted-foreground))",
+                }}
+                tickLine={false}
+                axisLine={false}
+                width={32}
+              />
+              <Tooltip content={<ChartTooltip />} />
+              <Legend
+                verticalAlign="top"
+                height={32}
+                iconType="square"
+                iconSize={8}
+                wrapperStyle={{ fontSize: 12 }}
+                formatter={(value) => (
+                  <span style={{ color: "hsl(var(--foreground))" }}>
+                    {value}
+                  </span>
+                )}
+              />
+              <defs>
+                <linearGradient
+                  id="completedGradient"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop
+                    offset="0%"
+                    stopColor="var(--color-completed)"
+                    stopOpacity={0.5}
+                  />
+                  <stop
+                    offset="100%"
+                    stopColor="var(--color-completed)"
+                    stopOpacity={0.05}
+                  />
+                </linearGradient>
+                {/* Diagonal hatching pattern for failed jobs */}
+                <pattern
+                  id="failedPattern"
+                  x="0"
+                  y="0"
+                  width="6"
+                  height="6"
+                  patternUnits="userSpaceOnUse"
+                >
+                  <rect
                     width="6"
                     height="6"
-                    patternUnits="userSpaceOnUse"
-                  >
-                    <rect
-                      width="6"
-                      height="6"
-                      fill="var(--color-failed)"
-                      fillOpacity={0.15}
-                    />
-                    <path
-                      d="M0,0 L6,6 M-1,5 L5,11 M-1,-1 L7,7"
-                      stroke="var(--color-failed)"
-                      strokeWidth="1"
-                      opacity="0.4"
-                    />
-                  </pattern>
-                </defs>
-                <Area
-                  type="monotone"
-                  dataKey="completed"
-                  name="Completed"
-                  stackId="1"
-                  stroke="var(--color-completed)"
-                  fill="url(#completedGradient)"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{
-                    r: 4,
-                    fill: "var(--color-completed)",
-                    stroke: "none",
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="failed"
-                  name="Failed"
-                  stackId="1"
-                  stroke="var(--color-failed)"
-                  fill="url(#failedPattern)"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{
-                    r: 4,
-                    fill: "var(--color-failed)",
-                    stroke: "none",
-                  }}
-                />
-              </AreaChart>
-            </ChartContainer>
-          </div>
+                    fill="var(--color-failed)"
+                    fillOpacity={0.15}
+                  />
+                  <path
+                    d="M0,0 L6,6 M-1,5 L5,11 M-1,-1 L7,7"
+                    stroke="var(--color-failed)"
+                    strokeWidth="1"
+                    opacity="0.4"
+                  />
+                </pattern>
+              </defs>
+              <Area
+                type="monotone"
+                dataKey="completed"
+                name="Completed"
+                stackId="1"
+                stroke="var(--color-completed)"
+                fill="url(#completedGradient)"
+                strokeWidth={2}
+                dot={false}
+                activeDot={{
+                  r: 4,
+                  fill: "var(--color-completed)",
+                  stroke: "none",
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="failed"
+                name="Failed"
+                stackId="1"
+                stroke="var(--color-failed)"
+                fill="url(#failedPattern)"
+                strokeWidth={2}
+                dot={false}
+                activeDot={{
+                  r: 4,
+                  fill: "var(--color-failed)",
+                  stroke: "none",
+                }}
+              />
+            </AreaChart>
+          </ChartContainer>
+        </div>
 
-          {/* Duration Chart */}
-          <div className="border border-dashed bg-card p-4">
-            <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
+        {/* Duration Chart */}
+        <div className="border border-dashed bg-card p-4">
+          <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            Processing Time
+          </h3>
+          <ChartContainer config={durationChartConfig} className="h-52 w-full">
+            <BarChart data={durationData}>
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="hsl(var(--border))"
+                strokeOpacity={0.5}
+              />
+              <XAxis
+                dataKey="hour"
+                tickFormatter={formatHourShort}
+                tick={{
+                  fontSize: 11,
+                  fill: "hsl(var(--muted-foreground))",
+                }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis
+                tickFormatter={(v) => formatDuration(v)}
+                tick={{
+                  fontSize: 11,
+                  fill: "hsl(var(--muted-foreground))",
+                }}
+                tickLine={false}
+                axisLine={false}
+                width={48}
+              />
+              <Tooltip content={<DurationTooltip />} cursor={false} />
+              <Legend
+                verticalAlign="top"
+                height={32}
+                iconType="square"
+                iconSize={8}
+                wrapperStyle={{ fontSize: 12 }}
+                formatter={(value) => (
+                  <span style={{ color: "hsl(var(--foreground))" }}>
+                    {value}
+                  </span>
+                )}
+              />
+              <Bar
+                dataKey="duration"
+                name="Duration"
+                fill="hsl(210, 90%, 50%)"
+                radius={[0, 0, 0, 0]}
+                style={{ outline: "none" }}
+                isAnimationActive={false}
+              />
+              <Bar
+                dataKey="waitTime"
+                name="Wait Time"
+                fill="hsl(45, 95%, 50%)"
+                radius={[0, 0, 0, 0]}
+                style={{ outline: "none" }}
+                isAnimationActive={false}
+              />
+            </BarChart>
+          </ChartContainer>
+        </div>
+      </div>
+
+      {/* Problem Tables */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Slowest Jobs */}
+        <div className="border border-dashed bg-card">
+          <div className="border-b border-dashed px-4 py-3">
+            <h3 className="text-sm font-medium flex items-center gap-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
-              Processing Time
+              Slowest Jobs
             </h3>
-            <ChartContainer
-              config={durationChartConfig}
-              className="h-52 w-full"
-            >
-              <BarChart data={durationData}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="hsl(var(--border))"
-                  strokeOpacity={0.5}
-                />
-                <XAxis
-                  dataKey="hour"
-                  tickFormatter={formatHourShort}
-                  tick={{
-                    fontSize: 11,
-                    fill: "hsl(var(--muted-foreground))",
-                  }}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  tickFormatter={(v) => formatDuration(v)}
-                  tick={{
-                    fontSize: 11,
-                    fill: "hsl(var(--muted-foreground))",
-                  }}
-                  tickLine={false}
-                  axisLine={false}
-                  width={48}
-                />
-                <Tooltip content={<DurationTooltip />} cursor={false} />
-                <Legend
-                  verticalAlign="top"
-                  height={32}
-                  iconType="square"
-                  iconSize={8}
-                  wrapperStyle={{ fontSize: 12 }}
-                />
-                <defs>
-                  <linearGradient
-                    id="durationGradient"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop
-                      offset="0%"
-                      stopColor="var(--color-duration)"
-                      stopOpacity={0.9}
-                    />
-                    <stop
-                      offset="100%"
-                      stopColor="var(--color-duration)"
-                      stopOpacity={0.6}
-                    />
-                  </linearGradient>
-                  <linearGradient
-                    id="waitTimeGradient"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop
-                      offset="0%"
-                      stopColor="var(--color-waitTime)"
-                      stopOpacity={0.9}
-                    />
-                    <stop
-                      offset="100%"
-                      stopColor="var(--color-waitTime)"
-                      stopOpacity={0.6}
-                    />
-                  </linearGradient>
-                </defs>
-                <Bar
-                  dataKey="duration"
-                  name="Duration"
-                  fill="url(#durationGradient)"
-                  radius={[0, 0, 0, 0]}
-                  style={{ outline: "none" }}
-                  isAnimationActive={false}
-                />
-                <Bar
-                  dataKey="waitTime"
-                  name="Wait Time"
-                  fill="url(#waitTimeGradient)"
-                  radius={[0, 0, 0, 0]}
-                  style={{ outline: "none" }}
-                  isAnimationActive={false}
-                />
-              </BarChart>
-            </ChartContainer>
           </div>
+          <SlowestJobsTable jobs={slowestJobs} />
         </div>
 
-        {/* Problem Tables */}
-        <div className="grid grid-cols-2 gap-4">
-          {/* Slowest Jobs */}
-          <div className="border border-dashed bg-card">
-            <div className="border-b border-dashed px-4 py-3">
-              <h3 className="text-sm font-medium flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                Slowest Jobs
-              </h3>
-            </div>
-            <SlowestJobsTable jobs={slowestJobs} />
+        {/* Most Failing */}
+        <div className="border border-dashed bg-card">
+          <div className="border-b border-dashed px-4 py-3">
+            <h3 className="text-sm font-medium flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+              Most Failing Job Types
+            </h3>
           </div>
-
-          {/* Most Failing */}
-          <div className="border border-dashed bg-card">
-            <div className="border-b border-dashed px-4 py-3">
-              <h3 className="text-sm font-medium flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                Most Failing Job Types
-              </h3>
-            </div>
-            <FailingJobsTable jobs={mostFailingTypes} />
-          </div>
+          <FailingJobsTable jobs={mostFailingTypes} />
         </div>
+      </div>
     </div>
   );
 }

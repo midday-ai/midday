@@ -40,6 +40,13 @@ export function createApiRoutes(core: WorkbenchCore): Hono {
     return c.json(stats);
   });
 
+  // GET /api/counts - Lightweight job counts for smart polling
+  // Returns just total counts per status, very fast (cached)
+  app.get("/counts", async (c) => {
+    const counts = await qm.getQuickCounts();
+    return c.json(counts);
+  });
+
   // GET /api/runs - All jobs across all queues
   // Note: Sorting on non-timestamp fields requires in-memory sort (limited to ~1000 jobs)
   // For timestamp sorting, Redis's natural order is used efficiently
@@ -49,7 +56,71 @@ export function createApiRoutes(core: WorkbenchCore): Hono {
     const start = cursor ? Number(cursor) : 0;
     const sort = parseSort(c.req.query("sort"));
 
-    const result = await qm.getAllRuns(limit, start, sort);
+    // Parse filter parameters
+    const status = c.req.query("status") as JobStatus | undefined;
+    const q = c.req.query("q"); // Text search
+    const from = c.req.query("from"); // Time range start
+    const to = c.req.query("to"); // Time range end
+    const tagsParam = c.req.query("tags"); // Tags as JSON string or key:value pairs
+
+    // Parse tags filter
+    let tags: Record<string, string> | undefined;
+    if (tagsParam) {
+      try {
+        // Try parsing as JSON first
+        tags = JSON.parse(tagsParam);
+      } catch {
+        // If not JSON, try parsing as key:value pairs
+        const tagPairs = tagsParam.split(",");
+        tags = {};
+        for (const pair of tagPairs) {
+          const [key, value] = pair.split(":");
+          if (key && value) {
+            tags[key.trim()] = value.trim();
+          }
+        }
+      }
+    }
+
+    // Parse time range
+    let timeRange: { start: number; end: number } | undefined;
+    if (from && to) {
+      timeRange = {
+        start: Number(from),
+        end: Number(to),
+      };
+    }
+
+    // Parse text search from q parameter
+    // The q parameter might contain both text and tags, so we extract text
+    let text: string | undefined;
+    if (q) {
+      // Simple extraction - if q doesn't contain colons, it's text search
+      // Otherwise, tags are already parsed above
+      if (!q.includes(":")) {
+        text = q;
+      } else {
+        // If q contains colons, try to extract text part
+        // This is a simplified approach - could be enhanced
+        const parts = q.split(" ");
+        const textParts = parts.filter((p) => !p.includes(":"));
+        if (textParts.length > 0) {
+          text = textParts.join(" ");
+        }
+      }
+    }
+
+    const filters =
+      status || tags || text || timeRange
+        ? {
+            status,
+            tags,
+            text,
+            timeRange,
+          }
+        : undefined;
+
+    const result = await qm.getAllRuns(limit, start, sort, filters);
     return c.json(result);
   });
 
@@ -83,7 +154,13 @@ export function createApiRoutes(core: WorkbenchCore): Hono {
     }
   });
 
-  // GET /api/queues - List all queues
+  // GET /api/queue-names - List just queue names (fast, no counts)
+  app.get("/queue-names", (c) => {
+    const names = qm.getQueueNames();
+    return c.json(names);
+  });
+
+  // GET /api/queues - List all queues with counts
   app.get("/queues", async (c) => {
     const queues = await qm.getQueues();
     return c.json(queues);

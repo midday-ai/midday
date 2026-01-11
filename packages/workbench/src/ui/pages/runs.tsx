@@ -14,7 +14,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { RunInfo } from "@/core/types";
+import type { JobStatus, RunInfoList } from "@/core/types";
 import {
   queryKeys,
   useActivityStats,
@@ -60,6 +60,44 @@ export function RunsPage({
     onSearchChange({ ...search, sort }),
   );
 
+  // Parse tag filters from the q param
+  const parsedQuery = React.useMemo(
+    () => parseSearchQuery(search.q ?? ""),
+    [search.q],
+  );
+
+  // Derive time range from URL params
+  const timeRange = React.useMemo<
+    { start: number; end: number } | undefined
+  >(() => {
+    if (search.from && search.to) {
+      return { start: search.from, end: search.to };
+    }
+    return undefined;
+  }, [search.from, search.to]);
+
+  // Build filters object for server-side filtering
+  const filters = React.useMemo(() => {
+    const statusFilter = search.status ?? "all";
+    const hasFilters =
+      statusFilter !== "all" ||
+      Object.keys(parsedQuery.tags).length > 0 ||
+      !!parsedQuery.text ||
+      !!timeRange;
+
+    if (!hasFilters) {
+      return undefined;
+    }
+
+    return {
+      status: statusFilter !== "all" ? (statusFilter as JobStatus) : undefined,
+      tags:
+        Object.keys(parsedQuery.tags).length > 0 ? parsedQuery.tags : undefined,
+      text: parsedQuery.text || undefined,
+      timeRange,
+    };
+  }, [search.status, parsedQuery, timeRange]);
+
   const {
     data,
     isLoading,
@@ -68,81 +106,16 @@ export function RunsPage({
     hasNextPage,
     isFetchingNextPage,
     isRefetching,
-  } = useRuns(search.sort);
+  } = useRuns(search.sort, filters);
 
-  // Parse tag filters from the q param
-  const parsedQuery = React.useMemo(
-    () => parseSearchQuery(search.q ?? ""),
-    [search.q],
-  );
-
-  // Derive time range from URL params
-  const timeRange = React.useMemo(() => {
-    if (search.from && search.to) {
-      return { start: search.from, end: search.to };
-    }
-    return null;
-  }, [search.from, search.to]);
-
-  // Flatten all pages into a single array
+  // Flatten all pages into a single array (already filtered server-side)
   const runs = React.useMemo(
     () => data?.pages.flatMap((page) => page.data) ?? [],
     [data],
   );
 
-  const total = data?.pages[0]?.total ?? 0;
-
-  const filteredRuns = React.useMemo(() => {
-    let filtered = runs;
-
-    // Time range filter
-    if (timeRange) {
-      filtered = filtered.filter((run) => {
-        const time = run.processedOn || run.timestamp;
-        return time >= timeRange.start && time <= timeRange.end;
-      });
-    }
-
-    // Status filter from URL
-    const statusFilter = search.status ?? "all";
-    if (statusFilter !== "all") {
-      filtered = filtered.filter((run) => run.status === statusFilter);
-    }
-
-    // Tag filters from parsed query
-    const tagFilters = Object.entries(parsedQuery.tags);
-    if (tagFilters.length > 0) {
-      filtered = filtered.filter((run) => {
-        if (!run.tags) return false;
-        return tagFilters.every(([field, value]) => {
-          const tagValue = run.tags?.[field];
-          return (
-            tagValue !== undefined &&
-            String(tagValue).toLowerCase().includes(value.toLowerCase())
-          );
-        });
-      });
-    }
-
-    // Text search from parsed query
-    if (parsedQuery.text) {
-      const query = parsedQuery.text.toLowerCase();
-      filtered = filtered.filter(
-        (run) =>
-          run.name.toLowerCase().includes(query) ||
-          run.id.toLowerCase().includes(query) ||
-          run.queueName.toLowerCase().includes(query) ||
-          (run.tags &&
-            Object.entries(run.tags).some(
-              ([key, val]) =>
-                key.toLowerCase().includes(query) ||
-                String(val).toLowerCase().includes(query),
-            )),
-      );
-    }
-
-    return filtered;
-  }, [runs, search.status, parsedQuery, timeRange]);
+  // No client-side filtering needed - server handles it
+  const filteredRuns = runs;
 
   // Handle search change
   const handleSearchChange = (q: string, status?: string) => {
@@ -180,7 +153,7 @@ export function RunsPage({
   const isSelected = (queueName: string, jobId: string) =>
     selection.has(selectionKey(queueName, jobId));
 
-  const toggleSelection = (run: RunInfo) => {
+  const toggleSelection = (run: RunInfoList) => {
     const key = selectionKey(run.queueName, run.id);
     setSelection((prev) => {
       const next = new Map(prev);
@@ -323,7 +296,7 @@ export function RunsPage({
       <div className="py-4">
         <ActivityTimeline
           data={timelineData}
-          selection={timeRange}
+          selection={timeRange ?? null}
           onSelectionChange={handleTimeRangeChange}
           totalSuccess={totalSuccess}
           totalError={totalError}
@@ -337,7 +310,6 @@ export function RunsPage({
           <SmartSearch
             value={search.q ?? ""}
             status={search.status}
-            totalCount={total}
             onChange={handleSearchChange}
           />
         </div>
@@ -404,7 +376,7 @@ export function RunsPage({
           {[...Array(15)].map((_, i) => (
             <div
               key={i.toString()}
-              className="grid grid-cols-12 items-center gap-4 px-6 py-3"
+              className="grid grid-cols-12 items-center gap-4 py-3"
             >
               <div className="col-span-5 flex items-center gap-3">
                 <div className="h-4 w-4 animate-pulse bg-muted" />
@@ -478,7 +450,7 @@ export function RunsPage({
 
           {/* Footer */}
           <div className="px-6 py-3 text-xs text-muted-foreground">
-            Showing {filteredRuns.length} of {total} runs
+            Showing {filteredRuns.length} runs
           </div>
         </>
       )}
@@ -499,7 +471,7 @@ export function RunsPage({
 }
 
 interface RunRowProps {
-  run: RunInfo;
+  run: RunInfoList;
   selected: boolean;
   onSelect: () => void;
   onClick: () => void;

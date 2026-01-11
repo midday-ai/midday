@@ -18,6 +18,7 @@ import type {
   QueueInfo,
   QueueMetrics,
   RunInfo,
+  RunInfoList,
   SchedulerInfo,
   SearchResult,
   SortOptions,
@@ -84,6 +85,141 @@ export class QueueManager {
   }
 
   /**
+   * Execute a promise with a timeout
+   */
+  private async withTimeout<T>(
+    promise: Promise<T>,
+    timeoutMs: number,
+    errorMessage: string,
+  ): Promise<T> {
+    return Promise.race([
+      promise,
+      new Promise<T>((_, reject) =>
+        setTimeout(() => reject(new Error(errorMessage)), timeoutMs),
+      ),
+    ]);
+  }
+
+  /**
+   * Get jobs by time range using Redis sorted sets (ZRANGEBYSCORE)
+   * This is more efficient than fetching all jobs and filtering in memory
+   */
+  private async getJobsByTimeRange(
+    queue: Queue,
+    status: "completed" | "failed",
+    startTime: number,
+    endTime: number,
+    limit: number,
+  ): Promise<Job[]> {
+    try {
+      // Access BullMQ's Redis client
+      const client = (queue as any).client;
+      if (!client) {
+        // Fallback to regular getJobs if client not available
+        const jobs = await queue.getJobs([status], 0, limit * 2);
+        return jobs.filter(
+          (job) =>
+            job.finishedOn &&
+            job.finishedOn >= startTime &&
+            job.finishedOn <= endTime,
+        );
+      }
+
+      // BullMQ stores jobs in sorted sets: bull:queueName:completed, bull:queueName:failed
+      // The score is the finishedOn timestamp
+      const queueKey = `bull:${queue.name}:${status}`;
+      const jobIds = await client.zrangebyscore(
+        queueKey,
+        startTime,
+        endTime,
+        "LIMIT",
+        0,
+        limit,
+      );
+
+      if (!jobIds || jobIds.length === 0) {
+        return [];
+      }
+
+      // Fetch job data for the IDs in parallel
+      const jobPromises = jobIds.map((jobId: string) => queue.getJob(jobId));
+      const jobs = await Promise.all(jobPromises);
+
+      // Filter out null/undefined results
+      return jobs.filter(
+        (job): job is Job => job !== null && job !== undefined,
+      );
+    } catch (error) {
+      // Fallback to regular getJobs on error
+      const jobs = await queue.getJobs([status], 0, limit * 2);
+      return jobs.filter(
+        (job) =>
+          job.finishedOn &&
+          job.finishedOn >= startTime &&
+          job.finishedOn <= endTime,
+      );
+    }
+  }
+
+  /**
+   * Cache for job state lookups to avoid repeated Redis calls
+   */
+  private jobStateCache = new LRUCache<string, JobStatus>({
+    max: 1000,
+    ttl: 1000 * 30, // 30 second TTL - job states don't change frequently
+  });
+
+  /**
+   * Cache for job counts to avoid repeated Redis calls
+   * Short TTL since counts change frequently but are expensive to fetch
+   */
+  private countCache = new LRUCache<
+    string,
+    Awaited<ReturnType<Queue["getJobCounts"]>>
+  >({
+    max: 100, // Cache counts for up to 100 queues
+    ttl: 1000 * 5, // 5 second TTL - counts change but not instantly
+  });
+
+  /**
+   * Get job counts with caching
+   */
+  private async getCachedJobCounts(
+    queue: Queue,
+  ): Promise<Awaited<ReturnType<Queue["getJobCounts"]>>> {
+    const cacheKey = queue.name;
+    const cached = this.countCache.get(cacheKey);
+    if (cached !== undefined) {
+      return cached;
+    }
+
+    const counts = await queue.getJobCounts();
+    this.countCache.set(cacheKey, counts);
+    return counts;
+  }
+
+  /**
+   * Invalidate caches related to a job or queue
+   */
+  private invalidateJobCache(queueName: string, jobId?: string): void {
+    // Invalidate count cache for the queue
+    this.countCache.delete(queueName);
+
+    // Invalidate job state cache if jobId provided
+    if (jobId) {
+      const stateCacheKey = `${queueName}:${jobId}`;
+      this.jobStateCache.delete(stateCacheKey);
+    }
+
+    // Invalidate main cache entries that might be affected
+    // These are expensive to recompute, so we invalidate them
+    // to ensure accuracy after mutations
+    this.cache.delete("metrics");
+    this.cache.delete("overview");
+    this.cache.delete("activity");
+  }
+
+  /**
    * Clear cache (useful after mutations)
    */
   clearCache(prefix?: string): void {
@@ -99,6 +235,53 @@ export class QueueManager {
   }
 
   /**
+   * Get quick job counts across all queues (lightweight, for smart polling)
+   * Returns total counts per status - cached and very fast
+   */
+  async getQuickCounts(): Promise<{
+    waiting: number;
+    active: number;
+    completed: number;
+    failed: number;
+    delayed: number;
+    total: number;
+    timestamp: number;
+  }> {
+    // Use short cache for counts - they change frequently
+    return this.cached("quick-counts", 2000, async () => {
+      const totals = {
+        waiting: 0,
+        active: 0,
+        completed: 0,
+        failed: 0,
+        delayed: 0,
+        total: 0,
+        timestamp: Date.now(),
+      };
+
+      await Promise.all(
+        Array.from(this.queues.values()).map(async (queue) => {
+          const counts = await this.getCachedJobCounts(queue);
+          totals.waiting += counts.waiting || 0;
+          totals.active += counts.active || 0;
+          totals.completed += counts.completed || 0;
+          totals.failed += counts.failed || 0;
+          totals.delayed += counts.delayed || 0;
+        }),
+      );
+
+      totals.total =
+        totals.waiting +
+        totals.active +
+        totals.completed +
+        totals.failed +
+        totals.delayed;
+
+      return totals;
+    });
+  }
+
+  /**
    * Get configured tag field names
    */
   getTagFields(): string[] {
@@ -106,7 +289,8 @@ export class QueueManager {
   }
 
   /**
-   * Get all queue names
+   * Get just queue names (very fast, no Redis calls)
+   * Used for sidebar initial render
    */
   getQueueNames(): string[] {
     return Array.from(this.queues.keys());
@@ -129,7 +313,7 @@ export class QueueManager {
       const results = await Promise.all(
         queueEntries.map(async ([name, queue]) => {
           const [counts, isPaused] = await Promise.all([
-            queue.getJobCounts(),
+            this.getCachedJobCounts(queue),
             queue.isPaused(),
           ]);
 
@@ -233,303 +417,316 @@ export class QueueManager {
    */
   async getMetrics(): Promise<MetricsResponse> {
     return this.cached("metrics", this.CACHE_TTL.metrics, async () => {
-      const now = Date.now();
-      const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
+      return this.withTimeout(
+        (async () => {
+          const now = Date.now();
+          const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
 
-      // Initialize hourly buckets for last 24 hours
-      const createEmptyBuckets = (): HourlyBucket[] => {
-        const buckets: HourlyBucket[] = [];
-        const startHour =
-          Math.floor(twentyFourHoursAgo / (60 * 60 * 1000)) * (60 * 60 * 1000);
-        for (let i = 0; i < 24; i++) {
-          buckets.push({
-            hour: startHour + i * 60 * 60 * 1000,
-            completed: 0,
-            failed: 0,
-            avgDuration: 0,
-            avgWaitTime: 0,
-          });
-        }
-        return buckets;
-      };
-
-      const queueMetricsMap = new Map<
-        string,
-        {
-          buckets: HourlyBucket[];
-          durations: number[][];
-          waitTimes: number[][];
-        }
-      >();
-
-      // Initialize per-queue metrics
-      for (const queueName of this.queues.keys()) {
-        queueMetricsMap.set(queueName, {
-          buckets: createEmptyBuckets(),
-          durations: Array.from({ length: 24 }, () => []),
-          waitTimes: Array.from({ length: 24 }, () => []),
-        });
-      }
-
-      // Track slowest jobs and failing job types
-      const allJobs: Array<{
-        name: string;
-        queueName: string;
-        duration: number;
-        jobId: string;
-      }> = [];
-      const jobTypeStats = new Map<
-        string,
-        { name: string; queueName: string; completed: number; failed: number }
-      >();
-
-      // Fetch completed and failed jobs from each queue IN PARALLEL
-      const queueEntries = Array.from(this.queues.entries());
-      const queueResults = await Promise.all(
-        queueEntries.map(async ([queueName, queue]) => {
-          // Fetch both completed and failed jobs in parallel, limit to 200 each for performance
-          const [completedJobs, failedJobs] = await Promise.all([
-            queue.getJobs(["completed"], 0, 200),
-            queue.getJobs(["failed"], 0, 200),
-          ]);
-          return { queueName, completedJobs, failedJobs };
-        }),
-      );
-
-      // Process results
-      for (const { queueName, completedJobs, failedJobs } of queueResults) {
-        const metrics = queueMetricsMap.get(queueName)!;
-
-        // Process completed jobs
-        for (const job of completedJobs) {
-          if (!job || !job.finishedOn || job.finishedOn < twentyFourHoursAgo)
-            continue;
-
-          const bucketIndex = Math.floor(
-            (job.finishedOn - (metrics.buckets[0]?.hour || 0)) /
-              (60 * 60 * 1000),
-          );
-          if (bucketIndex >= 0 && bucketIndex < 24) {
-            metrics.buckets[bucketIndex].completed++;
-
-            const duration = job.processedOn
-              ? job.finishedOn - job.processedOn
-              : 0;
-            const waitTime = job.processedOn
-              ? job.processedOn - job.timestamp
-              : 0;
-
-            if (duration > 0) {
-              metrics.durations[bucketIndex].push(duration);
-              allJobs.push({
-                name: job.name,
-                queueName,
-                duration,
-                jobId: job.id || "",
+          // Initialize hourly buckets for last 24 hours
+          const createEmptyBuckets = (): HourlyBucket[] => {
+            const buckets: HourlyBucket[] = [];
+            const startHour =
+              Math.floor(twentyFourHoursAgo / (60 * 60 * 1000)) *
+              (60 * 60 * 1000);
+            for (let i = 0; i < 24; i++) {
+              buckets.push({
+                hour: startHour + i * 60 * 60 * 1000,
+                completed: 0,
+                failed: 0,
+                avgDuration: 0,
+                avgWaitTime: 0,
               });
             }
-            if (waitTime > 0) {
-              metrics.waitTimes[bucketIndex].push(waitTime);
+            return buckets;
+          };
+
+          const queueMetricsMap = new Map<
+            string,
+            {
+              buckets: HourlyBucket[];
+              durations: number[][];
+              waitTimes: number[][];
+            }
+          >();
+
+          // Initialize per-queue metrics
+          for (const queueName of this.queues.keys()) {
+            queueMetricsMap.set(queueName, {
+              buckets: createEmptyBuckets(),
+              durations: Array.from({ length: 24 }, () => []),
+              waitTimes: Array.from({ length: 24 }, () => []),
+            });
+          }
+
+          // Track slowest jobs and failing job types
+          const allJobs: Array<{
+            name: string;
+            queueName: string;
+            duration: number;
+            jobId: string;
+          }> = [];
+          const jobTypeStats = new Map<
+            string,
+            {
+              name: string;
+              queueName: string;
+              completed: number;
+              failed: number;
+            }
+          >();
+
+          // Fetch completed and failed jobs from each queue IN PARALLEL
+          // Use time-based filtering to only get jobs within the 24-hour window
+          const queueEntries = Array.from(this.queues.entries());
+
+          // First, check which queues have relevant jobs using getJobCounts
+          const queueChecks = await Promise.all(
+            queueEntries.map(async ([queueName, queue]) => {
+              const counts = await this.getCachedJobCounts(queue);
+              return {
+                queueName,
+                queue,
+                hasRelevantJobs:
+                  (counts.completed || 0) > 0 || (counts.failed || 0) > 0,
+              };
+            }),
+          );
+
+          // Only process queues with relevant jobs
+          const relevantQueues = queueChecks.filter((q) => q.hasRelevantJobs);
+
+          const queueResults = await Promise.all(
+            relevantQueues.map(async ({ queueName, queue }) => {
+              // Use time-based filtering - only fetch jobs within the 24-hour window
+              // Reduced limit since we're filtering by time in Redis
+              const [completedJobs, failedJobs] = await Promise.all([
+                this.getJobsByTimeRange(
+                  queue,
+                  "completed",
+                  twentyFourHoursAgo,
+                  now,
+                  100, // Reduced from 200 - only recent jobs needed
+                ),
+                this.getJobsByTimeRange(
+                  queue,
+                  "failed",
+                  twentyFourHoursAgo,
+                  now,
+                  100, // Reduced from 200 - only recent jobs needed
+                ),
+              ]);
+              return { queueName, completedJobs, failedJobs };
+            }),
+          );
+
+          // Process results
+          for (const { queueName, completedJobs, failedJobs } of queueResults) {
+            const metrics = queueMetricsMap.get(queueName)!;
+
+            // Process completed jobs
+            for (const job of completedJobs) {
+              if (
+                !job ||
+                !job.finishedOn ||
+                job.finishedOn < twentyFourHoursAgo
+              )
+                continue;
+
+              const bucketIndex = Math.floor(
+                (job.finishedOn - (metrics.buckets[0]?.hour || 0)) /
+                  (60 * 60 * 1000),
+              );
+              if (bucketIndex >= 0 && bucketIndex < 24) {
+                metrics.buckets[bucketIndex].completed++;
+
+                const duration = job.processedOn
+                  ? job.finishedOn - job.processedOn
+                  : 0;
+                const waitTime = job.processedOn
+                  ? job.processedOn - job.timestamp
+                  : 0;
+
+                if (duration > 0) {
+                  metrics.durations[bucketIndex].push(duration);
+                  allJobs.push({
+                    name: job.name,
+                    queueName,
+                    duration,
+                    jobId: job.id || "",
+                  });
+                }
+                if (waitTime > 0) {
+                  metrics.waitTimes[bucketIndex].push(waitTime);
+                }
+              }
+
+              // Track job type stats
+              const key = `${queueName}:${job.name}`;
+              const stats = jobTypeStats.get(key) || {
+                name: job.name,
+                queueName,
+                completed: 0,
+                failed: 0,
+              };
+              stats.completed++;
+              jobTypeStats.set(key, stats);
+            }
+
+            // Process failed jobs
+            for (const job of failedJobs) {
+              if (
+                !job ||
+                !job.finishedOn ||
+                job.finishedOn < twentyFourHoursAgo
+              )
+                continue;
+
+              const bucketIndex = Math.floor(
+                (job.finishedOn - (metrics.buckets[0]?.hour || 0)) /
+                  (60 * 60 * 1000),
+              );
+              if (bucketIndex >= 0 && bucketIndex < 24) {
+                metrics.buckets[bucketIndex].failed++;
+              }
+
+              // Track job type stats
+              const key = `${queueName}:${job.name}`;
+              const stats = jobTypeStats.get(key) || {
+                name: job.name,
+                queueName,
+                completed: 0,
+                failed: 0,
+              };
+              stats.failed++;
+              jobTypeStats.set(key, stats);
             }
           }
 
-          // Track job type stats
-          const key = `${queueName}:${job.name}`;
-          const stats = jobTypeStats.get(key) || {
-            name: job.name,
-            queueName,
-            completed: 0,
-            failed: 0,
+          // Calculate averages for each bucket
+          for (const metrics of queueMetricsMap.values()) {
+            for (let i = 0; i < 24; i++) {
+              const durations = metrics.durations[i];
+              const waitTimes = metrics.waitTimes[i];
+              if (durations.length > 0) {
+                metrics.buckets[i].avgDuration = Math.round(
+                  durations.reduce((a, b) => a + b, 0) / durations.length,
+                );
+              }
+              if (waitTimes.length > 0) {
+                metrics.buckets[i].avgWaitTime = Math.round(
+                  waitTimes.reduce((a, b) => a + b, 0) / waitTimes.length,
+                );
+              }
+            }
+          }
+
+          // Skip per-queue metrics - not used by frontend (only aggregate is displayed)
+          // Return empty array to maintain API compatibility
+
+          // Build aggregate metrics
+          const aggregateBuckets = createEmptyBuckets();
+          const aggregateDurations: number[][] = Array.from(
+            { length: 24 },
+            () => [],
+          );
+          const aggregateWaitTimes: number[][] = Array.from(
+            { length: 24 },
+            () => [],
+          );
+
+          for (const metrics of queueMetricsMap.values()) {
+            for (let i = 0; i < 24; i++) {
+              aggregateBuckets[i].completed += metrics.buckets[i].completed;
+              aggregateBuckets[i].failed += metrics.buckets[i].failed;
+              aggregateDurations[i].push(...metrics.durations[i]);
+              aggregateWaitTimes[i].push(...metrics.waitTimes[i]);
+            }
+          }
+
+          // Calculate aggregate averages
+          for (let i = 0; i < 24; i++) {
+            if (aggregateDurations[i].length > 0) {
+              aggregateBuckets[i].avgDuration = Math.round(
+                aggregateDurations[i].reduce((a, b) => a + b, 0) /
+                  aggregateDurations[i].length,
+              );
+            }
+            if (aggregateWaitTimes[i].length > 0) {
+              aggregateBuckets[i].avgWaitTime = Math.round(
+                aggregateWaitTimes[i].reduce((a, b) => a + b, 0) /
+                  aggregateWaitTimes[i].length,
+              );
+            }
+          }
+
+          const totalCompleted = aggregateBuckets.reduce(
+            (sum, b) => sum + b.completed,
+            0,
+          );
+          const totalFailed = aggregateBuckets.reduce(
+            (sum, b) => sum + b.failed,
+            0,
+          );
+          const allDurations = aggregateDurations.flat();
+          const allWaitTimes = aggregateWaitTimes.flat();
+
+          // Get top 10 slowest jobs
+          const slowestJobs = allJobs
+            .sort((a, b) => b.duration - a.duration)
+            .slice(0, 10);
+
+          // Get top 10 most failing job types
+          const mostFailingTypes = Array.from(jobTypeStats.values())
+            .filter((s) => s.failed > 0)
+            .map((s) => ({
+              name: s.name,
+              queueName: s.queueName,
+              failCount: s.failed,
+              totalCount: s.completed + s.failed,
+              errorRate: s.failed / (s.completed + s.failed),
+            }))
+            .sort((a, b) => b.failCount - a.failCount)
+            .slice(0, 10);
+
+          return {
+            queues: [], // Empty - per-queue metrics not used by frontend
+            aggregate: {
+              queueName: "all",
+              buckets: aggregateBuckets,
+              summary: {
+                totalCompleted,
+                totalFailed,
+                errorRate:
+                  totalCompleted + totalFailed > 0
+                    ? totalFailed / (totalCompleted + totalFailed)
+                    : 0,
+                avgDuration:
+                  allDurations.length > 0
+                    ? Math.round(
+                        allDurations.reduce((a, b) => a + b, 0) /
+                          allDurations.length,
+                      )
+                    : 0,
+                avgWaitTime:
+                  allWaitTimes.length > 0
+                    ? Math.round(
+                        allWaitTimes.reduce((a, b) => a + b, 0) /
+                          allWaitTimes.length,
+                      )
+                    : 0,
+                throughputPerHour: Math.round(
+                  (totalCompleted + totalFailed) / 24,
+                ),
+              },
+            },
+            slowestJobs,
+            mostFailingTypes,
+            computedAt: now,
           };
-          stats.completed++;
-          jobTypeStats.set(key, stats);
-        }
-
-        // Process failed jobs
-        for (const job of failedJobs) {
-          if (!job || !job.finishedOn || job.finishedOn < twentyFourHoursAgo)
-            continue;
-
-          const bucketIndex = Math.floor(
-            (job.finishedOn - (metrics.buckets[0]?.hour || 0)) /
-              (60 * 60 * 1000),
-          );
-          if (bucketIndex >= 0 && bucketIndex < 24) {
-            metrics.buckets[bucketIndex].failed++;
-          }
-
-          // Track job type stats
-          const key = `${queueName}:${job.name}`;
-          const stats = jobTypeStats.get(key) || {
-            name: job.name,
-            queueName,
-            completed: 0,
-            failed: 0,
-          };
-          stats.failed++;
-          jobTypeStats.set(key, stats);
-        }
-      }
-
-      // Calculate averages for each bucket
-      for (const metrics of queueMetricsMap.values()) {
-        for (let i = 0; i < 24; i++) {
-          const durations = metrics.durations[i];
-          const waitTimes = metrics.waitTimes[i];
-          if (durations.length > 0) {
-            metrics.buckets[i].avgDuration = Math.round(
-              durations.reduce((a, b) => a + b, 0) / durations.length,
-            );
-          }
-          if (waitTimes.length > 0) {
-            metrics.buckets[i].avgWaitTime = Math.round(
-              waitTimes.reduce((a, b) => a + b, 0) / waitTimes.length,
-            );
-          }
-        }
-      }
-
-      // Build queue metrics array
-      const queues: QueueMetrics[] = [];
-      for (const [queueName, metrics] of queueMetricsMap) {
-        const totalCompleted = metrics.buckets.reduce(
-          (sum, b) => sum + b.completed,
-          0,
-        );
-        const totalFailed = metrics.buckets.reduce(
-          (sum, b) => sum + b.failed,
-          0,
-        );
-        const allDurations = metrics.durations.flat();
-        const allWaitTimes = metrics.waitTimes.flat();
-
-        queues.push({
-          queueName,
-          buckets: metrics.buckets,
-          summary: {
-            totalCompleted,
-            totalFailed,
-            errorRate:
-              totalCompleted + totalFailed > 0
-                ? totalFailed / (totalCompleted + totalFailed)
-                : 0,
-            avgDuration:
-              allDurations.length > 0
-                ? Math.round(
-                    allDurations.reduce((a, b) => a + b, 0) /
-                      allDurations.length,
-                  )
-                : 0,
-            avgWaitTime:
-              allWaitTimes.length > 0
-                ? Math.round(
-                    allWaitTimes.reduce((a, b) => a + b, 0) /
-                      allWaitTimes.length,
-                  )
-                : 0,
-            throughputPerHour: Math.round((totalCompleted + totalFailed) / 24),
-          },
-        });
-      }
-
-      // Build aggregate metrics
-      const aggregateBuckets = createEmptyBuckets();
-      const aggregateDurations: number[][] = Array.from(
-        { length: 24 },
-        () => [],
+        })(),
+        45000, // 45 second timeout (before Fly.io's 60s proxy timeout)
+        "Metrics computation timed out after 45 seconds",
       );
-      const aggregateWaitTimes: number[][] = Array.from(
-        { length: 24 },
-        () => [],
-      );
-
-      for (const metrics of queueMetricsMap.values()) {
-        for (let i = 0; i < 24; i++) {
-          aggregateBuckets[i].completed += metrics.buckets[i].completed;
-          aggregateBuckets[i].failed += metrics.buckets[i].failed;
-          aggregateDurations[i].push(...metrics.durations[i]);
-          aggregateWaitTimes[i].push(...metrics.waitTimes[i]);
-        }
-      }
-
-      // Calculate aggregate averages
-      for (let i = 0; i < 24; i++) {
-        if (aggregateDurations[i].length > 0) {
-          aggregateBuckets[i].avgDuration = Math.round(
-            aggregateDurations[i].reduce((a, b) => a + b, 0) /
-              aggregateDurations[i].length,
-          );
-        }
-        if (aggregateWaitTimes[i].length > 0) {
-          aggregateBuckets[i].avgWaitTime = Math.round(
-            aggregateWaitTimes[i].reduce((a, b) => a + b, 0) /
-              aggregateWaitTimes[i].length,
-          );
-        }
-      }
-
-      const totalCompleted = aggregateBuckets.reduce(
-        (sum, b) => sum + b.completed,
-        0,
-      );
-      const totalFailed = aggregateBuckets.reduce(
-        (sum, b) => sum + b.failed,
-        0,
-      );
-      const allDurations = aggregateDurations.flat();
-      const allWaitTimes = aggregateWaitTimes.flat();
-
-      // Get top 10 slowest jobs
-      const slowestJobs = allJobs
-        .sort((a, b) => b.duration - a.duration)
-        .slice(0, 10);
-
-      // Get top 10 most failing job types
-      const mostFailingTypes = Array.from(jobTypeStats.values())
-        .filter((s) => s.failed > 0)
-        .map((s) => ({
-          name: s.name,
-          queueName: s.queueName,
-          failCount: s.failed,
-          totalCount: s.completed + s.failed,
-          errorRate: s.failed / (s.completed + s.failed),
-        }))
-        .sort((a, b) => b.failCount - a.failCount)
-        .slice(0, 10);
-
-      return {
-        queues,
-        aggregate: {
-          queueName: "all",
-          buckets: aggregateBuckets,
-          summary: {
-            totalCompleted,
-            totalFailed,
-            errorRate:
-              totalCompleted + totalFailed > 0
-                ? totalFailed / (totalCompleted + totalFailed)
-                : 0,
-            avgDuration:
-              allDurations.length > 0
-                ? Math.round(
-                    allDurations.reduce((a, b) => a + b, 0) /
-                      allDurations.length,
-                  )
-                : 0,
-            avgWaitTime:
-              allWaitTimes.length > 0
-                ? Math.round(
-                    allWaitTimes.reduce((a, b) => a + b, 0) /
-                      allWaitTimes.length,
-                  )
-                : 0,
-            throughputPerHour: Math.round((totalCompleted + totalFailed) / 24),
-          },
-        },
-        slowestJobs,
-        mostFailingTypes,
-        computedAt: now,
-      };
     });
   }
 
@@ -560,14 +757,43 @@ export class QueueManager {
       }
 
       // Fetch completed and failed jobs from each queue IN PARALLEL
+      // Use time-based filtering to only get jobs within the 7-day window
       const queueEntries = Array.from(this.queues.entries());
-      const queueResults = await Promise.all(
+
+      // First, check which queues have relevant jobs
+      const queueChecks = await Promise.all(
         queueEntries.map(async ([, queue]) => {
-          // Fetch both completed and failed jobs in parallel
-          // Increase limit to get more historical data
+          const counts = await this.getCachedJobCounts(queue);
+          return {
+            queue,
+            hasRelevantJobs:
+              (counts.completed || 0) > 0 || (counts.failed || 0) > 0,
+          };
+        }),
+      );
+
+      // Only process queues with relevant jobs
+      const relevantQueues = queueChecks.filter((q) => q.hasRelevantJobs);
+
+      const queueResults = await Promise.all(
+        relevantQueues.map(async ({ queue }) => {
+          // Use time-based filtering - only fetch jobs within the 7-day window
+          // Reduced limit since we're filtering by time in Redis
           const [completedJobs, failedJobs] = await Promise.all([
-            queue.getJobs(["completed"], 0, 500),
-            queue.getJobs(["failed"], 0, 500),
+            this.getJobsByTimeRange(
+              queue,
+              "completed",
+              startTime,
+              now,
+              200, // Reduced from 500 - only jobs in time range needed
+            ),
+            this.getJobsByTimeRange(
+              queue,
+              "failed",
+              startTime,
+              now,
+              200, // Reduced from 500 - only jobs in time range needed
+            ),
           ]);
           return { completedJobs, failedJobs };
         }),
@@ -634,19 +860,27 @@ export class QueueManager {
       ? [status]
       : ["waiting", "active", "completed", "failed", "delayed"];
 
-    const jobs: Job[] = [];
+    // Fetch counts once before the loop (same for all types in a queue)
+    const counts = await this.getCachedJobCounts(queue);
+
+    // Track jobs with their known state to avoid getState() calls
+    const jobsWithState: { job: Job; state: JobStatus }[] = [];
     let total = 0;
 
     for (const type of types) {
       const typeJobs = await queue.getJobs(type as any, start, start + limit);
-      jobs.push(...typeJobs);
+      jobsWithState.push(
+        ...typeJobs.map((job) => ({ job, state: type as JobStatus })),
+      );
 
-      const counts = await queue.getJobCounts(type as any);
-      total += counts[type as keyof typeof counts] || 0;
+      const typeCount = counts[type as keyof typeof counts] || 0;
+      total += typeCount;
     }
 
-    // Convert to JobInfo first for sorting on computed fields
-    const jobInfos = await Promise.all(jobs.map((job) => this.jobToInfo(job)));
+    // Convert to JobInfo - pass known state to skip expensive getState() calls
+    const jobInfos = (await Promise.all(
+      jobsWithState.map(({ job, state }) => this.jobToInfo(job, "full", state)),
+    )) as JobInfo[];
 
     // Apply sorting
     const sortField = sort?.field ?? "timestamp";
@@ -681,7 +915,7 @@ export class QueueManager {
     const job = await queue.getJob(jobId);
     if (!job) return null;
 
-    return this.jobToInfo(job);
+    return this.jobToInfo(job, "full") as Promise<JobInfo>;
   }
 
   /**
@@ -695,6 +929,7 @@ export class QueueManager {
     if (!job) return false;
 
     await job.retry();
+    this.invalidateJobCache(queueName, jobId);
     return true;
   }
 
@@ -709,6 +944,7 @@ export class QueueManager {
     if (!job) return false;
 
     await job.remove();
+    this.invalidateJobCache(queueName, jobId);
     return true;
   }
 
@@ -723,6 +959,7 @@ export class QueueManager {
     if (!job) return false;
 
     await job.promote();
+    this.invalidateJobCache(queueName, jobId);
     return true;
   }
 
@@ -767,6 +1004,71 @@ export class QueueManager {
   }
 
   /**
+   * Check if a raw job matches all provided filters (before conversion)
+   * This is more efficient than converting to JobInfo first
+   */
+  private jobMatchesAllFilters(
+    job: Job,
+    filters: {
+      status?: JobStatus;
+      tags?: Record<string, string>;
+      text?: string;
+      timeRange?: { start: number; end: number };
+    },
+  ): boolean {
+    // Status filter is handled by fetching only the requested status types
+    // So we don't need to check it here - jobs are already filtered by type
+
+    // Check time range filter (cheap - uses raw timestamps)
+    if (filters.timeRange) {
+      const jobTime = job.processedOn || job.finishedOn || job.timestamp || 0;
+      if (
+        jobTime < filters.timeRange.start ||
+        jobTime > filters.timeRange.end
+      ) {
+        return false;
+      }
+    }
+
+    // Check tag filters (extract only needed fields from job.data)
+    if (filters.tags && Object.keys(filters.tags).length > 0) {
+      if (!job.data || typeof job.data !== "object") {
+        return false;
+      }
+      const dataObj = job.data as Record<string, unknown>;
+      for (const [field, value] of Object.entries(filters.tags)) {
+        const jobValue = dataObj[field];
+        if (jobValue === undefined || jobValue === null) {
+          return false;
+        }
+        // Case-insensitive comparison for strings
+        const strJobValue = String(jobValue).toLowerCase();
+        const strFilterValue = value.toLowerCase();
+        if (!strJobValue.includes(strFilterValue)) {
+          return false;
+        }
+      }
+    }
+
+    // Check text search (only stringify if needed)
+    if (filters.text) {
+      const lowerText = filters.text.toLowerCase();
+      const matchesId = job.id?.toLowerCase().includes(lowerText);
+      const matchesName = job.name?.toLowerCase().includes(lowerText);
+
+      if (!matchesId && !matchesName) {
+        // Only stringify job.data if ID and name don't match
+        const stringifiedData = JSON.stringify(job.data).toLowerCase();
+        if (!stringifiedData.includes(lowerText)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  /**
    * Check if a job matches the given tag filters
    */
   private jobMatchesFilters(
@@ -796,58 +1098,118 @@ export class QueueManager {
   /**
    * Search jobs across all queues
    * Supports field:value syntax (e.g., "teamId:abc-123 invoice")
+   * Optimized with parallel processing, early exits, and count checks
    */
   async search(query: string, limit = 20): Promise<SearchResult[]> {
-    const results: SearchResult[] = [];
     const { filters, text } = this.parseSearchQuery(query);
     const lowerText = text.toLowerCase();
     const hasFilters = Object.keys(filters).length > 0;
     const hasText = lowerText.length > 0;
 
-    for (const [queueName, queue] of this.queues) {
-      // Search in all job states
-      const types = ["waiting", "active", "completed", "failed", "delayed"];
+    // Early exit if no search criteria
+    if (!hasFilters && !hasText) {
+      return [];
+    }
 
-      for (const type of types) {
-        const jobs = await queue.getJobs(type as any, 0, 100);
+    // Check counts first to skip empty queues
+    const queueEntries = Array.from(this.queues.entries());
+    const queueChecks = await Promise.all(
+      queueEntries.map(async ([queueName, queue]) => {
+        const counts = await this.getCachedJobCounts(queue);
+        const hasJobs =
+          (counts.waiting || 0) > 0 ||
+          (counts.active || 0) > 0 ||
+          (counts.completed || 0) > 0 ||
+          (counts.failed || 0) > 0 ||
+          (counts.delayed || 0) > 0;
+        return { queueName, queue, hasJobs };
+      }),
+    );
 
-        for (const job of jobs) {
-          // Check field:value filters first
-          if (hasFilters && !this.jobMatchesFilters(job, filters)) {
-            continue;
-          }
+    const relevantQueues = queueChecks.filter((q) => q.hasJobs);
+    if (relevantQueues.length === 0) {
+      return [];
+    }
 
-          // If there's text search, match by job ID, name, or data
-          if (hasText) {
-            const matchesId = job.id?.toLowerCase().includes(lowerText);
-            const matchesName = job.name?.toLowerCase().includes(lowerText);
-            const matchesData = JSON.stringify(job.data)
-              .toLowerCase()
-              .includes(lowerText);
+    // Process all queues in parallel instead of sequentially
+    const types = ["waiting", "active", "completed", "failed", "delayed"];
+    const fetchLimit = Math.min(limit * 2, 50); // Reduced from 100 - only fetch what we need
 
-            if (!matchesId && !matchesName && !matchesData) {
-              continue;
+    // WeakMap for caching stringified job data
+    const stringifiedDataCache = new WeakMap<Job, string>();
+
+    // Process all queues concurrently
+    const queueResults = await Promise.allSettled(
+      relevantQueues.map(async ({ queueName, queue }) => {
+        // Search in all job states in parallel
+        const typeResults = await Promise.all(
+          types.map(async (type) => {
+            try {
+              const jobs = await queue.getJobs(type as any, 0, fetchLimit);
+              const matches: SearchResult[] = [];
+
+              for (const job of jobs) {
+                // Check field:value filters first
+                if (hasFilters && !this.jobMatchesFilters(job, filters)) {
+                  continue;
+                }
+
+                // If there's text search, match by job ID, name, or data
+                if (hasText) {
+                  const matchesId = job.id?.toLowerCase().includes(lowerText);
+                  const matchesName = job.name
+                    ?.toLowerCase()
+                    .includes(lowerText);
+
+                  // Only stringify if ID and name don't match (expensive operation)
+                  let matchesData = false;
+                  if (!matchesId && !matchesName) {
+                    // Use cached stringified data if available
+                    let stringifiedData = stringifiedDataCache.get(job);
+                    if (!stringifiedData) {
+                      stringifiedData = JSON.stringify(job.data).toLowerCase();
+                      stringifiedDataCache.set(job, stringifiedData);
+                    }
+                    matchesData = stringifiedData.includes(lowerText);
+                  }
+
+                  if (!matchesId && !matchesName && !matchesData) {
+                    continue;
+                  }
+                }
+
+                // Pass known state to skip expensive getState() calls
+                matches.push({
+                  queue: queueName,
+                  job: (await this.jobToInfo(
+                    job,
+                    "full",
+                    type as JobStatus,
+                  )) as JobInfo,
+                });
+              }
+
+              return matches;
+            } catch {
+              return [];
             }
-          }
+          }),
+        );
 
-          // If no text and no filters, this would match everything - skip
-          if (!hasFilters && !hasText) {
-            continue;
-          }
+        return typeResults.flat();
+      }),
+    );
 
-          results.push({
-            queue: queueName,
-            job: await this.jobToInfo(job),
-          });
-
-          if (results.length >= limit) {
-            return results;
-          }
-        }
+    // Collect all matches from all queues
+    const allMatches: SearchResult[] = [];
+    for (const result of queueResults) {
+      if (result.status === "fulfilled") {
+        allMatches.push(...result.value);
       }
     }
 
-    return results;
+    // Return limited results
+    return allMatches.slice(0, limit);
   }
 
   /**
@@ -866,75 +1228,293 @@ export class QueueManager {
   }
 
   /**
-   * Get all runs (jobs) across all queues with sorting
+   * FAST PATH: Get latest runs without filters
+   * Optimized for the common case of viewing newest jobs (timestamp desc, no filters)
+   * - Single getJobs call per queue (not per status type)
+   * - No count checks needed
+   * - Minimal Redis round-trips
+   */
+  private async getLatestRuns(
+    limit: number,
+    start: number,
+  ): Promise<PaginatedResponse<RunInfoList>> {
+    const queueEntries = Array.from(this.queues.entries());
+    const numQueues = queueEntries.length;
+
+    if (numQueues === 0) {
+      return { data: [], total: -1, hasMore: false, cursor: undefined };
+    }
+
+    // Fetch a small number of recent jobs from each queue
+    // We need enough to fill the page after sorting by timestamp
+    const perQueueFetch = Math.max(5, Math.ceil((limit + 10) / numQueues) + 2);
+
+    // Fetch from all queues in parallel - single call per queue with all types
+    const allTypes: JobStatus[] = [
+      "waiting",
+      "active",
+      "completed",
+      "failed",
+      "delayed",
+    ];
+
+    const results = await Promise.all(
+      queueEntries.map(async ([queueName, queue]) => {
+        // Single getJobs call with all types - much faster than 5 separate calls
+        const jobs = await queue.getJobs(allTypes as any, 0, perQueueFetch);
+        return jobs.map((job) => ({ job, queueName }));
+      }),
+    );
+
+    // Flatten and sort by timestamp desc
+    const allJobs = results.flat();
+    allJobs.sort((a, b) => {
+      const timeDiff = (b.job.timestamp || 0) - (a.job.timestamp || 0);
+      if (timeDiff !== 0) return timeDiff;
+      // Secondary sort for stability
+      return a.queueName.localeCompare(b.queueName);
+    });
+
+    // Apply pagination
+    const jobsToConvert = allJobs.slice(start, start + limit);
+
+    // Convert to RunInfoList - infer state from job properties
+    const runInfos = await Promise.all(
+      jobsToConvert.map(async ({ job, queueName }) => {
+        // Infer state from job properties to avoid getState() Redis call
+        let state: JobStatus = "waiting";
+        if (job.finishedOn) {
+          state = job.failedReason ? "failed" : "completed";
+        } else if (job.processedOn) {
+          state = "active";
+        } else if (job.delay && job.delay > 0) {
+          state = "delayed";
+        }
+
+        const info = await this.jobToInfo(job, "list", state);
+        return { ...info, queueName } as RunInfoList;
+      }),
+    );
+
+    // Determine if there are more results
+    const hasMore = allJobs.length > start + limit;
+
+    return {
+      data: runInfos,
+      total: -1, // Don't calculate total for fast path - not needed for UI
+      hasMore,
+      cursor: hasMore ? String(start + runInfos.length) : undefined,
+    };
+  }
+
+  /**
+   * Get all runs (jobs) across all queues with sorting and filtering
+   * Uses fast path for common case (no filters, timestamp desc)
    */
   async getAllRuns(
     limit = 50,
     start = 0,
     sort?: SortOptions,
-  ): Promise<PaginatedResponse<RunInfo>> {
-    const queueEntries = Array.from(this.queues.entries());
-
-    // Fetch counts and jobs from all queues IN PARALLEL
-    // Keep fetch limit small - we only need enough for pagination
-    const fetchLimit = Math.min(start + limit + 50, 100);
-    const types = ["waiting", "active", "completed", "failed", "delayed"];
-
-    const queueResults = await Promise.all(
-      queueEntries.map(async ([queueName, queue]) => {
-        // Fetch counts and all job types in parallel
-        const [counts, ...jobArrays] = await Promise.all([
-          queue.getJobCounts(),
-          ...types.map((type) => queue.getJobs(type as any, 0, fetchLimit)),
-        ]);
-
-        const queueTotal =
-          (counts.waiting || 0) +
-          (counts.active || 0) +
-          (counts.completed || 0) +
-          (counts.failed || 0) +
-          (counts.delayed || 0);
-
-        const jobs = jobArrays.flat().map((job) => ({ job, queueName }));
-        return { queueTotal, jobs };
-      }),
-    );
-
-    // Aggregate results
-    let total = 0;
-    const allJobs: { job: Job; queueName: string }[] = [];
-    for (const { queueTotal, jobs } of queueResults) {
-      total += queueTotal;
-      allJobs.push(...jobs);
-    }
-
-    // Convert to RunInfo for sorting on computed fields
-    const runInfos = await Promise.all(
-      allJobs.map(async ({ job, queueName }) => {
-        const info = await this.jobToInfo(job);
-        return { ...info, queueName } as RunInfo;
-      }),
-    );
-
-    // Apply sorting
+    filters?: {
+      status?: JobStatus;
+      tags?: Record<string, string>;
+      text?: string;
+      timeRange?: { start: number; end: number };
+    },
+  ): Promise<PaginatedResponse<RunInfoList>> {
     const sortField = sort?.field ?? "timestamp";
     const sortDir = sort?.direction === "asc" ? 1 : -1;
+    const hasFilters = !!(
+      filters?.status ||
+      filters?.tags ||
+      filters?.text ||
+      filters?.timeRange
+    );
+    const isTimestampSort = sortField === "timestamp";
 
-    runInfos.sort((a, b) => {
-      const aVal = this.getSortValue(a, sortField);
-      const bVal = this.getSortValue(b, sortField);
-      if (aVal < bVal) return -1 * sortDir;
-      if (aVal > bVal) return 1 * sortDir;
-      return 0;
-    });
+    // FAST PATH: No filters, timestamp desc = just get newest jobs
+    // This is the most common use case and should be instant
+    if (!hasFilters && isTimestampSort && sortDir === -1) {
+      return this.getLatestRuns(limit, start);
+    }
 
-    const data = runInfos.slice(start, start + limit);
+    // FILTERED PATH: More complex queries need full filtering logic
+    const queueEntries = Array.from(this.queues.entries());
+
+    // Determine which job types to fetch based on status filter
+    const types = filters?.status
+      ? [filters.status]
+      : ["waiting", "active", "completed", "failed", "delayed"];
+
+    const hasTimeRange = !!filters?.timeRange;
+    const numQueues = Math.max(queueEntries.length, 1);
+
+    if (queueEntries.length === 0) {
+      return {
+        data: [],
+        total: 0,
+        hasMore: false,
+        cursor: undefined,
+      };
+    }
+
+    // For filtered queries, fetch enough to likely fill one page after filtering
+    // Reduced from 50 to be smarter about distribution
+    const baseFetchPerQueue = Math.max(
+      Math.ceil((limit * 2) / numQueues) + 3,
+      5,
+    );
+
+    let allJobs: { job: Job; queueName: string; state: JobStatus }[] = [];
+
+    // Helper function to fetch from a single queue
+    const fetchFromQueue = async (
+      queueName: string,
+      queue: Queue,
+      fetchCount: number,
+    ) => {
+      // Use time-range queries for completed/failed jobs when time range is specified
+      if (hasTimeRange && filters?.timeRange) {
+        const timeRangeJobs: { job: Job; state: JobStatus }[] = [];
+
+        // Use efficient time-range queries for completed/failed
+        if (types.includes("completed")) {
+          const completedJobs = await this.getJobsByTimeRange(
+            queue,
+            "completed",
+            filters.timeRange.start,
+            filters.timeRange.end,
+            fetchCount,
+          );
+          timeRangeJobs.push(
+            ...completedJobs.map((job) => ({
+              job,
+              state: "completed" as JobStatus,
+            })),
+          );
+        }
+
+        if (types.includes("failed")) {
+          const failedJobs = await this.getJobsByTimeRange(
+            queue,
+            "failed",
+            filters.timeRange.start,
+            filters.timeRange.end,
+            fetchCount,
+          );
+          timeRangeJobs.push(
+            ...failedJobs.map((job) => ({
+              job,
+              state: "failed" as JobStatus,
+            })),
+          );
+        }
+
+        // For other types, use regular getJobs
+        const otherTypes = types.filter(
+          (t) => t !== "completed" && t !== "failed",
+        );
+        if (otherTypes.length > 0) {
+          const otherJobArrays = await Promise.all(
+            otherTypes.map(async (type) => {
+              const jobs = await queue.getJobs(type as any, 0, fetchCount);
+              return jobs.map((job) => ({ job, state: type as JobStatus }));
+            }),
+          );
+          timeRangeJobs.push(...otherJobArrays.flat());
+        }
+
+        return timeRangeJobs.map(({ job, state }) => ({
+          job,
+          queueName,
+          state,
+        }));
+      }
+
+      // For status filter, only fetch that type
+      if (filters?.status) {
+        const jobs = await queue.getJobs(filters.status as any, 0, fetchCount);
+        return jobs.map((job) => ({
+          job,
+          queueName,
+          state: filters.status as JobStatus,
+        }));
+      }
+
+      // Regular fetching for all types - track state for each type
+      const jobArrays = await Promise.all(
+        types.map(async (type) => {
+          const jobs = await queue.getJobs(type as any, 0, fetchCount);
+          return jobs.map((job) => ({ job, state: type as JobStatus }));
+        }),
+      );
+      return jobArrays
+        .flat()
+        .map(({ job, state }) => ({ job, queueName, state }));
+    };
+
+    // Fetch from ALL queues in parallel
+    const results = await Promise.all(
+      queueEntries.map(([queueName, queue]) =>
+        fetchFromQueue(queueName, queue, baseFetchPerQueue),
+      ),
+    );
+    allJobs = results.flat();
+
+    // Apply filters BEFORE sorting and pagination
+    if (filters) {
+      allJobs = allJobs.filter(({ job }) =>
+        this.jobMatchesAllFilters(job, filters),
+      );
+    }
+
+    // Sort all filtered jobs to ensure consistent ordering
+    // sortDir: 1 = asc (oldest first), -1 = desc (newest first, default)
+    if (isTimestampSort) {
+      allJobs.sort((a, b) => {
+        const aTime = a.job.timestamp || 0;
+        const bTime = b.job.timestamp || 0;
+        // Primary sort by timestamp
+        const timeDiff = sortDir === -1 ? bTime - aTime : aTime - bTime;
+        if (timeDiff !== 0) return timeDiff;
+        // Secondary sort by queueName for stability
+        const queueDiff = a.queueName.localeCompare(b.queueName);
+        if (queueDiff !== 0) return queueDiff;
+        // Tertiary sort by job ID for complete stability
+        return (a.job.id || "").localeCompare(b.job.id || "");
+      });
+    }
+
+    // Apply pagination
+    const jobsToConvert = allJobs.slice(start, start + limit);
+
+    // Convert only the jobs we'll return
+    const runInfos = await Promise.all(
+      jobsToConvert.map(async ({ job, queueName, state }) => {
+        const info = await this.jobToInfo(job, "list", state);
+        return { ...info, queueName } as RunInfoList;
+      }),
+    );
+
+    // For non-timestamp sorting, sort after conversion
+    if (!isTimestampSort) {
+      runInfos.sort((a, b) => {
+        const aVal = this.getSortValueForList(a, sortField);
+        const bVal = this.getSortValueForList(b, sortField);
+        if (aVal < bVal) return -1 * sortDir;
+        if (aVal > bVal) return 1 * sortDir;
+        return 0;
+      });
+    }
+
+    // Build cursor for next page
+    const hasMore = allJobs.length > start + limit;
 
     return {
-      data,
-      total,
-      hasMore: start + limit < total,
-      cursor: start + limit < total ? String(start + limit) : undefined,
+      data: runInfos,
+      total: -1, // Don't calculate total - not needed for UI
+      hasMore,
+      cursor: hasMore ? String(start + runInfos.length) : undefined,
     };
   }
 
@@ -1131,6 +1711,31 @@ export class QueueManager {
   }
 
   /**
+   * Get sortable value from RunInfoList (lightweight version)
+   */
+  private getSortValueForList(
+    item: RunInfoList,
+    field: string,
+  ): string | number {
+    switch (field) {
+      case "timestamp":
+        return item.timestamp ?? 0;
+      case "name":
+        return item.name.toLowerCase();
+      case "status":
+        return item.status;
+      case "duration":
+        return item.duration ?? 0;
+      case "queueName":
+        return item.queueName.toLowerCase();
+      case "processedOn":
+        return item.processedOn ?? 0;
+      default:
+        return item.timestamp ?? 0;
+    }
+  }
+
+  /**
    * Get sortable value from SchedulerInfo
    */
   private getSchedulerSortValue(
@@ -1175,10 +1780,27 @@ export class QueueManager {
   }
 
   /**
-   * Convert a BullMQ Job to JobInfo
+   * Convert a BullMQ Job to JobInfo or RunInfoList
+   * @param job - The BullMQ job to convert
+   * @param fields - "list" for lightweight list view, "full" for complete job details
+   * @param knownState - Optional: skip getState() call if state is already known from fetch
    */
-  private async jobToInfo(job: Job): Promise<JobInfo> {
-    const state = await job.getState();
+  private async jobToInfo(
+    job: Job,
+    fields: "list" | "full" = "full",
+    knownState?: JobStatus,
+  ): Promise<JobInfo | RunInfoList> {
+    // Use known state if provided (avoids expensive Redis getState() call)
+    // Otherwise use cached state, or fetch and cache
+    let state = knownState;
+    if (!state) {
+      const cacheKey = `${job.queueName}:${job.id}`;
+      state = this.jobStateCache.get(cacheKey);
+      if (!state) {
+        state = (await job.getState()) as JobStatus;
+        this.jobStateCache.set(cacheKey, state);
+      }
+    }
     const duration =
       job.finishedOn && job.processedOn
         ? job.finishedOn - job.processedOn
@@ -1244,30 +1866,35 @@ export class QueueManager {
 
   /**
    * Retry multiple jobs across queues
+   * Processed in parallel for better performance
    */
   async bulkRetry(
     jobs: { queueName: string; jobId: string }[],
   ): Promise<{ success: number; failed: number }> {
-    let success = 0;
-    let failed = 0;
-
-    for (const { queueName, jobId } of jobs) {
-      try {
+    const results = await Promise.allSettled(
+      jobs.map(async ({ queueName, jobId }) => {
         const queue = this.queues.get(queueName);
         if (!queue) {
-          failed++;
-          continue;
+          throw new Error("Queue not found");
         }
 
         const job = await queue.getJob(jobId);
         if (!job) {
-          failed++;
-          continue;
+          throw new Error("Job not found");
         }
 
         await job.retry();
+        this.invalidateJobCache(queueName, jobId);
+        return { success: true };
+      }),
+    );
+
+    let success = 0;
+    let failed = 0;
+    for (const result of results) {
+      if (result.status === "fulfilled") {
         success++;
-      } catch {
+      } else {
         failed++;
       }
     }
@@ -1277,30 +1904,35 @@ export class QueueManager {
 
   /**
    * Delete multiple jobs across queues
+   * Processed in parallel for better performance
    */
   async bulkDelete(
     jobs: { queueName: string; jobId: string }[],
   ): Promise<{ success: number; failed: number }> {
-    let success = 0;
-    let failed = 0;
-
-    for (const { queueName, jobId } of jobs) {
-      try {
+    const results = await Promise.allSettled(
+      jobs.map(async ({ queueName, jobId }) => {
         const queue = this.queues.get(queueName);
         if (!queue) {
-          failed++;
-          continue;
+          throw new Error("Queue not found");
         }
 
         const job = await queue.getJob(jobId);
         if (!job) {
-          failed++;
-          continue;
+          throw new Error("Job not found");
         }
 
         await job.remove();
+        this.invalidateJobCache(queueName, jobId);
+        return { success: true };
+      }),
+    );
+
+    let success = 0;
+    let failed = 0;
+    for (const result of results) {
+      if (result.status === "fulfilled") {
         success++;
-      } catch {
+      } else {
         failed++;
       }
     }
@@ -1310,30 +1942,35 @@ export class QueueManager {
 
   /**
    * Promote multiple delayed jobs across queues (move to waiting)
+   * Processed in parallel for better performance
    */
   async bulkPromote(
     jobs: { queueName: string; jobId: string }[],
   ): Promise<{ success: number; failed: number }> {
-    let success = 0;
-    let failed = 0;
-
-    for (const { queueName, jobId } of jobs) {
-      try {
+    const results = await Promise.allSettled(
+      jobs.map(async ({ queueName, jobId }) => {
         const queue = this.queues.get(queueName);
         if (!queue) {
-          failed++;
-          continue;
+          throw new Error("Queue not found");
         }
 
         const job = await queue.getJob(jobId);
         if (!job) {
-          failed++;
-          continue;
+          throw new Error("Job not found");
         }
 
         await job.promote();
+        this.invalidateJobCache(queueName, jobId);
+        return { success: true };
+      }),
+    );
+
+    let success = 0;
+    let failed = 0;
+    for (const result of results) {
+      if (result.status === "fulfilled") {
         success++;
-      } catch {
+      } else {
         failed++;
       }
     }
@@ -1347,6 +1984,7 @@ export class QueueManager {
 
   /**
    * Get all flows (jobs that have children or are part of a flow) - cached
+   * Optimized to focus on waiting-children type first and early exit
    */
   async getFlows(limit = 50): Promise<FlowSummary[]> {
     if (!this.flowProducer) {
@@ -1355,36 +1993,78 @@ export class QueueManager {
 
     return this.cached(`flows:${limit}`, this.CACHE_TTL.flows, async () => {
       const queueEntries = Array.from(this.queues.entries());
-      const types = [
-        "waiting",
-        "waiting-children",
-        "active",
-        "completed",
-        "failed",
-        "delayed",
-      ];
 
-      // Fetch jobs from all queues IN PARALLEL (reduced limit for performance)
-      const queueResults = await Promise.all(
+      // Check counts first to skip empty queues
+      const queueChecks = await Promise.all(
         queueEntries.map(async ([queueName, queue]) => {
-          const jobArrays = await Promise.all(
-            types.map(async (type) => {
-              try {
-                return await queue.getJobs(type as any, 0, 100);
-              } catch {
-                return [];
-              }
-            }),
-          );
-          return { queueName, jobs: jobArrays.flat() };
+          const counts = await this.getCachedJobCounts(queue);
+          const hasRelevantJobs =
+            (counts.waiting || 0) > 0 ||
+            (counts["waiting-children"] || 0) > 0 ||
+            (counts.active || 0) > 0;
+          return { queueName, queue, hasRelevantJobs };
+        }),
+      );
+
+      const relevantQueues = queueChecks.filter((q) => q.hasRelevantJobs);
+      if (relevantQueues.length === 0) {
+        return [];
+      }
+
+      // Focus on waiting-children first (most likely to be flows)
+      // Then check other types with reduced limits
+      const queueResults = await Promise.all(
+        relevantQueues.map(async ({ queueName, queue }) => {
+          try {
+            // Fetch waiting-children first (most likely flows) with higher limit
+            const waitingChildrenJobs = await queue.getJobs(
+              ["waiting-children"],
+              0,
+              50,
+            );
+
+            // If we already have enough flows, skip other types
+            if (waitingChildrenJobs.length >= limit) {
+              return { queueName, jobs: waitingChildrenJobs };
+            }
+
+            // Fetch other types with reduced limits
+            const otherTypes = [
+              "waiting",
+              "active",
+              "completed",
+              "failed",
+              "delayed",
+            ];
+            const otherJobArrays = await Promise.all(
+              otherTypes.map(async (type) => {
+                try {
+                  return await queue.getJobs(type as any, 0, 30); // Reduced from 100
+                } catch {
+                  return [];
+                }
+              }),
+            );
+
+            const allJobs = [...waitingChildrenJobs, ...otherJobArrays.flat()];
+            return { queueName, jobs: allJobs };
+          } catch {
+            return { queueName, jobs: [] };
+          }
         }),
       );
 
       // Collect potential root jobs (no parent)
+      // Early exit when we have enough flows
       const seenJobIds = new Set<string>();
       const potentialRoots: { queueName: string; job: Job }[] = [];
 
       for (const { queueName, jobs } of queueResults) {
+        // Early exit if we have enough flows
+        if (potentialRoots.length >= limit * 2) {
+          break;
+        }
+
         for (const job of jobs) {
           if (!job || !job.id) continue;
 
@@ -1396,6 +2076,11 @@ export class QueueManager {
           const hasParent = !!job.parent || !!job.parentKey;
           if (!hasParent) {
             potentialRoots.push({ queueName, job });
+
+            // Early exit if we have enough potential roots
+            if (potentialRoots.length >= limit * 2) {
+              break;
+            }
           }
         }
       }
