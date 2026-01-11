@@ -45,6 +45,9 @@ jobs:
         run: bun install
       - name: 🏗 Build @midday/engine
         run: bunx turbo run build --filter=@midday/engine...
+      - name: 🏗 Build workbench
+        run: bun run build
+        working-directory: ./packages/workbench
       - name: 🧪 Run tests
         run: bunx turbo run test --filter=@midday/worker...
       - name: 🔦 Run linter

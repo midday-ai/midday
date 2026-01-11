@@ -109,7 +109,6 @@ function initializeWorkbench() {
             }
           : undefined,
       title: "Midday Jobs",
-      // Configure which job.data fields to extract as filterable tags
       tags: ["teamId"],
     }),
   );
