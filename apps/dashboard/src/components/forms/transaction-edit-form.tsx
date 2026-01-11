@@ -435,6 +435,7 @@ export function TransactionEditForm({ transaction }: Props) {
             <PopoverContent className="w-auto p-0" align="end">
               <Calendar
                 mode="single"
+                weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
                 selected={transaction.date ? utc(transaction.date) : undefined}
                 onSelect={(value) => {
                   if (value) {

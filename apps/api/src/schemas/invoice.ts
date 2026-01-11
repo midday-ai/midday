@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+import { isValidTimezone } from "@midday/location/timezones";
 
 // TipTap JSONContent schema for editor fields
 export const tiptapContentSchema: z.ZodType<any> = z
@@ -89,7 +90,13 @@ const baseInvoiceTemplateSchema = z.object({
   subtotalLabel: z.string().optional(),
   taxLabel: z.string().optional(),
   discountLabel: z.string().optional(),
-  timezone: z.string().optional(),
+  timezone: z
+    .string()
+    .refine(isValidTimezone, {
+      message:
+        "Invalid timezone. Use IANA timezone format (e.g., 'America/New_York', 'UTC')",
+    })
+    .optional(),
   paymentLabel: z.string().optional(),
   noteLabel: z.string().optional(),
   logoUrl: z.string().optional().nullable(),
@@ -111,6 +118,7 @@ const baseInvoiceTemplateSchema = z.object({
   deliveryType: z.enum(["create", "create_and_send", "scheduled"]).optional(),
   locale: z.string().optional(),
   paymentEnabled: z.boolean().optional(),
+  paymentTermsDays: z.number().min(0).max(365).optional(),
 });
 
 // tRPC-compatible template schema (uses z.any() for editor fields)
@@ -586,6 +594,35 @@ export const getInvoicesSchema = z.object({
       param: { in: "query" },
       example: ["customer-uuid-1", "customer-uuid-2"],
     }),
+  ids: z
+    .array(z.string())
+    .nullable()
+    .optional()
+    .openapi({
+      description: "List of invoice IDs to filter by.",
+      param: { in: "query" },
+      example: ["invoice-uuid-1", "invoice-uuid-2"],
+    }),
+  recurringIds: z
+    .array(z.string())
+    .nullable()
+    .optional()
+    .openapi({
+      description:
+        "List of recurring series IDs to filter invoices by (shows all invoices from these series).",
+      param: { in: "query" },
+      example: ["recurring-uuid-1", "recurring-uuid-2"],
+    }),
+  recurring: z
+    .boolean()
+    .nullable()
+    .optional()
+    .openapi({
+      description:
+        "Filter by recurring status. true = only recurring invoices, false = only non-recurring invoices.",
+      param: { in: "query" },
+      example: true,
+    }),
 });
 
 export const getInvoiceByIdSchema = z.object({
@@ -630,6 +667,7 @@ export const updateInvoiceSchema = z.object({
     .optional(),
   paidAt: z.string().nullable().optional(),
   internalNote: z.string().nullable().optional(),
+  scheduledAt: z.string().nullable().optional(),
 });
 
 export const deleteInvoiceSchema = z.object({
@@ -644,7 +682,7 @@ export const deleteInvoiceSchema = z.object({
 export const createInvoiceSchema = z.object({
   id: z.string().uuid(),
   deliveryType: z.enum(["create", "create_and_send", "scheduled"]),
-  scheduledAt: z.string().datetime().optional(),
+  scheduledAt: z.string().datetime({ offset: true }).optional(),
 });
 
 export const remindInvoiceSchema = z.object({
@@ -662,7 +700,7 @@ export const remindInvoiceSchema = z.object({
 
 export const updateScheduledInvoiceSchema = z.object({
   id: z.string().uuid(),
-  scheduledAt: z.string().datetime(),
+  scheduledAt: z.string().datetime({ offset: true }),
 });
 
 export const cancelScheduledInvoiceSchema = z.object({
@@ -750,12 +788,14 @@ export const createInvoiceRequestSchema = z
         ],
       },
     }),
-    dueDate: z.string().openapi({
-      description: "Due date of the invoice in ISO 8601 format",
+    dueDate: z.string().datetime({ offset: true }).optional().openapi({
+      description:
+        "Due date of the invoice in ISO 8601 format. Defaults to issue date + payment terms (30 days) if not provided.",
       example: "2024-06-30T23:59:59.000Z",
     }),
-    issueDate: z.string().openapi({
-      description: "Issue date of the invoice in ISO 8601 format",
+    issueDate: z.string().datetime({ offset: true }).optional().openapi({
+      description:
+        "Issue date of the invoice in ISO 8601 format. Defaults to current date if not provided.",
       example: "2024-06-01T00:00:00.000Z",
     }),
     invoiceNumber: z.string().optional().openapi({
@@ -799,9 +839,9 @@ export const createInvoiceRequestSchema = z
         "How the invoice should be processed: 'create' - finalize immediately, 'create_and_send' - finalize and send to customer, 'scheduled' - schedule for automatic processing at specified date",
       example: "create",
     }),
-    scheduledAt: z.string().datetime().optional().openapi({
+    scheduledAt: z.string().datetime({ offset: true }).optional().openapi({
       description:
-        "Scheduled date of the invoice in ISO 8601 format. Required when deliveryType is 'scheduled'. Must be in the future.",
+        "Scheduled date of the invoice in ISO 8601 format with timezone offset (e.g., Z or +00:00). Required when deliveryType is 'scheduled'. Must be in the future.",
       example: "2024-06-30T23:59:59.000Z",
     }),
   })

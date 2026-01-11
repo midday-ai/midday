@@ -1,5 +1,10 @@
 import { useQueryStates } from "nuqs";
-import { createLoader, parseAsArrayOf, parseAsString } from "nuqs/server";
+import {
+  createLoader,
+  parseAsArrayOf,
+  parseAsBoolean,
+  parseAsString,
+} from "nuqs/server";
 
 const invoiceFilterParamsSchema = {
   q: parseAsString,
@@ -7,6 +12,9 @@ const invoiceFilterParamsSchema = {
   customers: parseAsArrayOf(parseAsString),
   start: parseAsString,
   end: parseAsString,
+  ids: parseAsArrayOf(parseAsString),
+  recurringIds: parseAsArrayOf(parseAsString),
+  recurring: parseAsBoolean,
 };
 
 export function useInvoiceFilterParams() {

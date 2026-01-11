@@ -18,6 +18,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
   varchar,
   vector,
@@ -139,6 +140,33 @@ export const invoiceStatusEnum = pgEnum("invoice_status", [
   "refunded",
 ]);
 
+export const invoiceRecurringFrequencyEnum = pgEnum(
+  "invoice_recurring_frequency",
+  [
+    "weekly",
+    "biweekly", // Every 2 weeks on the same weekday
+    "monthly_date", // Monthly on specific date (e.g., 15th)
+    "monthly_weekday", // Monthly on nth weekday (e.g., 1st Friday)
+    "monthly_last_day", // Monthly on the last day of the month
+    "quarterly", // Every 3 months
+    "semi_annual", // Every 6 months
+    "annual", // Every 12 months
+    "custom", // Every X days
+  ],
+);
+
+export const invoiceRecurringEndTypeEnum = pgEnum(
+  "invoice_recurring_end_type",
+  ["never", "on_date", "after_count"],
+);
+
+export const invoiceRecurringStatusEnum = pgEnum("invoice_recurring_status", [
+  "active",
+  "paused",
+  "completed",
+  "canceled",
+]);
+
 export const plansEnum = pgEnum("plans", ["trial", "starter", "pro"]);
 export const subscriptionStatusEnum = pgEnum("subscription_status", [
   "active",
@@ -207,6 +235,12 @@ export const activityTypeEnum = pgEnum("activity_type", [
   "invoice_sent",
   "inbox_match_confirmed",
   "invoice_refunded",
+
+  // Recurring invoice activities
+  "recurring_series_started",
+  "recurring_series_completed",
+  "recurring_series_paused",
+  "recurring_invoice_upcoming",
 
   // User actions
   "document_uploaded",
@@ -692,6 +726,114 @@ export const bankAccounts = pgTable(
   ],
 );
 
+export const invoiceRecurring = pgTable(
+  "invoice_recurring",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+      mode: "string",
+    }).defaultNow(),
+    teamId: uuid("team_id").notNull(),
+    userId: uuid("user_id").notNull(),
+    customerId: uuid("customer_id"),
+    // Frequency settings
+    frequency: invoiceRecurringFrequencyEnum().notNull(),
+    frequencyDay: integer("frequency_day"), // 0-6 for weekly (day of week), 1-31 for monthly_date
+    frequencyWeek: integer("frequency_week"), // 1-5 for monthly_weekday (e.g., 1st, 2nd Friday)
+    frequencyInterval: integer("frequency_interval"), // For custom: every X days
+    // End conditions
+    endType: invoiceRecurringEndTypeEnum("end_type").notNull(),
+    endDate: timestamp("end_date", { withTimezone: true, mode: "string" }),
+    endCount: integer("end_count"),
+    // Status tracking
+    status: invoiceRecurringStatusEnum().default("active").notNull(),
+    invoicesGenerated: integer("invoices_generated").default(0).notNull(),
+    consecutiveFailures: integer("consecutive_failures").default(0).notNull(), // Track failures for auto-pause
+    nextScheduledAt: timestamp("next_scheduled_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    lastGeneratedAt: timestamp("last_generated_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    timezone: text().notNull(), // User's timezone for correct day-of-week calculation
+    // Invoice template data
+    dueDateOffset: integer("due_date_offset").default(30).notNull(), // Days from issue date to due date
+    amount: numericCasted({ precision: 10, scale: 2 }),
+    currency: text(),
+    lineItems: jsonb("line_items"),
+    template: jsonb(), // Invoice template snapshot (labels, settings, etc.)
+    paymentDetails: jsonb("payment_details"),
+    fromDetails: jsonb("from_details"),
+    noteDetails: jsonb("note_details"),
+    customerName: text("customer_name"),
+    vat: numericCasted({ precision: 10, scale: 2 }),
+    tax: numericCasted({ precision: 10, scale: 2 }),
+    discount: numericCasted({ precision: 10, scale: 2 }),
+    subtotal: numericCasted({ precision: 10, scale: 2 }),
+    topBlock: jsonb("top_block"),
+    bottomBlock: jsonb("bottom_block"),
+    templateId: uuid("template_id"),
+    // Notification tracking
+    upcomingNotificationSentAt: timestamp("upcoming_notification_sent_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+  },
+  (table) => [
+    index("invoice_recurring_team_id_idx").using(
+      "btree",
+      table.teamId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("invoice_recurring_next_scheduled_at_idx").using(
+      "btree",
+      table.nextScheduledAt.asc().nullsLast().op("timestamptz_ops"),
+    ),
+    index("invoice_recurring_status_idx").using(
+      "btree",
+      table.status.asc().nullsLast(),
+    ),
+    // Compound partial index for scheduler query
+    index("invoice_recurring_active_scheduled_idx")
+      .using(
+        "btree",
+        table.nextScheduledAt.asc().nullsLast().op("timestamptz_ops"),
+      )
+      .where(sql`status = 'active'`),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "invoice_recurring_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "invoice_recurring_user_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.customerId],
+      foreignColumns: [customers.id],
+      name: "invoice_recurring_customer_id_fkey",
+    }).onDelete("set null"),
+    foreignKey({
+      columns: [table.templateId],
+      foreignColumns: [invoiceTemplates.id],
+      name: "invoice_recurring_template_id_fkey",
+    }).onDelete("set null"),
+    pgPolicy("Invoice recurring can be handled by a member of the team", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
 export const invoices = pgTable(
   "invoices",
   {
@@ -763,6 +905,9 @@ export const invoices = pgTable(
       withTimezone: true,
       mode: "string",
     }),
+    // Recurring invoice fields
+    invoiceRecurringId: uuid("invoice_recurring_id"),
+    recurringSequence: integer("recurring_sequence"), // Which number in the series (1, 2, 3...)
   },
   (table) => [
     index("invoices_created_at_idx").using(
@@ -801,6 +946,19 @@ export const invoices = pgTable(
       foreignColumns: [invoiceTemplates.id],
       name: "invoices_template_id_fkey",
     }).onDelete("set null"),
+    foreignKey({
+      columns: [table.invoiceRecurringId],
+      foreignColumns: [invoiceRecurring.id],
+      name: "invoices_invoice_recurring_id_fkey",
+    }).onDelete("set null"),
+    index("invoices_invoice_recurring_id_idx").using(
+      "btree",
+      table.invoiceRecurringId.asc().nullsLast().op("uuid_ops"),
+    ),
+    // Unique constraint for idempotency (prevents duplicate invoices for same sequence)
+    uniqueIndex("invoices_recurring_sequence_unique_idx")
+      .on(table.invoiceRecurringId, table.recurringSequence)
+      .where(sql`invoice_recurring_id IS NOT NULL`),
     unique("invoices_scheduled_job_id_key").on(table.scheduledJobId),
     pgPolicy("Invoices can be handled by a member of the team", {
       as: "permissive",
@@ -872,6 +1030,10 @@ export const customers = pgTable(
       withTimezone: true,
       mode: "string",
     }),
+
+    // Portal fields
+    portalEnabled: boolean("portal_enabled").default(false),
+    portalId: text("portal_id"),
 
     fts: tsvector("fts")
       .notNull()
@@ -1668,6 +1830,7 @@ export const invoiceTemplates = pgTable(
     includeLineItemTax: boolean("include_line_item_tax").default(false),
     lineItemTaxLabel: text("line_item_tax_label"),
     paymentEnabled: boolean("payment_enabled").default(false),
+    paymentTermsDays: integer("payment_terms_days").default(30),
   },
   (table) => [
     foreignKey({
@@ -3074,7 +3237,34 @@ export const invoicesRelations = relations(invoices, ({ one }) => ({
     fields: [invoices.teamId],
     references: [teams.id],
   }),
+  invoiceRecurring: one(invoiceRecurring, {
+    fields: [invoices.invoiceRecurringId],
+    references: [invoiceRecurring.id],
+  }),
 }));
+
+export const invoiceRecurringRelations = relations(
+  invoiceRecurring,
+  ({ one, many }) => ({
+    team: one(teams, {
+      fields: [invoiceRecurring.teamId],
+      references: [teams.id],
+    }),
+    user: one(users, {
+      fields: [invoiceRecurring.userId],
+      references: [users.id],
+    }),
+    customer: one(customers, {
+      fields: [invoiceRecurring.customerId],
+      references: [customers.id],
+    }),
+    invoiceTemplate: one(invoiceTemplates, {
+      fields: [invoiceRecurring.templateId],
+      references: [invoiceTemplates.id],
+    }),
+    invoices: many(invoices),
+  }),
+);
 
 export const trackerReportsRelations = relations(trackerReports, ({ one }) => ({
   user: one(users, {

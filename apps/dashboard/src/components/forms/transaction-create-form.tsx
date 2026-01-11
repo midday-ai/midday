@@ -349,6 +349,7 @@ export function TransactionCreateForm() {
                   <PopoverContent className="w-auto p-0" align="end">
                     <Calendar
                       mode="single"
+                      weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
                       selected={field.value ? utc(field.value) : undefined}
                       onSelect={(value) => {
                         if (value) {

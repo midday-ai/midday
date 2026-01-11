@@ -17,7 +17,6 @@ import { useTransactionFilterParams } from "@/hooks/use-transaction-filter-param
 import { useTransactionFilterParamsWithPersistence } from "@/hooks/use-transaction-filter-params-with-persistence";
 import { useTRPC } from "@/trpc/client";
 import { formatAccountName } from "@/utils/format";
-import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
@@ -33,10 +32,11 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useQuery } from "@tanstack/react-query";
-import { formatISO, parseISO } from "date-fns";
+import { formatISO } from "date-fns";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { AmountRange } from "./amount-range";
+import { DateRangeFilter } from "./date-range-filter";
 import { FilterList } from "./filter-list";
 import { SelectCategory } from "./select-category";
 
@@ -460,28 +460,10 @@ export function TransactionsSearchFilter() {
         side="top"
       >
         <FilterMenuItem icon={Icons.CalendarMonth} label="Date">
-          <Calendar
-            mode="range"
-            initialFocus
-            toDate={new Date()}
-            selected={{
-              from: filter.start ? parseISO(filter.start) : undefined,
-              to: filter.end ? parseISO(filter.end) : undefined,
-            }}
-            onSelect={(range) => {
-              if (!range) return;
-
-              const newRange = {
-                start: range.from
-                  ? formatISO(range.from, { representation: "date" })
-                  : null,
-                end: range.to
-                  ? formatISO(range.to, { representation: "date" })
-                  : null,
-              };
-
-              setFilter(newRange);
-            }}
+          <DateRangeFilter
+            start={filter.start}
+            end={filter.end}
+            onSelect={setFilter}
           />
         </FilterMenuItem>
 

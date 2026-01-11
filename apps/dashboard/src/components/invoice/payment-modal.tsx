@@ -1,9 +1,10 @@
 "use client";
 
+import { useSuccessSound } from "@/hooks/use-success-sound";
 import { fromStripeAmount } from "@midday/invoice/currency";
 import { Button } from "@midday/ui/button";
-import { Dialog, DialogContent } from "@midday/ui/dialog";
-import { Spinner } from "@midday/ui/spinner";
+import { Sheet, SheetContent } from "@midday/ui/sheet";
+import { Skeleton } from "@midday/ui/skeleton";
 import { SubmitButton } from "@midday/ui/submit-button";
 import {
   Elements,
@@ -13,6 +14,7 @@ import {
 } from "@stripe/react-stripe-js";
 import type { Appearance } from "@stripe/stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
+import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useEffect, useMemo, useState } from "react";
 
@@ -42,6 +44,7 @@ interface PaymentModalProps {
   currency: string;
   invoiceNumber: string;
   onSuccess?: () => void;
+  prefetch?: boolean;
 }
 
 interface PaymentFormProps {
@@ -96,31 +99,72 @@ function PaymentForm({
     }).format(fromStripeAmount(stripeAmount, curr));
   };
 
+  const [isReady, setIsReady] = useState(false);
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="bg-muted/50 rounded-lg p-4 text-center">
-        <p className="text-sm text-muted-foreground mb-1">Amount due</p>
-        <p className="text-2xl font-semibold">
-          {formatAmount(amount, currency)}
-        </p>
+    <form onSubmit={handleSubmit} className="flex flex-col h-full min-h-0">
+      <div className="flex-1 overflow-y-auto space-y-6 min-h-0">
+        {/* Amount - animates in first */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0 }}
+          className="bg-muted/50 rounded-lg p-4 text-center"
+        >
+          <p className="text-sm text-muted-foreground mb-1">Amount due</p>
+          <p className="text-2xl">{formatAmount(amount, currency)}</p>
+        </motion.div>
+
+        {/* Payment form skeleton - shows while loading */}
+        {!isReady && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2, delay: 0.1 }}
+            className="space-y-4"
+          >
+            {/* Payment method tabs skeleton */}
+            <div className="flex gap-2">
+              <Skeleton className="h-10 flex-1" />
+              <Skeleton className="h-10 flex-1" />
+            </div>
+            {/* Card number field skeleton */}
+            <Skeleton className="h-12 w-full" />
+            {/* Expiry and CVC row skeleton */}
+            <div className="flex gap-4">
+              <Skeleton className="h-12 flex-1" />
+              <Skeleton className="h-12 flex-1" />
+            </div>
+          </motion.div>
+        )}
+
+        {/* Payment form - animates in when ready */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isReady ? 1 : 0 }}
+          transition={{ duration: 0.3 }}
+          className={isReady ? "" : "absolute opacity-0 pointer-events-none"}
+        >
+          <PaymentElement
+            options={{
+              layout: "tabs",
+            }}
+            onReady={() => setIsReady(true)}
+          />
+        </motion.div>
+
+        {error && (
+          <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
+            {error}
+          </div>
+        )}
       </div>
 
-      <PaymentElement
-        options={{
-          layout: "tabs",
-        }}
-      />
-
-      {error && (
-        <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
-          {error}
-        </div>
-      )}
-
-      <div className="flex flex-col gap-3">
+      {/* Buttons - fixed at bottom */}
+      <div className="flex flex-col gap-3 pt-6 mt-6 border-t border-border">
         <SubmitButton
           isSubmitting={isProcessing}
-          disabled={!stripe || !elements || isProcessing}
+          disabled={!stripe || !elements || isProcessing || !isReady}
           className="w-full"
         >
           {isProcessing ? "Processing..." : "Pay now"}
@@ -145,8 +189,10 @@ export function PaymentModal({
   currency,
   invoiceNumber,
   onSuccess,
+  prefetch,
 }: PaymentModalProps) {
   const { resolvedTheme } = useTheme();
+  const { play: playSuccessSound } = useSuccessSound();
   const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -160,12 +206,12 @@ export function PaymentModal({
   // Need to wait for mount to access theme
   useEffect(() => setMounted(true), []);
 
-  // Auto-initialize payment when modal opens
+  // Auto-initialize payment when modal opens or prefetch is triggered
   useEffect(() => {
-    if (open && !paymentData && !isLoading && !error) {
+    if ((open || prefetch) && !paymentData && !isLoading && !error) {
       initializePayment();
     }
-  }, [open]);
+  }, [open, prefetch]);
 
   // Stripe Elements appearance based on theme
   const getAppearance = (): Appearance => {
@@ -176,7 +222,8 @@ export function PaymentModal({
       variables: {
         borderRadius: "0px",
         colorPrimary: isDark ? "#FFFFFF" : "#121212",
-        colorBackground: isDark ? "#1A1A1A" : "#FFFFFF",
+        // Sheet background: dark=#0C0C0C, light=#FAFAF9
+        colorBackground: isDark ? "#0C0C0C" : "#FAFAF9",
         colorText: isDark ? "#F5F5F3" : "#121212",
         colorTextSecondary: isDark ? "#A1A1A1" : "#666666",
         colorDanger: "#EF4444",
@@ -187,7 +234,7 @@ export function PaymentModal({
       },
       rules: {
         ".Input": {
-          backgroundColor: isDark ? "#121212" : "#FFFFFF",
+          backgroundColor: isDark ? "#0C0C0C" : "#F0F0EE",
           border: isDark ? "1px solid #2E2E2E" : "1px solid #E5E5E5",
           boxShadow: "none",
           padding: "12px",
@@ -196,24 +243,44 @@ export function PaymentModal({
           border: isDark ? "1px solid #404040" : "1px solid #121212",
           boxShadow: "none",
         },
+        ".TabList": {
+          border: "none",
+          boxShadow: "none",
+        },
         ".Tab": {
-          backgroundColor: isDark ? "#121212" : "#FFFFFF",
+          backgroundColor: "transparent",
           border: isDark ? "1px solid #2E2E2E" : "1px solid #E5E5E5",
+          boxShadow: "none",
+          outline: "none",
           color: isDark ? "#A1A1A1" : "#666666",
           padding: "10px 12px",
         },
         ".Tab:hover": {
-          backgroundColor: isDark ? "#1A1A1A" : "#F6F6F3",
+          backgroundColor: "transparent",
+          border: isDark ? "1px solid #404040" : "1px solid #CCCCCC",
+          boxShadow: "none",
           color: isDark ? "#FFFFFF" : "#121212",
         },
+        ".Tab:focus": {
+          boxShadow: "none",
+          outline: "none",
+        },
         ".Tab--selected": {
-          backgroundColor: isDark ? "#1A1A1A" : "#F6F6F3",
-          border: isDark ? "1px solid #404040" : "1px solid #121212",
+          backgroundColor: "transparent",
+          border: isDark ? "1px solid #FFFFFF" : "1px solid #121212",
+          boxShadow: "none",
+          outline: "none",
           color: isDark ? "#FFFFFF" : "#121212",
         },
         ".Tab--selected:hover": {
-          backgroundColor: isDark ? "#1A1A1A" : "#F6F6F3",
+          backgroundColor: "transparent",
+          border: isDark ? "1px solid #FFFFFF" : "1px solid #121212",
+          boxShadow: "none",
           color: isDark ? "#FFFFFF" : "#121212",
+        },
+        ".Tab--selected:focus": {
+          boxShadow: "none",
+          outline: "none",
         },
         ".Tab--selected .TabIcon": {
           fill: isDark ? "#FFFFFF" : "#121212",
@@ -237,7 +304,7 @@ export function PaymentModal({
           padding: "0",
         },
         ".CheckboxInput": {
-          backgroundColor: isDark ? "#121212" : "#FFFFFF",
+          backgroundColor: isDark ? "#0C0C0C" : "#F0F0EE",
           border: isDark ? "1px solid #2E2E2E" : "1px solid #E5E5E5",
         },
         ".CheckboxInput--checked": {
@@ -306,6 +373,7 @@ export function PaymentModal({
   };
 
   const handleSuccess = () => {
+    playSuccessSound();
     onOpenChange(false);
     onSuccess?.();
   };
@@ -322,18 +390,15 @@ export function PaymentModal({
     });
   }, [paymentData?.stripeAccountId]);
 
-  return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-[470px] px-8">
-        <div className="p-6">
-          {isLoading && (
-            <div className="flex items-center justify-center py-12">
-              <Spinner size={24} />
-            </div>
-          )}
+  const hasPaymentData = paymentData && stripePromise && !isLoading && !error;
 
-          {error && !isLoading && (
-            <div className="text-center py-8">
+  return (
+    <Sheet open={open} onOpenChange={handleOpenChange}>
+      <SheetContent title="Pay invoice" className="flex flex-col">
+        {/* Error state */}
+        {error && !hasPaymentData && (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
               <div className="bg-destructive/10 text-destructive text-sm p-4 rounded-md mb-4">
                 {error}
               </div>
@@ -341,39 +406,35 @@ export function PaymentModal({
                 Try again
               </Button>
             </div>
-          )}
-
-          {!isLoading && !error && !paymentData && (
-            <div className="flex items-center justify-center py-12">
-              <Spinner size={24} />
-            </div>
-          )}
-
-          {paymentData && stripePromise && !isLoading && !error && (
-            <Elements
-              stripe={stripePromise}
-              options={{
-                clientSecret: paymentData.clientSecret,
-                appearance: getAppearance(),
-              }}
-            >
-              <PaymentForm
-                onSuccess={handleSuccess}
-                onCancel={() => onOpenChange(false)}
-                amount={paymentData.amount}
-                currency={paymentData.currency}
-              />
-            </Elements>
-          )}
-
-          <div className="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-border">
-            <span className="text-xs text-muted-foreground">
-              Secure payment handled by
-            </span>
-            <StripeLogo className="text-muted-foreground" />
           </div>
+        )}
+
+        {/* Payment form */}
+        {hasPaymentData && (
+          <Elements
+            stripe={stripePromise}
+            options={{
+              clientSecret: paymentData.clientSecret,
+              appearance: getAppearance(),
+            }}
+          >
+            <PaymentForm
+              onSuccess={handleSuccess}
+              onCancel={() => onOpenChange(false)}
+              amount={paymentData.amount}
+              currency={paymentData.currency}
+            />
+          </Elements>
+        )}
+
+        {/* Stripe footer - always at bottom */}
+        <div className="flex items-center justify-center gap-2 py-2 border-t border-border mt-auto">
+          <span className="text-xs text-muted-foreground">
+            Secure payment handled by
+          </span>
+          <StripeLogo className="text-muted-foreground" />
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

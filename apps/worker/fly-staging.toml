@@ -5,6 +5,7 @@ primary_region = 'fra'
 
 [env]
   NODE_ENV = 'production'
+  WORKER_ENV = 'staging'
 
 [[services]]
   internal_port = 8080

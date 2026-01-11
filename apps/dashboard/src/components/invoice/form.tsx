@@ -1,11 +1,14 @@
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
+import { isDateInFutureUTC } from "@midday/invoice/recurring";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { useToast } from "@midday/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { differenceInDays } from "date-fns";
 import { useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useDebounceValue } from "usehooks-ts";
@@ -27,6 +30,7 @@ import { transformFormValuesToDraft } from "./utils";
 
 export function Form() {
   const { invoiceId, setParams } = useInvoiceParams();
+  const { data: user } = useUserQuery();
 
   const form = useFormContext();
   const token = form.watch("token");
@@ -80,7 +84,6 @@ export function Form() {
         setParams({ type: "success", invoiceId: data.id });
       },
       onError: (error) => {
-        console.log(error);
         // Check if this is a scheduling error using the specific error code
         if (error.data?.code === "SERVICE_UNAVAILABLE") {
           toast({
@@ -95,6 +98,56 @@ export function Form() {
             description: "An unexpected error occurred. Please try again.",
           });
         }
+      },
+    }),
+  );
+
+  const createRecurringInvoiceMutation = useMutation(
+    trpc.invoiceRecurring.create.mutationOptions({
+      onSuccess: () => {
+        // Invalidate queries - the form will be closed by createInvoiceMutation
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoiceRecurring.list.queryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.invoice.invoiceSummary.queryKey(),
+        });
+
+        // Invalidate global search
+        queryClient.invalidateQueries({
+          queryKey: trpc.search.global.queryKey(),
+        });
+
+        // Don't show toast or close form here - createInvoiceMutation will handle that
+      },
+      onError: (error) => {
+        toast({
+          title: "Recurring Invoice Failed",
+          description: "An unexpected error occurred. Please try again.",
+        });
+      },
+    }),
+  );
+
+  // Mutation to update recurring series template when editing an invoice in a series
+  const updateRecurringTemplateMutation = useMutation(
+    trpc.invoiceRecurring.update.mutationOptions(),
+  );
+
+  // Mutation to update invoice status (used for scheduling future-dated recurring invoices)
+  const updateInvoiceMutation = useMutation(
+    trpc.invoice.update.mutationOptions({
+      onError: () => {
+        toast({
+          title: "Scheduling Failed",
+          description:
+            "The recurring series was created, but the invoice could not be scheduled. Please try again.",
+        });
       },
     }),
   );
@@ -121,6 +174,8 @@ export function Form() {
       "topBlock",
       "bottomBlock",
       "scheduledAt",
+      "recurringConfig",
+      "invoiceRecurringId",
     ],
   });
 
@@ -135,14 +190,139 @@ export function Form() {
         // @ts-expect-error
         transformFormValuesToDraft(currentFormValues),
       );
+
+      // If invoice is part of a recurring series, also update the series template
+      const invoiceRecurringId = currentFormValues.invoiceRecurringId;
+      if (invoiceRecurringId) {
+        // Remove deliveryType from template since "recurring" is not a valid API deliveryType
+        const { deliveryType: _, ...templateWithoutDeliveryType } =
+          currentFormValues.template;
+
+        updateRecurringTemplateMutation.mutate({
+          id: invoiceRecurringId,
+          lineItems: currentFormValues.lineItems,
+          template: templateWithoutDeliveryType,
+          paymentDetails: currentFormValues.paymentDetails,
+          fromDetails: currentFormValues.fromDetails,
+          noteDetails: currentFormValues.noteDetails,
+          vat: currentFormValues.vat,
+          tax: currentFormValues.tax,
+          discount: currentFormValues.discount,
+          subtotal: currentFormValues.subtotal,
+          topBlock: currentFormValues.topBlock,
+          bottomBlock: currentFormValues.bottomBlock,
+          amount: currentFormValues.amount,
+        });
+      }
     }
   }, [debouncedValue, isDirty, invoiceNumberValid]);
 
   // Submit the form and the draft invoice
-  const handleSubmit = (values: InvoiceFormValues) => {
+  const handleSubmit = async (values: InvoiceFormValues) => {
+    // Handle recurring invoices differently
+    if (
+      values.template.deliveryType === "recurring" &&
+      values.recurringConfig
+    ) {
+      const config = values.recurringConfig;
+
+      // Calculate due date offset from issue date to due date
+      const issueDate = new Date(values.issueDate);
+      const dueDate = new Date(values.dueDate);
+      const dueDateOffset = differenceInDays(dueDate, issueDate);
+
+      // Remove deliveryType from template since recurring is handled differently
+      const { deliveryType: _, ...templateWithoutDeliveryType } =
+        values.template;
+
+      try {
+        // First create the recurring series and link the draft invoice
+        const recurringResult =
+          await createRecurringInvoiceMutation.mutateAsync({
+            invoiceId: values.id, // Link the draft invoice to the recurring series
+            customerId: values.customerId,
+            customerName: values.customerName ?? undefined,
+            frequency: config.frequency,
+            frequencyDay: config.frequencyDay,
+            frequencyWeek: config.frequencyWeek,
+            frequencyInterval: config.frequencyInterval,
+            endType: config.endType ?? "never",
+            endDate: config.endDate,
+            endCount: config.endCount,
+            timezone:
+              user?.timezone ||
+              Intl.DateTimeFormat().resolvedOptions().timeZone,
+            dueDateOffset: dueDateOffset >= 0 ? dueDateOffset : 30,
+            amount: values.amount,
+            currency: values.template.currency,
+            lineItems: values.lineItems,
+            template: {
+              ...templateWithoutDeliveryType,
+              deliveryType: "create_and_send" as const, // Recurring invoices are sent automatically
+            },
+            templateId: values.template.id, // Save the template reference
+            paymentDetails: values.paymentDetails,
+            fromDetails: values.fromDetails,
+            noteDetails: values.noteDetails,
+            vat: values.vat,
+            tax: values.tax,
+            discount: values.discount,
+            subtotal: values.subtotal,
+            topBlock: values.topBlock,
+            bottomBlock: values.bottomBlock,
+          });
+
+        // Update form state with the recurring series ID to prevent duplicate series
+        // if the send fails and user retries
+        if (recurringResult?.id) {
+          form.setValue("invoiceRecurringId", recurringResult.id);
+        }
+
+        // Check if issue date is in the future (at the UTC day level)
+        // If so, don't send the invoice immediately - the scheduler will handle it
+        // Using isDateInFutureUTC ensures consistent behavior with the backend
+        const isIssueDateFuture = isDateInFutureUTC(issueDate);
+
+        if (isIssueDateFuture) {
+          // Future-dated recurring invoice:
+          // - Set status to "scheduled" so user understands it will be sent later
+          // - Set scheduledAt to the issue date for consistency with the status tooltip
+          // - The scheduler will send it on the issue date
+          // - Navigate to success page
+          await updateInvoiceMutation.mutateAsync({
+            id: values.id,
+            status: "scheduled",
+            scheduledAt: issueDate.toISOString(),
+          });
+
+          queryClient.invalidateQueries({
+            queryKey: trpc.invoice.get.infiniteQueryKey(),
+          });
+          queryClient.invalidateQueries({
+            queryKey: trpc.invoice.invoiceSummary.queryKey(),
+          });
+          setParams({ type: "success", invoiceId: values.id });
+        } else {
+          // Issue date is today or in the past - send immediately
+          createInvoiceMutation.mutate({
+            id: values.id,
+            deliveryType: "create_and_send",
+          });
+        }
+      } catch {
+        // Errors are handled by each mutation's onError handler
+        // - createRecurringInvoiceMutation.onError shows "Recurring Invoice Failed"
+        // - updateInvoiceMutation.onError shows "Scheduling Failed"
+      }
+      return;
+    }
+
+    // Handle regular invoice creation
+    const deliveryType = values.template.deliveryType;
     createInvoiceMutation.mutate({
       id: values.id,
-      deliveryType: values.template.deliveryType ?? "create",
+      deliveryType:
+        deliveryType === "recurring" ? "create" : (deliveryType ?? "create"),
       scheduledAt: values.scheduledAt || undefined,
     });
   };
@@ -219,9 +399,13 @@ export function Form() {
               )}
 
               <SubmitButton
-                isSubmitting={createInvoiceMutation.isPending}
+                isSubmitting={
+                  createInvoiceMutation.isPending ||
+                  createRecurringInvoiceMutation.isPending
+                }
                 disabled={
                   createInvoiceMutation.isPending ||
+                  createRecurringInvoiceMutation.isPending ||
                   draftInvoiceMutation.isPending
                 }
               />

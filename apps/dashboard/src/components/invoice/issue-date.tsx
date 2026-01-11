@@ -1,22 +1,32 @@
 import { useTemplateUpdate } from "@/hooks/use-template-update";
+import { useUserQuery } from "@/hooks/use-user";
 import { TZDate } from "@date-fns/tz";
+import { localDateToUTCMidnight } from "@midday/invoice/recurring";
 import { Calendar } from "@midday/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
 export function IssueDate() {
   const { setValue, watch } = useFormContext();
+  const { data: user } = useUserQuery();
   const issueDate = watch("issueDate");
   const dateFormat = watch("template.dateFormat");
   const [isOpen, setIsOpen] = useState(false);
   const { updateTemplate } = useTemplateUpdate();
 
+  // Parse the ISO date string using TZDate to interpret it in UTC
+  // This ensures the calendar shows the same date as stored (e.g., "2024-01-15T00:00:00.000Z" shows Jan 15)
+  const selectedDate = useMemo(() => {
+    if (!issueDate) return undefined;
+    return new TZDate(issueDate, "UTC");
+  }, [issueDate]);
+
   const handleSelect = (date: Date | undefined) => {
     if (date) {
-      setValue("issueDate", date.toISOString(), {
+      setValue("issueDate", localDateToUTCMidnight(date), {
         shouldValidate: true,
         shouldDirty: true,
       });
@@ -38,12 +48,14 @@ export function IssueDate() {
 
       <Popover open={isOpen} onOpenChange={setIsOpen} modal>
         <PopoverTrigger className="text-primary text-[11px] whitespace-nowrap flex">
-          {issueDate && format(issueDate, dateFormat)}
+          {selectedDate && format(selectedDate, dateFormat)}
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0">
           <Calendar
             mode="single"
-            selected={issueDate ? new TZDate(issueDate, "UTC") : undefined}
+            weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
+            defaultMonth={selectedDate}
+            selected={selectedDate}
             onSelect={handleSelect}
             initialFocus
           />

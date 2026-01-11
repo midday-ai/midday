@@ -7,30 +7,21 @@ import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 import { getWebsiteLogo } from "@/utils/logos";
+import { TZDate } from "@date-fns/tz";
+import { getFrequencyShortLabel } from "@midday/invoice/recurring";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@midday/ui/accordion";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@midday/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { CopyInput } from "./copy-input";
 import { FormatAmount } from "./format-amount";
 import { InvoiceActions } from "./invoice-actions";
@@ -42,7 +33,6 @@ import { OpenURL } from "./open-url";
 
 export function InvoiceDetails() {
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
   const { invoiceId } = useInvoiceParams();
   const { data: user } = useUserQuery();
 
@@ -53,31 +43,14 @@ export function InvoiceDetails() {
     enabled: isOpen,
   });
 
-  const refundMutation = useMutation(
-    trpc.invoicePayments.refundPayment.mutationOptions({
-      onSuccess: () => {
-        // Invalidate the specific invoice
-        queryClient.invalidateQueries({
-          queryKey: trpc.invoice.getById.queryKey({ id: invoiceId! }),
-        });
-        // Invalidate the invoice table (infinite query for pagination)
-        queryClient.invalidateQueries({
-          queryKey: trpc.invoice.get.infiniteQueryKey(),
-        });
-        // Invalidate regular query key as well
-        queryClient.invalidateQueries({
-          queryKey: trpc.invoice.get.queryKey(),
-        });
-        // Invalidate summary and payment status
-        queryClient.invalidateQueries({
-          queryKey: trpc.invoice.invoiceSummary.queryKey(),
-        });
-        queryClient.invalidateQueries({
-          queryKey: trpc.invoice.paymentStatus.queryKey(),
-        });
-      },
+  // Fetch upcoming invoices for recurring series
+  const { data: upcomingInvoices } = useQuery({
+    ...trpc.invoiceRecurring.getUpcoming.queryOptions({
+      id: data?.invoiceRecurringId ?? "",
+      limit: 5,
     }),
-  );
+    enabled: !!data?.invoiceRecurringId && data?.recurring?.status === "active",
+  });
 
   const { url: downloadUrl } = useFileUrl({
     type: "invoice",
@@ -114,6 +87,9 @@ export function InvoiceDetails() {
     scheduledAt,
     paymentIntentId,
     refundedAt,
+    invoiceRecurringId,
+    recurring,
+    recurringSequence,
   } = data;
 
   return (
@@ -170,7 +146,13 @@ export function InvoiceDetails() {
         </div>
       </div>
 
-      <InvoiceActions status={status} id={id} />
+      <InvoiceActions
+        status={status}
+        id={id}
+        invoiceRecurringId={invoiceRecurringId}
+        recurringStatus={recurring?.status}
+        paymentIntentId={paymentIntentId}
+      />
 
       <div className="h-full p-0 pb-[143px] overflow-y-auto scrollbar-hide">
         {status === "paid" && (
@@ -204,13 +186,17 @@ export function InvoiceDetails() {
           <div className="flex justify-between items-center">
             <span className="text-sm text-[#606060]">Due date</span>
             <span className="text-sm">
-              <span>{dueDate && format(parseISO(dueDate), "MMM dd")}</span>
+              <span>
+                {dueDate && format(new TZDate(dueDate, "UTC"), "MMM dd")}
+              </span>
             </span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-[#606060]">Issue date</span>
             <span className="text-sm">
-              <span>{issueDate && format(parseISO(issueDate), "MMM dd")}</span>
+              <span>
+                {issueDate && format(new TZDate(issueDate, "UTC"), "MMM dd")}
+              </span>
             </span>
           </div>
 
@@ -251,6 +237,25 @@ export function InvoiceDetails() {
             </span>
           </div>
 
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-[#606060]">Type</span>
+            <span className="text-sm">
+              {invoiceRecurringId && recurring ? (
+                <span>
+                  {getFrequencyShortLabel(
+                    recurring.frequency,
+                    recurring.frequencyInterval,
+                  )}
+                  {recurringSequence && recurring.endCount
+                    ? ` (${recurringSequence} of ${recurring.endCount})`
+                    : ""}
+                </span>
+              ) : (
+                <span>One-time</span>
+              )}
+            </span>
+          </div>
+
           {status === "paid" && (
             <div className="flex justify-between items-center">
               <span className="text-sm text-[#606060]">Payment</span>
@@ -285,37 +290,126 @@ export function InvoiceDetails() {
           )}
         </div>
 
-        {status === "paid" && paymentIntentId && (
+        {invoiceRecurringId && recurring && (
           <div className="mt-6 border-t border-border pt-6">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <SubmitButton
-                  variant="outline"
-                  className="w-full"
-                  isSubmitting={refundMutation.isPending}
-                >
-                  Refund payment
-                </SubmitButton>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Refund payment</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will issue a full refund for this invoice. The invoice
-                    status will be changed to refunded. This action cannot be
-                    undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => refundMutation.mutate({ invoiceId: id })}
-                  >
-                    Refund
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-sm font-medium">Recurring Series</span>
+              <span
+                className={cn("text-xs px-2 py-0.5 rounded-full", {
+                  "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400":
+                    recurring.status === "active",
+                  "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400":
+                    recurring.status === "paused",
+                  "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400":
+                    recurring.status === "completed",
+                  "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400":
+                    recurring.status === "canceled",
+                })}
+              >
+                {recurring.status === "active" && "Active"}
+                {recurring.status === "paused" && "Paused"}
+                {recurring.status === "completed" && "Completed"}
+                {recurring.status === "canceled" && "Canceled"}
+              </span>
+            </div>
+
+            {/* Upcoming invoices preview */}
+            {upcomingInvoices?.invoices &&
+              upcomingInvoices.invoices.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-border space-y-3">
+                  {upcomingInvoices.invoices
+                    .slice(0, recurring.endCount ? 5 : 3)
+                    .map(
+                      (
+                        invoice: { date: string; amount: number },
+                        index: number,
+                      ) => {
+                        // Check if this is the first invoice in the series and it's scheduled
+                        const isCurrentScheduledInvoice =
+                          index === 0 &&
+                          status === "scheduled" &&
+                          recurring.invoicesGenerated === 0;
+
+                        return (
+                          <div
+                            key={index.toString()}
+                            className={cn(
+                              "flex items-center justify-between text-sm",
+                              isCurrentScheduledInvoice &&
+                                "bg-muted/50 -mx-2 px-2 py-1 rounded",
+                            )}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="w-[100px]">
+                                {format(
+                                  new TZDate(invoice.date, "UTC"),
+                                  "MMM d, yyyy",
+                                )}
+                              </span>
+                              <span className="text-muted-foreground">
+                                {format(new TZDate(invoice.date, "UTC"), "EEE")}
+                              </span>
+                              {isCurrentScheduledInvoice && (
+                                <span className="text-xs text-muted-foreground">
+                                  (this invoice)
+                                </span>
+                              )}
+                            </div>
+                            <FormatAmount
+                              amount={invoice.amount}
+                              currency={currency ?? "USD"}
+                            />
+                          </div>
+                        );
+                      },
+                    )}
+                  {/* Show ellipsis if there are more invoices */}
+                  {((recurring.endCount &&
+                    recurring.endCount - recurring.invoicesGenerated > 5) ||
+                    !recurring.endCount) && (
+                    <div className="text-center text-muted-foreground">...</div>
+                  )}
+                </div>
+              )}
+
+            {/* Summary */}
+            <div className="flex justify-between text-sm mt-4 pt-4 border-t border-border">
+              {upcomingInvoices &&
+              upcomingInvoices.summary?.totalCount !== null &&
+              upcomingInvoices.summary?.totalAmount !== null ? (
+                <>
+                  <span>
+                    {upcomingInvoices.summary.totalCount} invoices total
+                  </span>
+                  <FormatAmount
+                    amount={upcomingInvoices.summary.totalAmount}
+                    currency={currency ?? "USD"}
+                  />
+                </>
+              ) : recurring.endType === "on_date" ? (
+                <>
+                  <span className="text-muted-foreground">Ends on date</span>
+                  <span className="text-muted-foreground">
+                    {recurring.invoicesGenerated} generated
+                  </span>
+                </>
+              ) : recurring.endType === "after_count" && recurring.endCount ? (
+                <>
+                  <span className="text-muted-foreground">
+                    {recurring.invoicesGenerated} of {recurring.endCount}{" "}
+                    invoices
+                  </span>
+                  <span className="text-muted-foreground">
+                    {recurring.endCount - recurring.invoicesGenerated} remaining
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-muted-foreground">No end date</span>
+                  <span className="text-lg leading-none">∞</span>
+                </>
+              )}
+            </div>
           </div>
         )}
 

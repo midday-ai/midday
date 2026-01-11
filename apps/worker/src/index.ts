@@ -1,14 +1,11 @@
 // Import Sentry instrumentation first, before any other modules
 import "./instrument";
 
-import { createBullBoard } from "@bull-board/api";
-import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
-import { HonoAdapter } from "@bull-board/hono";
 import { closeWorkerDb } from "@midday/db/worker-client";
+import * as Sentry from "@sentry/bun";
 import { Worker } from "bullmq";
 import { Hono } from "hono";
-import { basicAuth } from "hono/basic-auth";
-import { serveStatic } from "hono/bun";
+import { workbench } from "workbench/hono";
 import { getProcessor } from "./processors/registry";
 import { getAllQueues, queueConfigs } from "./queues";
 import { registerStaticSchedulers } from "./schedulers/registry";
@@ -33,6 +30,35 @@ const workers = queueConfigs.map((config) => {
   // See: https://docs.bullmq.io/guide/going-to-production#log-errors
   worker.on("error", (err) => {
     console.error(`[Worker:${config.name}] Error:`, err);
+    Sentry.captureException(err, {
+      tags: { workerName: config.name, errorType: "worker_error" },
+    });
+  });
+
+  // Centralized failed handler that captures to Sentry
+  // Note: BaseProcessor already captures in-process failures with full context
+  // This catches failures that bypass the processor (e.g., no processor registered)
+  worker.on("failed", (job, err) => {
+    console.error(
+      `[Worker:${config.name}] Job failed: ${job?.name} (${job?.id})`,
+      err,
+    );
+    Sentry.captureException(err, {
+      tags: {
+        workerName: config.name,
+        jobName: job?.name ?? "unknown",
+        errorType: "job_failed",
+      },
+      extra: {
+        jobId: job?.id,
+        attemptsMade: job?.attemptsMade,
+      },
+    });
+
+    // Call custom onFailed handler if provided
+    if (config.eventHandlers?.onFailed) {
+      config.eventHandlers.onFailed(job ?? null, err);
+    }
   });
 
   // Register event handlers if provided
@@ -43,12 +69,6 @@ const workers = queueConfigs.map((config) => {
           name: job.name,
           id: job.id,
         });
-      });
-    }
-
-    if (config.eventHandlers.onFailed) {
-      worker.on("failed", (job, err) => {
-        config.eventHandlers!.onFailed!(job ?? null, err);
       });
     }
   }
@@ -67,52 +87,40 @@ const app = new Hono();
 
 const basePath = "/admin";
 
-// Authentication middleware for BullBoard
-if (process.env.BOARD_USERNAME && process.env.BOARD_PASSWORD) {
-  app.use(
-    basePath,
-    basicAuth({
-      username: process.env.BOARD_USERNAME,
-      password: process.env.BOARD_PASSWORD,
-    }),
-  );
-
-  app.use(
-    `${basePath}/*`,
-    basicAuth({
-      username: process.env.BOARD_USERNAME,
-      password: process.env.BOARD_PASSWORD,
-    }),
-  );
-}
-
-// Initialize BullBoard
-function initializeBullBoard() {
+// Initialize Workbench dashboard
+function initializeWorkbench() {
   const queues = getAllQueues();
 
   if (queues.length === 0) {
-    console.warn("No queues found when initializing BullBoard");
+    console.warn("No queues found when initializing Workbench");
     return;
   }
 
-  const serverAdapter = new HonoAdapter(serveStatic);
-  serverAdapter.setBasePath(basePath);
-
-  createBullBoard({
-    queues: queues.map((queue) => new BullMQAdapter(queue)),
-    serverAdapter,
-  });
-
-  app.route(basePath, serverAdapter.registerPlugin());
+  // Mount workbench with optional auth
+  app.route(
+    basePath,
+    workbench({
+      queues,
+      auth:
+        process.env.BOARD_USERNAME && process.env.BOARD_PASSWORD
+          ? {
+              username: process.env.BOARD_USERNAME,
+              password: process.env.BOARD_PASSWORD,
+            }
+          : undefined,
+      title: "Midday Jobs",
+      tags: ["teamId"],
+    }),
+  );
 
   console.log(
-    `BullBoard initialized with ${queues.length} queues:`,
+    `Workbench initialized with ${queues.length} queues:`,
     queues.map((q) => q.name),
   );
 }
 
-// Initialize BullBoard on startup
-initializeBullBoard();
+// Initialize Workbench on startup
+initializeWorkbench();
 
 // Health check endpoint - verifies service is running
 app.get("/", (c) => {
@@ -195,10 +203,19 @@ process.on("SIGINT", () => shutdown("SIGINT"));
  */
 process.on("uncaughtException", (err) => {
   console.error("[Worker] Uncaught exception:", err);
+  Sentry.captureException(err, {
+    tags: { errorType: "uncaught_exception" },
+  });
   // Don't exit - let the process manager (Fly.io) handle restarts
 });
 
 process.on("unhandledRejection", (reason, promise) => {
   console.error("[Worker] Unhandled rejection at:", promise, "reason:", reason);
+  Sentry.captureException(
+    reason instanceof Error ? reason : new Error(String(reason)),
+    {
+      tags: { errorType: "unhandled_rejection" },
+    },
+  );
   // Don't exit - let the process manager handle restarts
 });

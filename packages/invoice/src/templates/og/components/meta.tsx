@@ -38,7 +38,7 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
         <span tw="text-[22px] text-white" style={{ fontFamily: "hedvig-sans" }}>
           {issueDate
             ? format(
-                new TZDate(issueDate, template.timezone),
+                new TZDate(issueDate, "UTC"),
                 template.dateFormat,
               )
             : ""}
@@ -55,7 +55,7 @@ export function Meta({ template, invoiceNumber, issueDate, dueDate }: Props) {
         <span tw="text-[22px] text-white" style={{ fontFamily: "hedvig-sans" }}>
           {dueDate
             ? format(
-                new TZDate(dueDate, template.timezone),
+                new TZDate(dueDate, "UTC"),
                 template.dateFormat,
               )
             : ""}

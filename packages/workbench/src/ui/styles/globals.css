@@ -1,0 +1,282 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* Light theme - Neutral UI with vibrant data colors */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 9%;
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 9%;
+    --popover: 0 0% 98%;
+    --popover-foreground: 0 0% 9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 98%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 98%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 98%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 9%;
+
+    /* Status colors - vibrant data colors */
+    --status-success: 134 90% 40%;
+    --status-error: 0 90% 55%;
+    --status-warning: 45 95% 50%;
+    --status-pending: 0 0% 45%;
+    --status-active: 210 90% 50%;
+
+    /* Chart colors - Electric monitoring colors */
+    --chart-1: 134 90% 40%;
+    --chart-2: 210 90% 50%;
+    --chart-3: 270 70% 55%;
+    --chart-4: 350 80% 55%;
+    --chart-5: 45 95% 50%;
+    --chart-completed: 134 90% 40%;
+    --chart-failed: 0 90% 55%;
+    --chart-duration: 210 90% 50%;
+    --chart-wait: 45 95% 50%;
+
+    --radius: 0;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 9%;
+    --sidebar-border: 0 0% 90%;
+  }
+
+  .dark {
+    /* Dark theme - Neutral UI with vibrant data colors */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 4%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 55%;
+    --accent: 0 0% 14%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14%;
+    --input: 0 0% 14%;
+    --ring: 0 0% 83%;
+
+    /* Status colors - electric neon for dark mode */
+    --status-success: 120 100% 45%;
+    --status-error: 4 90% 58%;
+    --status-warning: 45 100% 50%;
+    --status-pending: 0 0% 50%;
+    --status-active: 199 100% 55%;
+
+    /* Chart colors - Electric neon monitoring colors */
+    --chart-1: 120 100% 45%;
+    --chart-2: 199 100% 55%;
+    --chart-3: 265 85% 65%;
+    --chart-4: 4 90% 58%;
+    --chart-5: 45 100% 50%;
+    --chart-completed: 120 100% 45%;
+    --chart-failed: 4 90% 58%;
+    --chart-duration: 199 100% 55%;
+    --chart-wait: 45 100% 50%;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 4%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 14%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  /* Disable transitions during theme switch */
+  .no-transitions,
+  .no-transitions *,
+  .no-transitions *::before,
+  .no-transitions *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  html {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Oxygen, Ubuntu, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Apply serif font to all headings */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-serif);
+  }
+
+  /* Film grain texture overlay */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.035;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* Remove focus ring outlines from Recharts elements */
+  .recharts-wrapper,
+  .recharts-wrapper *,
+  .recharts-surface,
+  .recharts-layer,
+  .recharts-dot,
+  .recharts-active-dot,
+  .recharts-legend-item,
+  .recharts-sector,
+  .recharts-bar-rectangle,
+  .recharts-area,
+  .recharts-curve {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  .recharts-wrapper:focus,
+  .recharts-wrapper *:focus,
+  .recharts-surface:focus,
+  .recharts-layer:focus,
+  .recharts-dot:focus,
+  .recharts-active-dot:focus,
+  .recharts-sector:focus,
+  .recharts-bar-rectangle:focus,
+  .recharts-area:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Remove default stroke on active dots */
+  .recharts-active-dot circle {
+    stroke: none !important;
+  }
+
+  /* Prevent focus visible styles on chart elements */
+  .recharts-wrapper:focus-visible,
+  .recharts-wrapper *:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Remove hover effects on chart elements */
+  .recharts-bar-rectangle:hover,
+  .recharts-area:hover,
+  .recharts-bar-rectangle:active,
+  .recharts-area:active {
+    opacity: 1 !important;
+    fill-opacity: 1 !important;
+  }
+
+  /* Dotted background for flow diagrams */
+  .dotted-bg {
+    background-image: radial-gradient(
+      circle,
+      hsl(var(--border)) 0.5px,
+      transparent 0.5px
+    );
+    background-size: 8px 8px;
+  }
+
+  /* React Flow overrides for clean look */
+  .react-flow__background {
+    background-color: transparent !important;
+  }
+
+  .react-flow__pane {
+    cursor: grab;
+  }
+
+  .react-flow__pane:active {
+    cursor: grabbing;
+  }
+
+  /* Hide scrollbars */
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+}
+
+@theme inline {
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-mono: "Geist Mono", "SF Mono", Monaco, "Cascadia Code", "Roboto Mono",
+    Menlo, monospace;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-status-success: hsl(var(--status-success));
+  --color-status-error: hsl(var(--status-error));
+  --color-status-warning: hsl(var(--status-warning));
+  --color-status-pending: hsl(var(--status-pending));
+  --color-status-active: hsl(var(--status-active));
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+  --color-chart-completed: hsl(var(--chart-completed));
+  --color-chart-failed: hsl(var(--chart-failed));
+  --color-chart-error: hsl(var(--chart-failed));
+  --color-chart-success: hsl(var(--chart-1));
+  --color-chart-duration: hsl(var(--chart-duration));
+  --color-chart-wait: hsl(var(--chart-wait));
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+}

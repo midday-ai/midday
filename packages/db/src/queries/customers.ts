@@ -10,8 +10,9 @@ import {
 } from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { generateToken } from "@midday/invoice/token";
-import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm/sql/sql";
+import { nanoid } from "nanoid";
 import { createActivity } from "./activities";
 
 type GetCustomerByIdParams = {
@@ -74,6 +75,9 @@ export const getCustomerById = async (
       fiscalYearEnd: customers.fiscalYearEnd,
       enrichmentStatus: customers.enrichmentStatus,
       enrichedAt: customers.enrichedAt,
+      // Portal fields
+      portalEnabled: customers.portalEnabled,
+      portalId: customers.portalId,
       invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
       projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
       tags: sql<CustomerTag[]>`
@@ -185,6 +189,9 @@ export const getCustomers = async (
       primaryLanguage: customers.primaryLanguage,
       fiscalYearEnd: customers.fiscalYearEnd,
       enrichmentStatus: customers.enrichmentStatus,
+      // Portal fields
+      portalEnabled: customers.portalEnabled,
+      portalId: customers.portalId,
       invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
       projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
       // Financial metrics
@@ -474,6 +481,8 @@ export const upsertCustomer = async (
       countryCode: customers.countryCode,
       token: customers.token,
       contact: customers.contact,
+      portalEnabled: customers.portalEnabled,
+      portalId: customers.portalId,
       invoiceCount: sql<number>`cast(count(${invoices.id}) as int)`,
       projectCount: sql<number>`cast(count(${trackerProjects.id}) as int)`,
       tags: sql<CustomerTag[]>`
@@ -647,5 +656,149 @@ export async function getCustomerInvoiceSummary(
     outstandingAmount: Math.round(outstandingAmount * 100) / 100,
     invoiceCount,
     currency: baseCurrency,
+  };
+}
+
+export type ToggleCustomerPortalParams = {
+  customerId: string;
+  teamId: string;
+  enabled: boolean;
+};
+
+/**
+ * Toggle customer portal access.
+ * Generates a portal_id (nanoid(8)) on first enable.
+ */
+export async function toggleCustomerPortal(
+  db: Database,
+  params: ToggleCustomerPortalParams,
+) {
+  const { customerId, teamId, enabled } = params;
+
+  // Get current customer to check if portal_id exists
+  const [currentCustomer] = await db
+    .select({
+      id: customers.id,
+      portalId: customers.portalId,
+    })
+    .from(customers)
+    .where(and(eq(customers.id, customerId), eq(customers.teamId, teamId)))
+    .limit(1);
+
+  if (!currentCustomer) {
+    throw new Error("Customer not found");
+  }
+
+  // Generate portal_id if enabling and doesn't exist yet
+  const portalId =
+    enabled && !currentCustomer.portalId ? nanoid(8) : currentCustomer.portalId;
+
+  // Update the customer
+  const [result] = await db
+    .update(customers)
+    .set({
+      portalEnabled: enabled,
+      portalId,
+    })
+    .where(and(eq(customers.id, customerId), eq(customers.teamId, teamId)))
+    .returning({
+      id: customers.id,
+      portalEnabled: customers.portalEnabled,
+      portalId: customers.portalId,
+    });
+
+  return result;
+}
+
+export type GetCustomerByPortalIdParams = {
+  portalId: string;
+};
+
+/**
+ * Get customer by portal ID for public portal page.
+ * Only returns customer if portal is enabled.
+ */
+export async function getCustomerByPortalId(
+  db: Database,
+  params: GetCustomerByPortalIdParams,
+) {
+  const { portalId } = params;
+
+  const [result] = await db
+    .select({
+      id: customers.id,
+      name: customers.name,
+      email: customers.email,
+      website: customers.website,
+      teamId: customers.teamId,
+      portalEnabled: customers.portalEnabled,
+      portalId: customers.portalId,
+      team: {
+        id: teams.id,
+        name: teams.name,
+        logoUrl: teams.logoUrl,
+        baseCurrency: teams.baseCurrency,
+      },
+    })
+    .from(customers)
+    .innerJoin(teams, eq(teams.id, customers.teamId))
+    .where(
+      and(eq(customers.portalId, portalId), eq(customers.portalEnabled, true)),
+    )
+    .limit(1);
+
+  return result;
+}
+
+export type GetCustomerPortalInvoicesParams = {
+  customerId: string;
+  teamId: string;
+  cursor?: string | null;
+  pageSize?: number;
+};
+
+/**
+ * Get invoices for customer portal.
+ * Only returns non-draft invoices (paid, unpaid, overdue).
+ */
+export async function getCustomerPortalInvoices(
+  db: Database,
+  params: GetCustomerPortalInvoicesParams,
+) {
+  const { customerId, teamId, cursor, pageSize = 10 } = params;
+
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+
+  const data = await db
+    .select({
+      id: invoices.id,
+      invoiceNumber: invoices.invoiceNumber,
+      status: invoices.status,
+      amount: invoices.amount,
+      currency: invoices.currency,
+      issueDate: invoices.issueDate,
+      dueDate: invoices.dueDate,
+      token: invoices.token,
+    })
+    .from(invoices)
+    .where(
+      and(
+        eq(invoices.customerId, customerId),
+        eq(invoices.teamId, teamId),
+        // Only show paid, unpaid, overdue (exclude draft, canceled, scheduled, refunded)
+        sql`${invoices.status} IN ('paid', 'unpaid', 'overdue')`,
+      ),
+    )
+    .orderBy(desc(invoices.issueDate))
+    .limit(pageSize)
+    .offset(offset);
+
+  const nextCursor =
+    data.length === pageSize ? (offset + pageSize).toString() : null;
+
+  return {
+    data,
+    nextCursor,
+    hasMore: data.length === pageSize,
   };
 }

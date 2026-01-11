@@ -2,17 +2,27 @@ import {
   deleteCustomerSchema,
   enrichCustomerSchema,
   getCustomerByIdSchema,
+  getCustomerByPortalIdSchema,
   getCustomerInvoiceSummarySchema,
   getCustomersSchema,
+  getPortalInvoicesSchema,
+  toggleCustomerPortalSchema,
   upsertCustomerSchema,
 } from "@api/schemas/customers";
-import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@api/trpc/init";
 import {
   clearCustomerEnrichment,
   deleteCustomer,
   getCustomerById,
+  getCustomerByPortalId,
   getCustomerInvoiceSummary,
+  getCustomerPortalInvoices,
   getCustomers,
+  toggleCustomerPortal,
   updateCustomerEnrichmentStatus,
   upsertCustomer,
 } from "@midday/db/queries";
@@ -184,5 +194,64 @@ export const customersRouter = createTRPCRouter({
       });
 
       return { cleared: true };
+    }),
+
+  togglePortal: protectedProcedure
+    .input(toggleCustomerPortalSchema)
+    .mutation(async ({ ctx: { db, teamId }, input }) => {
+      return toggleCustomerPortal(db, {
+        customerId: input.customerId,
+        teamId: teamId!,
+        enabled: input.enabled,
+      });
+    }),
+
+  getByPortalId: publicProcedure
+    .input(getCustomerByPortalIdSchema)
+    .query(async ({ ctx: { db }, input }) => {
+      const customer = await getCustomerByPortalId(db, {
+        portalId: input.portalId,
+      });
+
+      if (!customer) {
+        return null;
+      }
+
+      // Get invoice summary
+      const summary = await getCustomerInvoiceSummary(db, {
+        customerId: customer.id,
+        teamId: customer.teamId,
+      });
+
+      return {
+        customer,
+        summary,
+      };
+    }),
+
+  getPortalInvoices: publicProcedure
+    .input(getPortalInvoicesSchema)
+    .query(async ({ ctx: { db }, input }) => {
+      const customer = await getCustomerByPortalId(db, {
+        portalId: input.portalId,
+      });
+
+      if (!customer) {
+        return { data: [], meta: { cursor: null } };
+      }
+
+      const result = await getCustomerPortalInvoices(db, {
+        customerId: customer.id,
+        teamId: customer.teamId,
+        cursor: input.cursor,
+        pageSize: input.pageSize,
+      });
+
+      return {
+        data: result.data,
+        meta: {
+          cursor: result.nextCursor,
+        },
+      };
     }),
 });

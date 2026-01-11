@@ -6,6 +6,8 @@ import { useCustomerParams } from "@/hooks/use-customer-params";
 import { getDueDateStatus } from "@/utils/format";
 import { getWebsiteLogo } from "@/utils/logos";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { TZDate } from "@date-fns/tz";
+import { getFrequencyShortLabel } from "@midday/invoice/recurring";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Checkbox } from "@midday/ui/checkbox";
 import { cn } from "@midday/ui/cn";
@@ -17,6 +19,20 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { format, formatDistanceToNow } from "date-fns";
 import type { MouseEvent } from "react";
 import { ActionsMenu } from "./actions-menu";
+
+/**
+ * Format a date stored as UTC midnight (e.g., "2024-01-15T00:00:00.000Z") to display
+ * the correct date regardless of user's timezone.
+ */
+function formatDateUTC(date: string, dateFormat?: string | null): string {
+  const tzDate = new TZDate(date, "UTC");
+  // Check if same year for short format
+  const now = new Date();
+  if (tzDate.getUTCFullYear() === now.getUTCFullYear()) {
+    return format(tzDate, "MMM d");
+  }
+  return format(tzDate, dateFormat ?? "P");
+}
 
 export type Invoice = NonNullable<
   RouterOutputs["invoice"]["get"]["data"]
@@ -145,7 +161,7 @@ export const columns: ColumnDef<Invoice>[] = [
       return (
         <div className="flex flex-col space-y-1">
           <span className="truncate">
-            {date ? formatDate(date, table.options.meta?.dateFormat) : "-"}
+            {date ? formatDateUTC(date, table.options.meta?.dateFormat) : "-"}
           </span>
           {showDate && (
             <span className="text-xs text-muted-foreground truncate">
@@ -488,8 +504,77 @@ export const columns: ColumnDef<Invoice>[] = [
       const date = row.original.issueDate;
       return (
         <span className="truncate">
-          {date ? formatDate(date, table.options.meta?.dateFormat) : "-"}
+          {date ? formatDateUTC(date, table.options.meta?.dateFormat) : "-"}
         </span>
+      );
+    },
+  },
+  {
+    id: "type",
+    header: "Type",
+    accessorKey: "invoiceRecurringId",
+    size: 140,
+    minSize: 100,
+    maxSize: 200,
+    enableResizing: true,
+    meta: {
+      skeleton: { type: "text", width: "w-20" },
+      headerLabel: "Type",
+      className: "w-[140px] min-w-[100px]",
+    },
+    cell: ({ row }) => {
+      const recurringId = row.original.invoiceRecurringId;
+      const recurring = row.original.recurring;
+      const invoiceStatus = row.original.status;
+      const sequence = row.original.recurringSequence;
+
+      if (!recurringId || !recurring) {
+        return <span>One-time</span>;
+      }
+
+      const frequencyLabel = getFrequencyShortLabel(
+        recurring.frequency,
+        recurring.frequencyInterval,
+      );
+      const nextDate = recurring.nextScheduledAt;
+      const endCount = recurring.endCount;
+
+      // For scheduled invoices that are the first in the series,
+      // show "Sends on" instead of "Next on" since THIS invoice is the scheduled one
+      const isFirstScheduled =
+        invoiceStatus === "scheduled" &&
+        sequence === 1 &&
+        recurring.invoicesGenerated === 0;
+
+      // For sent/paid invoices, show the sequence info instead of "Next on"
+      const isAlreadySent = ["unpaid", "paid", "overdue"].includes(
+        invoiceStatus,
+      );
+
+      // Build the subtitle based on context
+      let subtitle: string | null = null;
+      if (isAlreadySent && sequence) {
+        // Show sequence info for sent invoices
+        subtitle = endCount ? `${sequence} of ${endCount}` : `${sequence}`;
+      } else if (recurring.status === "active" && nextDate) {
+        subtitle = isFirstScheduled
+          ? `Sends on ${format(new TZDate(nextDate, "UTC"), "MMM d")}`
+          : `Next on ${format(new TZDate(nextDate, "UTC"), "MMM d")}`;
+      } else if (recurring.status === "paused") {
+        subtitle = "Paused";
+      } else if (recurring.status === "completed") {
+        subtitle = "Completed";
+      } else if (recurring.status === "canceled") {
+        subtitle = "Canceled";
+      }
+
+      return (
+        <div className="flex flex-col">
+          <span>{frequencyLabel}</span>
+          {subtitle && (
+            <span className="text-xs text-muted-foreground">{subtitle}</span>
+          )}
+        </div>
       );
     },
   },

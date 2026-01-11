@@ -20,6 +20,10 @@ const SUPPORTED_NOTIFICATION_TYPES = [
   "inbox_needs_review",
   "inbox_auto_matched",
   "inbox_cross_currency_matched",
+  "recurring_series_started",
+  "recurring_series_completed",
+  "recurring_series_paused",
+  "recurring_invoice_upcoming",
 ];
 
 export function isNotificationClickable(activityType: string): boolean {
@@ -91,6 +95,34 @@ export function NotificationLink({
           } else {
             // Fallback to inbox page if no inboxId
             router.push("/inbox");
+          }
+          break;
+
+        case "recurring_series_started":
+        case "recurring_series_completed":
+          // Open the invoice details for the generated invoice
+          if (metadata?.invoiceId) {
+            setInvoiceParams({
+              invoiceId: metadata.invoiceId,
+              type: "details",
+            });
+          } else if (recordId) {
+            // Fallback: open the edit recurring sheet
+            setInvoiceParams({ editRecurringId: recordId });
+          }
+          break;
+
+        case "recurring_series_paused":
+          // Open the edit recurring sheet to let user resume/review the series
+          if (recordId) {
+            setInvoiceParams({ editRecurringId: recordId });
+          }
+          break;
+
+        case "recurring_invoice_upcoming":
+          // Open the edit recurring sheet to let user review/modify the series
+          if (recordId) {
+            setInvoiceParams({ editRecurringId: recordId });
           }
           break;
 

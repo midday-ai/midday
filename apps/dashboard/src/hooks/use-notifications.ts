@@ -30,6 +30,11 @@ export function getMetadataProperty(activity: Activity, key: string): any {
   return metadata[key];
 }
 
+// Get ISO timestamp for 24 hours ago
+function get24HoursAgo(): string {
+  return new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+}
+
 export function useNotifications() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();

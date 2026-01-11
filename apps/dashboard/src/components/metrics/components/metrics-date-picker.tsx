@@ -1,5 +1,6 @@
 "use client";
 
+import { useUserQuery } from "@/hooks/use-user";
 import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
 import { Icons } from "@midday/ui/icons";
@@ -29,6 +30,7 @@ export function MetricsDatePicker({
   fiscalYearStartMonth,
   onDateRangeChange,
 }: MetricsDatePickerProps) {
+  const { data: user } = useUserQuery();
   const presetOptions = getPresetOptions(fiscalYearStartMonth);
   const [selectedPreset, setSelectedPreset] = useState<string>("");
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -122,6 +124,7 @@ export function MetricsDatePicker({
             key={selectedPreset}
             className="!p-0"
             mode="range"
+            weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
             selected={dateRange}
             onSelect={handleDateRangeSelect}
             disabled={(date) => date > new Date()}

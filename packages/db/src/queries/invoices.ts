@@ -1,15 +1,17 @@
 import { UTCDate } from "@date-fns/utc";
-import type { Database } from "@db/client";
+import type { Database, DatabaseOrTransaction } from "@db/client";
 import {
   type activityTypeEnum,
   customers,
   exchangeRates,
+  invoiceRecurring,
   invoiceStatusEnum,
   invoiceTemplates,
   invoices,
   teams,
   trackerEntries,
   trackerProjects,
+  users,
 } from "@db/schema";
 import { buildSearchQuery } from "@midday/db/utils/search-query";
 import { generateToken } from "@midday/invoice/token";
@@ -22,17 +24,18 @@ import {
   format,
   parseISO,
   startOfMonth,
-  subMonths,
 } from "date-fns";
 import {
   and,
   asc,
+  count,
   desc,
   eq,
   gte,
   ilike,
   inArray,
   isNotNull,
+  isNull,
   lte,
   or,
   sql,
@@ -81,6 +84,7 @@ export type Template = {
   deliveryType: "create" | "create_and_send" | "scheduled";
   locale: string;
   paymentEnabled?: boolean;
+  paymentTermsDays?: number;
 };
 
 export type GetInvoicesParams = {
@@ -93,6 +97,9 @@ export type GetInvoicesParams = {
   start?: string | null;
   end?: string | null;
   sort?: string[] | null;
+  ids?: string[] | null;
+  recurringIds?: string[] | null;
+  recurring?: boolean | null;
 };
 
 export async function getInvoices(db: Database, params: GetInvoicesParams) {
@@ -106,9 +113,29 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
     start,
     end,
     customers: customerIds,
+    ids,
+    recurringIds,
+    recurring,
   } = params;
 
   const whereConditions: SQL[] = [eq(invoices.teamId, teamId)];
+
+  // Apply IDs filter
+  if (ids && ids.length > 0) {
+    whereConditions.push(inArray(invoices.id, ids));
+  }
+
+  // Apply recurring series IDs filter (shows all invoices from these recurring series)
+  if (recurringIds && recurringIds.length > 0) {
+    whereConditions.push(inArray(invoices.invoiceRecurringId, recurringIds));
+  }
+
+  // Apply recurring filter (shows all invoices that are/aren't part of a recurring series)
+  if (recurring === true) {
+    whereConditions.push(isNotNull(invoices.invoiceRecurringId));
+  } else if (recurring === false) {
+    whereConditions.push(isNull(invoices.invoiceRecurringId));
+  }
 
   // Apply status filter
   if (statuses && statuses.length > 0) {
@@ -199,10 +226,27 @@ export async function getInvoices(db: Database, params: GetInvoicesParams) {
       team: {
         name: teams.name,
       },
+      // Recurring invoice fields
+      invoiceRecurringId: invoices.invoiceRecurringId,
+      recurringSequence: invoices.recurringSequence,
+      recurring: {
+        id: invoiceRecurring.id,
+        status: invoiceRecurring.status,
+        frequency: invoiceRecurring.frequency,
+        frequencyInterval: invoiceRecurring.frequencyInterval,
+        endType: invoiceRecurring.endType,
+        endCount: invoiceRecurring.endCount,
+        invoicesGenerated: invoiceRecurring.invoicesGenerated,
+        nextScheduledAt: invoiceRecurring.nextScheduledAt,
+      },
     })
     .from(invoices)
     .leftJoin(customers, eq(invoices.customerId, customers.id))
     .leftJoin(teams, eq(invoices.teamId, teams.id))
+    .leftJoin(
+      invoiceRecurring,
+      eq(invoices.invoiceRecurringId, invoiceRecurring.id),
+    )
     .where(and(...whereConditions));
 
   // Apply sorting
@@ -315,10 +359,21 @@ export async function getInvoiceById(
         name: customers.name,
         website: customers.website,
         email: customers.email,
+        billingEmail: customers.billingEmail,
       },
       customerId: invoices.customerId,
       team: {
         name: teams.name,
+        email: teams.email,
+        stripeConnected:
+          sql<boolean>`${teams.stripeAccountId} IS NOT NULL AND ${teams.stripeConnectStatus} = 'connected'`.as(
+            "stripe_connected",
+          ),
+      },
+      user: {
+        email: users.email,
+        timezone: users.timezone,
+        locale: users.locale,
       },
       // Join to get the template name and isDefault from invoice_templates
       invoiceTemplate: {
@@ -326,11 +381,29 @@ export async function getInvoiceById(
         name: invoiceTemplates.name,
         isDefault: invoiceTemplates.isDefault,
       },
+      // Recurring invoice data
+      invoiceRecurringId: invoices.invoiceRecurringId,
+      recurringSequence: invoices.recurringSequence,
+      recurring: {
+        id: invoiceRecurring.id,
+        frequency: invoiceRecurring.frequency,
+        frequencyInterval: invoiceRecurring.frequencyInterval,
+        status: invoiceRecurring.status,
+        nextScheduledAt: invoiceRecurring.nextScheduledAt,
+        endType: invoiceRecurring.endType,
+        endCount: invoiceRecurring.endCount,
+        invoicesGenerated: invoiceRecurring.invoicesGenerated,
+      },
     })
     .from(invoices)
     .leftJoin(customers, eq(invoices.customerId, customers.id))
     .leftJoin(teams, eq(invoices.teamId, teams.id))
+    .leftJoin(users, eq(invoices.userId, users.id))
     .leftJoin(invoiceTemplates, eq(invoices.templateId, invoiceTemplates.id))
+    .leftJoin(
+      invoiceRecurring,
+      eq(invoices.invoiceRecurringId, invoiceRecurring.id),
+    )
     .where(
       and(
         eq(invoices.id, id),
@@ -553,19 +626,71 @@ export async function searchInvoiceNumber(
   return result ?? null;
 }
 
+/**
+ * Generate the next invoice number for a team.
+ * Format: INV-XXXX (e.g., INV-0001, INV-0042)
+ *
+ * Logic:
+ * 1. Find the highest numeric suffix from existing invoice numbers
+ * 2. If found, increment by 1
+ * 3. If not found, count total invoices + 1
+ * 4. Pad to 4 digits with leading zeros
+ */
 export async function getNextInvoiceNumber(
-  db: Database,
+  db: DatabaseOrTransaction,
   teamId: string,
 ): Promise<string> {
-  const [row] = await db.executeOnReplica(
-    sql`SELECT get_next_invoice_number(${teamId}) AS next_invoice_number`,
-  );
+  const PREFIX = "INV-";
+  const PAD_LENGTH = 4;
 
-  if (!row) {
-    throw new Error("Failed to fetch next invoice number");
+  // Find the highest invoice number with a numeric suffix for this team
+  // Using raw SQL for the regex extraction since Drizzle doesn't support it natively
+  const maxInvoiceResult = await db
+    .select({ invoiceNumber: invoices.invoiceNumber })
+    .from(invoices)
+    .where(
+      and(
+        eq(invoices.teamId, teamId),
+        sql`${invoices.invoiceNumber} ~ '[0-9]+$'`,
+      ),
+    )
+    .orderBy(
+      sql`CAST(SUBSTRING(${invoices.invoiceNumber} FROM '[0-9]+$') AS INTEGER) DESC`,
+    )
+    .limit(1);
+
+  let nextNumber: number;
+
+  if (maxInvoiceResult.length > 0 && maxInvoiceResult[0]?.invoiceNumber) {
+    // Extract the numeric part from the invoice number
+    const match = maxInvoiceResult[0].invoiceNumber.match(/(\d+)$/);
+
+    if (match?.[1]) {
+      // Increment the numeric part
+      nextNumber = Number.parseInt(match[1], 10) + 1;
+    } else {
+      // Fallback: count total invoices + 1
+      const countResult = await db
+        .select({ count: count() })
+        .from(invoices)
+        .where(eq(invoices.teamId, teamId));
+
+      nextNumber = (countResult[0]?.count ?? 0) + 1;
+    }
+  } else {
+    // No invoices with numeric suffix found, count total invoices + 1
+    const countResult = await db
+      .select({ count: count() })
+      .from(invoices)
+      .where(eq(invoices.teamId, teamId));
+
+    nextNumber = (countResult[0]?.count ?? 0) + 1;
   }
 
-  return row.next_invoice_number as string;
+  // Pad with leading zeros
+  const paddedNumber = nextNumber.toString().padStart(PAD_LENGTH, "0");
+
+  return `${PREFIX}${paddedNumber}`;
 }
 
 export async function isInvoiceNumberUsed(
@@ -663,7 +788,10 @@ type DraftInvoiceParams = {
   userId: string;
 };
 
-export async function draftInvoice(db: Database, params: DraftInvoiceParams) {
+export async function draftInvoice(
+  db: DatabaseOrTransaction,
+  params: DraftInvoiceParams,
+) {
   const {
     id,
     teamId,
@@ -976,11 +1104,20 @@ export type UpdateInvoiceParams = {
   scheduledJobId?: string | null;
   paymentIntentId?: string | null;
   refundedAt?: string | null;
+  sentTo?: string | null;
+  sentAt?: string | null;
+  filePath?: string[] | null;
+  fileSize?: number | null;
+  invoiceRecurringId?: string | null;
+  recurringSequence?: number | null;
   teamId: string;
   userId?: string;
 };
 
-export async function updateInvoice(db: Database, params: UpdateInvoiceParams) {
+export async function updateInvoice(
+  db: DatabaseOrTransaction,
+  params: UpdateInvoiceParams,
+) {
   const { id, teamId, userId, ...rest } = params;
 
   const [result] = await db

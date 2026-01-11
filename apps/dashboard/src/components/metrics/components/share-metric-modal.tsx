@@ -2,6 +2,7 @@
 
 import { CopyInput } from "@/components/copy-input";
 import { OpenURL } from "@/components/open-url";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 import { Button } from "@midday/ui/button";
@@ -43,6 +44,7 @@ export function ShareMetricModal({
   to,
   currency,
 }: ShareMetricModalProps) {
+  const { data: user } = useUserQuery();
   const trpc = useTRPC();
   const [expireAt, setExpireAt] = useState<Date | undefined>(
     addDays(new Date(), 30),
@@ -127,6 +129,7 @@ export function ShareMetricModal({
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
+                      weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
                       selected={expireAt}
                       onSelect={setExpireAt}
                       disabled={(date) => date < new Date()}

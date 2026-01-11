@@ -26,7 +26,7 @@ type FilterValue = {
   end: string;
   amount_range: string;
   attachments: string;
-  recurring: string[];
+  recurring: string[] | boolean;
   statuses: string[];
   categories: string[];
   tags: string[];
@@ -106,6 +106,11 @@ export function FilterList({
 
       case "recurring": {
         const recurringValue = value as FilterValue["recurring"];
+        // Handle boolean for invoice filters
+        if (typeof recurringValue === "boolean") {
+          return recurringValue ? "Recurring" : "One-time";
+        }
+        // Handle string array for transaction filters
         return recurringValue
           ?.map(
             (slug) =>

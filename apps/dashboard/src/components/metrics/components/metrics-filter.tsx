@@ -2,6 +2,7 @@
 
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useTeamQuery } from "@/hooks/use-team";
+import { useUserQuery } from "@/hooks/use-user";
 import { useTRPC } from "@/trpc/client";
 import type { PeriodOption } from "@/utils/metrics-date-utils";
 import { Button } from "@midday/ui/button";
@@ -45,6 +46,7 @@ const REVENUE_TYPE_OPTIONS: Array<{ value: "gross" | "net"; label: string }> = [
 
 export function MetricsFilter() {
   const { data: team } = useTeamQuery();
+  const { data: user } = useUserQuery();
   const trpc = useTRPC();
   const {
     period,
@@ -149,6 +151,7 @@ export function MetricsFilter() {
                   <DropdownMenuSubContent className="w-auto p-0" sideOffset={8}>
                     <Calendar
                       mode="range"
+                      weekStartsOn={user?.weekStartsOnMonday ? 1 : 0}
                       selected={dateRange}
                       onSelect={handleCustomDateSelect}
                       disabled={(date) => date > new Date()}

@@ -1,4 +1,4 @@
-import { OpenPanel, type PostEventPayload } from "@openpanel/nextjs";
+import { OpenPanel, type TrackProperties } from "@openpanel/nextjs";
 import { waitUntil } from "@vercel/functions";
 
 export const setupAnalytics = async () => {
@@ -8,7 +8,7 @@ export const setupAnalytics = async () => {
   });
 
   return {
-    track: (options: { event: string } & PostEventPayload["properties"]) => {
+    track: (options: { event: string } & TrackProperties) => {
       if (process.env.NODE_ENV !== "production") {
         console.log("Track", options);
         return;

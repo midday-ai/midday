@@ -463,3 +463,40 @@ export const upsertCustomerSchema = z.object({
       ],
     }),
 });
+
+export const toggleCustomerPortalSchema = z.object({
+  customerId: z.string().uuid().openapi({
+    description: "Unique identifier of the customer",
+    example: "b3b7c1e2-4c2a-4e7a-9c1a-2b7c1e24c2a4",
+  }),
+  enabled: z.boolean().openapi({
+    description: "Whether to enable or disable the customer portal",
+    example: true,
+  }),
+});
+
+export const getCustomerByPortalIdSchema = z.object({
+  portalId: z.string().openapi({
+    description: "Short ID for the customer portal URL",
+    example: "X7kM9nPq",
+    param: {
+      in: "path",
+      name: "portalId",
+    },
+  }),
+});
+
+export const getPortalInvoicesSchema = z.object({
+  portalId: z.string().openapi({
+    description: "Short ID for the customer portal URL",
+    example: "X7kM9nPq",
+  }),
+  cursor: z.string().nullish().openapi({
+    description: "Cursor for pagination",
+    example: "10",
+  }),
+  pageSize: z.number().min(1).max(50).optional().openapi({
+    description: "Number of invoices to return per page",
+    example: 10,
+  }),
+});

@@ -31,6 +31,10 @@ export const createActivitySchema = z.object({
     "transaction_category_created",
     "transactions_exported",
     "customer_created",
+    "recurring_series_completed",
+    "recurring_series_started",
+    "recurring_series_paused",
+    "recurring_invoice_upcoming",
   ]),
   source: z.enum(["system", "user"]).default("system"),
   priority: z.number().int().min(1).max(10).default(5),
@@ -226,6 +230,51 @@ export const invoiceRefundedSchema = z.object({
   refundedAt: z.string().optional(),
 });
 
+export const recurringSeriesCompletedSchema = z.object({
+  users: z.array(userSchema),
+  invoiceId: z.string().uuid(),
+  invoiceNumber: z.string(),
+  customerName: z.string().optional(),
+  recurringId: z.string().uuid(),
+  totalGenerated: z.number(),
+});
+
+export const recurringSeriesStartedSchema = z.object({
+  users: z.array(userSchema),
+  recurringId: z.string().uuid(),
+  invoiceId: z.string().uuid().optional(), // First invoice ID if linked
+  invoiceNumber: z.string().optional(),
+  customerName: z.string().optional(),
+  frequency: z.string(),
+  endType: z.enum(["never", "on_date", "after_count"]),
+  endDate: z.string().optional(),
+  endCount: z.number().optional(),
+});
+
+export const recurringSeriesPausedSchema = z.object({
+  users: z.array(userSchema),
+  recurringId: z.string().uuid(),
+  customerName: z.string().optional(),
+  reason: z.enum(["manual", "auto_failure"]).default("manual"),
+  failureCount: z.number().optional(),
+});
+
+// Schema for individual invoice in the batch
+export const upcomingInvoiceItemSchema = z.object({
+  recurringId: z.string().uuid(),
+  customerName: z.string().optional(),
+  amount: z.number().optional(),
+  currency: z.string().optional(),
+  scheduledAt: z.string(), // ISO date when invoice will be generated
+  frequency: z.string(), // e.g., "weekly", "monthly_date"
+});
+
+export const recurringInvoiceUpcomingSchema = z.object({
+  users: z.array(userSchema),
+  invoices: z.array(upcomingInvoiceItemSchema),
+  count: z.number(),
+});
+
 export const transactionsCategorizedSchema = z.object({
   users: z.array(userSchema),
   categorySlug: z.string(),
@@ -269,6 +318,19 @@ export type InvoiceReminderSentInput = z.infer<
 export type InvoiceCancelledInput = z.infer<typeof invoiceCancelledSchema>;
 export type InvoiceCreatedInput = z.infer<typeof invoiceCreatedSchema>;
 export type InvoiceRefundedInput = z.infer<typeof invoiceRefundedSchema>;
+export type RecurringSeriesCompletedInput = z.infer<
+  typeof recurringSeriesCompletedSchema
+>;
+export type RecurringSeriesStartedInput = z.infer<
+  typeof recurringSeriesStartedSchema
+>;
+export type RecurringSeriesPausedInput = z.infer<
+  typeof recurringSeriesPausedSchema
+>;
+export type UpcomingInvoiceItem = z.infer<typeof upcomingInvoiceItemSchema>;
+export type RecurringInvoiceUpcomingInput = z.infer<
+  typeof recurringInvoiceUpcomingSchema
+>;
 export type TransactionsCategorizedInput = z.infer<
   typeof transactionsCategorizedSchema
 >;
@@ -296,4 +358,8 @@ export type NotificationTypes = {
   invoice_cancelled: InvoiceCancelledInput;
   invoice_created: InvoiceCreatedInput;
   invoice_refunded: InvoiceRefundedInput;
+  recurring_series_completed: RecurringSeriesCompletedInput;
+  recurring_series_started: RecurringSeriesStartedInput;
+  recurring_series_paused: RecurringSeriesPausedInput;
+  recurring_invoice_upcoming: RecurringInvoiceUpcomingInput;
 };

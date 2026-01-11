@@ -36,6 +36,7 @@ export default function InvoiceToolbar({
   const [, copy] = useCopyToClipboard();
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [isPaid, setIsPaid] = useState(status === "paid");
+  const [shouldPrefetch, setShouldPrefetch] = useState(false);
 
   const handleCopyLink = () => {
     const url = window.location.href;
@@ -137,6 +138,7 @@ export default function InvoiceToolbar({
                   size="sm"
                   className="rounded-full h-7 px-3 text-xs text-secondary"
                   onClick={() => setPaymentModalOpen(true)}
+                  onMouseEnter={() => setShouldPrefetch(true)}
                 >
                   Pay invoice
                 </Button>
@@ -154,6 +156,7 @@ export default function InvoiceToolbar({
           amount={amount}
           currency={currency || "usd"}
           invoiceNumber={invoiceNumber}
+          prefetch={shouldPrefetch}
           onSuccess={() => {
             setIsPaid(true);
             onPaymentSuccess?.();

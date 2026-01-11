@@ -22,6 +22,7 @@ import {
   getCustomerById,
   getInvoiceById,
   getInvoiceSummary,
+  getInvoiceTemplate,
   getInvoices,
   getNextInvoiceNumber,
   getPaymentStatus,
@@ -30,9 +31,8 @@ import {
 } from "@midday/db/queries";
 import { calculateTotal } from "@midday/invoice/calculate";
 import { transformCustomerToContent } from "@midday/invoice/utils";
-import type { GenerateInvoicePayload } from "@midday/jobs/schema";
-import { tasks } from "@trigger.dev/sdk";
-import { addMonths } from "date-fns";
+import { decodeJobId, getQueue, triggerJob } from "@midday/job-client";
+import { addDays } from "date-fns";
 import { HTTPException } from "hono/http-exception";
 import { v4 as uuidv4 } from "uuid";
 import { withRequiredScope } from "../middleware";
@@ -430,9 +430,15 @@ app.openapi(
       }
     }
 
+    // Get template for default payment terms
+    const template = await getInvoiceTemplate(db, teamId);
+    const paymentTermsDays = template?.paymentTermsDays ?? 30;
+
     // Set default dates if not provided
     const issueDate = input.issueDate || new Date().toISOString();
-    const dueDate = input.dueDate || addMonths(new Date(), 1).toISOString();
+    const dueDate =
+      input.dueDate ||
+      addDays(new Date(issueDate), paymentTermsDays).toISOString();
 
     // Fetch customer and generate customerDetails
     const customer = await getCustomerById(db, {
@@ -496,10 +502,14 @@ app.openapi(
       }
 
       // Trigger invoice generation (and sending if create_and_send)
-      await tasks.trigger("generate-invoice", {
-        invoiceId: result.id,
-        deliveryType: input.deliveryType,
-      } satisfies GenerateInvoicePayload);
+      await triggerJob(
+        "generate-invoice",
+        {
+          invoiceId: result.id,
+          deliveryType: input.deliveryType,
+        },
+        "invoices",
+      );
     } else if (input.deliveryType === "scheduled") {
       // Handle scheduled invoices
       if (!input.scheduledAt) {
@@ -518,17 +528,26 @@ app.openapi(
         });
       }
 
-      // Create a scheduled job
-      const scheduledRun = await tasks.trigger(
+      // Calculate delay in milliseconds from now
+      const delayMs = scheduledDate.getTime() - now.getTime();
+
+      // Create a scheduled job with delay
+      const scheduledRun = await triggerJob(
         "schedule-invoice",
         {
           invoiceId: result.id,
-          scheduledAt: input.scheduledAt,
         },
+        "invoices",
         {
-          delay: scheduledDate,
+          delay: delayMs,
         },
       );
+
+      if (!scheduledRun?.id) {
+        throw new HTTPException(500, {
+          message: "Failed to create scheduled job - no job ID returned",
+        });
+      }
 
       // Update the invoice with scheduling information
       const updatedInvoice = await updateInvoice(db, {
@@ -540,18 +559,44 @@ app.openapi(
         userId,
       });
 
-      if (updatedInvoice) {
-        finalResult = updatedInvoice;
+      if (!updatedInvoice) {
+        // Clean up the orphaned job before throwing
+        try {
+          const queue = getQueue("invoices");
+          const { jobId: rawJobId } = decodeJobId(scheduledRun.id);
+          const job = await queue.getJob(rawJobId);
+          if (job) {
+            await job.remove();
+          }
+        } catch {
+          // Best effort cleanup - log but don't fail on cleanup errors
+          console.error(
+            "Failed to clean up orphaned scheduled job:",
+            scheduledRun.id,
+          );
+        }
+
+        throw new HTTPException(404, {
+          message: "Invoice not found",
+        });
       }
 
-      // Send notification
-      await tasks.trigger("notification", {
-        type: "invoice_scheduled",
-        teamId,
-        invoiceId: result.id,
-        invoiceNumber: finalResult.invoiceNumber,
-        scheduledAt: input.scheduledAt,
-        customerName: finalResult.customerName,
+      finalResult = updatedInvoice;
+
+      // Send notification (fire and forget)
+      triggerJob(
+        "invoice-notification",
+        {
+          type: "scheduled",
+          teamId,
+          invoiceId: result.id,
+          invoiceNumber: finalResult.invoiceNumber!,
+          scheduledAt: input.scheduledAt,
+          customerName: finalResult.customerName ?? undefined,
+        },
+        "invoices",
+      ).catch(() => {
+        // Ignore notification errors - invoice was scheduled successfully
       });
     }
 

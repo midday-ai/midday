@@ -14,7 +14,6 @@ import {
 import { useInvoiceFilterParams } from "@/hooks/use-invoice-filter-params";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
-import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
@@ -31,9 +30,10 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useQuery } from "@tanstack/react-query";
-import { formatISO, parseISO } from "date-fns";
+import { formatISO } from "date-fns";
 import { useCallback, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import { DateRangeFilter } from "./date-range-filter";
 import { FilterList } from "./filter-list";
 
 const allowedStatuses = [
@@ -237,23 +237,10 @@ export function InvoiceSearchFilter() {
                 alignOffset={-4}
                 className="p-0"
               >
-                <Calendar
-                  mode="range"
-                  initialFocus
-                  selected={{
-                    from: filter?.start ? parseISO(filter.start) : undefined,
-                    to: filter?.end ? parseISO(filter.end) : undefined,
-                  }}
-                  onSelect={(range) => {
-                    setFilter({
-                      start: range?.from
-                        ? formatISO(range.from, { representation: "date" })
-                        : null,
-                      end: range?.to
-                        ? formatISO(range.to, { representation: "date" })
-                        : null,
-                    });
-                  }}
+                <DateRangeFilter
+                  start={filter?.start}
+                  end={filter?.end}
+                  onSelect={setFilter}
                 />
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
@@ -270,7 +257,7 @@ export function InvoiceSearchFilter() {
               <DropdownMenuSubContent
                 sideOffset={14}
                 alignOffset={-4}
-                className="p-0"
+                className="p-0 max-h-[300px] overflow-auto"
               >
                 {customersData?.data?.map((customer) => (
                   <DropdownMenuCheckboxItem
@@ -323,6 +310,43 @@ export function InvoiceSearchFilter() {
                     {status.name}
                   </DropdownMenuCheckboxItem>
                 ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
+
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Icons.Repeat className="mr-2 h-4 w-4" />
+              <span>Type</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent
+                sideOffset={14}
+                alignOffset={-4}
+                className="p-0"
+              >
+                <DropdownMenuCheckboxItem
+                  checked={filter?.recurring === true}
+                  onCheckedChange={(checked) => {
+                    setFilter({
+                      recurring: checked ? true : null,
+                    });
+                  }}
+                >
+                  Recurring
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={filter?.recurring === false}
+                  onCheckedChange={(checked) => {
+                    setFilter({
+                      recurring: checked ? false : null,
+                    });
+                  }}
+                >
+                  One-time
+                </DropdownMenuCheckboxItem>
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>

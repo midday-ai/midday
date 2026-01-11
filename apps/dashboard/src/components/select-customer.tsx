@@ -98,7 +98,7 @@ export function SelectCustomer() {
             <CommandGroup>
               {formatData?.map((item) => (
                 <CommandItem
-                  key={item.value}
+                  key={item.id}
                   value={item.value}
                   onSelect={() => handleSelect(item.id)}
                   className="group text-xs"

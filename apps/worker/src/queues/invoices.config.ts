@@ -1,5 +1,6 @@
 import type { QueueOptions, WorkerOptions } from "bullmq";
 import { getRedisConnection } from "../config";
+import { DEFAULT_JOB_OPTIONS } from "../config/job-options";
 import type { QueueConfig } from "../types/queue-config";
 
 /**
@@ -8,11 +9,7 @@ import type { QueueConfig } from "../types/queue-config";
 const invoicesQueueOptions: QueueOptions = {
   connection: getRedisConnection(),
   defaultJobOptions: {
-    attempts: 3,
-    backoff: {
-      type: "exponential",
-      delay: 1000,
-    },
+    ...DEFAULT_JOB_OPTIONS,
     removeOnComplete: {
       age: 24 * 3600, // Keep completed jobs for 24 hours
       count: 1000, // Keep max 1000 completed jobs

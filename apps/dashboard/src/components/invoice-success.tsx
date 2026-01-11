@@ -5,6 +5,7 @@ import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
+import { TZDate } from "@date-fns/tz";
 import { formatEditorContent } from "@midday/invoice/format-to-html";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
@@ -73,7 +74,7 @@ export function InvoiceSuccess() {
 
               <span className="text-[11px]">
                 {format(
-                  new Date(invoice.dueDate!),
+                  new TZDate(invoice.dueDate!, "UTC"),
                   invoice.template.dateFormat,
                 )}
               </span>
