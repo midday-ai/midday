@@ -27,26 +27,26 @@ import {
   Zap,
 } from "lucide-react";
 
-// Chart configuration with Beam-style colors
+// Chart configuration using theme variables
 const throughputChartConfig = {
   completed: {
     label: "Completed",
-    color: "#22C55E", // vibrant green
+    color: "hsl(var(--chart-completed))",
   },
   failed: {
     label: "Failed",
-    color: "#EF4444", // vibrant red
+    color: "hsl(var(--chart-failed))",
   },
 } satisfies ChartConfig;
 
 const durationChartConfig = {
   duration: {
     label: "Duration",
-    color: "#A78BFA",
+    color: "hsl(var(--chart-duration))",
   },
   waitTime: {
     label: "Wait Time",
-    color: "#4ADE80",
+    color: "hsl(var(--chart-wait))",
   },
 } satisfies ChartConfig;
 
@@ -135,7 +135,7 @@ function SlowestJobsTable({ jobs }: { jobs: SlowestJob[] }) {
           key={`${job.queueName}-${job.jobId}`}
           to="/queues/$queueName/jobs/$jobId"
           params={{ queueName: job.queueName, jobId: job.jobId }}
-          className="flex items-center justify-between px-4 py-2.5 hover:bg-muted/50 transition-colors"
+          className="flex items-center justify-between px-4 py-2.5"
         >
           <div className="flex items-center gap-3 min-w-0">
             <span className="text-xs text-muted-foreground w-5 tabular-nums shrink-0">

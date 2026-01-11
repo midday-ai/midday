@@ -237,14 +237,46 @@ export function QueuePage({
 
       {/* Jobs Table */}
       {isLoading && jobs.length === 0 ? (
-        <div className="space-y-2">
-          {[...Array(5)].map((_, i) => (
-            <div
-              key={i.toString()}
-              className="h-16 animate-pulse border bg-card"
-            />
-          ))}
-        </div>
+        <>
+          {/* Table Header */}
+          <div className="grid grid-cols-12 gap-4 border-b px-4 py-2 text-xs uppercase tracking-wider text-muted-foreground">
+            <div className="col-span-5">Job</div>
+            <div className="col-span-2">Status</div>
+            <div className="col-span-2">Queued</div>
+            <div className="col-span-2">Started</div>
+            <div className="col-span-1" />
+          </div>
+          {/* Skeleton Rows */}
+          <div className="space-y-1">
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i.toString()}
+                className="grid grid-cols-12 items-center gap-4 border bg-card px-4 py-3"
+              >
+                <div className="col-span-5 flex items-center gap-3">
+                  <div className="h-4 w-4 animate-pulse rounded bg-muted" />
+                  <div className="h-4 w-4 animate-pulse rounded bg-muted" />
+                  <div className="space-y-1.5">
+                    <div className="h-4 w-28 animate-pulse rounded bg-muted" />
+                    <div className="h-3 w-20 animate-pulse rounded bg-muted" />
+                  </div>
+                </div>
+                <div className="col-span-2">
+                  <div className="h-5 w-20 animate-pulse rounded-full bg-muted" />
+                </div>
+                <div className="col-span-2">
+                  <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+                </div>
+                <div className="col-span-2">
+                  <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+                </div>
+                <div className="col-span-1 flex justify-end">
+                  <div className="h-4 w-4 animate-pulse rounded bg-muted" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       ) : error ? (
         <EmptyState
           icon={FileText}
@@ -387,10 +419,7 @@ function JobRow({ job, selected, onSelect, onClick }: JobRowProps) {
       onKeyDown={(e) => e.key === "Enter" && onClick()}
       role="button"
       tabIndex={0}
-      className={cn(
-        "grid w-full grid-cols-12 items-center gap-4 border bg-card px-4 py-3 text-left text-sm transition-colors hover:bg-accent cursor-pointer",
-        selected && "bg-muted/30",
-      )}
+      className="grid w-full grid-cols-12 items-center gap-4 border bg-card px-4 py-3 text-left text-sm cursor-pointer"
     >
       <div className="col-span-5 flex min-w-0 items-center gap-3">
         <div

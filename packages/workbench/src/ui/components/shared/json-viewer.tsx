@@ -29,10 +29,7 @@ export function JsonViewer({
         className="absolute right-3 top-3 rounded p-1.5 opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100"
       >
         {copied ? (
-          <Check
-            size={16}
-            className="h-4 w-4 text-[hsl(var(--status-success))]"
-          />
+          <Check size={16} className="h-4 w-4 text-status-success" />
         ) : (
           <Copy className="h-4 w-4 text-muted-foreground" />
         )}
@@ -55,7 +52,7 @@ function JsonNode({ data, level, defaultExpanded, keyName }: JsonNodeProps) {
   const [expanded, setExpanded] = React.useState(defaultExpanded);
 
   const KeyLabel = ({ name }: { name: string }) => (
-    <span className="text-[hsl(var(--status-active))]">"{name}"</span>
+    <span className="text-primary">"{name}"</span>
   );
 
   if (data === null) {
@@ -95,9 +92,7 @@ function JsonNode({ data, level, defaultExpanded, keyName }: JsonNodeProps) {
             <span className="text-foreground">: </span>
           </>
         )}
-        <span className="text-[hsl(var(--status-warning))]">
-          {String(data)}
-        </span>
+        <span className="text-status-warning">{String(data)}</span>
       </span>
     );
   }
@@ -111,7 +106,7 @@ function JsonNode({ data, level, defaultExpanded, keyName }: JsonNodeProps) {
             <span className="text-foreground">: </span>
           </>
         )}
-        <span className="text-[hsl(var(--status-success))]">{data}</span>
+        <span className="text-status-success">{data}</span>
       </span>
     );
   }
@@ -125,7 +120,7 @@ function JsonNode({ data, level, defaultExpanded, keyName }: JsonNodeProps) {
             <span className="text-foreground">: </span>
           </>
         )}
-        <span className="text-[hsl(var(--status-error))]">"{data}"</span>
+        <span className="text-chart-5">"{data}"</span>
       </span>
     );
   }
@@ -148,6 +143,7 @@ function JsonNode({ data, level, defaultExpanded, keyName }: JsonNodeProps) {
     return (
       <div>
         <button
+          type="button"
           onClick={() => setExpanded(!expanded)}
           className="inline-flex items-center gap-1 hover:opacity-70"
         >

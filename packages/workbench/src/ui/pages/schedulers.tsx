@@ -66,14 +66,49 @@ export function SchedulersPage({
   if (repeatableLoading || delayedLoading) {
     return (
       <div className="space-y-6">
-        <div className="h-10 w-48 animate-pulse bg-muted" />
-        <div className="space-y-2">
-          {[...Array(3)].map((_, i) => (
-            <div
-              key={`pulse-${i.toString()}`}
-              className="h-16 animate-pulse border bg-card"
-            />
-          ))}
+        <div className="flex items-center justify-between">
+          <div className="h-7 w-32 animate-pulse rounded bg-muted" />
+          <div className="h-9 w-9 animate-pulse rounded bg-muted" />
+        </div>
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            <div className="h-9 w-32 animate-pulse rounded bg-muted" />
+            <div className="h-9 w-28 animate-pulse rounded bg-muted" />
+          </div>
+          {/* Table Header */}
+          <div className="grid grid-cols-12 gap-4 border-b px-4 py-2 text-xs uppercase tracking-wider text-muted-foreground">
+            <div className="col-span-3">Name</div>
+            <div className="col-span-2">Queue</div>
+            <div className="col-span-3">Pattern</div>
+            <div className="col-span-2">Next Run</div>
+            <div className="col-span-2">Timezone</div>
+          </div>
+          {/* Skeleton Rows */}
+          <div className="space-y-2">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={`pulse-${i.toString()}`}
+                className="grid grid-cols-12 items-center gap-4 border bg-card px-4 py-3"
+              >
+                <div className="col-span-3 flex items-center gap-2">
+                  <div className="h-4 w-4 animate-pulse rounded bg-muted" />
+                  <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+                </div>
+                <div className="col-span-2">
+                  <div className="h-3 w-16 animate-pulse rounded bg-muted" />
+                </div>
+                <div className="col-span-3">
+                  <div className="h-4 w-20 animate-pulse rounded bg-muted" />
+                </div>
+                <div className="col-span-2">
+                  <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+                </div>
+                <div className="col-span-2">
+                  <div className="h-3 w-16 animate-pulse rounded bg-muted" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -98,7 +133,12 @@ export function SchedulersPage({
         </Button>
       </div>
 
-      <Tabs defaultValue="repeatable">
+      <Tabs
+        value={search.tab || "repeatable"}
+        onValueChange={(tab) =>
+          onSearchChange({ ...search, tab: tab as "repeatable" | "delayed" })
+        }
+      >
         <TabsList>
           <TabsTrigger value="repeatable">
             Repeatable ({repeatable.length})

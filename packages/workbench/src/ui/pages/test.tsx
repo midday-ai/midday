@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import { useTestJob } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
-import { AlertCircle, CheckCircle, FlaskConical, Send } from "lucide-react";
+import { AlertCircle, CheckCircle, FlaskConical } from "lucide-react";
 import * as React from "react";
 
 interface TestPageProps {
@@ -160,14 +160,7 @@ export function TestPage({ queues, readonly }: TestPageProps) {
         {/* Submit */}
         <div className="flex items-center gap-4">
           <Button type="submit" disabled={testJobMutation.isPending}>
-            {testJobMutation.isPending ? (
-              <>Processing...</>
-            ) : (
-              <>
-                <Send className="mr-2 h-4 w-4" />
-                Enqueue Job
-              </>
-            )}
+            {testJobMutation.isPending ? <>Processing...</> : <>Enqueue Job</>}
           </Button>
 
           {result && (

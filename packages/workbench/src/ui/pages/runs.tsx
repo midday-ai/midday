@@ -398,12 +398,30 @@ export function RunsPage({
 
       {/* Table content */}
       {isLoading && runs.length === 0 ? (
-        <div className="space-y-px">
+        <div className="divide-y divide-border">
           {[...Array(8)].map((_, i) => (
             <div
               key={i.toString()}
-              className="h-14 animate-pulse bg-muted/50"
-            />
+              className="grid grid-cols-12 items-center gap-4 px-4 py-3"
+            >
+              <div className="col-span-5 flex items-center gap-3">
+                <div className="h-4 w-4 animate-pulse rounded bg-muted" />
+                <div className="h-2 w-2 animate-pulse rounded-full bg-muted" />
+                <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+              </div>
+              <div className="col-span-2">
+                <div className="h-4 w-16 animate-pulse rounded bg-muted" />
+              </div>
+              <div className="col-span-2">
+                <div className="h-5 w-20 animate-pulse rounded-full bg-muted" />
+              </div>
+              <div className="col-span-2">
+                <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+              </div>
+              <div className="col-span-1">
+                <div className="h-4 w-12 animate-pulse rounded bg-muted" />
+              </div>
+            </div>
           ))}
         </div>
       ) : error ? (
@@ -494,10 +512,7 @@ function RunRow({ run, selected, onSelect, onClick }: RunRowProps) {
 
   return (
     <div
-      className={cn(
-        "group grid w-full grid-cols-12 items-center gap-4 px-4 py-3 text-left text-sm transition-colors hover:bg-muted/50 cursor-pointer",
-        selected && "bg-muted/30",
-      )}
+      className="group grid w-full grid-cols-12 items-center gap-4 px-4 py-3 text-left text-sm cursor-pointer"
       onClick={onClick}
       onKeyDown={(e) => e.key === "Enter" && onClick()}
       role="button"

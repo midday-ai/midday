@@ -13,13 +13,39 @@ export function OverviewPage({ onQueueSelect }: OverviewPageProps) {
   if (isLoading && !data) {
     return (
       <div className="space-y-6">
+        {/* Stats Grid Skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
-            <div
-              key={i.toString()}
-              className="h-24 border bg-card animate-pulse"
-            />
+            <div key={i.toString()} className="p-4 border bg-card">
+              <div className="flex items-center justify-between mb-2">
+                <div className="h-4 w-16 animate-pulse rounded bg-muted" />
+                <div className="h-4 w-4 animate-pulse rounded bg-muted" />
+              </div>
+              <div className="h-8 w-20 animate-pulse rounded bg-muted mb-1" />
+              <div className="h-3 w-12 animate-pulse rounded bg-muted" />
+            </div>
           ))}
+        </div>
+        {/* Queues Grid Skeleton */}
+        <div>
+          <div className="h-5 w-16 animate-pulse rounded bg-muted mb-4" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i.toString()} className="p-4 border bg-card">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="h-5 w-24 animate-pulse rounded bg-muted" />
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[...Array(3)].map((__, j) => (
+                    <div key={j.toString()}>
+                      <div className="h-3 w-12 animate-pulse rounded bg-muted mb-1" />
+                      <div className="h-5 w-8 animate-pulse rounded bg-muted" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );

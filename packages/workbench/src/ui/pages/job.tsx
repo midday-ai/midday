@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useJob, usePromoteJob, useRemoveJob, useRetryJob } from "@/lib/hooks";
 import { cn, formatAbsoluteTime, formatDuration } from "@/lib/utils";
+import type { JobSearch } from "@/router";
 import {
   AlertCircle,
   Check,
@@ -33,10 +34,19 @@ interface JobPageProps {
   queueName: string;
   jobId: string;
   readonly?: boolean;
+  search: JobSearch;
+  onSearchChange: (search: JobSearch) => void;
   onBack: () => void;
 }
 
-export function JobPage({ queueName, jobId, readonly, onBack }: JobPageProps) {
+export function JobPage({
+  queueName,
+  jobId,
+  readonly,
+  search,
+  onSearchChange,
+  onBack,
+}: JobPageProps) {
   const { data: job, isLoading, error } = useJob(queueName, jobId);
   const retryMutation = useRetryJob();
   const removeMutation = useRemoveJob();
@@ -105,9 +115,33 @@ export function JobPage({ queueName, jobId, readonly, onBack }: JobPageProps) {
   if (isLoading && !job) {
     return (
       <div className="space-y-4">
-        <div className="h-16 bg-muted/50 animate-pulse" />
-        <div className="h-48 bg-muted/50 animate-pulse" />
-        <div className="h-64 bg-muted/50 animate-pulse" />
+        {/* Header skeleton */}
+        <div className="rounded-lg border bg-card">
+          <div className="flex items-center justify-between border-b px-4 py-3">
+            <div className="flex items-center gap-3">
+              <div className="h-6 w-32 animate-pulse rounded bg-muted" />
+              <div className="h-5 w-20 animate-pulse rounded-full bg-muted" />
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 animate-pulse rounded bg-muted" />
+              <div className="h-8 w-8 animate-pulse rounded bg-muted" />
+            </div>
+          </div>
+          <div className="flex items-center gap-6 px-4 py-3">
+            <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+            <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+            <div className="h-4 w-20 animate-pulse rounded bg-muted" />
+          </div>
+        </div>
+        {/* Data section skeleton */}
+        <div className="rounded-lg border bg-card p-4">
+          <div className="h-5 w-16 animate-pulse rounded bg-muted mb-3" />
+          <div className="space-y-2">
+            <div className="h-4 w-full animate-pulse rounded bg-muted" />
+            <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+            <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -194,7 +228,7 @@ export function JobPage({ queueName, jobId, readonly, onBack }: JobPageProps) {
                 className="rounded p-1 hover:bg-muted"
               >
                 {copied ? (
-                  <Check className="h-3.5 w-3.5 text-[hsl(var(--status-success))]" />
+                  <Check className="h-3.5 w-3.5 text-status-success" />
                 ) : (
                   <Copy className="h-3.5 w-3.5 text-muted-foreground" />
                 )}
@@ -255,17 +289,20 @@ export function JobPage({ queueName, jobId, readonly, onBack }: JobPageProps) {
 
       {/* Content Tabs */}
       <Tabs
-        defaultValue={job.status === "failed" ? "error" : "payload"}
+        value={search.tab || (job.status === "failed" ? "error" : "payload")}
+        onValueChange={(tab) =>
+          onSearchChange({
+            ...search,
+            tab: tab as JobSearch["tab"],
+          })
+        }
         className="flex-1"
       >
         <TabsList>
           <TabsTrigger value="payload">Payload</TabsTrigger>
           <TabsTrigger value="output">Output</TabsTrigger>
           {job.failedReason && (
-            <TabsTrigger
-              value="error"
-              className="text-[hsl(var(--status-error))]"
-            >
+            <TabsTrigger value="error" className="text-status-error">
               Error
             </TabsTrigger>
           )}
@@ -382,16 +419,14 @@ function ErrorDisplay({
   };
 
   return (
-    <div className="overflow-hidden rounded-lg border border-[hsl(var(--status-error))]/30 bg-[hsl(var(--status-error))]/5">
-      <div className="flex items-center justify-between border-b border-[hsl(var(--status-error))]/30 px-4 py-2">
-        <span className="font-medium text-[hsl(var(--status-error))]">
-          {error}
-        </span>
+    <div className="overflow-hidden rounded-lg border border-status-error/30 bg-status-error/5">
+      <div className="flex items-center justify-between border-b border-status-error/30 px-4 py-2">
+        <span className="font-medium text-status-error">{error}</span>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handleOpenInCursor}
-            className="inline-flex items-center gap-1.5 rounded px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-[hsl(var(--status-error))]/10 hover:text-foreground"
+            className="inline-flex items-center gap-1.5 rounded px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-status-error/10 hover:text-foreground"
             title="Fix in Cursor"
           >
             {/* Cursor logo */}
@@ -412,11 +447,11 @@ function ErrorDisplay({
           <button
             type="button"
             onClick={handleCopy}
-            className="rounded p-1.5 hover:bg-[hsl(var(--status-error))]/10"
+            className="rounded p-1.5 hover:bg-status-error/10"
             title="Copy error"
           >
             {copied ? (
-              <Check className="h-4 w-4 text-[hsl(var(--status-success))]" />
+              <Check className="h-4 w-4 text-status-success" />
             ) : (
               <Copy className="h-4 w-4 text-muted-foreground" />
             )}
@@ -425,7 +460,7 @@ function ErrorDisplay({
             <button
               type="button"
               onClick={() => setExpanded(!expanded)}
-              className="rounded p-1.5 hover:bg-[hsl(var(--status-error))]/10"
+              className="rounded p-1.5 hover:bg-status-error/10"
               title={expanded ? "Collapse" : "Expand"}
             >
               <ChevronDown
@@ -490,10 +525,10 @@ function Timeline({ job }: TimelineProps) {
             : Play,
       iconColor:
         job.status === "completed"
-          ? "text-[hsl(var(--status-success))]"
+          ? "text-status-success"
           : job.status === "failed"
-            ? "text-[hsl(var(--status-error))]"
-            : "text-[hsl(var(--status-warning))]",
+            ? "text-status-error"
+            : "text-status-warning",
       startTime: job.timestamp,
       endTime: job.finishedOn,
       status:
@@ -569,7 +604,7 @@ function Timeline({ job }: TimelineProps) {
           id: "error",
           label: job.failedReason,
           icon: AlertCircle,
-          iconColor: "text-[hsl(var(--status-error))]",
+          iconColor: "text-status-error",
           startTime: job.finishedOn || job.processedOn,
           status: "error",
           isLog: true,
@@ -679,11 +714,9 @@ function Timeline({ job }: TimelineProps) {
               <div
                 className={cn(
                   "absolute top-1/2 h-5 -translate-y-1/2 rounded-sm",
-                  span.status === "success" &&
-                    "bg-[hsl(var(--status-success))]",
-                  span.status === "error" && "bg-[hsl(var(--status-error))]",
-                  span.status === "running" &&
-                    "bg-[hsl(var(--status-warning))]",
+                  span.status === "success" && "bg-status-success",
+                  span.status === "error" && "bg-status-error",
+                  span.status === "running" && "bg-status-warning",
                   span.status === "waiting" && "bg-muted-foreground/30",
                 )}
                 style={{
@@ -818,8 +851,8 @@ function RetryAttemptCard({
       className={cn(
         "overflow-hidden rounded-lg border",
         succeeded
-          ? "border-[hsl(var(--status-success))]/30 bg-[hsl(var(--status-success))]/5"
-          : "border-[hsl(var(--status-error))]/30 bg-[hsl(var(--status-error))]/5",
+          ? "border-status-success/30 bg-status-success/5"
+          : "border-status-error/30 bg-status-error/5",
       )}
     >
       <button
@@ -831,8 +864,8 @@ function RetryAttemptCard({
           className={cn(
             "flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium",
             succeeded
-              ? "bg-[hsl(var(--status-success))]/20 text-[hsl(var(--status-success))]"
-              : "bg-[hsl(var(--status-error))]/20 text-[hsl(var(--status-error))]",
+              ? "bg-status-success/20 text-status-success"
+              : "bg-status-error/20 text-status-error",
           )}
         >
           {attemptNumber}
@@ -843,14 +876,14 @@ function RetryAttemptCard({
             {succeeded ? (
               <Badge
                 variant="secondary"
-                className="bg-[hsl(var(--status-success))]/10 text-[hsl(var(--status-success))] text-[10px]"
+                className="bg-status-success/10 text-status-success text-[10px]"
               >
                 Success
               </Badge>
             ) : (
               <Badge
                 variant="secondary"
-                className="bg-[hsl(var(--status-error))]/10 text-[hsl(var(--status-error))] text-[10px]"
+                className="bg-status-error/10 text-status-error text-[10px]"
               >
                 Failed
               </Badge>
@@ -879,7 +912,7 @@ function RetryAttemptCard({
       )}
 
       {expanded && succeeded && (
-        <div className="border-t border-inherit px-4 py-3 text-sm text-[hsl(var(--status-success))]">
+        <div className="border-t border-inherit px-4 py-3 text-sm text-status-success">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4" />
             Job completed successfully on this attempt

@@ -48,11 +48,19 @@ export type QueueSearch = z.infer<typeof queueSearchSchema>;
 
 // Search params schema for the Schedulers page
 export const schedulersSearchSchema = z.object({
+  tab: z.enum(["repeatable", "delayed"]).optional().catch("repeatable"),
   repeatableSort: z.string().optional(), // format: "field:direction"
   delayedSort: z.string().optional(), // format: "field:direction"
 });
 
 export type SchedulersSearch = z.infer<typeof schedulersSearchSchema>;
+
+// Search params schema for the Job page
+export const jobSearchSchema = z.object({
+  tab: z.enum(["payload", "output", "error", "retries", "timeline"]).optional(),
+});
+
+export type JobSearch = z.infer<typeof jobSearchSchema>;
 
 // Helper to parse sort string
 export function parseSort(
@@ -112,10 +120,17 @@ function RootLayout() {
     return { activeNav: "runs" as NavItem, activeQueue: undefined };
   }, [location.pathname]);
 
-  // Toggle dark mode
+  // Toggle dark mode (disable transitions during switch)
   React.useEffect(() => {
+    document.documentElement.classList.add("no-transitions");
     document.documentElement.classList.toggle("dark", isDark);
     localStorage.setItem("workbench:theme", isDark ? "dark" : "light");
+    // Re-enable transitions after the theme switch
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.documentElement.classList.remove("no-transitions");
+      });
+    });
   }, [isDark]);
 
   // Keyboard shortcut for command palette
@@ -322,6 +337,7 @@ function JobRoute() {
   });
   const { data: config } = useConfig();
   const navigate = useNavigate();
+  const search = useSearch({ from: "/queues/$queueName/jobs/$jobId" });
 
   return (
     <PageLayout title="Job Details" subtitle={jobId}>
@@ -329,6 +345,15 @@ function JobRoute() {
         queueName={queueName}
         jobId={jobId}
         readonly={config?.readonly}
+        search={search}
+        onSearchChange={(newSearch) => {
+          navigate({
+            to: "/queues/$queueName/jobs/$jobId",
+            params: { queueName, jobId },
+            search: newSearch,
+            replace: true,
+          });
+        }}
         onBack={() =>
           navigate({ to: "/queues/$queueName", params: { queueName } })
         }
@@ -379,6 +404,7 @@ const jobRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/queues/$queueName/jobs/$jobId",
   component: JobRoute,
+  validateSearch: jobSearchSchema,
 });
 
 // Route tree

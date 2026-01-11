@@ -2,99 +2,112 @@
 
 @layer base {
   :root {
-    /* Vercel-inspired light theme */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
+    /* Light theme - subtle cool tints */
+    --background: 220 14% 98%;
+    --foreground: 240 10% 4%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card-foreground: 240 10% 4%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
-    --primary: 0 0% 0%;
+    --popover-foreground: 240 10% 4%;
+    --primary: 240 10% 4%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 0%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 0%;
-    --destructive: 0 100% 50%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 240 10% 4%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 172 66% 95%;
+    --accent-foreground: 172 66% 30%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 0% 0%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 172 66% 50%;
 
-    /* Status colors - Vercel style */
-    --status-success: 142 76% 36%;
+    /* Status colors - vibrant */
+    --status-success: 160 84% 39%;
     --status-error: 0 84% 60%;
     --status-warning: 38 92% 50%;
-    --status-pending: 0 0% 45%;
-    --status-active: 217 91% 60%;
+    --status-pending: 220 9% 46%;
+    --status-active: 172 66% 50%;
 
-    /* Chart colors - Beam exact palette (light mode) */
-    --chart-1: 217 91% 60%;
-    --chart-2: 263 90% 66%;
-    --chart-3: 142 69% 48%;
-    --chart-4: 47 96% 53%;
-    --chart-5: 142 69% 48%;
-    --chart-success: 142 69% 48%;
-    --chart-error: 0 72% 51%;
+    /* Chart colors - PlanetScale-inspired */
+    --chart-1: 172 66% 50%;
+    --chart-2: 262 83% 68%;
+    --chart-3: 160 84% 39%;
+    --chart-4: 38 92% 50%;
+    --chart-5: 330 81% 60%;
+    --chart-completed: 160 84% 39%;
+    --chart-failed: 0 84% 60%;
+    --chart-duration: 262 83% 68%;
+    --chart-wait: 172 66% 50%;
 
-    --radius: 0.375rem;
+    --radius: 0.5rem;
 
     /* Sidebar */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 0%;
-    --sidebar-border: 0 0% 90%;
+    --sidebar-background: 220 14% 98%;
+    --sidebar-foreground: 240 10% 4%;
+    --sidebar-border: 220 13% 91%;
   }
 
   .dark {
-    /* Vercel-inspired dark theme */
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
-    --card: 0 0% 4%;
-    --card-foreground: 0 0% 100%;
-    --popover: 0 0% 4%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 0%;
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 10%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 0 0% 10%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
-    --ring: 0 0% 100%;
+    /* PlanetScale-inspired dark theme */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 4%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 55%;
+    --accent: 0 0% 16%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 16%;
+    --input: 0 0% 16%;
+    --ring: 172 66% 50%;
 
-    /* Status colors - Vercel style (dark) */
-    --status-success: 142 71% 45%;
+    /* Status colors - vibrant for dark mode */
+    --status-success: 160 84% 45%;
     --status-error: 0 84% 60%;
-    --status-warning: 38 92% 50%;
-    --status-pending: 0 0% 50%;
-    --status-active: 217 91% 60%;
+    --status-warning: 43 96% 56%;
+    --status-pending: 240 5% 50%;
+    --status-active: 172 66% 55%;
 
-    /* Chart colors - Beam exact palette (dark mode) */
-    --chart-1: 217 91% 68%;
-    --chart-2: 263 90% 76%;
-    --chart-3: 142 69% 58%;
-    --chart-4: 47 96% 58%;
-    --chart-5: 142 69% 58%;
-    --chart-success: 142 69% 58%;
-    --chart-error: 0 84% 65%;
+    /* Chart colors - PlanetScale-inspired */
+    --chart-1: 172 66% 55%;
+    --chart-2: 262 83% 72%;
+    --chart-3: 160 84% 45%;
+    --chart-4: 43 96% 56%;
+    --chart-5: 330 81% 65%;
+    --chart-completed: 160 84% 45%;
+    --chart-failed: 0 84% 60%;
+    --chart-duration: 262 83% 72%;
+    --chart-wait: 172 66% 55%;
 
     /* Sidebar */
-    --sidebar-background: 0 0% 0%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 15%;
+    --sidebar-background: 0 0% 4%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 16%;
   }
 }
 
 @layer base {
   * {
     @apply border-border;
+  }
+
+  /* Disable transitions during theme switch */
+  .no-transitions,
+  .no-transitions *,
+  .no-transitions *::before,
+  .no-transitions *::after {
+    transition: none !important;
+    animation: none !important;
   }
 
   html {
@@ -154,7 +167,6 @@
 @theme inline {
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen, Ubuntu, sans-serif;
-  --font-serif: "Hedvig Letters Serif", Georgia, "Times New Roman", serif;
   --font-mono: "Geist Mono", "SF Mono", Monaco, "Cascadia Code", "Roboto Mono",
     Menlo, monospace;
 
@@ -189,8 +201,10 @@
   --color-chart-3: hsl(var(--chart-3));
   --color-chart-4: hsl(var(--chart-4));
   --color-chart-5: hsl(var(--chart-5));
-  --color-chart-success: hsl(var(--chart-success));
-  --color-chart-error: hsl(var(--chart-error));
+  --color-chart-completed: hsl(var(--chart-completed));
+  --color-chart-failed: hsl(var(--chart-failed));
+  --color-chart-duration: hsl(var(--chart-duration));
+  --color-chart-wait: hsl(var(--chart-wait));
 
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);
