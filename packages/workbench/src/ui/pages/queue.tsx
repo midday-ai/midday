@@ -248,7 +248,7 @@ export function QueuePage({
           </div>
           {/* Skeleton Rows */}
           <div className="space-y-1">
-            {[...Array(5)].map((_, i) => (
+            {[...Array(15)].map((_, i) => (
               <div
                 key={i.toString()}
                 className="grid grid-cols-12 items-center gap-4 border bg-card px-4 py-3"

@@ -85,7 +85,7 @@ export function SchedulersPage({
           </div>
           {/* Skeleton Rows */}
           <div className="space-y-2">
-            {[...Array(3)].map((_, i) => (
+            {[...Array(10)].map((_, i) => (
               <div
                 key={`pulse-${i.toString()}`}
                 className="grid grid-cols-12 items-center gap-4 border bg-card px-4 py-3"

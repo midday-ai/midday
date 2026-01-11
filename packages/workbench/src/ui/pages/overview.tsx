@@ -30,7 +30,7 @@ export function OverviewPage({ onQueueSelect }: OverviewPageProps) {
         <div>
           <div className="h-5 w-16 animate-pulse rounded bg-muted mb-4" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(3)].map((_, i) => (
+            {[...Array(6)].map((_, i) => (
               <div key={i.toString()} className="p-4 border bg-card">
                 <div className="flex items-center justify-between mb-3">
                   <div className="h-5 w-24 animate-pulse rounded bg-muted" />

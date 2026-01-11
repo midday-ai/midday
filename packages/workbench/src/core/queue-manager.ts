@@ -1,9 +1,9 @@
 import { FlowProducer, type Job, type Queue } from "bullmq";
+import { LRUCache } from "lru-cache";
 import type {
   CreateFlowChildRequest,
   CreateFlowRequest,
   DelayedJobInfo,
-  FailingJobType,
   FlowNode,
   FlowSummary,
   HourlyBucket,
@@ -18,7 +18,6 @@ import type {
   RunInfo,
   SchedulerInfo,
   SearchResult,
-  SlowestJob,
   SortOptions,
   TestJobRequest,
 } from "./types";
@@ -30,6 +29,22 @@ export class QueueManager {
   private queues: Map<string, Queue> = new Map();
   private tagFields: string[] = [];
   private flowProducer: FlowProducer | null = null;
+
+  // LRU cache for expensive operations
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private cache = new LRUCache<string, any>({
+    max: 100, // Max 100 entries
+    ttl: 1000 * 60, // Default 1 minute TTL
+    allowStale: false, // Don't return stale entries
+    updateAgeOnGet: true, // Reset TTL on access
+  });
+
+  private readonly CACHE_TTL = {
+    metrics: 10000, // 10 seconds - metrics are expensive
+    overview: 3000, // 3 seconds
+    queues: 2000, // 2 seconds
+    flows: 5000, // 5 seconds
+  };
 
   constructor(queues: Queue[], tagFields: string[] = []) {
     for (const queue of queues) {
@@ -44,6 +59,39 @@ export class QueueManager {
       if (connection) {
         this.flowProducer = new FlowProducer({ connection });
       }
+    }
+  }
+
+  /**
+   * Get cached value or compute and cache
+   */
+  private async cached<T>(
+    key: string,
+    ttl: number,
+    compute: () => Promise<T>,
+  ): Promise<T> {
+    const cached = this.cache.get(key);
+    if (cached !== undefined) {
+      return cached as T;
+    }
+
+    const data = await compute();
+    this.cache.set(key, data, { ttl });
+    return data;
+  }
+
+  /**
+   * Clear cache (useful after mutations)
+   */
+  clearCache(prefix?: string): void {
+    if (prefix) {
+      for (const key of this.cache.keys()) {
+        if (key.startsWith(prefix)) {
+          this.cache.delete(key);
+        }
+      }
+    } else {
+      this.cache.clear();
     }
   }
 
@@ -69,63 +117,71 @@ export class QueueManager {
   }
 
   /**
-   * Get information for all queues
+   * Get information for all queues (cached)
    */
   async getQueues(): Promise<QueueInfo[]> {
-    const results: QueueInfo[] = [];
+    return this.cached("queues", this.CACHE_TTL.queues, async () => {
+      // Parallelize queue info fetching
+      const queueEntries = Array.from(this.queues.entries());
+      const results = await Promise.all(
+        queueEntries.map(async ([name, queue]) => {
+          const [counts, isPaused] = await Promise.all([
+            queue.getJobCounts(),
+            queue.isPaused(),
+          ]);
 
-    for (const [name, queue] of this.queues) {
-      const counts = await queue.getJobCounts();
-      const isPaused = await queue.isPaused();
+          return {
+            name,
+            counts: {
+              waiting: counts.waiting || 0,
+              active: counts.active || 0,
+              completed: counts.completed || 0,
+              failed: counts.failed || 0,
+              delayed: counts.delayed || 0,
+              paused: counts.paused || 0,
+            },
+            isPaused,
+          };
+        }),
+      );
 
-      results.push({
-        name,
-        counts: {
-          waiting: counts.waiting || 0,
-          active: counts.active || 0,
-          completed: counts.completed || 0,
-          failed: counts.failed || 0,
-          delayed: counts.delayed || 0,
-          paused: counts.paused || 0,
-        },
-        isPaused,
-      });
-    }
-
-    return results;
+      return results;
+    });
   }
 
   /**
-   * Get overview statistics
+   * Get overview statistics (cached)
    */
   async getOverview(): Promise<OverviewStats> {
-    const queues = await this.getQueues();
+    return this.cached("overview", this.CACHE_TTL.overview, async () => {
+      const queues = await this.getQueues();
 
-    let totalJobs = 0;
-    let activeJobs = 0;
-    let failedJobs = 0;
+      let totalJobs = 0;
+      let activeJobs = 0;
+      let failedJobs = 0;
 
-    for (const queue of queues) {
-      totalJobs +=
-        queue.counts.waiting + queue.counts.active + queue.counts.delayed;
-      activeJobs += queue.counts.active;
-      failedJobs += queue.counts.failed;
-    }
+      for (const queue of queues) {
+        totalJobs +=
+          queue.counts.waiting + queue.counts.active + queue.counts.delayed;
+        activeJobs += queue.counts.active;
+        failedJobs += queue.counts.failed;
+      }
 
-    // Get completed jobs from today (approximation based on completed count)
-    const completedToday = queues.reduce(
-      (sum, q) => sum + q.counts.completed,
-      0,
-    );
+      // Get completed jobs from today (approximation based on completed count)
+      const completedToday = queues.reduce(
+        (sum, q) => sum + q.counts.completed,
+        0,
+      );
 
-    return {
-      totalJobs,
-      activeJobs,
-      failedJobs,
-      completedToday,
-      avgDuration: 0, // Would need metrics tracking
-      queues,
-    };
+      return {
+        totalJobs,
+        activeJobs,
+        failedJobs,
+        completedToday,
+        avgDuration: 0, // Would need metrics tracking
+        queues,
+      };
+    });
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -170,277 +226,308 @@ export class QueueManager {
   // ─────────────────────────────────────────────────────────────────────────────
 
   /**
-   * Get metrics for the last 24 hours
+   * Get metrics for the last 24 hours (cached - expensive operation)
    */
   async getMetrics(): Promise<MetricsResponse> {
-    const now = Date.now();
-    const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
+    return this.cached("metrics", this.CACHE_TTL.metrics, async () => {
+      const now = Date.now();
+      const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
 
-    // Initialize hourly buckets for last 24 hours
-    const createEmptyBuckets = (): HourlyBucket[] => {
-      const buckets: HourlyBucket[] = [];
-      const startHour =
-        Math.floor(twentyFourHoursAgo / (60 * 60 * 1000)) * (60 * 60 * 1000);
-      for (let i = 0; i < 24; i++) {
-        buckets.push({
-          hour: startHour + i * 60 * 60 * 1000,
-          completed: 0,
-          failed: 0,
-          avgDuration: 0,
-          avgWaitTime: 0,
+      // Initialize hourly buckets for last 24 hours
+      const createEmptyBuckets = (): HourlyBucket[] => {
+        const buckets: HourlyBucket[] = [];
+        const startHour =
+          Math.floor(twentyFourHoursAgo / (60 * 60 * 1000)) * (60 * 60 * 1000);
+        for (let i = 0; i < 24; i++) {
+          buckets.push({
+            hour: startHour + i * 60 * 60 * 1000,
+            completed: 0,
+            failed: 0,
+            avgDuration: 0,
+            avgWaitTime: 0,
+          });
+        }
+        return buckets;
+      };
+
+      const queueMetricsMap = new Map<
+        string,
+        {
+          buckets: HourlyBucket[];
+          durations: number[][];
+          waitTimes: number[][];
+        }
+      >();
+
+      // Initialize per-queue metrics
+      for (const queueName of this.queues.keys()) {
+        queueMetricsMap.set(queueName, {
+          buckets: createEmptyBuckets(),
+          durations: Array.from({ length: 24 }, () => []),
+          waitTimes: Array.from({ length: 24 }, () => []),
         });
       }
-      return buckets;
-    };
 
-    const queueMetricsMap = new Map<
-      string,
-      {
-        buckets: HourlyBucket[];
-        durations: number[][];
-        waitTimes: number[][];
-      }
-    >();
+      // Track slowest jobs and failing job types
+      const allJobs: Array<{
+        name: string;
+        queueName: string;
+        duration: number;
+        jobId: string;
+      }> = [];
+      const jobTypeStats = new Map<
+        string,
+        { name: string; queueName: string; completed: number; failed: number }
+      >();
 
-    // Initialize per-queue metrics
-    for (const queueName of this.queues.keys()) {
-      queueMetricsMap.set(queueName, {
-        buckets: createEmptyBuckets(),
-        durations: Array.from({ length: 24 }, () => []),
-        waitTimes: Array.from({ length: 24 }, () => []),
-      });
-    }
+      // Fetch completed and failed jobs from each queue IN PARALLEL
+      const queueEntries = Array.from(this.queues.entries());
+      const queueResults = await Promise.all(
+        queueEntries.map(async ([queueName, queue]) => {
+          // Fetch both completed and failed jobs in parallel, limit to 500 each for performance
+          const [completedJobs, failedJobs] = await Promise.all([
+            queue.getJobs(["completed"], 0, 500),
+            queue.getJobs(["failed"], 0, 500),
+          ]);
+          return { queueName, completedJobs, failedJobs };
+        }),
+      );
 
-    // Track slowest jobs and failing job types
-    const allJobs: Array<{
-      name: string;
-      queueName: string;
-      duration: number;
-      jobId: string;
-    }> = [];
-    const jobTypeStats = new Map<
-      string,
-      { name: string; queueName: string; completed: number; failed: number }
-    >();
+      // Process results
+      for (const { queueName, completedJobs, failedJobs } of queueResults) {
+        const metrics = queueMetricsMap.get(queueName)!;
 
-    // Fetch completed and failed jobs from each queue
-    for (const [queueName, queue] of this.queues) {
-      const metrics = queueMetricsMap.get(queueName)!;
+        // Process completed jobs
+        for (const job of completedJobs) {
+          if (!job || !job.finishedOn || job.finishedOn < twentyFourHoursAgo)
+            continue;
 
-      // Fetch completed jobs
-      const completedJobs = await queue.getJobs(["completed"], 0, 1000);
-      for (const job of completedJobs) {
-        if (!job || !job.finishedOn || job.finishedOn < twentyFourHoursAgo)
-          continue;
+          const bucketIndex = Math.floor(
+            (job.finishedOn - (metrics.buckets[0]?.hour || 0)) /
+              (60 * 60 * 1000),
+          );
+          if (bucketIndex >= 0 && bucketIndex < 24) {
+            metrics.buckets[bucketIndex].completed++;
 
-        const bucketIndex = Math.floor(
-          (job.finishedOn - (metrics.buckets[0]?.hour || 0)) / (60 * 60 * 1000),
-        );
-        if (bucketIndex >= 0 && bucketIndex < 24) {
-          metrics.buckets[bucketIndex].completed++;
+            const duration = job.processedOn
+              ? job.finishedOn - job.processedOn
+              : 0;
+            const waitTime = job.processedOn
+              ? job.processedOn - job.timestamp
+              : 0;
 
-          const duration = job.processedOn
-            ? job.finishedOn - job.processedOn
-            : 0;
-          const waitTime = job.processedOn
-            ? job.processedOn - job.timestamp
-            : 0;
-
-          if (duration > 0) {
-            metrics.durations[bucketIndex].push(duration);
-            allJobs.push({
-              name: job.name,
-              queueName,
-              duration,
-              jobId: job.id || "",
-            });
+            if (duration > 0) {
+              metrics.durations[bucketIndex].push(duration);
+              allJobs.push({
+                name: job.name,
+                queueName,
+                duration,
+                jobId: job.id || "",
+              });
+            }
+            if (waitTime > 0) {
+              metrics.waitTimes[bucketIndex].push(waitTime);
+            }
           }
-          if (waitTime > 0) {
-            metrics.waitTimes[bucketIndex].push(waitTime);
-          }
+
+          // Track job type stats
+          const key = `${queueName}:${job.name}`;
+          const stats = jobTypeStats.get(key) || {
+            name: job.name,
+            queueName,
+            completed: 0,
+            failed: 0,
+          };
+          stats.completed++;
+          jobTypeStats.set(key, stats);
         }
 
-        // Track job type stats
-        const key = `${queueName}:${job.name}`;
-        const stats = jobTypeStats.get(key) || {
-          name: job.name,
-          queueName,
-          completed: 0,
-          failed: 0,
-        };
-        stats.completed++;
-        jobTypeStats.set(key, stats);
-      }
+        // Process failed jobs
+        for (const job of failedJobs) {
+          if (!job || !job.finishedOn || job.finishedOn < twentyFourHoursAgo)
+            continue;
 
-      // Fetch failed jobs
-      const failedJobs = await queue.getJobs(["failed"], 0, 1000);
-      for (const job of failedJobs) {
-        if (!job || !job.finishedOn || job.finishedOn < twentyFourHoursAgo)
-          continue;
+          const bucketIndex = Math.floor(
+            (job.finishedOn - (metrics.buckets[0]?.hour || 0)) /
+              (60 * 60 * 1000),
+          );
+          if (bucketIndex >= 0 && bucketIndex < 24) {
+            metrics.buckets[bucketIndex].failed++;
+          }
 
-        const bucketIndex = Math.floor(
-          (job.finishedOn - (metrics.buckets[0]?.hour || 0)) / (60 * 60 * 1000),
-        );
-        if (bucketIndex >= 0 && bucketIndex < 24) {
-          metrics.buckets[bucketIndex].failed++;
+          // Track job type stats
+          const key = `${queueName}:${job.name}`;
+          const stats = jobTypeStats.get(key) || {
+            name: job.name,
+            queueName,
+            completed: 0,
+            failed: 0,
+          };
+          stats.failed++;
+          jobTypeStats.set(key, stats);
         }
-
-        // Track job type stats
-        const key = `${queueName}:${job.name}`;
-        const stats = jobTypeStats.get(key) || {
-          name: job.name,
-          queueName,
-          completed: 0,
-          failed: 0,
-        };
-        stats.failed++;
-        jobTypeStats.set(key, stats);
       }
-    }
 
-    // Calculate averages for each bucket
-    for (const metrics of queueMetricsMap.values()) {
+      // Calculate averages for each bucket
+      for (const metrics of queueMetricsMap.values()) {
+        for (let i = 0; i < 24; i++) {
+          const durations = metrics.durations[i];
+          const waitTimes = metrics.waitTimes[i];
+          if (durations.length > 0) {
+            metrics.buckets[i].avgDuration = Math.round(
+              durations.reduce((a, b) => a + b, 0) / durations.length,
+            );
+          }
+          if (waitTimes.length > 0) {
+            metrics.buckets[i].avgWaitTime = Math.round(
+              waitTimes.reduce((a, b) => a + b, 0) / waitTimes.length,
+            );
+          }
+        }
+      }
+
+      // Build queue metrics array
+      const queues: QueueMetrics[] = [];
+      for (const [queueName, metrics] of queueMetricsMap) {
+        const totalCompleted = metrics.buckets.reduce(
+          (sum, b) => sum + b.completed,
+          0,
+        );
+        const totalFailed = metrics.buckets.reduce(
+          (sum, b) => sum + b.failed,
+          0,
+        );
+        const allDurations = metrics.durations.flat();
+        const allWaitTimes = metrics.waitTimes.flat();
+
+        queues.push({
+          queueName,
+          buckets: metrics.buckets,
+          summary: {
+            totalCompleted,
+            totalFailed,
+            errorRate:
+              totalCompleted + totalFailed > 0
+                ? totalFailed / (totalCompleted + totalFailed)
+                : 0,
+            avgDuration:
+              allDurations.length > 0
+                ? Math.round(
+                    allDurations.reduce((a, b) => a + b, 0) /
+                      allDurations.length,
+                  )
+                : 0,
+            avgWaitTime:
+              allWaitTimes.length > 0
+                ? Math.round(
+                    allWaitTimes.reduce((a, b) => a + b, 0) /
+                      allWaitTimes.length,
+                  )
+                : 0,
+            throughputPerHour: Math.round((totalCompleted + totalFailed) / 24),
+          },
+        });
+      }
+
+      // Build aggregate metrics
+      const aggregateBuckets = createEmptyBuckets();
+      const aggregateDurations: number[][] = Array.from(
+        { length: 24 },
+        () => [],
+      );
+      const aggregateWaitTimes: number[][] = Array.from(
+        { length: 24 },
+        () => [],
+      );
+
+      for (const metrics of queueMetricsMap.values()) {
+        for (let i = 0; i < 24; i++) {
+          aggregateBuckets[i].completed += metrics.buckets[i].completed;
+          aggregateBuckets[i].failed += metrics.buckets[i].failed;
+          aggregateDurations[i].push(...metrics.durations[i]);
+          aggregateWaitTimes[i].push(...metrics.waitTimes[i]);
+        }
+      }
+
+      // Calculate aggregate averages
       for (let i = 0; i < 24; i++) {
-        const durations = metrics.durations[i];
-        const waitTimes = metrics.waitTimes[i];
-        if (durations.length > 0) {
-          metrics.buckets[i].avgDuration = Math.round(
-            durations.reduce((a, b) => a + b, 0) / durations.length,
+        if (aggregateDurations[i].length > 0) {
+          aggregateBuckets[i].avgDuration = Math.round(
+            aggregateDurations[i].reduce((a, b) => a + b, 0) /
+              aggregateDurations[i].length,
           );
         }
-        if (waitTimes.length > 0) {
-          metrics.buckets[i].avgWaitTime = Math.round(
-            waitTimes.reduce((a, b) => a + b, 0) / waitTimes.length,
+        if (aggregateWaitTimes[i].length > 0) {
+          aggregateBuckets[i].avgWaitTime = Math.round(
+            aggregateWaitTimes[i].reduce((a, b) => a + b, 0) /
+              aggregateWaitTimes[i].length,
           );
         }
       }
-    }
 
-    // Build queue metrics array
-    const queues: QueueMetrics[] = [];
-    for (const [queueName, metrics] of queueMetricsMap) {
-      const totalCompleted = metrics.buckets.reduce(
+      const totalCompleted = aggregateBuckets.reduce(
         (sum, b) => sum + b.completed,
         0,
       );
-      const totalFailed = metrics.buckets.reduce((sum, b) => sum + b.failed, 0);
-      const allDurations = metrics.durations.flat();
-      const allWaitTimes = metrics.waitTimes.flat();
+      const totalFailed = aggregateBuckets.reduce(
+        (sum, b) => sum + b.failed,
+        0,
+      );
+      const allDurations = aggregateDurations.flat();
+      const allWaitTimes = aggregateWaitTimes.flat();
 
-      queues.push({
-        queueName,
-        buckets: metrics.buckets,
-        summary: {
-          totalCompleted,
-          totalFailed,
-          errorRate:
-            totalCompleted + totalFailed > 0
-              ? totalFailed / (totalCompleted + totalFailed)
-              : 0,
-          avgDuration:
-            allDurations.length > 0
-              ? Math.round(
-                  allDurations.reduce((a, b) => a + b, 0) / allDurations.length,
-                )
-              : 0,
-          avgWaitTime:
-            allWaitTimes.length > 0
-              ? Math.round(
-                  allWaitTimes.reduce((a, b) => a + b, 0) / allWaitTimes.length,
-                )
-              : 0,
-          throughputPerHour: Math.round((totalCompleted + totalFailed) / 24),
+      // Get top 10 slowest jobs
+      const slowestJobs = allJobs
+        .sort((a, b) => b.duration - a.duration)
+        .slice(0, 10);
+
+      // Get top 10 most failing job types
+      const mostFailingTypes = Array.from(jobTypeStats.values())
+        .filter((s) => s.failed > 0)
+        .map((s) => ({
+          name: s.name,
+          queueName: s.queueName,
+          failCount: s.failed,
+          totalCount: s.completed + s.failed,
+          errorRate: s.failed / (s.completed + s.failed),
+        }))
+        .sort((a, b) => b.failCount - a.failCount)
+        .slice(0, 10);
+
+      return {
+        queues,
+        aggregate: {
+          queueName: "all",
+          buckets: aggregateBuckets,
+          summary: {
+            totalCompleted,
+            totalFailed,
+            errorRate:
+              totalCompleted + totalFailed > 0
+                ? totalFailed / (totalCompleted + totalFailed)
+                : 0,
+            avgDuration:
+              allDurations.length > 0
+                ? Math.round(
+                    allDurations.reduce((a, b) => a + b, 0) /
+                      allDurations.length,
+                  )
+                : 0,
+            avgWaitTime:
+              allWaitTimes.length > 0
+                ? Math.round(
+                    allWaitTimes.reduce((a, b) => a + b, 0) /
+                      allWaitTimes.length,
+                  )
+                : 0,
+            throughputPerHour: Math.round((totalCompleted + totalFailed) / 24),
+          },
         },
-      });
-    }
-
-    // Build aggregate metrics
-    const aggregateBuckets = createEmptyBuckets();
-    const aggregateDurations: number[][] = Array.from({ length: 24 }, () => []);
-    const aggregateWaitTimes: number[][] = Array.from({ length: 24 }, () => []);
-
-    for (const metrics of queueMetricsMap.values()) {
-      for (let i = 0; i < 24; i++) {
-        aggregateBuckets[i].completed += metrics.buckets[i].completed;
-        aggregateBuckets[i].failed += metrics.buckets[i].failed;
-        aggregateDurations[i].push(...metrics.durations[i]);
-        aggregateWaitTimes[i].push(...metrics.waitTimes[i]);
-      }
-    }
-
-    // Calculate aggregate averages
-    for (let i = 0; i < 24; i++) {
-      if (aggregateDurations[i].length > 0) {
-        aggregateBuckets[i].avgDuration = Math.round(
-          aggregateDurations[i].reduce((a, b) => a + b, 0) /
-            aggregateDurations[i].length,
-        );
-      }
-      if (aggregateWaitTimes[i].length > 0) {
-        aggregateBuckets[i].avgWaitTime = Math.round(
-          aggregateWaitTimes[i].reduce((a, b) => a + b, 0) /
-            aggregateWaitTimes[i].length,
-        );
-      }
-    }
-
-    const totalCompleted = aggregateBuckets.reduce(
-      (sum, b) => sum + b.completed,
-      0,
-    );
-    const totalFailed = aggregateBuckets.reduce((sum, b) => sum + b.failed, 0);
-    const allDurations = aggregateDurations.flat();
-    const allWaitTimes = aggregateWaitTimes.flat();
-
-    // Get top 10 slowest jobs
-    const slowestJobs = allJobs
-      .sort((a, b) => b.duration - a.duration)
-      .slice(0, 10);
-
-    // Get top 10 most failing job types
-    const mostFailingTypes = Array.from(jobTypeStats.values())
-      .filter((s) => s.failed > 0)
-      .map((s) => ({
-        name: s.name,
-        queueName: s.queueName,
-        failCount: s.failed,
-        totalCount: s.completed + s.failed,
-        errorRate: s.failed / (s.completed + s.failed),
-      }))
-      .sort((a, b) => b.failCount - a.failCount)
-      .slice(0, 10);
-
-    return {
-      queues,
-      aggregate: {
-        queueName: "all",
-        buckets: aggregateBuckets,
-        summary: {
-          totalCompleted,
-          totalFailed,
-          errorRate:
-            totalCompleted + totalFailed > 0
-              ? totalFailed / (totalCompleted + totalFailed)
-              : 0,
-          avgDuration:
-            allDurations.length > 0
-              ? Math.round(
-                  allDurations.reduce((a, b) => a + b, 0) / allDurations.length,
-                )
-              : 0,
-          avgWaitTime:
-            allWaitTimes.length > 0
-              ? Math.round(
-                  allWaitTimes.reduce((a, b) => a + b, 0) / allWaitTimes.length,
-                )
-              : 0,
-          throughputPerHour: Math.round((totalCompleted + totalFailed) / 24),
-        },
-      },
-      slowestJobs,
-      mostFailingTypes,
-      computedAt: now,
-    };
+        slowestJobs,
+        mostFailingTypes,
+        computedAt: now,
+      };
+    });
   }
 
   /**
@@ -701,30 +788,38 @@ export class QueueManager {
     start = 0,
     sort?: SortOptions,
   ): Promise<PaginatedResponse<RunInfo>> {
-    const allJobs: { job: Job; queueName: string }[] = [];
+    const queueEntries = Array.from(this.queues.entries());
 
-    // First, get accurate total count from all queues
+    // Fetch counts and jobs from all queues IN PARALLEL
+    const fetchLimit = Math.min(start + limit + 100, 500); // Reduced limit for performance
+    const types = ["waiting", "active", "completed", "failed", "delayed"];
+
+    const queueResults = await Promise.all(
+      queueEntries.map(async ([queueName, queue]) => {
+        // Fetch counts and all job types in parallel
+        const [counts, ...jobArrays] = await Promise.all([
+          queue.getJobCounts(),
+          ...types.map((type) => queue.getJobs(type as any, 0, fetchLimit)),
+        ]);
+
+        const queueTotal =
+          (counts.waiting || 0) +
+          (counts.active || 0) +
+          (counts.completed || 0) +
+          (counts.failed || 0) +
+          (counts.delayed || 0);
+
+        const jobs = jobArrays.flat().map((job) => ({ job, queueName }));
+        return { queueTotal, jobs };
+      }),
+    );
+
+    // Aggregate results
     let total = 0;
-    for (const [, queue] of this.queues) {
-      const counts = await queue.getJobCounts();
-      total +=
-        (counts.waiting || 0) +
-        (counts.active || 0) +
-        (counts.completed || 0) +
-        (counts.failed || 0) +
-        (counts.delayed || 0);
-    }
-
-    // Fetch jobs for pagination - get more than limit to ensure we have enough after sorting
-    const fetchLimit = Math.min(start + limit + 100, 1000);
-    for (const [queueName, queue] of this.queues) {
-      const types = ["waiting", "active", "completed", "failed", "delayed"];
-      for (const type of types) {
-        const jobs = await queue.getJobs(type as any, 0, fetchLimit);
-        for (const job of jobs) {
-          allJobs.push({ job, queueName });
-        }
-      }
+    const allJobs: { job: Job; queueName: string }[] = [];
+    for (const { queueTotal, jobs } of queueResults) {
+      total += queueTotal;
+      allJobs.push(...jobs);
     }
 
     // Convert to RunInfo for sorting on computed fields
@@ -1147,19 +1242,15 @@ export class QueueManager {
   // ─────────────────────────────────────────────────────────────────────────────
 
   /**
-   * Get all flows (jobs that have children or are part of a flow)
+   * Get all flows (jobs that have children or are part of a flow) - cached
    */
   async getFlows(limit = 50): Promise<FlowSummary[]> {
     if (!this.flowProducer) {
       return [];
     }
 
-    const flows: FlowSummary[] = [];
-    const seenJobIds = new Set<string>();
-
-    // Scan all queues for jobs that are part of flows
-    // Include "waiting-children" state for parent jobs waiting on children
-    for (const [queueName, queue] of this.queues) {
+    return this.cached(`flows:${limit}`, this.CACHE_TTL.flows, async () => {
+      const queueEntries = Array.from(this.queues.entries());
       const types = [
         "waiting",
         "waiting-children",
@@ -1169,37 +1260,66 @@ export class QueueManager {
         "delayed",
       ];
 
-      for (const type of types) {
-        try {
-          const jobs = await queue.getJobs(type as any, 0, 200);
+      // Fetch jobs from all queues IN PARALLEL (reduced limit for performance)
+      const queueResults = await Promise.all(
+        queueEntries.map(async ([queueName, queue]) => {
+          const jobArrays = await Promise.all(
+            types.map(async (type) => {
+              try {
+                return await queue.getJobs(type as any, 0, 100);
+              } catch {
+                return [];
+              }
+            }),
+          );
+          return { queueName, jobs: jobArrays.flat() };
+        }),
+      );
 
-          for (const job of jobs) {
-            if (!job || !job.id) continue;
+      // Collect potential root jobs (no parent)
+      const seenJobIds = new Set<string>();
+      const potentialRoots: { queueName: string; job: Job }[] = [];
 
-            // Skip if we've already seen this job
-            const jobKey = `${queueName}:${job.id}`;
-            if (seenJobIds.has(jobKey)) continue;
-            seenJobIds.add(jobKey);
+      for (const { queueName, jobs } of queueResults) {
+        for (const job of jobs) {
+          if (!job || !job.id) continue;
 
-            // Check if this is a root job (has no parent)
-            const hasParent = !!job.parent || !!job.parentKey;
-            if (hasParent) continue; // Skip non-root jobs
+          const jobKey = `${queueName}:${job.id}`;
+          if (seenJobIds.has(jobKey)) continue;
+          seenJobIds.add(jobKey);
 
-            // Try to get the flow tree
+          // Check if this is a root job (has no parent)
+          const hasParent = !!job.parent || !!job.parentKey;
+          if (!hasParent) {
+            potentialRoots.push({ queueName, job });
+          }
+        }
+      }
+
+      // Check flows in parallel (batch to avoid overwhelming Redis)
+      const batchSize = 20;
+      const flows: FlowSummary[] = [];
+
+      for (
+        let i = 0;
+        i < potentialRoots.length && flows.length < limit;
+        i += batchSize
+      ) {
+        const batch = potentialRoots.slice(i, i + batchSize);
+        const batchResults = await Promise.all(
+          batch.map(async ({ queueName, job }) => {
             try {
               const flowTree = await this.flowProducer!.getFlow({
-                id: job.id,
+                id: job.id!,
                 queueName,
               });
 
               if (flowTree?.children && flowTree.children.length > 0) {
-                // Count jobs in the tree
                 const stats = this.countFlowStats(flowTree);
-
                 const state = await job.getState();
 
-                flows.push({
-                  id: job.id,
+                return {
+                  id: job.id!,
                   name: job.name,
                   queueName,
                   status: state as JobStatus,
@@ -1211,23 +1331,24 @@ export class QueueManager {
                     job.finishedOn && job.processedOn
                       ? job.finishedOn - job.processedOn
                       : undefined,
-                });
-
-                if (flows.length >= limit) {
-                  return flows.sort((a, b) => b.timestamp - a.timestamp);
-                }
+                } as FlowSummary;
               }
             } catch {
               // Job might not have a flow, skip
             }
+            return null;
+          }),
+        );
+
+        for (const result of batchResults) {
+          if (result && flows.length < limit) {
+            flows.push(result);
           }
-        } catch {
-          // Queue might not support this state, skip
         }
       }
-    }
 
-    return flows.sort((a, b) => b.timestamp - a.timestamp);
+      return flows.sort((a, b) => b.timestamp - a.timestamp);
+    });
   }
 
   /**

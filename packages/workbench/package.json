@@ -39,7 +39,8 @@
     "@types/dagre": "^0.7.53",
     "@xyflow/react": "^12.10.0",
     "dagre": "^0.8.5",
-    "framer-motion": "^12.25.0"
+    "framer-motion": "^12.25.0",
+    "lru-cache": "^11.2.4"
   },
   "devDependencies": {
     "bullmq": "^5.66.4",

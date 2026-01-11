@@ -31,7 +31,7 @@ export function FlowsPage({ onFlowSelect }: FlowsPageProps) {
   if (isLoading && flows.length === 0) {
     return (
       <div className="divide-y divide-border">
-        {[...Array(6)].map((_, i) => (
+        {[...Array(12)].map((_, i) => (
           <div
             key={i.toString()}
             className="grid grid-cols-12 items-center gap-4 px-4 py-3"
