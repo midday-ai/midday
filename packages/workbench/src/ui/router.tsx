@@ -1,6 +1,8 @@
 import { AppSidebar, type NavItem } from "@/components/app-sidebar";
 import { CommandPalette } from "@/components/layout/command-palette";
 import { useConfig, useQueues } from "@/lib/hooks";
+import { FlowPage } from "@/pages/flow";
+import { FlowsPage } from "@/pages/flows";
 import { JobPage } from "@/pages/job";
 import { MetricsPage } from "@/pages/metrics";
 import { QueuePage } from "@/pages/queue";
@@ -119,6 +121,9 @@ function RootLayout() {
     if (path === "/schedulers") {
       return { activeNav: "schedulers" as NavItem, activeQueue: undefined };
     }
+    if (path === "/flows" || path.startsWith("/flows/")) {
+      return { activeNav: "flows" as NavItem, activeQueue: undefined };
+    }
     if (path === "/test") {
       return { activeNav: "test" as NavItem, activeQueue: undefined };
     }
@@ -173,6 +178,9 @@ function RootLayout() {
         break;
       case "schedulers":
         navigate({ to: "/schedulers" });
+        break;
+      case "flows":
+        navigate({ to: "/flows" });
         break;
       case "test":
         navigate({ to: "/test" });
@@ -273,6 +281,12 @@ function RunsRoute() {
             params: { queueName, jobId },
           })
         }
+        onQueueSelect={(queueName) =>
+          navigate({
+            to: "/queues/$queueName",
+            params: { queueName },
+          })
+        }
       />
     </PageLayout>
   );
@@ -300,6 +314,31 @@ function SchedulersRoute() {
 
 function MetricsRoute() {
   return <MetricsPage />;
+}
+
+function FlowsRoute() {
+  const navigate = useNavigate();
+  return (
+    <PageLayout title="Flows">
+      <FlowsPage
+        onFlowSelect={(queueName, jobId) =>
+          navigate({
+            to: "/flows/$queueName/$jobId",
+            params: { queueName, jobId },
+          })
+        }
+      />
+    </PageLayout>
+  );
+}
+
+function FlowDetailRoute() {
+  const { queueName, jobId } = useParams({ from: "/flows/$queueName/$jobId" });
+  return (
+    <PageLayout title="Flow Details" subtitle={jobId}>
+      <FlowPage queueName={queueName} jobId={jobId} />
+    </PageLayout>
+  );
 }
 
 function TestRoute() {
@@ -407,6 +446,18 @@ const schedulersRoute = createRoute({
   validateSearch: schedulersSearchSchema,
 });
 
+const flowsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/flows",
+  component: FlowsRoute,
+});
+
+const flowDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/flows/$queueName/$jobId",
+  component: FlowDetailRoute,
+});
+
 const testRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/test",
@@ -433,6 +484,8 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   metricsRoute,
   schedulersRoute,
+  flowsRoute,
+  flowDetailRoute,
   testRoute,
   queueRoute,
   jobRoute,

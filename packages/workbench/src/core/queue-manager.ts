@@ -1,7 +1,11 @@
-import type { Job, Queue } from "bullmq";
+import { FlowProducer, type Job, type Queue } from "bullmq";
 import type {
+  CreateFlowChildRequest,
+  CreateFlowRequest,
   DelayedJobInfo,
   FailingJobType,
+  FlowNode,
+  FlowSummary,
   HourlyBucket,
   JobInfo,
   JobStatus,
@@ -25,12 +29,22 @@ import type {
 export class QueueManager {
   private queues: Map<string, Queue> = new Map();
   private tagFields: string[] = [];
+  private flowProducer: FlowProducer | null = null;
 
   constructor(queues: Queue[], tagFields: string[] = []) {
     for (const queue of queues) {
       this.queues.set(queue.name, queue);
     }
     this.tagFields = tagFields;
+
+    // Initialize FlowProducer using connection from first queue
+    const firstQueue = queues[0];
+    if (firstQueue) {
+      const connection = firstQueue.opts?.connection;
+      if (connection) {
+        this.flowProducer = new FlowProducer({ connection });
+      }
+    }
   }
 
   /**
@@ -982,6 +996,25 @@ export class QueueManager {
     // Extract configured tag fields from job data
     const tags = this.extractTags(job.data);
 
+    // Extract parent info if this job is part of a flow
+    let parent: { id: string; queueName: string } | undefined;
+    if (job.parent?.id) {
+      parent = {
+        id: job.parent.id,
+        queueName:
+          job.parent.queueKey?.split(":")[1] || job.parent.queueKey || "",
+      };
+    } else if (job.parentKey) {
+      // parentKey format: "bull:queueName:jobId"
+      const parts = job.parentKey.split(":");
+      if (parts.length >= 3) {
+        parent = {
+          id: parts[parts.length - 1] || "",
+          queueName: parts[parts.length - 2] || "",
+        };
+      }
+    }
+
     return {
       id: job.id || "",
       name: job.name,
@@ -1002,6 +1035,7 @@ export class QueueManager {
       status: state as JobStatus,
       duration,
       tags,
+      parent,
     };
   }
 
@@ -1106,5 +1140,236 @@ export class QueueManager {
     }
 
     return { success, failed };
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Flow Operations
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Get all flows (jobs that have children or are part of a flow)
+   */
+  async getFlows(limit = 50): Promise<FlowSummary[]> {
+    if (!this.flowProducer) {
+      return [];
+    }
+
+    const flows: FlowSummary[] = [];
+    const seenJobIds = new Set<string>();
+
+    // Scan all queues for jobs that are part of flows
+    // Include "waiting-children" state for parent jobs waiting on children
+    for (const [queueName, queue] of this.queues) {
+      const types = [
+        "waiting",
+        "waiting-children",
+        "active",
+        "completed",
+        "failed",
+        "delayed",
+      ];
+
+      for (const type of types) {
+        try {
+          const jobs = await queue.getJobs(type as any, 0, 200);
+
+          for (const job of jobs) {
+            if (!job || !job.id) continue;
+
+            // Skip if we've already seen this job
+            const jobKey = `${queueName}:${job.id}`;
+            if (seenJobIds.has(jobKey)) continue;
+            seenJobIds.add(jobKey);
+
+            // Check if this is a root job (has no parent)
+            const hasParent = !!job.parent || !!job.parentKey;
+            if (hasParent) continue; // Skip non-root jobs
+
+            // Try to get the flow tree
+            try {
+              const flowTree = await this.flowProducer!.getFlow({
+                id: job.id,
+                queueName,
+              });
+
+              if (flowTree?.children && flowTree.children.length > 0) {
+                // Count jobs in the tree
+                const stats = this.countFlowStats(flowTree);
+
+                const state = await job.getState();
+
+                flows.push({
+                  id: job.id,
+                  name: job.name,
+                  queueName,
+                  status: state as JobStatus,
+                  totalJobs: stats.total,
+                  completedJobs: stats.completed,
+                  failedJobs: stats.failed,
+                  timestamp: job.timestamp,
+                  duration:
+                    job.finishedOn && job.processedOn
+                      ? job.finishedOn - job.processedOn
+                      : undefined,
+                });
+
+                if (flows.length >= limit) {
+                  return flows.sort((a, b) => b.timestamp - a.timestamp);
+                }
+              }
+            } catch {
+              // Job might not have a flow, skip
+            }
+          }
+        } catch {
+          // Queue might not support this state, skip
+        }
+      }
+    }
+
+    return flows.sort((a, b) => b.timestamp - a.timestamp);
+  }
+
+  /**
+   * Get a single flow tree by root job ID
+   */
+  async getFlow(queueName: string, jobId: string): Promise<FlowNode | null> {
+    if (!this.flowProducer) {
+      return null;
+    }
+
+    try {
+      const flowTree = await this.flowProducer.getFlow({
+        id: jobId,
+        queueName,
+      });
+
+      if (!flowTree) {
+        return null;
+      }
+
+      return this.convertFlowTree(flowTree);
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Create a new flow
+   */
+  async createFlow(request: CreateFlowRequest): Promise<{ id: string }> {
+    if (!this.flowProducer) {
+      throw new Error("FlowProducer not initialized");
+    }
+
+    const flowJob = this.buildFlowJob(request);
+    const result = await this.flowProducer.add(flowJob);
+
+    return { id: result.job.id || "" };
+  }
+
+  /**
+   * Build a FlowJob from CreateFlowRequest or CreateFlowChildRequest
+   */
+  private buildFlowJob(
+    request: CreateFlowRequest | CreateFlowChildRequest,
+  ): any {
+    const result: any = {
+      name: request.name,
+      queueName: request.queueName,
+      data: request.data || {},
+    };
+
+    if (request.children && request.children.length > 0) {
+      result.children = request.children.map((child) =>
+        this.buildFlowJob(child),
+      );
+    }
+
+    return result;
+  }
+
+  /**
+   * Convert BullMQ flow tree to our FlowNode structure
+   */
+  private async convertFlowTree(tree: any): Promise<FlowNode> {
+    const job = tree.job;
+    const state = await job.getState();
+    const duration =
+      job.finishedOn && job.processedOn
+        ? job.finishedOn - job.processedOn
+        : undefined;
+
+    const jobInfo: JobInfo = {
+      id: job.id || "",
+      name: job.name,
+      data: job.data,
+      opts: {
+        attempts: job.opts?.attempts,
+        delay: job.opts?.delay,
+        priority: job.opts?.priority,
+      },
+      progress:
+        typeof job.progress === "number"
+          ? job.progress
+          : typeof job.progress === "object"
+            ? job.progress
+            : 0,
+      attemptsMade: job.attemptsMade || 0,
+      processedOn: job.processedOn,
+      finishedOn: job.finishedOn,
+      timestamp: job.timestamp,
+      failedReason: job.failedReason,
+      stacktrace: job.stacktrace,
+      returnvalue: job.returnvalue,
+      status: state as JobStatus,
+      duration,
+      tags: this.extractTags(job.data),
+    };
+
+    const children: FlowNode[] = [];
+    if (tree.children && tree.children.length > 0) {
+      for (const child of tree.children) {
+        children.push(await this.convertFlowTree(child));
+      }
+    }
+
+    return {
+      job: jobInfo,
+      queueName: job.queueName || tree.queueName || "",
+      children: children.length > 0 ? children : undefined,
+    };
+  }
+
+  /**
+   * Count statistics for a flow tree
+   */
+  private countFlowStats(tree: any): {
+    total: number;
+    completed: number;
+    failed: number;
+  } {
+    let total = 1;
+    let completed = 0;
+    let failed = 0;
+
+    // Check current job status (synchronously from available data)
+    const job = tree.job;
+    if (job.finishedOn && !job.failedReason) {
+      completed = 1;
+    } else if (job.failedReason) {
+      failed = 1;
+    }
+
+    if (tree.children) {
+      for (const child of tree.children) {
+        const childStats = this.countFlowStats(child);
+        total += childStats.total;
+        completed += childStats.completed;
+        failed += childStats.failed;
+      }
+    }
+
+    return { total, completed, failed };
   }
 }

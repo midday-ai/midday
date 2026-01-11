@@ -32,12 +32,14 @@ interface RunsPageProps {
   search: RunsSearch;
   onSearchChange: (search: RunsSearch) => void;
   onJobSelect: (queueName: string, jobId: string) => void;
+  onQueueSelect: (queueName: string) => void;
 }
 
 export function RunsPage({
   search,
   onSearchChange,
   onJobSelect,
+  onQueueSelect,
 }: RunsPageProps) {
   const queryClient = useQueryClient();
 
@@ -457,6 +459,7 @@ export function RunsPage({
                 selected={isSelected(run.queueName, run.id)}
                 onSelect={() => toggleSelection(run)}
                 onClick={() => onJobSelect(run.queueName, run.id)}
+                onQueueClick={onQueueSelect}
               />
             ))}
           </div>
@@ -500,9 +503,16 @@ interface RunRowProps {
   selected: boolean;
   onSelect: () => void;
   onClick: () => void;
+  onQueueClick: (queueName: string) => void;
 }
 
-function RunRow({ run, selected, onSelect, onClick }: RunRowProps) {
+function RunRow({
+  run,
+  selected,
+  onSelect,
+  onClick,
+  onQueueClick,
+}: RunRowProps) {
   const hasTags = run.tags && Object.keys(run.tags).length > 0;
 
   const handleCheckboxClick = (e: React.MouseEvent) => {
@@ -510,13 +520,15 @@ function RunRow({ run, selected, onSelect, onClick }: RunRowProps) {
     onSelect();
   };
 
+  const handleQueueClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onQueueClick(run.queueName);
+  };
+
   return (
     <div
       className="group grid w-full grid-cols-12 items-center gap-4 px-4 py-3 text-left text-sm cursor-pointer"
       onClick={onClick}
-      onKeyDown={(e) => e.key === "Enter" && onClick()}
-      role="button"
-      tabIndex={0}
     >
       <div className="col-span-5 flex min-w-0 items-center gap-3">
         <div
@@ -560,8 +572,14 @@ function RunRow({ run, selected, onSelect, onClick }: RunRowProps) {
           </div>
         </div>
       </div>
-      <div className="col-span-2 truncate font-mono text-xs text-muted-foreground">
-        {run.queueName}
+      <div className="col-span-2">
+        <button
+          type="button"
+          onClick={handleQueueClick}
+          className="truncate font-mono text-xs text-primary hover:underline"
+        >
+          {run.queueName}
+        </button>
       </div>
       <div className="col-span-2">
         <StatusBadge status={run.status} />

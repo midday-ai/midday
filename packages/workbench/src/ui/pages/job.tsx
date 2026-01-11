@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useJob, usePromoteJob, useRemoveJob, useRetryJob } from "@/lib/hooks";
 import { cn, formatAbsoluteTime, formatDuration } from "@/lib/utils";
 import type { JobSearch } from "@/router";
+import { useNavigate } from "@tanstack/react-router";
 import {
   AlertCircle,
   Check,
@@ -23,6 +24,7 @@ import {
   Hash,
   Info,
   Layers,
+  Network,
   Play,
   RefreshCw,
   RotateCcw,
@@ -50,6 +52,7 @@ export function JobPage({
   onBack,
   onClone,
 }: JobPageProps) {
+  const navigate = useNavigate();
   const { data: job, isLoading, error } = useJob(queueName, jobId);
   const retryMutation = useRetryJob();
   const removeMutation = useRemoveJob();
@@ -248,9 +251,40 @@ export function JobPage({
               </button>
             </span>
           </MetadataRow>
-          <MetadataRow icon={Layers} label="Queue" mono>
-            {queueName}
+          <MetadataRow icon={Layers} label="Queue">
+            <button
+              type="button"
+              onClick={() =>
+                navigate({
+                  to: "/queues/$queueName",
+                  params: { queueName },
+                })
+              }
+              className="font-mono text-xs text-primary hover:underline"
+            >
+              {queueName}
+            </button>
           </MetadataRow>
+          {job.parent && (
+            <MetadataRow icon={Network} label="Part of Flow">
+              <button
+                type="button"
+                onClick={() =>
+                  navigate({
+                    to: "/flows/$queueName/$jobId",
+                    params: {
+                      queueName: job.parent!.queueName,
+                      jobId: job.parent!.id,
+                    },
+                  })
+                }
+                className="flex items-center gap-1.5 text-primary hover:underline"
+              >
+                <span className="font-mono text-xs">{job.parent.id}</span>
+                <ExternalLink className="h-3 w-3" />
+              </button>
+            </MetadataRow>
+          )}
           <MetadataRow icon={Clock} label="Created">
             {formatAbsoluteTime(job.timestamp)}
           </MetadataRow>

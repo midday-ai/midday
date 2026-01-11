@@ -30,6 +30,9 @@ export const queryKeys = {
   search: (query: string) => ["search", query] as const,
   tagValues: (field: string) => ["tagValues", field] as const,
   metrics: ["metrics"] as const,
+  flows: ["flows"] as const,
+  flow: (queueName: string, jobId: string) =>
+    ["flow", queueName, jobId] as const,
 };
 
 /**
@@ -49,7 +52,7 @@ export function useConfig() {
 export function useOverview() {
   return useQuery({
     queryKey: queryKeys.overview,
-    queryFn: () => api.getOverview(),
+    queryFn: ({ signal }) => api.getOverview(signal),
     refetchInterval: 5000,
   });
 }
@@ -60,7 +63,7 @@ export function useOverview() {
 export function useQueues() {
   return useQuery({
     queryKey: queryKeys.queues,
-    queryFn: () => api.getQueues(),
+    queryFn: ({ signal }) => api.getQueues(signal),
     refetchInterval: 5000,
   });
 }
@@ -71,7 +74,7 @@ export function useQueues() {
 export function useMetrics() {
   return useQuery({
     queryKey: queryKeys.metrics,
-    queryFn: () => api.getMetrics(),
+    queryFn: ({ signal }) => api.getMetrics(signal),
     refetchInterval: 30000, // Refresh every 30 seconds (metrics are compute-heavy)
   });
 }
@@ -107,8 +110,8 @@ export function useJob(queueName: string, jobId: string) {
 export function useRuns(sort?: string) {
   return useInfiniteQuery({
     queryKey: queryKeys.runs(sort),
-    queryFn: ({ pageParam }) =>
-      api.getRuns({ limit: 50, cursor: pageParam, sort }),
+    queryFn: ({ pageParam, signal }) =>
+      api.getRuns({ limit: 50, cursor: pageParam, sort }, signal),
     getNextPageParam: (lastPage) => lastPage.cursor,
     initialPageParam: undefined as string | undefined,
     refetchInterval: 5000,
@@ -340,6 +343,51 @@ export function useResumeQueue() {
   return useMutation({
     mutationFn: (queueName: string) => api.resumeQueue(queueName),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.queues });
+    },
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Flow Operations
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Hook for fetching all flows
+ */
+export function useFlows() {
+  return useQuery({
+    queryKey: queryKeys.flows,
+    queryFn: ({ signal }) => api.getFlows(undefined, signal),
+    refetchInterval: 5000,
+  });
+}
+
+/**
+ * Hook for fetching a single flow tree
+ */
+export function useFlow(queueName: string, jobId: string) {
+  return useQuery({
+    queryKey: queryKeys.flow(queueName, jobId),
+    queryFn: () => api.getFlow(queueName, jobId),
+    enabled: !!queueName && !!jobId,
+    retry: false, // Don't retry - flow might not exist
+    refetchInterval: 5000,
+  });
+}
+
+/**
+ * Hook for creating a flow
+ */
+export function useCreateFlow() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (request: Parameters<typeof api.createFlow>[0]) =>
+      api.createFlow(request),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.flows });
+      queryClient.invalidateQueries({ queryKey: queryKeys.runsAll });
       queryClient.invalidateQueries({ queryKey: queryKeys.queues });
     },
   });

@@ -1,5 +1,10 @@
 import { Hono } from "hono";
-import type { JobStatus, SortOptions, TestJobRequest } from "../core/types";
+import type {
+  CreateFlowRequest,
+  JobStatus,
+  SortOptions,
+  TestJobRequest,
+} from "../core/types";
 import type { WorkbenchCore } from "../core/workbench";
 
 /**
@@ -294,6 +299,52 @@ export function createApiRoutes(core: WorkbenchCore): Hono {
         },
         404,
       );
+    }
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Flow Operations
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // GET /api/flows - List all flows
+  app.get("/flows", async (c) => {
+    const limit = Number(c.req.query("limit")) || 50;
+    const flows = await qm.getFlows(limit);
+    return c.json({ flows });
+  });
+
+  // GET /api/flows/:queueName/:jobId - Get a single flow tree
+  app.get("/flows/:queueName/:jobId", async (c) => {
+    const { queueName, jobId } = c.req.param();
+    const flow = await qm.getFlow(queueName, jobId);
+
+    if (!flow) {
+      return c.json({ error: "Flow not found" }, 404);
+    }
+
+    return c.json(flow);
+  });
+
+  // POST /api/flows - Create a new flow
+  app.post("/flows", async (c) => {
+    if (core.options.readonly) {
+      return c.json({ error: "Dashboard is in readonly mode" }, 403);
+    }
+
+    const body = await c.req.json<CreateFlowRequest>();
+
+    if (!body.name || !body.queueName || !body.children?.length) {
+      return c.json(
+        { error: "name, queueName, and children are required" },
+        400,
+      );
+    }
+
+    try {
+      const result = await qm.createFlow(body);
+      return c.json(result);
+    } catch (e) {
+      return c.json({ error: (e as Error).message }, 400);
     }
   });
 

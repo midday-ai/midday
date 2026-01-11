@@ -6,6 +6,7 @@ import {
   FlaskConical,
   Layers,
   Moon,
+  Network,
   Play,
   Sun,
 } from "lucide-react";
@@ -46,7 +47,13 @@ function WorkbenchIcon({ className }: { className?: string }) {
   );
 }
 
-export type NavItem = "runs" | "metrics" | "schedulers" | "queues" | "test";
+export type NavItem =
+  | "runs"
+  | "metrics"
+  | "schedulers"
+  | "flows"
+  | "queues"
+  | "test";
 
 interface AppSidebarProps {
   queues: string[];
@@ -74,6 +81,7 @@ export function AppSidebar({
     { id: "runs" as const, label: "Runs", icon: Play },
     { id: "metrics" as const, label: "Metrics", icon: BarChart3 },
     { id: "schedulers" as const, label: "Schedulers", icon: Clock },
+    { id: "flows" as const, label: "Flows", icon: Network },
     { id: "test" as const, label: "Test", icon: FlaskConical },
   ];
 

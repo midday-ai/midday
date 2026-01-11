@@ -1,5 +1,8 @@
 import type {
+  CreateFlowRequest,
   DelayedJobInfo,
+  FlowNode,
+  FlowSummary,
   JobInfo,
   JobStatus,
   MetricsResponse,
@@ -13,43 +16,104 @@ import type {
 
 const API_BASE = "./api";
 
-async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
-  });
+// Default timeout of 60 seconds for API requests
+const DEFAULT_TIMEOUT = 60000;
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.error || `HTTP ${response.status}`);
+// Extended timeout for heavy operations (120 seconds)
+const EXTENDED_TIMEOUT = 120000;
+
+interface FetchOptions extends Omit<RequestInit, "signal"> {
+  timeout?: number;
+  signal?: AbortSignal; // React Query's signal for cancellation
+}
+
+async function fetchJson<T>(url: string, options?: FetchOptions): Promise<T> {
+  const {
+    timeout = DEFAULT_TIMEOUT,
+    signal: externalSignal,
+    ...fetchOptions
+  } = options || {};
+
+  // Create AbortController for timeout
+  const timeoutController = new AbortController();
+  const timeoutId = setTimeout(() => timeoutController.abort(), timeout);
+
+  // Combine signals: React Query's signal (for unmount) + timeout signal
+  // Use AbortSignal.any if available (modern browsers), otherwise just use timeout
+  let combinedSignal: AbortSignal;
+  if (externalSignal && "any" in AbortSignal) {
+    combinedSignal = AbortSignal.any([
+      externalSignal,
+      timeoutController.signal,
+    ]);
+  } else if (externalSignal) {
+    // Fallback: link external signal to our controller
+    if (externalSignal.aborted) {
+      timeoutController.abort();
+    } else {
+      externalSignal.addEventListener("abort", () => timeoutController.abort());
+    }
+    combinedSignal = timeoutController.signal;
+  } else {
+    combinedSignal = timeoutController.signal;
   }
 
-  return response.json();
+  try {
+    const response = await fetch(url, {
+      ...fetchOptions,
+      signal: combinedSignal,
+      headers: {
+        "Content-Type": "application/json",
+        ...fetchOptions?.headers,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.error || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      // Check if it was our timeout or external cancellation
+      if (externalSignal?.aborted) {
+        throw error; // Let React Query handle the cancellation
+      }
+      throw new Error(`Request timed out after ${timeout / 1000}s`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 export const api = {
   /**
-   * Get dashboard overview stats
+   * Get dashboard overview stats (longer timeout as it scans all queues)
    */
-  async getOverview(): Promise<OverviewStats> {
-    return fetchJson(`${API_BASE}/overview`);
+  async getOverview(signal?: AbortSignal): Promise<OverviewStats> {
+    return fetchJson(`${API_BASE}/overview`, {
+      signal,
+      timeout: EXTENDED_TIMEOUT,
+    });
   },
 
   /**
    * Get all queues
    */
-  async getQueues(): Promise<QueueInfo[]> {
-    return fetchJson(`${API_BASE}/queues`);
+  async getQueues(signal?: AbortSignal): Promise<QueueInfo[]> {
+    return fetchJson(`${API_BASE}/queues`, { signal });
   },
 
   /**
-   * Get 24-hour metrics
+   * Get 24-hour metrics (longer timeout as it scans all queues)
    */
-  async getMetrics(): Promise<MetricsResponse> {
-    return fetchJson(`${API_BASE}/metrics`);
+  async getMetrics(signal?: AbortSignal): Promise<MetricsResponse> {
+    return fetchJson(`${API_BASE}/metrics`, {
+      signal,
+      timeout: EXTENDED_TIMEOUT,
+    });
   },
 
   /**
@@ -173,20 +237,26 @@ export const api = {
   },
 
   /**
-   * Get all runs (jobs across all queues)
+   * Get all runs (jobs across all queues, longer timeout)
    */
-  async getRuns(options?: {
-    limit?: number;
-    cursor?: string;
-    sort?: string; // format: "field:direction"
-  }): Promise<PaginatedResponse<RunInfo>> {
+  async getRuns(
+    options?: {
+      limit?: number;
+      cursor?: string;
+      sort?: string; // format: "field:direction"
+    },
+    signal?: AbortSignal,
+  ): Promise<PaginatedResponse<RunInfo>> {
     const params = new URLSearchParams();
     if (options?.limit) params.set("limit", String(options.limit));
     if (options?.cursor) params.set("cursor", options.cursor);
     if (options?.sort) params.set("sort", options.sort);
 
     const query = params.toString();
-    return fetchJson(`${API_BASE}/runs${query ? `?${query}` : ""}`);
+    return fetchJson(`${API_BASE}/runs${query ? `?${query}` : ""}`, {
+      signal,
+      timeout: EXTENDED_TIMEOUT,
+    });
   },
 
   /**
@@ -322,5 +392,44 @@ export const api = {
       `${API_BASE}/queues/${encodeURIComponent(queueName)}/resume`,
       { method: "POST" },
     );
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Flow Operations
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Get all flows (longer timeout as it scans all queues)
+   */
+  async getFlows(
+    limit?: number,
+    signal?: AbortSignal,
+  ): Promise<{ flows: FlowSummary[] }> {
+    const params = new URLSearchParams();
+    if (limit) params.set("limit", String(limit));
+    const query = params.toString();
+    return fetchJson(`${API_BASE}/flows${query ? `?${query}` : ""}`, {
+      signal,
+      timeout: EXTENDED_TIMEOUT,
+    });
+  },
+
+  /**
+   * Get a single flow tree
+   */
+  async getFlow(queueName: string, jobId: string): Promise<FlowNode> {
+    return fetchJson(
+      `${API_BASE}/flows/${encodeURIComponent(queueName)}/${encodeURIComponent(jobId)}`,
+    );
+  },
+
+  /**
+   * Create a new flow
+   */
+  async createFlow(request: CreateFlowRequest): Promise<{ id: string }> {
+    return fetchJson(`${API_BASE}/flows`, {
+      method: "POST",
+      body: JSON.stringify(request),
+    });
   },
 };

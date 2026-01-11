@@ -95,6 +95,11 @@ export interface JobInfo {
   duration?: number;
   /** Extracted tag values from job.data based on configured tag fields */
   tags?: JobTags;
+  /** Parent job info if this job is part of a flow */
+  parent?: {
+    id: string;
+    queueName: string;
+  };
 }
 
 /**
@@ -277,4 +282,61 @@ export interface MetricsResponse {
   mostFailingTypes: FailingJobType[];
   /** Timestamp when metrics were computed */
   computedAt: number;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Flow Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * A node in a flow tree representing a job and its children
+ */
+export interface FlowNode {
+  job: JobInfo;
+  queueName: string;
+  children?: FlowNode[];
+}
+
+/**
+ * Flow summary for list view
+ */
+export interface FlowSummary {
+  /** Root job ID */
+  id: string;
+  /** Root job name */
+  name: string;
+  /** Queue containing root job */
+  queueName: string;
+  /** Root job status */
+  status: JobStatus;
+  /** Total number of jobs in flow */
+  totalJobs: number;
+  /** Number of completed jobs */
+  completedJobs: number;
+  /** Number of failed jobs */
+  failedJobs: number;
+  /** When flow was created */
+  timestamp: number;
+  /** Duration if completed */
+  duration?: number;
+}
+
+/**
+ * Request to create a test flow
+ */
+export interface CreateFlowRequest {
+  name: string;
+  queueName: string;
+  data?: unknown;
+  children: CreateFlowChildRequest[];
+}
+
+/**
+ * Child job in a flow creation request
+ */
+export interface CreateFlowChildRequest {
+  name: string;
+  queueName: string;
+  data?: unknown;
+  children?: CreateFlowChildRequest[];
 }
