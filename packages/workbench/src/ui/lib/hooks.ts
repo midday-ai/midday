@@ -1,4 +1,4 @@
-import type { JobStatus } from "@/core/types";
+import type { JobStatus, RunInfoList } from "@/core/types";
 import {
   useInfiniteQuery,
   useMutation,
@@ -20,7 +20,15 @@ export const queryKeys = {
     ["jobs", queueName, status, sort] as const,
   jobsAll: (queueName: string) => ["jobs", queueName] as const, // For invalidation
   job: (queueName: string, jobId: string) => ["job", queueName, jobId] as const,
-  runs: (sort?: string) => ["runs", sort] as const,
+  runs: (
+    sort?: string,
+    filters?: {
+      status?: JobStatus;
+      tags?: Record<string, string>;
+      text?: string;
+      timeRange?: { start: number; end: number };
+    },
+  ) => ["runs", sort, filters] as const,
   runsAll: ["runs"] as const, // For invalidation
   schedulers: {
     repeatable: (sort?: string) => ["schedulers", "repeatable", sort] as const,
@@ -117,13 +125,21 @@ export function useJob(queueName: string, jobId: string) {
 }
 
 /**
- * Hook for fetching all runs with sorting
+ * Hook for fetching all runs with sorting and filtering
  */
-export function useRuns(sort?: string) {
+export function useRuns(
+  sort?: string,
+  filters?: {
+    status?: JobStatus;
+    tags?: Record<string, string>;
+    text?: string;
+    timeRange?: { start: number; end: number };
+  },
+) {
   return useInfiniteQuery({
-    queryKey: queryKeys.runs(sort),
+    queryKey: queryKeys.runs(sort, filters),
     queryFn: ({ pageParam, signal }) =>
-      api.getRuns({ limit: 100, cursor: pageParam, sort }, signal),
+      api.getRuns({ limit: 20, cursor: pageParam, sort, ...filters }, signal),
     getNextPageParam: (lastPage) => lastPage.cursor,
     initialPageParam: undefined as string | undefined,
     refetchInterval: 5000,

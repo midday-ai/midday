@@ -140,6 +140,21 @@ export interface RunInfo extends JobInfo {
 }
 
 /**
+ * Lightweight run info for list view - only fields needed for table display
+ * Excludes large fields like full job.data, opts, progress, etc.
+ */
+export interface RunInfoList {
+  id: string;
+  name: string;
+  status: JobStatus;
+  queueName: string;
+  tags?: JobTags;
+  processedOn?: number;
+  timestamp: number;
+  duration?: number;
+}
+
+/**
  * Scheduler info for repeatable jobs
  */
 export interface SchedulerInfo {

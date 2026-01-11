@@ -18,6 +18,7 @@ import type {
   QueueInfo,
   QueueMetrics,
   RunInfo,
+  RunInfoList,
   SchedulerInfo,
   SearchResult,
   SortOptions,
@@ -867,8 +868,10 @@ export class QueueManager {
       total += typeCount;
     }
 
-    // Convert to JobInfo first for sorting on computed fields
-    const jobInfos = await Promise.all(jobs.map((job) => this.jobToInfo(job)));
+    // Convert to JobInfo first for sorting on computed fields (full view for queue page)
+    const jobInfos = (await Promise.all(
+      jobs.map((job) => this.jobToInfo(job, "full")),
+    )) as JobInfo[];
 
     // Apply sorting
     const sortField = sort?.field ?? "timestamp";
@@ -903,7 +906,7 @@ export class QueueManager {
     const job = await queue.getJob(jobId);
     if (!job) return null;
 
-    return this.jobToInfo(job);
+    return this.jobToInfo(job, "full") as Promise<JobInfo>;
   }
 
   /**
@@ -989,6 +992,71 @@ export class QueueManager {
       filters,
       text: parts.filter(Boolean).join(" "),
     };
+  }
+
+  /**
+   * Check if a raw job matches all provided filters (before conversion)
+   * This is more efficient than converting to JobInfo first
+   */
+  private jobMatchesAllFilters(
+    job: Job,
+    filters: {
+      status?: JobStatus;
+      tags?: Record<string, string>;
+      text?: string;
+      timeRange?: { start: number; end: number };
+    },
+  ): boolean {
+    // Status filter is handled by fetching only the requested status types
+    // So we don't need to check it here - jobs are already filtered by type
+
+    // Check time range filter (cheap - uses raw timestamps)
+    if (filters.timeRange) {
+      const jobTime = job.processedOn || job.finishedOn || job.timestamp || 0;
+      if (
+        jobTime < filters.timeRange.start ||
+        jobTime > filters.timeRange.end
+      ) {
+        return false;
+      }
+    }
+
+    // Check tag filters (extract only needed fields from job.data)
+    if (filters.tags && Object.keys(filters.tags).length > 0) {
+      if (!job.data || typeof job.data !== "object") {
+        return false;
+      }
+      const dataObj = job.data as Record<string, unknown>;
+      for (const [field, value] of Object.entries(filters.tags)) {
+        const jobValue = dataObj[field];
+        if (jobValue === undefined || jobValue === null) {
+          return false;
+        }
+        // Case-insensitive comparison for strings
+        const strJobValue = String(jobValue).toLowerCase();
+        const strFilterValue = value.toLowerCase();
+        if (!strJobValue.includes(strFilterValue)) {
+          return false;
+        }
+      }
+    }
+
+    // Check text search (only stringify if needed)
+    if (filters.text) {
+      const lowerText = filters.text.toLowerCase();
+      const matchesId = job.id?.toLowerCase().includes(lowerText);
+      const matchesName = job.name?.toLowerCase().includes(lowerText);
+
+      if (!matchesId && !matchesName) {
+        // Only stringify job.data if ID and name don't match
+        const stringifiedData = JSON.stringify(job.data).toLowerCase();
+        if (!stringifiedData.includes(lowerText)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -1103,7 +1171,7 @@ export class QueueManager {
 
                 matches.push({
                   queue: queueName,
-                  job: await this.jobToInfo(job),
+                  job: (await this.jobToInfo(job, "full")) as JobInfo,
                 });
               }
 
@@ -1153,19 +1221,34 @@ export class QueueManager {
     limit = 50,
     start = 0,
     sort?: SortOptions,
-  ): Promise<PaginatedResponse<RunInfo>> {
+    filters?: {
+      status?: JobStatus;
+      tags?: Record<string, string>;
+      text?: string;
+      timeRange?: { start: number; end: number };
+    },
+  ): Promise<PaginatedResponse<RunInfoList>> {
     const queueEntries = Array.from(this.queues.entries());
     const sortField = sort?.field ?? "timestamp";
     const sortDir = sort?.direction === "asc" ? 1 : -1;
 
+    // Determine which job types to fetch based on status filter
+    const types = filters?.status
+      ? [filters.status]
+      : ["waiting", "active", "completed", "failed", "delayed"];
+
     // For timestamp sorting, we can use Redis sorted sets more efficiently
     // For other sorting, we need to fetch more jobs to sort in memory
     const isTimestampSort = sortField === "timestamp";
-    const fetchLimit = isTimestampSort
-      ? Math.min(start + limit + 20, 100) // Smaller buffer for timestamp sort
-      : Math.min(start + limit + 100, 200); // Larger buffer for other sorts
+    const hasTimeRange = !!filters?.timeRange;
 
-    const types = ["waiting", "active", "completed", "failed", "delayed"];
+    // When using time range, we can fetch more efficiently
+    // Otherwise, use standard fetch limits
+    const fetchLimit = hasTimeRange
+      ? Math.min(start + limit * 3, 200) // Fetch more when filtering by time
+      : isTimestampSort
+        ? Math.min(start + limit + 20, 100) // Smaller buffer for timestamp sort
+        : Math.min(start + limit + 100, 200); // Larger buffer for other sorts
 
     // Fetch counts first to skip empty queues entirely
     const queueChecks = await Promise.all(
@@ -1197,17 +1280,65 @@ export class QueueManager {
     // Fetch jobs from queues that have them
     const queueResults = await Promise.all(
       queuesWithJobs.map(async ({ queueName, queue }) => {
-        // Fetch all job types in parallel (counts already fetched above)
+        // Use time-range queries for completed/failed jobs when time range is specified
+        if (hasTimeRange && filters?.timeRange) {
+          const timeRangeJobs: Job[] = [];
+
+          // Use efficient time-range queries for completed/failed
+          if (types.includes("completed")) {
+            const completedJobs = await this.getJobsByTimeRange(
+              queue,
+              "completed",
+              filters.timeRange.start,
+              filters.timeRange.end,
+              fetchLimit,
+            );
+            timeRangeJobs.push(...completedJobs);
+          }
+
+          if (types.includes("failed")) {
+            const failedJobs = await this.getJobsByTimeRange(
+              queue,
+              "failed",
+              filters.timeRange.start,
+              filters.timeRange.end,
+              fetchLimit,
+            );
+            timeRangeJobs.push(...failedJobs);
+          }
+
+          // For other types, use regular getJobs
+          const otherTypes = types.filter(
+            (t) => t !== "completed" && t !== "failed",
+          );
+          if (otherTypes.length > 0) {
+            const otherJobArrays = await Promise.all(
+              otherTypes.map((type) =>
+                queue.getJobs(type as any, 0, fetchLimit),
+              ),
+            );
+            timeRangeJobs.push(...otherJobArrays.flat());
+          }
+
+          return timeRangeJobs.map((job) => ({ job, queueName }));
+        }
+        // Regular fetching for all types
         const jobArrays = await Promise.all(
           types.map((type) => queue.getJobs(type as any, 0, fetchLimit)),
         );
-        const jobs = jobArrays.flat().map((job) => ({ job, queueName }));
-        return jobs;
+        return jobArrays.flat().map((job) => ({ job, queueName }));
       }),
     );
 
     // Flatten all jobs
-    const allJobs: { job: Job; queueName: string }[] = queueResults.flat();
+    let allJobs: { job: Job; queueName: string }[] = queueResults.flat();
+
+    // Apply filters BEFORE conversion (cheaper filtering on raw jobs)
+    if (filters) {
+      allJobs = allJobs.filter(({ job }) =>
+        this.jobMatchesAllFilters(job, filters),
+      );
+    }
 
     // For timestamp sorting, sort jobs before converting (cheaper)
     if (isTimestampSort) {
@@ -1219,30 +1350,34 @@ export class QueueManager {
     }
 
     // Only convert jobs that we'll actually return (lazy conversion)
+    // Use "list" fields for lightweight list view
     const jobsToConvert = allJobs.slice(start, start + limit);
     const runInfos = await Promise.all(
       jobsToConvert.map(async ({ job, queueName }) => {
-        const info = await this.jobToInfo(job);
-        return { ...info, queueName } as RunInfo;
+        const info = await this.jobToInfo(job, "list");
+        return { ...info, queueName } as RunInfoList;
       }),
     );
 
     // For non-timestamp sorting, sort after conversion
     if (!isTimestampSort) {
       runInfos.sort((a, b) => {
-        const aVal = this.getSortValue(a, sortField);
-        const bVal = this.getSortValue(b, sortField);
+        const aVal = this.getSortValueForList(a, sortField);
+        const bVal = this.getSortValueForList(b, sortField);
         if (aVal < bVal) return -1 * sortDir;
         if (aVal > bVal) return 1 * sortDir;
         return 0;
       });
     }
 
+    // Calculate total based on filtered results
+    const filteredTotal = filters ? allJobs.length : total;
+
     return {
       data: runInfos,
-      total,
-      hasMore: start + limit < total,
-      cursor: start + limit < total ? String(start + limit) : undefined,
+      total: filteredTotal,
+      hasMore: start + limit < filteredTotal,
+      cursor: start + limit < filteredTotal ? String(start + limit) : undefined,
     };
   }
 
@@ -1439,6 +1574,31 @@ export class QueueManager {
   }
 
   /**
+   * Get sortable value from RunInfoList (lightweight version)
+   */
+  private getSortValueForList(
+    item: RunInfoList,
+    field: string,
+  ): string | number {
+    switch (field) {
+      case "timestamp":
+        return item.timestamp ?? 0;
+      case "name":
+        return item.name.toLowerCase();
+      case "status":
+        return item.status;
+      case "duration":
+        return item.duration ?? 0;
+      case "queueName":
+        return item.queueName.toLowerCase();
+      case "processedOn":
+        return item.processedOn ?? 0;
+      default:
+        return item.timestamp ?? 0;
+    }
+  }
+
+  /**
    * Get sortable value from SchedulerInfo
    */
   private getSchedulerSortValue(
@@ -1483,9 +1643,14 @@ export class QueueManager {
   }
 
   /**
-   * Convert a BullMQ Job to JobInfo
+   * Convert a BullMQ Job to JobInfo or RunInfoList
+   * @param job - The BullMQ job to convert
+   * @param fields - "list" for lightweight list view, "full" for complete job details
    */
-  private async jobToInfo(job: Job): Promise<JobInfo> {
+  private async jobToInfo(
+    job: Job,
+    fields: "list" | "full" = "full",
+  ): Promise<JobInfo | RunInfoList> {
     // Use cached state if available, otherwise fetch and cache
     const cacheKey = `${job.queueName}:${job.id}`;
     let state = this.jobStateCache.get(cacheKey);
