@@ -1,7 +1,7 @@
 /**
  * AI content generation for insights
  */
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createOpenAI } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 import { z } from "zod/v4";
 import type {
@@ -13,8 +13,8 @@ import type {
 } from "../types";
 import { buildInsightPrompt, getFallbackContent } from "./prompts";
 
-const google = createGoogleGenerativeAI({
-  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY!,
+const openai = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
 });
 
 /**
@@ -54,7 +54,7 @@ export class ContentGenerator {
   private model: string;
 
   constructor(options: ContentGeneratorOptions = {}) {
-    this.model = options.model ?? "gemini-2.5-flash-lite";
+    this.model = options.model ?? "gpt-4o-mini";
   }
 
   /**
@@ -79,7 +79,7 @@ export class ContentGenerator {
 
     try {
       const { object } = await generateObject({
-        model: google(this.model),
+        model: openai(this.model),
         schema: insightContentSchema,
         temperature: 0.7,
         messages: [

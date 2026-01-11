@@ -28,6 +28,7 @@ import { invoiceRefunded } from "./types/invoice-refunded";
 import { invoiceReminderSent } from "./types/invoice-reminder-sent";
 import { invoiceScheduled } from "./types/invoice-scheduled";
 import { invoiceSent } from "./types/invoice-sent";
+import { insightReady } from "./types/insight-ready";
 import { recurringInvoiceUpcoming } from "./types/recurring-invoice-upcoming";
 import { recurringSeriesCompleted } from "./types/recurring-series-completed";
 import { recurringSeriesPaused } from "./types/recurring-series-paused";
@@ -60,6 +61,7 @@ const handlers = {
   recurring_series_started: recurringSeriesStarted,
   recurring_series_paused: recurringSeriesPaused,
   recurring_invoice_upcoming: recurringInvoiceUpcoming,
+  insight_ready: insightReady,
 } as const;
 
 export class Notifications {

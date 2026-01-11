@@ -80,6 +80,8 @@ export function InsightsWidget() {
       periodType: "weekly",
       limit: 4,
     }),
+    // Insights are generated weekly, so cache for 1 hour
+    staleTime: 60 * 60 * 1000,
   });
 
   const insights: InsightCard[] =

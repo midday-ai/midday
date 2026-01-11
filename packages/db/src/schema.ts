@@ -259,6 +259,7 @@ export const activityTypeEnum = pgEnum("activity_type", [
   "transaction_category_created",
   "transactions_exported",
   "customer_created",
+  "insight_ready",
 ]);
 
 export const activitySourceEnum = pgEnum("activity_source", [

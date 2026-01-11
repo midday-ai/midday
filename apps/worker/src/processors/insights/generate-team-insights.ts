@@ -9,6 +9,7 @@ import {
   createInsightsService,
   getPreviousCompletePeriod,
 } from "@midday/insights";
+import { triggerJob } from "@midday/job-client";
 import type { Job } from "bullmq";
 import { getDb } from "../../utils/db";
 import { BaseProcessor } from "../base";
@@ -140,6 +141,33 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
         periodLabel: period.periodLabel,
         metricsCount: result.selectedMetrics.length,
       });
+
+      // Trigger notification for new insights (not updates)
+      if (!existingInsight) {
+        try {
+          await triggerJob(
+            "notification",
+            {
+              type: "insight_ready",
+              teamId,
+              insightId,
+              periodType,
+              periodLabel: period.periodLabel,
+              periodNumber: period.periodNumber,
+              periodYear: period.periodYear,
+              goodNews: result.content.goodNews,
+            },
+            "notifications",
+          );
+        } catch (error) {
+          // Don't fail the entire process if notification fails
+          this.logger.warn("Failed to trigger insight_ready notification", {
+            teamId,
+            insightId,
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
+        }
+      }
 
       return {
         insightId,
