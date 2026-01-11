@@ -262,6 +262,7 @@
         "@midday/engine": "workspace:*",
         "@midday/engine-client": "workspace:*",
         "@midday/import": "workspace:*",
+        "@midday/insights": "workspace:*",
         "@midday/invoice": "workspace:*",
         "@midday/job-client": "workspace:*",
         "@midday/jobs": "workspace:*",
@@ -477,6 +478,21 @@
         "@midday/utils": "workspace:*",
         "googleapis": "^168.0.0",
         "zod": "^4.1.13",
+      },
+    },
+    "packages/insights": {
+      "name": "@midday/insights",
+      "version": "0.1.0",
+      "dependencies": {
+        "@ai-sdk/google": "^2.0.33",
+        "@midday/db": "workspace:*",
+        "ai": "5.0.87",
+        "date-fns": "^4.1.0",
+        "zod": "^4.1.13",
+      },
+      "devDependencies": {
+        "@midday/tsconfig": "workspace:*",
+        "typescript": "^5.9.3",
       },
     },
     "packages/invoice": {
@@ -1227,6 +1243,8 @@
     "@midday/import": ["@midday/import@workspace:packages/import"],
 
     "@midday/inbox": ["@midday/inbox@workspace:packages/inbox"],
+
+    "@midday/insights": ["@midday/insights@workspace:packages/insights"],
 
     "@midday/invoice": ["@midday/invoice@workspace:packages/invoice"],
 
@@ -5242,7 +5260,7 @@
 
     "@midday/customers/@ai-sdk/google": ["@ai-sdk/google@3.0.6", "", { "dependencies": { "@ai-sdk/provider": "3.0.2", "@ai-sdk/provider-utils": "4.0.4" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-Nr7E+ouWd/bKO9SFlgLnJJ1+fiGHC07KAeFr08faT+lvkECWlxVox3aL0dec8uCgBDUghYbq7f4S5teUrCc+QQ=="],
 
-    "@midday/customers/@types/node": ["@types/node@25.0.5", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-FuLxeLuSVOqHPxSN1fkcD8DLU21gAP7nCKqGRJ/FglbCUBs0NYN6TpHcdmyLeh8C0KwGIaZQJSv+OYG+KZz+Gw=="],
+    "@midday/customers/@types/node": ["@types/node@25.0.6", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-NNu0sjyNxpoiW3YuVFfNz7mxSQ+S4X2G28uqg2s+CzoqoQjLPsWSbsFFyztIAqt2vb8kfEAsJNepMGPTxFDx3Q=="],
 
     "@midday/customers/ai": ["ai@6.0.27", "", { "dependencies": { "@ai-sdk/gateway": "3.0.11", "@ai-sdk/provider": "3.0.2", "@ai-sdk/provider-utils": "4.0.4", "@opentelemetry/api": "1.9.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-a4ToMt5+4xOzHuYdoTy2GQXuNa2/Tpuhxfs5QESHtEV/Vf2HAzSwmTwikrIs8CDKPuMWV1I9YqAvaN5xexMCiQ=="],
 

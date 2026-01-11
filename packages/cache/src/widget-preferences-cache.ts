@@ -10,6 +10,9 @@ export const WIDGET_TYPES = [
   "revenue-summary",
   "growth-rate",
 
+  // AI Insights
+  "insights",
+
   // Customer insights
   "customer-lifetime-value",
   "top-customer",

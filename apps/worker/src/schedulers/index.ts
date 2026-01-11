@@ -6,6 +6,7 @@ import {
   inboxDynamicSchedulerTemplates,
   inboxStaticSchedulers,
 } from "./inbox.config";
+import { insightsStaticSchedulers } from "./insights.config";
 import { invoicesStaticSchedulers } from "./invoices.config";
 import { ratesStaticSchedulers } from "./rates.config";
 
@@ -17,6 +18,7 @@ export const staticSchedulerConfigs: StaticSchedulerConfig[] = [
   ...inboxStaticSchedulers,
   ...invoicesStaticSchedulers,
   ...ratesStaticSchedulers,
+  ...insightsStaticSchedulers,
 ];
 
 /**
