@@ -1,6 +1,8 @@
 import { RedisCache } from "./redis-client";
 
 export const WIDGET_TYPES = [
+  "insights",
+
   // Critical financial health (default primary widgets)
   "runway",
   "cash-flow",

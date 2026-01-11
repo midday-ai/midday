@@ -12,6 +12,7 @@ import { getCashFlowStressTestTool } from "@api/ai/tools/get-cash-flow-stress-te
 import { getExpensesTool } from "@api/ai/tools/get-expenses";
 import { getForecastTool } from "@api/ai/tools/get-forecast";
 import { getGrowthRateTool } from "@api/ai/tools/get-growth-rate";
+import { getInsightsTool } from "@api/ai/tools/get-insights";
 import { getInvoicePaymentAnalysisTool } from "@api/ai/tools/get-invoice-payment-analysis";
 import { getMetricsBreakdownTool } from "@api/ai/tools/get-metrics-breakdown";
 import { getProfitAnalysisTool } from "@api/ai/tools/get-profit-analysis";
@@ -48,6 +49,7 @@ When getMetricsBreakdown is called with showCanvas: true, respond with plain tex
 </priority>
 
 <Tool selection>
+- Weekly/monthly/quarterly insights or summary → getInsights (default to weekly)
 - Balance sheet → getBalanceSheet (showCanvas: true)
 - Breakdown → getMetricsBreakdown (showCanvas: true)
 - Spending → getSpending (showCanvas: true if "show" mentioned)
@@ -78,6 +80,7 @@ Split by calendar periods (years/quarters/months) and call tool multiple times w
 </Response>
 </instructions>`,
   tools: {
+    getInsights: getInsightsTool,
     getRunway: getRunwayTool,
     getCashFlow: getCashFlowTool,
     getCashFlowStressTest: getCashFlowStressTestTool,

@@ -34,7 +34,7 @@ import { CategoryExpensesWidget } from "./category-expenses";
 import { CustomerLifetimeValueWidget } from "./customer-lifetime-value";
 import { GrowthRateWidget } from "./growth-rate";
 import { InboxWidget } from "./inbox";
-// import { Insights } from "./insights";
+import { InsightsWidget } from "./insights";
 import { InvoicePaymentScoreWidget } from "./invoice-payment-score";
 import { MonthlySpendingWidget } from "./monthly-spending";
 import { NetPositionWidget } from "./net-position";
@@ -121,6 +121,7 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
   "cash-flow": CashFlowWidget,
   "outstanding-invoices": OutstandingInvoicesWidget,
   inbox: InboxWidget,
+  insights: InsightsWidget,
   "time-tracker": TimeTrackerWidget,
   vault: VaultWidget,
   "account-balances": AccountBalancesWidget,

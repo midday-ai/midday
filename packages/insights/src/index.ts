@@ -1,0 +1,441 @@
+/**
+ * @midday/insights - AI-powered business insights generation
+ *
+ * This package provides:
+ * - Smart metric selection and analysis
+ * - AI-powered content generation
+ * - Period date utilities
+ * - Type definitions for insights
+ */
+import type { Database } from "@midday/db/client";
+import {
+  getCashFlow,
+  getInsightActivityData,
+  getOverdueInvoicesAlert,
+  getProfit,
+  getRevenue,
+  getRunway,
+  getSpendingForPeriod,
+  getUpcomingDueRecurring,
+} from "@midday/db/queries";
+import {
+  ContentGenerator,
+  type ContentGeneratorOptions,
+} from "./content/generator";
+import {
+  addActivityMetrics,
+  calculateAllMetrics,
+  createMetric,
+  detectAnomalies,
+  selectTopMetrics,
+} from "./metrics";
+import {
+  formatDateForQuery,
+  getPreviousCompletePeriod,
+  getPreviousPeriod,
+} from "./period";
+import type {
+  GenerateInsightParams,
+  InsightActivity,
+  InsightAnomaly,
+  InsightContent,
+  InsightGenerationResult,
+  InsightMetric,
+  MetricData,
+  PeriodInfo,
+  PeriodType,
+} from "./types";
+
+export type InsightsServiceOptions = {
+  model?: string;
+};
+
+/**
+ * Main service class for generating business insights
+ */
+export class InsightsService {
+  private db: Database;
+  private contentGenerator: ContentGenerator;
+
+  constructor(db: Database, options: InsightsServiceOptions = {}) {
+    this.db = db;
+    this.contentGenerator = new ContentGenerator({
+      model: options.model,
+    });
+  }
+
+  /**
+   * Generate a complete insight for a team and period
+   */
+  async generateInsight(
+    params: GenerateInsightParams,
+  ): Promise<InsightGenerationResult> {
+    const {
+      teamId,
+      periodType,
+      periodStart,
+      periodEnd,
+      periodLabel,
+      periodYear,
+      periodNumber,
+      currency,
+    } = params;
+
+    // Create period info
+    const currentPeriod: PeriodInfo = {
+      periodStart,
+      periodEnd,
+      periodLabel,
+      periodYear,
+      periodNumber,
+    };
+
+    // Get previous period for comparison
+    const previousPeriod = getPreviousPeriod(periodType, currentPeriod);
+
+    // Fetch all data in parallel
+    const [currentMetrics, previousMetrics, currentActivity, previousActivity] =
+      await Promise.all([
+        this.fetchMetricData(teamId, currentPeriod, currency),
+        this.fetchMetricData(teamId, previousPeriod, currency),
+        this.fetchActivityData(teamId, currentPeriod, currency),
+        this.fetchActivityData(teamId, previousPeriod, currency),
+      ]);
+
+    // Calculate all metrics
+    let allMetrics = calculateAllMetrics(
+      currentMetrics,
+      previousMetrics,
+      currency,
+    );
+
+    // Add activity-based metrics
+    allMetrics = addActivityMetrics(
+      allMetrics,
+      currentActivity,
+      previousActivity,
+      currency,
+    );
+
+    // Select top metrics
+    const selectedMetrics = selectTopMetrics(allMetrics);
+
+    // Detect anomalies
+    const anomalies = detectAnomalies(allMetrics);
+
+    // Build activity summary
+    const activity = await this.buildActivitySummary(
+      teamId,
+      currentPeriod,
+      currency,
+      currentActivity,
+    );
+
+    // Generate AI content
+    const content = await this.contentGenerator.generate(
+      selectedMetrics,
+      anomalies,
+      activity,
+      periodLabel,
+      periodType,
+      currency,
+    );
+
+    return {
+      selectedMetrics,
+      allMetrics,
+      anomalies,
+      milestones: [], // TODO: Implement milestone detection
+      activity,
+      content,
+    };
+  }
+
+  /**
+   * Fetch financial metric data for a period
+   */
+  private async fetchMetricData(
+    teamId: string,
+    period: PeriodInfo,
+    currency: string,
+  ): Promise<MetricData> {
+    const from = formatDateForQuery(period.periodStart);
+    const to = formatDateForQuery(period.periodEnd);
+
+    const [revenueData, profitData, cashFlowData, spendingData, runwayData] =
+      await Promise.all([
+        getRevenue(this.db, { teamId, from, to, currency }).catch(() => []),
+        getProfit(this.db, { teamId, from, to, currency }).catch(() => []),
+        getCashFlow(this.db, { teamId, from, to, currency }).catch(() => null),
+        getSpendingForPeriod(this.db, { teamId, from, to, currency }).catch(
+          () => null,
+        ),
+        getRunway(this.db, { teamId, from, to, currency }).catch(() => 0),
+      ]);
+
+    // Sum up monthly values for revenue
+    const revenueTotal = Array.isArray(revenueData)
+      ? revenueData.reduce((sum, item) => sum + Number(item.value || 0), 0)
+      : 0;
+
+    // Sum up monthly values for profit
+    const profitTotal = Array.isArray(profitData)
+      ? profitData.reduce((sum, item) => sum + Number(item.value || 0), 0)
+      : 0;
+
+    // Get cash flow values
+    const cashIn = cashFlowData?.summary?.totalIncome ?? 0;
+    const cashOut = cashFlowData?.summary?.totalExpenses ?? 0;
+    const netCashFlow = cashIn - cashOut;
+
+    // Get expenses from spending
+    const expenses = spendingData?.totalSpending ?? 0;
+
+    // Calculate profit margin
+    const profitMargin =
+      revenueTotal > 0 ? (profitTotal / revenueTotal) * 100 : 0;
+
+    return {
+      revenue: revenueTotal,
+      expenses,
+      netProfit: profitTotal,
+      cashFlow: netCashFlow,
+      profitMargin,
+      runwayMonths: typeof runwayData === "number" ? runwayData : 0,
+    };
+  }
+
+  /**
+   * Fetch activity data for a period
+   */
+  private async fetchActivityData(
+    teamId: string,
+    period: PeriodInfo,
+    currency: string,
+  ): Promise<{
+    invoicesSent: number;
+    invoicesPaid: number;
+    invoicesOverdue: number;
+    hoursTracked: number;
+    unbilledHours: number;
+    billableAmount?: number;
+    newCustomers: number;
+    receiptsMatched: number;
+    transactionsCategorized: number;
+  }> {
+    const from = formatDateForQuery(period.periodStart);
+    const to = formatDateForQuery(period.periodEnd);
+
+    const activityData = await getInsightActivityData(this.db, {
+      teamId,
+      from,
+      to,
+      currency,
+    }).catch(() => null);
+
+    return {
+      invoicesSent: activityData?.invoicesSent ?? 0,
+      invoicesPaid: activityData?.invoicesPaid ?? 0,
+      invoicesOverdue: 0, // Fetched separately for current only
+      hoursTracked: activityData?.hoursTracked ?? 0,
+      unbilledHours: activityData?.unbilledHours ?? 0,
+      billableAmount: activityData?.billableAmount,
+      newCustomers: activityData?.newCustomers ?? 0,
+      receiptsMatched: activityData?.receiptsMatched ?? 0,
+      transactionsCategorized: activityData?.transactionsCategorized ?? 0,
+    };
+  }
+
+  /**
+   * Build the complete activity summary including overdue and upcoming invoices
+   */
+  private async buildActivitySummary(
+    teamId: string,
+    period: PeriodInfo,
+    currency: string,
+    activityData: {
+      invoicesSent: number;
+      invoicesPaid: number;
+      invoicesOverdue: number;
+      hoursTracked: number;
+      unbilledHours: number;
+      billableAmount?: number;
+      newCustomers: number;
+      receiptsMatched: number;
+      transactionsCategorized: number;
+    },
+  ): Promise<InsightActivity> {
+    // Fetch overdue and upcoming invoices
+    const [overdueData, upcomingRecurringData] = await Promise.all([
+      getOverdueInvoicesAlert(this.db, { teamId, currency }).catch(() => null),
+      getUpcomingDueRecurring(this.db, 7 * 24, { limit: 10 }).catch(() => null),
+    ]);
+
+    // Filter upcoming recurring to only this team
+    const teamUpcoming =
+      upcomingRecurringData?.data?.filter(
+        (inv: { teamId: string }) => inv.teamId === teamId,
+      ) ?? [];
+
+    // Build upcoming invoices summary
+    const upcomingInvoices =
+      teamUpcoming.length > 0
+        ? {
+            count: teamUpcoming.length,
+            totalAmount: teamUpcoming.reduce(
+              (sum: number, inv: { amount: number | null }) =>
+                sum + (inv.amount ?? 0),
+              0,
+            ),
+            nextDueDate:
+              (teamUpcoming[0] as { nextScheduledAt?: string | null })
+                ?.nextScheduledAt ?? undefined,
+            items: teamUpcoming.slice(0, 5).map(
+              (inv: {
+                customerName: string | null;
+                amount: number | null;
+                nextScheduledAt: string | null;
+                frequency: string | null;
+              }) => ({
+                customerName: inv.customerName ?? "Unknown",
+                amount: inv.amount ?? 0,
+                scheduledAt: inv.nextScheduledAt ?? "",
+                frequency: inv.frequency ?? undefined,
+              }),
+            ),
+          }
+        : undefined;
+
+    return {
+      invoicesSent: activityData.invoicesSent,
+      invoicesPaid: activityData.invoicesPaid,
+      invoicesOverdue: overdueData?.summary?.count ?? 0,
+      overdueAmount: overdueData?.summary?.totalAmount ?? 0,
+      hoursTracked: activityData.hoursTracked,
+      unbilledHours: activityData.unbilledHours,
+      billableAmount: activityData.billableAmount,
+      newCustomers: activityData.newCustomers,
+      receiptsMatched: activityData.receiptsMatched,
+      transactionsCategorized: activityData.transactionsCategorized,
+      upcomingInvoices,
+    };
+  }
+}
+
+/**
+ * Create an InsightsService instance
+ */
+export function createInsightsService(
+  db: Database,
+  options?: InsightsServiceOptions,
+): InsightsService {
+  return new InsightsService(db, options);
+}
+
+/**
+ * Get the list of team IDs enabled for insights generation.
+ * Returns undefined if all teams should receive insights.
+ * Returns empty array if no teams are configured (safe default).
+ */
+export function getEnabledTeamIds(): string[] | undefined {
+  const envValue = process.env.INSIGHTS_ENABLED_TEAM_IDS;
+
+  // Not set = disabled (safe default for staging)
+  if (!envValue) {
+    return [];
+  }
+
+  // "*" = all teams enabled
+  if (envValue.trim() === "*") {
+    return undefined;
+  }
+
+  // Parse comma-separated list
+  return envValue
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Check if a specific team is enabled for insights generation.
+ */
+export function isTeamEnabledForInsights(teamId: string): boolean {
+  const enabledIds = getEnabledTeamIds();
+
+  // undefined = all teams enabled
+  if (enabledIds === undefined) {
+    return true;
+  }
+
+  // Empty array = no teams enabled
+  if (enabledIds.length === 0) {
+    return false;
+  }
+
+  return enabledIds.includes(teamId);
+}
+
+// Re-export all types
+export type {
+  AnomalySeverity,
+  ChangeDirection,
+  GenerateInsightParams,
+  InsightActivity,
+  InsightAnomaly,
+  InsightContent,
+  InsightGenerationResult,
+  InsightMetric,
+  InsightMilestone,
+  MetricCategory,
+  MetricData,
+  PeriodInfo,
+  PeriodType,
+} from "./types";
+
+// Re-export constants
+export {
+  ANOMALY_THRESHOLDS,
+  CORE_FINANCIAL_METRICS,
+  DEFAULT_TOP_METRICS_COUNT,
+  MAX_METRICS_PER_CATEGORY,
+  type MetricDefinition,
+  METRIC_DEFINITIONS,
+  PERIOD_TYPE_LABELS,
+  SCORING_WEIGHTS,
+} from "./constants";
+
+// Re-export metrics utilities
+export {
+  addActivityMetrics,
+  calculateAllMetrics,
+  calculatePercentageChange,
+  createMetric,
+  detectAnomalies,
+  formatMetricValue,
+  getChangeDirection,
+  getMetricDefinition,
+  getMetricLabel,
+  getMetricPriority,
+  getMetricsByCategory,
+  getMetricUnit,
+  isCoreFinancialMetric,
+  selectTopMetrics,
+} from "./metrics";
+
+// Re-export period utilities
+export {
+  formatDateForQuery,
+  formatDateForStorage,
+  getCurrentPeriod,
+  getPeriodInfo,
+  getPreviousCompletePeriod,
+  getPreviousPeriod,
+} from "./period";
+
+// Re-export content utilities
+export {
+  ContentGenerator,
+  type ContentGeneratorOptions,
+  createContentGenerator,
+} from "./content";

@@ -272,6 +272,20 @@ export const activityStatusEnum = pgEnum("activity_status", [
   "archived",
 ]);
 
+export const insightPeriodTypeEnum = pgEnum("insight_period_type", [
+  "weekly",
+  "monthly",
+  "quarterly",
+  "yearly",
+]);
+
+export const insightStatusEnum = pgEnum("insight_status", [
+  "pending",
+  "generating",
+  "completed",
+  "failed",
+]);
+
 export const documentTagEmbeddings = pgTable(
   "document_tag_embeddings",
   {
@@ -523,6 +537,8 @@ export const trackerEntries = pgTable(
       "btree",
       table.teamId.asc().nullsLast().op("uuid_ops"),
     ),
+    // Composite index for insights activity date range queries
+    index("tracker_entries_team_date_idx").on(table.teamId, table.date),
     foreignKey({
       columns: [table.assignedId],
       foreignColumns: [users.id],
@@ -938,6 +954,13 @@ export const invoices = pgTable(
       "btree",
       table.templateId.asc().nullsLast().op("uuid_ops"),
     ),
+    // Composite indexes for insights activity queries
+    index("invoices_team_sent_at_idx").on(table.teamId, table.sentAt),
+    index("invoices_team_status_paid_at_idx").on(
+      table.teamId,
+      table.status,
+      table.paidAt,
+    ),
     foreignKey({
       columns: [table.userId],
       foreignColumns: [users.id],
@@ -1077,6 +1100,9 @@ export const customers = pgTable(
     index("idx_customers_enrichment_status").on(table.enrichmentStatus),
     index("idx_customers_website").on(table.website),
     index("idx_customers_industry").on(table.industry),
+    // Team and date indexes for insights activity queries
+    index("customers_team_id_idx").on(table.teamId),
+    index("customers_team_created_at_idx").on(table.teamId, table.createdAt),
     foreignKey({
       columns: [table.teamId],
       foreignColumns: [teams.id],
@@ -2199,6 +2225,12 @@ export const inbox = pgTable(
     index("inbox_grouped_inbox_id_idx").using(
       "btree",
       table.groupedInboxId.asc().nullsLast().op("uuid_ops"),
+    ),
+    // Composite index for insights activity queries
+    index("inbox_team_status_created_at_idx").on(
+      table.teamId,
+      table.status,
+      table.createdAt,
     ),
     foreignKey({
       columns: [table.attachmentId],
@@ -3733,3 +3765,145 @@ export const accountingSyncRecordsRelations = relations(
     }),
   }),
 );
+
+// ============================================================================
+// INSIGHTS - AI-generated business insights (weekly, monthly, quarterly, yearly)
+// ============================================================================
+
+// Type definitions for JSONB columns
+export type InsightMetric = {
+  type: string;
+  label: string;
+  value: number;
+  previousValue: number;
+  change: number; // percentage
+  changeDirection: "up" | "down" | "flat";
+  unit?: string;
+  historicalContext?: string; // "Highest since October"
+};
+
+export type InsightAnomaly = {
+  type: string;
+  severity: "info" | "warning" | "alert";
+  message: string;
+  metricType?: string;
+};
+
+export type InsightMilestone = {
+  type: string;
+  description: string;
+  achievedAt: string;
+};
+
+export type InsightActivity = {
+  invoicesSent: number;
+  invoicesPaid: number;
+  invoicesOverdue: number;
+  overdueAmount?: number;
+  hoursTracked: number;
+  unbilledHours: number;
+  largestPayment?: { customer: string; amount: number };
+  newCustomers: number;
+  receiptsMatched: number;
+  transactionsCategorized: number;
+  // Upcoming scheduled/recurring invoices
+  upcomingInvoices?: {
+    count: number;
+    totalAmount: number;
+    nextDueDate?: string;
+    items?: Array<{
+      customerName: string;
+      amount: number;
+      scheduledAt: string;
+      frequency?: string;
+    }>;
+  };
+};
+
+export type InsightContent = {
+  goodNews: string;
+  story: string;
+  actions: Array<{
+    text: string;
+    type?: string;
+    deepLink?: string;
+  }>;
+  celebration?: string;
+};
+
+export const insights = pgTable(
+  "insights",
+  {
+    id: uuid().defaultRandom().primaryKey(),
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => teams.id, { onDelete: "cascade" }),
+
+    // Flexible period definition
+    periodType: insightPeriodTypeEnum("period_type").notNull(),
+    periodStart: timestamp("period_start", { withTimezone: true }).notNull(),
+    periodEnd: timestamp("period_end", { withTimezone: true }).notNull(),
+    periodLabel: varchar("period_label", { length: 50 }), // "Week 3, 2026", "January 2026"
+    periodYear: smallint("period_year").notNull(),
+    periodNumber: smallint("period_number").notNull(), // Week 1-53, Month 1-12, Quarter 1-4
+
+    status: insightStatusEnum().default("pending").notNull(),
+
+    // Selected 4 key metrics (dynamically chosen)
+    selectedMetrics: jsonb("selected_metrics").$type<InsightMetric[]>(),
+
+    // Full metrics snapshot (for drill-down)
+    allMetrics: jsonb("all_metrics").$type<Record<string, InsightMetric>>(),
+
+    // Detected anomalies and patterns
+    anomalies: jsonb().$type<InsightAnomaly[]>(),
+
+    // Streaks and milestones
+    milestones: jsonb().$type<InsightMilestone[]>(),
+
+    // Activity context
+    activity: jsonb().$type<InsightActivity>(),
+
+    currency: varchar({ length: 3 }).default("USD"),
+
+    // AI-generated content (relief-first structure)
+    content: jsonb().$type<InsightContent>(),
+
+    // Future: voice
+    audioUrl: text("audio_url"),
+
+    generatedAt: timestamp("generated_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    unique("insights_team_period_unique").on(
+      table.teamId,
+      table.periodType,
+      table.periodYear,
+      table.periodNumber,
+    ),
+    index("insights_team_id_idx").on(table.teamId),
+    index("insights_team_period_type_idx").on(
+      table.teamId,
+      table.periodType,
+      table.generatedAt.desc(),
+    ),
+    pgPolicy("Team members can view their insights", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+    }),
+  ],
+);
+
+export const insightsRelations = relations(insights, ({ one }) => ({
+  team: one(teams, {
+    fields: [insights.teamId],
+    references: [teams.id],
+  }),
+}));

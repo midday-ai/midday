@@ -14,6 +14,7 @@ import { documentsRouter } from "./documents";
 import { chatFeedbackRouter } from "./feedback";
 import { inboxRouter } from "./inbox";
 import { inboxAccountsRouter } from "./inbox-accounts";
+import { insightsRouter } from "./insights";
 import { institutionsRouter } from "./institutions";
 import { invoiceRouter } from "./invoice";
 import { invoicePaymentsRouter } from "./invoice-payments";
@@ -54,6 +55,7 @@ export const appRouter = createTRPCRouter({
   chatFeedback: chatFeedbackRouter,
   inbox: inboxRouter,
   inboxAccounts: inboxAccountsRouter,
+  insights: insightsRouter,
   institutions: institutionsRouter,
   invoice: invoiceRouter,
   invoicePayments: invoicePaymentsRouter,
