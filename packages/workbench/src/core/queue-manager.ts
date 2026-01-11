@@ -572,50 +572,8 @@ export class QueueManager {
             }
           }
 
-          // Build queue metrics array
-          const queues: QueueMetrics[] = [];
-          for (const [queueName, metrics] of queueMetricsMap) {
-            const totalCompleted = metrics.buckets.reduce(
-              (sum, b) => sum + b.completed,
-              0,
-            );
-            const totalFailed = metrics.buckets.reduce(
-              (sum, b) => sum + b.failed,
-              0,
-            );
-            const allDurations = metrics.durations.flat();
-            const allWaitTimes = metrics.waitTimes.flat();
-
-            queues.push({
-              queueName,
-              buckets: metrics.buckets,
-              summary: {
-                totalCompleted,
-                totalFailed,
-                errorRate:
-                  totalCompleted + totalFailed > 0
-                    ? totalFailed / (totalCompleted + totalFailed)
-                    : 0,
-                avgDuration:
-                  allDurations.length > 0
-                    ? Math.round(
-                        allDurations.reduce((a, b) => a + b, 0) /
-                          allDurations.length,
-                      )
-                    : 0,
-                avgWaitTime:
-                  allWaitTimes.length > 0
-                    ? Math.round(
-                        allWaitTimes.reduce((a, b) => a + b, 0) /
-                          allWaitTimes.length,
-                      )
-                    : 0,
-                throughputPerHour: Math.round(
-                  (totalCompleted + totalFailed) / 24,
-                ),
-              },
-            });
-          }
+          // Skip per-queue metrics - not used by frontend (only aggregate is displayed)
+          // Return empty array to maintain API compatibility
 
           // Build aggregate metrics
           const aggregateBuckets = createEmptyBuckets();
@@ -683,7 +641,7 @@ export class QueueManager {
             .slice(0, 10);
 
           return {
-            queues,
+            queues: [], // Empty - per-queue metrics not used by frontend
             aggregate: {
               queueName: "all",
               buckets: aggregateBuckets,
@@ -857,20 +815,23 @@ export class QueueManager {
     // Fetch counts once before the loop (same for all types in a queue)
     const counts = await this.getCachedJobCounts(queue);
 
-    const jobs: Job[] = [];
+    // Track jobs with their known state to avoid getState() calls
+    const jobsWithState: { job: Job; state: JobStatus }[] = [];
     let total = 0;
 
     for (const type of types) {
       const typeJobs = await queue.getJobs(type as any, start, start + limit);
-      jobs.push(...typeJobs);
+      jobsWithState.push(
+        ...typeJobs.map((job) => ({ job, state: type as JobStatus })),
+      );
 
       const typeCount = counts[type as keyof typeof counts] || 0;
       total += typeCount;
     }
 
-    // Convert to JobInfo first for sorting on computed fields (full view for queue page)
+    // Convert to JobInfo - pass known state to skip expensive getState() calls
     const jobInfos = (await Promise.all(
-      jobs.map((job) => this.jobToInfo(job, "full")),
+      jobsWithState.map(({ job, state }) => this.jobToInfo(job, "full", state)),
     )) as JobInfo[];
 
     // Apply sorting
@@ -1169,9 +1130,14 @@ export class QueueManager {
                   }
                 }
 
+                // Pass known state to skip expensive getState() calls
                 matches.push({
                   queue: queueName,
-                  job: (await this.jobToInfo(job, "full")) as JobInfo,
+                  job: (await this.jobToInfo(
+                    job,
+                    "full",
+                    type as JobStatus,
+                  )) as JobInfo,
                 });
               }
 
@@ -1278,11 +1244,12 @@ export class QueueManager {
     }
 
     // Fetch jobs from queues that have them
+    // Track the state each job was fetched as to avoid expensive getState() calls
     const queueResults = await Promise.all(
       queuesWithJobs.map(async ({ queueName, queue }) => {
         // Use time-range queries for completed/failed jobs when time range is specified
         if (hasTimeRange && filters?.timeRange) {
-          const timeRangeJobs: Job[] = [];
+          const timeRangeJobs: { job: Job; state: JobStatus }[] = [];
 
           // Use efficient time-range queries for completed/failed
           if (types.includes("completed")) {
@@ -1293,7 +1260,12 @@ export class QueueManager {
               filters.timeRange.end,
               fetchLimit,
             );
-            timeRangeJobs.push(...completedJobs);
+            timeRangeJobs.push(
+              ...completedJobs.map((job) => ({
+                job,
+                state: "completed" as JobStatus,
+              })),
+            );
           }
 
           if (types.includes("failed")) {
@@ -1304,7 +1276,12 @@ export class QueueManager {
               filters.timeRange.end,
               fetchLimit,
             );
-            timeRangeJobs.push(...failedJobs);
+            timeRangeJobs.push(
+              ...failedJobs.map((job) => ({
+                job,
+                state: "failed" as JobStatus,
+              })),
+            );
           }
 
           // For other types, use regular getJobs
@@ -1313,25 +1290,36 @@ export class QueueManager {
           );
           if (otherTypes.length > 0) {
             const otherJobArrays = await Promise.all(
-              otherTypes.map((type) =>
-                queue.getJobs(type as any, 0, fetchLimit),
-              ),
+              otherTypes.map(async (type) => {
+                const jobs = await queue.getJobs(type as any, 0, fetchLimit);
+                return jobs.map((job) => ({ job, state: type as JobStatus }));
+              }),
             );
             timeRangeJobs.push(...otherJobArrays.flat());
           }
 
-          return timeRangeJobs.map((job) => ({ job, queueName }));
+          return timeRangeJobs.map(({ job, state }) => ({
+            job,
+            queueName,
+            state,
+          }));
         }
-        // Regular fetching for all types
+        // Regular fetching for all types - track state for each type
         const jobArrays = await Promise.all(
-          types.map((type) => queue.getJobs(type as any, 0, fetchLimit)),
+          types.map(async (type) => {
+            const jobs = await queue.getJobs(type as any, 0, fetchLimit);
+            return jobs.map((job) => ({ job, state: type as JobStatus }));
+          }),
         );
-        return jobArrays.flat().map((job) => ({ job, queueName }));
+        return jobArrays
+          .flat()
+          .map(({ job, state }) => ({ job, queueName, state }));
       }),
     );
 
-    // Flatten all jobs
-    let allJobs: { job: Job; queueName: string }[] = queueResults.flat();
+    // Flatten all jobs (now includes state from fetch)
+    let allJobs: { job: Job; queueName: string; state: JobStatus }[] =
+      queueResults.flat();
 
     // Apply filters BEFORE conversion (cheaper filtering on raw jobs)
     if (filters) {
@@ -1351,10 +1339,11 @@ export class QueueManager {
 
     // Only convert jobs that we'll actually return (lazy conversion)
     // Use "list" fields for lightweight list view
+    // Pass known state to skip expensive getState() Redis calls
     const jobsToConvert = allJobs.slice(start, start + limit);
     const runInfos = await Promise.all(
-      jobsToConvert.map(async ({ job, queueName }) => {
-        const info = await this.jobToInfo(job, "list");
+      jobsToConvert.map(async ({ job, queueName, state }) => {
+        const info = await this.jobToInfo(job, "list", state);
         return { ...info, queueName } as RunInfoList;
       }),
     );
@@ -1646,17 +1635,23 @@ export class QueueManager {
    * Convert a BullMQ Job to JobInfo or RunInfoList
    * @param job - The BullMQ job to convert
    * @param fields - "list" for lightweight list view, "full" for complete job details
+   * @param knownState - Optional: skip getState() call if state is already known from fetch
    */
   private async jobToInfo(
     job: Job,
     fields: "list" | "full" = "full",
+    knownState?: JobStatus,
   ): Promise<JobInfo | RunInfoList> {
-    // Use cached state if available, otherwise fetch and cache
-    const cacheKey = `${job.queueName}:${job.id}`;
-    let state = this.jobStateCache.get(cacheKey);
+    // Use known state if provided (avoids expensive Redis getState() call)
+    // Otherwise use cached state, or fetch and cache
+    let state = knownState;
     if (!state) {
-      state = (await job.getState()) as JobStatus;
-      this.jobStateCache.set(cacheKey, state);
+      const cacheKey = `${job.queueName}:${job.id}`;
+      state = this.jobStateCache.get(cacheKey);
+      if (!state) {
+        state = (await job.getState()) as JobStatus;
+        this.jobStateCache.set(cacheKey, state);
+      }
     }
     const duration =
       job.finishedOn && job.processedOn

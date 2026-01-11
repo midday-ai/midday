@@ -400,6 +400,11 @@ export function MetricsPage() {
                 iconType="square"
                 iconSize={8}
                 wrapperStyle={{ fontSize: 12 }}
+                formatter={(value) => (
+                  <span style={{ color: "hsl(var(--foreground))" }}>
+                    {value}
+                  </span>
+                )}
               />
               <defs>
                 <linearGradient
@@ -517,49 +522,16 @@ export function MetricsPage() {
                 iconType="square"
                 iconSize={8}
                 wrapperStyle={{ fontSize: 12 }}
+                formatter={(value) => (
+                  <span style={{ color: "hsl(var(--foreground))" }}>
+                    {value}
+                  </span>
+                )}
               />
-              <defs>
-                <linearGradient
-                  id="durationGradient"
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
-                  <stop
-                    offset="0%"
-                    stopColor="var(--color-duration)"
-                    stopOpacity={0.9}
-                  />
-                  <stop
-                    offset="100%"
-                    stopColor="var(--color-duration)"
-                    stopOpacity={0.6}
-                  />
-                </linearGradient>
-                <linearGradient
-                  id="waitTimeGradient"
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
-                  <stop
-                    offset="0%"
-                    stopColor="var(--color-waitTime)"
-                    stopOpacity={0.9}
-                  />
-                  <stop
-                    offset="100%"
-                    stopColor="var(--color-waitTime)"
-                    stopOpacity={0.6}
-                  />
-                </linearGradient>
-              </defs>
               <Bar
                 dataKey="duration"
                 name="Duration"
-                fill="url(#durationGradient)"
+                fill="hsl(210, 90%, 50%)"
                 radius={[0, 0, 0, 0]}
                 style={{ outline: "none" }}
                 isAnimationActive={false}
@@ -567,7 +539,7 @@ export function MetricsPage() {
               <Bar
                 dataKey="waitTime"
                 name="Wait Time"
-                fill="url(#waitTimeGradient)"
+                fill="hsl(45, 95%, 50%)"
                 radius={[0, 0, 0, 0]}
                 style={{ outline: "none" }}
                 isAnimationActive={false}
