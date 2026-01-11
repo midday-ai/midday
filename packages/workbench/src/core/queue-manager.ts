@@ -235,6 +235,53 @@ export class QueueManager {
   }
 
   /**
+   * Get quick job counts across all queues (lightweight, for smart polling)
+   * Returns total counts per status - cached and very fast
+   */
+  async getQuickCounts(): Promise<{
+    waiting: number;
+    active: number;
+    completed: number;
+    failed: number;
+    delayed: number;
+    total: number;
+    timestamp: number;
+  }> {
+    // Use short cache for counts - they change frequently
+    return this.cached("quick-counts", 2000, async () => {
+      const totals = {
+        waiting: 0,
+        active: 0,
+        completed: 0,
+        failed: 0,
+        delayed: 0,
+        total: 0,
+        timestamp: Date.now(),
+      };
+
+      await Promise.all(
+        Array.from(this.queues.values()).map(async (queue) => {
+          const counts = await this.getCachedJobCounts(queue);
+          totals.waiting += counts.waiting || 0;
+          totals.active += counts.active || 0;
+          totals.completed += counts.completed || 0;
+          totals.failed += counts.failed || 0;
+          totals.delayed += counts.delayed || 0;
+        }),
+      );
+
+      totals.total =
+        totals.waiting +
+        totals.active +
+        totals.completed +
+        totals.failed +
+        totals.delayed;
+
+      return totals;
+    });
+  }
+
+  /**
    * Get configured tag field names
    */
   getTagFields(): string[] {
@@ -1204,17 +1251,8 @@ export class QueueManager {
       : ["waiting", "active", "completed", "failed", "delayed"];
 
     // For timestamp sorting, we can use Redis sorted sets more efficiently
-    // For other sorting, we need to fetch more jobs to sort in memory
     const isTimestampSort = sortField === "timestamp";
     const hasTimeRange = !!filters?.timeRange;
-
-    // When using time range, we can fetch more efficiently
-    // Otherwise, use standard fetch limits
-    const fetchLimit = hasTimeRange
-      ? Math.min(start + limit * 3, 200) // Fetch more when filtering by time
-      : isTimestampSort
-        ? Math.min(start + limit + 20, 100) // Smaller buffer for timestamp sort
-        : Math.min(start + limit + 100, 200); // Larger buffer for other sorts
 
     // Fetch counts first to skip empty queues entirely
     const queueChecks = await Promise.all(
@@ -1232,6 +1270,17 @@ export class QueueManager {
 
     // Only process queues with jobs
     const queuesWithJobs = queueChecks.filter((q) => q.hasJobs);
+
+    // OPTIMIZATION: Calculate smart fetch limit based on number of queues
+    // Instead of fetching 100+ per queue, fetch only what we need distributed across queues
+    const numQueues = Math.max(queuesWithJobs.length, 1);
+    const targetJobs = start + limit + 10; // What we actually need + small buffer
+    const perQueueLimit = Math.ceil(targetJobs / numQueues) + 5; // Distribute across queues
+    const fetchLimit = hasTimeRange
+      ? Math.min(perQueueLimit * 2, 50) // More for time range filtering
+      : isTimestampSort
+        ? Math.min(perQueueLimit, 30) // Minimal for timestamp sort (already ordered)
+        : Math.min(perQueueLimit + 10, 50); // Slightly more for other sorts
     const total = queueChecks.reduce((sum, q) => sum + q.queueTotal, 0);
 
     if (queuesWithJobs.length === 0) {
@@ -1243,83 +1292,99 @@ export class QueueManager {
       };
     }
 
-    // Fetch jobs from queues that have them
-    // Track the state each job was fetched as to avoid expensive getState() calls
-    const queueResults = await Promise.all(
-      queuesWithJobs.map(async ({ queueName, queue }) => {
-        // Use time-range queries for completed/failed jobs when time range is specified
-        if (hasTimeRange && filters?.timeRange) {
-          const timeRangeJobs: { job: Job; state: JobStatus }[] = [];
+    // OPTIMIZATION: Two-phase fetch to ensure we get the latest jobs
+    // Phase 1: Fetch a small sample from ALL queues (ensures we see newest jobs everywhere)
+    // Phase 2: Only fetch more if we need additional jobs after sorting
+    let allJobs: { job: Job; queueName: string; state: JobStatus }[] = [];
 
-          // Use efficient time-range queries for completed/failed
-          if (types.includes("completed")) {
-            const completedJobs = await this.getJobsByTimeRange(
-              queue,
-              "completed",
-              filters.timeRange.start,
-              filters.timeRange.end,
-              fetchLimit,
-            );
-            timeRangeJobs.push(
-              ...completedJobs.map((job) => ({
-                job,
-                state: "completed" as JobStatus,
-              })),
-            );
-          }
+    // Helper function to fetch from a single queue
+    const fetchFromQueue = async (
+      queueName: string,
+      queue: Queue,
+      fetchCount: number,
+    ) => {
+      // Use time-range queries for completed/failed jobs when time range is specified
+      if (hasTimeRange && filters?.timeRange) {
+        const timeRangeJobs: { job: Job; state: JobStatus }[] = [];
 
-          if (types.includes("failed")) {
-            const failedJobs = await this.getJobsByTimeRange(
-              queue,
-              "failed",
-              filters.timeRange.start,
-              filters.timeRange.end,
-              fetchLimit,
-            );
-            timeRangeJobs.push(
-              ...failedJobs.map((job) => ({
-                job,
-                state: "failed" as JobStatus,
-              })),
-            );
-          }
-
-          // For other types, use regular getJobs
-          const otherTypes = types.filter(
-            (t) => t !== "completed" && t !== "failed",
+        // Use efficient time-range queries for completed/failed
+        if (types.includes("completed")) {
+          const completedJobs = await this.getJobsByTimeRange(
+            queue,
+            "completed",
+            filters.timeRange.start,
+            filters.timeRange.end,
+            fetchCount,
           );
-          if (otherTypes.length > 0) {
-            const otherJobArrays = await Promise.all(
-              otherTypes.map(async (type) => {
-                const jobs = await queue.getJobs(type as any, 0, fetchLimit);
-                return jobs.map((job) => ({ job, state: type as JobStatus }));
-              }),
-            );
-            timeRangeJobs.push(...otherJobArrays.flat());
-          }
-
-          return timeRangeJobs.map(({ job, state }) => ({
-            job,
-            queueName,
-            state,
-          }));
+          timeRangeJobs.push(
+            ...completedJobs.map((job) => ({
+              job,
+              state: "completed" as JobStatus,
+            })),
+          );
         }
-        // Regular fetching for all types - track state for each type
-        const jobArrays = await Promise.all(
-          types.map(async (type) => {
-            const jobs = await queue.getJobs(type as any, 0, fetchLimit);
-            return jobs.map((job) => ({ job, state: type as JobStatus }));
-          }),
-        );
-        return jobArrays
-          .flat()
-          .map(({ job, state }) => ({ job, queueName, state }));
-      }),
-    );
 
-    // Flatten all jobs (now includes state from fetch)
-    let allJobs: { job: Job; queueName: string; state: JobStatus }[] =
-      queueResults.flat();
+        if (types.includes("failed")) {
+          const failedJobs = await this.getJobsByTimeRange(
+            queue,
+            "failed",
+            filters.timeRange.start,
+            filters.timeRange.end,
+            fetchCount,
+          );
+          timeRangeJobs.push(
+            ...failedJobs.map((job) => ({
+              job,
+              state: "failed" as JobStatus,
+            })),
+          );
+        }
+
+        // For other types, use regular getJobs
+        const otherTypes = types.filter(
+          (t) => t !== "completed" && t !== "failed",
+        );
+        if (otherTypes.length > 0) {
+          const otherJobArrays = await Promise.all(
+            otherTypes.map(async (type) => {
+              const jobs = await queue.getJobs(type as any, 0, fetchCount);
+              return jobs.map((job) => ({ job, state: type as JobStatus }));
+            }),
+          );
+          timeRangeJobs.push(...otherJobArrays.flat());
+        }
+
+        return timeRangeJobs.map(({ job, state }) => ({
+          job,
+          queueName,
+          state,
+        }));
+      }
+      // Regular fetching for all types - track state for each type
+      const jobArrays = await Promise.all(
+        types.map(async (type) => {
+          const jobs = await queue.getJobs(type as any, 0, fetchCount);
+          return jobs.map((job) => ({ job, state: type as JobStatus }));
+        }),
+      );
+      return jobArrays
+        .flat()
+        .map(({ job, state }) => ({ job, queueName, state }));
+    };
+
+    // Fetch from ALL queues in parallel to ensure we see the newest jobs
+    // For pagination: we need start + limit jobs, distributed across queues
+    const targetTotal = start + limit + 10; // What we need total + small buffer
+    const fetchPerQueue = Math.max(
+      5, // Minimum 5 per queue to catch recent jobs
+      Math.ceil(targetTotal / numQueues) + 3, // Distribute across queues + buffer
+    );
+    const results = await Promise.all(
+      queuesWithJobs.map(({ queueName, queue }) =>
+        fetchFromQueue(queueName, queue, fetchPerQueue),
+      ),
+    );
+    allJobs = results.flat();
 
     // Apply filters BEFORE conversion (cheaper filtering on raw jobs)
     if (filters) {
@@ -1329,11 +1394,14 @@ export class QueueManager {
     }
 
     // For timestamp sorting, sort jobs before converting (cheaper)
+    // sortDir: 1 = asc (oldest first), -1 = desc (newest first, default)
     if (isTimestampSort) {
       allJobs.sort((a, b) => {
         const aTime = a.job.timestamp || 0;
         const bTime = b.job.timestamp || 0;
-        return (bTime - aTime) * sortDir;
+        // For desc (-1): bTime - aTime puts newest first
+        // For asc (1): aTime - bTime puts oldest first
+        return sortDir === -1 ? bTime - aTime : aTime - bTime;
       });
     }
 

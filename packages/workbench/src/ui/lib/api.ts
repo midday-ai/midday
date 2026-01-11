@@ -109,6 +109,21 @@ export const api = {
   },
 
   /**
+   * Get quick job counts for smart polling (lightweight, cached)
+   */
+  async getCounts(signal?: AbortSignal): Promise<{
+    waiting: number;
+    active: number;
+    completed: number;
+    failed: number;
+    delayed: number;
+    total: number;
+    timestamp: number;
+  }> {
+    return fetchJson(`${API_BASE}/counts`, { signal });
+  },
+
+  /**
    * Get all queues
    */
   async getQueues(signal?: AbortSignal): Promise<QueueInfo[]> {

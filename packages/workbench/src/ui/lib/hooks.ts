@@ -5,6 +5,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import * as React from "react";
 import { api } from "./api";
 
 /** Type for dashboard config returned by the API */
@@ -63,6 +64,18 @@ export function useOverview() {
     queryKey: queryKeys.overview,
     queryFn: ({ signal }) => api.getOverview(signal),
     refetchInterval: 5000,
+  });
+}
+
+/**
+ * Hook for fetching quick job counts (lightweight, for smart polling)
+ */
+export function useCounts() {
+  return useQuery({
+    queryKey: ["counts"],
+    queryFn: ({ signal }) => api.getCounts(signal),
+    refetchInterval: 2000, // Poll counts frequently (very cheap)
+    staleTime: 1000, // Consider data stale after 1 second
   });
 }
 
@@ -126,6 +139,7 @@ export function useJob(queueName: string, jobId: string) {
 
 /**
  * Hook for fetching all runs with sorting and filtering
+ * Uses smart polling - only refetches when needed
  */
 export function useRuns(
   sort?: string,
@@ -136,13 +150,34 @@ export function useRuns(
     timeRange?: { start: number; end: number };
   },
 ) {
+  // Track the last known counts to detect changes
+  const { data: counts } = useCounts();
+  const lastCountRef = React.useRef<number | undefined>(undefined);
+
+  // Determine if we should refetch based on count changes
+  const shouldRefetch = React.useMemo(() => {
+    if (!counts) return true;
+    const currentTotal = counts.total;
+    if (lastCountRef.current === undefined) {
+      lastCountRef.current = currentTotal;
+      return true;
+    }
+    const changed = currentTotal !== lastCountRef.current;
+    if (changed) {
+      lastCountRef.current = currentTotal;
+    }
+    return changed;
+  }, [counts]);
+
   return useInfiniteQuery({
     queryKey: queryKeys.runs(sort, filters),
     queryFn: ({ pageParam, signal }) =>
       api.getRuns({ limit: 20, cursor: pageParam, sort, ...filters }, signal),
     getNextPageParam: (lastPage) => lastPage.cursor,
     initialPageParam: undefined as string | undefined,
-    refetchInterval: 5000,
+    // Smart polling: refetch every 10s normally, but count changes trigger immediate refetch
+    refetchInterval: shouldRefetch ? 1000 : 10000,
+    staleTime: 2000, // Consider data stale after 2 seconds
   });
 }
 

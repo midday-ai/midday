@@ -40,6 +40,13 @@ export function createApiRoutes(core: WorkbenchCore): Hono {
     return c.json(stats);
   });
 
+  // GET /api/counts - Lightweight job counts for smart polling
+  // Returns just total counts per status, very fast (cached)
+  app.get("/counts", async (c) => {
+    const counts = await qm.getQuickCounts();
+    return c.json(counts);
+  });
+
   // GET /api/runs - All jobs across all queues
   // Note: Sorting on non-timestamp fields requires in-memory sort (limited to ~1000 jobs)
   // For timestamp sorting, Redis's natural order is used efficiently
