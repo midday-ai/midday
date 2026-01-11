@@ -1,19 +1,3 @@
-import {
-  FileText,
-  Layers,
-  BarChart3,
-  Calendar,
-  Network,
-  FlaskConical,
-  RefreshCw,
-  Moon,
-  Sun,
-  Search,
-  ArrowRight,
-} from "lucide-react";
-import * as React from "react";
-import { useConfig, useSearch, useTagValues } from "@/lib/hooks";
-import { formatRelativeTime, truncate } from "@/lib/utils";
 import { parseSearchQuery } from "@/components/smart-search";
 import {
   CommandDialog,
@@ -24,6 +8,22 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
+import { useConfig, useSearch, useTagValues } from "@/lib/hooks";
+import { formatRelativeTime, truncate } from "@/lib/utils";
+import {
+  ArrowRight,
+  BarChart3,
+  Calendar,
+  FileText,
+  FlaskConical,
+  Layers,
+  Moon,
+  Network,
+  RefreshCw,
+  Search,
+  Sun,
+} from "lucide-react";
+import * as React from "react";
 
 interface CommandPaletteProps {
   open: boolean;
@@ -215,10 +215,7 @@ export function CommandPalette({
                 key={key}
                 value={`tag-key-${key}`}
                 onSelect={() => {
-                  const newValue = inputValue.replace(
-                    currentToken,
-                    `${key}:`,
-                  );
+                  const newValue = inputValue.replace(currentToken, `${key}:`);
                   handleInputChange(newValue);
                 }}
               >

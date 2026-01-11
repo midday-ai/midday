@@ -27,10 +27,7 @@ export function StackTrace({ error, stacktrace, className }: StackTraceProps) {
 
   return (
     <div
-      className={cn(
-        "border border-destructive/20 bg-destructive/5",
-        className,
-      )}
+      className={cn("border border-destructive/20 bg-destructive/5", className)}
     >
       {/* Error message header */}
       <div className="p-4 flex items-start gap-3">
@@ -75,10 +72,7 @@ export function StackTrace({ error, stacktrace, className }: StackTraceProps) {
         <div className="border-t border-destructive/20 p-4">
           <pre className="font-mono text-xs text-muted-foreground overflow-auto max-h-64 whitespace-pre-wrap">
             {stacktrace.map((line, i) => (
-              <div
-                key={i}
-                className="hover:bg-destructive/10 px-1 -mx-1"
-              >
+              <div key={i} className="hover:bg-destructive/10 px-1 -mx-1">
                 {formatStackLine(line)}
               </div>
             ))}

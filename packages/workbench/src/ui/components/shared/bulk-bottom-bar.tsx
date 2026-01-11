@@ -1,10 +1,10 @@
 "use client";
 
-import type { JobStatus } from "@/core/types";
 import { Button } from "@/components/ui/button";
+import type { JobStatus } from "@/core/types";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { Loader2, RotateCcw, Trash2, Zap, MoreVertical } from "lucide-react";
+import { Loader2, MoreVertical, RotateCcw, Trash2, Zap } from "lucide-react";
 import * as React from "react";
 import { Portal } from "./portal";
 
@@ -97,7 +97,9 @@ export function BulkBottomBar({
                     Deselect all
                   </Button>
 
-                  {(onPromote && hasDelayedJobs) || (onRetry && hasFailedJobs) || onDelete ? (
+                  {(onPromote && hasDelayedJobs) ||
+                  (onRetry && hasFailedJobs) ||
+                  onDelete ? (
                     <MoreVertical className="h-3 w-3 text-muted-foreground/50" />
                   ) : null}
 
@@ -110,12 +112,14 @@ export function BulkBottomBar({
                         disabled={isLoading}
                         className="text-xs text-muted-foreground hover:text-foreground hover:bg-transparent"
                       >
-                      {isPromoting ? (
-                        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                      ) : (
-                        <Zap className="mr-1 h-3 w-3" />
-                      )}
-                      Promote{delayedCount < selection.length && ` (${delayedCount})`}
+                        {isPromoting ? (
+                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                        ) : (
+                          <Zap className="mr-1 h-3 w-3" />
+                        )}
+                        Promote
+                        {delayedCount < selection.length &&
+                          ` (${delayedCount})`}
                       </Button>
                       {(onRetry && hasFailedJobs) || onDelete ? (
                         <MoreVertical className="h-3 w-3 text-muted-foreground/50" />
@@ -132,12 +136,13 @@ export function BulkBottomBar({
                         disabled={isLoading}
                         className="text-xs text-muted-foreground hover:text-foreground hover:bg-transparent"
                       >
-                      {isRetrying ? (
-                        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                      ) : (
-                        <RotateCcw className="mr-1 h-3 w-3" />
-                      )}
-                      Retry{failedCount < selection.length && ` (${failedCount})`}
+                        {isRetrying ? (
+                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                        ) : (
+                          <RotateCcw className="mr-1 h-3 w-3" />
+                        )}
+                        Retry
+                        {failedCount < selection.length && ` (${failedCount})`}
                       </Button>
                       {onDelete ? (
                         <MoreVertical className="h-3 w-3 text-muted-foreground/50" />

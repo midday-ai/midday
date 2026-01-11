@@ -126,7 +126,6 @@ export function SchedulersPage({
 
   return (
     <div className="space-y-6">
-
       <Tabs
         value={search.tab || "repeatable"}
         onValueChange={(tab) =>
@@ -257,9 +256,7 @@ export function SchedulersPage({
                     onSort={handleDelayedSort}
                   />
                 </div>
-                <div className="col-span-2">
-                  Job ID
-                </div>
+                <div className="col-span-2">Job ID</div>
                 <div className="col-span-3">
                   <SortableHeader
                     field="processAt"

@@ -230,7 +230,6 @@ export function QueuePage({
               </>
             )}
           </Button>
-
         </div>
       </div>
 

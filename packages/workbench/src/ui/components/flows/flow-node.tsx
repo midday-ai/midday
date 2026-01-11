@@ -94,7 +94,7 @@ function FlowNodeComponent({ data }: FlowNodeProps) {
         "relative min-w-[180px] px-3 py-2.5 transition-all",
         "hover:bg-accent/50 cursor-pointer",
         "bg-background border",
-        config.border
+        config.border,
       )}
       onClick={() => onClick?.(flowNode)}
     >
@@ -107,17 +107,12 @@ function FlowNodeComponent({ data }: FlowNodeProps) {
 
       {/* Content */}
       <div className="flex items-start gap-2.5">
-        <div
-          className={cn(
-            "p-1.5 shrink-0",
-            config.bg
-          )}
-        >
+        <div className={cn("p-1.5 shrink-0", config.bg)}>
           <Icon
             className={cn(
               "h-3.5 w-3.5",
               config.color,
-              config.animate && "animate-spin"
+              config.animate && "animate-spin",
             )}
           />
         </div>
@@ -142,7 +137,7 @@ function FlowNodeComponent({ data }: FlowNodeProps) {
           "absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide",
           "bg-background border",
           config.color,
-          config.border
+          config.border,
         )}
       >
         {job.status}

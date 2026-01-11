@@ -195,12 +195,22 @@ export interface SortOptions {
 /**
  * Valid sort fields for runs/jobs
  */
-export type RunSortField = "timestamp" | "name" | "status" | "duration" | "queueName";
+export type RunSortField =
+  | "timestamp"
+  | "name"
+  | "status"
+  | "duration"
+  | "queueName";
 
 /**
  * Valid sort fields for repeatable schedulers
  */
-export type RepeatableSortField = "name" | "queueName" | "pattern" | "next" | "tz";
+export type RepeatableSortField =
+  | "name"
+  | "queueName"
+  | "pattern"
+  | "next"
+  | "tz";
 
 /**
  * Valid sort fields for delayed schedulers

@@ -35,7 +35,9 @@ const SearchContext = React.createContext<SearchContextValue | null>(null);
 export function useSearchContext() {
   const context = React.useContext(SearchContext);
   if (!context) {
-    throw new Error("useSearchContext must be used within SearchContextProvider");
+    throw new Error(
+      "useSearchContext must be used within SearchContextProvider",
+    );
   }
   return context;
 }
@@ -242,7 +244,9 @@ function RootLayout() {
       />
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <SearchContext.Provider value={{ searchQuery, setSearchQuery, setCommandOpen }}>
+        <SearchContext.Provider
+          value={{ searchQuery, setSearchQuery, setCommandOpen }}
+        >
           <Outlet />
         </SearchContext.Provider>
       </div>

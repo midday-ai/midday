@@ -1,5 +1,5 @@
-import { ArrowLeft, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ArrowLeft, RefreshCw } from "lucide-react";
 
 interface HeaderProps {
   title: string;
@@ -28,7 +28,9 @@ export function Header({
         <div>
           <h2 className="font-semibold">{title}</h2>
           {subtitle && (
-            <p className="text-xs text-muted-foreground font-mono">{subtitle}</p>
+            <p className="text-xs text-muted-foreground font-mono">
+              {subtitle}
+            </p>
           )}
         </div>
       </div>
