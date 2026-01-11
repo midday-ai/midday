@@ -387,13 +387,13 @@ export function SmartSearch({
             onKeyDown={handleKeyDown}
             onFocus={() => setShowSuggestions(true)}
             placeholder={placeholder}
-            className="h-9 w-full rounded-md border bg-transparent pl-9 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none"
+            className="h-9 w-full  border bg-transparent pl-9 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none"
           />
         </div>
 
         {/* Suggestions Dropdown */}
         {showSuggestions && (
-          <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-md border bg-popover/95 shadow-lg backdrop-blur-sm">
+          <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden  border bg-popover/95 shadow-lg backdrop-blur-sm">
             {/* Confirm search option */}
             <button
               type="button"
@@ -416,7 +416,7 @@ export function SmartSearch({
                     type="button"
                     onClick={() => handleSelectSuggestion(suggestion)}
                     className={cn(
-                      "rounded-md bg-muted px-3 py-1.5 font-mono text-sm transition-colors",
+                      " bg-muted px-3 py-1.5 font-mono text-sm transition-colors",
                       index === selectedIndex
                         ? "bg-primary text-primary-foreground"
                         : "text-foreground hover:bg-muted/80",
@@ -439,7 +439,7 @@ export function SmartSearch({
             <button
               type="button"
               onClick={handleRemoveStatus}
-              className="group flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary hover:bg-primary/20"
+              className="group flex items-center gap-1  bg-primary/10 px-2 py-1 text-xs font-medium text-primary hover:bg-primary/20"
             >
               <span className="font-mono">status:{status}</span>
               <X className="h-3 w-3 opacity-60 group-hover:opacity-100" />
@@ -452,7 +452,7 @@ export function SmartSearch({
               key={key}
               type="button"
               onClick={() => handleRemoveFilter(key)}
-              className="group flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary hover:bg-primary/20"
+              className="group flex items-center gap-1  bg-primary/10 px-2 py-1 text-xs font-medium text-primary hover:bg-primary/20"
             >
               <span className="font-mono">
                 {key}:{val.length > 16 ? `${val.slice(0, 16)}...` : val}

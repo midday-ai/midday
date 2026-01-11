@@ -23,7 +23,7 @@ export function EmptyState({
         className,
       )}
     >
-      <div className="rounded-full bg-muted p-4 mb-4">
+      <div className="bg-muted p-4 mb-4">
         <Icon className="h-8 w-8 text-muted-foreground" />
       </div>
       <h3 className="font-medium text-lg mb-1">{title}</h3>

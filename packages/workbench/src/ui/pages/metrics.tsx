@@ -77,13 +77,13 @@ function ChartTooltip({ active, payload, label }: ChartTooltipProps) {
   if (!active || !payload || !label) return null;
 
   return (
-    <div className="rounded-md border bg-popover px-3 py-2 text-popover-foreground shadow-md">
+    <div className=" border bg-popover px-3 py-2 text-popover-foreground shadow-md">
       <p className="text-xs font-medium mb-1.5">{formatHour(label)}</p>
       <div className="space-y-1">
         {payload.map((entry) => (
           <div key={entry.name} className="flex items-center gap-2 text-xs">
             <span
-              className="h-2 w-2 rounded-full shrink-0"
+              className="h-2 w-2 shrink-0"
               style={{ backgroundColor: entry.color }}
             />
             <span className="text-muted-foreground">{entry.name}:</span>
@@ -98,22 +98,34 @@ function ChartTooltip({ active, payload, label }: ChartTooltipProps) {
 function DurationTooltip({ active, payload, label }: ChartTooltipProps) {
   if (!active || !payload || !label) return null;
 
+  // Map dataKey to chart config colors
+  const getColor = (dataKey: string, fallbackColor?: string) => {
+    if (dataKey === "duration") return "hsl(var(--chart-duration))";
+    if (dataKey === "waitTime") return "hsl(var(--chart-wait))";
+    return fallbackColor || "hsl(var(--muted-foreground))";
+  };
+
   return (
-    <div className="rounded-md border bg-popover px-3 py-2 text-popover-foreground shadow-md">
+    <div className=" border bg-popover px-3 py-2 text-popover-foreground shadow-md">
       <p className="text-xs font-medium mb-1.5">{formatHour(label)}</p>
       <div className="space-y-1">
-        {payload.map((entry) => (
-          <div key={entry.name} className="flex items-center gap-2 text-xs">
-            <span
-              className="h-2 w-2 rounded-full shrink-0"
-              style={{ backgroundColor: entry.color }}
-            />
-            <span className="text-muted-foreground">{entry.name}:</span>
-            <span className="font-medium tabular-nums">
-              {formatDuration(entry.value)}
-            </span>
-          </div>
-        ))}
+        {payload.map((entry) => {
+          const color = entry.dataKey
+            ? getColor(entry.dataKey, entry.color)
+            : entry.color;
+          return (
+            <div key={entry.name} className="flex items-center gap-2 text-xs">
+              <span
+                className="h-2 w-2 shrink-0"
+                style={{ backgroundColor: color }}
+              />
+              <span className="text-muted-foreground">{entry.name}:</span>
+              <span className="font-medium tabular-nums">
+                {formatDuration(entry.value)}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -214,7 +226,7 @@ function LoadingSkeleton() {
       {/* Summary cards skeleton */}
       <div className="grid grid-cols-4 gap-4">
         {["throughput", "error-rate", "duration", "wait-time"].map((id) => (
-          <div key={id} className="rounded-lg border p-4 space-y-3">
+          <div key={id} className=" border p-4 space-y-3">
             <Skeleton className="h-4 w-20" />
             <Skeleton className="h-8 w-24" />
             <Skeleton className="h-6 w-20" />
@@ -224,11 +236,11 @@ function LoadingSkeleton() {
 
       {/* Charts skeleton */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-lg border p-4 space-y-3">
+        <div className=" border p-4 space-y-3">
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-48 w-full" />
         </div>
-        <div className="rounded-lg border p-4 space-y-3">
+        <div className=" border p-4 space-y-3">
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-48 w-full" />
         </div>
@@ -260,7 +272,7 @@ export function MetricsPage() {
           <h1 className="text-lg font-semibold">Metrics</h1>
         </header>
         <div className="p-6">
-          <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
+          <div className=" border border-destructive/50 bg-destructive/10 p-4">
             <p className="text-destructive">
               {error instanceof Error
                 ? error.message
@@ -369,7 +381,7 @@ export function MetricsPage() {
         {/* Charts */}
         <div className="grid grid-cols-2 gap-4">
           {/* Throughput Chart */}
-          <div className="rounded-lg border bg-card p-4">
+          <div className="border border-dashed bg-card p-4">
             <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
               <Activity className="h-4 w-4 text-muted-foreground" />
               Job Throughput
@@ -407,7 +419,7 @@ export function MetricsPage() {
                 <Legend
                   verticalAlign="top"
                   height={32}
-                  iconType="circle"
+                  iconType="square"
                   iconSize={8}
                   wrapperStyle={{ fontSize: 12 }}
                 />
@@ -488,7 +500,7 @@ export function MetricsPage() {
           </div>
 
           {/* Duration Chart */}
-          <div className="rounded-lg border bg-card p-4">
+          <div className="border border-dashed bg-card p-4">
             <h3 className="text-sm font-medium mb-4 flex items-center gap-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
               Processing Time
@@ -523,11 +535,11 @@ export function MetricsPage() {
                   axisLine={false}
                   width={48}
                 />
-                <Tooltip content={<DurationTooltip />} />
+                <Tooltip content={<DurationTooltip />} cursor={false} />
                 <Legend
                   verticalAlign="top"
                   height={32}
-                  iconType="circle"
+                  iconType="square"
                   iconSize={8}
                   wrapperStyle={{ fontSize: 12 }}
                 />
@@ -573,15 +585,17 @@ export function MetricsPage() {
                   dataKey="duration"
                   name="Duration"
                   fill="url(#durationGradient)"
-                  radius={[4, 4, 0, 0]}
+                  radius={[0, 0, 0, 0]}
                   style={{ outline: "none" }}
+                  isAnimationActive={false}
                 />
                 <Bar
                   dataKey="waitTime"
                   name="Wait Time"
                   fill="url(#waitTimeGradient)"
-                  radius={[4, 4, 0, 0]}
+                  radius={[0, 0, 0, 0]}
                   style={{ outline: "none" }}
+                  isAnimationActive={false}
                 />
               </BarChart>
             </ChartContainer>
@@ -591,8 +605,8 @@ export function MetricsPage() {
         {/* Problem Tables */}
         <div className="grid grid-cols-2 gap-4">
           {/* Slowest Jobs */}
-          <div className="rounded-lg border bg-card">
-            <div className="border-b px-4 py-3">
+          <div className="border border-dashed bg-card">
+            <div className="border-b border-dashed px-4 py-3">
               <h3 className="text-sm font-medium flex items-center gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
                 Slowest Jobs
@@ -602,8 +616,8 @@ export function MetricsPage() {
           </div>
 
           {/* Most Failing */}
-          <div className="rounded-lg border bg-card">
-            <div className="border-b px-4 py-3">
+          <div className="border border-dashed bg-card">
+            <div className="border-b border-dashed px-4 py-3">
               <h3 className="text-sm font-medium flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-muted-foreground" />
                 Most Failing Job Types

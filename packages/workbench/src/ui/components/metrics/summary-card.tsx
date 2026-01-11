@@ -33,16 +33,24 @@ function Sparkline({ data, className, color = "default" }: SparklineProps) {
 
   const colorClass = {
     default: "text-chart-1",
-    success: "text-chart-5",
+    success: "text-chart-success",
     danger: "text-chart-error",
     warning: "text-chart-4",
   }[color];
 
-  const fillClass = {
-    default: "fill-chart-1/20",
-    success: "fill-chart-5/20",
-    danger: "fill-chart-error/20",
-    warning: "fill-chart-4/20",
+  const patternId = `sparkline-${color}-pattern`;
+  const fillColorClass = {
+    default: "fill-chart-1",
+    success: "fill-chart-success",
+    danger: "fill-chart-error",
+    warning: "fill-chart-4",
+  }[color];
+
+  const strokeColorClass = {
+    default: "stroke-chart-1",
+    success: "stroke-chart-success",
+    danger: "stroke-chart-error",
+    warning: "stroke-chart-4",
   }[color];
 
   return (
@@ -51,7 +59,29 @@ function Sparkline({ data, className, color = "default" }: SparklineProps) {
       className={cn("w-20 h-6", className)}
       preserveAspectRatio="none"
     >
-      <polygon points={areaPoints} className={fillClass} />
+      <defs>
+        <pattern
+          id={patternId}
+          x="0"
+          y="0"
+          width="4"
+          height="4"
+          patternUnits="userSpaceOnUse"
+        >
+          <rect
+            width="4"
+            height="4"
+            className={cn(fillColorClass, "opacity-15")}
+          />
+          <path
+            d="M0,0 L4,4 M-1,3 L3,7 M-1,-1 L5,5"
+            className={strokeColorClass}
+            strokeWidth="0.75"
+            opacity="0.4"
+          />
+        </pattern>
+      </defs>
+      <polygon points={areaPoints} fill={`url(#${patternId})`} />
       <path
         d={pathD}
         fill="none"
@@ -98,7 +128,7 @@ function TrendBadge({
     <span
       className={cn(
         "inline-flex items-center text-xs font-medium",
-        isGood ? "text-chart-5" : "text-chart-error",
+        isGood ? "text-chart-success" : "text-chart-error",
       )}
     >
       {isUp ? (
@@ -142,7 +172,7 @@ export function SummaryCard({
   return (
     <div
       className={cn(
-        "rounded-lg border bg-card p-4 flex flex-col gap-2",
+        "border border-dashed bg-card p-4 flex flex-col gap-2",
         className,
       )}
     >

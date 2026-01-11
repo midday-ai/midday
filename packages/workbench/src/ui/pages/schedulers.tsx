@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   queryKeys,
   useDelayedSchedulers,
+  useRefresh,
   useRepeatableSchedulers,
 } from "@/lib/hooks";
 import { cn, formatDuration } from "@/lib/utils";
@@ -47,20 +48,19 @@ export function SchedulersPage({
     isRefetching: delayedRefetching,
   } = useDelayedSchedulers(search.delayedSort);
 
+  // Server-side cache refresh
+  const refreshMutation = useRefresh();
+
   const loading =
     repeatableLoading ||
     delayedLoading ||
     repeatableRefetching ||
-    delayedRefetching;
+    delayedRefetching ||
+    refreshMutation.isPending;
   const error = repeatableError || delayedError;
 
   const refresh = () => {
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.schedulers.repeatable(search.repeatableSort),
-    });
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.schedulers.delayed(search.delayedSort),
-    });
+    refreshMutation.mutate();
   };
 
   if (repeatableLoading || delayedLoading) {
@@ -76,7 +76,7 @@ export function SchedulersPage({
             <div className="h-9 w-28 animate-pulse rounded bg-muted" />
           </div>
           {/* Table Header */}
-          <div className="grid grid-cols-12 gap-4 border-b px-4 py-2 text-xs uppercase tracking-wider text-muted-foreground">
+          <div className="grid grid-cols-12 gap-4 border-b border-dashed py-2.5 text-[11px] uppercase tracking-wider text-muted-foreground">
             <div className="col-span-3">Name</div>
             <div className="col-span-2">Queue</div>
             <div className="col-span-3">Pattern</div>
@@ -84,11 +84,11 @@ export function SchedulersPage({
             <div className="col-span-2">Timezone</div>
           </div>
           {/* Skeleton Rows */}
-          <div className="space-y-2">
+          <div className="divide-y divide-border/50">
             {[...Array(10)].map((_, i) => (
               <div
                 key={`pulse-${i.toString()}`}
-                className="grid grid-cols-12 items-center gap-4 border bg-card px-4 py-3"
+                className="grid grid-cols-12 items-center gap-4 py-3"
               >
                 <div className="col-span-3 flex items-center gap-2">
                   <div className="h-4 w-4 animate-pulse rounded bg-muted" />
@@ -154,9 +154,9 @@ export function SchedulersPage({
               description="No cron or repeating jobs are configured"
             />
           ) : (
-            <div className="space-y-2">
+            <div className="divide-y divide-border/50">
               {/* Header */}
-              <div className="grid grid-cols-12 gap-4 border-b px-4 py-2 text-xs uppercase tracking-wider">
+              <div className="grid grid-cols-12 gap-4 border-b border-dashed py-2.5 text-[11px] uppercase tracking-wider text-muted-foreground">
                 <div className="col-span-3">
                   <SortableHeader
                     field="name"
@@ -203,7 +203,7 @@ export function SchedulersPage({
               {repeatable.map((scheduler) => (
                 <div
                   key={scheduler.key}
-                  className="grid grid-cols-12 items-center gap-4 border bg-card px-4 py-3 text-sm"
+                  className="grid grid-cols-12 items-center gap-4 py-3 text-sm"
                 >
                   <div className="col-span-3 flex items-center gap-2">
                     <Clock className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -244,9 +244,9 @@ export function SchedulersPage({
               description="No jobs are scheduled for future execution"
             />
           ) : (
-            <div className="space-y-2">
+            <div className="divide-y divide-border/50">
               {/* Header */}
-              <div className="grid grid-cols-12 gap-4 border-b px-4 py-2 text-xs uppercase tracking-wider">
+              <div className="grid grid-cols-12 gap-4 border-b border-dashed py-2.5 text-[11px] uppercase tracking-wider text-muted-foreground">
                 <div className="col-span-3">
                   <SortableHeader
                     field="name"
@@ -263,7 +263,7 @@ export function SchedulersPage({
                     onSort={handleDelayedSort}
                   />
                 </div>
-                <div className="col-span-2 text-muted-foreground font-medium">
+                <div className="col-span-2">
                   Job ID
                 </div>
                 <div className="col-span-3">
@@ -288,7 +288,7 @@ export function SchedulersPage({
               {delayed.map((job) => (
                 <div
                   key={`${job.queueName}-${job.id}`}
-                  className="grid grid-cols-12 items-center gap-4 border bg-card px-4 py-3 text-sm"
+                  className="grid grid-cols-12 items-center gap-4 py-3 text-sm"
                 >
                   <div className="col-span-3 flex items-center gap-2">
                     <Timer className="h-4 w-4 shrink-0 text-muted-foreground" />

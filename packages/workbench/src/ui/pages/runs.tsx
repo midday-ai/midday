@@ -17,9 +17,11 @@ import {
 import type { RunInfo } from "@/core/types";
 import {
   queryKeys,
+  useActivityStats,
   useBulkDelete,
   useBulkPromote,
   useBulkRetry,
+  useRefresh,
   useRuns,
 } from "@/lib/hooks";
 import { cn, formatDuration, truncate } from "@/lib/utils";
@@ -162,11 +164,14 @@ export function RunsPage({
     });
   };
 
+  // Server-side cache refresh
+  const refreshMutation = useRefresh();
+
   const refresh = () => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.runs(search.sort) });
+    refreshMutation.mutate();
   };
 
-  const loading = isLoading || isRefetching;
+  const loading = isLoading || isRefetching || refreshMutation.isPending;
 
   // Selection helpers
   const selectionKey = (queueName: string, jobId: string) =>
@@ -239,51 +244,58 @@ export function RunsPage({
     clearSelection();
   };
 
-  // Timeline data - last 30 minutes with 60-second buckets
+  // Fetch activity stats from API (cached server-side, complete 7-day data)
+  const { data: activityData } = useActivityStats();
+
+  // Transform API data into timeline format
   const timelineData = React.useMemo(() => {
-    const now = Date.now();
-    const duration = 30 * 60 * 1000; // 30 minutes
-    const bucketSize = 60 * 1000; // 60 seconds
-    const bucketCount = Math.ceil(duration / bucketSize);
-    const startTime = now - duration;
-
-    const buckets: {
-      time: number;
-      label: string;
-      success: number;
-      error: number;
-    }[] = [];
-
-    for (let i = 0; i < bucketCount; i++) {
-      const bucketStart = startTime + i * bucketSize;
-      const bucketEnd = bucketStart + bucketSize;
-      const date = new Date(bucketStart);
-
-      const runsInBucket = runs.filter((run) => {
-        const time = run.processedOn || run.timestamp;
-        return time >= bucketStart && time < bucketEnd;
-      });
-
-      buckets.push({
-        time: bucketStart,
-        label: date.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        }),
-        success: runsInBucket.filter((r) => r.status === "completed").length,
-        error: runsInBucket.filter((r) => r.status === "failed").length,
-      });
+    if (!activityData) {
+      // Return empty placeholder while loading
+      const now = Date.now();
+      const bucketSize = 4 * 60 * 60 * 1000;
+      const startDate = new Date(now);
+      startDate.setHours(0, 0, 0, 0);
+      startDate.setDate(startDate.getDate() - 6);
+      return {
+        buckets: [] as {
+          time: number;
+          label: string;
+          dayLabel: string;
+          success: number;
+          error: number;
+        }[],
+        startTime: startDate.getTime(),
+        endTime: now,
+        bucketSize,
+      };
     }
 
-    return { buckets, startTime, endTime: now, bucketSize };
-  }, [runs]);
+    const buckets = activityData.buckets.map((bucket) => {
+      const date = new Date(bucket.time);
+      return {
+        time: bucket.time,
+        label: date.toLocaleDateString([], {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+        }),
+        dayLabel: date.toLocaleDateString([], { weekday: "short" }),
+        success: bucket.completed,
+        error: bucket.failed,
+      };
+    });
 
-  const totalSuccess = timelineData.buckets.reduce(
-    (sum, b) => sum + b.success,
-    0,
-  );
-  const totalError = timelineData.buckets.reduce((sum, b) => sum + b.error, 0);
+    return {
+      buckets,
+      startTime: activityData.startTime,
+      endTime: activityData.endTime,
+      bucketSize: activityData.bucketSize,
+    };
+  }, [activityData]);
+
+  const totalSuccess = activityData?.totalCompleted ?? 0;
+  const totalError = activityData?.totalFailed ?? 0;
 
   // Infinite scroll - load more when sentinel is visible
   const loadMoreRef = React.useRef<HTMLDivElement>(null);
@@ -307,43 +319,31 @@ export function RunsPage({
 
   return (
     <div className="h-full overflow-auto">
-      {/* Sticky header section */}
+      {/* Activity Timeline - scrolls with content */}
+      <div className="py-4">
+        <ActivityTimeline
+          data={timelineData}
+          selection={timeRange}
+          onSelectionChange={handleTimeRangeChange}
+          totalSuccess={totalSuccess}
+          totalError={totalError}
+        />
+      </div>
+
+      {/* Sticky header section - Search and Table Header */}
       <div className="sticky top-0 z-20 bg-background">
-        {/* Activity Timeline */}
-        <div className="px-4 py-2">
-          <ActivityTimeline
-            data={timelineData}
-            selection={timeRange}
-            onSelectionChange={handleTimeRangeChange}
-            totalSuccess={totalSuccess}
-            totalError={totalError}
+        {/* Smart Search */}
+        <div className="border-b border-dashed pb-3">
+          <SmartSearch
+            value={search.q ?? ""}
+            status={search.status}
+            totalCount={total}
+            onChange={handleSearchChange}
           />
         </div>
 
-        {/* Smart Search */}
-        <div className="flex items-center gap-2 border-b border-t py-3">
-          <div className="flex-1">
-            <SmartSearch
-              value={search.q ?? ""}
-              status={search.status}
-              totalCount={total}
-              onChange={handleSearchChange}
-            />
-          </div>
-
-          {/* Refresh */}
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={refresh}
-            className="h-9 w-9 shrink-0"
-          >
-            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
-          </Button>
-        </div>
-
         {/* Table Header */}
-        <div className="grid grid-cols-12 gap-4 border-b px-4 py-2 text-[11px] uppercase tracking-wider">
+        <div className="grid grid-cols-12 gap-4 border-b border-dashed py-2.5 text-[11px] uppercase tracking-wider text-muted-foreground">
           <div className="col-span-5 flex items-center gap-3">
             <Checkbox
               checked={isAllSelected}
@@ -400,28 +400,28 @@ export function RunsPage({
 
       {/* Table content */}
       {isLoading && runs.length === 0 ? (
-        <div className="divide-y divide-border">
+        <div className="divide-y divide-border/50">
           {[...Array(15)].map((_, i) => (
             <div
               key={i.toString()}
-              className="grid grid-cols-12 items-center gap-4 px-4 py-3"
+              className="grid grid-cols-12 items-center gap-4 px-6 py-3"
             >
               <div className="col-span-5 flex items-center gap-3">
-                <div className="h-4 w-4 animate-pulse rounded bg-muted" />
-                <div className="h-2 w-2 animate-pulse rounded-full bg-muted" />
-                <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+                <div className="h-4 w-4 animate-pulse bg-muted" />
+                <div className="h-2 w-2 animate-pulse bg-muted" />
+                <div className="h-4 w-32 animate-pulse bg-muted" />
               </div>
               <div className="col-span-2">
-                <div className="h-4 w-16 animate-pulse rounded bg-muted" />
+                <div className="h-4 w-16 animate-pulse bg-muted" />
               </div>
               <div className="col-span-2">
-                <div className="h-5 w-20 animate-pulse rounded-full bg-muted" />
+                <div className="h-5 w-20 animate-pulse bg-muted" />
               </div>
               <div className="col-span-2">
-                <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+                <div className="h-4 w-24 animate-pulse bg-muted" />
               </div>
               <div className="col-span-1">
-                <div className="h-4 w-12 animate-pulse rounded bg-muted" />
+                <div className="h-4 w-12 animate-pulse bg-muted" />
               </div>
             </div>
           ))}
@@ -451,7 +451,7 @@ export function RunsPage({
       ) : (
         <>
           {/* Table Rows */}
-          <div className="divide-y">
+          <div className="divide-y divide-border/50">
             {filteredRuns.map((run) => (
               <RunRow
                 key={`${run.queueName}-${run.id}`}
@@ -477,7 +477,7 @@ export function RunsPage({
           )}
 
           {/* Footer */}
-          <div className="px-4 py-2 text-xs text-muted-foreground">
+          <div className="px-6 py-3 text-xs text-muted-foreground">
             Showing {filteredRuns.length} of {total} runs
           </div>
         </>
@@ -527,7 +527,7 @@ function RunRow({
 
   return (
     <div
-      className="group grid w-full grid-cols-12 items-center gap-4 px-4 py-3 text-left text-sm cursor-pointer"
+      className="group grid w-full grid-cols-12 items-center gap-4 py-3 text-left text-sm cursor-pointer"
       onClick={onClick}
     >
       <div className="col-span-5 flex min-w-0 items-center gap-3">
@@ -603,7 +603,13 @@ function RunRow({
 
 // Activity Timeline with brush selection
 interface TimelineData {
-  buckets: { time: number; label: string; success: number; error: number }[];
+  buckets: {
+    time: number;
+    label: string;
+    dayLabel: string;
+    success: number;
+    error: number;
+  }[];
   startTime: number;
   endTime: number;
   bucketSize: number;
@@ -621,6 +627,8 @@ function ActivityTimeline({
   data,
   selection,
   onSelectionChange,
+  totalSuccess,
+  totalError,
 }: ActivityTimelineProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = React.useState(false);
@@ -671,12 +679,12 @@ function ActivityTimeline({
     }
   };
 
-  const formatTimeLabel = (time: number) => {
-    return new Date(time).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
+  const formatDayLabel = (time: number) => {
+    const date = new Date(time);
+    const today = new Date();
+    const isToday = date.toDateString() === today.toDateString();
+    if (isToday) return "Today";
+    return date.toLocaleDateString([], { weekday: "short" });
   };
 
   // Calculate selection position for overlay
@@ -688,72 +696,123 @@ function ActivityTimeline({
   };
 
   return (
-    <div className="space-y-2">
-      {/* Selection clear button */}
-      {selection && (
-        <div className="mb-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onSelectionChange(null)}
-            className="h-6 gap-1 px-2 text-xs"
-          >
-            <X className="h-3 w-3" />
-            Clear selection
-          </Button>
+    <div className="border border-dashed p-4">
+      {/* Header with stats */}
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Activity
+          </span>
+          <span className="text-xs text-muted-foreground">Last 7 days</span>
         </div>
-      )}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5">
+            <div className="h-2 w-2 bg-chart-1" />
+            <span className="text-xs tabular-nums text-muted-foreground">
+              {totalSuccess} completed
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="h-2 w-2 bg-chart-failed" />
+            <span className="text-xs tabular-nums text-muted-foreground">
+              {totalError} failed
+            </span>
+          </div>
+          <div className="h-6">
+            {selection && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onSelectionChange(null)}
+                className="h-6 gap-1 px-2 text-xs"
+              >
+                <X className="h-3 w-3" />
+                Clear
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
 
-      {/* Chart area */}
+      {/* Chart area - 7 day flow with granular bars */}
       <div
         ref={containerRef}
-        className="relative h-8 cursor-crosshair select-none"
+        className="relative h-12 cursor-crosshair select-none"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
       >
         {/* Bars */}
-        <div className="absolute inset-x-0 bottom-0 top-0 flex items-end justify-between">
-          {data.buckets.map((bucket, i) => {
-            const total = bucket.success + bucket.error;
-            const height =
-              total > 0 ? Math.max((total / maxValue) * 100, 15) : 0;
+        {data.buckets.map((bucket, i) => {
+          const total = bucket.success + bucket.error;
+          const successHeight =
+            bucket.success > 0
+              ? Math.max((bucket.success / maxValue) * 100, 8)
+              : 0;
+          const errorHeight =
+            bucket.error > 0 ? Math.max((bucket.error / maxValue) * 100, 8) : 0;
+          const hasActivity = total > 0;
 
-            return (
-              <Tooltip key={i.toString()}>
-                <TooltipTrigger asChild>
-                  <div className="relative h-full w-[2px]">
-                    <div
-                      className="absolute bottom-0 w-[2px] bg-muted-foreground/60"
-                      style={{ height: `${height}%` }}
-                    />
-                  </div>
-                </TooltipTrigger>
-                {total > 0 && (
-                  <TooltipContent side="top" className="text-xs">
-                    <div className="font-mono text-muted-foreground">
-                      {bucket.label}
-                    </div>
-                    <div className="font-medium">
+          // Calculate position based on bucket time
+          const timeRange = data.endTime - data.startTime;
+          const bucketPosition =
+            ((bucket.time - data.startTime) / timeRange) * 100;
+
+          return (
+            <Tooltip key={i.toString()}>
+              <TooltipTrigger asChild>
+                <div
+                  className="absolute bottom-0 flex h-full w-[3px] flex-col justify-end"
+                  style={{ left: `${bucketPosition}%` }}
+                >
+                  {hasActivity ? (
+                    <>
+                      {bucket.error > 0 && (
+                        <div
+                          className="w-full bg-chart-failed"
+                          style={{ height: `${errorHeight}%` }}
+                        />
+                      )}
+                      {bucket.success > 0 && (
+                        <div
+                          className="w-full bg-chart-1"
+                          style={{ height: `${successHeight}%` }}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <div className="h-px w-full bg-muted/30" />
+                  )}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs">
+                <div className="font-medium text-foreground">
+                  {bucket.label}
+                </div>
+                {total > 0 ? (
+                  <>
+                    <div className="text-muted-foreground">
                       {total} {total === 1 ? "run" : "runs"}
                     </div>
                     {bucket.success > 0 && (
-                      <div className="text-muted-foreground">
-                        {bucket.success} success
+                      <div className="text-chart-1">
+                        {bucket.success} completed
                       </div>
                     )}
                     {bucket.error > 0 && (
-                      <div className="text-muted-foreground">
+                      <div className="text-chart-failed">
                         {bucket.error} failed
                       </div>
                     )}
-                  </TooltipContent>
+                  </>
+                ) : (
+                  <div className="text-muted-foreground">No activity</div>
                 )}
-              </Tooltip>
-            );
-          })}
-        </div>
+              </TooltipContent>
+            </Tooltip>
+          );
+        })}
 
         {/* Baseline */}
         <div className="absolute bottom-0 left-0 right-0 h-px bg-border" />
@@ -761,7 +820,7 @@ function ActivityTimeline({
         {/* Drag selection overlay */}
         {isDragging && dragStart !== null && dragEnd !== null && (
           <div
-            className="pointer-events-none absolute bottom-0 top-0 border-x border-primary/50 bg-primary/10"
+            className="pointer-events-none absolute bottom-0 top-0 border-x border-ring bg-ring/10"
             style={getSelectionStyle({
               start: Math.min(dragStart, dragEnd),
               end: Math.max(dragStart, dragEnd),
@@ -772,25 +831,18 @@ function ActivityTimeline({
         {/* Active selection overlay */}
         {selection && !isDragging && (
           <div
-            className="pointer-events-none absolute bottom-0 top-0 border-x-2 border-primary/70 bg-primary/20"
+            className="pointer-events-none absolute bottom-0 top-0 border-x-2 border-ring bg-ring/20"
             style={getSelectionStyle(selection)}
-          >
-            {/* Selection time labels */}
-            <div className="absolute -top-5 left-0 text-[10px] font-medium text-primary">
-              {formatTimeLabel(selection.start)}
-            </div>
-            <div className="absolute -top-5 right-0 text-[10px] font-medium text-primary">
-              {formatTimeLabel(selection.end)}
-            </div>
-          </div>
+          />
         )}
       </div>
 
-      {/* Time axis - single label at end */}
-      <div className="relative flex h-4 justify-end">
-        <span className="text-[10px] text-muted-foreground">
-          {formatTimeLabel(data.endTime)}
-        </span>
+      {/* Day labels */}
+      <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">
+        {Array.from({ length: 7 }).map((_, i) => {
+          const dayTime = data.startTime + i * 24 * 60 * 60 * 1000;
+          return <span key={i.toString()}>{formatDayLabel(dayTime)}</span>;
+        })}
       </div>
     </div>
   );

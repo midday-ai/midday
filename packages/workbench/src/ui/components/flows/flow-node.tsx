@@ -32,45 +32,45 @@ const statusConfig: Record<
 > = {
   completed: {
     icon: CheckCircle2,
-    color: "text-emerald-500",
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/30",
+    color: "text-emerald-600 dark:text-emerald-400",
+    bg: "bg-emerald-50 dark:bg-emerald-500/10",
+    border: "border-emerald-200 dark:border-emerald-500/20",
   },
   active: {
     icon: Loader2,
-    color: "text-blue-500",
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/30",
+    color: "text-blue-600 dark:text-blue-400",
+    bg: "bg-blue-50 dark:bg-blue-500/10",
+    border: "border-blue-200 dark:border-blue-500/20",
     animate: true,
   },
   waiting: {
     icon: Circle,
     color: "text-muted-foreground",
-    bg: "bg-muted/50",
+    bg: "bg-muted/30",
     border: "border-border",
   },
   delayed: {
     icon: Clock,
-    color: "text-amber-500",
-    bg: "bg-amber-500/10",
-    border: "border-amber-500/30",
+    color: "text-amber-600 dark:text-amber-400",
+    bg: "bg-amber-50 dark:bg-amber-500/10",
+    border: "border-amber-200 dark:border-amber-500/20",
   },
   failed: {
     icon: XCircle,
-    color: "text-red-500",
-    bg: "bg-red-500/10",
-    border: "border-red-500/30",
+    color: "text-destructive",
+    bg: "bg-red-50 dark:bg-red-500/10",
+    border: "border-red-200 dark:border-red-500/20",
   },
   paused: {
     icon: Pause,
     color: "text-muted-foreground",
-    bg: "bg-muted/50",
+    bg: "bg-muted/30",
     border: "border-border",
   },
   unknown: {
     icon: Circle,
     color: "text-muted-foreground",
-    bg: "bg-muted/50",
+    bg: "bg-muted/30",
     border: "border-border",
   },
 };
@@ -91,9 +91,9 @@ function FlowNodeComponent({ data }: FlowNodeProps) {
   return (
     <div
       className={cn(
-        "relative min-w-[180px] rounded-lg border px-3 py-2.5 shadow-md transition-all",
-        "hover:shadow-lg cursor-pointer",
-        "bg-card text-card-foreground",
+        "relative min-w-[180px] px-3 py-2.5 transition-all",
+        "hover:bg-accent/50 cursor-pointer",
+        "bg-background border",
         config.border
       )}
       onClick={() => onClick?.(flowNode)}
@@ -102,20 +102,20 @@ function FlowNodeComponent({ data }: FlowNodeProps) {
       <Handle
         type="target"
         position={Position.Top}
-        className="!w-2.5 !h-2.5 !bg-muted-foreground/50 !border-2 !border-background"
+        className="!w-2 !h-2 !bg-muted-foreground/40 !border-0"
       />
 
       {/* Content */}
       <div className="flex items-start gap-2.5">
         <div
           className={cn(
-            "p-1.5 rounded-md shrink-0",
+            "p-1.5 shrink-0",
             config.bg
           )}
         >
           <Icon
             className={cn(
-              "h-4 w-4",
+              "h-3.5 w-3.5",
               config.color,
               config.animate && "animate-spin"
             )}
@@ -125,11 +125,11 @@ function FlowNodeComponent({ data }: FlowNodeProps) {
           <div className="font-medium text-sm truncate text-foreground">
             {job.name}
           </div>
-          <div className="text-xs text-muted-foreground truncate mt-0.5">
+          <div className="text-[11px] text-muted-foreground truncate mt-0.5">
             {queueName}
           </div>
           {job.duration !== undefined && (
-            <div className="text-xs text-muted-foreground mt-1 font-mono">
+            <div className="text-[11px] text-muted-foreground mt-1 font-mono tabular-nums">
               {formatDuration(job.duration)}
             </div>
           )}
@@ -139,8 +139,8 @@ function FlowNodeComponent({ data }: FlowNodeProps) {
       {/* Status badge */}
       <div
         className={cn(
-          "absolute -top-2 -right-2 px-1.5 py-0.5 rounded text-[10px] font-medium uppercase",
-          "bg-background border shadow-sm",
+          "absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide",
+          "bg-background border",
           config.color,
           config.border
         )}
@@ -152,7 +152,7 @@ function FlowNodeComponent({ data }: FlowNodeProps) {
       <Handle
         type="source"
         position={Position.Bottom}
-        className="!w-2.5 !h-2.5 !bg-muted-foreground/50 !border-2 !border-background"
+        className="!w-2 !h-2 !bg-muted-foreground/40 !border-0"
       />
     </div>
   );

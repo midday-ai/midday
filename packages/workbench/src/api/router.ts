@@ -28,6 +28,12 @@ export function createApiRoutes(core: WorkbenchCore): Hono {
   const app = new Hono();
   const qm = core.queueManager;
 
+  // POST /api/refresh - Clear all caches (for user-initiated refresh)
+  app.post("/refresh", async (c) => {
+    qm.clearCache();
+    return c.json({ success: true });
+  });
+
   // GET /api/overview - Dashboard stats
   app.get("/overview", async (c) => {
     const stats = await qm.getOverview();
@@ -87,6 +93,12 @@ export function createApiRoutes(core: WorkbenchCore): Hono {
   app.get("/metrics", async (c) => {
     const metrics = await qm.getMetrics();
     return c.json(metrics);
+  });
+
+  // GET /api/activity - Get 7-day activity stats for timeline
+  app.get("/activity", async (c) => {
+    const stats = await qm.getActivityStats();
+    return c.json(stats);
   });
 
   // GET /api/queues/:name/jobs - List jobs for a queue

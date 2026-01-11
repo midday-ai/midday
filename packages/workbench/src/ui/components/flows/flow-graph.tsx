@@ -1,15 +1,9 @@
 import type { FlowNode as FlowNodeType } from "@/core/types";
-import {
-  Background,
-  BackgroundVariant,
-  ReactFlow,
-  type Edge,
-  type Node,
-} from "@xyflow/react";
+import { type Edge, type Node, ReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import dagre from "dagre";
 import { useCallback, useMemo } from "react";
-import { FlowNodeMemo, type FlowNodeData } from "./flow-node";
+import { type FlowNodeData, FlowNodeMemo } from "./flow-node";
 
 interface FlowGraphProps {
   flow: FlowNodeType;
@@ -28,7 +22,7 @@ const nodeHeight = 80;
  */
 function flowToGraph(
   flow: FlowNodeType,
-  onNodeClick?: (node: FlowNodeType) => void
+  onNodeClick?: (node: FlowNodeType) => void,
 ): { nodes: Node<FlowNodeData>[]; edges: Edge[] } {
   const nodes: Node<FlowNodeData>[] = [];
   const edges: Edge[] = [];
@@ -102,7 +96,7 @@ function flowToGraph(
 export function FlowGraph({ flow, onNodeClick }: FlowGraphProps) {
   const { nodes, edges } = useMemo(
     () => flowToGraph(flow, onNodeClick),
-    [flow, onNodeClick]
+    [flow, onNodeClick],
   );
 
   // Handle node click via React Flow's native handler
@@ -112,18 +106,18 @@ export function FlowGraph({ flow, onNodeClick }: FlowGraphProps) {
         node.data.onClick(node.data.flowNode);
       }
     },
-    []
+    [],
   );
 
   return (
-    <div className="w-full h-full min-h-[400px]">
+    <div className="w-full h-full">
       <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
         onNodeClick={handleNodeClick}
         fitView
-        fitViewOptions={{ padding: 0.4, maxZoom: 0.8 }}
+        fitViewOptions={{ padding: 0.3, maxZoom: 1 }}
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={true}
@@ -131,16 +125,10 @@ export function FlowGraph({ flow, onNodeClick }: FlowGraphProps) {
         zoomOnScroll
         minZoom={0.2}
         maxZoom={1.5}
-        defaultViewport={{ x: 0, y: 0, zoom: 0.7 }}
+        defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
         proOptions={{ hideAttribution: true }}
-      >
-        <Background
-          variant={BackgroundVariant.Dots}
-          gap={20}
-          size={1.5}
-          color="hsl(var(--muted-foreground) / 0.3)"
-        />
-      </ReactFlow>
+        style={{ background: "transparent" }}
+      />
     </div>
   );
 }

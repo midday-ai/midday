@@ -4,7 +4,7 @@ import type { JobStatus } from "@/core/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { Loader2, RotateCcw, Trash2, Zap } from "lucide-react";
+import { Loader2, RotateCcw, Trash2, Zap, MoreVertical } from "lucide-react";
 import * as React from "react";
 import { Portal } from "./portal";
 
@@ -73,7 +73,7 @@ export function BulkBottomBar({
             <div className="relative pointer-events-auto min-w-[400px] h-12">
               {/* Backdrop blur layer */}
               <motion.div
-                className="absolute inset-0 rounded-lg backdrop-blur-lg bg-background/85 border shadow-lg"
+                className="absolute inset-0 backdrop-blur-xl bg-background/70 shadow-lg"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -82,7 +82,7 @@ export function BulkBottomBar({
 
               {/* Content */}
               <div className="relative h-12 flex items-center justify-between px-4">
-                <span className="text-sm font-medium">
+                <span className="text-xs text-foreground">
                   {selection.length} selected
                 </span>
 
@@ -92,41 +92,57 @@ export function BulkBottomBar({
                     size="sm"
                     onClick={onClear}
                     disabled={isLoading}
-                    className="text-muted-foreground"
+                    className="text-xs text-muted-foreground hover:text-foreground hover:bg-transparent"
                   >
                     Deselect all
                   </Button>
 
+                  {(onPromote && hasDelayedJobs) || (onRetry && hasFailedJobs) || onDelete ? (
+                    <MoreVertical className="h-3 w-3 text-muted-foreground/50" />
+                  ) : null}
+
                   {onPromote && hasDelayedJobs && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={onPromote}
-                      disabled={isLoading}
-                    >
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={onPromote}
+                        disabled={isLoading}
+                        className="text-xs text-muted-foreground hover:text-foreground hover:bg-transparent"
+                      >
                       {isPromoting ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                       ) : (
-                        <Zap className="mr-2 h-4 w-4" />
+                        <Zap className="mr-1 h-3 w-3" />
                       )}
                       Promote{delayedCount < selection.length && ` (${delayedCount})`}
-                    </Button>
+                      </Button>
+                      {(onRetry && hasFailedJobs) || onDelete ? (
+                        <MoreVertical className="h-3 w-3 text-muted-foreground/50" />
+                      ) : null}
+                    </>
                   )}
 
                   {onRetry && hasFailedJobs && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={onRetry}
-                      disabled={isLoading}
-                    >
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={onRetry}
+                        disabled={isLoading}
+                        className="text-xs text-muted-foreground hover:text-foreground hover:bg-transparent"
+                      >
                       {isRetrying ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                       ) : (
-                        <RotateCcw className="mr-2 h-4 w-4" />
+                        <RotateCcw className="mr-1 h-3 w-3" />
                       )}
                       Retry{failedCount < selection.length && ` (${failedCount})`}
-                    </Button>
+                      </Button>
+                      {onDelete ? (
+                        <MoreVertical className="h-3 w-3 text-muted-foreground/50" />
+                      ) : null}
+                    </>
                   )}
 
                   {onDelete && (
@@ -135,12 +151,12 @@ export function BulkBottomBar({
                       size="sm"
                       onClick={onDelete}
                       disabled={isLoading}
-                      className="text-destructive hover:text-destructive"
+                      className="text-xs text-muted-foreground hover:text-foreground hover:bg-transparent"
                     >
                       {isDeleting ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                       ) : (
-                        <Trash2 className="mr-2 h-4 w-4" />
+                        <Trash2 className="mr-1 h-3 w-3" />
                       )}
                       Delete
                     </Button>

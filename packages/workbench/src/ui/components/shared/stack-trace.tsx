@@ -28,7 +28,7 @@ export function StackTrace({ error, stacktrace, className }: StackTraceProps) {
   return (
     <div
       className={cn(
-        "rounded-lg border border-destructive/20 bg-destructive/5",
+        "border border-destructive/20 bg-destructive/5",
         className,
       )}
     >
@@ -77,7 +77,7 @@ export function StackTrace({ error, stacktrace, className }: StackTraceProps) {
             {stacktrace.map((line, i) => (
               <div
                 key={i}
-                className="hover:bg-destructive/10 px-1 -mx-1 rounded"
+                className="hover:bg-destructive/10 px-1 -mx-1"
               >
                 {formatStackLine(line)}
               </div>

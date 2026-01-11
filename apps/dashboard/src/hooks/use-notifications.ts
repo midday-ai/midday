@@ -30,6 +30,11 @@ export function getMetadataProperty(activity: Activity, key: string): any {
   return metadata[key];
 }
 
+// Get ISO timestamp for 24 hours ago
+function get24HoursAgo(): string {
+  return new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+}
+
 export function useNotifications() {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -44,6 +49,7 @@ export function useNotifications() {
       maxPriority: 3, // Only fetch notifications (priority <= 3)
       pageSize: 20,
       status: ["unread", "read"], // Exclude archived notifications from query
+      createdAfter: get24HoursAgo(), // Only fetch last 24 hours
     }),
   );
 
@@ -54,6 +60,7 @@ export function useNotifications() {
         maxPriority: 3,
         pageSize: 20,
         status: "archived", // Only archived notifications
+        createdAfter: get24HoursAgo(), // Only fetch last 24 hours
       }),
     );
 

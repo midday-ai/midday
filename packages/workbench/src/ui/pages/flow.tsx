@@ -1,7 +1,7 @@
-import type { FlowNode } from "@/core/types";
 import { FlowGraph } from "@/components/flows";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
+import type { FlowNode } from "@/core/types";
 import { useFlow } from "@/lib/hooks";
 import { cn, formatDuration } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
@@ -34,24 +34,24 @@ export function FlowPage({ queueName, jobId }: FlowPageProps) {
   // Loading state
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="flex flex-col h-full -mb-6">
         {/* Header skeleton */}
-        <div className="rounded-lg border bg-card">
-          <div className="flex items-center justify-between border-b px-4 py-3">
+        <div className="pb-4 border-b border-border shrink-0">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="h-6 w-32 animate-pulse rounded bg-muted" />
-              <div className="h-5 w-20 animate-pulse rounded-full bg-muted" />
+              <div className="h-5 w-20 animate-pulse rounded bg-muted" />
             </div>
           </div>
-          <div className="flex items-center gap-6 px-4 py-3">
+          <div className="flex items-center gap-6">
             <div className="h-4 w-24 animate-pulse rounded bg-muted" />
             <div className="h-4 w-32 animate-pulse rounded bg-muted" />
             <div className="h-4 w-20 animate-pulse rounded bg-muted" />
           </div>
         </div>
         {/* Graph skeleton */}
-        <div className="rounded-lg border bg-card h-[500px] flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="flex-1 -mx-6 -mb-6 mt-6 flex items-center justify-center dotted-bg">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       </div>
     );
@@ -63,7 +63,10 @@ export function FlowPage({ queueName, jobId }: FlowPageProps) {
       <EmptyState
         icon={AlertCircle}
         title="Failed to load flow"
-        description={(error as Error)?.message || "Flow not found or jobs have been cleaned up"}
+        description={
+          (error as Error)?.message ||
+          "Flow not found or jobs have been cleaned up"
+        }
       />
     );
   }
@@ -72,11 +75,11 @@ export function FlowPage({ queueName, jobId }: FlowPageProps) {
   const stats = countFlowStats(flow);
 
   return (
-    <div className="space-y-4">
-      {/* Header Card */}
-      <div className="rounded-lg border bg-card">
+    <div className="flex flex-col h-full -mb-6">
+      {/* Header */}
+      <div className="pb-4 border-b border-border shrink-0">
         {/* Title row */}
-        <div className="flex items-center justify-between border-b px-4 py-3">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <Network className="h-5 w-5 text-muted-foreground" />
             <h2 className="text-lg font-semibold">{flow.job.name}</h2>
@@ -85,7 +88,7 @@ export function FlowPage({ queueName, jobId }: FlowPageProps) {
         </div>
 
         {/* Stats row */}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 text-sm">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">Queue:</span>
             <button
@@ -96,7 +99,7 @@ export function FlowPage({ queueName, jobId }: FlowPageProps) {
                   params: { queueName },
                 })
               }
-              className="text-xs bg-muted px-1.5 py-0.5 rounded font-mono text-primary hover:underline"
+              className="text-xs bg-muted px-1.5 py-0.5 font-mono text-primary hover:underline"
             >
               {queueName}
             </button>
@@ -109,7 +112,9 @@ export function FlowPage({ queueName, jobId }: FlowPageProps) {
           </div>
           <div className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-            <span className="text-muted-foreground">{stats.completed} completed</span>
+            <span className="text-muted-foreground">
+              {stats.completed} completed
+            </span>
           </div>
           {stats.failed > 0 && (
             <div className="flex items-center gap-2">
@@ -128,11 +133,9 @@ export function FlowPage({ queueName, jobId }: FlowPageProps) {
         </div>
       </div>
 
-      {/* Flow Graph Card */}
-      <div className="rounded-lg border bg-card overflow-hidden">
-        <div className="h-[600px]">
-          <FlowGraph flow={flow} onNodeClick={handleNodeClick} />
-        </div>
+      {/* Flow Graph - Full Width with dotted background */}
+      <div className="flex-1 -mx-6 -mb-6 mt-6 dotted-bg">
+        <FlowGraph flow={flow} onNodeClick={handleNodeClick} />
       </div>
     </div>
   );

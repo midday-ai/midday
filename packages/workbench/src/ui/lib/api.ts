@@ -1,4 +1,5 @@
 import type {
+  ActivityStatsResponse,
   CreateFlowRequest,
   DelayedJobInfo,
   FlowNode,
@@ -90,6 +91,13 @@ async function fetchJson<T>(url: string, options?: FetchOptions): Promise<T> {
 
 export const api = {
   /**
+   * Clear all server-side caches (for user-initiated refresh)
+   */
+  async refresh(): Promise<{ success: boolean }> {
+    return fetchJson(`${API_BASE}/refresh`, { method: "POST" });
+  },
+
+  /**
    * Get dashboard overview stats (longer timeout as it scans all queues)
    */
   async getOverview(signal?: AbortSignal): Promise<OverviewStats> {
@@ -111,6 +119,16 @@ export const api = {
    */
   async getMetrics(signal?: AbortSignal): Promise<MetricsResponse> {
     return fetchJson(`${API_BASE}/metrics`, {
+      signal,
+      timeout: EXTENDED_TIMEOUT,
+    });
+  },
+
+  /**
+   * Get 7-day activity stats for the timeline (cached server-side)
+   */
+  async getActivityStats(signal?: AbortSignal): Promise<ActivityStatsResponse> {
+    return fetchJson(`${API_BASE}/activity`, {
       signal,
       timeout: EXTENDED_TIMEOUT,
     });

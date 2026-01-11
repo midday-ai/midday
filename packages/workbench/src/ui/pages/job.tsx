@@ -128,11 +128,11 @@ export function JobPage({
     return (
       <div className="space-y-4">
         {/* Header skeleton */}
-        <div className="rounded-lg border bg-card">
+        <div className=" border bg-card">
           <div className="flex items-center justify-between border-b px-4 py-3">
             <div className="flex items-center gap-3">
               <div className="h-6 w-32 animate-pulse rounded bg-muted" />
-              <div className="h-5 w-20 animate-pulse rounded-full bg-muted" />
+              <div className="h-5 w-20 animate-pulse bg-muted" />
             </div>
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 animate-pulse rounded bg-muted" />
@@ -146,7 +146,7 @@ export function JobPage({
           </div>
         </div>
         {/* Data section skeleton */}
-        <div className="rounded-lg border bg-card p-4">
+        <div className=" border bg-card p-4">
           <div className="h-5 w-16 animate-pulse rounded bg-muted mb-3" />
           <div className="space-y-2">
             <div className="h-4 w-full animate-pulse rounded bg-muted" />
@@ -176,11 +176,11 @@ export function JobPage({
   return (
     <div className="flex h-full flex-col gap-4">
       {/* Header Card */}
-      <div className="rounded-lg border bg-card">
+      <div className=" border bg-card">
         {/* Title Row */}
         <div className="flex items-center justify-between border-b px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 rounded-md bg-muted px-2.5 py-1 text-sm font-medium">
+            <div className="flex items-center gap-2  bg-muted px-2.5 py-1 text-sm font-medium">
               {job.name}
             </div>
             <StatusBadge status={job.status} />
@@ -364,13 +364,13 @@ export function JobPage({
         </TabsList>
 
         <TabsContent value="payload" className="mt-4">
-          <div className="rounded-lg border">
+          <div className=" border">
             <JsonViewer data={job.data} />
           </div>
         </TabsContent>
 
         <TabsContent value="output" className="mt-4">
-          <div className="rounded-lg border">
+          <div className=" border">
             {job.returnvalue ? (
               <JsonViewer data={job.returnvalue} />
             ) : (
@@ -466,7 +466,7 @@ function ErrorDisplay({
   };
 
   return (
-    <div className="overflow-hidden rounded-lg border border-status-error/30 bg-status-error/5">
+    <div className="overflow-hidden  border border-status-error/30 bg-status-error/5">
       <div className="flex items-center justify-between border-b border-status-error/30 px-4 py-2">
         <span className="font-medium text-status-error">{error}</span>
         <div className="flex items-center gap-2">
@@ -673,15 +673,16 @@ function Timeline({ job }: TimelineProps) {
 
   // Generate time axis labels
   const timeLabels = React.useMemo(() => {
-    const { duration } = timeRange;
+    const { start, end, duration } = timeRange;
     const labels: { position: number; label: string }[] = [];
     const steps = 5;
 
     for (let i = 0; i <= steps; i++) {
-      const ms = (duration / steps) * i;
+      const timestamp = start + (duration / steps) * i;
+      const relativePosition = ((timestamp - start) / duration) * 100;
       labels.push({
-        position: (i / steps) * 100,
-        label: formatDuration(ms),
+        position: relativePosition,
+        label: formatDuration((timestamp - start)),
       });
     }
 
@@ -749,7 +750,7 @@ function Timeline({ job }: TimelineProps) {
           </div>
 
           {/* Right side - Waterfall */}
-          <div className="relative h-full flex-1 py-2">
+          <div className="relative h-full flex-1 py-2 pr-4">
             {span.isLog ? (
               // Log entries show as dots
               <div
@@ -760,7 +761,7 @@ function Timeline({ job }: TimelineProps) {
               // Spans show as bars
               <div
                 className={cn(
-                  "absolute top-1/2 h-5 -translate-y-1/2 rounded-sm",
+                  "absolute top-1/2 h-5 -translate-y-1/2 ",
                   span.status === "success" && "bg-status-success",
                   span.status === "error" && "bg-status-error",
                   span.status === "running" && "bg-status-warning",
@@ -792,20 +793,20 @@ function Timeline({ job }: TimelineProps) {
   };
 
   return (
-    <div className="overflow-hidden rounded-lg border bg-card">
+    <div className="flex flex-col border bg-card overflow-hidden h-full">
       {/* Header with time axis */}
-      <div className="flex border-b bg-muted/30">
-        <div className="w-[45%] shrink-0 px-3 py-2 text-xs font-medium text-muted-foreground">
-          Span
+      <div className="flex border-b bg-muted/30 shrink-0">
+        <div className="w-[45%] shrink-0 flex items-center py-2 pr-4" style={{ paddingLeft: '12px' }}>
+          <span className="text-xs font-medium text-muted-foreground">Span</span>
         </div>
-        <div className="relative flex-1 py-2">
+        <div className="relative flex-1 py-2 pr-4 flex items-center">
           {timeLabels.map((label, i) => (
             <span
               key={i.toString()}
-              className="absolute top-1/2 -translate-y-1/2 font-mono text-[10px] text-muted-foreground"
+              className="absolute font-mono text-[10px] text-muted-foreground"
               style={{
                 left: `${label.position}%`,
-                transform: "translate(-50%, -50%)",
+                transform: "translateX(-50%)",
               }}
             >
               {label.label}
@@ -815,7 +816,7 @@ function Timeline({ job }: TimelineProps) {
       </div>
 
       {/* Spans */}
-      <div className="max-h-[400px] overflow-auto">
+      <div className="flex-1 overflow-auto min-h-0">
         {spans.map((span) => renderSpan(span))}
       </div>
     </div>
@@ -839,7 +840,7 @@ function RetryHistory({
   return (
     <div className="space-y-4">
       {/* Summary */}
-      <div className="flex items-center gap-4 rounded-lg border bg-muted/30 px-4 py-3">
+      <div className="flex items-center gap-4  border bg-muted/30 px-4 py-3">
         <div className="flex items-center gap-2">
           <RotateCcw className="h-4 w-4 text-amber-500" />
           <span className="font-medium">Retry History</span>
@@ -896,7 +897,7 @@ function RetryAttemptCard({
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-lg border",
+        "overflow-hidden  border",
         succeeded
           ? "border-status-success/30 bg-status-success/5"
           : "border-status-error/30 bg-status-error/5",

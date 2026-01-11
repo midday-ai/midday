@@ -2,97 +2,97 @@
 
 @layer base {
   :root {
-    /* Light theme - subtle cool tints */
-    --background: 220 14% 98%;
-    --foreground: 240 10% 4%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 4%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 4%;
-    --primary: 240 10% 4%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 240 10% 4%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
-    --accent: 172 66% 95%;
-    --accent-foreground: 172 66% 30%;
+    /* Light theme - Neutral UI with vibrant data colors */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 9%;
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 9%;
+    --popover: 0 0% 98%;
+    --popover-foreground: 0 0% 9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 98%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 98%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 98%;
+    --accent-foreground: 0 0% 9%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 172 66% 50%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 9%;
 
-    /* Status colors - vibrant */
-    --status-success: 160 84% 39%;
-    --status-error: 0 84% 60%;
-    --status-warning: 38 92% 50%;
-    --status-pending: 220 9% 46%;
-    --status-active: 172 66% 50%;
+    /* Status colors - vibrant data colors */
+    --status-success: 134 90% 40%;
+    --status-error: 0 90% 55%;
+    --status-warning: 45 95% 50%;
+    --status-pending: 0 0% 45%;
+    --status-active: 210 90% 50%;
 
-    /* Chart colors - PlanetScale-inspired */
-    --chart-1: 172 66% 50%;
-    --chart-2: 262 83% 68%;
-    --chart-3: 160 84% 39%;
-    --chart-4: 38 92% 50%;
-    --chart-5: 330 81% 60%;
-    --chart-completed: 160 84% 39%;
-    --chart-failed: 0 84% 60%;
-    --chart-duration: 262 83% 68%;
-    --chart-wait: 172 66% 50%;
+    /* Chart colors - Electric monitoring colors */
+    --chart-1: 134 90% 40%;
+    --chart-2: 210 90% 50%;
+    --chart-3: 270 70% 55%;
+    --chart-4: 350 80% 55%;
+    --chart-5: 45 95% 50%;
+    --chart-completed: 134 90% 40%;
+    --chart-failed: 0 90% 55%;
+    --chart-duration: 210 90% 50%;
+    --chart-wait: 45 95% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0;
 
     /* Sidebar */
-    --sidebar-background: 220 14% 98%;
-    --sidebar-foreground: 240 10% 4%;
-    --sidebar-border: 220 13% 91%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 9%;
+    --sidebar-border: 0 0% 90%;
   }
 
   .dark {
-    /* PlanetScale-inspired dark theme */
+    /* Dark theme - Neutral UI with vibrant data colors */
     --background: 0 0% 4%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 6%;
+    --card: 0 0% 4%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 10%;
+    --popover: 0 0% 7%;
     --popover-foreground: 0 0% 98%;
     --primary: 0 0% 98%;
     --primary-foreground: 0 0% 4%;
-    --secondary: 0 0% 12%;
+    --secondary: 0 0% 10%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 12%;
+    --muted: 0 0% 10%;
     --muted-foreground: 0 0% 55%;
-    --accent: 0 0% 16%;
+    --accent: 0 0% 14%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 16%;
-    --input: 0 0% 16%;
-    --ring: 172 66% 50%;
+    --border: 0 0% 14%;
+    --input: 0 0% 14%;
+    --ring: 0 0% 83%;
 
-    /* Status colors - vibrant for dark mode */
-    --status-success: 160 84% 45%;
-    --status-error: 0 84% 60%;
-    --status-warning: 43 96% 56%;
-    --status-pending: 240 5% 50%;
-    --status-active: 172 66% 55%;
+    /* Status colors - electric neon for dark mode */
+    --status-success: 120 100% 45%;
+    --status-error: 4 90% 58%;
+    --status-warning: 45 100% 50%;
+    --status-pending: 0 0% 50%;
+    --status-active: 199 100% 55%;
 
-    /* Chart colors - PlanetScale-inspired */
-    --chart-1: 172 66% 55%;
-    --chart-2: 262 83% 72%;
-    --chart-3: 160 84% 45%;
-    --chart-4: 43 96% 56%;
-    --chart-5: 330 81% 65%;
-    --chart-completed: 160 84% 45%;
-    --chart-failed: 0 84% 60%;
-    --chart-duration: 262 83% 72%;
-    --chart-wait: 172 66% 55%;
+    /* Chart colors - Electric neon monitoring colors */
+    --chart-1: 120 100% 45%;
+    --chart-2: 199 100% 55%;
+    --chart-3: 265 85% 65%;
+    --chart-4: 4 90% 58%;
+    --chart-5: 45 100% 50%;
+    --chart-completed: 120 100% 45%;
+    --chart-failed: 4 90% 58%;
+    --chart-duration: 199 100% 55%;
+    --chart-wait: 45 100% 50%;
 
     /* Sidebar */
     --sidebar-background: 0 0% 4%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 16%;
+    --sidebar-border: 0 0% 14%;
   }
 }
 
@@ -120,6 +120,17 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Film grain texture overlay */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.035;
+    pointer-events: none;
+    z-index: 9999;
   }
 
   /* Remove focus ring outlines from Recharts elements */
@@ -162,6 +173,48 @@
     outline: none !important;
     box-shadow: none !important;
   }
+
+  /* Remove hover effects on chart elements */
+  .recharts-bar-rectangle:hover,
+  .recharts-area:hover,
+  .recharts-bar-rectangle:active,
+  .recharts-area:active {
+    opacity: 1 !important;
+    fill-opacity: 1 !important;
+  }
+
+  /* Dotted background for flow diagrams */
+  .dotted-bg {
+    background-image: radial-gradient(
+      circle,
+      hsl(var(--border)) 0.5px,
+      transparent 0.5px
+    );
+    background-size: 8px 8px;
+  }
+
+  /* React Flow overrides for clean look */
+  .react-flow__background {
+    background-color: transparent !important;
+  }
+
+  .react-flow__pane {
+    cursor: grab;
+  }
+
+  .react-flow__pane:active {
+    cursor: grabbing;
+  }
+
+  /* Hide scrollbars */
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
 }
 
 @theme inline {
@@ -203,6 +256,8 @@
   --color-chart-5: hsl(var(--chart-5));
   --color-chart-completed: hsl(var(--chart-completed));
   --color-chart-failed: hsl(var(--chart-failed));
+  --color-chart-error: hsl(var(--chart-failed));
+  --color-chart-success: hsl(var(--chart-1));
   --color-chart-duration: hsl(var(--chart-duration));
   --color-chart-wait: hsl(var(--chart-wait));
 

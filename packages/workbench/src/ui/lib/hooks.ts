@@ -30,6 +30,7 @@ export const queryKeys = {
   search: (query: string) => ["search", query] as const,
   tagValues: (field: string) => ["tagValues", field] as const,
   metrics: ["metrics"] as const,
+  activity: ["activity"] as const,
   flows: ["flows"] as const,
   flow: (queueName: string, jobId: string) =>
     ["flow", queueName, jobId] as const,
@@ -80,6 +81,17 @@ export function useMetrics() {
 }
 
 /**
+ * Hook for fetching 7-day activity stats for timeline
+ */
+export function useActivityStats() {
+  return useQuery({
+    queryKey: queryKeys.activity,
+    queryFn: ({ signal }) => api.getActivityStats(signal),
+    refetchInterval: 30000, // Refresh every 30 seconds (cached server-side)
+  });
+}
+
+/**
  * Hook for fetching jobs with pagination and sorting
  */
 export function useJobs(queueName: string, status?: JobStatus, sort?: string) {
@@ -111,7 +123,7 @@ export function useRuns(sort?: string) {
   return useInfiniteQuery({
     queryKey: queryKeys.runs(sort),
     queryFn: ({ pageParam, signal }) =>
-      api.getRuns({ limit: 50, cursor: pageParam, sort }, signal),
+      api.getRuns({ limit: 100, cursor: pageParam, sort }, signal),
     getNextPageParam: (lastPage) => lastPage.cursor,
     initialPageParam: undefined as string | undefined,
     refetchInterval: 5000,
@@ -165,6 +177,21 @@ export function useTagValues(field: string, enabled = true) {
 }
 
 // Mutations
+
+/**
+ * Hook for clearing server-side cache and refetching all data
+ */
+export function useRefresh() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => api.refresh(),
+    onSuccess: () => {
+      // Invalidate all queries to refetch fresh data
+      queryClient.invalidateQueries();
+    },
+  });
+}
 
 /**
  * Hook for retrying a job

@@ -340,3 +340,39 @@ export interface CreateFlowChildRequest {
   data?: unknown;
   children?: CreateFlowChildRequest[];
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Activity Timeline Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Activity bucket for timeline
+ */
+export interface ActivityBucket {
+  /** Unix timestamp (start of bucket) */
+  time: number;
+  /** Number of completed jobs */
+  completed: number;
+  /** Number of failed jobs */
+  failed: number;
+}
+
+/**
+ * Activity stats response for the 7-day timeline
+ */
+export interface ActivityStatsResponse {
+  /** Activity buckets (4-hour intervals over 7 days) */
+  buckets: ActivityBucket[];
+  /** Start time of the first bucket */
+  startTime: number;
+  /** End time (now) */
+  endTime: number;
+  /** Size of each bucket in ms */
+  bucketSize: number;
+  /** Total completed in period */
+  totalCompleted: number;
+  /** Total failed in period */
+  totalFailed: number;
+  /** Timestamp when stats were computed */
+  computedAt: number;
+}

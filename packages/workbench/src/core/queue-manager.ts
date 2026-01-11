@@ -1,6 +1,8 @@
 import { FlowProducer, type Job, type Queue } from "bullmq";
 import { LRUCache } from "lru-cache";
 import type {
+  ActivityBucket,
+  ActivityStatsResponse,
   CreateFlowChildRequest,
   CreateFlowRequest,
   DelayedJobInfo,
@@ -40,10 +42,11 @@ export class QueueManager {
   });
 
   private readonly CACHE_TTL = {
-    metrics: 30000, // 30 seconds - metrics are expensive
-    overview: 5000, // 5 seconds
-    queues: 5000, // 5 seconds
-    flows: 15000, // 15 seconds
+    metrics: 5 * 60 * 1000, // 5 minutes - metrics are expensive
+    overview: 2 * 60 * 1000, // 2 minutes
+    queues: 2 * 60 * 1000, // 2 minutes
+    flows: 2 * 60 * 1000, // 2 minutes
+    activity: 5 * 60 * 1000, // 5 minutes - activity timeline
   };
 
   constructor(queues: Queue[], tagFields: string[] = []) {
@@ -525,6 +528,88 @@ export class QueueManager {
         },
         slowestJobs,
         mostFailingTypes,
+        computedAt: now,
+      };
+    });
+  }
+
+  /**
+   * Get activity stats for the last 7 days (cached)
+   * Returns 4-hour buckets for the activity timeline
+   */
+  async getActivityStats(): Promise<ActivityStatsResponse> {
+    return this.cached("activity", this.CACHE_TTL.activity, async () => {
+      const now = Date.now();
+      const bucketSize = 4 * 60 * 60 * 1000; // 4 hours
+      const bucketCount = 42; // 7 days * 6 buckets per day
+
+      // Start from midnight 7 days ago
+      const startDate = new Date(now);
+      startDate.setHours(0, 0, 0, 0);
+      startDate.setDate(startDate.getDate() - 6);
+      const startTime = startDate.getTime();
+
+      // Initialize buckets
+      const buckets: ActivityBucket[] = [];
+      for (let i = 0; i < bucketCount; i++) {
+        buckets.push({
+          time: startTime + i * bucketSize,
+          completed: 0,
+          failed: 0,
+        });
+      }
+
+      // Fetch completed and failed jobs from each queue IN PARALLEL
+      const queueEntries = Array.from(this.queues.entries());
+      const queueResults = await Promise.all(
+        queueEntries.map(async ([, queue]) => {
+          // Fetch both completed and failed jobs in parallel
+          // Increase limit to get more historical data
+          const [completedJobs, failedJobs] = await Promise.all([
+            queue.getJobs(["completed"], 0, 500),
+            queue.getJobs(["failed"], 0, 500),
+          ]);
+          return { completedJobs, failedJobs };
+        }),
+      );
+
+      // Process results
+      for (const { completedJobs, failedJobs } of queueResults) {
+        // Process completed jobs
+        for (const job of completedJobs) {
+          if (!job || !job.finishedOn || job.finishedOn < startTime) continue;
+
+          const bucketIndex = Math.floor(
+            (job.finishedOn - startTime) / bucketSize,
+          );
+          if (bucketIndex >= 0 && bucketIndex < bucketCount) {
+            buckets[bucketIndex].completed++;
+          }
+        }
+
+        // Process failed jobs
+        for (const job of failedJobs) {
+          if (!job || !job.finishedOn || job.finishedOn < startTime) continue;
+
+          const bucketIndex = Math.floor(
+            (job.finishedOn - startTime) / bucketSize,
+          );
+          if (bucketIndex >= 0 && bucketIndex < bucketCount) {
+            buckets[bucketIndex].failed++;
+          }
+        }
+      }
+
+      const totalCompleted = buckets.reduce((sum, b) => sum + b.completed, 0);
+      const totalFailed = buckets.reduce((sum, b) => sum + b.failed, 0);
+
+      return {
+        buckets,
+        startTime,
+        endTime: now,
+        bucketSize,
+        totalCompleted,
+        totalFailed,
         computedAt: now,
       };
     });

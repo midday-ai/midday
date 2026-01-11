@@ -105,10 +105,10 @@ export function AppSidebar({
             type="button"
             onClick={onClick}
             className={cn(
-              "flex w-full items-center justify-center rounded-md p-2 text-sm font-medium transition-colors",
+              "flex w-full items-center justify-center p-2 text-sm font-medium transition-colors",
               isActive
-                ? "bg-muted text-foreground"
-                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             <div className="relative">
@@ -130,9 +130,9 @@ export function AppSidebar({
   };
 
   return (
-    <aside className="flex h-screen w-[52px] flex-col border-r">
+    <aside className="flex h-screen w-[52px] flex-col border-r border-border bg-background">
       {/* Header */}
-      <div className="flex h-14 items-center justify-center border-b">
+      <div className="flex h-14 items-center justify-center border-b border-border">
         <WorkbenchIcon className="h-5 w-5" />
       </div>
 
@@ -153,16 +153,16 @@ export function AppSidebar({
           </nav>
 
           {/* Queues Section */}
-          <div>
+          <div className="border-t border-border pt-2">
             <HoverCard openDelay={100} closeDelay={200}>
               <HoverCardTrigger asChild>
                 <button
                   type="button"
                   className={cn(
-                    "flex w-full items-center justify-center rounded-md p-2 text-sm font-medium transition-colors",
+                    "flex w-full items-center justify-center p-2 text-sm font-medium transition-colors",
                     activeNav === "queues" || activeQueue
-                      ? "bg-muted text-foreground"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
                   )}
                 >
                   <Layers className="h-4 w-4 shrink-0" />
@@ -175,7 +175,7 @@ export function AppSidebar({
                 className="w-auto min-w-[140px] p-1"
               >
                 <div className="space-y-0.5">
-                  <div className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <div className="px-2 py-1.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                     Queues
                   </div>
                   {queues.map((queue) => (
@@ -184,10 +184,10 @@ export function AppSidebar({
                       type="button"
                       onClick={() => onQueueSelect(queue)}
                       className={cn(
-                        "flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 font-mono text-xs transition-colors",
+                        "flex w-full items-center justify-between gap-2 px-2 py-1.5 font-mono text-[11px] transition-colors",
                         activeQueue === queue
-                          ? "bg-muted text-foreground"
-                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground",
                       )}
                     >
                       <span>{queue}</span>
@@ -204,13 +204,13 @@ export function AppSidebar({
       </ScrollArea>
 
       {/* Footer - Theme toggle only */}
-      <div className="border-t p-2">
+      <div className="border-t border-border p-2">
         <Tooltip>
           <TooltipTrigger asChild>
             <button
               type="button"
               onClick={onToggleTheme}
-              className="flex w-full items-center justify-center rounded-md p-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+              className="flex w-full items-center justify-center rounded p-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
             >
               {isDark ? (
                 <Sun className="h-4 w-4 shrink-0" />

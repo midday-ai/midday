@@ -19,6 +19,7 @@ import {
   useJobs,
   usePauseQueue,
   useQueues,
+  useRefresh,
   useResumeQueue,
 } from "@/lib/hooks";
 import { cn, truncate } from "@/lib/utils";
@@ -106,10 +107,11 @@ export function QueuePage({
 
   const total = data?.pages[0]?.total ?? 0;
 
+  // Server-side cache refresh
+  const refreshMutation = useRefresh();
+
   const refresh = () => {
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.jobs(queueName, statusFilter, search.sort),
-    });
+    refreshMutation.mutate();
   };
 
   const handleStatusChange = (status: string) => {
@@ -119,7 +121,7 @@ export function QueuePage({
     });
   };
 
-  const loading = isLoading || isRefetching;
+  const loading = isLoading || isRefetching || refreshMutation.isPending;
 
   // Selection helpers
   const isSelected = (jobId: string) => selection.has(jobId);
@@ -239,7 +241,7 @@ export function QueuePage({
       {isLoading && jobs.length === 0 ? (
         <>
           {/* Table Header */}
-          <div className="grid grid-cols-12 gap-4 border-b px-4 py-2 text-xs uppercase tracking-wider text-muted-foreground">
+          <div className="grid grid-cols-12 gap-4 border-b border-dashed py-2.5 text-[11px] uppercase tracking-wider text-muted-foreground">
             <div className="col-span-5">Job</div>
             <div className="col-span-2">Status</div>
             <div className="col-span-2">Queued</div>
@@ -247,11 +249,11 @@ export function QueuePage({
             <div className="col-span-1" />
           </div>
           {/* Skeleton Rows */}
-          <div className="space-y-1">
+          <div className="divide-y divide-border/50">
             {[...Array(15)].map((_, i) => (
               <div
                 key={i.toString()}
-                className="grid grid-cols-12 items-center gap-4 border bg-card px-4 py-3"
+                className="grid grid-cols-12 items-center gap-4 py-3"
               >
                 <div className="col-span-5 flex items-center gap-3">
                   <div className="h-4 w-4 animate-pulse rounded bg-muted" />
@@ -262,7 +264,7 @@ export function QueuePage({
                   </div>
                 </div>
                 <div className="col-span-2">
-                  <div className="h-5 w-20 animate-pulse rounded-full bg-muted" />
+                  <div className="h-5 w-20 animate-pulse bg-muted" />
                 </div>
                 <div className="col-span-2">
                   <div className="h-4 w-24 animate-pulse rounded bg-muted" />
@@ -296,7 +298,7 @@ export function QueuePage({
       ) : (
         <>
           {/* Table Header */}
-          <div className="grid grid-cols-12 gap-4 border-b px-4 py-2 text-xs uppercase tracking-wider">
+          <div className="grid grid-cols-12 gap-4 border-b border-dashed py-2.5 text-[11px] uppercase tracking-wider text-muted-foreground">
             <div className="col-span-5 flex items-center gap-3">
               <Checkbox
                 checked={isAllSelected}
@@ -344,7 +346,7 @@ export function QueuePage({
           </div>
 
           {/* Table Rows */}
-          <div className="space-y-1">
+          <div className="divide-y divide-border/50">
             {jobs.map((job) => (
               <JobRow
                 key={job.id}
@@ -419,7 +421,7 @@ function JobRow({ job, selected, onSelect, onClick }: JobRowProps) {
       onKeyDown={(e) => e.key === "Enter" && onClick()}
       role="button"
       tabIndex={0}
-      className="grid w-full grid-cols-12 items-center gap-4 border bg-card px-4 py-3 text-left text-sm cursor-pointer"
+      className="group grid w-full grid-cols-12 items-center gap-4 py-3 text-left text-sm cursor-default"
     >
       <div className="col-span-5 flex min-w-0 items-center gap-3">
         <div
