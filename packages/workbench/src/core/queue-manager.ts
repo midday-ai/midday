@@ -40,10 +40,10 @@ export class QueueManager {
   });
 
   private readonly CACHE_TTL = {
-    metrics: 10000, // 10 seconds - metrics are expensive
-    overview: 3000, // 3 seconds
-    queues: 2000, // 2 seconds
-    flows: 5000, // 5 seconds
+    metrics: 30000, // 30 seconds - metrics are expensive
+    overview: 5000, // 5 seconds
+    queues: 5000, // 5 seconds
+    flows: 15000, // 15 seconds
   };
 
   constructor(queues: Queue[], tagFields: string[] = []) {
@@ -284,10 +284,10 @@ export class QueueManager {
       const queueEntries = Array.from(this.queues.entries());
       const queueResults = await Promise.all(
         queueEntries.map(async ([queueName, queue]) => {
-          // Fetch both completed and failed jobs in parallel, limit to 500 each for performance
+          // Fetch both completed and failed jobs in parallel, limit to 200 each for performance
           const [completedJobs, failedJobs] = await Promise.all([
-            queue.getJobs(["completed"], 0, 500),
-            queue.getJobs(["failed"], 0, 500),
+            queue.getJobs(["completed"], 0, 200),
+            queue.getJobs(["failed"], 0, 200),
           ]);
           return { queueName, completedJobs, failedJobs };
         }),
@@ -791,7 +791,8 @@ export class QueueManager {
     const queueEntries = Array.from(this.queues.entries());
 
     // Fetch counts and jobs from all queues IN PARALLEL
-    const fetchLimit = Math.min(start + limit + 100, 500); // Reduced limit for performance
+    // Keep fetch limit small - we only need enough for pagination
+    const fetchLimit = Math.min(start + limit + 50, 100);
     const types = ["waiting", "active", "completed", "failed", "delayed"];
 
     const queueResults = await Promise.all(
@@ -865,9 +866,20 @@ export class QueueManager {
     const repeatable: SchedulerInfo[] = [];
     const delayed: DelayedJobInfo[] = [];
 
-    for (const [queueName, queue] of this.queues) {
-      // Get repeatable jobs
-      const repeatableJobs = await queue.getRepeatableJobs();
+    // Fetch from all queues in parallel
+    const queueEntries = Array.from(this.queues.entries());
+    const results = await Promise.all(
+      queueEntries.map(async ([queueName, queue]) => {
+        const [repeatableJobs, delayedJobs] = await Promise.all([
+          queue.getRepeatableJobs(),
+          queue.getJobs("delayed", 0, 50),
+        ]);
+        return { queueName, repeatableJobs, delayedJobs };
+      }),
+    );
+
+    // Process results
+    for (const { queueName, repeatableJobs, delayedJobs } of results) {
       for (const job of repeatableJobs) {
         repeatable.push({
           key: job.key,
@@ -881,8 +893,6 @@ export class QueueManager {
         });
       }
 
-      // Get delayed jobs
-      const delayedJobs = await queue.getJobs("delayed", 0, 100);
       for (const job of delayedJobs) {
         const delay = job.opts.delay || 0;
         delayed.push({
@@ -974,19 +984,28 @@ export class QueueManager {
     limit = 50,
   ): Promise<{ value: string; count: number }[]> {
     const valueMap = new Map<string, number>();
+    const types = ["waiting", "active", "completed", "failed", "delayed"];
 
-    for (const [, queue] of this.queues) {
-      const types = ["waiting", "active", "completed", "failed", "delayed"];
-      for (const type of types) {
-        const jobs = await queue.getJobs(type as any, 0, 500);
-        for (const job of jobs) {
-          if (job.data && typeof job.data === "object") {
-            const dataObj = job.data as Record<string, unknown>;
-            const value = dataObj[field];
-            if (value !== undefined && value !== null) {
-              const strValue = String(value);
-              valueMap.set(strValue, (valueMap.get(strValue) || 0) + 1);
-            }
+    // Fetch jobs from all queues in parallel
+    const queueEntries = Array.from(this.queues.entries());
+    const queueResults = await Promise.all(
+      queueEntries.map(async ([, queue]) => {
+        const jobArrays = await Promise.all(
+          types.map((type) => queue.getJobs(type as any, 0, 100)),
+        );
+        return jobArrays.flat();
+      }),
+    );
+
+    // Process all jobs
+    for (const jobs of queueResults) {
+      for (const job of jobs) {
+        if (job.data && typeof job.data === "object") {
+          const dataObj = job.data as Record<string, unknown>;
+          const value = dataObj[field];
+          if (value !== undefined && value !== null) {
+            const strValue = String(value);
+            valueMap.set(strValue, (valueMap.get(strValue) || 0) + 1);
           }
         }
       }
