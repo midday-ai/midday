@@ -22,6 +22,7 @@ import {
 import { invoicesQueue } from "../../queues/invoices";
 import type { InvoiceRecurringSchedulerPayload } from "../../schemas/invoices";
 import { getDb } from "../../utils/db";
+import { isStaging } from "../../utils/env";
 import {
   buildInvoiceTemplateFromRecurring,
   parseLineItems,
@@ -76,6 +77,59 @@ export class InvoiceRecurringSchedulerProcessor extends BaseProcessor<InvoiceRec
     }
 
     const db = getDb();
+
+    // In staging, log what would happen but don't execute
+    if (isStaging()) {
+      this.logger.info(
+        "[STAGING MODE] Recurring invoice scheduler - logging only, no execution",
+      );
+
+      const { data: dueRecurring, hasMore } = await getDueInvoiceRecurring(db);
+
+      if (dueRecurring.length === 0) {
+        this.logger.info("[STAGING] No recurring invoices due for generation");
+        return {
+          processed: 0,
+          skipped: 0,
+          failed: 0,
+          results: [],
+          errors: [],
+          hasMore: false,
+        };
+      }
+
+      this.logger.info(
+        `[STAGING] Would process ${dueRecurring.length} recurring invoices${hasMore ? " (more pending)" : ""}`,
+        {
+          count: dueRecurring.length,
+          hasMore,
+          recurringInvoices: dueRecurring.map((r) => ({
+            id: r.id,
+            teamId: r.teamId,
+            customerName: r.customerName,
+            nextScheduledAt: r.nextScheduledAt,
+            sequence: r.invoicesGenerated + 1,
+            amount: r.amount,
+            currency: r.currency,
+          })),
+        },
+      );
+
+      // Return simulated results
+      return {
+        processed: dueRecurring.length,
+        skipped: 0,
+        failed: 0,
+        results: dueRecurring.map((r) => ({
+          invoiceId: `[STAGING-SIMULATED-${r.id.slice(0, 8)}]`,
+          invoiceNumber: `[STAGING-SIM-${r.invoicesGenerated + 1}]`,
+          recurringId: r.id,
+          sequence: r.invoicesGenerated + 1,
+        })),
+        errors: [],
+        hasMore,
+      };
+    }
 
     this.logger.info("Starting recurring invoice scheduler");
 

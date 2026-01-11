@@ -10,6 +10,7 @@ primary_region = 'fra'
 
 [env]
   NODE_ENV = 'production'
+  WORKER_ENV = 'production'
 
 [[services]]
   protocol = 'tcp'

@@ -6,6 +6,7 @@ import { Notifications } from "@midday/notifications";
 import type { Job } from "bullmq";
 import type { InvoiceUpcomingNotificationPayload } from "../../schemas/invoices";
 import { getDb } from "../../utils/db";
+import { isStaging } from "../../utils/env";
 import { BaseProcessor } from "../base";
 
 type ProcessResult = {
@@ -48,6 +49,67 @@ export class InvoiceUpcomingNotificationProcessor extends BaseProcessor<InvoiceU
     }
 
     const db = getDb();
+
+    // In staging, log what would happen but don't execute
+    if (isStaging()) {
+      this.logger.info(
+        "[STAGING MODE] Upcoming invoice notification processor - logging only, no execution",
+      );
+
+      const { data: upcomingRecurring, hasMore } =
+        await getUpcomingDueRecurring(db, 24);
+
+      if (upcomingRecurring.length === 0) {
+        this.logger.info("[STAGING] No upcoming invoices to notify about");
+        return {
+          processed: 0,
+          skipped: 0,
+          failed: 0,
+          errors: [],
+          hasMore: false,
+        };
+      }
+
+      // Group invoices by teamId for logging
+      const invoicesByTeam = new Map<string, typeof upcomingRecurring>();
+      for (const invoice of upcomingRecurring) {
+        const existing = invoicesByTeam.get(invoice.teamId) || [];
+        existing.push(invoice);
+        invoicesByTeam.set(invoice.teamId, existing);
+      }
+
+      this.logger.info(
+        `[STAGING] Would notify ${invoicesByTeam.size} teams about ${upcomingRecurring.length} upcoming invoices${hasMore ? " (more pending)" : ""}`,
+        {
+          teamCount: invoicesByTeam.size,
+          invoiceCount: upcomingRecurring.length,
+          hasMore,
+          teams: Array.from(invoicesByTeam.entries()).map(
+            ([teamId, invoices]) => ({
+              teamId,
+              invoiceCount: invoices.length,
+              invoices: invoices.map((inv) => ({
+                recurringId: inv.id,
+                customerName: inv.customerName,
+                amount: inv.amount,
+                currency: inv.currency,
+                scheduledAt: inv.nextScheduledAt,
+              })),
+            }),
+          ),
+        },
+      );
+
+      // Return simulated results
+      return {
+        processed: invoicesByTeam.size,
+        skipped: 0,
+        failed: 0,
+        errors: [],
+        hasMore,
+      };
+    }
+
     const notifications = new Notifications(db);
 
     this.logger.info("Starting upcoming invoice notification processor");
