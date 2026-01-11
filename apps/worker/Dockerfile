@@ -35,6 +35,9 @@ RUN rm -f bun.lock
 # Generate a fresh lockfile
 RUN bun install
 
+# Build workbench package (required - exports from dist/)
+RUN cd packages/workbench && bun run build
+
 # Runner stage
 FROM installer AS runner
 

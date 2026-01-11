@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Clock,
   Copy,
+  CopyPlus,
   Download,
   ExternalLink,
   FastForward,
@@ -37,6 +38,7 @@ interface JobPageProps {
   search: JobSearch;
   onSearchChange: (search: JobSearch) => void;
   onBack: () => void;
+  onClone: (queueName: string, jobName: string, payload: string) => void;
 }
 
 export function JobPage({
@@ -46,6 +48,7 @@ export function JobPage({
   search,
   onSearchChange,
   onBack,
+  onClone,
 }: JobPageProps) {
   const { data: job, isLoading, error } = useJob(queueName, jobId);
   const retryMutation = useRetryJob();
@@ -110,6 +113,12 @@ export function JobPage({
     a.download = `job-${job.name}-${jobId}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleClone = () => {
+    if (!job) return;
+    const payload = JSON.stringify(job.data, null, 2);
+    onClone(queueName, job.name, payload);
   };
 
   if (isLoading && !job) {
@@ -180,6 +189,10 @@ export function JobPage({
             </Button>
             {!readonly && (
               <>
+                <Button variant="outline" size="sm" onClick={handleClone}>
+                  <CopyPlus className="mr-1.5 h-3.5 w-3.5" />
+                  Clone
+                </Button>
                 {job.status === "failed" && (
                   <Button
                     variant="outline"

@@ -62,6 +62,15 @@ export const jobSearchSchema = z.object({
 
 export type JobSearch = z.infer<typeof jobSearchSchema>;
 
+// Search params schema for the Test page (for cloning jobs)
+export const testSearchSchema = z.object({
+  queue: z.string().optional(),
+  jobName: z.string().optional(),
+  payload: z.string().optional(),
+});
+
+export type TestSearch = z.infer<typeof testSearchSchema>;
+
 // Helper to parse sort string
 export function parseSort(
   sort?: string,
@@ -295,9 +304,14 @@ function MetricsRoute() {
 
 function TestRoute() {
   const { data: config } = useConfig();
+  const search = useSearch({ from: "/test" });
   return (
     <PageLayout title="Test">
-      <TestPage queues={config?.queues || []} readonly={config?.readonly} />
+      <TestPage
+        queues={config?.queues || []}
+        readonly={config?.readonly}
+        prefill={search}
+      />
     </PageLayout>
   );
 }
@@ -357,6 +371,12 @@ function JobRoute() {
         onBack={() =>
           navigate({ to: "/queues/$queueName", params: { queueName } })
         }
+        onClone={(queue, jobName, payload) =>
+          navigate({
+            to: "/test",
+            search: { queue, jobName, payload },
+          })
+        }
       />
     </PageLayout>
   );
@@ -391,6 +411,7 @@ const testRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/test",
   component: TestRoute,
+  validateSearch: testSearchSchema,
 });
 
 const queueRoute = createRoute({

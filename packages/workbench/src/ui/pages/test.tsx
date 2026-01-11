@@ -8,26 +8,37 @@ import {
 } from "@/components/ui/select";
 import { useTestJob } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
+import type { TestSearch } from "@/router";
 import { AlertCircle, CheckCircle, FlaskConical } from "lucide-react";
 import * as React from "react";
 
 interface TestPageProps {
   queues: string[];
   readonly?: boolean;
+  prefill?: TestSearch;
 }
 
-export function TestPage({ queues, readonly }: TestPageProps) {
+export function TestPage({ queues, readonly, prefill }: TestPageProps) {
   const testJobMutation = useTestJob();
-  const [queueName, setQueueName] = React.useState<string>(queues[0] || "");
-  const [jobName, setJobName] = React.useState("test-job");
+  const [queueName, setQueueName] = React.useState<string>(
+    prefill?.queue || queues[0] || "",
+  );
+  const [jobName, setJobName] = React.useState(prefill?.jobName || "test-job");
   const [payload, setPayload] = React.useState(
-    '{\n  "message": "Hello from Workbench"\n}',
+    prefill?.payload || '{\n  "message": "Hello from Workbench"\n}',
   );
   const [delay, setDelay] = React.useState("");
   const [result, setResult] = React.useState<{
     success: boolean;
     message: string;
   } | null>(null);
+
+  // Update state when prefill changes (e.g., navigating from clone)
+  React.useEffect(() => {
+    if (prefill?.queue) setQueueName(prefill.queue);
+    if (prefill?.jobName) setJobName(prefill.jobName);
+    if (prefill?.payload) setPayload(prefill.payload);
+  }, [prefill?.queue, prefill?.jobName, prefill?.payload]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
