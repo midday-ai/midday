@@ -92,7 +92,7 @@ export function InsightsWidget() {
       periodNumber: insight.periodNumber,
       periodYear: insight.periodYear,
       goodNews: insight.content?.goodNews,
-      generatedAt: insight.generatedAt,
+      generatedAt: insight.generatedAt?.toISOString() ?? null,
     })) ?? [];
 
   const latestInsight = insights[0];
@@ -142,7 +142,7 @@ export function InsightsWidget() {
   return (
     <BaseWidget
       title="Weekly Insights"
-      icon={<Icons.Sparkles className="size-4" />}
+      icon={<Icons.AI className="size-4" />}
       description={getDescription()}
       actions={latestInsight ? "View latest insights" : "Check back Monday"}
       onClick={latestInsight ? handleViewInsights : undefined}

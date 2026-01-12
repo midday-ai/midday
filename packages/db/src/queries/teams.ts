@@ -14,7 +14,8 @@ import {
   getTaxRateForCategory,
   getTaxTypeForCountry,
 } from "@midday/categories";
-import { and, eq } from "drizzle-orm";
+import { subDays } from "date-fns";
+import { and, eq, gt, gte, inArray, isNotNull, isNull, or } from "drizzle-orm";
 
 export const hasTeamAccess = async (
   db: Database,
@@ -535,4 +536,100 @@ export async function getAvailablePlans(
     starter,
     pro: true,
   };
+}
+
+/**
+ * Parameters for getting teams eligible for insights generation
+ */
+export type GetTeamsForInsightsParams = {
+  /** Optional list of specific team IDs to filter by */
+  enabledTeamIds?: string[];
+  /** Cursor for pagination (team ID to start after) */
+  cursor?: string | null;
+  /** Number of teams to fetch per batch */
+  limit?: number;
+  /** Number of days a trial team can be eligible (default: 30) */
+  trialEligibilityDays?: number;
+};
+
+/**
+ * Result type for teams eligible for insights
+ */
+export type InsightEligibleTeam = {
+  id: string;
+  baseCurrency: string | null;
+};
+
+/**
+ * Get teams eligible for insights generation.
+ *
+ * Eligible teams are:
+ * - Paying customers (starter/pro plans)
+ * - Active trial users (created within past N days, not canceled)
+ * - Must have baseCurrency set (indicates they have financial data)
+ *
+ * Uses cursor-based pagination for efficient batch processing.
+ *
+ * @param db - Database instance
+ * @param params - Query parameters
+ * @returns Array of eligible teams with their base currency
+ */
+export async function getTeamsForInsights(
+  db: Database,
+  params: GetTeamsForInsightsParams = {},
+): Promise<InsightEligibleTeam[]> {
+  const {
+    enabledTeamIds,
+    cursor,
+    limit = 100,
+    trialEligibilityDays = 30,
+  } = params;
+
+  // Calculate trial eligibility cutoff
+  const trialCutoffDate = subDays(
+    new Date(),
+    trialEligibilityDays,
+  ).toISOString();
+
+  // Build plan condition:
+  // - Paying: plan is 'starter' or 'pro'
+  // - Active trial: plan is 'trial' AND not canceled AND created within eligibility period
+  const planCondition = or(
+    eq(teams.plan, "starter"),
+    eq(teams.plan, "pro"),
+    and(
+      eq(teams.plan, "trial"),
+      isNull(teams.canceledAt),
+      gte(teams.createdAt, trialCutoffDate),
+    ),
+  )!;
+
+  // Build where conditions
+  const conditions = [
+    // Must have base currency set (indicates they have financial data)
+    isNotNull(teams.baseCurrency),
+    planCondition,
+  ];
+
+  // Filter by enabled team IDs if specified
+  if (enabledTeamIds !== undefined) {
+    conditions.push(inArray(teams.id, enabledTeamIds));
+  }
+
+  // Cursor-based pagination: get teams with ID greater than cursor
+  if (cursor) {
+    conditions.push(gt(teams.id, cursor));
+  }
+
+  const result = await db
+    .select({
+      id: teams.id,
+      baseCurrency: teams.baseCurrency,
+    })
+    .from(teams)
+    .where(and(...conditions))
+    .orderBy(teams.id)
+    .limit(limit);
+
+  return result;
 }

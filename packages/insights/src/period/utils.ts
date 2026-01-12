@@ -11,6 +11,8 @@ import {
   getMonth,
   getQuarter,
   getYear,
+  setISOWeek,
+  setISOWeekYear,
   startOfMonth,
   startOfQuarter,
   startOfWeek,
@@ -102,12 +104,12 @@ export function getPeriodInfo(
 ): PeriodInfo {
   switch (periodType) {
     case "weekly": {
-      // Create a date in the given week
-      const jan1 = new Date(periodYear, 0, 1);
-      const daysOffset = (periodNumber - 1) * 7;
-      const weekDate = new Date(
-        jan1.getTime() + daysOffset * 24 * 60 * 60 * 1000,
-      );
+      // Use ISO week functions to properly handle week numbering
+      // ISO Week 1 is the week containing January 4th, not simply "first week of the year"
+      // This correctly handles year boundaries (e.g., Week 1 of 2023 starts Jan 2, not Dec 26)
+      const baseDate = new Date();
+      const withYear = setISOWeekYear(baseDate, periodYear);
+      const weekDate = setISOWeek(withYear, periodNumber);
       const start = startOfWeek(weekDate, { weekStartsOn: 1 });
       const end = endOfWeek(weekDate, { weekStartsOn: 1 });
       return {

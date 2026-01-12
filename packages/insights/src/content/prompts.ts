@@ -4,6 +4,7 @@
 import { PERIOD_TYPE_LABELS } from "../constants";
 import { formatMetricValue } from "../metrics/calculator";
 import type {
+  ExpenseAnomaly,
   InsightActivity,
   InsightAnomaly,
   InsightMetric,
@@ -103,6 +104,42 @@ export function formatOverdueContext(
 }
 
 /**
+ * Format expense anomalies for the AI prompt
+ */
+export function formatExpenseAnomaliesContext(
+  expenseAnomalies: ExpenseAnomaly[],
+  currency: string,
+): string {
+  if (expenseAnomalies.length === 0) {
+    return "";
+  }
+
+  const lines = expenseAnomalies.map((ea) => {
+    const currentFormatted = formatMetricValue(
+      ea.currentAmount,
+      "currency",
+      currency,
+    );
+    const previousFormatted = formatMetricValue(
+      ea.previousAmount,
+      "currency",
+      currency,
+    );
+
+    if (ea.type === "new_category") {
+      return `- NEW: ${ea.categoryName} - ${currentFormatted} (first time this category)`;
+    }
+    if (ea.type === "category_decrease") {
+      return `- ${ea.categoryName} decreased ${Math.abs(ea.change)}% (${previousFormatted} → ${currentFormatted})`;
+    }
+    // category_spike
+    return `- ${ea.categoryName} increased ${ea.change}% (${previousFormatted} → ${currentFormatted})`;
+  });
+
+  return `\nExpense Category Changes:\n${lines.join("\n")}`;
+}
+
+/**
  * Build the main prompt for AI content generation
  */
 export function buildInsightPrompt(
@@ -112,6 +149,7 @@ export function buildInsightPrompt(
   periodLabel: string,
   periodType: PeriodType,
   currency: string,
+  expenseAnomalies: ExpenseAnomaly[] = [],
 ): string {
   const periodName = getPeriodName(periodType);
   const metricsContext = formatMetricsContext(
@@ -122,6 +160,10 @@ export function buildInsightPrompt(
   const anomaliesContext = formatAnomaliesContext(anomalies);
   const upcomingContext = formatUpcomingInvoicesContext(activity, currency);
   const overdueContext = formatOverdueContext(activity, currency);
+  const expenseAnomaliesContext = formatExpenseAnomaliesContext(
+    expenseAnomalies,
+    currency,
+  );
 
   // Build action hints based on activity
   const actionHints: string[] = [];
@@ -131,6 +173,15 @@ export function buildInsightPrompt(
   if (activity.upcomingInvoices?.count) {
     actionHints.push("Consider mentioning preparing for upcoming invoices.");
   }
+  // Add expense anomaly hints
+  const warningExpenseAnomalies = expenseAnomalies.filter(
+    (ea) => ea.severity === "warning",
+  );
+  if (warningExpenseAnomalies.length > 0) {
+    actionHints.push(
+      "Recommend reviewing the expense categories that spiked significantly.",
+    );
+  }
   const actionHintsText =
     actionHints.length > 0 ? ` ${actionHints.join(" ")}` : "";
 
@@ -139,6 +190,12 @@ export function buildInsightPrompt(
   if (activity.upcomingInvoices?.count) {
     storyHints.push(
       "Mention the upcoming scheduled invoices as expected revenue.",
+    );
+  }
+  // Add expense anomaly story hints
+  if (expenseAnomalies.length > 0) {
+    storyHints.push(
+      "If relevant, briefly mention notable expense category changes.",
     );
   }
   const storyHintsText =
@@ -152,7 +209,7 @@ Key Metrics:
 ${metricsContext}
 
 Notable Changes:
-${anomaliesContext}${upcomingContext}${overdueContext}
+${anomaliesContext}${expenseAnomaliesContext}${upcomingContext}${overdueContext}
 
 Generate a business insight summary with these exact sections:
 

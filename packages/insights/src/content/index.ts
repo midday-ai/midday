@@ -10,6 +10,7 @@ export {
 export {
   buildInsightPrompt,
   formatAnomaliesContext,
+  formatExpenseAnomaliesContext,
   formatMetricsContext,
   formatOverdueContext,
   formatUpcomingInvoicesContext,

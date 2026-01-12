@@ -1,5 +1,6 @@
 import type { Database, DatabaseOrTransaction } from "@db/client";
 import {
+  type ExpenseAnomaly,
   type InsightActivity,
   type InsightAnomaly,
   type InsightContent,
@@ -66,10 +67,11 @@ export type UpdateInsightParams = {
   selectedMetrics?: InsightMetric[];
   allMetrics?: Record<string, InsightMetric>;
   anomalies?: InsightAnomaly[];
+  expenseAnomalies?: ExpenseAnomaly[];
   milestones?: InsightMilestone[];
   activity?: InsightActivity;
   content?: InsightContent;
-  audioUrl?: string;
+  audioPath?: string;
   generatedAt?: Date;
 };
 

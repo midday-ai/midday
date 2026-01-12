@@ -9,7 +9,15 @@ import {
   createInsightsService,
   getPeriodInfo,
 } from "@midday/insights";
+import {
+  buildAudioScript,
+  generateAudio,
+  getAudioPresignedUrl,
+  isAudioEnabled,
+  uploadInsightAudio,
+} from "@midday/insights/audio";
 import { triggerJob } from "@midday/job-client";
+import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
 import { getDb } from "../../utils/db";
 import { BaseProcessor } from "../base";
@@ -122,7 +130,65 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
         currency,
       });
 
-      // Update insight with all data
+      // Generate audio if ElevenLabs is configured
+      let audioPath: string | undefined;
+      let audioPresignedUrl: string | undefined;
+
+      if (isAudioEnabled()) {
+        try {
+          const supabase = createClient();
+
+          // Build audio script from content
+          const script = buildAudioScript(
+            result.content,
+            period.periodLabel,
+            result.selectedMetrics,
+            currency,
+          );
+
+          this.logger.info("Generating audio for insight", {
+            teamId,
+            insightId,
+            scriptLength: script.length,
+          });
+
+          // Generate audio via ElevenLabs v3
+          const audioBuffer = await generateAudio(script);
+
+          // Upload to Supabase storage
+          audioPath = await uploadInsightAudio(
+            supabase,
+            teamId,
+            insightId,
+            audioBuffer,
+          );
+
+          // Generate 7-day presigned URL for email notification
+          audioPresignedUrl = await getAudioPresignedUrl(
+            supabase,
+            audioPath,
+            7 * 24 * 60 * 60, // 7 days
+          );
+
+          this.logger.info("Audio generated successfully", {
+            teamId,
+            insightId,
+            audioPath,
+          });
+        } catch (error) {
+          // Don't fail the insight if audio generation fails - it's optional
+          this.logger.warn(
+            "Audio generation failed, continuing without audio",
+            {
+              teamId,
+              insightId,
+              error: error instanceof Error ? error.message : "Unknown error",
+            },
+          );
+        }
+      }
+
+      // Update insight with all data (including audio path if generated)
       await updateInsight(db, {
         id: insightId,
         teamId,
@@ -130,8 +196,10 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
         selectedMetrics: result.selectedMetrics,
         allMetrics: result.allMetrics as Record<string, InsightMetric>,
         anomalies: result.anomalies,
+        expenseAnomalies: result.expenseAnomalies,
         activity: result.activity,
         content: result.content,
+        audioPath,
         generatedAt: new Date(),
       });
 
@@ -140,6 +208,7 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
         insightId,
         periodLabel: period.periodLabel,
         metricsCount: result.selectedMetrics.length,
+        hasAudio: !!audioPath,
       });
 
       // Trigger notification for new insights (not updates)
@@ -156,6 +225,7 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
               periodNumber: period.periodNumber,
               periodYear: period.periodYear,
               goodNews: result.content.goodNews,
+              audioPresignedUrl,
             },
             "notifications",
           );

@@ -3,6 +3,7 @@
  */
 export {
   detectAnomalies,
+  detectExpenseAnomalies,
   selectTopMetrics,
 } from "./analyzer";
 

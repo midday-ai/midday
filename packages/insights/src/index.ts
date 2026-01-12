@@ -15,6 +15,7 @@ import {
   getProfit,
   getRevenue,
   getRunway,
+  getSpending,
   getSpendingForPeriod,
   getUpcomingDueRecurringByTeam,
 } from "@midday/db/queries";
@@ -27,6 +28,7 @@ import {
   calculateAllMetrics,
   createMetric,
   detectAnomalies,
+  detectExpenseAnomalies,
   selectTopMetrics,
 } from "./metrics";
 import {
@@ -35,6 +37,7 @@ import {
   getPreviousPeriod,
 } from "./period";
 import type {
+  ExpenseAnomaly,
   GenerateInsightParams,
   InsightActivity,
   InsightAnomaly,
@@ -123,6 +126,13 @@ export class InsightsService {
     // Detect anomalies
     const anomalies = detectAnomalies(allMetrics);
 
+    // Detect expense category anomalies
+    const expenseAnomalies = detectExpenseAnomalies(
+      currentMetrics.categorySpending ?? [],
+      previousMetrics.categorySpending ?? [],
+      currency,
+    );
+
     // Build activity summary
     const activity = await this.buildActivitySummary(
       teamId,
@@ -139,12 +149,14 @@ export class InsightsService {
       periodLabel,
       periodType,
       currency,
+      expenseAnomalies,
     );
 
     return {
       selectedMetrics,
       allMetrics,
       anomalies,
+      expenseAnomalies,
       milestones: [], // TODO: Implement milestone detection
       activity,
       content,
@@ -162,16 +174,23 @@ export class InsightsService {
     const from = formatDateForQuery(period.periodStart);
     const to = formatDateForQuery(period.periodEnd);
 
-    const [revenueData, profitData, cashFlowData, spendingData, runwayData] =
-      await Promise.all([
-        getRevenue(this.db, { teamId, from, to, currency }).catch(() => []),
-        getProfit(this.db, { teamId, from, to, currency }).catch(() => []),
-        getCashFlow(this.db, { teamId, from, to, currency }).catch(() => null),
-        getSpendingForPeriod(this.db, { teamId, from, to, currency }).catch(
-          () => null,
-        ),
-        getRunway(this.db, { teamId, from, to, currency }).catch(() => 0),
-      ]);
+    const [
+      revenueData,
+      profitData,
+      cashFlowData,
+      spendingData,
+      runwayData,
+      categorySpendingData,
+    ] = await Promise.all([
+      getRevenue(this.db, { teamId, from, to, currency }).catch(() => []),
+      getProfit(this.db, { teamId, from, to, currency }).catch(() => []),
+      getCashFlow(this.db, { teamId, from, to, currency }).catch(() => null),
+      getSpendingForPeriod(this.db, { teamId, from, to, currency }).catch(
+        () => null,
+      ),
+      getRunway(this.db, { teamId, from, to, currency }).catch(() => 0),
+      getSpending(this.db, { teamId, from, to, currency }).catch(() => []),
+    ]);
 
     // Sum up monthly values for revenue
     const revenueTotal = Array.isArray(revenueData)
@@ -202,6 +221,7 @@ export class InsightsService {
       cashFlow: netCashFlow,
       profitMargin,
       runwayMonths: typeof runwayData === "number" ? runwayData : 0,
+      categorySpending: categorySpendingData,
     };
   }
 
@@ -219,6 +239,7 @@ export class InsightsService {
     hoursTracked: number;
     unbilledHours: number;
     billableAmount?: number;
+    largestPayment?: { customer: string; amount: number };
     newCustomers: number;
     receiptsMatched: number;
     transactionsCategorized: number;
@@ -240,6 +261,7 @@ export class InsightsService {
       hoursTracked: activityData?.hoursTracked ?? 0,
       unbilledHours: activityData?.unbilledHours ?? 0,
       billableAmount: activityData?.billableAmount,
+      largestPayment: activityData?.largestPayment,
       newCustomers: activityData?.newCustomers ?? 0,
       receiptsMatched: activityData?.receiptsMatched ?? 0,
       transactionsCategorized: activityData?.transactionsCategorized ?? 0,
@@ -260,6 +282,7 @@ export class InsightsService {
       hoursTracked: number;
       unbilledHours: number;
       billableAmount?: number;
+      largestPayment?: { customer: string; amount: number };
       newCustomers: number;
       receiptsMatched: number;
       transactionsCategorized: number;
@@ -303,6 +326,7 @@ export class InsightsService {
       hoursTracked: activityData.hoursTracked,
       unbilledHours: activityData.unbilledHours,
       billableAmount: activityData.billableAmount,
+      largestPayment: activityData.largestPayment,
       newCustomers: activityData.newCustomers,
       receiptsMatched: activityData.receiptsMatched,
       transactionsCategorized: activityData.transactionsCategorized,
@@ -368,7 +392,9 @@ export function isTeamEnabledForInsights(teamId: string): boolean {
 // Re-export all types
 export type {
   AnomalySeverity,
+  CategorySpending,
   ChangeDirection,
+  ExpenseAnomaly,
   GenerateInsightParams,
   InsightActivity,
   InsightAnomaly,
@@ -387,6 +413,7 @@ export {
   ANOMALY_THRESHOLDS,
   CORE_FINANCIAL_METRICS,
   DEFAULT_TOP_METRICS_COUNT,
+  EXPENSE_ANOMALY_THRESHOLDS,
   MAX_METRICS_PER_CATEGORY,
   type MetricDefinition,
   METRIC_DEFINITIONS,
@@ -401,6 +428,7 @@ export {
   calculatePercentageChange,
   createMetric,
   detectAnomalies,
+  detectExpenseAnomalies,
   formatMetricValue,
   getChangeDirection,
   getMetricDefinition,

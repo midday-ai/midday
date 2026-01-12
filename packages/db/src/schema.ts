@@ -3790,6 +3790,19 @@ export type InsightAnomaly = {
   metricType?: string;
 };
 
+export type ExpenseAnomaly = {
+  type: "category_spike" | "new_category" | "category_decrease";
+  severity: "info" | "warning" | "alert";
+  categoryName: string;
+  categorySlug: string;
+  currentAmount: number;
+  previousAmount: number;
+  change: number; // percentage change
+  currency: string;
+  message: string;
+  tip?: string; // actionable tip for the user
+};
+
 export type InsightMilestone = {
   type: string;
   description: string;
@@ -3859,6 +3872,9 @@ export const insights = pgTable(
     // Detected anomalies and patterns
     anomalies: jsonb().$type<InsightAnomaly[]>(),
 
+    // Expense category anomalies (spikes, new categories, etc.)
+    expenseAnomalies: jsonb("expense_anomalies").$type<ExpenseAnomaly[]>(),
+
     // Streaks and milestones
     milestones: jsonb().$type<InsightMilestone[]>(),
 
@@ -3870,8 +3886,8 @@ export const insights = pgTable(
     // AI-generated content (relief-first structure)
     content: jsonb().$type<InsightContent>(),
 
-    // Future: voice
-    audioUrl: text("audio_url"),
+    // Audio narration storage path: {teamId}/insights/{insightId}.mp3
+    audioPath: text("audio_path"),
 
     generatedAt: timestamp("generated_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })

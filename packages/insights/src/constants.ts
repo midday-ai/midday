@@ -206,6 +206,23 @@ export const ANOMALY_THRESHOLDS = {
 };
 
 /**
+ * Thresholds for expense category anomaly detection
+ */
+export const EXPENSE_ANOMALY_THRESHOLDS = {
+  // Large spike: > 50% increase AND > $100 absolute = warning
+  largeSpikePercent: 50,
+  largeSpikeAbsolute: 100,
+
+  // Moderate spike: > 30% increase AND > $50 absolute = info
+  moderateSpikePercent: 30,
+  moderateSpikeAbsolute: 50,
+
+  // New category thresholds
+  newCategoryMinor: 50, // First-time spend > $50 = info
+  newCategoryMajor: 500, // First-time spend > $500 = warning
+};
+
+/**
  * Scoring weights for metric selection
  */
 export const SCORING_WEIGHTS = {
