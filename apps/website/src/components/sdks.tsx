@@ -207,7 +207,7 @@ export function SDKs() {
             <div className="flex justify-center w-full relative gap-4 sm:gap-6 mb-12 sm:mb-16 md:mb-20">
               <button
                 onClick={() => handleLogoClick("typescript")}
-                className="border border-border bg-background p-4 sm:p-6 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
+                className="border border-border bg-background p-4 sm:p-6 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200"
               >
                 <Image
                   src="/images/typescript.png"
@@ -220,7 +220,7 @@ export function SDKs() {
               </button>
               <button
                 onClick={() => handleLogoClick("go")}
-                className="border border-border bg-background p-4 sm:p-6 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
+                className="border border-border bg-background p-4 sm:p-6 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200"
               >
                 <Image
                   src="/images/go.png"
@@ -233,7 +233,7 @@ export function SDKs() {
               </button>
               <button
                 onClick={() => handleLogoClick("php")}
-                className="border border-border bg-background p-4 sm:p-6 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
+                className="border border-border bg-background p-4 sm:p-6 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200"
               >
                 <Image
                   src="/images/php.png"
@@ -282,7 +282,7 @@ export function SDKs() {
             <div className="flex justify-center w-full relative gap-8 xl:gap-10 mb-16 xl:mb-20 2xl:mb-24">
               <button
                 onClick={() => handleLogoClick("typescript")}
-                className="border border-border bg-background p-5 xl:p-7 2xl:p-8 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
+                className="border border-border bg-background p-5 xl:p-7 2xl:p-8 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200"
               >
                 <Image
                   src="/images/typescript.png"
@@ -295,7 +295,7 @@ export function SDKs() {
               </button>
               <button
                 onClick={() => handleLogoClick("go")}
-                className="border border-border bg-background p-5 xl:p-7 2xl:p-8 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
+                className="border border-border bg-background p-5 xl:p-7 2xl:p-8 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200"
               >
                 <Image
                   src="/images/go.png"
@@ -308,7 +308,7 @@ export function SDKs() {
               </button>
               <button
                 onClick={() => handleLogoClick("php")}
-                className="border border-border bg-background p-5 xl:p-7 2xl:p-8 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
+                className="border border-border bg-background p-5 xl:p-7 2xl:p-8 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200"
               >
                 <Image
                   src="/images/php.png"
