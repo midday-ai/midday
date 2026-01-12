@@ -5,6 +5,7 @@ import {
   getInsightByPeriod,
   getLatestInsight,
 } from "@midday/db/queries";
+import { getPeriodLabel } from "@midday/insights";
 import { formatAmount } from "@midday/utils/format";
 import { tool } from "ai";
 import { getISOWeek, getMonth, getQuarter, getYear } from "date-fns";
@@ -73,11 +74,16 @@ export const getInsightsTool = tool({
       let responseText = "";
 
       // Header with period
-      responseText += `## ${insight.periodLabel}\n\n`;
+      const periodLabel = getPeriodLabel(
+        insight.periodType,
+        insight.periodYear,
+        insight.periodNumber,
+      );
+      responseText += `## ${periodLabel}\n\n`;
 
-      // Good news section (relief-first)
-      if (insight.content?.goodNews) {
-        responseText += `### Good News\n${insight.content.goodNews}\n\n`;
+      // Opener section
+      if (insight.content?.opener) {
+        responseText += `### Summary\n${insight.content.opener}\n\n`;
       }
 
       // Key Metrics Grid (4 metrics)
@@ -222,7 +228,7 @@ export const getInsightsTool = tool({
         success: true,
         insight: {
           id: insight.id,
-          periodLabel: insight.periodLabel,
+          periodLabel,
           periodType: insight.periodType,
           periodYear: insight.periodYear,
           periodNumber: insight.periodNumber,

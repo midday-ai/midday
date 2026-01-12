@@ -19,7 +19,7 @@ import {
 interface Props {
   fullName: string;
   periodLabel: string;
-  goodNews: string;
+  opener: string;
   audioUrl?: string;
   insightId: string;
   locale?: string;
@@ -30,7 +30,7 @@ const baseAppUrl = getAppUrl();
 export const InsightReadyEmail = ({
   fullName = "",
   periodLabel = "Week 2, 2026",
-  goodNews = "Your revenue grew 12% this week, with profit margins improving across all categories.",
+  opener = "Your revenue grew 12% this week, with profit margins improving across all categories.",
   audioUrl,
   insightId = "preview-insight-id",
   locale = "en",
@@ -39,7 +39,7 @@ export const InsightReadyEmail = ({
   const themeClasses = getEmailThemeClasses();
   const lightStyles = getEmailInlineStyles("light");
 
-  const previewText = `Your ${periodLabel} business insight is ready: ${goodNews.slice(0, 100)}`;
+  const previewText = `Your ${periodLabel} business insight is ready: ${opener.slice(0, 100)}`;
   const dashboardUrl = `${baseAppUrl}/?insight=${insightId}`;
 
   return (
@@ -79,20 +79,19 @@ export const InsightReadyEmail = ({
             Your {periodLabel.toLowerCase()} business insight is ready.
           </Text>
 
-          {/* Good News Highlight */}
+          {/* Insight Highlight */}
           <Section
             className="my-[24px] p-[16px] rounded-[8px]"
             style={{
-              backgroundColor: "#f0fdf4",
-              border: "1px solid #bbf7d0",
+              backgroundColor: "#f8fafc",
+              border: "1px solid #e2e8f0",
             }}
           >
             <Text
               className="text-[14px] leading-[22px] m-0"
-              style={{ color: "#166534" }}
+              style={{ color: "#1e293b" }}
             >
-              <span style={{ fontWeight: 600 }}>Good news: </span>
-              {goodNews}
+              {opener}
             </Text>
           </Section>
 

@@ -10,13 +10,14 @@ import {
   inbox,
   type insightPeriodTypeEnum,
   type insightStatusEnum,
+  insightUserStatus,
   insights,
   invoices,
   trackerEntries,
   trackerProjects,
   transactions,
 } from "@db/schema";
-import { and, desc, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, isNotNull, isNull, lte, sql } from "drizzle-orm";
 
 /**
  * Insight type returned from database queries
@@ -28,10 +29,9 @@ export type CreateInsightParams = {
   periodType: (typeof insightPeriodTypeEnum.enumValues)[number];
   periodStart: Date;
   periodEnd: Date;
-  periodLabel: string;
   periodYear: number;
   periodNumber: number;
-  currency?: string;
+  currency: string;
 };
 
 /**
@@ -48,10 +48,9 @@ export async function createInsight(
       periodType: params.periodType,
       periodStart: params.periodStart,
       periodEnd: params.periodEnd,
-      periodLabel: params.periodLabel,
       periodYear: params.periodYear,
       periodNumber: params.periodNumber,
-      currency: params.currency ?? "USD",
+      currency: params.currency,
       status: "pending",
     })
     .onConflictDoNothing()
@@ -534,5 +533,206 @@ export async function getInsightActivityData(
     newCustomers: customerStats.newCount,
     receiptsMatched: inboxStats.matchedCount,
     transactionsCategorized: transactionStats.categorizedCount,
+  };
+}
+
+// ============================================================================
+// INSIGHT USER STATUS (PER-USER READ/DISMISS TRACKING)
+// ============================================================================
+
+export type InsightUserStatus = typeof insightUserStatus.$inferSelect;
+
+/**
+ * Get user's status for an insight
+ */
+export async function getInsightUserStatus(
+  db: Database,
+  params: { insightId: string; userId: string },
+): Promise<InsightUserStatus | null> {
+  const [result] = await db
+    .select()
+    .from(insightUserStatus)
+    .where(
+      and(
+        eq(insightUserStatus.insightId, params.insightId),
+        eq(insightUserStatus.userId, params.userId),
+      ),
+    )
+    .limit(1);
+
+  return result ?? null;
+}
+
+/**
+ * Mark an insight as read for a user
+ * Creates or updates the user status record
+ */
+export async function markInsightAsRead(
+  db: DatabaseOrTransaction,
+  params: { insightId: string; userId: string },
+): Promise<InsightUserStatus> {
+  const [result] = await db
+    .insert(insightUserStatus)
+    .values({
+      insightId: params.insightId,
+      userId: params.userId,
+      readAt: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: [insightUserStatus.insightId, insightUserStatus.userId],
+      set: {
+        readAt: sql`COALESCE(${insightUserStatus.readAt}, NOW())`,
+        updatedAt: new Date(),
+      },
+    })
+    .returning();
+
+  if (!result) {
+    throw new Error("Failed to mark insight as read");
+  }
+
+  return result;
+}
+
+/**
+ * Dismiss an insight for a user
+ * Creates or updates the user status record
+ */
+export async function dismissInsight(
+  db: DatabaseOrTransaction,
+  params: { insightId: string; userId: string },
+): Promise<InsightUserStatus> {
+  const [result] = await db
+    .insert(insightUserStatus)
+    .values({
+      insightId: params.insightId,
+      userId: params.userId,
+      dismissedAt: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: [insightUserStatus.insightId, insightUserStatus.userId],
+      set: {
+        dismissedAt: new Date(),
+        updatedAt: new Date(),
+      },
+    })
+    .returning();
+
+  if (!result) {
+    throw new Error("Failed to dismiss insight");
+  }
+
+  return result;
+}
+
+/**
+ * Undo dismiss for an insight (set dismissedAt back to null)
+ */
+export async function undoDismissInsight(
+  db: DatabaseOrTransaction,
+  params: { insightId: string; userId: string },
+): Promise<InsightUserStatus | null> {
+  const [result] = await db
+    .update(insightUserStatus)
+    .set({
+      dismissedAt: null,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(insightUserStatus.insightId, params.insightId),
+        eq(insightUserStatus.userId, params.userId),
+      ),
+    )
+    .returning();
+
+  return result ?? null;
+}
+
+export type GetInsightsForUserParams = {
+  teamId: string;
+  userId: string;
+  periodType?: (typeof insightPeriodTypeEnum.enumValues)[number];
+  includeDismissed?: boolean;
+  cursor?: string | null;
+  pageSize?: number;
+  status?: (typeof insightStatusEnum.enumValues)[number];
+};
+
+/**
+ * Get insights for a user with their read/dismiss status
+ * By default, filters out dismissed insights
+ */
+export async function getInsightsForUser(
+  db: Database,
+  params: GetInsightsForUserParams,
+) {
+  const {
+    teamId,
+    userId,
+    periodType,
+    includeDismissed = false,
+    cursor,
+    pageSize = 10,
+    status,
+  } = params;
+
+  const offset = cursor ? Number.parseInt(cursor, 10) : 0;
+
+  // Build base query with left join to get user status
+  const query = db
+    .select({
+      insight: insights,
+      userStatus: {
+        readAt: insightUserStatus.readAt,
+        dismissedAt: insightUserStatus.dismissedAt,
+      },
+    })
+    .from(insights)
+    .leftJoin(
+      insightUserStatus,
+      and(
+        eq(insightUserStatus.insightId, insights.id),
+        eq(insightUserStatus.userId, userId),
+      ),
+    );
+
+  // Build conditions
+  const conditions = [eq(insights.teamId, teamId)];
+
+  if (periodType) {
+    conditions.push(eq(insights.periodType, periodType));
+  }
+
+  if (status) {
+    conditions.push(eq(insights.status, status));
+  }
+
+  // Filter out dismissed unless explicitly requested
+  if (!includeDismissed) {
+    conditions.push(isNull(insightUserStatus.dismissedAt));
+  }
+
+  const data = await query
+    .where(and(...conditions))
+    .orderBy(desc(insights.periodEnd))
+    .limit(pageSize)
+    .offset(offset);
+
+  const nextCursor =
+    data && data.length === pageSize
+      ? (offset + pageSize).toString()
+      : undefined;
+
+  return {
+    meta: {
+      cursor: nextCursor ?? null,
+      hasPreviousPage: offset > 0,
+      hasNextPage: data && data.length === pageSize,
+    },
+    data: data.map((row) => ({
+      ...row.insight,
+      userStatus: row.userStatus,
+    })),
   };
 }

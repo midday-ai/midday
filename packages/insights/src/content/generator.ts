@@ -22,7 +22,12 @@ const openai = createOpenAI({
  * Schema for AI-generated content
  */
 const insightContentSchema = z.object({
-  goodNews: z.string().describe("1-2 sentences of positive news to start"),
+  sentiment: z
+    .enum(["positive", "neutral", "challenging"])
+    .describe("Overall assessment: positive, neutral, or challenging"),
+  opener: z
+    .string()
+    .describe("1-2 sentences context-aware opening that matches the sentiment"),
   story: z.string().describe("2-3 sentences explaining what happened"),
   actions: z
     .array(
@@ -94,7 +99,8 @@ export class ContentGenerator {
       });
 
       return {
-        goodNews: object.goodNews,
+        sentiment: object.sentiment,
+        opener: object.opener,
         story: object.story,
         actions: object.actions,
         celebration: object.celebration,

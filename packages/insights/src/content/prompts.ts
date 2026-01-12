@@ -8,6 +8,7 @@ import type {
   InsightActivity,
   InsightAnomaly,
   InsightMetric,
+  InsightSentiment,
   PeriodType,
 } from "../types";
 
@@ -213,15 +214,23 @@ ${anomaliesContext}${expenseAnomaliesContext}${upcomingContext}${overdueContext}
 
 Generate a business insight summary with these exact sections:
 
-1. GOOD NEWS (1-2 sentences): Start with something positive. Even if overall performance is down, find a silver lining. Be specific and reassuring.
+1. SENTIMENT: Assess the overall week. Choose ONE of:
+   - "positive" (good week: revenue up, profits healthy, progress made)
+   - "neutral" (mixed results, some wins and some challenges, stable)
+   - "challenging" (difficult week: revenue down significantly, cash flow issues, concerning trends)
 
-2. STORY (2-3 sentences): Explain what happened this ${periodName} in plain language. Connect the dots between metrics. Don't just repeat numbers - explain what they mean.${storyHintsText}
+2. OPENER (1-2 sentences): A context-aware opening that matches the sentiment.
+   - If positive: Lead with the win, be encouraging
+   - If neutral: Acknowledge the mixed results, be balanced
+   - If challenging: Be empathetic and supportive, acknowledge difficulty without catastrophizing
 
-3. ACTIONS (3-4 bullet points): Specific, actionable recommendations. Each should be concrete and achievable this ${periodName}. Format as short imperative sentences.${actionHintsText}
+3. STORY (2-3 sentences): Explain what happened this ${periodName} in plain language. Connect the dots between metrics. Don't just repeat numbers - explain what they mean.${storyHintsText}
 
-4. CELEBRATION (optional, 1 sentence): If there's a milestone, streak, or achievement worth celebrating, mention it. Otherwise, leave empty.
+4. ACTIONS (3-4 bullet points): Specific, actionable recommendations. Each should be concrete and achievable this ${periodName}. Format as short imperative sentences.${actionHintsText}
 
-Tone: Warm, professional, encouraging. Like a trusted advisor who genuinely cares about their success.`;
+5. CELEBRATION (optional, 1 sentence): If there's a milestone, streak, or achievement worth celebrating, mention it. Otherwise, leave empty.
+
+Tone: Warm, professional, supportive. Like a trusted advisor who tells you the truth while genuinely caring about your success. Don't force positivity when things are tough - be honest but constructive.`;
 }
 
 /**
@@ -231,7 +240,8 @@ export function getFallbackContent(
   periodLabel: string,
   periodType: PeriodType,
 ): {
-  goodNews: string;
+  sentiment: InsightSentiment;
+  opener: string;
   story: string;
   actions: Array<{ text: string; type?: string }>;
   celebration?: string;
@@ -239,7 +249,8 @@ export function getFallbackContent(
   const periodName = getPeriodName(periodType);
 
   return {
-    goodNews: `Your ${periodName}ly summary for ${periodLabel} is ready.`,
+    sentiment: "neutral",
+    opener: `Your ${periodName}ly summary for ${periodLabel} is ready.`,
     story: `Here's a snapshot of your business performance. Review the key metrics to understand how things are progressing.`,
     actions: [
       { text: "Review your top expense categories", type: "review" },

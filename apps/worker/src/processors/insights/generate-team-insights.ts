@@ -8,6 +8,7 @@ import {
   type PeriodType,
   createInsightsService,
   getPeriodInfo,
+  getPeriodLabel,
 } from "@midday/insights";
 import {
   buildAudioScript,
@@ -76,7 +77,7 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
       return {
         insightId: existingInsight.id,
         teamId,
-        periodLabel: existingInsight.periodLabel ?? "",
+        periodLabel: getPeriodLabel(periodType, periodYear, periodNumber),
         metricsCount: existingInsight.selectedMetrics?.length ?? 0,
         status: "skipped",
       };
@@ -100,7 +101,6 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
         periodType,
         periodStart: period.periodStart,
         periodEnd: period.periodEnd,
-        periodLabel: period.periodLabel,
         periodYear: period.periodYear,
         periodNumber: period.periodNumber,
         currency,
@@ -224,7 +224,7 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
               periodLabel: period.periodLabel,
               periodNumber: period.periodNumber,
               periodYear: period.periodYear,
-              goodNews: result.content.goodNews,
+              opener: result.content.opener,
               audioPresignedUrl,
             },
             "notifications",
