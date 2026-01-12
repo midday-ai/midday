@@ -41,7 +41,7 @@ function TeamDropdownSkeleton({ isExpanded }: { isExpanded: boolean }) {
 
 export function TeamDropdown({ isExpanded = false }: Props) {
   const ref = useRef<HTMLDivElement>(null);
-  const { data: user, isLoading: isUserLoading } = useUserQuery();
+  const { data: user } = useUserQuery();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
@@ -88,8 +88,9 @@ export function TeamDropdown({ isExpanded = false }: Props) {
 
   const toggleActive = () => setActive((prev) => !prev);
 
-  // Show skeleton while loading
-  if (isUserLoading || isTeamsLoading) {
+  // Show skeleton while teams are loading
+  // Note: user loading is handled by Suspense since useUserQuery uses useSuspenseQuery
+  if (isTeamsLoading) {
     return <TeamDropdownSkeleton isExpanded={isExpanded} />;
   }
 
