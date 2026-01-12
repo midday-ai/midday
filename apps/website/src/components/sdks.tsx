@@ -17,9 +17,9 @@ function ScrambledText() {
   const rows = 4;
   const charCount = cols * rows; // 32 characters
 
-  // Pre-compute random seeds for each character position (stable across renders)
+  // Pre-compute deterministic seeds for each character position (consistent between server and client)
   const charSeeds = useMemo(() => 
-    Array.from({ length: charCount }, () => Math.floor(Math.random() * 1000)),
+    Array.from({ length: charCount }, (_, i) => (i * 17 + 23) % 1000),
     [charCount]
   );
 
@@ -147,6 +147,28 @@ export function SDKs() {
 
         {/* Mobile Layout */}
         <div className="lg:hidden flex flex-col relative pt-32 pb-16 sm:pt-40 sm:pb-20 md:pt-48 overflow-hidden">
+          {/* Grid Pattern Background - Mobile/Tablet Only (Limited Height) */}
+          <div
+            className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0"
+            style={{ height: "600px" }}
+          >
+            <Image
+              src="/images/grid-light.svg"
+              alt="Grid Pattern"
+              width={1728}
+              height={1080}
+              className="w-full h-[600px] object-cover opacity-100 dark:opacity-[12%] dark:hidden"
+              priority
+            />
+            <Image
+              src="/images/grid-dark.svg"
+              alt="Grid Pattern"
+              width={1728}
+              height={1080}
+              className="w-full h-[600px] object-cover opacity-[12%] hidden dark:block"
+              priority
+            />
+          </div>
           <div className="flex flex-col justify-start items-center z-20 px-4 sm:px-6">
             {/* SDK Logos */}
             <div className="flex justify-center w-full relative gap-4 sm:gap-6 mb-12 sm:mb-16 md:mb-20">
@@ -155,7 +177,7 @@ export function SDKs() {
                 className="border border-border bg-background p-4 sm:p-6 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
               >
                 <Image
-                  src="/images/typescript.svg"
+                  src="/images/typescript.png"
                   alt="TypeScript"
                   width={64}
                   height={64}
@@ -168,7 +190,7 @@ export function SDKs() {
                 className="border border-border bg-background p-4 sm:p-6 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
               >
                 <Image
-                  src="/images/go.svg"
+                  src="/images/go.png"
                   alt="Go"
                   width={64}
                   height={64}
@@ -181,7 +203,7 @@ export function SDKs() {
                 className="border border-border bg-background p-4 sm:p-6 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
               >
                 <Image
-                  src="/images/php.svg"
+                  src="/images/php.png"
                   alt="PHP"
                   width={64}
                   height={64}
@@ -194,7 +216,7 @@ export function SDKs() {
                 className="border border-border bg-background p-4 sm:p-6 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
               >
                 <Image
-                  src="/images/python.svg"
+                  src="/images/python.png"
                   alt="Python"
                   width={64}
                   height={64}
@@ -240,53 +262,53 @@ export function SDKs() {
             <div className="flex justify-center w-full relative gap-8 xl:gap-10 mb-16 xl:mb-20 2xl:mb-24">
               <button
                 onClick={() => handleLogoClick("typescript")}
-                className="border border-border bg-background p-6 xl:p-8 2xl:p-10 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
+                className="border border-border bg-background p-5 xl:p-7 2xl:p-8 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
               >
                 <Image
-                  src="/images/typescript.svg"
+                  src="/images/typescript.png"
                   alt="TypeScript"
                   width={80}
                   height={80}
-                  className="w-16 h-16 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24 object-contain"
+                  className="w-14 h-14 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24 object-contain"
                   priority
                 />
               </button>
               <button
                 onClick={() => handleLogoClick("go")}
-                className="border border-border bg-background p-6 xl:p-8 2xl:p-10 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
+                className="border border-border bg-background p-5 xl:p-7 2xl:p-8 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
               >
                 <Image
-                  src="/images/go.svg"
+                  src="/images/go.png"
                   alt="Go"
                   width={80}
                   height={80}
-                  className="w-16 h-16 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24 object-contain"
+                  className="w-14 h-14 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24 object-contain"
                   priority
                 />
               </button>
               <button
                 onClick={() => handleLogoClick("php")}
-                className="border border-border bg-background p-6 xl:p-8 2xl:p-10 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
+                className="border border-border bg-background p-5 xl:p-7 2xl:p-8 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
               >
                 <Image
-                  src="/images/php.svg"
+                  src="/images/php.png"
                   alt="PHP"
                   width={80}
                   height={80}
-                  className="w-16 h-16 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24 object-contain"
+                  className="w-14 h-14 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24 object-contain"
                   priority
                 />
               </button>
               <button
                 onClick={() => handleLogoClick("python")}
-                className="border border-border bg-background p-6 xl:p-8 2xl:p-10 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
+                className="border border-border bg-background p-5 xl:p-7 2xl:p-8 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
               >
                 <Image
-                  src="/images/python.svg"
+                  src="/images/python.png"
                   alt="Python"
                   width={80}
                   height={80}
-                  className="w-16 h-16 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24 object-contain"
+                  className="w-14 h-14 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24 object-contain"
                   priority
                 />
               </button>
