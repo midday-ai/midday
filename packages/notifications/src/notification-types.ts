@@ -137,7 +137,7 @@ export const allNotificationTypes: NotificationType[] = [
   },
   {
     type: "insight_ready",
-    channels: ["in_app"],
+    channels: ["in_app", "email"],
     showInSettings: true,
     category: "insights",
     order: 1,

@@ -5,6 +5,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 import { z } from "zod/v4";
 import type {
+  ExpenseAnomaly,
   InsightActivity,
   InsightAnomaly,
   InsightContent,
@@ -67,6 +68,7 @@ export class ContentGenerator {
     periodLabel: string,
     periodType: PeriodType,
     currency: string,
+    expenseAnomalies: ExpenseAnomaly[] = [],
   ): Promise<InsightContent> {
     const prompt = buildInsightPrompt(
       selectedMetrics,
@@ -75,6 +77,7 @@ export class ContentGenerator {
       periodLabel,
       periodType,
       currency,
+      expenseAnomalies,
     );
 
     try {

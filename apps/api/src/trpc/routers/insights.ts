@@ -1,3 +1,4 @@
+import { createAdminClient } from "@api/services/supabase";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
   getInsightById,
@@ -7,6 +8,8 @@ import {
 } from "@midday/db/queries";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+
+const AUDIO_BUCKET = "vault";
 
 const periodTypeEnum = z.enum(["weekly", "monthly", "quarterly", "yearly"]);
 
@@ -100,5 +103,54 @@ export const insightsRouter = createTRPCRouter({
       }
 
       return insight;
+    }),
+
+  /**
+   * Get presigned URL for insight audio
+   * Returns a short-lived URL (1 hour) for dashboard playback
+   */
+  audioUrl: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().uuid(),
+      }),
+    )
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      const insight = await getInsightById(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
+
+      if (!insight) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Insight not found",
+        });
+      }
+
+      if (!insight.audioPath) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Audio not available for this insight",
+        });
+      }
+
+      // Generate presigned URL (1 hour for dashboard playback)
+      const supabase = await createAdminClient();
+      const { data, error } = await supabase.storage
+        .from(AUDIO_BUCKET)
+        .createSignedUrl(insight.audioPath, 60 * 60); // 1 hour
+
+      if (error || !data?.signedUrl) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to generate audio URL",
+        });
+      }
+
+      return {
+        audioUrl: data.signedUrl,
+        expiresIn: 60 * 60, // seconds
+      };
     }),
 });

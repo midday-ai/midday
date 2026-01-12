@@ -4,10 +4,16 @@
 import {
   ANOMALY_THRESHOLDS,
   DEFAULT_TOP_METRICS_COUNT,
+  EXPENSE_ANOMALY_THRESHOLDS,
   MAX_METRICS_PER_CATEGORY,
   SCORING_WEIGHTS,
 } from "../constants";
-import type { InsightAnomaly, InsightMetric } from "../types";
+import type {
+  CategorySpending,
+  ExpenseAnomaly,
+  InsightAnomaly,
+  InsightMetric,
+} from "../types";
 import { getMetricDefinition, isCoreFinancialMetric } from "./definitions";
 
 /**
@@ -218,4 +224,167 @@ export function detectAnomalies(
   }
 
   return anomalies;
+}
+
+/**
+ * Generate actionable tip based on category
+ */
+function getTipForCategory(categorySlug: string, isNew: boolean): string {
+  if (isNew) {
+    return "Review this new expense category to ensure it's expected.";
+  }
+
+  const tips: Record<string, string> = {
+    software: "Review recent subscription signups or renewals.",
+    subscriptions: "Check for new or upgraded subscriptions.",
+    office: "Verify office supply orders are necessary.",
+    travel: "Review travel bookings and reimbursements.",
+    meals: "Check team meal and entertainment expenses.",
+    marketing: "Review campaign spending and ROI.",
+    advertising: "Evaluate ad performance vs spend increase.",
+    equipment: "Verify equipment purchases were approved.",
+    utilities: "Check for rate changes or usage spikes.",
+    rent: "Review lease terms if rent increased.",
+    professional: "Verify consulting or legal fees.",
+    insurance: "Check for policy changes or renewals.",
+  };
+
+  return tips[categorySlug] ?? "Review recent transactions in this category.";
+}
+
+/**
+ * Detect anomalies in category-level spending
+ *
+ * Detection rules:
+ * - Large spike: > 50% increase AND > $100 absolute = warning
+ * - Moderate spike: > 30% increase AND > $50 absolute = info
+ * - New category: First-time spend > $50 = info, > $500 = warning
+ * - Significant decrease: > 50% decrease = info (good news, not warning)
+ */
+export function detectExpenseAnomalies(
+  currentSpending: CategorySpending[],
+  previousSpending: CategorySpending[],
+  currency: string,
+): ExpenseAnomaly[] {
+  const anomalies: ExpenseAnomaly[] = [];
+
+  // Create a map of previous spending by slug for quick lookup
+  const previousMap = new Map<string, CategorySpending>();
+  for (const cat of previousSpending) {
+    previousMap.set(cat.slug, cat);
+  }
+
+  // Check each current category
+  for (const current of currentSpending) {
+    const previous = previousMap.get(current.slug);
+
+    if (!previous) {
+      // New category - first time spending
+      if (current.amount >= EXPENSE_ANOMALY_THRESHOLDS.newCategoryMajor) {
+        anomalies.push({
+          type: "new_category",
+          severity: "warning",
+          categoryName: current.name,
+          categorySlug: current.slug,
+          currentAmount: current.amount,
+          previousAmount: 0,
+          change: 100,
+          currency,
+          message: `New expense category: ${current.name}`,
+          tip: getTipForCategory(current.slug, true),
+        });
+      } else if (current.amount >= EXPENSE_ANOMALY_THRESHOLDS.newCategoryMinor) {
+        anomalies.push({
+          type: "new_category",
+          severity: "info",
+          categoryName: current.name,
+          categorySlug: current.slug,
+          currentAmount: current.amount,
+          previousAmount: 0,
+          change: 100,
+          currency,
+          message: `New expense category: ${current.name}`,
+          tip: getTipForCategory(current.slug, true),
+        });
+      }
+    } else {
+      // Existing category - check for significant changes
+      const absoluteChange = current.amount - previous.amount;
+      const percentChange =
+        previous.amount > 0
+          ? ((current.amount - previous.amount) / previous.amount) * 100
+          : current.amount > 0
+            ? 100
+            : 0;
+
+      // Large spike: > 50% increase AND > $100
+      if (
+        percentChange >= EXPENSE_ANOMALY_THRESHOLDS.largeSpikePercent &&
+        absoluteChange >= EXPENSE_ANOMALY_THRESHOLDS.largeSpikeAbsolute
+      ) {
+        anomalies.push({
+          type: "category_spike",
+          severity: "warning",
+          categoryName: current.name,
+          categorySlug: current.slug,
+          currentAmount: current.amount,
+          previousAmount: previous.amount,
+          change: Math.round(percentChange),
+          currency,
+          message: `${current.name} increased ${Math.round(percentChange)}%`,
+          tip: getTipForCategory(current.slug, false),
+        });
+      }
+      // Moderate spike: > 30% increase AND > $50
+      else if (
+        percentChange >= EXPENSE_ANOMALY_THRESHOLDS.moderateSpikePercent &&
+        absoluteChange >= EXPENSE_ANOMALY_THRESHOLDS.moderateSpikeAbsolute
+      ) {
+        anomalies.push({
+          type: "category_spike",
+          severity: "info",
+          categoryName: current.name,
+          categorySlug: current.slug,
+          currentAmount: current.amount,
+          previousAmount: previous.amount,
+          change: Math.round(percentChange),
+          currency,
+          message: `${current.name} increased ${Math.round(percentChange)}%`,
+          tip: getTipForCategory(current.slug, false),
+        });
+      }
+      // Significant decrease (> 50%) - could be good news
+      else if (
+        percentChange <= -EXPENSE_ANOMALY_THRESHOLDS.largeSpikePercent &&
+        Math.abs(absoluteChange) >= EXPENSE_ANOMALY_THRESHOLDS.largeSpikeAbsolute
+      ) {
+        anomalies.push({
+          type: "category_decrease",
+          severity: "info",
+          categoryName: current.name,
+          categorySlug: current.slug,
+          currentAmount: current.amount,
+          previousAmount: previous.amount,
+          change: Math.round(percentChange),
+          currency,
+          message: `${current.name} decreased ${Math.round(Math.abs(percentChange))}%`,
+        });
+      }
+    }
+  }
+
+  // Sort by severity (warning first) then by absolute change amount
+  anomalies.sort((a, b) => {
+    const severityOrder = { alert: 0, warning: 1, info: 2 };
+    const severityDiff = severityOrder[a.severity] - severityOrder[b.severity];
+    if (severityDiff !== 0) return severityDiff;
+
+    // Then by absolute amount change
+    const aChange = Math.abs(a.currentAmount - a.previousAmount);
+    const bChange = Math.abs(b.currentAmount - b.previousAmount);
+    return bChange - aChange;
+  });
+
+  // Limit to top 3 most significant anomalies to avoid overwhelming
+  return anomalies.slice(0, 3);
 }

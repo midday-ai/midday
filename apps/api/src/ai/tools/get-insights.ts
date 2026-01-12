@@ -182,6 +182,39 @@ export const getInsightsTool = tool({
         }
       }
 
+      // Expense category anomalies
+      if (insight.expenseAnomalies && insight.expenseAnomalies.length > 0) {
+        responseText += "### Expense Alerts\n";
+        for (const ea of insight.expenseAnomalies) {
+          const currentFormatted = formatMetricValue(
+            ea.currentAmount,
+            "currency",
+            currency,
+            locale,
+          );
+          const previousFormatted = formatMetricValue(
+            ea.previousAmount,
+            "currency",
+            currency,
+            locale,
+          );
+
+          if (ea.type === "new_category") {
+            responseText += `- **${ea.categoryName}** (NEW): ${currentFormatted} first-time spend\n`;
+          } else if (ea.type === "category_decrease") {
+            responseText += `- **${ea.categoryName}** decreased ${Math.abs(ea.change)}% (${previousFormatted} → ${currentFormatted})\n`;
+          } else {
+            // category_spike
+            responseText += `- **${ea.categoryName}** increased ${ea.change}% (${previousFormatted} → ${currentFormatted})\n`;
+          }
+
+          if (ea.tip) {
+            responseText += `  *Tip: ${ea.tip}*\n`;
+          }
+        }
+        responseText += "\n";
+      }
+
       yield { text: responseText };
 
       // Return structured data for potential UI rendering
@@ -197,6 +230,7 @@ export const getInsightsTool = tool({
           selectedMetrics: insight.selectedMetrics,
           content: insight.content,
           anomalies: insight.anomalies,
+          expenseAnomalies: insight.expenseAnomalies,
           milestones: insight.milestones,
           activity: insight.activity,
           generatedAt: insight.generatedAt,
@@ -252,11 +286,13 @@ function formatMetricValue(
   }
 
   // Currency metrics (default)
-  return formatAmount({
-    amount: value,
-    currency: currency || "USD",
-    locale,
-  });
+  return (
+    formatAmount({
+      amount: value,
+      currency: currency || "USD",
+      locale,
+    }) ?? value.toLocaleString(locale)
+  );
 }
 
 function formatChange(

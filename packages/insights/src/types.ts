@@ -18,6 +18,34 @@ export type MetricCategory =
 export type AnomalySeverity = "info" | "warning" | "alert";
 
 /**
+ * Category spending data from getSpending query
+ */
+export type CategorySpending = {
+  name: string;
+  slug: string;
+  amount: number;
+  currency: string;
+  color: string;
+  percentage: number;
+};
+
+/**
+ * Expense anomaly detected in category-level spending
+ */
+export type ExpenseAnomaly = {
+  type: "category_spike" | "new_category" | "category_decrease";
+  severity: AnomalySeverity;
+  categoryName: string;
+  categorySlug: string;
+  currentAmount: number;
+  previousAmount: number;
+  change: number; // percentage change
+  currency: string;
+  message: string;
+  tip?: string; // actionable tip for the user
+};
+
+/**
  * A calculated metric with comparison to previous period
  */
 export type InsightMetric = {
@@ -103,6 +131,8 @@ export type MetricData = {
   cashFlow: number;
   profitMargin: number;
   runwayMonths: number;
+  /** Per-category spending breakdown */
+  categorySpending?: CategorySpending[];
 };
 
 /**
@@ -137,6 +167,7 @@ export type InsightGenerationResult = {
   selectedMetrics: InsightMetric[];
   allMetrics: Record<string, InsightMetric>;
   anomalies: InsightAnomaly[];
+  expenseAnomalies: ExpenseAnomaly[];
   milestones: InsightMilestone[];
   activity: InsightActivity;
   content: InsightContent;
