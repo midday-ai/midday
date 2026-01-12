@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { endOfDay, startOfDay, subDays } from "date-fns";
 import { useRouter } from "next/navigation";
 import { BaseWidget } from "./base";
+import { WidgetSkeleton } from "./widget-skeleton";
 
 export function InboxWidget() {
   const trpc = useTRPC();
@@ -16,13 +17,24 @@ export function InboxWidget() {
   const { setChatId } = useChatInterface();
   const { currency } = useMetricsFilter();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getInboxStats.queryOptions({
       from: startOfDay(subDays(new Date(), 7)).toISOString(),
       to: endOfDay(new Date()).toISOString(),
       currency,
     }),
   });
+
+  if (isLoading) {
+    return (
+      <WidgetSkeleton
+        title="Inbox"
+        icon={<Icons.Inbox2 className="size-4" />}
+        descriptionLines={2}
+        showValue={false}
+      />
+    );
+  }
 
   const stats = data?.result;
 

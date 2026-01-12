@@ -11,6 +11,7 @@ import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSkeleton } from "./widget-skeleton";
 
 export function CategoryExpensesWidget() {
   const trpc = useTRPC();
@@ -20,7 +21,7 @@ export function CategoryExpensesWidget() {
   const { setChatId } = useChatInterface();
   const { from, to, period, currency } = useMetricsFilter();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getCategoryExpenses.queryOptions({
       from,
       to,
@@ -28,6 +29,17 @@ export function CategoryExpensesWidget() {
     }),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  if (isLoading) {
+    return (
+      <WidgetSkeleton
+        title="Category Expenses"
+        icon={<Icons.PieChart className="size-4" />}
+        descriptionLines={3}
+        showValue={false}
+      />
+    );
+  }
 
   const categoryData = data?.result;
   const categories = categoryData?.categories || [];

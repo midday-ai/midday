@@ -34,6 +34,7 @@ export default async function Overview(props: Props) {
     trpc.widgets.getWidgetPreferences.queryOptions(),
   );
 
+  // Prefetch suggested actions (widgets fetch client-side with their dynamic params)
   prefetch(trpc.suggestedActions.list.queryOptions({ limit: 6 }));
 
   const chat = currentChatId

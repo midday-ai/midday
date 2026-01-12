@@ -9,6 +9,7 @@ import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSkeleton } from "./widget-skeleton";
 
 export function CashFlowWidget() {
   const trpc = useTRPC();
@@ -18,7 +19,7 @@ export function CashFlowWidget() {
   const { setChatId } = useChatInterface();
   const { from, to, period, currency } = useMetricsFilter();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getCashFlow.queryOptions({
       from,
       to,
@@ -27,6 +28,16 @@ export function CashFlowWidget() {
     }),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  if (isLoading) {
+    return (
+      <WidgetSkeleton
+        title="Cash Flow"
+        icon={<Icons.Accounts className="size-4" />}
+        descriptionLines={2}
+      />
+    );
+  }
 
   const handleToolCall = (params: {
     toolName: string;

@@ -12,6 +12,7 @@ import { format, parseISO } from "date-fns";
 import { Line, LineChart, ResponsiveContainer } from "recharts";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSkeleton } from "./widget-skeleton";
 
 export function RevenueForecastWidget() {
   const trpc = useTRPC();
@@ -22,7 +23,7 @@ export function RevenueForecastWidget() {
 
   const forecastMonths = 6;
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.reports.revenueForecast.queryOptions({
       from,
       to,
@@ -32,6 +33,16 @@ export function RevenueForecastWidget() {
     }),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  if (isLoading) {
+    return (
+      <WidgetSkeleton
+        title="Forecast"
+        icon={<Icons.TrendingUp className="size-4" />}
+        descriptionLines={3}
+      />
+    );
+  }
 
   const handleToolCall = (params: {
     toolName: string;

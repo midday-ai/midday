@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSkeleton } from "./widget-skeleton";
 
 export function CustomerLifetimeValueWidget() {
   const trpc = useTRPC();
@@ -25,6 +26,16 @@ export function CustomerLifetimeValueWidget() {
     }),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  if (isLoading) {
+    return (
+      <WidgetSkeleton
+        title="Customer Lifetime Value"
+        icon={<Icons.Customers className="size-4" />}
+        descriptionLines={3}
+      />
+    );
+  }
 
   const handleToolCall = (params: {
     toolName: string;

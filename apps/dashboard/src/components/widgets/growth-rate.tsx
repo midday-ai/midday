@@ -7,6 +7,7 @@ import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSkeleton } from "./widget-skeleton";
 
 export function GrowthRateWidget() {
   const trpc = useTRPC();
@@ -15,7 +16,7 @@ export function GrowthRateWidget() {
   const { setChatId } = useChatInterface();
   const { from, to, period, revenueType, currency } = useMetricsFilter();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getGrowthRate.queryOptions({
       from,
       to,
@@ -26,6 +27,16 @@ export function GrowthRateWidget() {
     }),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  if (isLoading) {
+    return (
+      <WidgetSkeleton
+        title="Growth Rate"
+        icon={<Icons.ShowChart className="size-4" />}
+        descriptionLines={2}
+      />
+    );
+  }
 
   const handleToolCall = (params: {
     toolName: string;

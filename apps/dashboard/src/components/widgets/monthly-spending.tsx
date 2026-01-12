@@ -10,6 +10,7 @@ import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSkeleton } from "./widget-skeleton";
 
 export function MonthlySpendingWidget() {
   const trpc = useTRPC();
@@ -18,13 +19,22 @@ export function MonthlySpendingWidget() {
   const { setChatId } = useChatInterface();
   const { from, to, period, currency } = useMetricsFilter();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getMonthlySpending.queryOptions({
       from,
       to,
     }),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  if (isLoading) {
+    return (
+      <WidgetSkeleton
+        title="Monthly Spending"
+        icon={<Icons.Transactions className="size-4" />}
+      />
+    );
+  }
 
   const spending = data?.result;
 
