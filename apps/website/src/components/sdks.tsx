@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
@@ -9,6 +9,69 @@ import { MaterialIcon } from "./homepage/icon-mapping";
 import Link from "next/link";
 
 type SDKTab = "typescript" | "go" | "php" | "python";
+
+function ScrambledText() {
+  const [tick, setTick] = useState(0);
+  const chars = 'ABCDEF0123456789';
+  const cols = 8;
+  const rows = 4;
+  const charCount = cols * rows; // 32 characters
+
+  // Pre-compute random seeds for each character position (stable across renders)
+  const charSeeds = useMemo(() => 
+    Array.from({ length: charCount }, () => Math.floor(Math.random() * 1000)),
+    [charCount]
+  );
+
+  useEffect(() => {
+    // Single interval with requestAnimationFrame for smoother updates
+    let animationFrameId: number;
+    let lastUpdate = 0;
+    const updateInterval = 200; // Update every 200ms
+
+    const update = (timestamp: number) => {
+      if (timestamp - lastUpdate >= updateInterval) {
+        setTick((prev) => prev + 1);
+        lastUpdate = timestamp;
+      }
+      animationFrameId = requestAnimationFrame(update);
+    };
+
+    animationFrameId = requestAnimationFrame(update);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  // Deterministic character generation - only recalculates when tick changes
+  const scrambledChars = useMemo(() => {
+    return Array.from({ length: charCount }, (_, i) => {
+      // Each character scrambles at different rates based on its seed
+      const charTick = Math.floor(tick / (1 + (charSeeds[i] % 3)));
+      const charIndex = (i * 7 + charTick * 11 + charSeeds[i]) % chars.length;
+      return chars[charIndex];
+    });
+  }, [tick, charCount, charSeeds, chars]);
+
+  return (
+    <div className="mb-8 relative">
+      <div className="grid grid-cols-8 gap-y-2 sm:gap-y-3 max-w-xs mx-auto relative" style={{ columnGap: 0 }}>
+        {/* Gradient fade masks */}
+        <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+        <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+        {scrambledChars.map((char, i) => (
+          <span
+            key={i}
+            className="font-mono text-sm sm:text-base text-muted-foreground opacity-60 group-hover:opacity-80 transition-opacity duration-300 text-center"
+          >
+            {char}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function CodeBlock({ code, language }: { code: string; language?: string }) {
   const [copied, setCopied] = useState(false);
@@ -545,44 +608,58 @@ transactions = midday.transactions.list()`} />
       </div>
 
       {/* What You Can Build Section */}
-      <section className="bg-background py-12 sm:py-16 lg:py-20">
+      <section className="bg-background py-12 sm:py-16 lg:py-24">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-8">
-          <div className="text-center space-y-8 max-w-3xl mx-auto">
+          <div className="text-center space-y-4 mb-12">
             <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
               Build real financial workflows
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-left">
-              <div className="space-y-2">
-                <h3 className="font-sans text-base text-foreground">
-                  Sync and analyze transactions
-                </h3>
-                <p className="font-sans text-sm text-muted-foreground">
-                  Access transaction data programmatically and build custom analysis tools.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <h3 className="font-sans text-base text-foreground">
-                  Build dashboards and reports
-                </h3>
-                <p className="font-sans text-sm text-muted-foreground">
-                  Create custom financial dashboards tailored to your needs.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <h3 className="font-sans text-base text-foreground">
-                  Power internal tools with financial data
-                </h3>
-                <p className="font-sans text-sm text-muted-foreground">
-                  Integrate financial data into your existing tools and workflows.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <h3 className="font-sans text-base text-foreground">
-                  Automate accounting-ready exports
-                </h3>
-                <p className="font-sans text-sm text-muted-foreground">
-                  Generate formatted exports ready for your accounting software.
-                </p>
+            <p className="hidden sm:block font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
+              Use Midday SDKs to integrate financial data, insights, and workflows into your product.
+            </p>
+          </div>
+
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-secondary border border-border p-6 relative">
+              <div className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+                    <MaterialIcon name="check" className="text-foreground" size={14} />
+                  </div>
+                  <span className="font-sans text-sm text-foreground">
+                    <span className="sm:hidden">Sync and analyze transactions</span>
+                    <span className="hidden sm:inline">Sync and analyze transactions programmatically and build custom analysis tools</span>
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+                    <MaterialIcon name="check" className="text-foreground" size={14} />
+                  </div>
+                  <span className="font-sans text-sm text-foreground">
+                    <span className="sm:hidden">Build dashboards and reports</span>
+                    <span className="hidden sm:inline">Build dashboards and reports tailored to your needs</span>
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+                    <MaterialIcon name="check" className="text-foreground" size={14} />
+                  </div>
+                  <span className="font-sans text-sm text-foreground">
+                    Power internal tools with financial data and integrate into existing workflows
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+                    <MaterialIcon name="check" className="text-foreground" size={14} />
+                  </div>
+                  <span className="font-sans text-sm text-foreground">
+                    <span className="sm:hidden">Automate accounting-ready exports</span>
+                    <span className="hidden sm:inline">Automate accounting-ready exports for your accounting software</span>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -595,9 +672,11 @@ transactions = midday.transactions.list()`} />
       </div>
 
       {/* Security Section */}
-      <section className="bg-background py-12 sm:py-16 lg:py-20">
+      <section className="bg-background py-12 sm:py-16 lg:py-20 group">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-8">
           <div className="text-center space-y-4 max-w-2xl mx-auto">
+            {/* Cryptographic Text */}
+            <ScrambledText />
             <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
               Secure by default
             </h2>
@@ -626,7 +705,7 @@ transactions = midday.transactions.list()`} />
                 className="bg-secondary border border-border p-6 hover:border-foreground/20 transition-colors group flex flex-col items-center text-center"
               >
                 <div className="mb-4 flex items-center justify-center">
-                  <MaterialIcon name="play_arrow" className="text-muted-foreground group-hover:text-foreground transition-colors" size={20} />
+                  <MaterialIcon name="timer" className="text-muted-foreground group-hover:text-foreground transition-colors" size={20} />
                 </div>
                 <h3 className="font-sans text-base text-foreground mb-2 group-hover:text-foreground">
                   Quickstart
@@ -654,7 +733,7 @@ transactions = midday.transactions.list()`} />
                 className="bg-secondary border border-border p-6 hover:border-foreground/20 transition-colors group flex flex-col items-center text-center"
               >
                 <div className="mb-4 flex items-center justify-center">
-                  <MaterialIcon name="open_in_new" className="text-muted-foreground group-hover:text-foreground transition-colors" size={20} />
+                  <MaterialIcon name="link" className="text-muted-foreground group-hover:text-foreground transition-colors" size={20} />
                 </div>
                 <h3 className="font-sans text-base text-foreground mb-2 group-hover:text-foreground">
                   API reference
