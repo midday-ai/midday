@@ -7,6 +7,9 @@ import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { MaterialIcon } from "./homepage/icon-mapping";
 import Link from "next/link";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { useTheme } from "next-themes";
 
 type SDKTab = "typescript" | "go" | "php";
 
@@ -73,8 +76,16 @@ function ScrambledText() {
   );
 }
 
-function CodeBlock({ code, language }: { code: string; language?: string }) {
+function CodeBlock({ code, language = "typescript" }: { code: string; language?: string }) {
   const [copied, setCopied] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = mounted && resolvedTheme === "dark";
 
   const handleCopy = async () => {
     try {
@@ -87,22 +98,44 @@ function CodeBlock({ code, language }: { code: string; language?: string }) {
     }
   };
 
+  // Map language for syntax highlighter
+  const highlightLanguage = language === "bash" || language === "shell" ? "bash" : 
+                            language === "javascript" ? "javascript" :
+                            language === "typescript" ? "typescript" :
+                            language === "go" ? "go" :
+                            language === "php" ? "php" : "typescript";
+
   return (
-      <div className="relative group">
-      <div className="bg-secondary border border-border p-4 rounded-none overflow-x-auto">
-        <pre className="font-mono text-sm text-muted-foreground whitespace-pre">
-          <code>{code}</code>
-        </pre>
+    <div className="relative group">
+      <div className="bg-secondary border border-border rounded-none overflow-hidden">
+        {/* @ts-expect-error - SyntaxHighlighter types */}
+        <SyntaxHighlighter
+          language={highlightLanguage}
+          style={isDark ? oneDark : oneLight}
+          customStyle={{
+            margin: 0,
+            padding: "1rem",
+            fontSize: "0.875rem",
+            background: "transparent",
+            fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
+          }}
+          codeTagProps={{
+            className: "font-mono",
+          }}
+          PreTag="div"
+        >
+          {code}
+        </SyntaxHighlighter>
       </div>
       <button
         onClick={handleCopy}
-        className="absolute top-2 right-2 p-2 text-muted-foreground hover:text-foreground transition-colors opacity-0 group-hover:opacity-100"
+        className="absolute top-3 right-3 p-1.5 bg-background/80 backdrop-blur-sm border border-border text-muted-foreground hover:text-foreground hover:bg-background transition-colors opacity-0 group-hover:opacity-100 rounded-none"
         aria-label="Copy code"
       >
         {copied ? (
-          <Icons.Check size={16} className="text-foreground" />
+          <Icons.Check size={14} className="text-foreground" />
         ) : (
-          <Icons.Copy size={16} />
+          <Icons.Copy size={14} />
         )}
       </button>
     </div>
@@ -392,10 +425,10 @@ export function SDKs() {
                   <div>
                     <p className="font-sans text-sm text-foreground mb-2">Install:</p>
                     <div className="space-y-2">
-                      <CodeBlock code="npm install @midday-ai/sdk" />
-                      <CodeBlock code="bun add @midday-ai/sdk" />
-                      <CodeBlock code="pnpm add @midday-ai/sdk" />
-                      <CodeBlock code="yarn add @midday-ai/sdk" />
+                      <CodeBlock code="npm install @midday-ai/sdk" language="bash" />
+                      <CodeBlock code="bun add @midday-ai/sdk" language="bash" />
+                      <CodeBlock code="pnpm add @midday-ai/sdk" language="bash" />
+                      <CodeBlock code="yarn add @midday-ai/sdk" language="bash" />
                     </div>
                   </div>
 
@@ -422,7 +455,7 @@ async function run() {
   console.log(result);
 }
 
-run();`} />
+run();`} language="typescript" />
                   </div>
                 </div>
 
@@ -461,7 +494,7 @@ run();`} />
               <div className="space-y-4">
                 <div>
                   <p className="font-sans text-sm text-foreground mb-2">Install:</p>
-                  <CodeBlock code="go get github.com/midday-ai/midday-go" />
+                  <CodeBlock code="go get github.com/midday-ai/midday-go" language="bash" />
                 </div>
 
                 <div>
@@ -491,7 +524,7 @@ func main() {
 	if res.Object != nil {
 		// handle response
 	}
-}`} />
+}`} language="go" />
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -529,7 +562,7 @@ func main() {
               <div className="space-y-4">
                 <div>
                   <p className="font-sans text-sm text-foreground mb-2">Install:</p>
-                  <CodeBlock code="composer require midday-ai/midday-php" />
+                  <CodeBlock code="composer require midday-ai/midday-php" language="bash" />
                 </div>
 
                 <div>
@@ -557,7 +590,7 @@ $response = $sdk->transactions->list(
 
 if ($response->object !== null) {
     // handle response
-}`} />
+}`} language="php" />
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
