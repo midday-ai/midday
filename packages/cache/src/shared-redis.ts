@@ -5,7 +5,6 @@ let sharedRedisClient: RedisClientType | null = null;
 /**
  * Get or create a shared Redis client instance
  * This ensures we reuse the same connection for both cache and memory providers
- * The client will auto-connect when methods are called, so it's safe to use immediately
  */
 export function getSharedRedisClient(): RedisClientType {
   if (sharedRedisClient) {
@@ -23,22 +22,34 @@ export function getSharedRedisClient(): RedisClientType {
 
   sharedRedisClient = createClient({
     url: redisUrl,
-    pingInterval: 4 * 60 * 1000, // 4-minute ping interval
+    pingInterval: 60 * 1000, // 1-minute ping to detect stale connections
     socket: {
-      family: isProduction ? 6 : 4, // IPv6 for Fly.io production, IPv4 for local
-      connectTimeout: isProduction ? 15000 : 5000,
+      family: isProduction ? 6 : 4, // IPv6 for Fly.io 6PN internal network
+      connectTimeout: isProduction ? 10000 : 5000,
+      keepAlive: true, // TCP keepalive for connection health
+      noDelay: true, // Disable Nagle's algorithm for lower latency
+      reconnectStrategy: (retries) => {
+        // Exponential backoff: 100ms, 200ms, 400ms... max 3s
+        const delay = Math.min(100 * 2 ** retries, 3000);
+        console.log(
+          `[Redis] Reconnecting in ${delay}ms (attempt ${retries + 1})`,
+        );
+        return delay;
+      },
     },
   });
 
-  // Event listeners
   sharedRedisClient.on("error", (err) => {
-    console.error("[Shared Redis] Error:", err);
+    console.error("[Redis] Error:", err.message);
   });
 
-  // Start connection in background (don't await)
-  // The client will auto-connect when methods are called
+  sharedRedisClient.on("reconnecting", () => {
+    console.log("[Redis] Reconnecting...");
+  });
+
+  // Connect immediately - redis v4+ requires explicit connect()
   sharedRedisClient.connect().catch((err) => {
-    console.error("[Shared Redis] Connection error:", err);
+    console.error("[Redis] Initial connection error:", err.message);
   });
 
   return sharedRedisClient;

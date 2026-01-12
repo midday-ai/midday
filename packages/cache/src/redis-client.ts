@@ -1,4 +1,3 @@
-import type { RedisClientType } from "redis";
 import { getSharedRedisClient } from "./shared-redis";
 
 export class RedisCache {
@@ -10,7 +9,8 @@ export class RedisCache {
     this.defaultTTL = defaultTTL;
   }
 
-  private getRedisClient(): RedisClientType {
+  // Get client lazily - allows picking up reconnected clients
+  private get redis() {
     return getSharedRedisClient();
   }
 
@@ -25,11 +25,10 @@ export class RedisCache {
     }
   }
 
-  private stringifyValue(value: any): string {
+  private stringifyValue(value: unknown): string {
     if (typeof value === "string") {
       return value;
     }
-
     return JSON.stringify(value);
   }
 
@@ -39,8 +38,7 @@ export class RedisCache {
 
   async get<T>(key: string): Promise<T | undefined> {
     try {
-      const redis = this.getRedisClient();
-      const value = await redis.get(this.getKey(key));
+      const value = await this.redis.get(this.getKey(key));
       return this.parseValue<T>(value);
     } catch (error) {
       console.error(
@@ -51,16 +49,16 @@ export class RedisCache {
     }
   }
 
-  async set(key: string, value: any, ttlSeconds?: number): Promise<void> {
+  async set(key: string, value: unknown, ttlSeconds?: number): Promise<void> {
     try {
-      const redis = this.getRedisClient();
       const serializedValue = this.stringifyValue(value);
       const redisKey = this.getKey(key);
       const ttl = ttlSeconds ?? this.defaultTTL;
 
-      await redis.set(redisKey, serializedValue);
       if (ttl > 0) {
-        await redis.expire(redisKey, ttl);
+        await this.redis.setEx(redisKey, ttl, serializedValue);
+      } else {
+        await this.redis.set(redisKey, serializedValue);
       }
     } catch (error) {
       console.error(
@@ -72,8 +70,7 @@ export class RedisCache {
 
   async delete(key: string): Promise<void> {
     try {
-      const redis = this.getRedisClient();
-      await redis.del(this.getKey(key));
+      await this.redis.del(this.getKey(key));
     } catch (error) {
       console.error(
         `Redis delete error for ${this.prefix} cache, key "${key}":`,
@@ -84,8 +81,7 @@ export class RedisCache {
 
   async healthCheck(): Promise<void> {
     try {
-      const redis = this.getRedisClient();
-      await redis.ping();
+      await this.redis.ping();
     } catch (error) {
       throw new Error(`Redis health check failed: ${error}`);
     }

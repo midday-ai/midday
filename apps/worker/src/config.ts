@@ -29,25 +29,56 @@ function parseRedisUrl() {
 /**
  * Get Redis connection options for BullMQ queues and workers
  * BullMQ will create its own connection with these options
+ *
+ * Based on BullMQ recommended settings:
+ * - maxRetriesPerRequest: null (required for Workers)
+ * - retryStrategy: exponential backoff (min 1s, max 20s)
+ * - enableOfflineQueue: true (Workers need to wait for reconnection)
+ * - reconnectOnError: auto-reconnect on READONLY (cluster failover)
+ *
+ * @see https://docs.bullmq.io/guide/going-to-production
  */
 export function getRedisConnection() {
   const baseOptions = parseRedisUrl();
 
   return {
     ...baseOptions,
-    // BullMQ required settings
-    maxRetriesPerRequest: null,
+    // BullMQ required settings for Workers
+    maxRetriesPerRequest: null, // Required: retry indefinitely for Workers
     enableReadyCheck: false,
     // Network settings
     lazyConnect: false,
     family: isProduction ? 6 : 4, // IPv6 for Fly.io production, IPv4 for local
-    keepAlive: 30000,
-    // Production settings
-    ...(isProduction && {
-      connectTimeout: 15000,
-      retryStrategy: (times: number) => Math.min(times * 50, 2000),
-      enableOfflineQueue: false,
-    }),
+    keepAlive: 30000, // TCP keep-alive every 30s
+    connectTimeout: isProduction ? 15000 : 5000,
+    // BullMQ recommended retry strategy: exponential backoff
+    // 1s, 2s, 4s, 8s, 16s, then capped at 20s
+    retryStrategy: (times: number) => {
+      const delay = Math.min(1000 * 2 ** times, 20000);
+      if (times > 5) {
+        console.log(
+          `[Redis/Worker] Reconnecting in ${delay}ms (attempt ${times})`,
+        );
+      }
+      return delay;
+    },
+    // Auto-reconnect on errors that indicate failover/upgrade
+    // READONLY: Redis is in replica mode during failover/upgrade
+    // ETIMEDOUT/timed out: Connection or script timed out (can happen during failover)
+    reconnectOnError: (err: Error) => {
+      const msg = err.message;
+      if (msg.includes("READONLY")) {
+        console.log(
+          "[Redis/Worker] READONLY error detected (server upgrade/failover), reconnecting",
+        );
+        return true;
+      }
+      if (msg.includes("timed out") || msg.includes("ETIMEDOUT")) {
+        console.log("[Redis/Worker] Timeout error detected, reconnecting");
+        return true;
+      }
+      return false;
+    },
   };
 }
 
