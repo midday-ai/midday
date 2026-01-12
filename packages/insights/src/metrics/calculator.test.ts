@@ -40,7 +40,7 @@ describe("calculatePercentageChange", () => {
   });
 
   it("should handle small decimal values", () => {
-    const result = calculatePercentageChange(0.12, 0.10);
+    const result = calculatePercentageChange(0.12, 0.1);
     expect(result).toBeCloseTo(20, 1);
   });
 

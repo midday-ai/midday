@@ -3,15 +3,17 @@
  */
 import {
   CORE_FINANCIAL_METRICS,
-  type MetricDefinition,
   METRIC_DEFINITIONS,
+  type MetricDefinition,
 } from "../constants";
 import type { MetricCategory } from "../types";
 
 /**
  * Get a metric definition by type
  */
-export function getMetricDefinition(type: string): MetricDefinition | undefined {
+export function getMetricDefinition(
+  type: string,
+): MetricDefinition | undefined {
   return METRIC_DEFINITIONS.find((d) => d.type === type);
 }
 

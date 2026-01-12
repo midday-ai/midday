@@ -7,7 +7,7 @@ import type { InsightMetric } from "@midday/db/schema";
 import {
   type PeriodType,
   createInsightsService,
-  getPreviousCompletePeriod,
+  getPeriodInfo,
 } from "@midday/insights";
 import { triggerJob } from "@midday/job-client";
 import type { Job } from "bullmq";
@@ -74,8 +74,8 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
       };
     }
 
-    // Get period info
-    const period = getPreviousCompletePeriod(periodType);
+    // Get period info from the job payload (not recalculated from current date)
+    const period = getPeriodInfo(periodType, periodYear, periodNumber);
 
     // Create or update insight record with "generating" status
     let insightId: string;

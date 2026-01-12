@@ -961,6 +961,53 @@ export async function getUpcomingDueRecurring(
 }
 
 /**
+ * Get upcoming recurring invoices for a specific team before a given date
+ * Used by insights to show upcoming recurring invoices for a team
+ *
+ * @param db - Database instance
+ * @param params.teamId - Team ID to filter by
+ * @param params.before - Only include invoices scheduled before this date
+ * @param params.limit - Maximum number of records to return (default: 10)
+ * @returns Array of upcoming recurring invoices for the team
+ */
+export async function getUpcomingDueRecurringByTeam(
+  db: Database,
+  params: {
+    teamId: string;
+    before: Date;
+    limit?: number;
+  },
+) {
+  const { teamId, before, limit = 10 } = params;
+  const now = new Date();
+
+  const data = await db
+    .select({
+      id: invoiceRecurring.id,
+      teamId: invoiceRecurring.teamId,
+      customerId: invoiceRecurring.customerId,
+      customerName: invoiceRecurring.customerName,
+      frequency: invoiceRecurring.frequency,
+      nextScheduledAt: invoiceRecurring.nextScheduledAt,
+      amount: invoiceRecurring.amount,
+      currency: invoiceRecurring.currency,
+    })
+    .from(invoiceRecurring)
+    .where(
+      and(
+        eq(invoiceRecurring.teamId, teamId),
+        eq(invoiceRecurring.status, "active"),
+        gt(invoiceRecurring.nextScheduledAt, now.toISOString()),
+        lte(invoiceRecurring.nextScheduledAt, before.toISOString()),
+      ),
+    )
+    .orderBy(invoiceRecurring.nextScheduledAt)
+    .limit(limit);
+
+  return data;
+}
+
+/**
  * Mark that the upcoming notification has been sent for a recurring invoice series
  */
 export async function markUpcomingNotificationSent(

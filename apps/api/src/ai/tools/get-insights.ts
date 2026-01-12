@@ -1,6 +1,10 @@
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { db } from "@midday/db/client";
-import { getInsightByPeriod, getLatestInsight } from "@midday/db/queries";
+import {
+  type Insight,
+  getInsightByPeriod,
+  getLatestInsight,
+} from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
 import { tool } from "ai";
 import { getISOWeek, getMonth, getQuarter, getYear } from "date-fns";
@@ -22,7 +26,10 @@ export const getInsightsTool = tool({
   description:
     "Get AI-generated business insights summary for a period (weekly, monthly, quarterly, or yearly). Shows key metrics with comparisons, achievements, and personalized recommendations.",
   inputSchema: getInsightsSchema,
-  execute: async function* ({ periodType, periodNumber, year }, executionOptions) {
+  execute: async function* (
+    { periodType, periodNumber, year },
+    executionOptions,
+  ) {
     const appContext = executionOptions.experimental_context as AppContext;
     const teamId = appContext.teamId as string;
 
@@ -34,7 +41,7 @@ export const getInsightsTool = tool({
     }
 
     try {
-      let insight;
+      let insight: Insight | null = null;
 
       // If specific period requested, fetch it
       if (periodNumber && year) {
@@ -53,9 +60,8 @@ export const getInsightsTool = tool({
       }
 
       if (!insight || insight.status !== "completed") {
-        const periodName = periodType === "weekly" ? "week" : periodType.replace("ly", "");
         yield {
-          text: `No ${periodName}ly insights available yet. Insights are generated automatically and will appear here once ready.`,
+          text: `No ${periodType} insights available yet. Insights are generated automatically and will appear here once ready.`,
         };
         return { success: false, reason: "not_found" };
       }
@@ -81,8 +87,16 @@ export const getInsightsTool = tool({
         responseText += "|--------|-------|-------------|\n";
 
         for (const metric of insight.selectedMetrics) {
-          const formattedValue = formatMetricValue(metric.value, metric.type, currency, locale);
-          const changeText = formatChange(metric.change, metric.changeDirection);
+          const formattedValue = formatMetricValue(
+            metric.value,
+            metric.type,
+            currency,
+            locale,
+          );
+          const changeText = formatChange(
+            metric.change,
+            metric.changeDirection,
+          );
           responseText += `| ${metric.label} | ${formattedValue} | ${changeText} |\n`;
         }
         responseText += "\n";
@@ -94,7 +108,10 @@ export const getInsightsTool = tool({
       }
 
       // Upcoming invoices section
-      if (insight.activity?.upcomingInvoices && insight.activity.upcomingInvoices.count > 0) {
+      if (
+        insight.activity?.upcomingInvoices &&
+        insight.activity.upcomingInvoices.count > 0
+      ) {
         const upcoming = insight.activity.upcomingInvoices;
         responseText += "### Upcoming Invoices\n";
         responseText += `You have **${upcoming.count}** recurring invoice${upcoming.count > 1 ? "s" : ""} scheduled in the next 7 days`;
@@ -105,7 +122,12 @@ export const getInsightsTool = tool({
 
         if (upcoming.items && upcoming.items.length > 0) {
           for (const item of upcoming.items.slice(0, 3)) {
-            const amountStr = formatMetricValue(item.amount, "currency", currency, locale);
+            const amountStr = formatMetricValue(
+              item.amount,
+              "currency",
+              currency,
+              locale,
+            );
             responseText += `- **${item.customerName}**: ${amountStr}`;
             if (item.frequency) {
               responseText += ` (${item.frequency})`;
@@ -120,7 +142,10 @@ export const getInsightsTool = tool({
       }
 
       // Overdue invoices alert
-      if (insight.activity?.invoicesOverdue && insight.activity.invoicesOverdue > 0) {
+      if (
+        insight.activity?.invoicesOverdue &&
+        insight.activity.invoicesOverdue > 0
+      ) {
         responseText += "### Needs Attention\n";
         responseText += `You have **${insight.activity.invoicesOverdue}** overdue invoice${insight.activity.invoicesOverdue > 1 ? "s" : ""}`;
         if (insight.activity.overdueAmount) {
@@ -193,7 +218,11 @@ function formatMetricValue(
   locale: string,
 ): string {
   // Percentage metrics
-  if (type.includes("margin") || type.includes("rate") || type === "profit_margin") {
+  if (
+    type.includes("margin") ||
+    type.includes("rate") ||
+    type === "profit_margin"
+  ) {
     return `${value.toFixed(1)}%`;
   }
 
@@ -202,7 +231,11 @@ function formatMetricValue(
     return `${value.toFixed(1)} months`;
   }
 
-  if (type === "hours_tracked" || type === "billable_hours") {
+  if (
+    type === "hours_tracked" ||
+    type === "billable_hours" ||
+    type === "unbilled_hours"
+  ) {
     return `${value.toFixed(1)}h`;
   }
 
@@ -211,16 +244,25 @@ function formatMetricValue(
     type.includes("invoices") ||
     type.includes("customers") ||
     type === "new_customers" ||
-    type === "active_customers"
+    type === "active_customers" ||
+    type === "receipts_matched" ||
+    type === "transactions_categorized"
   ) {
     return value.toLocaleString(locale);
   }
 
   // Currency metrics (default)
-  return formatAmount({ amount: value, currency, locale });
+  return formatAmount({
+    amount: value,
+    currency: currency || "USD",
+    locale,
+  });
 }
 
-function formatChange(change: number, direction: "up" | "down" | "flat"): string {
+function formatChange(
+  change: number,
+  direction: "up" | "down" | "flat",
+): string {
   if (direction === "flat" || Math.abs(change) < 0.5) {
     return "→ stable";
   }
@@ -231,7 +273,10 @@ function formatChange(change: number, direction: "up" | "down" | "flat"): string
 }
 
 // Helper to get current period info
-export function getCurrentPeriodInfo(periodType: string): { year: number; number: number } {
+export function getCurrentPeriodInfo(periodType: string): {
+  year: number;
+  number: number;
+} {
   const now = new Date();
   const year = getYear(now);
 

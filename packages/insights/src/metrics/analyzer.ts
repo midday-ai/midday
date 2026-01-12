@@ -21,7 +21,10 @@ function scoreMetric(metric: InsightMetric): number {
   const priority = definition?.priority ?? 3;
 
   // 1. Base priority score (25 points max - priority 1 = 25, priority 4 = 10)
-  score += Math.max(10, SCORING_WEIGHTS.basePriority - priority * SCORING_WEIGHTS.priorityDecrement);
+  score += Math.max(
+    10,
+    SCORING_WEIGHTS.basePriority - priority * SCORING_WEIGHTS.priorityDecrement,
+  );
 
   // 2. Has meaningful data (25 points)
   if (metric.value !== 0 || metric.previousValue !== 0) {
@@ -48,7 +51,10 @@ function scoreMetric(metric: InsightMetric): number {
   if (metric.type === "net_profit" && metric.value < 0) {
     score += SCORING_WEIGHTS.anomalyBoost;
   }
-  if (metric.type === "cash_flow" && metric.value < ANOMALY_THRESHOLDS.negativeCashFlow) {
+  if (
+    metric.type === "cash_flow" &&
+    metric.value < ANOMALY_THRESHOLDS.negativeCashFlow
+  ) {
     score += SCORING_WEIGHTS.anomalyBoost;
   }
 
@@ -169,7 +175,9 @@ export function detectAnomalies(
       anomalies.push({
         type: "low_runway",
         severity:
-          metric.value < ANOMALY_THRESHOLDS.runwayCritical ? "alert" : "warning",
+          metric.value < ANOMALY_THRESHOLDS.runwayCritical
+            ? "alert"
+            : "warning",
         message: `Runway is ${metric.value.toFixed(1)} months`,
         metricType: metric.type,
       });

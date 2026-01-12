@@ -105,7 +105,9 @@ export function getPeriodInfo(
       // Create a date in the given week
       const jan1 = new Date(periodYear, 0, 1);
       const daysOffset = (periodNumber - 1) * 7;
-      const weekDate = new Date(jan1.getTime() + daysOffset * 24 * 60 * 60 * 1000);
+      const weekDate = new Date(
+        jan1.getTime() + daysOffset * 24 * 60 * 60 * 1000,
+      );
       const start = startOfWeek(weekDate, { weekStartsOn: 1 });
       const end = endOfWeek(weekDate, { weekStartsOn: 1 });
       return {
@@ -163,18 +165,8 @@ export function getPreviousPeriod(
   periodType: PeriodType,
   currentPeriod: PeriodInfo,
 ): PeriodInfo {
-  switch (periodType) {
-    case "weekly":
-      return getPreviousCompletePeriod("weekly", subWeeks(currentPeriod.periodStart, 1));
-    case "monthly":
-      return getPreviousCompletePeriod("monthly", subMonths(currentPeriod.periodStart, 1));
-    case "quarterly":
-      return getPreviousCompletePeriod("quarterly", subQuarters(currentPeriod.periodStart, 1));
-    case "yearly":
-      return getPreviousCompletePeriod("yearly", subYears(currentPeriod.periodStart, 1));
-    default:
-      throw new Error(`Unknown period type: ${periodType}`);
-  }
+  // Pass periodStart directly - getPreviousCompletePeriod handles the subtraction internally
+  return getPreviousCompletePeriod(periodType, currentPeriod.periodStart);
 }
 
 /**
