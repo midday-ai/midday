@@ -263,77 +263,60 @@ export function SDKs() {
       <section id="sdk-tabs" className="bg-background py-12 sm:py-16 lg:py-20">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-8">
           {/* Tabs */}
-          <div className="flex justify-center mb-12">
-            <div
-              className="relative flex items-stretch bg-muted"
-              style={{ width: 'fit-content' }}
-            >
-              <div className="flex items-stretch">
-                <button
-                  onClick={() => setActiveTab("typescript")}
-                  className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none font-sans ${
-                    activeTab === "typescript"
-                      ? "text-foreground bg-background border-border"
-                      : "text-muted-foreground hover:text-foreground bg-muted border-transparent"
-                  }`}
-                  style={{
-                    WebkitTapHighlightColor: 'transparent',
-                    marginBottom: activeTab === "typescript" ? '-1px' : '0px',
-                    position: 'relative',
-                    zIndex: activeTab === "typescript" ? 10 : 1,
-                  }}
-                >
-                  <span>TypeScript</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab("go")}
-                  className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none font-sans ${
-                    activeTab === "go"
-                      ? "text-foreground bg-background border-border"
-                      : "text-muted-foreground hover:text-foreground bg-muted border-transparent"
-                  }`}
-                  style={{
-                    WebkitTapHighlightColor: 'transparent',
-                    marginBottom: activeTab === "go" ? '-1px' : '0px',
-                    position: 'relative',
-                    zIndex: activeTab === "go" ? 10 : 1,
-                  }}
-                >
-                  <span>Go</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab("php")}
-                  className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none font-sans ${
-                    activeTab === "php"
-                      ? "text-foreground bg-background border-border"
-                      : "text-muted-foreground hover:text-foreground bg-muted border-transparent"
-                  }`}
-                  style={{
-                    WebkitTapHighlightColor: 'transparent',
-                    marginBottom: activeTab === "php" ? '-1px' : '0px',
-                    position: 'relative',
-                    zIndex: activeTab === "php" ? 10 : 1,
-                  }}
-                >
-                  <span>PHP</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab("python")}
-                  className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none font-sans ${
-                    activeTab === "python"
-                      ? "text-foreground bg-background border-border"
-                      : "text-muted-foreground hover:text-foreground bg-muted border-transparent"
-                  }`}
-                  style={{
-                    WebkitTapHighlightColor: 'transparent',
-                    marginBottom: activeTab === "python" ? '-1px' : '0px',
-                    position: 'relative',
-                    zIndex: activeTab === "python" ? 10 : 1,
-                  }}
-                >
-                  <span>Python</span>
-                </button>
-              </div>
+          <div className="mb-12">
+            <div className="flex flex-wrap justify-center gap-2 border-b border-border">
+              <button
+                onClick={() => setActiveTab("typescript")}
+                className={`px-4 py-2 text-sm font-sans transition-colors relative ${
+                  activeTab === "typescript"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                TypeScript
+                {activeTab === "typescript" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground -mb-[2px]" />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab("go")}
+                className={`px-4 py-2 text-sm font-sans transition-colors relative ${
+                  activeTab === "go"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Go
+                {activeTab === "go" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground -mb-[2px]" />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab("php")}
+                className={`px-4 py-2 text-sm font-sans transition-colors relative ${
+                  activeTab === "php"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                PHP
+                {activeTab === "php" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground -mb-[2px]" />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab("python")}
+                className={`px-4 py-2 text-sm font-sans transition-colors relative ${
+                  activeTab === "python"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Python
+                {activeTab === "python" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground -mb-[2px]" />
+                )}
+              </button>
             </div>
           </div>
 
