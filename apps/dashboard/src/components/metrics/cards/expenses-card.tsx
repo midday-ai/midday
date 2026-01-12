@@ -4,7 +4,6 @@ import { AnimatedNumber } from "@/components/animated-number";
 import { StackedBarChart } from "@/components/charts/stacked-bar-chart";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
-import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useChatStore } from "@/store/chat";
 import { useTRPC } from "@/trpc/client";
 import { generateChartSelectionMessage } from "@/utils/chart-selection-message";
@@ -31,7 +30,6 @@ export function ExpensesCard({
   wiggleClass,
 }: ExpensesCardProps) {
   const trpc = useTRPC();
-  const { isMetricsTab } = useOverviewTab();
   const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
     useMetricsCustomize();
   const setInput = useChatStore((state) => state.setInput);
@@ -43,14 +41,13 @@ export function ExpensesCard({
     disabled: metricsIsCustomizing || isSelecting,
   });
 
-  const { data: expenseData } = useQuery({
-    ...trpc.reports.expense.queryOptions({
+  const { data: expenseData } = useQuery(
+    trpc.reports.expense.queryOptions({
       from,
       to,
       currency: currency,
     }),
-    enabled: isMetricsTab,
-  });
+  );
 
   const averageExpense = expenseData?.summary?.averageExpense ?? 0;
 

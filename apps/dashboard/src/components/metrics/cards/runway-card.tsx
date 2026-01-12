@@ -3,7 +3,6 @@
 import { RunwayChart } from "@/components/charts/runway-chart";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
-import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useUserQuery } from "@/hooks/use-user";
 import { useChatStore } from "@/store/chat";
 import { useTRPC } from "@/trpc/client";
@@ -27,7 +26,6 @@ interface RunwayCardProps {
 export function RunwayCard({ from, to, currency, locale }: RunwayCardProps) {
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
-  const { isMetricsTab } = useOverviewTab();
   const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
   const setInput = useChatStore((state) => state.setInput);
   const [isSelecting, setIsSelecting] = useState(false);
@@ -41,32 +39,29 @@ export function RunwayCard({ from, to, currency, locale }: RunwayCardProps) {
   const displayRunwayRef = useRef<number>(0);
   const hasInitializedRef = useRef<boolean>(false);
 
-  const { data: runwayData } = useQuery({
-    ...trpc.reports.runway.queryOptions({
+  const { data: runwayData } = useQuery(
+    trpc.reports.runway.queryOptions({
       from,
       to,
       currency: currency,
     }),
-    enabled: isMetricsTab,
-  });
+  );
 
   // Fetch cash balance for runway chart
-  const { data: cashBalanceData } = useQuery({
-    ...trpc.widgets.getAccountBalances.queryOptions({
+  const { data: cashBalanceData } = useQuery(
+    trpc.widgets.getAccountBalances.queryOptions({
       currency: currency,
     }),
-    enabled: isMetricsTab,
-  });
+  );
 
   // Fetch burn rate data for calculations
-  const { data: burnRateData } = useQuery({
-    ...trpc.reports.burnRate.queryOptions({
+  const { data: burnRateData } = useQuery(
+    trpc.reports.burnRate.queryOptions({
       from,
       to,
       currency: currency,
     }),
-    enabled: isMetricsTab,
-  });
+  );
 
   // Transform runway data - need to calculate monthly projections
   const runwayChartData = useMemo<
