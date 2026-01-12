@@ -53,7 +53,7 @@ export function WidgetSkeleton({
         <div className="space-y-2">
           {Array.from({ length: descriptionLines }).map((_, i) => (
             <Skeleton
-              key={i}
+              key={i.toString()}
               className={cn(
                 "h-3",
                 i === descriptionLines - 1 ? "w-3/4" : "w-full",
