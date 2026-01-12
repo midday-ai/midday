@@ -8,7 +8,7 @@ import { Icons } from "@midday/ui/icons";
 import { MaterialIcon } from "./homepage/icon-mapping";
 import Link from "next/link";
 
-type SDKTab = "typescript" | "go" | "php" | "python";
+type SDKTab = "typescript" | "go" | "php";
 
 function ScrambledText() {
   const [tick, setTick] = useState(0);
@@ -211,19 +211,6 @@ export function SDKs() {
                   priority
                 />
               </button>
-              <button
-                onClick={() => handleLogoClick("python")}
-                className="border border-border bg-background p-4 sm:p-6 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
-              >
-                <Image
-                  src="/images/python.png"
-                  alt="Python"
-                  width={64}
-                  height={64}
-                  className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
-                  priority
-                />
-              </button>
             </div>
 
             {/* Title and Description */}
@@ -269,7 +256,7 @@ export function SDKs() {
                   alt="TypeScript"
                   width={80}
                   height={80}
-                  className="w-14 h-14 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24 object-contain"
+                  className="w-14 h-14 xl:w-24 xl:h-24 2xl:w-24 2xl:h-24 object-contain"
                   priority
                 />
               </button>
@@ -282,7 +269,7 @@ export function SDKs() {
                   alt="Go"
                   width={80}
                   height={80}
-                  className="w-14 h-14 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24 object-contain"
+                  className="w-14 h-14 xl:w-24 xl:h-24 2xl:w-24 2xl:h-24 object-contain"
                   priority
                 />
               </button>
@@ -295,20 +282,7 @@ export function SDKs() {
                   alt="PHP"
                   width={80}
                   height={80}
-                  className="w-14 h-14 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24 object-contain"
-                  priority
-                />
-              </button>
-              <button
-                onClick={() => handleLogoClick("python")}
-                className="border border-border bg-background p-5 xl:p-7 2xl:p-8 flex items-center justify-center rounded-none cursor-pointer hover:border-foreground/20 transition-colors"
-              >
-                <Image
-                  src="/images/python.png"
-                  alt="Python"
-                  width={80}
-                  height={80}
-                  className="w-14 h-14 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24 object-contain"
+                  className="w-14 h-14 xl:w-24 xl:h-24 2xl:w-24 2xl:h-24 object-contain"
                   priority
                 />
               </button>
@@ -389,19 +363,6 @@ export function SDKs() {
                   <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground -mb-[2px]" />
                 )}
               </button>
-              <button
-                onClick={() => setActiveTab("python")}
-                className={`px-4 py-2 text-sm font-sans transition-colors relative ${
-                  activeTab === "python"
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Python
-                {activeTab === "python" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground -mb-[2px]" />
-                )}
-              </button>
             </div>
           </div>
 
@@ -430,18 +391,38 @@ export function SDKs() {
                 <div className="space-y-4">
                   <div>
                     <p className="font-sans text-sm text-foreground mb-2">Install:</p>
-                    <CodeBlock code="bun add @midday/sdk" />
+                    <div className="space-y-2">
+                      <CodeBlock code="npm install @midday-ai/sdk" />
+                      <CodeBlock code="bun add @midday-ai/sdk" />
+                      <CodeBlock code="pnpm add @midday-ai/sdk" />
+                      <CodeBlock code="yarn add @midday-ai/sdk" />
+                    </div>
                   </div>
 
                   <div>
                     <p className="font-sans text-sm text-foreground mb-2">Example:</p>
-                    <CodeBlock code={`import { Midday } from "@midday/sdk";
+                    <CodeBlock code={`import { Midday } from "@midday-ai/sdk";
 
-const midday = new Midday({ 
-  apiKey: process.env.MIDDAY_API_KEY 
+const midday = new Midday({
+  security: {
+    oauth2: process.env["MIDDAY_OAUTH2"] ?? "",
+  },
 });
 
-const transactions = await midday.transactions.list();`} />
+async function run() {
+  const result = await midday.oAuth.getOAuthAuthorization({
+    responseType: "code",
+    clientId: "mid_client_abcdef123456789",
+    redirectUri: "https://myapp.com/callback",
+    scope: "transactions.read invoices.read",
+    state: "abc123xyz789_secure-random-state-value-with-sufficient-entropy",
+    codeChallenge: "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+  });
+
+  console.log(result);
+}
+
+run();`} />
                   </div>
                 </div>
 
@@ -480,7 +461,7 @@ const transactions = await midday.transactions.list();`} />
               <div className="space-y-4">
                 <div>
                   <p className="font-sans text-sm text-foreground mb-2">Install:</p>
-                  <CodeBlock code="go get github.com/midday/sdk-go" />
+                  <CodeBlock code="go get github.com/midday-ai/midday-go" />
                 </div>
 
                 <div>
@@ -488,17 +469,28 @@ const transactions = await midday.transactions.list();`} />
                   <CodeBlock code={`package main
 
 import (
-  "context"
-  "github.com/midday/sdk-go"
+	"context"
+	middaygo "github.com/midday-ai/midday-go"
+	"github.com/midday-ai/midday-go/models/operations"
+	"log"
 )
 
 func main() {
-  client := midday.NewClient(midday.WithAPIKey("YOUR_API_KEY"))
-  
-  transactions, err := client.Transactions.List(context.Background())
-  if err != nil {
-    panic(err)
-  }
+	ctx := context.Background()
+
+	s := middaygo.New(
+		middaygo.WithSecurity("MIDDAY_API_KEY"),
+	)
+
+	res, err := s.Transactions.List(ctx, operations.ListTransactionsRequest{
+		PageSize: middaygo.Float64(50),
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	if res.Object != nil {
+		// handle response
+	}
 }`} />
                 </div>
 
@@ -537,22 +529,35 @@ func main() {
               <div className="space-y-4">
                 <div>
                   <p className="font-sans text-sm text-foreground mb-2">Install:</p>
-                  <CodeBlock code="composer require midday/sdk" />
+                  <CodeBlock code="composer require midday-ai/midday-php" />
                 </div>
 
                 <div>
                   <p className="font-sans text-sm text-foreground mb-2">Example:</p>
                   <CodeBlock code={`<?php
 
+declare(strict_types=1);
+
 require 'vendor/autoload.php';
 
 use Midday\Midday;
+use Midday\Midday\Models\Operations;
 
-$midday = new Midday([
-  'api_key' => getenv('MIDDAY_API_KEY')
-]);
+$sdk = Midday\Midday::builder()
+    ->setSecurity('MIDDAY_API_KEY')
+    ->build();
 
-$transactions = $midday->transactions()->list();`} />
+$request = new Operations\ListTransactionsRequest(
+    pageSize: 50,
+);
+
+$response = $sdk->transactions->list(
+    request: $request
+);
+
+if ($response->object !== null) {
+    // handle response
+}`} />
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -575,52 +580,6 @@ $transactions = $midday->transactions()->list();`} />
             </div>
           )}
 
-          {/* Python SDK Content */}
-          {activeTab === "python" && (
-            <div className="max-w-4xl mx-auto space-y-8">
-              <div className="text-center space-y-4">
-                <h3 className="font-serif text-2xl sm:text-2xl text-foreground">
-                  Python SDK
-                </h3>
-                <p className="font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
-                  A Python SDK for integrating Midday's APIs into your Python applications.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <p className="font-sans text-sm text-foreground mb-2">Install:</p>
-                  <CodeBlock code="pip install midday-sdk" />
-                </div>
-
-                <div>
-                  <p className="font-sans text-sm text-foreground mb-2">Example:</p>
-                  <CodeBlock code={`from midday import Midday
-
-midday = Midday(api_key="YOUR_API_KEY")
-
-transactions = midday.transactions.list()`} />
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => router.push("/docs")}
-                    className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
-                  >
-                    View Python docs
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => router.push("/docs/examples")}
-                    className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
-                  >
-                    See examples
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </section>
 
