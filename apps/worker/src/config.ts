@@ -52,9 +52,9 @@ export function getRedisConnection() {
     keepAlive: 30000, // TCP keep-alive every 30s
     connectTimeout: isProduction ? 15000 : 5000,
     // BullMQ recommended retry strategy: exponential backoff
-    // min 1 second, max 20 seconds (matches BullMQ default)
+    // 1s, 2s, 4s, 8s, 16s, then capped at 20s
     retryStrategy: (times: number) => {
-      const delay = Math.max(Math.min(Math.exp(times), 20000), 1000);
+      const delay = Math.min(1000 * 2 ** times, 20000);
       if (times > 5) {
         console.log(
           `[Redis/Worker] Reconnecting in ${delay}ms (attempt ${times})`,
