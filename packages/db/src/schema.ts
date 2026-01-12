@@ -3834,8 +3834,11 @@ export type InsightActivity = {
   };
 };
 
+export type InsightSentiment = "positive" | "neutral" | "challenging";
+
 export type InsightContent = {
-  goodNews: string;
+  sentiment: InsightSentiment;
+  opener: string;
   story: string;
   actions: Array<{
     text: string;
@@ -3857,7 +3860,6 @@ export const insights = pgTable(
     periodType: insightPeriodTypeEnum("period_type").notNull(),
     periodStart: timestamp("period_start", { withTimezone: true }).notNull(),
     periodEnd: timestamp("period_end", { withTimezone: true }).notNull(),
-    periodLabel: varchar("period_label", { length: 50 }), // "Week 3, 2026", "January 2026"
     periodYear: smallint("period_year").notNull(),
     periodNumber: smallint("period_number").notNull(), // Week 1-53, Month 1-12, Quarter 1-4
 
@@ -3881,7 +3883,7 @@ export const insights = pgTable(
     // Activity context
     activity: jsonb().$type<InsightActivity>(),
 
-    currency: varchar({ length: 3 }).default("USD"),
+    currency: varchar({ length: 3 }).notNull(),
 
     // AI-generated content (relief-first structure)
     content: jsonb().$type<InsightContent>(),
@@ -3918,9 +3920,55 @@ export const insights = pgTable(
   ],
 );
 
-export const insightsRelations = relations(insights, ({ one }) => ({
+export const insightsRelations = relations(insights, ({ one, many }) => ({
   team: one(teams, {
     fields: [insights.teamId],
     references: [teams.id],
   }),
+  userStatuses: many(insightUserStatus),
 }));
+
+// Per-user insight interaction tracking (read/dismiss state)
+export const insightUserStatus = pgTable(
+  "insight_user_status",
+  {
+    insightId: uuid("insight_id")
+      .notNull()
+      .references(() => insights.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    dismissedAt: timestamp("dismissed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.insightId, table.userId] }),
+    index("insight_user_status_user_idx").on(table.userId),
+    index("insight_user_status_insight_idx").on(table.insightId),
+    pgPolicy("Users can manage their own insight status", {
+      as: "permissive",
+      for: "all",
+      to: ["public"],
+    }),
+  ],
+);
+
+export const insightUserStatusRelations = relations(
+  insightUserStatus,
+  ({ one }) => ({
+    insight: one(insights, {
+      fields: [insightUserStatus.insightId],
+      references: [insights.id],
+    }),
+    user: one(users, {
+      fields: [insightUserStatus.userId],
+      references: [users.id],
+    }),
+  }),
+);

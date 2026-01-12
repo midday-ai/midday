@@ -172,6 +172,41 @@ export function getPreviousPeriod(
 }
 
 /**
+ * Get a human-readable label for a period
+ * Used to derive the label instead of storing it in the database
+ *
+ * @param periodType - weekly, monthly, quarterly, yearly
+ * @param periodYear - The year (e.g., 2026)
+ * @param periodNumber - Week 1-53, Month 1-12, Quarter 1-4, or year
+ * @param locale - Optional locale for month names (default: en-US)
+ */
+export function getPeriodLabel(
+  periodType: PeriodType,
+  periodYear: number,
+  periodNumber: number,
+  locale = "en-US",
+): string {
+  switch (periodType) {
+    case "weekly":
+      return `Week ${periodNumber}, ${periodYear}`;
+    case "monthly": {
+      // periodNumber 1-12 → month name
+      const monthName = new Date(
+        periodYear,
+        periodNumber - 1,
+      ).toLocaleDateString(locale, { month: "long" });
+      return `${monthName} ${periodYear}`;
+    }
+    case "quarterly":
+      return `Q${periodNumber} ${periodYear}`;
+    case "yearly":
+      return `${periodYear} Year in Review`;
+    default:
+      return `${periodType} ${periodNumber}, ${periodYear}`;
+  }
+}
+
+/**
  * Format a date for database queries (YYYY-MM-DD)
  */
 export function formatDateForQuery(date: Date): string {

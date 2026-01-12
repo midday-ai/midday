@@ -3,7 +3,7 @@ import { formatMetricValue } from "../metrics/calculator";
  * Audio script builder for insights
  * Creates natural-sounding scripts with Eleven v3 audio tags
  */
-import type { InsightContent, InsightMetric } from "../types";
+import type { InsightContent, InsightMetric, InsightSentiment } from "../types";
 
 /**
  * Eleven v3 Audio Tags Reference:
@@ -13,7 +13,22 @@ import type { InsightContent, InsightMetric } from "../types";
  * - [pause] - Natural pauses for emphasis
  * - [excited] - For celebrations and achievements
  * - [thoughtfully] - Reflective, considered tone
+ * - [gently] - Soft, supportive tone for challenging news
  */
+
+/**
+ * Get the appropriate tone tag based on sentiment
+ */
+function getOpenerTone(sentiment: InsightSentiment): string {
+  switch (sentiment) {
+    case "positive":
+      return "[upbeat]";
+    case "neutral":
+      return "[warmly]";
+    case "challenging":
+      return "[gently]";
+  }
+}
 
 /**
  * Build an audio script from insight content
@@ -36,8 +51,9 @@ export function buildAudioScript(
   // Opening with warm greeting
   parts.push(`[warmly] Here's your ${periodLabel} business insight. [pause]`);
 
-  // Good news first (relief-first approach with upbeat tone)
-  parts.push(`[upbeat] ${content.goodNews}`);
+  // Opener with sentiment-appropriate tone
+  const openerTone = getOpenerTone(content.sentiment);
+  parts.push(`${openerTone} ${content.opener}`);
 
   // Key metrics summary (clear, professional delivery)
   if (metrics.length > 0) {
@@ -130,5 +146,6 @@ export function buildTeaserScript(
   content: InsightContent,
   periodLabel: string,
 ): string {
-  return `[warmly] Here's your ${periodLabel} business insight. [pause] [upbeat] ${content.goodNews} [pause] [warmly] Check your dashboard for the full details and recommended actions.`;
+  const openerTone = getOpenerTone(content.sentiment);
+  return `[warmly] Here's your ${periodLabel} business insight. [pause] ${openerTone} ${content.opener} [pause] [warmly] Check your dashboard for the full details and recommended actions.`;
 }

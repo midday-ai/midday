@@ -6,6 +6,7 @@ export {
   formatDateForStorage,
   getCurrentPeriod,
   getPeriodInfo,
+  getPeriodLabel,
   getPreviousCompletePeriod,
   getPreviousPeriod,
 } from "./utils";

@@ -1,10 +1,12 @@
 import { createAdminClient } from "@api/services/supabase";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
+  dismissInsight,
   getInsightById,
   getInsightByPeriod,
-  getInsights,
+  getInsightsForUser,
   getLatestInsight,
+  markInsightAsRead,
 } from "@midday/db/queries";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -15,7 +17,8 @@ const periodTypeEnum = z.enum(["weekly", "monthly", "quarterly", "yearly"]);
 
 export const insightsRouter = createTRPCRouter({
   /**
-   * Get paginated list of insights for the team
+   * Get paginated list of insights for the team with user's read/dismiss status
+   * By default, filters out insights the user has dismissed
    */
   list: protectedProcedure
     .input(
@@ -23,14 +26,17 @@ export const insightsRouter = createTRPCRouter({
         periodType: periodTypeEnum.optional(),
         limit: z.number().min(1).max(50).default(10),
         cursor: z.string().nullish(),
+        includeDismissed: z.boolean().default(false),
       }),
     )
-    .query(async ({ ctx: { db, teamId }, input }) => {
-      return getInsights(db, {
+    .query(async ({ ctx: { db, teamId, session }, input }) => {
+      return getInsightsForUser(db, {
         teamId: teamId!,
+        userId: session.user.id,
         periodType: input.periodType,
         pageSize: input.limit,
         cursor: input.cursor,
+        includeDismissed: input.includeDismissed,
         status: "completed",
       });
     }),
@@ -152,5 +158,69 @@ export const insightsRouter = createTRPCRouter({
         audioUrl: data.signedUrl,
         expiresIn: 60 * 60, // seconds
       };
+    }),
+
+  /**
+   * Mark an insight as read for the current user
+   * Safe to call multiple times - only sets readAt if not already set
+   */
+  markAsRead: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ ctx: { db, teamId, session }, input }) => {
+      // Verify the insight belongs to the user's team
+      const insight = await getInsightById(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
+
+      if (!insight) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Insight not found",
+        });
+      }
+
+      const result = await markInsightAsRead(db, {
+        insightId: input.id,
+        userId: session.user.id,
+      });
+
+      return { success: true, readAt: result.readAt };
+    }),
+
+  /**
+   * Dismiss an insight for the current user
+   * The insight will no longer appear in their list unless includeDismissed is true
+   */
+  dismiss: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ ctx: { db, teamId, session }, input }) => {
+      // Verify the insight belongs to the user's team
+      const insight = await getInsightById(db, {
+        id: input.id,
+        teamId: teamId!,
+      });
+
+      if (!insight) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Insight not found",
+        });
+      }
+
+      const result = await dismissInsight(db, {
+        insightId: input.id,
+        userId: session.user.id,
+      });
+
+      return { success: true, dismissedAt: result.dismissedAt };
     }),
 });

@@ -108,10 +108,17 @@ export type InsightActivity = {
 };
 
 /**
- * AI-generated content structure (relief-first approach)
+ * Sentiment indicator for insight tone
+ */
+export type InsightSentiment = "positive" | "neutral" | "challenging";
+
+/**
+ * AI-generated content structure
+ * Uses adaptive tone based on actual business performance
  */
 export type InsightContent = {
-  goodNews: string;
+  sentiment: InsightSentiment;
+  opener: string; // Context-aware opening (positive, neutral, or empathetic)
   story: string;
   actions: Array<{
     text: string;

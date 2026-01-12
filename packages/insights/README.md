@@ -36,7 +36,7 @@ const result = await service.generateInsight({
 // - allMetrics: Full metrics snapshot
 // - anomalies: Detected issues/alerts
 // - activity: Invoice, time tracking, customer activity
-// - content: AI-generated narrative (goodNews, story, actions)
+// - content: AI-generated narrative (sentiment, opener, story, actions)
 ```
 
 ## Environment Variables

@@ -80,7 +80,8 @@ export const insightActionSchema = z.object({
 });
 
 export const insightContentSchema = z.object({
-  goodNews: z.string(),
+  sentiment: z.enum(["positive", "neutral", "challenging"]),
+  opener: z.string(),
   story: z.string(),
   actions: z.array(insightActionSchema),
   celebration: z.string().optional(),
