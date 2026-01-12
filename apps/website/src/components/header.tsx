@@ -923,6 +923,21 @@ export function Header({
               >
                           Developer & API
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            router.push("/sdks");
+                            setIsMenuOpen(false);
+                            setIsMobileAppsOpen(false);
+                          }}
+                          onTouchEnd={(e) => {
+                            e.currentTarget.blur();
+                          }}
+                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                          style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
+                          SDKs
+                        </button>
                       </div>
                     </motion.div>
                   </>
