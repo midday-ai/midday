@@ -1,4 +1,3 @@
-import type { RedisClientType } from "redis";
 import { getSharedRedisClient } from "./shared-redis";
 
 export class RedisCache {
@@ -10,7 +9,7 @@ export class RedisCache {
     this.defaultTTL = defaultTTL;
   }
 
-  private getRedisClient(): RedisClientType {
+  private getRedisClient() {
     return getSharedRedisClient();
   }
 
@@ -58,9 +57,11 @@ export class RedisCache {
       const redisKey = this.getKey(key);
       const ttl = ttlSeconds ?? this.defaultTTL;
 
-      await redis.set(redisKey, serializedValue);
       if (ttl > 0) {
-        await redis.expire(redisKey, ttl);
+        // Use setEx for atomic set + expire (single round trip)
+        await redis.setEx(redisKey, ttl, serializedValue);
+      } else {
+        await redis.set(redisKey, serializedValue);
       }
     } catch (error) {
       console.error(
