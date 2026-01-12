@@ -506,7 +506,23 @@ export function Header({
                               Developer & API
                             </span>
                             <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Build custom workflows and integrations using Midday's API.
+                              Programmatic access to Midday data and workflows.
+                            </span>
+                          </div>
+                        </div>
+                        <div
+                          className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
+                          onClick={() => {
+                            setIsAppsOpen(false);
+                            router.push("/sdks");
+                          }}
+                        >
+                          <div className="flex flex-col pl-2">
+                            <span className="font-sans text-base text-foreground mb-1">
+                              SDKs
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              Typed SDKs to build faster with Midday.
                             </span>
                           </div>
                         </div>
