@@ -16,7 +16,7 @@ import {
   getRevenue,
   getRunway,
   getSpendingForPeriod,
-  getUpcomingDueRecurring,
+  getUpcomingDueRecurringByTeam,
 } from "@midday/db/queries";
 import {
   ContentGenerator,
@@ -266,43 +266,32 @@ export class InsightsService {
     },
   ): Promise<InsightActivity> {
     // Fetch overdue and upcoming invoices
-    const [overdueData, upcomingRecurringData] = await Promise.all([
+    const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const [overdueData, upcomingRecurring] = await Promise.all([
       getOverdueInvoicesAlert(this.db, { teamId, currency }).catch(() => null),
-      getUpcomingDueRecurring(this.db, 7 * 24, { limit: 10 }).catch(() => null),
+      getUpcomingDueRecurringByTeam(this.db, {
+        teamId,
+        before: sevenDaysFromNow,
+      }).catch(() => []),
     ]);
 
-    // Filter upcoming recurring to only this team
-    const teamUpcoming =
-      upcomingRecurringData?.data?.filter(
-        (inv: { teamId: string }) => inv.teamId === teamId,
-      ) ?? [];
-
     // Build upcoming invoices summary
+    type UpcomingInvoice = (typeof upcomingRecurring)[number];
     const upcomingInvoices =
-      teamUpcoming.length > 0
+      upcomingRecurring.length > 0
         ? {
-            count: teamUpcoming.length,
-            totalAmount: teamUpcoming.reduce(
-              (sum: number, inv: { amount: number | null }) =>
-                sum + (inv.amount ?? 0),
+            count: upcomingRecurring.length,
+            totalAmount: upcomingRecurring.reduce(
+              (sum: number, inv: UpcomingInvoice) => sum + (inv.amount ?? 0),
               0,
             ),
-            nextDueDate:
-              (teamUpcoming[0] as { nextScheduledAt?: string | null })
-                ?.nextScheduledAt ?? undefined,
-            items: teamUpcoming.slice(0, 5).map(
-              (inv: {
-                customerName: string | null;
-                amount: number | null;
-                nextScheduledAt: string | null;
-                frequency: string | null;
-              }) => ({
-                customerName: inv.customerName ?? "Unknown",
-                amount: inv.amount ?? 0,
-                scheduledAt: inv.nextScheduledAt ?? "",
-                frequency: inv.frequency ?? undefined,
-              }),
-            ),
+            nextDueDate: upcomingRecurring[0]?.nextScheduledAt ?? undefined,
+            items: upcomingRecurring.map((inv: UpcomingInvoice) => ({
+              customerName: inv.customerName ?? "Unknown",
+              amount: inv.amount ?? 0,
+              scheduledAt: inv.nextScheduledAt ?? "",
+              frequency: inv.frequency ?? undefined,
+            })),
           }
         : undefined;
 

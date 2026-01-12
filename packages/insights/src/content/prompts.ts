@@ -2,8 +2,13 @@
  * AI prompt templates for insight content generation
  */
 import { PERIOD_TYPE_LABELS } from "../constants";
-import type { InsightActivity, InsightAnomaly, InsightMetric, PeriodType } from "../types";
 import { formatMetricValue } from "../metrics/calculator";
+import type {
+  InsightActivity,
+  InsightAnomaly,
+  InsightMetric,
+  PeriodType,
+} from "../types";
 
 /**
  * Get the period name for display in prompts
@@ -67,7 +72,10 @@ export function formatUpcomingInvoicesContext(
   if (items && items.length > 0) {
     const topItems = items.slice(0, 3);
     const formattedItems = topItems
-      .map((i) => `${i.customerName} (${formatMetricValue(i.amount, "currency", currency)})`)
+      .map(
+        (i) =>
+          `${i.customerName} (${formatMetricValue(i.amount, "currency", currency)})`,
+      )
       .join(", ");
     context += `\n- Top upcoming: ${formattedItems}`;
   }
@@ -106,7 +114,11 @@ export function buildInsightPrompt(
   currency: string,
 ): string {
   const periodName = getPeriodName(periodType);
-  const metricsContext = formatMetricsContext(selectedMetrics, periodType, currency);
+  const metricsContext = formatMetricsContext(
+    selectedMetrics,
+    periodType,
+    currency,
+  );
   const anomaliesContext = formatAnomaliesContext(anomalies);
   const upcomingContext = formatUpcomingInvoicesContext(activity, currency);
   const overdueContext = formatOverdueContext(activity, currency);
@@ -119,14 +131,18 @@ export function buildInsightPrompt(
   if (activity.upcomingInvoices?.count) {
     actionHints.push("Consider mentioning preparing for upcoming invoices.");
   }
-  const actionHintsText = actionHints.length > 0 ? ` ${actionHints.join(" ")}` : "";
+  const actionHintsText =
+    actionHints.length > 0 ? ` ${actionHints.join(" ")}` : "";
 
   // Build story hints
   const storyHints: string[] = [];
   if (activity.upcomingInvoices?.count) {
-    storyHints.push("Mention the upcoming scheduled invoices as expected revenue.");
+    storyHints.push(
+      "Mention the upcoming scheduled invoices as expected revenue.",
+    );
   }
-  const storyHintsText = storyHints.length > 0 ? ` ${storyHints.join(" ")}` : "";
+  const storyHintsText =
+    storyHints.length > 0 ? ` ${storyHints.join(" ")}` : "";
 
   return `You are a friendly business advisor helping a small business owner understand their ${periodName}ly performance.
 
