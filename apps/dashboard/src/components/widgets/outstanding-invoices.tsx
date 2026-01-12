@@ -7,6 +7,7 @@ import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSkeleton } from "./widget-skeleton";
 
 export function OutstandingInvoicesWidget() {
   const trpc = useTRPC();
@@ -15,13 +16,24 @@ export function OutstandingInvoicesWidget() {
   const { setChatId } = useChatInterface();
   const { currency } = useMetricsFilter();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getOutstandingInvoices.queryOptions({
       currency: currency,
       status: ["unpaid", "overdue"],
     }),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  if (isLoading) {
+    return (
+      <WidgetSkeleton
+        title="Outstanding Invoices"
+        icon={<Icons.Invoice className="size-4" />}
+        descriptionLines={2}
+        showValue={false}
+      />
+    );
+  }
 
   const handleToolCall = (params: {
     toolName: string;

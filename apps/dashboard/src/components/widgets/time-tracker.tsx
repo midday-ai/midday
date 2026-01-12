@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSkeleton } from "./widget-skeleton";
 
 export function TimeTrackerWidget() {
   const trpc = useTRPC();
@@ -32,10 +33,19 @@ export function TimeTrackerWidget() {
   }, [user?.weekStartsOnMonday]);
 
   // Fetch tracked time for the current week
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getTrackedTime.queryOptions(currentWeekRange),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  if (isLoading) {
+    return (
+      <WidgetSkeleton
+        title="Time Tracker"
+        icon={<Icons.Tracker className="size-4" />}
+      />
+    );
+  }
 
   const totalWeeklyTime = data?.result?.totalDuration ?? 0;
 

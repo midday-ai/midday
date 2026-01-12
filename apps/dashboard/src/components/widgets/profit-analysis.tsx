@@ -21,6 +21,7 @@ import {
 } from "recharts";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSkeleton } from "./widget-skeleton";
 
 export function ProfitAnalysisWidget() {
   const trpc = useTRPC();
@@ -30,7 +31,7 @@ export function ProfitAnalysisWidget() {
   const { setChatId } = useChatInterface();
   const { from, to, period, revenueType, currency } = useMetricsFilter();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.reports.profit.queryOptions({
       from,
       to,
@@ -39,6 +40,16 @@ export function ProfitAnalysisWidget() {
     }),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  if (isLoading) {
+    return (
+      <WidgetSkeleton
+        title="Profit & Loss"
+        icon={<Icons.PieChart className="size-4" />}
+        descriptionLines={2}
+      />
+    );
+  }
 
   const handleToolCall = (params: {
     toolName: string;

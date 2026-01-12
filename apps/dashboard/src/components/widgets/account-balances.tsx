@@ -7,6 +7,7 @@ import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSkeleton } from "./widget-skeleton";
 
 export function AccountBalancesWidget() {
   const trpc = useTRPC();
@@ -16,12 +17,21 @@ export function AccountBalancesWidget() {
   const { currency } = useMetricsFilter();
 
   // Fetch combined account balances
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getAccountBalances.queryOptions({
       currency,
     }),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  if (isLoading) {
+    return (
+      <WidgetSkeleton
+        title="Account Balances"
+        icon={<Icons.Accounts className="size-4" />}
+      />
+    );
+  }
 
   const balanceData = data?.result;
   const totalBalance = balanceData?.totalBalance ?? 0;

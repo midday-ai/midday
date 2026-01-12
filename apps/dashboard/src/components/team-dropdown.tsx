@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
+import { Skeleton } from "@midday/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
@@ -22,6 +23,21 @@ import { useOnClickOutside } from "usehooks-ts";
 type Props = {
   isExpanded?: boolean;
 };
+
+function TeamDropdownSkeleton({ isExpanded }: { isExpanded: boolean }) {
+  return (
+    <div className="relative h-[32px]">
+      <div className="fixed left-[19px] bottom-4 w-[32px] h-[32px]">
+        <Skeleton className="w-[32px] h-[32px] rounded-none" />
+      </div>
+      {isExpanded && (
+        <div className="fixed left-[62px] bottom-4 h-[32px] flex items-center">
+          <Skeleton className="h-4 w-24" />
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function TeamDropdown({ isExpanded = false }: Props) {
   const ref = useRef<HTMLDivElement>(null);
@@ -45,7 +61,9 @@ export function TeamDropdown({ isExpanded = false }: Props) {
     }),
   );
 
-  const { data: teams } = useQuery(trpc.team.list.queryOptions());
+  const { data: teams, isLoading: isTeamsLoading } = useQuery(
+    trpc.team.list.queryOptions(),
+  );
 
   useEffect(() => {
     if (user?.team?.id) {
@@ -69,6 +87,12 @@ export function TeamDropdown({ isExpanded = false }: Props) {
   });
 
   const toggleActive = () => setActive((prev) => !prev);
+
+  // Show skeleton while teams are loading
+  // Note: user loading is handled by Suspense since useUserQuery uses useSuspenseQuery
+  if (isTeamsLoading) {
+    return <TeamDropdownSkeleton isExpanded={isExpanded} />;
+  }
 
   const handleTeamChange = (teamId: string) => {
     if (teamId === selectedId) {

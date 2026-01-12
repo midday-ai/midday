@@ -6,7 +6,6 @@ import {
 } from "@/components/charts/category-expense-donut-chart";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
-import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
 import { cn } from "@midday/ui/cn";
@@ -32,7 +31,6 @@ export function CategoryExpensesCard({
   isCustomizing,
 }: CategoryExpensesCardProps) {
   const trpc = useTRPC();
-  const { isMetricsTab } = useOverviewTab();
   const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
     useMetricsCustomize();
 
@@ -43,14 +41,13 @@ export function CategoryExpensesCard({
   });
 
   // Get spending data for categories
-  const { data: spendingData } = useQuery({
-    ...trpc.reports.spending.queryOptions({
+  const { data: spendingData } = useQuery(
+    trpc.reports.spending.queryOptions({
       from,
       to,
       currency: currency,
     }),
-    enabled: isMetricsTab,
-  });
+  );
 
   const categoryDonutChartData = useMemo(() => {
     if (!spendingData || spendingData.length === 0) return [];

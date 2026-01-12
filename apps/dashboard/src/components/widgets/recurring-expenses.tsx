@@ -10,6 +10,7 @@ import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSkeleton } from "./widget-skeleton";
 
 export function RecurringExpensesWidget() {
   const trpc = useTRPC();
@@ -18,13 +19,22 @@ export function RecurringExpensesWidget() {
   const { setChatId } = useChatInterface();
   const { from, to, period, currency } = useMetricsFilter();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getRecurringExpenses.queryOptions({
       from,
       to,
     }),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  if (isLoading) {
+    return (
+      <WidgetSkeleton
+        title="Recurring Expenses"
+        icon={<Icons.Repeat className="size-4" />}
+      />
+    );
+  }
 
   const recurringData = data?.result;
 

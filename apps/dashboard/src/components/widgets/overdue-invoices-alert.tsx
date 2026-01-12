@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSkeleton } from "./widget-skeleton";
 
 export function OverdueInvoicesAlertWidget() {
   const trpc = useTRPC();
@@ -19,10 +20,19 @@ export function OverdueInvoicesAlertWidget() {
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getOverdueInvoicesAlert.queryOptions(),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  if (isLoading) {
+    return (
+      <WidgetSkeleton
+        title={t("overdue_invoices.title")}
+        icon={<Icons.ReceiptLong className="size-4" />}
+      />
+    );
+  }
 
   const overdueData = data?.result;
   const hasOverdue = overdueData && overdueData.count > 0;

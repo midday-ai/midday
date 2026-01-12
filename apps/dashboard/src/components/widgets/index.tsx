@@ -2,6 +2,7 @@
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useOverviewTab } from "@/hooks/use-overview-tab";
+import { usePrefetchMetrics } from "@/hooks/use-prefetch-metrics";
 import type { AppRouter } from "@midday/api/trpc/routers/_app";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
@@ -38,6 +39,9 @@ function WidgetsContent() {
   const { isChatPage, isHome } = useChatInterface();
   const isCustomizing = useIsCustomizing();
   const { tab, setTab } = useOverviewTab();
+
+  // Prefetch metrics data in background when on overview tab
+  usePrefetchMetrics();
 
   if (isChatPage) {
     return null;

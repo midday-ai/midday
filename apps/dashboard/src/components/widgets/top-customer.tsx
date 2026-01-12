@@ -6,6 +6,7 @@ import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSkeleton } from "./widget-skeleton";
 
 export function TopCustomerWidget() {
   const trpc = useTRPC();
@@ -13,10 +14,21 @@ export function TopCustomerWidget() {
   const chatId = useChatId();
   const { setChatId } = useChatInterface();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getTopCustomer.queryOptions(),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  if (isLoading) {
+    return (
+      <WidgetSkeleton
+        title="Top Customer"
+        icon={<Icons.Star className="size-4" />}
+        descriptionLines={2}
+        showValue={false}
+      />
+    );
+  }
 
   const handleToolCall = (params: {
     toolName: string;

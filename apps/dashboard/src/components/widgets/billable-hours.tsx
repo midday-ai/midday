@@ -7,17 +7,27 @@ import { Icons } from "@midday/ui/icons";
 import { useRouter } from "next/navigation";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSkeleton } from "./widget-skeleton";
 
 export function BillableHoursWidget() {
   const router = useRouter();
   const t = useI18n();
 
   // Single source of truth for billable hours with polling
-  const { data: billableData } = useBillableHours({
+  const { data: billableData, isLoading } = useBillableHours({
     date: new Date(),
     view: "month",
     refetchInterval: WIDGET_POLLING_CONFIG.refetchInterval,
   });
+
+  if (isLoading) {
+    return (
+      <WidgetSkeleton
+        title={t("billable_hours.title")}
+        icon={<Icons.Tracker className="size-4" />}
+      />
+    );
+  }
 
   const hasBillableHours = billableData && billableData.totalDuration > 0;
   const earningsByCurrency = billableData?.earningsByCurrency || {};

@@ -4,7 +4,6 @@ import { AnimatedNumber } from "@/components/animated-number";
 import { MonthlyRevenueChart } from "@/components/charts/monthly-revenue-chart";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
-import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useChatStore } from "@/store/chat";
 import { useTRPC } from "@/trpc/client";
 import { generateChartSelectionMessage } from "@/utils/chart-selection-message";
@@ -32,7 +31,6 @@ export function MonthlyRevenueCard({
   revenueType = "net",
 }: MonthlyRevenueCardProps) {
   const trpc = useTRPC();
-  const { isMetricsTab } = useOverviewTab();
   const { isCustomizing, setIsCustomizing } = useMetricsCustomize();
   const setInput = useChatStore((state) => state.setInput);
   const [isSelecting, setIsSelecting] = useState(false);
@@ -43,15 +41,14 @@ export function MonthlyRevenueCard({
     disabled: isCustomizing || isSelecting,
   });
 
-  const { data: revenueData } = useQuery({
-    ...trpc.reports.revenue.queryOptions({
+  const { data: revenueData } = useQuery(
+    trpc.reports.revenue.queryOptions({
       from,
       to,
       currency: currency,
       revenueType,
     }),
-    enabled: isMetricsTab,
-  });
+  );
 
   // Transform revenue data
   const monthlyRevenueChartData = useMemo(() => {

@@ -4,7 +4,6 @@ import { AnimatedNumber } from "@/components/animated-number";
 import { ProfitChart } from "@/components/charts/profit-chart";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
-import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useChatStore } from "@/store/chat";
 import { useTRPC } from "@/trpc/client";
 import { generateChartSelectionMessage } from "@/utils/chart-selection-message";
@@ -34,7 +33,6 @@ export function ProfitCard({
   revenueType = "net",
 }: ProfitCardProps) {
   const trpc = useTRPC();
-  const { isMetricsTab } = useOverviewTab();
   const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
     useMetricsCustomize();
   const setInput = useChatStore((state) => state.setInput);
@@ -46,15 +44,14 @@ export function ProfitCard({
     disabled: metricsIsCustomizing || isSelecting,
   });
 
-  const { data: profitData } = useQuery({
-    ...trpc.reports.profit.queryOptions({
+  const { data: profitData } = useQuery(
+    trpc.reports.profit.queryOptions({
       from,
       to,
       currency: currency,
       revenueType,
     }),
-    enabled: isMetricsTab,
-  });
+  );
 
   // Transform profit data
   const profitChartData = useMemo(() => {

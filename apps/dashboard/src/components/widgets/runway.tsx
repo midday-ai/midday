@@ -6,6 +6,7 @@ import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSkeleton } from "./widget-skeleton";
 
 export function RunwayWidget() {
   const trpc = useTRPC();
@@ -14,7 +15,7 @@ export function RunwayWidget() {
   const { setChatId } = useChatInterface();
   const { from, to, currency } = useMetricsFilter();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getRunway.queryOptions({
       from,
       to,
@@ -22,6 +23,15 @@ export function RunwayWidget() {
     }),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  if (isLoading) {
+    return (
+      <WidgetSkeleton
+        title="Cash Runway"
+        icon={<Icons.Time className="size-4" />}
+      />
+    );
+  }
 
   const handleToolCall = (params: {
     toolName: string;

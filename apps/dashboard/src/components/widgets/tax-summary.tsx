@@ -15,6 +15,7 @@ import { getDefaultTaxType } from "@midday/utils";
 import { useQuery } from "@tanstack/react-query";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSkeleton } from "./widget-skeleton";
 
 function getTaxTerminology(
   countryCode: string | undefined,
@@ -57,13 +58,23 @@ export function TaxSummaryWidget() {
 
   const taxTerms = getTaxTerminology(team?.countryCode ?? undefined, t);
 
-  const { data: yearData } = useQuery({
+  const { data: yearData, isLoading } = useQuery({
     ...trpc.widgets.getTaxSummary.queryOptions({
       from,
       to,
     }),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  if (isLoading) {
+    return (
+      <WidgetSkeleton
+        title={taxTerms.title}
+        icon={<Icons.ReceiptLong className="size-4" />}
+        descriptionLines={2}
+      />
+    );
+  }
 
   const taxData = yearData?.result;
 

@@ -4,7 +4,6 @@ import { AnimatedNumber } from "@/components/animated-number";
 import { BurnRateChart } from "@/components/charts/burn-rate-chart";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMetricsCustomize } from "@/hooks/use-metrics-customize";
-import { useOverviewTab } from "@/hooks/use-overview-tab";
 import { useChatStore } from "@/store/chat";
 import { useTRPC } from "@/trpc/client";
 import { generateChartSelectionMessage } from "@/utils/chart-selection-message";
@@ -32,7 +31,6 @@ export function BurnRateCard({
   wiggleClass,
 }: BurnRateCardProps) {
   const trpc = useTRPC();
-  const { isMetricsTab } = useOverviewTab();
   const { isCustomizing: metricsIsCustomizing, setIsCustomizing } =
     useMetricsCustomize();
   const setInput = useChatStore((state) => state.setInput);
@@ -44,14 +42,13 @@ export function BurnRateCard({
     disabled: metricsIsCustomizing || isSelecting,
   });
 
-  const { data: burnRateData } = useQuery({
-    ...trpc.reports.burnRate.queryOptions({
+  const { data: burnRateData } = useQuery(
+    trpc.reports.burnRate.queryOptions({
       from,
       to,
       currency: currency,
     }),
-    enabled: isMetricsTab,
-  });
+  );
 
   // Transform burn rate data
   const burnRateChartData = useMemo(() => {
