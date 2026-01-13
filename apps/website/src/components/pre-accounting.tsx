@@ -81,7 +81,7 @@ export function PreAccounting() {
             <div className="space-y-4 text-center w-full">
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-md mx-auto justify-center sm:justify-center">
                 <Button
-                  onClick={() => router.push("/login")}
+                  onClick={() => window.location.href = 'https://app.midday.ai/'}
                   className="w-full sm:w-auto h-11 px-6 text-sm font-sans"
                 >
                   Start free trial
@@ -142,7 +142,7 @@ export function PreAccounting() {
             {/* CTA Buttons */}
             <div className="flex gap-6 justify-center">
               <Button
-                onClick={() => router.push("/login")}
+                onClick={() => window.location.href = 'https://app.midday.ai/'}
                 className="h-11 px-6 text-sm font-sans"
               >
                 Start free trial

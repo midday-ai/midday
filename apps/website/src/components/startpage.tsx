@@ -129,7 +129,7 @@ export function StartPage() {
             <div className="space-y-4 text-center w-full">
               <div className="flex flex-col gap-3 w-full max-w-md mx-auto">
                 <Button
-                  onClick={() => router.push('/login')}
+                  onClick={() => window.location.href = 'https://app.midday.ai/'}
                   className="w-full btn-inverse h-11 px-5 transition-colors"
                 >
                   <span className="text-inherit text-sm ">
@@ -214,7 +214,7 @@ export function StartPage() {
                 <div className="flex flex-col items-end space-y-4">
                   <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                     <Button
-                      onClick={() => router.push('/login')}
+                      onClick={() => window.location.href = 'https://app.midday.ai/'}
                       className="btn-inverse h-11 px-4 transition-colors w-full sm:w-auto"
                     >
                       <span className="text-inherit text-sm ">

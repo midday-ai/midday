@@ -162,15 +162,29 @@ export function Footer() {
 
         {/* Bottom Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-2 justify-start">
+          <Link
+            href="https://midday.openstatus.dev/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 justify-start hover:opacity-80 transition-opacity"
+          >
             <span className="font-sans text-sm text-muted-foreground">
               System status:
             </span>
             <span className="font-sans text-sm text-foreground">
               Operational
             </span>
-            <div className="w-2 h-2 bg-green-500 rounded-full" />
-          </div>
+            <div className="relative flex items-center justify-center">
+              <div className="w-2 h-2 bg-green-500 rounded-full relative z-10" />
+              <div 
+                className="absolute w-2 h-2 bg-green-500 rounded-full"
+                style={{
+                  animation: 'pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                  willChange: 'transform, opacity, box-shadow',
+                }}
+              />
+            </div>
+          </Link>
           <p className="font-sans text-sm text-muted-foreground text-left sm:text-right">
             © {new Date().getFullYear()} Midday Labs AB. All rights reserved.
           </p>

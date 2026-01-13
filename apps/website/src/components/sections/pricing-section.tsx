@@ -128,7 +128,10 @@ export function PricingSection() {
               </div>
 
               <div className="space-y-3">
-                <Button className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors">
+                <Button 
+                  onClick={() => window.location.href = 'https://app.midday.ai/'}
+                  className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors"
+                >
                   Start your trial
                 </Button>
                 <p className="font-sans text-xs text-muted-foreground text-center">
@@ -210,7 +213,10 @@ export function PricingSection() {
               </div>
 
               <div className="space-y-3">
-                <Button className="w-full btn-inverse font-sans text-sm py-3 px-4 transition-colors">
+                <Button 
+                  onClick={() => window.location.href = 'https://app.midday.ai/'}
+                  className="w-full btn-inverse font-sans text-sm py-3 px-4 transition-colors"
+                >
                   Start your trial
                 </Button>
                 <p className="font-sans text-xs text-muted-foreground text-center">
@@ -285,7 +291,10 @@ export function PricingSection() {
               </div>
 
               <div className="space-y-3">
-                <Button className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors">
+                <Button 
+                  onClick={() => window.location.href = 'https://app.midday.ai/'}
+                  className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors"
+                >
                   Start your trial
                 </Button>
                 <p className="font-sans text-xs text-muted-foreground text-center">
