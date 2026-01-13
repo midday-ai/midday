@@ -18,11 +18,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.7",
-    "@elevenlabs/elevenlabs-js": "^2.30.0",
     "@midday/db": "workspace:*",
+    "@ai-sdk/openai": "2.0.62",
+    "@elevenlabs/elevenlabs-js": "^2.30.0",
     "@supabase/supabase-js": "^2.49.4",
-    "ai": "^6.0.13",
+    "ai": "5.0.87",
     "date-fns": "^4.1.0",
     "zod": "^4.1.13"
   },

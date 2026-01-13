@@ -13,7 +13,17 @@ import {
   getTaxTypeForCountry,
 } from "@midday/categories";
 import { subDays } from "date-fns";
-import { and, eq, gt, gte, inArray, isNotNull, isNull, or } from "drizzle-orm";
+import {
+  and,
+  asc,
+  eq,
+  gt,
+  gte,
+  inArray,
+  isNotNull,
+  isNull,
+  or,
+} from "drizzle-orm";
 
 export const hasTeamAccess = async (
   db: Database,
@@ -510,6 +520,32 @@ export async function getAvailablePlans(
 }
 
 /**
+ * Get the team owner's timezone.
+ * Owner is defined as the first user to join the team (earliest usersOnTeam.createdAt).
+ * Falls back to UTC if no timezone is set.
+ *
+ * @param db - Database instance
+ * @param teamId - Team ID to get owner timezone for
+ * @returns Owner's timezone (IANA format) or "UTC" as fallback
+ */
+export async function getTeamOwnerTimezone(
+  db: Database,
+  teamId: string,
+): Promise<string> {
+  const result = await db
+    .select({
+      timezone: users.timezone,
+    })
+    .from(usersOnTeam)
+    .innerJoin(users, eq(usersOnTeam.userId, users.id))
+    .where(eq(usersOnTeam.teamId, teamId))
+    .orderBy(usersOnTeam.createdAt)
+    .limit(1);
+
+  return result[0]?.timezone || "UTC";
+}
+
+/**
  * Parameters for getting teams eligible for insights generation
  */
 export type GetTeamsForInsightsParams = {
@@ -521,6 +557,8 @@ export type GetTeamsForInsightsParams = {
   limit?: number;
   /** Number of days a trial team can be eligible (default: 30) */
   trialEligibilityDays?: number;
+  /** Only return teams where it's currently this hour (0-23) in their local time */
+  targetLocalHour?: number;
 };
 
 /**
@@ -538,6 +576,7 @@ export type InsightEligibleTeam = {
  * - Paying customers (starter/pro plans)
  * - Active trial users (created within past N days, not canceled)
  * - Must have baseCurrency set (indicates they have financial data)
+ * - If targetLocalHour is set, only teams where it's that hour locally
  *
  * Uses cursor-based pagination for efficient batch processing.
  *
@@ -554,6 +593,7 @@ export async function getTeamsForInsights(
     cursor,
     limit = 100,
     trialEligibilityDays = 30,
+    targetLocalHour,
   } = params;
 
   // Calculate trial eligibility cutoff
@@ -576,7 +616,7 @@ export async function getTeamsForInsights(
   )!;
 
   // Build where conditions
-  const conditions = [
+  const conditions: (typeof planCondition)[] = [
     // Must have base currency set (indicates they have financial data)
     isNotNull(teams.baseCurrency),
     planCondition,
@@ -602,5 +642,42 @@ export async function getTeamsForInsights(
     .orderBy(teams.id)
     .limit(limit);
 
+  // If no target hour filter, return all eligible teams
+  if (targetLocalHour === undefined) {
   return result;
+  }
+
+  // Filter by teams where it's currently the target hour in their timezone
+  const now = new Date();
+  const teamsInTargetHour: InsightEligibleTeam[] = [];
+
+  for (const team of result) {
+    const ownerTimezone = await getTeamOwnerTimezone(db, team.id);
+    const localHour = getHourInTimezone(now, ownerTimezone);
+
+    if (localHour === targetLocalHour) {
+      teamsInTargetHour.push(team);
+    }
+  }
+
+  return teamsInTargetHour;
+}
+
+/**
+ * Get the current hour (0-23) in a given IANA timezone
+ */
+function getHourInTimezone(date: Date, timezone: string): number {
+  try {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      hour: "numeric",
+      hour12: false,
+    });
+    const parts = formatter.formatToParts(date);
+    const hourPart = parts.find((p) => p.type === "hour");
+    return hourPart ? Number.parseInt(hourPart.value, 10) : date.getUTCHours();
+  } catch {
+    // Invalid timezone, fall back to UTC
+    return date.getUTCHours();
+  }
 }

@@ -141,6 +141,26 @@ export function formatExpenseAnomaliesContext(
 }
 
 /**
+ * Format unbilled hours context - this is a KEY Midday insight
+ */
+function formatUnbilledContext(
+  activity: InsightActivity,
+  currency: string,
+): string {
+  if (!activity.unbilledHours || activity.unbilledHours === 0) {
+    return "";
+  }
+
+  const hours = activity.unbilledHours;
+  const amount = activity.billableAmount ?? 0;
+
+  if (amount > 0) {
+    return `\nUnbilled Work:\n- ${hours.toFixed(1)} hours worth ${formatMetricValue(amount, "currency", currency)} not yet invoiced`;
+  }
+  return `\nUnbilled Work:\n- ${hours.toFixed(1)} hours not yet invoiced`;
+}
+
+/**
  * Build the main prompt for AI content generation
  */
 export function buildInsightPrompt(
@@ -165,72 +185,56 @@ export function buildInsightPrompt(
     expenseAnomalies,
     currency,
   );
+  const unbilledContext = formatUnbilledContext(activity, currency);
 
-  // Build action hints based on activity
-  const actionHints: string[] = [];
-  if (activity.invoicesOverdue > 0) {
-    actionHints.push("Include following up on overdue invoices.");
-  }
-  if (activity.upcomingInvoices?.count) {
-    actionHints.push("Consider mentioning preparing for upcoming invoices.");
-  }
-  // Add expense anomaly hints
-  const warningExpenseAnomalies = expenseAnomalies.filter(
-    (ea) => ea.severity === "warning",
-  );
-  if (warningExpenseAnomalies.length > 0) {
-    actionHints.push(
-      "Recommend reviewing the expense categories that spiked significantly.",
-    );
-  }
-  const actionHintsText =
-    actionHints.length > 0 ? ` ${actionHints.join(" ")}` : "";
+  return `You're a smart business friend who just looked at ${periodLabel}'s numbers. Give a quick summary.
 
-  // Build story hints
-  const storyHints: string[] = [];
-  if (activity.upcomingInvoices?.count) {
-    storyHints.push(
-      "Mention the upcoming scheduled invoices as expected revenue.",
-    );
-  }
-  // Add expense anomaly story hints
-  if (expenseAnomalies.length > 0) {
-    storyHints.push(
-      "If relevant, briefly mention notable expense category changes.",
-    );
-  }
-  const storyHintsText =
-    storyHints.length > 0 ? ` ${storyHints.join(" ")}` : "";
-
-  return `You are a friendly business advisor helping a small business owner understand their ${periodName}ly performance.
-
-Period: ${periodLabel}
-
-Key Metrics:
+THE DATA:
 ${metricsContext}
+${anomaliesContext}${expenseAnomaliesContext}${unbilledContext}${upcomingContext}${overdueContext}
 
-Notable Changes:
-${anomaliesContext}${expenseAnomaliesContext}${upcomingContext}${overdueContext}
+WRITE THIS:
 
-Generate a business insight summary with these exact sections:
+1. TITLE (max 15 words): A natural summary combining key numbers.
+   REQUIRED FORMAT: "Revenue [X], Expenses [Y], Net [Z]. [One other metric]. [Short sentiment]!"
+   
+   - Always start with "Revenue", "Expenses", and "Net" (if revenue > 0).
+   - Use the EXACT currency format from the data.
+   - Add exactly one other relevant metric (hours, overdue, customers).
+   - End with a very short 2-word sentiment (e.g., "Strong week!", "Quiet week!", "Tough week!", "Nice progress!").
+   
+   CORRECT Examples:
+   - "Revenue $4,200, Expenses $1,800, Net $2,400. 3 new customers. Strong week!"
+   - "Revenue $0, Expenses $17K. 4.8 hours tracked. Quiet week."
+   - "Revenue €2,100, Expenses €1,200, Net €900. All paid. Solid week!"
+   - "Revenue $0, Expenses $1,200. $4.5K in overdue invoices. Tough week."
 
-1. SENTIMENT: Assess the overall week. Choose ONE of:
-   - "positive" (good week: revenue up, profits healthy, progress made)
-   - "neutral" (mixed results, some wins and some challenges, stable)
-   - "challenging" (difficult week: revenue down significantly, cash flow issues, concerning trends)
+2. SENTIMENT: Pick one: "positive" | "neutral" | "challenging"
 
-2. OPENER (1-2 sentences): A context-aware opening that matches the sentiment.
-   - If positive: Lead with the win, be encouraging
-   - If neutral: Acknowledge the mixed results, be balanced
-   - If challenging: Be empathetic and supportive, acknowledge difficulty without catastrophizing
+3. OPENER (max 10 words): The single most important thing. Be blunt.
+   Good: "Slow week—hours dropped 59%."
+   Good: "Revenue up 25%, nice work."
+   Good: "You've got $4,500 in overdue invoices."
+   Bad: "This week presented some challenges..." (too vague)
 
-3. STORY (2-3 sentences): Explain what happened this ${periodName} in plain language. Connect the dots between metrics. Don't just repeat numbers - explain what they mean.${storyHintsText}
+4. STORY (exactly 2 sentences): Connect the dots between 2-3 data points. Use specific numbers and names.
+   Good: "Hours tracked fell but you categorized more expenses. The $900 Lost Island invoice is ready to send."
+   Bad: "There were mixed results this week with some areas improving." (no specifics)
 
-4. ACTIONS (3-4 bullet points): Specific, actionable recommendations. Each should be concrete and achievable this ${periodName}. Format as short imperative sentences.${actionHintsText}
+5. ACTIONS (exactly 2 items): What to DO. Be specific with names and amounts.
+   Good: "Send the $900 Lost Island invoice."
+   Good: "Review why professional services jumped to $17K."
+   Bad: "Consider reviewing expense categories." (too vague)
 
-5. CELEBRATION (optional, 1 sentence): If there's a milestone, streak, or achievement worth celebrating, mention it. Otherwise, leave empty.
+6. CELEBRATION: Only if there's a genuine win. Otherwise return null.
+   Good: "First week with all invoices paid on time!"
+   Leave null if nothing worth celebrating.
 
-Tone: Warm, professional, supportive. Like a trusted advisor who tells you the truth while genuinely caring about your success. Don't force positivity when things are tough - be honest but constructive.`;
+RULES:
+- Use actual numbers, names, and amounts from the data
+- No corporate speak or filler words
+- Talk like you're texting a friend who asked "how's my business doing?"
+- If something needs attention, say it directly`;
 }
 
 /**
@@ -238,24 +242,24 @@ Tone: Warm, professional, supportive. Like a trusted advisor who tells you the t
  */
 export function getFallbackContent(
   periodLabel: string,
-  periodType: PeriodType,
+  _periodType: PeriodType,
 ): {
+  title: string;
   sentiment: InsightSentiment;
   opener: string;
   story: string;
-  actions: Array<{ text: string; type?: string }>;
+  actions: Array<{ text: string }>;
   celebration?: string;
 } {
-  const periodName = getPeriodName(periodType);
-
   return {
+    title: `${periodLabel} summary`,
     sentiment: "neutral",
-    opener: `Your ${periodName}ly summary for ${periodLabel} is ready.`,
-    story: `Here's a snapshot of your business performance. Review the key metrics to understand how things are progressing.`,
+    opener: `${periodLabel} summary ready.`,
+    story:
+      "Check your dashboard for the detailed numbers. The key metrics are waiting for your review.",
     actions: [
-      { text: "Review your top expense categories", type: "review" },
-      { text: "Follow up on any pending invoices", type: "follow_up" },
-      { text: "Check your cash flow forecast", type: "review" },
+      { text: "Review your numbers in the dashboard" },
+      { text: "Check any pending invoices" },
     ],
   };
 }

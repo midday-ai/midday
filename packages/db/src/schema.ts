@@ -3873,6 +3873,9 @@ export const insights = pgTable(
 
     currency: varchar({ length: 3 }).notNull(),
 
+    // AI-generated title (for card headers and email subjects)
+    title: text(),
+
     // AI-generated content (relief-first structure)
     content: jsonb().$type<InsightContent>(),
 

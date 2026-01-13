@@ -442,9 +442,12 @@ export {
 
 // Re-export period utilities
 export {
+  calculateNextInsightTime,
+  DEFAULT_INSIGHT_HOUR,
   formatDateForQuery,
   formatDateForStorage,
   getCurrentPeriod,
+  getInitialInsightSchedule,
   getPeriodInfo,
   getPeriodLabel,
   getPreviousCompletePeriod,

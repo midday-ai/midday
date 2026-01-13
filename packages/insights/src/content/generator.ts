@@ -20,31 +20,35 @@ const openai = createOpenAI({
 
 /**
  * Schema for AI-generated content
+ * Note: OpenAI structured output requires all properties to be required,
+ * so we use nullable() instead of optional() for optional fields.
  */
 const insightContentSchema = z.object({
+  title: z
+    .string()
+    .describe(
+      "Exactly one sentence. Format: 'Revenue $X, Expenses $Y, Net $Z. [Other metric]. [Sentiment]!'. Use actual numbers and currency symbol from data.",
+    ),
   sentiment: z
     .enum(["positive", "neutral", "challenging"])
-    .describe("Overall assessment: positive, neutral, or challenging"),
+    .describe("positive, neutral, or challenging"),
   opener: z
     .string()
-    .describe("1-2 sentences context-aware opening that matches the sentiment"),
-  story: z.string().describe("2-3 sentences explaining what happened"),
+    .describe("Max 10 words. The single most important insight."),
+  story: z
+    .string()
+    .describe("Exactly 2 sentences connecting specific data points."),
   actions: z
     .array(
       z.object({
-        text: z.string().describe("The action item text"),
-        type: z
-          .string()
-          .optional()
-          .describe("Type of action: review, send, follow_up, optimize"),
-        deepLink: z.string().optional().describe("Optional deep link path"),
+        text: z.string().describe("Specific action with names/amounts"),
       }),
     )
-    .describe("3-4 specific actionable recommendations"),
+    .describe("Exactly 2 specific actions"),
   celebration: z
     .string()
-    .optional()
-    .describe("Optional celebration message for milestones"),
+    .nullable()
+    .describe("A genuine win to celebrate, or null"),
 });
 
 type InsightContentOutput = z.infer<typeof insightContentSchema>;
@@ -89,7 +93,7 @@ export class ContentGenerator {
       const { object } = await generateObject({
         model: openai(this.model),
         schema: insightContentSchema,
-        temperature: 0.7,
+        temperature: 0.4, // Lower for more consistent, focused output
         messages: [
           {
             role: "user",
@@ -99,11 +103,14 @@ export class ContentGenerator {
       });
 
       return {
+        title: object.title,
         sentiment: object.sentiment,
         opener: object.opener,
         story: object.story,
-        actions: object.actions,
-        celebration: object.celebration,
+        actions: object.actions.map((action) => ({
+          text: action.text,
+        })),
+        celebration: object.celebration ?? undefined,
       };
     } catch (error) {
       console.error(
