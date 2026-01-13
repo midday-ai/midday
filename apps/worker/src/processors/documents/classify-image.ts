@@ -70,8 +70,10 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
 
     try {
       const classifier = new DocumentClassifier();
+      // Convert Buffer to ArrayBuffer for classifier
+      const arrayBuffer = new Uint8Array(imageContent).buffer;
       classificationResult = await withTimeout(
-        classifier.classifyImage({ content: imageContent }),
+        classifier.classifyImage({ content: arrayBuffer }),
         TIMEOUTS.AI_CLASSIFICATION,
         `Image classification timed out after ${TIMEOUTS.AI_CLASSIFICATION}ms`,
       );
