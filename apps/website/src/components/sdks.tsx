@@ -462,14 +462,14 @@ run();`} language="typescript" />
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <Button
                     variant="outline"
-                    onClick={() => router.push("/docs")}
+                    onClick={() => window.location.href = 'https://github.com/midday-ai/midday-ts'}
                     className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
                   >
                     View TypeScript docs
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => router.push("/docs/examples")}
+                    onClick={() => window.location.href = 'https://github.com/midday-ai/midday-ts'}
                     className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
                   >
                     See examples
@@ -530,14 +530,14 @@ func main() {
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <Button
                     variant="outline"
-                    onClick={() => router.push("/docs")}
+                    onClick={() => window.location.href = 'https://github.com/midday-ai/midday-go'}
                     className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
                   >
                     View Go docs
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => router.push("/docs/examples")}
+                    onClick={() => window.location.href = 'https://github.com/midday-ai/midday-go'}
                     className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
                   >
                     See examples
@@ -596,14 +596,14 @@ if ($response->object !== null) {
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <Button
                     variant="outline"
-                    onClick={() => router.push("/docs")}
+                    onClick={() => window.location.href = 'https://github.com/midday-ai/midday-php'}
                     className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
                   >
                     View PHP docs
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => router.push("/docs/examples")}
+                    onClick={() => window.location.href = 'https://github.com/midday-ai/midday-php'}
                     className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
                   >
                     See examples
@@ -743,7 +743,9 @@ if ($response->object !== null) {
                 </p>
               </Link>
               <Link
-                href="/docs"
+                href="https://api.midday.ai"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="bg-secondary border border-border p-6 hover:border-foreground/20 transition-colors group flex flex-col items-center text-center"
               >
                 <div className="mb-4 flex items-center justify-center">
