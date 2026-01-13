@@ -37,7 +37,7 @@ export function PricingSection() {
                 </div>
               </div>
 
-              <div className="flex-1 space-y-1 border-t border-border pt-8 pb-6">
+              <div className="flex-1 space-y-1 border-t border-border pt-6 pb-6">
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
@@ -129,7 +129,7 @@ export function PricingSection() {
                 </div>
               </div>
 
-              <div className="flex-1 space-y-1 border-t border-border pt-8 pb-6">
+              <div className="flex-1 space-y-1 border-t border-border pt-6 pb-6">
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
