@@ -67,3 +67,14 @@ export const TIMEOUTS = {
   // Using 180s to ensure parent job doesn't timeout while child classification is valid
   // This prevents race conditions where parent marks "failed" but child completes "completed"
 } as const;
+
+/**
+ * Image size configurations for processing
+ * Based on research: 2048px is optimal for vision models + OCR
+ * - Preserves text legibility (x-height >= 20px for receipts)
+ * - Within all major AI model limits (Gemini, GPT-4V, Claude)
+ * - Good balance between OCR quality and processing speed
+ */
+export const IMAGE_SIZES = {
+  MAX_DIMENSION: 2048, // Max width/height for image processing
+} as const;

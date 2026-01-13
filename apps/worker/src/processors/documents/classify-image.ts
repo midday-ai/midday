@@ -7,6 +7,7 @@ import type { ClassifyImagePayload } from "../../schemas/documents";
 import { getDb } from "../../utils/db";
 import { updateDocumentWithRetry } from "../../utils/document-update";
 import { NonRetryableError } from "../../utils/error-classification";
+import { resizeImage } from "../../utils/image-processing";
 import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";
 
@@ -53,7 +54,15 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
       throw new NonRetryableError("File not found", undefined, "validation");
     }
 
-    const imageContent = await fileData.arrayBuffer();
+    const rawImageContent = await fileData.arrayBuffer();
+
+    // Resize image for optimal AI processing (2048px max dimension)
+    // This improves processing speed and reduces token costs while maintaining OCR quality
+    const { buffer: imageContent } = await resizeImage(
+      rawImageContent,
+      fileData.type || "image/jpeg",
+      this.logger,
+    );
 
     // Attempt AI classification with graceful fallback
     let classificationResult: ImageClassificationResult | null = null;

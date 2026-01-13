@@ -13,7 +13,7 @@ import type { Job } from "bullmq";
 import type { ProcessAttachmentPayload } from "../../schemas/inbox";
 import { getDb } from "../../utils/db";
 import { NonRetryableError } from "../../utils/error-classification";
-import { convertHeicToJpeg } from "../../utils/heic-converter";
+import { convertHeicToJpeg } from "../../utils/image-processing";
 import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";
 

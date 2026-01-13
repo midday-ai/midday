@@ -31,7 +31,7 @@ graph TB
     end
     
     subgraph api [API Layer]
-        Router[documents router]
+        ProcessAPI[processDocument]
         Reprocess[reprocessDocument]
     end
     
@@ -46,13 +46,13 @@ graph TB
         ClassifyDoc[classify-document]
         ClassifyImg[classify-image]
         EmbedTags[embed-document-tags]
-        Cleanup[cleanup-stale-documents]
     end
     
     Upload --> Bucket
     Bucket --> Trigger
     Trigger --> Documents
-    Trigger --> ProcessDoc
+    Upload -->|after upload| ProcessAPI
+    ProcessAPI --> ProcessDoc
     
     ProcessDoc -->|PDF/text| ClassifyDoc
     ProcessDoc -->|image| ClassifyImg
@@ -67,8 +67,6 @@ graph TB
     VaultItem -->|retry| Reprocess
     DataTable -->|retry| Reprocess
     Reprocess --> ProcessDoc
-    
-    Cleanup -->|scheduled| Documents
 ```
 
 ## Data Model
@@ -188,7 +186,6 @@ sequenceDiagram
 | `classify-document` | process-document | AI text classification | 90 sec |
 | `classify-image` | process-document | AI vision classification | 90 sec + 60 sec download |
 | `embed-document-tags` | classify-* | Generate tag embeddings | 30 sec |
-| `cleanup-stale-documents` | Scheduler | Mark stale docs as failed | 60 sec |
 
 ### Job Deduplication
 
@@ -345,9 +342,7 @@ const reprocessMutation = useMutation({
 
 ## Stale Document Detection
 
-### Client-Side Detection
-
-Documents pending >10 minutes are considered "stale" and show retry option:
+Documents pending >10 minutes are considered "stale" and show retry option in the UI:
 
 ```typescript
 const isStaleProcessing =
@@ -362,67 +357,93 @@ const isLoading = data.processingStatus === "pending" && !isStaleProcessing;
 const showRetry = isFailed || needsClassification || isStaleProcessing;
 ```
 
-### Server-Side Cleanup (Scheduled)
+This client-side detection allows users to manually retry documents that appear stuck without requiring a server-side cleanup job.
 
-A scheduled job runs every 5 minutes to mark truly stuck documents:
+## Image Optimization
 
-```typescript
-// cleanup-stale-documents processor
-const staleThreshold = new Date(Date.now() - 10 * 60 * 1000);
+All images are resized before AI processing to optimize for speed, cost, and OCR quality.
 
-const staleDocuments = await db
-  .select()
-  .from(documents)
-  .where(
-    and(
-      eq(documents.processingStatus, "pending"),
-      sql`${documents.createdAt} < ${staleThreshold}::timestamp`
-    )
-  )
-  .limit(100);
+### Why 2048px?
 
-// Batch update to failed
-await db
-  .update(documents)
-  .set({ processingStatus: "failed" })
-  .where(inArray(documents.id, staleIds));
-```
+The `IMAGE_SIZES.MAX_DIMENSION` constant (2048px) was chosen based on research:
 
-## HEIC Image Handling
+| Factor | Consideration |
+|--------|---------------|
+| **OCR Quality** | Text x-height ≥20px required for accurate OCR. 2048px preserves legibility for receipt small print (~400 DPI equivalent) |
+| **AI Model Limits** | Within optimal ranges: Gemini (≤3072), GPT-4V (≤2048), Claude (≤1568) |
+| **Performance** | Smaller images = fewer tokens = faster response + lower costs |
+| **Aspect Ratio** | Uses `fit: "inside"` to maintain proportions without cropping |
 
-### Conversion Flow
+### Image Processing Flow
 
 ```mermaid
 flowchart TD
-    A[HEIC File Uploaded] --> B{Try Sharp}
-    B -->|Success| C[JPEG Buffer]
-    B -->|Failure| D{Try heic-convert}
-    D -->|Success| E[Raw JPEG]
-    D -->|Failure| F[Error: Unsupported]
+    A[Image Uploaded] --> B{Is HEIC?}
+    B -->|Yes| C[convertHeicToJpeg]
+    B -->|No| D[resizeImage]
     
-    E --> G[Sharp: Resize + Rotate]
-    G --> C
+    C --> E[Two-stage conversion]
+    E --> F{Try Sharp}
+    F -->|Success| G[JPEG @ 2048px]
+    F -->|Failure| H[heic-convert fallback]
+    H --> I[Sharp resize]
+    I --> G
     
-    C --> H[Upload to Storage]
-    H --> I[Continue to Classification]
+    D --> J{Size > 2048px?}
+    J -->|Yes| K[Resize to fit 2048px]
+    J -->|No| L[Keep original]
+    K --> M[Continue to AI]
+    L --> M
+    G --> M
 ```
 
 ### Implementation
 
 ```typescript
-// heic-converter.ts - Two-stage approach
+// image-processing.ts - Centralized image utilities
+
+// Resize any image to fit within max dimensions
+export async function resizeImage(
+  inputBuffer: ArrayBuffer,
+  mimetype: string,
+  logger: Logger,
+  options?: { maxSize?: number }
+): Promise<{ buffer: Buffer; mimetype: string }> {
+  const maxSize = options?.maxSize ?? IMAGE_SIZES.MAX_DIMENSION; // 2048px
+  
+  // Skip unsupported formats
+  if (!RESIZABLE_MIMETYPES.has(mimetype)) {
+    return { buffer: Buffer.from(inputBuffer), mimetype };
+  }
+  
+  // Skip if already within size limits
+  const metadata = await sharp(Buffer.from(inputBuffer)).metadata();
+  if (metadata.width <= maxSize && metadata.height <= maxSize) {
+    return { buffer: Buffer.from(inputBuffer), mimetype };
+  }
+  
+  // Resize maintaining aspect ratio
+  const buffer = await sharp(Buffer.from(inputBuffer))
+    .rotate()
+    .resize({ width: maxSize, height: maxSize, fit: "inside" })
+    .toBuffer();
+  
+  return { buffer, mimetype };
+}
+
+// HEIC conversion with resize
 export async function convertHeicToJpeg(
   inputBuffer: ArrayBuffer,
   logger: Logger,
   options?: { maxSize?: number }
 ): Promise<HeicConversionResult> {
-  const maxSize = options?.maxSize ?? 1500;
+  const maxSize = options?.maxSize ?? IMAGE_SIZES.MAX_DIMENSION; // 2048px
   
   // Try sharp first (handles HEIF/HEIC + mislabeled files)
   try {
     const buffer = await sharp(Buffer.from(inputBuffer))
       .rotate()
-      .resize({ width: maxSize })
+      .resize({ width: maxSize, height: maxSize, fit: "inside" })
       .toFormat("jpeg")
       .toBuffer();
     return { buffer, mimetype: "image/jpeg" };
@@ -434,16 +455,27 @@ export async function convertHeicToJpeg(
       quality: 1,
     });
     
-    // Process with sharp for resize
     const buffer = await sharp(Buffer.from(decodedImage))
       .rotate()
-      .resize({ width: maxSize })
+      .resize({ width: maxSize, height: maxSize, fit: "inside" })
       .toFormat("jpeg")
       .toBuffer();
     return { buffer, mimetype: "image/jpeg" };
   }
 }
 ```
+
+### Supported Image Types
+
+| Mimetype | Resize | HEIC Conversion |
+|----------|--------|-----------------|
+| `image/jpeg` | ✅ | - |
+| `image/png` | ✅ | - |
+| `image/webp` | ✅ | - |
+| `image/gif` | ✅ | - |
+| `image/tiff` | ✅ | - |
+| `image/heic` | Via conversion | ✅ |
+| `image/heif` | Via conversion | ✅ |
 
 ## Timeout Configuration
 
@@ -456,6 +488,11 @@ export const TIMEOUTS = {
   FILE_DOWNLOAD: 60_000,         // 1 minute - storage downloads
   FILE_UPLOAD: 60_000,           // 1 minute - storage uploads
   EMBEDDING: 30_000,             // 30 seconds - embedding generation
+} as const;
+
+// Image size constants
+export const IMAGE_SIZES = {
+  MAX_DIMENSION: 2048,  // Optimal for vision models + OCR
 } as const;
 
 // Usage with timeout wrapper
@@ -485,9 +522,8 @@ This ensures parent jobs don't timeout while child jobs are still valid.
 | [`apps/worker/src/processors/documents/classify-document.ts`](../apps/worker/src/processors/documents/classify-document.ts) | AI text classification with graceful degradation |
 | [`apps/worker/src/processors/documents/classify-image.ts`](../apps/worker/src/processors/documents/classify-image.ts) | AI vision classification with graceful degradation |
 | [`apps/worker/src/processors/documents/embed-document-tags.ts`](../apps/worker/src/processors/documents/embed-document-tags.ts) | Tag embedding generation |
-| [`apps/worker/src/processors/documents/cleanup-stale-documents.ts`](../apps/worker/src/processors/documents/cleanup-stale-documents.ts) | Scheduled stale document cleanup |
 | [`apps/worker/src/queues/documents.config.ts`](../apps/worker/src/queues/documents.config.ts) | Queue configuration and failure handlers |
-| [`apps/worker/src/utils/heic-converter.ts`](../apps/worker/src/utils/heic-converter.ts) | HEIC to JPEG conversion utility |
+| [`apps/worker/src/utils/image-processing.ts`](../apps/worker/src/utils/image-processing.ts) | Image resize and HEIC conversion utilities |
 | [`apps/worker/src/utils/document-update.ts`](../apps/worker/src/utils/document-update.ts) | Document update with retry for race conditions |
 | [`apps/worker/src/utils/error-classification.ts`](../apps/worker/src/utils/error-classification.ts) | Error categorization and retry strategies |
 | [`apps/worker/src/utils/timeout.ts`](../apps/worker/src/utils/timeout.ts) | Timeout constants and wrapper utility |
