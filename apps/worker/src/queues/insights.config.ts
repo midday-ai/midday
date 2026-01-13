@@ -4,6 +4,12 @@ import { DEFAULT_JOB_OPTIONS } from "../config/job-options";
 import type { QueueConfig } from "../types/queue-config";
 
 /**
+ * Job timeout in milliseconds (5 minutes)
+ * Jobs exceeding this will be marked as failed to prevent hung workers
+ */
+const JOB_TIMEOUT_MS = 5 * 60 * 1000;
+
+/**
  * Queue options for insights queue
  */
 const insightsQueueOptions: QueueOptions = {
@@ -22,13 +28,23 @@ const insightsQueueOptions: QueueOptions = {
 
 /**
  * Worker options for insights queue
- * Concurrency: 5 - insights generation involves AI calls and should be rate limited
+ * Rate limited to prevent overwhelming external APIs (ElevenLabs, AI providers)
+ *
+ * With 15s dispatch delay + 15s rate limiter:
+ * - 100 teams in same timezone = ~28 minutes total processing time
+ * - Insights arrive between 7:00 AM - 7:28 AM local time
+ *
+ * Timeout: Jobs exceeding 5 minutes are automatically failed to prevent hung workers
  */
 const insightsWorkerOptions: WorkerOptions = {
   connection: getRedisConnection(),
-  concurrency: 5,
-  lockDuration: 120000, // 2 minutes - AI generation can take time
-  stalledInterval: 180000, // 3 minutes
+  concurrency: 2, // Only 2 jobs at once
+  lockDuration: JOB_TIMEOUT_MS, // 5 minutes - must cover full job duration
+  stalledInterval: 60000, // Check for stalled jobs every minute
+  limiter: {
+    max: 1, // 1 job per 15 seconds
+    duration: 15000,
+  },
 };
 
 /**

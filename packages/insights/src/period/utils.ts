@@ -2,6 +2,9 @@
  * Period date utilities for insights
  */
 import {
+  addMonths,
+  addWeeks,
+  addYears,
   endOfMonth,
   endOfQuarter,
   endOfWeek,
@@ -11,6 +14,7 @@ import {
   getMonth,
   getQuarter,
   getYear,
+  nextMonday,
   setISOWeek,
   setISOWeekYear,
   startOfMonth,
@@ -283,4 +287,202 @@ export function getCurrentPeriod(
     default:
       throw new Error(`Unknown period type: ${periodType}`);
   }
+}
+
+/** Default hour for insights delivery (7 AM) */
+export const DEFAULT_INSIGHT_HOUR = 7;
+
+/**
+ * Calculate the next scheduled time for insight generation.
+ *
+ * Schedules insights to be delivered at a specific local time (default 7 AM).
+ * - Weekly: Next Monday at target hour
+ * - Monthly: 1st of next month at target hour
+ * - Quarterly: 1st of next quarter at target hour
+ * - Yearly: January 1st at target hour
+ *
+ * @param periodType - Type of period (weekly, monthly, quarterly, yearly)
+ * @param timezone - IANA timezone string (e.g., "Europe/Stockholm")
+ * @param targetHour - Hour in local time to deliver (0-23, default 7)
+ * @param referenceDate - Reference date to calculate from (default: now)
+ * @returns Date object representing the next scheduled time in UTC
+ */
+export function calculateNextInsightTime(
+  periodType: PeriodType,
+  timezone: string = "UTC",
+  targetHour: number = DEFAULT_INSIGHT_HOUR,
+  referenceDate: Date = new Date(),
+): Date {
+  // Get the next period boundary
+  let nextDate: Date;
+
+  switch (periodType) {
+    case "weekly": {
+      // Next Monday
+      nextDate = nextMonday(referenceDate);
+      break;
+    }
+    case "monthly": {
+      // 1st of next month
+      const nextMonth = addMonths(startOfMonth(referenceDate), 1);
+      nextDate = nextMonth;
+      break;
+    }
+    case "quarterly": {
+      // 1st of next quarter
+      const currentQuarter = getQuarter(referenceDate);
+      const currentYear = getYear(referenceDate);
+
+      if (currentQuarter === 4) {
+        // Next quarter is Q1 of next year
+        nextDate = new Date(currentYear + 1, 0, 1);
+      } else {
+        // Next quarter starts at month (currentQuarter * 3)
+        nextDate = new Date(currentYear, currentQuarter * 3, 1);
+      }
+      break;
+    }
+    case "yearly": {
+      // January 1st of next year
+      const year = getYear(referenceDate);
+      nextDate = new Date(year + 1, 0, 1);
+      break;
+    }
+    default:
+      throw new Error(`Unknown period type: ${periodType}`);
+  }
+
+  // Set the target hour in the specified timezone
+  // We create a date string in the target timezone and parse it back to UTC
+  return setHourInTimezone(nextDate, targetHour, timezone);
+}
+
+/**
+ * Set a specific hour in a given timezone and return as UTC Date.
+ *
+ * @param date - Base date (only year, month, day are used)
+ * @param hour - Target hour (0-23) in the specified timezone
+ * @param timezone - IANA timezone string
+ * @returns Date object representing that moment in UTC
+ */
+function setHourInTimezone(date: Date, hour: number, timezone: string): Date {
+  // Format the date components we need
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hourStr = String(hour).padStart(2, "0");
+
+  // Create an ISO string for that local time
+  // We'll use the timezone-aware Date constructor behavior
+  const localDateStr = `${year}-${month}-${day}T${hourStr}:00:00`;
+
+  // Use Intl to get the UTC offset for this specific datetime in the timezone
+  try {
+    // Create a temporary date to get the offset
+    const tempDate = new Date(localDateStr);
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+
+    // Get parts in the target timezone
+    const parts = formatter.formatToParts(tempDate);
+    const getPart = (type: string) =>
+      parts.find((p) => p.type === type)?.value ?? "0";
+
+    // The current UTC time formatted in target timezone
+    const tzYear = Number.parseInt(getPart("year"), 10);
+    const tzMonth = Number.parseInt(getPart("month"), 10);
+    const tzDay = Number.parseInt(getPart("day"), 10);
+    const tzHour = Number.parseInt(getPart("hour"), 10);
+
+    // Calculate the offset: what UTC time gives us the target local time?
+    // We need to find UTC time such that when converted to timezone, it equals our target
+    // Start with a guess and adjust
+    const targetUtc = new Date(
+      Date.UTC(year, date.getMonth(), date.getDate(), hour, 0, 0),
+    );
+
+    // Check what local time this UTC gives us
+    const checkParts = formatter.formatToParts(targetUtc);
+    const checkHour = Number.parseInt(
+      checkParts.find((p) => p.type === "hour")?.value ?? "0",
+      10,
+    );
+    const checkDay = Number.parseInt(
+      checkParts.find((p) => p.type === "day")?.value ?? "0",
+      10,
+    );
+
+    // Calculate hour difference
+    let hourDiff = checkHour - hour;
+    let dayDiff = checkDay - date.getDate();
+
+    // Adjust for day boundary
+    if (dayDiff > 0) hourDiff += 24;
+    if (dayDiff < 0) hourDiff -= 24;
+
+    // Adjust UTC time to compensate
+    const adjustedUtc = new Date(targetUtc.getTime() - hourDiff * 60 * 60 * 1000);
+
+    return adjustedUtc;
+  } catch {
+    // Fallback to UTC if timezone is invalid
+    return new Date(Date.UTC(year, date.getMonth(), date.getDate(), hour, 0, 0));
+  }
+}
+
+/**
+ * Get the initial next_at time for a newly enabled team.
+ * If we're past the delivery time today, schedule for the next occurrence.
+ *
+ * @param periodType - Type of period
+ * @param timezone - Team's timezone
+ * @param targetHour - Target delivery hour
+ */
+export function getInitialInsightSchedule(
+  periodType: PeriodType,
+  timezone: string = "UTC",
+  targetHour: number = DEFAULT_INSIGHT_HOUR,
+): Date {
+  const now = new Date();
+
+  // Calculate next occurrence
+  const nextTime = calculateNextInsightTime(
+    periodType,
+    timezone,
+    targetHour,
+    now,
+  );
+
+  // If the next time is in the past (shouldn't happen normally), add one period
+  if (nextTime <= now) {
+    // Recalculate from one period ahead
+    let futureRef: Date;
+    switch (periodType) {
+      case "weekly":
+        futureRef = addWeeks(now, 1);
+        break;
+      case "monthly":
+        futureRef = addMonths(now, 1);
+        break;
+      case "quarterly":
+        futureRef = addMonths(now, 3);
+        break;
+      case "yearly":
+        futureRef = addYears(now, 1);
+        break;
+      default:
+        futureRef = addWeeks(now, 1);
+    }
+    return calculateNextInsightTime(periodType, timezone, targetHour, futureRef);
+  }
+
+  return nextTime;
 }

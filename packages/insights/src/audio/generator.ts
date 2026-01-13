@@ -20,10 +20,25 @@ function getElevenLabsClient(): ElevenLabsClient {
 
 /**
  * Default voice ID for Eleven v3
+ * "George" - Professional, warm, clear business voice
  * Can be overridden via ELEVENLABS_VOICE_ID env var
  * See available voices at: https://elevenlabs.io/voice-library
  */
-const DEFAULT_VOICE_ID = "JBFqnCBsd6RMkjVDRZzb"; // Default v3 voice
+const DEFAULT_VOICE_ID = "JBFqnCBsd6RMkjVDRZzb"; // George - warm, professional
+
+/**
+ * Voice settings optimized for business insights
+ * - stability: 0.5 = balanced between consistent and expressive
+ * - similarity_boost: 0.8 = close to natural voice
+ * - style: 0.3 = slight expressiveness without being dramatic
+ * - speed: 1.1 = slightly faster for efficient delivery
+ */
+const VOICE_SETTINGS = {
+  stability: 0.5,
+  similarity_boost: 0.8,
+  style: 0.3,
+  use_speaker_boost: true,
+};
 
 function getVoiceId(): string {
   return process.env.ELEVENLABS_VOICE_ID || DEFAULT_VOICE_ID;
@@ -48,11 +63,11 @@ export async function generateAudio(script: string): Promise<Buffer> {
   const voiceId = getVoiceId();
 
   // Use convert() for full audio buffer (not streaming)
-  // v2.x uses camelCase for parameters
   const audioStream = await client.textToSpeech.convert(voiceId, {
     text: script,
     modelId: "eleven_v3", // Use v3 for audio tag support
     outputFormat: "mp3_44100_128", // High quality MP3
+    voiceSettings: VOICE_SETTINGS,
   });
 
   // ReadableStream to Buffer conversion

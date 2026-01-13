@@ -1,4 +1,5 @@
 import {
+  checkInsightDataQuality,
   createInsight,
   getInsightByPeriod,
   updateInsight,
@@ -7,6 +8,7 @@ import type { InsightMetric } from "@midday/db/schema";
 import {
   type PeriodType,
   createInsightsService,
+  formatDateForQuery,
   getPeriodInfo,
   getPeriodLabel,
 } from "@midday/insights";
@@ -29,14 +31,17 @@ type GenerateTeamInsightsPayload = {
   periodYear: number;
   periodNumber: number;
   currency: string;
+  /** If true, bypass data quality checks (for testing) */
+  skipDataQualityCheck?: boolean;
 };
 
 type ProcessResult = {
-  insightId: string;
+  insightId?: string;
   teamId: string;
   periodLabel: string;
   metricsCount: number;
-  status: "created" | "updated" | "skipped";
+  status: "created" | "updated" | "skipped" | "skipped_insufficient_data";
+  skipReason?: string;
 };
 
 /**
@@ -51,7 +56,14 @@ type ProcessResult = {
  */
 export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsightsPayload> {
   async process(job: Job<GenerateTeamInsightsPayload>): Promise<ProcessResult> {
-    const { teamId, periodType, periodYear, periodNumber, currency } = job.data;
+    const {
+      teamId,
+      periodType,
+      periodYear,
+      periodNumber,
+      currency,
+      skipDataQualityCheck,
+    } = job.data;
     const db = getDb();
 
     this.logger.info("Starting insight generation", {
@@ -59,6 +71,7 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
       periodType,
       periodYear,
       periodNumber,
+      skipDataQualityCheck: !!skipDataQualityCheck,
     });
 
     // Check if insight already exists
@@ -85,6 +98,43 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
 
     // Get period info from the job payload (not recalculated from current date)
     const period = getPeriodInfo(periodType, periodYear, periodNumber);
+
+    // Check data quality before generating (unless explicitly skipped for testing)
+    if (!skipDataQualityCheck) {
+      const dataQuality = await checkInsightDataQuality(db, {
+        teamId,
+        periodStart: formatDateForQuery(period.periodStart),
+        periodEnd: formatDateForQuery(period.periodEnd),
+      });
+
+      if (!dataQuality.hasSufficientData) {
+        this.logger.info(
+          "Skipping insight generation due to insufficient data",
+          {
+            teamId,
+            periodType,
+            periodLabel: period.periodLabel,
+            skipReason: dataQuality.skipReason,
+            metrics: dataQuality.metrics,
+          },
+        );
+
+        return {
+          teamId,
+          periodLabel: period.periodLabel,
+          metricsCount: 0,
+          status: "skipped_insufficient_data",
+          skipReason: dataQuality.skipReason,
+        };
+      }
+
+      this.logger.info("Data quality check passed", {
+        teamId,
+        metrics: dataQuality.metrics,
+      });
+    } else {
+      this.logger.warn("Skipping data quality check (force mode)", { teamId });
+    }
 
     // Create or update insight record with "generating" status
     let insightId: string;
@@ -193,6 +243,7 @@ export class GenerateInsightsProcessor extends BaseProcessor<GenerateTeamInsight
         id: insightId,
         teamId,
         status: "completed",
+        title: result.content.title,
         selectedMetrics: result.selectedMetrics,
         allMetrics: result.allMetrics as Record<string, InsightMetric>,
         anomalies: result.anomalies,

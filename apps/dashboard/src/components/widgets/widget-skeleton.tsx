@@ -7,9 +7,9 @@ interface WidgetSkeletonProps {
    */
   title: string;
   /**
-   * Widget icon - shown immediately
+   * Widget icon - shown immediately (optional)
    */
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   /**
    * Number of description lines to show as skeleton
    * @default 1
@@ -44,7 +44,7 @@ export function WidgetSkeleton({
         {/* Header - title and icon are shown immediately */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <span className="text-[#666666]">{icon}</span>
+            {icon && <span className="text-[#666666]">{icon}</span>}
             <h3 className="text-xs text-[#666666] font-medium">{title}</h3>
           </div>
         </div>

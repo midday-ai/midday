@@ -6,6 +6,8 @@ import {
   type InsightContent,
   type InsightMetric,
   type InsightMilestone,
+  bankAccounts,
+  bankConnections,
   customers,
   inbox,
   type insightPeriodTypeEnum,
@@ -17,7 +19,17 @@ import {
   trackerProjects,
   transactions,
 } from "@db/schema";
-import { and, desc, eq, gte, isNotNull, isNull, lte, sql } from "drizzle-orm";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gte,
+  isNotNull,
+  isNull,
+  lte,
+  sql,
+} from "drizzle-orm";
 
 /**
  * Insight type returned from database queries
@@ -63,6 +75,7 @@ export type UpdateInsightParams = {
   id: string;
   teamId: string;
   status?: (typeof insightStatusEnum.enumValues)[number];
+  title?: string;
   selectedMetrics?: InsightMetric[];
   allMetrics?: Record<string, InsightMetric>;
   anomalies?: InsightAnomaly[];
@@ -734,5 +747,164 @@ export async function getInsightsForUser(
       ...row.insight,
       userStatus: row.userStatus,
     })),
+  };
+}
+
+// ============================================================================
+// DATA QUALITY CHECK
+// ============================================================================
+
+/**
+ * Minimum thresholds for generating meaningful insights
+ */
+export const DATA_QUALITY_THRESHOLDS = {
+  /** Minimum number of transactions in the period */
+  MIN_TRANSACTIONS: 3,
+  /** Maximum days since last bank sync (to ensure data freshness)
+   * Set to 7 to account for weekends (2-3 days) + bank sync delays (1-3 days) */
+  MAX_BANK_SYNC_AGE_DAYS: 7,
+  /** Minimum data points required (transactions + invoices) */
+  MIN_TOTAL_DATA_POINTS: 3,
+} as const;
+
+export type DataQualityResult = {
+  /** Whether the team has sufficient data for insights */
+  hasSufficientData: boolean;
+  /** Reason for skipping if insufficient */
+  skipReason?: string;
+  /** Detailed metrics about the data quality check */
+  metrics: {
+    transactionCount: number;
+    invoiceCount: number;
+    hasBankConnection: boolean;
+    lastBankSyncDate: Date | null;
+    bankSyncAgeDays: number | null;
+  };
+};
+
+/**
+ * Check if a team has sufficient data quality for meaningful insight generation.
+ *
+ * This prevents generating empty or misleading insights for teams with:
+ * - No transactions
+ * - No recent bank syncs
+ * - Minimal activity
+ */
+export async function checkInsightDataQuality(
+  db: Database,
+  params: {
+    teamId: string;
+    periodStart: string;
+    periodEnd: string;
+  },
+): Promise<DataQualityResult> {
+  const { teamId, periodStart, periodEnd } = params;
+
+  // Fetch data quality metrics in parallel
+  const [transactionResult, invoiceResult, bankConnectionResult] =
+    await Promise.all([
+      // Count transactions in the period
+      db
+        .select({ count: count() })
+        .from(transactions)
+        .where(
+          and(
+            eq(transactions.teamId, teamId),
+            gte(transactions.date, periodStart),
+            sql`${transactions.date} <= ${periodEnd}`,
+          ),
+        )
+        .then((r) => r[0]?.count ?? 0),
+
+      // Count invoices in the period (sent or paid)
+      db
+        .select({ count: count() })
+        .from(invoices)
+        .where(
+          and(
+            eq(invoices.teamId, teamId),
+            gte(invoices.issueDate, periodStart),
+            sql`${invoices.issueDate} <= ${periodEnd}`,
+          ),
+        )
+        .then((r) => r[0]?.count ?? 0),
+
+      // Get most recent bank sync
+      db
+        .select({
+          lastAccessed: bankConnections.lastAccessed,
+        })
+        .from(bankConnections)
+        .innerJoin(
+          bankAccounts,
+          eq(bankAccounts.bankConnectionId, bankConnections.id),
+        )
+        .where(
+          and(
+            eq(bankAccounts.teamId, teamId),
+            eq(bankAccounts.enabled, true),
+            isNotNull(bankConnections.lastAccessed),
+          ),
+        )
+        .orderBy(sql`${bankConnections.lastAccessed} DESC`)
+        .limit(1)
+        .then((r) => r[0]?.lastAccessed ?? null),
+    ]);
+
+  const transactionCount = transactionResult;
+  const invoiceCount = invoiceResult;
+  const lastBankSync = bankConnectionResult
+    ? new Date(bankConnectionResult)
+    : null;
+
+  // Calculate bank sync age
+  const bankSyncAgeDays = lastBankSync
+    ? Math.floor((Date.now() - lastBankSync.getTime()) / (1000 * 60 * 60 * 24))
+    : null;
+
+  const metrics: DataQualityResult["metrics"] = {
+    transactionCount,
+    invoiceCount,
+    hasBankConnection: lastBankSync !== null,
+    lastBankSyncDate: lastBankSync,
+    bankSyncAgeDays,
+  };
+
+  // Check 1: Minimum transactions
+  if (transactionCount < DATA_QUALITY_THRESHOLDS.MIN_TRANSACTIONS) {
+    // Allow if they have invoices instead (invoice-focused business)
+    const totalDataPoints = transactionCount + invoiceCount;
+    if (totalDataPoints < DATA_QUALITY_THRESHOLDS.MIN_TOTAL_DATA_POINTS) {
+      return {
+        hasSufficientData: false,
+        skipReason: `Insufficient data: only ${transactionCount} transactions and ${invoiceCount} invoices in period (minimum ${DATA_QUALITY_THRESHOLDS.MIN_TOTAL_DATA_POINTS} data points required)`,
+        metrics,
+      };
+    }
+  }
+
+  // Check 2: Bank sync freshness (only if they have bank connections)
+  if (lastBankSync && bankSyncAgeDays !== null) {
+    if (bankSyncAgeDays > DATA_QUALITY_THRESHOLDS.MAX_BANK_SYNC_AGE_DAYS) {
+      return {
+        hasSufficientData: false,
+        skipReason: `Stale bank data: last sync was ${bankSyncAgeDays} days ago (maximum ${DATA_QUALITY_THRESHOLDS.MAX_BANK_SYNC_AGE_DAYS} days allowed)`,
+        metrics,
+      };
+    }
+  }
+
+  // Check 3: No bank connection AND no invoices = probably not using the platform actively
+  if (!lastBankSync && invoiceCount === 0 && transactionCount === 0) {
+    return {
+      hasSufficientData: false,
+      skipReason: "No bank connection and no activity in period",
+      metrics,
+    };
+  }
+
+  return {
+    hasSufficientData: true,
+    metrics,
   };
 }

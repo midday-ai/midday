@@ -7,7 +7,8 @@
     "start": "bun run src/index.ts",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
-    "lint:fix": "biome check --write ."
+    "lint:fix": "biome check --write .",
+    "generate-insight": "bun run scripts/generate-test-insight.ts"
   },
   "dependencies": {
     "workbench": "workspace:*",
@@ -23,6 +24,7 @@
     "@midday/import": "workspace:*",
     "@midday/insights": "workspace:*",
     "@midday/invoice": "workspace:*",
+    "@midday/location": "workspace:*",
     "@midday/app-store": "workspace:*",
     "@midday/job-client": "workspace:*",
     "@midday/jobs": "workspace:*",
