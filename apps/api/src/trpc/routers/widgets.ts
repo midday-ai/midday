@@ -23,8 +23,8 @@ import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { widgetPreferencesCache } from "@midday/cache/widget-preferences-cache";
 import {
   getBillableHours,
+  getCashBalance,
   getCashFlow,
-  getCombinedAccountBalance,
   getCustomerLifetimeValue,
   getGrowthRate,
   getInboxStats,
@@ -242,7 +242,7 @@ export const widgetsRouter = createTRPCRouter({
   getAccountBalances: protectedProcedure
     .input(getAccountBalancesSchema)
     .query(async ({ ctx: { db, teamId }, input }) => {
-      const accountBalances = await getCombinedAccountBalance(db, {
+      const accountBalances = await getCashBalance(db, {
         teamId: teamId!,
         currency: input.currency,
       });

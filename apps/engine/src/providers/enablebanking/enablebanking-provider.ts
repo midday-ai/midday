@@ -51,7 +51,7 @@ export class EnableBankingProvider implements Provider {
   ): Promise<GetAccountBalanceResponse> {
     const response = await this.#api.getAccountBalance(params.accountId);
 
-    return transformBalance(response);
+    return transformBalance({ balance: response, accountType: params.accountType });
   }
 
   async getTransactions(

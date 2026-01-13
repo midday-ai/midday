@@ -279,11 +279,46 @@ test("Transform accounts", () => {
   ).toMatchSnapshot();
 });
 
-test("Transform account balance", () => {
+test("Transform account balance - depository", () => {
   expect(
     transformAccountBalance({
-      currency: "USD",
-      amount: 2011100,
+      balance: {
+        currency: "USD",
+        amount: 2011100,
+      },
+      accountType: "depository",
     }),
   ).toMatchSnapshot();
+});
+
+test("Transform account balance - credit with positive (stays positive)", () => {
+  // Teller returns positive values for credit card debt
+  expect(
+    transformAccountBalance({
+      balance: {
+        currency: "USD",
+        amount: 150000,
+      },
+      accountType: "credit",
+    }),
+  ).toEqual({
+    currency: "USD",
+    amount: 150000,
+  });
+});
+
+test("Transform account balance - credit with negative (normalized to positive)", () => {
+  // Safety: if Teller ever returns negative credit balance, normalize it
+  expect(
+    transformAccountBalance({
+      balance: {
+        currency: "USD",
+        amount: -150000,
+      },
+      accountType: "credit",
+    }),
+  ).toEqual({
+    currency: "USD",
+    amount: 150000,
+  });
 });

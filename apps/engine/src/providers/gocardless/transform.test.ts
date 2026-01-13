@@ -171,11 +171,155 @@ test("Transform credit card account (CARD type)", () => {
   expect(stableAccount).toMatchSnapshot();
 });
 
-test("Transform account balance", () => {
+test("Transform account balance - depository (positive stays positive)", () => {
   expect(
     transformAccountBalance({
-      currency: "SEK",
-      amount: "1942682.86",
+      balance: {
+        currency: "SEK",
+        amount: "1942682.86",
+      },
+      accountType: "depository",
     }),
   ).toMatchSnapshot();
+});
+
+test("Transform account balance - credit card with negative balance (normalized to positive)", () => {
+  // GoCardless stores credit card debt as NEGATIVE (e.g., -1500 means $1500 owed)
+  // We normalize to positive for consistency with other providers
+  expect(
+    transformAccountBalance({
+      balance: {
+        currency: "EUR",
+        amount: "-1500.00",
+      },
+      accountType: "credit",
+    }),
+  ).toEqual({
+    currency: "EUR",
+    amount: 1500,
+  });
+});
+
+test("Transform account balance - credit card with positive balance (overpayment stays positive)", () => {
+  // If someone overpays their credit card, the balance is positive (credit in their favor)
+  // This should stay positive
+  expect(
+    transformAccountBalance({
+      balance: {
+        currency: "EUR",
+        amount: "200.00",
+      },
+      accountType: "credit",
+    }),
+  ).toEqual({
+    currency: "EUR",
+    amount: 200,
+  });
+});
+
+test("Transform account balance - credit card with zero balance", () => {
+  expect(
+    transformAccountBalance({
+      balance: {
+        currency: "USD",
+        amount: "0.00",
+      },
+      accountType: "credit",
+    }),
+  ).toEqual({
+    currency: "USD",
+    amount: 0,
+  });
+});
+
+test("Transform account balance - no accountType provided", () => {
+  // When accountType is not provided, don't normalize (safety for backwards compatibility)
+  expect(
+    transformAccountBalance({
+      balance: {
+        currency: "EUR",
+        amount: "-500.00",
+      },
+    }),
+  ).toEqual({
+    currency: "EUR",
+    amount: -500,
+  });
+});
+
+test("Transform account balance - handles undefined balance gracefully", () => {
+  expect(
+    transformAccountBalance({
+      balance: undefined,
+      accountType: "depository",
+    }),
+  ).toEqual({
+    currency: "EUR",
+    amount: 0,
+  });
+});
+
+test("Transform account balance - very large credit card balance", () => {
+  // Verify large balances are normalized correctly
+  expect(
+    transformAccountBalance({
+      balance: {
+        currency: "USD",
+        amount: "-50000.00",
+      },
+      accountType: "credit",
+    }),
+  ).toEqual({
+    currency: "USD",
+    amount: 50000,
+  });
+});
+
+test("Transform account balance - decimal precision maintained", () => {
+  expect(
+    transformAccountBalance({
+      balance: {
+        currency: "EUR",
+        amount: "-1234.56",
+      },
+      accountType: "credit",
+    }),
+  ).toEqual({
+    currency: "EUR",
+    amount: 1234.56,
+  });
+});
+
+test("Transform account balance - loan type keeps negative (if bank reports that way)", () => {
+  // Note: GoCardless transform only normalizes credit cards, not loans
+  // Loans are typically reported as positive by banks anyway
+  // This test documents the current behavior
+  expect(
+    transformAccountBalance({
+      balance: {
+        currency: "GBP",
+        amount: "-25000.00",
+      },
+      accountType: "loan",
+    }),
+  ).toEqual({
+    currency: "GBP",
+    amount: -25000, // Not normalized (only credit type is normalized)
+  });
+});
+
+test("Transform account balance - loan type with positive value", () => {
+  // Most banks report loan balances as positive (amount owed)
+  expect(
+    transformAccountBalance({
+      balance: {
+        currency: "GBP",
+        amount: "25000.00",
+      },
+      accountType: "loan",
+    }),
+  ).toEqual({
+    currency: "GBP",
+    amount: 25000,
+  });
 });

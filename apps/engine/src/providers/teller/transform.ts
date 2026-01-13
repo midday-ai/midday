@@ -190,26 +190,48 @@ export const transformAccount = ({
   balance,
   last_four,
 }: TransformAccount): BaseAccount => {
+  const accountType = getType(type);
+
   return {
     id,
     name,
     currency: currency.toUpperCase(),
     enrollment_id: enrollment_id,
     institution: transformInstitution(institution),
-    type: getType(type),
-    balance: transformAccountBalance(balance),
+    type: accountType,
+    balance: transformAccountBalance({ balance, accountType }),
     // Use last_four as stable identifier for account matching during reconnect
     resource_id: last_four,
     expires_at: null,
   };
 };
 
-export const transformAccountBalance = (
-  account: TransformAccountBalance,
-): BaseAccountBalance => ({
-  currency: account.currency.toUpperCase(),
-  amount: +account.amount,
-});
+type TransformAccountBalanceParams = {
+  balance: TransformAccountBalance;
+  accountType?: string;
+};
+
+/**
+ * Transform Teller balance to internal format.
+ *
+ * Teller typically returns positive values for credit card debt.
+ * Normalization is added for safety and consistency with other providers.
+ */
+export const transformAccountBalance = ({
+  balance,
+  accountType,
+}: TransformAccountBalanceParams): BaseAccountBalance => {
+  const rawAmount = +balance.amount;
+
+  // Normalize credit card balances to positive (amount owed) for consistency
+  const amount =
+    accountType === "credit" && rawAmount < 0 ? Math.abs(rawAmount) : rawAmount;
+
+  return {
+    currency: balance.currency.toUpperCase(),
+    amount,
+  };
+};
 
 export const transformInstitution = (institution: TransformInstitution) => ({
   id: institution.id,

@@ -33,6 +33,7 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./account": "./src/utils/account.ts",
     "./gocardless/utils": "./src/providers/gocardless/utils.ts"
   }
 }

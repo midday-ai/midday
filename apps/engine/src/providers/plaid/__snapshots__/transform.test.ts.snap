@@ -75,7 +75,7 @@ exports[`Transform accounts 1`] = `
   },
   "name": "Plaid Mortgage",
   "resource_id": null,
-  "type": "other_asset",
+  "type": "loan",
 }
 `;
 

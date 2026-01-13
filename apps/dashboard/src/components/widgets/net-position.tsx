@@ -7,6 +7,7 @@ import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
+import { WidgetSkeleton } from "./widget-skeleton";
 
 export function NetPositionWidget() {
   const trpc = useTRPC();
@@ -15,12 +16,22 @@ export function NetPositionWidget() {
   const { setChatId } = useChatInterface();
   const { currency } = useMetricsFilter();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     ...trpc.widgets.getNetPosition.queryOptions({
       currency,
     }),
     ...WIDGET_POLLING_CONFIG,
   });
+
+  if (isLoading) {
+    return (
+      <WidgetSkeleton
+        title="Net Position"
+        icon={<Icons.Accounts className="size-4" />}
+        descriptionLines={2}
+      />
+    );
+  }
 
   const netPositionData = data?.result;
   const netPosition = netPositionData?.netPosition ?? 0;

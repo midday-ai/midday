@@ -4,6 +4,7 @@ import {
   CONTRA_REVENUE_CATEGORIES,
   REVENUE_CATEGORIES,
 } from "@midday/categories";
+import { CASH_ACCOUNT_TYPES } from "@midday/engine/account";
 import {
   eachMonthOfInterval,
   endOfMonth,
@@ -42,7 +43,7 @@ import {
   transactionCategories,
   transactions,
 } from "../schema";
-import { getCombinedAccountBalance } from "./bank-accounts";
+import { getCashBalance } from "./bank-accounts";
 import { getExchangeRatesBatch } from "./exhange-rates";
 import { getBillableHours } from "./tracker-entries";
 
@@ -1162,10 +1163,7 @@ export async function getRunway(db: Database, params: GetRunwayParams) {
   const balanceConditions = [
     eq(bankAccounts.teamId, teamId),
     eq(bankAccounts.enabled, true),
-    or(
-      eq(bankAccounts.type, "depository"),
-      eq(bankAccounts.type, "other_asset"),
-    ),
+    inArray(bankAccounts.type, [...CASH_ACCOUNT_TYPES]),
   ];
 
   const balanceResult = await db
@@ -3035,8 +3033,8 @@ export async function getBalanceSheet(
     bankAccountsData,
     unmatchedBillsData,
   ] = await Promise.all([
-    // 1. Bank account balances (Cash) - only depository accounts
-    getCombinedAccountBalance(db, {
+    // 1. Bank account balances (Cash) - depository + other_asset accounts
+    getCashBalance(db, {
       teamId,
       currency: inputCurrency,
     }),

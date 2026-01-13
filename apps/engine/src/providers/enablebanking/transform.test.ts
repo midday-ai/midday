@@ -191,15 +191,57 @@ test("Transform account", () => {
   ).toMatchSnapshot();
 });
 
-test("Transform account balance", () => {
+test("Transform account balance - depository", () => {
   expect(
     transformBalance({
-      name: "",
-      balance_amount: { currency: "SEK", amount: "90737.960" },
-      balance_type: "ITAV",
-      last_change_date_time: "2024-03-06",
-      reference_date: "2024-03-06",
-      last_committed_transaction: "1234567890",
+      balance: {
+        name: "",
+        balance_amount: { currency: "SEK", amount: "90737.960" },
+        balance_type: "ITAV",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      accountType: "depository",
     }),
   ).toMatchSnapshot();
+});
+
+test("Transform account balance - credit with negative balance (normalized)", () => {
+  // Safety: if Enable Banking ever returns negative credit balance, normalize it
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "EUR", amount: "-1500.00" },
+        balance_type: "CLBD",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      accountType: "credit",
+    }),
+  ).toEqual({
+    amount: 1500,
+    currency: "EUR",
+  });
+});
+
+test("Transform account balance - credit with positive balance (stays positive)", () => {
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "EUR", amount: "2000.00" },
+        balance_type: "CLBD",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      accountType: "credit",
+    }),
+  ).toEqual({
+    amount: 2000,
+    currency: "EUR",
+  });
 });

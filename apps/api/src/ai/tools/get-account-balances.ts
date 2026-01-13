@@ -1,7 +1,7 @@
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
-import { getCombinedAccountBalance } from "@midday/db/queries";
+import { getCashBalance } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
 import { tool } from "ai";
 import { z } from "zod";
@@ -40,7 +40,7 @@ export const getAccountBalancesTool = tool({
     }
 
     try {
-      const result = await getCombinedAccountBalance(db, {
+      const result = await getCashBalance(db, {
         teamId,
         currency: currency ?? undefined,
       });

@@ -243,9 +243,11 @@ export const transformAccount = ({
   balance,
   institution,
 }: TransformAccount): BaseAccount => {
+  const accountType = getAccountType(account.cashAccountType);
+
   return {
     id,
-    type: getAccountType(account.cashAccountType),
+    type: accountType,
     name: transformAccountName({
       name: account.name,
       product: account.product,
@@ -254,7 +256,7 @@ export const transformAccount = ({
     }),
     currency: account.currency.toUpperCase(),
     enrollment_id: null,
-    balance: transformAccountBalance(balance),
+    balance: transformAccountBalance({ balance, accountType }),
     institution: transformInstitution(institution),
     resource_id: account.resourceId,
     expires_at: addDays(
@@ -264,12 +266,36 @@ export const transformAccount = ({
   };
 };
 
-export const transformAccountBalance = (
-  account?: TransformAccountBalance,
-): BaseAccountBalance => ({
-  currency: account?.currency.toUpperCase() || "EUR",
-  amount: +(account?.amount ?? 0),
-});
+type TransformAccountBalanceParams = {
+  balance?: TransformAccountBalance;
+  accountType?: string;
+};
+
+/**
+ * Transform GoCardless balance to internal format.
+ *
+ * GoCardless stores credit card balances as NEGATIVE values (e.g., -1000 means $1000 owed).
+ * We normalize to POSITIVE values for consistency with other providers (Plaid, Teller, Enable Banking).
+ *
+ * @param balance - The raw balance from GoCardless
+ * @param accountType - The account type (credit accounts get normalized)
+ */
+export const transformAccountBalance = ({
+  balance,
+  accountType,
+}: TransformAccountBalanceParams): BaseAccountBalance => {
+  const rawAmount = +(balance?.amount ?? 0);
+
+  // GoCardless stores credit card debt as negative values (e.g., -1000 = $1000 owed)
+  // Normalize to positive for consistency with other providers
+  const amount =
+    accountType === "credit" && rawAmount < 0 ? Math.abs(rawAmount) : rawAmount;
+
+  return {
+    currency: balance?.currency.toUpperCase() || "EUR",
+    amount,
+  };
+};
 
 export const transformInstitution = (
   institution: Institution,

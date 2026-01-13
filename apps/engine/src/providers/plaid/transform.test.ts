@@ -283,6 +283,82 @@ test("Transform account balance - credit uses current (amount owed)", () => {
   ).toMatchSnapshot();
 });
 
+test("Transform account balance - depository falls back to current when available is null", () => {
+  // Some accounts may not have available balance
+  expect(
+    transformAccountBalance({
+      balances: {
+        available: null,
+        current: 5000,
+        iso_currency_code: "USD",
+        limit: null,
+        unofficial_currency_code: null,
+      },
+      accountType: "depository",
+    }),
+  ).toEqual({
+    currency: "USD",
+    amount: 5000,
+  });
+});
+
+test("Transform account balance - handles null balances gracefully", () => {
+  expect(
+    transformAccountBalance({
+      balances: {
+        available: null,
+        current: null,
+        iso_currency_code: "USD",
+        limit: null,
+        unofficial_currency_code: null,
+      },
+      accountType: "depository",
+    }),
+  ).toEqual({
+    currency: "USD",
+    amount: 0,
+  });
+});
+
+test("Transform account balance - credit card overpayment (negative current)", () => {
+  // If someone overpays their credit card, Plaid shows negative current
+  // This means they have a credit balance (bank owes them money)
+  expect(
+    transformAccountBalance({
+      balances: {
+        available: 5500, // Available credit PLUS overpayment
+        current: -500, // Negative = overpaid by $500
+        iso_currency_code: "USD",
+        limit: 5000,
+        unofficial_currency_code: null,
+      },
+      accountType: "credit",
+    }),
+  ).toEqual({
+    currency: "USD",
+    amount: -500, // Shows as negative (credit in customer's favor)
+  });
+});
+
+test("Transform account balance - loan account uses current", () => {
+  // Loan accounts don't have available balance
+  expect(
+    transformAccountBalance({
+      balances: {
+        available: null,
+        current: 75000, // Outstanding loan balance
+        iso_currency_code: "USD",
+        limit: null,
+        unofficial_currency_code: null,
+      },
+      accountType: "loan",
+    }),
+  ).toEqual({
+    currency: "USD",
+    amount: 75000,
+  });
+});
+
 test("Transform credit card payment - should be credit-card-payment not income", () => {
   expect(
     transformTransaction({

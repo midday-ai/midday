@@ -79,7 +79,7 @@ exports[`Transform account 1`] = `
 }
 `;
 
-exports[`Transform account balance 1`] = `
+exports[`Transform account balance - depository 1`] = `
 {
   "amount": 90737.96,
   "currency": "SEK",

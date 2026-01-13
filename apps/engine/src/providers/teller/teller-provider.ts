@@ -11,6 +11,7 @@ import type {
 import { TellerApi } from "./teller-api";
 import {
   transformAccount,
+  transformAccountBalance,
   transformInstitution,
   transformTransaction,
 } from "./transform";
@@ -63,15 +64,18 @@ export class TellerProvider implements Provider {
   async getAccountBalance({
     accessToken,
     accountId,
+    accountType,
   }: GetAccountBalanceRequest) {
     if (!accessToken || !accountId) {
       throw Error("Missing params");
     }
 
-    return this.#api.getAccountBalance({
+    const response = await this.#api.getAccountBalance({
       accessToken,
       accountId,
     });
+
+    return transformAccountBalance({ balance: response, accountType });
   }
 
   async getInstitutions() {

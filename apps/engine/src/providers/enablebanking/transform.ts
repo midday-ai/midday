@@ -65,11 +65,19 @@ function getAccountType(cashAccountType?: string): AccountType {
 export const transformAccount = (
   account: GetAccountDetailsResponse,
 ): Account => {
+  const accountType = getAccountType(account.cash_account_type);
+  const rawAmount = +account.balance.balance_amount.amount;
+
+  // Normalize credit card balances to positive (amount owed) for consistency
+  // Enable Banking typically returns positive values, but this ensures consistency
+  const amount =
+    accountType === "credit" && rawAmount < 0 ? Math.abs(rawAmount) : rawAmount;
+
   return {
     id: account.uid,
     name: getAccountName(account),
     currency: account.currency,
-    type: getAccountType(account.cash_account_type),
+    type: accountType,
     institution: {
       id: hashInstitutionId(
         account.institution.name,
@@ -80,7 +88,7 @@ export const transformAccount = (
       provider: "enablebanking",
     },
     balance: {
-      amount: +account.balance.balance_amount.amount,
+      amount,
       currency: account.currency,
     },
     enrollment_id: null,
@@ -101,12 +109,32 @@ export const transformSessionData = (session: GetExchangeCodeResponse) => {
   };
 };
 
-export const transformBalance = (
-  balance: GetBalancesResponse["balances"][0],
-): Balance => ({
-  amount: +balance.balance_amount.amount,
-  currency: balance.balance_amount.currency,
-});
+type TransformBalanceParams = {
+  balance: GetBalancesResponse["balances"][0];
+  accountType?: string;
+};
+
+/**
+ * Transform Enable Banking balance to internal format.
+ *
+ * Enable Banking typically returns positive values for credit card debt.
+ * Normalization is added for safety and consistency with other providers.
+ */
+export const transformBalance = ({
+  balance,
+  accountType,
+}: TransformBalanceParams): Balance => {
+  const rawAmount = +balance.balance_amount.amount;
+
+  // Normalize credit card balances to positive (amount owed) for consistency
+  const amount =
+    accountType === "credit" && rawAmount < 0 ? Math.abs(rawAmount) : rawAmount;
+
+  return {
+    amount,
+    currency: balance.balance_amount.currency,
+  };
+};
 
 export const transformConnectionStatus = (
   session: GetSessionResponse,
