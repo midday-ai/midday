@@ -1,8 +1,13 @@
-'use client'
+"use client";
 
-import { Button } from '@midday/ui/button'
+import { Button } from "@midday/ui/button";
+import { useState } from "react";
 
-export function PricingSection() {
+export function PricingSectionV2() {
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">(
+    "yearly",
+  );
+
   return (
     <section className="bg-background py-12 sm:py-16 lg:py-24">
       <div className="max-w-[1400px] mx-auto">
@@ -15,6 +20,51 @@ export function PricingSection() {
           </p>
         </div>
 
+        {/* Billing Toggle */}
+        <div className="flex justify-center mb-8 sm:mb-8 lg:mb-16">
+          <div
+            className="relative flex items-stretch bg-muted"
+            style={{ width: "fit-content" }}
+          >
+            <div className="flex items-stretch">
+              <button
+                type="button"
+                onClick={() => setBillingPeriod("monthly")}
+                className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none ${
+                  billingPeriod === "monthly"
+                    ? "text-foreground bg-background border-border"
+                    : "text-muted-foreground hover:text-foreground bg-muted border-transparent"
+                }`}
+                style={{
+                  WebkitTapHighlightColor: "transparent",
+                  marginBottom: billingPeriod === "monthly" ? "-1px" : "0px",
+                  position: "relative",
+                  zIndex: billingPeriod === "monthly" ? 10 : 1,
+                }}
+              >
+                <span>Monthly</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setBillingPeriod("yearly")}
+                className={`group relative flex items-center gap-1.5 px-3 py-1.5 h-9 text-[14px] whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none ${
+                  billingPeriod === "yearly"
+                    ? "text-foreground bg-background border-border"
+                    : "text-muted-foreground hover:text-foreground bg-muted border-transparent"
+                }`}
+                style={{
+                  WebkitTapHighlightColor: "transparent",
+                  marginBottom: billingPeriod === "yearly" ? "-1px" : "0px",
+                  position: "relative",
+                  zIndex: billingPeriod === "yearly" ? 10 : 1,
+                }}
+              >
+                <span>Yearly (Save 15%)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Pricing Cards */}
         <div className="flex flex-col lg:flex-row gap-14 justify-center items-center lg:items-stretch max-w-6xl mx-auto">
           {/* Starter */}
@@ -25,16 +75,22 @@ export function PricingSection() {
                   Starter
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground mb-3">
-                  For solo founders who want a clean starting point for their business finances
+                  For solo founders who want a clean starting point for their
+                  business finances
                 </p>
                 <div className="flex items-baseline gap-2">
                   <span className="font-sans text-2xl text-foreground">
-                    $29
+                    {billingPeriod === "monthly" ? "$29" : "$25"}
                   </span>
                   <span className="font-sans text-sm text-muted-foreground">
                     /month
                   </span>
                 </div>
+                <p className="font-sans text-xs text-muted-foreground mt-1">
+                  {billingPeriod === "monthly"
+                    ? "Billed monthly"
+                    : "Billed yearly"}
+                </p>
               </div>
 
               <div className="flex-1 space-y-1 border-t border-border pt-8 pb-6">
@@ -59,38 +115,28 @@ export function PricingSection() {
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Receipts, invoices, and file storage
+                    Receipt and invoice matching
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Invoicing (up to 10 invoices per month)
+                    Invoicing and time tracking basics
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Time tracking
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-foreground leading-[1.5rem]">•</span>
-                  <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Up to 2 connected banks
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-foreground leading-[1.5rem]">•</span>
-                  <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Up to 2 users
+                    Export-ready records via CSV or ZIP
                   </span>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <Button 
-                  onClick={() => window.location.href = 'https://app.midday.ai/'}
+                <Button
+                  onClick={() => {
+                    window.location.href = "https://app.midday.ai/";
+                  }}
                   className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors"
                 >
                   Start your trial
@@ -117,72 +163,67 @@ export function PricingSection() {
                   Pro
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground mb-3">
-                  For founders and small teams running weekly finance workflows end to end
+                  For founders and small teams running weekly finance workflows
                 </p>
                 <div className="flex items-baseline gap-2">
                   <span className="font-sans text-2xl text-foreground">
-                    $49
+                    {billingPeriod === "monthly" ? "$79" : "$67"}
                   </span>
                   <span className="font-sans text-sm text-muted-foreground">
                     /month
                   </span>
                 </div>
+                <p className="font-sans text-xs text-muted-foreground mt-1">
+                  {billingPeriod === "monthly"
+                    ? "Billed monthly"
+                    : "Billed yearly"}
+                </p>
               </div>
 
               <div className="flex-1 space-y-1 border-t border-border pt-8 pb-6">
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Financial overview and widgets
+                    Everything in Starter
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Weekly summaries and insights
+                    Higher transaction and receipt volume
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Transactions with categorization
+                    Advanced insights and trends
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Receipts, invoices, and file storage
+                    Multi-currency support
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Invoicing (up to 50 invoices per month)
+                    Team access for collaborators
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Time tracking
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-foreground leading-[1.5rem]">•</span>
-                  <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Up to 10 connected banks
-                  </span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-foreground leading-[1.5rem]">•</span>
-                  <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Up to 10 users
+                    Priority exports for accounting workflows
                   </span>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <Button 
-                  onClick={() => window.location.href = 'https://app.midday.ai/'}
+                <Button
+                  onClick={() => {
+                    window.location.href = "https://app.midday.ai/";
+                  }}
                   className="w-full btn-inverse font-sans text-sm py-3 px-4 transition-colors"
                 >
                   Start your trial
@@ -193,11 +234,91 @@ export function PricingSection() {
               </div>
             </div>
           </div>
+
+          {/* Scale */}
+          <div className="flex-1 max-w-md w-full lg:w-auto">
+            <div className="bg-background backdrop-blur-[43px] border border-border p-4 py-6 h-full flex flex-col">
+              <div className="mb-4">
+                <h3 className="font-sans text-base text-foreground mb-1">
+                  Scale
+                </h3>
+                <p className="font-sans text-sm text-muted-foreground mb-3">
+                  For growing companies that need more control and volume
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <span className="font-sans text-2xl text-foreground">
+                    {billingPeriod === "monthly" ? "$129" : "$110"}
+                  </span>
+                  <span className="font-sans text-sm text-muted-foreground">
+                    /month
+                  </span>
+                </div>
+                <p className="font-sans text-xs text-muted-foreground mt-1">
+                  {billingPeriod === "monthly"
+                    ? "Billed monthly"
+                    : "Billed yearly"}
+                </p>
+              </div>
+
+              <div className="flex-1 space-y-1 border-t border-border pt-8 pb-6">
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    Everything in Pro
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    Unlimited team access
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    Highest volumes for receipts and transactions
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    Advanced reporting and forecasting
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    Priority support
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-foreground leading-[1.5rem]">•</span>
+                  <span className="font-sans text-sm text-foreground leading-relaxed">
+                    Accounting-ready exports at scale
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <Button
+                  onClick={() => {
+                    window.location.href = "https://app.midday.ai/";
+                  }}
+                  className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors"
+                >
+                  Start your trial
+                </Button>
+                <p className="font-sans text-xs text-muted-foreground text-center">
+                  For teams scaling operations
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="text-center mt-16 space-y-1">
           <p className="font-sans text-xs text-muted-foreground">
-            14-day free trial · Cancel anytime
+            14-day free trial · Credit card required · Cancel anytime
           </p>
           <p className="font-sans text-xs text-muted-foreground">
             Prices shown in USD. Local taxes may apply.
@@ -205,5 +326,5 @@ export function PricingSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }
