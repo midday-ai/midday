@@ -127,7 +127,7 @@ export const documentsRouter = createTRPCRouter({
               teamId: teamId!,
             },
             "documents",
-            { jobId: `process-doc:${teamId}:${item.filePath.join("/")}` },
+            { jobId: `process-doc_${teamId}_${item.filePath.join("/")}` },
           ),
         ),
       );
@@ -186,8 +186,11 @@ export const documentsRouter = createTRPCRouter({
         processingStatus: "pending",
       });
 
-      // Trigger reprocessing with deterministic jobId for deduplication
-      // pathTokens is validated above, safe to use directly
+      // Trigger reprocessing with unique jobId (includes timestamp)
+      // Unlike initial processing which uses deterministic IDs to prevent duplicate uploads,
+      // reprocessing MUST use unique IDs because BullMQ won't create a new job if an ID exists.
+      // Completed jobs are retained for 24h and failed for 7 days, so deterministic IDs
+      // would cause retries within these windows to silently fail (returns existing job).
       const jobResult = await triggerJob(
         "process-document",
         {
@@ -196,7 +199,9 @@ export const documentsRouter = createTRPCRouter({
           teamId: teamId!,
         },
         "documents",
-        { jobId: `process-doc:${teamId}:${document.pathTokens.join("/")}` },
+        {
+          jobId: `reprocess-doc_${teamId}_${document.pathTokens.join("/")}_${Date.now()}`,
+        },
       );
 
       return {

@@ -192,11 +192,11 @@ sequenceDiagram
 Jobs use deterministic IDs to prevent duplicate processing:
 
 ```typescript
-// Pattern: {action}:{teamId}:{filePath}
-jobId: `process-doc:${teamId}:${filePath.join("/")}`
-jobId: `classify-doc:${teamId}:${fileName}`
-jobId: `classify-img:${teamId}:${fileName}`
-jobId: `embed-tags:${teamId}:${documentId}`
+// Pattern: {action}_{teamId}_{identifier}
+jobId: `process-doc_${teamId}_${filePath.join("/")}`
+jobId: `classify-doc_${teamId}_${fileName}`
+jobId: `classify-img_${teamId}_${fileName}`
+jobId: `embed-tags_${teamId}_${documentId}`
 ```
 
 **Benefits:**

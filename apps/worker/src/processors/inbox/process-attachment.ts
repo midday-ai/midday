@@ -349,7 +349,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           teamId,
         },
         "documents",
-        { jobId: `process-doc:${teamId}:${filePath.join("/")}` },
+        { jobId: `process-doc_${teamId}_${filePath.join("/")}` },
       )
         .then((result) => {
           this.logger.info("Triggered process-document job", {

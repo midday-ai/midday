@@ -19,6 +19,7 @@ import { STICKY_COLUMNS } from "@/utils/table-configs";
 import type { TableSettings } from "@/utils/table-settings";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
+import { toast } from "@midday/ui/use-toast";
 import {
   useMutation,
   useQueryClient,
@@ -91,7 +92,7 @@ export function DataTable({ initialSettings }: Props) {
     ),
   );
 
-  const documents = useMemo(() => {
+  const baseDocuments = useMemo(() => {
     return data?.pages.flatMap((page) => page.data) ?? [];
   }, [data]);
 
@@ -146,6 +147,8 @@ export function DataTable({ initialSettings }: Props) {
     }),
   );
 
+  const documents = baseDocuments;
+
   const reprocessMutation = useMutation(
     trpc.documents.reprocessDocument.mutationOptions({
       onSuccess: () => {
@@ -181,6 +184,11 @@ export function DataTable({ initialSettings }: Props) {
 
   const handleReprocess = useCallback(
     (id: string) => {
+      toast({
+        title: "Processing document",
+        description: "The document is being processed. This may take a moment.",
+        duration: 3000,
+      });
       reprocessMutation.mutate({ id });
     },
     [reprocessMutation],

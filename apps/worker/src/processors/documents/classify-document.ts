@@ -175,7 +175,7 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
           teamId,
         },
         "documents",
-        { jobId: `embed-tags:${teamId}:${data.id}` },
+        { jobId: `embed-tags_${teamId}_${data.id}` },
       );
     } else {
       this.logger.info("Document processing completed", {

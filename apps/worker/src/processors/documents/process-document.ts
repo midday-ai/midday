@@ -249,7 +249,7 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
           },
           "documents",
           {
-            jobId: `classify-img:${teamId}:${fileName}`,
+            jobId: `classify-img_${teamId}_${fileName}`,
             timeout: TIMEOUTS.CLASSIFICATION_JOB_WAIT,
           },
         );
@@ -403,7 +403,7 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         },
         "documents",
         {
-          jobId: `classify-doc:${teamId}:${fileName}`,
+          jobId: `classify-doc_${teamId}_${fileName}`,
           timeout: TIMEOUTS.CLASSIFICATION_JOB_WAIT,
         },
       );

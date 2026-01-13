@@ -202,7 +202,7 @@ export class ClassifyImageProcessor extends BaseProcessor<ClassifyImagePayload> 
         "embed-document-tags",
         { documentId: data.id, tags: classificationResult.tags, teamId },
         "documents",
-        { jobId: `embed-tags:${teamId}:${data.id}` },
+        { jobId: `embed-tags_${teamId}_${data.id}` },
       );
     } else {
       this.logger.info("Image processing completed", {

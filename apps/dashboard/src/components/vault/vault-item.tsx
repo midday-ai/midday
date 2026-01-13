@@ -4,6 +4,7 @@ import { FilePreview } from "@/components/file-preview";
 import { VaultItemTags } from "@/components/vault/vault-item-tags";
 import { useDocumentParams } from "@/hooks/use-document-params";
 import { useTRPC } from "@/trpc/client";
+import { isStaleProcessing } from "@/utils/document";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { isMimeTypeSupportedForProcessing } from "@midday/documents/utils";
 import { Button } from "@midday/ui/button";
@@ -50,13 +51,14 @@ export function VaultItem({ data, small }: Props) {
     data.processingStatus === "completed" && !data.title;
 
   // Check if document is stuck in processing (pending for >10 minutes since creation)
-  const isStaleProcessing =
-    data.processingStatus === "pending" &&
-    data.createdAt &&
-    Date.now() - new Date(data.createdAt).getTime() > 10 * 60 * 1000;
+  const staleProcessing = isStaleProcessing(
+    data.processingStatus,
+    data.createdAt,
+    data.title,
+  );
 
   // Show skeleton only for recently pending documents (not stale ones)
-  const isLoading = data.processingStatus === "pending" && !isStaleProcessing;
+  const isLoading = data.processingStatus === "pending" && !staleProcessing;
 
   // Clear local state once processing completes or becomes fresh pending
   useEffect(() => {
@@ -71,7 +73,7 @@ export function VaultItem({ data, small }: Props) {
 
   // Show retry for failed, unclassified, or stale processing
   const showRetry =
-    isSupported && (isFailed || needsClassification || isStaleProcessing);
+    isSupported && (isFailed || needsClassification || staleProcessing);
 
   // Get display name - fallback to filename from path if no title
   const displayName =
@@ -111,7 +113,7 @@ export function VaultItem({ data, small }: Props) {
         small && "h-48",
         !showSkeleton && isFailed && isSupported && "border-destructive/50",
         !showSkeleton &&
-          (needsClassification || isStaleProcessing) &&
+          (needsClassification || staleProcessing) &&
           isSupported &&
           "border-amber-500/30",
       )}
