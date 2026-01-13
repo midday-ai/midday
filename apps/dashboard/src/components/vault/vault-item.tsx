@@ -162,32 +162,32 @@ export function VaultItem({ data, small }: Props) {
 
         {showSkeleton ? (
           <Skeleton className="w-[50%] h-4" />
-        ) : showRetry ? (
+        ) : !showRetry ? (
+          <p className="text-xs text-muted-foreground line-clamp-3">
+            {data?.summary}
+          </p>
+        ) : null}
+      </div>
+
+      <div className="mt-auto" onClick={(e) => e.stopPropagation()}>
+        {showRetry && !showSkeleton ? (
           <Button
             variant="outline"
             size="sm"
             onClick={handleReprocess}
             disabled={reprocessMutation.isPending}
-            className="gap-2 mt-12 text-primary"
+            className="gap-2 text-primary w-full"
           >
             <Icons.Refresh className="size-3" />
             Process document
           </Button>
-        ) : (
-          <p className="text-xs text-muted-foreground line-clamp-3">
-            {data?.summary}
-          </p>
-        )}
-      </div>
-
-      {!small && (
-        <div className="mt-auto" onClick={(e) => e.stopPropagation()}>
+        ) : !small ? (
           <VaultItemTags
             tags={data?.documentTagAssignments ?? []}
             isLoading={showSkeleton}
           />
-        </div>
-      )}
+        ) : null}
+      </div>
     </div>
   );
 }
