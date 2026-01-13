@@ -79,12 +79,10 @@ export class PlaidProvider implements Provider {
       accountId,
     });
 
-    if (!response) return undefined;
-
     // Use account type from Plaid response - no need to pass it from caller
-    const accountType = getType(response.type);
+    const accountType = response ? getType(response.type) : undefined;
     return transformAccountBalance({
-      balances: response.balances,
+      balances: response?.balances,
       accountType,
     });
   }
