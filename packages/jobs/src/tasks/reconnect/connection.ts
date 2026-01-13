@@ -55,16 +55,70 @@ export const reconnectConnection = schemaTask({
 
       const accountsResponse = await accounts.json();
 
-      await Promise.all(
-        accountsResponse.data.map(async (account) => {
-          await supabase
-            .from("bank_accounts")
-            .update({
-              account_id: account.id,
-            })
-            .eq("account_reference", account.resource_id!);
-        }),
-      );
+      // Fetch existing bank accounts for this connection to match by unique ID
+      // This prevents the multiple-row update problem when accounts share the same last_four
+      const { data: existingAccounts } = await supabase
+        .from("bank_accounts")
+        .select("id, account_reference, type, currency, name")
+        .eq("bank_connection_id", connectionId);
+
+      if (!existingAccounts || existingAccounts.length === 0) {
+        logger.warn("No existing bank accounts found for connection", {
+          connectionId,
+        });
+      } else {
+        // Track which DB accounts have been matched to prevent double-matching
+        const matchedDbIds = new Set<string>();
+
+        await Promise.all(
+          accountsResponse.data.map(async (account) => {
+            if (!account.resource_id) return;
+
+            // Find the best matching DB account that hasn't been matched yet
+            // Priority: resource_id + type + currency + name (most specific)
+            // Fallback: resource_id + type + currency
+            // Last resort: resource_id only
+            const match = existingAccounts.find((dbAccount) => {
+              if (matchedDbIds.has(dbAccount.id)) return false;
+              if (dbAccount.account_reference !== account.resource_id)
+                return false;
+
+              // Try to match on type and currency if available
+              const typeMatch =
+                !dbAccount.type || dbAccount.type === account.type;
+              const currencyMatch =
+                !dbAccount.currency || dbAccount.currency === account.currency;
+
+              return typeMatch && currencyMatch;
+            });
+
+            if (match) {
+              matchedDbIds.add(match.id);
+              const result = await supabase
+                .from("bank_accounts")
+                .update({ account_id: account.id })
+                .eq("id", match.id);
+
+              if (result.error) {
+                logger.warn("Failed to update GoCardless account", {
+                  resource_id: account.resource_id,
+                  dbAccountId: match.id,
+                  error: result.error.message,
+                });
+              }
+            } else {
+              logger.warn(
+                "No matching DB account found for GoCardless account",
+                {
+                  resource_id: account.resource_id,
+                  type: account.type,
+                  currency: account.currency,
+                },
+              );
+            }
+          }),
+        );
+      }
     }
 
     if (provider === "teller") {
@@ -101,32 +155,73 @@ export const reconnectConnection = schemaTask({
         accountCount: accountsResponse.data.length,
       });
 
-      // Update account_ids by matching on resource_id (last_four), type, and currency
-      // Using multiple constraints to avoid mismatches when accounts share the same last_four
-      await Promise.all(
-        accountsResponse.data.map(async (account) => {
-          if (account.resource_id) {
-            const result = await supabase
-              .from("bank_accounts")
-              .update({
-                account_id: account.id,
-              })
-              .eq("account_reference", account.resource_id)
-              .eq("bank_connection_id", connectionId)
-              .eq("type", account.type)
-              .eq("currency", account.currency);
+      // Fetch existing bank accounts for this connection to match by unique ID
+      // This prevents the multiple-row update problem when accounts share the same last_four
+      const { data: existingAccounts } = await supabase
+        .from("bank_accounts")
+        .select("id, account_reference, type, currency, name")
+        .eq("bank_connection_id", connectionId);
 
-            if (result.error) {
-              logger.warn("Failed to update Teller account", {
+      if (!existingAccounts || existingAccounts.length === 0) {
+        logger.warn("No existing bank accounts found for Teller connection", {
+          connectionId,
+        });
+      } else {
+        // Track which DB accounts have been matched to prevent double-matching
+        const matchedDbIds = new Set<string>();
+
+        await Promise.all(
+          accountsResponse.data.map(async (account) => {
+            if (!account.resource_id) return;
+
+            // Find the best matching DB account that hasn't been matched yet
+            // Match on: resource_id (last_four) + type + currency
+            // If multiple accounts match these criteria, use name as a tiebreaker
+            const candidates = existingAccounts.filter((dbAccount) => {
+              if (matchedDbIds.has(dbAccount.id)) return false;
+              if (dbAccount.account_reference !== account.resource_id)
+                return false;
+              if (dbAccount.type && dbAccount.type !== account.type)
+                return false;
+              if (dbAccount.currency && dbAccount.currency !== account.currency)
+                return false;
+              return true;
+            });
+
+            // If multiple candidates, prefer exact name match
+            let match = candidates.find(
+              (c) => c.name?.toLowerCase() === account.name?.toLowerCase(),
+            );
+            // Otherwise take the first candidate
+            if (!match && candidates.length > 0) {
+              match = candidates[0];
+            }
+
+            if (match) {
+              matchedDbIds.add(match.id);
+              const result = await supabase
+                .from("bank_accounts")
+                .update({ account_id: account.id })
+                .eq("id", match.id);
+
+              if (result.error) {
+                logger.warn("Failed to update Teller account", {
+                  resource_id: account.resource_id,
+                  dbAccountId: match.id,
+                  error: result.error.message,
+                });
+              }
+            } else {
+              logger.warn("No matching DB account found for Teller account", {
                 resource_id: account.resource_id,
                 type: account.type,
                 currency: account.currency,
-                error: result.error.message,
+                name: account.name,
               });
             }
-          }
-        }),
-      );
+          }),
+        );
+      }
     }
 
     await syncConnection.trigger({
