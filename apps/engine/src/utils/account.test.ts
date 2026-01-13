@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
 import {
+  type AccountType,
   CASH_ACCOUNT_TYPES,
   CREDIT_ACCOUNT_TYPE,
   DEBT_ACCOUNT_TYPES,
   LOAN_ACCOUNT_TYPE,
-  type AccountType,
   getType,
 } from "./account";
 
