@@ -134,6 +134,7 @@ export async function getDocuments(db: Database, params: GetDocumentsParams) {
       metadata: true,
       pathTokens: true,
       processingStatus: true,
+      createdAt: true,
     },
     with: {
       documentTagAssignments: {

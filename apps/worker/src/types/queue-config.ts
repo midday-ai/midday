@@ -12,6 +12,17 @@ export interface JobTimeoutConfig {
 }
 
 /**
+ * Job info with full data access for event handlers
+ */
+export interface JobInfo {
+  name?: string;
+  id?: string;
+  data?: unknown;
+  attemptsMade?: number;
+  opts?: { attempts?: number };
+}
+
+/**
  * Configuration for a queue and its worker
  */
 export interface QueueConfig {
@@ -24,7 +35,7 @@ export interface QueueConfig {
   /** Optional custom event handlers */
   eventHandlers?: {
     onCompleted?: (job: { name: string; id?: string }) => void;
-    onFailed?: (job: { name?: string; id?: string } | null, err: Error) => void;
+    onFailed?: (job: JobInfo | null, err: Error) => void | Promise<void>;
   };
   /** Optional job-specific timeout configurations */
   jobTimeouts?: Record<string, JobTimeoutConfig>;

@@ -4,15 +4,19 @@ import { useDocumentFilterParams } from "@/hooks/use-document-filter-params";
 import { useDocumentParams } from "@/hooks/use-document-params";
 import { useFileUrl } from "@/hooks/use-file-url";
 import { downloadFile } from "@/lib/download";
+import { isStaleProcessing } from "@/utils/document";
 import { formatSize } from "@/utils/format";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
+import { isMimeTypeSupportedForProcessing } from "@midday/documents/utils";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
+import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Skeleton } from "@midday/ui/skeleton";
@@ -107,16 +111,47 @@ export const columns: ColumnDef<Document>[] = [
         "w-[250px] min-w-[180px] md:sticky md:left-[50px] bg-background group-hover:bg-[#F2F1EF] group-hover:dark:bg-[#0f0f0f] z-20",
     },
     cell: ({ row }) => {
-      const isLoading = row.original.processingStatus === "pending";
+      // @ts-expect-error - mimetype is not typed (JSONB)
+      const mimetype = row.original.metadata?.mimetype as string | undefined;
+      const isSupported = mimetype
+        ? isMimeTypeSupportedForProcessing(mimetype)
+        : false;
+
+      const isFailed = row.original.processingStatus === "failed";
+      // Document completed but AI classification failed - title is null
+      const needsClassification =
+        row.original.processingStatus === "completed" && !row.original.title;
+      // Get display name - fallback to filename from path
+      const displayName =
+        row.original.title ?? row.original.name?.split("/").at(-1);
+
+      // Check if document is stuck in processing (pending for >10 minutes since creation)
+      const staleProcessing = isStaleProcessing(
+        row.original.processingStatus,
+        row.original.createdAt,
+        row.original.title,
+      );
+
+      // Show skeleton only for recently pending documents (not stale ones)
+      const isLoading =
+        row.original.processingStatus === "pending" && !staleProcessing;
 
       if (isLoading) {
         return <Skeleton className="w-52 h-4" />;
       }
 
       return (
-        <div className="truncate">
-          {row.original.title ?? row.original.name?.split("/").at(-1)}
-        </div>
+        <span
+          className={cn(
+            "truncate",
+            isSupported && isFailed && "text-destructive",
+            isSupported &&
+              (needsClassification || staleProcessing) &&
+              "text-amber-600 dark:text-amber-500",
+          )}
+        >
+          {displayName}
+        </span>
       );
     },
   },
@@ -136,14 +171,22 @@ export const columns: ColumnDef<Document>[] = [
     cell: ({ row }) => {
       const { setFilter } = useDocumentFilterParams();
 
-      const isLoading = row.original.processingStatus === "pending";
+      // Check if document is stuck in processing (pending for >10 minutes since creation)
+      const staleProcessing = isStaleProcessing(
+        row.original.processingStatus,
+        row.original.createdAt,
+        row.original.title,
+      );
+
+      // Show skeleton only for recently pending documents (not stale ones)
+      const isLoading =
+        row.original.processingStatus === "pending" && !staleProcessing;
 
       if (isLoading) {
         return (
-          <div className="flex gap-2 flex-wrap">
-            <Skeleton className="h-6 w-20 rounded-full" />
-            <Skeleton className="h-6 w-16 rounded-full" />
-            <Skeleton className="h-6 w-24 rounded-full" />
+          <div className="flex items-center space-x-2">
+            <Skeleton className="h-5 w-16 rounded-full" />
+            <Skeleton className="h-5 w-20 rounded-full" />
           </div>
         );
       }
@@ -205,11 +248,31 @@ export const columns: ColumnDef<Document>[] = [
     cell: ({ row, table }) => {
       const { setParams } = useDocumentParams();
 
+      // @ts-expect-error - mimetype is not typed (JSONB)
+      const mimetype = row.original.metadata?.mimetype as string | undefined;
+      const isSupported = mimetype
+        ? isMimeTypeSupportedForProcessing(mimetype)
+        : false;
+
+      const isFailed = row.original.processingStatus === "failed";
+      // Document completed but AI classification failed - title is null
+      const needsClassification =
+        row.original.processingStatus === "completed" && !row.original.title;
+      // Check if document is stuck in processing (pending for >10 minutes since creation)
+      const staleProcessing = isStaleProcessing(
+        row.original.processingStatus,
+        row.original.createdAt,
+        row.original.title,
+      );
+      // Show retry option only for supported file types
+      const showRetry =
+        isSupported && (isFailed || needsClassification || staleProcessing);
+
       if (!table.options.meta) {
         return null;
       }
 
-      const { handleDelete, handleShare } = table.options.meta;
+      const { handleDelete, handleShare, handleReprocess } = table.options.meta;
 
       return (
         <div className="flex items-center justify-center w-full">
@@ -243,6 +306,22 @@ export const columns: ColumnDef<Document>[] = [
                 Copy link
               </DropdownMenuItem>
 
+              {showRetry && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => {
+                      handleReprocess?.(row.original.id);
+                    }}
+                  >
+                    {isFailed || staleProcessing
+                      ? "Retry processing"
+                      : "Retry classification"}
+                  </DropdownMenuItem>
+                </>
+              )}
+
+              <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
                   handleDelete?.(row.original.id);

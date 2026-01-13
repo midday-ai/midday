@@ -11,7 +11,10 @@ export type ErrorCategory =
   | "network"
   | "validation"
   | "not_found"
-  | "unauthorized";
+  | "unauthorized"
+  | "ai_content_blocked"
+  | "ai_quota"
+  | "unsupported_file_type";
 
 export interface ClassifiedError {
   category: ErrorCategory;
@@ -36,6 +39,24 @@ export class NonRetryableError extends Error {
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, NonRetryableError);
     }
+  }
+}
+
+/**
+ * Error for unsupported file types (ZIP, etc.)
+ * Not a failure - file is stored but can't be classified
+ */
+export class UnsupportedFileTypeError extends NonRetryableError {
+  constructor(
+    public readonly mimetype: string,
+    public readonly fileName: string,
+  ) {
+    super(
+      `File type ${mimetype} is not supported for processing`,
+      undefined,
+      "unsupported_file_type",
+    );
+    this.name = "UnsupportedFileTypeError";
   }
 }
 
@@ -85,7 +106,41 @@ export function classifyError(error: unknown): ClassifiedError {
       };
     }
 
-    // Rate limiting
+    // AI content moderation/safety errors (non-retryable - content won't pass)
+    // These errors indicate the content was blocked by the AI's safety filters
+    if (
+      message.includes("content filtered") ||
+      message.includes("content_filter") ||
+      message.includes("safety") ||
+      message.includes("blocked") ||
+      message.includes("harm_category") ||
+      message.includes("finish_reason") ||
+      message.includes("recitation")
+    ) {
+      return {
+        category: "ai_content_blocked",
+        retryable: false, // Content won't pass, don't waste retries
+      };
+    }
+
+    // AI quota/resource exhausted errors (retryable with longer delay)
+    // These indicate temporary capacity issues or billing problems
+    if (
+      message.includes("quota exceeded") ||
+      message.includes("resource_exhausted") ||
+      message.includes("overloaded") ||
+      message.includes("model_overloaded") ||
+      message.includes("capacity")
+    ) {
+      return {
+        category: "ai_quota",
+        retryable: true,
+        retryDelay: 60_000, // 60 seconds for quota/capacity issues
+        maxRetries: 3,
+      };
+    }
+
+    // Rate limiting (including AI rate limits)
     if (
       message.includes("rate limit") ||
       message.includes("429") ||
@@ -256,6 +311,7 @@ export function getJobRetryOptions(errorCategory?: ErrorCategory): {
     case "validation":
     case "not_found":
     case "unauthorized":
+    case "ai_content_blocked":
       return {
         attempts: 1, // Don't retry non-retryable errors
         backoff: {
@@ -264,6 +320,17 @@ export function getJobRetryOptions(errorCategory?: ErrorCategory): {
         },
         removeOnFail: {
           age: 24 * 3600, // Keep for 1 day only
+        },
+      };
+    case "ai_quota":
+      return {
+        attempts: 3,
+        backoff: {
+          type: "exponential",
+          delay: 60000, // Start with 60 seconds for AI quota issues
+        },
+        removeOnFail: {
+          age: 7 * 24 * 3600,
         },
       };
     default:

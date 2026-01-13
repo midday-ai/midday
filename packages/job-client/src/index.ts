@@ -16,6 +16,8 @@ export const logger = createLoggerWithContext("job-client");
 export interface TriggerJobOptions {
   /** Delay in milliseconds before the job starts processing */
   delay?: number;
+  /** Custom job ID for deduplication - BullMQ will reject duplicates with the same jobId */
+  jobId?: string;
 }
 
 /**
@@ -38,6 +40,7 @@ export async function triggerJob(
   try {
     const job = await queue.add(jobName, payload, {
       delay: options?.delay,
+      jobId: options?.jobId,
     });
 
     if (!job?.id) {
@@ -52,6 +55,7 @@ export async function triggerJob(
       jobName,
       jobId: compositeId,
       queueName,
+      customJobId: options?.jobId,
       duration: `${enqueueDuration}ms`,
     });
 
@@ -78,20 +82,23 @@ export async function triggerJob(
  * @param queueName - Name of the queue (e.g., "inbox")
  * @param options - Optional parameters
  * @param options.timeout - Maximum time to wait in milliseconds (default: 60000)
+ * @param options.jobId - Custom job ID for deduplication
  * @returns Job information including the job ID and result
  */
 export async function triggerJobAndWait(
   jobName: string,
   payload: unknown,
   queueName: string,
-  options?: { timeout?: number },
+  options?: { timeout?: number; jobId?: string },
 ): Promise<JobTriggerResponse & { result?: unknown }> {
   const queue = getQueue(queueName);
   const enqueueStartTime = Date.now();
   const timeout = options?.timeout ?? 60000; // Default 60 seconds
 
   try {
-    const job = await queue.add(jobName, payload);
+    const job = await queue.add(jobName, payload, {
+      jobId: options?.jobId,
+    });
 
     if (!job?.id) {
       throw new Error(

@@ -3,13 +3,10 @@ import { DocumentClient } from "@midday/documents";
 import { triggerJob } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
-import convert from "heic-convert";
-import sharp from "sharp";
 import type { ProcessTransactionAttachmentPayload } from "../../schemas/transactions";
 import { getDb } from "../../utils/db";
+import { convertHeicToJpeg } from "../../utils/image-processing";
 import { BaseProcessor } from "../base";
-
-const MAX_SIZE = 1500;
 
 /**
  * Process transaction attachments (receipts/invoices)
@@ -43,42 +40,10 @@ export class ProcessTransactionAttachmentProcessor extends BaseProcessor<Process
 
       const buffer = await data.arrayBuffer();
 
-      // Try sharp first (handles HEIF/HEIC + mislabeled files like JPEG with .heic extension)
-      // Fall back to heic-convert only if sharp fails
-      let image: Buffer;
-      try {
-        image = await sharp(Buffer.from(buffer))
-          .rotate()
-          .resize({ width: MAX_SIZE })
-          .toFormat("jpeg")
-          .toBuffer();
-      } catch (sharpError) {
-        this.logger.warn(
-          "Sharp failed to process HEIC, falling back to heic-convert",
-          {
-            filePath: filePath.join("/"),
-            error:
-              sharpError instanceof Error
-                ? sharpError.message
-                : "Unknown error",
-          },
-        );
+      // Use shared HEIC conversion utility (resizes to 2048px)
+      const { buffer: image } = await convertHeicToJpeg(buffer, this.logger);
 
-        const decodedImage = await convert({
-          // @ts-ignore
-          buffer: new Uint8Array(buffer),
-          format: "JPEG",
-          quality: 1,
-        });
-
-        image = await sharp(Buffer.from(decodedImage))
-          .rotate()
-          .resize({ width: MAX_SIZE })
-          .toFormat("jpeg")
-          .toBuffer();
-      }
-
-      // Upload the converted image with .jpg extension
+      // Upload the converted image
       const { data: uploadedData } = await supabase.storage
         .from("vault")
         .upload(filePath.join("/"), image, {

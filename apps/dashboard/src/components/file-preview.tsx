@@ -103,7 +103,7 @@ export function FilePreview({
                 fill: true,
               })}
           className={cn(
-            "object-contain border border-border dark:border-none",
+            "object-cover object-top border border-border dark:border-none w-full h-full",
             imageLoading ? "opacity-0" : "opacity-100",
           )}
           loading={lazy ? "lazy" : "eager"}

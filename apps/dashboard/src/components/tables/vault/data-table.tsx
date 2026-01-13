@@ -19,6 +19,7 @@ import { STICKY_COLUMNS } from "@/utils/table-configs";
 import type { TableSettings } from "@/utils/table-settings";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
+import { toast } from "@midday/ui/use-toast";
 import {
   useMutation,
   useQueryClient,
@@ -91,7 +92,7 @@ export function DataTable({ initialSettings }: Props) {
     ),
   );
 
-  const documents = useMemo(() => {
+  const baseDocuments = useMemo(() => {
     return data?.pages.flatMap((page) => page.data) ?? [];
   }, [data]);
 
@@ -146,6 +147,22 @@ export function DataTable({ initialSettings }: Props) {
     }),
   );
 
+  const documents = baseDocuments;
+
+  const reprocessMutation = useMutation(
+    trpc.documents.reprocessDocument.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.get.queryKey(),
+        });
+      },
+    }),
+  );
+
   const handleDelete = useCallback(
     (id: string) => {
       deleteDocumentMutation.mutate({
@@ -165,6 +182,18 @@ export function DataTable({ initialSettings }: Props) {
     [shortLinkMutation],
   );
 
+  const handleReprocess = useCallback(
+    (id: string) => {
+      toast({
+        title: "Processing document",
+        description: "The document is being processed. This may take a moment.",
+        duration: 3000,
+      });
+      reprocessMutation.mutate({ id });
+    },
+    [reprocessMutation],
+  );
+
   const files = useMemo(() => {
     return documents.map((document) => document.pathTokens?.join("/") ?? "");
   }, [documents]);
@@ -176,8 +205,9 @@ export function DataTable({ initialSettings }: Props) {
     () => ({
       handleDelete,
       handleShare,
+      handleReprocess,
     }),
-    [handleDelete, handleShare],
+    [handleDelete, handleShare, handleReprocess],
   );
 
   const table = useReactTable({

@@ -1,6 +1,5 @@
 import {
   getDocumentTagEmbeddings,
-  updateDocumentProcessingStatus,
   upsertDocumentTagAssignments,
   upsertDocumentTagEmbeddings,
   upsertDocumentTags,
@@ -10,11 +9,12 @@ import slugify from "@sindresorhus/slugify";
 import type { Job } from "bullmq";
 import type { EmbedDocumentTagsPayload } from "../../schemas/documents";
 import { getDb } from "../../utils/db";
+import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";
 
 /**
  * Embed document tags and create tag assignments
- * This is the final step in document processing that marks documents as completed
+ * This enriches documents with tag embeddings for better searchability
  */
 export class EmbedDocumentTagsProcessor extends BaseProcessor<EmbedDocumentTagsPayload> {
   async process(job: Job<EmbedDocumentTagsPayload>): Promise<void> {
@@ -59,7 +59,11 @@ export class EmbedDocumentTagsProcessor extends BaseProcessor<EmbedDocumentTagsP
         newTagsCount: newTagNames.length,
       });
 
-      const { embeddings, model } = await embed.embedMany(newTagNames);
+      const { embeddings, model } = await withTimeout(
+        embed.embedMany(newTagNames),
+        TIMEOUTS.EMBEDDING,
+        `Embedding generation timed out after ${TIMEOUTS.EMBEDDING}ms`,
+      );
 
       if (!embeddings || embeddings.length !== newTagNames.length) {
         this.logger.error("Embeddings result is missing or length mismatch", {
@@ -119,12 +123,6 @@ export class EmbedDocumentTagsProcessor extends BaseProcessor<EmbedDocumentTagsP
       }));
 
       await upsertDocumentTagAssignments(db, assignmentsToInsert);
-
-      // Update the document processing status to completed
-      await updateDocumentProcessingStatus(db, {
-        id: documentId,
-        processingStatus: "completed",
-      });
 
       this.logger.info("Document tags embedded and assigned successfully", {
         documentId,

@@ -1,15 +1,28 @@
-import { updateDocumentByPath } from "@midday/db/queries";
 import { limitWords, mapLanguageCodeToPostgresConfig } from "@midday/documents";
 import { DocumentClassifier } from "@midday/documents/classifier";
 import { triggerJob } from "@midday/job-client";
 import type { Job } from "bullmq";
 import type { ClassifyDocumentPayload } from "../../schemas/documents";
 import { getDb } from "../../utils/db";
+import { updateDocumentWithRetry } from "../../utils/document-update";
 import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";
 
 /**
+ * Classification result type for graceful error handling
+ */
+interface ClassificationResult {
+  title: string | null;
+  summary: string | null;
+  date: string | null;
+  language: string | null;
+  tags: string[] | null;
+}
+
+/**
  * Classify documents using AI to extract metadata and tags
+ * Uses graceful degradation - if AI fails, document is still marked completed
+ * with null values so users can access the file and retry classification later
  */
 export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPayload> {
   async process(job: Job<ClassifyDocumentPayload>): Promise<void> {
@@ -27,24 +40,47 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
       contentLength: content.length,
     });
 
-    const classifier = new DocumentClassifier();
-    const result = await withTimeout(
-      classifier.classifyDocument({ content }),
-      TIMEOUTS.EXTERNAL_API,
-      `Document classification timed out after ${TIMEOUTS.EXTERNAL_API}ms`,
-    );
+    // Attempt AI classification with graceful fallback
+    let classificationResult: ClassificationResult | null = null;
+    let classificationFailed = false;
 
-    // Validate title extraction - log if null and generate fallback
-    let finalTitle = result.title;
-    if (!finalTitle || finalTitle.trim().length === 0) {
+    try {
+      const classifier = new DocumentClassifier();
+      classificationResult = await withTimeout(
+        classifier.classifyDocument({ content }),
+        TIMEOUTS.AI_CLASSIFICATION,
+        `Document classification timed out after ${TIMEOUTS.AI_CLASSIFICATION}ms`,
+      );
+    } catch (error) {
+      // Log error but don't fail - we'll complete with fallback
+      classificationFailed = true;
+      this.logger.warn("AI classification failed, completing with fallback", {
+        fileName,
+        teamId,
+        error: error instanceof Error ? error.message : "Unknown error",
+        errorType: error instanceof Error ? error.name : "Unknown",
+        contentLength: content.length,
+      });
+    }
+
+    // Process title - use AI result, generate fallback, or leave null for retry
+    let finalTitle: string | null = null;
+
+    if (
+      classificationResult?.title &&
+      classificationResult.title.trim().length > 0
+    ) {
+      finalTitle = classificationResult.title;
+    } else if (classificationResult && !classificationFailed) {
+      // AI returned but with empty title - generate fallback from available data
       this.logger.warn(
         "Classification returned null or empty title - generating fallback",
         {
           fileName,
           pathTokens,
           teamId,
-          hasSummary: !!result.summary,
-          hasDate: !!result.date,
+          hasSummary: !!classificationResult.summary,
+          hasDate: !!classificationResult.date,
           contentLength: content.length,
         },
       );
@@ -55,9 +91,11 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
           .split("/")
           .pop()
           ?.replace(/\.[^/.]+$/, "") || "Document";
-      const datePart = result.date ? ` - ${result.date}` : "";
-      const summaryPart = result.summary
-        ? ` - ${result.summary.substring(0, 50)}${result.summary.length > 50 ? "..." : ""}`
+      const datePart = classificationResult.date
+        ? ` - ${classificationResult.date}`
+        : "";
+      const summaryPart = classificationResult.summary
+        ? ` - ${classificationResult.summary.substring(0, 50)}${classificationResult.summary.length > 50 ? "..." : ""}`
         : "";
 
       // Try to extract company name or key info from content sample
@@ -83,19 +121,27 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
         generatedTitle: finalTitle,
       });
     }
+    // If classificationFailed, leave finalTitle as null - UI will show filename + retry option
 
-    const updatedDocs = await updateDocumentByPath(db, {
-      pathTokens,
-      teamId,
-      title: finalTitle ?? undefined,
-      summary: result.summary ?? undefined,
-      content: limitWords(content, 10000),
-      date: result.date ?? undefined,
-      language: mapLanguageCodeToPostgresConfig(result.language),
-      // If the document has no tags, we consider it as processed
-      processingStatus:
-        !result.tags || result.tags.length === 0 ? "completed" : undefined,
-    });
+    // Always update document - with AI results or null fallback
+    // Document always reaches "completed" state so users can access the file
+    const updatedDocs = await updateDocumentWithRetry(
+      db,
+      {
+        pathTokens,
+        teamId,
+        title: finalTitle ?? undefined,
+        summary: classificationResult?.summary ?? undefined,
+        content: limitWords(content, 10000),
+        date: classificationResult?.date ?? undefined,
+        language: mapLanguageCodeToPostgresConfig(
+          classificationResult?.language,
+        ),
+        // Always mark as completed - even if AI failed, document is usable
+        processingStatus: "completed",
+      },
+      this.logger,
+    );
 
     if (!updatedDocs || updatedDocs.length === 0) {
       this.logger.error("Document not found for classification update", {
@@ -113,10 +159,11 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
       );
     }
 
-    if (result.tags && result.tags.length > 0) {
+    // Only trigger tag embedding if we have tags from successful classification
+    if (classificationResult?.tags && classificationResult.tags.length > 0) {
       this.logger.info("Triggering document tag embedding", {
         documentId: data.id,
-        tagsCount: result.tags.length,
+        tagsCount: classificationResult.tags.length,
       });
 
       // Trigger tag embedding (fire and forget)
@@ -124,14 +171,17 @@ export class ClassifyDocumentProcessor extends BaseProcessor<ClassifyDocumentPay
         "embed-document-tags",
         {
           documentId: data.id,
-          tags: result.tags,
+          tags: classificationResult.tags,
           teamId,
         },
         "documents",
+        { jobId: `embed-tags_${teamId}_${data.id}` },
       );
     } else {
-      this.logger.info("No tags found, document processing completed", {
+      this.logger.info("Document processing completed", {
         documentId: data.id,
+        classificationFailed,
+        hasTitle: !!finalTitle,
       });
     }
   }
