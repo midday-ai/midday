@@ -30,3 +30,19 @@
     box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
   }
 }
+
+@layer utilities {
+  .bg-background-semi-transparent {
+    position: relative;
+  }
+
+  .bg-background-semi-transparent::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: hsl(var(--background));
+    opacity: 0.8;
+    z-index: -1;
+    pointer-events: none;
+  }
+}

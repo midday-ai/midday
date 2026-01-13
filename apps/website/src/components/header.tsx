@@ -37,6 +37,7 @@ export function Header({
   const appsListRef = useRef<HTMLDivElement>(null);
   const macAppRef = useRef<HTMLAnchorElement>(null);
   const integrationsAppRef = useRef<HTMLAnchorElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
 
   // All non-ERP integrations
   const allIntegrations = [
@@ -134,12 +135,11 @@ export function Header({
       {/* Navigation Bar */}
       <nav className="fixed top-0 left-0 right-0 z-50 w-full">
         <div
+          ref={headerRef}
           className={cn(
-            transparent
-              ? "bg-transparent"
-              : "bg-background/95 backdrop-blur-md",
-            "py-3 xl:py-4 px-4 sm:px-4 md:px-4 lg:px-4 xl:px-6 2xl:px-8 flex items-center justify-between xl:gap-6",
+            "relative py-3 xl:py-4 px-4 sm:px-4 md:px-4 lg:px-4 xl:px-6 2xl:px-8 flex items-center justify-between xl:gap-6",
             isMenuOpen && "border-b border-border",
+            !transparent && "backdrop-blur-md bg-background-semi-transparent",
           )}
         >
           {/* Logo and Brand */}
