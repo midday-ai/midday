@@ -145,7 +145,10 @@ export function Header({
           {/* Logo and Brand */}
           <div
             className="flex items-center gap-2 cursor-pointer hover:opacity-80 active:opacity-80 transition-opacity duration-200 touch-manipulation"
-            onClick={() => router.push("/")}
+            onClick={() => {
+              setIsMenuOpen(false);
+              router.push("/");
+            }}
             style={{ WebkitTapHighlightColor: "transparent" }}
             onTouchEnd={(e) => e.currentTarget.blur()}
           >
@@ -498,7 +501,7 @@ export function Header({
                           className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
                           onClick={() => {
                             setIsAppsOpen(false);
-                            router.push("/docs");
+                            window.location.href = 'https://api.midday.ai';
                           }}
                         >
                           <div className="flex flex-col pl-2">
@@ -648,7 +651,7 @@ export function Header({
       {/* Mobile & Tablet Menu Overlay */}
       {isMenuOpen && (
         <div className="fixed inset-0 z-40 xl:hidden bg-background">
-          <div className="pt-32 px-6">
+          <div className="pt-28 px-6">
             <div className="flex flex-col space-y-6 text-left">
               {/* Features Expandable Section */}
               <div className="flex flex-col">
@@ -661,7 +664,7 @@ export function Header({
                   onTouchEnd={(e) => {
                     e.currentTarget.blur();
                   }}
-                  className="text-2xl font-sans transition-colors py-2 text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation flex items-center justify-between"
+                  className="text-2xl font-sans transition-colors py-2 text-primary hover:text-primary xl:active:text-primary focus:outline-none focus-visible:outline-none touch-manipulation flex items-center justify-between"
                   style={{
                     WebkitTapHighlightColor: "transparent",
                   }}
@@ -814,7 +817,7 @@ export function Header({
                   e.currentTarget.blur();
                   setTimeout(() => e.currentTarget.blur(), 100);
                 }}
-                className="no-touch-active text-2xl font-sans transition-colors py-2 text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+                className="no-touch-active text-2xl font-sans transition-colors py-2 text-primary hover:text-primary xl:active:text-primary focus:outline-none focus-visible:outline-none touch-manipulation"
                 onClick={() => setIsMenuOpen(false)}
                 style={{ WebkitTapHighlightColor: "transparent" }}
               >
@@ -826,7 +829,7 @@ export function Header({
                   e.currentTarget.blur();
                   setTimeout(() => e.currentTarget.blur(), 100);
                 }}
-                className="no-touch-active text-2xl font-sans transition-colors py-2 text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+                className="no-touch-active text-2xl font-sans transition-colors py-2 text-primary hover:text-primary xl:active:text-primary focus:outline-none focus-visible:outline-none touch-manipulation"
                 onClick={() => setIsMenuOpen(false)}
                 style={{ WebkitTapHighlightColor: "transparent" }}
               >
@@ -838,7 +841,7 @@ export function Header({
                   e.currentTarget.blur();
                   setTimeout(() => e.currentTarget.blur(), 100);
                 }}
-                className="no-touch-active text-2xl font-sans transition-colors py-2 text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation"
+                className="no-touch-active text-2xl font-sans transition-colors py-2 text-primary hover:text-primary xl:active:text-primary focus:outline-none focus-visible:outline-none touch-manipulation"
                 onClick={() => setIsMenuOpen(false)}
                 style={{ WebkitTapHighlightColor: "transparent" }}
               >
@@ -856,7 +859,7 @@ export function Header({
                   onTouchEnd={(e) => {
                     e.currentTarget.blur();
                   }}
-                  className="text-2xl font-sans transition-colors py-2 text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation flex items-center justify-between"
+                  className="text-2xl font-sans transition-colors py-2 text-primary hover:text-primary xl:active:text-primary focus:outline-none focus-visible:outline-none touch-manipulation flex items-center justify-between"
                   style={{
                     WebkitTapHighlightColor: "transparent",
                   }}
@@ -911,7 +914,7 @@ export function Header({
                         <button
                           type="button"
                           onClick={() => {
-                            router.push("/docs");
+                            window.location.href = 'https://api.midday.ai';
                             setIsMenuOpen(false);
                             setIsMobileAppsOpen(false);
                           }}
@@ -952,7 +955,7 @@ export function Header({
                     e.currentTarget.blur();
                     setTimeout(() => e.currentTarget.blur(), 100);
                   }}
-                  className="text-2xl font-sans transition-colors py-2 text-primary hover:text-primary/80 xl:active:text-primary/80 focus:outline-none focus-visible:outline-none touch-manipulation"
+                  className="text-2xl font-sans transition-colors py-2 text-primary hover:text-primary xl:active:text-primary focus:outline-none focus-visible:outline-none touch-manipulation"
                   onClick={() => setIsMenuOpen(false)}
                   style={{ WebkitTapHighlightColor: "transparent" }}
                 >
