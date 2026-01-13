@@ -158,6 +158,14 @@ export const documentsRouter = createTRPCRouter({
         (document.metadata as { mimetype?: string })?.mimetype ??
         "application/octet-stream";
 
+      // Validate pathTokens exists - required for job processing
+      if (!document.pathTokens || document.pathTokens.length === 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Document has no file path and cannot be reprocessed",
+        });
+      }
+
       // Check if it's a supported file type
       if (!isMimeTypeSupportedForProcessing(mimetype)) {
         // Mark unsupported files as completed
@@ -179,6 +187,7 @@ export const documentsRouter = createTRPCRouter({
       });
 
       // Trigger reprocessing with deterministic jobId for deduplication
+      // pathTokens is validated above, safe to use directly
       const jobResult = await triggerJob(
         "process-document",
         {
@@ -187,7 +196,7 @@ export const documentsRouter = createTRPCRouter({
           teamId: teamId!,
         },
         "documents",
-        { jobId: `process-doc:${teamId}:${document.pathTokens?.join("/")}` },
+        { jobId: `process-doc:${teamId}:${document.pathTokens.join("/")}` },
       );
 
       return {

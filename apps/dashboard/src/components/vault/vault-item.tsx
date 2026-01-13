@@ -22,6 +22,7 @@ type Props = {
     pathTokens: string[];
     title: string;
     summary: string;
+    createdAt?: string | Date | null;
     documentTagAssignments?: Array<{
       documentTag: { id: string; name: string; slug: string };
     }>;
@@ -48,25 +49,50 @@ export function VaultItem({ data, small }: Props) {
   const needsClassification =
     data.processingStatus === "completed" && !data.title;
 
-  // Pending = processing in progress, show skeleton
-  const isLoading = data.processingStatus === "pending";
+  // Check if document is stuck in processing (pending for >10 minutes since creation)
+  const isStaleProcessing =
+    data.processingStatus === "pending" &&
+    data.createdAt &&
+    Date.now() - new Date(data.createdAt).getTime() > 10 * 60 * 1000;
 
-  // Clear local state once parent props reflect pending status
+  // Show skeleton only for recently pending documents (not stale ones)
+  const isLoading = data.processingStatus === "pending" && !isStaleProcessing;
+
+  // Clear local state once processing completes or becomes fresh pending
   useEffect(() => {
-    if (isReprocessing && isLoading) {
-      setIsReprocessing(false);
+    if (isReprocessing) {
+      // Clear when: status changed to completed/failed, OR became fresh pending
+      const isCompleted = data.processingStatus === "completed";
+      if (isCompleted || isFailed || isLoading) {
+        setIsReprocessing(false);
+      }
     }
-  }, [isReprocessing, isLoading]);
+  }, [isReprocessing, isLoading, isFailed, data.processingStatus]);
 
-  // Show retry option only for supported file types that failed or need classification
-  const showRetry = isSupported && (isFailed || needsClassification);
+  // Show retry for failed, unclassified, or stale processing
+  const showRetry =
+    isSupported && (isFailed || needsClassification || isStaleProcessing);
 
   // Get display name - fallback to filename from path if no title
   const displayName =
     data?.title || data?.name?.split("/").at(-1) || "Document";
 
   const reprocessMutation = useMutation(
-    trpc.documents.reprocessDocument.mutationOptions(),
+    trpc.documents.reprocessDocument.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.get.queryKey(),
+        });
+      },
+      onError: () => {
+        // Reset local state so user can retry
+        setIsReprocessing(false);
+      },
+    }),
   );
 
   const handleReprocess = (e: React.MouseEvent) => {
@@ -85,7 +111,7 @@ export function VaultItem({ data, small }: Props) {
         small && "h-48",
         !showSkeleton && isFailed && isSupported && "border-destructive/50",
         !showSkeleton &&
-          needsClassification &&
+          (needsClassification || isStaleProcessing) &&
           isSupported &&
           "border-amber-500/30",
       )}

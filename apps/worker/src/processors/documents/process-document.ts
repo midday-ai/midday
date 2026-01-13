@@ -239,6 +239,8 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
 
         // Trigger image classification via BullMQ and wait for completion
         // This ensures errors propagate and status is properly updated
+        // Use CLASSIFICATION_JOB_WAIT timeout to ensure we don't timeout before the child job completes
+        // Child job uses AI_CLASSIFICATION (90s) + FILE_DOWNLOAD (60s), so we need at least 150s
         await triggerJobAndWait(
           "classify-image",
           {
@@ -246,7 +248,10 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
             teamId,
           },
           "documents",
-          { jobId: `classify-img:${teamId}:${fileName}` },
+          {
+            jobId: `classify-img:${teamId}:${fileName}`,
+            timeout: TIMEOUTS.CLASSIFICATION_JOB_WAIT,
+          },
         );
 
         return;
@@ -387,6 +392,8 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
 
       // Trigger document classification via BullMQ and wait for completion
       // This ensures errors propagate and status is properly updated
+      // Use CLASSIFICATION_JOB_WAIT timeout to ensure we don't timeout before the child job completes
+      // Child job uses AI_CLASSIFICATION (90s), so we need at least that + overhead
       const classificationJobResult = await triggerJobAndWait(
         "classify-document",
         {
@@ -395,7 +402,10 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
           teamId,
         },
         "documents",
-        { jobId: `classify-doc:${teamId}:${fileName}` },
+        {
+          jobId: `classify-doc:${teamId}:${fileName}`,
+          timeout: TIMEOUTS.CLASSIFICATION_JOB_WAIT,
+        },
       );
 
       const classificationDuration = Date.now() - classificationStartTime;

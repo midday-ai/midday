@@ -62,4 +62,8 @@ export const TIMEOUTS = {
   AI_CLASSIFICATION: 90_000, // 90 seconds for AI document/image classification
   // AI classification can be slow for complex documents with OCR, multiple pages,
   // or when the model is under load. 90s provides sufficient buffer.
+  CLASSIFICATION_JOB_WAIT: 180_000, // 3 minutes for waiting on classification jobs
+  // Must be >= AI_CLASSIFICATION (90s) + FILE_DOWNLOAD (60s for images) + job overhead
+  // Using 180s to ensure parent job doesn't timeout while child classification is valid
+  // This prevents race conditions where parent marks "failed" but child completes "completed"
 } as const;
