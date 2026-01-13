@@ -245,6 +245,9 @@ export const transformAccount = ({
   balances,
   institution,
   type,
+  subtype,
+  mask,
+  persistent_account_id,
 }: TransformAccount): BaseAccount => {
   const accountType = getType(type);
   return {
@@ -263,8 +266,13 @@ export const transformAccount = ({
       logo: getLogoURL(institution.id),
       provider: Providers.enum.plaid,
     },
-    resource_id: null,
+    // Use persistent_account_id (stable across Item resets for TAN institutions)
+    // Fall back to mask (last 2-4 digits) for other institutions
+    resource_id: persistent_account_id || mask || null,
     expires_at: null,
+    iban: null, // Plaid (US-focused) doesn't typically provide IBAN
+    subtype: subtype || null, // checking, savings, credit_card, mortgage, etc.
+    bic: null, // Plaid doesn't have BIC
   };
 };
 

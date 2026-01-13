@@ -63,9 +63,11 @@ exports[`Transform accounts 1`] = `
     "amount": 56302.06,
     "currency": "CAD",
   },
+  "bic": null,
   "currency": "CAD",
   "enrollment_id": null,
   "expires_at": null,
+  "iban": null,
   "id": "kKZWQnoZVqcBeN71qdyoh8mVoErgb7tL7gmBL",
   "institution": {
     "id": "ins_100546",
@@ -74,7 +76,8 @@ exports[`Transform accounts 1`] = `
     "provider": "plaid",
   },
   "name": "Plaid Mortgage",
-  "resource_id": null,
+  "resource_id": "8888",
+  "subtype": "mortgage",
   "type": "loan",
 }
 `;

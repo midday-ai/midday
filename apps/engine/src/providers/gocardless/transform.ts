@@ -263,6 +263,9 @@ export const transformAccount = ({
       new Date(),
       getAccessValidForDays({ institutionId: institution.id }),
     ).toISOString(),
+    iban: account.iban || null,
+    subtype: null, // GoCardless uses cashAccountType for type, no additional subtype
+    bic: institution.bic || null,
   };
 };
 

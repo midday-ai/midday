@@ -40,6 +40,10 @@ export const getBankConnections = async (
           balance: true,
           type: true,
           errorRetries: true,
+          // Additional account data for display
+          iban: true,
+          subtype: true,
+          bic: true,
         },
         where:
           enabled !== undefined ? eq(bankAccounts.enabled, enabled) : undefined,
@@ -84,6 +88,10 @@ export type CreateBankConnectionPayload = {
     type: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
     accountReference?: string | null;
     expiresAt?: string | null;
+    // Additional account data for reconnect matching and user display
+    iban?: string | null;
+    subtype?: string | null;
+    bic?: string | null;
   }[];
   accessToken?: string | null;
   enrollmentId?: string | null;
@@ -161,6 +169,10 @@ export const createBankConnection = async (
       accountReference: account.accountReference,
       balance: account.balance ?? 0,
       manual: false,
+      // Additional account data for reconnect matching and user display
+      iban: account.iban,
+      subtype: account.subtype,
+      bic: account.bic,
     })),
   );
 

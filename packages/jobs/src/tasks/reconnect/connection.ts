@@ -1,5 +1,6 @@
 import { reconnectConnectionSchema } from "@jobs/schema";
 import { syncConnection } from "@jobs/tasks/bank/sync/connection";
+import { matchAndUpdateAccountIds } from "@jobs/utils/account-matching";
 import { client } from "@midday/engine-client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk";
@@ -14,6 +15,19 @@ export const reconnectConnection = schemaTask({
   run: async ({ teamId, connectionId, provider }) => {
     const supabase = createClient();
 
+    // Fetch existing bank accounts for this connection
+    const { data: existingAccounts } = await supabase
+      .from("bank_accounts")
+      .select("id, account_reference, type, currency, name")
+      .eq("bank_connection_id", connectionId);
+
+    if (!existingAccounts || existingAccounts.length === 0) {
+      logger.warn("No existing bank accounts found for connection", {
+        connectionId,
+        provider,
+      });
+    }
+
     if (provider === "gocardless") {
       // We need to update the reference of the connection
       const connection = await client.connections[":reference"].$get({
@@ -25,23 +39,18 @@ export const reconnectConnection = schemaTask({
       }
 
       const connectionResponse = await connection.json();
-
       const referenceId = connectionResponse?.data.id;
 
       // Update the reference_id of the new connection
       if (referenceId) {
-        logger.info("Updating reference_id of the new connection");
-
+        logger.info("Updating reference_id for GoCardless connection");
         await supabase
           .from("bank_connections")
-          .update({
-            reference_id: referenceId,
-          })
+          .update({ reference_id: referenceId })
           .eq("id", connectionId);
       }
 
-      // The account_ids can be different between the old and new connection
-      // So we need to check for account_reference and update
+      // Fetch fresh accounts from GoCardless API
       const accounts = await client.accounts.$get({
         query: {
           id: referenceId,
@@ -55,69 +64,13 @@ export const reconnectConnection = schemaTask({
 
       const accountsResponse = await accounts.json();
 
-      // Fetch existing bank accounts for this connection to match by unique ID
-      // This prevents the multiple-row update problem when accounts share the same last_four
-      const { data: existingAccounts } = await supabase
-        .from("bank_accounts")
-        .select("id, account_reference, type, currency, name")
-        .eq("bank_connection_id", connectionId);
-
-      if (!existingAccounts || existingAccounts.length === 0) {
-        logger.warn("No existing bank accounts found for connection", {
+      if (existingAccounts && existingAccounts.length > 0) {
+        await matchAndUpdateAccountIds({
+          existingAccounts,
+          apiAccounts: accountsResponse.data,
           connectionId,
+          provider: "gocardless",
         });
-      } else {
-        // Track which DB accounts have been matched to prevent double-matching
-        const matchedDbIds = new Set<string>();
-
-        await Promise.all(
-          accountsResponse.data.map(async (account) => {
-            if (!account.resource_id) return;
-
-            // Find the best matching DB account that hasn't been matched yet
-            // Priority: resource_id + type + currency + name (most specific)
-            // Fallback: resource_id + type + currency
-            // Last resort: resource_id only
-            const match = existingAccounts.find((dbAccount) => {
-              if (matchedDbIds.has(dbAccount.id)) return false;
-              if (dbAccount.account_reference !== account.resource_id)
-                return false;
-
-              // Try to match on type and currency if available
-              const typeMatch =
-                !dbAccount.type || dbAccount.type === account.type;
-              const currencyMatch =
-                !dbAccount.currency || dbAccount.currency === account.currency;
-
-              return typeMatch && currencyMatch;
-            });
-
-            if (match) {
-              matchedDbIds.add(match.id);
-              const result = await supabase
-                .from("bank_accounts")
-                .update({ account_id: account.id })
-                .eq("id", match.id);
-
-              if (result.error) {
-                logger.warn("Failed to update GoCardless account", {
-                  resource_id: account.resource_id,
-                  dbAccountId: match.id,
-                  error: result.error.message,
-                });
-              }
-            } else {
-              logger.warn(
-                "No matching DB account found for GoCardless account",
-                {
-                  resource_id: account.resource_id,
-                  type: account.type,
-                  currency: account.currency,
-                },
-              );
-            }
-          }),
-        );
       }
     }
 
@@ -135,7 +88,6 @@ export const reconnectConnection = schemaTask({
       }
 
       // Fetch fresh accounts from Teller API
-      // Account IDs may change after reconnect, but last_four (resource_id) remains stable
       const accounts = await client.accounts.$get({
         query: {
           id: connectionData.enrollment_id,
@@ -155,75 +107,97 @@ export const reconnectConnection = schemaTask({
         accountCount: accountsResponse.data.length,
       });
 
-      // Fetch existing bank accounts for this connection to match by unique ID
-      // This prevents the multiple-row update problem when accounts share the same last_four
-      const { data: existingAccounts } = await supabase
-        .from("bank_accounts")
-        .select("id, account_reference, type, currency, name")
-        .eq("bank_connection_id", connectionId);
-
-      if (!existingAccounts || existingAccounts.length === 0) {
-        logger.warn("No existing bank accounts found for Teller connection", {
+      if (existingAccounts && existingAccounts.length > 0) {
+        await matchAndUpdateAccountIds({
+          existingAccounts,
+          apiAccounts: accountsResponse.data,
           connectionId,
+          provider: "teller",
         });
-      } else {
-        // Track which DB accounts have been matched to prevent double-matching
-        const matchedDbIds = new Set<string>();
-
-        await Promise.all(
-          accountsResponse.data.map(async (account) => {
-            if (!account.resource_id) return;
-
-            // Find the best matching DB account that hasn't been matched yet
-            // Match on: resource_id (last_four) + type + currency
-            // If multiple accounts match these criteria, use name as a tiebreaker
-            const candidates = existingAccounts.filter((dbAccount) => {
-              if (matchedDbIds.has(dbAccount.id)) return false;
-              if (dbAccount.account_reference !== account.resource_id)
-                return false;
-              if (dbAccount.type && dbAccount.type !== account.type)
-                return false;
-              if (dbAccount.currency && dbAccount.currency !== account.currency)
-                return false;
-              return true;
-            });
-
-            // If multiple candidates, prefer exact name match
-            let match = candidates.find(
-              (c) => c.name?.toLowerCase() === account.name?.toLowerCase(),
-            );
-            // Otherwise take the first candidate
-            if (!match && candidates.length > 0) {
-              match = candidates[0];
-            }
-
-            if (match) {
-              matchedDbIds.add(match.id);
-              const result = await supabase
-                .from("bank_accounts")
-                .update({ account_id: account.id })
-                .eq("id", match.id);
-
-              if (result.error) {
-                logger.warn("Failed to update Teller account", {
-                  resource_id: account.resource_id,
-                  dbAccountId: match.id,
-                  error: result.error.message,
-                });
-              }
-            } else {
-              logger.warn("No matching DB account found for Teller account", {
-                resource_id: account.resource_id,
-                type: account.type,
-                currency: account.currency,
-                name: account.name,
-              });
-            }
-          }),
-        );
       }
     }
 
+    if (provider === "enablebanking") {
+      // Get the connection to retrieve reference_id (session_id)
+      const { data: connectionData } = await supabase
+        .from("bank_connections")
+        .select("reference_id")
+        .eq("id", connectionId)
+        .single();
+
+      if (!connectionData?.reference_id) {
+        logger.error("EnableBanking connection missing reference_id");
+        throw new Error("EnableBanking connection not found");
+      }
+
+      // Fetch fresh accounts from EnableBanking API
+      const accounts = await client.accounts.$get({
+        query: {
+          id: connectionData.reference_id,
+          provider: "enablebanking",
+        },
+      });
+
+      if (!accounts.ok) {
+        logger.error("Failed to fetch EnableBanking accounts");
+        throw new Error("EnableBanking accounts not found");
+      }
+
+      const accountsResponse = await accounts.json();
+
+      logger.info("Updating EnableBanking account IDs after reconnect", {
+        accountCount: accountsResponse.data.length,
+      });
+
+      if (existingAccounts && existingAccounts.length > 0) {
+        await matchAndUpdateAccountIds({
+          existingAccounts,
+          apiAccounts: accountsResponse.data,
+          connectionId,
+          provider: "enablebanking",
+        });
+      }
+    }
+
+    if (provider === "plaid") {
+      // Plaid uses "update mode" for reconnect which preserves account IDs
+      // No account ID remapping is needed, but we log for consistency
+      logger.info("Plaid reconnect - account IDs preserved via update mode", {
+        connectionId,
+      });
+
+      // We still fetch accounts to verify the connection is working
+      const { data: connectionData } = await supabase
+        .from("bank_connections")
+        .select("access_token, institution_id")
+        .eq("id", connectionId)
+        .single();
+
+      if (!connectionData?.access_token) {
+        logger.error("Plaid connection missing access_token");
+        throw new Error("Plaid connection not found");
+      }
+
+      const accounts = await client.accounts.$get({
+        query: {
+          provider: "plaid",
+          accessToken: connectionData.access_token,
+          institutionId: connectionData.institution_id ?? undefined,
+        },
+      });
+
+      if (!accounts.ok) {
+        logger.error("Failed to verify Plaid accounts after reconnect");
+        throw new Error("Plaid accounts verification failed");
+      }
+
+      const accountsResponse = await accounts.json();
+      logger.info("Plaid accounts verified after reconnect", {
+        accountCount: accountsResponse.data.length,
+      });
+    }
+
+    // Trigger sync to fetch latest transactions
     await syncConnection.trigger({
       connectionId,
       manualSync: true,

@@ -158,9 +158,11 @@ exports[`Transform accounts 1`] = `
     "amount": 2011100,
     "currency": "USD",
   },
+  "bic": null,
   "currency": "USD",
   "enrollment_id": "enr_os557c8pck2deoskak000",
   "expires_at": null,
+  "iban": null,
   "id": "acc_os557c2mge29shubl2000",
   "institution": {
     "id": "mercury",
@@ -170,6 +172,7 @@ exports[`Transform accounts 1`] = `
   },
   "name": "Platinum Card",
   "resource_id": "6587",
+  "subtype": "credit_card",
   "type": "credit",
 }
 `;

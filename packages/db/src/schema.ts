@@ -673,6 +673,10 @@ export const bankAccounts = pgTable(
     errorDetails: text("error_details"),
     errorRetries: smallint("error_retries"),
     accountReference: text("account_reference"),
+    // Additional account data for reconnect matching and user display
+    iban: text(), // International Bank Account Number (EU/UK accounts)
+    subtype: text(), // Granular type: checking, savings, credit_card, money_market, etc.
+    bic: text(), // Bank Identifier Code / SWIFT
   },
   (table) => [
     index("bank_accounts_bank_connection_id_idx").using(

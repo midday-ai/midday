@@ -94,6 +94,9 @@ export const transformAccount = (
     enrollment_id: null,
     resource_id: account.identification_hash,
     expires_at: account.valid_until,
+    iban: account.account_id?.iban || null,
+    subtype: account.cash_account_type?.toLowerCase() || null, // CACC, CARD, SVGS, LOAN, CASH
+    bic: account.account_servicer?.bic_fi || null,
   };
 };
 

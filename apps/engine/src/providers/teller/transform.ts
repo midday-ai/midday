@@ -186,6 +186,7 @@ export const transformAccount = ({
   currency,
   enrollment_id,
   type,
+  subtype,
   institution,
   balance,
   last_four,
@@ -203,6 +204,9 @@ export const transformAccount = ({
     // Use last_four as stable identifier for account matching during reconnect
     resource_id: last_four,
     expires_at: null,
+    iban: null, // Teller (US-only) doesn't have IBAN
+    subtype: subtype || null, // checking, savings, money_market, credit_card, etc.
+    bic: null, // Teller doesn't have BIC
   };
 };
 

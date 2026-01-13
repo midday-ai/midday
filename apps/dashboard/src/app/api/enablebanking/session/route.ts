@@ -1,6 +1,8 @@
 import { client } from "@midday/engine-client";
+import type { ReconnectConnectionPayload } from "@midday/jobs/schema";
 import { getSession } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
+import { tasks } from "@trigger.dev/sdk";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -66,18 +68,16 @@ export async function GET(request: NextRequest) {
         .select("id, team_id")
         .single();
 
-      // Update bank account_ids based on the persisted identification_hash (account_reference)
-      await Promise.all(
-        sessionData?.accounts?.map((account) =>
-          supabase
-            .from("bank_accounts")
-            .update({
-              account_id: account.account_id,
-            })
-            .eq("account_reference", account.account_reference)
-            .eq("team_id", data?.team_id!),
-        ),
-      );
+      // Trigger the reconnect job to safely update account IDs
+      // This uses the shared matchAndUpdateAccountIds function to prevent
+      // the multiple-row update issue when accounts share the same account_reference
+      if (data?.id && data?.team_id) {
+        await tasks.trigger("reconnect-connection", {
+          teamId: data.team_id,
+          connectionId: data.id,
+          provider: "enablebanking",
+        } satisfies ReconnectConnectionPayload);
+      }
 
       return NextResponse.redirect(
         new URL(

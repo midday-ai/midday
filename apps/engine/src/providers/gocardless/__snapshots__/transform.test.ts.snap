@@ -82,9 +82,11 @@ exports[`Transform accounts 1`] = `
     "amount": 1942682.86,
     "currency": "SEK",
   },
+  "bic": "PLEODK00",
   "currency": "SEK",
   "enrollment_id": null,
   "expires_at": "FIXED_DATE_FOR_TESTING",
+  "iban": "123",
   "id": "b11e5627-cac8-41c9-a74a-2b88438fe07d",
   "institution": {
     "id": "PLEO_PLEODK00",
@@ -94,6 +96,7 @@ exports[`Transform accounts 1`] = `
   },
   "name": "Pleo Account",
   "resource_id": "3133",
+  "subtype": null,
   "type": "depository",
 }
 `;
@@ -104,9 +107,11 @@ exports[`Transform credit card account (CARD type) 1`] = `
     "amount": 1500,
     "currency": "EUR",
   },
+  "bic": "TESTBIC",
   "currency": "EUR",
   "enrollment_id": null,
   "expires_at": "FIXED_DATE_FOR_TESTING",
+  "iban": "4444",
   "id": "credit-card-account-123",
   "institution": {
     "id": "BANK_CREDIT",
@@ -116,6 +121,7 @@ exports[`Transform credit card account (CARD type) 1`] = `
   },
   "name": "Credit Card",
   "resource_id": "4444",
+  "subtype": null,
   "type": "credit",
 }
 `;

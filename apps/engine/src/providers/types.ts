@@ -50,8 +50,12 @@ export type Account = {
   institution: Institution;
   balance: Balance;
   enrollment_id: string | null; // Teller
-  resource_id: string | null; // GoCardLess
+  resource_id: string | null; // GoCardLess, EnableBanking, Teller (last_four), Plaid (persistent_account_id || mask)
   expires_at: string | null; // EnableBanking & GoCardLess
+  // Additional account data for reconnect matching and user display
+  iban: string | null; // GoCardless, EnableBanking (EU/UK accounts)
+  subtype: string | null; // Teller, Plaid, EnableBanking (checking, savings, credit_card, etc.)
+  bic: string | null; // GoCardless, EnableBanking (Bank Identifier Code / SWIFT)
 };
 
 export type ConnectionStatus = {

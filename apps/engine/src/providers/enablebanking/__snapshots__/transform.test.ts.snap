@@ -63,9 +63,11 @@ exports[`Transform account 1`] = `
     "amount": 90737.96,
     "currency": "SEK",
   },
+  "bic": "SEB",
   "currency": "SEK",
   "enrollment_id": null,
   "expires_at": "2024-03-06",
+  "iban": "SE234234234",
   "id": "83435345-d61cb425f293",
   "institution": {
     "id": "7df7c347a9cf",
@@ -75,6 +77,7 @@ exports[`Transform account 1`] = `
   },
   "name": "Enkla Sparkontot Företag",
   "resource_id": "3234.3GP8GRsZp9MO9sZwxoW/Fy+5rUBIsFLHcrXP8GZ/rv4=",
+  "subtype": "cacc",
   "type": "depository",
 }
 `;

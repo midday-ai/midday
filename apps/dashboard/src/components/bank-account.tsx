@@ -23,9 +23,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
+import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
 import { Switch } from "@midday/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
+import { useToast } from "@midday/ui/use-toast";
 import { getInitials } from "@midday/utils/format";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MoreHorizontal } from "lucide-react";
@@ -47,6 +55,7 @@ export function BankAccount({ data }: Props) {
   const [value, setValue] = useState("");
   const [isOpen, setOpen] = useState(false);
   const t = useI18n();
+  const { toast } = useToast();
 
   const [_, setParams] = useQueryStates({
     step: parseAsString,
@@ -55,7 +64,26 @@ export function BankAccount({ data }: Props) {
     type: parseAsString,
   });
 
-  const { id, enabled, manual, type, name, balance, currency } = data;
+  const {
+    id,
+    enabled,
+    manual,
+    type,
+    name,
+    balance,
+    currency,
+    iban,
+    subtype,
+    bic,
+  } = data;
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      duration: 2000,
+      title: `${label} copied to clipboard`,
+    });
+  };
 
   const deleteAccountMutation = useMutation(
     trpc.bankAccounts.delete.mutationOptions({
@@ -104,6 +132,59 @@ export function BankAccount({ data }: Props) {
         <div className="flex items-center justify-between w-full">
           <div className="flex flex-col">
             <p className="font-medium leading-none mb-1 text-sm">{name}</p>
+            {(subtype || iban || bic) && (
+              <div className="flex items-center gap-2 mt-1">
+                {subtype && (
+                  <span className="text-xs text-[#878787]">
+                    {subtype.replace(/_/g, " ")}
+                  </span>
+                )}
+                {iban && (
+                  <TooltipProvider delayDuration={70}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            copyToClipboard(iban, "IBAN");
+                          }}
+                          className="text-xs text-[#878787] hover:text-primary flex items-center gap-1"
+                        >
+                          <span>****{iban.slice(-4)}</span>
+                          <Icons.Copy className="size-3" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent className="px-3 py-1.5 text-xs">
+                        Click to copy IBAN: {iban}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+                {bic && (
+                  <TooltipProvider delayDuration={70}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            copyToClipboard(bic, "BIC");
+                          }}
+                          className="text-xs text-[#878787] hover:text-primary flex items-center gap-1"
+                        >
+                          <span>BIC</span>
+                          <Icons.Copy className="size-3" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent className="px-3 py-1.5 text-xs">
+                        Click to copy BIC: {bic}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
+            )}
           </div>
 
           {balance && currency ? (

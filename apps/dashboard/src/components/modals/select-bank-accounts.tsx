@@ -157,6 +157,10 @@ const formSchema = z.object({
           "loan",
           "other_liability",
         ]),
+        // Additional account data for reconnect matching and user display
+        iban: z.string().nullable().optional(),
+        subtype: z.string().nullable().optional(),
+        bic: z.string().nullable().optional(),
       }),
     )
     .refine((accounts) => accounts.some((account) => account.enabled), {
@@ -271,6 +275,10 @@ export function SelectBankAccountsModal() {
         enabled: true,
         type: account.type,
         expiresAt: account.expires_at,
+        // Additional account data for reconnect matching and user display
+        iban: account.iban,
+        subtype: account.subtype,
+        bic: account.bic,
       })),
     });
   }, [data, ref]);
@@ -329,7 +337,14 @@ export function SelectBankAccountsModal() {
                                       {account.name}
                                     </p>
                                     <span className="text-xs text-[#878787] font-normal">
-                                      {t(`account_type.${account.type}`)}
+                                      {account.subtype
+                                        ? `${t(`account_type.${account.type}`)} · ${account.subtype.replace(/_/g, " ")}`
+                                        : t(`account_type.${account.type}`)}
+                                      {account.iban && (
+                                        <span className="ml-1">
+                                          · ****{account.iban.slice(-4)}
+                                        </span>
+                                      )}
                                     </span>
                                   </div>
 

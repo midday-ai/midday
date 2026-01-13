@@ -6,6 +6,106 @@ import { logger, schemaTask } from "@trigger.dev/sdk";
 import { transactionNotifications } from "../notifications/transactions";
 import { syncAccount } from "./account";
 
+/**
+ * TEMPORARY BACKFILL: Populate iban, subtype, bic for existing accounts.
+ *
+ * This function fetches fresh account data from the banking API and updates
+ * any existing accounts that are missing the new fields. This ensures existing
+ * users get the new data without requiring a reconnect.
+ *
+ * TODO: Remove this function after 2025-02-01 when most accounts have been updated.
+ */
+async function backfillAccountData({
+  connectionId,
+  provider,
+  referenceId,
+  accessToken,
+}: {
+  connectionId: string;
+  provider: "gocardless" | "plaid" | "teller" | "enablebanking";
+  referenceId: string;
+  accessToken?: string;
+}) {
+  const supabase = createClient();
+
+  // Fetch existing accounts that need backfill (missing iban, subtype, or bic)
+  const { data: existingAccounts } = await supabase
+    .from("bank_accounts")
+    .select("id, account_id, iban, subtype, bic")
+    .eq("bank_connection_id", connectionId);
+
+  if (!existingAccounts || existingAccounts.length === 0) {
+    return;
+  }
+
+  // Check if any accounts need backfill
+  const accountsNeedingBackfill = existingAccounts.filter(
+    (account) =>
+      account.iban === null &&
+      account.subtype === null &&
+      account.bic === null,
+  );
+
+  if (accountsNeedingBackfill.length === 0) {
+    logger.debug("No accounts need backfill", { connectionId });
+    return;
+  }
+
+  logger.info("Backfilling account data", {
+    connectionId,
+    provider,
+    accountsToBackfill: accountsNeedingBackfill.length,
+  });
+
+  // Fetch fresh accounts from API
+  const accounts = await client.accounts.$get({
+    query: {
+      id: referenceId,
+      provider,
+      accessToken,
+    },
+  });
+
+  if (!accounts.ok) {
+    logger.warn("Failed to fetch accounts for backfill", { connectionId });
+    return;
+  }
+
+  const accountsResponse = await accounts.json();
+
+  // Create a map of API account ID to account data
+  const apiAccountMap = new Map(
+    accountsResponse.data.map((account) => [account.id, account]),
+  );
+
+  // Update each account that needs backfill
+  let updated = 0;
+  for (const dbAccount of accountsNeedingBackfill) {
+    const apiAccount = apiAccountMap.get(dbAccount.account_id);
+    if (!apiAccount) continue;
+
+    // Only update if API has any of the new fields
+    if (apiAccount.iban || apiAccount.subtype || apiAccount.bic) {
+      const { error } = await supabase
+        .from("bank_accounts")
+        .update({
+          iban: apiAccount.iban,
+          subtype: apiAccount.subtype,
+          bic: apiAccount.bic,
+        })
+        .eq("id", dbAccount.id);
+
+      if (!error) {
+        updated++;
+      }
+    }
+  }
+
+  if (updated > 0) {
+    logger.info("Backfill complete", { connectionId, updated });
+  }
+}
+
 // Fan-out pattern. We want to trigger a task for each bank account (Transactions, Balance)
 export const syncConnection = schemaTask({
   id: "sync-connection",
@@ -59,6 +159,25 @@ export const syncConnection = schemaTask({
             last_accessed: new Date().toISOString(),
           })
           .eq("id", connectionId);
+
+        // TEMPORARY BACKFILL: Populate iban, subtype, bic for existing accounts
+        // This can be removed after ~2 weeks when most accounts have been updated
+        // TODO: Remove this backfill logic after 2025-02-01
+        try {
+          await backfillAccountData({
+            connectionId,
+            provider: data.provider as
+              | "gocardless"
+              | "plaid"
+              | "teller"
+              | "enablebanking",
+            referenceId: data.reference_id!,
+            accessToken: data.access_token ?? undefined,
+          });
+        } catch (error) {
+          // Log but don't fail the sync - backfill is best effort
+          logger.warn("Backfill account data failed", { error });
+        }
 
         const query = supabase
           .from("bank_accounts")
