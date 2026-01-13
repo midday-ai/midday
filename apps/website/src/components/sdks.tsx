@@ -401,7 +401,7 @@ export function SDKs() {
 
           {/* TypeScript SDK Content */}
           {activeTab === "typescript" && (
-            <div className="max-w-4xl mx-auto space-y-8 px-4">
+            <div className="max-w-4xl mx-auto space-y-8">
               <div className="text-center space-y-4">
                 <h3 className="font-serif text-2xl sm:text-2xl text-foreground">
                   TypeScript SDK
@@ -481,7 +481,7 @@ run();`} language="typescript" />
 
           {/* Go SDK Content */}
           {activeTab === "go" && (
-            <div className="max-w-4xl mx-auto space-y-8 px-4">
+            <div className="max-w-4xl mx-auto space-y-8">
               <div className="text-center space-y-4">
                 <h3 className="font-serif text-2xl sm:text-2xl text-foreground">
                   Go SDK
@@ -549,7 +549,7 @@ func main() {
 
           {/* PHP SDK Content */}
           {activeTab === "php" && (
-            <div className="max-w-4xl mx-auto space-y-8 px-4">
+            <div className="max-w-4xl mx-auto space-y-8">
               <div className="text-center space-y-4">
                 <h3 className="font-serif text-2xl sm:text-2xl text-foreground">
                   PHP SDK
@@ -624,7 +624,7 @@ if ($response->object !== null) {
       {/* What You Can Build Section */}
       <section className="bg-background py-12 sm:py-16 lg:py-24">
         <div className="max-w-[1400px] mx-auto">
-          <div className="text-center space-y-4 mb-12 px-4">
+          <div className="text-center space-y-4 mb-12">
             <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
               Build real financial workflows
             </h2>
@@ -633,7 +633,7 @@ if ($response->object !== null) {
             </p>
           </div>
 
-          <div className="max-w-2xl mx-auto px-4">
+          <div className="max-w-2xl mx-auto">
             <div className="bg-secondary border border-border p-6 relative">
               <div className="space-y-6">
                 <div className="flex items-center gap-3">
@@ -688,7 +688,7 @@ if ($response->object !== null) {
       {/* Security Section */}
       <section className="bg-background py-12 sm:py-16 lg:py-20 group">
         <div className="max-w-[1400px] mx-auto">
-          <div className="text-center space-y-4 max-w-2xl mx-auto px-4">
+          <div className="text-center space-y-4 max-w-2xl mx-auto">
             {/* Cryptographic Text */}
             <ScrambledText />
             <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
@@ -709,7 +709,7 @@ if ($response->object !== null) {
       {/* Resources Section */}
       <section className="bg-background py-12 sm:py-16 lg:py-20">
         <div className="max-w-[1400px] mx-auto">
-          <div className="text-center space-y-8 max-w-3xl mx-auto px-4">
+          <div className="text-center space-y-8 max-w-3xl mx-auto">
             <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
               Get up and running
             </h2>
