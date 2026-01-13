@@ -1,5 +1,6 @@
 import { ClassifyDocumentProcessor } from "./classify-document";
 import { ClassifyImageProcessor } from "./classify-image";
+import { CleanupStaleDocumentsProcessor } from "./cleanup-stale-documents";
 import { EmbedDocumentTagsProcessor } from "./embed-document-tags";
 import { ProcessDocumentProcessor } from "./process-document";
 
@@ -10,6 +11,7 @@ export { ProcessDocumentProcessor } from "./process-document";
 export { ClassifyImageProcessor } from "./classify-image";
 export { ClassifyDocumentProcessor } from "./classify-document";
 export { EmbedDocumentTagsProcessor } from "./embed-document-tags";
+export { CleanupStaleDocumentsProcessor } from "./cleanup-stale-documents";
 
 /**
  * Document processor registry
@@ -20,4 +22,5 @@ export const documentProcessors = {
   "classify-image": new ClassifyImageProcessor(),
   "classify-document": new ClassifyDocumentProcessor(),
   "embed-document-tags": new EmbedDocumentTagsProcessor(),
+  "cleanup-stale-documents": new CleanupStaleDocumentsProcessor(),
 };

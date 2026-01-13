@@ -79,6 +79,19 @@ export const deleteDocumentResponseSchema = z.object({
   id: z.string(),
 });
 
+export const reprocessDocumentSchema = z.object({
+  id: z
+    .string()
+    .uuid()
+    .openapi({
+      description: "The ID of the document to reprocess",
+      param: {
+        in: "path",
+        name: "id",
+      },
+    }),
+});
+
 export const processDocumentSchema = z.array(
   z.object({
     mimetype: z.string(),

@@ -1,18 +1,22 @@
-import { updateDocumentByPath } from "@midday/db/queries";
 import { loadDocument } from "@midday/documents/loader";
-import { getContentSample } from "@midday/documents/utils";
-import { triggerJob } from "@midday/job-client";
+import {
+  getContentSample,
+  isMimeTypeSupportedForProcessing,
+} from "@midday/documents/utils";
+import { triggerJob, triggerJobAndWait } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
-import convert from "heic-convert";
-import sharp from "sharp";
 import type { ProcessDocumentPayload } from "../../schemas/documents";
 import { getDb } from "../../utils/db";
 import { detectFileTypeFromBlob } from "../../utils/detect-file-type";
+import { updateDocumentWithRetry } from "../../utils/document-update";
+import {
+  NonRetryableError,
+  UnsupportedFileTypeError,
+} from "../../utils/error-classification";
+import { convertHeicToJpeg } from "../../utils/heic-converter";
 import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";
-
-const MAX_SIZE = 1500;
 
 /**
  * Process documents and images for classification
@@ -72,61 +76,29 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         );
 
         if (!data) {
-          throw new Error("File not found");
+          throw new NonRetryableError(
+            "File not found",
+            undefined,
+            "validation",
+          );
         }
+
+        await this.updateProgress(
+          job,
+          this.ProgressMilestones.FETCHED,
+          "HEIC file downloaded",
+        );
 
         const buffer = await data.arrayBuffer();
 
-        // Edge case: Validate buffer is not empty
-        if (buffer.byteLength === 0) {
-          throw new Error("Downloaded file is empty");
-        }
+        // Convert HEIC to JPEG using shared utility
+        const { buffer: image } = await convertHeicToJpeg(buffer, this.logger);
 
-        let decodedImage: ArrayBuffer;
-        try {
-          decodedImage = await convert({
-            // @ts-ignore
-            buffer: new Uint8Array(buffer),
-            format: "JPEG",
-            quality: 1,
-          });
-        } catch (error) {
-          this.logger.error(
-            "Failed to decode HEIC image - file may be corrupted",
-            {
-              filePath: fileName,
-              error: error instanceof Error ? error.message : "Unknown error",
-            },
-          );
-          throw new Error(
-            `Failed to convert HEIC image: ${error instanceof Error ? error.message : "Unknown error"}`,
-          );
-        }
-
-        // Edge case: Validate decoded image
-        if (!decodedImage || decodedImage.byteLength === 0) {
-          throw new Error("Decoded image is empty");
-        }
-
-        let image: Buffer;
-        try {
-          image = await sharp(Buffer.from(decodedImage))
-            .rotate()
-            .resize({ width: MAX_SIZE })
-            .toFormat("jpeg")
-            .toBuffer();
-        } catch (error) {
-          this.logger.error(
-            "Failed to process image with sharp - file may be corrupted",
-            {
-              filePath: fileName,
-              error: error instanceof Error ? error.message : "Unknown error",
-            },
-          );
-          throw new Error(
-            `Failed to process image: ${error instanceof Error ? error.message : "Unknown error"}`,
-          );
-        }
+        await this.updateProgress(
+          job,
+          this.ProgressMilestones.PROCESSING,
+          "HEIC converted to JPEG",
+        );
 
         // Upload the converted image
         const { data: uploadedData } = await withTimeout(
@@ -141,6 +113,12 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         if (!uploadedData) {
           throw new Error("Failed to upload converted image");
         }
+
+        await this.updateProgress(
+          job,
+          this.ProgressMilestones.HALFWAY,
+          "Converted image uploaded",
+        );
 
         // Create Blob from converted image for reuse
         fileData = new Blob([image], { type: "image/jpeg" });
@@ -171,7 +149,11 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         });
 
         if (!data) {
-          throw new Error("File not found");
+          throw new NonRetryableError(
+            "File not found",
+            undefined,
+            "validation",
+          );
         }
 
         fileData = data;
@@ -207,11 +189,15 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
               },
             );
             // Update document status to indicate it's not processable
-            await updateDocumentByPath(db, {
-              pathTokens: filePath,
-              teamId,
-              processingStatus: "failed",
-            });
+            await updateDocumentWithRetry(
+              db,
+              {
+                pathTokens: filePath,
+                teamId,
+                processingStatus: "failed",
+              },
+              this.logger,
+            );
             return;
           }
         } catch (error) {
@@ -239,6 +225,11 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         }
       }
 
+      // Check if file type is supported - throw error for queue config to handle
+      if (!isMimeTypeSupportedForProcessing(processedMimetype)) {
+        throw new UnsupportedFileTypeError(processedMimetype, fileName);
+      }
+
       // If the file is an image, trigger image classification
       if (processedMimetype.startsWith("image/")) {
         this.logger.info("Triggering image classification", {
@@ -246,21 +237,26 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
           teamId,
         });
 
-        // Trigger image classification via BullMQ (fire and forget)
-        await triggerJob(
+        // Trigger image classification via BullMQ and wait for completion
+        // This ensures errors propagate and status is properly updated
+        await triggerJobAndWait(
           "classify-image",
           {
             fileName,
             teamId,
           },
           "documents",
+          { jobId: `classify-img:${teamId}:${fileName}` },
         );
 
         return;
       }
 
       // Process document: load and classify
-      let document: string;
+      // Use graceful degradation - if content extraction fails, complete with null values
+      let document: string | null = null;
+      let documentLoadFailed = false;
+
       try {
         const parseStartTime = Date.now();
         this.logger.info("Parsing document content (extracting text)", {
@@ -271,10 +267,15 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
           fileSize: fileData?.size,
         });
 
-        const loadedDoc = await loadDocument({
-          content: fileData,
-          metadata: { mimetype: processedMimetype },
-        });
+        // 60 second timeout for document parsing - prevents hanging on corrupt/problematic files
+        const loadedDoc = await withTimeout(
+          loadDocument({
+            content: fileData,
+            metadata: { mimetype: processedMimetype },
+          }),
+          60_000,
+          "Document parsing timed out after 60000ms",
+        );
 
         if (!loadedDoc) {
           throw new Error("Failed to load document");
@@ -290,8 +291,10 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
           duration: `${parseDuration}ms`,
         });
       } catch (error) {
-        this.logger.error(
-          "Failed to load document - file may be corrupted or unsupported",
+        // Log error but don't fail - complete with null values so user can still access file
+        documentLoadFailed = true;
+        this.logger.warn(
+          "Failed to extract document content - completing with fallback",
           {
             jobId: job.id,
             fileName,
@@ -300,30 +303,77 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
             error: error instanceof Error ? error.message : "Unknown error",
           },
         );
-        throw new Error(
-          `Failed to load document: ${error instanceof Error ? error.message : "Unknown error"}`,
+      }
+
+      // If document loading failed, complete with null values
+      // User can still view/download the file and retry classification later
+      if (documentLoadFailed || !document) {
+        this.logger.info(
+          "Completing document with null values - user can retry classification",
+          {
+            fileName,
+            teamId,
+            documentLoadFailed,
+          },
         );
+        await updateDocumentWithRetry(
+          db,
+          {
+            pathTokens: filePath,
+            teamId,
+            title: undefined, // null - UI will show filename + retry option
+            summary: undefined,
+            processingStatus: "completed",
+          },
+          this.logger,
+        );
+        return;
       }
 
       // Edge case: Validate document has content
-      if (!document || document.trim().length === 0) {
+      if (document.trim().length === 0) {
         this.logger.warn("Document loaded but has no extractable content", {
           fileName,
           teamId,
         });
-        // Don't throw - still try to classify, might be an image-only document
+        // Complete with null - user can still access the file
+        await updateDocumentWithRetry(
+          db,
+          {
+            pathTokens: filePath,
+            teamId,
+            title: undefined,
+            summary: undefined,
+            processingStatus: "completed",
+          },
+          this.logger,
+        );
+        return;
       }
 
       const sample = getContentSample(document);
 
       // Edge case: Validate sample has content
       if (!sample || sample.trim().length === 0) {
-        this.logger.warn("Document sample is empty, skipping classification", {
-          fileName,
-          teamId,
-          contentLength: document.length,
-        });
-        return; // Skip classification if no content
+        this.logger.warn(
+          "Document sample is empty, marking as completed without classification",
+          {
+            fileName,
+            teamId,
+            contentLength: document.length,
+          },
+        );
+        // Mark as completed - document exists but has no extractable content to classify
+        await updateDocumentWithRetry(
+          db,
+          {
+            pathTokens: filePath,
+            teamId,
+            processingStatus: "completed",
+          },
+          this.logger,
+        );
+        return;
       }
 
       const classificationStartTime = Date.now();
@@ -335,8 +385,9 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         sampleLength: sample.length,
       });
 
-      // Trigger document classification via BullMQ (fire and forget)
-      const classificationJobResult = await triggerJob(
+      // Trigger document classification via BullMQ and wait for completion
+      // This ensures errors propagate and status is properly updated
+      const classificationJobResult = await triggerJobAndWait(
         "classify-document",
         {
           content: sample,
@@ -344,10 +395,11 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
           teamId,
         },
         "documents",
+        { jobId: `classify-doc:${teamId}:${fileName}` },
       );
 
       const classificationDuration = Date.now() - classificationStartTime;
-      this.logger.info("Document classification job triggered", {
+      this.logger.info("Document classification job completed", {
         jobId: job.id,
         fileName,
         teamId,
@@ -396,12 +448,8 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         error: error instanceof Error ? error.message : "Unknown error",
       });
 
-      await updateDocumentByPath(db, {
-        pathTokens: filePath,
-        teamId,
-        processingStatus: "failed",
-      });
-
+      // Status update to "failed" is handled by handleDocumentJobFinalFailure
+      // in documents.config.ts when all retries are exhausted
       throw error;
     }
   }

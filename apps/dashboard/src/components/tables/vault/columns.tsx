@@ -9,12 +9,15 @@ import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
+import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
+import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import type { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
@@ -108,14 +111,36 @@ export const columns: ColumnDef<Document>[] = [
     },
     cell: ({ row }) => {
       const isLoading = row.original.processingStatus === "pending";
+      const isFailed = row.original.processingStatus === "failed";
+      // Document completed but AI classification failed - title is null
+      const needsClassification =
+        row.original.processingStatus === "completed" && !row.original.title;
 
       if (isLoading) {
         return <Skeleton className="w-52 h-4" />;
       }
 
+      // Get display name - fallback to filename from path
+      const displayName =
+        row.original.title ?? row.original.name?.split("/").at(-1);
+
       return (
-        <div className="truncate">
-          {row.original.title ?? row.original.name?.split("/").at(-1)}
+        <div className="flex items-center gap-2">
+          <span
+            className={cn(
+              "truncate",
+              isFailed && "text-destructive",
+              needsClassification && "text-amber-600 dark:text-amber-500",
+            )}
+          >
+            {displayName}
+          </span>
+          {isFailed && (
+            <Icons.AlertCircle className="size-3.5 text-destructive flex-shrink-0" />
+          )}
+          {needsClassification && (
+            <Icons.AlertCircle className="size-3.5 text-amber-500 flex-shrink-0" />
+          )}
         </div>
       );
     },
@@ -204,12 +229,18 @@ export const columns: ColumnDef<Document>[] = [
     },
     cell: ({ row, table }) => {
       const { setParams } = useDocumentParams();
+      const isFailed = row.original.processingStatus === "failed";
+      // Document completed but AI classification failed - title is null
+      const needsClassification =
+        row.original.processingStatus === "completed" && !row.original.title;
+      // Show retry option for failed OR unclassified documents
+      const showRetry = isFailed || needsClassification;
 
       if (!table.options.meta) {
         return null;
       }
 
-      const { handleDelete, handleShare } = table.options.meta;
+      const { handleDelete, handleShare, handleReprocess } = table.options.meta;
 
       return (
         <div className="flex items-center justify-center w-full">
@@ -243,6 +274,21 @@ export const columns: ColumnDef<Document>[] = [
                 Copy link
               </DropdownMenuItem>
 
+              {showRetry && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => {
+                      handleReprocess?.(row.original.id);
+                    }}
+                  >
+                    <Icons.Refresh className="size-4 mr-2" />
+                    {isFailed ? "Retry processing" : "Retry classification"}
+                  </DropdownMenuItem>
+                </>
+              )}
+
+              <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
                   handleDelete?.(row.original.id);

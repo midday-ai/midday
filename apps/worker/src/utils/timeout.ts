@@ -59,4 +59,7 @@ export const TIMEOUTS = {
   FILE_UPLOAD: 60_000, // 1 minute for file uploads
   DATABASE_QUERY: 15_000, // 15 seconds for database queries
   EXTERNAL_API: 30_000, // 30 seconds for external API calls
+  AI_CLASSIFICATION: 90_000, // 90 seconds for AI document/image classification
+  // AI classification can be slow for complex documents with OCR, multiple pages,
+  // or when the model is under load. 90s provides sufficient buffer.
 } as const;

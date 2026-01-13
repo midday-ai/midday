@@ -146,6 +146,20 @@ export function DataTable({ initialSettings }: Props) {
     }),
   );
 
+  const reprocessMutation = useMutation(
+    trpc.documents.reprocessDocument.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.get.infiniteQueryKey(),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: trpc.documents.get.queryKey(),
+        });
+      },
+    }),
+  );
+
   const handleDelete = useCallback(
     (id: string) => {
       deleteDocumentMutation.mutate({
@@ -165,6 +179,13 @@ export function DataTable({ initialSettings }: Props) {
     [shortLinkMutation],
   );
 
+  const handleReprocess = useCallback(
+    (id: string) => {
+      reprocessMutation.mutate({ id });
+    },
+    [reprocessMutation],
+  );
+
   const files = useMemo(() => {
     return documents.map((document) => document.pathTokens?.join("/") ?? "");
   }, [documents]);
@@ -176,8 +197,9 @@ export function DataTable({ initialSettings }: Props) {
     () => ({
       handleDelete,
       handleShare,
+      handleReprocess,
     }),
-    [handleDelete, handleShare],
+    [handleDelete, handleShare, handleReprocess],
   );
 
   const table = useReactTable({

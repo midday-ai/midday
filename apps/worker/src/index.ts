@@ -38,7 +38,7 @@ const workers = queueConfigs.map((config) => {
   // Centralized failed handler that captures to Sentry
   // Note: BaseProcessor already captures in-process failures with full context
   // This catches failures that bypass the processor (e.g., no processor registered)
-  worker.on("failed", (job, err) => {
+  worker.on("failed", async (job, err) => {
     console.error(
       `[Worker:${config.name}] Job failed: ${job?.name} (${job?.id})`,
       err,
@@ -56,8 +56,33 @@ const workers = queueConfigs.map((config) => {
     });
 
     // Call custom onFailed handler if provided
+    // Pass full job info including data for status updates
     if (config.eventHandlers?.onFailed) {
-      config.eventHandlers.onFailed(job ?? null, err);
+      try {
+        await config.eventHandlers.onFailed(
+          job
+            ? {
+                name: job.name,
+                id: job.id,
+                data: job.data,
+                attemptsMade: job.attemptsMade,
+                opts: job.opts,
+              }
+            : null,
+          err,
+        );
+      } catch (handlerError) {
+        console.error(
+          `[Worker:${config.name}] Error in onFailed handler:`,
+          handlerError,
+        );
+        Sentry.captureException(handlerError, {
+          tags: {
+            workerName: config.name,
+            errorType: "onfailed_handler_error",
+          },
+        });
+      }
     }
   });
 

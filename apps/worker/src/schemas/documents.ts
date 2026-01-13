@@ -34,3 +34,11 @@ export const embedDocumentTagsSchema = z.object({
 });
 
 export type EmbedDocumentTagsPayload = z.infer<typeof embedDocumentTagsSchema>;
+
+export const cleanupStaleDocumentsSchema = z.object({
+  // Empty payload - scheduler runs globally
+});
+
+export type CleanupStaleDocumentsPayload = z.infer<
+  typeof cleanupStaleDocumentsSchema
+>;

@@ -10,14 +10,12 @@ import { DocumentClient } from "@midday/documents";
 import { triggerJob, triggerJobAndWait } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
-import convert from "heic-convert";
-import sharp from "sharp";
 import type { ProcessAttachmentPayload } from "../../schemas/inbox";
 import { getDb } from "../../utils/db";
+import { NonRetryableError } from "../../utils/error-classification";
+import { convertHeicToJpeg } from "../../utils/heic-converter";
 import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";
-
-const MAX_SIZE = 1500;
 
 export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentPayload> {
   async process(job: Job<ProcessAttachmentPayload>): Promise<void> {
@@ -63,101 +61,13 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       );
 
       if (!data) {
-        throw new Error("File not found");
+        throw new NonRetryableError("File not found", undefined, "validation");
       }
 
       const buffer = await data.arrayBuffer();
 
-      // Edge case: Validate buffer is not empty
-      if (buffer.byteLength === 0) {
-        throw new Error("Downloaded file is empty");
-      }
-
-      // Try sharp first (handles HEIF/HEIC + mislabeled files like JPEG with .heic extension)
-      // Fall back to heic-convert only if sharp fails
-      let image: Buffer;
-      try {
-        this.logger.info("Attempting HEIC conversion with sharp", {
-          filePath: fileName,
-          jobId: job.id,
-        });
-        image = await sharp(Buffer.from(buffer))
-          .rotate()
-          .resize({ width: MAX_SIZE })
-          .toFormat("jpeg")
-          .toBuffer();
-        this.logger.info("Sharp successfully processed HEIC image", {
-          filePath: fileName,
-          jobId: job.id,
-        });
-      } catch (sharpError) {
-        this.logger.warn(
-          "Sharp failed to process HEIC, falling back to heic-convert",
-          {
-            filePath: fileName,
-            error:
-              sharpError instanceof Error
-                ? sharpError.message
-                : "Unknown error",
-          },
-        );
-
-        // Fall back to heic-convert for edge cases
-        let decodedImage: ArrayBuffer;
-        try {
-          decodedImage = await convert({
-            // @ts-ignore
-            buffer: new Uint8Array(buffer),
-            format: "JPEG",
-            quality: 1,
-          });
-        } catch (heicError) {
-          this.logger.error(
-            "Both sharp and heic-convert failed - file may be corrupted or unsupported format",
-            {
-              filePath: fileName,
-              sharpError:
-                sharpError instanceof Error
-                  ? sharpError.message
-                  : "Unknown error",
-              heicError:
-                heicError instanceof Error
-                  ? heicError.message
-                  : "Unknown error",
-            },
-          );
-          throw new Error(
-            `Failed to convert HEIC image: sharp error: ${sharpError instanceof Error ? sharpError.message : "Unknown"}, heic-convert error: ${heicError instanceof Error ? heicError.message : "Unknown"}`,
-          );
-        }
-
-        // Validate decoded image
-        if (!decodedImage || decodedImage.byteLength === 0) {
-          throw new Error("Decoded image is empty");
-        }
-
-        try {
-          image = await sharp(Buffer.from(decodedImage))
-            .rotate()
-            .resize({ width: MAX_SIZE })
-            .toFormat("jpeg")
-            .toBuffer();
-        } catch (finalSharpError) {
-          this.logger.error(
-            "Failed to process heic-convert output with sharp",
-            {
-              filePath: fileName,
-              error:
-                finalSharpError instanceof Error
-                  ? finalSharpError.message
-                  : "Unknown error",
-            },
-          );
-          throw new Error(
-            `Failed to process converted image: ${finalSharpError instanceof Error ? finalSharpError.message : "Unknown error"}`,
-          );
-        }
-      }
+      // Convert HEIC to JPEG using shared utility
+      const { buffer: image } = await convertHeicToJpeg(buffer, this.logger);
 
       // Upload the converted image
       const { data: uploadedData } = await withTimeout(
@@ -354,7 +264,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
     });
 
     if (!signedUrlResult) {
-      throw new Error("File not found");
+      throw new NonRetryableError("File not found", undefined, "validation");
     }
 
     try {
@@ -439,6 +349,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
           teamId,
         },
         "documents",
+        { jobId: `process-doc:${teamId}:${filePath.join("/")}` },
       )
         .then((result) => {
           this.logger.info("Triggered process-document job", {
