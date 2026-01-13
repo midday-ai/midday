@@ -80,7 +80,7 @@ export const transformAccount = (
       provider: "enablebanking",
     },
     balance: {
-      amount: Number.parseFloat(account.balance.balance_amount.amount),
+      amount: +account.balance.balance_amount.amount,
       currency: account.currency,
     },
     enrollment_id: null,
@@ -104,7 +104,7 @@ export const transformSessionData = (session: GetExchangeCodeResponse) => {
 export const transformBalance = (
   balance: GetBalancesResponse["balances"][0],
 ): Balance => ({
-  amount: Number.parseFloat(balance.balance_amount.amount),
+  amount: +balance.balance_amount.amount,
   currency: balance.balance_amount.currency,
 });
 
@@ -264,7 +264,7 @@ export const transformTransaction = ({
     date: transaction.booking_date,
     status: "posted",
     balance: transaction.balance_after_transaction
-      ? Number.parseFloat(transaction.balance_after_transaction.amount)
+      ? +transaction.balance_after_transaction.amount
       : null,
     category: transformTransactionCategory({ transaction, accountType }),
     counterparty_name: transformCounterpartyName(transaction),

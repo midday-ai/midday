@@ -1,7 +1,7 @@
 import type { Database } from "@db/client";
 import { bankAccounts, teams } from "@db/schema";
 import { chatCache } from "@midday/cache/chat-cache";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, or } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
@@ -304,12 +304,15 @@ export async function getNetPosition(
     baseCurrency = team[0]?.baseCurrency || "USD";
   }
 
-  // Get depository accounts (cash)
-  const depositoryAccounts = await db.query.bankAccounts.findMany({
+  // Get cash accounts (depository + other_asset like treasury)
+  const cashAccounts = await db.query.bankAccounts.findMany({
     where: and(
       eq(bankAccounts.teamId, teamId),
       eq(bankAccounts.enabled, true),
-      eq(bankAccounts.type, "depository"),
+      or(
+        eq(bankAccounts.type, "depository"),
+        eq(bankAccounts.type, "other_asset"),
+      ),
     ),
     columns: {
       id: true,
@@ -340,7 +343,7 @@ export async function getNetPosition(
 
   // Calculate cash total
   let cashTotal = 0;
-  for (const account of depositoryAccounts) {
+  for (const account of cashAccounts) {
     const balance = Number(account.balance) || 0;
     const accountCurrency: string = account.currency || baseCurrency;
 
@@ -356,19 +359,23 @@ export async function getNetPosition(
     cashTotal += convertedBalance;
   }
 
-  // Calculate credit debt total (balances are stored as positive amounts owed)
+  // Calculate credit debt total
+  // Note: Different providers store credit balances differently:
+  // - Plaid stores as positive (amount owed)
+  // - GoCardless stores as negative (debt)
+  // We use Math.abs() to normalize both conventions
   let creditDebt = 0;
   for (const account of creditAccounts) {
     const balance = Number(account.balance) || 0;
     const accountCurrency: string = account.currency || baseCurrency;
 
-    let convertedBalance = balance;
+    let convertedBalance = Math.abs(balance);
     if (
       accountCurrency !== baseCurrency &&
       account.baseBalance &&
       account.baseCurrency === baseCurrency
     ) {
-      convertedBalance = Number(account.baseBalance);
+      convertedBalance = Math.abs(Number(account.baseBalance));
     }
 
     creditDebt += convertedBalance;
@@ -381,7 +388,7 @@ export async function getNetPosition(
     creditDebt: Math.round(creditDebt * 100) / 100,
     netPosition: Math.round(netPosition * 100) / 100,
     currency: baseCurrency,
-    depositoryAccountCount: depositoryAccounts.length,
+    cashAccountCount: cashAccounts.length,
     creditAccountCount: creditAccounts.length,
   };
 }

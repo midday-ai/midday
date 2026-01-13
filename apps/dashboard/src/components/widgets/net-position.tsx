@@ -56,9 +56,9 @@ export function NetPositionWidget() {
   };
 
   const getDescription = () => {
-    const depositoryCount = netPositionData?.depositoryAccountCount ?? 0;
+    const cashCount = netPositionData?.cashAccountCount ?? 0;
     const creditCount = netPositionData?.creditAccountCount ?? 0;
-    const totalAccounts = depositoryCount + creditCount;
+    const totalAccounts = cashCount + creditCount;
 
     if (totalAccounts === 0) {
       return "No accounts connected";

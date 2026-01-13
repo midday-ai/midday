@@ -101,17 +101,29 @@ export const reconnectConnection = schemaTask({
         accountCount: accountsResponse.data.length,
       });
 
-      // Update account_ids by matching on resource_id (last_four)
+      // Update account_ids by matching on resource_id (last_four), type, and currency
+      // Using multiple constraints to avoid mismatches when accounts share the same last_four
       await Promise.all(
         accountsResponse.data.map(async (account) => {
           if (account.resource_id) {
-            await supabase
+            const result = await supabase
               .from("bank_accounts")
               .update({
                 account_id: account.id,
               })
               .eq("account_reference", account.resource_id)
-              .eq("bank_connection_id", connectionId);
+              .eq("bank_connection_id", connectionId)
+              .eq("type", account.type)
+              .eq("currency", account.currency);
+
+            if (result.error) {
+              logger.warn("Failed to update Teller account", {
+                resource_id: account.resource_id,
+                type: account.type,
+                currency: account.currency,
+                error: result.error.message,
+              });
+            }
           }
         }),
       );

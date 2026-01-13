@@ -179,9 +179,7 @@ export const transformTransaction = ({
   let currencyExchange: { rate: number; currency: string } | undefined;
 
   if (Array.isArray(transaction.currencyExchange)) {
-    const rate = Number.parseFloat(
-      transaction.currencyExchange.at(0)?.exchangeRate ?? "",
-    );
+    const rate = +(transaction.currencyExchange.at(0)?.exchangeRate ?? "");
 
     if (rate) {
       const currency = transaction?.currencyExchange?.at(0)?.sourceCurrency;

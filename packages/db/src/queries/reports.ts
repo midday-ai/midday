@@ -1157,10 +1157,15 @@ export async function getRunway(db: Database, params: GetRunwayParams) {
     return 0;
   }
 
-  // Step 2: Get total balance (equivalent to get_total_balance_v3)
+  // Step 2: Get total cash balance (depository + other_asset only)
+  // Credit/loan balances are excluded - credit payments are already in burn rate as expenses
   const balanceConditions = [
     eq(bankAccounts.teamId, teamId),
     eq(bankAccounts.enabled, true),
+    or(
+      eq(bankAccounts.type, "depository"),
+      eq(bankAccounts.type, "other_asset"),
+    ),
   ];
 
   const balanceResult = await db

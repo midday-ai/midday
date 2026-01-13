@@ -70,7 +70,7 @@ export const getNetPositionTool = tool({
       let responseText = `**Net Position:** ${formattedNetPosition}\n\n`;
       responseText += "| Category | Amount |\n";
       responseText += "|----------|--------|\n";
-      responseText += `| Cash (${result.depositoryAccountCount} accounts) | ${formattedCash} |\n`;
+      responseText += `| Cash (${result.cashAccountCount} accounts) | ${formattedCash} |\n`;
       responseText += `| Credit Debt (${result.creditAccountCount} accounts) | -${formattedCreditDebt} |\n`;
       responseText += `| **Net Position** | **${formattedNetPosition}** |\n`;
 
@@ -81,7 +81,7 @@ export const getNetPositionTool = tool({
         creditDebt: result.creditDebt,
         netPosition: result.netPosition,
         currency: targetCurrency,
-        depositoryAccountCount: result.depositoryAccountCount,
+        cashAccountCount: result.cashAccountCount,
         creditAccountCount: result.creditAccountCount,
       };
     } catch (error) {

@@ -253,8 +253,8 @@ export class EnableBankingApi {
 
     // Find balance with highest amount
     const highestBalance = response.balances.reduce((max, current) => {
-      const currentAmount = Number.parseFloat(current.balance_amount.amount);
-      const maxAmount = Number.parseFloat(max.balance_amount.amount);
+      const currentAmount = +current.balance_amount.amount;
+      const maxAmount = +max.balance_amount.amount;
       return currentAmount > maxAmount ? current : max;
     }, response.balances[0]);
 
