@@ -87,6 +87,27 @@ export const AccountSchema = z
         example: "2024-03-06",
       })
       .nullable(),
+    iban: z
+      .string()
+      .openapi({
+        description: "International Bank Account Number (EU/UK accounts)",
+        example: "GB82WEST12345698765432",
+      })
+      .nullable(),
+    subtype: z
+      .string()
+      .openapi({
+        description: "Account subtype (checking, savings, credit_card, etc.)",
+        example: "checking",
+      })
+      .nullable(),
+    bic: z
+      .string()
+      .openapi({
+        description: "Bank Identifier Code / SWIFT code",
+        example: "WESTGB2L",
+      })
+      .nullable(),
   })
   .openapi("AccountSchema");
 
