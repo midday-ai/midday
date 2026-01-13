@@ -14,7 +14,10 @@ import {
   NonRetryableError,
   UnsupportedFileTypeError,
 } from "../../utils/error-classification";
-import { convertHeicToJpeg } from "../../utils/image-processing";
+import {
+  MAX_HEIC_FILE_SIZE,
+  convertHeicToJpeg,
+} from "../../utils/image-processing";
 import { TIMEOUTS, withTimeout } from "../../utils/timeout";
 import { BaseProcessor } from "../base";
 
@@ -91,38 +94,106 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
 
         const buffer = await data.arrayBuffer();
 
-        // Convert HEIC to JPEG using shared utility
-        const { buffer: image } = await convertHeicToJpeg(buffer, this.logger);
+        // Log file size for debugging memory issues
+        const fileSizeMB = (buffer.byteLength / (1024 * 1024)).toFixed(2);
+        this.logger.info("HEIC file size", {
+          fileName,
+          sizeBytes: buffer.byteLength,
+          sizeMB: fileSizeMB,
+        });
 
-        await this.updateProgress(
-          job,
-          this.ProgressMilestones.PROCESSING,
-          "HEIC converted to JPEG",
-        );
+        // Skip AI classification for very large HEIC files to prevent OOM
+        // 15MB HEIC ≈ 24MP ≈ ~100MB decoded. Complete with filename instead.
+        if (buffer.byteLength > MAX_HEIC_FILE_SIZE) {
+          this.logger.warn(
+            "HEIC file too large for AI classification - completing with filename",
+            {
+              fileName,
+              teamId,
+              sizeBytes: buffer.byteLength,
+              maxSizeBytes: MAX_HEIC_FILE_SIZE,
+            },
+          );
 
-        // Upload the converted image
-        const { data: uploadedData } = await withTimeout(
-          supabase.storage.from("vault").upload(fileName, image, {
-            contentType: "image/jpeg",
-            upsert: true,
-          }),
-          TIMEOUTS.FILE_UPLOAD,
-          `File upload timed out after ${TIMEOUTS.FILE_UPLOAD}ms`,
-        );
-
-        if (!uploadedData) {
-          throw new Error("Failed to upload converted image");
+          await updateDocumentWithRetry(
+            db,
+            {
+              pathTokens: filePath,
+              teamId,
+              title: filePath.at(-1) ?? "Large HEIC Image",
+              summary: `Large image (${fileSizeMB}MB) - AI classification skipped`,
+              processingStatus: "completed",
+            },
+            this.logger,
+          );
+          return;
         }
 
-        await this.updateProgress(
-          job,
-          this.ProgressMilestones.HALFWAY,
-          "Converted image uploaded",
-        );
+        // Try to convert HEIC to JPEG - use graceful degradation if it fails (e.g., OOM)
+        try {
+          const { buffer: image } = await convertHeicToJpeg(
+            buffer,
+            this.logger,
+          );
 
-        // Create Blob from converted image for reuse
-        fileData = new Blob([image], { type: "image/jpeg" });
-        processedMimetype = "image/jpeg";
+          await this.updateProgress(
+            job,
+            this.ProgressMilestones.PROCESSING,
+            "HEIC converted to JPEG",
+          );
+
+          // Upload the converted image
+          const { data: uploadedData } = await withTimeout(
+            supabase.storage.from("vault").upload(fileName, image, {
+              contentType: "image/jpeg",
+              upsert: true,
+            }),
+            TIMEOUTS.FILE_UPLOAD,
+            `File upload timed out after ${TIMEOUTS.FILE_UPLOAD}ms`,
+          );
+
+          if (!uploadedData) {
+            throw new Error("Failed to upload converted image");
+          }
+
+          await this.updateProgress(
+            job,
+            this.ProgressMilestones.HALFWAY,
+            "Converted image uploaded",
+          );
+
+          // Create Blob from converted image for reuse
+          fileData = new Blob([image], { type: "image/jpeg" });
+          processedMimetype = "image/jpeg";
+        } catch (conversionError) {
+          // HEIC conversion failed (possibly OOM) - complete with fallback
+          // User can still see the file and retry later
+          this.logger.error(
+            "HEIC conversion failed - completing with fallback",
+            {
+              fileName,
+              teamId,
+              fileSizeMB,
+              error:
+                conversionError instanceof Error
+                  ? conversionError.message
+                  : "Unknown error",
+            },
+          );
+
+          await updateDocumentWithRetry(
+            db,
+            {
+              pathTokens: filePath,
+              teamId,
+              title: filePath.at(-1) ?? "HEIC Image",
+              summary: "HEIC conversion failed - original file preserved",
+              processingStatus: "completed",
+            },
+            this.logger,
+          );
+          return;
+        }
       } else {
         // Download file for non-HEIC files
         const downloadStartTime = Date.now();
@@ -241,6 +312,8 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         // This ensures errors propagate and status is properly updated
         // Use CLASSIFICATION_JOB_WAIT timeout to ensure we don't timeout before the child job completes
         // Child job uses AI_CLASSIFICATION (90s) + FILE_DOWNLOAD (60s), so we need at least 150s
+        // NOTE: Job IDs must include timestamp for reprocessing to work - BullMQ returns existing
+        // jobs instead of creating new ones when IDs match (completed retained 24h, failed 7 days)
         await triggerJobAndWait(
           "classify-image",
           {
@@ -249,7 +322,7 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
           },
           "documents",
           {
-            jobId: `classify-img_${teamId}_${fileName}`,
+            jobId: `classify-img_${teamId}_${fileName}_${Date.now()}`,
             timeout: TIMEOUTS.CLASSIFICATION_JOB_WAIT,
           },
         );
@@ -394,6 +467,8 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
       // This ensures errors propagate and status is properly updated
       // Use CLASSIFICATION_JOB_WAIT timeout to ensure we don't timeout before the child job completes
       // Child job uses AI_CLASSIFICATION (90s), so we need at least that + overhead
+      // NOTE: Job IDs must include timestamp for reprocessing to work - BullMQ returns existing
+      // jobs instead of creating new ones when IDs match (completed retained 24h, failed 7 days)
       const classificationJobResult = await triggerJobAndWait(
         "classify-document",
         {
@@ -403,7 +478,7 @@ export class ProcessDocumentProcessor extends BaseProcessor<ProcessDocumentPaylo
         },
         "documents",
         {
-          jobId: `classify-doc_${teamId}_${fileName}`,
+          jobId: `classify-doc_${teamId}_${fileName}_${Date.now()}`,
           timeout: TIMEOUTS.CLASSIFICATION_JOB_WAIT,
         },
       );

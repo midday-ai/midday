@@ -3,6 +3,18 @@ import convert from "heic-convert";
 import sharp from "sharp";
 import { IMAGE_SIZES } from "./timeout";
 
+// Configure sharp for memory efficiency
+// Limit concurrent operations and cache size to prevent OOM
+sharp.cache({ memory: 256, files: 20, items: 100 }); // 256MB cache limit
+sharp.concurrency(2); // Limit internal parallelism per sharp instance
+
+/**
+ * Maximum file size for HEIC conversion (in bytes)
+ * Files larger than this will skip AI classification to prevent OOM
+ * 15MB HEIC ≈ 24MP image ≈ ~100MB decoded RGBA
+ */
+export const MAX_HEIC_FILE_SIZE = 15 * 1024 * 1024; // 15MB
+
 export interface HeicConversionResult {
   buffer: Buffer;
   mimetype: "image/jpeg";
@@ -151,13 +163,15 @@ export async function convertHeicToJpeg(
     });
 
     // Fall back to heic-convert for edge cases
+    // Note: heic-convert is memory-intensive as it decodes to raw pixels
+    // A 12MP photo = ~48MB raw RGBA, so we use lower quality to reduce output size
     let decodedImage: ArrayBuffer;
     try {
       decodedImage = await convert({
         // @ts-ignore - heic-convert types are incomplete
         buffer: new Uint8Array(inputBuffer),
         format: "JPEG",
-        quality: 1,
+        quality: 0.8, // Reduced from 1.0 to save memory - still good quality for AI classification
       });
     } catch (heicError) {
       // Both methods failed - file is likely corrupted or unsupported

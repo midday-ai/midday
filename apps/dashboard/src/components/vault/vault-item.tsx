@@ -60,16 +60,25 @@ export function VaultItem({ data, small }: Props) {
   // Show skeleton only for recently pending documents (not stale ones)
   const isLoading = data.processingStatus === "pending" && !staleProcessing;
 
-  // Clear local state once processing completes or becomes fresh pending
+  // Clear local state once processing actually completes successfully
   useEffect(() => {
     if (isReprocessing) {
-      // Clear when: status changed to completed/failed, OR became fresh pending
-      const isCompleted = data.processingStatus === "completed";
-      if (isCompleted || isFailed || isLoading) {
+      // Clear when:
+      // - Processing failed (isFailed)
+      // - Status is pending and fresh (isLoading) - API responded, job queued
+      // - Status is completed AND has title (successful classification)
+      //
+      // Note: We don't clear on just "completed" because the document may already
+      // be completed without a title (needsClassification case). We need to wait
+      // until either the status changes to pending (API responded) or the document
+      // is successfully classified (has title).
+      const isSuccessfullyCompleted =
+        data.processingStatus === "completed" && !!data.title;
+      if (isSuccessfullyCompleted || isFailed || isLoading) {
         setIsReprocessing(false);
       }
     }
-  }, [isReprocessing, isLoading, isFailed, data.processingStatus]);
+  }, [isReprocessing, isLoading, isFailed, data.processingStatus, data.title]);
 
   // Show retry for failed, unclassified, or stale processing
   const showRetry =

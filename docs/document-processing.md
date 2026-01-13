@@ -209,15 +209,28 @@ jobId: `embed-tags_${teamId}_${documentId}`
 ```typescript
 const documentsQueueConfig = {
   name: "documents",
-  concurrency: 100,           // High throughput
+  concurrency: 10,            // Conservative for memory + API rate limits
   lockDuration: 660_000,      // 11 minutes (> process timeout)
   stalledInterval: 720_000,   // 12 minutes (> lock duration)
   limiter: {
-    max: 200,                 // 200 jobs/second max
+    max: 20,                  // 20 jobs/second max - prevents API burst
     duration: 1000,
   },
 };
+
+// Sharp memory optimization (in image-processing.ts)
+sharp.cache({ memory: 256, files: 20, items: 100 }); // 256MB cache limit
+sharp.concurrency(2); // Limit internal parallelism
+
+// File size limit for HEIC
+const MAX_HEIC_FILE_SIZE = 15 * 1024 * 1024; // 15MB - larger files skip AI
 ```
+
+**Why concurrency of 10?**
+- HEIC conversion is memory-intensive (~50-100MB per 12MP image)
+- AI classification (Gemini) has rate limits - avoid 429 errors
+- Matches other API-heavy queues (customers: 5, teams: 5, accounting: 10)
+- With 4GB worker memory, 10 concurrent jobs has plenty of headroom
 
 ## Error Handling
 
@@ -449,10 +462,12 @@ export async function convertHeicToJpeg(
     return { buffer, mimetype: "image/jpeg" };
   } catch (sharpError) {
     // Fall back to heic-convert for edge cases
+    // Note: heic-convert decodes to raw pixels - memory intensive!
+    // 12MP photo = ~48MB raw RGBA. Quality 0.8 reduces output size.
     const decodedImage = await convert({
       buffer: new Uint8Array(inputBuffer),
       format: "JPEG",
-      quality: 1,
+      quality: 0.8, // Reduced from 1.0 to save memory
     });
     
     const buffer = await sharp(Buffer.from(decodedImage))
@@ -462,6 +477,17 @@ export async function convertHeicToJpeg(
       .toBuffer();
     return { buffer, mimetype: "image/jpeg" };
   }
+}
+
+// In process-document.ts - graceful degradation for HEIC
+// If conversion fails (e.g., OOM), document completes with fallback
+try {
+  const { buffer: image } = await convertHeicToJpeg(buffer, logger);
+  // ... upload and continue
+} catch (conversionError) {
+  // Complete with fallback - user can still see file and retry
+  await updateDocument({ title: filename, status: "completed" });
+  return;
 }
 ```
 

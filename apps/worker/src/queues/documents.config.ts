@@ -31,8 +31,10 @@ const documentsQueueOptions: QueueOptions = {
 
 /**
  * Worker options for documents queue
- * Concurrency: 100 (increased from 50 for faster processing)
- * Documents processing optimized to reduce duplicate downloads and overhead
+ * Concurrency: 10 - conservative for memory + API rate limits
+ * - HEIC conversion is memory-intensive (~50-100MB per 12MP image)
+ * - AI classification calls (Gemini) have rate limits
+ * - With 4GB worker memory and 10 concurrent jobs, plenty of headroom
  * Lock duration: 660000ms (11 minutes) to handle long-running document processing
  * - Document processing timeout is 10 minutes (TIMEOUTS.DOCUMENT_PROCESSING)
  * - Plus 1 minute buffer for classification and other operations
@@ -40,12 +42,12 @@ const documentsQueueOptions: QueueOptions = {
  */
 const documentsWorkerOptions: WorkerOptions = {
   connection: getRedisConnection(),
-  concurrency: 100, // Increased from 50 for better throughput
+  concurrency: 10, // Conservative for memory safety + AI API rate limits
   lockDuration: 660000, // 11 minutes - align with DOCUMENT_PROCESSING timeout (10min) + buffer
   stalledInterval: 720000, // 12 minutes - longer than lockDuration to avoid false stalls
   limiter: {
-    max: 200, // Increased from 100 for higher throughput
-    duration: 1000, // 200 jobs per second max
+    max: 20, // 20 jobs/second max - prevents API burst
+    duration: 1000,
   },
 };
 
