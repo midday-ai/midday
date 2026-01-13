@@ -60,25 +60,37 @@ export function VaultItem({ data, small }: Props) {
   // Show skeleton only for recently pending documents (not stale ones)
   const isLoading = data.processingStatus === "pending" && !staleProcessing;
 
-  // Clear local state once processing actually completes successfully
+  // Clear local state once processing completes (successfully or with graceful degradation)
   useEffect(() => {
     if (isReprocessing) {
       // Clear when:
       // - Processing failed (isFailed)
       // - Status is pending and fresh (isLoading) - API responded, job queued
       // - Status is completed AND has title (successful classification)
+      // - Status is completed but no title (needsClassification) - graceful degradation
       //
-      // Note: We don't clear on just "completed" because the document may already
-      // be completed without a title (needsClassification case). We need to wait
-      // until either the status changes to pending (API responded) or the document
-      // is successfully classified (has title).
+      // The needsClassification case handles graceful degradation where AI classification
+      // fails but the document is marked as completed. We need to clear isReprocessing
+      // so the retry button shows again instead of an infinite loading skeleton.
       const isSuccessfullyCompleted =
         data.processingStatus === "completed" && !!data.title;
-      if (isSuccessfullyCompleted || isFailed || isLoading) {
+      if (
+        isSuccessfullyCompleted ||
+        isFailed ||
+        isLoading ||
+        needsClassification
+      ) {
         setIsReprocessing(false);
       }
     }
-  }, [isReprocessing, isLoading, isFailed, data.processingStatus, data.title]);
+  }, [
+    isReprocessing,
+    isLoading,
+    isFailed,
+    needsClassification,
+    data.processingStatus,
+    data.title,
+  ]);
 
   // Show retry for failed, unclassified, or stale processing
   const showRetry =
