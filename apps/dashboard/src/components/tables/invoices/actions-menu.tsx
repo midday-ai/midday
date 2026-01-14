@@ -1,6 +1,7 @@
 "use client";
 
 import { OpenURL } from "@/components/open-url";
+import { useFileUrl } from "@/hooks/use-file-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
@@ -47,6 +48,13 @@ export function ActionsMenu({ row }: Props) {
   const { toast } = useToast();
   const [, copy] = useCopyToClipboard();
   const [cancelSeriesOpen, setCancelSeriesOpen] = useState(false);
+
+  const canDownloadReceipt = row.status === "paid";
+  const { url: receiptUrl } = useFileUrl(
+    canDownloadReceipt && user?.fileKey
+      ? { type: "invoice", invoiceId: row.id, isReceipt: true }
+      : null,
+  );
 
   const canCancelSeries =
     row.invoiceRecurringId &&
@@ -286,21 +294,11 @@ export function ActionsMenu({ row }: Props) {
             </DropdownMenuItem>
           )}
 
-          {row.status === "paid" && (
+          {canDownloadReceipt && receiptUrl && (
             <DropdownMenuItem
               onClick={() => {
-                if (!user?.fileKey) {
-                  console.error("File key not available");
-                  return;
-                }
-                const url = new URL(
-                  `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice`,
-                );
-                url.searchParams.set("id", row.id);
-                url.searchParams.set("fk", user.fileKey);
-                url.searchParams.set("type", "receipt");
                 downloadFile(
-                  url.toString(),
+                  receiptUrl,
                   `receipt-${row.invoiceNumber || "invoice"}.pdf`,
                 );
               }}

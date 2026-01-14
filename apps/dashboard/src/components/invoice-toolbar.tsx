@@ -3,13 +3,17 @@
 import { downloadFile } from "@/lib/download";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { Spinner } from "@midday/ui/spinner";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import { useToast } from "@midday/ui/use-toast";
+import { saveAs } from "file-saver";
 import { motion } from "framer-motion";
+import JSZip from "jszip";
 import { useEffect, useRef, useState } from "react";
 import { MdContentCopy, MdOutlineFileDownload } from "react-icons/md";
 import { useCopyToClipboard } from "usehooks-ts";
@@ -45,14 +49,21 @@ export default function InvoiceToolbar({
   useOverlay,
 }: Props) {
   const [, copy] = useCopyToClipboard();
+  const { toast } = useToast();
   const [internalPaymentOpen, setInternalPaymentOpen] = useState(false);
   const [isPaid, setIsPaid] = useState(status === "paid");
   const [shouldPrefetch, setShouldPrefetch] = useState(false);
   const [paymentSucceeded, setPaymentSucceeded] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const paymentModalOpen = isPaymentOpen ?? internalPaymentOpen;
   const setPaymentModalOpen = onPaymentOpenChange ?? setInternalPaymentOpen;
   const paymentModalOpenRef = useRef(paymentModalOpen);
+
+  // Sync isPaid with status prop
+  useEffect(() => {
+    setIsPaid(status === "paid");
+  }, [status]);
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -62,6 +73,67 @@ export default function InvoiceToolbar({
   const handleCopyLink = () => {
     const url = window.location.href;
     copy(url);
+  };
+
+  const handleDownload = async () => {
+    if (isDownloading) return;
+
+    setIsDownloading(true);
+    try {
+      if (isPaid) {
+        // For paid invoices, download both invoice and receipt as a zip
+        const zip = new JSZip();
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+        // Fetch both PDFs in parallel for better performance
+        const [invoiceResponse, receiptResponse] = await Promise.all([
+          fetch(`${apiUrl}/files/download/invoice?token=${token}`),
+          fetch(`${apiUrl}/files/download/invoice?token=${token}&type=receipt`),
+        ]);
+
+        if (!invoiceResponse.ok) {
+          throw new Error("Failed to fetch invoice");
+        }
+        if (!receiptResponse.ok) {
+          throw new Error("Failed to fetch receipt");
+        }
+
+        const [invoiceBlob, receiptBlob] = await Promise.all([
+          invoiceResponse.blob(),
+          receiptResponse.blob(),
+        ]);
+
+        zip.file(`${invoiceNumber}.pdf`, invoiceBlob);
+        zip.file(`receipt-${invoiceNumber}.pdf`, receiptBlob);
+
+        // Generate and download zip
+        const zipBlob = await zip.generateAsync({
+          type: "blob",
+          compression: "DEFLATE",
+          compressionOptions: { level: 9 },
+        });
+
+        saveAs(zipBlob, `${invoiceNumber}-invoice-and-receipt.zip`);
+      } else {
+        // Download invoice only
+        await downloadFile(
+          `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?token=${token}`,
+          `${invoiceNumber}.pdf`,
+        );
+      }
+    } catch (error) {
+      toast({
+        duration: 4000,
+        title: "Download failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to download files. Please try again.",
+        variant: "error",
+      });
+    } finally {
+      setTimeout(() => setIsDownloading(false), 500);
+    }
   };
 
   const handleTogglePayment = (e: React.MouseEvent) => {
@@ -100,30 +172,24 @@ export default function InvoiceToolbar({
                   variant="ghost"
                   size="icon"
                   className="rounded-full size-8"
-                  onClick={() => {
-                    if (isPaid) {
-                      // Download receipt for paid invoices
-                      downloadFile(
-                        `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?token=${token}&type=receipt`,
-                        `receipt-${invoiceNumber}.pdf`,
-                      );
-                    } else {
-                      // Download invoice
-                      downloadFile(
-                        `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?token=${token}`,
-                        `${invoiceNumber}.pdf`,
-                      );
-                    }
+                  disabled={isDownloading}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownload();
                   }}
                 >
-                  <MdOutlineFileDownload className="size-[18px]" />
+                  {isDownloading ? (
+                    <Spinner className="size-[18px]" />
+                  ) : (
+                    <MdOutlineFileDownload className="size-[18px]" />
+                  )}
                 </Button>
               </TooltipTrigger>
               <TooltipContent
                 sideOffset={15}
                 className="text-[10px] px-2 py-1 rounded-none font-medium"
               >
-                <p>{isPaid ? "Download receipt" : "Download"}</p>
+                <p>{isPaid ? "Download invoice & receipt" : "Download"}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -217,30 +283,32 @@ export default function InvoiceToolbar({
         </div>
       </motion.div>
 
-      {shouldRenderModal && status !== "draft" && (
-        <PaymentModal
-          open={paymentModalOpen}
-          onOpenChange={(open) => {
-            setPaymentModalOpen(open);
-            // When modal closes after successful payment, update isPaid state
-            if (!open && paymentSucceeded) {
-              setIsPaid(true);
-            }
-          }}
-          invoiceToken={token}
-          amount={amount}
-          currency={currency || "usd"}
-          invoiceNumber={invoiceNumber}
-          prefetch={shouldPrefetch}
-          useOverlay={useOverlay}
-          onSuccess={() => {
-            // Mark payment as succeeded but don't set isPaid yet
-            // (that happens when modal closes, to keep modal mounted)
-            setPaymentSucceeded(true);
-            onPaymentSuccess?.();
-          }}
-        />
-      )}
+      {shouldRenderModal &&
+        status !== "draft" &&
+        typeof amount === "number" && (
+          <PaymentModal
+            open={paymentModalOpen}
+            onOpenChange={(open) => {
+              setPaymentModalOpen(open);
+              // When modal closes after successful payment, update isPaid state
+              if (!open && paymentSucceeded) {
+                setIsPaid(true);
+              }
+            }}
+            invoiceToken={token}
+            amount={amount}
+            currency={currency || "usd"}
+            invoiceNumber={invoiceNumber}
+            prefetch={shouldPrefetch}
+            useOverlay={useOverlay}
+            onSuccess={() => {
+              // Mark payment as succeeded but don't set isPaid yet
+              // (that happens when modal closes, to keep modal mounted)
+              setPaymentSucceeded(true);
+              onPaymentSuccess?.();
+            }}
+          />
+        )}
     </>
   );
 }

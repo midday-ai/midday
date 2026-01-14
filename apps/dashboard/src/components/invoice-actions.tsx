@@ -1,5 +1,6 @@
 "use client";
 
+import { useFileUrl } from "@/hooks/use-file-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
@@ -67,6 +68,12 @@ export function InvoiceActions({
     (recurringStatus === "active" || recurringStatus === "paused");
   const canRefund = status === "paid" && paymentIntentId;
   const canDownloadReceipt = status === "paid";
+
+  const { url: receiptUrl } = useFileUrl(
+    canDownloadReceipt && user?.fileKey
+      ? { type: "invoice", invoiceId: id, isReceipt: true }
+      : null,
+  );
 
   const updateInvoiceMutation = useMutation(
     trpc.invoice.update.mutationOptions({
@@ -287,26 +294,20 @@ export function InvoiceActions({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent sideOffset={10} align="end">
-                {canDownloadReceipt && user?.fileKey && (
-                  <DropdownMenuItem
-                    onClick={() => {
-                      const url = new URL(
-                        `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice`,
-                      );
-                      url.searchParams.set("id", id);
-                      url.searchParams.set("fk", user.fileKey!);
-                      url.searchParams.set("type", "receipt");
-                      downloadFile(
-                        url.toString(),
-                        `receipt-${invoiceNumber || "invoice"}.pdf`,
-                      );
-                    }}
-                  >
-                    Download receipt
-                  </DropdownMenuItem>
-                )}
-                {canDownloadReceipt && user?.fileKey && (
-                  <DropdownMenuSeparator />
+                {canDownloadReceipt && receiptUrl && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        downloadFile(
+                          receiptUrl,
+                          `receipt-${invoiceNumber || "invoice"}.pdf`,
+                        );
+                      }}
+                    >
+                      Download receipt
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
                 )}
                 <DropdownMenuItem
                   onClick={() =>

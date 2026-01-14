@@ -10,6 +10,7 @@ type FileUrlOptions =
   | {
       type: "invoice";
       invoiceId: string;
+      isReceipt?: boolean;
     }
   | {
       type: "url";
@@ -89,6 +90,9 @@ export function useFileUrl(options: FileUrlOptions | null) {
       const url = new URL(baseUrl);
       url.searchParams.set("id", options.invoiceId);
       url.searchParams.set("fk", user.fileKey);
+      if (options.isReceipt) {
+        url.searchParams.set("type", "receipt");
+      }
       return {
         url: url.toString(),
         isLoading: false,

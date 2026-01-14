@@ -407,12 +407,12 @@ export function PaymentModal({
   useOnClickOutside(panelRef as RefObject<HTMLElement>, (event) => {
     if (isDesktop && open && !useOverlay) {
       const target = event.target as Element;
-      // Don't close if clicking on a button or inside the toolbar
-      const isButton = target.closest("button");
-      const isToolbar = target.closest("[data-invoice-toolbar]");
-      if (!isButton && !isToolbar) {
-        onOpenChange(false);
+      // Don't close if clicking inside the invoice toolbar
+      const toolbar = document.querySelector("[data-invoice-toolbar]");
+      if (toolbar?.contains(target)) {
+        return;
       }
+      onOpenChange(false);
     }
   });
 
@@ -569,6 +569,7 @@ export function PaymentModal({
         )}
         <div
           ref={panelRef}
+          data-payment-panel
           className={cn(
             "fixed z-40 scrollbar-hide overflow-y-auto",
             "bg-white dark:bg-[#0C0C0C] border border-[#e6e6e6] dark:border-[#1d1d1d]",
@@ -594,6 +595,7 @@ export function PaymentModal({
   return (
     <div
       ref={panelRef}
+      data-payment-panel
       className={cn(
         "fixed z-30 scrollbar-hide overflow-y-auto",
         "bg-white dark:bg-[#0C0C0C] border border-[#e6e6e6] dark:border-[#1d1d1d]",
