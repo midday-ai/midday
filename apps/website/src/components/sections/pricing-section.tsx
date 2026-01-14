@@ -59,7 +59,7 @@ export function PricingSection() {
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Receipts, invoices, and file storage
+                    Receipts and file storage
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
@@ -151,7 +151,7 @@ export function PricingSection() {
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Receipts, invoices, and file storage
+                    Receipts and file storage
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
