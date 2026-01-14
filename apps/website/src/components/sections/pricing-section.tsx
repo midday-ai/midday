@@ -83,7 +83,7 @@ export function PricingSection() {
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Up to 2 users
+                    Up to 2 team members
                   </span>
                 </div>
               </div>
@@ -175,7 +175,7 @@ export function PricingSection() {
                 <div className="flex items-start gap-2">
                   <span className="text-foreground leading-[1.5rem]">•</span>
                   <span className="font-sans text-sm text-foreground leading-relaxed">
-                    Up to 10 users
+                    Up to 10 team members
                   </span>
                 </div>
               </div>
