@@ -194,7 +194,7 @@ export function StartPage() {
         {/* Desktop Layout */}
         <div className="hidden lg:flex flex-col min-h-screen relative">
           <div className="max-w-[1400px] mx-auto w-full">
-            <div className="pt-56 mb-16 3xl:mb-24">
+            <div className="pt-56 mb-16 3xl:mb-16">
               <div className="flex justify-between items-end">
                 <div className="max-w-xl">
                   <div className="space-y-3">
@@ -233,10 +233,10 @@ export function StartPage() {
             </div>
           </div>
 
-          <div className="w-full mb-4 3xl:mb-8 relative" ref={videoContainerRef}>
+          <div className="w-full mb-4 3xl:mb-20 relative" ref={videoContainerRef}>
             <div className="relative overflow-hidden">
               <video
-                className="w-full h-[800px] xl:h-[900px] object-cover block"
+                className="w-full h-[800px] xl:h-[900px] 3xl:h-[1000px] object-cover block"
                 poster="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/video-poster-v2.jpg"
                 autoPlay
                 loop
@@ -290,7 +290,7 @@ export function StartPage() {
       </div>
 
       {/* Features 2-Column Layout Section */}
-      <section className="bg-background pt-12 sm:pt-16 lg:pt-24 pb-20 lg:pb-24">
+      <section className="bg-background pt-12 sm:pt-16 lg:pt-24 3xl:pt-32 pb-20 lg:pb-24">
         <div className="max-w-[1400px] mx-auto">
           {/* Mobile: Stacked features */}
           <div className="grid grid-cols-1 gap-12 sm:gap-16 lg:hidden">
