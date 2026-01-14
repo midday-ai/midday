@@ -8,7 +8,11 @@ type Props = {
   timezone?: string;
 };
 
-export function PaidWatermark({ paidAt, dateFormat = "MM/dd/yyyy" }: Props) {
+export function PaidWatermark({
+  paidAt,
+  dateFormat = "MM/dd/yyyy",
+  timezone,
+}: Props) {
   return (
     <View
       style={{
@@ -51,7 +55,7 @@ export function PaidWatermark({ paidAt, dateFormat = "MM/dd/yyyy" }: Props) {
               marginTop: 6,
             }}
           >
-            {format(new TZDate(paidAt, "UTC"), dateFormat)}
+            {format(new TZDate(paidAt, timezone || "UTC"), dateFormat)}
           </Text>
         )}
       </View>
