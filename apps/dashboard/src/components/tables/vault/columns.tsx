@@ -129,7 +129,6 @@ export const columns: ColumnDef<Document>[] = [
       const staleProcessing = isStaleProcessing(
         row.original.processingStatus,
         row.original.createdAt,
-        row.original.title,
       );
 
       // Show skeleton only for recently pending documents (not stale ones)
@@ -175,7 +174,6 @@ export const columns: ColumnDef<Document>[] = [
       const staleProcessing = isStaleProcessing(
         row.original.processingStatus,
         row.original.createdAt,
-        row.original.title,
       );
 
       // Show skeleton only for recently pending documents (not stale ones)
@@ -262,7 +260,6 @@ export const columns: ColumnDef<Document>[] = [
       const staleProcessing = isStaleProcessing(
         row.original.processingStatus,
         row.original.createdAt,
-        row.original.title,
       );
       // Show retry option only for supported file types
       const showRetry =
@@ -314,9 +311,7 @@ export const columns: ColumnDef<Document>[] = [
                       handleReprocess?.(row.original.id);
                     }}
                   >
-                    {isFailed || staleProcessing
-                      ? "Retry processing"
-                      : "Retry classification"}
+                    Re-analyze document
                   </DropdownMenuItem>
                 </>
               )}

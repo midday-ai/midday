@@ -1,7 +1,9 @@
 "use client";
 
+import { useFileUrl } from "@/hooks/use-file-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useUserQuery } from "@/hooks/use-user";
+import { downloadFile } from "@/lib/download";
 import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
@@ -34,6 +36,7 @@ import { useState } from "react";
 type Props = {
   status: string;
   id: string;
+  invoiceNumber?: string | null;
   invoiceRecurringId?: string | null;
   recurringStatus?: string | null;
   paymentIntentId?: string | null;
@@ -42,6 +45,7 @@ type Props = {
 export function InvoiceActions({
   status,
   id,
+  invoiceNumber,
   invoiceRecurringId,
   recurringStatus,
   paymentIntentId,
@@ -63,6 +67,13 @@ export function InvoiceActions({
     invoiceRecurringId &&
     (recurringStatus === "active" || recurringStatus === "paused");
   const canRefund = status === "paid" && paymentIntentId;
+  const canDownloadReceipt = status === "paid";
+
+  const { url: receiptUrl } = useFileUrl(
+    canDownloadReceipt && user?.fileKey
+      ? { type: "invoice", invoiceId: id, isReceipt: true }
+      : null,
+  );
 
   const updateInvoiceMutation = useMutation(
     trpc.invoice.update.mutationOptions({
@@ -283,6 +294,21 @@ export function InvoiceActions({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent sideOffset={10} align="end">
+                {canDownloadReceipt && receiptUrl && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        downloadFile(
+                          receiptUrl,
+                          `receipt-${invoiceNumber || "invoice"}.pdf`,
+                        );
+                      }}
+                    >
+                      Download receipt
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem
                   onClick={() =>
                     updateInvoiceMutation.mutate({

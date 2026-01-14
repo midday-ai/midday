@@ -1,6 +1,7 @@
 "use client";
 
 import { OpenURL } from "@/components/open-url";
+import { useFileUrl } from "@/hooks/use-file-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
@@ -47,6 +48,13 @@ export function ActionsMenu({ row }: Props) {
   const { toast } = useToast();
   const [, copy] = useCopyToClipboard();
   const [cancelSeriesOpen, setCancelSeriesOpen] = useState(false);
+
+  const canDownloadReceipt = row.status === "paid";
+  const { url: receiptUrl } = useFileUrl(
+    canDownloadReceipt && user?.fileKey
+      ? { type: "invoice", invoiceId: row.id, isReceipt: true }
+      : null,
+  );
 
   const canCancelSeries =
     row.invoiceRecurringId &&
@@ -283,6 +291,19 @@ export function ActionsMenu({ row }: Props) {
               }}
             >
               Download
+            </DropdownMenuItem>
+          )}
+
+          {canDownloadReceipt && receiptUrl && (
+            <DropdownMenuItem
+              onClick={() => {
+                downloadFile(
+                  receiptUrl,
+                  `receipt-${row.invoiceNumber || "invoice"}.pdf`,
+                );
+              }}
+            >
+              Download receipt
             </DropdownMenuItem>
           )}
 

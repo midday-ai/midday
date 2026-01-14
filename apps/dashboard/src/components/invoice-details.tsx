@@ -149,6 +149,7 @@ export function InvoiceDetails() {
       <InvoiceActions
         status={status}
         id={id}
+        invoiceNumber={invoiceNumber}
         invoiceRecurringId={invoiceRecurringId}
         recurringStatus={recurring?.status}
         paymentIntentId={paymentIntentId}

@@ -123,4 +123,17 @@ export const downloadInvoiceSchema = z.object({
         name: "preview",
       },
     }),
+  type: z
+    .enum(["invoice", "receipt"])
+    .optional()
+    .default("invoice")
+    .openapi({
+      description:
+        "Type of document to download. Use 'receipt' to download a receipt for paid invoices.",
+      example: "invoice",
+      param: {
+        in: "query",
+        name: "type",
+      },
+    }),
 });

@@ -1,3 +1,5 @@
+"use client";
+
 import { ScrollArea } from "@midday/ui/scroll-area";
 import type { Invoice } from "../../types";
 import { EditorContent } from "./components/editor-content";

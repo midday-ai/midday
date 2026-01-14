@@ -360,6 +360,8 @@ export async function getInvoiceById(
         website: customers.website,
         email: customers.email,
         billingEmail: customers.billingEmail,
+        portalId: customers.portalId,
+        portalEnabled: customers.portalEnabled,
       },
       customerId: invoices.customerId,
       team: {
