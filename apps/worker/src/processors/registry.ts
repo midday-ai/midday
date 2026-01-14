@@ -5,6 +5,7 @@ import { customerProcessors } from "./customers";
 import { documentProcessors } from "./documents";
 import { embeddingsProcessors } from "./embeddings";
 import { inboxProcessors } from "./inbox";
+import { insightsProcessors } from "./insights";
 import { invoiceProcessors } from "./invoices";
 import { ratesProcessors } from "./rates";
 import { teamProcessors } from "./teams";
@@ -61,6 +62,11 @@ for (const [jobName, processor] of Object.entries(customerProcessors)) {
 
 // Register team processors
 for (const [jobName, processor] of Object.entries(teamProcessors)) {
+  processors.set(jobName, processor);
+}
+
+// Register insights processors
+for (const [jobName, processor] of Object.entries(insightsProcessors)) {
   processors.set(jobName, processor);
 }
 

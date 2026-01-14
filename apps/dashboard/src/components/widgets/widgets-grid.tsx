@@ -34,7 +34,7 @@ import { CategoryExpensesWidget } from "./category-expenses";
 import { CustomerLifetimeValueWidget } from "./customer-lifetime-value";
 import { GrowthRateWidget } from "./growth-rate";
 import { InboxWidget } from "./inbox";
-// import { Insights } from "./insights";
+import { InsightsWidget } from "./insights";
 import { InvoicePaymentScoreWidget } from "./invoice-payment-score";
 import { MonthlySpendingWidget } from "./monthly-spending";
 import { OutstandingInvoicesWidget } from "./outstanding-invoices";
@@ -61,7 +61,7 @@ type RouterOutputs = inferRouterOutputs<AppRouter>;
 type WidgetPreferences = RouterOutputs["widgets"]["getWidgetPreferences"];
 type WidgetType = WidgetPreferences["primaryWidgets"][number];
 
-const NUMBER_OF_WIDGETS = 8;
+const NUMBER_OF_WIDGETS = 7;
 
 // Sortable Card Component
 function SortableCard({
@@ -108,7 +108,7 @@ function SortableCard({
   );
 }
 
-// Widget mapping to components
+// Widget mapping to components (insights is rendered separately)
 const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
   runway: RunwayWidget,
   "top-customer": TopCustomerWidget,
@@ -275,6 +275,12 @@ export function WidgetsGrid() {
             {/* Mobile: Horizontal scrollable row with snap */}
             <div className="lg:hidden overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4">
               <div className="flex gap-4">
+                {/* Insights Widget - Fixed, first position */}
+                <div className="flex-shrink-0 w-[calc(100vw-2rem)] snap-center first:ml-4">
+                  <ErrorBoundary fallback={<WidgetErrorFallback />}>
+                    <InsightsWidget />
+                  </ErrorBoundary>
+                </div>
                 {primaryWidgets.map((widgetType, index) => {
                   const WidgetComponent = WIDGET_COMPONENTS[widgetType];
                   const wiggleClass = getWiggleClass(index);
@@ -282,7 +288,7 @@ export function WidgetsGrid() {
                   return (
                     <div
                       key={widgetType}
-                      className="flex-shrink-0 w-[calc(100vw-2rem)] snap-center first:ml-4 last:mr-4"
+                      className="flex-shrink-0 w-[calc(100vw-2rem)] snap-center last:mr-4"
                     >
                       <SortableCard
                         id={widgetType}
@@ -302,6 +308,10 @@ export function WidgetsGrid() {
 
             {/* Desktop: Grid layout */}
             <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-6">
+              {/* Insights Widget - Fixed, first position */}
+              <ErrorBoundary fallback={<WidgetErrorFallback />}>
+                <InsightsWidget />
+              </ErrorBoundary>
               {primaryWidgets.map((widgetType, index) => {
                 const WidgetComponent = WIDGET_COMPONENTS[widgetType];
                 const wiggleClass = getWiggleClass(index);
@@ -327,12 +337,18 @@ export function WidgetsGrid() {
             {/* Mobile: Horizontal scrollable row with snap */}
             <div className="lg:hidden overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4">
               <div className="flex gap-4">
-                {primaryWidgets.map((widgetType, index) => {
+                {/* Insights Widget - Fixed, first position */}
+                <div className="flex-shrink-0 w-[calc(100vw-2rem)] snap-center first:ml-4">
+                  <ErrorBoundary fallback={<WidgetErrorFallback />}>
+                    <InsightsWidget />
+                  </ErrorBoundary>
+                </div>
+                {primaryWidgets.map((widgetType) => {
                   const WidgetComponent = WIDGET_COMPONENTS[widgetType];
                   return (
                     <div
                       key={widgetType}
-                      className="flex-shrink-0 w-[calc(100vw-2rem)] snap-center first:ml-4 last:mr-4"
+                      className="flex-shrink-0 w-[calc(100vw-2rem)] snap-center last:mr-4"
                     >
                       <ErrorBoundary fallback={<WidgetErrorFallback />}>
                         <WidgetComponent />
@@ -345,6 +361,10 @@ export function WidgetsGrid() {
 
             {/* Desktop: Grid layout */}
             <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-6">
+              {/* Insights Widget - Fixed, first position */}
+              <ErrorBoundary fallback={<WidgetErrorFallback />}>
+                <InsightsWidget />
+              </ErrorBoundary>
               {primaryWidgets.map((widgetType) => {
                 const WidgetComponent = WIDGET_COMPONENTS[widgetType];
                 return (
