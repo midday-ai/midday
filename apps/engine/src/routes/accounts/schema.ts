@@ -208,20 +208,14 @@ export const AccountBalanceSchema = z
         currency: z.string().openapi({
           example: "USD",
         }),
-        available_balance: z
-          .number()
-          .nullable()
-          .openapi({
-            description: "Available credit (cards) or available funds",
-            example: 4000,
-          }),
-        credit_limit: z
-          .number()
-          .nullable()
-          .openapi({
-            description: "Credit limit (credit cards only)",
-            example: 5000,
-          }),
+        available_balance: z.number().nullable().openapi({
+          description: "Available credit (cards) or available funds",
+          example: 4000,
+        }),
+        credit_limit: z.number().nullable().openapi({
+          description: "Credit limit (credit cards only)",
+          example: 5000,
+        }),
       })
       .nullable(),
   })

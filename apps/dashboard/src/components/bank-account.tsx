@@ -42,10 +42,7 @@ type Props = {
   provider?: string | null;
 };
 
-function CopyButton({
-  value,
-  label,
-}: { value: string; label: string }) {
+function CopyButton({ value, label }: { value: string; label: string }) {
   const { toast } = useToast();
 
   return (
@@ -312,7 +309,10 @@ export function BankAccount({ data, provider }: Props) {
                     <span className="text-[#878787]">Routing</span>
                     <div className="flex items-center gap-1">
                       <span className="font-mono text-xs">{routingNumber}</span>
-                      <CopyButton value={routingNumber} label="Routing number" />
+                      <CopyButton
+                        value={routingNumber}
+                        label="Routing number"
+                      />
                     </div>
                   </div>
                 )}

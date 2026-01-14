@@ -10,7 +10,7 @@ export function ConnectedAccounts() {
         <BankAccountList />
       </Suspense>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end border-t pt-4">
         <AddAccountButton />
       </div>
     </div>

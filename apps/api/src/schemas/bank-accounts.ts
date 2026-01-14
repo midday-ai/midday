@@ -111,14 +111,11 @@ export const getBankAccountByIdSchema = z.object({
 });
 
 export const getBankAccountDetailsSchema = z.object({
-  id: z
-    .string()
-    .uuid()
-    .openapi({
-      description:
-        "The unique identifier of the bank account to get details for.",
-      example: "b7e6c2a0-1f2d-4c3b-9a8e-123456789abc",
-    }),
+  id: z.string().uuid().openapi({
+    description:
+      "The unique identifier of the bank account to get details for.",
+    example: "b7e6c2a0-1f2d-4c3b-9a8e-123456789abc",
+  }),
 });
 
 export const updateBankAccountSchema = z
