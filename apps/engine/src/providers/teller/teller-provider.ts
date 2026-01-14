@@ -56,9 +56,21 @@ export class TellerProvider implements Provider {
       throw Error("accessToken missing");
     }
 
-    const response = await this.#api.getAccounts({ accessToken });
+    const accounts = await this.#api.getAccounts({ accessToken });
 
-    return response.map(transformAccount);
+    // Fetch account details (routing numbers, account numbers) for each account
+    // This is available instantly for most institutions
+    const accountsWithDetails = await Promise.all(
+      accounts.map(async (account) => {
+        const accountDetails = await this.#api.getAccountDetails({
+          accountId: account.id,
+          accessToken,
+        });
+        return { ...account, accountDetails };
+      }),
+    );
+
+    return accountsWithDetails.map(transformAccount);
   }
 
   async getAccountBalance({
@@ -70,12 +82,13 @@ export class TellerProvider implements Provider {
       throw Error("Missing params");
     }
 
-    const response = await this.#api.getAccountBalance({
-      accessToken,
-      accountId,
-    });
+    // Fetch both balance (from transactions) and full balances (with available)
+    const [balance, balances] = await Promise.all([
+      this.#api.getAccountBalance({ accessToken, accountId }),
+      this.#api.getAccountBalances({ accessToken, accountId }),
+    ]);
 
-    return transformAccountBalance({ balance: response, accountType });
+    return transformAccountBalance({ balance, balances, accountType });
   }
 
   async getInstitutions() {

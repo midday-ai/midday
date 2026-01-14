@@ -52,7 +52,8 @@ export class EnableBankingProvider implements Provider {
     const response = await this.#api.getAccountBalance(params.accountId);
 
     return transformBalance({
-      balance: response,
+      balance: response.balance,
+      creditLimit: response.creditLimit,
       accountType: params.accountType,
     });
   }

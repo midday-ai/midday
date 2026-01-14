@@ -197,6 +197,8 @@ test("Transform account balance - credit card with negative balance (normalized 
   ).toEqual({
     currency: "EUR",
     amount: 1500,
+    available_balance: null,
+    credit_limit: null,
   });
 });
 
@@ -214,6 +216,8 @@ test("Transform account balance - credit card with positive balance (overpayment
   ).toEqual({
     currency: "EUR",
     amount: 200,
+    available_balance: null,
+    credit_limit: null,
   });
 });
 
@@ -229,6 +233,8 @@ test("Transform account balance - credit card with zero balance", () => {
   ).toEqual({
     currency: "USD",
     amount: 0,
+    available_balance: null,
+    credit_limit: null,
   });
 });
 
@@ -244,6 +250,8 @@ test("Transform account balance - no accountType provided", () => {
   ).toEqual({
     currency: "EUR",
     amount: -500,
+    available_balance: null,
+    credit_limit: null,
   });
 });
 
@@ -256,6 +264,8 @@ test("Transform account balance - handles undefined balance gracefully", () => {
   ).toEqual({
     currency: "EUR",
     amount: 0,
+    available_balance: null,
+    credit_limit: null,
   });
 });
 
@@ -272,6 +282,8 @@ test("Transform account balance - very large credit card balance", () => {
   ).toEqual({
     currency: "USD",
     amount: 50000,
+    available_balance: null,
+    credit_limit: null,
   });
 });
 
@@ -287,6 +299,8 @@ test("Transform account balance - decimal precision maintained", () => {
   ).toEqual({
     currency: "EUR",
     amount: 1234.56,
+    available_balance: null,
+    credit_limit: null,
   });
 });
 
@@ -305,6 +319,8 @@ test("Transform account balance - loan type keeps negative (if bank reports that
   ).toEqual({
     currency: "GBP",
     amount: -25000, // Not normalized (only credit type is normalized)
+    available_balance: null,
+    credit_limit: null,
   });
 });
 
@@ -321,5 +337,134 @@ test("Transform account balance - loan type with positive value", () => {
   ).toEqual({
     currency: "GBP",
     amount: 25000,
+    available_balance: null,
+    credit_limit: null,
   });
+});
+
+test("Transform account - extracts available_balance from balances array", () => {
+  const result = transformAccount({
+    id: "gc_account_123",
+    created: "2024-02-23T13:29:47.314568Z",
+    last_accessed: "2024-03-06T16:34:16.782598Z",
+    iban: "DE89370400440532013000",
+    institution_id: "REVOLUT_REVOGB21",
+    status: "READY",
+    owner_name: "John Doe",
+    account: {
+      currency: "EUR",
+      iban: "DE89370400440532013000",
+      ownerName: "John Doe",
+      name: "Main Account",
+      product: "Current Account",
+      cashAccountType: "CACC",
+      resourceId: "resource_123",
+    },
+    balance: {
+      currency: "EUR",
+      amount: "5000.00",
+    },
+    balances: [
+      {
+        balanceType: "interimBooked",
+        balanceAmount: { amount: "5000.00", currency: "EUR" },
+        creditLimitIncluded: false,
+      },
+      {
+        balanceType: "interimAvailable",
+        balanceAmount: { amount: "4800.00", currency: "EUR" },
+        creditLimitIncluded: false,
+      },
+    ],
+    institution: {
+      id: "REVOLUT_REVOGB21",
+      name: "Revolut",
+      bic: "REVOGB21",
+      transaction_total_days: "90",
+      countries: ["GB"],
+      logo: "https://cdn.nordigen.com/revolut.png",
+    },
+  });
+
+  expect(result.available_balance).toBe(4800);
+  expect(result.credit_limit).toBeNull(); // GoCardless doesn't provide credit limit
+});
+
+test("Transform account - available_balance falls back to expected balance", () => {
+  const result = transformAccount({
+    id: "gc_account_456",
+    created: "2024-02-23T13:29:47.314568Z",
+    last_accessed: "2024-03-06T16:34:16.782598Z",
+    iban: "DE89370400440532013001",
+    institution_id: "REVOLUT_REVOGB21",
+    status: "READY",
+    owner_name: "Jane Doe",
+    account: {
+      currency: "EUR",
+      iban: "DE89370400440532013001",
+      ownerName: "Jane Doe",
+      name: "Savings",
+      product: "Savings Account",
+      cashAccountType: "SVGS",
+      resourceId: "resource_456",
+    },
+    balance: {
+      currency: "EUR",
+      amount: "10000.00",
+    },
+    balances: [
+      {
+        balanceType: "expected",
+        balanceAmount: { amount: "10000.00", currency: "EUR" },
+        creditLimitIncluded: false,
+      },
+    ],
+    institution: {
+      id: "REVOLUT_REVOGB21",
+      name: "Revolut",
+      bic: "REVOGB21",
+      transaction_total_days: "90",
+      countries: ["GB"],
+      logo: "https://cdn.nordigen.com/revolut.png",
+    },
+  });
+
+  expect(result.available_balance).toBe(10000);
+});
+
+test("Transform account - handles empty balances array", () => {
+  const result = transformAccount({
+    id: "gc_account_789",
+    created: "2024-02-23T13:29:47.314568Z",
+    last_accessed: "2024-03-06T16:34:16.782598Z",
+    iban: "GB82WEST12345698765432",
+    institution_id: "MONZO_MONZGB21",
+    status: "READY",
+    owner_name: "Test User",
+    account: {
+      currency: "GBP",
+      iban: "GB82WEST12345698765432",
+      ownerName: "Test User",
+      name: "Current",
+      product: "Current Account",
+      cashAccountType: "CACC",
+      resourceId: "resource_789",
+    },
+    balance: {
+      currency: "GBP",
+      amount: "1000.00",
+    },
+    balances: [],
+    institution: {
+      id: "MONZO_MONZGB21",
+      name: "Monzo",
+      bic: "MONZGB21",
+      transaction_total_days: "90",
+      countries: ["GB"],
+      logo: "https://cdn.nordigen.com/monzo.png",
+    },
+  });
+
+  expect(result.available_balance).toBeNull();
+  expect(result.credit_limit).toBeNull();
 });

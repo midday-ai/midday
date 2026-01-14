@@ -8,6 +8,7 @@ import type {
   Balance as BaseAccountBalance,
   Transaction as BaseTransaction,
   ConnectionStatus,
+  GetAccountBalanceResponse,
 } from "../types";
 import type {
   GetRequisitionResponse,
@@ -237,10 +238,36 @@ const transformAccountName = (account: TransformAccountName) => {
   return "No name";
 };
 
+/**
+ * Extract available balance from GoCardless balances array.
+ * Looks for interimAvailable balance type first, falls back to expected.
+ */
+const getAvailableBalance = (
+  balances?: TransformAccount["balances"],
+): number | null => {
+  if (!balances?.length) return null;
+
+  const interimAvailable = balances.find(
+    (b) => b.balanceType === "interimAvailable",
+  );
+  if (interimAvailable) {
+    return +interimAvailable.balanceAmount.amount;
+  }
+
+  // Fall back to expected balance if no interimAvailable
+  const expected = balances.find((b) => b.balanceType === "expected");
+  if (expected) {
+    return +expected.balanceAmount.amount;
+  }
+
+  return null;
+};
+
 export const transformAccount = ({
   id,
   account,
   balance,
+  balances,
   institution,
 }: TransformAccount): BaseAccount => {
   const accountType = getAccountType(account.cashAccountType);
@@ -266,11 +293,20 @@ export const transformAccount = ({
     iban: account.iban || null,
     subtype: null, // GoCardless uses cashAccountType for type, no additional subtype
     bic: institution.bic || null,
+    // US bank details not available for GoCardless (EU/UK provider)
+    routing_number: null,
+    wire_routing_number: null,
+    account_number: null,
+    sort_code: null,
+    // Credit account balances - GoCardless provides available via balance types
+    available_balance: getAvailableBalance(balances),
+    credit_limit: null, // GoCardless only has creditLimitIncluded boolean, not actual limit
   };
 };
 
 type TransformAccountBalanceParams = {
   balance?: TransformAccountBalance;
+  balances?: TransformAccount["balances"];
   accountType?: string;
 };
 
@@ -281,12 +317,14 @@ type TransformAccountBalanceParams = {
  * We normalize to POSITIVE values for consistency with other providers (Plaid, Teller, Enable Banking).
  *
  * @param balance - The raw balance from GoCardless
+ * @param balances - Full balances array for available_balance extraction
  * @param accountType - The account type (credit accounts get normalized)
  */
 export const transformAccountBalance = ({
   balance,
+  balances,
   accountType,
-}: TransformAccountBalanceParams): BaseAccountBalance => {
+}: TransformAccountBalanceParams): GetAccountBalanceResponse => {
   const rawAmount = +(balance?.amount ?? 0);
 
   // GoCardless stores credit card debt as negative values (e.g., -1000 = $1000 owed)
@@ -297,6 +335,8 @@ export const transformAccountBalance = ({
   return {
     currency: balance?.currency.toUpperCase() || "EUR",
     amount,
+    available_balance: getAvailableBalance(balances),
+    credit_limit: null, // GoCardless only has creditLimitIncluded boolean, not actual limit
   };
 };
 

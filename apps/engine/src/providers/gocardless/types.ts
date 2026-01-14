@@ -168,6 +168,7 @@ export type GetAccountsResponse = {
   owner_name?: string;
   account: Account;
   balance?: GetBalanceRequest;
+  balances?: AccountBalance[];
   institution: Institution;
   resourceId?: string;
 }[];

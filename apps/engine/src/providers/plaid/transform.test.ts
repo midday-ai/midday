@@ -299,6 +299,8 @@ test("Transform account balance - depository falls back to current when availabl
   ).toEqual({
     currency: "USD",
     amount: 5000,
+    available_balance: null,
+    credit_limit: null,
   });
 });
 
@@ -317,6 +319,8 @@ test("Transform account balance - handles null balances gracefully", () => {
   ).toEqual({
     currency: "USD",
     amount: 0,
+    available_balance: null,
+    credit_limit: null,
   });
 });
 
@@ -337,6 +341,8 @@ test("Transform account balance - credit card overpayment (negative current)", (
   ).toEqual({
     currency: "USD",
     amount: -500, // Shows as negative (credit in customer's favor)
+    available_balance: 5500,
+    credit_limit: 5000,
   });
 });
 
@@ -356,6 +362,8 @@ test("Transform account balance - loan account uses current", () => {
   ).toEqual({
     currency: "USD",
     amount: 75000,
+    available_balance: null,
+    credit_limit: null,
   });
 });
 
@@ -486,4 +494,84 @@ test("Transform credit card refund - should have no category", () => {
       },
     }),
   ).toMatchSnapshot();
+});
+
+test("Transform account - credit card with available_balance and credit_limit", () => {
+  const result = transformAccount({
+    account_id: "credit_123",
+    balances: {
+      available: 4000, // Available credit
+      current: 1000, // Amount owed
+      iso_currency_code: "USD",
+      limit: 5000, // Credit limit
+      unofficial_currency_code: null,
+    },
+    mask: "1234",
+    name: "My Credit Card",
+    official_name: "Chase Sapphire",
+    subtype: AccountSubtype.CreditCard,
+    type: AccountType.Credit,
+    institution: {
+      id: "ins_chase",
+      name: "Chase",
+      logo: null,
+    },
+  });
+
+  expect(result.available_balance).toBe(4000);
+  expect(result.credit_limit).toBe(5000);
+  expect(result.balance.amount).toBe(1000); // Current balance (amount owed)
+});
+
+test("Transform account - depository with available_balance, no credit_limit", () => {
+  const result = transformAccount({
+    account_id: "checking_123",
+    balances: {
+      available: 5000,
+      current: 5200, // Includes pending
+      iso_currency_code: "USD",
+      limit: null,
+      unofficial_currency_code: null,
+    },
+    mask: "5678",
+    name: "My Checking",
+    official_name: "Chase Checking",
+    subtype: AccountSubtype.Checking,
+    type: AccountType.Depository,
+    institution: {
+      id: "ins_chase",
+      name: "Chase",
+      logo: null,
+    },
+  });
+
+  expect(result.available_balance).toBe(5000);
+  expect(result.credit_limit).toBeNull();
+  expect(result.balance.amount).toBe(5000); // Depository uses available
+});
+
+test("Transform account - handles null balances gracefully", () => {
+  const result = transformAccount({
+    account_id: "savings_123",
+    balances: {
+      available: null,
+      current: 10000,
+      iso_currency_code: "USD",
+      limit: null,
+      unofficial_currency_code: null,
+    },
+    mask: "9999",
+    name: "My Savings",
+    official_name: null,
+    subtype: AccountSubtype.Savings,
+    type: AccountType.Depository,
+    institution: {
+      id: "ins_boa",
+      name: "Bank of America",
+      logo: null,
+    },
+  });
+
+  expect(result.available_balance).toBeNull();
+  expect(result.credit_limit).toBeNull();
 });

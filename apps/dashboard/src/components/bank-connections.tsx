@@ -349,9 +349,15 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
       </div>
 
       <AccordionContent className="bg-background">
-        <div className="ml-[30px] divide-y">
+        <div className="ml-[30px] grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
           {connection.bankAccounts.map((account) => {
-            return <BankAccount key={account.id} data={account} />;
+            return (
+              <BankAccount
+                key={account.id}
+                data={account}
+                provider={connection.provider}
+              />
+            );
           })}
         </div>
       </AccordionContent>
@@ -365,7 +371,7 @@ export function BankConnections() {
   const defaultValue = data?.length === 1 ? ["connection-0"] : undefined;
 
   return (
-    <div className="px-6 divide-y">
+    <div className="divide-y">
       <Accordion type="multiple" className="w-full" defaultValue={defaultValue}>
         {data?.map((connection, index) => {
           return (

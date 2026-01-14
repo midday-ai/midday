@@ -5,7 +5,14 @@ import { useConnectParams } from "@/hooks/use-connect-params";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
+import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { zodResolver } from "@hookform/resolvers/zod";
+
+// Extended account type with new balance fields (until engine types are regenerated)
+type AccountWithBalances = RouterOutputs["institutions"]["accounts"][number] & {
+  available_balance?: number | null;
+  credit_limit?: number | null;
+};
 import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
@@ -161,6 +168,14 @@ const formSchema = z.object({
         iban: z.string().nullable().optional(),
         subtype: z.string().nullable().optional(),
         bic: z.string().nullable().optional(),
+        // US bank account details (Teller, Plaid)
+        routingNumber: z.string().nullable().optional(),
+        wireRoutingNumber: z.string().nullable().optional(),
+        accountNumber: z.string().nullable().optional(),
+        sortCode: z.string().nullable().optional(),
+        // Credit account balances
+        availableBalance: z.number().nullable().optional(),
+        creditLimit: z.number().nullable().optional(),
       }),
     )
     .refine((accounts) => accounts.some((account) => account.enabled), {
@@ -262,7 +277,7 @@ export function SelectBankAccountsModal() {
       enrollmentId: enrollment_id ?? undefined,
       // GoCardLess Requestion ID or Plaid Item ID
       referenceId: ref ?? undefined,
-      accounts: data?.map((account) => ({
+      accounts: (data as AccountWithBalances[] | undefined)?.map((account) => ({
         name: account.name,
         institutionId: account.institution.id,
         logoUrl: account.institution?.logo,
@@ -279,6 +294,14 @@ export function SelectBankAccountsModal() {
         iban: account.iban,
         subtype: account.subtype,
         bic: account.bic,
+        // US bank account details (Teller, Plaid)
+        routingNumber: account.routing_number,
+        wireRoutingNumber: account.wire_routing_number,
+        accountNumber: account.account_number,
+        sortCode: account.sort_code,
+        // Credit account balances
+        availableBalance: account.available_balance ?? null,
+        creditLimit: account.credit_limit ?? null,
       })),
     });
   }, [data, ref]);

@@ -224,6 +224,8 @@ test("Transform account balance - credit with negative balance (normalized)", ()
   ).toEqual({
     amount: 1500,
     currency: "EUR",
+    available_balance: null, // CLBD is not an available balance type
+    credit_limit: null,
   });
 });
 
@@ -243,5 +245,7 @@ test("Transform account balance - credit with positive balance (stays positive)"
   ).toEqual({
     amount: 2000,
     currency: "EUR",
+    available_balance: null,
+    credit_limit: null,
   });
 });

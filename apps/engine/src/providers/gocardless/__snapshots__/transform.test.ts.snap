@@ -78,11 +78,16 @@ exports[`Transform credit card refund - should be null (user categorizes) 1`] = 
 
 exports[`Transform accounts 1`] = `
 {
+  "account_number": null,
+  "available_balance": null,
   "balance": {
     "amount": 1942682.86,
+    "available_balance": null,
+    "credit_limit": null,
     "currency": "SEK",
   },
   "bic": "PLEODK00",
+  "credit_limit": null,
   "currency": "SEK",
   "enrollment_id": null,
   "expires_at": "FIXED_DATE_FOR_TESTING",
@@ -96,18 +101,26 @@ exports[`Transform accounts 1`] = `
   },
   "name": "Pleo Account",
   "resource_id": "3133",
+  "routing_number": null,
+  "sort_code": null,
   "subtype": null,
   "type": "depository",
+  "wire_routing_number": null,
 }
 `;
 
 exports[`Transform credit card account (CARD type) 1`] = `
 {
+  "account_number": null,
+  "available_balance": null,
   "balance": {
     "amount": 1500,
+    "available_balance": null,
+    "credit_limit": null,
     "currency": "EUR",
   },
   "bic": "TESTBIC",
+  "credit_limit": null,
   "currency": "EUR",
   "enrollment_id": null,
   "expires_at": "FIXED_DATE_FOR_TESTING",
@@ -121,14 +134,19 @@ exports[`Transform credit card account (CARD type) 1`] = `
   },
   "name": "Credit Card",
   "resource_id": "4444",
+  "routing_number": null,
+  "sort_code": null,
   "subtype": null,
   "type": "credit",
+  "wire_routing_number": null,
 }
 `;
 
 exports[`Transform account balance - depository (positive stays positive) 1`] = `
 {
   "amount": 1942682.86,
+  "available_balance": null,
+  "credit_limit": null,
   "currency": "SEK",
 }
 `;

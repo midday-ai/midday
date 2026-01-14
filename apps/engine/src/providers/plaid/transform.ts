@@ -7,6 +7,7 @@ import type {
   Account as BaseAccount,
   Balance as BaseBalance,
   Transaction as BaseTransaction,
+  GetAccountBalanceResponse,
 } from "../types";
 import type {
   TransformAccount,
@@ -273,6 +274,14 @@ export const transformAccount = ({
     iban: null, // Plaid (US-focused) doesn't typically provide IBAN
     subtype: subtype || null, // checking, savings, credit_card, mortgage, etc.
     bic: null, // Plaid doesn't have BIC
+    // US bank details - requires Auth product, fetched separately
+    routing_number: null,
+    wire_routing_number: null,
+    account_number: null,
+    sort_code: null,
+    // Credit account balances - Plaid provides both
+    available_balance: balances?.available ?? null,
+    credit_limit: balances?.limit ?? null,
   };
 };
 
@@ -284,7 +293,7 @@ type TransformAccountBalanceParams = {
 export const transformAccountBalance = ({
   balances,
   accountType,
-}: TransformAccountBalanceParams): BaseBalance => {
+}: TransformAccountBalanceParams): GetAccountBalanceResponse => {
   // For credit cards, use `current` (amount owed), not `available` (available credit)
   // Example: $5000 limit, $1000 owed → available=$4000, current=$1000
   // We want to show $1000 (current), not $4000 (available)
@@ -299,6 +308,8 @@ export const transformAccountBalance = ({
       balances?.unofficial_currency_code?.toUpperCase() ||
       "USD",
     amount,
+    available_balance: balances?.available ?? null,
+    credit_limit: balances?.limit ?? null,
   };
 };
 

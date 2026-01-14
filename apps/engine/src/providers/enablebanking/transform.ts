@@ -2,7 +2,13 @@ import { createHash } from "node:crypto";
 import type { AccountType } from "@engine/utils/account";
 import { getLogoURL } from "@engine/utils/logo";
 import { capitalCase } from "change-case";
-import type { Account, Balance, ConnectionStatus, Transaction } from "../types";
+import type {
+  Account,
+  Balance,
+  ConnectionStatus,
+  GetAccountBalanceResponse,
+  Transaction,
+} from "../types";
 import type {
   GetAccountDetailsResponse,
   GetBalancesResponse,
@@ -62,6 +68,24 @@ function getAccountType(cashAccountType?: string): AccountType {
   }
 }
 
+/**
+ * Get available balance from EnableBanking balance.
+ * EnableBanking returns balance_type which can indicate available balance.
+ */
+const getAvailableBalance = (
+  balance: GetAccountDetailsResponse["balance"],
+): number | null => {
+  // EnableBanking's balance_type can be: closingAvailable, interimAvailable, etc.
+  // For now, use the balance amount as available if it has an "available" type
+  if (
+    balance?.balance_type?.toLowerCase().includes("available") ||
+    balance?.balance_type?.toLowerCase().includes("interim")
+  ) {
+    return +balance.balance_amount.amount;
+  }
+  return null;
+};
+
 export const transformAccount = (
   account: GetAccountDetailsResponse,
 ): Account => {
@@ -97,6 +121,16 @@ export const transformAccount = (
     iban: account.account_id?.iban || null,
     subtype: account.cash_account_type?.toLowerCase() || null, // CACC, CARD, SVGS, LOAN, CASH
     bic: account.account_servicer?.bic_fi || null,
+    // US bank details not available for EnableBanking (EU/UK provider)
+    routing_number: null,
+    wire_routing_number: null,
+    account_number: null,
+    sort_code: null,
+    // Credit account balances - EnableBanking provides credit_limit directly
+    available_balance: getAvailableBalance(account.balance),
+    credit_limit: account.credit_limit?.amount
+      ? +account.credit_limit.amount
+      : null,
   };
 };
 
@@ -114,6 +148,7 @@ export const transformSessionData = (session: GetExchangeCodeResponse) => {
 
 type TransformBalanceParams = {
   balance: GetBalancesResponse["balances"][0];
+  creditLimit?: { currency: string; amount: string } | null;
   accountType?: string;
 };
 
@@ -125,17 +160,27 @@ type TransformBalanceParams = {
  */
 export const transformBalance = ({
   balance,
+  creditLimit,
   accountType,
-}: TransformBalanceParams): Balance => {
+}: TransformBalanceParams): GetAccountBalanceResponse => {
   const rawAmount = +balance.balance_amount.amount;
 
   // Normalize credit card balances to positive (amount owed) for consistency
   const amount =
     accountType === "credit" && rawAmount < 0 ? Math.abs(rawAmount) : rawAmount;
 
+  // Check if balance_type indicates available balance
+  const availableBalance =
+    balance.balance_type?.toLowerCase().includes("available") ||
+    balance.balance_type?.toLowerCase().includes("interim")
+      ? rawAmount
+      : null;
+
   return {
     amount,
     currency: balance.balance_amount.currency,
+    available_balance: availableBalance,
+    credit_limit: creditLimit?.amount ? +creditLimit.amount : null,
   };
 };
 

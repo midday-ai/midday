@@ -29,44 +29,102 @@ All providers use a shared `matchAndUpdateAccountIds()` function that safely mat
 
 ## Provider-Specific Behavior
 
-### GoCardless
+### GoCardless (EU/UK)
 
 - **resource_id**: `account.resourceId` (stable identifier)
-- **Additional data**: `iban`, `bic`
+- **Additional data**: `iban`, `bic`, `available_balance` (from `interimAvailable` balance type)
+- **Note**: `credit_limit` is NOT available - only `creditLimitIncluded` boolean exists
 - **Reconnect flow**: User re-authenticates → job triggered → accounts remapped
 
 ### Teller (US)
 
 - **resource_id**: `last_four` (last 4 digits of account number)
-- **Additional data**: `subtype` (checking, savings, credit_card, etc.)
+- **Additional data**: `subtype`, `routing_number`, `wire_routing_number`, `account_number`, `sort_code`, `available_balance`
+- **Account details**: Available instantly for most institutions (`verify.instant`), some require microdeposit verification
+- **Balances**: `ledger` (total) and `available` (net pending) - no `credit_limit`
 - **Note**: `last_four` can be shared between accounts (e.g., checking and savings with same last 4 digits)
+- **Reconnect flow**: User re-authenticates → job triggered → accounts remapped
 
 ### EnableBanking (EU)
 
 - **resource_id**: `identification_hash` (cryptographic hash, very stable)
-- **Additional data**: `iban`, `bic`, `subtype`
+- **Additional data**: `iban`, `bic`, `subtype`, `available_balance`
+- **Note**: `credit_limit` is NOT in EnableBanking's documented API (may return from some banks but not guaranteed)
 - **Reconnect flow**: API route updates connection → triggers reconnect job
 
 ### Plaid (US)
 
 - **resource_id**: `persistent_account_id || mask`
-- **Additional data**: `subtype`
+- **Additional data**: `subtype`, `available_balance`, `credit_limit`
 - **Note**: Plaid uses "update mode" for reconnects which preserves account IDs. No remapping needed.
 
 ## Data Fields
 
+### Account Identification Fields
+
 | Field | Description | Providers |
 |-------|-------------|-----------|
 | `account_reference` | Stable identifier for matching | All |
-| `iban` | International Bank Account Number | GoCardless, EnableBanking |
+| `iban` | International Bank Account Number (encrypted) | GoCardless, EnableBanking |
 | `bic` | Bank Identifier Code (SWIFT) | GoCardless, EnableBanking |
 | `subtype` | Granular account type | Teller, Plaid, EnableBanking |
+
+### US Bank Details (Teller, Plaid)
+
+| Field | Description | Notes |
+|-------|-------------|-------|
+| `routing_number` | ACH routing number | Public info |
+| `wire_routing_number` | Wire routing number | May differ from ACH |
+| `account_number` | Full account number (encrypted) | Sensitive |
+| `sort_code` | UK BACS sort code | UK accounts via Teller |
+
+### Balance Fields
+
+| Field | Description | Providers | Sync Frequency |
+|-------|-------------|-----------|----------------|
+| `balance` | Current/ledger balance (depository) or amount owed (credit) | All | Every sync |
+| `available_balance` | Spendable funds (depository) or available credit (cards) | All | Every sync |
+| `credit_limit` | Maximum credit line (cards only) | Plaid only* | Every sync |
+
+*EnableBanking does NOT officially support `credit_limit` - our code handles it if returned but it's not guaranteed
+
+**Balance vs Available Balance:**
+- **Depository accounts**: `balance` is ledger balance, `available_balance` is spendable (minus holds/pending)
+- **Credit accounts**: `balance` is amount owed, `available_balance` is remaining credit
+
+### Encryption
+
+Sensitive fields are encrypted at rest using `@midday/encryption`:
+- `iban` - Encrypted
+- `account_number` - Encrypted
+
+Non-sensitive fields stored in plain text:
+- `routing_number`, `wire_routing_number`, `bic`, `sort_code`
+
+To retrieve decrypted values, use the `bankAccounts.getDetails` tRPC procedure.
 
 ### Subtype Values
 
 - **Teller**: `checking`, `savings`, `money_market`, `certificate_of_deposit`, `treasury`, `sweep`, `credit_card`
 - **Plaid**: `checking`, `savings`, `credit_card`, `mortgage`, `student`, `auto`, etc.
 - **EnableBanking**: `cacc` (current), `card`, `svgs` (savings), `loan`, `cash`
+
+## Sync Flow
+
+### Regular Balance Sync (`syncAccount`)
+
+The `syncAccount` job runs periodically and updates:
+- `balance` - Primary balance from `/accounts/balance` endpoint
+- `available_balance` - From same endpoint (added to response)
+- `credit_limit` - From same endpoint (added to response)
+
+### Static Field Backfill (`backfillAccountStaticFields`)
+
+For existing accounts that were created before these fields existed, the sync job includes a temporary backfill that populates:
+- `iban`, `subtype`, `bic` (EU/UK accounts)
+- `routing_number`, `wire_routing_number`, `account_number`, `sort_code` (US/UK accounts)
+
+This backfill only runs for accounts missing ALL static fields and can be removed after most accounts have been updated.
 
 ## Troubleshooting
 

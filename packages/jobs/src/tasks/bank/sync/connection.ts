@@ -1,21 +1,38 @@
 import { syncConnectionSchema } from "@jobs/schema";
 import { triggerSequenceAndWait } from "@jobs/utils/trigger-sequence";
+import { encrypt } from "@midday/encryption";
 import { client } from "@midday/engine-client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { transactionNotifications } from "../notifications/transactions";
 import { syncAccount } from "./account";
 
+// Extended type for API accounts with all new fields
+type ApiAccountWithDetails = {
+  id: string;
+  iban: string | null;
+  subtype: string | null;
+  bic: string | null;
+  routing_number: string | null;
+  wire_routing_number: string | null;
+  account_number: string | null;
+  sort_code: string | null;
+};
+
 /**
- * TEMPORARY BACKFILL: Populate iban, subtype, bic for existing accounts.
+ * TEMPORARY BACKFILL: Populate static account fields for existing accounts.
  *
  * This function fetches fresh account data from the banking API and updates
- * any existing accounts that are missing the new fields. This ensures existing
- * users get the new data without requiring a reconnect.
+ * any existing accounts that are missing the new static fields:
+ * - iban, subtype, bic (EU/UK accounts)
+ * - routing_number, wire_routing_number, account_number, sort_code (US/UK accounts)
+ *
+ * Note: available_balance and credit_limit are synced in account.ts alongside
+ * the regular balance sync.
  *
  * TODO: Remove this function after 2025-02-01 when most accounts have been updated.
  */
-async function backfillAccountData({
+async function backfillAccountStaticFields({
   connectionId,
   provider,
   referenceId,
@@ -28,22 +45,26 @@ async function backfillAccountData({
 }) {
   const supabase = createClient();
 
-  // Fetch existing accounts that need backfill (missing iban, subtype, or bic)
+  // Fetch existing accounts - check all static fields
   const { data: existingAccounts } = await supabase
     .from("bank_accounts")
-    .select("id, account_id, iban, subtype, bic")
+    .select(
+      "id, account_id, iban, subtype, bic, routing_number, wire_routing_number, account_number, sort_code",
+    )
     .eq("bank_connection_id", connectionId);
 
   if (!existingAccounts || existingAccounts.length === 0) {
     return;
   }
 
-  // Check if any accounts need backfill
+  // Check if any accounts need backfill (missing ALL static fields)
   const accountsNeedingBackfill = existingAccounts.filter(
     (account) =>
       account.iban === null &&
       account.subtype === null &&
-      account.bic === null,
+      account.bic === null &&
+      account.routing_number === null &&
+      account.account_number === null,
   );
 
   if (accountsNeedingBackfill.length === 0) {
@@ -51,7 +72,7 @@ async function backfillAccountData({
     return;
   }
 
-  logger.info("Backfilling account data", {
+  logger.info("Backfilling account static fields", {
     connectionId,
     provider,
     accountsToBackfill: accountsNeedingBackfill.length,
@@ -75,7 +96,10 @@ async function backfillAccountData({
 
   // Create a map of API account ID to account data
   const apiAccountMap = new Map(
-    accountsResponse.data.map((account) => [account.id, account]),
+    accountsResponse.data.map((account) => [
+      account.id,
+      account as ApiAccountWithDetails,
+    ]),
   );
 
   // Update each account that needs backfill
@@ -84,15 +108,41 @@ async function backfillAccountData({
     const apiAccount = apiAccountMap.get(dbAccount.account_id);
     if (!apiAccount) continue;
 
-    // Only update if API has any of the new fields
-    if (apiAccount.iban || apiAccount.subtype || apiAccount.bic) {
+    // Build update object with available fields
+    const updateData: Record<string, string | null> = {};
+
+    // EU/UK fields
+    if (apiAccount.iban) {
+      updateData.iban = encrypt(apiAccount.iban); // Encrypt IBAN
+    }
+    if (apiAccount.subtype) {
+      updateData.subtype = apiAccount.subtype;
+    }
+    if (apiAccount.bic) {
+      updateData.bic = apiAccount.bic;
+    }
+
+    // US fields
+    if (apiAccount.routing_number) {
+      updateData.routing_number = apiAccount.routing_number;
+    }
+    if (apiAccount.wire_routing_number) {
+      updateData.wire_routing_number = apiAccount.wire_routing_number;
+    }
+    if (apiAccount.account_number) {
+      updateData.account_number = encrypt(apiAccount.account_number); // Encrypt account number
+    }
+
+    // UK field
+    if (apiAccount.sort_code) {
+      updateData.sort_code = apiAccount.sort_code;
+    }
+
+    // Only update if we have at least one field
+    if (Object.keys(updateData).length > 0) {
       const { error } = await supabase
         .from("bank_accounts")
-        .update({
-          iban: apiAccount.iban,
-          subtype: apiAccount.subtype,
-          bic: apiAccount.bic,
-        })
+        .update(updateData)
         .eq("id", dbAccount.id);
 
       if (!error) {
@@ -161,10 +211,10 @@ export const syncConnection = schemaTask({
           .eq("id", connectionId);
 
         // TEMPORARY BACKFILL: Populate iban, subtype, bic for existing accounts
-        // This can be removed after ~2 weeks when most accounts have been updated
+        // Note: available_balance and credit_limit are synced in syncAccount()
         // TODO: Remove this backfill logic after 2025-02-01
         try {
-          await backfillAccountData({
+          await backfillAccountStaticFields({
             connectionId,
             provider: data.provider as
               | "gocardless"
@@ -176,7 +226,7 @@ export const syncConnection = schemaTask({
           });
         } catch (error) {
           // Log but don't fail the sync - backfill is best effort
-          logger.warn("Backfill account data failed", { error });
+          logger.warn("Backfill account static fields failed", { error });
         }
 
         const query = supabase

@@ -58,7 +58,14 @@ export const syncAccount = schemaTask({
         throw new Error("Failed to get balance");
       }
 
-      const { data: balanceData } = await balanceResponse.json();
+      const { data: balanceData } = (await balanceResponse.json()) as {
+        data: {
+          amount: number;
+          currency: string;
+          available_balance?: number | null;
+          credit_limit?: number | null;
+        } | null;
+      };
 
       const balance = balanceData?.amount ?? null;
 
@@ -69,6 +76,8 @@ export const syncAccount = schemaTask({
           .from("bank_accounts")
           .update({
             balance,
+            available_balance: balanceData?.available_balance ?? null,
+            credit_limit: balanceData?.credit_limit ?? null,
             error_details: null,
             error_retries: null,
           })

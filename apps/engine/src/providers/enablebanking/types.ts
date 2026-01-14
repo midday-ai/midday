@@ -83,7 +83,9 @@ export interface GetAccountDetailsResponse {
   product: string;
   currency: string;
   psu_status: string;
-  credit_limit: {
+  // Note: credit_limit is NOT documented in EnableBanking's official API
+  // Some banks MAY return it, but it's not guaranteed - treat as optional
+  credit_limit?: {
     currency: string;
     amount: string;
   };

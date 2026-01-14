@@ -108,6 +108,48 @@ export const AccountSchema = z
         example: "WESTGB2L",
       })
       .nullable(),
+    routing_number: z
+      .string()
+      .openapi({
+        description: "ACH routing number (US accounts)",
+        example: "021000021",
+      })
+      .nullable(),
+    wire_routing_number: z
+      .string()
+      .openapi({
+        description: "Wire routing number (US accounts, can differ from ACH)",
+        example: "021000089",
+      })
+      .nullable(),
+    account_number: z
+      .string()
+      .openapi({
+        description: "Full account number (sensitive)",
+        example: "1234567890",
+      })
+      .nullable(),
+    sort_code: z
+      .string()
+      .openapi({
+        description: "UK BACS sort code",
+        example: "601613",
+      })
+      .nullable(),
+    available_balance: z
+      .number()
+      .openapi({
+        description: "Available credit (cards) or available funds (depository)",
+        example: 4000,
+      })
+      .nullable(),
+    credit_limit: z
+      .number()
+      .openapi({
+        description: "Credit limit (credit cards only)",
+        example: 5000,
+      })
+      .nullable(),
   })
   .openapi("AccountSchema");
 
@@ -166,6 +208,20 @@ export const AccountBalanceSchema = z
         currency: z.string().openapi({
           example: "USD",
         }),
+        available_balance: z
+          .number()
+          .nullable()
+          .openapi({
+            description: "Available credit (cards) or available funds",
+            example: 4000,
+          }),
+        credit_limit: z
+          .number()
+          .nullable()
+          .openapi({
+            description: "Credit limit (credit cards only)",
+            example: 5000,
+          }),
       })
       .nullable(),
   })

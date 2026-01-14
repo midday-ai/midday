@@ -271,6 +271,7 @@ export type Database = {
       bank_accounts: {
         Row: {
           account_id: string;
+          account_number: string | null;
           account_reference: string | null;
           balance: number | null;
           bank_connection_id: string | null;
@@ -287,12 +288,18 @@ export type Database = {
           id: string;
           manual: boolean | null;
           name: string | null;
+          routing_number: string | null;
+          sort_code: string | null;
           subtype: string | null;
           team_id: string;
           type: Database["public"]["Enums"]["account_type"] | null;
+          wire_routing_number: string | null;
+          available_balance: number | null;
+          credit_limit: number | null;
         };
         Insert: {
           account_id: string;
+          account_number?: string | null;
           account_reference?: string | null;
           balance?: number | null;
           bank_connection_id?: string | null;
@@ -309,12 +316,18 @@ export type Database = {
           id?: string;
           manual?: boolean | null;
           name?: string | null;
+          routing_number?: string | null;
+          sort_code?: string | null;
           subtype?: string | null;
           team_id: string;
           type?: Database["public"]["Enums"]["account_type"] | null;
+          wire_routing_number?: string | null;
+          available_balance?: number | null;
+          credit_limit?: number | null;
         };
         Update: {
           account_id?: string;
+          account_number?: string | null;
           account_reference?: string | null;
           balance?: number | null;
           bank_connection_id?: string | null;
@@ -331,9 +344,14 @@ export type Database = {
           id?: string;
           manual?: boolean | null;
           name?: string | null;
+          routing_number?: string | null;
+          sort_code?: string | null;
           subtype?: string | null;
           team_id?: string;
           type?: Database["public"]["Enums"]["account_type"] | null;
+          wire_routing_number?: string | null;
+          available_balance?: number | null;
+          credit_limit?: number | null;
         };
         Relationships: [
           {

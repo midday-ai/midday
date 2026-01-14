@@ -65,9 +65,15 @@ export class GoCardLessProvider implements Provider {
       throw Error("Missing params");
     }
 
-    const response = await this.#api.getAccountBalance(accountId);
+    // Fetch full balances array to get available_balance
+    const { primaryBalance, balances } =
+      await this.#api.getAccountBalances(accountId);
 
-    return transformAccountBalance({ balance: response, accountType });
+    return transformAccountBalance({
+      balance: primaryBalance,
+      balances,
+      accountType,
+    });
   }
 
   async getInstitutions({ countryCode }: GetInstitutionsRequest) {

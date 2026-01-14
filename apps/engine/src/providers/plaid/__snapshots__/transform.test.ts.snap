@@ -59,11 +59,16 @@ exports[`Transform type transfer 1`] = `
 
 exports[`Transform accounts 1`] = `
 {
+  "account_number": null,
+  "available_balance": 56302.06,
   "balance": {
     "amount": 56302.06,
+    "available_balance": 56302.06,
+    "credit_limit": null,
     "currency": "CAD",
   },
   "bic": null,
+  "credit_limit": null,
   "currency": "CAD",
   "enrollment_id": null,
   "expires_at": null,
@@ -77,14 +82,19 @@ exports[`Transform accounts 1`] = `
   },
   "name": "Plaid Mortgage",
   "resource_id": "8888",
+  "routing_number": null,
+  "sort_code": null,
   "subtype": "mortgage",
   "type": "loan",
+  "wire_routing_number": null,
 }
 `;
 
 exports[`Transform account balance - depository uses available 1`] = `
 {
   "amount": 2000,
+  "available_balance": 2000,
+  "credit_limit": null,
   "currency": "USD",
 }
 `;
@@ -92,6 +102,8 @@ exports[`Transform account balance - depository uses available 1`] = `
 exports[`Transform account balance - credit uses current (amount owed) 1`] = `
 {
   "amount": 1000,
+  "available_balance": 4000,
+  "credit_limit": 5000,
   "currency": "USD",
 }
 `;

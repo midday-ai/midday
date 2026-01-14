@@ -4,8 +4,8 @@ import { getLogoURL } from "@engine/utils/logo";
 import { capitalCase } from "change-case";
 import type {
   Account as BaseAccount,
-  Balance as BaseAccountBalance,
   Transaction as BaseTransaction,
+  GetAccountBalanceResponse,
 } from "../types";
 import type {
   FormatAmount,
@@ -180,6 +180,17 @@ export const transformTransaction = ({
   };
 };
 
+type TransformAccountParams = TransformAccount & {
+  accountDetails?: {
+    account_number: string;
+    routing_numbers: {
+      ach: string | null;
+      wire: string | null;
+      bacs: string | null;
+    };
+  } | null;
+};
+
 export const transformAccount = ({
   id,
   name,
@@ -189,8 +200,10 @@ export const transformAccount = ({
   subtype,
   institution,
   balance,
+  balances,
   last_four,
-}: TransformAccount): BaseAccount => {
+  accountDetails,
+}: TransformAccountParams): BaseAccount => {
   const accountType = getType(type);
 
   return {
@@ -207,11 +220,20 @@ export const transformAccount = ({
     iban: null, // Teller (US-only) doesn't have IBAN
     subtype: subtype || null, // checking, savings, money_market, credit_card, etc.
     bic: null, // Teller doesn't have BIC
+    // US bank account details from /accounts/:id/details
+    routing_number: accountDetails?.routing_numbers?.ach || null,
+    wire_routing_number: accountDetails?.routing_numbers?.wire || null,
+    account_number: accountDetails?.account_number || null,
+    sort_code: accountDetails?.routing_numbers?.bacs || null,
+    // Credit account balances - Teller provides available via /balances endpoint
+    available_balance: balances?.available ? +balances.available : null,
+    credit_limit: null, // Teller doesn't provide credit limit
   };
 };
 
 type TransformAccountBalanceParams = {
   balance: TransformAccountBalance;
+  balances?: { available: string | null; ledger: string | null } | null;
   accountType?: string;
 };
 
@@ -223,8 +245,9 @@ type TransformAccountBalanceParams = {
  */
 export const transformAccountBalance = ({
   balance,
+  balances,
   accountType,
-}: TransformAccountBalanceParams): BaseAccountBalance => {
+}: TransformAccountBalanceParams): GetAccountBalanceResponse => {
   const rawAmount = +balance.amount;
 
   // Normalize credit card balances to positive (amount owed) for consistency
@@ -234,6 +257,8 @@ export const transformAccountBalance = ({
   return {
     currency: balance.currency.toUpperCase(),
     amount,
+    available_balance: balances?.available ? +balances.available : null,
+    credit_limit: null, // Teller doesn't provide credit limit
   };
 };
 
