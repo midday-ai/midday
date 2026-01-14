@@ -318,6 +318,18 @@ export function PortalContent({ portalId }: Props) {
                         >
                           Download
                         </DropdownMenuItem>
+                        {invoice.status === "paid" && (
+                          <DropdownMenuItem
+                            onClick={() => {
+                              downloadFile(
+                                `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?token=${invoice.token}&type=receipt`,
+                                `receipt-${invoice.invoiceNumber || "invoice"}.pdf`,
+                              );
+                            }}
+                          >
+                            Download receipt
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>

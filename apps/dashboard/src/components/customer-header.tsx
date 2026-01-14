@@ -1,5 +1,6 @@
 import { getWebsiteLogo } from "@/utils/logos";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@midday/ui/avatar";
+import Link from "next/link";
 import { InvoiceStatus } from "./invoice-status";
 
 type Props = {
@@ -13,30 +14,51 @@ type Props = {
     | "canceled"
     | "scheduled"
     | "refunded";
+  portalEnabled?: boolean;
+  portalId?: string | null;
 };
 
-export default function CustomerHeader({ name, website, status }: Props) {
+export default function CustomerHeader({
+  name,
+  website,
+  status,
+  portalEnabled,
+  portalId,
+}: Props) {
+  const customerInfo = (
+    <div className="flex items-center space-x-2">
+      {name && (
+        <Avatar className="size-5 object-contain border border-border">
+          {website && (
+            <AvatarImageNext
+              src={getWebsiteLogo(website)}
+              alt={`${name} logo`}
+              width={20}
+              height={20}
+              quality={100}
+            />
+          )}
+          <AvatarFallback className="text-[9px] font-medium">
+            {name?.[0]}
+          </AvatarFallback>
+        </Avatar>
+      )}
+      <span className="truncate text-sm">{name}</span>
+    </div>
+  );
+
   return (
     <div className="flex justify-between items-center mb-4">
-      <div className="flex items-center space-x-2">
-        {name && (
-          <Avatar className="size-5 object-contain border border-border">
-            {website && (
-              <AvatarImageNext
-                src={getWebsiteLogo(website)}
-                alt={`${name} logo`}
-                width={20}
-                height={20}
-                quality={100}
-              />
-            )}
-            <AvatarFallback className="text-[9px] font-medium">
-              {name?.[0]}
-            </AvatarFallback>
-          </Avatar>
-        )}
-        <span className="truncate text-sm">{name}</span>
-      </div>
+      {portalEnabled && portalId ? (
+        <Link
+          href={`/p/${portalId}`}
+          className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+        >
+          {customerInfo}
+        </Link>
+      ) : (
+        customerInfo
+      )}
 
       <InvoiceStatus status={status} />
     </div>

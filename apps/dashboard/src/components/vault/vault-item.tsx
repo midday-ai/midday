@@ -54,7 +54,6 @@ export function VaultItem({ data, small }: Props) {
   const staleProcessing = isStaleProcessing(
     data.processingStatus,
     data.createdAt,
-    data.title,
   );
 
   // Show skeleton only for recently pending documents (not stale ones)
@@ -132,28 +131,35 @@ export function VaultItem({ data, small }: Props) {
       className={cn(
         "h-72 border relative flex text-muted-foreground p-4 flex-col gap-3 hover:bg-muted dark:hover:bg-[#141414] transition-colors duration-200 group cursor-pointer",
         small && "h-48",
-        !showSkeleton && isFailed && isSupported && "border-destructive/50",
-        !showSkeleton &&
-          (needsClassification || staleProcessing) &&
-          isSupported &&
-          "border-amber-500/30",
       )}
       onClick={() => {
         setParams({ documentId: data.id });
       }}
     >
-      <div
-        className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      >
-        <VaultItemActions
-          id={data.id}
-          filePath={data.pathTokens ?? []}
-          hideDelete={small}
-        />
-      </div>
+      {/* Status badge - top right */}
+      {showRetry && !showSkeleton && (
+        <div className="absolute top-4 right-4 z-10">
+          <span className="px-2 py-0.5 rounded-full text-[11px] bg-[#FFD02B]/10 text-[#FFD02B] dark:bg-[#FFD02B]/10 dark:text-[#FFD02B]">
+            Processing incomplete
+          </span>
+        </div>
+      )}
+
+      {/* Actions menu - top right (hidden when badge is showing) */}
+      {!(showRetry && !showSkeleton) && (
+        <div
+          className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <VaultItemActions
+            id={data.id}
+            filePath={data.pathTokens ?? []}
+            hideDelete={small}
+          />
+        </div>
+      )}
 
       <div
         className={cn(
@@ -193,17 +199,23 @@ export function VaultItem({ data, small }: Props) {
       </div>
 
       <div className="mt-auto" onClick={(e) => e.stopPropagation()}>
-        {showRetry && !showSkeleton ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleReprocess}
-            disabled={reprocessMutation.isPending}
-            className="gap-2 text-primary w-full"
-          >
-            <Icons.Refresh className="size-3" />
-            Process document
-          </Button>
+        {showRetry ? (
+          showSkeleton ? (
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-8 w-full" />
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReprocess}
+              disabled={reprocessMutation.isPending}
+              className="gap-2 w-full text-primary"
+            >
+              <Icons.Refresh className="size-3" />
+              Re-analyze document
+            </Button>
+          )
         ) : !small ? (
           <VaultItemTags
             tags={data?.documentTagAssignments ?? []}

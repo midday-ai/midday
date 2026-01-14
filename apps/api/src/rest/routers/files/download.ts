@@ -219,7 +219,8 @@ downloadInvoiceApp.openapi(
   }),
   async (c) => {
     const db = c.get("db");
-    const { id, token, preview } = c.req.valid("query");
+    const { id, token, preview, type } = c.req.valid("query");
+    const isReceipt = type === "receipt";
 
     if (!id && !token) {
       throw new HTTPException(400, {
@@ -270,8 +271,17 @@ downloadInvoiceApp.openapi(
       throw new HTTPException(404, { message: "Invoice not found" });
     }
 
+    // For receipt, validate that invoice is paid
+    if (isReceipt && invoiceData.status !== "paid") {
+      throw new HTTPException(400, {
+        message: "Receipt is only available for paid invoices",
+      });
+    }
+
     try {
-      const stream = await renderToStream(await PdfTemplate(invoiceData));
+      const stream = await renderToStream(
+        await PdfTemplate(invoiceData, { isReceipt }),
+      );
 
       // Convert stream to blob
       const blob = await new Response(stream as any).blob();
@@ -282,14 +292,16 @@ downloadInvoiceApp.openapi(
       };
 
       if (!preview) {
-        headers["Content-Disposition"] =
-          `attachment; filename="${invoiceData.invoiceNumber}.pdf"`;
+        const filename = isReceipt
+          ? `receipt-${invoiceData.invoiceNumber}.pdf`
+          : `${invoiceData.invoiceNumber}.pdf`;
+        headers["Content-Disposition"] = `attachment; filename="${filename}"`;
       }
 
       return new Response(blob, { headers });
     } catch (error: unknown) {
       throw new HTTPException(500, {
-        message: `Failed to generate invoice PDF: ${
+        message: `Failed to generate ${isReceipt ? "receipt" : "invoice"} PDF: ${
           error instanceof Error ? error.message : String(error)
         }`,
       });

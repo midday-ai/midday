@@ -185,8 +185,8 @@ export function DataTable({ initialSettings }: Props) {
   const handleReprocess = useCallback(
     (id: string) => {
       toast({
-        title: "Processing document",
-        description: "The document is being processed. This may take a moment.",
+        title: "Analyzing document",
+        description: "The document is being analyzed. This may take a moment.",
         duration: 3000,
       });
       reprocessMutation.mutate({ id });

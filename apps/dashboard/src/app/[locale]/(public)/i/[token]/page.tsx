@@ -128,30 +128,28 @@ export default async function Page(props: Props) {
     invoice.template.paymentEnabled && invoice.team?.stripeConnected === true;
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen dotted-bg p-4 sm:p-6 md:p-0">
-      <div
-        className="flex flex-col w-full max-w-full py-6"
-        style={{ maxWidth: width }}
+    <>
+      <InvoiceViewWrapper
+        token={invoice.token}
+        invoiceNumber={invoice.invoiceNumber || "invoice"}
+        paymentEnabled={paymentEnabled}
+        amount={invoice.amount ?? undefined}
+        currency={invoice.currency ?? undefined}
+        initialStatus={invoice.status}
+        customerName={
+          invoice.customerName || (invoice.customer?.name as string)
+        }
+        customerWebsite={invoice.customer?.website}
+        customerPortalEnabled={invoice.customer?.portalEnabled ?? false}
+        customerPortalId={invoice.customer?.portalId ?? undefined}
+        invoiceWidth={width}
       >
-        <InvoiceViewWrapper
-          token={invoice.token}
-          invoiceNumber={invoice.invoiceNumber || "invoice"}
-          paymentEnabled={paymentEnabled}
-          amount={invoice.amount ?? undefined}
-          currency={invoice.currency ?? undefined}
-          initialStatus={invoice.status}
-          customerName={
-            invoice.customerName || (invoice.customer?.name as string)
-          }
-          customerWebsite={invoice.customer?.website}
-        >
-          <div className="pb-24 md:pb-0">
-            <div className="shadow-[0_24px_48px_-12px_rgba(0,0,0,0.3)] dark:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)]">
-              <HtmlTemplate data={invoice} width={width} height={height} />
-            </div>
+        <div className="pb-24 md:pb-0">
+          <div className="shadow-[0_24px_48px_-12px_rgba(0,0,0,0.3)] dark:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)]">
+            <HtmlTemplate data={invoice} width={width} height={height} />
           </div>
-        </InvoiceViewWrapper>
-      </div>
+        </div>
+      </InvoiceViewWrapper>
 
       <div className="fixed bottom-4 right-4 hidden md:block">
         <a
@@ -163,6 +161,6 @@ export default async function Page(props: Props) {
           Powered by <span className="text-primary">midday</span>
         </a>
       </div>
-    </div>
+    </>
   );
 }

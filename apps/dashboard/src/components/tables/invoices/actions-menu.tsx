@@ -286,6 +286,29 @@ export function ActionsMenu({ row }: Props) {
             </DropdownMenuItem>
           )}
 
+          {row.status === "paid" && (
+            <DropdownMenuItem
+              onClick={() => {
+                if (!user?.fileKey) {
+                  console.error("File key not available");
+                  return;
+                }
+                const url = new URL(
+                  `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice`,
+                );
+                url.searchParams.set("id", row.id);
+                url.searchParams.set("fk", user.fileKey);
+                url.searchParams.set("type", "receipt");
+                downloadFile(
+                  url.toString(),
+                  `receipt-${row.invoiceNumber || "invoice"}.pdf`,
+                );
+              }}
+            >
+              Download receipt
+            </DropdownMenuItem>
+          )}
+
           <DropdownMenuItem
             onClick={() => duplicateInvoiceMutation.mutate({ id: row.id })}
           >
