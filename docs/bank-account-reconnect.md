@@ -4,6 +4,86 @@
 
 When a user reconnects a bank connection, the provider may assign new account IDs. This document describes how we safely match existing database accounts to the new API accounts and update the `account_id` field without data corruption.
 
+## Reconnect Flow Diagram
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant User
+    participant Frontend as Dashboard Frontend
+    participant API as API Route
+    participant DB as Database
+    participant Job as Trigger.dev Job
+    participant Provider as Bank Provider API
+
+    Note over User,Provider: Step 1: User Initiates Reconnect
+    User->>Frontend: Click "Reconnect" button
+    Frontend->>Provider: Open provider auth flow<br/>(Teller Connect / Plaid Link / EnableBanking)
+    Provider->>User: Bank authentication UI
+    User->>Provider: Authenticate with bank
+    Provider->>API: Redirect with auth code/token
+
+    Note over User,Provider: Step 2: API Route Updates Connection
+    API->>DB: Update bank_connection<br/>(reference_id, expires_at, status)
+    API->>Frontend: Redirect to /settings/accounts?step=reconnect&id=xxx
+
+    Note over User,Provider: Step 3: Frontend Triggers Job
+    Frontend->>Frontend: useEffect detects step=reconnect
+    Frontend->>Job: trigger("reconnect-connection")
+    Job-->>Frontend: Return runId + accessToken
+
+    Note over User,Provider: Step 4: Job Fetches & Matches Accounts
+    Job->>Provider: Fetch current accounts
+    Provider-->>Job: Return accounts with new IDs
+    Job->>DB: Load existing accounts for connection
+    Job->>Job: matchAndUpdateAccountIds()<br/>(match by account_reference, type, currency)
+
+    Note over User,Provider: Step 5: Update Account IDs
+    Job->>DB: Update account_id for each matched account
+    Job->>Job: Trigger sync-connection job
+
+    Note over User,Provider: Step 6: Sync Transactions
+    Job->>Provider: Fetch latest transactions
+    Provider-->>Job: Return transactions
+    Job->>DB: Upsert transactions
+
+    Note over User,Provider: Step 7: Frontend Shows Completion
+    Frontend->>Frontend: Poll job status via accessToken
+    Frontend->>User: Show "Sync complete" toast
+    Frontend->>Frontend: Invalidate queries (refresh UI)
+```
+
+## Provider-Specific Flow Variations
+
+### GoCardless / EnableBanking (EU/UK)
+```
+User clicks Reconnect
+    → Opens provider's auth page in new window
+    → User authenticates at bank
+    → Provider redirects to /api/gocardless/reconnect or /api/enablebanking/session
+    → API route updates DB + redirects to frontend
+    → Frontend useEffect triggers reconnect-connection job
+```
+
+### Teller (US)
+```
+User clicks Reconnect
+    → Opens Teller Connect modal
+    → User authenticates at bank
+    → Teller Connect calls onSuccess callback
+    → Frontend directly triggers reconnect-connection job
+    → (No API route redirect needed)
+```
+
+### Plaid (US)
+```
+User clicks Reconnect  
+    → Opens Plaid Link in "update mode"
+    → User authenticates at bank
+    → Plaid preserves account IDs (no remapping needed)
+    → Frontend triggers manual sync (not reconnect job)
+```
+
 ## The Problem
 
 Bank providers (GoCardless, Teller, EnableBanking) may change account IDs after a reconnect. We need to match existing database accounts to the new API accounts to maintain transaction history continuity.
@@ -140,3 +220,34 @@ This means an API account couldn't be matched to any database account. Possible 
 1. Check `bank_accounts.error_retries` - may have exceeded limit
 2. Verify `bank_accounts.account_id` matches the new API account ID
 3. Check reconnect job logs for matching results
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `apps/dashboard/src/components/bank-connections.tsx` | Frontend component with useEffect that triggers reconnect job |
+| `apps/dashboard/src/components/reconnect-provider.tsx` | Provider-specific reconnect UI (Teller Connect, Plaid Link, etc.) |
+| `apps/dashboard/src/app/api/enablebanking/session/route.ts` | EnableBanking OAuth callback - updates DB, redirects to frontend |
+| `apps/dashboard/src/app/api/gocardless/reconnect/route.ts` | GoCardless OAuth callback - updates DB, redirects to frontend |
+| `apps/dashboard/src/actions/transactions/reconnect-connection-action.ts` | Server action that triggers the reconnect job |
+| `packages/jobs/src/tasks/reconnect/connection.ts` | Main reconnect job - fetches accounts, matches, updates IDs |
+| `packages/jobs/src/utils/account-matching.ts` | Shared `matchAndUpdateAccountIds()` function |
+
+## Important Implementation Notes
+
+### Single Job Trigger
+The reconnect job should only be triggered **once** per reconnect flow. The frontend `useEffect` in `bank-connections.tsx` handles this:
+
+```typescript
+// Only triggers when params.id matches this connection
+useEffect(() => {
+  if (params.step === "reconnect" && params.id === connection.id) {
+    reconnectConnection.execute({ ... });
+  }
+}, [params.step, params.id, connection.id, connection.provider]);
+```
+
+API routes (EnableBanking, GoCardless) do **not** trigger the job - they only update the database and redirect. This ensures:
+1. No duplicate job triggers (race conditions)
+2. Frontend can track job progress via `runId`/`accessToken`
+3. UI shows proper sync status feedback

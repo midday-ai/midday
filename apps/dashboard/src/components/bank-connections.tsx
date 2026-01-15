@@ -244,11 +244,12 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
     }
   }, [status]);
 
-  // NOTE: GoCardLess reconnect flow (redirect from API route)
+  // Handle reconnect flow from API route redirect (EnableBanking/GoCardLess)
+  // Only trigger for the specific connection that matches the URL param ID
   useEffect(() => {
-    if (params.step === "reconnect" && params.id) {
+    if (params.step === "reconnect" && params.id === connection.id) {
       reconnectConnection.execute({
-        connectionId: params.id,
+        connectionId: connection.id,
         provider: connection.provider as
           | "gocardless"
           | "plaid"
@@ -256,7 +257,7 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
           | "enablebanking",
       });
     }
-  }, [params]);
+  }, [params.step, params.id, connection.id, connection.provider]);
 
   const handleManualSync = () => {
     manualSyncTransactions.execute({
