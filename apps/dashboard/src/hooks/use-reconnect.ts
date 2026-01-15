@@ -111,7 +111,6 @@ export function useReconnect({
         variant: "spinner",
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSyncing]);
 
   // Handle completion - invalidate queries and reset state
@@ -142,12 +141,12 @@ export function useReconnect({
         queryKey: trpc.transactions.get.infiniteQueryKey(),
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
   // Handle failure - show error toast and reset state
   useEffect(() => {
     if (status === "FAILED") {
+      dismiss();
       setSyncing(false);
       setRunId(undefined);
 
@@ -165,7 +164,6 @@ export function useReconnect({
         title: "Something went wrong please try again.",
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
   // Handle reconnect flow from API route redirect (EnableBanking/GoCardLess)
@@ -186,7 +184,6 @@ export function useReconnect({
       // Clear URL params to prevent re-triggering on page refresh
       setParams({ step: null, id: null });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.step, params.id, connectionId, provider]);
 
   // Trigger reconnect manually (for Teller which uses embedded SDK)
@@ -195,7 +192,6 @@ export function useReconnect({
       connectionId,
       provider: provider as Provider,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectionId, provider]);
 
   // Trigger manual sync (for sync button)
@@ -203,7 +199,6 @@ export function useReconnect({
     manualSyncTransactions.execute({
       connectionId,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectionId]);
 
   return {
