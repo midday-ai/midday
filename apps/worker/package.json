@@ -37,7 +37,7 @@
     "camelcase-keys": "^9.1.3",
     "date-fns": "^4.1.0",
     "heic-convert": "1.2.4",
-    "hono": "4.11.3",
+    "hono": "4.11.4",
     "node-xlsx": "^0.24.0",
     "papaparse": "^5.5.3",
     "sharp": "0.34.5",
