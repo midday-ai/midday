@@ -61,8 +61,9 @@ User clicks Reconnect
     → Opens provider's auth page in new window
     → User authenticates at bank
     → Provider redirects to /api/gocardless/reconnect or /api/enablebanking/session
-    → API route updates DB + redirects to frontend
-    → Frontend useEffect triggers reconnect-connection job
+    → API route updates DB + redirects to frontend with ?step=reconnect&id=xxx
+    → useReconnect hook detects URL params → triggers reconnect-connection job
+    → URL params cleared to prevent re-triggering
 ```
 
 ### Teller (US)
@@ -70,9 +71,9 @@ User clicks Reconnect
 User clicks Reconnect
     → Opens Teller Connect modal
     → User authenticates at bank
-    → Teller Connect calls onSuccess callback
-    → Frontend directly triggers reconnect-connection job
-    → (No API route redirect needed)
+    → Teller Connect calls onComplete("reconnect")
+    → BankConnection routes to triggerReconnect()
+    → useReconnect hook triggers reconnect-connection job
 ```
 
 ### Plaid (US)
@@ -81,7 +82,9 @@ User clicks Reconnect
     → Opens Plaid Link in "update mode"
     → User authenticates at bank
     → Plaid preserves account IDs (no remapping needed)
-    → Frontend triggers manual sync (not reconnect job)
+    → Plaid Link calls onComplete("sync")
+    → BankConnection routes to triggerManualSync()
+    → useReconnect hook triggers manual sync job
 ```
 
 ## The Problem
@@ -225,7 +228,8 @@ This means an API account couldn't be matched to any database account. Possible 
 
 | File | Purpose |
 |------|---------|
-| `apps/dashboard/src/components/bank-connections.tsx` | Frontend component with useEffect that triggers reconnect job |
+| `apps/dashboard/src/hooks/use-reconnect.ts` | Hook encapsulating all reconnect/sync logic |
+| `apps/dashboard/src/components/bank-connections.tsx` | Frontend component using useReconnect hook |
 | `apps/dashboard/src/components/reconnect-provider.tsx` | Provider-specific reconnect UI (Teller Connect, Plaid Link, etc.) |
 | `apps/dashboard/src/app/api/enablebanking/session/route.ts` | EnableBanking OAuth callback - updates DB, redirects to frontend |
 | `apps/dashboard/src/app/api/gocardless/reconnect/route.ts` | GoCardless OAuth callback - updates DB, redirects to frontend |
@@ -233,21 +237,104 @@ This means an API account couldn't be matched to any database account. Possible 
 | `packages/jobs/src/tasks/reconnect/connection.ts` | Main reconnect job - fetches accounts, matches, updates IDs |
 | `packages/jobs/src/utils/account-matching.ts` | Shared `matchAndUpdateAccountIds()` function |
 
+## useReconnect Hook
+
+All reconnect and sync logic is encapsulated in the `useReconnect` hook, providing a clean interface for the `BankConnection` component.
+
+### Usage
+
+```typescript
+const { isSyncing, triggerReconnect, triggerManualSync } = useReconnect({
+  connectionId: connection.id,
+  provider: connection.provider,
+});
+```
+
+### What the Hook Handles
+
+1. **URL param detection** - Detects `step=reconnect&id=xxx` for OAuth providers
+2. **URL param cleanup** - Clears params after triggering to prevent re-triggering
+3. **Job triggering** - Via `reconnectConnectionAction` or `manualSyncTransactionsAction`
+4. **Status tracking** - Uses `useSyncStatus` hook to track job progress
+5. **Toast notifications** - Shows syncing, success, and error toasts
+6. **Query invalidation** - Refreshes bank connections, accounts, and transactions on completion
+
+### Architecture
+
+```mermaid
+flowchart TD
+    subgraph hooks [Hooks Layer]
+        useReconnect[useReconnect]
+        useSyncStatus[useSyncStatus]
+    end
+    
+    subgraph components [Components]
+        BankConnection[BankConnection]
+        ReconnectProvider[ReconnectProvider]
+    end
+    
+    subgraph external [External]
+        URLParams[URL Params via nuqs]
+        TriggerJob[Trigger.dev Job]
+        Toast[Toast Notifications]
+        QueryClient[React Query]
+    end
+    
+    BankConnection --> useReconnect
+    ReconnectProvider --> BankConnection
+    
+    useReconnect --> useSyncStatus
+    useReconnect --> URLParams
+    useReconnect --> TriggerJob
+    useReconnect --> Toast
+    useReconnect --> QueryClient
+```
+
+## ReconnectProvider Callback
+
+The `ReconnectProvider` component uses a unified `onComplete` callback:
+
+```typescript
+type OnCompleteType = "reconnect" | "sync";
+
+// In ReconnectProvider
+onComplete: (type: OnCompleteType) => void;
+
+// In BankConnection
+const handleComplete = (type: "reconnect" | "sync") => {
+  if (type === "reconnect") {
+    triggerReconnect();  // Account IDs may have changed
+  } else {
+    triggerManualSync(); // Account IDs preserved (Plaid)
+  }
+};
+```
+
+- **"reconnect"**: Provider may have changed account IDs (Teller) - triggers reconnect job
+- **"sync"**: Provider preserves account IDs (Plaid update mode) - triggers manual sync
+
 ## Important Implementation Notes
 
 ### Single Job Trigger
-The reconnect job should only be triggered **once** per reconnect flow. The frontend `useEffect` in `bank-connections.tsx` handles this:
+The reconnect job should only be triggered **once** per reconnect flow. The `useReconnect` hook handles this:
 
 ```typescript
-// Only triggers when params.id matches this connection
+// In useReconnect hook - only triggers when params.id matches this connection
 useEffect(() => {
-  if (params.step === "reconnect" && params.id === connection.id) {
-    reconnectConnection.execute({ ... });
+  if (params.step === "reconnect" && params.id === connectionId) {
+    reconnectConnection.execute({
+      connectionId,
+      provider: provider as Provider,
+    });
+
+    // Clear URL params to prevent re-triggering on page refresh
+    setParams({ step: null, id: null });
   }
-}, [params.step, params.id, connection.id, connection.provider]);
+}, [params.step, params.id, connectionId, provider, setParams]);
 ```
 
 API routes (EnableBanking, GoCardless) do **not** trigger the job - they only update the database and redirect. This ensures:
 1. No duplicate job triggers (race conditions)
 2. Frontend can track job progress via `runId`/`accessToken`
 3. UI shows proper sync status feedback
+4. URL params are cleared immediately to prevent re-triggering on page refresh

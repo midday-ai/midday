@@ -19,6 +19,13 @@ import { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import { useScript } from "usehooks-ts";
 
+/**
+ * Callback type for when a provider reconnect flow completes.
+ * - "reconnect": Provider may have changed account IDs, trigger reconnect job
+ * - "sync": Provider preserves account IDs (e.g., Plaid update mode), trigger manual sync
+ */
+type OnCompleteType = "reconnect" | "sync";
+
 type Props = {
   id: string;
   provider: string;
@@ -26,8 +33,11 @@ type Props = {
   institutionId: string;
   referenceId?: string | null;
   accessToken: string | null;
-  onManualSync: () => void;
-  onReconnect?: () => void;
+  /**
+   * Called when the provider's reconnect flow completes successfully.
+   * @param type - "reconnect" if account IDs may have changed, "sync" if they're preserved
+   */
+  onComplete: (type: OnCompleteType) => void;
   variant?: "button" | "icon";
 };
 
@@ -38,8 +48,7 @@ export function ReconnectProvider({
   institutionId,
   referenceId,
   accessToken,
-  onManualSync,
-  onReconnect,
+  onComplete,
   variant,
 }: Props) {
   const { toast } = useToast();
@@ -98,7 +107,8 @@ export function ReconnectProvider({
     product: ["transactions"],
     onSuccess: () => {
       setPlaidToken(undefined);
-      onManualSync();
+      // Plaid uses "update mode" which preserves account IDs - just sync
+      onComplete("sync");
     },
     onExit: () => {
       setPlaidToken(undefined);
@@ -113,13 +123,8 @@ export function ReconnectProvider({
       enrollmentId,
       appearance: theme,
       onSuccess: () => {
-        // Trigger reconnect flow to update account IDs if they changed
-        // Account IDs may change after reconnect, but last_four remains stable
-        if (onReconnect) {
-          onReconnect();
-        } else {
-          onManualSync();
-        }
+        // Teller may change account IDs after reconnect - trigger reconnect job
+        onComplete("reconnect");
       },
       onFailure: () => {},
     });
@@ -149,6 +154,8 @@ export function ReconnectProvider({
         return;
       }
       case "gocardless": {
+        // GoCardless redirects to API route, which then redirects to frontend
+        // The useReconnect hook detects URL params and triggers the job
         return reconnectGoCardLessLink.execute({
           id,
           institutionId,
@@ -158,6 +165,8 @@ export function ReconnectProvider({
         });
       }
       case "enablebanking": {
+        // EnableBanking redirects to API route, which then redirects to frontend
+        // The useReconnect hook detects URL params and triggers the job
         return reconnectEnableBankingLink.execute({
           institutionId,
           isDesktop: isDesktopApp(),

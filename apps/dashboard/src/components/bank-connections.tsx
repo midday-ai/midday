@@ -1,8 +1,6 @@
 "use client";
 
-import { manualSyncTransactionsAction } from "@/actions/transactions/manual-sync-transactions-action";
-import { reconnectConnectionAction } from "@/actions/transactions/reconnect-connection-action";
-import { useSyncStatus } from "@/hooks/use-sync-status";
+import { useReconnect } from "@/hooks/use-reconnect";
 import { useTRPC } from "@/trpc/client";
 import { connectionStatus } from "@/utils/connection-status";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
@@ -13,12 +11,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { useToast } from "@midday/ui/use-toast";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
-import { useAction } from "next-safe-action/hooks";
-import { parseAsString, useQueryStates } from "nuqs";
-import { useEffect, useState } from "react";
 import { BankAccount } from "./bank-account";
 import { BankLogo } from "./bank-logo";
 import { DeleteConnection } from "./delete-connection";
@@ -127,153 +121,21 @@ function ConnectionState({
 }
 
 export function BankConnection({ connection }: { connection: BankConnection }) {
-  const trpc = useTRPC();
-  const queryClient = useQueryClient();
-  const [runId, setRunId] = useState<string | undefined>();
-  const [accessToken, setAccessToken] = useState<string | undefined>();
-  const [isSyncing, setSyncing] = useState(false);
-  const { toast, dismiss } = useToast();
-
   const { show } = connectionStatus(connection);
-  const { status, setStatus } = useSyncStatus({ runId, accessToken });
 
-  const [params] = useQueryStates({
-    step: parseAsString,
-    id: parseAsString,
+  // All reconnect/sync logic is encapsulated in the useReconnect hook
+  const { isSyncing, triggerReconnect, triggerManualSync } = useReconnect({
+    connectionId: connection.id,
+    provider: connection.provider,
   });
 
-  const manualSyncTransactions = useAction(manualSyncTransactionsAction, {
-    onExecute: () => setSyncing(true),
-    onSuccess: ({ data }) => {
-      if (data) {
-        setRunId(data.id);
-        setAccessToken(data.publicAccessToken);
-      }
-    },
-    onError: () => {
-      setSyncing(false);
-      setRunId(undefined);
-      setStatus("FAILED");
-
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-  });
-
-  const reconnectConnection = useAction(reconnectConnectionAction, {
-    onExecute: () => setSyncing(true),
-    onSuccess: ({ data }) => {
-      if (data) {
-        setRunId(data.id);
-        setAccessToken(data.publicAccessToken);
-      }
-    },
-    onError: () => {
-      setSyncing(false);
-      setRunId(undefined);
-      setStatus("FAILED");
-
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-  });
-
-  useEffect(() => {
-    if (isSyncing) {
-      toast({
-        title: "Syncing...",
-        description: "We're connecting to your bank, please wait.",
-        duration: Number.POSITIVE_INFINITY,
-        variant: "spinner",
-      });
+  // Handle completion from ReconnectProvider - route to appropriate action
+  const handleComplete = (type: "reconnect" | "sync") => {
+    if (type === "reconnect") {
+      triggerReconnect();
+    } else {
+      triggerManualSync();
     }
-  }, [isSyncing]);
-
-  useEffect(() => {
-    if (status === "COMPLETED") {
-      dismiss();
-      setRunId(undefined);
-      setSyncing(false);
-
-      queryClient.invalidateQueries({
-        queryKey: trpc.bankConnections.get.queryKey(),
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: trpc.bankAccounts.get.queryKey(),
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: trpc.team.current.queryKey(),
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: trpc.transactions.get.queryKey(),
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: trpc.transactions.get.infiniteQueryKey(),
-      });
-    }
-  }, [status]);
-
-  useEffect(() => {
-    if (status === "FAILED") {
-      setSyncing(false);
-      setRunId(undefined);
-
-      queryClient.invalidateQueries({
-        queryKey: trpc.bankConnections.get.queryKey(),
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: trpc.bankAccounts.get.queryKey(),
-      });
-
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    }
-  }, [status]);
-
-  // Handle reconnect flow from API route redirect (EnableBanking/GoCardLess)
-  // Only trigger for the specific connection that matches the URL param ID
-  useEffect(() => {
-    if (params.step === "reconnect" && params.id === connection.id) {
-      reconnectConnection.execute({
-        connectionId: connection.id,
-        provider: connection.provider as
-          | "gocardless"
-          | "plaid"
-          | "teller"
-          | "enablebanking",
-      });
-    }
-  }, [params.step, params.id, connection.id, connection.provider]);
-
-  const handleManualSync = () => {
-    manualSyncTransactions.execute({
-      connectionId: connection.id,
-    });
-  };
-
-  const handleReconnect = () => {
-    reconnectConnection.execute({
-      connectionId: connection.id,
-      provider: connection.provider as
-        | "gocardless"
-        | "plaid"
-        | "teller"
-        | "enablebanking",
-    });
   };
 
   return (
@@ -310,8 +172,7 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
                 enrollmentId={connection.enrollmentId}
                 institutionId={connection.institutionId}
                 accessToken={connection.accessToken}
-                onManualSync={handleManualSync}
-                onReconnect={handleReconnect}
+                onComplete={handleComplete}
                 referenceId={connection.referenceId}
               />
               <DeleteConnection connectionId={connection.id} />
@@ -324,13 +185,12 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
                 enrollmentId={connection.enrollmentId}
                 institutionId={connection.institutionId}
                 accessToken={connection.accessToken}
-                onManualSync={handleManualSync}
-                onReconnect={handleReconnect}
+                onComplete={handleComplete}
                 referenceId={connection.referenceId}
               />
               <SyncTransactions
                 disabled={isSyncing}
-                onClick={handleManualSync}
+                onClick={triggerManualSync}
               />
               <DeleteConnection connectionId={connection.id} />
             </>
