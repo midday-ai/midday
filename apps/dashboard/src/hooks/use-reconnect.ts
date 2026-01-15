@@ -8,7 +8,7 @@ import { useToast } from "@midday/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type Provider = "gocardless" | "plaid" | "teller" | "enablebanking";
 
@@ -53,6 +53,9 @@ export function useReconnect({
     step: parseAsString,
     id: parseAsString,
   });
+
+  // Track if we've already triggered for this URL param combination
+  const hasTriggeredRef = useRef(false);
 
   // Manual sync action (for sync button)
   const manualSyncTransactions = useAction(manualSyncTransactionsAction, {
@@ -108,7 +111,8 @@ export function useReconnect({
         variant: "spinner",
       });
     }
-  }, [isSyncing, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSyncing]);
 
   // Handle completion - invalidate queries and reset state
   useEffect(() => {
@@ -138,7 +142,8 @@ export function useReconnect({
         queryKey: trpc.transactions.get.infiniteQueryKey(),
       });
     }
-  }, [status, dismiss, queryClient, trpc]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
 
   // Handle failure - show error toast and reset state
   useEffect(() => {
@@ -160,12 +165,19 @@ export function useReconnect({
         title: "Something went wrong please try again.",
       });
     }
-  }, [status, queryClient, trpc, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
 
   // Handle reconnect flow from API route redirect (EnableBanking/GoCardLess)
   // Only trigger for the specific connection that matches the URL param ID
   useEffect(() => {
-    if (params.step === "reconnect" && params.id === connectionId) {
+    if (
+      params.step === "reconnect" &&
+      params.id === connectionId &&
+      !hasTriggeredRef.current
+    ) {
+      hasTriggeredRef.current = true;
+
       reconnectConnection.execute({
         connectionId,
         provider: provider as Provider,
@@ -174,7 +186,8 @@ export function useReconnect({
       // Clear URL params to prevent re-triggering on page refresh
       setParams({ step: null, id: null });
     }
-  }, [params.step, params.id, connectionId, provider, setParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.step, params.id, connectionId, provider]);
 
   // Trigger reconnect manually (for Teller which uses embedded SDK)
   const triggerReconnect = useCallback(() => {
@@ -182,14 +195,16 @@ export function useReconnect({
       connectionId,
       provider: provider as Provider,
     });
-  }, [connectionId, provider, reconnectConnection]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectionId, provider]);
 
   // Trigger manual sync (for sync button)
   const triggerManualSync = useCallback(() => {
     manualSyncTransactions.execute({
       connectionId,
     });
-  }, [connectionId, manualSyncTransactions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectionId]);
 
   return {
     isSyncing,
