@@ -924,6 +924,7 @@ export async function getSpending(
   const totalAmountConditions = [
     eq(transactions.teamId, teamId),
     eq(transactions.internal, false),
+    ne(transactions.status, "excluded"),
     gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
   ];
@@ -978,6 +979,7 @@ export async function getSpending(
   const spendingConditions = [
     eq(transactions.teamId, teamId),
     eq(transactions.internal, false),
+    ne(transactions.status, "excluded"),
     gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
     isNotNull(transactions.categorySlug), // Only categorized transactions
@@ -1066,6 +1068,7 @@ export async function getSpending(
   const uncategorizedConditions = [
     eq(transactions.teamId, teamId),
     eq(transactions.internal, false),
+    ne(transactions.status, "excluded"),
     gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
   ];
@@ -1295,6 +1298,8 @@ export async function getTaxSummary(db: Database, params: GetTaxParams) {
   // Build the base query with conditions
   const conditions = [
     sql`t.team_id = ${teamId}`,
+    sql`t.internal = false`,
+    sql`t.status != 'excluded'`,
     sql`t.date >= ${fromDate}`,
     sql`t.date <= ${toDate}`,
   ];
@@ -1346,6 +1351,9 @@ export async function getTaxSummary(db: Database, params: GetTaxParams) {
   conditions.push(
     sql`(t.tax_rate IS NOT NULL OR t.tax_amount IS NOT NULL OR tc.tax_rate IS NOT NULL)`,
   );
+
+  // Exclude transactions in excluded categories
+  conditions.push(sql`(tc.excluded IS NULL OR tc.excluded = false)`);
 
   const whereClause = sql.join(conditions, sql` AND `);
 
@@ -2121,6 +2129,7 @@ export async function getRecurringExpenses(
     eq(transactions.teamId, teamId),
     eq(transactions.recurring, true),
     eq(transactions.internal, false),
+    ne(transactions.status, "excluded"),
   ];
 
   // Amount condition: handle NULL baseAmount gracefully
@@ -2171,7 +2180,16 @@ export async function getRecurringExpenses(
         eq(transactionCategories.teamId, teamId),
       ),
     )
-    .where(and(...conditions))
+    .where(
+      and(
+        ...conditions,
+        or(
+          isNull(transactions.categorySlug),
+          isNull(transactionCategories.excluded),
+          eq(transactionCategories.excluded, false),
+        )!,
+      ),
+    )
     .groupBy(
       transactions.name,
       transactions.frequency,
