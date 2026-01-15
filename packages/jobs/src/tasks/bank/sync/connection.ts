@@ -30,7 +30,7 @@ type ApiAccountWithDetails = {
  * Note: available_balance and credit_limit are synced in account.ts alongside
  * the regular balance sync.
  *
- * TODO: Remove this function after 2025-02-01 when most accounts have been updated.
+ * TODO: Remove this function after 2025-01-20 when all existing accounts have been updated.
  */
 async function backfillAccountStaticFields({
   connectionId,
@@ -49,7 +49,7 @@ async function backfillAccountStaticFields({
   const { data: existingAccounts } = await supabase
     .from("bank_accounts")
     .select(
-      "id, account_id, iban, subtype, bic, routing_number, wire_routing_number, account_number, sort_code",
+      "id, account_id, created_at, iban, subtype, bic, routing_number, wire_routing_number, account_number, sort_code",
     )
     .eq("bank_connection_id", connectionId);
 
@@ -57,14 +57,11 @@ async function backfillAccountStaticFields({
     return;
   }
 
-  // Check if any accounts need backfill (missing ALL static fields)
+  // Backfill all accounts created before 2026-01-16
+  // TODO: Remove this entire backfill function after 2026-01-20
+  const backfillCutoff = new Date("2026-01-16");
   const accountsNeedingBackfill = existingAccounts.filter(
-    (account) =>
-      account.iban === null &&
-      account.subtype === null &&
-      account.bic === null &&
-      account.routing_number === null &&
-      account.account_number === null,
+    (account) => new Date(account.created_at) < backfillCutoff,
   );
 
   if (accountsNeedingBackfill.length === 0) {
