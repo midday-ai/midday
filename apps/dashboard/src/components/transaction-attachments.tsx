@@ -26,9 +26,21 @@ type Props = {
   id: string;
   data?: NonNullable<RouterOutputs["transactions"]["getById"]>["attachments"];
   onUpload?: (files: Attachment[]) => void;
+  /**
+   * Whether to create attachment records and trigger processing after upload.
+   * Set to false when the transaction doesn't exist yet (e.g., in create form).
+   * When false, files are only uploaded to storage and tracked via onUpload callback.
+   * Defaults to true.
+   */
+  enableDatabaseOperations?: boolean;
 };
 
-export function TransactionAttachments({ id, data, onUpload }: Props) {
+export function TransactionAttachments({
+  id,
+  data,
+  onUpload,
+  enableDatabaseOperations = true,
+}: Props) {
   const { toast } = useToast();
   const [files, setFiles] = useState<Attachment[]>([]);
   const { uploadFile } = useUpload();
@@ -192,23 +204,26 @@ export function TransactionAttachments({ id, data, onUpload }: Props) {
 
     onUpload?.(uploadedFiles);
 
-    createAttachmentsMutation.mutate(
-      uploadedFiles.map((file) => ({
-        name: file.name,
-        type: file.type,
-        path: file.path,
-        size: file.size,
-        transactionId: id,
-      })),
-    );
+    // Only create attachment records and trigger processing if transaction exists
+    if (enableDatabaseOperations) {
+      createAttachmentsMutation.mutate(
+        uploadedFiles.map((file) => ({
+          name: file.name,
+          type: file.type,
+          path: file.path,
+          size: file.size,
+          transactionId: id,
+        })),
+      );
 
-    processTransactionAttachmentMutation.mutate(
-      uploadedFiles.map((file) => ({
-        filePath: file.path,
-        mimetype: file.type,
-        transactionId: id,
-      })),
-    );
+      processTransactionAttachmentMutation.mutate(
+        uploadedFiles.map((file) => ({
+          filePath: file.path,
+          mimetype: file.type,
+          transactionId: id,
+        })),
+      );
+    }
   };
 
   // @ts-expect-error

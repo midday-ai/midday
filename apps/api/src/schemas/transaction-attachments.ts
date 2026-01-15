@@ -5,16 +5,16 @@ export const createAttachmentsSchema = z.array(
     path: z.array(z.string()),
     name: z.string(),
     size: z.number(),
-    transactionId: z.string(),
+    transactionId: z.string().uuid(),
     type: z.string(),
   }),
 );
 
-export const deleteAttachmentSchema = z.object({ id: z.string() });
+export const deleteAttachmentSchema = z.object({ id: z.string().uuid() });
 
 export const processTransactionAttachmentSchema = z.array(
   z.object({
-    transactionId: z.string(),
+    transactionId: z.string().uuid(),
     mimetype: z.string(),
     filePath: z.array(z.string()),
   }),
