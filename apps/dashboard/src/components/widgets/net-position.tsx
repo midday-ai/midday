@@ -90,7 +90,7 @@ export function NetPositionWidget() {
         <div className="flex flex-col gap-3">
           <h2 className="text-2xl font-normal">
             <FormatAmount
-              currency={currency || "USD"}
+              currency={netPositionData.currency || "USD"}
               amount={netPosition}
               minimumFractionDigits={0}
               maximumFractionDigits={0}
@@ -102,7 +102,7 @@ export function NetPositionWidget() {
               <span className="text-[#666666]">Cash</span>
               <span>
                 <FormatAmount
-                  currency={currency || "USD"}
+                  currency={netPositionData.currency || "USD"}
                   amount={cash}
                   minimumFractionDigits={0}
                   maximumFractionDigits={0}
@@ -114,7 +114,7 @@ export function NetPositionWidget() {
               <span>
                 -
                 <FormatAmount
-                  currency={currency || "USD"}
+                  currency={netPositionData.currency || "USD"}
                   amount={creditDebt}
                   minimumFractionDigits={0}
                   maximumFractionDigits={0}
