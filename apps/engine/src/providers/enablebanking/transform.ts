@@ -352,6 +352,8 @@ function generateTransactionId(transaction: GetTransaction): string {
   // Use fundamental values + additional discriminators for stable ID
   // balance_after_transaction is particularly useful as it's unique per transaction
   // in a sequence (running balance changes with each transaction)
+  // Use empty string for null/undefined to preserve positional information
+  // (filtering would cause collisions when different nullable fields have same value)
   const input = [
     transaction.booking_date,
     transaction.value_date,
@@ -362,7 +364,7 @@ function generateTransactionId(transaction: GetTransaction): string {
     transaction.remittance_information?.join("|"),
     transaction.balance_after_transaction?.amount,
   ]
-    .filter(Boolean)
+    .map((v) => v ?? "")
     .join("-");
 
   return createHash("md5").update(input).digest("hex");

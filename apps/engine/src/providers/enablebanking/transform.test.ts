@@ -101,6 +101,55 @@ test("Transform expense transaction", () => {
   ).toMatchSnapshot();
 });
 
+test("generateTransactionId - different nullable fields produce different IDs", () => {
+  // Verifies fix for hash collision when different nullable fields have same value
+  // e.g., reference_number="ABC" with null remittance_information should differ from
+  // null reference_number with remittance_information=["ABC"]
+  const baseTransaction = {
+    entry_reference: null,
+    transaction_id: null,
+    merchant_category_code: null,
+    transaction_amount: { currency: "SEK", amount: "100.00" },
+    creditor: null,
+    creditor_account: null,
+    creditor_agent: null,
+    debtor: null,
+    debtor_account: null,
+    debtor_agent: null,
+    bank_transaction_code: null,
+    credit_debit_indicator: "DBIT" as const,
+    status: "BOOK",
+    booking_date: "2024-01-01",
+    value_date: "2024-01-01",
+    transaction_date: null,
+    balance_after_transaction: null,
+    debtor_account_additional_identification: null,
+    creditor_account_additional_identification: null,
+    exchange_rate: null,
+    note: null,
+  };
+
+  const txA = transformTransaction({
+    accountType: "depository",
+    transaction: {
+      ...baseTransaction,
+      reference_number: "ABC",
+      remittance_information: null,
+    },
+  });
+
+  const txB = transformTransaction({
+    accountType: "depository",
+    transaction: {
+      ...baseTransaction,
+      reference_number: null,
+      remittance_information: ["ABC"],
+    },
+  });
+
+  expect(txA.id).not.toBe(txB.id);
+});
+
 test("Transform credit card payment - should be credit-card-payment", () => {
   expect(
     transformTransaction({
