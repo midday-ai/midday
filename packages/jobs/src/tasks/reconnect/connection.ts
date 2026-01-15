@@ -19,7 +19,8 @@ export const reconnectConnection = schemaTask({
     const { data: existingAccounts } = await supabase
       .from("bank_accounts")
       .select("id, account_reference, type, currency, name")
-      .eq("bank_connection_id", connectionId);
+      .eq("bank_connection_id", connectionId)
+      .eq("team_id", teamId);
 
     if (!existingAccounts || existingAccounts.length === 0) {
       logger.warn("No existing bank accounts found for connection", {
@@ -47,7 +48,8 @@ export const reconnectConnection = schemaTask({
         await supabase
           .from("bank_connections")
           .update({ reference_id: referenceId })
-          .eq("id", connectionId);
+          .eq("id", connectionId)
+          .eq("team_id", teamId);
       }
 
       // Fetch fresh accounts from GoCardless API
@@ -80,6 +82,7 @@ export const reconnectConnection = schemaTask({
         .from("bank_connections")
         .select("access_token, enrollment_id")
         .eq("id", connectionId)
+        .eq("team_id", teamId)
         .single();
 
       if (!connectionData?.access_token || !connectionData?.enrollment_id) {
@@ -123,6 +126,7 @@ export const reconnectConnection = schemaTask({
         .from("bank_connections")
         .select("reference_id")
         .eq("id", connectionId)
+        .eq("team_id", teamId)
         .single();
 
       if (!connectionData?.reference_id) {
@@ -171,6 +175,7 @@ export const reconnectConnection = schemaTask({
         .from("bank_connections")
         .select("access_token, institution_id")
         .eq("id", connectionId)
+        .eq("team_id", teamId)
         .single();
 
       if (!connectionData?.access_token) {
