@@ -175,10 +175,13 @@ export const transformBalance = ({
 
   // Check if balance_type indicates available balance
   // Only match "available" types (e.g., interimAvailable, closingAvailable)
+  // Apply same normalization as amount for credit accounts
   const availableBalance = balance.balance_type
     ?.toLowerCase()
     .includes("available")
-    ? rawAmount
+    ? accountType === "credit" && rawAmount < 0
+      ? Math.abs(rawAmount)
+      : rawAmount
     : null;
 
   return {

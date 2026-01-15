@@ -168,11 +168,9 @@ export function BankAccount({ data, provider }: Props) {
       <div className="flex items-start justify-between">
         <div className="flex flex-col gap-1">
           <p className="font-medium text-sm">{name}</p>
-          {subtype && (
-            <span className="text-xs text-[#878787] capitalize">
-              {subtype.replace(/_/g, " ")}
-            </span>
-          )}
+          <span className="text-xs text-[#878787] capitalize">
+            {t(`account_type.${type}`)}
+          </span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -198,7 +196,7 @@ export function BankAccount({ data, provider }: Props) {
                     });
                   }}
                 >
-                  Import
+                  Backfill
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>

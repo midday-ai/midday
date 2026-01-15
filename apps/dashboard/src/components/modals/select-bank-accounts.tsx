@@ -336,81 +336,87 @@ export function SelectBankAccountsModal() {
                   >
                     {isLoading && <RowsSkeleton />}
 
-                    {data?.map((account) => (
-                      <FormField
-                        key={account.id}
-                        control={form.control}
-                        name="accounts"
-                        render={({ field }) => {
-                          return (
-                            <FormItem
-                              key={account.id}
-                              className="flex justify-between"
-                            >
-                              <FormLabel className="flex items-center space-x-4 w-full mr-8">
-                                <Avatar className="size-[34px]">
-                                  <AvatarFallback className="text-[11px]">
-                                    {getInitials(account.name)}
-                                  </AvatarFallback>
-                                </Avatar>
+                    {data?.map((account) => {
+                      // Get the last 4 digits of IBAN or account identifier for display
+                      const accountIdentifier = account.iban?.slice(-4);
 
-                                <div className="flex items-center justify-between w-full">
-                                  <div className="flex flex-col">
-                                    <p className="font-medium leading-none mb-1 text-sm">
-                                      {account.name}
-                                    </p>
-                                    <span className="text-xs text-[#878787] font-normal">
-                                      {account.subtype
-                                        ? `${t(`account_type.${account.type}`)} · ${account.subtype.replace(/_/g, " ")}`
-                                        : t(`account_type.${account.type}`)}
-                                      {account.iban && (
-                                        <span className="ml-1">
-                                          · ****{account.iban.slice(-4)}
+                      return (
+                        <FormField
+                          key={account.id}
+                          control={form.control}
+                          name="accounts"
+                          render={({ field }) => {
+                            return (
+                              <FormItem
+                                key={account.id}
+                                className="flex justify-between"
+                              >
+                                <FormLabel className="flex items-center space-x-4 w-full mr-8">
+                                  <Avatar className="size-[34px]">
+                                    <AvatarFallback className="text-[11px]">
+                                      {getInitials(account.name)}
+                                    </AvatarFallback>
+                                  </Avatar>
+
+                                  <div className="flex flex-col flex-1 min-w-0">
+                                    <div className="flex items-center justify-between">
+                                      <p className="font-medium leading-none text-sm truncate">
+                                        {account.name}
+                                      </p>
+                                      {accountIdentifier && (
+                                        <span className="text-xs text-[#878787] font-normal shrink-0">
+                                          ····{accountIdentifier}
                                         </span>
                                       )}
-                                    </span>
+                                    </div>
+                                    <div className="flex items-center justify-between mt-1">
+                                      <span className="text-xs text-[#878787] font-normal">
+                                        {t(`account_type.${account.type}`)}
+                                      </span>
+                                      <span className="text-sm font-medium">
+                                        <FormatAmount
+                                          amount={account.balance.amount}
+                                          currency={account.balance.currency}
+                                        />
+                                      </span>
+                                    </div>
                                   </div>
+                                </FormLabel>
 
-                                  <span className="text-[#878787] text-sm">
-                                    <FormatAmount
-                                      amount={account.balance.amount}
-                                      currency={account.balance.currency}
+                                <div>
+                                  <FormControl>
+                                    <Switch
+                                      checked={
+                                        field.value?.find(
+                                          (value) =>
+                                            value.accountId === account.id,
+                                        )?.enabled
+                                      }
+                                      onCheckedChange={(checked) => {
+                                        return field.onChange(
+                                          field.value.map((value) => {
+                                            if (
+                                              value.accountId === account.id
+                                            ) {
+                                              return {
+                                                ...value,
+                                                enabled: checked,
+                                              };
+                                            }
+
+                                            return value;
+                                          }),
+                                        );
+                                      }}
                                     />
-                                  </span>
+                                  </FormControl>
                                 </div>
-                              </FormLabel>
-
-                              <div>
-                                <FormControl>
-                                  <Switch
-                                    checked={
-                                      field.value?.find(
-                                        (value) =>
-                                          value.accountId === account.id,
-                                      )?.enabled
-                                    }
-                                    onCheckedChange={(checked) => {
-                                      return field.onChange(
-                                        field.value.map((value) => {
-                                          if (value.accountId === account.id) {
-                                            return {
-                                              ...value,
-                                              enabled: checked,
-                                            };
-                                          }
-
-                                          return value;
-                                        }),
-                                      );
-                                    }}
-                                  />
-                                </FormControl>
-                              </div>
-                            </FormItem>
-                          );
-                        }}
-                      />
-                    ))}
+                              </FormItem>
+                            );
+                          }}
+                        />
+                      );
+                    })}
 
                     <div className="fixed bottom-0 left-0 right-0 z-10 bg-background pt-4 px-6 pb-6">
                       <SubmitButton

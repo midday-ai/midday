@@ -336,3 +336,26 @@ test("Transform account balance - closingBooked does NOT return available_balanc
     credit_limit: null,
   });
 });
+
+test("Transform account balance - credit with negative balance and available type normalizes both amount and available_balance", () => {
+  // This test verifies that both amount and available_balance are normalized consistently
+  // for credit accounts with negative raw balances and an "available" balance type
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "EUR", amount: "-1500.00" },
+        balance_type: "interimAvailable",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      accountType: "credit",
+    }),
+  ).toEqual({
+    amount: 1500, // Normalized to positive
+    currency: "EUR",
+    available_balance: 1500, // Also normalized to positive (not -1500)
+    credit_limit: null,
+  });
+});
