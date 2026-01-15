@@ -1,4 +1,3 @@
-import { AddAccountButton } from "@/components/add-account-button";
 import { BankAccountList } from "@/components/bank-account-list";
 import { Suspense } from "react";
 import { BankAccountListSkeleton } from "./bank-account-list-skeleton";
@@ -9,10 +8,6 @@ export function ConnectedAccounts() {
       <Suspense fallback={<BankAccountListSkeleton />}>
         <BankAccountList />
       </Suspense>
-
-      <div className="flex justify-end border-t pt-4">
-        <AddAccountButton />
-      </div>
     </div>
   );
 }
