@@ -225,7 +225,7 @@ export type GetAccountsRequest = {
 };
 
 export type GetTransaction = {
-  entry_reference: string;
+  entry_reference: string | null;
   merchant_category_code: string | null;
   transaction_amount: {
     currency: string;

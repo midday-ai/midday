@@ -334,6 +334,31 @@ type TransformTransactionPayload = {
   accountType: AccountType;
 };
 
+/**
+ * Generate a stable transaction ID when entry_reference is missing.
+ * Uses EnableBanking's recommended "fundamental values" for matching.
+ * @see https://enablebanking.com/blog/2024/10/29/how-to-sync-account-transactions-from-open-banking-apis-without-unique-transaction-ids
+ */
+function generateTransactionId(transaction: GetTransaction): string {
+  if (transaction.entry_reference) {
+    return transaction.entry_reference;
+  }
+
+  // Use fundamental values + additional discriminators for stable ID
+  const input = [
+    transaction.booking_date,
+    transaction.transaction_amount.amount,
+    transaction.transaction_amount.currency,
+    transaction.credit_debit_indicator,
+    transaction.reference_number,
+    transaction.remittance_information?.join("|"),
+  ]
+    .filter(Boolean)
+    .join("-");
+
+  return createHash("md5").update(input).digest("hex");
+}
+
 export const transformTransaction = ({
   transaction,
   accountType,
@@ -342,7 +367,7 @@ export const transformTransaction = ({
   const description = transformDescription({ transaction, name });
 
   return {
-    id: transaction.entry_reference,
+    id: generateTransactionId(transaction),
     amount: formatAmount(transaction),
     currency: transaction.transaction_amount.currency,
     date: transaction.booking_date,
