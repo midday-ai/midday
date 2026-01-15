@@ -1,38 +1,58 @@
 import { Skeleton } from "@midday/ui/skeleton";
 
-export function BankAccountListSkeleton() {
+function BankAccountCardSkeleton() {
   return (
-    <div className="px-6 pb-6 space-y-6 divide-y">
-      <div className="flex justify-between items-center">
-        <div className="ml-[30px] divide-y">
-          <div className="flex justify-between items-center mb-4 pt-4">
-            <div className="flex items-center">
-              <Skeleton className="flex h-9 w-9 items-center justify-center space-y-0 rounded-full" />
-              <div className="ml-4 flex flex-col">
-                <span className="text-sm font-medium leading-none mb-1">
-                  <Skeleton className="h-3 w-[200px] rounded-none" />
-                </span>
-                <span className="text-xs font-medium text-[#606060]">
-                  <Skeleton className="h-2.5 w-[100px] mt-1 rounded-none" />
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-between items-center mb-4 pt-4">
-            <div className="flex items-center">
-              <Skeleton className="flex h-9 w-9 items-center justify-center space-y-0 rounded-full" />
-              <div className="ml-4 flex flex-col">
-                <span className="text-sm font-medium leading-none mb-1">
-                  <Skeleton className="h-3 w-[200px] rounded-none" />
-                </span>
-                <span className="text-xs font-medium text-[#606060]">
-                  <Skeleton className="h-2.5 w-[100px] mt-1 rounded-none" />
-                </span>
-              </div>
-            </div>
-          </div>
+    <div className="border border-border p-4 flex flex-col gap-3 h-full">
+      {/* Header: Name, Actions, Toggle */}
+      <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-1">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-5 w-9 rounded-full" />
         </div>
       </div>
+
+      {/* Balance */}
+      <Skeleton className="h-6 w-24" />
+    </div>
+  );
+}
+
+function BankConnectionSkeleton() {
+  return (
+    <div className="py-4">
+      {/* Connection Header */}
+      <div className="flex justify-between items-center">
+        <div className="flex space-x-4 items-center">
+          <Skeleton className="h-9 w-9 rounded-full" />
+          <div className="flex flex-col gap-1">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-3 w-48" />
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-8 w-8" />
+        </div>
+      </div>
+
+      {/* Account Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <BankAccountCardSkeleton />
+        <BankAccountCardSkeleton />
+      </div>
+    </div>
+  );
+}
+
+export function BankAccountListSkeleton() {
+  return (
+    <div className="divide-y">
+      <BankConnectionSkeleton />
+      <BankConnectionSkeleton />
     </div>
   );
 }

@@ -344,14 +344,23 @@ function generateTransactionId(transaction: GetTransaction): string {
     return transaction.entry_reference;
   }
 
+  // Use transaction_id if available (bank-specific ID)
+  if (transaction.transaction_id) {
+    return transaction.transaction_id;
+  }
+
   // Use fundamental values + additional discriminators for stable ID
+  // balance_after_transaction is particularly useful as it's unique per transaction
+  // in a sequence (running balance changes with each transaction)
   const input = [
     transaction.booking_date,
+    transaction.value_date,
     transaction.transaction_amount.amount,
     transaction.transaction_amount.currency,
     transaction.credit_debit_indicator,
     transaction.reference_number,
     transaction.remittance_information?.join("|"),
+    transaction.balance_after_transaction?.amount,
   ]
     .filter(Boolean)
     .join("-");
