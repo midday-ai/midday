@@ -8,44 +8,47 @@ import {
 test("Transform income transaction", () => {
   expect(
     transformTransaction({
-      entry_reference: "rtrhrth",
-      merchant_category_code: null,
-      transaction_amount: { currency: "SEK", amount: "25000.000" },
-      creditor: null,
-      creditor_account: {
-        iban: "SE1750000000050401007804",
-        other: {
-          identification: "50401007804",
-          scheme_name: "BBAN",
-          issuer: null,
+      accountType: "depository",
+      transaction: {
+        entry_reference: "rtrhrth",
+        merchant_category_code: null,
+        transaction_amount: { currency: "SEK", amount: "25000.000" },
+        creditor: null,
+        creditor_account: {
+          iban: "SE1750000000050401007804",
+          other: {
+            identification: "50401007804",
+            scheme_name: "BBAN",
+            issuer: null,
+          },
         },
+        creditor_agent: {
+          bic_fi: "ESSESESSXXX",
+          clearing_system_member_id: null,
+          name: null,
+        },
+        debtor: null,
+        debtor_account: null,
+        debtor_agent: null,
+        bank_transaction_code: {
+          description: "Other",
+          code: null,
+          sub_code: null,
+        },
+        credit_debit_indicator: "CRDT",
+        status: "BOOK",
+        booking_date: "2024-04-04",
+        value_date: "2024-04-04",
+        transaction_date: null,
+        balance_after_transaction: { currency: "XXX", amount: "25000.000" },
+        reference_number: null,
+        remittance_information: ["ÖVERF. SALDO"],
+        debtor_account_additional_identification: null,
+        creditor_account_additional_identification: null,
+        exchange_rate: null,
+        note: null,
+        transaction_id: null,
       },
-      creditor_agent: {
-        bic_fi: "ESSESESSXXX",
-        clearing_system_member_id: null,
-        name: null,
-      },
-      debtor: null,
-      debtor_account: null,
-      debtor_agent: null,
-      bank_transaction_code: {
-        description: "Other",
-        code: null,
-        sub_code: null,
-      },
-      credit_debit_indicator: "CRDT",
-      status: "BOOK",
-      booking_date: "2024-04-04",
-      value_date: "2024-04-04",
-      transaction_date: null,
-      balance_after_transaction: { currency: "XXX", amount: "25000.000" },
-      reference_number: null,
-      remittance_information: ["ÖVERF. SALDO"],
-      debtor_account_additional_identification: null,
-      creditor_account_additional_identification: null,
-      exchange_rate: null,
-      note: null,
-      transaction_id: null,
     }),
   ).toMatchSnapshot();
 });
@@ -53,44 +56,84 @@ test("Transform income transaction", () => {
 test("Transform expense transaction", () => {
   expect(
     transformTransaction({
-      entry_reference: "rtrhrth",
-      merchant_category_code: null,
-      transaction_amount: { currency: "SEK", amount: "25000.000" },
-      creditor: null,
-      creditor_account: {
-        iban: "SE1750000000050401007804",
-        other: {
-          identification: "50401007804",
-          scheme_name: "BBAN",
-          issuer: null,
+      accountType: "depository",
+      transaction: {
+        entry_reference: "rtrhrth",
+        merchant_category_code: null,
+        transaction_amount: { currency: "SEK", amount: "25000.000" },
+        creditor: null,
+        creditor_account: {
+          iban: "SE1750000000050401007804",
+          other: {
+            identification: "50401007804",
+            scheme_name: "BBAN",
+            issuer: null,
+          },
         },
+        creditor_agent: {
+          bic_fi: "ESSESESSXXX",
+          clearing_system_member_id: null,
+          name: null,
+        },
+        debtor: null,
+        debtor_account: null,
+        debtor_agent: null,
+        bank_transaction_code: {
+          description: "Other",
+          code: null,
+          sub_code: null,
+        },
+        credit_debit_indicator: "CRDT",
+        status: "BOOK",
+        booking_date: "2024-04-04",
+        value_date: "2024-04-04",
+        transaction_date: null,
+        balance_after_transaction: { currency: "XXX", amount: "25000.000" },
+        reference_number: null,
+        remittance_information: ["ÖVERF. SALDO"],
+        debtor_account_additional_identification: null,
+        creditor_account_additional_identification: null,
+        exchange_rate: null,
+        note: null,
+        transaction_id: null,
       },
-      creditor_agent: {
-        bic_fi: "ESSESESSXXX",
-        clearing_system_member_id: null,
-        name: null,
+    }),
+  ).toMatchSnapshot();
+});
+
+test("Transform credit card payment - should be credit-card-payment", () => {
+  expect(
+    transformTransaction({
+      accountType: "credit",
+      transaction: {
+        entry_reference: "payment123",
+        merchant_category_code: null,
+        transaction_amount: { currency: "SEK", amount: "5000.00" },
+        creditor: null,
+        creditor_account: null,
+        creditor_agent: null,
+        debtor: { name: "BANK PAYMENT" },
+        debtor_account: null,
+        debtor_agent: null,
+        bank_transaction_code: {
+          description: "Payment",
+          code: null,
+          sub_code: null,
+        },
+        credit_debit_indicator: "CRDT",
+        status: "BOOK",
+        booking_date: "2024-04-04",
+        value_date: "2024-04-04",
+        transaction_date: null,
+        balance_after_transaction: null,
+        reference_number: null,
+        remittance_information: ["Credit Card Payment"],
+        debtor_account_additional_identification: null,
+        creditor_account_additional_identification: null,
+        exchange_rate: null,
+        note: null,
+        transaction_id: null,
       },
-      debtor: null,
-      debtor_account: null,
-      debtor_agent: null,
-      bank_transaction_code: {
-        description: "Other",
-        code: null,
-        sub_code: null,
-      },
-      credit_debit_indicator: "CRDT",
-      status: "BOOK",
-      booking_date: "2024-04-04",
-      value_date: "2024-04-04",
-      transaction_date: null,
-      balance_after_transaction: { currency: "XXX", amount: "25000.000" },
-      reference_number: null,
-      remittance_information: ["ÖVERF. SALDO"],
-      debtor_account_additional_identification: null,
-      creditor_account_additional_identification: null,
-      exchange_rate: null,
-      note: null,
-      transaction_id: null,
     }),
   ).toMatchSnapshot();
 });
@@ -148,15 +191,171 @@ test("Transform account", () => {
   ).toMatchSnapshot();
 });
 
-test("Transform account balance", () => {
+test("Transform account balance - depository", () => {
   expect(
     transformBalance({
-      name: "",
-      balance_amount: { currency: "SEK", amount: "90737.960" },
-      balance_type: "ITAV",
-      last_change_date_time: "2024-03-06",
-      reference_date: "2024-03-06",
-      last_committed_transaction: "1234567890",
+      balance: {
+        name: "",
+        balance_amount: { currency: "SEK", amount: "90737.960" },
+        balance_type: "ITAV",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      accountType: "depository",
     }),
   ).toMatchSnapshot();
+});
+
+test("Transform account balance - credit with negative balance (normalized)", () => {
+  // Safety: if Enable Banking ever returns negative credit balance, normalize it
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "EUR", amount: "-1500.00" },
+        balance_type: "CLBD",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      accountType: "credit",
+    }),
+  ).toEqual({
+    amount: 1500,
+    currency: "EUR",
+    available_balance: null, // CLBD is not an available balance type
+    credit_limit: null,
+  });
+});
+
+test("Transform account balance - credit with positive balance (stays positive)", () => {
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "EUR", amount: "2000.00" },
+        balance_type: "CLBD",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      accountType: "credit",
+    }),
+  ).toEqual({
+    amount: 2000,
+    currency: "EUR",
+    available_balance: null,
+    credit_limit: null,
+  });
+});
+
+test("Transform account balance - interimAvailable returns available_balance", () => {
+  // interimAvailable is an available balance type and should populate available_balance
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "EUR", amount: "5000.00" },
+        balance_type: "interimAvailable",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      accountType: "depository",
+    }),
+  ).toEqual({
+    amount: 5000,
+    currency: "EUR",
+    available_balance: 5000,
+    credit_limit: null,
+  });
+});
+
+test("Transform account balance - interimBooked does NOT return available_balance", () => {
+  // interimBooked is a booked/posted balance, NOT available funds
+  // This test verifies the fix for the bug where .includes("interim") incorrectly matched interimBooked
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "EUR", amount: "5000.00" },
+        balance_type: "interimBooked",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      accountType: "depository",
+    }),
+  ).toEqual({
+    amount: 5000,
+    currency: "EUR",
+    available_balance: null, // Should be null - interimBooked is NOT an available balance
+    credit_limit: null,
+  });
+});
+
+test("Transform account balance - closingAvailable returns available_balance", () => {
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "EUR", amount: "3000.00" },
+        balance_type: "closingAvailable",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      accountType: "depository",
+    }),
+  ).toEqual({
+    amount: 3000,
+    currency: "EUR",
+    available_balance: 3000,
+    credit_limit: null,
+  });
+});
+
+test("Transform account balance - closingBooked does NOT return available_balance", () => {
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "EUR", amount: "3000.00" },
+        balance_type: "closingBooked",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      accountType: "depository",
+    }),
+  ).toEqual({
+    amount: 3000,
+    currency: "EUR",
+    available_balance: null,
+    credit_limit: null,
+  });
+});
+
+test("Transform account balance - credit with negative balance and available type normalizes both amount and available_balance", () => {
+  // This test verifies that both amount and available_balance are normalized consistently
+  // for credit accounts with negative raw balances and an "available" balance type
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "EUR", amount: "-1500.00" },
+        balance_type: "interimAvailable",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      accountType: "credit",
+    }),
+  ).toEqual({
+    amount: 1500, // Normalized to positive
+    currency: "EUR",
+    available_balance: 1500, // Also normalized to positive (not -1500)
+    credit_limit: null,
+  });
 });

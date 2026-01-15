@@ -159,7 +159,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
     }),
     async (c) => {
       const envs = env(c);
-      const { provider, accessToken, id } = c.req.valid("query");
+      const { provider, accessToken, id, accountType } = c.req.valid("query");
 
       const api = new Provider({
         provider,
@@ -172,6 +172,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
         const data = await api.getAccountBalance({
           accessToken,
           accountId: id,
+          accountType,
         });
 
         return c.json(

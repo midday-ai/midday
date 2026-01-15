@@ -1,7 +1,11 @@
 import type { Database } from "@db/client";
 import { bankAccounts, teams } from "@db/schema";
 import { chatCache } from "@midday/cache/chat-cache";
-import { and, asc, desc, eq } from "drizzle-orm";
+import {
+  CASH_ACCOUNT_TYPES,
+  CREDIT_ACCOUNT_TYPE,
+} from "@midday/engine/account";
+import { and, asc, desc, eq, inArray, or } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
@@ -178,14 +182,18 @@ export async function getBankAccountsCurrencies(db: Database, teamId: string) {
   return result;
 }
 
-export type GetCombinedAccountBalanceParams = {
+export type GetCashBalanceParams = {
   teamId: string;
   currency?: string;
 };
 
-export async function getCombinedAccountBalance(
+/**
+ * Get total cash balance across all cash accounts (depository + other_asset).
+ * Credit cards, loans, and other liabilities are excluded.
+ */
+export async function getCashBalance(
   db: Database,
-  params: GetCombinedAccountBalanceParams,
+  params: GetCashBalanceParams,
 ) {
   const { teamId, currency: targetCurrency } = params;
 
@@ -201,9 +209,13 @@ export async function getCombinedAccountBalance(
     baseCurrency = team[0]?.baseCurrency || "USD";
   }
 
-  // Get all enabled bank accounts with their balances
+  // Get cash accounts (depository + other_asset like treasury/money market)
   const accounts = await db.query.bankAccounts.findMany({
-    where: and(eq(bankAccounts.teamId, teamId), eq(bankAccounts.enabled, true)),
+    where: and(
+      eq(bankAccounts.teamId, teamId),
+      eq(bankAccounts.enabled, true),
+      inArray(bankAccounts.type, [...CASH_ACCOUNT_TYPES]),
+    ),
     columns: {
       id: true,
       name: true,
@@ -273,5 +285,139 @@ export async function getCombinedAccountBalance(
     currency: baseCurrency,
     accountCount: accounts.length,
     accountBreakdown,
+  };
+}
+
+export type GetNetPositionParams = {
+  teamId: string;
+  currency?: string;
+};
+
+/**
+ * Calculate net position: Cash minus Credit Card Debt.
+ *
+ * Net Position provides a quick "working capital" view for SMB owners.
+ *
+ * **Cash includes:**
+ * - `depository` accounts (checking, savings)
+ * - `other_asset` accounts (treasury, money market)
+ *
+ * **Debt includes:**
+ * - `credit` accounts (credit cards)
+ *
+ * **Why loans are excluded:**
+ * Loan accounts (`loan` type) are intentionally NOT included in Net Position because:
+ * 1. Net Position is designed as a simple "cash vs credit card" metric
+ * 2. Loans are long-term liabilities with different payment structures
+ * 3. Including loans would conflate short-term liquidity with long-term debt
+ * 4. For complete debt visibility, use `getBalanceSheet()` which includes all debt types
+ *
+ * @see getBalanceSheet - For complete assets/liabilities including loans
+ * @see getCashBalance - For cash-only calculation
+ */
+export async function getNetPosition(
+  db: Database,
+  params: GetNetPositionParams,
+) {
+  const { teamId, currency: targetCurrency } = params;
+
+  // Get team's base currency if no target currency specified
+  let baseCurrency = targetCurrency;
+  if (!baseCurrency) {
+    const team = await db
+      .select({ baseCurrency: teams.baseCurrency })
+      .from(teams)
+      .where(eq(teams.id, teamId))
+      .limit(1);
+
+    baseCurrency = team[0]?.baseCurrency || "USD";
+  }
+
+  // Get cash accounts (depository + other_asset like treasury)
+  // Uses shared CASH_ACCOUNT_TYPES constant for consistency
+  const cashAccounts = await db.query.bankAccounts.findMany({
+    where: and(
+      eq(bankAccounts.teamId, teamId),
+      eq(bankAccounts.enabled, true),
+      inArray(bankAccounts.type, [...CASH_ACCOUNT_TYPES]),
+    ),
+    columns: {
+      id: true,
+      name: true,
+      currency: true,
+      balance: true,
+      baseCurrency: true,
+      baseBalance: true,
+    },
+  });
+
+  // Get credit accounts (credit cards only - NOT loans)
+  // Loans are excluded by design - see JSDoc above for rationale
+  // For complete debt view including loans, use getBalanceSheet()
+  const creditAccounts = await db.query.bankAccounts.findMany({
+    where: and(
+      eq(bankAccounts.teamId, teamId),
+      eq(bankAccounts.enabled, true),
+      eq(bankAccounts.type, CREDIT_ACCOUNT_TYPE), // Only "credit", not "loan"
+    ),
+    columns: {
+      id: true,
+      name: true,
+      currency: true,
+      balance: true,
+      baseCurrency: true,
+      baseBalance: true,
+    },
+  });
+
+  // Calculate cash total
+  let cashTotal = 0;
+  for (const account of cashAccounts) {
+    const balance = Number(account.balance) || 0;
+    const accountCurrency: string = account.currency || baseCurrency;
+
+    let convertedBalance = balance;
+    if (
+      accountCurrency !== baseCurrency &&
+      account.baseBalance &&
+      account.baseCurrency === baseCurrency
+    ) {
+      convertedBalance = Number(account.baseBalance);
+    }
+
+    cashTotal += convertedBalance;
+  }
+
+  // Calculate credit debt total
+  // Note: Different providers store credit balances differently:
+  // - Plaid stores as positive (amount owed)
+  // - GoCardless stores as negative (debt)
+  // We use Math.abs() to normalize both conventions
+  let creditDebt = 0;
+  for (const account of creditAccounts) {
+    const balance = Number(account.balance) || 0;
+    const accountCurrency: string = account.currency || baseCurrency;
+
+    let convertedBalance = Math.abs(balance);
+    if (
+      accountCurrency !== baseCurrency &&
+      account.baseBalance &&
+      account.baseCurrency === baseCurrency
+    ) {
+      convertedBalance = Math.abs(Number(account.baseBalance));
+    }
+
+    creditDebt += convertedBalance;
+  }
+
+  const netPosition = cashTotal - creditDebt;
+
+  return {
+    cash: Math.round(cashTotal * 100) / 100,
+    creditDebt: Math.round(creditDebt * 100) / 100,
+    netPosition: Math.round(netPosition * 100) / 100,
+    currency: baseCurrency,
+    cashAccountCount: cashAccounts.length,
+    creditAccountCount: creditAccounts.length,
   };
 }

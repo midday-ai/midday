@@ -1,6 +1,7 @@
 import {
   createBankAccountSchema,
   deleteBankAccountSchema,
+  getBankAccountDetailsSchema,
   getBankAccountsSchema,
   updateBankAccountSchema,
 } from "@api/schemas/bank-accounts";
@@ -8,6 +9,7 @@ import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import {
   createBankAccount,
   deleteBankAccount,
+  getBankAccountDetails,
   getBankAccounts,
   getBankAccountsBalances,
   getBankAccountsCurrencies,
@@ -22,6 +24,19 @@ export const bankAccountsRouter = createTRPCRouter({
         teamId: teamId!,
         enabled: input?.enabled,
         manual: input?.manual,
+      });
+    }),
+
+  /**
+   * Get decrypted account details (IBAN, account number, etc.)
+   * Only call this when user explicitly requests to reveal account details.
+   */
+  getDetails: protectedProcedure
+    .input(getBankAccountDetailsSchema)
+    .query(async ({ input, ctx: { db, teamId } }) => {
+      return getBankAccountDetails(db, {
+        accountId: input.id,
+        teamId: teamId!,
       });
     }),
 

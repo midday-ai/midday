@@ -124,6 +124,7 @@ export type Account = DepositoryAccount | CreditAccount;
 
 export type TransformAccount = Account & {
   balance: GetAccountBalanceResponse;
+  balances?: GetAccountBalancesResponse | null; // Full balance with available/ledger
 };
 
 export type GetAccountsResponse = TransformAccount[];
@@ -135,6 +136,17 @@ export interface GetAccountBalanceRequest extends AuthenticatedRequest {
 export type GetAccountBalanceResponse = {
   currency: string;
   amount: number;
+};
+
+// Full balance response from /accounts/:id/balances endpoint
+export type GetAccountBalancesResponse = {
+  account_id: string;
+  ledger: string | null; // Total amount of funds in the account
+  available: string | null; // Ledger balance net any pending inflows or outflows
+  links: {
+    self: string;
+    account: string;
+  };
 };
 
 export type TransformTransaction = {
@@ -152,3 +164,24 @@ export type TransformAccountBalance = GetAccountBalanceResponse;
 export type GetInstitutionsResponse = Institution[];
 
 export type TransformInstitution = Institution;
+
+// Account Details types (routing numbers, account numbers)
+export interface GetAccountDetailsRequest extends AuthenticatedRequest {
+  accountId: string;
+}
+
+export type AccountDetails = {
+  account_id: string;
+  account_number: string;
+  links: {
+    self: string;
+    account: string;
+  };
+  routing_numbers: {
+    ach: string | null;
+    wire: string | null;
+    bacs: string | null; // UK sort code
+  };
+};
+
+export type GetAccountDetailsResponse = AccountDetails;

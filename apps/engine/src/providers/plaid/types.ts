@@ -65,8 +65,10 @@ export type TransformTransaction = Transaction;
 
 export type GetTransactionsResponse = TransactionsSyncResponse["added"];
 
-export type GetAccountBalanceResponse =
-  AccountsGetResponse["accounts"][0]["balances"];
+export type GetAccountBalanceResponse = {
+  balances: AccountsGetResponse["accounts"][0]["balances"];
+  type: AccountsGetResponse["accounts"][0]["type"];
+};
 
 export interface GetAccountBalanceRequest {
   accessToken: string;

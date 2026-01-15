@@ -19,7 +19,7 @@ exports[`Transform pending transaction 1`] = `
 }
 `;
 
-exports[`Transform pending transaction 2`] = `
+exports[`Transform credit card purchase transaction 1`] = `
 {
   "amount": -29,
   "balance": null,
@@ -35,6 +35,63 @@ exports[`Transform pending transaction 2`] = `
   "method": "other",
   "name": "Technology",
   "status": "pending",
+}
+`;
+
+exports[`Transform credit card payment received - should be credit-card-payment not income 1`] = `
+{
+  "amount": 200,
+  "balance": 500,
+  "category": "credit-card-payment",
+  "counterparty_name": "Bank Payment",
+  "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-03-05",
+  "description": "Bank Payment",
+  "id": "txn_os41r5u90e29shubl3000",
+  "merchant_name": null,
+  "method": "payment",
+  "name": "Payment Thank You",
+  "status": "posted",
+}
+`;
+
+exports[`Transform credit card refund - should have no category 1`] = `
+{
+  "amount": 50,
+  "balance": 500,
+  "category": null,
+  "counterparty_name": "Amazon Refund",
+  "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-03-05",
+  "description": null,
+  "id": "txn_os41r5u90e29shubl4000",
+  "merchant_name": null,
+  "method": "card_purchase",
+  "name": "Amazon Refund",
+  "status": "posted",
+}
+`;
+
+exports[`Transform credit card cashback - should be income 1`] = `
+{
+  "amount": 25,
+  "balance": 500,
+  "category": "income",
+  "counterparty_name": "Rewards",
+  "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-03-05",
+  "description": "Rewards",
+  "id": "txn_os41r5u90e29shubl5000",
+  "merchant_name": null,
+  "method": "other",
+  "name": "Cash Back Rewards",
+  "status": "posted",
 }
 `;
 
@@ -97,13 +154,20 @@ exports[`Transform type transfer 1`] = `
 
 exports[`Transform accounts 1`] = `
 {
+  "account_number": null,
+  "available_balance": null,
   "balance": {
     "amount": 2011100,
+    "available_balance": null,
+    "credit_limit": null,
     "currency": "USD",
   },
+  "bic": null,
+  "credit_limit": null,
   "currency": "USD",
   "enrollment_id": "enr_os557c8pck2deoskak000",
   "expires_at": null,
+  "iban": null,
   "id": "acc_os557c2mge29shubl2000",
   "institution": {
     "id": "mercury",
@@ -112,14 +176,20 @@ exports[`Transform accounts 1`] = `
     "provider": "teller",
   },
   "name": "Platinum Card",
-  "resource_id": null,
+  "resource_id": "6587",
+  "routing_number": null,
+  "sort_code": null,
+  "subtype": "credit_card",
   "type": "credit",
+  "wire_routing_number": null,
 }
 `;
 
-exports[`Transform account balance 1`] = `
+exports[`Transform account balance - depository 1`] = `
 {
   "amount": 2011100,
+  "available_balance": null,
+  "credit_limit": null,
   "currency": "USD",
 }
 `;

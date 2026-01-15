@@ -87,6 +87,69 @@ export const AccountSchema = z
         example: "2024-03-06",
       })
       .nullable(),
+    iban: z
+      .string()
+      .openapi({
+        description: "International Bank Account Number (EU/UK accounts)",
+        example: "GB82WEST12345698765432",
+      })
+      .nullable(),
+    subtype: z
+      .string()
+      .openapi({
+        description: "Account subtype (checking, savings, credit_card, etc.)",
+        example: "checking",
+      })
+      .nullable(),
+    bic: z
+      .string()
+      .openapi({
+        description: "Bank Identifier Code / SWIFT code",
+        example: "WESTGB2L",
+      })
+      .nullable(),
+    routing_number: z
+      .string()
+      .openapi({
+        description: "ACH routing number (US accounts)",
+        example: "021000021",
+      })
+      .nullable(),
+    wire_routing_number: z
+      .string()
+      .openapi({
+        description: "Wire routing number (US accounts, can differ from ACH)",
+        example: "021000089",
+      })
+      .nullable(),
+    account_number: z
+      .string()
+      .openapi({
+        description: "Full account number (sensitive)",
+        example: "1234567890",
+      })
+      .nullable(),
+    sort_code: z
+      .string()
+      .openapi({
+        description: "UK BACS sort code",
+        example: "601613",
+      })
+      .nullable(),
+    available_balance: z
+      .number()
+      .openapi({
+        description: "Available credit (cards) or available funds (depository)",
+        example: 4000,
+      })
+      .nullable(),
+    credit_limit: z
+      .number()
+      .openapi({
+        description: "Credit limit (credit cards only)",
+        example: 5000,
+      })
+      .nullable(),
   })
   .openapi("AccountSchema");
 
@@ -120,6 +183,18 @@ export const AccountBalanceParamsSchema = z
         },
         example: "test_token_ky6igyqi3qxa4",
       }),
+    accountType: z
+      .enum(["credit", "depository", "other_asset", "loan", "other_liability"])
+      .optional()
+      .openapi({
+        description:
+          "Account type for correct balance handling (credit cards use current, depository uses available)",
+        param: {
+          name: "accountType",
+          in: "query",
+        },
+        example: "depository",
+      }),
   })
   .openapi("AccountBalanceParamsSchema");
 
@@ -132,6 +207,14 @@ export const AccountBalanceSchema = z
         }),
         currency: z.string().openapi({
           example: "USD",
+        }),
+        available_balance: z.number().nullable().openapi({
+          description: "Available credit (cards) or available funds",
+          example: 4000,
+        }),
+        credit_limit: z.number().nullable().openapi({
+          description: "Credit limit (credit cards only)",
+          example: 5000,
         }),
       })
       .nullable(),

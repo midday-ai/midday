@@ -7,7 +7,7 @@ import {
   createTransactionEmbeddings,
   getTransactionsForEmbedding,
 } from "@midday/db/queries";
-import { logger, schemaTask } from "@trigger.dev/sdk";
+import { logger, schemaTask, tasks } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { enrichTransactions } from "./enrich-transaction";
 
@@ -53,6 +53,13 @@ export const embedTransaction = schemaTask({
         teamId,
         requestedCount: transactionIds.length,
       });
+
+      // Still trigger matching for new transactions even if no embeddings needed
+      await tasks.trigger("match-transactions-bidirectional", {
+        teamId,
+        newTransactionIds: transactionIds,
+      });
+
       return;
     }
 
@@ -124,6 +131,18 @@ export const embedTransaction = schemaTask({
 
     logger.info("All transaction embeddings created", {
       totalCount: transactionsToEmbed.length,
+      teamId,
+    });
+
+    // Trigger bidirectional matching after embeddings are created
+    // This matches new transactions with inbox items and vice versa
+    await tasks.trigger("match-transactions-bidirectional", {
+      teamId,
+      newTransactionIds: transactionIds,
+    });
+
+    logger.info("Triggered bidirectional transaction matching", {
+      transactionCount: transactionIds.length,
       teamId,
     });
   },

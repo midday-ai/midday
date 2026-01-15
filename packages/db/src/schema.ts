@@ -673,6 +673,18 @@ export const bankAccounts = pgTable(
     errorDetails: text("error_details"),
     errorRetries: smallint("error_retries"),
     accountReference: text("account_reference"),
+    // Additional account data for reconnect matching and user display
+    iban: text(), // IBAN (EU/UK) - encrypted at rest
+    subtype: text(), // Granular type: checking, savings, credit_card, money_market, etc.
+    bic: text(), // Bank Identifier Code / SWIFT
+    // US bank account details (Teller, Plaid)
+    routingNumber: text("routing_number"), // ACH routing number
+    wireRoutingNumber: text("wire_routing_number"), // Wire routing number
+    accountNumber: text("account_number"), // Full account number - encrypted at rest
+    sortCode: text("sort_code"), // UK BACS sort code
+    // Credit account balances
+    availableBalance: numericCasted({ precision: 10, scale: 2 }), // Available credit (cards) or available funds
+    creditLimit: numericCasted({ precision: 10, scale: 2 }), // Credit limit (cards only)
   },
   (table) => [
     index("bank_accounts_bank_connection_id_idx").using(

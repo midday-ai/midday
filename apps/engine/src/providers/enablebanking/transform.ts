@@ -1,7 +1,14 @@
 import { createHash } from "node:crypto";
+import type { AccountType } from "@engine/utils/account";
 import { getLogoURL } from "@engine/utils/logo";
 import { capitalCase } from "change-case";
-import type { Account, Balance, ConnectionStatus, Transaction } from "../types";
+import type {
+  Account,
+  Balance,
+  ConnectionStatus,
+  GetAccountBalanceResponse,
+  Transaction,
+} from "../types";
 import type {
   GetAccountDetailsResponse,
   GetBalancesResponse,
@@ -42,14 +49,63 @@ function getAccountName(account: GetAccountDetailsResponse) {
   return "Account";
 }
 
+/**
+ * Maps Enable Banking cash_account_type (ISO 20022) to Midday AccountType
+ * - CACC: Current account → depository
+ * - CARD: Card account → credit
+ * - SVGS: Savings account → depository
+ * - LOAN: Loan account → loan
+ * - CASH: Cash account → depository
+ */
+function getAccountType(cashAccountType?: string): AccountType {
+  switch (cashAccountType) {
+    case "CARD":
+      return "credit";
+    case "LOAN":
+      return "loan";
+    default:
+      return "depository";
+  }
+}
+
+/**
+ * Get available balance from EnableBanking balance.
+ * EnableBanking returns balance_type which can indicate available balance.
+ *
+ * ISO 20022 balance types include:
+ * - closingAvailable, interimAvailable, openingAvailable, forwardAvailable → available funds
+ * - closingBooked, interimBooked, openingBooked → posted/booked balance (NOT available)
+ *
+ * Only "available" types represent available funds. The "interim" prefix indicates
+ * intraday snapshot, NOT available balance.
+ */
+const getAvailableBalance = (
+  balance: GetAccountDetailsResponse["balance"],
+): number | null => {
+  // Only match balance types containing "available" (e.g., interimAvailable, closingAvailable)
+  // Do NOT match "interim" alone as interimBooked is a booked balance, not available
+  if (balance?.balance_type?.toLowerCase().includes("available")) {
+    return +balance.balance_amount.amount;
+  }
+  return null;
+};
+
 export const transformAccount = (
   account: GetAccountDetailsResponse,
 ): Account => {
+  const accountType = getAccountType(account.cash_account_type);
+  const rawAmount = +account.balance.balance_amount.amount;
+
+  // Normalize credit card balances to positive (amount owed) for consistency
+  // Enable Banking typically returns positive values, but this ensures consistency
+  const amount =
+    accountType === "credit" && rawAmount < 0 ? Math.abs(rawAmount) : rawAmount;
+
   return {
     id: account.uid,
     name: getAccountName(account),
     currency: account.currency,
-    type: "depository",
+    type: accountType,
     institution: {
       id: hashInstitutionId(
         account.institution.name,
@@ -60,12 +116,25 @@ export const transformAccount = (
       provider: "enablebanking",
     },
     balance: {
-      amount: Number.parseFloat(account.balance.balance_amount.amount),
+      amount,
       currency: account.currency,
     },
     enrollment_id: null,
     resource_id: account.identification_hash,
     expires_at: account.valid_until,
+    iban: account.account_id?.iban || null,
+    subtype: account.cash_account_type?.toLowerCase() || null, // CACC, CARD, SVGS, LOAN, CASH
+    bic: account.account_servicer?.bic_fi || null,
+    // US bank details not available for EnableBanking (EU/UK provider)
+    routing_number: null,
+    wire_routing_number: null,
+    account_number: null,
+    sort_code: null,
+    // Credit account balances - EnableBanking provides credit_limit directly
+    available_balance: getAvailableBalance(account.balance),
+    credit_limit: account.credit_limit?.amount
+      ? +account.credit_limit.amount
+      : null,
   };
 };
 
@@ -81,12 +150,47 @@ export const transformSessionData = (session: GetExchangeCodeResponse) => {
   };
 };
 
-export const transformBalance = (
-  balance: GetBalancesResponse["balances"][0],
-): Balance => ({
-  amount: Number.parseFloat(balance.balance_amount.amount),
-  currency: balance.balance_amount.currency,
-});
+type TransformBalanceParams = {
+  balance: GetBalancesResponse["balances"][0];
+  creditLimit?: { currency: string; amount: string } | null;
+  accountType?: string;
+};
+
+/**
+ * Transform Enable Banking balance to internal format.
+ *
+ * Enable Banking typically returns positive values for credit card debt.
+ * Normalization is added for safety and consistency with other providers.
+ */
+export const transformBalance = ({
+  balance,
+  creditLimit,
+  accountType,
+}: TransformBalanceParams): GetAccountBalanceResponse => {
+  const rawAmount = +balance.balance_amount.amount;
+
+  // Normalize credit card balances to positive (amount owed) for consistency
+  const amount =
+    accountType === "credit" && rawAmount < 0 ? Math.abs(rawAmount) : rawAmount;
+
+  // Check if balance_type indicates available balance
+  // Only match "available" types (e.g., interimAvailable, closingAvailable)
+  // Apply same normalization as amount for credit accounts
+  const availableBalance = balance.balance_type
+    ?.toLowerCase()
+    .includes("available")
+    ? accountType === "credit" && rawAmount < 0
+      ? Math.abs(rawAmount)
+      : rawAmount
+    : null;
+
+  return {
+    amount,
+    currency: balance.balance_amount.currency,
+    available_balance: availableBalance,
+    credit_limit: creditLimit?.amount ? +creditLimit.amount : null,
+  };
+};
 
 export const transformConnectionStatus = (
   session: GetSessionResponse,
@@ -133,12 +237,30 @@ export const transformTransactionName = (
   return "No information";
 };
 
-export const transformTransactionCategory = (transaction: GetTransaction) => {
-  // Income
-  if (
-    transaction.credit_debit_indicator === "CRDT" &&
-    +transaction.transaction_amount.amount > 0
-  ) {
+type TransformTransactionCategory = {
+  transaction: GetTransaction;
+  accountType: AccountType;
+};
+
+export const transformTransactionCategory = ({
+  transaction,
+  accountType,
+}: TransformTransactionCategory) => {
+  const amount = +transaction.transaction_amount.amount;
+  const isCredit = transaction.credit_debit_indicator === "CRDT";
+
+  // For credit (money IN)
+  if (isCredit && amount > 0) {
+    // For credit card accounts, money IN is usually a payment, not income
+    if (accountType === "credit") {
+      // Check if it's a transfer/payment type
+      const description = transaction.bank_transaction_code?.description;
+      if (description === "Transfer" || description === "Payment") {
+        return "credit-card-payment";
+      }
+      // Otherwise it's likely a refund - don't auto-categorize
+      return null;
+    }
     return "income";
   }
 
@@ -207,9 +329,15 @@ const transformCounterpartyName = (transaction: GetTransaction) => {
   return null;
 };
 
-export const transformTransaction = (
-  transaction: GetTransaction,
-): Transaction => {
+type TransformTransactionPayload = {
+  transaction: GetTransaction;
+  accountType: AccountType;
+};
+
+export const transformTransaction = ({
+  transaction,
+  accountType,
+}: TransformTransactionPayload): Transaction => {
   const name = capitalCase(transformTransactionName(transaction));
   const description = transformDescription({ transaction, name });
 
@@ -220,9 +348,9 @@ export const transformTransaction = (
     date: transaction.booking_date,
     status: "posted",
     balance: transaction.balance_after_transaction
-      ? Number.parseFloat(transaction.balance_after_transaction.amount)
+      ? +transaction.balance_after_transaction.amount
       : null,
-    category: transformTransactionCategory(transaction),
+    category: transformTransactionCategory({ transaction, accountType }),
     counterparty_name: transformCounterpartyName(transaction),
     merchant_name: null,
     method: transformTransactionMethod(transaction),

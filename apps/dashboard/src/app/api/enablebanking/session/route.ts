@@ -63,22 +63,11 @@ export async function GET(request: NextRequest) {
           status: "connected",
         })
         .eq("reference_id", sessionId)
-        .select("id, team_id")
+        .select("id")
         .single();
 
-      // Update bank account_ids based on the persisted identification_hash (account_reference)
-      await Promise.all(
-        sessionData?.accounts?.map((account) =>
-          supabase
-            .from("bank_accounts")
-            .update({
-              account_id: account.account_id,
-            })
-            .eq("account_reference", account.account_reference)
-            .eq("team_id", data?.team_id!),
-        ),
-      );
-
+      // Redirect to frontend which will trigger the reconnect job
+      // The frontend handles job triggering to track progress via runId/accessToken
       return NextResponse.redirect(
         new URL(
           `/settings/accounts?id=${data?.id}&step=reconnect`,

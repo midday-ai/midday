@@ -16,6 +16,7 @@
     "@fast-csv/format": "5.0.5",
     "@midday/db": "workspace:*",
     "@midday/email": "workspace:*",
+    "@midday/encryption": "workspace:*",
     "@midday/engine": "workspace:*",
     "@midday/engine-client": "workspace:*",
     "@midday/notifications": "workspace:*",

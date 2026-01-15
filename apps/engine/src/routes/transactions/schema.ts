@@ -18,15 +18,17 @@ export const TransactionsParamsSchema = z
       },
       example: "5341343-4234-4c65-815c-t234213442",
     }),
-    accountType: z.enum(["credit", "depository"]).openapi({
-      description:
-        "Get transactions with the correct amount depending on credit or depository",
-      param: {
-        name: "accountType",
-        in: "query",
-      },
-      example: "depository",
-    }),
+    accountType: z
+      .enum(["credit", "depository", "other_asset", "loan", "other_liability"])
+      .openapi({
+        description:
+          "Account type for correct transaction categorization (e.g., credit card payments vs income)",
+        param: {
+          name: "accountType",
+          in: "query",
+        },
+        example: "depository",
+      }),
     accessToken: z
       .string()
       .optional()

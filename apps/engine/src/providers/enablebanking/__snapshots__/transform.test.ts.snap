@@ -38,15 +38,39 @@ exports[`Transform expense transaction 1`] = `
 }
 `;
 
+exports[`Transform credit card payment - should be credit-card-payment 1`] = `
+{
+  "amount": 5000,
+  "balance": null,
+  "category": "credit-card-payment",
+  "counterparty_name": "Bank Payment",
+  "currency": "SEK",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-04-04",
+  "description": null,
+  "id": "payment123",
+  "merchant_name": null,
+  "method": "payment",
+  "name": "Credit Card Payment",
+  "status": "posted",
+}
+`;
+
 exports[`Transform account 1`] = `
 {
+  "account_number": null,
+  "available_balance": null,
   "balance": {
     "amount": 90737.96,
     "currency": "SEK",
   },
+  "bic": "SEB",
+  "credit_limit": 1000000,
   "currency": "SEK",
   "enrollment_id": null,
   "expires_at": "2024-03-06",
+  "iban": "SE234234234",
   "id": "83435345-d61cb425f293",
   "institution": {
     "id": "7df7c347a9cf",
@@ -56,13 +80,19 @@ exports[`Transform account 1`] = `
   },
   "name": "Enkla Sparkontot Företag",
   "resource_id": "3234.3GP8GRsZp9MO9sZwxoW/Fy+5rUBIsFLHcrXP8GZ/rv4=",
+  "routing_number": null,
+  "sort_code": null,
+  "subtype": "cacc",
   "type": "depository",
+  "wire_routing_number": null,
 }
 `;
 
-exports[`Transform account balance 1`] = `
+exports[`Transform account balance - depository 1`] = `
 {
   "amount": 90737.96,
+  "available_balance": null,
+  "credit_limit": null,
   "currency": "SEK",
 }
 `;

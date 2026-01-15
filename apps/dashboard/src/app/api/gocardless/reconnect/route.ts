@@ -20,6 +20,8 @@ export async function GET(req: NextRequest) {
 
   if (id) {
     await updateBankConnection(supabase, { id, referenceId });
+    // Frontend will trigger the reconnect job via useEffect when it sees step=reconnect
+    // This allows the frontend to track job progress via runId/accessToken
   }
 
   if (isDesktop === "true") {

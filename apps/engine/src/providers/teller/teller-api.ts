@@ -9,6 +9,9 @@ import type {
   DisconnectAccountRequest,
   GetAccountBalanceRequest,
   GetAccountBalanceResponse,
+  GetAccountBalancesResponse,
+  GetAccountDetailsRequest,
+  GetAccountDetailsResponse,
   GetAccountsResponse,
   GetInstitutionsResponse,
   GetTransactionsRequest,
@@ -49,9 +52,34 @@ export class TellerApi {
           accessToken,
         });
 
-        return { ...account, balance };
+        // Fetch full balances for available_balance
+        const balances = await this.getAccountBalances({
+          accountId: account.id,
+          accessToken,
+        });
+
+        return { ...account, balance, balances };
       }),
     );
+  }
+
+  /**
+   * Get full account balances including ledger and available.
+   * Returns null if balances are not available.
+   */
+  async getAccountBalances({
+    accountId,
+    accessToken,
+  }: GetAccountBalanceRequest): Promise<GetAccountBalancesResponse | null> {
+    try {
+      return await this.#get<GetAccountBalancesResponse>(
+        `/accounts/${accountId}/balances`,
+        accessToken,
+      );
+    } catch {
+      // Balances endpoint may not be available for all institutions
+      return null;
+    }
   }
 
   async getTransactions({
@@ -94,6 +122,28 @@ export class TellerApi {
 
   async getInstitutions(): Promise<GetInstitutionsResponse> {
     return this.#get("/institutions");
+  }
+
+  /**
+   * Get account details including routing numbers and account number.
+   * Available instantly for most institutions (verify.instant).
+   * Some institutions require microdeposit verification (verify.microdeposit).
+   * Returns null if account details are not available.
+   */
+  async getAccountDetails({
+    accountId,
+    accessToken,
+  }: GetAccountDetailsRequest): Promise<GetAccountDetailsResponse | null> {
+    try {
+      return await this.#get<GetAccountDetailsResponse>(
+        `/accounts/${accountId}/details`,
+        accessToken,
+      );
+    } catch (error) {
+      // Account details may not be available for all institutions
+      // or may require microdeposit verification
+      return null;
+    }
   }
 
   async getConnectionStatus({

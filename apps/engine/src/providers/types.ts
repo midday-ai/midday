@@ -50,8 +50,20 @@ export type Account = {
   institution: Institution;
   balance: Balance;
   enrollment_id: string | null; // Teller
-  resource_id: string | null; // GoCardLess
+  resource_id: string | null; // GoCardLess, EnableBanking, Teller (last_four), Plaid (persistent_account_id || mask)
   expires_at: string | null; // EnableBanking & GoCardLess
+  // Additional account data for reconnect matching and user display
+  iban: string | null; // GoCardless, EnableBanking (EU/UK accounts)
+  subtype: string | null; // Teller, Plaid, EnableBanking (checking, savings, credit_card, etc.)
+  bic: string | null; // GoCardless, EnableBanking (Bank Identifier Code / SWIFT)
+  // US bank account details (Teller, Plaid)
+  routing_number: string | null; // ACH routing number
+  wire_routing_number: string | null; // Wire routing number (can differ from ACH)
+  account_number: string | null; // Full account number (sensitive - should be encrypted when stored)
+  sort_code: string | null; // UK BACS sort code
+  // Credit account balances
+  available_balance: number | null; // Available credit (cards) or available funds (depository)
+  credit_limit: number | null; // Credit limit (credit cards only)
 };
 
 export type ConnectionStatus = {
@@ -79,11 +91,14 @@ export type GetAccountsRequest = {
 export type GetAccountBalanceRequest = {
   accountId: string;
   accessToken?: string; // Teller & Plaid
+  accountType?: string; // For correct balance handling (credit cards use current, depository uses available)
 };
 
 export type GetAccountBalanceResponse = {
   currency: string;
   amount: number;
+  available_balance: number | null;
+  credit_limit: number | null;
 };
 
 export type DeleteAccountsRequest = {

@@ -1,7 +1,7 @@
 import type { AppContext } from "@api/ai/agents/config/shared";
 import { checkBankAccountsRequired } from "@api/ai/utils/tool-helpers";
 import { db } from "@midday/db/client";
-import { getCombinedAccountBalance } from "@midday/db/queries";
+import { getCashBalance } from "@midday/db/queries";
 import { formatAmount } from "@midday/utils/format";
 import { tool } from "ai";
 import { z } from "zod";
@@ -16,7 +16,7 @@ const getAccountBalancesSchema = z.object({
 
 export const getAccountBalancesTool = tool({
   description:
-    "Get account balances for all bank accounts - returns combined total balance and individual account balances.",
+    "Get cash balance from depository accounts (checking/savings) - returns combined total and individual account balances.",
   inputSchema: getAccountBalancesSchema,
   execute: async function* ({ currency }, executionOptions) {
     const appContext = executionOptions.experimental_context as AppContext;
@@ -40,7 +40,7 @@ export const getAccountBalancesTool = tool({
     }
 
     try {
-      const result = await getCombinedAccountBalance(db, {
+      const result = await getCashBalance(db, {
         teamId,
         currency: currency ?? undefined,
       });
@@ -87,7 +87,7 @@ export const getAccountBalancesTool = tool({
       );
 
       // Build response text with markdown table
-      let responseText = `**Total Balance:** ${formattedTotalBalance}\n\n`;
+      let responseText = `**Cash Balance:** ${formattedTotalBalance}\n\n`;
 
       if (formattedAccounts.length > 0) {
         responseText += "**Account Breakdown:**\n\n";
@@ -111,7 +111,7 @@ export const getAccountBalancesTool = tool({
           }
         }
       } else {
-        responseText += "No enabled bank accounts found.";
+        responseText += "No enabled depository accounts found.";
       }
 
       yield { text: responseText };

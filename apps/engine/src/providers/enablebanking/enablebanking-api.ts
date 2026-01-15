@@ -223,10 +223,17 @@ export class EnableBankingApi {
 
       const accountDetails = await Promise.all(
         session.accounts.map(async (id) => {
-          const [details, balance] = await Promise.all([
+          const [details, balanceResponse] = await Promise.all([
             this.getAccountDetails(id),
-            this.getAccountBalance(id),
+            this.#get<GetBalancesResponse>(`/accounts/${id}/balances`),
           ]);
+
+          // Find balance with highest amount
+          const balance = balanceResponse.balances.reduce((max, current) => {
+            const currentAmount = +current.balance_amount.amount;
+            const maxAmount = +max.balance_amount.amount;
+            return currentAmount > maxAmount ? current : max;
+          }, balanceResponse.balances[0]);
 
           return {
             ...details,
@@ -244,21 +251,27 @@ export class EnableBankingApi {
     }
   }
 
-  async getAccountBalance(
-    accountId: string,
-  ): Promise<GetBalancesResponse["balances"][0]> {
-    const response = await this.#get<GetBalancesResponse>(
-      `/accounts/${accountId}/balances`,
-    );
+  async getAccountBalance(accountId: string): Promise<{
+    balance: GetBalancesResponse["balances"][0];
+    creditLimit?: { currency: string; amount: string } | null;
+  }> {
+    // Fetch both balance and account details (for credit_limit)
+    const [balanceResponse, accountDetails] = await Promise.all([
+      this.#get<GetBalancesResponse>(`/accounts/${accountId}/balances`),
+      this.getAccountDetails(accountId).catch(() => null),
+    ]);
 
     // Find balance with highest amount
-    const highestBalance = response.balances.reduce((max, current) => {
-      const currentAmount = Number.parseFloat(current.balance_amount.amount);
-      const maxAmount = Number.parseFloat(max.balance_amount.amount);
+    const highestBalance = balanceResponse.balances.reduce((max, current) => {
+      const currentAmount = +current.balance_amount.amount;
+      const maxAmount = +max.balance_amount.amount;
       return currentAmount > maxAmount ? current : max;
-    }, response.balances[0]);
+    }, balanceResponse.balances[0]);
 
-    return highestBalance;
+    return {
+      balance: highestBalance,
+      creditLimit: accountDetails?.credit_limit,
+    };
   }
 
   /**

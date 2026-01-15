@@ -14,6 +14,83 @@ export type Database = {
   };
   public: {
     Tables: {
+      accounting_sync_records: {
+        Row: {
+          created_at: string;
+          error_code: string | null;
+          error_message: string | null;
+          id: string;
+          provider: Database["public"]["Enums"]["accounting_provider"];
+          provider_entity_type: string | null;
+          provider_tenant_id: string;
+          provider_transaction_id: string | null;
+          status: Database["public"]["Enums"]["accounting_sync_status"];
+          sync_type: Database["public"]["Enums"]["accounting_sync_type"] | null;
+          synced_at: string;
+          synced_attachment_mapping: Json;
+          team_id: string;
+          transaction_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          error_code?: string | null;
+          error_message?: string | null;
+          id?: string;
+          provider: Database["public"]["Enums"]["accounting_provider"];
+          provider_entity_type?: string | null;
+          provider_tenant_id: string;
+          provider_transaction_id?: string | null;
+          status?: Database["public"]["Enums"]["accounting_sync_status"];
+          sync_type?:
+            | Database["public"]["Enums"]["accounting_sync_type"]
+            | null;
+          synced_at?: string;
+          synced_attachment_mapping?: Json;
+          team_id: string;
+          transaction_id: string;
+        };
+        Update: {
+          created_at?: string;
+          error_code?: string | null;
+          error_message?: string | null;
+          id?: string;
+          provider?: Database["public"]["Enums"]["accounting_provider"];
+          provider_entity_type?: string | null;
+          provider_tenant_id?: string;
+          provider_transaction_id?: string | null;
+          status?: Database["public"]["Enums"]["accounting_sync_status"];
+          sync_type?:
+            | Database["public"]["Enums"]["accounting_sync_type"]
+            | null;
+          synced_at?: string;
+          synced_attachment_mapping?: Json;
+          team_id?: string;
+          transaction_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "accounting_sync_records_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "team_limits_metrics";
+            referencedColumns: ["team_id"];
+          },
+          {
+            foreignKeyName: "accounting_sync_records_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "accounting_sync_records_transaction_id_fkey";
+            columns: ["transaction_id"];
+            isOneToOne: false;
+            referencedRelation: "transactions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       activities: {
         Row: {
           created_at: string;
@@ -194,60 +271,87 @@ export type Database = {
       bank_accounts: {
         Row: {
           account_id: string;
+          account_number: string | null;
           account_reference: string | null;
           balance: number | null;
           bank_connection_id: string | null;
           base_balance: number | null;
           base_currency: string | null;
+          bic: string | null;
           created_at: string;
           created_by: string;
           currency: string | null;
           enabled: boolean;
           error_details: string | null;
           error_retries: number | null;
+          iban: string | null;
           id: string;
           manual: boolean | null;
           name: string | null;
+          routing_number: string | null;
+          sort_code: string | null;
+          subtype: string | null;
           team_id: string;
           type: Database["public"]["Enums"]["account_type"] | null;
+          wire_routing_number: string | null;
+          available_balance: number | null;
+          credit_limit: number | null;
         };
         Insert: {
           account_id: string;
+          account_number?: string | null;
           account_reference?: string | null;
           balance?: number | null;
           bank_connection_id?: string | null;
           base_balance?: number | null;
           base_currency?: string | null;
+          bic?: string | null;
           created_at?: string;
           created_by: string;
           currency?: string | null;
           enabled?: boolean;
           error_details?: string | null;
           error_retries?: number | null;
+          iban?: string | null;
           id?: string;
           manual?: boolean | null;
           name?: string | null;
+          routing_number?: string | null;
+          sort_code?: string | null;
+          subtype?: string | null;
           team_id: string;
           type?: Database["public"]["Enums"]["account_type"] | null;
+          wire_routing_number?: string | null;
+          available_balance?: number | null;
+          credit_limit?: number | null;
         };
         Update: {
           account_id?: string;
+          account_number?: string | null;
           account_reference?: string | null;
           balance?: number | null;
           bank_connection_id?: string | null;
           base_balance?: number | null;
           base_currency?: string | null;
+          bic?: string | null;
           created_at?: string;
           created_by?: string;
           currency?: string | null;
           enabled?: boolean;
           error_details?: string | null;
           error_retries?: number | null;
+          iban?: string | null;
           id?: string;
           manual?: boolean | null;
           name?: string | null;
+          routing_number?: string | null;
+          sort_code?: string | null;
+          subtype?: string | null;
           team_id?: string;
           type?: Database["public"]["Enums"]["account_type"] | null;
+          wire_routing_number?: string | null;
+          available_balance?: number | null;
+          credit_limit?: number | null;
         };
         Relationships: [
           {
@@ -577,20 +681,51 @@ export type Database = {
           address_line_1: string | null;
           address_line_2: string | null;
           billing_email: string | null;
+          brand_color: string | null;
+          ceo_name: string | null;
           city: string | null;
+          company_type: string | null;
           contact: string | null;
           country: string | null;
           country_code: string | null;
           created_at: string;
+          default_payment_terms: number | null;
+          description: string | null;
           email: string;
-          fts: unknown | null;
+          employee_count: string | null;
+          enriched_at: string | null;
+          enrichment_status: string | null;
+          estimated_revenue: string | null;
+          external_id: string | null;
+          facebook_url: string | null;
+          finance_contact: string | null;
+          finance_contact_email: string | null;
+          fiscal_year_end: string | null;
+          founded_year: number | null;
+          fts: unknown;
+          funding_stage: string | null;
+          headquarters_location: string | null;
           id: string;
+          industry: string | null;
+          instagram_url: string | null;
+          is_archived: boolean | null;
+          linkedin_url: string | null;
+          logo_url: string | null;
           name: string;
           note: string | null;
           phone: string | null;
+          portal_enabled: boolean | null;
+          portal_id: string | null;
+          preferred_currency: string | null;
+          primary_language: string | null;
+          source: string | null;
           state: string | null;
+          status: string | null;
           team_id: string;
+          timezone: string | null;
           token: string;
+          total_funding: string | null;
+          twitter_url: string | null;
           vat_number: string | null;
           website: string | null;
           zip: string | null;
@@ -599,20 +734,51 @@ export type Database = {
           address_line_1?: string | null;
           address_line_2?: string | null;
           billing_email?: string | null;
+          brand_color?: string | null;
+          ceo_name?: string | null;
           city?: string | null;
+          company_type?: string | null;
           contact?: string | null;
           country?: string | null;
           country_code?: string | null;
           created_at?: string;
+          default_payment_terms?: number | null;
+          description?: string | null;
           email: string;
-          fts?: unknown | null;
+          employee_count?: string | null;
+          enriched_at?: string | null;
+          enrichment_status?: string | null;
+          estimated_revenue?: string | null;
+          external_id?: string | null;
+          facebook_url?: string | null;
+          finance_contact?: string | null;
+          finance_contact_email?: string | null;
+          fiscal_year_end?: string | null;
+          founded_year?: number | null;
+          fts?: unknown;
+          funding_stage?: string | null;
+          headquarters_location?: string | null;
           id?: string;
+          industry?: string | null;
+          instagram_url?: string | null;
+          is_archived?: boolean | null;
+          linkedin_url?: string | null;
+          logo_url?: string | null;
           name: string;
           note?: string | null;
           phone?: string | null;
+          portal_enabled?: boolean | null;
+          portal_id?: string | null;
+          preferred_currency?: string | null;
+          primary_language?: string | null;
+          source?: string | null;
           state?: string | null;
+          status?: string | null;
           team_id?: string;
+          timezone?: string | null;
           token?: string;
+          total_funding?: string | null;
+          twitter_url?: string | null;
           vat_number?: string | null;
           website?: string | null;
           zip?: string | null;
@@ -621,20 +787,51 @@ export type Database = {
           address_line_1?: string | null;
           address_line_2?: string | null;
           billing_email?: string | null;
+          brand_color?: string | null;
+          ceo_name?: string | null;
           city?: string | null;
+          company_type?: string | null;
           contact?: string | null;
           country?: string | null;
           country_code?: string | null;
           created_at?: string;
+          default_payment_terms?: number | null;
+          description?: string | null;
           email?: string;
-          fts?: unknown | null;
+          employee_count?: string | null;
+          enriched_at?: string | null;
+          enrichment_status?: string | null;
+          estimated_revenue?: string | null;
+          external_id?: string | null;
+          facebook_url?: string | null;
+          finance_contact?: string | null;
+          finance_contact_email?: string | null;
+          fiscal_year_end?: string | null;
+          founded_year?: number | null;
+          fts?: unknown;
+          funding_stage?: string | null;
+          headquarters_location?: string | null;
           id?: string;
+          industry?: string | null;
+          instagram_url?: string | null;
+          is_archived?: boolean | null;
+          linkedin_url?: string | null;
+          logo_url?: string | null;
           name?: string;
           note?: string | null;
           phone?: string | null;
+          portal_enabled?: boolean | null;
+          portal_id?: string | null;
+          preferred_currency?: string | null;
+          primary_language?: string | null;
+          source?: string | null;
           state?: string | null;
+          status?: string | null;
           team_id?: string;
+          timezone?: string | null;
           token?: string;
+          total_funding?: string | null;
+          twitter_url?: string | null;
           vat_number?: string | null;
           website?: string | null;
           zip?: string | null;
@@ -769,10 +966,10 @@ export type Database = {
           content: string | null;
           created_at: string | null;
           date: string | null;
-          fts: unknown | null;
-          fts_english: unknown | null;
-          fts_language: unknown | null;
-          fts_simple: unknown | null;
+          fts: unknown;
+          fts_english: unknown;
+          fts_language: unknown;
+          fts_simple: unknown;
           id: string;
           language: string | null;
           metadata: Json | null;
@@ -794,10 +991,10 @@ export type Database = {
           content?: string | null;
           created_at?: string | null;
           date?: string | null;
-          fts?: unknown | null;
-          fts_english?: unknown | null;
-          fts_language?: unknown | null;
-          fts_simple?: unknown | null;
+          fts?: unknown;
+          fts_english?: unknown;
+          fts_language?: unknown;
+          fts_simple?: unknown;
           id?: string;
           language?: string | null;
           metadata?: Json | null;
@@ -819,10 +1016,10 @@ export type Database = {
           content?: string | null;
           created_at?: string | null;
           date?: string | null;
-          fts?: unknown | null;
-          fts_english?: unknown | null;
-          fts_language?: unknown | null;
-          fts_simple?: unknown | null;
+          fts?: unknown;
+          fts_english?: unknown;
+          fts_language?: unknown;
+          fts_simple?: unknown;
           id?: string;
           language?: string | null;
           metadata?: Json | null;
@@ -902,11 +1099,14 @@ export type Database = {
           file_name: string | null;
           file_path: string[] | null;
           forwarded_to: string | null;
-          fts: unknown | null;
+          fts: unknown;
+          grouped_inbox_id: string | null;
           id: string;
           inbox_account_id: string | null;
+          invoice_number: string | null;
           meta: Json | null;
           reference_id: string | null;
+          sender_email: string | null;
           size: number | null;
           status: Database["public"]["Enums"]["inbox_status"] | null;
           tax_amount: number | null;
@@ -932,11 +1132,14 @@ export type Database = {
           file_name?: string | null;
           file_path?: string[] | null;
           forwarded_to?: string | null;
-          fts?: unknown | null;
+          fts?: unknown;
+          grouped_inbox_id?: string | null;
           id?: string;
           inbox_account_id?: string | null;
+          invoice_number?: string | null;
           meta?: Json | null;
           reference_id?: string | null;
+          sender_email?: string | null;
           size?: number | null;
           status?: Database["public"]["Enums"]["inbox_status"] | null;
           tax_amount?: number | null;
@@ -961,11 +1164,14 @@ export type Database = {
           file_name?: string | null;
           file_path?: string[] | null;
           forwarded_to?: string | null;
-          fts?: unknown | null;
+          fts?: unknown;
+          grouped_inbox_id?: string | null;
           id?: string;
           inbox_account_id?: string | null;
+          invoice_number?: string | null;
           meta?: Json | null;
           reference_id?: string | null;
+          sender_email?: string | null;
           size?: number | null;
           status?: Database["public"]["Enums"]["inbox_status"] | null;
           tax_amount?: number | null;
@@ -982,6 +1188,13 @@ export type Database = {
             columns: ["attachment_id"];
             isOneToOne: false;
             referencedRelation: "transaction_attachments";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "inbox_grouped_inbox_id_fkey";
+            columns: ["grouped_inbox_id"];
+            isOneToOne: false;
+            referencedRelation: "inbox";
             referencedColumns: ["id"];
           },
           {
@@ -1083,6 +1296,45 @@ export type Database = {
           },
         ];
       };
+      inbox_blocklist: {
+        Row: {
+          created_at: string;
+          id: string;
+          team_id: string;
+          type: Database["public"]["Enums"]["inbox_blocklist_type"];
+          value: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          team_id: string;
+          type: Database["public"]["Enums"]["inbox_blocklist_type"];
+          value: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          team_id?: string;
+          type?: Database["public"]["Enums"]["inbox_blocklist_type"];
+          value?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "inbox_blocklist_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "team_limits_metrics";
+            referencedColumns: ["team_id"];
+          },
+          {
+            foreignKeyName: "inbox_blocklist_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       inbox_embeddings: {
         Row: {
           created_at: string;
@@ -1135,6 +1387,135 @@ export type Database = {
           },
         ];
       };
+      insight_user_status: {
+        Row: {
+          created_at: string;
+          dismissed_at: string | null;
+          insight_id: string;
+          read_at: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          dismissed_at?: string | null;
+          insight_id: string;
+          read_at?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          dismissed_at?: string | null;
+          insight_id?: string;
+          read_at?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "insight_user_status_insight_id_fkey";
+            columns: ["insight_id"];
+            isOneToOne: false;
+            referencedRelation: "insights";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "insight_user_status_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      insights: {
+        Row: {
+          activity: Json | null;
+          all_metrics: Json | null;
+          anomalies: Json | null;
+          audio_path: string | null;
+          content: Json | null;
+          created_at: string;
+          currency: string;
+          expense_anomalies: Json | null;
+          generated_at: string | null;
+          id: string;
+          milestones: Json | null;
+          period_end: string;
+          period_number: number;
+          period_start: string;
+          period_type: Database["public"]["Enums"]["insight_period_type"];
+          period_year: number;
+          selected_metrics: Json | null;
+          status: Database["public"]["Enums"]["insight_status"];
+          team_id: string;
+          title: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          activity?: Json | null;
+          all_metrics?: Json | null;
+          anomalies?: Json | null;
+          audio_path?: string | null;
+          content?: Json | null;
+          created_at?: string;
+          currency: string;
+          expense_anomalies?: Json | null;
+          generated_at?: string | null;
+          id?: string;
+          milestones?: Json | null;
+          period_end: string;
+          period_number: number;
+          period_start: string;
+          period_type: Database["public"]["Enums"]["insight_period_type"];
+          period_year: number;
+          selected_metrics?: Json | null;
+          status?: Database["public"]["Enums"]["insight_status"];
+          team_id: string;
+          title?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          activity?: Json | null;
+          all_metrics?: Json | null;
+          anomalies?: Json | null;
+          audio_path?: string | null;
+          content?: Json | null;
+          created_at?: string;
+          currency?: string;
+          expense_anomalies?: Json | null;
+          generated_at?: string | null;
+          id?: string;
+          milestones?: Json | null;
+          period_end?: string;
+          period_number?: number;
+          period_start?: string;
+          period_type?: Database["public"]["Enums"]["insight_period_type"];
+          period_year?: number;
+          selected_metrics?: Json | null;
+          status?: Database["public"]["Enums"]["insight_status"];
+          team_id?: string;
+          title?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "insights_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "team_limits_metrics";
+            referencedColumns: ["team_id"];
+          },
+          {
+            foreignKeyName: "insights_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       invoice_comments: {
         Row: {
           created_at: string;
@@ -1156,12 +1537,13 @@ export type Database = {
           created_by: string | null;
           currency: string | null;
           description: string | null;
-          fts: unknown | null;
+          fts: unknown;
           id: string;
           is_active: boolean;
           last_used_at: string | null;
           name: string;
           price: number | null;
+          tax_rate: number | null;
           team_id: string;
           unit: string | null;
           updated_at: string | null;
@@ -1172,12 +1554,13 @@ export type Database = {
           created_by?: string | null;
           currency?: string | null;
           description?: string | null;
-          fts?: unknown | null;
+          fts?: unknown;
           id?: string;
           is_active?: boolean;
           last_used_at?: string | null;
           name: string;
           price?: number | null;
+          tax_rate?: number | null;
           team_id: string;
           unit?: string | null;
           updated_at?: string | null;
@@ -1188,12 +1571,13 @@ export type Database = {
           created_by?: string | null;
           currency?: string | null;
           description?: string | null;
-          fts?: unknown | null;
+          fts?: unknown;
           id?: string;
           is_active?: boolean;
           last_used_at?: string | null;
           name?: string;
           price?: number | null;
+          tax_rate?: number | null;
           team_id?: string;
           unit?: string | null;
           updated_at?: string | null;
@@ -1223,6 +1607,159 @@ export type Database = {
           },
         ];
       };
+      invoice_recurring: {
+        Row: {
+          amount: number | null;
+          bottom_block: Json | null;
+          consecutive_failures: number;
+          created_at: string;
+          currency: string | null;
+          customer_id: string | null;
+          customer_name: string | null;
+          discount: number | null;
+          due_date_offset: number;
+          end_count: number | null;
+          end_date: string | null;
+          end_type: Database["public"]["Enums"]["invoice_recurring_end_type"];
+          frequency: Database["public"]["Enums"]["invoice_recurring_frequency"];
+          frequency_day: number | null;
+          frequency_interval: number | null;
+          frequency_week: number | null;
+          from_details: Json | null;
+          id: string;
+          invoices_generated: number;
+          last_generated_at: string | null;
+          line_items: Json | null;
+          next_scheduled_at: string | null;
+          note_details: Json | null;
+          payment_details: Json | null;
+          status: Database["public"]["Enums"]["invoice_recurring_status"];
+          subtotal: number | null;
+          tax: number | null;
+          team_id: string;
+          template: Json | null;
+          template_id: string | null;
+          timezone: string;
+          top_block: Json | null;
+          upcoming_notification_sent_at: string | null;
+          updated_at: string | null;
+          user_id: string;
+          vat: number | null;
+        };
+        Insert: {
+          amount?: number | null;
+          bottom_block?: Json | null;
+          consecutive_failures?: number;
+          created_at?: string;
+          currency?: string | null;
+          customer_id?: string | null;
+          customer_name?: string | null;
+          discount?: number | null;
+          due_date_offset?: number;
+          end_count?: number | null;
+          end_date?: string | null;
+          end_type: Database["public"]["Enums"]["invoice_recurring_end_type"];
+          frequency: Database["public"]["Enums"]["invoice_recurring_frequency"];
+          frequency_day?: number | null;
+          frequency_interval?: number | null;
+          frequency_week?: number | null;
+          from_details?: Json | null;
+          id?: string;
+          invoices_generated?: number;
+          last_generated_at?: string | null;
+          line_items?: Json | null;
+          next_scheduled_at?: string | null;
+          note_details?: Json | null;
+          payment_details?: Json | null;
+          status?: Database["public"]["Enums"]["invoice_recurring_status"];
+          subtotal?: number | null;
+          tax?: number | null;
+          team_id: string;
+          template?: Json | null;
+          template_id?: string | null;
+          timezone: string;
+          top_block?: Json | null;
+          upcoming_notification_sent_at?: string | null;
+          updated_at?: string | null;
+          user_id: string;
+          vat?: number | null;
+        };
+        Update: {
+          amount?: number | null;
+          bottom_block?: Json | null;
+          consecutive_failures?: number;
+          created_at?: string;
+          currency?: string | null;
+          customer_id?: string | null;
+          customer_name?: string | null;
+          discount?: number | null;
+          due_date_offset?: number;
+          end_count?: number | null;
+          end_date?: string | null;
+          end_type?: Database["public"]["Enums"]["invoice_recurring_end_type"];
+          frequency?: Database["public"]["Enums"]["invoice_recurring_frequency"];
+          frequency_day?: number | null;
+          frequency_interval?: number | null;
+          frequency_week?: number | null;
+          from_details?: Json | null;
+          id?: string;
+          invoices_generated?: number;
+          last_generated_at?: string | null;
+          line_items?: Json | null;
+          next_scheduled_at?: string | null;
+          note_details?: Json | null;
+          payment_details?: Json | null;
+          status?: Database["public"]["Enums"]["invoice_recurring_status"];
+          subtotal?: number | null;
+          tax?: number | null;
+          team_id?: string;
+          template?: Json | null;
+          template_id?: string | null;
+          timezone?: string;
+          top_block?: Json | null;
+          upcoming_notification_sent_at?: string | null;
+          updated_at?: string | null;
+          user_id?: string;
+          vat?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "invoice_recurring_customer_id_fkey";
+            columns: ["customer_id"];
+            isOneToOne: false;
+            referencedRelation: "customers";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invoice_recurring_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "team_limits_metrics";
+            referencedColumns: ["team_id"];
+          },
+          {
+            foreignKeyName: "invoice_recurring_team_id_fkey";
+            columns: ["team_id"];
+            isOneToOne: false;
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invoice_recurring_template_id_fkey";
+            columns: ["template_id"];
+            isOneToOne: false;
+            referencedRelation: "invoice_templates";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invoice_recurring_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       invoice_templates: {
         Row: {
           created_at: string;
@@ -1238,18 +1775,24 @@ export type Database = {
           id: string;
           include_decimals: boolean | null;
           include_discount: boolean | null;
+          include_line_item_tax: boolean | null;
           include_pdf: boolean | null;
           include_qr: boolean | null;
           include_tax: boolean | null;
           include_units: boolean | null;
           include_vat: boolean | null;
           invoice_no_label: string | null;
+          is_default: boolean;
           issue_date_label: string | null;
+          line_item_tax_label: string | null;
           logo_url: string | null;
+          name: string;
           note_details: Json | null;
           note_label: string | null;
           payment_details: Json | null;
+          payment_enabled: boolean | null;
           payment_label: string | null;
+          payment_terms_days: number | null;
           price_label: string | null;
           quantity_label: string | null;
           send_copy: boolean | null;
@@ -1278,18 +1821,24 @@ export type Database = {
           id?: string;
           include_decimals?: boolean | null;
           include_discount?: boolean | null;
+          include_line_item_tax?: boolean | null;
           include_pdf?: boolean | null;
           include_qr?: boolean | null;
           include_tax?: boolean | null;
           include_units?: boolean | null;
           include_vat?: boolean | null;
           invoice_no_label?: string | null;
+          is_default?: boolean;
           issue_date_label?: string | null;
+          line_item_tax_label?: string | null;
           logo_url?: string | null;
+          name?: string;
           note_details?: Json | null;
           note_label?: string | null;
           payment_details?: Json | null;
+          payment_enabled?: boolean | null;
           payment_label?: string | null;
+          payment_terms_days?: number | null;
           price_label?: string | null;
           quantity_label?: string | null;
           send_copy?: boolean | null;
@@ -1318,18 +1867,24 @@ export type Database = {
           id?: string;
           include_decimals?: boolean | null;
           include_discount?: boolean | null;
+          include_line_item_tax?: boolean | null;
           include_pdf?: boolean | null;
           include_qr?: boolean | null;
           include_tax?: boolean | null;
           include_units?: boolean | null;
           include_vat?: boolean | null;
           invoice_no_label?: string | null;
+          is_default?: boolean;
           issue_date_label?: string | null;
+          line_item_tax_label?: string | null;
           logo_url?: string | null;
+          name?: string;
           note_details?: Json | null;
           note_label?: string | null;
           payment_details?: Json | null;
+          payment_enabled?: boolean | null;
           payment_label?: string | null;
+          payment_terms_days?: number | null;
           price_label?: string | null;
           quantity_label?: string | null;
           send_copy?: boolean | null;
@@ -1348,14 +1903,14 @@ export type Database = {
           {
             foreignKeyName: "invoice_settings_team_id_fkey";
             columns: ["team_id"];
-            isOneToOne: true;
+            isOneToOne: false;
             referencedRelation: "team_limits_metrics";
             referencedColumns: ["team_id"];
           },
           {
             foreignKeyName: "invoice_settings_team_id_fkey";
             columns: ["team_id"];
-            isOneToOne: true;
+            isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
           },
@@ -1376,16 +1931,20 @@ export type Database = {
           file_path: string[] | null;
           file_size: number | null;
           from_details: Json | null;
-          fts: unknown | null;
+          fts: unknown;
           id: string;
           internal_note: string | null;
           invoice_number: string | null;
+          invoice_recurring_id: string | null;
           issue_date: string | null;
           line_items: Json | null;
           note: string | null;
           note_details: Json | null;
           paid_at: string | null;
           payment_details: Json | null;
+          payment_intent_id: string | null;
+          recurring_sequence: number | null;
+          refunded_at: string | null;
           reminder_sent_at: string | null;
           scheduled_at: string | null;
           scheduled_job_id: string | null;
@@ -1396,6 +1955,7 @@ export type Database = {
           tax: number | null;
           team_id: string;
           template: Json | null;
+          template_id: string | null;
           token: string;
           top_block: Json | null;
           updated_at: string | null;
@@ -1418,16 +1978,20 @@ export type Database = {
           file_path?: string[] | null;
           file_size?: number | null;
           from_details?: Json | null;
-          fts?: unknown | null;
+          fts?: unknown;
           id?: string;
           internal_note?: string | null;
           invoice_number?: string | null;
+          invoice_recurring_id?: string | null;
           issue_date?: string | null;
           line_items?: Json | null;
           note?: string | null;
           note_details?: Json | null;
           paid_at?: string | null;
           payment_details?: Json | null;
+          payment_intent_id?: string | null;
+          recurring_sequence?: number | null;
+          refunded_at?: string | null;
           reminder_sent_at?: string | null;
           scheduled_at?: string | null;
           scheduled_job_id?: string | null;
@@ -1438,6 +2002,7 @@ export type Database = {
           tax?: number | null;
           team_id: string;
           template?: Json | null;
+          template_id?: string | null;
           token?: string;
           top_block?: Json | null;
           updated_at?: string | null;
@@ -1460,16 +2025,20 @@ export type Database = {
           file_path?: string[] | null;
           file_size?: number | null;
           from_details?: Json | null;
-          fts?: unknown | null;
+          fts?: unknown;
           id?: string;
           internal_note?: string | null;
           invoice_number?: string | null;
+          invoice_recurring_id?: string | null;
           issue_date?: string | null;
           line_items?: Json | null;
           note?: string | null;
           note_details?: Json | null;
           paid_at?: string | null;
           payment_details?: Json | null;
+          payment_intent_id?: string | null;
+          recurring_sequence?: number | null;
+          refunded_at?: string | null;
           reminder_sent_at?: string | null;
           scheduled_at?: string | null;
           scheduled_job_id?: string | null;
@@ -1480,6 +2049,7 @@ export type Database = {
           tax?: number | null;
           team_id?: string;
           template?: Json | null;
+          template_id?: string | null;
           token?: string;
           top_block?: Json | null;
           updated_at?: string | null;
@@ -1504,6 +2074,13 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "invoices_invoice_recurring_id_fkey";
+            columns: ["invoice_recurring_id"];
+            isOneToOne: false;
+            referencedRelation: "invoice_recurring";
+            referencedColumns: ["id"];
+          },
+          {
             foreignKeyName: "invoices_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
@@ -1515,6 +2092,13 @@ export type Database = {
             columns: ["team_id"];
             isOneToOne: false;
             referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invoices_template_id_fkey";
+            columns: ["template_id"];
+            isOneToOne: false;
+            referencedRelation: "invoice_templates";
             referencedColumns: ["id"];
           },
         ];
@@ -2001,6 +2585,11 @@ export type Database = {
           logo_url: string | null;
           name: string | null;
           plan: Database["public"]["Enums"]["plans"];
+          stripe_account_id: string | null;
+          stripe_connect_status: string | null;
+          subscription_status:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null;
         };
         Insert: {
           base_currency?: string | null;
@@ -2019,6 +2608,11 @@ export type Database = {
           logo_url?: string | null;
           name?: string | null;
           plan?: Database["public"]["Enums"]["plans"];
+          stripe_account_id?: string | null;
+          stripe_connect_status?: string | null;
+          subscription_status?:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null;
         };
         Update: {
           base_currency?: string | null;
@@ -2037,6 +2631,11 @@ export type Database = {
           logo_url?: string | null;
           name?: string | null;
           plan?: Database["public"]["Enums"]["plans"];
+          stripe_account_id?: string | null;
+          stripe_connect_status?: string | null;
+          subscription_status?:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null;
         };
         Relationships: [];
       };
@@ -2183,7 +2782,7 @@ export type Database = {
           customer_id: string | null;
           description: string | null;
           estimate: number | null;
-          fts: unknown | null;
+          fts: unknown;
           id: string;
           name: string;
           rate: number | null;
@@ -2205,7 +2804,7 @@ export type Database = {
           customer_id?: string | null;
           description?: string | null;
           estimate?: number | null;
-          fts?: unknown | null;
+          fts?: unknown;
           id?: string;
           name: string;
           rate?: number | null;
@@ -2219,7 +2818,7 @@ export type Database = {
           customer_id?: string | null;
           description?: string | null;
           estimate?: number | null;
-          fts?: unknown | null;
+          fts?: unknown;
           id?: string;
           name?: string;
           rate?: number | null;
@@ -2733,7 +3332,7 @@ export type Database = {
           frequency:
             | Database["public"]["Enums"]["transaction_frequency"]
             | null;
-          fts_vector: unknown | null;
+          fts_vector: unknown;
           id: string;
           internal: boolean | null;
           internal_id: string;
@@ -2773,7 +3372,7 @@ export type Database = {
           frequency?:
             | Database["public"]["Enums"]["transaction_frequency"]
             | null;
-          fts_vector?: unknown | null;
+          fts_vector?: unknown;
           id?: string;
           internal?: boolean | null;
           internal_id: string;
@@ -2810,7 +3409,7 @@ export type Database = {
           frequency?:
             | Database["public"]["Enums"]["transaction_frequency"]
             | null;
-          fts_vector?: unknown | null;
+          fts_vector?: unknown;
           id?: string;
           internal?: boolean | null;
           internal_id?: string;
@@ -3040,7 +3639,9 @@ export type Database = {
     Functions: {
       amount_text: {
         Args: { "": Database["public"]["Tables"]["transactions"]["Row"] };
-        Returns: string;
+        Returns: {
+          error: true;
+        } & "the function public.amount_text with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache";
       };
       calculate_amount_similarity: {
         Args: {
@@ -3120,7 +3721,9 @@ export type Database = {
       };
       calculated_vat: {
         Args: { "": Database["public"]["Tables"]["transactions"]["Row"] };
-        Returns: number;
+        Returns: {
+          error: true;
+        } & "the function public.calculated_vat with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache";
       };
       classify_frequency_v2: {
         Args: { p_team_id: string };
@@ -3133,29 +3736,26 @@ export type Database = {
           transaction_group: string;
         }[];
       };
-      create_team: {
-        Args: { name: string };
-        Returns: string;
-      };
+      create_team: { Args: { name: string }; Returns: string };
       create_team_v2: {
         Args: { currency?: string; name: string };
         Returns: string;
       };
-      determine_transaction_frequency: {
-        Args:
-          | {
+      determine_transaction_frequency:
+        | {
+            Args: { p_avg_days_between: number; p_transaction_count: number };
+            Returns: string;
+          }
+        | {
+            Args: {
               p_avg_days_between: number;
               p_is_recurring: boolean;
               p_latest_frequency: string;
               p_transaction_count: number;
-            }
-          | { p_avg_days_between: number; p_transaction_count: number };
-        Returns: string;
-      };
-      extract_product_names: {
-        Args: { products_json: Json };
-        Returns: string;
-      };
+            };
+            Returns: string;
+          };
+      extract_product_names: { Args: { products_json: Json }; Returns: string };
       find_matching_inbox_item: {
         Args: { input_transaction_id: string; specific_inbox_id?: string };
         Returns: {
@@ -3170,26 +3770,26 @@ export type Database = {
         Args: { message: string; secret_key: string };
         Returns: string;
       };
-      generate_id: {
-        Args: { size: number };
-        Returns: string;
-      };
-      generate_inbox: {
-        Args: { size: number };
-        Returns: string;
-      };
-      generate_inbox_fts: {
-        Args:
-          | {
+      generate_id: { Args: { size: number }; Returns: string };
+      generate_inbox: { Args: { size: number }; Returns: string };
+      generate_inbox_fts:
+        | {
+            Args: { display_name: string; products_json: Json };
+            Returns: unknown;
+          }
+        | {
+            Args: { display_name_text: string; product_names: string };
+            Returns: unknown;
+          }
+        | {
+            Args: {
               amount: number;
               display_name_text: string;
               due_date: string;
               product_names: string;
-            }
-          | { display_name: string; products_json: Json }
-          | { display_name_text: string; product_names: string };
-        Returns: unknown;
-      };
+            };
+            Returns: unknown;
+          };
       get_all_transactions_by_account: {
         Args: { account_id: string };
         Returns: {
@@ -3210,7 +3810,7 @@ export type Database = {
           frequency:
             | Database["public"]["Enums"]["transaction_frequency"]
             | null;
-          fts_vector: unknown | null;
+          fts_vector: unknown;
           id: string;
           internal: boolean | null;
           internal_id: string;
@@ -3227,10 +3827,18 @@ export type Database = {
           tax_type: string | null;
           team_id: string;
         }[];
+        SetofOptions: {
+          from: "*";
+          to: "transactions";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
       };
       get_assigned_users_for_project: {
         Args: { "": Database["public"]["Tables"]["tracker_projects"]["Row"] };
-        Returns: Json;
+        Returns: {
+          error: true;
+        } & "the function public.get_assigned_users_for_project with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache";
       };
       get_bank_account_currencies: {
         Args: { team_id: string };
@@ -3307,14 +3915,8 @@ export type Database = {
           value: number;
         }[];
       };
-      get_current_user_team_id: {
-        Args: Record<PropertyKey, never>;
-        Returns: string;
-      };
-      get_customer_name: {
-        Args: { customer_id: string };
-        Returns: string;
-      };
+      get_current_user_team_id: { Args: never; Returns: string };
+      get_customer_name: { Args: { customer_id: string }; Returns: string };
       get_expenses: {
         Args: {
           base_currency?: string;
@@ -3346,10 +3948,7 @@ export type Database = {
           total_amount: number;
         }[];
       };
-      get_next_invoice_number: {
-        Args: { team_id: string };
-        Returns: string;
-      };
+      get_next_invoice_number: { Args: { team_id: string }; Returns: string };
       get_payment_score: {
         Args: { team_id: string };
         Returns: {
@@ -3422,7 +4021,9 @@ export type Database = {
       };
       get_project_total_amount: {
         Args: { "": Database["public"]["Tables"]["tracker_projects"]["Row"] };
-        Returns: number;
+        Returns: {
+          error: true;
+        } & "the function public.get_project_total_amount with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache";
       };
       get_revenue: {
         Args: {
@@ -3662,26 +4263,6 @@ export type Database = {
           transaction_group: string;
         }[];
       };
-      gtrgm_compress: {
-        Args: { "": unknown };
-        Returns: unknown;
-      };
-      gtrgm_decompress: {
-        Args: { "": unknown };
-        Returns: unknown;
-      };
-      gtrgm_in: {
-        Args: { "": unknown };
-        Returns: unknown;
-      };
-      gtrgm_options: {
-        Args: { "": unknown };
-        Returns: undefined;
-      };
-      gtrgm_out: {
-        Args: { "": unknown };
-        Returns: unknown;
-      };
       identify_similar_transactions_v2: {
         Args: { p_team_id: string };
         Returns: {
@@ -3696,7 +4277,9 @@ export type Database = {
       };
       inbox_amount_text: {
         Args: { "": Database["public"]["Tables"]["inbox"]["Row"] };
-        Returns: string;
+        Returns: {
+          error: true;
+        } & "the function public.inbox_amount_text with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache";
       };
       is_customer_tagged: {
         Args: {
@@ -3706,7 +4289,9 @@ export type Database = {
       };
       is_fulfilled: {
         Args: { "": Database["public"]["Tables"]["transactions"]["Row"] };
-        Returns: boolean;
+        Returns: {
+          error: true;
+        } & "the function public.is_fulfilled with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache";
       };
       is_project_tagged: {
         Args: {
@@ -3770,16 +4355,23 @@ export type Database = {
         Args: { alphabet: string; mask: number; size: number; step: number };
         Returns: string;
       };
-      project_members: {
-        Args:
-          | { "": Database["public"]["Tables"]["tracker_entries"]["Row"] }
-          | { "": Database["public"]["Tables"]["tracker_projects"]["Row"] };
-        Returns: {
-          avatar_url: string;
-          full_name: string;
-          id: string;
-        }[];
-      };
+      project_members:
+        | {
+            Args: {
+              "": Database["public"]["Tables"]["tracker_entries"]["Row"];
+            };
+            Returns: {
+              error: true;
+            } & "the function public.project_members with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"[];
+          }
+        | {
+            Args: {
+              "": Database["public"]["Tables"]["tracker_projects"]["Row"];
+            };
+            Returns: {
+              error: true;
+            } & "the function public.project_members with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"[];
+          };
       search_transactions: {
         Args: {
           inbox_id?: string;
@@ -3815,34 +4407,16 @@ export type Database = {
           transaction_id: string;
         }[];
       };
-      set_limit: {
-        Args: { "": number };
-        Returns: number;
-      };
-      show_limit: {
-        Args: Record<PropertyKey, never>;
-        Returns: number;
-      };
-      show_trgm: {
-        Args: { "": string };
-        Returns: string[];
-      };
-      slugify: {
-        Args: { value: string };
-        Returns: string;
-      };
+      show_limit: { Args: never; Returns: number };
+      show_trgm: { Args: { "": string }; Returns: string[] };
+      slugify: { Args: { value: string }; Returns: string };
       total_duration: {
         Args: { "": Database["public"]["Tables"]["tracker_projects"]["Row"] };
-        Returns: number;
+        Returns: {
+          error: true;
+        } & "the function public.total_duration with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache";
       };
-      unaccent: {
-        Args: { "": string };
-        Returns: string;
-      };
-      unaccent_init: {
-        Args: { "": unknown };
-        Returns: unknown;
-      };
+      unaccent: { Args: { "": string }; Returns: string };
     };
     Enums: {
       account_type:
@@ -3851,6 +4425,9 @@ export type Database = {
         | "other_asset"
         | "loan"
         | "other_liability";
+      accounting_provider: "xero" | "quickbooks" | "fortnox";
+      accounting_sync_status: "synced" | "failed" | "pending" | "partial";
+      accounting_sync_type: "auto" | "manual";
       activity_source: "system" | "user";
       activity_status: "unread" | "read" | "archived";
       activity_type:
@@ -3879,7 +4456,13 @@ export type Database = {
         | "inbox_auto_matched"
         | "inbox_needs_review"
         | "inbox_cross_currency_matched"
-        | "inbox_match_confirmed";
+        | "inbox_match_confirmed"
+        | "invoice_refunded"
+        | "recurring_series_started"
+        | "recurring_series_completed"
+        | "recurring_series_paused"
+        | "recurring_invoice_upcoming"
+        | "insight_ready";
       approval_status: "draft" | "pending" | "approved" | "rejected";
       bank_providers:
         | "gocardless"
@@ -3894,8 +4477,9 @@ export type Database = {
         | "processing"
         | "completed"
         | "failed";
-      inbox_account_providers: "gmail";
+      inbox_account_providers: "gmail" | "outlook";
       inbox_account_status: "connected" | "disconnected";
+      inbox_blocklist_type: "email" | "domain";
       inbox_status:
         | "processing"
         | "pending"
@@ -3907,7 +4491,21 @@ export type Database = {
         | "suggested_match"
         | "no_match";
       inbox_type: "invoice" | "expense";
+      insight_period_type: "weekly" | "monthly" | "quarterly" | "yearly";
+      insight_status: "pending" | "generating" | "completed" | "failed";
       invoice_delivery_type: "create" | "create_and_send" | "scheduled";
+      invoice_recurring_end_type: "never" | "on_date" | "after_count";
+      invoice_recurring_frequency:
+        | "weekly"
+        | "monthly_date"
+        | "monthly_weekday"
+        | "quarterly"
+        | "semi_annual"
+        | "annual"
+        | "custom"
+        | "biweekly"
+        | "monthly_last_day";
+      invoice_recurring_status: "active" | "paused" | "completed" | "canceled";
       invoice_size: "a4" | "letter";
       invoice_status:
         | "draft"
@@ -3915,9 +4513,19 @@ export type Database = {
         | "paid"
         | "unpaid"
         | "canceled"
-        | "scheduled";
+        | "scheduled"
+        | "refunded";
       plans: "trial" | "starter" | "pro";
-      reportTypes: "profit" | "revenue" | "burn_rate" | "expense";
+      reportTypes:
+        | "profit"
+        | "revenue"
+        | "burn_rate"
+        | "expense"
+        | "monthly_revenue"
+        | "revenue_forecast"
+        | "runway"
+        | "category_expenses";
+      subscription_status: "active" | "past_due";
       teamRoles: "owner" | "member";
       trackerStatus: "in_progress" | "completed";
       transaction_frequency:
@@ -3962,7 +4570,8 @@ export type Database = {
         | "pending"
         | "excluded"
         | "completed"
-        | "archived";
+        | "archived"
+        | "exported";
     };
     CompositeTypes: {
       metrics_record: {
@@ -4103,6 +4712,9 @@ export const Constants = {
         "loan",
         "other_liability",
       ],
+      accounting_provider: ["xero", "quickbooks", "fortnox"],
+      accounting_sync_status: ["synced", "failed", "pending", "partial"],
+      accounting_sync_type: ["auto", "manual"],
       activity_source: ["system", "user"],
       activity_status: ["unread", "read", "archived"],
       activity_type: [
@@ -4132,6 +4744,12 @@ export const Constants = {
         "inbox_needs_review",
         "inbox_cross_currency_matched",
         "inbox_match_confirmed",
+        "invoice_refunded",
+        "recurring_series_started",
+        "recurring_series_completed",
+        "recurring_series_paused",
+        "recurring_invoice_upcoming",
+        "insight_ready",
       ],
       approval_status: ["draft", "pending", "approved", "rejected"],
       bank_providers: [
@@ -4149,8 +4767,9 @@ export const Constants = {
         "completed",
         "failed",
       ],
-      inbox_account_providers: ["gmail"],
+      inbox_account_providers: ["gmail", "outlook"],
       inbox_account_status: ["connected", "disconnected"],
+      inbox_blocklist_type: ["email", "domain"],
       inbox_status: [
         "processing",
         "pending",
@@ -4163,7 +4782,22 @@ export const Constants = {
         "no_match",
       ],
       inbox_type: ["invoice", "expense"],
+      insight_period_type: ["weekly", "monthly", "quarterly", "yearly"],
+      insight_status: ["pending", "generating", "completed", "failed"],
       invoice_delivery_type: ["create", "create_and_send", "scheduled"],
+      invoice_recurring_end_type: ["never", "on_date", "after_count"],
+      invoice_recurring_frequency: [
+        "weekly",
+        "monthly_date",
+        "monthly_weekday",
+        "quarterly",
+        "semi_annual",
+        "annual",
+        "custom",
+        "biweekly",
+        "monthly_last_day",
+      ],
+      invoice_recurring_status: ["active", "paused", "completed", "canceled"],
       invoice_size: ["a4", "letter"],
       invoice_status: [
         "draft",
@@ -4172,9 +4806,20 @@ export const Constants = {
         "unpaid",
         "canceled",
         "scheduled",
+        "refunded",
       ],
       plans: ["trial", "starter", "pro"],
-      reportTypes: ["profit", "revenue", "burn_rate", "expense"],
+      reportTypes: [
+        "profit",
+        "revenue",
+        "burn_rate",
+        "expense",
+        "monthly_revenue",
+        "revenue_forecast",
+        "runway",
+        "category_expenses",
+      ],
+      subscription_status: ["active", "past_due"],
       teamRoles: ["owner", "member"],
       trackerStatus: ["in_progress", "completed"],
       transaction_frequency: [
@@ -4223,6 +4868,7 @@ export const Constants = {
         "excluded",
         "completed",
         "archived",
+        "exported",
       ],
     },
   },

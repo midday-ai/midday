@@ -1,6 +1,7 @@
 import type { Database } from "@db/client";
 import { bankAccounts, bankConnections } from "@db/schema";
 import { chatCache } from "@midday/cache/chat-cache";
+import { decrypt, encrypt } from "@midday/encryption";
 import { and, eq } from "drizzle-orm";
 
 export type GetBankConnectionsParams = {
@@ -40,6 +41,18 @@ export const getBankConnections = async (
           balance: true,
           type: true,
           errorRetries: true,
+          // Additional account data for display (non-sensitive only)
+          subtype: true,
+          bic: true,
+          // US bank account details (public, not sensitive)
+          routingNumber: true,
+          wireRoutingNumber: true,
+          sortCode: true,
+          // Credit account balances
+          availableBalance: true,
+          creditLimit: true,
+          // Note: iban and accountNumber are encrypted and NOT returned here
+          // Use getBankAccountDetails() to get decrypted sensitive data when needed
         },
         where:
           enabled !== undefined ? eq(bankAccounts.enabled, enabled) : undefined,
@@ -84,6 +97,18 @@ export type CreateBankConnectionPayload = {
     type: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
     accountReference?: string | null;
     expiresAt?: string | null;
+    // Additional account data for reconnect matching and user display
+    iban?: string | null;
+    subtype?: string | null;
+    bic?: string | null;
+    // US bank account details (Teller, Plaid)
+    routingNumber?: string | null;
+    wireRoutingNumber?: string | null;
+    accountNumber?: string | null; // Will be encrypted before storage
+    sortCode?: string | null;
+    // Credit account balances
+    availableBalance?: number | null;
+    creditLimit?: number | null;
   }[];
   accessToken?: string | null;
   enrollmentId?: string | null;
@@ -161,6 +186,21 @@ export const createBankConnection = async (
       accountReference: account.accountReference,
       balance: account.balance ?? 0,
       manual: false,
+      // Additional account data for reconnect matching and user display
+      subtype: account.subtype,
+      bic: account.bic,
+      // US bank account details
+      routingNumber: account.routingNumber,
+      wireRoutingNumber: account.wireRoutingNumber,
+      sortCode: account.sortCode,
+      // Sensitive data - encrypted at rest
+      iban: account.iban ? encrypt(account.iban) : null,
+      accountNumber: account.accountNumber
+        ? encrypt(account.accountNumber)
+        : null,
+      // Credit account balances
+      availableBalance: account.availableBalance,
+      creditLimit: account.creditLimit,
     })),
   );
 
@@ -168,4 +208,51 @@ export const createBankConnection = async (
   await chatCache.invalidateTeamContext(teamId);
 
   return bankConnection;
+};
+
+export type GetBankAccountDetailsParams = {
+  accountId: string;
+  teamId: string;
+};
+
+/**
+ * Get bank account details including decrypted sensitive fields.
+ * Only call this when user explicitly requests to reveal account details.
+ */
+export const getBankAccountDetails = async (
+  db: Database,
+  params: GetBankAccountDetailsParams,
+) => {
+  const { accountId, teamId } = params;
+
+  const account = await db.query.bankAccounts.findFirst({
+    where: and(eq(bankAccounts.id, accountId), eq(bankAccounts.teamId, teamId)),
+    columns: {
+      id: true,
+      iban: true,
+      accountNumber: true,
+      routingNumber: true,
+      wireRoutingNumber: true,
+      bic: true,
+      sortCode: true,
+    },
+  });
+
+  if (!account) {
+    return null;
+  }
+
+  return {
+    id: account.id,
+    // Decrypt sensitive fields
+    iban: account.iban ? decrypt(account.iban) : null,
+    accountNumber: account.accountNumber
+      ? decrypt(account.accountNumber)
+      : null,
+    // Non-sensitive fields returned as-is
+    routingNumber: account.routingNumber,
+    wireRoutingNumber: account.wireRoutingNumber,
+    bic: account.bic,
+    sortCode: account.sortCode,
+  };
 };

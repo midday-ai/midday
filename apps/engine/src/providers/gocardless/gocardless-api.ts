@@ -117,6 +117,20 @@ export class GoCardLessApi {
   ): Promise<
     GetAccountBalanceResponse["balances"][0]["balanceAmount"] | undefined
   > {
+    const result = await this.getAccountBalances(accountId);
+    return result?.primaryBalance;
+  }
+
+  /**
+   * Get all balances for an account including available balance.
+   * Returns primary balance and full balances array for available_balance extraction.
+   */
+  async getAccountBalances(accountId: string): Promise<{
+    primaryBalance:
+      | GetAccountBalanceResponse["balances"][0]["balanceAmount"]
+      | undefined;
+    balances: GetAccountBalanceResponse["balances"] | undefined;
+  }> {
     const token = await this.#getAccessToken();
 
     try {
@@ -136,16 +150,20 @@ export class GoCardLessApi {
         (account) => account.balanceType === "expected",
       );
 
-      return (
-        foundInterimAvailable?.balanceAmount ||
-        foundExpectedAvailable?.balanceAmount
-      );
+      return {
+        primaryBalance:
+          foundInterimAvailable?.balanceAmount ||
+          foundExpectedAvailable?.balanceAmount,
+        balances,
+      };
     } catch (error) {
       const parsedError = isError(error);
 
       if (parsedError) {
         throw new ProviderError(parsedError);
       }
+
+      return { primaryBalance: undefined, balances: undefined };
     }
   }
 
@@ -267,14 +285,15 @@ export class GoCardLessApi {
 
       return Promise.all(
         response.accounts.map(async (acountId: string) => {
-          const [details, balance, institution] = await Promise.all([
+          const [details, balanceResult, institution] = await Promise.all([
             this.getAccountDetails(acountId),
-            this.getAccountBalance(acountId),
+            this.getAccountBalances(acountId),
             this.getInstitution(response.institution_id),
           ]);
 
           return {
-            balance,
+            balance: balanceResult.primaryBalance,
+            balances: balanceResult.balances,
             institution,
             ...details,
           };

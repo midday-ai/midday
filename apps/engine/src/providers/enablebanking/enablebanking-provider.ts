@@ -51,14 +51,23 @@ export class EnableBankingProvider implements Provider {
   ): Promise<GetAccountBalanceResponse> {
     const response = await this.#api.getAccountBalance(params.accountId);
 
-    return transformBalance(response);
+    return transformBalance({
+      balance: response.balance,
+      creditLimit: response.creditLimit,
+      accountType: params.accountType,
+    });
   }
 
   async getTransactions(
     params: GetTransactionsRequest,
   ): Promise<GetTransactionsResponse> {
     const response = await this.#api.getTransactions(params);
-    return response.transactions.map(transformTransaction);
+    return response.transactions.map((transaction) =>
+      transformTransaction({
+        transaction,
+        accountType: params.accountType,
+      }),
+    );
   }
 
   async getConnectionStatus({ id }: GetConnectionStatusRequest) {

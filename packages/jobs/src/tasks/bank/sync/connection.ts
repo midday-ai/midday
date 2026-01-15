@@ -1,10 +1,157 @@
 import { syncConnectionSchema } from "@jobs/schema";
 import { triggerSequenceAndWait } from "@jobs/utils/trigger-sequence";
+import { encrypt } from "@midday/encryption";
 import { client } from "@midday/engine-client";
 import { createClient } from "@midday/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { transactionNotifications } from "../notifications/transactions";
 import { syncAccount } from "./account";
+
+// Extended type for API accounts with all new fields
+type ApiAccountWithDetails = {
+  id: string;
+  iban: string | null;
+  subtype: string | null;
+  bic: string | null;
+  routing_number: string | null;
+  wire_routing_number: string | null;
+  account_number: string | null;
+  sort_code: string | null;
+};
+
+/**
+ * TEMPORARY BACKFILL: Populate static account fields for existing accounts.
+ *
+ * This function fetches fresh account data from the banking API and updates
+ * any existing accounts that are missing the new static fields:
+ * - iban, subtype, bic (EU/UK accounts)
+ * - routing_number, wire_routing_number, account_number, sort_code (US/UK accounts)
+ *
+ * Note: available_balance and credit_limit are synced in account.ts alongside
+ * the regular balance sync.
+ *
+ * TODO: Remove this function after 2025-01-20 when all existing accounts have been updated.
+ */
+async function backfillAccountStaticFields({
+  connectionId,
+  provider,
+  referenceId,
+  accessToken,
+}: {
+  connectionId: string;
+  provider: "gocardless" | "plaid" | "teller" | "enablebanking";
+  referenceId: string;
+  accessToken?: string;
+}) {
+  const supabase = createClient();
+
+  // Fetch existing accounts - check all static fields
+  const { data: existingAccounts } = await supabase
+    .from("bank_accounts")
+    .select(
+      "id, account_id, created_at, iban, subtype, bic, routing_number, wire_routing_number, account_number, sort_code",
+    )
+    .eq("bank_connection_id", connectionId);
+
+  if (!existingAccounts || existingAccounts.length === 0) {
+    return;
+  }
+
+  // Backfill all accounts created before 2026-01-16
+  // TODO: Remove this entire backfill function after 2026-01-20
+  const backfillCutoff = new Date("2026-01-16");
+  const accountsNeedingBackfill = existingAccounts.filter(
+    (account) => new Date(account.created_at) < backfillCutoff,
+  );
+
+  if (accountsNeedingBackfill.length === 0) {
+    logger.debug("No accounts need backfill", { connectionId });
+    return;
+  }
+
+  logger.info("Backfilling account static fields", {
+    connectionId,
+    provider,
+    accountsToBackfill: accountsNeedingBackfill.length,
+  });
+
+  // Fetch fresh accounts from API
+  const accounts = await client.accounts.$get({
+    query: {
+      id: referenceId,
+      provider,
+      accessToken,
+    },
+  });
+
+  if (!accounts.ok) {
+    logger.warn("Failed to fetch accounts for backfill", { connectionId });
+    return;
+  }
+
+  const accountsResponse = await accounts.json();
+
+  // Create a map of API account ID to account data
+  const apiAccountMap = new Map(
+    accountsResponse.data.map((account) => [
+      account.id,
+      account as ApiAccountWithDetails,
+    ]),
+  );
+
+  // Update each account that needs backfill
+  let updated = 0;
+  for (const dbAccount of accountsNeedingBackfill) {
+    const apiAccount = apiAccountMap.get(dbAccount.account_id);
+    if (!apiAccount) continue;
+
+    // Build update object with available fields
+    const updateData: Record<string, string | null> = {};
+
+    // EU/UK fields
+    if (apiAccount.iban) {
+      updateData.iban = encrypt(apiAccount.iban); // Encrypt IBAN
+    }
+    if (apiAccount.subtype) {
+      updateData.subtype = apiAccount.subtype;
+    }
+    if (apiAccount.bic) {
+      updateData.bic = apiAccount.bic;
+    }
+
+    // US fields
+    if (apiAccount.routing_number) {
+      updateData.routing_number = apiAccount.routing_number;
+    }
+    if (apiAccount.wire_routing_number) {
+      updateData.wire_routing_number = apiAccount.wire_routing_number;
+    }
+    if (apiAccount.account_number) {
+      updateData.account_number = encrypt(apiAccount.account_number); // Encrypt account number
+    }
+
+    // UK field
+    if (apiAccount.sort_code) {
+      updateData.sort_code = apiAccount.sort_code;
+    }
+
+    // Only update if we have at least one field
+    if (Object.keys(updateData).length > 0) {
+      const { error } = await supabase
+        .from("bank_accounts")
+        .update(updateData)
+        .eq("id", dbAccount.id);
+
+      if (!error) {
+        updated++;
+      }
+    }
+  }
+
+  if (updated > 0) {
+    logger.info("Backfill complete", { connectionId, updated });
+  }
+}
 
 // Fan-out pattern. We want to trigger a task for each bank account (Transactions, Balance)
 export const syncConnection = schemaTask({
@@ -59,6 +206,25 @@ export const syncConnection = schemaTask({
             last_accessed: new Date().toISOString(),
           })
           .eq("id", connectionId);
+
+        // TEMPORARY BACKFILL: Populate iban, subtype, bic for existing accounts
+        // Note: available_balance and credit_limit are synced in syncAccount()
+        // TODO: Remove this backfill logic after 2025-02-01
+        try {
+          await backfillAccountStaticFields({
+            connectionId,
+            provider: data.provider as
+              | "gocardless"
+              | "plaid"
+              | "teller"
+              | "enablebanking",
+            referenceId: data.reference_id!,
+            accessToken: data.access_token ?? undefined,
+          });
+        } catch (error) {
+          // Log but don't fail the sync - backfill is best effort
+          logger.warn("Backfill account static fields failed", { error });
+        }
 
         const query = supabase
           .from("bank_accounts")

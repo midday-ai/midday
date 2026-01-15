@@ -13,6 +13,10 @@ export function ManualAccounts() {
     }),
   );
 
+  if (data?.length === 0) {
+    return null;
+  }
+
   return (
     <div className="px-6 pb-6 space-y-6 divide-y">
       {data?.map((account) => (

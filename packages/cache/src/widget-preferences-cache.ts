@@ -10,6 +10,9 @@ export const WIDGET_TYPES = [
   "revenue-summary",
   "growth-rate",
 
+  // Financial position
+  "net-position",
+
   // Customer insights
   "customer-lifetime-value",
   "top-customer",

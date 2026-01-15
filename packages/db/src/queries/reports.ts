@@ -4,6 +4,7 @@ import {
   CONTRA_REVENUE_CATEGORIES,
   REVENUE_CATEGORIES,
 } from "@midday/categories";
+import { CASH_ACCOUNT_TYPES } from "@midday/engine/account";
 import {
   eachMonthOfInterval,
   endOfMonth,
@@ -42,7 +43,7 @@ import {
   transactionCategories,
   transactions,
 } from "../schema";
-import { getCombinedAccountBalance } from "./bank-accounts";
+import { getCashBalance } from "./bank-accounts";
 import { getExchangeRatesBatch } from "./exhange-rates";
 import { getBillableHours } from "./tracker-entries";
 
@@ -923,6 +924,7 @@ export async function getSpending(
   const totalAmountConditions = [
     eq(transactions.teamId, teamId),
     eq(transactions.internal, false),
+    ne(transactions.status, "excluded"),
     gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
   ];
@@ -977,6 +979,7 @@ export async function getSpending(
   const spendingConditions = [
     eq(transactions.teamId, teamId),
     eq(transactions.internal, false),
+    ne(transactions.status, "excluded"),
     gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
     isNotNull(transactions.categorySlug), // Only categorized transactions
@@ -1065,6 +1068,7 @@ export async function getSpending(
   const uncategorizedConditions = [
     eq(transactions.teamId, teamId),
     eq(transactions.internal, false),
+    ne(transactions.status, "excluded"),
     gte(transactions.date, format(fromDate, "yyyy-MM-dd")),
     lte(transactions.date, format(toDate, "yyyy-MM-dd")),
   ];
@@ -1157,10 +1161,12 @@ export async function getRunway(db: Database, params: GetRunwayParams) {
     return 0;
   }
 
-  // Step 2: Get total balance (equivalent to get_total_balance_v3)
+  // Step 2: Get total cash balance (depository + other_asset only)
+  // Credit/loan balances are excluded - credit payments are already in burn rate as expenses
   const balanceConditions = [
     eq(bankAccounts.teamId, teamId),
     eq(bankAccounts.enabled, true),
+    inArray(bankAccounts.type, [...CASH_ACCOUNT_TYPES]),
   ];
 
   const balanceResult = await db
@@ -1292,6 +1298,8 @@ export async function getTaxSummary(db: Database, params: GetTaxParams) {
   // Build the base query with conditions
   const conditions = [
     sql`t.team_id = ${teamId}`,
+    sql`t.internal = false`,
+    sql`t.status != 'excluded'`,
     sql`t.date >= ${fromDate}`,
     sql`t.date <= ${toDate}`,
   ];
@@ -1343,6 +1351,9 @@ export async function getTaxSummary(db: Database, params: GetTaxParams) {
   conditions.push(
     sql`(t.tax_rate IS NOT NULL OR t.tax_amount IS NOT NULL OR tc.tax_rate IS NOT NULL)`,
   );
+
+  // Exclude transactions in excluded categories
+  conditions.push(sql`(tc.excluded IS NULL OR tc.excluded = false)`);
 
   const whereClause = sql.join(conditions, sql` AND `);
 
@@ -2118,6 +2129,7 @@ export async function getRecurringExpenses(
     eq(transactions.teamId, teamId),
     eq(transactions.recurring, true),
     eq(transactions.internal, false),
+    ne(transactions.status, "excluded"),
   ];
 
   // Amount condition: handle NULL baseAmount gracefully
@@ -2168,7 +2180,16 @@ export async function getRecurringExpenses(
         eq(transactionCategories.teamId, teamId),
       ),
     )
-    .where(and(...conditions))
+    .where(
+      and(
+        ...conditions,
+        or(
+          isNull(transactions.categorySlug),
+          isNull(transactionCategories.excluded),
+          eq(transactionCategories.excluded, false),
+        )!,
+      ),
+    )
     .groupBy(
       transactions.name,
       transactions.frequency,
@@ -3030,8 +3051,8 @@ export async function getBalanceSheet(
     bankAccountsData,
     unmatchedBillsData,
   ] = await Promise.all([
-    // 1. Bank account balances (Cash) - only depository accounts
-    getCombinedAccountBalance(db, {
+    // 1. Bank account balances (Cash) - depository + other_asset accounts
+    getCashBalance(db, {
       teamId,
       currency: inputCurrency,
     }),

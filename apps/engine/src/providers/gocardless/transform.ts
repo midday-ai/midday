@@ -1,4 +1,5 @@
 import { Providers } from "@engine/common/schema";
+import type { AccountType } from "@engine/utils/account";
 import { getFileExtension, getLogoURL } from "@engine/utils/logo";
 import { capitalCase } from "change-case";
 import { addDays } from "date-fns";
@@ -7,6 +8,7 @@ import type {
   Balance as BaseAccountBalance,
   Transaction as BaseTransaction,
   ConnectionStatus,
+  GetAccountBalanceResponse,
 } from "../types";
 import type {
   GetRequisitionResponse,
@@ -17,12 +19,51 @@ import type {
   TransformAccountBalance,
   TransformAccountName,
   TransformInstitution,
-  TransformTransaction,
 } from "./types";
 import { getAccessValidForDays } from "./utils";
 
-export const mapTransactionCategory = (transaction: Transaction) => {
-  if (+transaction.transactionAmount.amount > 0) {
+/**
+ * Maps GoCardless cashAccountType (ISO 20022) to Midday AccountType
+ * - CACC: Current account → depository
+ * - CARD: Card account → credit
+ * - SVGS: Savings account → depository
+ * - TRAN: Transaction account → depository
+ * - LOAN: Loan account → loan
+ */
+const getAccountType = (cashAccountType?: string): AccountType => {
+  switch (cashAccountType) {
+    case "CARD":
+      return "credit";
+    case "LOAN":
+      return "loan";
+    default:
+      // CACC, SVGS, TRAN, CASH, and others default to depository
+      return "depository";
+  }
+};
+
+type MapTransactionCategory = {
+  transaction: Transaction;
+  accountType: AccountType;
+};
+
+export const mapTransactionCategory = ({
+  transaction,
+  accountType,
+}: MapTransactionCategory) => {
+  const amount = +transaction.transactionAmount.amount;
+
+  if (amount > 0) {
+    // For credit accounts, positive amount means money came IN (payment, refund, cashback)
+    if (accountType === "credit") {
+      // Check if it's a transfer/payment type
+      const method = transaction.proprietaryBankTransactionCode;
+      if (method === "Transfer" || method === "Payment") {
+        return "credit-card-payment";
+      }
+      // Otherwise it's likely a refund - don't auto-categorize
+      return null;
+    }
     return "income";
   }
 
@@ -123,9 +164,15 @@ const transformCounterpartyName = (transaction: Transaction) => {
   return null;
 };
 
-export const transformTransaction = (
-  transaction: TransformTransaction,
-): BaseTransaction => {
+type TransformTransactionPayload = {
+  transaction: Transaction;
+  accountType: AccountType;
+};
+
+export const transformTransaction = ({
+  transaction,
+  accountType,
+}: TransformTransactionPayload): BaseTransaction => {
   const method = mapTransactionMethod(
     transaction?.proprietaryBankTransactionCode,
   );
@@ -133,9 +180,7 @@ export const transformTransaction = (
   let currencyExchange: { rate: number; currency: string } | undefined;
 
   if (Array.isArray(transaction.currencyExchange)) {
-    const rate = Number.parseFloat(
-      transaction.currencyExchange.at(0)?.exchangeRate ?? "",
-    );
+    const rate = +(transaction.currencyExchange.at(0)?.exchangeRate ?? "");
 
     if (rate) {
       const currency = transaction?.currencyExchange?.at(0)?.sourceCurrency;
@@ -162,7 +207,7 @@ export const transformTransaction = (
     method,
     amount: +transaction.transactionAmount.amount,
     currency: transaction.transactionAmount.currency,
-    category: mapTransactionCategory(transaction),
+    category: mapTransactionCategory({ transaction, accountType }),
     currency_rate: currencyExchange?.rate || null,
     currency_source: currencyExchange?.currency?.toUpperCase() || null,
     balance,
@@ -193,15 +238,43 @@ const transformAccountName = (account: TransformAccountName) => {
   return "No name";
 };
 
+/**
+ * Extract available balance from GoCardless balances array.
+ * Looks for interimAvailable balance type first, falls back to expected.
+ */
+const getAvailableBalance = (
+  balances?: TransformAccount["balances"],
+): number | null => {
+  if (!balances?.length) return null;
+
+  const interimAvailable = balances.find(
+    (b) => b.balanceType === "interimAvailable",
+  );
+  if (interimAvailable) {
+    return +interimAvailable.balanceAmount.amount;
+  }
+
+  // Fall back to expected balance if no interimAvailable
+  const expected = balances.find((b) => b.balanceType === "expected");
+  if (expected) {
+    return +expected.balanceAmount.amount;
+  }
+
+  return null;
+};
+
 export const transformAccount = ({
   id,
   account,
   balance,
+  balances,
   institution,
 }: TransformAccount): BaseAccount => {
+  const accountType = getAccountType(account.cashAccountType);
+
   return {
     id,
-    type: "depository",
+    type: accountType,
     name: transformAccountName({
       name: account.name,
       product: account.product,
@@ -210,22 +283,62 @@ export const transformAccount = ({
     }),
     currency: account.currency.toUpperCase(),
     enrollment_id: null,
-    balance: transformAccountBalance(balance),
+    balance: transformAccountBalance({ balance, accountType }),
     institution: transformInstitution(institution),
     resource_id: account.resourceId,
     expires_at: addDays(
       new Date(),
       getAccessValidForDays({ institutionId: institution.id }),
     ).toISOString(),
+    iban: account.iban || null,
+    subtype: null, // GoCardless uses cashAccountType for type, no additional subtype
+    bic: institution.bic || null,
+    // US bank details not available for GoCardless (EU/UK provider)
+    routing_number: null,
+    wire_routing_number: null,
+    account_number: null,
+    sort_code: null,
+    // Credit account balances - GoCardless provides available via balance types
+    available_balance: getAvailableBalance(balances),
+    credit_limit: null, // GoCardless only has creditLimitIncluded boolean, not actual limit
   };
 };
 
-export const transformAccountBalance = (
-  account?: TransformAccountBalance,
-): BaseAccountBalance => ({
-  currency: account?.currency.toUpperCase() || "EUR",
-  amount: +(account?.amount ?? 0),
-});
+type TransformAccountBalanceParams = {
+  balance?: TransformAccountBalance;
+  balances?: TransformAccount["balances"];
+  accountType?: string;
+};
+
+/**
+ * Transform GoCardless balance to internal format.
+ *
+ * GoCardless stores credit card balances as NEGATIVE values (e.g., -1000 means $1000 owed).
+ * We normalize to POSITIVE values for consistency with other providers (Plaid, Teller, Enable Banking).
+ *
+ * @param balance - The raw balance from GoCardless
+ * @param balances - Full balances array for available_balance extraction
+ * @param accountType - The account type (credit accounts get normalized)
+ */
+export const transformAccountBalance = ({
+  balance,
+  balances,
+  accountType,
+}: TransformAccountBalanceParams): GetAccountBalanceResponse => {
+  const rawAmount = +(balance?.amount ?? 0);
+
+  // GoCardless stores credit card debt as negative values (e.g., -1000 = $1000 owed)
+  // Normalize to positive for consistency with other providers
+  const amount =
+    accountType === "credit" && rawAmount < 0 ? Math.abs(rawAmount) : rawAmount;
+
+  return {
+    currency: balance?.currency.toUpperCase() || "EUR",
+    amount,
+    available_balance: getAvailableBalance(balances),
+    credit_limit: null, // GoCardless only has creditLimitIncluded boolean, not actual limit
+  };
+};
 
 export const transformInstitution = (
   institution: Institution,

@@ -96,7 +96,14 @@ export class PlaidApi {
         },
       });
 
-      return accounts.data.accounts.at(0)?.balances;
+      const account = accounts.data.accounts.at(0);
+      if (!account) return undefined;
+
+      // Return both balances and type so provider can infer correct balance field
+      return {
+        balances: account.balances,
+        type: account.type,
+      };
     } catch (error) {
       const parsedError = isError(error);
 
