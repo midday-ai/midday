@@ -249,3 +249,90 @@ test("Transform account balance - credit with positive balance (stays positive)"
     credit_limit: null,
   });
 });
+
+test("Transform account balance - interimAvailable returns available_balance", () => {
+  // interimAvailable is an available balance type and should populate available_balance
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "EUR", amount: "5000.00" },
+        balance_type: "interimAvailable",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      accountType: "depository",
+    }),
+  ).toEqual({
+    amount: 5000,
+    currency: "EUR",
+    available_balance: 5000,
+    credit_limit: null,
+  });
+});
+
+test("Transform account balance - interimBooked does NOT return available_balance", () => {
+  // interimBooked is a booked/posted balance, NOT available funds
+  // This test verifies the fix for the bug where .includes("interim") incorrectly matched interimBooked
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "EUR", amount: "5000.00" },
+        balance_type: "interimBooked",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      accountType: "depository",
+    }),
+  ).toEqual({
+    amount: 5000,
+    currency: "EUR",
+    available_balance: null, // Should be null - interimBooked is NOT an available balance
+    credit_limit: null,
+  });
+});
+
+test("Transform account balance - closingAvailable returns available_balance", () => {
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "EUR", amount: "3000.00" },
+        balance_type: "closingAvailable",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      accountType: "depository",
+    }),
+  ).toEqual({
+    amount: 3000,
+    currency: "EUR",
+    available_balance: 3000,
+    credit_limit: null,
+  });
+});
+
+test("Transform account balance - closingBooked does NOT return available_balance", () => {
+  expect(
+    transformBalance({
+      balance: {
+        name: "",
+        balance_amount: { currency: "EUR", amount: "3000.00" },
+        balance_type: "closingBooked",
+        last_change_date_time: "2024-03-06",
+        reference_date: "2024-03-06",
+        last_committed_transaction: "1234567890",
+      },
+      accountType: "depository",
+    }),
+  ).toEqual({
+    amount: 3000,
+    currency: "EUR",
+    available_balance: null,
+    credit_limit: null,
+  });
+});

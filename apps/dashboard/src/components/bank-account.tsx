@@ -160,7 +160,7 @@ export function BankAccount({ data, provider }: Props) {
   return (
     <div
       className={cn(
-        "border border-border p-4 flex flex-col gap-3",
+        "border border-border p-4 flex flex-col gap-3 h-full",
         !enabled && "opacity-60",
       )}
     >
@@ -298,7 +298,7 @@ export function BankAccount({ data, provider }: Props) {
       </div>
 
       {/* Bank Details Section */}
-      {(hasRoutingInfo || isEUAccount || bic) && (
+      {(hasRoutingInfo || bic || (showSensitive && hasIbanOrAccountNumber)) && (
         <div className="border-t border-border pt-3 mt-1">
           <div className="flex flex-col gap-2 text-sm">
             {/* US Account Details */}
@@ -330,39 +330,41 @@ export function BankAccount({ data, provider }: Props) {
                     </div>
                   </div>
                 )}
-                <div className="flex items-center justify-between">
-                  <span className="text-[#878787]">Account</span>
-                  <div className="flex items-center gap-1">
-                    {isLoadingDetails ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : details?.accountNumber ? (
-                      <>
-                        <MaskedValue
-                          value={details.accountNumber}
-                          revealed={showSensitive}
-                        />
-                        <CopyButton
-                          value={details.accountNumber}
-                          label="Account number"
-                        />
-                      </>
-                    ) : (
-                      <span className="text-xs text-[#878787]">—</span>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-5 w-5"
-                      onClick={() => setShowSensitive(!showSensitive)}
-                    >
-                      {showSensitive ? (
-                        <EyeOff className="size-3" />
+                {(hasRoutingInfo || details?.accountNumber) && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#878787]">Account</span>
+                    <div className="flex items-center gap-1">
+                      {isLoadingDetails ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : details?.accountNumber ? (
+                        <>
+                          <MaskedValue
+                            value={details.accountNumber}
+                            revealed={showSensitive}
+                          />
+                          <CopyButton
+                            value={details.accountNumber}
+                            label="Account number"
+                          />
+                        </>
                       ) : (
-                        <Eye className="size-3" />
+                        <span className="text-xs text-[#878787]">—</span>
                       )}
-                    </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5"
+                        onClick={() => setShowSensitive(!showSensitive)}
+                      >
+                        {showSensitive ? (
+                          <EyeOff className="size-3" />
+                        ) : (
+                          <Eye className="size-3" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                )}
               </>
             )}
 
@@ -377,49 +379,49 @@ export function BankAccount({ data, provider }: Props) {
               </div>
             )}
 
-            {/* EU Account Details */}
-            {isEUAccount && (
-              <>
-                <div className="flex items-center justify-between">
-                  <span className="text-[#878787]">IBAN</span>
-                  <div className="flex items-center gap-1">
-                    {isLoadingDetails ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : details?.iban ? (
-                      <>
-                        <MaskedValue
-                          value={details.iban}
-                          revealed={showSensitive}
-                        />
-                        <CopyButton value={details.iban} label="IBAN" />
-                      </>
+            {/* EU Account Details - IBAN */}
+            {isEUAccount && (bic || details?.iban) && (
+              <div className="flex items-center justify-between">
+                <span className="text-[#878787]">IBAN</span>
+                <div className="flex items-center gap-1">
+                  {isLoadingDetails ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : details?.iban ? (
+                    <>
+                      <MaskedValue
+                        value={details.iban}
+                        revealed={showSensitive}
+                      />
+                      <CopyButton value={details.iban} label="IBAN" />
+                    </>
+                  ) : (
+                    <span className="text-xs text-[#878787]">—</span>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-5 w-5"
+                    onClick={() => setShowSensitive(!showSensitive)}
+                  >
+                    {showSensitive ? (
+                      <EyeOff className="size-3" />
                     ) : (
-                      <span className="text-xs text-[#878787]">—</span>
+                      <Eye className="size-3" />
                     )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-5 w-5"
-                      onClick={() => setShowSensitive(!showSensitive)}
-                    >
-                      {showSensitive ? (
-                        <EyeOff className="size-3" />
-                      ) : (
-                        <Eye className="size-3" />
-                      )}
-                    </Button>
-                  </div>
+                  </Button>
                 </div>
-                {bic && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#878787]">BIC</span>
-                    <div className="flex items-center gap-1">
-                      <span className="font-mono text-xs">{bic}</span>
-                      <CopyButton value={bic} label="BIC" />
-                    </div>
-                  </div>
-                )}
-              </>
+              </div>
+            )}
+
+            {/* EU Account Details - BIC */}
+            {bic && (
+              <div className="flex items-center justify-between">
+                <span className="text-[#878787]">BIC</span>
+                <div className="flex items-center gap-1">
+                  <span className="font-mono text-xs">{bic}</span>
+                  <CopyButton value={bic} label="BIC" />
+                </div>
+              </div>
             )}
           </div>
         </div>

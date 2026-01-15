@@ -71,16 +71,20 @@ function getAccountType(cashAccountType?: string): AccountType {
 /**
  * Get available balance from EnableBanking balance.
  * EnableBanking returns balance_type which can indicate available balance.
+ *
+ * ISO 20022 balance types include:
+ * - closingAvailable, interimAvailable, openingAvailable, forwardAvailable → available funds
+ * - closingBooked, interimBooked, openingBooked → posted/booked balance (NOT available)
+ *
+ * Only "available" types represent available funds. The "interim" prefix indicates
+ * intraday snapshot, NOT available balance.
  */
 const getAvailableBalance = (
   balance: GetAccountDetailsResponse["balance"],
 ): number | null => {
-  // EnableBanking's balance_type can be: closingAvailable, interimAvailable, etc.
-  // For now, use the balance amount as available if it has an "available" type
-  if (
-    balance?.balance_type?.toLowerCase().includes("available") ||
-    balance?.balance_type?.toLowerCase().includes("interim")
-  ) {
+  // Only match balance types containing "available" (e.g., interimAvailable, closingAvailable)
+  // Do NOT match "interim" alone as interimBooked is a booked balance, not available
+  if (balance?.balance_type?.toLowerCase().includes("available")) {
     return +balance.balance_amount.amount;
   }
   return null;
@@ -170,11 +174,12 @@ export const transformBalance = ({
     accountType === "credit" && rawAmount < 0 ? Math.abs(rawAmount) : rawAmount;
 
   // Check if balance_type indicates available balance
-  const availableBalance =
-    balance.balance_type?.toLowerCase().includes("available") ||
-    balance.balance_type?.toLowerCase().includes("interim")
-      ? rawAmount
-      : null;
+  // Only match "available" types (e.g., interimAvailable, closingAvailable)
+  const availableBalance = balance.balance_type
+    ?.toLowerCase()
+    .includes("available")
+    ? rawAmount
+    : null;
 
   return {
     amount,

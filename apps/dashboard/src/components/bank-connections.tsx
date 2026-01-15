@@ -6,12 +6,6 @@ import { useSyncStatus } from "@/hooks/use-sync-status";
 import { useTRPC } from "@/trpc/client";
 import { connectionStatus } from "@/utils/connection-status";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@midday/ui/accordion";
 import { Icons } from "@midday/ui/icons";
 import {
   Tooltip,
@@ -282,33 +276,28 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
   };
 
   return (
-    <div>
+    <div className="py-4">
       <div className="flex justify-between items-center">
-        <AccordionTrigger
-          className="justify-start text-start w-full"
-          chevronBefore
-        >
-          <div className="flex space-x-4 items-center ml-4 w-full">
-            <BankLogo src={connection.logoUrl} alt={connection.name} />
+        <div className="flex space-x-4 items-center w-full">
+          <BankLogo src={connection.logoUrl} alt={connection.name} />
 
-            <div className="flex flex-col">
-              <span className="text-sm">{connection.name}</span>
+          <div className="flex flex-col">
+            <span className="text-sm">{connection.name}</span>
 
-              <TooltipProvider delayDuration={70}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div>
-                      <ConnectionState
-                        connection={connection}
-                        isSyncing={isSyncing}
-                      />
-                    </div>
-                  </TooltipTrigger>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
+            <TooltipProvider delayDuration={70}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <ConnectionState
+                      connection={connection}
+                      isSyncing={isSyncing}
+                    />
+                  </div>
+                </TooltipTrigger>
+              </Tooltip>
+            </TooltipProvider>
           </div>
-        </AccordionTrigger>
+        </div>
 
         <div className="ml-auto flex space-x-2 items-center">
           {connection.status === "disconnected" || show ? (
@@ -348,19 +337,17 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
         </div>
       </div>
 
-      <AccordionContent className="bg-background">
-        <div className="ml-[30px] grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-          {connection.bankAccounts.map((account) => {
-            return (
-              <BankAccount
-                key={account.id}
-                data={account}
-                provider={connection.provider}
-              />
-            );
-          })}
-        </div>
-      </AccordionContent>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        {connection.bankAccounts.map((account) => {
+          return (
+            <BankAccount
+              key={account.id}
+              data={account}
+              provider={connection.provider}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -368,23 +355,12 @@ export function BankConnection({ connection }: { connection: BankConnection }) {
 export function BankConnections() {
   const trpc = useTRPC();
   const { data } = useSuspenseQuery(trpc.bankConnections.get.queryOptions());
-  const defaultValue = data?.length === 1 ? ["connection-0"] : undefined;
 
   return (
     <div className="divide-y">
-      <Accordion type="multiple" className="w-full" defaultValue={defaultValue}>
-        {data?.map((connection, index) => {
-          return (
-            <AccordionItem
-              value={`connection-${index}`}
-              key={connection.id}
-              className="border-none"
-            >
-              <BankConnection connection={connection} />
-            </AccordionItem>
-          );
-        })}
-      </Accordion>
+      {data?.map((connection) => {
+        return <BankConnection key={connection.id} connection={connection} />;
+      })}
     </div>
   );
 }
