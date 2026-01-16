@@ -1,6 +1,7 @@
 "use client";
 
 import { downloadFile } from "@/lib/download";
+import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Spinner } from "@midday/ui/spinner";
@@ -11,6 +12,7 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import { saveAs } from "file-saver";
 import { motion } from "framer-motion";
 import JSZip from "jszip";
@@ -48,6 +50,7 @@ export default function InvoiceToolbar({
   isPaymentOpen,
   useOverlay,
 }: Props) {
+  const trpc = useTRPC();
   const [, copy] = useCopyToClipboard();
   const { toast } = useToast();
   const [internalPaymentOpen, setInternalPaymentOpen] = useState(false);
@@ -59,6 +62,12 @@ export default function InvoiceToolbar({
   const paymentModalOpen = isPaymentOpen ?? internalPaymentOpen;
   const setPaymentModalOpen = onPaymentOpenChange ?? setInternalPaymentOpen;
   const paymentModalOpenRef = useRef(paymentModalOpen);
+
+  // Fetch attachments for the invoice
+  const { data: attachments = [] } = useQuery({
+    ...trpc.invoiceAttachments.getByToken.queryOptions({ token }),
+    enabled: !!token,
+  });
 
   // Sync isPaid with status prop
   useEffect(() => {
@@ -80,31 +89,47 @@ export default function InvoiceToolbar({
 
     setIsDownloading(true);
     try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const hasAttachments = attachments.length > 0;
+
       if (isPaid) {
-        // For paid invoices, download both invoice and receipt as a zip
+        // For paid invoices, create a zip with invoice, receipt, and attachments
         const zip = new JSZip();
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-        // Fetch both PDFs in parallel for better performance
-        const [invoiceResponse, receiptResponse] = await Promise.all([
-          fetch(`${apiUrl}/files/download/invoice?token=${token}`),
-          fetch(`${apiUrl}/files/download/invoice?token=${token}&type=receipt`),
-        ]);
+        // Fetch invoice (with attachments if any - server will include them)
+        const invoiceUrl = hasAttachments
+          ? `${apiUrl}/files/download/invoice?token=${token}&includeAttachments=true`
+          : `${apiUrl}/files/download/invoice?token=${token}`;
 
+        const invoiceResponse = await fetch(invoiceUrl);
         if (!invoiceResponse.ok) {
           throw new Error("Failed to fetch invoice");
         }
-        if (!receiptResponse.ok) {
-          throw new Error("Failed to fetch receipt");
+
+        // If there are attachments, the response is already a ZIP
+        if (hasAttachments) {
+          const invoiceZipBlob = await invoiceResponse.blob();
+          // Extract files from the invoice ZIP and add to our combined ZIP
+          const invoiceZip = await JSZip.loadAsync(invoiceZipBlob);
+          for (const [filename, file] of Object.entries(invoiceZip.files)) {
+            if (!file.dir) {
+              const content = await file.async("blob");
+              zip.file(filename, content);
+            }
+          }
+        } else {
+          const invoiceBlob = await invoiceResponse.blob();
+          zip.file(`${invoiceNumber}.pdf`, invoiceBlob);
         }
 
-        const [invoiceBlob, receiptBlob] = await Promise.all([
-          invoiceResponse.blob(),
-          receiptResponse.blob(),
-        ]);
-
-        zip.file(`${invoiceNumber}.pdf`, invoiceBlob);
-        zip.file(`receipt-${invoiceNumber}.pdf`, receiptBlob);
+        // Fetch receipt
+        const receiptResponse = await fetch(
+          `${apiUrl}/files/download/invoice?token=${token}&type=receipt`,
+        );
+        if (receiptResponse.ok) {
+          const receiptBlob = await receiptResponse.blob();
+          zip.file(`receipt-${invoiceNumber}.pdf`, receiptBlob);
+        }
 
         // Generate and download zip
         const zipBlob = await zip.generateAsync({
@@ -113,11 +138,24 @@ export default function InvoiceToolbar({
           compressionOptions: { level: 9 },
         });
 
-        saveAs(zipBlob, `${invoiceNumber}-invoice-and-receipt.zip`);
+        const zipName = hasAttachments
+          ? `${invoiceNumber}-complete.zip`
+          : `${invoiceNumber}-invoice-and-receipt.zip`;
+        saveAs(zipBlob, zipName);
+      } else if (hasAttachments) {
+        // Unpaid invoice with attachments - use server-side ZIP
+        const response = await fetch(
+          `${apiUrl}/files/download/invoice?token=${token}&includeAttachments=true`,
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch invoice");
+        }
+        const blob = await response.blob();
+        saveAs(blob, `${invoiceNumber}-with-attachments.zip`);
       } else {
-        // Download invoice only
+        // Download invoice only (no attachments, not paid)
         await downloadFile(
-          `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?token=${token}`,
+          `${apiUrl}/files/download/invoice?token=${token}`,
           `${invoiceNumber}.pdf`,
         );
       }
@@ -189,7 +227,15 @@ export default function InvoiceToolbar({
                 sideOffset={15}
                 className="text-[10px] px-2 py-1 rounded-none font-medium"
               >
-                <p>{isPaid ? "Download invoice & receipt" : "Download"}</p>
+                <p>
+                  {isPaid && attachments.length > 0
+                    ? "Download all files"
+                    : isPaid
+                      ? "Download invoice & receipt"
+                      : attachments.length > 0
+                        ? "Download with attachments"
+                        : "Download"}
+                </p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

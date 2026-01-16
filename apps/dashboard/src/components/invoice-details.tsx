@@ -43,6 +43,14 @@ export function InvoiceDetails() {
     enabled: isOpen,
   });
 
+  // Fetch attachments for the invoice
+  const { data: attachments = [] } = useQuery({
+    ...trpc.invoiceAttachments.getByInvoiceId.queryOptions({
+      invoiceId: invoiceId!,
+    }),
+    enabled: isOpen,
+  });
+
   // Fetch upcoming invoices for recurring series
   const { data: upcomingInvoices } = useQuery({
     ...trpc.invoiceRecurring.getUpcoming.queryOptions({
@@ -444,6 +452,48 @@ export function InvoiceDetails() {
                   </div>
                 </Button>
               )}
+            </div>
+          </div>
+        )}
+
+        {attachments.length > 0 && (
+          <div className="mt-6 border-t border-border pt-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Icons.Attachments className="size-4 text-muted-foreground" />
+              <span className="text-sm font-medium">
+                Attachments ({attachments.length})
+              </span>
+            </div>
+            <div className="space-y-2">
+              {attachments.map((attachment) => (
+                <div
+                  key={attachment.id}
+                  className="flex items-center justify-between bg-muted/50 rounded-md px-3 py-2"
+                >
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <Icons.PdfOutline className="size-4 shrink-0 text-red-500" />
+                    <span className="text-sm truncate">{attachment.name}</span>
+                  </div>
+                  {user?.fileKey && attachment.path && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 shrink-0"
+                      onClick={() => {
+                        const path = attachment.path?.join("/");
+                        if (path) {
+                          downloadFile(
+                            `${process.env.NEXT_PUBLIC_API_URL}/files/download/file?path=${encodeURIComponent(path)}&fk=${user.fileKey}`,
+                            attachment.name,
+                          );
+                        }
+                      }}
+                    >
+                      <Icons.ArrowCoolDown className="size-3.5" />
+                    </Button>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         )}

@@ -981,6 +981,59 @@ export const invoices = pgTable(
   ],
 );
 
+export const invoiceAttachments = pgTable(
+  "invoice_attachments",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    invoiceId: uuid("invoice_id").notNull(),
+    teamId: uuid("team_id").notNull(),
+    name: text().notNull(),
+    path: text().array().notNull(),
+    size: bigint({ mode: "number" }),
+  },
+  (table) => [
+    index("invoice_attachments_invoice_id_idx").using(
+      "btree",
+      table.invoiceId.asc().nullsLast().op("uuid_ops"),
+    ),
+    index("invoice_attachments_team_id_idx").using(
+      "btree",
+      table.teamId.asc().nullsLast().op("uuid_ops"),
+    ),
+    foreignKey({
+      columns: [table.invoiceId],
+      foreignColumns: [invoices.id],
+      name: "invoice_attachments_invoice_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "invoice_attachments_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("Invoice attachments can be created by a member of the team", {
+      as: "permissive",
+      for: "insert",
+      to: ["public"],
+      withCheck: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Invoice attachments can be deleted by a member of the team", {
+      as: "permissive",
+      for: "delete",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+    pgPolicy("Invoice attachments can be selected by a member of the team", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
 export const customers = pgTable(
   "customers",
   {
@@ -3236,7 +3289,7 @@ export const bankConnectionsRelations = relations(
   }),
 );
 
-export const invoicesRelations = relations(invoices, ({ one }) => ({
+export const invoicesRelations = relations(invoices, ({ one, many }) => ({
   user: one(users, {
     fields: [invoices.userId],
     references: [users.id],
@@ -3253,7 +3306,22 @@ export const invoicesRelations = relations(invoices, ({ one }) => ({
     fields: [invoices.invoiceRecurringId],
     references: [invoiceRecurring.id],
   }),
+  attachments: many(invoiceAttachments),
 }));
+
+export const invoiceAttachmentsRelations = relations(
+  invoiceAttachments,
+  ({ one }) => ({
+    invoice: one(invoices, {
+      fields: [invoiceAttachments.invoiceId],
+      references: [invoices.id],
+    }),
+    team: one(teams, {
+      fields: [invoiceAttachments.teamId],
+      references: [teams.id],
+    }),
+  }),
+);
 
 export const invoiceRecurringRelations = relations(
   invoiceRecurring,

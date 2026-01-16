@@ -90,10 +90,24 @@ export function PortalContent({ portalId }: Props) {
   const handleDownloadSingle = async (invoice: (typeof invoices)[number]) => {
     setDownloadingId(invoice.id);
     try {
-      downloadFile(
-        `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?token=${invoice.token}`,
-        `${invoice.invoiceNumber || "invoice"}.pdf`,
+      // Include attachments in download - server will return ZIP if there are attachments
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?token=${invoice.token}&includeAttachments=true`,
       );
+      if (!response.ok) {
+        throw new Error("Failed to download invoice");
+      }
+
+      const contentType = response.headers.get("content-type");
+      const blob = await response.blob();
+
+      // If server returned a ZIP (has attachments), use .zip extension
+      const isZip = contentType?.includes("application/zip");
+      const filename = isZip
+        ? `${invoice.invoiceNumber || "invoice"}-with-attachments.zip`
+        : `${invoice.invoiceNumber || "invoice"}.pdf`;
+
+      saveAs(blob, filename);
     } finally {
       setTimeout(() => setDownloadingId(null), 1000);
     }
@@ -116,22 +130,50 @@ export function PortalContent({ portalId }: Props) {
 
       const filePromises = selected.map(async (invoice) => {
         try {
-          const url = `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?token=${invoice.token}`;
+          // Include attachments in download
+          const url = `${process.env.NEXT_PUBLIC_API_URL}/files/download/invoice?token=${invoice.token}&includeAttachments=true`;
           const response = await fetch(url);
           if (!response.ok) {
             throw new Error(`Failed to fetch invoice ${invoice.id}`);
           }
 
+          const contentType = response.headers.get("content-type");
           const blob = await response.blob();
           const baseName = invoice.invoiceNumber ?? `invoice-${invoice.id}`;
-          let filename = `${baseName}.pdf`;
-          let counter = 1;
-          while (usedFilenames.has(filename)) {
-            filename = `${baseName}-${counter}.pdf`;
-            counter++;
+          const isZip = contentType?.includes("application/zip");
+
+          if (isZip) {
+            // If this invoice has attachments (returned as ZIP), extract and add to main ZIP
+            const invoiceZip = await JSZip.loadAsync(blob);
+            const folderName = `${baseName}/`;
+
+            // Track folder name uniqueness
+            let finalFolderName = folderName;
+            let counter = 1;
+            while (usedFilenames.has(finalFolderName)) {
+              finalFolderName = `${baseName}-${counter}/`;
+              counter++;
+            }
+            usedFilenames.add(finalFolderName);
+
+            // Add all files from the invoice ZIP to a subfolder
+            for (const [filename, file] of Object.entries(invoiceZip.files)) {
+              if (!file.dir) {
+                const content = await file.async("blob");
+                zip.file(`${finalFolderName}${filename}`, content);
+              }
+            }
+          } else {
+            // Single PDF, add directly
+            let filename = `${baseName}.pdf`;
+            let counter = 1;
+            while (usedFilenames.has(filename)) {
+              filename = `${baseName}-${counter}.pdf`;
+              counter++;
+            }
+            usedFilenames.add(filename);
+            zip.file(filename, blob);
           }
-          usedFilenames.add(filename);
-          zip.file(filename, blob);
         } catch (error) {
           console.error(`Error processing invoice ${invoice.id}:`, error);
         }

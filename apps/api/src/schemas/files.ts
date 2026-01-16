@@ -136,4 +136,19 @@ export const downloadInvoiceSchema = z.object({
         name: "type",
       },
     }),
+  includeAttachments: z
+    .preprocess(
+      (val) => val === "true" || val === true,
+      z.boolean().default(false),
+    )
+    .optional()
+    .openapi({
+      description:
+        "If true and the invoice has attachments, returns a ZIP containing the invoice PDF and all attachments. If false or no attachments exist, returns only the invoice PDF.",
+      example: false,
+      param: {
+        in: "query",
+        name: "includeAttachments",
+      },
+    }),
 });
