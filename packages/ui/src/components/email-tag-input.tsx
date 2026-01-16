@@ -69,16 +69,19 @@ export function EmailTagInput({
     const pastedText = e.clipboardData.getData("text");
     const pastedEmails = pastedText
       .split(/[,;\s]+/)
-      .map((e) => e.trim())
+      .map((e) => e.trim().toLowerCase())
       .filter((e) => isValidEmail(e));
 
     if (pastedEmails.length > 0) {
-      const uniqueNewEmails = pastedEmails.filter(
-        (e) =>
-          !emails.some(
-            (existing) => existing.toLowerCase() === e.toLowerCase(),
-          ),
-      );
+      // Deduplicate within pasted emails and against existing emails
+      const seen = new Set(emails.map((e) => e.toLowerCase()));
+      const uniqueNewEmails: string[] = [];
+      for (const email of pastedEmails) {
+        if (!seen.has(email)) {
+          seen.add(email);
+          uniqueNewEmails.push(email);
+        }
+      }
       if (uniqueNewEmails.length > 0) {
         updateEmails([...emails, ...uniqueNewEmails]);
       }
