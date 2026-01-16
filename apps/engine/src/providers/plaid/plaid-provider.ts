@@ -53,7 +53,11 @@ export class PlaidProvider implements Provider {
     return this.#api.getHealthCheck();
   }
 
-  async getAccounts({ accessToken, institutionId }: GetAccountsRequest) {
+  async getAccounts({
+    accessToken,
+    institutionId,
+    skipCache,
+  }: GetAccountsRequest) {
     if (!accessToken || !institutionId) {
       throw Error("accessToken or institutionId is missing");
     }
@@ -61,6 +65,7 @@ export class PlaidProvider implements Provider {
     const response = await this.#api.getAccounts({
       accessToken,
       institutionId,
+      skipCache,
     });
 
     return (response ?? []).map(transformAccount);

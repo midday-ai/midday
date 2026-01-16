@@ -10,6 +10,7 @@ export const getAccountsSchema = z.object({
   accessToken: z.string().optional(),
   institutionId: z.string().optional(), // Plaid
   provider: z.enum(["gocardless", "teller", "plaid", "enablebanking"]),
+  skipCache: z.coerce.boolean().optional(), // Skip cache and fetch fresh data (for refresh/reconnect)
 });
 
 export const updateUsageSchema = z.object({ id: z.string() });

@@ -120,6 +120,7 @@ export type GetAccountDetailsResponse = GetAccountResponse & AccountDetails;
 
 export type GetAccountsRequest = {
   id: string;
+  skipCache?: boolean;
 };
 
 export type Requestion = {

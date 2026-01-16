@@ -119,6 +119,7 @@ export class PlaidApi {
   async getAccounts({
     accessToken,
     institutionId,
+    skipCache,
   }: GetAccountsRequest): Promise<GetAccountsResponse | undefined> {
     const tokenHash = await hashToken(accessToken ?? "");
     const cacheKey = `plaid_accounts_${tokenHash}`;
@@ -143,6 +144,7 @@ export class PlaidApi {
             },
           }));
         },
+        { skipCache },
       );
     } catch (error) {
       const parsedError = isError(error);

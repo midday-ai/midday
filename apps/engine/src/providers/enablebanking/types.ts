@@ -222,6 +222,7 @@ export type AuthenticateResponse = {
 
 export type GetAccountsRequest = {
   id: string;
+  skipCache?: boolean;
 };
 
 export type GetTransaction = {

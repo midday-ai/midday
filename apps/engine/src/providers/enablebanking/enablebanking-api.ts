@@ -227,6 +227,7 @@ export class EnableBankingApi {
 
   async getAccounts({
     id,
+    skipCache,
   }: GetAccountsRequest): Promise<GetAccountDetailsResponse[]> {
     const cacheKey = `enablebanking_accounts_${id}`;
 
@@ -261,6 +262,7 @@ export class EnableBankingApi {
             }),
           );
         },
+        { skipCache },
       );
     } catch (error) {
       console.log(error);

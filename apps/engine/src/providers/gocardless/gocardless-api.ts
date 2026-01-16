@@ -130,46 +130,39 @@ export class GoCardLessApi {
       | undefined;
     balances: GetAccountBalanceResponse["balances"] | undefined;
   }> {
-    // Cache balances for 15 minutes (shorter than other caches since balances change more)
     const cacheKey = `gocardless_account_balances_${accountId}`;
-    const cached = await this.#kv?.get(cacheKey);
-
-    if (cached) {
-      return JSON.parse(cached);
-    }
-
-    const token = await this.#getAccessToken();
 
     try {
-      const { balances } = await this.#get<GetAccountBalanceResponse>(
-        `/api/v2/accounts/${accountId}/balances/`,
-        token,
+      return await withCache(
+        this.#kv,
+        cacheKey,
+        CACHE_TTL.ONE_HOUR,
+        async () => {
+          const token = await this.#getAccessToken();
+          const { balances } = await this.#get<GetAccountBalanceResponse>(
+            `/api/v2/accounts/${accountId}/balances/`,
+            token,
+          );
+
+          const foundInterimAvailable = balances?.find(
+            (account) =>
+              account.balanceType === "interimAvailable" ||
+              account.balanceType === "interimBooked",
+          );
+
+          // For some accounts, the interimAvailable balance is 0, so we need to use the expected balance
+          const foundExpectedAvailable = balances?.find(
+            (account) => account.balanceType === "expected",
+          );
+
+          return {
+            primaryBalance:
+              foundInterimAvailable?.balanceAmount ||
+              foundExpectedAvailable?.balanceAmount,
+            balances,
+          };
+        },
       );
-
-      const foundInterimAvailable = balances?.find(
-        (account) =>
-          account.balanceType === "interimAvailable" ||
-          account.balanceType === "interimBooked",
-      );
-
-      // For some accounts, the interimAvailable balance is 0, so we need to use the expected balance
-      const foundExpectedAvailable = balances?.find(
-        (account) => account.balanceType === "expected",
-      );
-
-      const result = {
-        primaryBalance:
-          foundInterimAvailable?.balanceAmount ||
-          foundExpectedAvailable?.balanceAmount,
-        balances,
-      };
-
-      // Cache for 1 hour (balance during account selection doesn't need to be real-time)
-      await this.#kv?.put(cacheKey, JSON.stringify(result), {
-        expirationTtl: CACHE_TTL.ONE_HOUR,
-      });
-
-      return result;
     } catch (error) {
       const parsedError = isError(error);
 
@@ -262,102 +255,78 @@ export class GoCardLessApi {
   }
 
   async getAccountDetails(id: string): Promise<GetAccountDetailsResponse> {
-    // Cache account details for 1 hour
     const cacheKey = `gocardless_account_details_${id}`;
-    const cached = await this.#kv?.get(cacheKey);
 
-    if (cached) {
-      return JSON.parse(cached) as GetAccountDetailsResponse;
-    }
+    return withCache(this.#kv, cacheKey, CACHE_TTL.FOUR_HOURS, async () => {
+      const token = await this.#getAccessToken();
 
-    const token = await this.#getAccessToken();
+      // Only fetch details endpoint - the basic /accounts/{id}/ endpoint returns
+      // fields (created, last_accessed, status, owner_name) that aren't used in transforms
+      const details = await this.#get<GetAccountDetailsResponse>(
+        `/api/v2/accounts/${id}/details/`,
+        token,
+      );
 
-    // Only fetch details endpoint - the basic /accounts/{id}/ endpoint returns
-    // fields (created, last_accessed, status, owner_name) that aren't used in transforms
-    const details = await this.#get<GetAccountDetailsResponse>(
-      `/api/v2/accounts/${id}/details/`,
-      token,
-    );
-
-    const result = {
-      ...details,
-      id, // Use the account ID we already have (details endpoint doesn't return id)
-    };
-
-    await this.#kv?.put(cacheKey, JSON.stringify(result), {
-      expirationTtl: CACHE_TTL.FOUR_HOURS,
+      return {
+        ...details,
+        id, // Use the account ID we already have (details endpoint doesn't return id)
+      };
     });
-
-    return result;
   }
 
   async getInstitution(id: string): Promise<GetInstitutionResponse> {
-    // Cache institution data for 1 hour
     const cacheKey = `gocardless_institution_${id}`;
-    const cached = await this.#kv?.get(cacheKey);
 
-    if (cached) {
-      return JSON.parse(cached) as GetInstitutionResponse;
-    }
-
-    const token = await this.#getAccessToken();
-
-    const response = await this.#get<GetInstitutionResponse>(
-      `/api/v2/institutions/${id}/`,
-      token,
-    );
-
-    await this.#kv?.put(cacheKey, JSON.stringify(response), {
-      expirationTtl: CACHE_TTL.ONE_HOUR,
+    return withCache(this.#kv, cacheKey, CACHE_TTL.ONE_HOUR, async () => {
+      const token = await this.#getAccessToken();
+      return this.#get<GetInstitutionResponse>(
+        `/api/v2/institutions/${id}/`,
+        token,
+      );
     });
-
-    return response;
   }
 
   async getAccounts({
     id,
+    skipCache,
   }: GetAccountsRequest): Promise<GetAccountsResponse | undefined> {
-    // Check cache first - cache for 1 hour to avoid rate limits (12/day)
     const cacheKey = `${this.#accountsCacheKeyPrefix}_${id}`;
-    const cachedAccounts = await this.#kv?.get(cacheKey);
-
-    if (cachedAccounts) {
-      logger("Returning cached accounts for requisition", id);
-      return JSON.parse(cachedAccounts) as GetAccountsResponse;
-    }
 
     try {
-      const response = await this.getRequestion(id);
+      return await withCache(
+        this.#kv,
+        cacheKey,
+        CACHE_TTL.FOUR_HOURS,
+        async () => {
+          const response = await this.getRequestion(id);
 
-      if (!response?.accounts) {
-        return undefined;
-      }
+          if (!response?.accounts) {
+            return undefined;
+          }
 
-      // Fetch institution once - it's the same for all accounts in a requisition
-      const institution = await this.getInstitution(response.institution_id);
+          // Fetch institution once - it's the same for all accounts in a requisition
+          const institution = await this.getInstitution(
+            response.institution_id,
+          );
 
-      const accounts = await Promise.all(
-        response.accounts.map(async (acountId: string) => {
-          const [details, balanceResult] = await Promise.all([
-            this.getAccountDetails(acountId),
-            this.getAccountBalances(acountId),
-          ]);
+          return Promise.all(
+            response.accounts.map(async (acountId: string) => {
+              const [details, balanceResult] = await Promise.all([
+                this.getAccountDetails(acountId),
+                this.getAccountBalances(acountId),
+              ]);
 
-          return {
-            balance: balanceResult.primaryBalance,
-            balances: balanceResult.balances,
-            institution,
-            ...details,
-          };
-        }),
+              return {
+                balance: balanceResult.primaryBalance,
+                balances: balanceResult.balances,
+                institution,
+                ...details,
+              };
+            }),
+          );
+        },
+        { skipCache },
       );
-
-      // Cache the accounts for 4 hours due to strict GoCardLess rate limits (12/day)
-      await this.#kv?.put(cacheKey, JSON.stringify(accounts), {
-        expirationTtl: CACHE_TTL.FOUR_HOURS,
-      });
-
-      return accounts;
     } catch (error) {
       const parsedError = isError(error);
 
@@ -405,30 +374,21 @@ export class GoCardLessApi {
   }
 
   async getRequestion(id: string): Promise<GetRequisitionResponse | undefined> {
-    // Cache requisition data for 1 hour to reduce API calls
     const cacheKey = `gocardless_requisition_${id}`;
-    const cached = await this.#kv?.get(cacheKey);
-
-    if (cached) {
-      return JSON.parse(cached) as GetRequisitionResponse;
-    }
 
     try {
-      const token = await this.#getAccessToken();
-
-      const response = await this.#get<GetRequisitionResponse>(
-        `/api/v2/requisitions/${id}/`,
-        token,
+      return await withCache(
+        this.#kv,
+        cacheKey,
+        CACHE_TTL.ONE_HOUR,
+        async () => {
+          const token = await this.#getAccessToken();
+          return this.#get<GetRequisitionResponse>(
+            `/api/v2/requisitions/${id}/`,
+            token,
+          );
+        },
       );
-
-      // Only cache if we got valid data
-      if (response) {
-        await this.#kv?.put(cacheKey, JSON.stringify(response), {
-          expirationTtl: CACHE_TTL.ONE_HOUR,
-        });
-      }
-
-      return response;
     } catch (error) {
       const parsedError = isError(error);
 

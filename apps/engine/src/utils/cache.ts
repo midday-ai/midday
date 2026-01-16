@@ -25,27 +25,45 @@ export async function hashToken(token: string): Promise<string> {
 
 /**
  * Cache wrapper that handles get/set with JSON serialization
+ * Automatically invalidates cache on error to allow fresh retry
+ *
+ * @param options.skipCache - If true, bypasses cache read but still writes result to cache
  */
 export async function withCache<T>(
-  kv: KVNamespace,
+  kv: KVNamespace | undefined,
   key: string,
   ttl: number,
   fetcher: () => Promise<T>,
+  options?: { skipCache?: boolean },
 ): Promise<T> {
-  const cached = await kv.get(key);
-
-  if (cached) {
-    return JSON.parse(cached) as T;
+  // If KV is not available, just call the fetcher directly
+  if (!kv) {
+    return fetcher();
   }
 
-  const result = await fetcher();
+  // Only read from cache if not skipping
+  if (!options?.skipCache) {
+    const cached = await kv.get(key);
 
-  // Only cache non-null/undefined results
-  if (result !== null && result !== undefined) {
-    await kv.put(key, JSON.stringify(result), {
-      expirationTtl: ttl,
-    });
+    if (cached) {
+      return JSON.parse(cached) as T;
+    }
   }
 
-  return result;
+  try {
+    const result = await fetcher();
+
+    // Always cache non-null/undefined results (even when skipCache is true)
+    if (result !== null && result !== undefined) {
+      await kv.put(key, JSON.stringify(result), {
+        expirationTtl: ttl,
+      });
+    }
+
+    return result;
+  } catch (error) {
+    // Invalidate any stale cache on error so next attempt fetches fresh
+    await kv.delete(key);
+    throw error;
+  }
 }

@@ -42,33 +42,42 @@ export class TellerApi {
 
   async getAccounts({
     accessToken,
-  }: AuthenticatedRequest): Promise<GetAccountsResponse> {
+    skipCache,
+  }: AuthenticatedRequest & {
+    skipCache?: boolean;
+  }): Promise<GetAccountsResponse> {
     const tokenHash = await hashToken(accessToken);
     const cacheKey = `teller_accounts_${tokenHash}`;
 
-    return withCache(this.#kv, cacheKey, CACHE_TTL.FOUR_HOURS, async () => {
-      const accounts: GetAccountsResponse = await this.#get(
-        "/accounts",
-        accessToken,
-      );
+    return withCache(
+      this.#kv,
+      cacheKey,
+      CACHE_TTL.FOUR_HOURS,
+      async () => {
+        const accounts: GetAccountsResponse = await this.#get(
+          "/accounts",
+          accessToken,
+        );
 
-      return Promise.all(
-        accounts?.map(async (account) => {
-          const balance = await this.getAccountBalance({
-            accountId: account.id,
-            accessToken,
-          });
+        return Promise.all(
+          accounts?.map(async (account) => {
+            const balance = await this.getAccountBalance({
+              accountId: account.id,
+              accessToken,
+            });
 
-          // Fetch full balances for available_balance
-          const balances = await this.getAccountBalances({
-            accountId: account.id,
-            accessToken,
-          });
+            // Fetch full balances for available_balance
+            const balances = await this.getAccountBalances({
+              accountId: account.id,
+              accessToken,
+            });
 
-          return { ...account, balance, balances };
-        }),
-      );
-    });
+            return { ...account, balance, balances };
+          }),
+        );
+      },
+      { skipCache },
+    );
   }
 
   /**

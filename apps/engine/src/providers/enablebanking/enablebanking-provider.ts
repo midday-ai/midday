@@ -37,12 +37,15 @@ export class EnableBankingProvider implements Provider {
     return response.map(transformInstitution);
   }
 
-  async getAccounts({ id }: GetAccountsRequest): Promise<GetAccountsResponse> {
+  async getAccounts({
+    id,
+    skipCache,
+  }: GetAccountsRequest): Promise<GetAccountsResponse> {
     if (!id) {
       throw Error("Missing params");
     }
 
-    const response = await this.#api.getAccounts({ id });
+    const response = await this.#api.getAccounts({ id, skipCache });
     return response.map(transformAccount);
   }
 

@@ -39,6 +39,17 @@ export const AccountsParamsSchema = z.object({
       },
       example: "ins_109508",
     }),
+  skipCache: z.coerce
+    .boolean()
+    .optional()
+    .openapi({
+      description: "Skip cache and fetch fresh data (for refresh/reconnect)",
+      param: {
+        name: "skipCache",
+        in: "query",
+      },
+      example: false,
+    }),
 });
 
 export const AccountSchema = z

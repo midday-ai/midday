@@ -36,6 +36,7 @@ export type GetTransactionsRequest = {
 export type GetAccountsRequest = {
   accessToken: string;
   institutionId: string;
+  skipCache?: boolean;
 };
 
 export type ItemPublicTokenExchangeRequest = {
