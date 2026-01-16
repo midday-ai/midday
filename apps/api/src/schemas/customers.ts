@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+import { isValidEmailList } from "@midday/utils";
 
 export const getCustomersSchema = z
   .object({
@@ -72,9 +73,10 @@ export const customerResponseSchema = z.object({
     description: "Primary email address of the customer",
     example: "contact@acme.com",
   }),
-  billingEmail: z.string().email().nullable().openapi({
-    description: "Billing email address of the customer",
-    example: "finance@acme.com",
+  billingEmail: z.string().nullable().openapi({
+    description:
+      "Billing email addresses of the customer (comma-separated for multiple)",
+    example: "finance@acme.com, accounting@acme.com",
   }),
   phone: z.string().nullable().openapi({
     description: "Primary phone number of the customer",
@@ -387,10 +389,18 @@ export const upsertCustomerSchema = z.object({
     description: "Primary email address of the customer",
     example: "contact@acme.com",
   }),
-  billingEmail: z.string().email().nullable().optional().openapi({
-    description: "Billing email address of the customer",
-    example: "finance@acme.com",
-  }),
+  billingEmail: z
+    .string()
+    .nullable()
+    .optional()
+    .refine(isValidEmailList, {
+      message: "All billing emails must be valid and unique",
+    })
+    .openapi({
+      description:
+        "Billing email addresses of the customer (comma-separated for multiple)",
+      example: "finance@acme.com, accounting@acme.com",
+    }),
   country: z.string().nullable().optional().openapi({
     description: "Country name where the customer is located",
     example: "United States",

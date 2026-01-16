@@ -18,7 +18,7 @@ export const sendInvoiceReminder = schemaTask({
     const { data: invoice } = await supabase
       .from("invoices")
       .select(
-        "id, token, invoice_number, team_id, customer:customer_id(name, website, email), team:team_id(name, email)",
+        "id, token, invoice_number, team_id, customer:customer_id(name, website, email, billing_email), team:team_id(name, email)",
       )
       .eq("id", invoiceId)
       .single();
@@ -35,6 +35,14 @@ export const sendInvoiceReminder = schemaTask({
       return;
     }
 
+    // Parse billing emails (supports comma-separated list)
+    const billingEmails = invoice?.customer?.billing_email
+      ? invoice.customer.billing_email
+          .split(",")
+          .map((e) => e.trim())
+          .filter(Boolean)
+      : [];
+
     try {
       await notifications.create(
         "invoice_reminder_sent",
@@ -48,6 +56,7 @@ export const sendInvoiceReminder = schemaTask({
         },
         {
           sendEmail: true,
+          bcc: billingEmails.length > 0 ? billingEmails : undefined,
           replyTo: invoice?.team.email ?? undefined,
         },
       );

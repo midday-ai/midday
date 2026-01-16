@@ -41,6 +41,7 @@
     "./hover-card": "./src/components/hover-card.tsx",
     "./icons": "./src/components/icons.tsx",
     "./input": "./src/components/input.tsx",
+    "./email-tag-input": "./src/components/email-tag-input.tsx",
     "./input-otp": "./src/components/input-otp.tsx",
     "./label": "./src/components/label.tsx",
     "./navigation-menu": "./src/components/navigation-menu.tsx",
@@ -138,7 +139,8 @@
     "tailwindcss": "^3.4.13",
     "tailwindcss-animate": "^1.0.7",
     "use-stick-to-bottom": "^1.1.1",
-    "vaul": "^1.1.2"
+    "vaul": "^1.1.2",
+    "@midday/utils": "workspace:*"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",

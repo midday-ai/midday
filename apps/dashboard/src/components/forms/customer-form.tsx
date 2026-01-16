@@ -12,6 +12,7 @@ import {
   AccordionTrigger,
 } from "@midday/ui/accordion";
 import { Button } from "@midday/ui/button";
+import { EmailTagInput } from "@midday/ui/email-tag-input";
 import {
   Form,
   FormControl,
@@ -26,6 +27,7 @@ import { Label } from "@midday/ui/label";
 import { Skeleton } from "@midday/ui/skeleton";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { Textarea } from "@midday/ui/textarea";
+import { isValidEmailList } from "@midday/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { z } from "zod/v3";
@@ -51,13 +53,9 @@ const formSchema = z.object({
   email: z.string().email({
     message: "Email is not valid.",
   }),
-  billingEmail: z
-    .string()
-    .email({
-      message: "Email is not valid.",
-    })
-    .nullable()
-    .optional(),
+  billingEmail: z.string().nullable().optional().refine(isValidEmailList, {
+    message: "All emails must be valid and unique.",
+  }),
   phone: z.string().optional(),
   website: z
     .string()
@@ -296,24 +294,15 @@ export function CustomerForm({ data }: Props) {
                             Billing Email
                           </FormLabel>
                           <FormControl>
-                            <Input
-                              {...field}
-                              value={field.value ?? ""}
-                              onChange={(e) => {
-                                field.onChange(
-                                  e.target.value.trim().length > 0
-                                    ? e.target.value.trim()
-                                    : null,
-                                );
-                              }}
-                              placeholder="finance@example.com"
-                              type="email"
-                              autoComplete="off"
+                            <EmailTagInput
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="finance@example.com, accounting@example.com"
                             />
                           </FormControl>
                           <FormDescription>
-                            This is an additional email that will be used to
-                            send invoices to.
+                            Additional emails to BCC when sending invoices.
+                            Press Enter or comma to add.
                           </FormDescription>
                           <FormMessage />
                         </FormItem>

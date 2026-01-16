@@ -58,10 +58,16 @@ export const sendInvoiceEmail = schemaTask({
     // @ts-expect-error template is a jsonb field
     const shouldSendCopy = invoice?.template?.sendCopy;
 
+    // Parse billing emails (supports comma-separated list)
+    const billingEmails = invoice?.customer?.billing_email
+      ? invoice.customer.billing_email
+          .split(",")
+          .map((e) => e.trim())
+          .filter(Boolean)
+      : [];
+
     const bcc = [
-      ...(invoice?.customer?.billing_email
-        ? [invoice?.customer?.billing_email]
-        : []),
+      ...billingEmails,
       ...(shouldSendCopy && userEmail ? [userEmail] : []),
     ];
 
