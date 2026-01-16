@@ -22,6 +22,7 @@ import { Logo } from "./logo";
 import { Meta } from "./meta";
 import { NoteDetails } from "./note-details";
 import { PaymentDetails } from "./payment-details";
+import { AttachmentsMenu } from "./attachments-menu";
 import { SettingsMenu } from "./settings-menu";
 import { SubmitButton } from "./submit-button";
 import { Summary } from "./summary";
@@ -386,6 +387,7 @@ export function Form() {
           <div className="flex justify-between items-center">
             <div className="flex gap-2">
               <SettingsMenu />
+              <AttachmentsMenu />
               <TemplateSelector />
             </div>
 

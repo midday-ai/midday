@@ -2,12 +2,13 @@ import type { Context } from "@api/rest/types";
 import { downloadFileSchema, downloadInvoiceSchema } from "@api/schemas/files";
 import { createAdminClient } from "@api/services/supabase";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { getInvoiceById } from "@midday/db/queries";
+import { getInvoiceAttachments, getInvoiceById } from "@midday/db/queries";
 import { verifyFileKey } from "@midday/encryption";
 import { PdfTemplate, renderToStream } from "@midday/invoice";
 import { verify } from "@midday/invoice/token";
 import { download } from "@midday/supabase/storage";
 import { HTTPException } from "hono/http-exception";
+import JSZip from "jszip";
 import { publicMiddleware } from "../../middleware";
 import { withDatabase } from "../../middleware/db";
 import { withFileAuth } from "../../middleware/file-auth";
@@ -166,16 +167,22 @@ downloadInvoiceApp.openapi(
     operationId: "downloadInvoice",
     "x-speakeasy-name-override": "downloadInvoice",
     description:
-      "Downloads an invoice as a PDF. Can be accessed with an invoice ID (requires team file key via fk query parameter) or invoice token (public access).",
+      "Downloads an invoice as a PDF. Can be accessed with an invoice ID (requires team file key via fk query parameter) or invoice token (public access). When includeAttachments is true and the invoice has attachments, returns a ZIP file containing the invoice PDF and all attachments.",
     tags: ["Files"],
     request: {
       query: downloadInvoiceSchema,
     },
     responses: {
       200: {
-        description: "Invoice PDF",
+        description: "Invoice PDF or ZIP file with invoice and attachments",
         content: {
           "application/pdf": {
+            schema: {
+              type: "string",
+              format: "binary",
+            },
+          },
+          "application/zip": {
             schema: {
               type: "string",
               format: "binary",
@@ -219,7 +226,8 @@ downloadInvoiceApp.openapi(
   }),
   async (c) => {
     const db = c.get("db");
-    const { id, token, preview, type } = c.req.valid("query");
+    const { id, token, preview, type, includeAttachments } =
+      c.req.valid("query");
     const isReceipt = type === "receipt";
 
     if (!id && !token) {
@@ -229,6 +237,7 @@ downloadInvoiceApp.openapi(
     }
 
     let invoiceData = null;
+    let invoiceId: string | null = null;
 
     if (id) {
       // Require authentication for ID-based access
@@ -243,20 +252,24 @@ downloadInvoiceApp.openapi(
         id,
         teamId,
       });
+      invoiceId = id;
     } else if (token) {
       // Public access with token - verify token and get invoice
       try {
-        const { id: invoiceId } = (await verify(decodeURIComponent(token))) as {
+        const { id: decodedInvoiceId } = (await verify(
+          decodeURIComponent(token),
+        )) as {
           id: string;
         };
 
-        if (!invoiceId) {
+        if (!decodedInvoiceId) {
           throw new HTTPException(404, { message: "Invoice not found" });
         }
 
         invoiceData = await getInvoiceById(db, {
-          id: invoiceId,
+          id: decodedInvoiceId,
         });
+        invoiceId = decodedInvoiceId;
       } catch (error) {
         // Re-throw HTTPException as-is (e.g., "Invoice not found" from line 253)
         if (error instanceof HTTPException) {
@@ -284,21 +297,81 @@ downloadInvoiceApp.openapi(
       );
 
       // Convert stream to blob
-      const blob = await new Response(stream as any).blob();
+      const invoicePdfBlob = await new Response(stream as any).blob();
+      const invoiceFilename = isReceipt
+        ? `receipt-${invoiceData.invoiceNumber}.pdf`
+        : `${invoiceData.invoiceNumber}.pdf`;
 
+      // Check if we need to include attachments
+      if (includeAttachments && invoiceId && !preview) {
+        const attachments = await getInvoiceAttachments(db, {
+          invoiceId,
+        });
+
+        if (attachments.length > 0) {
+          // Create a ZIP file with invoice and attachments
+          const zip = new JSZip();
+
+          // Add the invoice PDF
+          zip.file(invoiceFilename, invoicePdfBlob);
+
+          // Download and add each attachment
+          const supabase = await createAdminClient();
+          for (const attachment of attachments) {
+            const storagePath = attachment.path?.join("/");
+            if (!storagePath) continue;
+
+            try {
+              const { data: fileData } = await download(supabase, {
+                bucket: "vault",
+                path: storagePath,
+              });
+
+              if (fileData) {
+                const fileBuffer = await fileData.arrayBuffer();
+                // Add attachment to attachments subfolder to organize
+                zip.file(`attachments/${attachment.name}`, fileBuffer);
+              }
+            } catch (error) {
+              // Log but don't fail if one attachment can't be downloaded
+              console.error(
+                `Failed to download attachment ${attachment.name}:`,
+                error,
+              );
+            }
+          }
+
+          // Generate ZIP
+          const zipBlob = await zip.generateAsync({
+            type: "blob",
+            compression: "DEFLATE",
+            compressionOptions: { level: 9 },
+          });
+
+          const zipFilename = `${invoiceData.invoiceNumber}-with-attachments.zip`;
+
+          return new Response(zipBlob, {
+            headers: {
+              "Content-Type": "application/zip",
+              "Content-Disposition": `attachment; filename="${zipFilename}"`,
+              "Cache-Control": "no-store, max-age=0",
+            },
+          });
+        }
+      }
+
+      // Default: return just the invoice PDF
       const headers: Record<string, string> = {
         "Content-Type": "application/pdf",
         "Cache-Control": "no-store, max-age=0",
       };
 
       if (!preview) {
-        const filename = isReceipt
-          ? `receipt-${invoiceData.invoiceNumber}.pdf`
-          : `${invoiceData.invoiceNumber}.pdf`;
-        headers["Content-Disposition"] = `attachment; filename="${filename}"`;
+        headers["Content-Disposition"] =
+          `attachment; filename="${invoiceFilename}"`;
       }
 
-      return new Response(blob, { headers });
+      return new Response(invoicePdfBlob, { headers });
     } catch (error: unknown) {
       throw new HTTPException(500, {
         message: `Failed to generate ${isReceipt ? "receipt" : "invoice"} PDF: ${
