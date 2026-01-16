@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { Document, Page, PasswordResponses, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/TextLayer.css";
-import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import { Alert, AlertDescription } from "@midday/ui/alert";
 import { cn } from "@midday/ui/cn";
 import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
+import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
