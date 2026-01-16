@@ -115,14 +115,12 @@ export function StartPage() {
             <div className="space-y-4 text-center max-w-xl px-2">
               <h1 className="font-serif text-3xl sm:text-3xl md:text-3xl lg:text-3xl xl:text-2xl 2xl:text-2xl leading-tight">
                 <span className="text-foreground">
-                  Know how your business is doing.
-                  <br />
-                  No guesswork.
+                  Run your business finances without manual work.
                 </span>
               </h1>
 
               <p className="text-muted-foreground text-base leading-normal font-sans max-w-md text-center mx-auto lg:text-left lg:mx-0">
-                Midday keeps your finances reconciled, explained and ready to act on.
+                Transactions, receipts, invoices, time stay connected and reconciled in the background.
               </p>
             </div>
 
@@ -200,13 +198,11 @@ export function StartPage() {
                   <div className="space-y-3">
                     <h1 className="font-serif text-xl lg:text-3xl xl:text-3xl 2xl:text-3xl 3xl:text-4xl leading-tight lg:leading-tight xl:leading-[1.3] text-left">
                       <span className="text-foreground">
-                        Know how your business is doing.
-                        <br />
-                        No guesswork.
+                        Run your business finances without manual work.
                       </span>
                     </h1>
                     <p className="font-sans text-base text-muted-foreground leading-normal text-left">
-                      Midday keeps your finances reconciled, explained and ready to act on.
+                      Transactions, receipts, invoices, time stay connected and reconciled in the background.
                     </p>
                   </div>
                 </div>
