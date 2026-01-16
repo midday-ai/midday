@@ -58,11 +58,17 @@ export class SendInvoiceEmailProcessor extends BaseProcessor<SendInvoiceEmailPay
     const userEmail = invoice.user?.email;
     const shouldSendCopy = template?.sendCopy;
 
+    // Parse billing emails (supports comma-separated list)
+    const billingEmails = invoice.customer?.billingEmail
+      ? invoice.customer.billingEmail
+          .split(",")
+          .map((e) => e.trim())
+          .filter(Boolean)
+      : [];
+
     // Build BCC list
     const bcc = [
-      ...(invoice.customer?.billingEmail
-        ? [invoice.customer.billingEmail]
-        : []),
+      ...billingEmails,
       ...(shouldSendCopy && userEmail ? [userEmail] : []),
     ];
 

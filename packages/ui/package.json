@@ -41,6 +41,7 @@
     "./hover-card": "./src/components/hover-card.tsx",
     "./icons": "./src/components/icons.tsx",
     "./input": "./src/components/input.tsx",
+    "./email-tag-input": "./src/components/email-tag-input.tsx",
     "./input-otp": "./src/components/input-otp.tsx",
     "./label": "./src/components/label.tsx",
     "./navigation-menu": "./src/components/navigation-menu.tsx",

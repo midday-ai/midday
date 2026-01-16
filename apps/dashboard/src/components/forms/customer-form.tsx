@@ -12,6 +12,7 @@ import {
   AccordionTrigger,
 } from "@midday/ui/accordion";
 import { Button } from "@midday/ui/button";
+import { EmailTagInput } from "@midday/ui/email-tag-input";
 import {
   Form,
   FormControl,
@@ -53,11 +54,21 @@ const formSchema = z.object({
   }),
   billingEmail: z
     .string()
-    .email({
-      message: "Email is not valid.",
-    })
     .nullable()
-    .optional(),
+    .optional()
+    .refine(
+      (val) => {
+        if (!val) return true;
+        const emails = val
+          .split(",")
+          .map((e) => e.trim())
+          .filter(Boolean);
+        return emails.every((email) =>
+          /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+        );
+      },
+      { message: "All emails must be valid." },
+    ),
   phone: z.string().optional(),
   website: z
     .string()
@@ -296,24 +307,15 @@ export function CustomerForm({ data }: Props) {
                             Billing Email
                           </FormLabel>
                           <FormControl>
-                            <Input
-                              {...field}
-                              value={field.value ?? ""}
-                              onChange={(e) => {
-                                field.onChange(
-                                  e.target.value.trim().length > 0
-                                    ? e.target.value.trim()
-                                    : null,
-                                );
-                              }}
-                              placeholder="finance@example.com"
-                              type="email"
-                              autoComplete="off"
+                            <EmailTagInput
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="finance@example.com, accounting@example.com"
                             />
                           </FormControl>
                           <FormDescription>
-                            This is an additional email that will be used to
-                            send invoices to.
+                            Additional emails to BCC when sending invoices.
+                            Press Enter or comma to add.
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
