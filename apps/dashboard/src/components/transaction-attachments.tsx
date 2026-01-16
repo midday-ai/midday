@@ -169,7 +169,12 @@ export function TransactionAttachments({
 
   const handleOnDelete = (id: string) => {
     setFiles((files) => files.filter((file) => file?.id !== id));
-    deleteattachmentMutation.mutate({ id });
+
+    // Only call delete mutation if database operations are enabled
+    // (when enableDatabaseOperations is false, attachments have temp IDs that aren't valid UUIDs)
+    if (enableDatabaseOperations) {
+      deleteattachmentMutation.mutate({ id });
+    }
   };
 
   const onDrop = async (acceptedFiles: Array<Attachment>) => {
