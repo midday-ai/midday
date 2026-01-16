@@ -1,4 +1,5 @@
 import { Buffer } from "node:buffer";
+import { CACHE_TTL, withCache } from "@engine/utils/cache";
 import { ProviderError } from "@engine/utils/error";
 import { formatISO, subDays } from "date-fns";
 import * as jose from "jose";
@@ -22,11 +23,14 @@ export class EnableBankingApi {
   #redirectUrl: string;
   #applicationId: string;
   #keyContent: string;
+  #kv: KVNamespace;
 
   // Maximum allowed TTL is 24 hours (86400 seconds)
   #expiresIn = 20; // hours
 
   constructor(params: Omit<ProviderParams, "provider">) {
+    this.#kv = params.kv;
+
     this.#applicationId =
       params.envs.ENABLEBANKING_APPLICATION_ID ||
       process.env.ENABLEBANKING_APPLICATION_ID!;
@@ -189,7 +193,11 @@ export class EnableBankingApi {
   }
 
   async getSession(sessionId: string): Promise<GetSessionResponse> {
-    return this.#get<GetSessionResponse>(`/sessions/${sessionId}`);
+    const cacheKey = `enablebanking_session_${sessionId}`;
+
+    return withCache(this.#kv, cacheKey, CACHE_TTL.FOUR_HOURS, () =>
+      this.#get<GetSessionResponse>(`/sessions/${sessionId}`),
+    );
   }
 
   async getHealthCheck(): Promise<boolean> {
@@ -210,54 +218,71 @@ export class EnableBankingApi {
   async getAccountDetails(
     accountId: string,
   ): Promise<GetAccountDetailsResponse> {
-    return this.#get<GetAccountDetailsResponse>(
-      `/accounts/${accountId}/details`,
+    const cacheKey = `enablebanking_account_details_${accountId}`;
+
+    return withCache(this.#kv, cacheKey, CACHE_TTL.FOUR_HOURS, () =>
+      this.#get<GetAccountDetailsResponse>(`/accounts/${accountId}/details`),
     );
   }
 
   async getAccounts({
     id,
   }: GetAccountsRequest): Promise<GetAccountDetailsResponse[]> {
+    const cacheKey = `enablebanking_accounts_${id}`;
+
     try {
-      const session = await this.getSession(id);
+      return await withCache(
+        this.#kv,
+        cacheKey,
+        CACHE_TTL.FOUR_HOURS,
+        async () => {
+          const session = await this.getSession(id);
 
-      const accountDetails = await Promise.all(
-        session.accounts.map(async (id) => {
-          const [details, balanceResponse] = await Promise.all([
-            this.getAccountDetails(id),
-            this.#get<GetBalancesResponse>(`/accounts/${id}/balances`),
-          ]);
+          return Promise.all(
+            session.accounts.map(async (accountId) => {
+              const [details, balanceResponse] = await Promise.all([
+                this.getAccountDetails(accountId),
+                this.getAccountBalances(accountId),
+              ]);
 
-          // Find balance with highest amount
-          const balance = balanceResponse.balances.reduce((max, current) => {
-            const currentAmount = +current.balance_amount.amount;
-            const maxAmount = +max.balance_amount.amount;
-            return currentAmount > maxAmount ? current : max;
-          }, balanceResponse.balances[0]);
+              // Find balance with highest amount
+              const balance = balanceResponse.balances.reduce((max, current) => {
+                const currentAmount = +current.balance_amount.amount;
+                const maxAmount = +max.balance_amount.amount;
+                return currentAmount > maxAmount ? current : max;
+              }, balanceResponse.balances[0]);
 
-          return {
-            ...details,
-            institution: session.aspsp,
-            valid_until: session.access.valid_until,
-            balance,
-          };
-        }),
+              return {
+                ...details,
+                institution: session.aspsp,
+                valid_until: session.access.valid_until,
+                balance,
+              };
+            }),
+          );
+        },
       );
-
-      return accountDetails;
     } catch (error) {
       console.log(error);
       throw error;
     }
   }
 
+  async getAccountBalances(accountId: string): Promise<GetBalancesResponse> {
+    const cacheKey = `enablebanking_balances_${accountId}`;
+
+    return withCache(this.#kv, cacheKey, CACHE_TTL.ONE_HOUR, () =>
+      this.#get<GetBalancesResponse>(`/accounts/${accountId}/balances`),
+    );
+  }
+
   async getAccountBalance(accountId: string): Promise<{
     balance: GetBalancesResponse["balances"][0];
     creditLimit?: { currency: string; amount: string } | null;
   }> {
-    // Fetch both balance and account details (for credit_limit)
+    // Fetch both balance and account details (for credit_limit) - both are cached
     const [balanceResponse, accountDetails] = await Promise.all([
-      this.#get<GetBalancesResponse>(`/accounts/${accountId}/balances`),
+      this.getAccountBalances(accountId),
       this.getAccountDetails(accountId).catch(() => null),
     ]);
 

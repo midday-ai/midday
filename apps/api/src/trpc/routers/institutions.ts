@@ -5,7 +5,10 @@ import {
 } from "@api/schemas/institutions";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { client } from "@midday/engine-client";
+import { createLoggerWithContext } from "@midday/logger";
 import { TRPCError } from "@trpc/server";
+
+const logger = createLoggerWithContext("institutions");
 
 export const institutionsRouter = createTRPCRouter({
   get: protectedProcedure
@@ -39,17 +42,29 @@ export const institutionsRouter = createTRPCRouter({
         });
 
         if (!accountsResponse.ok) {
-          throw new Error("Failed to get accounts");
+          const errorBody = await accountsResponse.json().catch(() => null);
+          logger.error("Engine accounts error", {
+            status: accountsResponse.status,
+            error: errorBody,
+            input,
+          });
+          throw new Error(
+            errorBody?.message ||
+              `Failed to get accounts (${accountsResponse.status})`,
+          );
         }
 
         const { data } = await accountsResponse.json();
 
         return data.sort((a, b) => b.balance.amount - a.balance.amount);
       } catch (error) {
-        console.log(error);
+        logger.error("Failed to get accounts", {
+          error: error instanceof Error ? error.message : String(error),
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to get accounts",
+          message:
+            error instanceof Error ? error.message : "Failed to get accounts",
         });
       }
     }),

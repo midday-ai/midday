@@ -1,3 +1,4 @@
+import { CACHE_TTL, hashToken, withCache } from "@engine/utils/cache";
 import { PLAID_COUNTRIES } from "@engine/utils/countries";
 import { ProviderError } from "@engine/utils/error";
 import { logger } from "@engine/utils/logger";
@@ -38,12 +39,14 @@ export class PlaidApi {
   #client: PlaidBaseApi;
   #clientId: string;
   #clientSecret: string;
+  #kv: KVNamespace;
 
   #countryCodes = PLAID_COUNTRIES as CountryCode[];
 
   constructor(params: Omit<ProviderParams, "provider">) {
     this.#clientId = params.envs.PLAID_CLIENT_ID;
     this.#clientSecret = params.envs.PLAID_SECRET;
+    this.#kv = params.kv;
 
     const configuration = new Configuration({
       basePath:
@@ -117,20 +120,30 @@ export class PlaidApi {
     accessToken,
     institutionId,
   }: GetAccountsRequest): Promise<GetAccountsResponse | undefined> {
+    const tokenHash = await hashToken(accessToken ?? "");
+    const cacheKey = `plaid_accounts_${tokenHash}`;
+
     try {
-      const accounts = await this.#client.accountsGet({
-        access_token: accessToken,
-      });
+      return await withCache(
+        this.#kv,
+        cacheKey,
+        CACHE_TTL.FOUR_HOURS,
+        async () => {
+          const accounts = await this.#client.accountsGet({
+            access_token: accessToken,
+          });
 
-      const institution = await this.institutionsGetById(institutionId);
+          const institution = await this.institutionsGetById(institutionId);
 
-      return accounts.data.accounts.map((account) => ({
-        ...account,
-        institution: {
-          id: institution.data.institution.institution_id,
-          name: institution.data.institution.name,
+          return accounts.data.accounts.map((account) => ({
+            ...account,
+            institution: {
+              id: institution.data.institution.institution_id,
+              name: institution.data.institution.name,
+            },
+          }));
         },
-      }));
+      );
     } catch (error) {
       const parsedError = isError(error);
 
@@ -219,13 +232,20 @@ export class PlaidApi {
   }
 
   async institutionsGetById(institution_id: string) {
-    return this.#client.institutionsGetById({
-      institution_id,
-      country_codes: this.#countryCodes,
-      options: {
-        include_auth_metadata: true,
-      },
+    const cacheKey = `plaid_institution_${institution_id}`;
+
+    const data = await withCache(this.#kv, cacheKey, CACHE_TTL.FOUR_HOURS, async () => {
+      const response = await this.#client.institutionsGetById({
+        institution_id,
+        country_codes: this.#countryCodes,
+        options: {
+          include_auth_metadata: true,
+        },
+      });
+      return response.data;
     });
+
+    return { data };
   }
 
   async itemPublicTokenExchange({

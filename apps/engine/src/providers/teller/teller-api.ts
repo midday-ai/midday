@@ -1,3 +1,4 @@
+import { CACHE_TTL, hashToken, withCache } from "@engine/utils/cache";
 import { ProviderError } from "@engine/utils/error";
 import type {
   GetConnectionStatusRequest,
@@ -23,9 +24,11 @@ export class TellerApi {
   #baseUrl = "https://api.teller.io";
 
   #fetcher: Fetcher;
+  #kv: KVNamespace;
 
   constructor(params: Omit<ProviderParams, "provider">) {
     this.#fetcher = params.fetcher as Fetcher;
+    this.#kv = params.kv;
   }
 
   async getHealthCheck() {
@@ -40,27 +43,32 @@ export class TellerApi {
   async getAccounts({
     accessToken,
   }: AuthenticatedRequest): Promise<GetAccountsResponse> {
-    const accounts: GetAccountsResponse = await this.#get(
-      "/accounts",
-      accessToken,
-    );
+    const tokenHash = await hashToken(accessToken);
+    const cacheKey = `teller_accounts_${tokenHash}`;
 
-    return Promise.all(
-      accounts?.map(async (account) => {
-        const balance = await this.getAccountBalance({
-          accountId: account.id,
-          accessToken,
-        });
+    return withCache(this.#kv, cacheKey, CACHE_TTL.FOUR_HOURS, async () => {
+      const accounts: GetAccountsResponse = await this.#get(
+        "/accounts",
+        accessToken,
+      );
 
-        // Fetch full balances for available_balance
-        const balances = await this.getAccountBalances({
-          accountId: account.id,
-          accessToken,
-        });
+      return Promise.all(
+        accounts?.map(async (account) => {
+          const balance = await this.getAccountBalance({
+            accountId: account.id,
+            accessToken,
+          });
 
-        return { ...account, balance, balances };
-      }),
-    );
+          // Fetch full balances for available_balance
+          const balances = await this.getAccountBalances({
+            accountId: account.id,
+            accessToken,
+          });
+
+          return { ...account, balance, balances };
+        }),
+      );
+    });
   }
 
   /**
@@ -71,10 +79,14 @@ export class TellerApi {
     accountId,
     accessToken,
   }: GetAccountBalanceRequest): Promise<GetAccountBalancesResponse | null> {
+    const cacheKey = `teller_balances_${accountId}`;
+
     try {
-      return await this.#get<GetAccountBalancesResponse>(
-        `/accounts/${accountId}/balances`,
-        accessToken,
+      return await withCache(this.#kv, cacheKey, CACHE_TTL.ONE_HOUR, () =>
+        this.#get<GetAccountBalancesResponse>(
+          `/accounts/${accountId}/balances`,
+          accessToken,
+        ),
       );
     } catch {
       // Balances endpoint may not be available for all institutions
@@ -134,12 +146,16 @@ export class TellerApi {
     accountId,
     accessToken,
   }: GetAccountDetailsRequest): Promise<GetAccountDetailsResponse | null> {
+    const cacheKey = `teller_account_details_${accountId}`;
+
     try {
-      return await this.#get<GetAccountDetailsResponse>(
-        `/accounts/${accountId}/details`,
-        accessToken,
+      return await withCache(this.#kv, cacheKey, CACHE_TTL.FOUR_HOURS, () =>
+        this.#get<GetAccountDetailsResponse>(
+          `/accounts/${accountId}/details`,
+          accessToken,
+        ),
       );
-    } catch (error) {
+    } catch {
       // Account details may not be available for all institutions
       // or may require microdeposit verification
       return null;

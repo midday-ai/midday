@@ -1,3 +1,4 @@
+import { CACHE_TTL, withCache } from "@engine/utils/cache";
 import { ProviderError } from "@engine/utils/error";
 import { logger } from "@engine/utils/logger";
 import { formatISO, subDays } from "date-fns";
@@ -9,7 +10,6 @@ import type {
   GetAccessTokenResponse,
   GetAccountBalanceResponse,
   GetAccountDetailsResponse,
-  GetAccountResponse,
   GetAccountsRequest,
   GetAccountsResponse,
   GetInstitutionResponse,
@@ -33,10 +33,9 @@ export class GoCardLessApi {
   #accessTokenCacheKey = "gocardless_access_token";
   #refreshTokenCacheKey = "gocardless_refresh_token";
   #institutionsCacheKey = "gocardless_institutions";
+  #accountsCacheKeyPrefix = "gocardless_accounts";
 
   #kv: KVNamespace;
-
-  #oneHour = 3600;
 
   #secretKey;
   #secretId;
@@ -67,7 +66,7 @@ export class GoCardLessApi {
     );
 
     await this.#kv?.put(this.#accessTokenCacheKey, response.access, {
-      expirationTtl: response.access_expires - this.#oneHour,
+      expirationTtl: response.access_expires - CACHE_TTL.ONE_HOUR,
     });
 
     return response.refresh;
@@ -99,10 +98,10 @@ export class GoCardLessApi {
     try {
       await Promise.all([
         this.#kv?.put(this.#accessTokenCacheKey, response.access, {
-          expirationTtl: response.access_expires - this.#oneHour,
+          expirationTtl: response.access_expires - CACHE_TTL.ONE_HOUR,
         }),
         this.#kv?.put(this.#refreshTokenCacheKey, response.refresh, {
-          expirationTtl: response.refresh_expires - this.#oneHour,
+          expirationTtl: response.refresh_expires - CACHE_TTL.ONE_HOUR,
         }),
       ]);
     } catch (error) {
@@ -131,6 +130,14 @@ export class GoCardLessApi {
       | undefined;
     balances: GetAccountBalanceResponse["balances"] | undefined;
   }> {
+    // Cache balances for 15 minutes (shorter than other caches since balances change more)
+    const cacheKey = `gocardless_account_balances_${accountId}`;
+    const cached = await this.#kv?.get(cacheKey);
+
+    if (cached) {
+      return JSON.parse(cached);
+    }
+
     const token = await this.#getAccessToken();
 
     try {
@@ -150,12 +157,19 @@ export class GoCardLessApi {
         (account) => account.balanceType === "expected",
       );
 
-      return {
+      const result = {
         primaryBalance:
           foundInterimAvailable?.balanceAmount ||
           foundExpectedAvailable?.balanceAmount,
         balances,
       };
+
+      // Cache for 1 hour (balance during account selection doesn't need to be real-time)
+      await this.#kv?.put(cacheKey, JSON.stringify(result), {
+        expirationTtl: CACHE_TTL.ONE_HOUR,
+      });
+
+      return result;
     } catch (error) {
       const parsedError = isError(error);
 
@@ -193,7 +207,7 @@ export class GoCardLessApi {
     );
 
     this.#kv?.put(cacheKey, JSON.stringify(response), {
-      expirationTtl: this.#oneHour,
+      expirationTtl: CACHE_TTL.ONE_HOUR,
     });
 
     if (countryCode) {
@@ -248,34 +262,70 @@ export class GoCardLessApi {
   }
 
   async getAccountDetails(id: string): Promise<GetAccountDetailsResponse> {
+    // Cache account details for 1 hour
+    const cacheKey = `gocardless_account_details_${id}`;
+    const cached = await this.#kv?.get(cacheKey);
+
+    if (cached) {
+      return JSON.parse(cached) as GetAccountDetailsResponse;
+    }
+
     const token = await this.#getAccessToken();
 
-    const [account, details] = await Promise.all([
-      this.#get<GetAccountResponse>(`/api/v2/accounts/${id}/`, token),
-      this.#get<GetAccountDetailsResponse>(
-        `/api/v2/accounts/${id}/details/`,
-        token,
-      ),
-    ]);
+    // Only fetch details endpoint - the basic /accounts/{id}/ endpoint returns
+    // fields (created, last_accessed, status, owner_name) that aren't used in transforms
+    const details = await this.#get<GetAccountDetailsResponse>(
+      `/api/v2/accounts/${id}/details/`,
+      token,
+    );
 
-    return {
-      ...account,
+    const result = {
       ...details,
+      id, // Use the account ID we already have (details endpoint doesn't return id)
     };
+
+    await this.#kv?.put(cacheKey, JSON.stringify(result), {
+      expirationTtl: CACHE_TTL.FOUR_HOURS,
+    });
+
+    return result;
   }
 
   async getInstitution(id: string): Promise<GetInstitutionResponse> {
+    // Cache institution data for 1 hour
+    const cacheKey = `gocardless_institution_${id}`;
+    const cached = await this.#kv?.get(cacheKey);
+
+    if (cached) {
+      return JSON.parse(cached) as GetInstitutionResponse;
+    }
+
     const token = await this.#getAccessToken();
 
-    return this.#get<GetInstitutionResponse>(
+    const response = await this.#get<GetInstitutionResponse>(
       `/api/v2/institutions/${id}/`,
       token,
     );
+
+    await this.#kv?.put(cacheKey, JSON.stringify(response), {
+      expirationTtl: CACHE_TTL.ONE_HOUR,
+    });
+
+    return response;
   }
 
   async getAccounts({
     id,
   }: GetAccountsRequest): Promise<GetAccountsResponse | undefined> {
+    // Check cache first - cache for 1 hour to avoid rate limits (12/day)
+    const cacheKey = `${this.#accountsCacheKeyPrefix}_${id}`;
+    const cachedAccounts = await this.#kv?.get(cacheKey);
+
+    if (cachedAccounts) {
+      logger("Returning cached accounts for requisition", id);
+      return JSON.parse(cachedAccounts) as GetAccountsResponse;
+    }
+
     try {
       const response = await this.getRequestion(id);
 
@@ -283,12 +333,14 @@ export class GoCardLessApi {
         return undefined;
       }
 
-      return Promise.all(
+      // Fetch institution once - it's the same for all accounts in a requisition
+      const institution = await this.getInstitution(response.institution_id);
+
+      const accounts = await Promise.all(
         response.accounts.map(async (acountId: string) => {
-          const [details, balanceResult, institution] = await Promise.all([
+          const [details, balanceResult] = await Promise.all([
             this.getAccountDetails(acountId),
             this.getAccountBalances(acountId),
-            this.getInstitution(response.institution_id),
           ]);
 
           return {
@@ -299,6 +351,13 @@ export class GoCardLessApi {
           };
         }),
       );
+
+      // Cache the accounts for 4 hours due to strict GoCardLess rate limits (12/day)
+      await this.#kv?.put(cacheKey, JSON.stringify(accounts), {
+        expirationTtl: CACHE_TTL.FOUR_HOURS,
+      });
+
+      return accounts;
     } catch (error) {
       const parsedError = isError(error);
 
@@ -346,13 +405,30 @@ export class GoCardLessApi {
   }
 
   async getRequestion(id: string): Promise<GetRequisitionResponse | undefined> {
+    // Cache requisition data for 1 hour to reduce API calls
+    const cacheKey = `gocardless_requisition_${id}`;
+    const cached = await this.#kv?.get(cacheKey);
+
+    if (cached) {
+      return JSON.parse(cached) as GetRequisitionResponse;
+    }
+
     try {
       const token = await this.#getAccessToken();
 
-      return this.#get<GetRequisitionResponse>(
+      const response = await this.#get<GetRequisitionResponse>(
         `/api/v2/requisitions/${id}/`,
         token,
       );
+
+      // Only cache if we got valid data
+      if (response) {
+        await this.#kv?.put(cacheKey, JSON.stringify(response), {
+          expirationTtl: CACHE_TTL.ONE_HOUR,
+        });
+      }
+
+      return response;
     } catch (error) {
       const parsedError = isError(error);
 
