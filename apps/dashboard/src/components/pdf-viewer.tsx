@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { Document, Page, PasswordResponses, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/TextLayer.css";
+import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import { Alert, AlertDescription } from "@midday/ui/alert";
 import { cn } from "@midday/ui/cn";
 import { Input } from "@midday/ui/input";
-import { ScrollArea } from "@midday/ui/scroll-area";
 import { Skeleton } from "@midday/ui/skeleton";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -123,88 +123,109 @@ export function PdfViewer({ url, maxWidth }: PdfViewerProps) {
         numPages && "bg-white",
       )}
     >
-      <ScrollArea className="w-full flex-1">
-        {isPasswordProtected && !isSubmittingPassword ? (
-          <div className="absolute inset-0 flex items-center justify-center p-8">
-            <div className="max-w-md w-full space-y-6 text-center">
-              <div className="space-y-1">
-                <h3 className="text-[#878787]">
-                  This document is password protected.
-                </h3>
-                <p className="text-xs text-[#878787]">
-                  Please enter the password below.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handlePasswordSubmit();
+      {isPasswordProtected && !isSubmittingPassword ? (
+        <div className="absolute inset-0 flex items-center justify-center p-8">
+          <div className="max-w-md w-full space-y-6 text-center">
+            <div className="space-y-1">
+              <h3 className="text-[#878787]">
+                This document is password protected.
+              </h3>
+              <p className="text-xs text-[#878787]">
+                Please enter the password below.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handlePasswordSubmit();
+                }}
+                autoComplete="off"
+                data-lpignore="true"
+                data-1p-ignore="true"
+              >
+                <Input
+                  type="password"
+                  placeholder="Enter password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && password.trim()) {
+                      handlePasswordSubmit();
+                    }
                   }}
-                  autoComplete="off"
+                  disabled={isSubmittingPassword}
+                  autoComplete="one-time-code"
+                  data-form-type="other"
                   data-lpignore="true"
                   data-1p-ignore="true"
-                >
-                  <Input
-                    type="password"
-                    placeholder="Enter password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && password.trim()) {
-                        handlePasswordSubmit();
-                      }
-                    }}
-                    disabled={isSubmittingPassword}
-                    autoComplete="one-time-code"
-                    data-form-type="other"
-                    data-lpignore="true"
-                    data-1p-ignore="true"
-                    data-bitwarden-watching="false"
-                    name="document-unlock-password"
-                    className="text-center bg-transparent focus:ring-0 focus:outline-none"
-                  />
-                </form>
-                {passwordError && (
-                  <p className="text-sm text-red-500">{passwordError}</p>
-                )}
-              </div>
+                  data-bitwarden-watching="false"
+                  name="document-unlock-password"
+                  className="text-center bg-transparent focus:ring-0 focus:outline-none"
+                />
+              </form>
+              {passwordError && (
+                <p className="text-sm text-red-500">{passwordError}</p>
+              )}
             </div>
           </div>
-        ) : (
-          <div className="pb-24">
-            <Document
-              key={`${url}_${isPasswordProtected}`}
-              file={url}
-              onLoadSuccess={onDocumentLoadSuccess}
-              onLoadError={onDocumentLoadError}
-              onPassword={onPassword}
-              loading={
-                <Skeleton className="w-full h-[calc(100vh-theme(spacing.24))]" />
-              }
-              error={
-                <div className="flex flex-col items-center justify-center p-8 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Failed to load PDF. The file may be corrupted or
-                    unsupported.
-                  </p>
-                </div>
-              }
-            >
-              {numPages &&
-                Array.from(new Array(numPages), (_, index) => (
-                  <Page
-                    width={maxWidth}
-                    key={`${url}_${index + 1}`}
-                    pageNumber={index + 1}
-                    renderAnnotationLayer={false}
-                    renderTextLayer={true}
-                  />
-                ))}
-            </Document>
-          </div>
-        )}
-      </ScrollArea>
+        </div>
+      ) : (
+        <TransformWrapper
+          initialScale={1}
+          minScale={1}
+          maxScale={2}
+          doubleClick={{ mode: "toggle", step: 2 }}
+          panning={{ disabled: false }}
+          wheel={{ disabled: true }}
+          smooth
+          alignmentAnimation={{ sizeX: 0, sizeY: 0 }}
+        >
+          <TransformComponent
+            wrapperStyle={{
+              width: "100%",
+              height: "100%",
+              overflow: "auto",
+            }}
+            contentStyle={{
+              cursor: "grab",
+            }}
+            wrapperClass="[&:active]:cursor-grabbing"
+          >
+            <div className="pb-24">
+              <Document
+                key={`${url}_${isPasswordProtected}`}
+                file={url}
+                onLoadSuccess={onDocumentLoadSuccess}
+                onLoadError={onDocumentLoadError}
+                onPassword={onPassword}
+                loading={
+                  <Skeleton className="w-full h-[calc(100vh-theme(spacing.24))]" />
+                }
+                error={
+                  <div className="flex flex-col items-center justify-center p-8 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Failed to load PDF. The file may be corrupted or
+                      unsupported.
+                    </p>
+                  </div>
+                }
+              >
+                {numPages &&
+                  Array.from(new Array(numPages), (_, index) => (
+                    <Page
+                      width={maxWidth}
+                      key={`${url}_${index + 1}`}
+                      pageNumber={index + 1}
+                      renderAnnotationLayer={false}
+                      renderTextLayer={true}
+                    />
+                  ))}
+              </Document>
+            </div>
+          </TransformComponent>
+        </TransformWrapper>
+      )}
     </div>
   );
 }
