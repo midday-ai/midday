@@ -2,13 +2,36 @@
  * Email validation utilities for comma-separated email lists
  */
 
-export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 /**
- * Validates a single email address
+ * Validates a single email address using a non-backtracking approach
+ * to prevent ReDoS vulnerabilities
  */
 export function isValidEmail(email: string): boolean {
-  return EMAIL_REGEX.test(email.trim());
+  const trimmed = email.trim();
+
+  // Length limits per RFC 5321
+  if (trimmed.length === 0 || trimmed.length > 254) return false;
+
+  const atIndex = trimmed.indexOf("@");
+
+  // Must have exactly one @ with content on both sides
+  if (atIndex < 1 || atIndex !== trimmed.lastIndexOf("@")) return false;
+
+  const local = trimmed.slice(0, atIndex);
+  const domain = trimmed.slice(atIndex + 1);
+
+  // Local part validation
+  if (local.length > 64 || /\s/.test(local)) return false;
+
+  // Domain validation: must have content, no spaces, and a valid TLD
+  if (domain.length === 0 || domain.length > 253 || /\s/.test(domain))
+    return false;
+
+  // Domain must have at least one dot with content on both sides
+  const lastDotIndex = domain.lastIndexOf(".");
+  if (lastDotIndex < 1 || lastDotIndex >= domain.length - 1) return false;
+
+  return true;
 }
 
 /**

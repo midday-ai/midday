@@ -27,9 +27,4 @@ export {
   getFiscalYearToDate,
 } from "./fiscal-year";
 
-export {
-  EMAIL_REGEX,
-  isValidEmail,
-  parseEmailList,
-  isValidEmailList,
-} from "./email";
+export { isValidEmail, parseEmailList, isValidEmailList } from "./email";
