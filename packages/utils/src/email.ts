@@ -47,10 +47,16 @@ export function parseEmailList(value: string | null | undefined): string[] {
 
 /**
  * Validates a comma-separated email string
- * Returns true if empty/null or if all emails are valid
+ * Returns true if empty/null or if all emails are valid and unique (case-insensitive)
  */
 export function isValidEmailList(value: string | null | undefined): boolean {
   if (!value) return true;
   const emails = parseEmailList(value);
-  return emails.every((email) => isValidEmail(email));
+
+  // Check all emails are valid
+  if (!emails.every((email) => isValidEmail(email))) return false;
+
+  // Check for duplicates (case-insensitive)
+  const uniqueEmails = new Set(emails.map((e) => e.toLowerCase()));
+  return uniqueEmails.size === emails.length;
 }

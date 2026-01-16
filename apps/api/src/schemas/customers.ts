@@ -394,7 +394,7 @@ export const upsertCustomerSchema = z.object({
     .nullable()
     .optional()
     .refine(isValidEmailList, {
-      message: "All billing emails must be valid email addresses",
+      message: "All billing emails must be valid and unique",
     })
     .openapi({
       description:

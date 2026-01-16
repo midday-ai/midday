@@ -91,18 +91,14 @@ export function EmailTagInput({
   return (
     <div
       className={cn(
-        "flex h-9 w-full items-center gap-1.5 border bg-transparent px-3 text-sm transition-colors overflow-x-auto",
+        "flex min-h-9 w-full flex-wrap items-center gap-1.5 border bg-transparent px-3 py-1 text-sm transition-colors",
         disabled && "cursor-not-allowed opacity-50",
         className,
       )}
       onClick={() => inputRef.current?.focus()}
     >
       {emails.map((email) => (
-        <Badge
-          key={email}
-          variant="tag"
-          className="flex items-center gap-1 shrink-0"
-        >
+        <Badge key={email} variant="tag" className="flex items-center gap-1">
           {email}
           {!disabled && (
             <button
@@ -129,7 +125,7 @@ export function EmailTagInput({
         onPaste={handlePaste}
         placeholder={emails.length === 0 ? placeholder : ""}
         disabled={disabled}
-        className="flex-1 min-w-[140px] bg-transparent outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
+        className="flex-1 min-w-[120px] bg-transparent outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
         autoComplete="off"
       />
     </div>

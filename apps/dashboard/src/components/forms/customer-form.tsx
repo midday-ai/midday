@@ -57,7 +57,9 @@ const formSchema = z.object({
     .string()
     .nullable()
     .optional()
-    .refine(isValidEmailList, { message: "All emails must be valid." }),
+    .refine(isValidEmailList, {
+      message: "All emails must be valid and unique.",
+    }),
   phone: z.string().optional(),
   website: z
     .string()
