@@ -26,3 +26,10 @@ export {
   getFiscalYearDates,
   getFiscalYearToDate,
 } from "./fiscal-year";
+
+export {
+  EMAIL_REGEX,
+  isValidEmail,
+  parseEmailList,
+  isValidEmailList,
+} from "./email";

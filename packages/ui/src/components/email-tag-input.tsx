@@ -1,11 +1,10 @@
 "use client";
 
+import { isValidEmail, parseEmailList } from "@midday/utils";
 import { X } from "lucide-react";
 import * as React from "react";
 import { cn } from "../utils";
 import { Badge } from "./badge";
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export interface EmailTagInputProps {
   value?: string | null;
@@ -26,13 +25,7 @@ export function EmailTagInput({
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   // Parse comma-separated emails from value
-  const emails = React.useMemo(() => {
-    if (!value) return [];
-    return value
-      .split(",")
-      .map((e) => e.trim())
-      .filter(Boolean);
-  }, [value]);
+  const emails = React.useMemo(() => parseEmailList(value), [value]);
 
   const updateEmails = (newEmails: string[]) => {
     onChange?.(newEmails.length > 0 ? newEmails.join(", ") : null);
@@ -43,7 +36,7 @@ export function EmailTagInput({
     if (!trimmed) return;
 
     // Check if valid email
-    if (!EMAIL_REGEX.test(trimmed)) return;
+    if (!isValidEmail(trimmed)) return;
 
     // Check for duplicates
     if (emails.some((e) => e.toLowerCase() === trimmed)) return;
@@ -77,7 +70,7 @@ export function EmailTagInput({
     const pastedEmails = pastedText
       .split(/[,;\s]+/)
       .map((e) => e.trim())
-      .filter((e) => EMAIL_REGEX.test(e));
+      .filter((e) => isValidEmail(e));
 
     if (pastedEmails.length > 0) {
       const uniqueNewEmails = pastedEmails.filter(
