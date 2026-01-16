@@ -120,7 +120,7 @@ export function StartPage() {
               </h1>
 
               <p className="text-muted-foreground text-base leading-normal font-sans max-w-md text-center mx-auto lg:text-left lg:mx-0">
-                One place for your transactions, receipts, invoices and time. Always in sync and reconciled in the background.
+                One place for transactions, receipts, invoices and everything around it.
               </p>
             </div>
 
@@ -202,9 +202,7 @@ export function StartPage() {
                       </span>
                     </h1>
                     <p className="font-sans text-base text-muted-foreground leading-normal text-left">
-                      One place for your transactions, receipts, invoices and time.
-                      <br />
-                      Always in sync and reconciled in the background.
+                      One place for transactions, receipts, invoices and everything around it.
                     </p>
                   </div>
                 </div>
