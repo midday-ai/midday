@@ -247,11 +247,14 @@ export class EnableBankingApi {
               ]);
 
               // Find balance with highest amount
-              const balance = balanceResponse.balances.reduce((max, current) => {
-                const currentAmount = +current.balance_amount.amount;
-                const maxAmount = +max.balance_amount.amount;
-                return currentAmount > maxAmount ? current : max;
-              }, balanceResponse.balances[0]);
+              const balance = balanceResponse.balances.reduce(
+                (max, current) => {
+                  const currentAmount = +current.balance_amount.amount;
+                  const maxAmount = +max.balance_amount.amount;
+                  return currentAmount > maxAmount ? current : max;
+                },
+                balanceResponse.balances[0],
+              );
 
               return {
                 ...details,

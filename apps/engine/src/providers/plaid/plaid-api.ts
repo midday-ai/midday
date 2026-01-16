@@ -236,16 +236,21 @@ export class PlaidApi {
   async institutionsGetById(institution_id: string) {
     const cacheKey = `plaid_institution_${institution_id}`;
 
-    const data = await withCache(this.#kv, cacheKey, CACHE_TTL.FOUR_HOURS, async () => {
-      const response = await this.#client.institutionsGetById({
-        institution_id,
-        country_codes: this.#countryCodes,
-        options: {
-          include_auth_metadata: true,
-        },
-      });
-      return response.data;
-    });
+    const data = await withCache(
+      this.#kv,
+      cacheKey,
+      CACHE_TTL.FOUR_HOURS,
+      async () => {
+        const response = await this.#client.institutionsGetById({
+          institution_id,
+          country_codes: this.#countryCodes,
+          options: {
+            include_auth_metadata: true,
+          },
+        });
+        return response.data;
+      },
+    );
 
     return { data };
   }
