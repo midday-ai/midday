@@ -6,7 +6,6 @@ import { Icons } from "@midday/ui/icons";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { HeaderAssistantInputPreview } from "./header-assistant-input-preview";
 import { HeaderInsightsPreview } from "./header-insights-preview";
@@ -21,7 +20,6 @@ export function Header({
   transparent = false,
   hideMenuItems = false,
 }: HeaderProps) {
-  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
   const [isAppsOpen, setIsAppsOpen] = useState(false);
@@ -143,14 +141,11 @@ export function Header({
           )}
         >
           {/* Logo and Brand */}
-          <div
-            className="flex items-center gap-2 cursor-pointer hover:opacity-80 active:opacity-80 transition-opacity duration-200 touch-manipulation"
-            onClick={() => {
-              setIsMenuOpen(false);
-              router.push("/");
-            }}
+          <Link
+            href="/"
+            className="flex items-center gap-2 hover:opacity-80 active:opacity-80 transition-opacity duration-200 touch-manipulation"
+            onClick={() => setIsMenuOpen(false)}
             style={{ WebkitTapHighlightColor: "transparent" }}
-            onTouchEnd={(e) => e.currentTarget.blur()}
           >
             <div className="w-6 h-6">
               <Icons.LogoSmall className="w-full h-full text-foreground" />
@@ -158,7 +153,7 @@ export function Header({
             <span className="font-sans text-base xl:hidden text-foreground">
               midday
             </span>
-          </div>
+          </Link>
 
           {/* Desktop Navigation Links */}
           {!hideMenuItems && (
@@ -203,137 +198,121 @@ export function Header({
                         <div className="grid grid-cols-2 gap-x-4">
                           {/* Column 1 */}
                           <div>
-                            <div
-                              className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                              onClick={() => {
-                                setIsFeaturesOpen(false);
-                                router.push("/assistant");
-                              }}
+                            <Link
+                              href="/assistant"
+                              className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                              onClick={() => setIsFeaturesOpen(false)}
                             >
                               <div className="flex flex-col pl-2">
-                                <span className="font-sans text-base text-foreground mb-1">
-                                  Assistant
-                                </span>
-                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                  Ask questions and get clear financial answers
-                                </span>
-                              </div>
-                            </div>
-                            <div
-                              className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                              onClick={() => {
-                                setIsFeaturesOpen(false);
-                                router.push("/insights");
-                              }}
-                            >
-                              <div className="flex flex-col pl-2">
-                                <span className="font-sans text-base text-foreground mb-1">
-                                  Insights
-                                </span>
-                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                  See what's changing
-                                </span>
-                              </div>
-                            </div>
-                            <div
-                              className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                              onClick={() => {
-                                setIsFeaturesOpen(false);
-                                router.push("/transactions");
-                              }}
-                            >
-                              <div className="flex flex-col pl-2">
-                                <span className="font-sans text-base text-foreground mb-1">
-                                  Transactions
-                                </span>
-                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                  All transactions together
-                                </span>
-                              </div>
-                            </div>
-                            <div
-                              className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                              onClick={() => {
-                                setIsFeaturesOpen(false);
-                                router.push("/inbox");
-                              }}
-                            >
-                              <div className="flex flex-col pl-2">
-                                <span className="font-sans text-base text-foreground mb-1">
-                                  Inbox
-                                </span>
-                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                  Receipts handled automatically
-                                </span>
-                              </div>
-                            </div>
+                            <span className="font-sans text-base text-foreground mb-1">
+                              Assistant
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              Ask questions and get clear financial answers
+                            </span>
                           </div>
+                            </Link>
+                            <Link
+                              href="/insights"
+                              className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                              onClick={() => setIsFeaturesOpen(false)}
+                            >
+                              <div className="flex flex-col pl-2">
+                            <span className="font-sans text-base text-foreground mb-1">
+                              Insights
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              See what's changing
+                            </span>
+                          </div>
+                            </Link>
+                            <Link
+                              href="/transactions"
+                              className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                              onClick={() => setIsFeaturesOpen(false)}
+                            >
+                              <div className="flex flex-col pl-2">
+                            <span className="font-sans text-base text-foreground mb-1">
+                              Transactions
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              All transactions together
+                            </span>
+                          </div>
+                            </Link>
+                            <Link
+                              href="/inbox"
+                              className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                              onClick={() => setIsFeaturesOpen(false)}
+                            >
+                              <div className="flex flex-col pl-2">
+                            <span className="font-sans text-base text-foreground mb-1">
+                              Inbox
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              Receipts handled automatically
+                            </span>
+                          </div>
+                            </Link>
+                        </div>
                           {/* Column 2 */}
                           <div>
-                            <div
-                              className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                              onClick={() => {
-                                setIsFeaturesOpen(false);
-                                router.push("/time-tracking");
-                              }}
+                            <Link
+                              href="/time-tracking"
+                              className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                              onClick={() => setIsFeaturesOpen(false)}
                             >
                               <div className="flex flex-col pl-2">
-                                <span className="font-sans text-base text-foreground mb-1">
-                                  Time tracking
-                                </span>
-                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                  See where time goes
-                                </span>
-                              </div>
-                            </div>
-                            <div
-                              className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                              onClick={() => {
-                                setIsFeaturesOpen(false);
-                                router.push("/invoicing");
-                              }}
+                            <span className="font-sans text-base text-foreground mb-1">
+                              Time tracking
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              See where time goes
+                            </span>
+                          </div>
+                            </Link>
+                            <Link
+                              href="/invoicing"
+                              className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                              onClick={() => setIsFeaturesOpen(false)}
                             >
                               <div className="flex flex-col pl-2">
-                                <span className="font-sans text-base text-foreground mb-1">
-                                  Invoicing
-                                </span>
-                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                  Get paid faster
-                                </span>
-                              </div>
-                            </div>
-                            <div
-                              className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                              onClick={() => {
-                                setIsFeaturesOpen(false);
-                                router.push("/customers");
-                              }}
+                            <span className="font-sans text-base text-foreground mb-1">
+                              Invoicing
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              Get paid faster
+                            </span>
+                          </div>
+                            </Link>
+                            <Link
+                              href="/customers"
+                              className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                              onClick={() => setIsFeaturesOpen(false)}
                             >
                               <div className="flex flex-col pl-2">
-                                <span className="font-sans text-base text-foreground mb-1">
-                                  Customers
-                                </span>
-                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                  Know your customers
-                                </span>
-                              </div>
-                            </div>
-                            <div
-                              className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                              onClick={() => {
-                                setIsFeaturesOpen(false);
-                                router.push("/file-storage");
-                              }}
+                            <span className="font-sans text-base text-foreground mb-1">
+                              Customers
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              Know your customers
+                            </span>
+                          </div>
+                            </Link>
+                            <Link
+                              href="/file-storage"
+                              className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                              onClick={() => setIsFeaturesOpen(false)}
                             >
                               <div className="flex flex-col pl-2">
-                                <span className="font-sans text-base text-foreground mb-1">
-                                  Files
-                                </span>
-                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                  Everything in one place
-                                </span>
+                            <span className="font-sans text-base text-foreground mb-1">
+                              Files
+                            </span>
+                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                              Everything in one place
+                            </span>
                               </div>
-                            </div>
+                            </Link>
                           </div>
                         </div>
                       </div>
@@ -361,7 +340,7 @@ export function Header({
                               height={400}
                               className="h-auto w-auto max-h-[80px] object-contain hidden dark:block"
                             />
-                          </div>
+                                </div>
                           <div className="bg-background border-t border-border p-2.5 flex items-center justify-between gap-4">
                             <div className="flex-1">
                               <span className="font-sans text-xs text-foreground block">
@@ -370,7 +349,7 @@ export function Header({
                               <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
                                 Clean records ready for your accountant
                               </span>
-                            </div>
+                                </div>
                             <div className="flex items-center gap-1.5 flex-shrink-0">
                               <div className="w-6 h-6 border border-border flex items-center justify-center bg-background">
                                 <Image
@@ -389,7 +368,7 @@ export function Header({
                                   height={14}
                                   className="object-contain opacity-70"
                                 />
-                              </div>
+                                </div>
                               <div className="w-6 h-6 border border-border flex items-center justify-center bg-background">
                                 <Image
                                   src="/images/fortnox.svg"
@@ -465,12 +444,10 @@ export function Header({
                     <div className="grid grid-cols-1 lg:grid-cols-6 gap-0 h-full">
                       {/* Column 1 & 2 - Apps List */}
                       <div ref={appsListRef} className="lg:col-span-2 2xl:max-w-xs lg:pr-4">
-                        <div
-                          className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                          onClick={() => {
-                            setIsAppsOpen(false);
-                            router.push("/download");
-                          }}
+                        <Link
+                          href="/download"
+                          className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                          onClick={() => setIsAppsOpen(false)}
                         >
                           <div className="flex flex-col pl-2">
                             <span className="font-sans text-base text-foreground mb-1">
@@ -480,13 +457,11 @@ export function Header({
                               Your finances, always one click away.
                             </span>
                           </div>
-                        </div>
-                        <div
-                          className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                          onClick={() => {
-                            setIsAppsOpen(false);
-                            router.push("/download");
-                          }}
+              </Link>
+              <Link
+                href="/download"
+                          className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                          onClick={() => setIsAppsOpen(false)}
                         >
                           <div className="flex flex-col pl-2">
                             <span className="font-sans text-base text-foreground mb-1">
@@ -496,13 +471,11 @@ export function Header({
                               Connect your existing tools.
                             </span>
                           </div>
-                        </div>
-                        <div
-                          className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                          onClick={() => {
-                            setIsAppsOpen(false);
-                            window.location.href = 'https://api.midday.ai';
-                          }}
+                        </Link>
+                        <a
+                          href="https://api.midday.ai"
+                          className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                          onClick={() => setIsAppsOpen(false)}
                         >
                           <div className="flex flex-col pl-2">
                             <span className="font-sans text-base text-foreground mb-1">
@@ -512,13 +485,11 @@ export function Header({
                               Programmatic access to Midday data and workflows.
                             </span>
                           </div>
-                        </div>
-                        <div
-                          className="flex items-center py-3 cursor-pointer group hover:bg-secondary transition-colors duration-200"
-                          onClick={() => {
-                            setIsAppsOpen(false);
-                            router.push("/sdks");
-                          }}
+                        </a>
+                        <Link
+                          href="/sdks"
+                          className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                          onClick={() => setIsAppsOpen(false)}
                         >
                           <div className="flex flex-col pl-2">
                             <span className="font-sans text-base text-foreground mb-1">
@@ -528,7 +499,7 @@ export function Header({
                               Typed SDKs to build faster with Midday.
                             </span>
                           </div>
-                        </div>
+                        </Link>
                       </div>
 
                       {/* Columns 3-6 - Image Previews Container */}
@@ -576,7 +547,7 @@ export function Header({
                               </AnimatePresence>
                             </div>
                           </div>
-                        </Link>
+              </Link>
 
                         {/* Mac App Preview */}
                         <Link
@@ -686,126 +657,94 @@ export function Header({
                       className="overflow-hidden"
                     >
                       <div className="flex flex-col space-y-4 pt-2">
-                        <button
-                          type="button"
+                        <Link
+                          href="/assistant"
                           onClick={() => {
-                            router.push("/assistant");
                             setIsMenuOpen(false);
                             setIsMobileFeaturesOpen(false);
-                          }}
-                          onTouchEnd={(e) => {
-                            e.currentTarget.blur();
                           }}
                           className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
                           Assistant
-                        </button>
-                        <button
-                          type="button"
+                        </Link>
+                        <Link
+                          href="/insights"
                           onClick={() => {
-                            router.push("/insights");
                             setIsMenuOpen(false);
                             setIsMobileFeaturesOpen(false);
-                          }}
-                          onTouchEnd={(e) => {
-                            e.currentTarget.blur();
                           }}
                           className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
                           Insights
-                        </button>
-                        <button
-                          type="button"
+                        </Link>
+                        <Link
+                          href="/transactions"
                           onClick={() => {
-                            router.push("/transactions");
                             setIsMenuOpen(false);
                             setIsMobileFeaturesOpen(false);
-                          }}
-                          onTouchEnd={(e) => {
-                            e.currentTarget.blur();
                           }}
                           className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
                           Transactions
-                        </button>
-                        <button
-                          type="button"
+                        </Link>
+                        <Link
+                          href="/inbox"
                           onClick={() => {
-                            router.push("/inbox");
                             setIsMenuOpen(false);
                             setIsMobileFeaturesOpen(false);
-                          }}
-                          onTouchEnd={(e) => {
-                            e.currentTarget.blur();
                           }}
                           className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
                           Inbox
-                        </button>
-                        <button
-                          type="button"
+                        </Link>
+                        <Link
+                          href="/time-tracking"
                           onClick={() => {
-                            router.push("/time-tracking");
                             setIsMenuOpen(false);
                             setIsMobileFeaturesOpen(false);
-                          }}
-                          onTouchEnd={(e) => {
-                            e.currentTarget.blur();
                           }}
                           className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
                           Time tracking
-                        </button>
-                        <button
-                          type="button"
+                        </Link>
+                        <Link
+                          href="/invoicing"
                           onClick={() => {
-                            router.push("/invoicing");
                             setIsMenuOpen(false);
                             setIsMobileFeaturesOpen(false);
-                          }}
-                          onTouchEnd={(e) => {
-                            e.currentTarget.blur();
                           }}
                           className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
                           Invoicing
-                        </button>
-                        <button
-                          type="button"
+                        </Link>
+                        <Link
+                          href="/customers"
                           onClick={() => {
-                            router.push("/customers");
                             setIsMenuOpen(false);
                             setIsMobileFeaturesOpen(false);
-                          }}
-                          onTouchEnd={(e) => {
-                            e.currentTarget.blur();
                           }}
                           className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
                           Customers
-                        </button>
-                        <button
-                          type="button"
+                        </Link>
+                        <Link
+                          href="/file-storage"
                           onClick={() => {
-                            router.push("/file-storage");
                             setIsMenuOpen(false);
                             setIsMobileFeaturesOpen(false);
-                          }}
-                          onTouchEnd={(e) => {
-                            e.currentTarget.blur();
                           }}
                           className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
                           Files
-                        </button>
+                        </Link>
                       </div>
                     </motion.div>
                   </>
@@ -881,66 +820,50 @@ export function Header({
                       className="overflow-hidden"
                     >
                       <div className="flex flex-col space-y-4 pt-2">
-                        <button
-                          type="button"
+                        <Link
+                          href="/download"
                           onClick={() => {
-                            router.push("/download");
                             setIsMenuOpen(false);
                             setIsMobileAppsOpen(false);
-                          }}
-                          onTouchEnd={(e) => {
-                            e.currentTarget.blur();
                           }}
                           className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
                           Mac app
-                        </button>
-                        <button
-                          type="button"
+                        </Link>
+                        <Link
+                          href="/download"
                           onClick={() => {
-                            router.push("/download");
                             setIsMenuOpen(false);
                             setIsMobileAppsOpen(false);
-                          }}
-                          onTouchEnd={(e) => {
-                            e.currentTarget.blur();
                           }}
                           className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
                           Integrations
-                        </button>
-                        <button
-                          type="button"
+                        </Link>
+                        <a
+                          href="https://api.midday.ai"
                           onClick={() => {
-                            window.location.href = 'https://api.midday.ai';
                             setIsMenuOpen(false);
                             setIsMobileAppsOpen(false);
                           }}
-                onTouchEnd={(e) => {
-                  e.currentTarget.blur();
-                }}
                           className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
-                style={{ WebkitTapHighlightColor: "transparent" }}
-              >
+                          style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
                           Developer & API
-                        </button>
-                        <button
-                          type="button"
+                        </a>
+                        <Link
+                          href="/sdks"
                           onClick={() => {
-                            router.push("/sdks");
                             setIsMenuOpen(false);
                             setIsMobileAppsOpen(false);
-                          }}
-                          onTouchEnd={(e) => {
-                            e.currentTarget.blur();
                           }}
                           className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
                           SDKs
-                        </button>
+                        </Link>
                       </div>
                     </motion.div>
                   </>

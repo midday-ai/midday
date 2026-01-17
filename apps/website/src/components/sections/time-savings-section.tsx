@@ -1,10 +1,8 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export function TimeSavingsSection() {
-  const router = useRouter()
-
   return (
     <section className="bg-background py-12 sm:py-16 lg:py-24">
       <div className="max-w-[1400px] mx-auto">
@@ -69,9 +67,9 @@ export function TimeSavingsSection() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-10 gap-3 sm:gap-4">
-            <article
-              onClick={() => router.push('/file-storage')}
-              className="group relative overflow-hidden bg-background border border-border p-4 sm:p-5 hover-bg hover-border transition-all duration-200 cursor-pointer xl:col-span-3 touch-manipulation"
+            <Link
+              href="/file-storage"
+              className="group relative overflow-hidden bg-background border border-border p-4 sm:p-5 hover-bg hover-border transition-all duration-200 xl:col-span-3 touch-manipulation"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               <div className="flex items-start gap-3">
@@ -87,7 +85,7 @@ export function TimeSavingsSection() {
                   </p>
                 </div>
               </div>
-            </article>
+            </Link>
 
             <article className="group relative overflow-hidden bg-background border border-border p-4 sm:p-5 hover-bg hover-border transition-all duration-200 cursor-pointer xl:hidden">
               <div className="flex items-start gap-3">
@@ -105,9 +103,9 @@ export function TimeSavingsSection() {
               </div>
             </article>
 
-            <article
-              onClick={() => window.location.href = 'https://app.midday.ai/'}
-              className="relative overflow-hidden bg-secondary border border-border p-4 sm:p-5 md:p-5 lg:p-6 transition-all duration-200 cursor-pointer group hidden xl:block xl:col-span-7 hover:border-muted-foreground touch-manipulation"
+            <a
+              href="https://app.midday.ai/"
+              className="relative overflow-hidden bg-secondary border border-border p-4 sm:p-5 md:p-5 lg:p-6 transition-all duration-200 group hidden xl:block xl:col-span-7 hover:border-muted-foreground touch-manipulation"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -143,13 +141,13 @@ export function TimeSavingsSection() {
                   </div>
                 </div>
               </div>
-            </article>
+            </a>
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:gap-4 xl:hidden">
-            <article
-              onClick={() => window.location.href = 'https://app.midday.ai/'}
-              className="relative overflow-hidden bg-secondary border border-border p-4 sm:p-5 md:p-5 lg:p-6 transition-all duration-200 cursor-pointer hover:border-muted-foreground touch-manipulation"
+            <a
+              href="https://app.midday.ai/"
+              className="relative overflow-hidden bg-secondary border border-border p-4 sm:p-5 md:p-5 lg:p-6 transition-all duration-200 hover:border-muted-foreground touch-manipulation"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -170,11 +168,10 @@ export function TimeSavingsSection() {
                   </div>
                 </div>
               </div>
-            </article>
+            </a>
           </div>
         </div>
       </div>
     </section>
   )
 }
-

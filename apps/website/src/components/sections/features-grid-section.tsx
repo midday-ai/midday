@@ -1,11 +1,9 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { MaterialIcon } from '../homepage/icon-mapping'
 
 export function FeaturesGridSection() {
-  const router = useRouter()
-
   return (
     <section className="bg-background py-12 sm:py-16 lg:py-24">
       <div className="max-w-[1400px] mx-auto">
@@ -20,9 +18,9 @@ export function FeaturesGridSection() {
 
         <div className="flex flex-col gap-8 sm:gap-10 max-w-sm sm:max-w-none mx-auto">
           <div className="grid grid-cols-2 gap-6 sm:flex sm:justify-center sm:gap-20">
-            <div 
-              className="flex flex-col items-center w-full sm:w-[150px] cursor-pointer touch-manipulation"
-              onClick={() => router.push('/assistant')}
+            <Link 
+              href="/assistant"
+              className="flex flex-col items-center w-full sm:w-[150px] touch-manipulation"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover:border-muted-foreground transition-all duration-200">
@@ -36,11 +34,11 @@ export function FeaturesGridSection() {
                   Financial answers
                 </p>
               </div>
-            </div>
+            </Link>
 
-            <div 
-              className="flex flex-col items-center w-full sm:w-[150px] cursor-pointer"
-              onClick={() => router.push('/insights')}
+            <Link 
+              href="/insights"
+              className="flex flex-col items-center w-full sm:w-[150px]"
             >
               <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover:border-muted-foreground transition-all duration-200">
                 <MaterialIcon name="trending_up" className="text-muted-foreground " size={24} />
@@ -53,11 +51,11 @@ export function FeaturesGridSection() {
                   Weekly updates
                 </p>
               </div>
-            </div>
+            </Link>
 
-            <div 
-              className="flex flex-col items-center w-full sm:w-[150px] cursor-pointer"
-              onClick={() => router.push('/transactions')}
+            <Link 
+              href="/transactions"
+              className="flex flex-col items-center w-full sm:w-[150px]"
             >
               <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover:border-muted-foreground transition-all duration-200">
                 <MaterialIcon name="list_alt" className="text-muted-foreground " size={24} />
@@ -70,11 +68,11 @@ export function FeaturesGridSection() {
                   Money movement
                 </p>
               </div>
-            </div>
+            </Link>
 
-            <div 
-              className="flex flex-col items-center w-full sm:w-[150px] cursor-pointer"
-              onClick={() => router.push('/inbox')}
+            <Link 
+              href="/inbox"
+              className="flex flex-col items-center w-full sm:w-[150px]"
             >
               <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover:border-muted-foreground transition-all duration-200">
                 <MaterialIcon name="inbox" className="text-muted-foreground " size={24} />
@@ -87,13 +85,13 @@ export function FeaturesGridSection() {
                   Receipt matching
                 </p>
               </div>
-            </div>
+            </Link>
           </div>
 
           <div className="grid grid-cols-2 gap-6 sm:flex sm:justify-center sm:gap-20">
-            <div 
-              className="flex flex-col items-center w-full sm:w-[150px] cursor-pointer"
-              onClick={() => router.push('/time-tracking')}
+            <Link 
+              href="/time-tracking"
+              className="flex flex-col items-center w-full sm:w-[150px]"
             >
               <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover:border-muted-foreground transition-all duration-200">
                 <MaterialIcon name="timer" className="text-muted-foreground " size={24} />
@@ -106,11 +104,11 @@ export function FeaturesGridSection() {
                   Project hours
                 </p>
               </div>
-            </div>
+            </Link>
 
-            <div 
-              className="flex flex-col items-center w-full sm:w-[150px] cursor-pointer"
-              onClick={() => router.push('/invoicing')}
+            <Link 
+              href="/invoicing"
+              className="flex flex-col items-center w-full sm:w-[150px]"
             >
               <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover:border-muted-foreground transition-all duration-200">
                 <MaterialIcon name="description" className="text-muted-foreground " size={24} />
@@ -123,11 +121,11 @@ export function FeaturesGridSection() {
                   Invoice management
                 </p>
               </div>
-            </div>
+            </Link>
 
-            <div 
-              className="flex flex-col items-center w-full sm:w-[150px] cursor-pointer"
-              onClick={() => router.push('/customers')}
+            <Link 
+              href="/customers"
+              className="flex flex-col items-center w-full sm:w-[150px]"
             >
               <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover:border-muted-foreground transition-all duration-200">
                 <MaterialIcon name="scatter_plot" className="text-muted-foreground " size={24} />
@@ -140,11 +138,11 @@ export function FeaturesGridSection() {
                   Customer performance
                 </p>
               </div>
-            </div>
+            </Link>
 
-            <div 
-              className="flex flex-col items-center w-full sm:w-[150px] cursor-pointer"
-              onClick={() => router.push('/file-storage')}
+            <Link 
+              href="/file-storage"
+              className="flex flex-col items-center w-full sm:w-[150px]"
             >
               <div className="bg-secondary border border-border w-[60px] h-[60px] flex items-center justify-center rounded-none mb-4 hover:border-muted-foreground transition-all duration-200">
                 <MaterialIcon name="folder_zip" className="text-muted-foreground " size={24} />
@@ -157,11 +155,10 @@ export function FeaturesGridSection() {
                   Document storage
                 </p>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </div>
     </section>
   )
 }
-
