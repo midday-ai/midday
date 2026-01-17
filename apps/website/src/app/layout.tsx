@@ -1,10 +1,8 @@
-import { DevMessage } from "@/components/dev-message";
-import { Footer } from "@/components/footer";
-import { FooterCTA } from "@/components/footer-cta";
-import { Header } from "@/components/header";
 import "@/styles/globals.css";
 import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
+import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Provider as Analytics } from "@midday/events/client";
 import type { Metadata } from "next";
@@ -29,45 +27,44 @@ const hedvigSerif = Hedvig_Letters_Serif({
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "Midday | Your AI-Powered Business Assistant",
+    default: "Run your business finances without manual work | Midday",
     template: "%s | Midday",
   },
   description:
-    "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
+    "Midday gives you one place for transactions, receipts, invoices and everything around your business finances without manual work.",
   openGraph: {
-    title: "Midday | Your AI-Powered Business Assistant",
+    title: "Run your business finances without manual work | Midday",
     description:
-      "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
+      "Midday gives you one place for transactions, receipts, invoices and everything around your business finances without manual work.",
     url: baseUrl,
-    siteName:
-      "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
+    siteName: "Midday",
     locale: "en_US",
     type: "website",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
         width: 1800,
         height: 1600,
       },
     ],
   },
   twitter: {
-    title: "Midday | Your AI-Powered Business Assistant",
+    title: "Run your business finances without manual work | Midday",
     description:
-      "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
+      "Midday gives you one place for transactions, receipts, invoices and everything around your business finances without manual work.",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
         width: 1800,
         height: 1600,
       },
@@ -99,7 +96,7 @@ export default function Layout({ children }: { children: ReactElement }) {
       <body
         className={cn(
           `${hedvigSans.variable} ${hedvigSerif.variable} font-sans`,
-          "bg-[#fbfbfb] dark:bg-[#0C0C0C] overflow-x-hidden font-sans antialiased",
+          "bg-background overflow-x-hidden font-sans antialiased",
         )}
       >
         <ThemeProvider
@@ -112,10 +109,8 @@ export default function Layout({ children }: { children: ReactElement }) {
           <main className="container mx-auto px-4 overflow-hidden md:overflow-visible">
             {children}
           </main>
-          <FooterCTA />
           <Footer />
           <Analytics />
-          <DevMessage />
         </ThemeProvider>
       </body>
     </html>

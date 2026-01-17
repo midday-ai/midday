@@ -62,143 +62,165 @@ export function SupportForm() {
   });
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(sendSupport.execute)}
-        className="space-y-8"
-      >
-        <div className="flex space-x-4">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="Email" type="email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="fullName"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Full Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="John Doe" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <div className="pt-32 pb-24">
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="mb-12">
+          <h1 className="font-serif text-3xl lg:text-4xl text-foreground mb-4">
+            Support
+          </h1>
+          <p className="font-sans text-base text-muted-foreground leading-relaxed">
+            Get help with Midday. Contact our team for assistance with any
+            questions or issues you may have.
+          </p>
         </div>
 
-        <FormField
-          control={form.control}
-          name="subject"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Subject</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Summary of the problem you have"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Form */}
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(sendSupport.execute)}
+            className="space-y-6"
+          >
+            <div className="flex flex-col sm:flex-row gap-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel className="font-sans text-sm">Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Email" type="email" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        <div className="flex space-x-4">
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Product</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+              <FormField
+                control={form.control}
+                name="fullName"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel className="font-sans text-sm">
+                      Full Name
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="John Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="subject"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-sans text-sm">Subject</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Product" />
-                    </SelectTrigger>
+                    <Input
+                      placeholder="Summary of the problem you have"
+                      {...field}
+                    />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Transactions">Transactions</SelectItem>
-                    <SelectItem value="Vault">Vault</SelectItem>
-                    <SelectItem value="Inbox">Inbox</SelectItem>
-                    <SelectItem value="Invoicing">Invoicing</SelectItem>
-                    <SelectItem value="Tracker">Tracker</SelectItem>
-                    <SelectItem value="AI">AI</SelectItem>
-                    <SelectItem value="General">General</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="priority"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Severity</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel className="font-sans text-sm">Product</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Product" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Transactions">
+                          Transactions
+                        </SelectItem>
+                        <SelectItem value="Vault">Vault</SelectItem>
+                        <SelectItem value="Inbox">Inbox</SelectItem>
+                        <SelectItem value="Invoicing">Invoicing</SelectItem>
+                        <SelectItem value="Tracker">Tracker</SelectItem>
+                        <SelectItem value="AI">AI</SelectItem>
+                        <SelectItem value="General">General</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel className="font-sans text-sm">
+                      Severity
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select severity" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="normal">Normal</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="urgent">Urgent</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="message"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-sans text-sm">Message</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select severity" />
-                    </SelectTrigger>
+                    <Textarea
+                      placeholder="Describe the issue you're facing, along with any relevant information. Please be as detailed and specific as possible."
+                      className="resize-none min-h-[150px]"
+                      {...field}
+                    />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="normal">Normal</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
 
-        <FormField
-          control={form.control}
-          name="message"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Message</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Describe the issue you're facing, along with any relevant information. Please be as detailed and specific as possible."
-                  className="resize-none min-h-[150px]"
-                  {...field}
-                />
-              </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Button type="submit" disabled={sendSupport.status === "executing"}>
-          {sendSupport.status === "executing" ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            "Submit"
-          )}
-        </Button>
-      </form>
-    </Form>
+            <Button type="submit" disabled={sendSupport.status === "executing"}>
+              {sendSupport.status === "executing" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Submit"
+              )}
+            </Button>
+          </form>
+        </Form>
+      </div>
+    </div>
   );
 }

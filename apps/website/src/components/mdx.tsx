@@ -129,14 +129,15 @@ const components = {
 };
 
 interface CustomMDXProps {
+  source: string;
   components?: Record<string, React.ComponentType<unknown>>;
 }
 
-export function CustomMDX(props: CustomMDXProps) {
+export function CustomMDX({ source, components: customComponents }: CustomMDXProps) {
   return (
     <MDXRemote
-      {...props}
-      components={{ ...components, ...(props.components || {}) }}
+      source={source}
+      components={{ ...components, ...(customComponents || {}) }}
     />
   );
 }

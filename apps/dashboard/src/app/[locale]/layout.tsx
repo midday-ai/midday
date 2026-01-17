@@ -22,12 +22,12 @@ export const metadata: Metadata = {
       "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
         width: 1800,
         height: 1600,
       },
@@ -41,12 +41,12 @@ export const metadata: Metadata = {
     siteName: "Midday",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
         width: 1800,
         height: 1600,
       },

@@ -1,118 +1,241 @@
-import { LogoLarge } from "@/components/logo-large";
-import { SubscribeInput } from "@/components/subscribe-input";
+"use client";
+
+import { cn } from "@midday/ui/cn";
+import Image from "next/image";
 import Link from "next/link";
-import { GithubStars } from "./github-stars";
-import { SocialLinks } from "./social-links";
-import { StatusWidget } from "./status-widget";
 
 export function Footer() {
   return (
-    <footer className="border-t-[1px] border-border px-4 md:px-6 pt-10 md:pt-16 bg-[#fff] dark:bg-[#0C0C0C] overflow-hidden md:max-h-[820px]">
-      <div className="container">
-        <div className="flex justify-between items-center border-border border-b-[1px] pb-10 md:pb-16 mb-12">
-          <Link href="/" className="scale-50 -ml-[52px] md:ml-0 md:scale-100">
-            <LogoLarge />
-            <span className="sr-only">Midday</span>
-          </Link>
+    <footer className="bg-background relative overflow-hidden">
+      {/* Top Divider - Full Bleed */}
+      <div className="h-px w-full border-t border-border" />
 
-          <span className="font-normal md:text-2xl text-right">
-            Run your business smarter.
-          </span>
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-16 sm:pb-80">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-16">
+          {/* Left Column - Links */}
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4 sm:gap-10 lg:col-span-1">
+            {/* Features Column */}
+            <div className="space-y-3">
+              <h3 className="font-sans text-sm text-foreground mb-4">
+                Features
+              </h3>
+              <div className="space-y-2.5">
+                {[
+                  { href: "/assistant", label: "Assistant" },
+                  { href: "/insights", label: "Insights" },
+                  { href: "/transactions", label: "Transactions" },
+                  { href: "/inbox", label: "Inbox" },
+                  { href: "/time-tracking", label: "Time tracking" },
+                  { href: "/invoicing", label: "Invoicing" },
+                  { href: "/customers", label: "Customers" },
+                  { href: "/file-storage", label: "Files" },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="font-sans text-sm text-muted-foreground hover:text-foreground transition-colors block"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Product Column */}
+            <div className="space-y-3">
+              <h3 className="font-sans text-sm text-foreground mb-4">
+                Product
+              </h3>
+              <div className="space-y-2.5">
+                {[
+                  { href: "/pricing", label: "Pricing" },
+                  { href: "/download", label: "Download" },
+                  { href: "/pre-accounting", label: "Pre-accounting" },
+                  { href: "/integrations", label: "Apps & Integrations" },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="font-sans text-sm text-muted-foreground hover:text-foreground transition-colors block"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Company Column */}
+            <div className="space-y-3">
+              <h3 className="font-sans text-sm text-foreground mb-4">
+                Company
+              </h3>
+              <div className="space-y-2.5">
+                {[
+                  { href: "/story", label: "Story", external: false },
+                  { href: "/updates", label: "Updates", external: false },
+                  {
+                    href: "https://x.com/middayai",
+                    label: "X",
+                    external: true,
+                  },
+                  {
+                    href: "https://www.linkedin.com/company/midday-ai",
+                    label: "LinkedIn",
+                    external: true,
+                  },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    target={item.external ? "_blank" : undefined}
+                    rel={item.external ? "noopener noreferrer" : undefined}
+                    className="font-sans text-sm text-muted-foreground hover:text-foreground transition-colors block"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Resources Column */}
+            <div className="space-y-3">
+              <h3 className="font-sans text-sm text-foreground mb-4">
+                Resources
+              </h3>
+              <div className="space-y-2.5">
+                {[
+                  {
+                    href: "https://api.midday.ai",
+                    label: "API",
+                    external: true,
+                  },
+                  { href: "/sdks", label: "SDKs", external: false },
+                  { href: "/support", label: "Support", external: false },
+                  {
+                    href: "/privacy",
+                    label: "Privacy Policy",
+                    external: false,
+                  },
+                  {
+                    href: "/terms",
+                    label: "Terms of Service",
+                    external: false,
+                  },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    target={item.external ? "_blank" : undefined}
+                    rel={item.external ? "noopener noreferrer" : undefined}
+                    className="font-sans text-sm text-muted-foreground hover:text-foreground transition-colors block"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Tagline & Compliance */}
+          <div className="flex flex-col items-start lg:items-end gap-6 lg:gap-10">
+            <p className="font-sans text-base sm:text-xl text-foreground text-left lg:text-right">
+              Business finances that explain themselves.
+            </p>
+
+            {/* Compliance Section */}
+            <div className="flex items-center gap-4">
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-9 h-9">
+                  <Image
+                    src="/images/gdpr.png"
+                    alt="GDPR Compliant"
+                    width={36}
+                    height={36}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div className="text-center">
+                  <p className="font-sans text-xs text-foreground">GDPR</p>
+                  <p className="font-sans text-xs text-muted-foreground">
+                    Compliant
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-9 h-9">
+                  <Image
+                    src="/images/soc2.png"
+                    alt="SOC2 In Progress"
+                    width={36}
+                    height={36}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div className="text-center">
+                  <p className="font-sans text-xs text-foreground">Soc2</p>
+                  <p className="font-sans text-xs text-muted-foreground">
+                    In progress
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-col md:flex-row w-full">
-          <div className="flex flex-col space-y-8 md:space-y-0 md:flex-row md:w-6/12 justify-between leading-8">
-            <div>
-              <span className="font-medium">Features</span>
-              <ul>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/overview">Overview</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/inbox">Inbox</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/vault">Vault</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/tracker">Tracker</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/invoice">Invoice</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/pricing">Pricing</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/engine">Engine</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/download">Download</Link>
-                </li>
-              </ul>
-            </div>
+        {/* Divider */}
+        <div className="my-16">
+          <div className="h-px w-full border-t border-border" />
+        </div>
 
-            <div>
-              <span>Resources</span>
-              <ul>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="https://git.new/midday">Github</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/support">Support</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/policy">Privacy policy</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/terms">Terms and Conditions</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/branding">Branding</Link>
-                </li>
-              </ul>
+        {/* Bottom Section */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <Link
+            href="https://midday.openstatus.dev/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden md:flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
+            <span className="font-sans text-sm text-muted-foreground">
+              System status:
+            </span>
+            <span className="font-sans text-sm text-foreground">
+              Operational
+            </span>
+            <div className="relative flex items-center justify-center">
+              <div className="w-2 h-2 bg-green-500 rounded-full relative z-10" />
+              <div
+                className="absolute w-2 h-2 bg-green-500 rounded-full"
+                style={{
+                  animation:
+                    "pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                  willChange: "transform, opacity, box-shadow",
+                }}
+              />
             </div>
-
-            <div>
-              <span>Company</span>
-              <ul>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/story">Story</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/updates">Updates</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/open-startup">Open startup</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/oss-friends">OSS friends</Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="md:w-6/12 flex mt-8 md:mt-0 md:justify-end">
-            <div className="flex md:items-end flex-col">
-              <div className="flex items-start md:items-center flex-col md:flex-row space-y-6 md:space-y-0 mb-8">
-                <GithubStars />
-                <SocialLinks />
-              </div>
-
-              <div className="mb-8">
-                <SubscribeInput />
-              </div>
-              <div className="md:mr-0 mt-auto mr-auto">
-                <StatusWidget />
-              </div>
-            </div>
-          </div>
+          </Link>
+          <p className="font-sans text-sm text-muted-foreground">
+            © {new Date().getFullYear()} Midday Labs AB. All rights reserved.
+          </p>
         </div>
       </div>
 
-      <h5 className="dark:text-[#161616] text-[#F4F4F3] text-[500px] leading-none text-center pointer-events-none">
-        midday
-      </h5>
+      {/* Large Wordmark */}
+      <div className="absolute bottom-0 left-0 sm:left-1/2 sm:transform sm:-translate-x-1/2 translate-y-[25%] sm:translate-y-[40%] bg-background overflow-hidden">
+        <h1
+          className={cn(
+            "font-sans text-[200px] sm:text-[508px] leading-none select-none",
+            "text-secondary",
+            "[WebkitTextStroke:1px_hsl(var(--muted-foreground))]",
+            "[textStroke:1px_hsl(var(--muted-foreground))]",
+          )}
+          style={{
+            WebkitTextStroke: "1px hsl(var(--muted-foreground))",
+            color: "hsl(var(--secondary))",
+          }}
+        >
+          midday
+        </h1>
+      </div>
     </footer>
   );
 }

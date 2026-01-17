@@ -12,26 +12,18 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@midday/supabase": "workspace:*",
+    "@midday/app-store": "workspace:*",
     "@midday/ui": "workspace:*",
     "@openpanel/nextjs": "^1.1.1",
     "@openstatus/react": "^0.0.3",
-    "@team-plain/typescript-sdk": "5.11.0",
-    "@uidotdev/usehooks": "^2.4.1",
-    "date-fns": "^4.1.0",
     "framer-motion": "^12.23.25",
-    "geist": "^1.5.1",
-    "next": "16.1.1",
+    "hls.js": "^1.6.15",
+    "motion": "^12.23.26",
+    "next": "16.0.10",
     "next-mdx-remote": "^5.0.0",
-    "next-safe-action": "^8.0.11",
     "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "react-hls-player": "^3.0.7",
-    "react-use-draggable-scroll": "^0.4.7",
-    "resend": "^6.5.2",
-    "server-only": "^0.0.1",
-    "sharp": "0.34.5",
-    "sugar-high": "^0.9.5"
+    "sugar-high": "^0.7.0",
+    "react-dom": "19.2.3"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",

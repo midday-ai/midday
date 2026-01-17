@@ -1,0 +1,119 @@
+"use client";
+
+import { AppLogo } from "@/components/app-logo";
+import { apps, categories } from "@/data/apps";
+import { cn } from "@midday/ui/cn";
+import Link from "next/link";
+import { useState } from "react";
+
+export function IntegrationsPage() {
+  const [activeCategory, setActiveCategory] = useState("all");
+
+  const filteredApps =
+    activeCategory === "all"
+      ? apps
+      : apps.filter(
+          (app) =>
+            app.category.toLowerCase().replace(" ", "-") === activeCategory,
+        );
+
+  return (
+    <div className="pt-32 pb-24">
+      {/* Header */}
+      <div className="max-w-[1400px] mx-auto mb-16">
+        <div className="max-w-2xl">
+          <h1 className="font-serif text-3xl lg:text-4xl text-foreground mb-4">
+            Integrations
+          </h1>
+          <p className="font-sans text-base text-muted-foreground leading-relaxed">
+            Connect Midday with the tools you already use. From email and
+            messaging to accounting software, our integrations help you
+            streamline your financial workflow.
+          </p>
+        </div>
+      </div>
+
+      {/* Category Filter */}
+      <div className="max-w-[1400px] mx-auto mb-12">
+        <div className="flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              type="button"
+              onClick={() => setActiveCategory(category.id)}
+              className={cn(
+                "px-4 py-2 text-sm font-sans border transition-colors",
+                activeCategory === category.id
+                  ? "bg-foreground text-background border-foreground"
+                  : "bg-background text-muted-foreground border-border hover:border-foreground hover:text-foreground",
+              )}
+            >
+              {category.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Apps Grid */}
+      <div className="max-w-[1400px] mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredApps.map((app) => (
+            <Link
+              key={app.id}
+              href={`/integrations/${app.slug}`}
+              className="group border border-border p-6 hover:border-foreground/20 transition-all duration-200 flex flex-col"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 flex items-center justify-center">
+                  <AppLogo appId={app.id} />
+                </div>
+                <div className="flex gap-1">
+                  {app.beta && (
+                    <span className="text-xs font-sans text-foreground bg-secondary px-2 py-1">
+                      Beta
+                    </span>
+                  )}
+                  {!app.active && (
+                    <span className="text-xs font-sans text-muted-foreground bg-secondary px-2 py-1">
+                      Coming soon
+                    </span>
+                  )}
+                </div>
+              </div>
+              <h3 className="font-sans text-lg text-foreground mb-2">
+                {app.name}
+              </h3>
+              <p className="font-sans text-sm text-muted-foreground leading-relaxed flex-1">
+                {app.short_description}
+              </p>
+              <div className="mt-4 pt-4 border-t border-border">
+                <span className="text-xs font-sans text-muted-foreground">
+                  {app.category}
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="max-w-[1400px] mx-auto mt-24">
+        <div className="border border-border p-8 lg:p-12 text-center">
+          <h2 className="font-serif text-2xl lg:text-3xl text-foreground mb-4">
+            Don't see what you need?
+          </h2>
+          <p className="font-sans text-base text-muted-foreground mb-6 max-w-lg mx-auto">
+            We're always adding new integrations. Let us know what tools you'd
+            like to connect with Midday.
+          </p>
+          <Link
+            href="/support"
+            className="inline-flex items-center justify-center px-6 py-3 bg-foreground text-background font-sans text-sm hover:opacity-90 transition-opacity"
+          >
+            Request an integration
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
