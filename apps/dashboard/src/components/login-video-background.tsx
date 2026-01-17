@@ -80,7 +80,6 @@ export function LoginVideoBackground() {
       {/* Overlay for better text readability */}
       <div className="absolute inset-0 bg-black/20" />
 
-
       {/* Content overlay */}
       <div className="relative z-10 flex flex-col justify-center items-center p-2 text-center h-full w-full">
         <div className="max-w-lg">
