@@ -62,7 +62,9 @@ export const processAttachmentSchema = z.object({
   filePath: z.array(z.string()),
   referenceId: z.string().optional(),
   website: z.string().optional(),
-  senderEmail: z.email().optional(),
+  // Use string instead of email() because Microsoft Graph can return
+  // non-standard email formats (e.g., external users with #EXT#)
+  senderEmail: z.string().optional(),
   inboxAccountId: z.string().uuid().optional(),
 });
 

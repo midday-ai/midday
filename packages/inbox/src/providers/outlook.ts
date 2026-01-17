@@ -1,4 +1,7 @@
-import { Client } from "@microsoft/microsoft-graph-client";
+import {
+  type AuthenticationProvider,
+  Client,
+} from "@microsoft/microsoft-graph-client";
 import type { Database } from "@midday/db/client";
 import { updateInboxAccount } from "@midday/db/queries";
 import { encrypt } from "@midday/encryption";
@@ -16,12 +19,40 @@ import type {
   UserInfo,
 } from "./types";
 
+/**
+ * Token expiry buffer in milliseconds.
+ * We refresh tokens 5 minutes before they expire to avoid edge cases
+ * where a token expires mid-request.
+ */
+const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
+
+/**
+ * Custom AuthenticationProvider that handles token refresh automatically.
+ * This is called by the Graph SDK before every request, allowing us to
+ * proactively refresh expired tokens.
+ */
+class OutlookAuthProvider implements AuthenticationProvider {
+  #getAccessToken: () => Promise<string>;
+
+  constructor(getAccessToken: () => Promise<string>) {
+    this.#getAccessToken = getAccessToken;
+  }
+
+  async getAccessToken(): Promise<string> {
+    return this.#getAccessToken();
+  }
+}
+
 export class OutlookProvider implements OAuthProviderInterface {
   #graphClient: Client | null = null;
   #accountId: string | null = null;
   #db: Database;
   #accessToken: string | null = null;
   #refreshToken: string | null = null;
+  #expiryDate: number | null = null;
+
+  // Prevent concurrent refresh operations
+  #refreshPromise: Promise<void> | null = null;
 
   #clientId: string;
   #clientSecret: string;
@@ -136,23 +167,81 @@ export class OutlookProvider implements OAuthProviderInterface {
 
     this.#accessToken = tokens.access_token;
     this.#refreshToken = tokens.refresh_token ?? null;
+    this.#expiryDate = tokens.expiry_date ?? null;
 
-    // Initialize Microsoft Graph client with the access token
-    this.#graphClient = Client.init({
-      authProvider: (done) => {
-        done(null, this.#accessToken!);
-      },
+    // Initialize Microsoft Graph client with custom auth provider
+    // This provider is called before every request, allowing proactive token refresh
+    const authProvider = new OutlookAuthProvider(() =>
+      this.#ensureValidAccessToken(),
+    );
+
+    this.#graphClient = Client.initWithMiddleware({
+      authProvider,
     });
   }
 
-  async refreshTokens(): Promise<void> {
-    if (!this.#accountId) {
-      throw new Error("Account ID is required for token refresh");
+  /**
+   * Ensures we have a valid access token, refreshing if necessary.
+   * This is called by the AuthenticationProvider before every Graph request.
+   */
+  async #ensureValidAccessToken(): Promise<string> {
+    if (!this.#accessToken) {
+      throw new Error(
+        "unauthorized - No access token available. Authentication required.",
+      );
     }
 
+    // Check if token is expired or about to expire
+    if (this.#isTokenExpiredOrExpiring()) {
+      await this.#refreshTokensInternal();
+    }
+
+    return this.#accessToken;
+  }
+
+  /**
+   * Checks if the token is expired or will expire within the buffer period.
+   */
+  #isTokenExpiredOrExpiring(): boolean {
+    if (!this.#expiryDate) {
+      // If we don't have expiry info, assume token might be expired
+      // This is a safe default that triggers a refresh attempt
+      return true;
+    }
+
+    const now = Date.now();
+    const expiresWithBuffer = this.#expiryDate - TOKEN_EXPIRY_BUFFER_MS;
+
+    return now >= expiresWithBuffer;
+  }
+
+  /**
+   * Internal token refresh with concurrency protection.
+   * Ensures only one refresh operation happens at a time.
+   */
+  async #refreshTokensInternal(): Promise<void> {
+    // If a refresh is already in progress, wait for it
+    if (this.#refreshPromise) {
+      return this.#refreshPromise;
+    }
+
+    // Start a new refresh operation
+    this.#refreshPromise = this.#doRefreshTokens();
+
+    try {
+      await this.#refreshPromise;
+    } finally {
+      this.#refreshPromise = null;
+    }
+  }
+
+  /**
+   * Performs the actual token refresh.
+   */
+  async #doRefreshTokens(): Promise<void> {
     if (!this.#refreshToken) {
       throw new Error(
-        "Refresh token is not available. Re-authentication required.",
+        "unauthorized - Refresh token is not available. Re-authentication required.",
       );
     }
 
@@ -175,32 +264,13 @@ export class OutlookProvider implements OAuthProviderInterface {
 
       if (!response.ok) {
         const errorData = await response.text();
-
-        // Check for specific Microsoft identity platform errors
-        if (
-          errorData.includes("invalid_grant") ||
-          errorData.includes("AADSTS700082") ||
-          errorData.includes("AADSTS50076")
-        ) {
-          throw new Error(
-            "Refresh token is invalid or expired. Re-authentication required.",
-          );
-        }
-        if (errorData.includes("invalid_request")) {
-          throw new Error(
-            "Invalid refresh token request. Check OAuth2 client configuration.",
-          );
-        }
-
-        throw new Error(
-          `Token refresh failed: ${response.status} ${errorData}`,
-        );
+        this.#handleRefreshError(response.status, errorData);
       }
 
       const tokenResponse = (await response.json()) as MicrosoftTokenResponse;
 
       if (!tokenResponse.access_token) {
-        throw new Error("Failed to refresh access token");
+        throw new Error("unauthorized - Failed to refresh access token");
       }
 
       // Calculate expiry date from expires_in (seconds from now)
@@ -208,43 +278,132 @@ export class OutlookProvider implements OAuthProviderInterface {
 
       // Update tokens in memory
       this.#accessToken = tokenResponse.access_token;
+      this.#expiryDate = expiryDate;
+
+      // Microsoft may issue a new refresh token (rotation)
       if (tokenResponse.refresh_token) {
         this.#refreshToken = tokenResponse.refresh_token;
       }
 
-      // Re-initialize Graph client with new token
-      this.#graphClient = Client.init({
-        authProvider: (done) => {
-          done(null, this.#accessToken!);
-        },
-      });
-
-      // Update tokens in database
-      if (tokenResponse.refresh_token) {
-        await updateInboxAccount(this.#db, {
-          id: this.#accountId,
-          refreshToken: encrypt(tokenResponse.refresh_token),
-        });
+      // Persist tokens to database if we have an account ID
+      if (this.#accountId) {
+        await this.#persistTokensToDatabase(tokenResponse, expiryDate);
       }
 
-      await updateInboxAccount(this.#db, {
-        id: this.#accountId,
-        accessToken: encrypt(tokenResponse.access_token),
-        expiryDate: new Date(expiryDate).toISOString(),
+      console.log("Successfully refreshed Outlook access token", {
+        accountId: this.#accountId,
+        newExpiryDate: new Date(expiryDate).toISOString(),
       });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Unknown error";
 
-      // Re-throw if it's already a formatted error
-      if (
-        message.includes("Re-authentication required") ||
-        message.includes("Check OAuth2 client configuration")
-      ) {
+      // Re-throw if it's already a properly formatted error
+      if (message.startsWith("unauthorized -")) {
         throw error;
       }
 
-      throw new Error(`Token refresh failed: ${message}`);
+      throw new Error(`unauthorized - Token refresh failed: ${message}`);
     }
+  }
+
+  /**
+   * Handles refresh token errors by checking status codes and error codes.
+   * This is more reliable than parsing error messages.
+   */
+  #handleRefreshError(statusCode: number, errorBody: string): never {
+    // Try to parse the error response as JSON
+    let errorCode: string | undefined;
+    let errorDescription: string | undefined;
+
+    try {
+      const parsed = JSON.parse(errorBody);
+      errorCode = parsed.error;
+      errorDescription = parsed.error_description;
+    } catch {
+      // Not JSON, use raw body
+    }
+
+    console.error("Token refresh failed", {
+      statusCode,
+      errorCode,
+      errorDescription,
+      accountId: this.#accountId,
+    });
+
+    // Check for specific OAuth error codes that indicate the refresh token is invalid
+    // These are standard OAuth 2.0 error codes, not message strings
+    const invalidRefreshTokenErrors = [
+      "invalid_grant", // Refresh token expired, revoked, or invalid
+      "invalid_request", // Malformed request (could be bad refresh token)
+    ];
+
+    // Azure AD specific error codes (AADSTS*)
+    const azureAdInvalidTokenPatterns = [
+      "AADSTS700082", // Refresh token expired due to inactivity
+      "AADSTS700084", // Refresh token was revoked or not found
+      "AADSTS50076", // MFA required (user needs to re-authenticate)
+      "AADSTS65001", // User consent required
+      "AADSTS50173", // Credential expired
+      "AADSTS50078", // Conditional access requires re-authentication
+      "AADSTS53003", // Blocked by conditional access
+    ];
+
+    const isInvalidRefreshToken =
+      invalidRefreshTokenErrors.includes(errorCode ?? "") ||
+      azureAdInvalidTokenPatterns.some(
+        (pattern) =>
+          errorBody.includes(pattern) || errorDescription?.includes(pattern),
+      );
+
+    if (isInvalidRefreshToken) {
+      throw new Error(
+        "unauthorized - Refresh token is invalid or expired. Re-authentication required.",
+      );
+    }
+
+    // For other errors, include the error code if available
+    const errorInfo = errorCode
+      ? `${errorCode}: ${errorDescription}`
+      : errorBody;
+    throw new Error(
+      `unauthorized - Token refresh failed: ${statusCode} ${errorInfo}`,
+    );
+  }
+
+  /**
+   * Persists refreshed tokens to the database.
+   */
+  async #persistTokensToDatabase(
+    tokenResponse: MicrosoftTokenResponse,
+    expiryDate: number,
+  ): Promise<void> {
+    if (!this.#accountId) return;
+
+    // Update refresh token if a new one was issued (token rotation)
+    if (tokenResponse.refresh_token) {
+      await updateInboxAccount(this.#db, {
+        id: this.#accountId,
+        refreshToken: encrypt(tokenResponse.refresh_token),
+      });
+    }
+
+    // Always update access token and expiry
+    await updateInboxAccount(this.#db, {
+      id: this.#accountId,
+      accessToken: encrypt(tokenResponse.access_token),
+      expiryDate: new Date(expiryDate).toISOString(),
+    });
+  }
+
+  /**
+   * Public method for explicit token refresh (used by connector retry logic).
+   */
+  async refreshTokens(): Promise<void> {
+    if (!this.#accountId) {
+      throw new Error("Account ID is required for token refresh");
+    }
+
+    await this.#refreshTokensInternal();
   }
 
   async getUserInfo(): Promise<UserInfo | undefined> {
@@ -362,32 +521,48 @@ export class OutlookProvider implements OAuthProviderInterface {
 
       return flattenedAttachments;
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Unknown error";
+      // Extract GraphError properties for reliable error detection
+      const graphError = error as {
+        statusCode?: number;
+        code?: string;
+        message?: string;
+      };
+
+      const statusCode = graphError.statusCode;
+      const errorCode = graphError.code;
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
 
       console.error("Microsoft Graph API error:", {
-        error: message,
+        statusCode,
+        errorCode,
+        errorMessage,
         accountId: this.#accountId,
         timestamp: new Date().toISOString(),
       });
 
-      if (
-        message.includes("InvalidAuthenticationToken") ||
-        message.includes("401")
-      ) {
+      // Use status codes and error codes for reliable detection, not message parsing
+      // 401 = Unauthorized (token issues)
+      // InvalidAuthenticationToken = Microsoft's error code for token problems
+      if (statusCode === 401 || errorCode === "InvalidAuthenticationToken") {
         throw new Error(
           "unauthorized - Access token is invalid or expired. Authentication required.",
         );
       }
-      if (
-        message.includes("Authorization_RequestDenied") ||
-        message.includes("403")
-      ) {
+
+      // 403 = Forbidden (permission issues)
+      if (statusCode === 403 || errorCode === "Authorization_RequestDenied") {
         throw new Error(
           "forbidden - Insufficient permissions or access denied.",
         );
       }
 
-      throw new Error(`Failed to fetch attachments: ${message}`);
+      // Re-throw errors that already have our format (from auth provider)
+      if (errorMessage.startsWith("unauthorized -")) {
+        throw error;
+      }
+
+      throw new Error(`Failed to fetch attachments: ${errorMessage}`);
     }
   }
 

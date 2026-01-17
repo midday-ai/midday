@@ -107,11 +107,23 @@ export function isAuthenticationError(errorMessage: string): boolean {
     "api key expired",
   ];
 
+  // Microsoft-specific error patterns
+  const microsoftSpecificErrors = [
+    "invalidauthenticationtoken", // Microsoft Graph error code
+    "lifetime validation failed", // Token lifetime expired
+    "token is expired", // Explicit expiration message
+    "aadsts700082", // Refresh token expired
+    "aadsts50076", // MFA required
+    "aadsts700084", // Refresh token not found
+    "aadsts65001", // User consent required
+  ];
+
   // Combine all error patterns
   const allAuthPatterns = [
     ...oauthErrors,
     ...httpAuthErrors,
     ...googleSpecificErrors,
+    ...microsoftSpecificErrors,
   ];
 
   return allAuthPatterns.some((pattern) => message.includes(pattern));
