@@ -48,7 +48,7 @@ export function IntegrationDetailPage({ app }: Props) {
   };
 
   const dashboardUrl = app.active
-    ? `https://app.midday.ai/settings/apps?app=${app.id}`
+    ? `https://app.midday.ai/apps?app=${app.id}`
     : undefined;
 
   return (
