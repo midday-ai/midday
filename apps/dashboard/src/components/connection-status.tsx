@@ -1,103 +1,116 @@
 "use client";
 
+import { BankLogo } from "@/components/bank-logo";
 import { useTRPC } from "@/trpc/client";
-import { getConnectionsStatus } from "@/utils/connection-status";
-import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@midday/ui/tooltip";
+  type ConnectionIssue,
+  buildConnectionIssues,
+  getHighestSeverity,
+} from "@/utils/connection-status";
+import { Button } from "@midday/ui/button";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@midday/ui/hover-card";
+import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+
+function IssueLogo({ issue }: { issue: ConnectionIssue }) {
+  if (issue.type === "bank") {
+    return <BankLogo src={issue.logoUrl ?? null} alt={issue.title} size={20} />;
+  }
+
+  // Inbox provider icons
+  if (issue.provider === "gmail") {
+    return <Icons.Gmail className="size-5" />;
+  }
+  if (issue.provider === "outlook") {
+    return <Icons.Outlook className="size-5" />;
+  }
+
+  return null;
+}
+
+function IssueRow({ issue }: { issue: ConnectionIssue }) {
+  return (
+    <Link
+      href={issue.path}
+      className="flex items-center justify-between gap-3 py-2.5 px-4 hover:bg-accent transition-colors"
+    >
+      <div className="flex items-center gap-2.5 min-w-0">
+        <div className="shrink-0">
+          <IssueLogo issue={issue} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-xs font-medium truncate">{issue.title}</p>
+          <p className="text-[11px] text-muted-foreground">{issue.message}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-0.5 text-[11px] text-muted-foreground shrink-0">
+        {issue.linkText}
+        <Icons.ChevronRight className="size-3" />
+      </div>
+    </Link>
+  );
+}
+
+// Delay before fetching to avoid being included in initial TRPC batch
+const FETCH_DELAY_MS = 500;
 
 export function ConnectionStatus() {
   const trpc = useTRPC();
+  const [shouldFetch, setShouldFetch] = useState(false);
 
-  const { data, isLoading } = useQuery(
-    trpc.bankConnections.get.queryOptions({
-      enabled: true,
-    }),
-  );
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShouldFetch(true);
+    }, FETCH_DELAY_MS);
 
-  if (isLoading || !data) {
+    return () => clearTimeout(timer);
+  }, []);
+
+  const { data, isLoading } = useQuery({
+    ...trpc.team.connectionStatus.queryOptions(),
+    enabled: shouldFetch,
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  const issues = useMemo(() => buildConnectionIssues(data), [data]);
+  const severity = getHighestSeverity(issues);
+
+  if (!shouldFetch || isLoading || issues.length === 0) {
     return null;
   }
 
-  const connectionIssue = data?.some((bank) => bank.status === "disconnected");
-
-  if (connectionIssue) {
-    return (
-      <TooltipProvider delayDuration={70}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link href="/settings/accounts" prefetch>
-              <Button
-                variant="outline"
-                size="icon"
-                className="rounded-full w-8 h-8 items-center hidden md:flex"
-              >
-                <Icons.Error size={16} className="text-[#FF3638]" />
-              </Button>
-            </Link>
-          </TooltipTrigger>
-
-          <TooltipContent
-            className="px-3 py-1.5 text-xs max-w-[230px]"
-            sideOffset={10}
-          >
-            There is a connection issue with one of your banks.
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
-  }
-
-  // Only show expiration UI if at least one connection has an expiration date
-  // (Only GoCardLess and Enable Banking have expiration dates)
-  if (!data?.some((bank) => bank.expiresAt !== null)) {
-    return null;
-  }
-
-  const { warning, error, expired, show } = getConnectionsStatus(data);
-
-  if (!show) {
-    return null;
-  }
+  const iconColor = severity === "error" ? "text-[#FF3638]" : "text-[#FFD02B]";
 
   return (
-    <TooltipProvider delayDuration={70}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Link href="/settings/accounts" prefetch>
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full w-8 h-8 items-center hidden md:flex"
-            >
-              <Icons.Error
-                size={16}
-                className={cn(
-                  (error || expired) && "text-[#FF3638]",
-                  warning && !error && !expired && "text-[#FFD02B]",
-                )}
-              />
-            </Button>
-          </Link>
-        </TooltipTrigger>
-
-        <TooltipContent
-          className="px-3 py-1.5 text-xs max-w-[230px]"
-          sideOffset={10}
+    <HoverCard openDelay={100} closeDelay={200}>
+      <HoverCardTrigger asChild>
+        <Button
+          variant="outline"
+          size="icon"
+          className="rounded-full w-8 h-8 items-center hidden md:flex"
         >
-          {expired
-            ? "A bank connection has expired, please reconnect."
-            : "The connection is expiring soon, update your connection."}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+          <Icons.Error size={16} className={iconColor} />
+        </Button>
+      </HoverCardTrigger>
+      <HoverCardContent className="w-[320px] p-0" align="end" sideOffset={10}>
+        <div className="px-4 py-2.5 border-b">
+          <p className="text-[11px] font-medium text-muted-foreground">
+            Connection Issues
+          </p>
+        </div>
+        <div className="max-h-[280px] overflow-y-auto">
+          {issues.map((issue) => (
+            <IssueRow key={`${issue.type}-${issue.title}`} issue={issue} />
+          ))}
+        </div>
+      </HoverCardContent>
+    </HoverCard>
   );
 }

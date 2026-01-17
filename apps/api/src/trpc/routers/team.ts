@@ -23,6 +23,7 @@ import {
   deleteTeamMember,
   getAvailablePlans,
   getBankConnections,
+  getInboxAccounts,
   getInvitesByEmail,
   getTeamById,
   getTeamInvites,
@@ -293,4 +294,38 @@ export const teamRouter = createTRPCRouter({
         "transactions",
       );
     }),
+
+  /**
+   * Get unified connection status for the team.
+   * Returns raw connection data - presentation logic handled by client.
+   */
+  connectionStatus: protectedProcedure.query(
+    async ({ ctx: { db, teamId } }) => {
+      if (!teamId) {
+        return { bankConnections: [], inboxAccounts: [] };
+      }
+
+      // Fetch bank connections and inbox accounts in parallel
+      const [bankConnections, inboxAccounts] = await Promise.all([
+        getBankConnections(db, { teamId }),
+        getInboxAccounts(db, teamId),
+      ]);
+
+      return {
+        bankConnections: bankConnections.map((c) => ({
+          id: c.id,
+          name: c.name,
+          status: c.status,
+          expiresAt: c.expiresAt,
+          logoUrl: c.logoUrl,
+        })),
+        inboxAccounts: inboxAccounts.map((a) => ({
+          id: a.id,
+          email: a.email,
+          status: a.status,
+          provider: a.provider,
+        })),
+      };
+    },
+  ),
 });
