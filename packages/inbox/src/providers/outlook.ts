@@ -431,20 +431,25 @@ export class OutlookProvider implements OAuthProviderInterface {
   ): Promise<void> {
     if (!this.#accountId) return;
 
-    // Update refresh token if a new one was issued (token rotation)
-    if (tokenResponse.refresh_token) {
+    try {
+      // Update refresh token if a new one was issued (token rotation)
+      if (tokenResponse.refresh_token) {
+        await updateInboxAccount(this.#db, {
+          id: this.#accountId,
+          refreshToken: encrypt(tokenResponse.refresh_token),
+        });
+      }
+
+      // Always update access token and expiry
       await updateInboxAccount(this.#db, {
         id: this.#accountId,
-        refreshToken: encrypt(tokenResponse.refresh_token),
+        accessToken: encrypt(tokenResponse.access_token),
+        expiryDate: new Date(expiryDate).toISOString(),
       });
+    } catch (error) {
+      console.error("Failed to persist tokens to database:", error);
+      // Don't throw - the refresh itself succeeded, we just failed to persist
     }
-
-    // Always update access token and expiry
-    await updateInboxAccount(this.#db, {
-      id: this.#accountId,
-      accessToken: encrypt(tokenResponse.access_token),
-      expiryDate: new Date(expiryDate).toISOString(),
-    });
   }
 
   /**
