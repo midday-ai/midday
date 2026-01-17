@@ -21,16 +21,16 @@ export function ReceiptAttachmentAnimation() {
   useEffect(() => {
     if (!shouldPlay) return;
 
-    // Show receipt after initial delay
+    // Show receipt immediately
     const receiptTimer = setTimeout(() => {
       setShowReceipt(true);
       setShowLogo(true);
-    }, 500);
+    }, 0);
 
     // Show bar after receipt is shown
     const barTimer = setTimeout(() => {
       setShowBar(true);
-    }, 2000);
+    }, 1500);
 
     return () => {
       clearTimeout(receiptTimer);

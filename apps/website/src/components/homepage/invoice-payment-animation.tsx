@@ -174,7 +174,7 @@ export function InvoicePaymentAnimation({
     if (!shouldPlay) return;
 
     // Show cards first
-    const cardsTimer = setTimeout(() => setShowCards(true), 300);
+    const cardsTimer = setTimeout(() => setShowCards(true), 0);
 
     // Show payment score bar
     const scoreTimer = setTimeout(() => {
@@ -185,13 +185,13 @@ export function InvoicePaymentAnimation({
           () => {
             setVisibleBars((prev) => [...prev, index]);
           },
-          1200 + index * 50,
+          900 + index * 50,
         );
       });
-    }, 1000);
+    }, 700);
 
     // Show table
-    const tableTimer = setTimeout(() => setShowTable(true), 800);
+    const tableTimer = setTimeout(() => setShowTable(true), 500);
 
     // Start flipping status tags one by one
     // Some invoices become overdue (yellow), scheduled (blue), or paid (green)

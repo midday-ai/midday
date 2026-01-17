@@ -275,9 +275,9 @@ export function TransactionFlowAnimation({
     if (!shouldPlay) return;
 
     // Sequence: accounts -> arrows -> transactions
-    const accountsTimer = setTimeout(() => setShowAccounts(true), 300);
-    const arrowsTimer = setTimeout(() => setShowArrows(true), 800);
-    const transactionsTimer = setTimeout(() => setShowTransactions(true), 1200);
+    const accountsTimer = setTimeout(() => setShowAccounts(true), 0);
+    const arrowsTimer = setTimeout(() => setShowArrows(true), 500);
+    const transactionsTimer = setTimeout(() => setShowTransactions(true), 900);
 
     const doneTimer = onComplete
       ? setTimeout(() => {

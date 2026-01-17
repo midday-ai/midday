@@ -90,11 +90,11 @@ export function CustomerStatementAnimation({
     const headerTimer = setTimeout(() => {
       setShowHeader(true)
       setShowLogo(true)
-    }, 300)
-    const generalTimer = setTimeout(() => setShowGeneral(true), 600)
-    const statementTimer = setTimeout(() => setShowStatement(true), 900)
-    const cardsTimer = setTimeout(() => setShowCards(true), 1200)
-    const tableTimer = setTimeout(() => setShowTable(true), 1500)
+    }, 0)
+    const generalTimer = setTimeout(() => setShowGeneral(true), 300)
+    const statementTimer = setTimeout(() => setShowStatement(true), 600)
+    const cardsTimer = setTimeout(() => setShowCards(true), 900)
+    const tableTimer = setTimeout(() => setShowTable(true), 1200)
 
     const doneTimer = onComplete
       ? setTimeout(() => {

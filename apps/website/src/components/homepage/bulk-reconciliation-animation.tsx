@@ -376,7 +376,12 @@ export function BulkReconciliationAnimation({
 
       {/* Table */}
       {showTable && (
-        <div className="flex-1 min-h-0 overflow-visible border border-b border-border bg-background relative z-0 mt-2 md:mt-3 flex flex-col">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          className="flex-1 min-h-0 overflow-visible border border-b border-border bg-background relative z-0 mt-2 md:mt-3 flex flex-col"
+        >
           <div className="overflow-visible pb-12">
             <table
               className="w-full border-collapse"
@@ -494,7 +499,7 @@ export function BulkReconciliationAnimation({
               </button>
             </motion.div>
           )}
-        </div>
+        </motion.div>
       )}
     </div>
   );

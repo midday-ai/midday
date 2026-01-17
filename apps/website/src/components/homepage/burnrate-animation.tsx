@@ -46,7 +46,7 @@ export function BurnrateAnimation({
   useEffect(() => {
     if (!shouldPlay) return;
 
-    const graphTimer = setTimeout(() => setShowGraph(true), 300);
+    const graphTimer = setTimeout(() => setShowGraph(true), 0);
 
     const doneTimer = onComplete
       ? setTimeout(() => {
@@ -69,10 +69,10 @@ export function BurnrateAnimation({
       // Animate average line
       setTimeout(() => {
         setShowAverageLine(true);
-      }, 300);
+      }, 0);
 
-      const metricsTimer = setTimeout(() => setShowMetrics(true), 1200);
-      const summaryTimer = setTimeout(() => setShowSummary(true), 1800);
+      const metricsTimer = setTimeout(() => setShowMetrics(true), 900);
+      const summaryTimer = setTimeout(() => setShowSummary(true), 1500);
       return () => {
         clearTimeout(metricsTimer);
         clearTimeout(summaryTimer);
