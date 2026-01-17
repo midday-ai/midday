@@ -51,6 +51,7 @@ export function InboxDetails() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [showFallback, setShowFallback] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { data: user } = useUserQuery();
   const [, copy] = useCopyToClipboard();
@@ -204,6 +205,7 @@ export function InboxDetails() {
 
   useEffect(() => {
     setShowFallback(false);
+    setImageLoading(true);
   }, [data]);
 
   const handleCopyLink = () => {
@@ -410,6 +412,9 @@ export function InboxDetails() {
                 <Skeleton className="h-[40px] w-[40px] rounded-full" />
               ) : (
                 <div className="relative">
+                  {data.website && imageLoading && (
+                    <Skeleton className="h-[40px] w-[40px] rounded-full absolute z-20" />
+                  )}
                   <Avatar>
                     {data.website && (
                       <AvatarImageNext
@@ -422,7 +427,11 @@ export function InboxDetails() {
                         )}
                         src={getWebsiteLogo(data.website)}
                         quality={100}
+                        onLoad={() => {
+                          setImageLoading(false);
+                        }}
                         onError={() => {
+                          setImageLoading(false);
                           setShowFallback(true);
                         }}
                       />
