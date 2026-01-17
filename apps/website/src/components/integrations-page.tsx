@@ -1,8 +1,8 @@
 "use client";
 
+import { AppLogo } from "@/components/app-logo";
 import { apps, categories } from "@/data/apps";
 import { cn } from "@midday/ui/cn";
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -65,13 +65,7 @@ export function IntegrationsPage() {
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="w-12 h-12 flex items-center justify-center">
-                  <Image
-                    src={app.logo}
-                    alt={app.name}
-                    width={48}
-                    height={48}
-                    className="w-auto h-8 object-contain"
-                  />
+                  <AppLogo appId={app.id} />
                 </div>
                 <div className="flex gap-1">
                   {app.beta && (

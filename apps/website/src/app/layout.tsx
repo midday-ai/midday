@@ -42,12 +42,12 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
         width: 1800,
         height: 1600,
       },
@@ -59,12 +59,12 @@ export const metadata: Metadata = {
       "Midday gives you one place for transactions, receipts, invoices and everything around your business finances without manual work.",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
         width: 1800,
         height: 1600,
       },

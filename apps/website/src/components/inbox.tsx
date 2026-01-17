@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
 import { MaterialIcon } from './homepage/icon-mapping'
 import { InboxMatchAnimation } from './homepage/inbox-match-animation'
 import { ReceiptAttachmentAnimation } from './homepage/receipt-attachment-animation'
@@ -182,22 +183,22 @@ export function Inbox() {
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                       <span className="font-sans text-sm text-foreground">OCR scanning</span>
                     </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                    <Link href="/integrations/gmail" className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors">
                       <Image src="/images/gmail.svg" alt="Gmail" width={16} height={16} className="object-contain" />
                       <span className="font-sans text-sm text-foreground">Gmail</span>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                    </Link>
+                    <Link href="/integrations/outlook" className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors">
                       <Image src="/images/outlook.svg" alt="Outlook" width={16} height={16} className="object-contain" />
                       <span className="font-sans text-sm text-foreground">Outlook</span>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                    </Link>
+                    <Link href="/integrations/whatsapp" className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors">
                       <Image src="/images/whatsapp.svg" alt="WhatsApp" width={16} height={16} className="object-contain" />
                       <span className="font-sans text-sm text-foreground">WhatsApp</span>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                    </Link>
+                    <Link href="/integrations/slack" className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors">
                       <Image src="/images/slack.svg" alt="Slack" width={16} height={16} className="object-contain" />
                       <span className="font-sans text-sm text-foreground">Slack</span>
-                    </div>
+                    </Link>
                   </div>
                 </div>
               </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MaterialIcon } from "./homepage/icon-mapping";
 import { InvoicePaymentAnimation } from "./homepage/invoice-payment-animation";
@@ -250,7 +251,7 @@ export function Invoicing() {
                         Revenue per customer
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                    <Link href="/integrations/stripe-payments" className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors">
                       <Image
                         src="/images/stripe.svg"
                         alt="Stripe"
@@ -261,7 +262,7 @@ export function Invoicing() {
                       <span className="font-sans text-sm text-foreground">
                         Stripe
                       </span>
-                    </div>
+                    </Link>
                   </div>
                 </div>
               </div>

@@ -1,5 +1,4 @@
 // Import apps from the app-store package (source of truth)
-// We extend with website-specific data like static image paths and URL slugs
 import { apps as appStoreApps } from "@midday/app-store";
 
 export interface WebsiteApp {
@@ -9,21 +8,19 @@ export interface WebsiteApp {
   category: string;
   active: boolean;
   beta?: boolean;
-  logo: string; // Static image path for website
   short_description: string;
   description: string | null;
   features: string[];
   installUrl?: string;
 }
 
-// Website-specific extensions for each app
+// Website-specific extensions for each app (features and slugs only)
 const appExtensions: Record<
   string,
-  { slug: string; logo: string; features: string[]; installUrl?: string }
+  { slug: string; features: string[]; installUrl?: string }
 > = {
   gmail: {
     slug: "gmail",
-    logo: "/images/gmail.svg",
     features: [
       "Continuous inbox monitoring",
       "Automatic PDF extraction",
@@ -33,7 +30,6 @@ const appExtensions: Record<
   },
   outlook: {
     slug: "outlook",
-    logo: "/images/outlook.svg",
     features: [
       "Continuous inbox monitoring",
       "Automatic PDF extraction",
@@ -43,7 +39,6 @@ const appExtensions: Record<
   },
   slack: {
     slug: "slack",
-    logo: "/images/slack.svg",
     features: [
       "Real-time transaction notifications",
       "Direct receipt upload from Slack",
@@ -53,7 +48,6 @@ const appExtensions: Record<
   },
   whatsapp: {
     slug: "whatsapp",
-    logo: "/images/whatsapp.svg",
     features: [
       "QR code setup - no app needed",
       "Forward receipts on the go",
@@ -63,7 +57,6 @@ const appExtensions: Record<
   },
   xero: {
     slug: "xero",
-    logo: "/images/xero.svg",
     features: [
       "Manual transaction export",
       "Receipt & invoice attachments",
@@ -73,7 +66,6 @@ const appExtensions: Record<
   },
   quickbooks: {
     slug: "quickbooks",
-    logo: "/images/quickbooks.svg",
     features: [
       "Export as purchases and sales receipts",
       "Automatic document attachment",
@@ -83,7 +75,6 @@ const appExtensions: Record<
   },
   fortnox: {
     slug: "fortnox",
-    logo: "/images/fortnox.svg",
     features: [
       "Export transactions as vouchers",
       "Automatic attachments",
@@ -93,7 +84,6 @@ const appExtensions: Record<
   },
   raycast: {
     slug: "raycast",
-    logo: "/images/raycast.svg",
     features: [
       "Start/stop timers instantly",
       "Project selection",
@@ -103,7 +93,6 @@ const appExtensions: Record<
   },
   "stripe-payments": {
     slug: "stripe-payments",
-    logo: "/images/stripe.svg",
     features: [
       "Accept credit cards on invoices",
       "Apple Pay & Google Pay support",
@@ -113,7 +102,6 @@ const appExtensions: Record<
   },
   stripe: {
     slug: "stripe",
-    logo: "/images/stripe.svg",
     features: [
       "Sync payments automatically",
       "Revenue data import",
@@ -123,7 +111,6 @@ const appExtensions: Record<
   },
   "midday-desktop": {
     slug: "midday-desktop",
-    logo: "/images/midday-icon.svg",
     features: [
       "One-click access to finances",
       "Track time from menu bar",
@@ -134,7 +121,6 @@ const appExtensions: Record<
   },
   "google-drive": {
     slug: "google-drive",
-    logo: "/images/gdrive.svg",
     features: [
       "Automatic file sync",
       "Document organization",
@@ -144,7 +130,6 @@ const appExtensions: Record<
   },
   dropbox: {
     slug: "dropbox",
-    logo: "/images/dropbox.svg",
     features: [
       "Automatic file sync",
       "Document organization",
@@ -154,7 +139,6 @@ const appExtensions: Record<
   },
   polar: {
     slug: "polar",
-    logo: "/images/polar.svg",
     features: [
       "Sync subscription payments",
       "Revenue tracking",
@@ -164,7 +148,6 @@ const appExtensions: Record<
   },
   deel: {
     slug: "deel",
-    logo: "/images/deel.svg",
     features: [
       "Sync contractor payments",
       "Payroll integration",
@@ -174,7 +157,6 @@ const appExtensions: Record<
   },
   "e-invoice": {
     slug: "e-invoice",
-    logo: "/images/e-invoice.svg",
     features: [
       "Peppol network support",
       "European compliance",
@@ -203,7 +185,6 @@ export const apps: WebsiteApp[] = appStoreApps
       category: appWithCategory.category || "Other",
       active: app.active,
       beta: appWithCategory.beta,
-      logo: extension.logo,
       short_description: app.short_description || "",
       description: app.description || null,
       features: extension.features,

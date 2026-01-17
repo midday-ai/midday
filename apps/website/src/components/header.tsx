@@ -1,14 +1,11 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { HeaderAssistantInputPreview } from "./header-assistant-input-preview";
-import { HeaderInsightsPreview } from "./header-insights-preview";
 import { HeaderIntegrationsPreview } from "./header-integrations-preview";
 
 interface HeaderProps {

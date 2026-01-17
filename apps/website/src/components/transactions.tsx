@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MaterialIcon } from "./homepage/icon-mapping";
 import { TransactionFlowAnimation } from "./homepage/transaction-flow-animation";
@@ -197,22 +198,22 @@ export function Transactions() {
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
                       <span className="font-sans text-sm text-foreground">Filters and search</span>
                     </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                    <Link href="/integrations/fortnox" className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors">
                       <Image src="/images/fortnox.svg" alt="Fortnox" width={16} height={16} className="object-contain" />
                       <span className="font-sans text-sm text-foreground">Fortnox</span>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                    </Link>
+                    <Link href="/integrations/xero" className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors">
                       <Image src="/images/xero.svg" alt="Xero" width={16} height={16} className="object-contain" />
                       <span className="font-sans text-sm text-foreground">Xero</span>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                    </Link>
+                    <Link href="/integrations/quickbooks" className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors">
                       <Image src="/images/quickbooks.svg" alt="QuickBooks" width={16} height={16} className="object-contain" />
                       <span className="font-sans text-sm text-foreground">QuickBooks</span>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
+                    </Link>
+                    <Link href="/integrations/slack" className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors">
                       <Image src="/images/slack.svg" alt="Slack" width={16} height={16} className="object-contain" />
                       <span className="font-sans text-sm text-foreground">Slack</span>
-                    </div>
+                    </Link>
                   </div>
                 </div>
               </div>

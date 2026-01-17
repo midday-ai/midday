@@ -1,9 +1,9 @@
 "use client";
 
+import { AppLogo } from "@/components/app-logo";
 import type { WebsiteApp } from "@/data/apps";
 import { apps } from "@/data/apps";
 import { Button } from "@midday/ui/button";
-import Image from "next/image";
 import Link from "next/link";
 
 interface Props {
@@ -76,13 +76,7 @@ export function IntegrationDetailPage({ app }: Props) {
             {/* Header */}
             <div className="flex items-start gap-6 mb-8">
               <div className="w-16 h-16 flex items-center justify-center border border-border p-3">
-                <Image
-                  src={app.logo}
-                  alt={app.name}
-                  width={64}
-                  height={64}
-                  className="w-auto h-10 object-contain"
-                />
+                <AppLogo appId={app.id} />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
@@ -177,13 +171,7 @@ export function IntegrationDetailPage({ app }: Props) {
                         className="flex items-center gap-3 group"
                       >
                         <div className="w-8 h-8 flex items-center justify-center">
-                          <Image
-                            src={relatedApp.logo}
-                            alt={relatedApp.name}
-                            width={32}
-                            height={32}
-                            className="w-auto h-5 object-contain"
-                          />
+                          <AppLogo appId={relatedApp.id} />
                         </div>
                         <span className="font-sans text-sm text-foreground group-hover:text-muted-foreground transition-colors">
                           {relatedApp.name}
