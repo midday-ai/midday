@@ -4,6 +4,7 @@ import { useImageLoadState } from "@/hooks/use-image-load-state";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
+import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 
 function ErrorImage() {
   return (
@@ -30,17 +31,44 @@ export function ImageViewer({ url }: { url: string }) {
       {isError && <ErrorImage />}
 
       {!isError && (
-        <img
-          ref={imgRef}
-          src={url}
-          alt="Viewer content"
-          className={cn(
-            "max-h-full max-w-full object-contain",
-            isLoading ? "opacity-0" : "opacity-100",
-          )}
-          onLoad={handleLoad}
-          onError={handleError}
-        />
+        <TransformWrapper
+          initialScale={1}
+          minScale={1}
+          maxScale={4}
+          doubleClick={{ mode: "zoomIn", step: 0.5 }}
+          panning={{ disabled: false }}
+          wheel={{ wheelDisabled: true, touchPadDisabled: false, step: 0.5 }}
+          pinch={{ step: 5 }}
+          alignmentAnimation={{ sizeX: 0, sizeY: 0 }}
+        >
+          <TransformComponent
+            wrapperStyle={{
+              width: "100%",
+              height: "100%",
+            }}
+            contentStyle={{
+              cursor: "grab",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              height: "100%",
+            }}
+            wrapperClass="[&:active]:cursor-grabbing"
+          >
+            <img
+              ref={imgRef}
+              src={url}
+              alt="Viewer content"
+              className={cn(
+                "max-h-full max-w-full object-contain",
+                isLoading ? "opacity-0" : "opacity-100",
+              )}
+              onLoad={handleLoad}
+              onError={handleError}
+            />
+          </TransformComponent>
+        </TransformWrapper>
       )}
     </div>
   );

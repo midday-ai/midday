@@ -2,7 +2,9 @@
 
 import { useAppOAuth } from "@/hooks/use-app-oauth";
 import { useTRPC } from "@/trpc/client";
+import { localDateToUTCMidnight } from "@midday/invoice/recurring";
 import { uniqueCurrencies } from "@midday/location/currencies";
+import { addDays, parseISO } from "date-fns";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -371,6 +373,18 @@ export function SettingsMenu() {
       shouldValidate: true,
       shouldDirty: true,
     });
+
+    // Update due date based on issue date + new payment terms
+    const issueDate = watch("issueDate");
+    if (issueDate) {
+      const issueDateParsed = parseISO(issueDate);
+      const newDueDate = addDays(issueDateParsed, days);
+      setValue("dueDate", localDateToUTCMidnight(newDueDate), {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+
     updateTemplateMutation.mutate({
       id: templateId,
       paymentTermsDays: days,

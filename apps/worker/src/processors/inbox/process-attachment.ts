@@ -34,6 +34,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
     const db = getDb();
 
     const fileName = filePath.join("/");
+    const filename = filePath.at(-1);
     let processedMimetype = mimetype;
 
     this.logger.info("Starting process-attachment job", {
@@ -46,10 +47,43 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
       inboxAccountId,
     });
 
-    // If the file is a HEIC we need to convert it to a JPG
+    // Edge case: Validate filename exists
+    if (!filename || filename.trim().length === 0) {
+      throw new Error("Invalid file path: filename is missing");
+    }
+
+    // Edge case: Validate file size is reasonable
+    if (size <= 0) {
+      throw new Error(`Invalid file size: ${size} bytes`);
+    }
+
+    // Check if inbox item already exists FIRST (for retry scenarios or manual uploads)
+    const inboxCheckStartTime = Date.now();
+    this.logger.info("Checking for existing inbox item", {
+      jobId: job.id,
+      filePath: fileName,
+      teamId,
+    });
+
+    let inboxData = await getInboxByFilePath(db, {
+      filePath,
+      teamId,
+    });
+
+    const inboxCheckDuration = Date.now() - inboxCheckStartTime;
+    this.logger.info("Inbox item check completed", {
+      jobId: job.id,
+      filePath: fileName,
+      existingItem: !!inboxData,
+      existingStatus: inboxData?.status,
+      teamId,
+      duration: `${inboxCheckDuration}ms`,
+    });
+
+    // Convert HEIC to JPEG if needed (do this after inbox check so we can update contentType immediately)
     if (mimetype === "image/heic") {
       const heicStartTime = Date.now();
-      this.logger.info("Converting HEIC to JPG", {
+      this.logger.info("Converting HEIC to JPEG", {
         filePath: fileName,
         jobId: job.id,
       });
@@ -90,42 +124,20 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         jobId: job.id,
         duration: `${heicDuration}ms`,
       });
+
+      // Update contentType immediately if item exists (so frontend can show image sooner)
+      if (inboxData && inboxData.contentType === "image/heic") {
+        await updateInbox(db, {
+          id: inboxData.id,
+          teamId,
+          contentType: "image/jpeg",
+        });
+        this.logger.info("Updated contentType to jpeg", {
+          inboxId: inboxData.id,
+          jobId: job.id,
+        });
+      }
     }
-
-    const filename = filePath.at(-1);
-
-    // Edge case: Validate filename exists
-    if (!filename || filename.trim().length === 0) {
-      throw new Error("Invalid file path: filename is missing");
-    }
-
-    // Edge case: Validate file size is reasonable
-    if (size <= 0) {
-      throw new Error(`Invalid file size: ${size} bytes`);
-    }
-
-    // Check if inbox item already exists (for retry scenarios or manual uploads)
-    const inboxCheckStartTime = Date.now();
-    this.logger.info("Checking for existing inbox item", {
-      jobId: job.id,
-      filePath: fileName,
-      teamId,
-    });
-
-    let inboxData = await getInboxByFilePath(db, {
-      filePath,
-      teamId,
-    });
-
-    const inboxCheckDuration = Date.now() - inboxCheckStartTime;
-    this.logger.info("Inbox item check completed", {
-      jobId: job.id,
-      filePath: fileName,
-      existingItem: !!inboxData,
-      existingStatus: inboxData?.status,
-      teamId,
-      duration: `${inboxCheckDuration}ms`,
-    });
 
     // Create inbox item if it doesn't exist (for non-manual uploads)
     // or update existing item status if it was created manually
@@ -140,7 +152,7 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         teamId,
         filePath,
         fileName: filename ?? "Unknown",
-        contentType: mimetype,
+        contentType: processedMimetype, // Use processed mimetype (jpeg if converted from heic)
         size,
         referenceId,
         website,
@@ -523,7 +535,8 @@ export class ProcessAttachmentProcessor extends BaseProcessor<ProcessAttachmentP
         inboxId: inboxData.id,
         error: error instanceof Error ? error.message : "Unknown error",
         referenceId,
-        mimetype,
+        mimetype: processedMimetype,
+        originalMimetype: mimetype,
       });
 
       // Re-throw timeout errors to trigger retry

@@ -486,13 +486,23 @@ export function InboxDetails() {
 
           <div className="flex flex-col gap-4 overflow-y-auto flex-1 min-h-0 scrollbar-hide">
             {data?.filePath && (
-              <div className="min-h-0 flex-shrink-0">
-                <FileViewer
-                  mimeType={data.contentType}
-                  url={`${process.env.NEXT_PUBLIC_API_URL}/files/proxy?filePath=vault/${data?.filePath.join("/")}`}
-                  // If the order changes, the file viewer will remount otherwise the PDF worker will crash
-                  key={`${params.order}-${JSON.stringify(filterParams)}-primary`}
-                />
+              <div className="min-h-0 flex-shrink-0 h-full">
+                {/* Show skeleton while HEIC is being converted (browser can't render HEIC natively) */}
+                {data.contentType === "image/heic" && isProcessing ? (
+                  <Skeleton className="h-full w-full" />
+                ) : (
+                  <FileViewer
+                    // Use jpeg mimetype if heic (file was converted, contentType not yet updated)
+                    mimeType={
+                      data.contentType === "image/heic"
+                        ? "image/jpeg"
+                        : data.contentType
+                    }
+                    url={`${process.env.NEXT_PUBLIC_API_URL}/files/proxy?filePath=vault/${data?.filePath.join("/")}`}
+                    // Include contentType in key to remount after HEIC conversion (busts browser cache)
+                    key={`${params.order}-${JSON.stringify(filterParams)}-${data.contentType}-primary`}
+                  />
+                )}
               </div>
             )}
 
@@ -501,12 +511,27 @@ export function InboxDetails() {
               data.relatedItems.map(
                 (relatedItem) =>
                   relatedItem.filePath && (
-                    <div key={relatedItem.id} className="min-h-0 flex-shrink-0">
-                      <FileViewer
-                        mimeType={relatedItem.contentType}
-                        url={`${process.env.NEXT_PUBLIC_API_URL}/files/proxy?filePath=vault/${relatedItem.filePath.join("/")}`}
-                        key={`${relatedItem.id}-${params.order}-${JSON.stringify(filterParams)}`}
-                      />
+                    <div
+                      key={relatedItem.id}
+                      className="min-h-0 flex-shrink-0 h-full"
+                    >
+                      {/* Show skeleton while HEIC is being converted */}
+                      {relatedItem.contentType === "image/heic" &&
+                      isProcessing ? (
+                        <Skeleton className="h-full w-full" />
+                      ) : (
+                        <FileViewer
+                          // Use jpeg mimetype if heic (file was converted, contentType not yet updated)
+                          mimeType={
+                            relatedItem.contentType === "image/heic"
+                              ? "image/jpeg"
+                              : relatedItem.contentType
+                          }
+                          url={`${process.env.NEXT_PUBLIC_API_URL}/files/proxy?filePath=vault/${relatedItem.filePath.join("/")}`}
+                          // Include contentType in key to remount after HEIC conversion
+                          key={`${relatedItem.id}-${params.order}-${JSON.stringify(filterParams)}-${relatedItem.contentType}`}
+                        />
+                      )}
                     </div>
                   ),
               )}

@@ -174,11 +174,11 @@ export function PdfViewer({ url, maxWidth }: PdfViewerProps) {
         <TransformWrapper
           initialScale={1}
           minScale={1}
-          maxScale={2}
-          doubleClick={{ mode: "toggle", step: 2 }}
+          maxScale={4}
+          doubleClick={{ mode: "zoomIn", step: 0.5 }}
           panning={{ disabled: false }}
-          wheel={{ disabled: true }}
-          smooth
+          wheel={{ wheelDisabled: true, touchPadDisabled: false, step: 0.5 }}
+          pinch={{ step: 5 }}
           alignmentAnimation={{ sizeX: 0, sizeY: 0 }}
         >
           <TransformComponent
