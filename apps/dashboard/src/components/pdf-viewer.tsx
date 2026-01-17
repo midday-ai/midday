@@ -179,8 +179,8 @@ export function PdfViewer({ url, maxWidth }: PdfViewerProps) {
         <TransformWrapper
           initialScale={1}
           minScale={1}
-          maxScale={4}
-          doubleClick={{ mode: "zoomIn", step: 0.5 }}
+          maxScale={2}
+          doubleClick={{ mode: "toggle", step: 1 }}
           panning={{ disabled: false }}
           wheel={{ wheelDisabled: true, touchPadDisabled: false, step: 0.5 }}
           pinch={{ step: 5 }}
