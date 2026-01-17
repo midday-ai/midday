@@ -47,12 +47,12 @@ export class GoCardLessProvider implements Provider {
     );
   }
 
-  async getAccounts({ id }: GetAccountsRequest) {
+  async getAccounts({ id, skipCache }: GetAccountsRequest) {
     if (!id) {
       throw Error("Missing params");
     }
 
-    const response = await this.#api.getAccounts({ id });
+    const response = await this.#api.getAccounts({ id, skipCache });
 
     return (response ?? []).map(transformAccount);
   }

@@ -86,6 +86,7 @@ export type GetAccountsRequest = {
   id?: string; // GoCardLess & EnableBanking
   accessToken?: string; // Teller & Plaid
   institutionId?: string; // Plaid
+  skipCache?: boolean; // Skip cache and fetch fresh data (for refresh/reconnect)
 };
 
 export type GetAccountBalanceRequest = {

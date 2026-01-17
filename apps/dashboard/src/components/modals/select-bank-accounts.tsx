@@ -63,7 +63,7 @@ function RowsSkeleton() {
   );
 }
 
-function SupportForm() {
+function SupportForm({ hasError }: { hasError?: boolean }) {
   const form = useForm({
     resolver: zodResolver(z.object({ message: z.string() })),
     defaultValues: {
@@ -81,8 +81,8 @@ function SupportForm() {
     sendSupport.execute({
       message: values.message,
       type: "bank-connection",
-      priority: "3",
-      subject: "Select bank accounts",
+      priority: hasError ? "2" : "3",
+      subject: hasError ? "Bank connection issue" : "Select bank accounts",
       url: document.URL,
     });
   });
@@ -101,6 +101,20 @@ function SupportForm() {
   return (
     <Form {...form}>
       <form onSubmit={handleOnSubmit}>
+        {hasError && (
+          <div className="mb-4 px-3 py-3 bg-amber-50 border border-amber-200 dark:bg-amber-900/10 dark:border-amber-800/30">
+            <div className="text-sm">
+              <p className="font-medium text-amber-700 dark:text-amber-300 mb-1">
+                Unable to load your accounts
+              </p>
+              <p className="text-amber-700 dark:text-amber-300">
+                This can happen due to temporary connection issues. Please
+                describe your issue below and we'll help you.
+              </p>
+            </div>
+          </div>
+        )}
+
         <FormField
           control={form.control}
           name="message"
@@ -109,7 +123,11 @@ function SupportForm() {
               <FormLabel>Message</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Describe the issue you're facing, along with any relevant information. Please be as detailed and specific as possible."
+                  placeholder={
+                    hasError
+                      ? "Let us know which bank you're trying to connect (optional)"
+                      : "Describe the issue you're facing, along with any relevant information. Please be as detailed and specific as possible."
+                  }
                   className="resize-none min-h-[150px]"
                   autoFocus
                   {...field}
@@ -123,7 +141,8 @@ function SupportForm() {
           <Button
             type="submit"
             disabled={
-              sendSupport.status === "executing" || !form.formState.isValid
+              sendSupport.status === "executing" ||
+              (!hasError && !form.formState.isValid)
             }
             className="mt-4"
           >
@@ -207,7 +226,7 @@ export function SelectBankAccountsModal() {
 
   const isOpen = step === "account";
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isError } = useQuery(
     trpc.institutions.accounts.queryOptions(
       {
         id: ref ?? undefined,
@@ -221,9 +240,17 @@ export function SelectBankAccountsModal() {
       },
       {
         enabled: isOpen,
+        retry: false,
       },
     ),
   );
+
+  // Show support form when there's an error loading accounts
+  useEffect(() => {
+    if (isError && !isLoading) {
+      setActiveTab("support");
+    }
+  }, [isError, isLoading]);
 
   const connectBankConnectionMutation = useMutation(
     trpc.bankConnections.create.mutationOptions({
@@ -458,16 +485,18 @@ export function SelectBankAccountsModal() {
 
             <TabsContent value="support">
               <div className="flex items-center space-x-3 mb-6">
-                <button
-                  type="button"
-                  className="items-center border bg-accent p-1"
-                  onClick={() => setActiveTab("select-accounts")}
-                >
-                  <Icons.ArrowBack />
-                </button>
+                {!isError && (
+                  <button
+                    type="button"
+                    className="items-center border bg-accent p-1"
+                    onClick={() => setActiveTab("select-accounts")}
+                  >
+                    <Icons.ArrowBack />
+                  </button>
+                )}
                 <h2>Support</h2>
               </div>
-              <SupportForm />
+              <SupportForm hasError={isError} />
             </TabsContent>
           </Tabs>
         </div>

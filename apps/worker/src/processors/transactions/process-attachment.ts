@@ -3,7 +3,11 @@ import { DocumentClient } from "@midday/documents";
 import { triggerJob } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import type { Job } from "bullmq";
-import type { ProcessTransactionAttachmentPayload } from "../../schemas/transactions";
+import type { ZodSchema } from "zod";
+import {
+  type ProcessTransactionAttachmentPayload,
+  processTransactionAttachmentSchema,
+} from "../../schemas/transactions";
 import { getDb } from "../../utils/db";
 import { convertHeicToJpeg } from "../../utils/image-processing";
 import { BaseProcessor } from "../base";
@@ -13,6 +17,10 @@ import { BaseProcessor } from "../base";
  * Extracts tax information and updates the transaction
  */
 export class ProcessTransactionAttachmentProcessor extends BaseProcessor<ProcessTransactionAttachmentPayload> {
+  protected getPayloadSchema(): ZodSchema<ProcessTransactionAttachmentPayload> {
+    return processTransactionAttachmentSchema;
+  }
+
   async process(job: Job<ProcessTransactionAttachmentPayload>): Promise<void> {
     const { transactionId, mimetype, filePath, teamId } = job.data;
     const supabase = createClient();

@@ -51,12 +51,12 @@ export class TellerProvider implements Provider {
     );
   }
 
-  async getAccounts({ accessToken }: GetAccountsRequest) {
+  async getAccounts({ accessToken, skipCache }: GetAccountsRequest) {
     if (!accessToken) {
       throw Error("accessToken missing");
     }
 
-    const accounts = await this.#api.getAccounts({ accessToken });
+    const accounts = await this.#api.getAccounts({ accessToken, skipCache });
 
     // Fetch account details (routing numbers, account numbers) for each account
     // This is available instantly for most institutions
