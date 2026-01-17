@@ -4,7 +4,21 @@ interface ImageLoaderParams {
   quality?: number;
 }
 
-const CDN_URL = "https://midday.ai";
+// Use VERCEL_URL for preview deployments, otherwise use production CDN
+const getBaseUrl = () => {
+  // Development
+  if (process.env.NODE_ENV === "development") {
+    return "";
+  }
+
+  // Preview deployments on Vercel
+  if (process.env.VERCEL_ENV === "preview" && process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  // Production
+  return "https://midday.ai";
+};
 
 export default function imageLoader({
   src,
@@ -20,6 +34,20 @@ export default function imageLoader({
     // For external URLs in dev, return as-is
     return src;
   }
+
+  const baseUrl = getBaseUrl();
+  const isPreview = process.env.VERCEL_ENV === "preview";
+
+  // In preview, skip Cloudflare CDN transformation (not available on preview URLs)
+  if (isPreview) {
+    if (src.startsWith("/")) {
+      return `${baseUrl}${src}`;
+    }
+    return src;
+  }
+
+  // Production: use Cloudflare CDN transformation
+  const CDN_URL = "https://midday.ai";
 
   // Handle /_next static assets
   if (src.startsWith("/_next")) {
