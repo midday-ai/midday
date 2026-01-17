@@ -13,103 +13,123 @@ export function Footer() {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-16 sm:pb-80">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-16">
           {/* Left Column - Links */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-16 lg:col-span-1">
-            <div className="space-y-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-10 lg:col-span-1">
+            {/* Features Column */}
+            <div className="space-y-3">
+              <h3 className="font-sans text-sm text-foreground mb-4">
+                Features
+              </h3>
+              <div className="space-y-2.5">
+                {[
+                  { href: "/assistant", label: "Assistant" },
+                  { href: "/insights", label: "Insights" },
+                  { href: "/transactions", label: "Transactions" },
+                  { href: "/inbox", label: "Inbox" },
+                  { href: "/time-tracking", label: "Time tracking" },
+                  { href: "/invoicing", label: "Invoicing" },
+                  { href: "/customers", label: "Customers" },
+                  { href: "/file-storage", label: "Files" },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="font-sans text-sm text-muted-foreground hover:text-foreground transition-colors block"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Product Column */}
+            <div className="space-y-3">
               <h3 className="font-sans text-sm text-foreground mb-4">
                 Product
               </h3>
-              <div className="space-y-2">
-                <Link
-                  href="/pricing"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: "transparent" }}
-                >
-                  Pricing
-                </Link>
-                <Link
-                  href="/download"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: "transparent" }}
-                >
-                  Download
-                </Link>
-                <Link
-                  href="/bank-coverage/"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: "transparent" }}
-                >
-                  Bank coverage
-                </Link>
-                <Link
-                  href="/pre-accounting"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: "transparent" }}
-                >
-                  Pre-accounting
-                </Link>
+              <div className="space-y-2.5">
+                {[
+                  { href: "/pricing", label: "Pricing" },
+                  { href: "/download", label: "Download" },
+                  { href: "/pre-accounting", label: "Pre-accounting" },
+                  { href: "/integrations", label: "Apps & Integrations" },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="font-sans text-sm text-muted-foreground hover:text-foreground transition-colors block"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
               </div>
             </div>
 
-            <div className="space-y-2">
+            {/* Company Column */}
+            <div className="space-y-3">
               <h3 className="font-sans text-sm text-foreground mb-4">
                 Company
               </h3>
-              <div className="space-y-2">
-                <Link
-                  href="/story"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: "transparent" }}
-                >
-                  Story
-                </Link>
-                <Link
-                  href="/updates"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: "transparent" }}
-                >
-                  Updates
-                </Link>
-                <Link
-                  href="/roadmap"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: "transparent" }}
-                >
-                  Roadmap
-                </Link>
+              <div className="space-y-2.5">
+                {[
+                  { href: "/story", label: "Story", external: false },
+                  { href: "/updates", label: "Updates", external: false },
+                  { href: "https://x.com/middayai", label: "X", external: true },
+                  {
+                    href: "https://www.linkedin.com/company/midday-ai",
+                    label: "LinkedIn",
+                    external: true,
+                  },
+                  {
+                    href: "https://www.youtube.com/@middayai",
+                    label: "YouTube",
+                    external: true,
+                  },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    target={item.external ? "_blank" : undefined}
+                    rel={item.external ? "noopener noreferrer" : undefined}
+                    className="font-sans text-sm text-muted-foreground hover:text-foreground transition-colors block"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
               </div>
             </div>
 
-            <div className="space-y-2">
+            {/* Resources Column */}
+            <div className="space-y-3">
               <h3 className="font-sans text-sm text-foreground mb-4">
                 Resources
               </h3>
-              <div className="space-y-2">
-                <Link
-                  href="/support"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: "transparent" }}
-                >
-                  Support
-                </Link>
-                <Link
-                  href="/privacy"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: "transparent" }}
-                >
-                  Privacy Policy
-                </Link>
-                <Link
-                  href="/terms"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground xl:active:text-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors block"
-                  style={{ WebkitTapHighlightColor: "transparent" }}
-                >
-                  Terms of Service
-                </Link>
+              <div className="space-y-2.5">
+                {[
+                  {
+                    href: "https://api.midday.ai",
+                    label: "API",
+                    external: true,
+                  },
+                  { href: "/sdks", label: "SDKs", external: false },
+                  { href: "/support", label: "Support", external: false },
+                  { href: "/privacy", label: "Privacy Policy", external: false },
+                  { href: "/terms", label: "Terms of Service", external: false },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    target={item.external ? "_blank" : undefined}
+                    rel={item.external ? "noopener noreferrer" : undefined}
+                    className="font-sans text-sm text-muted-foreground hover:text-foreground transition-colors block"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* Right Column - Text and Compliance Images */}
+          {/* Right Column - Tagline & Compliance */}
           <div className="flex flex-col items-start lg:items-end gap-6 lg:gap-10">
             <p className="font-sans text-base sm:text-xl text-foreground text-left lg:text-right">
               Business finances that explain themselves.
@@ -162,30 +182,33 @@ export function Footer() {
 
         {/* Bottom Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <Link
-            href="https://midday.openstatus.dev/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 justify-start hover:opacity-80 transition-opacity"
-          >
-            <span className="font-sans text-sm text-muted-foreground">
-              System status:
-            </span>
-            <span className="font-sans text-sm text-foreground">
-              Operational
-            </span>
-            <div className="relative flex items-center justify-center">
-              <div className="w-2 h-2 bg-green-500 rounded-full relative z-10" />
-              <div 
-                className="absolute w-2 h-2 bg-green-500 rounded-full"
-                style={{
-                  animation: 'pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                  willChange: 'transform, opacity, box-shadow',
-                }}
-              />
-            </div>
-          </Link>
-          <p className="font-sans text-sm text-muted-foreground text-left sm:text-right">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+            <Link
+              href="https://midday.openstatus.dev/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            >
+              <span className="font-sans text-sm text-muted-foreground">
+                System status:
+              </span>
+              <span className="font-sans text-sm text-foreground">
+                Operational
+              </span>
+              <div className="relative flex items-center justify-center">
+                <div className="w-2 h-2 bg-green-500 rounded-full relative z-10" />
+                <div
+                  className="absolute w-2 h-2 bg-green-500 rounded-full"
+                  style={{
+                    animation:
+                      "pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                    willChange: "transform, opacity, box-shadow",
+                  }}
+                />
+              </div>
+            </Link>
+          </div>
+          <p className="font-sans text-sm text-muted-foreground">
             © {new Date().getFullYear()} Midday Labs AB. All rights reserved.
           </p>
         </div>

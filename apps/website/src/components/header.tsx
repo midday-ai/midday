@@ -25,8 +25,12 @@ export function Header({
   const [isAppsOpen, setIsAppsOpen] = useState(false);
   const [isMobileFeaturesOpen, setIsMobileFeaturesOpen] = useState(false);
   const [isMobileAppsOpen, setIsMobileAppsOpen] = useState(false);
-  const [visibleIntegrations, setVisibleIntegrations] = useState<Array<{ id: number; key: string }>>([]);
-  const [featuresDropdownHeight, setFeaturesDropdownHeight] = useState<number | null>(null);
+  const [visibleIntegrations, setVisibleIntegrations] = useState<
+    Array<{ id: number; key: string }>
+  >([]);
+  const [featuresDropdownHeight, setFeaturesDropdownHeight] = useState<
+    number | null
+  >(null);
   const featuresTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const appsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const integrationKeyCounterRef = useRef(0);
@@ -51,12 +55,14 @@ export function Header({
   // Initialize with 4 random integrations
   useEffect(() => {
     if (isAppsOpen && visibleIntegrations.length === 0) {
-      const shuffled = [...allIntegrations.keys()].sort(() => Math.random() - 0.5);
+      const shuffled = [...allIntegrations.keys()].sort(
+        () => Math.random() - 0.5,
+      );
       setVisibleIntegrations(
         shuffled.slice(0, 4).map((idx) => ({
           id: idx,
           key: `init-${integrationKeyCounterRef.current++}`,
-        }))
+        })),
       );
     }
   }, [isAppsOpen]);
@@ -65,28 +71,34 @@ export function Header({
   useEffect(() => {
     if (!isAppsOpen || visibleIntegrations.length === 0) return;
 
-    const interval = setInterval(() => {
-      setVisibleIntegrations((current) => {
-        // Randomly decide to replace one logo (70% chance)
-        if (Math.random() < 0.7 && current.length === 4) {
-          const indexToReplace = Math.floor(Math.random() * 4);
-          const availableIndices = allIntegrations
-            .map((_, i) => i)
-            .filter((i) => !current.some((item) => item.id === i));
-          
-          if (availableIndices.length > 0) {
-            const newIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
-            const newVisible = [...current];
-            newVisible[indexToReplace] = {
-              id: newIndex,
-              key: `change-${integrationKeyCounterRef.current++}`,
-            };
-            return newVisible;
+    const interval = setInterval(
+      () => {
+        setVisibleIntegrations((current) => {
+          // Randomly decide to replace one logo (70% chance)
+          if (Math.random() < 0.7 && current.length === 4) {
+            const indexToReplace = Math.floor(Math.random() * 4);
+            const availableIndices = allIntegrations
+              .map((_, i) => i)
+              .filter((i) => !current.some((item) => item.id === i));
+
+            if (availableIndices.length > 0) {
+              const newIndex =
+                availableIndices[
+                  Math.floor(Math.random() * availableIndices.length)
+                ];
+              const newVisible = [...current];
+              newVisible[indexToReplace] = {
+                id: newIndex ?? 0,
+                key: `change-${integrationKeyCounterRef.current++}`,
+              };
+              return newVisible;
+            }
           }
-        }
-        return current;
-      });
-    }, 1500 + Math.random() * 1000); // Random interval between 1.5-2.5 seconds
+          return current;
+        });
+      },
+      1500 + Math.random() * 1000,
+    ); // Random interval between 1.5-2.5 seconds
 
     return () => clearInterval(interval);
   }, [isAppsOpen, visibleIntegrations.length]);
@@ -95,10 +107,14 @@ export function Header({
   useEffect(() => {
     if (isFeaturesOpen && featuresListRef.current) {
       // Get the full dropdown height including padding
-      const featuresDropdown = featuresListRef.current.closest('[data-features-dropdown]') as HTMLElement;
-      const featuresHeight = featuresDropdown ? featuresDropdown.offsetHeight : featuresListRef.current.offsetHeight;
+      const featuresDropdown = featuresListRef.current.closest(
+        "[data-features-dropdown]",
+      ) as HTMLElement;
+      const featuresHeight = featuresDropdown
+        ? featuresDropdown.offsetHeight
+        : featuresListRef.current.offsetHeight;
       setFeaturesDropdownHeight(featuresHeight);
-      
+
       if (preAccountingRef.current) {
         preAccountingRef.current.style.height = `${featuresListRef.current.offsetHeight}px`;
       }
@@ -180,211 +196,199 @@ export function Header({
                   Features
                 </button>
 
-
                 {/* Features Dropdown - Full Width */}
-                <div
-                  data-features-dropdown
-                  className={`fixed left-0 right-0 bg-background border-t border-b border-border shadow-lg z-50 overflow-hidden transition-opacity duration-150 ${
-                    isFeaturesOpen
-                      ? "opacity-100 visible"
-                      : "opacity-0 invisible"
-                  }`}
-                  style={{ top: "100%" }}
-                >
-                  <div className="p-6 xl:p-8 2xl:p-10">
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
-                      {/* Column 1 & 2 - Features List (2 columns) */}
-                      <div className="lg:col-span-2 2xl:max-w-xl" ref={featuresListRef}>
-                        <div className="grid grid-cols-2 gap-x-4">
-                          {/* Column 1 */}
-                          <div>
-                            <Link
-                              href="/assistant"
-                              className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
-                              onClick={() => setIsFeaturesOpen(false)}
-                            >
-                              <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Assistant
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Ask questions and get clear financial answers
-                            </span>
-                          </div>
-                            </Link>
-                            <Link
-                              href="/insights"
-                              className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
-                              onClick={() => setIsFeaturesOpen(false)}
-                            >
-                              <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Insights
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              See what's changing
-                            </span>
-                          </div>
-                            </Link>
-                            <Link
-                              href="/transactions"
-                              className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
-                              onClick={() => setIsFeaturesOpen(false)}
-                            >
-                              <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Transactions
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              All transactions together
-                            </span>
-                          </div>
-                            </Link>
-                            <Link
-                              href="/inbox"
-                              className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
-                              onClick={() => setIsFeaturesOpen(false)}
-                            >
-                              <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Inbox
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Receipts handled automatically
-                            </span>
-                          </div>
-                            </Link>
-                        </div>
-                          {/* Column 2 */}
-                          <div>
-                            <Link
-                              href="/time-tracking"
-                              className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
-                              onClick={() => setIsFeaturesOpen(false)}
-                            >
-                              <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Time tracking
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              See where time goes
-                            </span>
-                          </div>
-                            </Link>
-                            <Link
-                              href="/invoicing"
-                              className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
-                              onClick={() => setIsFeaturesOpen(false)}
-                            >
-                              <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Invoicing
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Get paid faster
-                            </span>
-                          </div>
-                            </Link>
-                            <Link
-                              href="/customers"
-                              className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
-                              onClick={() => setIsFeaturesOpen(false)}
-                            >
-                              <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Customers
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Know your customers
-                            </span>
-                          </div>
-                            </Link>
-                            <Link
-                              href="/file-storage"
-                              className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
-                              onClick={() => setIsFeaturesOpen(false)}
-                            >
-                              <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Files
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Everything in one place
-                            </span>
+                <AnimatePresence>
+                  {isFeaturesOpen && (
+                    <motion.div
+                      data-features-dropdown
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="fixed left-0 right-0 bg-background border-t border-b border-border shadow-lg z-50 overflow-hidden"
+                      style={{ top: "100%" }}
+                    >
+                      <div className="p-6 xl:p-8 2xl:p-10">
+                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+                          {/* Column 1 & 2 - Features List (2 columns) */}
+                          <div
+                            className="lg:col-span-2 2xl:max-w-xl"
+                            ref={featuresListRef}
+                          >
+                            <div className="grid grid-cols-2 gap-x-4">
+                              {/* Column 1 */}
+                              <div>
+                                {[
+                                  {
+                                    href: "/assistant",
+                                    title: "Assistant",
+                                    desc: "Ask questions and get clear financial answers",
+                                  },
+                                  {
+                                    href: "/insights",
+                                    title: "Insights",
+                                    desc: "See what's changing",
+                                  },
+                                  {
+                                    href: "/transactions",
+                                    title: "Transactions",
+                                    desc: "All transactions together",
+                                  },
+                                  {
+                                    href: "/inbox",
+                                    title: "Inbox",
+                                    desc: "Receipts handled automatically",
+                                  },
+                                ].map((item, index) => (
+                                  <motion.div
+                                    key={item.href}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{
+                                      duration: 0.2,
+                                      delay: index * 0.03,
+                                    }}
+                                  >
+                                    <Link
+                                      href={item.href}
+                                      className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                                      onClick={() => setIsFeaturesOpen(false)}
+                                    >
+                                      <div className="flex flex-col pl-2">
+                                        <span className="font-sans text-base text-foreground mb-1">
+                                          {item.title}
+                                        </span>
+                                        <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                          {item.desc}
+                                        </span>
+                                      </div>
+                                    </Link>
+                                  </motion.div>
+                                ))}
                               </div>
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Column 3 & 4 - Pre-accounting Preview */}
-                      <div className="lg:col-span-2 flex items-start justify-end">
-                        <Link
-                          ref={preAccountingRef}
-                          href="/pre-accounting"
-                          onClick={() => setIsFeaturesOpen(false)}
-                          className="w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col"
-                        >
-                          <div className="flex-1 flex items-center justify-center bg-background p-4">
-                            <Image
-                              src="/images/accounting-light.png"
-                              alt="Pre-accounting"
-                              width={112}
-                              height={400}
-                              className="h-auto w-auto max-h-[80px] object-contain dark:hidden"
-                            />
-                            <Image
-                              src="/images/accounting-dark.png"
-                              alt="Pre-accounting"
-                              width={112}
-                              height={400}
-                              className="h-auto w-auto max-h-[80px] object-contain hidden dark:block"
-                            />
-                                </div>
-                          <div className="bg-background border-t border-border p-2.5 flex items-center justify-between gap-4">
-                            <div className="flex-1">
-                              <span className="font-sans text-xs text-foreground block">
-                                Pre-accounting
-                              </span>
-                              <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                Clean records ready for your accountant
-                              </span>
-                                </div>
-                            <div className="flex items-center gap-1.5 flex-shrink-0">
-                              <div className="w-6 h-6 border border-border flex items-center justify-center bg-background">
-                                <Image
-                                  src="/images/xero.svg"
-                                  alt="Xero"
-                                  width={14}
-                                  height={14}
-                                  className="object-contain opacity-70"
-                                />
-                              </div>
-                              <div className="w-6 h-6 border border-border flex items-center justify-center bg-background">
-                                <Image
-                                  src="/images/quickbooks.svg"
-                                  alt="QuickBooks"
-                                  width={14}
-                                  height={14}
-                                  className="object-contain opacity-70"
-                                />
-                                </div>
-                              <div className="w-6 h-6 border border-border flex items-center justify-center bg-background">
-                                <Image
-                                  src="/images/fortnox.svg"
-                                  alt="Fortnox"
-                                  width={14}
-                                  height={14}
-                                  className="object-contain opacity-70"
-                                />
+                              {/* Column 2 */}
+                              <div>
+                                {[
+                                  {
+                                    href: "/time-tracking",
+                                    title: "Time tracking",
+                                    desc: "See where time goes",
+                                  },
+                                  {
+                                    href: "/invoicing",
+                                    title: "Invoicing",
+                                    desc: "Get paid faster",
+                                  },
+                                  {
+                                    href: "/customers",
+                                    title: "Customers",
+                                    desc: "Know your customers",
+                                  },
+                                  {
+                                    href: "/file-storage",
+                                    title: "Files",
+                                    desc: "Everything in one place",
+                                  },
+                                ].map((item, index) => (
+                                  <motion.div
+                                    key={item.href}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{
+                                      duration: 0.2,
+                                      delay: (index + 4) * 0.03,
+                                    }}
+                                  >
+                                    <Link
+                                      href={item.href}
+                                      className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                                      onClick={() => setIsFeaturesOpen(false)}
+                                    >
+                                      <div className="flex flex-col pl-2">
+                                        <span className="font-sans text-base text-foreground mb-1">
+                                          {item.title}
+                                        </span>
+                                        <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                          {item.desc}
+                                        </span>
+                                      </div>
+                                    </Link>
+                                  </motion.div>
+                                ))}
                               </div>
                             </div>
                           </div>
-                        </Link>
+
+                          {/* Column 3 & 4 - Pre-accounting Preview */}
+                          <div className="lg:col-span-2 flex items-start justify-end">
+                            <Link
+                              ref={preAccountingRef}
+                              href="/pre-accounting"
+                              onClick={() => setIsFeaturesOpen(false)}
+                              className="w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col"
+                            >
+                              <div className="flex-1 flex items-center justify-center bg-background p-4">
+                                <Image
+                                  src="/images/accounting-light.png"
+                                  alt="Pre-accounting"
+                                  width={112}
+                                  height={400}
+                                  className="h-auto w-auto max-h-[80px] object-contain dark:hidden"
+                                />
+                                <Image
+                                  src="/images/accounting-dark.png"
+                                  alt="Pre-accounting"
+                                  width={112}
+                                  height={400}
+                                  className="h-auto w-auto max-h-[80px] object-contain hidden dark:block"
+                                />
+                              </div>
+                              <div className="bg-background border-t border-border p-2.5 flex items-center justify-between gap-4">
+                                <div className="flex-1">
+                                  <span className="font-sans text-xs text-foreground block">
+                                    Pre-accounting
+                                  </span>
+                                  <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                    Clean records ready for your accountant
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5 flex-shrink-0">
+                                  <div className="w-6 h-6 border border-border flex items-center justify-center bg-background">
+                                    <Image
+                                      src="/images/xero.svg"
+                                      alt="Xero"
+                                      width={14}
+                                      height={14}
+                                      className="object-contain opacity-70"
+                                    />
+                                  </div>
+                                  <div className="w-6 h-6 border border-border flex items-center justify-center bg-background">
+                                    <Image
+                                      src="/images/quickbooks.svg"
+                                      alt="QuickBooks"
+                                      width={14}
+                                      height={14}
+                                      className="object-contain opacity-70"
+                                    />
+                                  </div>
+                                  <div className="w-6 h-6 border border-border flex items-center justify-center bg-background">
+                                    <Image
+                                      src="/images/fortnox.svg"
+                                      alt="Fortnox"
+                                      width={14}
+                                      height={14}
+                                      className="object-contain opacity-70"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            </Link>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               <Link
@@ -405,7 +409,7 @@ export function Header({
               >
                 Story
               </Link>
-              
+
               {/* Apps with Dropdown */}
               <div
                 className="relative"
@@ -429,162 +433,191 @@ export function Header({
                 </button>
 
                 {/* Apps Dropdown - Full Width */}
-                <div
-                  className={`fixed left-0 right-0 bg-background border-t border-b border-border shadow-lg z-50 overflow-hidden transition-opacity duration-150 ${
-                    isAppsOpen
-                      ? "opacity-100 visible"
-                      : "opacity-0 invisible"
-                  }`}
-                  style={{ 
-                    top: "100%",
-                    height: featuresDropdownHeight !== null ? `${featuresDropdownHeight}px` : 'auto'
-                  }}
-                >
-                  <div className="p-6 xl:p-8 2xl:p-10 h-full">
-                    <div className="grid grid-cols-1 lg:grid-cols-6 gap-0 h-full">
-                      {/* Column 1 & 2 - Apps List */}
-                      <div ref={appsListRef} className="lg:col-span-2 2xl:max-w-xs lg:pr-4">
-                        <Link
-                          href="/download"
-                          className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
-                          onClick={() => setIsAppsOpen(false)}
-                        >
-                          <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Mac app
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Your finances, always one click away.
-                            </span>
-                          </div>
-              </Link>
-              <Link
-                href="/download"
-                          className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
-                          onClick={() => setIsAppsOpen(false)}
-                        >
-                          <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Integrations
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Connect your existing tools.
-                            </span>
-                          </div>
-                        </Link>
-                        <a
-                          href="https://api.midday.ai"
-                          className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
-                          onClick={() => setIsAppsOpen(false)}
-                        >
-                          <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              Developer & API
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Programmatic access to Midday data and workflows.
-                            </span>
-                          </div>
-                        </a>
-                        <Link
-                          href="/sdks"
-                          className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
-                          onClick={() => setIsAppsOpen(false)}
-                        >
-                          <div className="flex flex-col pl-2">
-                            <span className="font-sans text-base text-foreground mb-1">
-                              SDKs
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Typed SDKs to build faster with Midday.
-                            </span>
-                          </div>
-                        </Link>
-                      </div>
-
-                      {/* Columns 3-6 - Image Previews Container */}
-                      <div className="lg:col-span-4 flex items-start justify-end gap-4">
-                        {/* Integrations Preview */}
-                        <Link
-                          ref={integrationsAppRef}
-                          href="/download"
-                          onClick={() => setIsAppsOpen(false)}
-                          className="w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col flex-shrink-0"
-                        >
-                          <div className="flex-1">
-                            <HeaderIntegrationsPreview />
-                          </div>
-                          <div className="bg-background border-t border-border p-2.5 flex items-center justify-between gap-4">
-                            <div className="flex-1">
-                              <span className="font-sans text-xs text-foreground block">
-                                Integrations
-                              </span>
-                              <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                Connect your existing tools.
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1.5 flex-shrink-0 relative h-6">
-                              <AnimatePresence mode="popLayout">
-                                {visibleIntegrations.map((item) => (
-                                  <motion.div
-                                    key={item.key}
-                                    layout
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.8 }}
-                                    transition={{ duration: 0.4, ease: "easeInOut" }}
-                                    className="w-6 h-6 border border-border flex items-center justify-center bg-background"
+                <AnimatePresence>
+                  {isAppsOpen && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="fixed left-0 right-0 bg-background border-t border-b border-border shadow-lg z-50 overflow-hidden"
+                      style={{
+                        top: "100%",
+                        height:
+                          featuresDropdownHeight !== null
+                            ? `${featuresDropdownHeight}px`
+                            : "auto",
+                      }}
+                    >
+                      <div className="p-6 xl:p-8 2xl:p-10 h-full">
+                        <div className="grid grid-cols-1 lg:grid-cols-6 gap-0 h-full">
+                          {/* Column 1 & 2 - Apps List */}
+                          <div
+                            ref={appsListRef}
+                            className="lg:col-span-2 2xl:max-w-xs lg:pr-4"
+                          >
+                            {[
+                              {
+                                href: "/download",
+                                title: "Mac app",
+                                desc: "Your finances, always one click away.",
+                                external: false,
+                              },
+                              {
+                                href: "/integrations",
+                                title: "Integrations",
+                                desc: "Connect your existing tools.",
+                                external: false,
+                              },
+                              {
+                                href: "https://api.midday.ai",
+                                title: "Developer & API",
+                                desc: "Programmatic access to Midday data and workflows.",
+                                external: true,
+                              },
+                              {
+                                href: "/sdks",
+                                title: "SDKs",
+                                desc: "Typed SDKs to build faster with Midday.",
+                                external: false,
+                              },
+                            ].map((item, index) => (
+                              <motion.div
+                                key={`${item.href}-${item.title}`}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{
+                                  duration: 0.2,
+                                  delay: index * 0.03,
+                                }}
+                              >
+                                {item.external ? (
+                                  <a
+                                    href={item.href}
+                                    className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                                    onClick={() => setIsAppsOpen(false)}
                                   >
-                                    <Image
-                                      src={allIntegrations[item.id].src}
-                                      alt={allIntegrations[item.id].alt}
-                                      width={14}
-                                      height={14}
-                                      className="object-contain opacity-70"
-                                    />
-                                  </motion.div>
-                                ))}
-                              </AnimatePresence>
-                            </div>
+                                    <div className="flex flex-col pl-2">
+                                      <span className="font-sans text-base text-foreground mb-1">
+                                        {item.title}
+                                      </span>
+                                      <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                        {item.desc}
+                                      </span>
+                                    </div>
+                                  </a>
+                                ) : (
+                                  <Link
+                                    href={item.href}
+                                    className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                                    onClick={() => setIsAppsOpen(false)}
+                                  >
+                                    <div className="flex flex-col pl-2">
+                                      <span className="font-sans text-base text-foreground mb-1">
+                                        {item.title}
+                                      </span>
+                                      <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                        {item.desc}
+                                      </span>
+                                    </div>
+                                  </Link>
+                                )}
+                              </motion.div>
+                            ))}
                           </div>
-              </Link>
 
-                        {/* Mac App Preview */}
-                        <Link
-                          ref={macAppRef}
-                          href="/download"
-                          onClick={() => setIsAppsOpen(false)}
-                          className="w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col flex-shrink-0"
-                        >
-                          <div className="flex-1 flex items-center justify-center bg-background p-4">
-                            <Image
-                              src="/images/header-dock-light.png"
-                              alt="Mac Dock"
-                              width={1200}
-                              height={300}
-                              className="w-3/4 h-auto object-contain dark:hidden"
-                            />
-                            <Image
-                              src="/images/header-dock-dark.png"
-                              alt="Mac Dock"
-                              width={1200}
-                              height={300}
-                              className="w-3/4 h-auto object-contain hidden dark:block"
-                            />
+                          {/* Columns 3-6 - Image Previews Container */}
+                          <div className="lg:col-span-4 flex items-start justify-end gap-4">
+                            {/* Integrations Preview */}
+                            <Link
+                              ref={integrationsAppRef}
+                              href="/integrations"
+                              onClick={() => setIsAppsOpen(false)}
+                              className="w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col flex-shrink-0"
+                            >
+                              <div className="flex-1">
+                                <HeaderIntegrationsPreview />
+                              </div>
+                              <div className="bg-background border-t border-border p-2.5 flex items-center justify-between gap-4">
+                                <div className="flex-1">
+                                  <span className="font-sans text-xs text-foreground block">
+                                    Integrations
+                                  </span>
+                                  <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                    Connect your existing tools.
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5 flex-shrink-0 relative h-6">
+                                  <AnimatePresence mode="popLayout">
+                                    {visibleIntegrations.map((item) => (
+                                      <motion.div
+                                        key={item.key}
+                                        layout
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.8 }}
+                                        transition={{
+                                          duration: 0.4,
+                                          ease: "easeInOut",
+                                        }}
+                                        className="w-6 h-6 border border-border flex items-center justify-center bg-background"
+                                      >
+                                        <Image
+                                          src={
+                                            allIntegrations[item.id]?.src ?? ""
+                                          }
+                                          alt={
+                                            allIntegrations[item.id]?.alt ?? ""
+                                          }
+                                          width={14}
+                                          height={14}
+                                          className="object-contain opacity-70"
+                                        />
+                                      </motion.div>
+                                    ))}
+                                  </AnimatePresence>
+                                </div>
+                              </div>
+                            </Link>
+
+                            {/* Mac App Preview */}
+                            <Link
+                              ref={macAppRef}
+                              href="/download"
+                              onClick={() => setIsAppsOpen(false)}
+                              className="w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col flex-shrink-0"
+                            >
+                              <div className="flex-1 flex items-center justify-center bg-background p-4">
+                                <Image
+                                  src="/images/header-dock-light.png"
+                                  alt="Mac Dock"
+                                  width={1200}
+                                  height={300}
+                                  className="w-3/4 h-auto object-contain dark:hidden"
+                                />
+                                <Image
+                                  src="/images/header-dock-dark.png"
+                                  alt="Mac Dock"
+                                  width={1200}
+                                  height={300}
+                                  className="w-3/4 h-auto object-contain hidden dark:block"
+                                />
+                              </div>
+                              <div className="bg-background border-t border-border p-2.5">
+                                <span className="font-sans text-xs text-foreground block">
+                                  Mac app
+                                </span>
+                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                  Your finances, always one click away.
+                                </span>
+                              </div>
+                            </Link>
                           </div>
-                          <div className="bg-background border-t border-border p-2.5">
-                            <span className="font-sans text-xs text-foreground block">
-                              Mac app
-                            </span>
-                            <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                              Your finances, always one click away.
-                            </span>
-                          </div>
-                        </Link>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Sign in */}
@@ -786,7 +819,7 @@ export function Header({
               >
                 Story
               </Link>
-              
+
               {/* Apps Expandable Section */}
               <div className="flex flex-col">
                 <button
@@ -832,7 +865,7 @@ export function Header({
                           Mac app
                         </Link>
                         <Link
-                          href="/download"
+                          href="/integrations"
                           onClick={() => {
                             setIsMenuOpen(false);
                             setIsMobileAppsOpen(false);

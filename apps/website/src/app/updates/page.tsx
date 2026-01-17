@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Updates",
+  description:
+    "The latest updates and improvements to Midday. See what we've been building to help you manage your business finances better.",
+};
+
 export default function UpdatesPage() {
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -6,6 +14,5 @@ export default function UpdatesPage() {
         <p className="text-muted-foreground">Page coming soon</p>
       </div>
     </div>
-  )
+  );
 }
-

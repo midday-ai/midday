@@ -1,4 +1,10 @@
 import Image from 'next/image'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Story',
+  description: 'Why we built Midday. Learn about our mission to help founders and small teams stay on top of their business finances without the manual work.',
+}
 
 export default function StoryPage() {
   return (
