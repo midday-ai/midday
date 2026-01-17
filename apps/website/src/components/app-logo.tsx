@@ -18,6 +18,7 @@ import {
   WhatsAppLogo,
   XeroLogo,
 } from "@midday/app-store/logos";
+import { cn } from "@midday/ui/cn";
 
 const logoMap: Record<string, React.ComponentType> = {
   gmail: GmailLogo,
@@ -51,7 +52,7 @@ export function AppLogo({ appId, className }: AppLogoProps) {
   }
 
   return (
-    <div className={className}>
+    <div className={cn("w-full h-full flex items-center justify-center [&>svg]:w-full [&>svg]:h-full [&>svg]:max-w-full [&>svg]:max-h-full", className)}>
       <Logo />
     </div>
   );

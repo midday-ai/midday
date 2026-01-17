@@ -64,7 +64,7 @@ export function IntegrationsPage() {
               className="group border border-border p-6 hover:border-foreground/20 transition-all duration-200 flex flex-col"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 flex items-center justify-center">
+                <div className="w-8 h-8 flex items-center justify-center">
                   <AppLogo appId={app.id} />
                 </div>
                 <div className="flex gap-1">
@@ -98,8 +98,8 @@ export function IntegrationsPage() {
 
       {/* CTA Section */}
       <div className="max-w-[1400px] mx-auto mt-24">
-        <div className="border border-border p-8 lg:p-12 text-center">
-          <h2 className="font-serif text-2xl lg:text-3xl text-foreground mb-4">
+        <div className="bg-secondary border border-border p-8 lg:p-12 text-center">
+          <h2 className="font-serif text-2xl sm:text-2xl text-foreground mb-4">
             Don't see what you need?
           </h2>
           <p className="font-sans text-base text-muted-foreground mb-6 max-w-lg mx-auto">
