@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+// ============================================================================
+// Predefined Options
+// ============================================================================
+
 // Predefined options for structured fields (helps LLM accuracy)
 export const industryOptions = [
   "Software",
@@ -63,10 +67,13 @@ export const fundingStageOptions = [
   "Acquired",
 ] as const;
 
+// ============================================================================
+// Zod Schema for Structured Extraction
+// ============================================================================
+
 /**
- * Schema for LLM extraction.
- * CRITICAL: Each field must be verified to be about the SPECIFIC company domain.
- * Return null if there's any doubt about which company the data refers to.
+ * Schema for LLM extraction using Zod.
+ * Used with AI SDK's generateObject for structured output.
  */
 export const customerEnrichmentSchema = z.object({
   description: z
@@ -119,6 +126,37 @@ export const customerEnrichmentSchema = z.object({
     .nullable()
     .describe("City and country of headquarters (e.g. 'Stockholm, Sweden')."),
 
+  addressLine1: z
+    .string()
+    .nullable()
+    .describe(
+      "Street address of the company headquarters (e.g. '123 Main Street'). Found on contact pages or business registries.",
+    ),
+
+  city: z
+    .string()
+    .nullable()
+    .describe(
+      "City where the company is headquartered (e.g. 'Stockholm', 'New York').",
+    ),
+
+  state: z
+    .string()
+    .nullable()
+    .describe(
+      "State, province, or region (e.g. 'California', 'Stockholm County'). May not apply to all countries.",
+    ),
+
+  zipCode: z
+    .string()
+    .nullable()
+    .describe("Postal/ZIP code (e.g. '11120', '94105')."),
+
+  country: z
+    .string()
+    .nullable()
+    .describe("Country name (e.g. 'Sweden', 'United States', 'Germany')."),
+
   timezone: z
     .string()
     .nullable()
@@ -126,30 +164,30 @@ export const customerEnrichmentSchema = z.object({
 
   linkedinUrl: z
     .string()
-    .url()
     .nullable()
     .describe(
-      "LinkedIn company page URL (e.g. 'https://linkedin.com/company/example').",
+      "LinkedIn company page URL (e.g. 'https://linkedin.com/company/example'). Include https:// prefix.",
     ),
 
   twitterUrl: z
     .string()
-    .url()
     .nullable()
-    .describe("Twitter/X company URL (e.g. 'https://twitter.com/example')."),
+    .describe(
+      "Twitter/X company URL (e.g. 'https://twitter.com/example'). Include https:// prefix.",
+    ),
 
   instagramUrl: z
     .string()
-    .url()
     .nullable()
-    .describe("Instagram company URL (e.g. 'https://instagram.com/example')."),
+    .describe(
+      "Instagram company URL (e.g. 'https://instagram.com/example'). Include https:// prefix.",
+    ),
 
   facebookUrl: z
     .string()
-    .url()
     .nullable()
     .describe(
-      "Facebook company page URL (e.g. 'https://facebook.com/example').",
+      "Facebook company page URL (e.g. 'https://facebook.com/example'). Include https:// prefix.",
     ),
 
   ceoName: z
@@ -168,7 +206,6 @@ export const customerEnrichmentSchema = z.object({
 
   financeContactEmail: z
     .string()
-    .email()
     .nullable()
     .describe(
       "Email address for the finance, accounting, or accounts payable department. Look for finance@, accounting@, ap@, invoices@ on Contact pages.",
@@ -198,6 +235,10 @@ export const customerEnrichmentSchema = z.object({
 
 export type CustomerEnrichmentResult = z.infer<typeof customerEnrichmentSchema>;
 
+// ============================================================================
+// Types
+// ============================================================================
+
 /**
  * Type for verified/validated enrichment data that will be saved to DB.
  * This is the output after URL verification and data validation.
@@ -212,6 +253,11 @@ export type VerifiedEnrichmentData = {
   fundingStage: (typeof fundingStageOptions)[number] | null;
   totalFunding: string | null;
   headquartersLocation: string | null;
+  addressLine1: string | null;
+  city: string | null;
+  state: string | null;
+  zipCode: string | null;
+  country: string | null;
   timezone: string | null;
   linkedinUrl: string | null;
   twitterUrl: string | null;
@@ -224,10 +270,6 @@ export type VerifiedEnrichmentData = {
   fiscalYearEnd: string | null;
   vatNumber: string | null;
 };
-
-// ============================================================================
-// Enrichment Input/Output Types
-// ============================================================================
 
 /**
  * Input parameters for customer enrichment
