@@ -1,6 +1,7 @@
 import type { Database } from "@midday/db/client";
 import { getInboxAccountById, upsertInboxAccount } from "@midday/db/queries";
 import { decrypt, encrypt } from "@midday/encryption";
+import { InboxAuthError, InboxSyncError } from "./errors";
 import { GmailProvider } from "./providers/gmail";
 import { OutlookProvider } from "./providers/outlook";
 import {
@@ -12,7 +13,6 @@ import {
   type OAuthProvider,
   type OAuthProviderInterface,
 } from "./providers/types";
-import { isAuthenticationError } from "./utils";
 
 export class InboxConnector extends Connector {
   #db: Database;
@@ -109,68 +109,69 @@ export class InboxConnector extends Connector {
         fullSync: options.fullSync,
       });
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
+      // Handle structured auth errors
+      if (error instanceof InboxAuthError) {
+        // If reauth is required, don't retry - propagate the error
+        if (error.requiresReauth) {
+          throw error;
+        }
 
-      // Check if it's an authentication error that might be resolved by token refresh
-      if (isAuthenticationError(errorMessage)) {
+        // Try token refresh for potentially transient auth errors
         try {
           return await this.#retryWithTokenRefresh(options, account);
         } catch (retryError) {
-          const retryMessage =
-            retryError instanceof Error
-              ? retryError.message
-              : "Unknown retry error";
-          throw new Error(
-            `Failed to fetch attachments after token refresh: ${retryMessage}`,
-          );
+          // Propagate structured errors
+          if (
+            retryError instanceof InboxAuthError ||
+            retryError instanceof InboxSyncError
+          ) {
+            throw retryError;
+          }
+          throw new InboxSyncError({
+            code: "fetch_failed",
+            provider: this.#providerName,
+            message: `Failed to fetch attachments after token refresh: ${
+              retryError instanceof Error ? retryError.message : "Unknown error"
+            }`,
+            cause: retryError instanceof Error ? retryError : undefined,
+          });
         }
       }
 
-      throw new Error(`Failed to fetch attachments: ${errorMessage}`);
+      // Propagate sync errors as-is
+      if (error instanceof InboxSyncError) {
+        throw error;
+      }
+
+      // Wrap unknown errors
+      throw new InboxSyncError({
+        code: "fetch_failed",
+        provider: this.#providerName,
+        message: `Failed to fetch attachments: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+        cause: error instanceof Error ? error : undefined,
+      });
     }
   }
 
   async #retryWithTokenRefresh(
     options: GetAttachmentsOptions,
-    account: any,
+    account: NonNullable<Awaited<ReturnType<typeof getInboxAccountById>>>,
   ): Promise<Attachment[]> {
-    // Set tokens with actual expiry date
-    const expiryDate = account.expiryDate
-      ? new Date(account.expiryDate).getTime()
-      : undefined;
+    // Provider already has tokens set from the initial getAttachments call.
+    // Just trigger an explicit refresh and retry the request.
+    // The provider handles all token state internally and persists to DB.
+    await this.#provider.refreshTokens();
 
-    this.#provider.setTokens({
-      access_token: decrypt(account.accessToken),
-      refresh_token: decrypt(account.refreshToken),
-      expiry_date: expiryDate,
+    // After successful refresh, retry the request
+    return await this.#provider.getAttachments({
+      id: account.id,
+      teamId: options.teamId,
+      maxResults: options.maxResults,
+      lastAccessed: account.lastAccessed,
+      fullSync: options.fullSync,
     });
-
-    try {
-      // Explicitly refresh the tokens
-      await this.#provider.refreshTokens();
-
-      // After successful refresh, try the request immediately
-      return await this.#provider.getAttachments({
-        id: account.id,
-        teamId: options.teamId,
-        maxResults: options.maxResults,
-        lastAccessed: account.lastAccessed,
-        fullSync: options.fullSync,
-      });
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-
-      // Check for invalid_grant which indicates refresh token is invalid
-      if (errorMessage.includes("invalid_grant")) {
-        throw new Error(
-          `Refresh token is invalid or expired. The user needs to re-authenticate their ${this.#providerName} account.`,
-        );
-      }
-
-      throw new Error(`Token refresh failed: ${errorMessage}`);
-    }
   }
 
   async #saveAccount(params: {

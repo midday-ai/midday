@@ -6,6 +6,7 @@ import type { Database } from "@midday/db/client";
 import { updateInboxAccount } from "@midday/db/queries";
 import { encrypt } from "@midday/encryption";
 import { ensureFileExtension } from "@midday/utils";
+import { InboxAuthError, InboxSyncError } from "../errors";
 import { generateDeterministicId } from "../generate-id";
 import type {
   Attachment,
@@ -186,9 +187,12 @@ export class OutlookProvider implements OAuthProviderInterface {
    */
   async #ensureValidAccessToken(): Promise<string> {
     if (!this.#accessToken) {
-      throw new Error(
-        "unauthorized - No access token available. Authentication required.",
-      );
+      throw new InboxAuthError({
+        code: "token_invalid",
+        provider: "outlook",
+        message: "No access token available. Authentication required.",
+        requiresReauth: true,
+      });
     }
 
     // Check if token is expired or about to expire
@@ -240,9 +244,12 @@ export class OutlookProvider implements OAuthProviderInterface {
    */
   async #doRefreshTokens(): Promise<void> {
     if (!this.#refreshToken) {
-      throw new Error(
-        "unauthorized - Refresh token is not available. Re-authentication required.",
-      );
+      throw new InboxAuthError({
+        code: "refresh_token_invalid",
+        provider: "outlook",
+        message: "Refresh token is not available. Re-authentication required.",
+        requiresReauth: true,
+      });
     }
 
     try {
@@ -270,7 +277,12 @@ export class OutlookProvider implements OAuthProviderInterface {
       const tokenResponse = (await response.json()) as MicrosoftTokenResponse;
 
       if (!tokenResponse.access_token) {
-        throw new Error("unauthorized - Failed to refresh access token");
+        throw new InboxAuthError({
+          code: "token_invalid",
+          provider: "outlook",
+          message: "Failed to refresh access token",
+          requiresReauth: true,
+        });
       }
 
       // Calculate expiry date from expires_in (seconds from now)
@@ -295,14 +307,20 @@ export class OutlookProvider implements OAuthProviderInterface {
         newExpiryDate: new Date(expiryDate).toISOString(),
       });
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Unknown error";
-
-      // Re-throw if it's already a properly formatted error
-      if (message.startsWith("unauthorized -")) {
+      // Re-throw InboxAuthError as-is
+      if (error instanceof InboxAuthError) {
         throw error;
       }
 
-      throw new Error(`unauthorized - Token refresh failed: ${message}`);
+      const message = error instanceof Error ? error.message : "Unknown error";
+
+      throw new InboxAuthError({
+        code: "token_invalid",
+        provider: "outlook",
+        message: `Token refresh failed: ${message}`,
+        requiresReauth: false, // May be transient
+        cause: error instanceof Error ? error : undefined,
+      });
     }
   }
 
@@ -338,36 +356,70 @@ export class OutlookProvider implements OAuthProviderInterface {
     ];
 
     // Azure AD specific error codes (AADSTS*)
-    const azureAdInvalidTokenPatterns = [
+    const mfaRequiredPatterns = ["AADSTS50076", "AADSTS50078"];
+    const consentRequiredPatterns = ["AADSTS65001"];
+    const tokenExpiredPatterns = [
       "AADSTS700082", // Refresh token expired due to inactivity
       "AADSTS700084", // Refresh token was revoked or not found
-      "AADSTS50076", // MFA required (user needs to re-authenticate)
-      "AADSTS65001", // User consent required
       "AADSTS50173", // Credential expired
-      "AADSTS50078", // Conditional access requires re-authentication
       "AADSTS53003", // Blocked by conditional access
     ];
 
-    const isInvalidRefreshToken =
+    // Determine error type based on patterns
+    const isMfaRequired = mfaRequiredPatterns.some(
+      (pattern) =>
+        errorBody.includes(pattern) || errorDescription?.includes(pattern),
+    );
+    const isConsentRequired = consentRequiredPatterns.some(
+      (pattern) =>
+        errorBody.includes(pattern) || errorDescription?.includes(pattern),
+    );
+    const isTokenExpired =
       invalidRefreshTokenErrors.includes(errorCode ?? "") ||
-      azureAdInvalidTokenPatterns.some(
+      tokenExpiredPatterns.some(
         (pattern) =>
           errorBody.includes(pattern) || errorDescription?.includes(pattern),
       );
 
-    if (isInvalidRefreshToken) {
-      throw new Error(
-        "unauthorized - Refresh token is invalid or expired. Re-authentication required.",
-      );
+    if (isMfaRequired) {
+      throw new InboxAuthError({
+        code: "mfa_required",
+        provider: "outlook",
+        message:
+          "Multi-factor authentication required. Re-authentication needed.",
+        requiresReauth: true,
+      });
+    }
+
+    if (isConsentRequired) {
+      throw new InboxAuthError({
+        code: "consent_required",
+        provider: "outlook",
+        message: "User consent required. Re-authentication needed.",
+        requiresReauth: true,
+      });
+    }
+
+    if (isTokenExpired) {
+      throw new InboxAuthError({
+        code: "refresh_token_expired",
+        provider: "outlook",
+        message:
+          "Refresh token is invalid or expired. Re-authentication required.",
+        requiresReauth: true,
+      });
     }
 
     // For other errors, include the error code if available
     const errorInfo = errorCode
       ? `${errorCode}: ${errorDescription}`
       : errorBody;
-    throw new Error(
-      `unauthorized - Token refresh failed: ${statusCode} ${errorInfo}`,
-    );
+    throw new InboxAuthError({
+      code: "token_invalid",
+      provider: "outlook",
+      message: `Token refresh failed: ${statusCode} ${errorInfo}`,
+      requiresReauth: false, // May be transient
+    });
   }
 
   /**
@@ -521,6 +573,11 @@ export class OutlookProvider implements OAuthProviderInterface {
 
       return flattenedAttachments;
     } catch (error: unknown) {
+      // Re-throw InboxAuthError and InboxSyncError as-is
+      if (error instanceof InboxAuthError || error instanceof InboxSyncError) {
+        throw error;
+      }
+
       // Extract GraphError properties for reliable error detection
       const graphError = error as {
         statusCode?: number;
@@ -545,24 +602,44 @@ export class OutlookProvider implements OAuthProviderInterface {
       // 401 = Unauthorized (token issues)
       // InvalidAuthenticationToken = Microsoft's error code for token problems
       if (statusCode === 401 || errorCode === "InvalidAuthenticationToken") {
-        throw new Error(
-          "unauthorized - Access token is invalid or expired. Authentication required.",
-        );
+        throw new InboxAuthError({
+          code: "token_expired",
+          provider: "outlook",
+          message:
+            "Access token is invalid or expired. Authentication required.",
+          requiresReauth: true,
+          cause: error instanceof Error ? error : undefined,
+        });
       }
 
       // 403 = Forbidden (permission issues)
       if (statusCode === 403 || errorCode === "Authorization_RequestDenied") {
-        throw new Error(
-          "forbidden - Insufficient permissions or access denied.",
-        );
+        throw new InboxAuthError({
+          code: "forbidden",
+          provider: "outlook",
+          message: "Insufficient permissions or access denied.",
+          requiresReauth: true,
+          cause: error instanceof Error ? error : undefined,
+        });
       }
 
-      // Re-throw errors that already have our format (from auth provider)
-      if (errorMessage.startsWith("unauthorized -")) {
-        throw error;
+      // 429 = Rate limited
+      if (statusCode === 429) {
+        throw new InboxSyncError({
+          code: "rate_limited",
+          provider: "outlook",
+          message:
+            "Microsoft Graph API rate limit exceeded. Please try again later.",
+          cause: error instanceof Error ? error : undefined,
+        });
       }
 
-      throw new Error(`Failed to fetch attachments: ${errorMessage}`);
+      throw new InboxSyncError({
+        code: "fetch_failed",
+        provider: "outlook",
+        message: `Failed to fetch attachments: ${errorMessage}`,
+        cause: error instanceof Error ? error : undefined,
+      });
     }
   }
 
