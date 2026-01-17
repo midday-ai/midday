@@ -14,13 +14,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.4",
-    "ai": "^6.0.13",
+    "@ai-sdk/google": "^3.0.10",
+    "@exalabs/ai-sdk": "^1.0.5",
+    "ai": "^6.0.39",
+    "exa-js": "^2.0.12",
     "zod": "^4.3.5"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "@types/node": "^25.0.3",
+    "@types/node": "^25.0.9",
     "typescript": "^5.9.3"
   }
 }
