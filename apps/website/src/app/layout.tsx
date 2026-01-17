@@ -27,18 +27,17 @@ const hedvigSerif = Hedvig_Letters_Serif({
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "Midday | Your AI-Powered Business Assistant",
+    default: "Run your business finances without manual work | Midday",
     template: "%s | Midday",
   },
   description:
-    "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
+    "Midday gives you one place for transactions, receipts, invoices and everything around your business finances without manual work.",
   openGraph: {
-    title: "Midday | Your AI-Powered Business Assistant",
+    title: "Run your business finances without manual work | Midday",
     description:
-      "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
+      "Midday gives you one place for transactions, receipts, invoices and everything around your business finances without manual work.",
     url: baseUrl,
-    siteName:
-      "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
+    siteName: "Midday",
     locale: "en_US",
     type: "website",
     images: [
@@ -55,9 +54,9 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    title: "Midday | Your AI-Powered Business Assistant",
+    title: "Run your business finances without manual work | Midday",
     description:
-      "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
+      "Midday gives you one place for transactions, receipts, invoices and everything around your business finances without manual work.",
     images: [
       {
         url: "https://cdn.midday.ai/opengraph-image.jpg",

@@ -6,7 +6,6 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import { AIAssistantAnimation } from "./homepage/ai-assistant-animation";
 import { DashboardAnimation } from "./homepage/dashboard-animation";
-import { MaterialIcon } from "./homepage/icon-mapping";
 import { InboxMatchAnimation } from "./homepage/inbox-match-animation";
 import { InvoicePaymentAnimation } from "./homepage/invoice-payment-animation";
 import { TransactionFlowAnimation } from "./homepage/transaction-flow-animation";
@@ -103,14 +102,14 @@ export function StartPage() {
             <div className="space-y-4 text-center w-full">
               <div className="flex flex-col gap-3 w-full max-w-md mx-auto">
                 <Button
-                  onClick={() =>
-                    (window.location.href = "https://app.midday.ai/")
-                  }
+                  asChild
                   className="w-full btn-inverse h-11 px-5 transition-colors"
                 >
-                  <span className="text-inherit text-sm ">
-                    Set up your business
-                  </span>
+                  <a href="https://app.midday.ai/">
+                    <span className="text-inherit text-sm">
+                      Set up your business
+                    </span>
+                  </a>
                 </Button>
               </div>
 
@@ -157,16 +156,6 @@ export function StartPage() {
                   />
                 </div>
               </div>
-
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <button className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-200 pointer-events-auto">
-                  <MaterialIcon
-                    name="play_arrow"
-                    className="text-foreground"
-                    size={24}
-                  />
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -193,14 +182,14 @@ export function StartPage() {
                 <div className="flex flex-col items-end space-y-4">
                   <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                     <Button
-                      onClick={() =>
-                        (window.location.href = "https://app.midday.ai/")
-                      }
+                      asChild
                       className="btn-inverse h-11 px-4 transition-colors w-full sm:w-auto"
                     >
-                      <span className="text-inherit text-sm ">
-                        Set up your business
-                      </span>
+                      <a href="https://app.midday.ai/">
+                        <span className="text-inherit text-sm">
+                          Set up your business
+                        </span>
+                      </a>
                     </Button>
                   </div>
 
@@ -261,16 +250,6 @@ export function StartPage() {
                     priority
                   />
                 </div>
-              </div>
-
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <button className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-200 pointer-events-auto">
-                  <MaterialIcon
-                    name="play_arrow"
-                    className="text-foreground"
-                    size={30}
-                  />
-                </button>
               </div>
             </div>
           </div>

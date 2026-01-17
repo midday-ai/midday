@@ -134,12 +134,10 @@ export function PricingSectionV2() {
 
               <div className="space-y-3">
                 <Button
-                  onClick={() => {
-                    window.location.href = "https://app.midday.ai/";
-                  }}
+                  asChild
                   className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors"
                 >
-                  Start your trial
+                  <a href="https://app.midday.ai/">Start your trial</a>
                 </Button>
                 <p className="font-sans text-xs text-muted-foreground text-center">
                   Best for getting started
@@ -221,12 +219,10 @@ export function PricingSectionV2() {
 
               <div className="space-y-3">
                 <Button
-                  onClick={() => {
-                    window.location.href = "https://app.midday.ai/";
-                  }}
+                  asChild
                   className="w-full btn-inverse font-sans text-sm py-3 px-4 transition-colors"
                 >
-                  Start your trial
+                  <a href="https://app.midday.ai/">Start your trial</a>
                 </Button>
                 <p className="font-sans text-xs text-muted-foreground text-center">
                   Best value for most businesses
@@ -301,12 +297,10 @@ export function PricingSectionV2() {
 
               <div className="space-y-3">
                 <Button
-                  onClick={() => {
-                    window.location.href = "https://app.midday.ai/";
-                  }}
+                  asChild
                   className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors"
                 >
-                  Start your trial
+                  <a href="https://app.midday.ai/">Start your trial</a>
                 </Button>
                 <p className="font-sans text-xs text-muted-foreground text-center">
                   For teams scaling operations

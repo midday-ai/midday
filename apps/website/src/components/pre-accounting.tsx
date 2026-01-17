@@ -1,19 +1,19 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Button } from "@midday/ui/button";
-import { MaterialIcon } from "./homepage/icon-mapping";
-import { TransactionFlowAnimation } from "./homepage/transaction-flow-animation";
-import { InboxMatchAnimation } from "./homepage/inbox-match-animation";
-import { DashboardAnimation } from "./homepage/dashboard-animation";
-import { AIAssistantAnimation } from "./homepage/ai-assistant-animation";
-import { BulkReconciliationAnimation } from "./homepage/bulk-reconciliation-animation";
-import { PricingSection } from "./sections/pricing-section";
-import { FeaturesGridSection } from "./sections/features-grid-section";
+import { Button }ton } f@midday"ui/buttonay/ui/button";
+import { motiont} ion } framer-motionmer-motion";
+import Imageext/image";image
+import Linkixt/linnext/link
+import { useRouterter } fronext/navigationation";
+import { useStatete } fromreact
+import { AIAssistantAnimationnimation } from "./haiaassistant-animationssistant-animation";
+import { BulkReconciliationAnimationion } from "./homepabulkoreconciliationiation-animation";
+import { DashboardAnimation} from "./homepage/ddashboardimation";
+import { MaterialIconm "./homepage/icon-miconmapping
+import { InboxMatchAnimation} from "./homepage/iinboxomatchnimation";
+import { TransactionFlowAnimationfrom "./homepage/tratransactiontflowtion";
+import { FeaturesGridSectionction } from "./sectfeatures-gridatures-grid-section";
+import { PricingSectionom "./sections/pricipricing
 
 const howItWorksSteps = [
   {
@@ -81,10 +81,10 @@ export function PreAccounting() {
             <div className="space-y-4 text-center w-full">
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-md mx-auto justify-center sm:justify-center">
                 <Button
-                  onClick={() => window.location.href = 'https://app.midday.ai/'}
+                  asChild
                   className="w-full sm:w-auto h-11 px-6 text-sm font-sans"
                 >
-                  Start free trial
+                  <a href="https://app.midday.ai/">Start free trial</a>
                 </Button>
                 <Button
                   variant="outline"
@@ -142,10 +142,10 @@ export function PreAccounting() {
             {/* CTA Buttons */}
             <div className="flex gap-6 justify-center">
               <Button
-                onClick={() => window.location.href = 'https://app.midday.ai/'}
+                asChild
                 className="h-11 px-6 text-sm font-sans"
               >
-                Start free trial
+                <a href="https://app.midday.ai/">Start free trial</a>
               </Button>
               <Button
                 variant="outline"

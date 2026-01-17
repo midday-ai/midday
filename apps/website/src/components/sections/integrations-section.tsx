@@ -1,11 +1,13 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 
 export interface Integration {
   name: string
   icon: string
   alt: string
+  slug: string
 }
 
 interface IntegrationsSectionProps {
@@ -15,16 +17,16 @@ interface IntegrationsSectionProps {
 }
 
 const defaultIntegrations: Integration[] = [
-  { name: 'Gmail', icon: '/images/gmail.svg', alt: 'Gmail' },
-  { name: 'Outlook', icon: '/images/outlook.svg', alt: 'Outlook' },
-  { name: 'WhatsApp', icon: '/images/whatsapp.svg', alt: 'WhatsApp' },
-  { name: 'Google Drive', icon: '/images/gdrive.svg', alt: 'Google Drive' },
-  { name: 'Dropbox', icon: '/images/dropbox.svg', alt: 'Dropbox' },
-  { name: 'Slack', icon: '/images/slack.svg', alt: 'Slack' },
-  { name: 'Stripe', icon: '/images/stripe.svg', alt: 'Stripe' },
-  { name: 'Xero', icon: '/images/xero.svg', alt: 'Xero' },
-  { name: 'QuickBooks', icon: '/images/quickbooks.svg', alt: 'QuickBooks' },
-  { name: 'Fortnox', icon: '/images/fortnox.svg', alt: 'Fortnox' },
+  { name: 'Gmail', icon: '/images/gmail.svg', alt: 'Gmail', slug: 'gmail' },
+  { name: 'Outlook', icon: '/images/outlook.svg', alt: 'Outlook', slug: 'outlook' },
+  { name: 'WhatsApp', icon: '/images/whatsapp.svg', alt: 'WhatsApp', slug: 'whatsapp' },
+  { name: 'Google Drive', icon: '/images/gdrive.svg', alt: 'Google Drive', slug: 'google-drive' },
+  { name: 'Dropbox', icon: '/images/dropbox.svg', alt: 'Dropbox', slug: 'dropbox' },
+  { name: 'Slack', icon: '/images/slack.svg', alt: 'Slack', slug: 'slack' },
+  { name: 'Stripe', icon: '/images/stripe.svg', alt: 'Stripe', slug: 'stripe-payments' },
+  { name: 'Xero', icon: '/images/xero.svg', alt: 'Xero', slug: 'xero' },
+  { name: 'QuickBooks', icon: '/images/quickbooks.svg', alt: 'QuickBooks', slug: 'quickbooks' },
+  { name: 'Fortnox', icon: '/images/fortnox.svg', alt: 'Fortnox', slug: 'fortnox' },
 ]
 
 export function IntegrationsSection({
@@ -44,11 +46,11 @@ export function IntegrationsSection({
           </p>
         </div>
         <div className="flex flex-wrap justify-center gap-2">
-          {integrations.map((integration) => {
-            return (
-            <div
+          {integrations.map((integration) => (
+            <Link
               key={integration.name}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background"
+              href={`/integrations/${integration.slug}`}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:border-foreground/20 transition-colors"
             >
               <Image
                 src={integration.icon}
@@ -60,9 +62,8 @@ export function IntegrationsSection({
               <span className="font-sans text-sm text-foreground">
                 {integration.name}
               </span>
-            </div>
-            )
-          })}
+            </Link>
+          ))}
         </div>
       </div>
     </section>

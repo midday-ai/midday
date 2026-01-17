@@ -461,18 +461,18 @@ run();`} language="typescript" />
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <Button
+                    asChild
                     variant="outline"
-                    onClick={() => window.location.href = 'https://github.com/midday-ai/midday-ts'}
                     className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
                   >
-                    View TypeScript docs
+                    <a href="https://github.com/midday-ai/midday-ts">View TypeScript docs</a>
                   </Button>
                   <Button
+                    asChild
                     variant="outline"
-                    onClick={() => window.location.href = 'https://github.com/midday-ai/midday-ts'}
                     className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
                   >
-                    See examples
+                    <a href="https://github.com/midday-ai/midday-ts">See examples</a>
                   </Button>
                 </div>
               </div>
@@ -529,18 +529,18 @@ func main() {
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <Button
+                    asChild
                     variant="outline"
-                    onClick={() => window.location.href = 'https://github.com/midday-ai/midday-go'}
                     className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
                   >
-                    View Go docs
+                    <a href="https://github.com/midday-ai/midday-go">View Go docs</a>
                   </Button>
                   <Button
+                    asChild
                     variant="outline"
-                    onClick={() => window.location.href = 'https://github.com/midday-ai/midday-go'}
                     className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
                   >
-                    See examples
+                    <a href="https://github.com/midday-ai/midday-go">See examples</a>
                   </Button>
                 </div>
               </div>
@@ -595,18 +595,18 @@ if ($response->object !== null) {
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <Button
+                    asChild
                     variant="outline"
-                    onClick={() => window.location.href = 'https://github.com/midday-ai/midday-php'}
                     className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
                   >
-                    View PHP docs
+                    <a href="https://github.com/midday-ai/midday-php">View PHP docs</a>
                   </Button>
                   <Button
+                    asChild
                     variant="outline"
-                    onClick={() => window.location.href = 'https://github.com/midday-ai/midday-php'}
                     className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
                   >
-                    See examples
+                    <a href="https://github.com/midday-ai/midday-php">See examples</a>
                   </Button>
                 </div>
               </div>

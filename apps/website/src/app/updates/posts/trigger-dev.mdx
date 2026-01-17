@@ -1,0 +1,43 @@
+---
+title: "How we are using Trigger.dev for our background jobs"
+publishedAt: "2024-03-19"
+summary: "At Midday, we use background jobs extensively. Here's an in-depth exploration of our approach."
+image: "/images/trigger.png"
+tag: "Engineering"
+---
+
+At Midday, we use background jobs extensively. Here's an in-depth exploration of our approach.
+
+<br />
+### Transactions Setup
+
+Upon successful user authentication of their bank, we initiate the creation of a **`bank_connection`** containing essential data and provider information (Plaid, GoCardLess, Teller). This facilitates subsequent retrieval of transactions on their behalf. Additionally, we store bank connection accounts in **`bank_accounts`**, along with an enable/disable flag, enabling us to determine which accounts to fetch transactions from.
+
+Once **`bank_connection`** and **`bank_accounts`** are securely stored in the database, we trigger the **`transactions-setup`** job. This job orchestrates the initial synchronization from the providers through batch requests, ensuring resilience against extensive transaction loads. Moreover, it dynamically schedules intervals for running **`transactions-sync`** every hour for each team. Clients subscribe to the **`eventId`** to track the completion of the initial sync process.
+
+<br />
+### Transactions Sync
+
+The **`transactions-sync`** task fetches transactions for each team hourly. A team may have multiple connected bank accounts, requiring one request per account. We aim to consolidate new transactions into a single collection for notification purposes. Transactions are limited to the last 30 days, streamlining data retrieval.
+
+This approach offers a 30-day window for rectifying any potential errors and acquiring new transactions. Moreover, teams can seamlessly enable/disable accounts between sync runs, as transactions are fetched exclusively for enabled accounts. If a **`team_id`** is not found, indicating deletion, the scheduler is promptly removed.
+
+<br />
+### Process Document
+
+Upon receipt of a new inbound email from Postmarks, we upload the attachments (invoices) to Supabase and create an **`inbox`** record. Subsequently, we trigger the **`process-document`** job, responsible for parsing the invoice using Google Document AI to extract vital information such as **`due_date`**, **`amount`**, and currency. Successful extraction triggers the **`match-inbox`** event.
+
+<br />
+### **Match Inbox**
+
+The **`match-inbox`** process utilizes the **`inboxId`**, **`teamId`**, and **`amount`** to verify transactions matching the invoice amount, accounting for sign differences (transactions are always signed, whereas invoices are not). This verification extends back 45 days, considering cases where no attachments are available yet. Currently, encountering multiple matches necessitates further validation, a feature we plan to address in future UI enhancements.
+
+<br />
+### Export Transactions
+
+The **`export-transactions`** task retrieves selected **`transactionIds`**, gathers their attachments, compiles a CSV file, and uploads it to our Vault. Clients subscribe to monitor the progress status of this operation.
+
+<br />
+### GitHub
+
+You can find all of our jobs in our [GitHub repository](https://github.com/midday-ai/midday/tree/main/packages/jobs/src).

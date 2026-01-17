@@ -13,7 +13,7 @@ export function Footer() {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-16 sm:pb-80">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-16">
           {/* Left Column - Links */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-10 lg:col-span-1">
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4 sm:gap-10 lg:col-span-1">
             {/* Features Column */}
             <div className="space-y-3">
               <h3 className="font-sans text-sm text-foreground mb-4">
@@ -73,7 +73,11 @@ export function Footer() {
                 {[
                   { href: "/story", label: "Story", external: false },
                   { href: "/updates", label: "Updates", external: false },
-                  { href: "https://x.com/middayai", label: "X", external: true },
+                  {
+                    href: "https://x.com/middayai",
+                    label: "X",
+                    external: true,
+                  },
                   {
                     href: "https://www.linkedin.com/company/midday-ai",
                     label: "LinkedIn",
@@ -112,8 +116,16 @@ export function Footer() {
                   },
                   { href: "/sdks", label: "SDKs", external: false },
                   { href: "/support", label: "Support", external: false },
-                  { href: "/privacy", label: "Privacy Policy", external: false },
-                  { href: "/terms", label: "Terms of Service", external: false },
+                  {
+                    href: "/privacy",
+                    label: "Privacy Policy",
+                    external: false,
+                  },
+                  {
+                    href: "/terms",
+                    label: "Terms of Service",
+                    external: false,
+                  },
                 ].map((item) => (
                   <Link
                     key={item.href}
@@ -181,33 +193,31 @@ export function Footer() {
         </div>
 
         {/* Bottom Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-            <Link
-              href="https://midday.openstatus.dev/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-            >
-              <span className="font-sans text-sm text-muted-foreground">
-                System status:
-              </span>
-              <span className="font-sans text-sm text-foreground">
-                Operational
-              </span>
-              <div className="relative flex items-center justify-center">
-                <div className="w-2 h-2 bg-green-500 rounded-full relative z-10" />
-                <div
-                  className="absolute w-2 h-2 bg-green-500 rounded-full"
-                  style={{
-                    animation:
-                      "pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-                    willChange: "transform, opacity, box-shadow",
-                  }}
-                />
-              </div>
-            </Link>
-          </div>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <Link
+            href="https://midday.openstatus.dev/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden md:flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
+            <span className="font-sans text-sm text-muted-foreground">
+              System status:
+            </span>
+            <span className="font-sans text-sm text-foreground">
+              Operational
+            </span>
+            <div className="relative flex items-center justify-center">
+              <div className="w-2 h-2 bg-green-500 rounded-full relative z-10" />
+              <div
+                className="absolute w-2 h-2 bg-green-500 rounded-full"
+                style={{
+                  animation:
+                    "pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                  willChange: "transform, opacity, box-shadow",
+                }}
+              />
+            </div>
+          </Link>
           <p className="font-sans text-sm text-muted-foreground">
             © {new Date().getFullYear()} Midday Labs AB. All rights reserved.
           </p>

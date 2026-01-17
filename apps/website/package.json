@@ -22,6 +22,7 @@
     "next": "16.0.10",
     "next-mdx-remote": "^5.0.0",
     "react": "19.2.3",
+    "sugar-high": "^0.7.0",
     "react-dom": "19.2.3"
   },
   "devDependencies": {
