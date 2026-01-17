@@ -24,12 +24,12 @@ export function StartPage() {
 
   const features = [
     {
-      title: "All transactions in one place",
+      title: "Transactions sync automatically",
       subtitle:
         "Every payment in and out of the business is automatically synced from your connected accounts.",
       mobileSubtitle: "Every payment in and out is pulled in automatically.",
       mergedText:
-        "All transactions in one place. Every payment in and out of the business is automatically synced from your connected accounts.",
+        "Transactions sync automatically. Every payment in and out of the business is automatically synced from your connected accounts.",
       illustration: "animation",
     },
     {
