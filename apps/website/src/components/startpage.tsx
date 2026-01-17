@@ -1,109 +1,84 @@
-'use client'
+"use client";
 
-import { useState, useRef, useEffect } from 'react'
-import { motion, useMotionValue, useInView } from 'framer-motion'
-import { useRouter } from 'next/navigation'
-import { useTheme } from 'next-themes'
-import Image from 'next/image'
-import { Button } from '@midday/ui/button'
-import { AIAssistantAnimation } from './homepage/ai-assistant-animation'
-import { InvoicePromptAnimation } from './homepage/invoice-prompt-animation'
-import { InvoicePaymentAnimation } from './homepage/invoice-payment-animation'
-import { InboxMatchAnimation } from './homepage/inbox-match-animation'
-import { FileGridAnimation } from './homepage/file-grid-animation'
-import { DashboardAnimation } from './homepage/dashboard-animation'
-import { TransactionFlowAnimation } from './homepage/transaction-flow-animation'
-import { MaterialIcon, IconMap } from './homepage/icon-mapping'
-import { TimeSavingsSection } from './sections/time-savings-section'
-import { TestimonialsSection } from './sections/testimonials-section'
-import { PreAccountingSection } from './sections/pre-accounting-section'
-import { FeaturesGridSection } from './sections/features-grid-section'
-import { IntegrationsSection } from './sections/integrations-section'
-import { PricingSection } from './sections/pricing-section'
-import { WeeklyAudioSection } from './sections/weekly-audio-section'
+import { Button } from "@midday/ui/button";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import { useRef, useState } from "react";
+import { AIAssistantAnimation } from "./homepage/ai-assistant-animation";
+import { DashboardAnimation } from "./homepage/dashboard-animation";
+import { MaterialIcon } from "./homepage/icon-mapping";
+import { InboxMatchAnimation } from "./homepage/inbox-match-animation";
+import { InvoicePaymentAnimation } from "./homepage/invoice-payment-animation";
+import { TransactionFlowAnimation } from "./homepage/transaction-flow-animation";
+import { FeaturesGridSection } from "./sections/features-grid-section";
+import { IntegrationsSection } from "./sections/integrations-section";
+import { PreAccountingSection } from "./sections/pre-accounting-section";
+import { PricingSection } from "./sections/pricing-section";
+import { TestimonialsSection } from "./sections/testimonials-section";
+import { TimeSavingsSection } from "./sections/time-savings-section";
+import { WeeklyAudioSection } from "./sections/weekly-audio-section";
 
 export function StartPage() {
-  const router = useRouter()
-  const [activeFeature, setActiveFeature] = useState(0)
-  const [mounted, setMounted] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-  const { resolvedTheme } = useTheme()
-  
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-  
-  // Prevent hydration mismatch by only using theme after mount
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-  
-  // Always use light mode during SSR to prevent hydration mismatch
-  // Only use actual theme after component has mounted on client
-  const isLightMode = mounted && resolvedTheme ? resolvedTheme !== 'dark' : true
+  const [activeFeature, setActiveFeature] = useState(0);
 
-  const videoContainerRef = useRef(null)
-  const isVideoInView = useInView(videoContainerRef, { once: true })
+  const videoContainerRef = useRef(null);
 
   const features = [
     {
-      title: 'All transactions in one place',
+      title: "All transactions in one place",
       subtitle:
-        'Every payment in and out of the business is automatically synced from your connected accounts.',
-      mobileSubtitle: 'Every payment in and out is pulled in automatically.',
+        "Every payment in and out of the business is automatically synced from your connected accounts.",
+      mobileSubtitle: "Every payment in and out is pulled in automatically.",
       mergedText:
-        'All transactions in one place. Every payment in and out of the business is automatically synced from your connected accounts.',
-      illustration: 'animation',
+        "All transactions in one place. Every payment in and out of the business is automatically synced from your connected accounts.",
+      illustration: "animation",
     },
     {
-      title: 'Invoices get paid',
+      title: "Invoices get paid",
       subtitle:
-        'Customers can pay invoices online, with payments flowing straight into your finances.',
-      mobileSubtitle: 'Customers can pay invoices online with payments flowing straight into your finances.',
+        "Customers can pay invoices online, with payments flowing straight into your finances.",
+      mobileSubtitle:
+        "Customers can pay invoices online with payments flowing straight into your finances.",
       mergedText:
-        'Invoices get paid. Customers can pay invoices online, with payments flowing straight into your finances.',
-      illustration: 'animation',
+        "Invoices get paid. Customers can pay invoices online, with payments flowing straight into your finances.",
+      illustration: "animation",
     },
     {
-      title: 'Reconciliation gets handled',
+      title: "Reconciliation gets handled",
       subtitle:
-        'Payments, receipts, and transactions are automatically matched so records stay accurate.',
-      mobileSubtitle: 'Transactions are categorized and reconciled automatically.',
+        "Payments, receipts, and transactions are automatically matched so records stay accurate.",
+      mobileSubtitle:
+        "Transactions are categorized and reconciled automatically.",
       mergedText:
-        'Reconciliation gets handled. Payments, receipts, and transactions are automatically matched so records stay accurate.',
-      illustration: 'animation',
+        "Reconciliation gets handled. Payments, receipts, and transactions are automatically matched so records stay accurate.",
+      illustration: "animation",
     },
     {
       title: "Understand what's happening",
       subtitle:
-        'Midday explains changes in cash, revenue, and spending as they happen.',
+        "Midday explains changes in cash, revenue, and spending as they happen.",
       mobileSubtitle: "See what's changing and why.",
       mergedText:
         "Understand what's happening. Midday explains changes in cash, revenue, and spending as they happen.",
-      illustration: 'animation',
+      illustration: "animation",
     },
     {
-      title: 'Stay updated and in control',
+      title: "Stay updated and in control",
       subtitle:
-        'Weekly summaries and notifications keep you on top without constant checking.',
-      mobileSubtitle: 'Weekly summaries keep you up to date.',
+        "Weekly summaries and notifications keep you on top without constant checking.",
+      mobileSubtitle: "Weekly summaries keep you up to date.",
       mergedText:
-        'Stay updated and in control. Weekly summaries and notifications keep you on top without constant checking.',
-      illustration: 'animation',
+        "Stay updated and in control. Weekly summaries and notifications keep you on top without constant checking.",
+      illustration: "animation",
     },
-  ]
+  ];
 
   const agentTags: Array<{ label: string; icon: string }> = [
-    { label: 'Insights-agent', icon: 'insights' },
-    { label: 'Inbox-agent', icon: 'inbox' },
-    { label: 'Invoice-agent', icon: 'description' },
-    { label: 'Files-agent', icon: 'folder_zip' },
-  ]
+    { label: "Insights-agent", icon: "insights" },
+    { label: "Inbox-agent", icon: "inbox" },
+    { label: "Invoice-agent", icon: "description" },
+    { label: "Files-agent", icon: "folder_zip" },
+  ];
 
   return (
     <div className="min-h-screen">
@@ -120,14 +95,17 @@ export function StartPage() {
               </h1>
 
               <p className="text-muted-foreground text-base leading-normal font-sans max-w-md text-center mx-auto lg:text-left lg:mx-0">
-                One place for transactions, receipts, invoices and everything around it.
+                One place for transactions, receipts, invoices and everything
+                around it.
               </p>
             </div>
 
             <div className="space-y-4 text-center w-full">
               <div className="flex flex-col gap-3 w-full max-w-md mx-auto">
                 <Button
-                  onClick={() => window.location.href = 'https://app.midday.ai/'}
+                  onClick={() =>
+                    (window.location.href = "https://app.midday.ai/")
+                  }
                   className="w-full btn-inverse h-11 px-5 transition-colors"
                 >
                   <span className="text-inherit text-sm ">
@@ -161,28 +139,32 @@ export function StartPage() {
 
               <div className="absolute inset-0 flex items-center justify-center p-0">
                 <div className="relative scale-[0.95] md:scale-100">
-                      <Image
-                        src="/images/dashboard-light.svg"
-                        alt="Dashboard illustration"
-                        width={1000}
-                        height={750}
-                        className="w-full h-auto md:!scale-[0.85] dark:hidden"
-                        priority
-                      />
-                      <Image
-                        src="/images/dashboard-dark.svg"
-                        alt="Dashboard illustration"
-                        width={1000}
-                        height={750}
-                        className="w-full h-auto md:!scale-[0.85] hidden dark:block"
-                        priority
-                      />
+                  <Image
+                    src="/images/dashboard-light.svg"
+                    alt="Dashboard illustration"
+                    width={1000}
+                    height={750}
+                    className="w-full h-auto md:!scale-[0.85] dark:hidden"
+                    priority
+                  />
+                  <Image
+                    src="/images/dashboard-dark.svg"
+                    alt="Dashboard illustration"
+                    width={1000}
+                    height={750}
+                    className="w-full h-auto md:!scale-[0.85] hidden dark:block"
+                    priority
+                  />
                 </div>
               </div>
 
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <button className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-200 pointer-events-auto">
-                  <MaterialIcon name="play_arrow" className="text-foreground" size={24} />
+                  <MaterialIcon
+                    name="play_arrow"
+                    className="text-foreground"
+                    size={24}
+                  />
                 </button>
               </div>
             </div>
@@ -202,7 +184,8 @@ export function StartPage() {
                       </span>
                     </h1>
                     <p className="font-sans text-base text-muted-foreground leading-normal text-left">
-                      One place for transactions, receipts, invoices and everything around it.
+                      One place for transactions, receipts, invoices and
+                      everything around it.
                     </p>
                   </div>
                 </div>
@@ -210,7 +193,9 @@ export function StartPage() {
                 <div className="flex flex-col items-end space-y-4">
                   <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                     <Button
-                      onClick={() => window.location.href = 'https://app.midday.ai/'}
+                      onClick={() =>
+                        (window.location.href = "https://app.midday.ai/")
+                      }
                       className="btn-inverse h-11 px-4 transition-colors w-full sm:w-auto"
                     >
                       <span className="text-inherit text-sm ">
@@ -229,7 +214,10 @@ export function StartPage() {
             </div>
           </div>
 
-          <div className="w-full mb-4 3xl:mb-20 relative" ref={videoContainerRef}>
+          <div
+            className="w-full mb-4 3xl:mb-20 relative"
+            ref={videoContainerRef}
+          >
             <div className="relative overflow-hidden">
               <video
                 className="w-full h-[800px] xl:h-[900px] 3xl:h-[1000px] object-cover block"
@@ -248,36 +236,40 @@ export function StartPage() {
 
               <div className="absolute inset-0 p-4">
                 <div className="h-full flex flex-col items-center justify-center">
-                      <Image
-                        src="/images/dashboard-light.svg"
-                        alt="Dashboard illustration"
-                        width={1600}
-                        height={1200}
-                        className="w-full h-auto object-contain max-w-[85%] 2xl:max-w-[66%] dark:hidden"
-                        style={{
-                          transform: 'rotate(-2deg) skew-y-1',
-                          filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.6))',
-                        }}
-                        priority
-                      />
-                      <Image
-                        src="/images/dashboard-dark.svg"
-                        alt="Dashboard illustration"
-                        width={1600}
-                        height={1200}
-                        className="w-full h-auto object-contain max-w-[85%] 2xl:max-w-[66%] hidden dark:block"
-                        style={{
-                          transform: 'rotate(-2deg) skew-y-1',
-                          filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.6))',
-                        }}
-                        priority
-                      />
+                  <Image
+                    src="/images/dashboard-light.svg"
+                    alt="Dashboard illustration"
+                    width={1600}
+                    height={1200}
+                    className="w-full h-auto object-contain max-w-[85%] 2xl:max-w-[66%] dark:hidden"
+                    style={{
+                      transform: "rotate(-2deg) skew-y-1",
+                      filter: "drop-shadow(0 30px 60px rgba(0,0,0,0.6))",
+                    }}
+                    priority
+                  />
+                  <Image
+                    src="/images/dashboard-dark.svg"
+                    alt="Dashboard illustration"
+                    width={1600}
+                    height={1200}
+                    className="w-full h-auto object-contain max-w-[85%] 2xl:max-w-[66%] hidden dark:block"
+                    style={{
+                      transform: "rotate(-2deg) skew-y-1",
+                      filter: "drop-shadow(0 30px 60px rgba(0,0,0,0.6))",
+                    }}
+                    priority
+                  />
                 </div>
               </div>
 
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <button className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-200 pointer-events-auto">
-                  <MaterialIcon name="play_arrow" className="text-foreground" size={30} />
+                  <MaterialIcon
+                    name="play_arrow"
+                    className="text-foreground"
+                    size={30}
+                  />
                 </button>
               </div>
             </div>
@@ -302,7 +294,9 @@ export function StartPage() {
                     {feature.title}
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-md mx-auto">
-                    <span className="sm:hidden">{feature.mobileSubtitle || feature.subtitle}</span>
+                    <span className="sm:hidden">
+                      {feature.mobileSubtitle || feature.subtitle}
+                    </span>
                     <span className="hidden sm:inline">{feature.subtitle}</span>
                   </p>
                 </div>
@@ -342,31 +336,33 @@ export function StartPage() {
               {/* Timeline */}
               <div className="flex flex-col justify-center items-center flex-shrink-0 relative">
                 <div className="flex flex-col justify-center space-y-5 lg:space-y-6 mt-2 lg:mt-3">
-                  <div className="flex items-center justify-center relative mb-4 lg:mb-6" style={{ minHeight: '3rem' }}>
-                  </div>
+                  <div
+                    className="flex items-center justify-center relative mb-4 lg:mb-6"
+                    style={{ minHeight: "3rem" }}
+                  ></div>
                   {features.map((feature, index) => (
                     <div
                       key={index}
                       className="flex items-start justify-center relative"
-                      style={{ minHeight: '3.5rem' }}
+                      style={{ minHeight: "3.5rem" }}
                     >
                       <button
                         onClick={() => setActiveFeature(index)}
                         className="cursor-pointer relative z-10"
-                        style={{ marginTop: '0.125rem' }}
+                        style={{ marginTop: "0.125rem" }}
                       >
                         <motion.div
                           className={`w-2 h-2 rounded-none transition-all duration-300 ${
                             activeFeature === index
-                              ? 'bg-primary'
-                              : 'bg-border hover:bg-muted-foreground'
+                              ? "bg-primary"
+                              : "bg-border hover:bg-muted-foreground"
                           }`}
                           animate={{
                             scale: activeFeature === index ? 1.2 : 1,
                           }}
                           transition={{
                             duration: 0.2,
-                            ease: 'easeOut',
+                            ease: "easeOut",
                           }}
                         />
                       </button>
@@ -374,8 +370,8 @@ export function StartPage() {
                         <div
                           className="absolute left-1/2 -translate-x-1/2 w-px border-l border-border"
                           style={{
-                            height: 'calc(3.5rem + 1.25rem - 0.25rem)',
-                            top: '0.375rem',
+                            height: "calc(3.5rem + 1.25rem - 0.25rem)",
+                            top: "0.375rem",
                           }}
                         />
                       )}
@@ -386,7 +382,10 @@ export function StartPage() {
 
               {/* Text Content */}
               <div className="flex flex-col justify-center space-y-5 lg:space-y-6 flex-1">
-                <div className="flex items-center mb-4 lg:mb-6" style={{ minHeight: '3rem' }}>
+                <div
+                  className="flex items-center mb-4 lg:mb-6"
+                  style={{ minHeight: "3rem" }}
+                >
                   <h2 className="font-serif text-2xl text-foreground">
                     How it works
                   </h2>
@@ -396,17 +395,17 @@ export function StartPage() {
                     key={index}
                     className={`cursor-pointer transition-all duration-300 flex items-start ${
                       activeFeature === index
-                        ? 'opacity-100'
-                        : 'opacity-60 hover:opacity-80'
+                        ? "opacity-100"
+                        : "opacity-60 hover:opacity-80"
                     }`}
                     onClick={() => setActiveFeature(index)}
-                    style={{ minHeight: '3rem' }}
+                    style={{ minHeight: "3rem" }}
                   >
                     {activeFeature === index ? (
                       <motion.div
-                        initial={{ opacity: 0, filter: 'blur(6px)' }}
-                        animate={{ opacity: 1, filter: 'blur(0px)' }}
-                        exit={{ opacity: 0, filter: 'blur(6px)' }}
+                        initial={{ opacity: 0, filter: "blur(6px)" }}
+                        animate={{ opacity: 1, filter: "blur(0px)" }}
+                        exit={{ opacity: 0, filter: "blur(6px)" }}
                         transition={{ duration: 0.35 }}
                         className="overflow-hidden"
                       >
@@ -434,13 +433,15 @@ export function StartPage() {
                 key={activeFeature}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, ease: 'easeOut' }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
                 className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center"
-                style={{ transformOrigin: 'center' }}
+                style={{ transformOrigin: "center" }}
               >
-                <div className={`w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95] ${
-                  activeFeature === 3 ? 'lg:scale-[0.94]' : ''
-                }`}>
+                <div
+                  className={`w-full h-full origin-center scale-[0.85] sm:scale-[0.90] lg:scale-[0.95] ${
+                    activeFeature === 3 ? "lg:scale-[0.94]" : ""
+                  }`}
+                >
                   {activeFeature === 0 ? (
                     <TransactionFlowAnimation
                       onComplete={() =>
@@ -544,5 +545,5 @@ export function StartPage() {
       {/* Pricing Section */}
       <PricingSection />
     </div>
-  )
+  );
 }

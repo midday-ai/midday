@@ -9,6 +9,7 @@ const config = {
   },
   experimental: {
     inlineCss: true,
+    optimizePackageImports: ["react-icons", "framer-motion", "@midday/ui"],
   },
   images: {
     loader: "custom",
