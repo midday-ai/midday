@@ -493,7 +493,8 @@ export default {
 
     // Child Categories - Banking & Finance
     transfer: "Bank transfers between accounts",
-    "credit-card-payment": "Credit card payments and fees",
+    "credit-card-payment":
+      "Payments to credit cards. Excluded from reports to avoid double-counting expenses",
     "banking-fees": "Bank account maintenance and transaction fees",
     "loan-proceeds": "Money received from loans and financing",
     "loan-principal-repayment": "Principal payments on loans",
@@ -525,6 +526,8 @@ export default {
     // Child Categories - System
     uncategorized: "Transactions that haven't been classified yet",
     other: "Miscellaneous transactions not fitting other categories",
+    "internal-transfer":
+      "Transfers between your own accounts. Excluded from reports to avoid double-counting",
   },
   tax_summary: {
     title: {

@@ -1049,6 +1049,7 @@ export type UpdateInboxParams = {
     | "pending"
     | "analyzing"
     | "suggested_match";
+  contentType?: string;
 };
 
 export async function updateInbox(db: Database, params: UpdateInboxParams) {
@@ -1548,6 +1549,7 @@ export async function getInboxByFilePath(
       id: inbox.id,
       status: inbox.status,
       createdAt: inbox.createdAt,
+      contentType: inbox.contentType,
     })
     .from(inbox)
     .where(
@@ -1568,6 +1570,7 @@ export async function getInboxByFilePath(
       id: item.id,
       status: item.status,
       createdAt: item.createdAt,
+      contentType: item.contentType,
     };
   }
 
@@ -1577,6 +1580,7 @@ export async function getInboxByFilePath(
       id: inbox.id,
       status: inbox.status,
       createdAt: inbox.createdAt,
+      contentType: inbox.contentType,
     })
     .from(inbox)
     .where(
@@ -1597,6 +1601,7 @@ export async function getInboxByFilePath(
     id: result.id,
     status: result.status,
     createdAt: result.createdAt,
+    contentType: result.contentType,
   };
 }
 

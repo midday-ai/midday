@@ -150,7 +150,8 @@ export default {
 
     // Child Categories - Banking & Finance
     transfer: "Banköverföringar mellan konton",
-    "credit-card-payment": "Kreditkortsbetalningar och avgifter",
+    "credit-card-payment":
+      "Betalningar till kreditkort. Exkluderas från rapporter för att undvika dubbelräkning",
     "banking-fees": "Bankkontounderhåll och transaktionsavgifter",
     "loan-proceeds": "Pengar mottagna från lån och finansiering",
     "loan-principal-repayment": "Huvudstolsbetalningar på lån",
@@ -184,5 +185,7 @@ export default {
     // Child Categories - System
     uncategorized: "Transaktioner som inte har klassificerats ännu",
     other: "Diverse transaktioner som inte passar in i andra kategorier",
+    "internal-transfer":
+      "Överföringar mellan egna konton. Exkluderas från rapporter för att undvika dubbelräkning",
   },
 } as const;
