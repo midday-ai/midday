@@ -1,26 +1,31 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { ToolLoopAgent, generateObject, stepCountIs, tool } from "ai";
+import {
+  ToolLoopAgent,
+  generateObject,
+  stepCountIs,
+  tool,
+  zodSchema,
+} from "ai";
+import Exa from "exa-js";
 import { z } from "zod";
-import { detectCountryCode } from "./registries";
-import {
-  type CustomerEnrichmentResult,
-  type EnrichCustomerOptions,
-  type EnrichCustomerParams,
-  type EnrichCustomerResult,
-  customerEnrichmentSchema,
+import type {
+  CustomerEnrichmentResult,
+  EnrichCustomerOptions,
+  EnrichCustomerParams,
+  EnrichCustomerResult,
+  VerifiedEnrichmentData,
 } from "./schema";
-import {
-  executeExtractData,
-  executeReadWebsite,
-  executeSearchCompany,
-} from "./tools";
+import { customerEnrichmentSchema } from "./schema";
 import { verifyEnrichmentData } from "./verify";
 
 // Create Google AI instance
 const google = createGoogleGenerativeAI();
 
-// Default timeout for enrichment (60 seconds)
-const DEFAULT_TIMEOUT_MS = 60_000;
+// Create Exa client
+const exa = new Exa(process.env.EXA_API_KEY);
+
+// Default timeout
+const DEFAULT_TIMEOUT_MS = 120_000;
 
 // Fields to count for metrics
 const DATA_FIELDS = [
@@ -32,75 +37,87 @@ const DATA_FIELDS = [
   "linkedinUrl",
   "twitterUrl",
   "ceoName",
+  "vatNumber",
 ] as const;
 
 // ============================================================================
-// Helper Functions
+// Create the Agent
 // ============================================================================
 
-/**
- * Build context section from available customer data
- */
-function buildContextSection(params: EnrichCustomerParams): string {
-  const parts: string[] = [];
+const agent = new ToolLoopAgent({
+  model: google("gemini-3-flash-preview"),
+  instructions: `You are a company research agent. Search the web to find comprehensive information about companies.
 
-  // Email domain (if corporate)
-  if (params.email) {
-    const domain = params.email.split("@")[1];
-    if (
-      domain &&
-      !["gmail", "yahoo", "hotmail", "outlook"].some((p) => domain.includes(p))
-    ) {
-      parts.push(`Email domain: ${domain}`);
-    }
-  }
+## Your Task
+Use the search tool to find:
+1. LinkedIn company profile
+2. Business registry information (VAT/organization number, address)
+3. Company website details
 
-  // Location
-  const location = [params.city, params.state, params.country]
-    .filter(Boolean)
-    .join(", ");
-  if (location) parts.push(`Location: ${location}`);
-  if (params.countryCode) parts.push(`Country code: ${params.countryCode}`);
+## Search Strategy
+- Use 1-3 diverse queries per search call
+- Search multiple times if needed to gather complete information
+- Be smart about finding the right business registry for each country
+- Look for official company registrations, not just news articles
 
-  // Other context
-  if (params.address) parts.push(`Address: ${params.address}`);
-  if (params.phone) parts.push(`Phone: ${params.phone}`);
-  if (params.vatNumber) parts.push(`VAT: ${params.vatNumber}`);
-  if (params.contactName) parts.push(`Contact: ${params.contactName}`);
-  if (params.note) parts.push(`Notes: ${params.note}`);
+## What to Find
+- LinkedIn URL (company page)
+- VAT/Tax ID/Organization number
+- Employee count
+- Founded year
+- CEO/Founder name
+- Full address (street, city, state/region, postal code, country)
+- Company description
+- Social media URLs (Twitter, Instagram, Facebook)
 
-  return parts.length > 0 ? parts.map((p) => `- ${p}`).join("\n") : "";
-}
+## Output
+After searching, provide a detailed summary of ALL information found with source URLs.`,
+  tools: {
+    search: tool({
+      description:
+        "Search the web with 1-3 queries. Use diverse queries to find LinkedIn profiles, business registries, and company details.",
+      inputSchema: zodSchema(
+        z.object({
+          queries: z.array(z.string()).max(3),
+        }),
+      ),
+      execute: async ({ queries }: { queries: string[] }) => {
+        console.log("[Agent] Searching:", queries);
 
-/**
- * Combine multiple AbortSignals into one
- */
-function combineAbortSignals(...signals: AbortSignal[]): AbortSignal {
-  const controller = new AbortController();
-  for (const signal of signals) {
-    if (signal.aborted) {
-      controller.abort(signal.reason);
-      return controller.signal;
-    }
-    signal.addEventListener("abort", () => controller.abort(signal.reason), {
-      once: true,
-    });
-  }
-  return controller.signal;
-}
+        const results = await Promise.all(
+          queries.map((q) =>
+            exa.search(q, {
+              type: "auto",
+              numResults: 8,
+              contents: {
+                text: { maxCharacters: 2000 },
+                livecrawl: "preferred",
+              },
+            }),
+          ),
+        );
+
+        const allResults = results.flatMap((r) => r.results || []);
+        console.log("[Agent] Found", allResults.length, "results");
+
+        const formatted = allResults
+          .map((r) => {
+            const content = r.text?.slice(0, 600) || "";
+            return `**${r.title || "Untitled"}**\nURL: ${r.url}\n${content}`;
+          })
+          .join("\n\n---\n\n");
+
+        return formatted || "No results found. Try different queries.";
+      },
+    }),
+  },
+  stopWhen: stepCountIs(8),
+});
 
 // ============================================================================
 // Main Enrichment Function
 // ============================================================================
 
-/**
- * Enriches customer data using a 2-step agent pipeline:
- *
- * Step 0 (parallel): readWebsite + searchCompany
- * Step 1: extractData
- *
- * Total: 3 LLM calls
- */
 export async function enrichCustomer(
   params: EnrichCustomerParams,
   options: EnrichCustomerOptions = {},
@@ -108,191 +125,165 @@ export async function enrichCustomer(
   const startTime = Date.now();
   const { timeoutMs = DEFAULT_TIMEOUT_MS, signal: externalSignal } = options;
 
-  // Setup timeout
   const timeoutController = new AbortController();
   const timeoutId = setTimeout(() => {
     timeoutController.abort(new Error("Enrichment timed out"));
   }, timeoutMs);
 
-  const signal = externalSignal
-    ? combineAbortSignals(externalSignal, timeoutController.signal)
-    : timeoutController.signal;
-
   try {
-    // Prepare inputs
-    const domain = params.website
-      .replace(/^https?:\/\//, "")
-      .replace(/\/$/, "");
-    const fullUrl = params.website.startsWith("http")
-      ? params.website
-      : `https://${params.website}`;
-    const contextSection = buildContextSection(params);
+    const domain = extractDomain(params.website);
 
-    // Detect country from VAT, TLD, or explicit code
-    const detectedCountry = detectCountryCode({
-      countryCode: params.countryCode,
-      vatNumber: params.vatNumber,
-      website: params.website,
-    });
+    console.log(
+      "[Enrichment] Starting for",
+      params.companyName,
+      "| Domain:",
+      domain,
+    );
 
-    console.log("[Enrichment] Starting for", params.companyName, domain);
-    console.log("[Enrichment] Country:", detectedCountry || "unknown");
-
-    // Closure to collect data from tool calls
-    let websiteData: string | null = null;
-    let searchData: string | null = null;
-
-    // Create agent with tools that call our execute functions
-    const agent = new ToolLoopAgent({
-      model: google("gemini-3-flash-preview"),
-      tools: {
-        readWebsite: tool({
-          description: "Read company website to extract information",
-          inputSchema: z.object({
-            url: z.string().describe("Website URL"),
-          }),
-          execute: async ({ url }) => {
-            const result = await executeReadWebsite({ url });
-            if (result.success) websiteData = result.data;
-            return result;
-          },
-        }),
-
-        searchCompany: tool({
-          description:
-            "Search for company info like LinkedIn, funding, social profiles",
-          inputSchema: z.object({
-            companyName: z.string().describe("Company name"),
-            domain: z.string().describe("Company domain"),
-            countryCode: z.string().nullable().describe("ISO country code"),
-          }),
-          execute: async ({ companyName, domain: d, countryCode }) => {
-            const result = await executeSearchCompany({
-              companyName,
-              domain: d,
-              countryCode,
-            });
-            if (result.success) searchData = result.data;
-            return result;
-          },
-        }),
-
-        extractData: tool({
-          description: "Extract structured data from gathered information",
-          inputSchema: z.object({
-            companyName: z.string().describe("Company name"),
-            domain: z.string().describe("Company domain"),
-          }),
-          execute: async ({ companyName, domain: d }) => {
-            // Use collected data from closure
-            return executeExtractData({
-              companyName,
-              domain: d,
-              websiteData,
-              searchData,
-              context: contextSection,
-            });
-          },
-        }),
-      },
-      stopWhen: stepCountIs(3),
-      prepareStep: async ({ stepNumber }) => {
-        if (stepNumber === 0) {
-          // Step 0: Read website and search in parallel
-          return { activeTools: ["readWebsite", "searchCompany"] };
-        }
-        // Step 1+: Extract structured data
-        return {
-          activeTools: ["extractData"],
-          toolChoice: { type: "tool", toolName: "extractData" },
-        };
-      },
-    });
-
-    // Run agent
-    const result = await agent.generate({
-      prompt: `Research "${params.companyName}" at ${fullUrl}.
-
-Step 1: Call BOTH tools in parallel:
-- readWebsite with url="${fullUrl}"
-- searchCompany with companyName="${params.companyName}", domain="${domain}", countryCode=${detectedCountry ? `"${detectedCountry}"` : "null"}
-
-Step 2: Call extractData with companyName="${params.companyName}", domain="${domain}"`,
-    });
-
-    console.log("[Enrichment] Agent completed. Steps:", result.steps?.length);
-
-    if (signal.aborted) {
+    if (externalSignal?.aborted) {
       throw new Error("Enrichment cancelled");
     }
 
-    // Get extracted data from tool results
-    let extractedData: CustomerEnrichmentResult | null = null;
-    for (const tr of result.toolResults || []) {
-      const output = tr.output as Record<string, unknown>;
-      if (
-        tr.toolName === "extractData" &&
-        output?.success &&
-        output?.extractedData
-      ) {
-        extractedData = output.extractedData as CustomerEnrichmentResult;
-      }
+    // ========================================
+    // Phase 1: Agent Research
+    // ========================================
+    const prompt = buildPrompt(params, domain);
+
+    console.log("[Enrichment] Starting ToolLoopAgent...");
+
+    const { text: researchText, steps } = await agent.generate({
+      prompt,
+      abortSignal: timeoutController.signal,
+    });
+
+    const searchRounds = steps.filter((s) => s.toolCalls.length > 0).length;
+    console.log(
+      "[Enrichment] Agent finished | Rounds:",
+      searchRounds,
+      "| Text:",
+      researchText.length,
+      "chars",
+    );
+
+    if (externalSignal?.aborted || timeoutController.signal.aborted) {
+      throw new Error("Enrichment cancelled");
     }
 
-    // Fallback extraction if agent didn't produce results
-    if (!extractedData) {
-      console.log("[Enrichment] Fallback extraction");
-      const fallback = await generateObject({
-        model: google("gemini-3-flash-preview"),
-        schema: customerEnrichmentSchema,
-        prompt: `Extract structured data for "${params.companyName}" (${domain}).
+    // ========================================
+    // Phase 2: Structured Extraction
+    // ========================================
+    console.log("[Enrichment] Extracting structured data...");
 
-=== WEBSITE DATA ===
-${websiteData || "Not available"}
+    const { object: extractedData } = await generateObject({
+      model: google("gemini-2.0-flash"),
+      schema: customerEnrichmentSchema,
+      prompt: buildExtractionPrompt(params, researchText),
+      abortSignal: timeoutController.signal,
+    });
 
-=== SEARCH DATA ===
-${searchData || "Not available"}
+    // ========================================
+    // Phase 3: Verify
+    // ========================================
+    const verified = await verifyEnrichmentData(
+      extractedData as CustomerEnrichmentResult,
+      { signal: externalSignal },
+    );
 
-=== CONTEXT ===
-${contextSection || "None"}
-
-Extract all available fields. Return null for fields without clear evidence.
-For funding amounts, use whole numbers (no decimals) and keep the original currency.
-If fundingStage is "Bootstrapped", totalFunding must be null.`,
-        temperature: 0,
-      });
-      extractedData = fallback.object;
-    }
-
-    // Verify and validate data
-    const verified = await verifyEnrichmentData(extractedData, { signal });
     const verifiedFieldCount = DATA_FIELDS.filter(
-      (f) => verified[f] !== null,
+      (f) => verified[f as keyof VerifiedEnrichmentData] !== null,
     ).length;
 
     const durationMs = Date.now() - startTime;
     console.log(
-      "[Enrichment] Complete. Fields:",
+      "[Enrichment] Complete | Fields:",
       verifiedFieldCount,
-      "Duration:",
+      "| Duration:",
       durationMs,
       "ms",
     );
 
     return {
-      raw: extractedData,
+      raw: extractedData as CustomerEnrichmentResult,
       verified,
       verifiedFieldCount,
       metrics: {
-        stepsUsed: result.steps?.length || 0,
-        websiteReadSuccess: websiteData !== null,
-        linkedinFound: verified.linkedinUrl !== null,
-        searchSuccess: searchData !== null,
-        countryDetected: detectedCountry,
+        stepsUsed: searchRounds,
+        websiteReadSuccess: researchText.length > 500,
+        linkedinFound:
+          researchText.toLowerCase().includes("linkedin.com/company") ||
+          verified.linkedinUrl !== null,
+        searchSuccess: searchRounds > 0,
+        countryDetected: null,
         durationMs,
       },
     };
   } finally {
     clearTimeout(timeoutId);
   }
+}
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+function extractDomain(website: string): string {
+  return website
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/.*$/, "");
+}
+
+function buildPrompt(params: EnrichCustomerParams, domain: string): string {
+  const extras: string[] = [];
+  if (params.countryCode) extras.push(`Country: ${params.countryCode}`);
+  if (params.city) extras.push(`City: ${params.city}`);
+  if (params.vatNumber) extras.push(`Known VAT: ${params.vatNumber}`);
+
+  return `Research this company and find comprehensive information:
+
+**Company:** ${params.companyName}
+**Website:** ${domain}
+${extras.length > 0 ? extras.join("\n") : ""}
+
+Find:
+- LinkedIn company page URL
+- VAT/Tax ID/Organization number (search the appropriate business registry for their country)
+- Employee count
+- Founded year  
+- CEO/Founder name
+- Full headquarters address (street, city, state, ZIP, country)
+- What the company does (description)
+- Social media (Twitter, Instagram, Facebook)
+
+Start by searching for their LinkedIn profile and business registry information.`;
+}
+
+function buildExtractionPrompt(
+  params: EnrichCustomerParams,
+  research: string,
+): string {
+  return `Extract structured company data from this research.
+
+**Company:** ${params.companyName}
+**Website:** ${params.website}
+
+## Research Findings:
+
+${research}
+
+## Extraction Rules:
+
+- Only extract data clearly about ${params.companyName}
+- Return null for any field not found
+- vatNumber: include country prefix if known (e.g. SE5567037485, GB123456789)
+- linkedinUrl: full URL with https:// (e.g. https://linkedin.com/company/example)
+- employeeCount: map to ranges "1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"
+- headquartersLocation: "City, Country" format
+- addressLine1: street address only
+- city: city name only  
+- state: state/province/region (or null if not applicable)
+- zipCode: postal/ZIP code
+- country: full country name
+
+Extract the data now:`;
 }
