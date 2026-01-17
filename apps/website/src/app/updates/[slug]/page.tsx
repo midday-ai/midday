@@ -7,6 +7,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+// Force static generation
+export const dynamic = "force-static";
+
 export async function generateStaticParams() {
   const posts = getBlogPosts();
 

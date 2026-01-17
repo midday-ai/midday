@@ -7,6 +7,11 @@ type Props = {
   basePath: string;
 };
 
+function getPageUrl(basePath: string, page: number): string {
+  // Page 1 goes to base path, other pages go to /page/[page]
+  return page === 1 ? basePath : `${basePath}/page/${page}`;
+}
+
 export function Pagination({ currentPage, totalPages, basePath }: Props) {
   if (totalPages <= 1) return null;
 
@@ -16,7 +21,7 @@ export function Pagination({ currentPage, totalPages, basePath }: Props) {
     <nav className="flex items-center justify-center gap-2 mt-16 mb-8">
       {currentPage > 1 && (
         <Link
-          href={currentPage === 2 ? basePath : `${basePath}?page=${currentPage - 1}`}
+          href={getPageUrl(basePath, currentPage - 1)}
           className="px-3 py-2 text-sm text-[#878787] hover:text-foreground transition-colors"
         >
           Previous
@@ -26,7 +31,7 @@ export function Pagination({ currentPage, totalPages, basePath }: Props) {
       <div className="flex items-center gap-1">
         {pages.map((page) => {
           const isCurrentPage = page === currentPage;
-          const href = page === 1 ? basePath : `${basePath}?page=${page}`;
+          const href = getPageUrl(basePath, page);
 
           return (
             <Link
@@ -47,7 +52,7 @@ export function Pagination({ currentPage, totalPages, basePath }: Props) {
 
       {currentPage < totalPages && (
         <Link
-          href={`${basePath}?page=${currentPage + 1}`}
+          href={getPageUrl(basePath, currentPage + 1)}
           className="px-3 py-2 text-sm text-[#878787] hover:text-foreground transition-colors"
         >
           Next

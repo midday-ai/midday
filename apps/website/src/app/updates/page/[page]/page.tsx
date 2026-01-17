@@ -5,19 +5,42 @@ import { getBlogPosts } from "@/lib/blog";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-
-export const metadata: Metadata = {
-  title: "Updates",
-  description:
-    "The latest updates and improvements to Midday. See what we've been building to help you manage your business finances better.",
-};
-
-// Force static generation
-export const dynamic = "force-static";
+import { notFound, redirect } from "next/navigation";
 
 const POSTS_PER_PAGE = 3;
 
-export default function UpdatesPage() {
+export async function generateStaticParams() {
+  const posts = getBlogPosts();
+  const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
+
+  // Generate pages 2 onwards (page 1 is handled by /updates)
+  return Array.from({ length: totalPages - 1 }, (_, i) => ({
+    page: String(i + 2),
+  }));
+}
+
+type Props = {
+  params: Promise<{ page: string }>;
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { page } = await params;
+  return {
+    title: `Updates - Page ${page}`,
+    description:
+      "The latest updates and improvements to Midday. See what we've been building to help you manage your business finances better.",
+  };
+}
+
+export default async function UpdatesPagePaginated({ params }: Props) {
+  const { page } = await params;
+  const currentPage = Number.parseInt(page, 10);
+
+  // Redirect page 1 to /updates
+  if (currentPage === 1) {
+    redirect("/updates");
+  }
+
   const allPosts = getBlogPosts().sort((a, b) => {
     if (new Date(a.metadata.publishedAt) > new Date(b.metadata.publishedAt)) {
       return -1;
@@ -26,7 +49,14 @@ export default function UpdatesPage() {
   });
 
   const totalPages = Math.ceil(allPosts.length / POSTS_PER_PAGE);
-  const posts = allPosts.slice(0, POSTS_PER_PAGE);
+
+  // 404 for invalid pages
+  if (currentPage < 1 || currentPage > totalPages) {
+    notFound();
+  }
+
+  const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
+  const posts = allPosts.slice(startIndex, startIndex + POSTS_PER_PAGE);
 
   return (
     <div className="container flex flex-col items-center">
@@ -58,7 +88,7 @@ export default function UpdatesPage() {
         ))}
 
         <Pagination
-          currentPage={1}
+          currentPage={currentPage}
           totalPages={totalPages}
           basePath="/updates"
         />
