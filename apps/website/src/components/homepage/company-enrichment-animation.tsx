@@ -28,11 +28,11 @@ export function CompanyEnrichmentAnimation({
     const headerTimer = setTimeout(() => {
       setShowHeader(true)
       setShowLogo(true)
-    }, 300)
-    const tagsTimer = setTimeout(() => setShowTags(true), 900)
-    const generalTimer = setTimeout(() => setShowGeneral(true), 1200)
-    const profileTimer = setTimeout(() => setShowCompanyProfile(true), 1500)
-    const detailsTimer = setTimeout(() => setShowDetails(true), 1800)
+    }, 0)
+    const tagsTimer = setTimeout(() => setShowTags(true), 600)
+    const generalTimer = setTimeout(() => setShowGeneral(true), 900)
+    const profileTimer = setTimeout(() => setShowCompanyProfile(true), 1200)
+    const detailsTimer = setTimeout(() => setShowDetails(true), 1500)
 
     const doneTimer = onComplete
       ? setTimeout(() => {

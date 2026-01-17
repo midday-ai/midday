@@ -29,7 +29,7 @@ export function DashboardAnimation({
   useEffect(() => {
     if (!shouldPlay) return;
 
-    const timer = setTimeout(() => setShowWidgets(true), 300);
+    const timer = setTimeout(() => setShowWidgets(true), 0);
 
     // Call onComplete after animation duration
     const doneTimer = onComplete
@@ -47,9 +47,9 @@ export function DashboardAnimation({
   // Sequential reveal
   useEffect(() => {
     if (showWidgets) {
-      const chartTimer = setTimeout(() => setShowChart(true), 300);
-      const metricsTimer = setTimeout(() => setShowMetrics(true), 800);
-      const summaryTimer = setTimeout(() => setShowSummary(true), 1200);
+      const chartTimer = setTimeout(() => setShowChart(true), 0);
+      const metricsTimer = setTimeout(() => setShowMetrics(true), 500);
+      const summaryTimer = setTimeout(() => setShowSummary(true), 900);
       return () => {
         clearTimeout(chartTimer);
         clearTimeout(metricsTimer);

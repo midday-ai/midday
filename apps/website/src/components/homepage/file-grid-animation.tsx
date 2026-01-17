@@ -27,8 +27,8 @@ export function FileGridAnimation({
   useEffect(() => {
     if (!shouldPlay) return;
 
-    const cardsTimer = setTimeout(() => setShowCards(true), 300);
-    const contentTimer = setTimeout(() => setFirstCardLoaded(true), 1500);
+    const cardsTimer = setTimeout(() => setShowCards(true), 0);
+    const contentTimer = setTimeout(() => setFirstCardLoaded(true), 1200);
 
     const doneTimer = onComplete
       ? setTimeout(() => {

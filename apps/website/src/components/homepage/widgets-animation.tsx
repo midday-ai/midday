@@ -117,7 +117,7 @@ export function WidgetsAnimation({
     setCardOrder(initialOrder);
     clearAllTimeouts();
 
-    const timer = setTimeout(() => setShowWidgets(true), 300);
+    const timer = setTimeout(() => setShowWidgets(true), 0);
     timeoutRefs.current.push(timer);
 
     // Start wiggling after cards appear

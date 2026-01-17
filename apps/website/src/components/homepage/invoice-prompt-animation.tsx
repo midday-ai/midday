@@ -37,7 +37,7 @@ export function InvoicePromptAnimation({
   useEffect(() => {
     if (!shouldPlay) return;
 
-    const t1 = setTimeout(() => setShowUserMessage(true), 500);
+    const t1 = setTimeout(() => setShowUserMessage(true), 0);
 
     const t2 = setTimeout(() => {
       setShowInvoice(true);

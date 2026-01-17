@@ -75,9 +75,9 @@ export function InboxMatchAnimation({
   useEffect(() => {
     if (!shouldPlay) return;
 
-    const itemsTimer = setTimeout(() => setShowItems(true), 300);
-    const incomingTimer = setTimeout(() => setShowIncoming(true), 1400);
-    const barTimer = setTimeout(() => setShowSuggestBar(true), 1800);
+    const itemsTimer = setTimeout(() => setShowItems(true), 0);
+    const incomingTimer = setTimeout(() => setShowIncoming(true), 1100);
+    const barTimer = setTimeout(() => setShowSuggestBar(true), 1500);
 
     const doneTimer = onComplete
       ? setTimeout(() => {
