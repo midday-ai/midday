@@ -172,15 +172,19 @@ function InboxAccountItem({ account }: { account: InboxAccount }) {
               <TooltipProvider delayDuration={0}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Badge variant="tag-rounded" className="text-xs cursor-help">
+                    <Badge
+                      variant="tag-rounded"
+                      className="text-xs cursor-help"
+                    >
                       Disconnected
                     </Badge>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-[300px] text-xs">
                     <p>
-                      Account access has expired. Email providers typically expire
-                      access tokens periodically as part of their security
-                      practices. Simply reconnect to restore functionality.
+                      Account access has expired. Email providers typically
+                      expire access tokens periodically as part of their
+                      security practices. Simply reconnect to restore
+                      functionality.
                     </p>
                   </TooltipContent>
                 </Tooltip>

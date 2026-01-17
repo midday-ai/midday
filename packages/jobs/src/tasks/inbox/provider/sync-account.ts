@@ -8,8 +8,8 @@ import {
 import { separateBlocklistEntries } from "@midday/db/utils/blocklist";
 import { InboxConnector } from "@midday/inbox/connector";
 import {
-  type InboxAuthError,
   InboxSyncError,
+  assertInboxAuthError,
   isInboxAuthError,
 } from "@midday/inbox/errors";
 import { createClient } from "@midday/supabase/job";
@@ -277,35 +277,36 @@ export const syncInboxAccount = schemaTask({
     } catch (error) {
       // Handle structured InboxAuthError
       if (isInboxAuthError(error)) {
-        const authError = error as InboxAuthError;
+        // Use assertion to narrow type without casting
+        assertInboxAuthError(error);
 
         logger.error("Inbox sync failed - authentication error", {
           accountId: id,
-          errorCode: authError.code,
-          errorMessage: authError.message,
-          requiresReauth: authError.requiresReauth,
-          provider: authError.provider,
+          errorCode: error.code,
+          errorMessage: error.message,
+          requiresReauth: error.requiresReauth,
+          provider: error.provider,
         });
 
-        if (authError.requiresReauth) {
+        if (error.requiresReauth) {
           // Mark as disconnected - user needs to re-authenticate
           await updateInboxAccount(getDb(), {
             id,
             status: "disconnected",
-            errorMessage: `Authentication failed (${authError.code}): ${authError.message}`,
+            errorMessage: `Authentication failed (${error.code}): ${error.message}`,
           });
 
           logger.error("Account marked as disconnected - requires reauth", {
             accountId: id,
-            errorCode: authError.code,
-            provider: authError.provider,
+            errorCode: error.code,
+            provider: error.provider,
           });
         } else {
           // Transient auth error - don't change status, let retry handle it
           logger.warn("Transient auth error - will retry", {
             accountId: id,
-            errorCode: authError.code,
-            provider: authError.provider,
+            errorCode: error.code,
+            provider: error.provider,
           });
         }
 
