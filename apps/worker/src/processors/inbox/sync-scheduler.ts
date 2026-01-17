@@ -6,7 +6,11 @@ import {
 } from "@midday/db/queries";
 import { separateBlocklistEntries } from "@midday/db/utils/blocklist";
 import { InboxConnector } from "@midday/inbox/connector";
-import { isAuthenticationError } from "@midday/inbox/utils";
+import {
+  InboxSyncError,
+  assertInboxAuthError,
+  isInboxAuthError,
+} from "@midday/inbox/errors";
 import { triggerJob } from "@midday/job-client";
 import { createClient } from "@midday/supabase/job";
 import { ensureFileExtension } from "@midday/utils";
@@ -294,42 +298,71 @@ export class SyncSchedulerProcessor extends BaseProcessor<InboxProviderSyncAccou
         syncedAt: new Date().toISOString(),
       };
     } catch (error) {
+      // Handle structured InboxAuthError
+      if (isInboxAuthError(error)) {
+        assertInboxAuthError(error);
+
+        this.logger.error("Inbox sync failed - authentication error", {
+          accountId: inboxAccountId,
+          errorCode: error.code,
+          errorMessage: error.message,
+          requiresReauth: error.requiresReauth,
+          provider: error.provider,
+        });
+
+        if (error.requiresReauth) {
+          // Mark as disconnected - user needs to re-authenticate
+          await updateInboxAccount(db, {
+            id: inboxAccountId,
+            status: "disconnected",
+            errorMessage: `Authentication failed (${error.code}): ${error.message}`,
+          });
+
+          this.logger.error(
+            "Account marked as disconnected - requires reauth",
+            {
+              accountId: inboxAccountId,
+              errorCode: error.code,
+              provider: error.provider,
+            },
+          );
+        } else {
+          // Transient auth error - don't change status, let retry handle it
+          this.logger.warn("Transient auth error - will retry", {
+            accountId: inboxAccountId,
+            errorCode: error.code,
+            provider: error.provider,
+          });
+        }
+
+        throw error;
+      }
+
+      // Handle structured InboxSyncError
+      if (error instanceof InboxSyncError) {
+        this.logger.warn("Inbox sync failed - sync error", {
+          accountId: inboxAccountId,
+          errorCode: error.code,
+          errorMessage: error.message,
+          isRetryable: error.isRetryable(),
+          provider: error.provider,
+        });
+
+        // Sync errors are typically transient - don't change connection status
+        throw error;
+      }
+
+      // Handle unknown errors (fallback)
       const errorMessage =
         error instanceof Error ? error.message : "Unknown sync error";
 
-      this.logger.error("Inbox sync failed", {
+      this.logger.error("Inbox sync failed - unknown error", {
         accountId: inboxAccountId,
         error: errorMessage,
         provider: accountRow.provider,
       });
 
-      // Check if this is an authentication/authorization error
-      const isAuthError = isAuthenticationError(errorMessage);
-
-      if (isAuthError) {
-        // Only mark as disconnected for authentication errors
-        await updateInboxAccount(db, {
-          id: inboxAccountId,
-          status: "disconnected",
-          errorMessage: `Authentication failed: ${errorMessage}`,
-        });
-
-        this.logger.error("Account marked as disconnected due to auth error", {
-          accountId: inboxAccountId,
-          error: errorMessage,
-          provider: accountRow.provider,
-        });
-      } else {
-        // For temporary errors (network, API downtime, etc.), don't change connection status
-        this.logger.warn("Temporary sync error - connection status unchanged", {
-          accountId: inboxAccountId,
-          error: errorMessage,
-          provider: accountRow.provider,
-          errorType: "temporary",
-        });
-      }
-
-      // Re-throw the error so the job is marked as failed
+      // For unknown errors, don't change connection status
       throw error;
     }
   }
