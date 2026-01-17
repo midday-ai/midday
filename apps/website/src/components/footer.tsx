@@ -83,11 +83,6 @@ export function Footer() {
                     label: "LinkedIn",
                     external: true,
                   },
-                  {
-                    href: "https://www.youtube.com/@middayai",
-                    label: "YouTube",
-                    external: true,
-                  },
                 ].map((item) => (
                   <Link
                     key={item.href}

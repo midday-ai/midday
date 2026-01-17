@@ -4,15 +4,19 @@ interface ImageLoaderParams {
   quality?: number;
 }
 
+const CDN_URL = "https://midday.ai";
+
 export default function imageLoader({
   src,
   width,
   quality = 80,
 }: ImageLoaderParams): string {
-  const isPreview = process.env.NEXT_PUBLIC_VERCEL_ENV === "preview";
-  const vercelUrl = process.env.NEXT_PUBLIC_VERCEL_URL;
+  // Skip CDN optimization for localhost (local development)
+  if (src.includes("localhost") || src.includes("127.0.0.1")) {
+    return src;
+  }
 
-  // In development, serve images without CDN transformation
+  // In development, serve local images without CDN
   if (process.env.NODE_ENV === "development") {
     if (src.startsWith("/")) {
       return `${src}?w=${width}&q=${quality}`;
@@ -21,6 +25,9 @@ export default function imageLoader({
   }
 
   // In preview, skip Cloudflare CDN (not available on preview URLs)
+  const isPreview = process.env.NEXT_PUBLIC_VERCEL_ENV === "preview";
+  const vercelUrl = process.env.NEXT_PUBLIC_VERCEL_URL;
+
   if (isPreview && vercelUrl) {
     if (src.startsWith("/")) {
       return `https://${vercelUrl}${src}`;
@@ -29,18 +36,13 @@ export default function imageLoader({
   }
 
   // Production: use Cloudflare CDN transformation
-  const CDN_URL = "https://midday.ai";
-
-  // Handle /_next static assets
   if (src.startsWith("/_next")) {
     return `${CDN_URL}/cdn-cgi/image/width=${width},quality=${quality}/${CDN_URL}${src}`;
   }
 
-  // Handle local images (starting with /)
   if (src.startsWith("/")) {
     return `${CDN_URL}/cdn-cgi/image/width=${width},quality=${quality}/${CDN_URL}${src}`;
   }
 
-  // Handle external URLs
   return `${CDN_URL}/cdn-cgi/image/width=${width},quality=${quality}/${src}`;
 }
