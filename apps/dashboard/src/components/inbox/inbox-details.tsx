@@ -57,11 +57,12 @@ export function InboxDetails() {
 
   const id = params.inboxId;
 
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isError } = useQuery(
     trpc.inbox.getById.queryOptions(
       { id: id! },
       {
         enabled: !!id,
+        retry: false,
       },
     ),
   );
@@ -237,6 +238,29 @@ export function InboxDetails() {
 
   if (isLoading) {
     return <InboxDetailsSkeleton />;
+  }
+
+  if (isError || (id && !data)) {
+    return (
+      <div className="h-[calc(100vh-125px)] border w-[614px] hidden md:flex shrink-0 -mt-[54px] items-center justify-center">
+        <div className="flex flex-col items-center justify-center gap-3 text-center max-w-[250px]">
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-primary">Item not found</p>
+            <p className="text-xs text-[#878787]">
+              This item may have been deleted or you don't have access to it.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-2"
+            onClick={() => setParams({ ...params, inboxId: null })}
+          >
+            Clear selection
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (

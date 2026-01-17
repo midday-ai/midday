@@ -8,9 +8,10 @@ import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 
 function ErrorImage() {
   return (
-    <div className="w-full h-full flex items-center justify-center bg-primary/10">
-      <div className="flex flex-col items-center justify-center">
-        <Icons.BrokenImage className="size-4" />
+    <div className="w-full h-full flex items-center justify-center">
+      <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+        <Icons.BrokenImage className="size-8" />
+        <p className="text-sm">File not found</p>
       </div>
     </div>
   );
