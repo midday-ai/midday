@@ -3,9 +3,18 @@ const config = {
   poweredByHeader: false,
   reactStrictMode: true,
   trailingSlash: true,
-  transpilePackages: ["@midday/ui", "@midday/tailwind", "@midday/app-store", "next-mdx-remote"],
+  transpilePackages: [
+    "@midday/ui",
+    "@midday/tailwind",
+    "@midday/app-store",
+    "next-mdx-remote",
+  ],
   typescript: {
     ignoreBuildErrors: true,
+  },
+  env: {
+    NEXT_PUBLIC_VERCEL_ENV: process.env.VERCEL_ENV,
+    NEXT_PUBLIC_VERCEL_URL: process.env.VERCEL_URL,
   },
   experimental: {
     inlineCss: true,

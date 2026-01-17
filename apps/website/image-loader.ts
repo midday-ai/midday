@@ -4,44 +4,26 @@ interface ImageLoaderParams {
   quality?: number;
 }
 
-// Use VERCEL_URL for preview deployments, otherwise use production CDN
-const getBaseUrl = () => {
-  // Development
-  if (process.env.NODE_ENV === "development") {
-    return "";
-  }
-
-  // Preview deployments on Vercel
-  if (process.env.VERCEL_ENV === "preview" && process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-
-  // Production
-  return "https://midday.ai";
-};
-
 export default function imageLoader({
   src,
   width,
   quality = 80,
 }: ImageLoaderParams): string {
+  const isPreview = process.env.NEXT_PUBLIC_VERCEL_ENV === "preview";
+  const vercelUrl = process.env.NEXT_PUBLIC_VERCEL_URL;
+
   // In development, serve images without CDN transformation
   if (process.env.NODE_ENV === "development") {
-    // For local images, just return with width param
     if (src.startsWith("/")) {
       return `${src}?w=${width}&q=${quality}`;
     }
-    // For external URLs in dev, return as-is
     return src;
   }
 
-  const baseUrl = getBaseUrl();
-  const isPreview = process.env.VERCEL_ENV === "preview";
-
-  // In preview, skip Cloudflare CDN transformation (not available on preview URLs)
-  if (isPreview) {
+  // In preview, skip Cloudflare CDN (not available on preview URLs)
+  if (isPreview && vercelUrl) {
     if (src.startsWith("/")) {
-      return `${baseUrl}${src}`;
+      return `https://${vercelUrl}${src}`;
     }
     return src;
   }
