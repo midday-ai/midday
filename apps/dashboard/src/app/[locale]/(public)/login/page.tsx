@@ -5,6 +5,7 @@ import { LoginAccordion } from "@/components/login-accordion";
 import { LoginVideoBackground } from "@/components/login-video-background";
 import { OTPSignIn } from "@/components/otp-sign-in";
 import { Cookies } from "@/utils/constants";
+import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import Link from "next/link";
@@ -97,7 +98,21 @@ export default async function Page() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex relative">
+      {/* Logo - Fixed position matching website header exactly */}
+      <nav className="fixed top-0 left-0 right-0 z-50 w-full pointer-events-none">
+        <div className="relative py-3 xl:py-4 px-4 sm:px-4 md:px-4 lg:px-4 xl:px-6 2xl:px-8 flex items-center">
+          <Link
+            href="https://midday.ai"
+            className="flex items-center gap-2 hover:opacity-80 active:opacity-80 transition-opacity duration-200 pointer-events-auto"
+          >
+            <div className="w-6 h-6">
+              <Icons.LogoSmall className="w-full h-full text-foreground" />
+            </div>
+          </Link>
+        </div>
+      </nav>
+
       {/* Left Side - Video Background */}
       <LoginVideoBackground />
 

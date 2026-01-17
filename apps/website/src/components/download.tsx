@@ -1,23 +1,21 @@
-'use client'
+"use client";
 
-import Image from 'next/image'
-import { Button } from '@midday/ui/button'
-import { FeaturesGridSection } from './sections/features-grid-section'
-import { TimeSavingsSection } from './sections/time-savings-section'
-import { PreAccountingSection } from './sections/pre-accounting-section'
-import { TestimonialsSection } from './sections/testimonials-section'
-import { IntegrationsSection } from './sections/integrations-section'
-import { PricingSection } from './sections/pricing-section'
+import { Button } from "@midday/ui/button";
+import Image from "next/image";
+import { FeaturesGridSection } from "./sections/features-grid-section";
+import { IntegrationsSection } from "./sections/integrations-section";
+import { PreAccountingSection } from "./sections/pre-accounting-section";
+import { PricingSection } from "./sections/pricing-section";
+import { TestimonialsSection } from "./sections/testimonials-section";
+import { TimeSavingsSection } from "./sections/time-savings-section";
 
 export function Download() {
-
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <div className="bg-background relative overflow-visible lg:min-h-screen lg:overflow-hidden">
         {/* Mobile Layout */}
         <div className="lg:hidden flex flex-col relative pt-32 pb-16 sm:pt-40 sm:pb-20 md:pt-48 overflow-hidden">
-
           <div className="flex flex-col justify-start items-center space-y-8 z-20 px-4 sm:px-6">
             {/* Dock Image */}
             <div className="flex justify-center w-full relative">
@@ -51,17 +49,19 @@ export function Download() {
 
             {/* Download Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-md mx-auto justify-center sm:justify-center">
-              <Button
-                className="w-full sm:w-auto h-11 px-6 text-sm font-sans"
-              >
-                Apple Silicon
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full sm:w-auto h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
-              >
-                Intel Macs
-              </Button>
+              <a href="/api/download?platform=aarch64" download>
+                <Button className="w-full sm:w-auto h-11 px-6 text-sm font-sans">
+                  Apple Silicon
+                </Button>
+              </a>
+              <a href="/api/download?platform=x64" download>
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
+                >
+                  Intel Macs
+                </Button>
+              </a>
             </div>
           </div>
         </div>
@@ -101,17 +101,19 @@ export function Download() {
 
             {/* Download Buttons */}
             <div className="flex gap-6 justify-center">
-              <Button
-                className="h-11 px-6 text-sm font-sans"
-              >
-                Apple Silicon
-              </Button>
-              <Button
-                variant="outline"
-                className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
-              >
-                Intel Macs
-              </Button>
+              <a href="/api/download?platform=aarch64" download>
+                <Button className="h-11 px-6 text-sm font-sans">
+                  Apple Silicon
+                </Button>
+              </a>
+              <a href="/api/download?platform=x64" download>
+                <Button
+                  variant="outline"
+                  className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
+                >
+                  Intel Macs
+                </Button>
+              </a>
             </div>
           </div>
         </div>
@@ -128,7 +130,8 @@ export function Download() {
                   Native performance
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal">
-                  Midday runs fast and light on Apple silicon, so everything stays responsive and out of your way.
+                  Midday runs fast and light on Apple silicon, so everything
+                  stays responsive and out of your way.
                 </p>
               </div>
 
@@ -168,7 +171,9 @@ export function Download() {
                   Universal search anywhere
                 </h2>
                 <p className="font-sans text-base text-muted-foreground leading-normal">
-                  Press <span className="text-foreground font-mono">⇧⌥K</span> to search Midday from anywhere on your Mac. Instantly find receipts, invoices, transactions, customers, and files.
+                  Press <span className="text-foreground font-mono">⇧⌥K</span>{" "}
+                  to search Midday from anywhere on your Mac. Instantly find
+                  receipts, invoices, transactions, customers, and files.
                 </p>
               </div>
 
@@ -222,6 +227,5 @@ export function Download() {
       {/* Pricing Section */}
       <PricingSection />
     </div>
-  )
+  );
 }
-
