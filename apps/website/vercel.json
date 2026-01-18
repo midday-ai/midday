@@ -4,6 +4,6 @@
   "github": {
     "enabled": false
   },
-  "installCommand": "pnpm install",
+  "installCommand": "cd ../.. && pnpm install",
   "regions": ["fra1", "iad1", "sfo1"]
 }
