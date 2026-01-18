@@ -1,7 +1,7 @@
 "use client";
 
 import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 
 interface Invoice {

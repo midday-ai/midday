@@ -1,7 +1,7 @@
 "use client";
 
 import { Icons } from "@midday/ui/icons";
-import Hls from "hls.js";
+import type Hls from "hls.js";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
@@ -109,23 +109,31 @@ function HLSVideo({
     const video = videoRef.current;
     if (!video || !src) return;
 
-    if (Hls.isSupported()) {
-      // Use hls.js for browsers that don't support HLS natively
-      const hls = new Hls();
-      hlsRef.current = hls;
-      hls.loadSource(src);
-      hls.attachMedia(video);
-
-      return () => {
-        if (hlsRef.current) {
-          hlsRef.current.destroy();
-        }
-      };
-    }
+    // Check for native HLS support first (Safari)
     if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      // Native HLS support (Safari)
       video.src = src;
+      return;
     }
+
+    // Dynamically import hls.js only when needed
+    let mounted = true;
+    import("hls.js").then(({ default: HlsModule }) => {
+      if (!mounted || !video) return;
+
+      if (HlsModule.isSupported()) {
+        const hls = new HlsModule();
+        hlsRef.current = hls;
+        hls.loadSource(src);
+        hls.attachMedia(video);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+      }
+    };
   }, [src]);
 
   return (

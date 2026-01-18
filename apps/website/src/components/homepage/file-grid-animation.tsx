@@ -1,7 +1,7 @@
 "use client";
 
 import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { MaterialIcon } from "./icon-mapping";

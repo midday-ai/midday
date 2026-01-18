@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@midday/ui/cn";
 import Image from "next/image";
 import Link from "next/link";

@@ -12,15 +12,34 @@ export function WeeklyAudioSection({ audioUrl }: WeeklyAudioSectionProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
+  const hasRenderedOnce = useRef(false);
 
   // Web Audio API refs for real waveform
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
   const frequencyDataRef = useRef<number[]>([]);
+
+  // Track visibility to pause animation when off-screen
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry?.isIntersecting ?? false);
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -268,7 +287,46 @@ export function WeeklyAudioSection({ audioUrl }: WeeklyAudioSectionProps) {
       animationRef.current = requestAnimationFrame(animate);
     };
 
-    animate();
+    // Only animate when visible or playing (audio should work even when scrolled away)
+    const shouldAnimate = isVisible || isPlaying;
+
+    if (shouldAnimate) {
+      // Render once initially, then only animate when playing
+      if (!hasRenderedOnce.current || isPlaying) {
+        animate();
+        hasRenderedOnce.current = true;
+      } else {
+        // Static render when visible but not playing
+        animationRef.current = requestAnimationFrame(() => {
+          // Single frame render for static state
+          const width = cachedWidth;
+          const height = cachedHeight;
+          const centerY = height / 2;
+          const barCount = Math.floor(width / step);
+
+          if (staticPattern.length !== barCount) {
+            staticPattern = generateStaticPattern(barCount);
+          }
+
+          ctx.clearRect(0, 0, width, height);
+          const progress = duration > 0 ? currentTime / duration : 0;
+          const progressIndex = Math.floor(progress * barCount);
+
+          for (let i = 0; i < barCount; i++) {
+            const x = i * step;
+            const value = staticPattern[i] || 0.15;
+            const barHeight = Math.max(2, value * height * 0.8);
+            const y = centerY - barHeight / 2;
+            ctx.fillStyle = cachedBarColor;
+            const isPlayedBar = i <= progressIndex;
+            ctx.globalAlpha = isPlayedBar
+              ? 0.4 + (barHeight / height) * 0.3
+              : 0.2 + (barHeight / height) * 0.15;
+            ctx.fillRect(x, y, barWidth, barHeight);
+          }
+        });
+      }
+    }
 
     return () => {
       window.removeEventListener("resize", resizeCanvas);
@@ -276,7 +334,7 @@ export function WeeklyAudioSection({ audioUrl }: WeeklyAudioSectionProps) {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isPlaying, currentTime, duration]);
+  }, [isPlaying, currentTime, duration, isVisible]);
 
   const togglePlay = async () => {
     const audio = audioRef.current;
@@ -311,7 +369,7 @@ export function WeeklyAudioSection({ audioUrl }: WeeklyAudioSectionProps) {
   };
 
   return (
-    <section className="bg-background py-12 sm:py-16 lg:py-24">
+    <section ref={sectionRef} className="bg-background py-12 sm:py-16 lg:py-24">
       <div className="max-w-[1400px] mx-auto">
         <div className="text-center space-y-4 mb-12">
           <h2 className="font-serif text-2xl sm:text-2xl text-foreground">

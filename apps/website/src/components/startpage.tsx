@@ -246,7 +246,7 @@ export function StartPage() {
                 loop
                 muted
                 playsInline
-                preload="auto"
+                preload="metadata"
               >
                 <source
                   src="https://cdn.midday.ai/videos/login-video.mp4"
@@ -367,7 +367,7 @@ export function StartPage() {
                 loop
                 muted
                 playsInline
-                preload="auto"
+                preload="metadata"
               >
                 <source
                   src="https://cdn.midday.ai/videos/login-video.mp4"
