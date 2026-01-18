@@ -387,7 +387,7 @@ export function WeeklyAudioSection({ audioUrl }: WeeklyAudioSectionProps) {
               <audio
                 ref={audioRef}
                 src={audioUrl}
-                preload="metadata"
+                preload="none"
                 crossOrigin="anonymous"
               >
                 <track kind="captions" />

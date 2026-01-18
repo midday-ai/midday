@@ -329,7 +329,7 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
               <audio
                 ref={audioRef}
                 src={audioUrl}
-                preload="metadata"
+                preload="none"
                 crossOrigin="anonymous"
               >
                 <track kind="captions" />

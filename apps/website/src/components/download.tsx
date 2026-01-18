@@ -19,22 +19,24 @@ export function Download() {
           <div className="flex flex-col justify-start items-center space-y-8 z-20 px-4 sm:px-6">
             {/* Dock Image */}
             <div className="flex justify-center w-full relative">
-              <Image
-                src="/images/dock-light.png"
-                alt="Mac Dock"
-                width={800}
-                height={200}
-                className="w-full max-w-lg h-auto object-contain dark:hidden"
-                priority
-              />
-              <Image
-                src="/images/dock-dark.png"
-                alt="Mac Dock"
-                width={800}
-                height={200}
-                className="w-full max-w-lg h-auto object-contain hidden dark:block"
-                priority
-              />
+              <div className="w-full max-w-lg aspect-[2175/1193] relative">
+                <Image
+                  src="/images/dock-light.png"
+                  alt="Mac Dock"
+                  width={2175}
+                  height={1193}
+                  className="absolute inset-0 w-full h-full object-contain dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/dock-dark.png"
+                  alt="Mac Dock"
+                  width={2175}
+                  height={1193}
+                  className="absolute inset-0 w-full h-full object-contain hidden dark:block"
+                  priority
+                />
+              </div>
             </div>
 
             {/* Title and Description */}
@@ -71,22 +73,24 @@ export function Download() {
           <div className="flex-1 flex flex-col justify-center items-center space-y-8 z-20 px-4 pb-32">
             {/* Dock Image - Centered */}
             <div className="flex justify-center w-full relative">
-              <Image
-                src="/images/dock-light.png"
-                alt="Mac Dock"
-                width={1200}
-                height={300}
-                className="w-full max-w-xl h-auto object-contain dark:hidden"
-                priority
-              />
-              <Image
-                src="/images/dock-dark.png"
-                alt="Mac Dock"
-                width={1200}
-                height={300}
-                className="w-full max-w-xl h-auto object-contain hidden dark:block"
-                priority
-              />
+              <div className="w-full max-w-xl aspect-[2175/1193] relative">
+                <Image
+                  src="/images/dock-light.png"
+                  alt="Mac Dock"
+                  width={2175}
+                  height={1193}
+                  className="absolute inset-0 w-full h-full object-contain dark:hidden"
+                  priority
+                />
+                <Image
+                  src="/images/dock-dark.png"
+                  alt="Mac Dock"
+                  width={2175}
+                  height={1193}
+                  className="absolute inset-0 w-full h-full object-contain hidden dark:block"
+                  priority
+                />
+              </div>
             </div>
 
             {/* Title and Description */}

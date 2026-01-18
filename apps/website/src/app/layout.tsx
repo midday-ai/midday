@@ -13,19 +13,21 @@ import { baseUrl } from "./sitemap";
 const hedvigSans = Hedvig_Letters_Sans({
   weight: "400",
   subsets: ["latin"],
-  display: "swap",
+  display: "optional", // No flicker - uses font if loads fast, otherwise fallback
   variable: "--font-hedvig-sans",
   preload: true,
   adjustFontFallback: true,
+  fallback: ["system-ui", "arial"],
 });
 
 const hedvigSerif = Hedvig_Letters_Serif({
   weight: "400",
   subsets: ["latin"],
-  display: "swap",
+  display: "optional", // No flicker - uses font if loads fast, otherwise fallback
   variable: "--font-hedvig-serif",
   preload: true,
   adjustFontFallback: true,
+  fallback: ["Georgia", "Times New Roman", "serif"],
 });
 
 export const metadata: Metadata = {
