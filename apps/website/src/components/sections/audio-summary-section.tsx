@@ -15,6 +15,12 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
+  
+  // Web Audio API refs for real waveform
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const frequencyDataRef = useRef<number[]>([]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -66,13 +72,74 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
     };
   }, [audioUrl]);
 
-  // Simple animated waveform - no Web Audio API needed
+  // Setup Web Audio API for real waveform visualization
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !audioUrl) return;
+
+    const setupAudioContext = async () => {
+      // Only create once
+      if (audioContextRef.current && sourceRef.current) return;
+
+      try {
+        const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        const audioContext = new AudioContextClass();
+        audioContextRef.current = audioContext;
+
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.8;
+        analyserRef.current = analyser;
+
+        const source = audioContext.createMediaElementSource(audio);
+        sourceRef.current = source;
+
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+      } catch (error) {
+        console.error("Error setting up Web Audio API:", error);
+      }
+    };
+
+    // Setup on user interaction (required for AudioContext)
+    const handleInteraction = () => {
+      setupAudioContext();
+      if (audioContextRef.current?.state === "suspended") {
+        audioContextRef.current.resume();
+      }
+    };
+
+    audio.addEventListener("play", handleInteraction);
+    
+    return () => {
+      audio.removeEventListener("play", handleInteraction);
+    };
+  }, [audioUrl]);
+
+  // Real-time waveform visualization
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+
+    // Cache dimensions to avoid forced reflows in animation loop
+    let cachedWidth = 0;
+    let cachedHeight = 0;
+    let cachedBarColor = "";
+
+    const updateCachedValues = () => {
+      const rect = canvas.getBoundingClientRect();
+      cachedWidth = rect.width;
+      cachedHeight = rect.height;
+      
+      // Cache computed color (only changes on theme change)
+      const style = getComputedStyle(canvas);
+      const primaryColor =
+        style.getPropertyValue("--primary").trim() || "220 14% 96%";
+      cachedBarColor = `hsl(${primaryColor})`;
+    };
 
     const resizeCanvas = () => {
       const rect = canvas.getBoundingClientRect();
@@ -82,18 +149,15 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
       canvas.style.width = `${rect.width}px`;
       canvas.style.height = `${rect.height}px`;
       ctx.scale(dpr, dpr);
+      updateCachedValues();
     };
 
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    let time = 0;
     const barWidth = 3;
     const barGap = 1;
     const step = barWidth + barGap;
-
-    // Animation speed control - lower = slower
-    const animationSpeed = 0.004;
 
     // Generate static pattern once for idle state (no random to avoid glitches)
     const generateStaticPattern = (barCount: number): number[] => {
@@ -117,13 +181,39 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
     let staticPattern: number[] = [];
 
     const animate = () => {
-      const rect = canvas.getBoundingClientRect();
-      const width = rect.width;
-      const height = rect.height;
+      // Use cached dimensions instead of getBoundingClientRect()
+      const width = cachedWidth;
+      const height = cachedHeight;
       const centerY = height / 2;
 
       // Calculate bar count based on actual width to fill entire space
       const barCount = Math.floor(width / step);
+
+      // Get real frequency data if playing and analyser is available
+      if (isPlaying && analyserRef.current) {
+        const analyser = analyserRef.current;
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(dataArray);
+        
+        // Map frequency data to bar count with mirroring for symmetric display
+        const newFrequencyData: number[] = [];
+        const halfCount = Math.floor(barCount / 2);
+        
+        // Use lower frequencies (more musical content) - skip very low frequencies
+        const startFreq = Math.floor(dataArray.length * 0.05);
+        const endFreq = Math.floor(dataArray.length * 0.5);
+        const relevantData = Array.from(dataArray.slice(startFreq, endFreq));
+        
+        for (let i = 0; i < halfCount; i++) {
+          const dataIndex = Math.floor((i / halfCount) * relevantData.length);
+          const value = Math.max(0.1, (relevantData[dataIndex] || 0) / 255);
+          newFrequencyData.push(value);
+        }
+        
+        // Mirror for symmetric display
+        const mirroredData = [...newFrequencyData].reverse();
+        frequencyDataRef.current = [...mirroredData, ...newFrequencyData];
+      }
 
       // Generate static pattern if not playing and pattern doesn't match bar count
       if (!isPlaying && staticPattern.length !== barCount) {
@@ -132,11 +222,8 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
 
       ctx.clearRect(0, 0, width, height);
 
-      // Get color
-      const style = getComputedStyle(canvas);
-      const primaryColor =
-        style.getPropertyValue("--primary").trim() || "220 14% 96%";
-      const barColor = `hsl(${primaryColor})`;
+      // Use cached color instead of getComputedStyle()
+      const barColor = cachedBarColor;
 
       // Calculate progress for visual indication
       const progress = duration > 0 ? currentTime / duration : 0;
@@ -144,18 +231,12 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
 
       for (let i = 0; i < barCount; i++) {
         const x = i * step;
-        const normalizedPos = (i - barCount / 2) / (barCount / 2);
 
         let barHeight: number;
-        if (isPlaying) {
-          // Animated waveform when playing
-          time += animationSpeed;
-          const wave1 = Math.sin(time * 0.5 + normalizedPos * 3) * 0.3;
-          const wave2 = Math.sin(time * 0.35 - normalizedPos * 2) * 0.2;
-          const wave3 = Math.cos(time * 0.7 + normalizedPos) * 0.15;
-          const combinedWave = wave1 + wave2 + wave3;
-          const value = Math.max(0.15, 0.3 + combinedWave);
-          barHeight = Math.max(2, value * height * 0.8);
+        if (isPlaying && frequencyDataRef.current.length > 0) {
+          // Use real frequency data when playing
+          const value = frequencyDataRef.current[i] || 0.1;
+          barHeight = Math.max(2, value * height * 0.85);
         } else {
           // Use pre-generated static pattern (no random = no glitches)
           const value = staticPattern[i] || 0.15;
@@ -238,9 +319,16 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
 
         <div className="max-w-2xl mx-auto">
           <div className="flex flex-col border border-border bg-secondary">
-            <audio ref={audioRef} src={audioUrl} preload="metadata">
-              <track kind="captions" />
-            </audio>
+            {audioUrl && (
+              <audio
+                ref={audioRef}
+                src={audioUrl}
+                preload="metadata"
+                crossOrigin="anonymous"
+              >
+                <track kind="captions" />
+              </audio>
+            )}
 
             {/* Audio Player Bar */}
             <div className="flex items-center gap-3 px-3 py-2.5 border-b border-border">

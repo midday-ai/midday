@@ -123,7 +123,7 @@ export function StartPage() {
             <div className="relative overflow-hidden">
               <video
                 className="w-full h-[420px] sm:h-[520px] md:h-[600px] object-cover"
-                poster="https://cdn.midday.ai/video-poster-v2.jpg"
+                poster="https://midday.ai/cdn-cgi/image/width=800,quality=80,format=auto/https://cdn.midday.ai/video-poster-v2.jpg"
                 autoPlay
                 loop
                 muted
@@ -210,7 +210,7 @@ export function StartPage() {
             <div className="relative overflow-hidden">
               <video
                 className="w-full h-[800px] xl:h-[900px] 3xl:h-[1000px] object-cover block"
-                poster="https://cdn.midday.ai/video-poster-v2.jpg"
+                poster="https://midday.ai/cdn-cgi/image/width=1400,quality=80,format=auto/https://cdn.midday.ai/video-poster-v2.jpg"
                 autoPlay
                 loop
                 muted

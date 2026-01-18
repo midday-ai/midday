@@ -14,20 +14,20 @@
   "dependencies": {
     "@midday/app-store": "workspace:*",
     "@midday/ui": "workspace:*",
-    "@openpanel/nextjs": "^1.1.1",
+    "@openpanel/nextjs": "^1.1.3",
     "@openstatus/react": "^0.0.3",
-    "framer-motion": "^12.23.25",
+    "framer-motion": "^12.26.2",
     "hls.js": "^1.6.15",
-    "motion": "^12.23.26",
-    "next": "16.0.10",
+    "motion": "^12.26.2",
+    "next": "16.1.3",
     "next-mdx-remote": "^5.0.0",
     "react": "19.2.3",
-    "sugar-high": "^0.7.0",
+    "sugar-high": "^0.9.5",
     "react-dom": "19.2.3"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "@types/node": "^24.10.1",
-    "@types/react": "19.2.7"
+    "@types/node": "^25.0.9",
+    "@types/react": "19.2.8"
   }
 }
