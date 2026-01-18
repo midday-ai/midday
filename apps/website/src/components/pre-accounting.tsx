@@ -210,7 +210,7 @@ export function PreAccounting() {
                   <div
                     className="flex items-center justify-center relative mb-4 lg:mb-6"
                     style={{ minHeight: "3rem" }}
-                  ></div>
+                  />
                   {howItWorksSteps.map((step, index) => (
                     <div
                       key={index}

@@ -15,7 +15,7 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
-  
+
   // Web Audio API refs for real waveform
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -82,7 +82,13 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
       if (audioContextRef.current && sourceRef.current) return;
 
       try {
-        const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        const AudioContextClass =
+          window.AudioContext ||
+          (
+            window as typeof window & {
+              webkitAudioContext: typeof AudioContext;
+            }
+          ).webkitAudioContext;
         const audioContext = new AudioContextClass();
         audioContextRef.current = audioContext;
 
@@ -110,7 +116,7 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
     };
 
     audio.addEventListener("play", handleInteraction);
-    
+
     return () => {
       audio.removeEventListener("play", handleInteraction);
     };
@@ -133,7 +139,7 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
       const rect = canvas.getBoundingClientRect();
       cachedWidth = rect.width;
       cachedHeight = rect.height;
-      
+
       // Cache computed color (only changes on theme change)
       const style = getComputedStyle(canvas);
       const primaryColor =
@@ -194,22 +200,22 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
         const analyser = analyserRef.current;
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(dataArray);
-        
+
         // Map frequency data to bar count with mirroring for symmetric display
         const newFrequencyData: number[] = [];
         const halfCount = Math.floor(barCount / 2);
-        
+
         // Use lower frequencies (more musical content) - skip very low frequencies
         const startFreq = Math.floor(dataArray.length * 0.05);
         const endFreq = Math.floor(dataArray.length * 0.5);
         const relevantData = Array.from(dataArray.slice(startFreq, endFreq));
-        
+
         for (let i = 0; i < halfCount; i++) {
           const dataIndex = Math.floor((i / halfCount) * relevantData.length);
           const value = Math.max(0.1, (relevantData[dataIndex] || 0) / 255);
           newFrequencyData.push(value);
         }
-        
+
         // Mirror for symmetric display
         const mirroredData = [...newFrequencyData].reverse();
         frequencyDataRef.current = [...mirroredData, ...newFrequencyData];

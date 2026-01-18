@@ -472,7 +472,7 @@ export function StartPage() {
                   <div
                     className="flex items-center justify-center relative mb-4 lg:mb-6"
                     style={{ minHeight: "3rem" }}
-                  ></div>
+                  />
                   {features.map((feature, index) => (
                     <div
                       key={index}

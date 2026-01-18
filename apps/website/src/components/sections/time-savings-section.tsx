@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
+import Link from "next/link";
 
 export function TimeSavingsSection() {
   return (
@@ -11,7 +11,8 @@ export function TimeSavingsSection() {
             Less admin. More focus.
           </h2>
           <p className="hidden sm:block font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
-            Midday removes manual financial work so you can spend time on what actually matters.
+            Midday removes manual financial work so you can spend time on what
+            actually matters.
           </p>
         </div>
 
@@ -59,7 +60,8 @@ export function TimeSavingsSection() {
                     1–2 hours per week
                   </h3>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Creating invoices, checking payments, and answering questions.
+                    Creating invoices, checking payments, and answering
+                    questions.
                   </p>
                 </div>
               </div>
@@ -70,7 +72,7 @@ export function TimeSavingsSection() {
             <Link
               href="/file-storage"
               className="group relative overflow-hidden bg-background border border-border p-4 sm:p-5 hover-bg hover-border transition-all duration-200 xl:col-span-3 touch-manipulation"
-              style={{ WebkitTapHighlightColor: 'transparent' }}
+              style={{ WebkitTapHighlightColor: "transparent" }}
             >
               <div className="flex items-start gap-3">
                 <div className="min-w-0">
@@ -97,7 +99,8 @@ export function TimeSavingsSection() {
                     1–2 hours per week
                   </h3>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Creating invoices, checking payments, and answering questions.
+                    Creating invoices, checking payments, and answering
+                    questions.
                   </p>
                 </div>
               </div>
@@ -106,7 +109,7 @@ export function TimeSavingsSection() {
             <a
               href="https://app.midday.ai/"
               className="relative overflow-hidden bg-secondary border border-border p-4 sm:p-5 md:p-5 lg:p-6 transition-all duration-200 group hidden xl:block xl:col-span-7 hover:border-muted-foreground touch-manipulation"
-              style={{ WebkitTapHighlightColor: 'transparent' }}
+              style={{ WebkitTapHighlightColor: "transparent" }}
             >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex-1">
@@ -131,7 +134,8 @@ export function TimeSavingsSection() {
                       Manual financial work caused by disconnected tools.
                     </span>
                     <span className="hidden group-hover:inline transition-opacity duration-200">
-                      Midday handles the financial busywork so you can focus on running the business.
+                      Midday handles the financial busywork so you can focus on
+                      running the business.
                     </span>
                   </p>
                 </div>
@@ -148,7 +152,7 @@ export function TimeSavingsSection() {
             <a
               href="https://app.midday.ai/"
               className="relative overflow-hidden bg-secondary border border-border p-4 sm:p-5 md:p-5 lg:p-6 transition-all duration-200 hover:border-muted-foreground touch-manipulation"
-              style={{ WebkitTapHighlightColor: 'transparent' }}
+              style={{ WebkitTapHighlightColor: "transparent" }}
             >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex-1">
@@ -173,5 +177,5 @@ export function TimeSavingsSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }

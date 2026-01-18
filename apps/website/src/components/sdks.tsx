@@ -1,29 +1,32 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, useEffect, useMemo } from "react";
-import Image from "next/image";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { MaterialIcon } from "./homepage/icon-mapping";
-import Link from "next/link";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useTheme } from "next-themes";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import {
+  oneDark,
+  oneLight,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
+import { MaterialIcon } from "./homepage/icon-mapping";
 
 type SDKTab = "typescript" | "go" | "php";
 
 function ScrambledText() {
   const [tick, setTick] = useState(0);
-  const chars = 'ABCDEF0123456789';
+  const chars = "ABCDEF0123456789";
   const cols = 8;
   const rows = 4;
   const charCount = cols * rows; // 32 characters
 
   // Pre-compute deterministic seeds for each character position (consistent between server and client)
-  const charSeeds = useMemo(() => 
-    Array.from({ length: charCount }, (_, i) => (i * 17 + 23) % 1000),
-    [charCount]
+  const charSeeds = useMemo(
+    () => Array.from({ length: charCount }, (_, i) => (i * 17 + 23) % 1000),
+    [charCount],
   );
 
   useEffect(() => {
@@ -59,7 +62,10 @@ function ScrambledText() {
 
   return (
     <div className="mb-8 relative">
-      <div className="grid grid-cols-8 gap-y-2 sm:gap-y-3 max-w-xs mx-auto relative" style={{ columnGap: 0 }}>
+      <div
+        className="grid grid-cols-8 gap-y-2 sm:gap-y-3 max-w-xs mx-auto relative"
+        style={{ columnGap: 0 }}
+      >
         {/* Gradient fade masks */}
         <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
         <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
@@ -76,7 +82,10 @@ function ScrambledText() {
   );
 }
 
-function CodeBlock({ code, language = "typescript" }: { code: string; language?: string }) {
+function CodeBlock({
+  code,
+  language = "typescript",
+}: { code: string; language?: string }) {
   const [copied, setCopied] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
@@ -99,11 +108,18 @@ function CodeBlock({ code, language = "typescript" }: { code: string; language?:
   };
 
   // Map language for syntax highlighter
-  const highlightLanguage = language === "bash" || language === "shell" ? "bash" : 
-                            language === "javascript" ? "javascript" :
-                            language === "typescript" ? "typescript" :
-                            language === "go" ? "go" :
-                            language === "php" ? "php" : "typescript";
+  const highlightLanguage =
+    language === "bash" || language === "shell"
+      ? "bash"
+      : language === "javascript"
+        ? "javascript"
+        : language === "typescript"
+          ? "typescript"
+          : language === "go"
+            ? "go"
+            : language === "php"
+              ? "php"
+              : "typescript";
 
   return (
     <div className="relative group">
@@ -117,7 +133,8 @@ function CodeBlock({ code, language = "typescript" }: { code: string; language?:
             padding: "1rem",
             fontSize: "0.875rem",
             background: "transparent",
-            fontFamily: "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
+            fontFamily:
+              "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
           }}
           codeTagProps={{
             className: "font-mono",
@@ -252,7 +269,8 @@ export function SDKs() {
                 Build with Midday
               </h1>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto">
-                Use Midday's SDKs to integrate financial data, insights, and workflows into your product with just a few lines of code.
+                Use Midday's SDKs to integrate financial data, insights, and
+                workflows into your product with just a few lines of code.
               </p>
             </div>
 
@@ -327,7 +345,8 @@ export function SDKs() {
                 Build with Midday
               </h1>
               <p className="text-muted-foreground text-sm xl:text-base leading-normal max-w-xl mx-auto font-sans text-center">
-                Use Midday's SDKs to integrate financial data, insights, and workflows into your product with just a few lines of code.
+                Use Midday's SDKs to integrate financial data, insights, and
+                workflows into your product with just a few lines of code.
               </p>
             </div>
 
@@ -407,13 +426,16 @@ export function SDKs() {
                   TypeScript SDK
                 </h3>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
-                  A fully typed SDK for interacting with Midday's APIs, designed for modern web and backend applications.
+                  A fully typed SDK for interacting with Midday's APIs, designed
+                  for modern web and backend applications.
                 </p>
               </div>
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <p className="font-sans text-sm text-foreground">Key features:</p>
+                  <p className="font-sans text-sm text-foreground">
+                    Key features:
+                  </p>
                   <ul className="list-disc list-inside space-y-1 font-sans text-sm text-muted-foreground">
                     <li>Fully typed with first-class TypeScript support</li>
                     <li>Works in Node, Bun, and modern runtimes</li>
@@ -423,18 +445,35 @@ export function SDKs() {
 
                 <div className="space-y-4">
                   <div>
-                    <p className="font-sans text-sm text-foreground mb-2">Install:</p>
+                    <p className="font-sans text-sm text-foreground mb-2">
+                      Install:
+                    </p>
                     <div className="space-y-2">
-                      <CodeBlock code="npm install @midday-ai/sdk" language="bash" />
-                      <CodeBlock code="bun add @midday-ai/sdk" language="bash" />
-                      <CodeBlock code="pnpm add @midday-ai/sdk" language="bash" />
-                      <CodeBlock code="yarn add @midday-ai/sdk" language="bash" />
+                      <CodeBlock
+                        code="npm install @midday-ai/sdk"
+                        language="bash"
+                      />
+                      <CodeBlock
+                        code="bun add @midday-ai/sdk"
+                        language="bash"
+                      />
+                      <CodeBlock
+                        code="pnpm add @midday-ai/sdk"
+                        language="bash"
+                      />
+                      <CodeBlock
+                        code="yarn add @midday-ai/sdk"
+                        language="bash"
+                      />
                     </div>
                   </div>
 
                   <div>
-                    <p className="font-sans text-sm text-foreground mb-2">Example:</p>
-                    <CodeBlock code={`import { Midday } from "@midday-ai/sdk";
+                    <p className="font-sans text-sm text-foreground mb-2">
+                      Example:
+                    </p>
+                    <CodeBlock
+                      code={`import { Midday } from "@midday-ai/sdk";
 
 const midday = new Midday({
   security: {
@@ -455,7 +494,9 @@ async function run() {
   console.log(result);
 }
 
-run();`} language="typescript" />
+run();`}
+                      language="typescript"
+                    />
                   </div>
                 </div>
 
@@ -465,14 +506,18 @@ run();`} language="typescript" />
                     variant="outline"
                     className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
                   >
-                    <a href="https://github.com/midday-ai/midday-ts">View TypeScript docs</a>
+                    <a href="https://github.com/midday-ai/midday-ts">
+                      View TypeScript docs
+                    </a>
                   </Button>
                   <Button
                     asChild
                     variant="outline"
                     className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
                   >
-                    <a href="https://github.com/midday-ai/midday-ts">See examples</a>
+                    <a href="https://github.com/midday-ai/midday-ts">
+                      See examples
+                    </a>
                   </Button>
                 </div>
               </div>
@@ -487,19 +532,28 @@ run();`} language="typescript" />
                   Go SDK
                 </h3>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
-                  A lightweight Go SDK for building server-side applications with Midday's APIs.
+                  A lightweight Go SDK for building server-side applications
+                  with Midday's APIs.
                 </p>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <p className="font-sans text-sm text-foreground mb-2">Install:</p>
-                  <CodeBlock code="go get github.com/midday-ai/midday-go" language="bash" />
+                  <p className="font-sans text-sm text-foreground mb-2">
+                    Install:
+                  </p>
+                  <CodeBlock
+                    code="go get github.com/midday-ai/midday-go"
+                    language="bash"
+                  />
                 </div>
 
                 <div>
-                  <p className="font-sans text-sm text-foreground mb-2">Example:</p>
-                  <CodeBlock code={`package main
+                  <p className="font-sans text-sm text-foreground mb-2">
+                    Example:
+                  </p>
+                  <CodeBlock
+                    code={`package main
 
 import (
 	"context"
@@ -524,7 +578,9 @@ func main() {
 	if res.Object != nil {
 		// handle response
 	}
-}`} language="go" />
+}`}
+                    language="go"
+                  />
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -533,14 +589,18 @@ func main() {
                     variant="outline"
                     className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
                   >
-                    <a href="https://github.com/midday-ai/midday-go">View Go docs</a>
+                    <a href="https://github.com/midday-ai/midday-go">
+                      View Go docs
+                    </a>
                   </Button>
                   <Button
                     asChild
                     variant="outline"
                     className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
                   >
-                    <a href="https://github.com/midday-ai/midday-go">See examples</a>
+                    <a href="https://github.com/midday-ai/midday-go">
+                      See examples
+                    </a>
                   </Button>
                 </div>
               </div>
@@ -555,19 +615,28 @@ func main() {
                   PHP SDK
                 </h3>
                 <p className="font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
-                  A PHP SDK for integrating Midday's APIs into your PHP applications.
+                  A PHP SDK for integrating Midday's APIs into your PHP
+                  applications.
                 </p>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <p className="font-sans text-sm text-foreground mb-2">Install:</p>
-                  <CodeBlock code="composer require midday-ai/midday-php" language="bash" />
+                  <p className="font-sans text-sm text-foreground mb-2">
+                    Install:
+                  </p>
+                  <CodeBlock
+                    code="composer require midday-ai/midday-php"
+                    language="bash"
+                  />
                 </div>
 
                 <div>
-                  <p className="font-sans text-sm text-foreground mb-2">Example:</p>
-                  <CodeBlock code={`<?php
+                  <p className="font-sans text-sm text-foreground mb-2">
+                    Example:
+                  </p>
+                  <CodeBlock
+                    code={`<?php
 
 declare(strict_types=1);
 
@@ -590,7 +659,9 @@ $response = $sdk->transactions->list(
 
 if ($response->object !== null) {
     // handle response
-}`} language="php" />
+}`}
+                    language="php"
+                  />
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -599,20 +670,23 @@ if ($response->object !== null) {
                     variant="outline"
                     className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
                   >
-                    <a href="https://github.com/midday-ai/midday-php">View PHP docs</a>
+                    <a href="https://github.com/midday-ai/midday-php">
+                      View PHP docs
+                    </a>
                   </Button>
                   <Button
                     asChild
                     variant="outline"
                     className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
                   >
-                    <a href="https://github.com/midday-ai/midday-php">See examples</a>
+                    <a href="https://github.com/midday-ai/midday-php">
+                      See examples
+                    </a>
                   </Button>
                 </div>
               </div>
             </div>
           )}
-
         </div>
       </section>
 
@@ -629,7 +703,8 @@ if ($response->object !== null) {
               Build real financial workflows
             </h2>
             <p className="hidden sm:block font-sans text-base text-muted-foreground leading-normal max-w-2xl mx-auto">
-              Use Midday SDKs to integrate financial data, insights, and workflows into your product.
+              Use Midday SDKs to integrate financial data, insights, and
+              workflows into your product.
             </p>
           </div>
 
@@ -638,40 +713,71 @@ if ($response->object !== null) {
               <div className="space-y-6">
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
-                    <MaterialIcon name="check" className="text-foreground" size={14} />
+                    <MaterialIcon
+                      name="check"
+                      className="text-foreground"
+                      size={14}
+                    />
                   </div>
                   <span className="font-sans text-sm text-foreground">
-                    <span className="sm:hidden">Sync and analyze transactions</span>
-                    <span className="hidden sm:inline">Sync and analyze transactions programmatically and build custom analysis tools</span>
+                    <span className="sm:hidden">
+                      Sync and analyze transactions
+                    </span>
+                    <span className="hidden sm:inline">
+                      Sync and analyze transactions programmatically and build
+                      custom analysis tools
+                    </span>
                   </span>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
-                    <MaterialIcon name="check" className="text-foreground" size={14} />
+                    <MaterialIcon
+                      name="check"
+                      className="text-foreground"
+                      size={14}
+                    />
                   </div>
                   <span className="font-sans text-sm text-foreground">
-                    <span className="sm:hidden">Build dashboards and reports</span>
-                    <span className="hidden sm:inline">Build dashboards and reports tailored to your needs</span>
+                    <span className="sm:hidden">
+                      Build dashboards and reports
+                    </span>
+                    <span className="hidden sm:inline">
+                      Build dashboards and reports tailored to your needs
+                    </span>
                   </span>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
-                    <MaterialIcon name="check" className="text-foreground" size={14} />
+                    <MaterialIcon
+                      name="check"
+                      className="text-foreground"
+                      size={14}
+                    />
                   </div>
                   <span className="font-sans text-sm text-foreground">
-                    Power internal tools with financial data and integrate into existing workflows
+                    Power internal tools with financial data and integrate into
+                    existing workflows
                   </span>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
-                    <MaterialIcon name="check" className="text-foreground" size={14} />
+                    <MaterialIcon
+                      name="check"
+                      className="text-foreground"
+                      size={14}
+                    />
                   </div>
                   <span className="font-sans text-sm text-foreground">
-                    <span className="sm:hidden">Automate accounting-ready exports</span>
-                    <span className="hidden sm:inline">Automate accounting-ready exports for your accounting software</span>
+                    <span className="sm:hidden">
+                      Automate accounting-ready exports
+                    </span>
+                    <span className="hidden sm:inline">
+                      Automate accounting-ready exports for your accounting
+                      software
+                    </span>
                   </span>
                 </div>
               </div>
@@ -695,7 +801,8 @@ if ($response->object !== null) {
               Secure by default
             </h2>
             <p className="font-sans text-base text-muted-foreground leading-normal">
-              All SDKs use secure API keys and scoped access to ensure your data stays protected.
+              All SDKs use secure API keys and scoped access to ensure your data
+              stays protected.
             </p>
           </div>
         </div>
@@ -719,7 +826,11 @@ if ($response->object !== null) {
                 className="bg-secondary border border-border p-6 hover:border-foreground/20 transition-colors group flex flex-col items-center text-center"
               >
                 <div className="mb-4 flex items-center justify-center">
-                  <MaterialIcon name="timer" className="text-muted-foreground group-hover:text-foreground transition-colors" size={20} />
+                  <MaterialIcon
+                    name="timer"
+                    className="text-muted-foreground group-hover:text-foreground transition-colors"
+                    size={20}
+                  />
                 </div>
                 <h3 className="font-sans text-base text-foreground mb-2 group-hover:text-foreground">
                   Quickstart
@@ -733,7 +844,11 @@ if ($response->object !== null) {
                 className="bg-secondary border border-border p-6 hover:border-foreground/20 transition-colors group flex flex-col items-center text-center"
               >
                 <div className="mb-4 flex items-center justify-center">
-                  <MaterialIcon name="description" className="text-muted-foreground group-hover:text-foreground transition-colors" size={20} />
+                  <MaterialIcon
+                    name="description"
+                    className="text-muted-foreground group-hover:text-foreground transition-colors"
+                    size={20}
+                  />
                 </div>
                 <h3 className="font-sans text-base text-foreground mb-2 group-hover:text-foreground">
                   Examples
@@ -749,7 +864,11 @@ if ($response->object !== null) {
                 className="bg-secondary border border-border p-6 hover:border-foreground/20 transition-colors group flex flex-col items-center text-center"
               >
                 <div className="mb-4 flex items-center justify-center">
-                  <MaterialIcon name="link" className="text-muted-foreground group-hover:text-foreground transition-colors" size={20} />
+                  <MaterialIcon
+                    name="link"
+                    className="text-muted-foreground group-hover:text-foreground transition-colors"
+                    size={20}
+                  />
                 </div>
                 <h3 className="font-sans text-base text-foreground mb-2 group-hover:text-foreground">
                   API reference
@@ -763,7 +882,10 @@ if ($response->object !== null) {
                 className="bg-secondary border border-border p-6 hover:border-foreground/20 transition-colors group flex flex-col items-center text-center"
               >
                 <div className="mb-4 flex items-center justify-center">
-                  <Icons.History size={20} className="text-muted-foreground group-hover:text-foreground transition-colors" />
+                  <Icons.History
+                    size={20}
+                    className="text-muted-foreground group-hover:text-foreground transition-colors"
+                  />
                 </div>
                 <h3 className="font-sans text-base text-foreground mb-2 group-hover:text-foreground">
                   Changelog
@@ -776,8 +898,6 @@ if ($response->object !== null) {
           </div>
         </div>
       </section>
-
     </div>
   );
 }
-

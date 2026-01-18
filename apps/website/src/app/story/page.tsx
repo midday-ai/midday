@@ -1,10 +1,11 @@
-import Image from 'next/image'
-import type { Metadata } from 'next'
+import type { Metadata } from "next";
+import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: 'Story',
-  description: 'Why we built Midday. Learn about our mission to help founders and small teams stay on top of their business finances without the manual work.',
-}
+  title: "Story",
+  description:
+    "Why we built Midday. Learn about our mission to help founders and small teams stay on top of their business finances without the manual work.",
+};
 
 export default function StoryPage() {
   return (
@@ -28,13 +29,23 @@ export default function StoryPage() {
                     The problem
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    Running a business shouldn't require constant checking just to know where things stand.
+                    Running a business shouldn't require constant checking just
+                    to know where things stand.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    After years of running our own companies, we kept running into the same friction. Time tracking lived in one place. Invoices in another. Receipts scattered across inboxes and folders. Transactions buried in bank dashboards. And when something changed, you often found out too late or only after digging through numbers.
+                    After years of running our own companies, we kept running
+                    into the same friction. Time tracking lived in one place.
+                    Invoices in another. Receipts scattered across inboxes and
+                    folders. Transactions buried in bank dashboards. And when
+                    something changed, you often found out too late or only
+                    after digging through numbers.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Most tools handling this work focus on individual tasks. They rarely work together, and even more rarely help you stay on top of your business without manual effort. The result is too much context switching, too many tools, and a constant feeling of being slightly behind.
+                    Most tools handling this work focus on individual tasks.
+                    They rarely work together, and even more rarely help you
+                    stay on top of your business without manual effort. The
+                    result is too much context switching, too many tools, and a
+                    constant feeling of being slightly behind.
                   </p>
                 </section>
 
@@ -49,16 +60,30 @@ export default function StoryPage() {
                     The idea
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    We didn't want another finance tool. We wanted a system that works for you.
+                    We didn't want another finance tool. We wanted a system that
+                    works for you.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Midday is built around the idea that your finances should stay reconciled, explained, and monitored as your business changes — without you having to constantly check dashboards or chase updates. Time, invoices, receipts, transactions, and documents shouldn't live in silos. They should reinforce each other and reflect what's actually happening.
+                    Midday is built around the idea that your finances should
+                    stay reconciled, explained, and monitored as your business
+                    changes — without you having to constantly check dashboards
+                    or chase updates. Time, invoices, receipts, transactions,
+                    and documents shouldn't live in silos. They should reinforce
+                    each other and reflect what's actually happening.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Instead of pulling information out of the system, Midday pushes the right information to you. Summaries, notifications, and clear signals help you understand what's changed, what needs attention, and what's on track. That way, you stay informed without living inside financial software.
+                    Instead of pulling information out of the system, Midday
+                    pushes the right information to you. Summaries,
+                    notifications, and clear signals help you understand what's
+                    changed, what needs attention, and what's on track. That
+                    way, you stay informed without living inside financial
+                    software.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Midday doesn't replace your accountant. It sits in between, keeping everything organized, connected, and ready, so conversations are easier and decisions are based on up-to-date information.
+                    Midday doesn't replace your accountant. It sits in between,
+                    keeping everything organized, connected, and ready, so
+                    conversations are easier and decisions are based on
+                    up-to-date information.
                   </p>
                 </section>
 
@@ -73,7 +98,9 @@ export default function StoryPage() {
                     What we're focused on
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    Midday is built for founders and small teams who want to feel on top of their business without spending their time managing financial admin.
+                    Midday is built for founders and small teams who want to
+                    feel on top of their business without spending their time
+                    managing financial admin.
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
                     We focus on:
@@ -82,11 +109,16 @@ export default function StoryPage() {
                     <li>Reducing manual and repetitive work</li>
                     <li>Keeping financial data consistent and reliable</li>
                     <li>Surfacing the right information at the right time</li>
-                    <li>Making it easy to understand what's happening and why</li>
-                    <li>Building software that works quietly in the background</li>
+                    <li>
+                      Making it easy to understand what's happening and why
+                    </li>
+                    <li>
+                      Building software that works quietly in the background
+                    </li>
                   </ul>
                   <p className="text-muted-foreground leading-relaxed mt-4">
-                    Our goal is simple: when you use Midday, you shouldn't have to wonder how your business is doing.
+                    Our goal is simple: when you use Midday, you shouldn't have
+                    to wonder how your business is doing.
                   </p>
                   <p className="text-muted-foreground leading-relaxed font-medium">
                     Your finances should explain themselves.
@@ -118,6 +150,5 @@ export default function StoryPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

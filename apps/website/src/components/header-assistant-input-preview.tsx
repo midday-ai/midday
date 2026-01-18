@@ -1,7 +1,7 @@
 "use client";
 
-import { Icons } from "@midday/ui/icons";
 import { cn } from "@midday/ui/cn";
+import { Icons } from "@midday/ui/icons";
 import { useState } from "react";
 
 const SHORTCUT_SUGGESTIONS = [
@@ -29,9 +29,7 @@ export function HeaderAssistantInputPreview() {
               key={index}
               className={cn(
                 "px-2 py-1.5 text-[10px] cursor-pointer transition-colors font-sans",
-                index === 0
-                  ? "text-foreground bg-muted"
-                  : "text-foreground/50"
+                index === 0 ? "text-foreground bg-muted" : "text-foreground/50",
               )}
             >
               {suggestion}
@@ -61,9 +59,7 @@ export function HeaderAssistantInputPreview() {
             <button
               className={cn(
                 "w-5 h-5 flex items-center justify-center transition-colors",
-                isBoltActive
-                  ? "text-foreground"
-                  : "text-muted-foreground"
+                isBoltActive ? "text-foreground" : "text-muted-foreground",
               )}
               onClick={() => setIsBoltActive(!isBoltActive)}
             >
@@ -81,10 +77,7 @@ export function HeaderAssistantInputPreview() {
               <Icons.Record size={14} />
             </button>
             <button className="w-5 h-5 flex items-center justify-center transition-opacity bg-foreground">
-              <Icons.ArrowUpward
-                size={12}
-                className="text-background"
-              />
+              <Icons.ArrowUpward size={12} className="text-background" />
             </button>
           </div>
         </div>
@@ -92,4 +85,3 @@ export function HeaderAssistantInputPreview() {
     </div>
   );
 }
-

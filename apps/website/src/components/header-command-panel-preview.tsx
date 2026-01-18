@@ -1,7 +1,7 @@
 "use client";
 
-import { MaterialIcon } from "./homepage/icon-mapping";
 import { Icons } from "@midday/ui/icons";
+import { MaterialIcon } from "./homepage/icon-mapping";
 
 export function HeaderCommandPanelPreview() {
   const transaction = {
@@ -152,7 +152,10 @@ export function HeaderCommandPanelPreview() {
               </div>
               <div className="space-y-0.5">
                 {files.map((file) => (
-                  <div key={file.id} className="flex items-center gap-2 pr-2 py-1">
+                  <div
+                    key={file.id}
+                    className="flex items-center gap-2 pr-2 py-1"
+                  >
                     <MaterialIcon
                       name="pdf"
                       className="text-muted-foreground flex-shrink-0"

@@ -44,24 +44,41 @@ export function HeaderInsightsPreview() {
   return (
     <div className="w-full h-full flex items-center justify-center p-4 bg-background">
       {/* Container with border and dotted pattern */}
-      <div 
+      <div
         className="w-full h-full border border-border p-4 relative"
         style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--border)) 0.5px, transparent 0)',
-          backgroundSize: '6px 6px',
+          backgroundImage:
+            "radial-gradient(circle at 1px 1px, hsl(var(--border)) 0.5px, transparent 0)",
+          backgroundSize: "6px 6px",
         }}
       >
         {/* Stacked Background Card - Tilted */}
-        <div className="absolute w-full max-w-[260px] border border-border bg-secondary rotate-[-3deg] translate-x-[-2px] translate-y-[2px]" style={{ zIndex: 0, left: '50%', top: '50%', transform: 'translate(-50%, -50%) rotate(-3deg) translate(-2px, 2px)' }}>
+        <div
+          className="absolute w-full max-w-[260px] border border-border bg-secondary rotate-[-3deg] translate-x-[-2px] translate-y-[2px]"
+          style={{
+            zIndex: 0,
+            left: "50%",
+            top: "50%",
+            transform:
+              "translate(-50%, -50%) rotate(-3deg) translate(-2px, 2px)",
+          }}
+        >
           {cardContent}
         </div>
 
         {/* Main Card */}
-        <div className="absolute w-full max-w-[260px] border border-border bg-secondary" style={{ zIndex: 1, left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
+        <div
+          className="absolute w-full max-w-[260px] border border-border bg-secondary"
+          style={{
+            zIndex: 1,
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
           {cardContent}
         </div>
       </div>
     </div>
   );
 }
-

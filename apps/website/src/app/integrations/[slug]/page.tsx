@@ -1,7 +1,7 @@
+import { IntegrationDetailPage } from "@/components/integration-detail-page";
+import { apps, getAllSlugs, getAppBySlug } from "@/data/apps";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { apps, getAllSlugs, getAppBySlug } from "@/data/apps";
-import { IntegrationDetailPage } from "@/components/integration-detail-page";
 
 interface Props {
   params: Promise<{ slug: string }>;

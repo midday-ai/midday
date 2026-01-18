@@ -1,130 +1,136 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { motion } from "motion/react"
-import Image from 'next/image'
-import { MaterialIcon } from './icon-mapping'
-import { usePlayOnceOnVisible } from '@/hooks/use-play-once-on-visible'
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
+import { motion } from "motion/react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { MaterialIcon } from "./icon-mapping";
 
 interface Invoice {
-  id: string
-  invoiceNo: string
-  date: string
-  dueDate: string
-  amount: string
-  status: 'unpaid' | 'overdue' | 'paid'
+  id: string;
+  invoiceNo: string;
+  date: string;
+  dueDate: string;
+  amount: string;
+  status: "unpaid" | "overdue" | "paid";
 }
 
 const initialInvoices: Invoice[] = [
   {
-    id: '1',
-    invoiceNo: 'INV-0042',
-    date: 'Mar 15',
-    dueDate: 'Apr 15',
-    amount: '12 450,00 €',
-    status: 'unpaid',
+    id: "1",
+    invoiceNo: "INV-0042",
+    date: "Mar 15",
+    dueDate: "Apr 15",
+    amount: "12 450,00 €",
+    status: "unpaid",
   },
   {
-    id: '2',
-    invoiceNo: 'INV-0038',
-    date: 'Feb 10',
-    dueDate: 'Mar 10',
-    amount: '18 750,00 €',
-    status: 'overdue',
+    id: "2",
+    invoiceNo: "INV-0038",
+    date: "Feb 10",
+    dueDate: "Mar 10",
+    amount: "18 750,00 €",
+    status: "overdue",
   },
   {
-    id: '3',
-    invoiceNo: 'INV-0035',
-    date: 'Jan 20',
-    dueDate: 'Feb 20',
-    amount: '22 300,00 €',
-    status: 'paid',
+    id: "3",
+    invoiceNo: "INV-0035",
+    date: "Jan 20",
+    dueDate: "Feb 20",
+    amount: "22 300,00 €",
+    status: "paid",
   },
   {
-    id: '4',
-    invoiceNo: 'INV-0032',
-    date: 'Dec 15',
-    dueDate: 'Jan 15',
-    amount: '15 600,00 €',
-    status: 'paid',
+    id: "4",
+    invoiceNo: "INV-0032",
+    date: "Dec 15",
+    dueDate: "Jan 15",
+    amount: "15 600,00 €",
+    status: "paid",
   },
   {
-    id: '5',
-    invoiceNo: 'INV-0029',
-    date: 'Nov 20',
-    dueDate: 'Dec 20',
-    amount: '19 800,00 €',
-    status: 'paid',
+    id: "5",
+    invoiceNo: "INV-0029",
+    date: "Nov 20",
+    dueDate: "Dec 20",
+    amount: "19 800,00 €",
+    status: "paid",
   },
   {
-    id: '6',
-    invoiceNo: 'INV-0026',
-    date: 'Oct 25',
-    dueDate: 'Nov 25',
-    amount: '14 200,00 €',
-    status: 'paid',
+    id: "6",
+    invoiceNo: "INV-0026",
+    date: "Oct 25",
+    dueDate: "Nov 25",
+    amount: "14 200,00 €",
+    status: "paid",
   },
-]
+];
 
 export function CustomerStatementAnimation({
   onComplete,
 }: {
-  onComplete?: () => void
+  onComplete?: () => void;
 }) {
-  const [showHeader, setShowHeader] = useState(false)
-  const [showLogo, setShowLogo] = useState(false)
-  const [showGeneral, setShowGeneral] = useState(false)
-  const [showDetails, setShowDetails] = useState(false)
-  const [showStatement, setShowStatement] = useState(false)
-  const [showCards, setShowCards] = useState(false)
-  const [showTable, setShowTable] = useState(false)
-  const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices)
+  const [showHeader, setShowHeader] = useState(false);
+  const [showLogo, setShowLogo] = useState(false);
+  const [showGeneral, setShowGeneral] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [showStatement, setShowStatement] = useState(false);
+  const [showCards, setShowCards] = useState(false);
+  const [showTable, setShowTable] = useState(false);
+  const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
 
-  const [containerRef, shouldPlay] = usePlayOnceOnVisible(() => {
-    // Callback triggered when element becomes visible
-  }, { threshold: 0.5 })
+  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
+    () => {
+      // Callback triggered when element becomes visible
+    },
+    { threshold: 0.5 },
+  );
 
   useEffect(() => {
-    if (!shouldPlay) return
+    if (!shouldPlay) return;
 
     const headerTimer = setTimeout(() => {
-      setShowHeader(true)
-      setShowLogo(true)
-    }, 0)
-    const generalTimer = setTimeout(() => setShowGeneral(true), 300)
-    const statementTimer = setTimeout(() => setShowStatement(true), 600)
-    const cardsTimer = setTimeout(() => setShowCards(true), 900)
-    const tableTimer = setTimeout(() => setShowTable(true), 1200)
+      setShowHeader(true);
+      setShowLogo(true);
+    }, 0);
+    const generalTimer = setTimeout(() => setShowGeneral(true), 300);
+    const statementTimer = setTimeout(() => setShowStatement(true), 600);
+    const cardsTimer = setTimeout(() => setShowCards(true), 900);
+    const tableTimer = setTimeout(() => setShowTable(true), 1200);
 
     const doneTimer = onComplete
       ? setTimeout(() => {
-          onComplete()
+          onComplete();
         }, 10000)
-      : undefined
+      : undefined;
 
     return () => {
-      clearTimeout(headerTimer)
-      clearTimeout(generalTimer)
-      clearTimeout(statementTimer)
-      clearTimeout(cardsTimer)
-      clearTimeout(tableTimer)
-      if (doneTimer) clearTimeout(doneTimer)
-    }
-  }, [shouldPlay, onComplete])
+      clearTimeout(headerTimer);
+      clearTimeout(generalTimer);
+      clearTimeout(statementTimer);
+      clearTimeout(cardsTimer);
+      clearTimeout(tableTimer);
+      if (doneTimer) clearTimeout(doneTimer);
+    };
+  }, [shouldPlay, onComplete]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'paid':
-        return 'text-green-500'
-      case 'overdue':
-        return 'text-yellow-500'
+      case "paid":
+        return "text-green-500";
+      case "overdue":
+        return "text-yellow-500";
       default:
-        return 'text-foreground'
+        return "text-foreground";
     }
-  }
+  };
 
   return (
-    <div ref={containerRef} className="w-full h-full flex flex-col relative bg-background min-h-0">
+    <div
+      ref={containerRef}
+      className="w-full h-full flex flex-col relative bg-background min-h-0"
+    >
       {/* Header */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -148,9 +154,15 @@ export function CustomerStatementAnimation({
               className="w-full h-full object-contain"
             />
           </motion.div>
-          <h2 className="text-[16px] md:text-[18px] font-serif text-foreground">Supabase</h2>
+          <h2 className="text-[16px] md:text-[18px] font-serif text-foreground">
+            Supabase
+          </h2>
         </div>
-        <MaterialIcon name="more_vert" className="text-sm text-muted-foreground" size={16} />
+        <MaterialIcon
+          name="more_vert"
+          className="text-sm text-muted-foreground"
+          size={16}
+        />
       </motion.div>
 
       {/* General Section */}
@@ -161,16 +173,24 @@ export function CustomerStatementAnimation({
         className="border-b border-border md:mt-2"
       >
         <div className="pt-2 md:pt-3 pb-3 md:py-5 flex items-center justify-between px-2 md:px-3">
-          <h3 className="text-[11px] md:text-[12px] text-foreground">General</h3>
-          <MaterialIcon name="expand_less" className="text-sm text-muted-foreground" size={16} />
+          <h3 className="text-[11px] md:text-[12px] text-foreground">
+            General
+          </h3>
+          <MaterialIcon
+            name="expand_less"
+            className="text-sm text-muted-foreground"
+            size={16}
+          />
         </div>
         {showGeneral && (
           <div className="pt-0 pb-3 md:pb-4 space-y-2.5 md:space-y-3 px-2 md:px-3">
             <div className="text-[10px] md:text-[11px] text-muted-foreground">
-              <span className="text-foreground">Contact person:</span> Michael Thompson
+              <span className="text-foreground">Contact person:</span> Michael
+              Thompson
             </div>
             <div className="text-[10px] md:text-[11px] text-muted-foreground">
-              <span className="text-foreground">Email:</span> finance@supabase.com
+              <span className="text-foreground">Email:</span>{" "}
+              finance@supabase.com
             </div>
             <div className="text-[10px] md:text-[11px] text-muted-foreground">
               <span className="text-foreground">Website:</span> supabase.com
@@ -187,8 +207,14 @@ export function CustomerStatementAnimation({
         className="border-b border-border"
       >
         <div className="py-2.5 md:py-3.5 flex items-center justify-between px-2 md:px-3">
-          <h3 className="text-[11px] md:text-[12px] text-foreground">Details</h3>
-          <MaterialIcon name="expand_more" className="text-sm text-muted-foreground" size={16} />
+          <h3 className="text-[11px] md:text-[12px] text-foreground">
+            Details
+          </h3>
+          <MaterialIcon
+            name="expand_more"
+            className="text-sm text-muted-foreground"
+            size={16}
+          />
         </div>
       </motion.div>
 
@@ -200,8 +226,14 @@ export function CustomerStatementAnimation({
         className="flex-1 flex flex-col min-h-0 overflow-hidden"
       >
         <div className="py-2.5 md:py-3.5 flex items-center justify-between border-b border-border flex-shrink-0 px-2 md:px-3">
-          <h3 className="text-[11px] md:text-[12px] text-foreground">Statement</h3>
-          <MaterialIcon name="more_vert" className="text-sm text-muted-foreground" size={16} />
+          <h3 className="text-[11px] md:text-[12px] text-foreground">
+            Statement
+          </h3>
+          <MaterialIcon
+            name="more_vert"
+            className="text-sm text-muted-foreground"
+            size={16}
+          />
         </div>
 
         {/* Summary Cards */}
@@ -273,14 +305,27 @@ export function CustomerStatementAnimation({
             transition={{ duration: 0.25 }}
             className="flex-1 min-h-0 overflow-hidden border border-border bg-background relative"
           >
-            <table className="w-full border-collapse" style={{ borderSpacing: 0 }}>
+            <table
+              className="w-full border-collapse"
+              style={{ borderSpacing: 0 }}
+            >
               <thead className="sticky top-0 z-10 bg-secondary border-b border-border">
                 <tr className="h-[28px] md:h-[32px]">
-                  <th className="w-[90px] md:w-[100px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">Invoice</th>
-                  <th className="w-[70px] md:w-[80px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">Date</th>
-                  <th className="w-[80px] md:w-[90px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">Due Date</th>
-                  <th className="w-[100px] md:w-[110px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">Amount</th>
-                  <th className="w-[80px] md:w-[90px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground">Status</th>
+                  <th className="w-[90px] md:w-[100px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">
+                    Invoice
+                  </th>
+                  <th className="w-[70px] md:w-[80px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">
+                    Date
+                  </th>
+                  <th className="w-[80px] md:w-[90px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">
+                    Due Date
+                  </th>
+                  <th className="w-[100px] md:w-[110px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground border-r border-border">
+                    Amount
+                  </th>
+                  <th className="w-[80px] md:w-[90px] px-1.5 md:px-2 text-left text-[10px] md:text-[11px] font-medium text-muted-foreground">
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -295,17 +340,31 @@ export function CustomerStatementAnimation({
                     transition={{
                       duration: 0.3,
                       delay: 0.5 + index * 0.08,
-                      ease: 'easeOut',
+                      ease: "easeOut",
                     }}
                     className="h-[28px] md:h-[32px] border-b border-border bg-background hover:bg-secondary transition-colors"
                   >
-                    <td className="w-[90px] md:w-[100px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-foreground border-r border-border">{invoice.invoiceNo}</td>
-                    <td className="w-[70px] md:w-[80px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-muted-foreground border-r border-border">{invoice.date}</td>
-                    <td className="w-[80px] md:w-[90px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-muted-foreground border-r border-border">{invoice.dueDate}</td>
-                    <td className="w-[100px] md:w-[110px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-foreground border-r border-border">{invoice.amount}</td>
+                    <td className="w-[90px] md:w-[100px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-foreground border-r border-border">
+                      {invoice.invoiceNo}
+                    </td>
+                    <td className="w-[70px] md:w-[80px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-muted-foreground border-r border-border">
+                      {invoice.date}
+                    </td>
+                    <td className="w-[80px] md:w-[90px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-muted-foreground border-r border-border">
+                      {invoice.dueDate}
+                    </td>
+                    <td className="w-[100px] md:w-[110px] px-1.5 md:px-2 text-[10px] md:text-[11px] text-foreground border-r border-border">
+                      {invoice.amount}
+                    </td>
                     <td className="w-[80px] md:w-[90px] px-1.5 md:px-2">
-                      <span className={`text-[10px] md:text-[11px] ${getStatusColor(invoice.status)}`}>
-                        {invoice.status === 'unpaid' ? 'Unpaid' : invoice.status === 'overdue' ? 'Overdue' : 'Paid'}
+                      <span
+                        className={`text-[10px] md:text-[11px] ${getStatusColor(invoice.status)}`}
+                      >
+                        {invoice.status === "unpaid"
+                          ? "Unpaid"
+                          : invoice.status === "overdue"
+                            ? "Overdue"
+                            : "Paid"}
                       </span>
                     </td>
                   </motion.tr>
@@ -316,6 +375,5 @@ export function CustomerStatementAnimation({
         )}
       </motion.div>
     </div>
-  )
+  );
 }
-

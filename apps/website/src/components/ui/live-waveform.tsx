@@ -492,11 +492,7 @@ export const LiveWaveform = ({
       {!active && (
         <div className="border-primary/20 absolute top-1/2 right-0 left-0 -translate-y-1/2 border-t-2 border-dotted" />
       )}
-      <canvas
-        className="block h-full w-full"
-        ref={canvasRef}
-        aria-hidden="true"
-      />
+      <canvas className="block h-full w-full" ref={canvasRef} />
     </div>
   );
 };

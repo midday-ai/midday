@@ -1,14 +1,14 @@
 "use client";
 
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
+import { cn } from "@midday/ui/cn";
+import { Icons } from "@midday/ui/icons";
 import { motion } from "motion/react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { ReactElement } from "react";
 import { type IconMap, MaterialIcon } from "./icon-mapping";
-import { Icons } from "@midday/ui/icons";
-import { cn } from "@midday/ui/cn";
-import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
 
 export function AIAssistantAnimation({
   onComplete,
@@ -84,7 +84,8 @@ export function AIAssistantAnimation({
     {
       id: 2,
       text: "## Business Activity\n\nBusiness activity included 8 invoices sent (3 more than last week), 47 hours tracked across projects, $2,800 in forecasted revenue from tracked hours, 23 receipts automatically matched to transactions, and 4 bank transactions categorized automatically.\n\nKeep monitoring cash flow trends to maintain this positive momentum.",
-      textMobile: "## Business Activity\n\nBusiness activity included 8 invoices sent (3 more than last week), 47 hours tracked across projects, $2,800 in forecasted revenue from tracked hours, 23 receipts automatically matched to transactions, and 4 bank transactions categorized automatically.",
+      textMobile:
+        "## Business Activity\n\nBusiness activity included 8 invoices sent (3 more than last week), 47 hours tracked across projects, $2,800 in forecasted revenue from tracked hours, 23 receipts automatically matched to transactions, and 4 bank transactions categorized automatically.",
       toolCall: {
         text: "Processing business metrics",
         icon: "receipt",
@@ -134,9 +135,12 @@ export function AIAssistantAnimation({
     return elements;
   };
 
-  const [containerRef, shouldPlay] = usePlayOnceOnVisible(() => {
-    // Callback triggered when element becomes visible
-  }, { threshold: 0.5 });
+  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
+    () => {
+      // Callback triggered when element becomes visible
+    },
+    { threshold: 0.5 },
+  );
 
   useEffect(() => {
     if (!shouldPlay) return;

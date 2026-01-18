@@ -6,11 +6,12 @@ export function HeaderIntegrationsPreview() {
   return (
     <div className="w-full h-full flex items-center justify-center p-4 bg-background">
       {/* Container with border and dotted pattern */}
-      <div 
+      <div
         className="w-full h-full border border-border relative"
         style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--border)) 0.5px, transparent 0)',
-          backgroundSize: '6px 6px',
+          backgroundImage:
+            "radial-gradient(circle at 1px 1px, hsl(var(--border)) 0.5px, transparent 0)",
+          backgroundSize: "6px 6px",
         }}
       >
         {/* Integrations Wordmark */}
@@ -34,4 +35,3 @@ export function HeaderIntegrationsPreview() {
     </div>
   );
 }
-

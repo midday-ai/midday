@@ -22,7 +22,9 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata | undefined> {
+export async function generateMetadata({
+  params,
+}: Props): Promise<Metadata | undefined> {
   const { slug } = await params;
   const post = getBlogPosts().find((post) => post.slug === slug);
 
@@ -84,7 +86,9 @@ export default async function Page({ params }: Props) {
             datePublished: post.metadata.publishedAt,
             dateModified: post.metadata.publishedAt,
             description: post.metadata.summary,
-            image: post.metadata.image ? `${baseUrl}${post.metadata.image}` : undefined,
+            image: post.metadata.image
+              ? `${baseUrl}${post.metadata.image}`
+              : undefined,
             url: `${baseUrl}/updates/${post.slug}`,
           }),
         }}

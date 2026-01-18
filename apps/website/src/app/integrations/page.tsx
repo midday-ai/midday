@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { IntegrationsPage } from "@/components/integrations-page";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Integrations",

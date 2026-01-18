@@ -1,57 +1,63 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { motion } from "motion/react"
-import Image from 'next/image'
-import { MaterialIcon } from './icon-mapping'
-import { usePlayOnceOnVisible } from '@/hooks/use-play-once-on-visible'
+import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
+import { motion } from "motion/react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { MaterialIcon } from "./icon-mapping";
 
 export function CompanyEnrichmentAnimation({
   onComplete,
 }: {
-  onComplete?: () => void
+  onComplete?: () => void;
 }) {
-  const [showHeader, setShowHeader] = useState(false)
-  const [showLogo, setShowLogo] = useState(false)
-  const [showTags, setShowTags] = useState(false)
-  const [showGeneral, setShowGeneral] = useState(false)
-  const [showCompanyProfile, setShowCompanyProfile] = useState(false)
-  const [showDetails, setShowDetails] = useState(false)
+  const [showHeader, setShowHeader] = useState(false);
+  const [showLogo, setShowLogo] = useState(false);
+  const [showTags, setShowTags] = useState(false);
+  const [showGeneral, setShowGeneral] = useState(false);
+  const [showCompanyProfile, setShowCompanyProfile] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
-  const [containerRef, shouldPlay] = usePlayOnceOnVisible(() => {
-    // Callback triggered when element becomes visible
-  }, { threshold: 0.5 })
+  const [containerRef, shouldPlay] = usePlayOnceOnVisible(
+    () => {
+      // Callback triggered when element becomes visible
+    },
+    { threshold: 0.5 },
+  );
 
   useEffect(() => {
-    if (!shouldPlay) return
+    if (!shouldPlay) return;
 
     const headerTimer = setTimeout(() => {
-      setShowHeader(true)
-      setShowLogo(true)
-    }, 0)
-    const tagsTimer = setTimeout(() => setShowTags(true), 600)
-    const generalTimer = setTimeout(() => setShowGeneral(true), 900)
-    const profileTimer = setTimeout(() => setShowCompanyProfile(true), 1200)
-    const detailsTimer = setTimeout(() => setShowDetails(true), 1500)
+      setShowHeader(true);
+      setShowLogo(true);
+    }, 0);
+    const tagsTimer = setTimeout(() => setShowTags(true), 600);
+    const generalTimer = setTimeout(() => setShowGeneral(true), 900);
+    const profileTimer = setTimeout(() => setShowCompanyProfile(true), 1200);
+    const detailsTimer = setTimeout(() => setShowDetails(true), 1500);
 
     const doneTimer = onComplete
       ? setTimeout(() => {
-          onComplete()
+          onComplete();
         }, 10000)
-      : undefined
+      : undefined;
 
     return () => {
-      clearTimeout(headerTimer)
-      clearTimeout(tagsTimer)
-      clearTimeout(generalTimer)
-      clearTimeout(profileTimer)
-      clearTimeout(detailsTimer)
-      if (doneTimer) clearTimeout(doneTimer)
-    }
-  }, [shouldPlay, onComplete])
+      clearTimeout(headerTimer);
+      clearTimeout(tagsTimer);
+      clearTimeout(generalTimer);
+      clearTimeout(profileTimer);
+      clearTimeout(detailsTimer);
+      if (doneTimer) clearTimeout(doneTimer);
+    };
+  }, [shouldPlay, onComplete]);
 
   return (
-    <div ref={containerRef} className="w-full h-full flex flex-col relative bg-background min-h-0">
+    <div
+      ref={containerRef}
+      className="w-full h-full flex flex-col relative bg-background min-h-0"
+    >
       {/* Header */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -75,9 +81,15 @@ export function CompanyEnrichmentAnimation({
               className="w-full h-full object-contain"
             />
           </motion.div>
-          <h2 className="text-[16px] md:text-[18px] font-serif text-foreground">Supabase</h2>
+          <h2 className="text-[16px] md:text-[18px] font-serif text-foreground">
+            Supabase
+          </h2>
         </div>
-        <MaterialIcon name="more_vert" className="text-sm text-muted-foreground" size={16} />
+        <MaterialIcon
+          name="more_vert"
+          className="text-sm text-muted-foreground"
+          size={16}
+        />
       </motion.div>
 
       {/* Description */}
@@ -89,8 +101,17 @@ export function CompanyEnrichmentAnimation({
           className="pt-2 md:pt-3 px-2 md:px-3 pb-1 md:pb-1.5"
         >
           <p className="text-[10px] md:text-[11px] text-muted-foreground leading-relaxed">
-            <span className="md:hidden">A technology company that provides enterprise cloud solutions and data synchronization services for businesses worldwide.</span>
-            <span className="hidden md:inline">A technology company that provides enterprise cloud solutions and data synchronization services for businesses worldwide. The platform enables seamless data integration across multiple systems, offering real-time synchronization, advanced security features, and comprehensive analytics for enterprise customers.</span>
+            <span className="md:hidden">
+              A technology company that provides enterprise cloud solutions and
+              data synchronization services for businesses worldwide.
+            </span>
+            <span className="hidden md:inline">
+              A technology company that provides enterprise cloud solutions and
+              data synchronization services for businesses worldwide. The
+              platform enables seamless data integration across multiple
+              systems, offering real-time synchronization, advanced security
+              features, and comprehensive analytics for enterprise customers.
+            </span>
           </p>
         </motion.div>
       )}
@@ -146,8 +167,14 @@ export function CompanyEnrichmentAnimation({
         className="border-b border-border md:mt-2"
       >
         <div className="pt-2 md:pt-3 pb-3 md:py-5 flex items-center justify-between px-2 md:px-3">
-          <h3 className="text-[11px] md:text-[12px] text-foreground">General</h3>
-          <MaterialIcon name="expand_less" className="text-sm text-muted-foreground" size={16} />
+          <h3 className="text-[11px] md:text-[12px] text-foreground">
+            General
+          </h3>
+          <MaterialIcon
+            name="expand_less"
+            className="text-sm text-muted-foreground"
+            size={16}
+          />
         </div>
         {showGeneral && (
           <motion.div
@@ -162,7 +189,8 @@ export function CompanyEnrichmentAnimation({
               transition={{ duration: 0.2, delay: 0.1 }}
               className="text-[10px] md:text-[11px] text-muted-foreground"
             >
-              <span className="text-foreground">Contact person:</span> Michael Thompson
+              <span className="text-foreground">Contact person:</span> Michael
+              Thompson
             </motion.div>
             <motion.div
               initial={{ opacity: 0, x: -10 }}
@@ -170,7 +198,8 @@ export function CompanyEnrichmentAnimation({
               transition={{ duration: 0.2, delay: 0.2 }}
               className="text-[10px] md:text-[11px] text-muted-foreground"
             >
-              <span className="text-foreground">Email:</span> finance@supabase.com
+              <span className="text-foreground">Email:</span>{" "}
+              finance@supabase.com
             </motion.div>
             <motion.div
               initial={{ opacity: 0, x: -10 }}
@@ -192,8 +221,14 @@ export function CompanyEnrichmentAnimation({
         className="flex-1 min-h-0 overflow-y-auto flex flex-col md:mt-2"
       >
         <div className="pt-2 md:pt-3 pb-3 md:py-5 flex items-center justify-between px-2 md:px-3 flex-shrink-0">
-          <h3 className="text-[11px] md:text-[12px] text-foreground">Company Profile</h3>
-          <MaterialIcon name="expand_less" className="text-sm text-muted-foreground" size={16} />
+          <h3 className="text-[11px] md:text-[12px] text-foreground">
+            Company Profile
+          </h3>
+          <MaterialIcon
+            name="expand_less"
+            className="text-sm text-muted-foreground"
+            size={16}
+          />
         </div>
         {showCompanyProfile && (
           <motion.div
@@ -241,7 +276,8 @@ export function CompanyEnrichmentAnimation({
                 transition={{ duration: 0.2, delay: 0.5 }}
                 className="text-[10px] md:text-[11px] text-muted-foreground"
               >
-                <span className="text-foreground">Funding:</span> Series C ($125M)
+                <span className="text-foreground">Funding:</span> Series C
+                ($125M)
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
@@ -249,7 +285,8 @@ export function CompanyEnrichmentAnimation({
                 transition={{ duration: 0.2, delay: 0.6 }}
                 className="text-[10px] md:text-[11px] text-muted-foreground"
               >
-                <span className="text-foreground">Headquarters:</span> San Francisco, CA
+                <span className="text-foreground">Headquarters:</span> San
+                Francisco, CA
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
@@ -257,7 +294,8 @@ export function CompanyEnrichmentAnimation({
                 transition={{ duration: 0.2, delay: 0.7 }}
                 className="text-[10px] md:text-[11px] text-muted-foreground"
               >
-                <span className="text-foreground">CEO / Founder:</span> David Rodriguez
+                <span className="text-foreground">CEO / Founder:</span> David
+                Rodriguez
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
@@ -273,7 +311,8 @@ export function CompanyEnrichmentAnimation({
                 transition={{ duration: 0.2, delay: 0.9 }}
                 className="text-[10px] md:text-[11px] text-muted-foreground"
               >
-                <span className="text-foreground">Fiscal Year End:</span> December
+                <span className="text-foreground">Fiscal Year End:</span>{" "}
+                December
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
@@ -296,11 +335,16 @@ export function CompanyEnrichmentAnimation({
         className="border-t border-border"
       >
         <div className="py-2.5 md:py-3.5 flex items-center justify-between px-2 md:px-3">
-          <h3 className="text-[11px] md:text-[12px] text-foreground">Details</h3>
-          <MaterialIcon name="expand_more" className="text-sm text-muted-foreground" size={16} />
+          <h3 className="text-[11px] md:text-[12px] text-foreground">
+            Details
+          </h3>
+          <MaterialIcon
+            name="expand_more"
+            className="text-sm text-muted-foreground"
+            size={16}
+          />
         </div>
       </motion.div>
     </div>
-  )
+  );
 }
-

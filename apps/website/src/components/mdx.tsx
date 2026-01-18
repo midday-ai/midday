@@ -133,7 +133,10 @@ interface CustomMDXProps {
   components?: Record<string, React.ComponentType<unknown>>;
 }
 
-export function CustomMDX({ source, components: customComponents }: CustomMDXProps) {
+export function CustomMDX({
+  source,
+  components: customComponents,
+}: CustomMDXProps) {
   return (
     <MDXRemote
       source={source}

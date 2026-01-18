@@ -1,14 +1,14 @@
-'use client'
+"use client";
 
-import { PricingSection } from './sections/pricing-section'
-import { FAQSection } from './sections/faq-section'
+import { FAQSection } from "./sections/faq-section";
+import { PricingSection } from "./sections/pricing-section";
 
 export function Pricing() {
   return (
     <div className="min-h-screen">
       {/* Pricing Section */}
       <div className="pt-12 sm:pt-16 lg:pt-20">
-      <PricingSection />
+        <PricingSection />
       </div>
 
       {/* Divider */}
@@ -19,6 +19,5 @@ export function Pricing() {
       {/* FAQ Section */}
       <FAQSection />
     </div>
-  )
+  );
 }
-

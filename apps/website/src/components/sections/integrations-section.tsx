@@ -1,37 +1,72 @@
-'use client'
+"use client";
 
-import Image from 'next/image'
-import Link from 'next/link'
+import Image from "next/image";
+import Link from "next/link";
 
 export interface Integration {
-  name: string
-  icon: string
-  alt: string
-  slug: string
+  name: string;
+  icon: string;
+  alt: string;
+  slug: string;
 }
 
 interface IntegrationsSectionProps {
-  title?: string
-  subtitle?: string
-  integrations?: Integration[]
+  title?: string;
+  subtitle?: string;
+  integrations?: Integration[];
 }
 
 const defaultIntegrations: Integration[] = [
-  { name: 'Gmail', icon: '/images/gmail.svg', alt: 'Gmail', slug: 'gmail' },
-  { name: 'Outlook', icon: '/images/outlook.svg', alt: 'Outlook', slug: 'outlook' },
-  { name: 'WhatsApp', icon: '/images/whatsapp.svg', alt: 'WhatsApp', slug: 'whatsapp' },
-  { name: 'Google Drive', icon: '/images/gdrive.svg', alt: 'Google Drive', slug: 'google-drive' },
-  { name: 'Dropbox', icon: '/images/dropbox.svg', alt: 'Dropbox', slug: 'dropbox' },
-  { name: 'Slack', icon: '/images/slack.svg', alt: 'Slack', slug: 'slack' },
-  { name: 'Stripe', icon: '/images/stripe.svg', alt: 'Stripe', slug: 'stripe-payments' },
-  { name: 'Xero', icon: '/images/xero.svg', alt: 'Xero', slug: 'xero' },
-  { name: 'QuickBooks', icon: '/images/quickbooks.svg', alt: 'QuickBooks', slug: 'quickbooks' },
-  { name: 'Fortnox', icon: '/images/fortnox.svg', alt: 'Fortnox', slug: 'fortnox' },
-]
+  { name: "Gmail", icon: "/images/gmail.svg", alt: "Gmail", slug: "gmail" },
+  {
+    name: "Outlook",
+    icon: "/images/outlook.svg",
+    alt: "Outlook",
+    slug: "outlook",
+  },
+  {
+    name: "WhatsApp",
+    icon: "/images/whatsapp.svg",
+    alt: "WhatsApp",
+    slug: "whatsapp",
+  },
+  {
+    name: "Google Drive",
+    icon: "/images/gdrive.svg",
+    alt: "Google Drive",
+    slug: "google-drive",
+  },
+  {
+    name: "Dropbox",
+    icon: "/images/dropbox.svg",
+    alt: "Dropbox",
+    slug: "dropbox",
+  },
+  { name: "Slack", icon: "/images/slack.svg", alt: "Slack", slug: "slack" },
+  {
+    name: "Stripe",
+    icon: "/images/stripe.svg",
+    alt: "Stripe",
+    slug: "stripe-payments",
+  },
+  { name: "Xero", icon: "/images/xero.svg", alt: "Xero", slug: "xero" },
+  {
+    name: "QuickBooks",
+    icon: "/images/quickbooks.svg",
+    alt: "QuickBooks",
+    slug: "quickbooks",
+  },
+  {
+    name: "Fortnox",
+    icon: "/images/fortnox.svg",
+    alt: "Fortnox",
+    slug: "fortnox",
+  },
+];
 
 export function IntegrationsSection({
-  title = 'Works with the tools you already use',
-  subtitle = 'Connect your banks, email, payments and accounting software in minutes.',
+  title = "Works with the tools you already use",
+  subtitle = "Connect your banks, email, payments and accounting software in minutes.",
   integrations = defaultIntegrations,
 }: IntegrationsSectionProps) {
   return (
@@ -67,6 +102,5 @@ export function IntegrationsSection({
         </div>
       </div>
     </section>
-  )
+  );
 }
-

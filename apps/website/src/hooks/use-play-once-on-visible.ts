@@ -106,4 +106,3 @@ export function usePlayOnceOnVisible<T extends HTMLElement = HTMLDivElement>(
 
   return [elementRef, shouldPlay];
 }
-

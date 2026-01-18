@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { cn } from "@midday/ui/cn";
+import Link from "next/link";
 
 type Props = {
   currentPage: number;
@@ -41,7 +41,7 @@ export function Pagination({ currentPage, totalPages, basePath }: Props) {
                 "w-8 h-8 flex items-center justify-center text-sm rounded-full transition-colors",
                 isCurrentPage
                   ? "bg-primary text-primary-foreground"
-                  : "text-[#878787] hover:text-foreground hover:bg-accent"
+                  : "text-[#878787] hover:text-foreground hover:bg-accent",
               )}
             >
               {page}

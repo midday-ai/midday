@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import { Button } from '@midday/ui/button'
+import { Button } from "@midday/ui/button";
 
 export function PricingSection() {
   return (
@@ -25,7 +25,8 @@ export function PricingSection() {
                   Starter
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground mb-3">
-                  For solo founders who want a clean starting point for their business finances
+                  For solo founders who want a clean starting point for their
+                  business finances
                 </p>
                 <div className="flex items-baseline gap-2">
                   <span className="font-sans text-2xl text-foreground">
@@ -89,7 +90,7 @@ export function PricingSection() {
               </div>
 
               <div className="space-y-3">
-                <Button 
+                <Button
                   asChild
                   className="w-full bg-background border border-border text-foreground font-sans text-sm py-3 px-4 hover:bg-muted transition-colors"
                 >
@@ -117,7 +118,8 @@ export function PricingSection() {
                   Pro
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground mb-3">
-                  For founders and small teams running weekly finance workflows end to end
+                  For founders and small teams running weekly finance workflows
+                  end to end
                 </p>
                 <div className="flex items-baseline gap-2">
                   <span className="font-sans text-2xl text-foreground">
@@ -181,7 +183,7 @@ export function PricingSection() {
               </div>
 
               <div className="space-y-3">
-                <Button 
+                <Button
                   asChild
                   className="w-full btn-inverse font-sans text-sm py-3 px-4 transition-colors"
                 >
@@ -205,5 +207,5 @@ export function PricingSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }
