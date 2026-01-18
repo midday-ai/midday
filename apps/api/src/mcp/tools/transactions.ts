@@ -3,7 +3,7 @@ import {
   getTransactionsSchema,
 } from "@api/schemas/transactions";
 import { getTransactionById, getTransactions } from "@midday/db/queries";
-import { READ_ONLY_ANNOTATIONS, hasScope, type RegisterTools } from "../types";
+import { READ_ONLY_ANNOTATIONS, type RegisterTools, hasScope } from "../types";
 
 export const registerTransactionTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;

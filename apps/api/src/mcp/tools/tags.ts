@@ -1,6 +1,6 @@
 import { getTagById, getTags } from "@midday/db/queries";
 import { z } from "zod";
-import { READ_ONLY_ANNOTATIONS, hasScope, type RegisterTools } from "../types";
+import { READ_ONLY_ANNOTATIONS, type RegisterTools, hasScope } from "../types";
 
 export const registerTagTools: RegisterTools = (server, ctx) => {
   const { db, teamId } = ctx;
