@@ -4,5 +4,7 @@
   "github": {
     "enabled": false
   },
+  "installCommand": "bun install",
+  "buildCommand": "bun run build",
   "regions": ["fra1", "iad1", "sfo1"]
 }
