@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@midday/ui/button";
-import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -487,19 +486,12 @@ export function StartPage() {
                         type="button"
                         aria-label={`Go to feature: ${feature.title}`}
                       >
-                        <motion.div
-                          className={`w-2 h-2 rounded-none transition-all duration-300 ${
+                        <div
+                          className={`w-2 h-2 rounded-none transition-all duration-200 ease-out ${
                             activeFeature === index
-                              ? "bg-primary"
-                              : "bg-border hover:bg-muted-foreground"
+                              ? "bg-primary scale-[1.2]"
+                              : "bg-border hover:bg-muted-foreground scale-100"
                           }`}
-                          animate={{
-                            scale: activeFeature === index ? 1.2 : 1,
-                          }}
-                          transition={{
-                            duration: 0.2,
-                            ease: "easeOut",
-                          }}
                         />
                       </button>
                       {index < features.length - 1 && (
@@ -538,20 +530,14 @@ export function StartPage() {
                     style={{ minHeight: "3rem" }}
                   >
                     {activeFeature === index ? (
-                      <motion.div
-                        initial={{ opacity: 0, filter: "blur(6px)" }}
-                        animate={{ opacity: 1, filter: "blur(0px)" }}
-                        exit={{ opacity: 0, filter: "blur(6px)" }}
-                        transition={{ duration: 0.35 }}
-                        className="overflow-hidden"
-                      >
+                      <div className="overflow-hidden animate-[fadeInBlur_0.35s_ease-out_forwards]">
                         <h2 className="font-sans text-lg lg:text-xl text-primary transition-colors duration-300 max-w-md">
                           {feature.title}
                         </h2>
                         <p className="font-sans text-sm text-primary leading-relaxed max-w-md mt-1">
                           {feature.subtitle}
                         </p>
-                      </motion.div>
+                      </div>
                     ) : (
                       <div>
                         <h2 className="font-sans text-lg lg:text-xl text-muted-foreground transition-colors duration-300 max-w-md">
@@ -565,12 +551,9 @@ export function StartPage() {
             </div>
 
             <div className="flex items-center justify-center p-6 lg:p-8 border border-border h-full overflow-hidden relative bg-background">
-              <motion.div
+              <div
                 key={activeFeature}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-                className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center"
+                className="w-[400px] h-[500px] sm:w-[520px] sm:h-[640px] lg:w-[600px] lg:h-[700px] relative overflow-hidden z-10 flex items-center justify-center animate-[fadeInScale_0.4s_ease-out_forwards]"
                 style={{ transformOrigin: "center" }}
               >
                 <div
@@ -619,7 +602,7 @@ export function StartPage() {
                     />
                   )}
                 </div>
-              </motion.div>
+              </div>
             </div>
           </div>
         </div>

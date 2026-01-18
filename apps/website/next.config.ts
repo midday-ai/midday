@@ -14,7 +14,14 @@ const config = {
   },
   experimental: {
     inlineCss: true,
-    optimizePackageImports: ["react-icons", "framer-motion", "@midday/ui"],
+    optimizePackageImports: [
+      "react-icons",
+      "framer-motion",
+      "motion",
+      "@midday/ui",
+      "@radix-ui/react-icons",
+      "lucide-react",
+    ],
   },
   images: {
     loader: "custom",
