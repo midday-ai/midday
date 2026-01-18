@@ -3,11 +3,9 @@
 import { RaycastMcpLogo } from "@midday/app-store/logos";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { Input } from "@midday/ui/input";
 import { useTheme } from "next-themes";
-import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
   oneDark,
@@ -76,58 +74,26 @@ function CodeBlock({
   );
 }
 
+// Raycast config for deeplink
+const raycastConfig = {
+  name: "midday",
+  type: "stdio",
+  command: "npx",
+  args: ["-y", "mcp-remote", "https://api.midday.ai/mcp"],
+  env: {
+    MCP_AUTH_HEADER: "Bearer YOUR_API_KEY",
+  },
+};
+const raycastDeepLink = `raycast://mcp/install?${encodeURIComponent(JSON.stringify(raycastConfig))}`;
+
+const manualConfig = JSON.stringify(raycastConfig, null, 2);
+
 export function MCPRaycast() {
-  const [apiKey, setApiKey] = useState("");
-
-  const config = useMemo(() => {
-    const key = apiKey || "YOUR_API_KEY";
-    return {
-      name: "midday",
-      type: "stdio",
-      command: "npx",
-      args: ["-y", "mcp-remote", "https://api.midday.ai/mcp"],
-      env: {
-        MCP_AUTH_HEADER: `Bearer ${key}`,
-      },
-    };
-  }, [apiKey]);
-
-  const manualConfig = useMemo(() => {
-    return JSON.stringify(config, null, 2);
-  }, [config]);
-
-  const deepLink = useMemo(() => {
-    const configEncoded = encodeURIComponent(JSON.stringify(config));
-    return `raycast://mcp/install?${configEncoded}`;
-  }, [config]);
-
-  const hasApiKey = apiKey.startsWith("mid_");
-
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="bg-background relative overflow-visible">
-        {/* Grid Pattern Background */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-          <Image
-            src="/images/grid-light.svg"
-            alt="Grid Pattern"
-            width={1728}
-            height={1080}
-            className="w-[1728px] h-[600px] object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-            loading="lazy"
-          />
-          <Image
-            src="/images/grid-dark.svg"
-            alt="Grid Pattern"
-            width={1728}
-            height={1080}
-            className="w-[1728px] h-[600px] object-cover opacity-[12%] hidden dark:block"
-            loading="lazy"
-          />
-        </div>
-
-        <div className="relative z-10 pt-32 pb-16 sm:pt-40 sm:pb-20 md:pt-48 px-4 sm:px-6">
+      <div className="bg-background">
+        <div className="pt-32 pb-16 sm:pt-40 sm:pb-20 md:pt-48 px-4 sm:px-6">
           <div className="max-w-2xl mx-auto">
             {/* Back Link */}
             <Link
@@ -140,7 +106,7 @@ export function MCPRaycast() {
 
             {/* Logo and Title */}
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-14 h-14 overflow-hidden rounded-[22%] [&>img]:w-full [&>img]:h-full [&>img]:rounded-none">
+              <div className="w-14 h-14 [&>img]:w-full [&>img]:h-full">
                 <RaycastMcpLogo />
               </div>
               <div>
@@ -165,54 +131,26 @@ export function MCPRaycast() {
               </p>
             </div>
 
-            {/* API Key Input */}
-            <div className="space-y-4 mb-8">
-              <div className="space-y-2">
-                <label
-                  htmlFor="api-key"
-                  className="font-sans text-sm text-foreground"
-                >
-                  Your API key
-                </label>
-                <Input
-                  id="api-key"
-                  type="password"
-                  placeholder="mid_..."
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  className="font-mono text-sm"
-                />
-                <p className="font-sans text-xs text-muted-foreground">
-                  Don't have an API key?{" "}
-                  <Link
-                    href="https://app.midday.ai/settings/developer"
-                    className="underline hover:text-foreground"
-                  >
-                    Create one in Settings → Developer
-                  </Link>
-                </p>
-              </div>
-            </div>
-
             {/* Install Button */}
             <div className="space-y-4 mb-12">
               <Button
-                asChild={hasApiKey}
-                disabled={!hasApiKey}
+                asChild
                 className="w-full sm:w-auto h-11 px-6 text-sm font-sans"
               >
-                {hasApiKey ? (
-                  <a href={deepLink}>Install in Raycast</a>
-                ) : (
-                  <span>Enter API key to install</span>
-                )}
+                <a href={raycastDeepLink}>Add to Raycast</a>
               </Button>
-              {hasApiKey && (
-                <p className="font-sans text-xs text-muted-foreground">
-                  Clicking will open Raycast and prompt you to add the Midday
-                  MCP server.
-                </p>
-              )}
+              <p className="font-sans text-xs text-muted-foreground">
+                After installing, update{" "}
+                <code className="font-mono">YOUR_API_KEY</code> in Raycast's MCP
+                server settings with your{" "}
+                <Link
+                  href="https://app.midday.ai/settings/developer"
+                  className="underline hover:text-foreground"
+                >
+                  API key
+                </Link>
+                .
+              </p>
             </div>
 
             {/* Divider */}
@@ -240,6 +178,14 @@ export function MCPRaycast() {
                     1
                   </span>
                   <span className="font-sans text-sm text-muted-foreground pt-0.5">
+                    Click "Add to Raycast" above
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
+                    2
+                  </span>
+                  <span className="font-sans text-sm text-muted-foreground pt-0.5">
                     Get an API key from{" "}
                     <Link
                       href="https://app.midday.ai/settings/developer"
@@ -251,15 +197,16 @@ export function MCPRaycast() {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
-                    2
+                    3
                   </span>
                   <span className="font-sans text-sm text-muted-foreground pt-0.5">
-                    Click "Install in Raycast" or use the Install Server command
+                    Open Raycast's "Manage Servers" and edit Midday to add your
+                    API key
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
-                    3
+                    4
                   </span>
                   <span className="font-sans text-sm text-muted-foreground pt-0.5">
                     @-mention Midday in Raycast AI to query your data

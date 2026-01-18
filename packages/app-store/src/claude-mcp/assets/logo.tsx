@@ -3,7 +3,7 @@ import claudeIcon from "./claude.png";
 export const Logo = () => {
   return (
     <img
-      src={claudeIcon}
+      src={typeof claudeIcon === "string" ? claudeIcon : claudeIcon.src}
       alt="Claude"
       width={36}
       height={36}

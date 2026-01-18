@@ -3,7 +3,7 @@ import cursorIcon from "./cursor.png";
 export const Logo = () => {
   return (
     <img
-      src={cursorIcon}
+      src={typeof cursorIcon === "string" ? cursorIcon : cursorIcon.src}
       alt="Cursor"
       width={36}
       height={36}

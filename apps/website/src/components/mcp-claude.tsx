@@ -5,7 +5,6 @@ import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useTheme } from "next-themes";
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -109,28 +108,8 @@ export function MCPClaude() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="bg-background relative overflow-visible">
-        {/* Grid Pattern Background */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-          <Image
-            src="/images/grid-light.svg"
-            alt="Grid Pattern"
-            width={1728}
-            height={1080}
-            className="w-[1728px] h-[600px] object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-            loading="lazy"
-          />
-          <Image
-            src="/images/grid-dark.svg"
-            alt="Grid Pattern"
-            width={1728}
-            height={1080}
-            className="w-[1728px] h-[600px] object-cover opacity-[12%] hidden dark:block"
-            loading="lazy"
-          />
-        </div>
-
-        <div className="relative z-10 pt-32 pb-16 sm:pt-40 sm:pb-20 md:pt-48 px-4 sm:px-6">
+      <div className="bg-background">
+        <div className="pt-32 pb-16 sm:pt-40 sm:pb-20 md:pt-48 px-4 sm:px-6">
           <div className="max-w-2xl mx-auto">
             {/* Back Link */}
             <Link
@@ -143,7 +122,7 @@ export function MCPClaude() {
 
             {/* Logo and Title */}
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-14 h-14 overflow-hidden rounded-[22%] [&>img]:w-full [&>img]:h-full [&>img]:rounded-none">
+              <div className="w-14 h-14 [&>img]:w-full [&>img]:h-full">
                 <ClaudeMcpLogo />
               </div>
               <div>

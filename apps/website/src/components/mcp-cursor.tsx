@@ -1,13 +1,10 @@
 "use client";
 
 import { CursorMcpLogo } from "@midday/app-store/logos";
-import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { Input } from "@midday/ui/input";
 import { useTheme } from "next-themes";
-import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
   oneDark,
@@ -76,69 +73,36 @@ function CodeBlock({
   );
 }
 
-export function MCPCursor() {
-  const [apiKey, setApiKey] = useState("");
+// Pre-computed deeplink with placeholder token
+const cursorConfig = {
+  url: "https://api.midday.ai/mcp",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+  },
+};
+const cursorDeepLink = `cursor://anysphere.cursor-deeplink/mcp/install?name=midday&config=${encodeURIComponent(btoa(JSON.stringify(cursorConfig)))}`;
 
-  const config = useMemo(() => {
-    const key = apiKey || "YOUR_API_KEY";
-    return {
-      url: "https://api.midday.ai/mcp",
-      headers: {
-        Authorization: `Bearer ${key}`,
-      },
-    };
-  }, [apiKey]);
-
-  const manualConfig = useMemo(() => {
-    const key = apiKey || "YOUR_API_KEY";
-    return JSON.stringify(
-      {
-        mcpServers: {
-          midday: {
-            url: "https://api.midday.ai/mcp",
-            headers: {
-              Authorization: `Bearer ${key}`,
-            },
-          },
+const manualConfig = JSON.stringify(
+  {
+    mcpServers: {
+      midday: {
+        url: "https://api.midday.ai/mcp",
+        headers: {
+          Authorization: "Bearer YOUR_API_KEY",
         },
       },
-      null,
-      2,
-    );
-  }, [apiKey]);
+    },
+  },
+  null,
+  2,
+);
 
-  const deepLink = useMemo(() => {
-    const configBase64 = btoa(JSON.stringify(config));
-    return `cursor://anysphere.cursor-deeplink/mcp/install?name=midday&config=${encodeURIComponent(configBase64)}`;
-  }, [config]);
-
-  const hasApiKey = apiKey.startsWith("mid_");
-
+export function MCPCursor() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="bg-background relative overflow-visible">
-        {/* Grid Pattern Background */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-          <Image
-            src="/images/grid-light.svg"
-            alt="Grid Pattern"
-            width={1728}
-            height={1080}
-            className="w-[1728px] h-[600px] object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-            loading="lazy"
-          />
-          <Image
-            src="/images/grid-dark.svg"
-            alt="Grid Pattern"
-            width={1728}
-            height={1080}
-            className="w-[1728px] h-[600px] object-cover opacity-[12%] hidden dark:block"
-            loading="lazy"
-          />
-        </div>
-
-        <div className="relative z-10 pt-32 pb-16 sm:pt-40 sm:pb-20 md:pt-48 px-4 sm:px-6">
+      <div className="bg-background">
+        <div className="pt-32 pb-16 sm:pt-40 sm:pb-20 md:pt-48 px-4 sm:px-6">
           <div className="max-w-2xl mx-auto">
             {/* Back Link */}
             <Link
@@ -151,7 +115,7 @@ export function MCPCursor() {
 
             {/* Logo and Title */}
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-14 h-14 overflow-hidden rounded-[22%] [&>img]:w-full [&>img]:h-full [&>img]:rounded-none">
+              <div className="w-14 h-14 [&>img]:w-full [&>img]:h-full">
                 <CursorMcpLogo />
               </div>
               <div>
@@ -176,54 +140,34 @@ export function MCPCursor() {
               </p>
             </div>
 
-            {/* API Key Input */}
-            <div className="space-y-4 mb-8">
-              <div className="space-y-2">
-                <label
-                  htmlFor="api-key"
-                  className="font-sans text-sm text-foreground"
-                >
-                  Your API key
-                </label>
-                <Input
-                  id="api-key"
-                  type="password"
-                  placeholder="mid_..."
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  className="font-mono text-sm"
-                />
-                <p className="font-sans text-xs text-muted-foreground">
-                  Don't have an API key?{" "}
-                  <Link
-                    href="https://app.midday.ai/settings/developer"
-                    className="underline hover:text-foreground"
-                  >
-                    Create one in Settings → Developer
-                  </Link>
-                </p>
-              </div>
-            </div>
-
             {/* Install Button */}
             <div className="space-y-4 mb-12">
-              <Button
-                asChild={hasApiKey}
-                disabled={!hasApiKey}
-                className="w-full sm:w-auto h-11 px-6 text-sm font-sans"
-              >
-                {hasApiKey ? (
-                  <a href={deepLink}>Install in Cursor</a>
-                ) : (
-                  <span>Enter API key to install</span>
-                )}
-              </Button>
-              {hasApiKey && (
-                <p className="font-sans text-xs text-muted-foreground">
-                  Clicking will open Cursor and prompt you to add the Midday MCP
-                  server.
-                </p>
-              )}
+              <a href={cursorDeepLink} className="inline-block">
+                <img
+                  src="https://cursor.com/deeplink/mcp-install-dark.png"
+                  alt="Add Midday MCP server to Cursor"
+                  height={32}
+                  className="h-8 dark:hidden"
+                />
+                <img
+                  src="https://cursor.com/deeplink/mcp-install-light.png"
+                  alt="Add Midday MCP server to Cursor"
+                  height={32}
+                  className="h-8 hidden dark:block"
+                />
+              </a>
+              <p className="font-sans text-xs text-muted-foreground">
+                After installing, update{" "}
+                <code className="font-mono">YOUR_API_KEY</code> in{" "}
+                <code className="font-mono">~/.cursor/mcp.json</code> with your{" "}
+                <Link
+                  href="https://app.midday.ai/settings/developer"
+                  className="underline hover:text-foreground"
+                >
+                  API key
+                </Link>
+                .
+              </p>
             </div>
 
             {/* Divider */}
@@ -251,6 +195,14 @@ export function MCPCursor() {
                     1
                   </span>
                   <span className="font-sans text-sm text-muted-foreground pt-0.5">
+                    Click "Add to Cursor" above
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
+                    2
+                  </span>
+                  <span className="font-sans text-sm text-muted-foreground pt-0.5">
                     Get an API key from{" "}
                     <Link
                       href="https://app.midday.ai/settings/developer"
@@ -262,15 +214,16 @@ export function MCPCursor() {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
-                    2
+                    3
                   </span>
                   <span className="font-sans text-sm text-muted-foreground pt-0.5">
-                    Click "Install in Cursor" or add the config manually
+                    Replace <code className="font-mono">YOUR_API_KEY</code> in{" "}
+                    <code className="font-mono">~/.cursor/mcp.json</code>
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
-                    3
+                    4
                   </span>
                   <span className="font-sans text-sm text-muted-foreground pt-0.5">
                     Restart Cursor and @-mention Midday in chat

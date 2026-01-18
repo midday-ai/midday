@@ -15,25 +15,25 @@ const clients = [
   {
     id: "cursor",
     name: "Cursor",
-    description: "Code with full financial context",
+    description: "Track time and expenses while you code",
     href: "/mcp/cursor",
   },
   {
     id: "claude",
     name: "Claude",
-    description: "Conversations grounded in real data",
+    description: "Analyze trends and get insights",
     href: "/mcp/claude",
   },
   {
     id: "raycast",
     name: "Raycast",
-    description: "Financial tools at your fingertips",
+    description: "Quick answers, one shortcut away",
     href: "/mcp/raycast",
   },
   {
     id: "chatgpt",
     name: "ChatGPT",
-    description: "Build custom workflows with the SDK",
+    description: "Build custom integrations",
     href: "/mcp/chatgpt",
   },
 ];
@@ -66,9 +66,7 @@ function ClientLogo({ id, size = "md" }: { id: string; size?: "sm" | "md" }) {
   const containerSize = size === "sm" ? "w-10 h-10" : "w-12 h-12";
 
   return (
-    <div
-      className={`${containerSize} overflow-hidden rounded-[22%] [&>img]:w-full [&>img]:h-full [&>img]:rounded-none`}
-    >
+    <div className={`${containerSize} [&>img]:w-full [&>img]:h-full`}>
       <Logo />
     </div>
   );
@@ -101,7 +99,7 @@ export function MCP() {
 
         {/* Mobile Layout */}
         <div className="lg:hidden flex flex-col relative pt-32 pb-16 sm:pt-40 sm:pb-20 md:pt-48 overflow-hidden">
-          {/* Grid Pattern Background - Mobile/Tablet Only (Limited Height) */}
+          {/* Grid Pattern Background - Mobile/Tablet Only */}
           <div
             className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0"
             style={{ height: "600px" }}
@@ -130,12 +128,11 @@ export function MCP() {
                 MCP Server
               </p>
               <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl leading-tight text-foreground">
-                Your finances, available to AI
+                Your business, available to AI
               </h1>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto">
-                Connect Cursor, Claude, Raycast, or ChatGPT to your Midday data.
-                Ask questions and get answers based on what's actually happening
-                in your business.
+                Connect your AI tools to Midday. Ask about cash flow, invoices,
+                customers—get answers from your actual data.
               </p>
             </div>
 
@@ -171,12 +168,11 @@ export function MCP() {
                 MCP Server
               </p>
               <h1 className="font-serif text-6xl xl:text-7xl 2xl:text-8xl leading-tight text-foreground">
-                Your finances, available to AI
+                Your business, available to AI
               </h1>
               <p className="text-muted-foreground text-sm xl:text-base leading-normal max-w-2xl mx-auto font-sans text-center">
-                Connect Cursor, Claude, Raycast, or ChatGPT to your Midday data.
-                Ask questions, generate reports, and get answers based on what's
-                actually happening in your business.
+                Connect your AI tools to Midday. Ask about cash flow, invoices,
+                customers—get answers from your actual data.
               </p>
             </div>
 
@@ -214,10 +210,10 @@ export function MCP() {
         <div className="max-w-[1400px] mx-auto">
           <div className="text-center space-y-4 mb-12">
             <h2 className="font-serif text-2xl sm:text-3xl text-foreground">
-              Questions get answered
+              Skip the dashboards
             </h2>
             <p className="font-sans text-base text-muted-foreground leading-normal max-w-xl mx-auto">
-              Instead of digging through dashboards, just ask.
+              Just ask.
             </p>
           </div>
 
@@ -248,11 +244,10 @@ export function MCP() {
         <div className="max-w-[1400px] mx-auto">
           <div className="text-center space-y-4 mb-12">
             <h2 className="font-serif text-2xl sm:text-3xl text-foreground">
-              Everything stays read-only
+              Read-only by design
             </h2>
             <p className="font-sans text-base text-muted-foreground leading-normal max-w-xl mx-auto">
-              AI tools can query your data but never change it. Access is scoped
-              to your API key permissions.
+              Your AI tools can query data but never modify it.
             </p>
           </div>
 
@@ -288,8 +283,8 @@ export function MCP() {
               Get started
             </h2>
             <p className="font-sans text-base text-muted-foreground leading-normal">
-              Choose your AI client to see setup instructions. You'll need an
-              API key from your Midday dashboard.
+              Choose your AI client above. You'll need an API key from your
+              Midday dashboard.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button asChild className="h-11 px-6 text-sm font-sans">
