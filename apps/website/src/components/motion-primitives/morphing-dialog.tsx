@@ -277,6 +277,7 @@ function MorphingDialogContent({
         stiffness: 200,
         damping: 24,
       }}
+      // biome-ignore lint/a11y/useSemanticElements: motion.div cannot be replaced with dialog element
       role="dialog"
       aria-modal="true"
       aria-labelledby={`motion-ui-morphing-dialog-title-${uniqueId}`}

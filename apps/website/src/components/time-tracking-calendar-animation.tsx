@@ -158,6 +158,7 @@ export function TimeTrackingCalendarAnimation() {
         {/* Month Navigation Button */}
         <div className="bg-background border border-border flex items-center gap-2 px-2 py-1.5 h-7">
           <button
+            type="button"
             onClick={handlePreviousMonth}
             className="flex items-center justify-center w-4 h-4 transition-colors hover:text-muted-foreground touch-manipulation focus:outline-none focus-visible:outline-none"
             style={{ WebkitTapHighlightColor: "transparent" }}
@@ -168,6 +169,7 @@ export function TimeTrackingCalendarAnimation() {
             {currentMonthName} {currentYear}
           </span>
           <button
+            type="button"
             onClick={handleNextMonth}
             className="flex items-center justify-center w-4 h-4 transition-colors hover:text-muted-foreground touch-manipulation focus:outline-none focus-visible:outline-none"
             style={{ WebkitTapHighlightColor: "transparent" }}
@@ -183,6 +185,7 @@ export function TimeTrackingCalendarAnimation() {
         >
           <div className="flex items-stretch">
             <button
+              type="button"
               onClick={() => setSelectedView("week")}
               className={`group relative flex items-center gap-1.5 px-2 py-1 h-7 text-[10px] sm:text-xs whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none ${
                 selectedView === "week"
@@ -199,6 +202,7 @@ export function TimeTrackingCalendarAnimation() {
               <span>Week</span>
             </button>
             <button
+              type="button"
               onClick={() => setSelectedView("month")}
               className={`group relative flex items-center gap-1.5 px-2 py-1 h-7 text-[10px] sm:text-xs whitespace-nowrap border transition-colors touch-manipulation focus:outline-none focus-visible:outline-none ${
                 selectedView === "month"
@@ -237,10 +241,15 @@ export function TimeTrackingCalendarAnimation() {
           {calendarDays.map((calendarDay, index) => {
             const { day, isPreviousMonth, isNextMonth } = calendarDay;
             const events = getEventsForDay(day, isPreviousMonth, isNextMonth);
+            const keyPrefix = isPreviousMonth
+              ? "prev"
+              : isNextMonth
+                ? "next"
+                : "curr";
 
             return (
               <div
-                key={index}
+                key={`${keyPrefix}-${day ?? index}`}
                 className={`
                 min-h-[60px] sm:min-h-[75px] lg:min-h-[89px] pt-1.5 sm:pt-2 pb-1.5 sm:pb-2 px-1.5 sm:px-2 lg:px-3 text-xs sm:text-sm relative transition-all duration-100 text-left flex flex-col bg-background
                 ${

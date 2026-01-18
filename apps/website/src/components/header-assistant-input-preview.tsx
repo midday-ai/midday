@@ -26,7 +26,7 @@ export function HeaderAssistantInputPreview() {
         <div className="p-1 space-y-0.5">
           {SHORTCUT_SUGGESTIONS.map((suggestion, index) => (
             <div
-              key={index}
+              key={suggestion}
               className={cn(
                 "px-2 py-1.5 text-[10px] cursor-pointer transition-colors font-sans",
                 index === 0 ? "text-foreground bg-muted" : "text-foreground/50",
@@ -53,10 +53,14 @@ export function HeaderAssistantInputPreview() {
         {/* Icons Row */}
         <div className="flex items-end justify-between px-3 pb-2">
           <div className="flex items-center gap-1.5">
-            <button className="w-5 h-5 flex items-center justify-center transition-colors text-muted-foreground">
+            <button
+              type="button"
+              className="w-5 h-5 flex items-center justify-center transition-colors text-muted-foreground"
+            >
               <Icons.Add size={14} />
             </button>
             <button
+              type="button"
               className={cn(
                 "w-5 h-5 flex items-center justify-center transition-colors",
                 isBoltActive ? "text-foreground" : "text-muted-foreground",
@@ -65,18 +69,30 @@ export function HeaderAssistantInputPreview() {
             >
               <Icons.Bolt size={14} />
             </button>
-            <button className="w-5 h-5 flex items-center justify-center transition-colors text-muted-foreground">
+            <button
+              type="button"
+              className="w-5 h-5 flex items-center justify-center transition-colors text-muted-foreground"
+            >
               <Icons.Globle size={14} />
             </button>
-            <button className="w-5 h-5 flex items-center justify-center transition-colors text-muted-foreground">
+            <button
+              type="button"
+              className="w-5 h-5 flex items-center justify-center transition-colors text-muted-foreground"
+            >
               <Icons.Time size={14} />
             </button>
           </div>
           <div className="flex items-end gap-1.5">
-            <button className="w-5 h-5 flex items-center justify-center transition-colors text-muted-foreground">
+            <button
+              type="button"
+              className="w-5 h-5 flex items-center justify-center transition-colors text-muted-foreground"
+            >
               <Icons.Record size={14} />
             </button>
-            <button className="w-5 h-5 flex items-center justify-center transition-opacity bg-foreground">
+            <button
+              type="button"
+              className="w-5 h-5 flex items-center justify-center transition-opacity bg-foreground"
+            >
               <Icons.ArrowUpward size={12} className="text-background" />
             </button>
           </div>

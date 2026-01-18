@@ -78,6 +78,7 @@ export default async function Page({ params }: Props) {
       <script
         type="application/ld+json"
         suppressHydrationWarning
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data requires innerHTML
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",

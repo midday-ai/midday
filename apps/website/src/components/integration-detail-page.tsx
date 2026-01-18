@@ -21,12 +21,12 @@ export function IntegrationDetailPage({ app }: Props) {
     if (!text) return null;
 
     const parts = text.split("\n\n");
-    return parts.map((part, index) => {
+    return parts.map((part) => {
       if (part.startsWith("**") && part.includes("**\n")) {
         const [title, ...content] = part.split("\n");
-        const cleanTitle = title.replace(/\*\*/g, "");
+        const cleanTitle = title?.replace(/\*\*/g, "") || "";
         return (
-          <div key={index} className="mb-6">
+          <div key={cleanTitle} className="mb-6">
             <h3 className="font-sans text-lg text-foreground mb-2">
               {cleanTitle}
             </h3>
@@ -38,7 +38,7 @@ export function IntegrationDetailPage({ app }: Props) {
       }
       return (
         <p
-          key={index}
+          key={part.slice(0, 50)}
           className="font-sans text-base text-muted-foreground leading-relaxed mb-4"
         >
           {part}
@@ -120,8 +120,8 @@ export function IntegrationDetailPage({ app }: Props) {
                   Key Features
                 </h2>
                 <ul className="space-y-4">
-                  {app.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-3">
+                  {app.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-3">
                       <div className="w-1.5 h-1.5 bg-foreground mt-2 flex-shrink-0" />
                       <span className="font-sans text-base text-muted-foreground">
                         {feature}

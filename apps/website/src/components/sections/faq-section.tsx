@@ -96,7 +96,10 @@ export function FAQSection() {
 
         <div className="max-w-3xl mx-auto space-y-4">
           {faqs.map((faq, index) => (
-            <div key={index} className="border border-border bg-background">
+            <div
+              key={faq.question}
+              className="border border-border bg-background"
+            >
               <button
                 type="button"
                 onClick={() => toggleFAQ(index)}

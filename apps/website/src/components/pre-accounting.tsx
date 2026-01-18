@@ -173,7 +173,7 @@ export function PreAccounting() {
           {/* Mobile: Stacked features with animations */}
           <div className="grid grid-cols-1 gap-12 sm:gap-16 lg:hidden">
             {howItWorksSteps.map((step, index) => (
-              <div key={index} className="space-y-6 sm:space-y-8">
+              <div key={step.title} className="space-y-6 sm:space-y-8">
                 <div className="space-y-2 text-center">
                   <h2 className="font-serif text-2xl sm:text-2xl text-foreground max-w-md mx-auto">
                     {step.title}
@@ -213,7 +213,7 @@ export function PreAccounting() {
                   />
                   {howItWorksSteps.map((step, index) => (
                     <div
-                      key={index}
+                      key={step.title}
                       className="flex items-start justify-center relative"
                       style={{ minHeight: "3.5rem" }}
                     >
@@ -264,9 +264,10 @@ export function PreAccounting() {
                   </h2>
                 </div>
                 {howItWorksSteps.map((step, index) => (
-                  <div
-                    key={index}
-                    className={`cursor-pointer transition-all duration-300 flex items-start ${
+                  <button
+                    type="button"
+                    key={step.title}
+                    className={`cursor-pointer transition-all duration-300 flex items-start bg-transparent border-0 p-0 text-left ${
                       activeStep === index
                         ? "opacity-100"
                         : "opacity-60 hover:opacity-80"
@@ -296,7 +297,7 @@ export function PreAccounting() {
                         </h2>
                       </div>
                     )}
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>

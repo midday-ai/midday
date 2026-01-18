@@ -34,7 +34,10 @@ export function HeaderInsightsPreview() {
             Listen to breakdown
           </span>
         </div>
-        <button className="text-[10px] font-sans text-muted-foreground transition-colors">
+        <button
+          type="button"
+          className="text-[10px] font-sans text-muted-foreground transition-colors"
+        >
           Dismiss
         </button>
       </div>

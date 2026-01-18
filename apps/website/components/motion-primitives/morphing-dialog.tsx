@@ -1,5 +1,14 @@
 "use client";
 
+import { cn } from "@midday/ui/cn";
+import { Cross2Icon } from "@radix-ui/react-icons";
+import {
+  AnimatePresence,
+  MotionConfig,
+  type Transition,
+  type Variant,
+  motion,
+} from "motion/react";
 import React, {
   useCallback,
   useContext,
@@ -9,16 +18,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import {
-  motion,
-  AnimatePresence,
-  MotionConfig,
-  Transition,
-  Variant,
-} from "motion/react";
 import { createPortal } from "react-dom";
-import { cn } from "@midday/ui/cn";
-import { Cross2Icon } from "@radix-ui/react-icons";
 import useClickOutside from "./useClickOutside";
 
 export type MorphingDialogContextType = {
@@ -209,6 +209,7 @@ function MorphingDialogContent({
       layoutId={`dialog-${uniqueId}`}
       className={cn("overflow-hidden", className)}
       style={style}
+      // biome-ignore lint/a11y/useSemanticElements: motion.div cannot be replaced with dialog element
       role="dialog"
       aria-modal="true"
       aria-labelledby={`motion-ui-morphing-dialog-title-${uniqueId}`}

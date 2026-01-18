@@ -1,11 +1,9 @@
 "use client";
 
 import { usePlayOnceOnVisible } from "@/hooks/use-play-once-on-visible";
-import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { motion } from "motion/react";
 import { useTheme } from "next-themes";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { ReactElement } from "react";
 import { type IconMap, MaterialIcon } from "./icon-mapping";
@@ -380,24 +378,42 @@ export function AssistantQuestionAnimation({
         {/* Icons Row */}
         <div className="flex items-end justify-between px-2 md:px-3 pb-1.5 md:pb-2">
           <div className="flex items-center gap-1 md:gap-1.5">
-            <button className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center transition-colors text-muted-foreground">
+            <button
+              type="button"
+              className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center transition-colors text-muted-foreground"
+            >
               <Icons.Add size={12} className="md:w-[14px] md:h-[14px]" />
             </button>
-            <button className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center transition-colors text-muted-foreground">
+            <button
+              type="button"
+              className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center transition-colors text-muted-foreground"
+            >
               <Icons.Bolt size={12} className="md:w-[14px] md:h-[14px]" />
             </button>
-            <button className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center transition-colors text-muted-foreground">
+            <button
+              type="button"
+              className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center transition-colors text-muted-foreground"
+            >
               <Icons.Globle size={12} className="md:w-[14px] md:h-[14px]" />
             </button>
-            <button className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center transition-colors text-muted-foreground">
+            <button
+              type="button"
+              className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center transition-colors text-muted-foreground"
+            >
               <Icons.Time size={12} className="md:w-[14px] md:h-[14px]" />
             </button>
           </div>
           <div className="flex items-end gap-1 md:gap-1.5">
-            <button className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center transition-colors text-muted-foreground">
+            <button
+              type="button"
+              className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center transition-colors text-muted-foreground"
+            >
               <Icons.Record size={12} className="md:w-[14px] md:h-[14px]" />
             </button>
-            <button className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center transition-opacity bg-foreground">
+            <button
+              type="button"
+              className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center transition-opacity bg-foreground"
+            >
               <Icons.ArrowUpward
                 size={10}
                 className="text-background md:w-[12px] md:h-[12px]"

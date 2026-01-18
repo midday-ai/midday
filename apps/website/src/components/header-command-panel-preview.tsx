@@ -178,21 +178,30 @@ export function HeaderCommandPanelPreview() {
               <Icons.LogoSmall className="w-4 h-4 text-muted-foreground" />
             </div>
             <div className="flex items-center gap-1">
-              <button className="w-5 h-5 flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors">
+              <button
+                type="button"
+                className="w-5 h-5 flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors"
+              >
                 <MaterialIcon
                   name="arrow_upward"
                   className="text-muted-foreground"
                   size={12}
                 />
               </button>
-              <button className="w-5 h-5 flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors">
+              <button
+                type="button"
+                className="w-5 h-5 flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors"
+              >
                 <MaterialIcon
                   name="arrow_downward"
                   className="text-muted-foreground"
                   size={12}
                 />
               </button>
-              <button className="w-5 h-5 flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors">
+              <button
+                type="button"
+                className="w-5 h-5 flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors"
+              >
                 <MaterialIcon
                   name="subdirectory_arrow_left"
                   className="text-muted-foreground"

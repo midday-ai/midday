@@ -475,7 +475,7 @@ export function StartPage() {
                   />
                   {features.map((feature, index) => (
                     <div
-                      key={index}
+                      key={feature.title}
                       className="flex items-start justify-center relative"
                       style={{ minHeight: "3.5rem" }}
                     >
