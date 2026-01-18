@@ -16,7 +16,7 @@ import type { SearchParams } from "nuqs/server";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Transactions | Midday",
+  title: "Transactions | Abacus",
 };
 
 type Props = {

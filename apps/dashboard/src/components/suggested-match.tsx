@@ -76,7 +76,7 @@ export function SuggestedMatch({
   const showLearningToast = () => {
     if (!hasSeenLearningToast) {
       toast({
-        title: "Midday AI",
+        title: "Abacus AI",
         description: "We learn from your choices to improve matches over time.",
         variant: "ai",
         duration: 5000,

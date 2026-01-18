@@ -12,12 +12,12 @@ import type { ReactElement } from "react";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://app.midday.ai"),
-  title: "Midday | Your AI-Powered Business Assistant",
+  metadataBase: new URL("https://abacusinc.vercel.app"),
+  title: "Abacus | Your AI-Powered Business Assistant",
   description:
     "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
   twitter: {
-    title: "Midday | Your AI-Powered Business Assistant",
+    title: "Abacus | Your AI-Powered Business Assistant",
     description:
       "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
     images: [
@@ -34,11 +34,11 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "Midday | Your AI-Powered Business Assistant",
+    title: "Abacus | Your AI-Powered Business Assistant",
     description:
       "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
-    url: "https://app.midday.ai",
-    siteName: "Midday",
+    url: "https://abacusinc.vercel.app",
+    siteName: "Abacus",
     images: [
       {
         url: "https://cdn.midday.ai/opengraph-image-v1.jpg",

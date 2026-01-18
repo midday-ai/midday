@@ -9,7 +9,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Overview | Midday",
+  title: "Overview | Abacus",
 };
 
 type Props = {

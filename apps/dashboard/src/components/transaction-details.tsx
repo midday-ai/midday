@@ -500,7 +500,7 @@ export function TransactionDetails() {
                     toast({
                       duration: 6000,
                       variant: "ai",
-                      title: "Midday AI",
+                      title: "Abacus AI",
                       description: `We found ${similarTransactions?.length} similar transactions to "${data?.name}". Mark them as recurring (${value}) too?`,
                       footer: (
                         <div className="flex space-x-2 mt-4">

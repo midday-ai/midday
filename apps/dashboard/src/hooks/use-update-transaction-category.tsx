@@ -88,7 +88,7 @@ export function useUpdateTransactionCategory(
       toast({
         duration: 6000,
         variant: "ai",
-        title: "Midday AI",
+        title: "Abacus AI",
         description: `We found ${similarTransactions.length} similar transactions to "${transactionName}". Mark them as ${category.name} too?`,
         footer: (
           <div className="flex space-x-2 mt-4">

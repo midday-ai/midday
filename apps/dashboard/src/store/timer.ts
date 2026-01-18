@@ -36,7 +36,7 @@ const formatTime = (seconds: number): string => {
 const updateTitle = (elapsedTime: number, projectName: string | null) => {
   if (typeof window === "undefined") return;
   if (projectName) {
-    document.title = `${formatTime(elapsedTime)} • ${projectName} | Midday`;
+    document.title = `${formatTime(elapsedTime)} • ${projectName} | Abacus`;
   }
 };
 

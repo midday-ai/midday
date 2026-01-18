@@ -10,7 +10,7 @@ import type { SearchParams } from "nuqs";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Inbox | Midday",
+  title: "Inbox | Abacus",
 };
 
 type Props = {

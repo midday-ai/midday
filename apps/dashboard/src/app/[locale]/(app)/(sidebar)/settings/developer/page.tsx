@@ -10,7 +10,7 @@ import { batchPrefetch, trpc } from "@/trpc/server";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Developer | Midday",
+  title: "Developer | Abacus",
 };
 
 export default async function Page() {
