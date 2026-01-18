@@ -456,6 +456,8 @@ export function StartPage() {
                         onClick={() => setActiveFeature(index)}
                         className="cursor-pointer relative z-10"
                         style={{ marginTop: "0.125rem" }}
+                        type="button"
+                        aria-label={`Go to feature: ${feature.title}`}
                       >
                         <motion.div
                           className={`w-2 h-2 rounded-none transition-all duration-300 ${

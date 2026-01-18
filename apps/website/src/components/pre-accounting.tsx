@@ -223,6 +223,8 @@ export function PreAccounting() {
                         onClick={() => setActiveStep(index)}
                         className="cursor-pointer relative z-10"
                         style={{ marginTop: "0.125rem" }}
+                        type="button"
+                        aria-label={`Go to step: ${step.title}`}
                       >
                         <motion.div
                           className={`w-2 h-2 rounded-none transition-all duration-300 ${

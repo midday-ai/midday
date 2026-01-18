@@ -388,24 +388,28 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
                   <button
                     type="button"
                     className="w-5 h-5 flex items-center justify-center transition-colors text-muted-foreground hover:text-foreground"
+                    aria-label="Add attachment"
                   >
                     <Icons.Add size={16} />
                   </button>
                   <button
                     type="button"
                     className="w-5 h-5 flex items-center justify-center transition-colors text-muted-foreground hover:text-foreground"
+                    aria-label="Quick actions"
                   >
                     <Icons.Bolt size={16} />
                   </button>
                   <button
                     type="button"
                     className="w-5 h-5 flex items-center justify-center transition-colors text-muted-foreground hover:text-foreground"
+                    aria-label="Web search"
                   >
                     <Icons.Globle size={16} />
                   </button>
                   <button
                     type="button"
                     className="w-5 h-5 flex items-center justify-center transition-colors text-muted-foreground hover:text-foreground"
+                    aria-label="History"
                   >
                     <Icons.History size={16} />
                   </button>
@@ -414,12 +418,14 @@ export function AudioSummarySection({ audioUrl }: AudioSummarySectionProps) {
                   <button
                     type="button"
                     className="w-5 h-5 flex items-center justify-center transition-colors text-muted-foreground hover:text-foreground"
+                    aria-label="Voice input"
                   >
                     <Icons.Record size={16} />
                   </button>
                   <button
                     type="button"
                     className="w-6 h-6 flex items-center justify-center transition-opacity bg-foreground hover:opacity-90"
+                    aria-label="Send message"
                   >
                     <Icons.ArrowUpward size={18} className="text-background" />
                   </button>
