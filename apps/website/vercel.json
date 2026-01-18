@@ -4,7 +4,7 @@
   "github": {
     "enabled": false
   },
-  "installCommand": "bun install",
+  "installCommand": "cd ../.. && bun install --frozen-lockfile",
   "buildCommand": "bun run build",
   "regions": ["fra1", "iad1", "sfo1"]
 }
