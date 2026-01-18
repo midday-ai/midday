@@ -45,7 +45,9 @@ export async function POST(req: Request) {
   const forwarded = req.headers.get("x-forwarded-for");
   const ip = forwarded ? forwarded.split(",")[0]?.trim() : "127.0.0.1";
 
-  const { success, remaining, reset } = await ratelimit.limit(ip ?? "127.0.0.1");
+  const { success, remaining, reset } = await ratelimit.limit(
+    ip ?? "127.0.0.1",
+  );
 
   if (!success) {
     return new Response(
@@ -61,7 +63,7 @@ export async function POST(req: Request) {
           "X-RateLimit-Remaining": remaining.toString(),
           "X-RateLimit-Reset": reset.toString(),
         },
-      }
+      },
     );
   }
 

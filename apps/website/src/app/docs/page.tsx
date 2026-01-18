@@ -60,7 +60,8 @@ export default function DocsPage() {
             Ask Midday
           </h1>
           <p className="text-muted-foreground text-base md:text-lg max-w-lg mx-auto leading-relaxed">
-            Get instant answers about invoicing, banking, time tracking, reports, and more.
+            Get instant answers about invoicing, banking, time tracking,
+            reports, and more.
           </p>
         </div>
 
