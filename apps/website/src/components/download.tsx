@@ -4,11 +4,8 @@ import { Button } from "@midday/ui/button";
 import Image from "next/image";
 import { useState } from "react";
 import { FeaturesGridSection } from "./sections/features-grid-section";
-import { IntegrationsSection } from "./sections/integrations-section";
-import { PreAccountingSection } from "./sections/pre-accounting-section";
 import { PricingSection } from "./sections/pricing-section";
 import { TestimonialsSection } from "./sections/testimonials-section";
-import { TimeSavingsSection } from "./sections/time-savings-section";
 
 export function Download() {
   const [isDockLoaded, setIsDockLoaded] = useState(false);
@@ -30,6 +27,7 @@ export function Download() {
                   height={1193}
                   className="absolute inset-0 w-full h-full object-contain dark:hidden transition-all duration-1000 ease-in-out"
                   style={{
+                    opacity: isDockLoaded ? 1 : 0,
                     filter: isDockLoaded ? "blur(0px)" : "blur(12px)",
                     transform: isDockLoaded ? "scale(1)" : "scale(1.05)",
                   }}
@@ -43,6 +41,7 @@ export function Download() {
                   height={1193}
                   className="absolute inset-0 w-full h-full object-contain hidden dark:block transition-all duration-1000 ease-in-out"
                   style={{
+                    opacity: isDockLoaded ? 1 : 0,
                     filter: isDockLoaded ? "blur(0px)" : "blur(12px)",
                     transform: isDockLoaded ? "scale(1)" : "scale(1.05)",
                   }}
@@ -94,6 +93,7 @@ export function Download() {
                   height={1193}
                   className="absolute inset-0 w-full h-full object-contain dark:hidden transition-all duration-1000 ease-in-out"
                   style={{
+                    opacity: isDockLoaded ? 1 : 0,
                     filter: isDockLoaded ? "blur(0px)" : "blur(12px)",
                     transform: isDockLoaded ? "scale(1)" : "scale(1.05)",
                   }}
@@ -107,6 +107,7 @@ export function Download() {
                   height={1193}
                   className="absolute inset-0 w-full h-full object-contain hidden dark:block transition-all duration-1000 ease-in-out"
                   style={{
+                    opacity: isDockLoaded ? 1 : 0,
                     filter: isDockLoaded ? "blur(0px)" : "blur(12px)",
                     transform: isDockLoaded ? "scale(1)" : "scale(1.05)",
                   }}
