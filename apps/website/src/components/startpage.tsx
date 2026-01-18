@@ -60,7 +60,7 @@ const PricingSection = dynamic(() =>
 // Static features data - moved outside component to avoid recreation on each render
 const features = [
   {
-    title: "All transactions in one place",
+    title: "All your transactions, unified",
     subtitle:
       "Every payment in and out of the business is automatically synced from your connected accounts.",
     mobileSubtitle: "Every payment in and out is pulled in automatically.",

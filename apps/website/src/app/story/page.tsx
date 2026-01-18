@@ -10,19 +10,18 @@ export const metadata: Metadata = {
 export default function StoryPage() {
   return (
     <div className="min-h-screen">
-      <div className="pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-24">
-        <div className="pt-12 sm:pt-16 lg:pt-24">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="space-y-12">
-              {/* Title */}
-              <div className="space-y-4 text-center">
-                <h1 className="font-serif text-2xl sm:text-3xl lg:text-3xl xl:text-3xl 2xl:text-3xl 3xl:text-4xl leading-tight lg:leading-tight xl:leading-[1.3] text-foreground">
-                  Why we started Midday
-                </h1>
-              </div>
+      <div className="pt-32 pb-16 sm:pb-24">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="space-y-12">
+            {/* Title */}
+            <div className="space-y-4 text-center">
+              <h1 className="font-serif text-3xl lg:text-3xl xl:text-3xl 2xl:text-3xl 3xl:text-4xl leading-tight lg:leading-tight xl:leading-[1.3] text-foreground">
+                Why we started Midday
+              </h1>
+            </div>
 
-              {/* Content */}
-              <div className="prose prose-sm sm:prose-base max-w-none space-y-8 font-sans text-foreground">
+            {/* Content */}
+            <div className="prose prose-sm sm:prose-base max-w-none space-y-8 font-sans text-foreground">
                 {/* The problem */}
                 <section className="space-y-4">
                   <h2 className="font-sans text-base text-foreground">
@@ -124,26 +123,25 @@ export default function StoryPage() {
                     Your finances should explain themselves.
                   </p>
                 </section>
-              </div>
+            </div>
 
-              {/* Founders Image */}
-              <div className="w-full space-y-3">
-                <Image
-                  src="/founders.png"
-                  alt="Founders"
-                  width={1200}
-                  height={450}
-                  className="w-full h-[350px] sm:h-[450px] object-cover object-center"
-                  priority
-                />
-                <div className="text-left">
-                  <p className="font-sans text-sm text-primary">
-                    Pontus & Viktor
-                  </p>
-                  <p className="font-sans text-sm text-muted-foreground">
-                    Founders, Midday
-                  </p>
-                </div>
+            {/* Founders Image */}
+            <div className="w-full space-y-3">
+              <Image
+                src="/founders.png"
+                alt="Founders"
+                width={1200}
+                height={450}
+                className="w-full h-[350px] sm:h-[450px] object-cover object-center"
+                priority
+              />
+              <div className="text-left">
+                <p className="font-sans text-sm text-primary">
+                  Pontus & Viktor
+                </p>
+                <p className="font-sans text-sm text-muted-foreground">
+                  Founders, Midday
+                </p>
               </div>
             </div>
           </div>

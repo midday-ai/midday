@@ -253,7 +253,7 @@ export function Header({
                       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
                         {/* Column 1 & 2 - Features List (2 columns) */}
                         <div
-                          className="lg:col-span-2 2xl:max-w-xl"
+                          className="lg:col-span-2 xl:max-w-xl 2xl:max-w-xl"
                           ref={featuresListRef}
                         >
                           <div className="grid grid-cols-2 gap-x-4">
@@ -487,11 +487,11 @@ export function Header({
                     }}
                   >
                     <div className="p-6 xl:p-8 2xl:p-10 h-full">
-                      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start h-full">
+                      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 xl:gap-6 items-start h-full">
                         {/* Column 1 & 2 - Apps List (2 columns) */}
                         <div
                           ref={appsListRef}
-                          className="lg:col-span-2 2xl:max-w-xl"
+                          className="lg:col-span-2 lg:max-w-md xl:max-w-lg 2xl:max-w-xl"
                         >
                           <div className="grid grid-cols-2 gap-x-4">
                             {/* Column 1 */}
@@ -599,13 +599,13 @@ export function Header({
                         </div>
 
                         {/* Columns 3 & 4 - Image Previews Container */}
-                        <div className="lg:col-span-2 flex items-start justify-end gap-4">
+                        <div className="lg:col-span-2 flex items-start justify-end gap-4 flex-nowrap">
                           {/* Integrations Preview */}
                           <Link
                             ref={integrationsAppRef}
                             href="/integrations"
                             onClick={() => setIsAppsOpen(false)}
-                            className="w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col flex-shrink-0"
+                            className="w-full max-w-[320px] lg:w-[320px] lg:max-w-none xl:w-[350px] 2xl:w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col flex-shrink-0"
                           >
                             <div className="flex-1">
                               <HeaderIntegrationsPreview />
@@ -643,7 +643,7 @@ export function Header({
                             ref={macAppRef}
                             href="/download"
                             onClick={() => setIsAppsOpen(false)}
-                            className="w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col flex-shrink-0"
+                            className="w-full max-w-[320px] lg:w-[320px] lg:max-w-none xl:w-[350px] 2xl:w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col flex-shrink-0"
                           >
                             <div className="flex-1 flex items-center justify-center bg-background p-4">
                               <Image
@@ -838,8 +838,15 @@ export function Header({
               <Link
                 href="/pricing"
                 onTouchEnd={(e) => {
-                  e.currentTarget.blur();
-                  setTimeout(() => e.currentTarget.blur(), 100);
+                  const target = e.currentTarget;
+                  if (target) {
+                    target.blur();
+                    setTimeout(() => {
+                      if (target) {
+                        target.blur();
+                      }
+                    }, 100);
+                  }
                 }}
                 className="no-touch-active text-2xl font-sans transition-colors py-2 text-primary hover:text-primary xl:active:text-primary focus:outline-none focus-visible:outline-none touch-manipulation"
                 onClick={() => setIsMenuOpen(false)}
@@ -850,8 +857,15 @@ export function Header({
               <Link
                 href="/updates"
                 onTouchEnd={(e) => {
-                  e.currentTarget.blur();
-                  setTimeout(() => e.currentTarget.blur(), 100);
+                  const target = e.currentTarget;
+                  if (target) {
+                    target.blur();
+                    setTimeout(() => {
+                      if (target) {
+                        target.blur();
+                      }
+                    }, 100);
+                  }
                 }}
                 className="no-touch-active text-2xl font-sans transition-colors py-2 text-primary hover:text-primary xl:active:text-primary focus:outline-none focus-visible:outline-none touch-manipulation"
                 onClick={() => setIsMenuOpen(false)}
@@ -862,8 +876,15 @@ export function Header({
               <Link
                 href="/story"
                 onTouchEnd={(e) => {
-                  e.currentTarget.blur();
-                  setTimeout(() => e.currentTarget.blur(), 100);
+                  const target = e.currentTarget;
+                  if (target) {
+                    target.blur();
+                    setTimeout(() => {
+                      if (target) {
+                        target.blur();
+                      }
+                    }, 100);
+                  }
                 }}
                 className="no-touch-active text-2xl font-sans transition-colors py-2 text-primary hover:text-primary xl:active:text-primary focus:outline-none focus-visible:outline-none touch-manipulation"
                 onClick={() => setIsMenuOpen(false)}
@@ -966,8 +987,15 @@ export function Header({
                 <Link
                   href="https://app.midday.ai/"
                   onTouchEnd={(e) => {
-                    e.currentTarget.blur();
-                    setTimeout(() => e.currentTarget.blur(), 100);
+                    const target = e.currentTarget;
+                    if (target) {
+                      target.blur();
+                      setTimeout(() => {
+                        if (target) {
+                          target.blur();
+                        }
+                      }, 100);
+                    }
                   }}
                   className="text-2xl font-sans transition-colors py-2 text-primary hover:text-primary xl:active:text-primary focus:outline-none focus-visible:outline-none touch-manipulation"
                   onClick={() => setIsMenuOpen(false)}
