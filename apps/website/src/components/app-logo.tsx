@@ -1,6 +1,9 @@
 "use client";
 
 import {
+  ChatGPTMcpLogo,
+  ClaudeMcpLogo,
+  CursorMcpLogo,
   DeelLogo,
   DropboxLogo,
   EInvoiceLogo,
@@ -12,6 +15,7 @@ import {
   PolarLogo,
   QuickBooksLogo,
   RaycastLogo,
+  RaycastMcpLogo,
   SlackLogo,
   StripeLogo,
   StripePaymentsLogo,
@@ -37,6 +41,10 @@ const logoMap: Record<string, React.ComponentType> = {
   polar: PolarLogo,
   deel: DeelLogo,
   "e-invoice": EInvoiceLogo,
+  "cursor-mcp": CursorMcpLogo,
+  "claude-mcp": ClaudeMcpLogo,
+  "raycast-mcp": RaycastMcpLogo,
+  "chatgpt-mcp": ChatGPTMcpLogo,
 };
 
 interface AppLogoProps {

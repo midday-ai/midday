@@ -27,7 +27,7 @@ const FEATURE_ROUTES = [
 ];
 
 // App pages to prefetch on hover
-const APP_ROUTES = ["/integrations", "/download", "/docs"];
+const APP_ROUTES = ["/integrations", "/download", "/docs", "/mcp"];
 
 export function Header({
   transparent = false,
@@ -487,80 +487,119 @@ export function Header({
                     }}
                   >
                     <div className="p-6 xl:p-8 2xl:p-10 h-full">
-                      <div className="grid grid-cols-1 lg:grid-cols-6 gap-0 h-full">
-                        {/* Column 1 & 2 - Apps List */}
+                      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start h-full">
+                        {/* Column 1 & 2 - Apps List (2 columns) */}
                         <div
                           ref={appsListRef}
-                          className="lg:col-span-2 2xl:max-w-xs lg:pr-4"
+                          className="lg:col-span-2 2xl:max-w-xl"
                         >
-                          {[
-                            {
-                              href: "/download",
-                              title: "Mac app",
-                              desc: "Your finances, always one click away.",
-                              external: false,
-                            },
-                            {
-                              href: "/integrations",
-                              title: "Integrations",
-                              desc: "Connect your existing tools.",
-                              external: false,
-                            },
-                            {
-                              href: "https://api.midday.ai",
-                              title: "Developer & API",
-                              desc: "Programmatic access to Midday data and workflows.",
-                              external: true,
-                            },
-                            {
-                              href: "/sdks",
-                              title: "SDKs",
-                              desc: "Typed SDKs to build faster with Midday.",
-                              external: false,
-                            },
-                          ].map((item, index) => (
-                            <div
-                              key={`${item.href}-${item.title}`}
-                              className="opacity-0 animate-dropdown-slide"
-                              style={{ animationDelay: `${index * 30}ms` }}
-                            >
-                              {item.external ? (
-                                <a
-                                  href={item.href}
-                                  className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
-                                  onClick={() => setIsAppsOpen(false)}
+                          <div className="grid grid-cols-2 gap-x-4">
+                            {/* Column 1 */}
+                            <div>
+                              {[
+                                {
+                                  href: "/download",
+                                  title: "Mac app",
+                                  desc: "Your finances, always one click away.",
+                                  external: false,
+                                },
+                                {
+                                  href: "/integrations",
+                                  title: "Integrations",
+                                  desc: "Connect your existing tools.",
+                                  external: false,
+                                },
+                              ].map((item, index) => (
+                                <div
+                                  key={item.href}
+                                  className="opacity-0 animate-dropdown-slide"
+                                  style={{ animationDelay: `${index * 30}ms` }}
                                 >
-                                  <div className="flex flex-col pl-2">
-                                    <span className="font-sans text-base text-foreground mb-1">
-                                      {item.title}
-                                    </span>
-                                    <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                      {item.desc}
-                                    </span>
-                                  </div>
-                                </a>
-                              ) : (
-                                <Link
-                                  href={item.href}
-                                  className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
-                                  onClick={() => setIsAppsOpen(false)}
-                                >
-                                  <div className="flex flex-col pl-2">
-                                    <span className="font-sans text-base text-foreground mb-1">
-                                      {item.title}
-                                    </span>
-                                    <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                      {item.desc}
-                                    </span>
-                                  </div>
-                                </Link>
-                              )}
+                                  <Link
+                                    href={item.href}
+                                    className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                                    onClick={() => setIsAppsOpen(false)}
+                                  >
+                                    <div className="flex flex-col pl-2">
+                                      <span className="font-sans text-base text-foreground mb-1">
+                                        {item.title}
+                                      </span>
+                                      <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                        {item.desc}
+                                      </span>
+                                    </div>
+                                  </Link>
+                                </div>
+                              ))}
                             </div>
-                          ))}
+                            {/* Column 2 */}
+                            <div>
+                              {[
+                                {
+                                  href: "/mcp",
+                                  title: "MCP Server",
+                                  desc: "Connect AI tools to your financial data.",
+                                  external: false,
+                                },
+                                {
+                                  href: "https://api.midday.ai",
+                                  title: "Developer & API",
+                                  desc: "Programmatic access to Midday.",
+                                  external: true,
+                                },
+                                {
+                                  href: "/sdks",
+                                  title: "SDKs",
+                                  desc: "Typed SDKs to build faster.",
+                                  external: false,
+                                },
+                              ].map((item, index) => (
+                                <div
+                                  key={`${item.href}-${item.title}`}
+                                  className="opacity-0 animate-dropdown-slide"
+                                  style={{
+                                    animationDelay: `${(index + 2) * 30}ms`,
+                                  }}
+                                >
+                                  {item.external ? (
+                                    <a
+                                      href={item.href}
+                                      className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                                      onClick={() => setIsAppsOpen(false)}
+                                    >
+                                      <div className="flex flex-col pl-2">
+                                        <span className="font-sans text-base text-foreground mb-1">
+                                          {item.title}
+                                        </span>
+                                        <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                          {item.desc}
+                                        </span>
+                                      </div>
+                                    </a>
+                                  ) : (
+                                    <Link
+                                      href={item.href}
+                                      className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                                      onClick={() => setIsAppsOpen(false)}
+                                    >
+                                      <div className="flex flex-col pl-2">
+                                        <span className="font-sans text-base text-foreground mb-1">
+                                          {item.title}
+                                        </span>
+                                        <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                          {item.desc}
+                                        </span>
+                                      </div>
+                                    </Link>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
 
-                        {/* Columns 3-6 - Image Previews Container */}
-                        <div className="lg:col-span-4 flex items-start justify-end gap-4">
+                        {/* Columns 3 & 4 - Image Previews Container */}
+                        <div className="lg:col-span-2 flex items-start justify-end gap-4">
                           {/* Integrations Preview */}
                           <Link
                             ref={integrationsAppRef}
@@ -882,6 +921,17 @@ export function Header({
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
                           Integrations
+                        </Link>
+                        <Link
+                          href="/mcp"
+                          onClick={() => {
+                            setIsMenuOpen(false);
+                            setIsMobileAppsOpen(false);
+                          }}
+                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                          style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
+                          MCP Server
                         </Link>
                         <a
                           href="https://api.midday.ai"

@@ -1,0 +1,260 @@
+---
+title: "MCP Server"
+description: "Connect AI assistants to Midday using the Model Context Protocol"
+---
+
+# MCP Server
+
+Midday exposes a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that allows AI assistants like Claude, OpenAI, and Cursor to interact with your financial data.
+
+## Endpoint
+
+```
+POST https://api.midday.ai/mcp
+```
+
+## Authentication
+
+The MCP endpoint requires authentication using your Midday API key. Include it in the `Authorization` header:
+
+```
+Authorization: Bearer mid_your_api_key
+```
+
+### Getting an API Key
+
+1. Go to **Settings → Developer** in the Midday dashboard
+2. Click **Create API Key**
+3. Choose the appropriate scope (Full Access, Read Only, or Restricted)
+4. Copy and securely store the generated key
+
+## Available Tools
+
+The MCP server exposes the following tools:
+
+### Transactions
+
+| Tool | Description |
+|------|-------------|
+| `transactions_list` | List transactions with filtering by date, category, status, type, and accounts |
+| `transactions_get` | Get a specific transaction by ID |
+
+### Invoices
+
+| Tool | Description |
+|------|-------------|
+| `invoices_list` | List invoices with filtering by status, customer, and date range |
+| `invoices_get` | Get a specific invoice by ID |
+| `invoices_summary` | Get invoice summary with totals and counts by status |
+
+### Customers
+
+| Tool | Description |
+|------|-------------|
+| `customers_list` | List customers with search |
+| `customers_get` | Get a specific customer by ID |
+
+### Bank Accounts
+
+| Tool | Description |
+|------|-------------|
+| `bank_accounts_list` | List all bank accounts with balances |
+
+### Documents
+
+| Tool | Description |
+|------|-------------|
+| `documents_list` | List documents in the vault |
+| `documents_get` | Get a specific document by ID |
+
+### Time Tracking
+
+| Tool | Description |
+|------|-------------|
+| `tracker_projects_list` | List time tracking projects |
+| `tracker_projects_get` | Get a specific project by ID |
+| `tracker_entries_list` | List time entries for a date range |
+
+### Reports & Analytics
+
+| Tool | Description |
+|------|-------------|
+| `reports_revenue` | Get revenue reports with period comparisons |
+| `reports_profit` | Get profit reports (revenue minus expenses) |
+| `reports_burn_rate` | Get monthly burn rate for cash outflow analysis |
+| `reports_runway` | Get runway estimate (months of cash remaining) |
+| `reports_expenses` | Get expense breakdown with recurring vs one-time |
+| `reports_spending` | Get spending by category |
+
+### Search
+
+| Tool | Description |
+|------|-------------|
+| `search_global` | Search across all data: invoices, transactions, customers, documents |
+
+### Inbox
+
+| Tool | Description |
+|------|-------------|
+| `inbox_list` | List inbox items (receipts, invoices, documents) |
+| `inbox_get` | Get a specific inbox item by ID |
+
+### Tags
+
+| Tool | Description |
+|------|-------------|
+| `tags_list` | List all tags for organizing data |
+| `tags_get` | Get a specific tag by ID |
+
+### Team
+
+| Tool | Description |
+|------|-------------|
+| `team_get` | Get team info including settings and base currency |
+| `team_members` | List all team members with roles |
+
+## Resources
+
+Resources provide static or semi-static data that AI can reference without making tool calls:
+
+| Resource URI | Description |
+|--------------|-------------|
+| `midday://team/info` | Current team information including name and base currency |
+| `midday://categories` | List of all transaction categories with hierarchy and colors |
+| `midday://tags` | List of custom tags used for organizing data |
+
+## Prompts
+
+Pre-built prompt templates for common financial analysis tasks:
+
+| Prompt | Description |
+|--------|-------------|
+| `financial_health_check` | Comprehensive analysis of revenue, expenses, burn rate, and runway |
+| `invoice_followup` | Generate follow-up plan for overdue invoices |
+| `expense_analysis` | Deep dive into expenses to identify cost-saving opportunities |
+| `customer_insights` | Analyze customer data to identify top customers and trends |
+
+### Using Prompts
+
+Prompts can be invoked through the MCP client:
+
+```typescript
+// Get a prompt template
+const prompt = await client.getPrompt({
+  name: "financial_health_check",
+  arguments: {
+    period: "quarter"
+  }
+});
+
+// The AI will receive instructions to perform the analysis
+console.log(prompt.messages);
+```
+
+## Tool Annotations
+
+All tools include MCP annotations to help AI assistants make better decisions:
+
+- `readOnlyHint: true` - All tools are read-only and safe to call
+- `destructiveHint: false` - No tools modify or delete data
+- `idempotentHint: true` - Tools can be called multiple times safely
+
+## Client Configuration
+
+### Cursor
+
+Add to `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "midday": {
+      "url": "https://api.midday.ai/mcp",
+      "headers": {
+        "Authorization": "Bearer mid_your_api_key"
+      }
+    }
+  }
+}
+```
+
+### Claude Desktop
+
+Add to your Claude Desktop config (requires [mcp-remote](https://www.npmjs.com/package/mcp-remote)):
+
+```json
+{
+  "mcpServers": {
+    "midday": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://api.midday.ai/mcp"],
+      "env": {
+        "MCP_AUTH_HEADER": "Bearer mid_your_api_key"
+      }
+    }
+  }
+}
+```
+
+### OpenAI / Custom Clients
+
+Use the MCP SDK to connect:
+
+```typescript
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+
+const transport = new StreamableHTTPClientTransport({
+  url: "https://api.midday.ai/mcp",
+  headers: {
+    Authorization: "Bearer mid_your_api_key",
+  },
+});
+
+const client = new Client({
+  name: "my-client",
+  version: "1.0.0",
+});
+
+await client.connect(transport);
+
+// List available tools
+const tools = await client.listTools();
+console.log(tools);
+
+// Call a tool
+const result = await client.callTool({
+  name: "transactions_list",
+  arguments: {
+    pageSize: 10,
+    type: "expense",
+  },
+});
+console.log(result);
+
+await client.close();
+```
+
+## Example Usage
+
+Once connected, you can ask your AI assistant questions like:
+
+- "Show me my recent transactions"
+- "What invoices are overdue?"
+- "List all customers"
+- "How much time did I track last week?"
+- "What's my bank account balance?"
+- "What's my burn rate this quarter?"
+- "How many months of runway do I have?"
+- "Search for transactions from Acme Corp"
+- "What's my profit this year compared to last year?"
+- "Show me my spending by category"
+
+The AI will use the appropriate MCP tools to fetch the data and provide answers.
+
+## Security Considerations
+
+- API keys have the same permissions as the scopes you select when creating them
+- Use **Read Only** or **Restricted** scopes for AI assistants when possible
+- Rotate keys regularly
+- Never share API keys in public repositories or chat logs

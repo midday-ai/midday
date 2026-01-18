@@ -1,0 +1,310 @@
+"use client";
+
+import {
+  ChatGPTMcpLogo,
+  ClaudeMcpLogo,
+  CursorMcpLogo,
+  RaycastMcpLogo,
+} from "@midday/app-store/logos";
+import { Button } from "@midday/ui/button";
+import { Icons } from "@midday/ui/icons";
+import Image from "next/image";
+import Link from "next/link";
+
+const clients = [
+  {
+    id: "cursor",
+    name: "Cursor",
+    description: "Track time and expenses while you code",
+    href: "/mcp/cursor",
+  },
+  {
+    id: "claude",
+    name: "Claude",
+    description: "Analyze trends and get insights",
+    href: "/mcp/claude",
+  },
+  {
+    id: "raycast",
+    name: "Raycast",
+    description: "Quick answers, one shortcut away",
+    href: "/mcp/raycast",
+  },
+  {
+    id: "chatgpt",
+    name: "ChatGPT",
+    description: "Build custom integrations",
+    href: "/mcp/chatgpt",
+  },
+];
+
+const questions = [
+  "How much runway do we have at current burn rate?",
+  "Which invoices are overdue and by how much?",
+  "What did we spend on software last quarter?",
+  "Show me revenue compared to last year",
+  "Who are our top customers by revenue?",
+];
+
+const capabilities = [
+  "27 tools across transactions, invoices, customers, and reports",
+  "Secure authentication with your existing API keys",
+  "Works with Cursor, Claude, Raycast, and any MCP-compatible client",
+];
+
+function ClientLogo({ id, size = "md" }: { id: string; size?: "sm" | "md" }) {
+  const logos: Record<string, React.ComponentType> = {
+    cursor: CursorMcpLogo,
+    claude: ClaudeMcpLogo,
+    raycast: RaycastMcpLogo,
+    chatgpt: ChatGPTMcpLogo,
+  };
+
+  const Logo = logos[id];
+  if (!Logo) return null;
+
+  const containerSize = size === "sm" ? "w-10 h-10" : "w-12 h-12";
+
+  return (
+    <div className={`${containerSize} [&>img]:w-full [&>img]:h-full`}>
+      <Logo />
+    </div>
+  );
+}
+
+export function MCP() {
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Hero Section */}
+      <div className="bg-background relative overflow-visible lg:min-h-screen lg:overflow-hidden">
+        {/* Grid Pattern Background - Desktop Only */}
+        <div className="hidden lg:flex absolute inset-0 items-center justify-center pointer-events-none z-0">
+          <Image
+            src="/images/grid-light.svg"
+            alt="Grid Pattern"
+            width={1728}
+            height={1080}
+            className="w-[1728px] h-screen object-cover opacity-100 dark:opacity-[12%] dark:hidden"
+            loading="lazy"
+          />
+          <Image
+            src="/images/grid-dark.svg"
+            alt="Grid Pattern"
+            width={1728}
+            height={1080}
+            className="w-[1728px] h-screen object-cover opacity-[12%] hidden dark:block"
+            loading="lazy"
+          />
+        </div>
+
+        {/* Mobile Layout */}
+        <div className="lg:hidden flex flex-col relative pt-32 pb-16 sm:pt-40 sm:pb-20 md:pt-48 overflow-hidden">
+          {/* Grid Pattern Background - Mobile/Tablet Only */}
+          <div
+            className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0"
+            style={{ height: "600px" }}
+          >
+            <Image
+              src="/images/grid-light.svg"
+              alt="Grid Pattern"
+              width={1728}
+              height={1080}
+              className="w-full h-[600px] object-cover opacity-100 dark:opacity-[12%] dark:hidden"
+              loading="lazy"
+            />
+            <Image
+              src="/images/grid-dark.svg"
+              alt="Grid Pattern"
+              width={1728}
+              height={1080}
+              className="w-full h-[600px] object-cover opacity-[12%] hidden dark:block"
+              loading="lazy"
+            />
+          </div>
+          <div className="flex flex-col justify-start items-center z-20 px-4 sm:px-6">
+            {/* Title and Description */}
+            <div className="space-y-4 text-center max-w-xl w-full">
+              <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider">
+                MCP Server
+              </p>
+              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl leading-tight text-foreground">
+                Your business, available to AI
+              </h1>
+              <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto">
+                Connect your AI tools to Midday. Ask about cash flow, invoices,
+                customers—get answers from your actual data.
+              </p>
+            </div>
+
+            {/* Client Cards */}
+            <div className="grid grid-cols-2 gap-4 w-full max-w-lg mt-12">
+              {clients.map((client) => (
+                <Link
+                  key={client.id}
+                  href={client.href}
+                  className="group border border-border bg-background p-5 flex flex-col items-start hover:border-foreground/20 transition-all duration-200"
+                >
+                  <div className="mb-3">
+                    <ClientLogo id={client.id} size="sm" />
+                  </div>
+                  <h3 className="font-sans text-sm font-medium text-foreground mb-1">
+                    {client.name}
+                  </h3>
+                  <p className="font-sans text-xs text-muted-foreground">
+                    {client.description}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Layout */}
+        <div className="hidden lg:flex flex-col min-h-screen relative pt-40 overflow-hidden">
+          <div className="flex-1 flex flex-col justify-center items-center z-20 px-4 pb-32">
+            {/* Title and Description */}
+            <div className="text-center space-y-4 w-full mb-16">
+              <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider">
+                MCP Server
+              </p>
+              <h1 className="font-serif text-6xl xl:text-7xl 2xl:text-8xl leading-tight text-foreground">
+                Your business, available to AI
+              </h1>
+              <p className="text-muted-foreground text-sm xl:text-base leading-normal max-w-2xl mx-auto font-sans text-center">
+                Connect your AI tools to Midday. Ask about cash flow, invoices,
+                customers—get answers from your actual data.
+              </p>
+            </div>
+
+            {/* Client Cards */}
+            <div className="flex justify-center gap-6">
+              {clients.map((client) => (
+                <Link
+                  key={client.id}
+                  href={client.href}
+                  className="group border border-border bg-background p-6 flex flex-col items-start hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 w-52"
+                >
+                  <div className="mb-4">
+                    <ClientLogo id={client.id} />
+                  </div>
+                  <h3 className="font-sans text-base font-medium text-foreground mb-1">
+                    {client.name}
+                  </h3>
+                  <p className="font-sans text-sm text-muted-foreground">
+                    {client.description}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="max-w-[1400px] mx-auto">
+        <div className="h-px w-full border-t border-border" />
+      </div>
+
+      {/* Questions Section */}
+      <section className="bg-background py-12 sm:py-16 lg:py-24">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="text-center space-y-4 mb-12">
+            <h2 className="font-serif text-2xl sm:text-3xl text-foreground">
+              Skip the dashboards
+            </h2>
+            <p className="font-sans text-base text-muted-foreground leading-normal max-w-xl mx-auto">
+              Just ask.
+            </p>
+          </div>
+
+          <div className="max-w-2xl mx-auto">
+            <div className="space-y-3">
+              {questions.map((question) => (
+                <div
+                  key={question}
+                  className="bg-secondary border border-border p-4 flex items-start gap-3"
+                >
+                  <span className="font-sans text-sm text-foreground">
+                    "{question}"
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Divider */}
+      <div className="max-w-[1400px] mx-auto">
+        <div className="h-px w-full border-t border-border" />
+      </div>
+
+      {/* Capabilities Section */}
+      <section className="bg-background py-12 sm:py-16 lg:py-24">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="text-center space-y-4 mb-12">
+            <h2 className="font-serif text-2xl sm:text-3xl text-foreground">
+              Read-only by design
+            </h2>
+            <p className="font-sans text-base text-muted-foreground leading-normal max-w-xl mx-auto">
+              Your AI tools can query data but never modify it.
+            </p>
+          </div>
+
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-secondary border border-border p-6">
+              <div className="space-y-4">
+                {capabilities.map((capability) => (
+                  <div key={capability} className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+                      <Icons.Check size={14} className="text-foreground" />
+                    </div>
+                    <span className="font-sans text-sm text-foreground">
+                      {capability}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Divider */}
+      <div className="max-w-[1400px] mx-auto">
+        <div className="h-px w-full border-t border-border" />
+      </div>
+
+      {/* CTA Section */}
+      <section className="bg-background py-12 sm:py-16 lg:py-24">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="text-center space-y-6 max-w-xl mx-auto">
+            <h2 className="font-serif text-2xl sm:text-3xl text-foreground">
+              Get started
+            </h2>
+            <p className="font-sans text-base text-muted-foreground leading-normal">
+              Choose your AI client above. You'll need an API key from your
+              Midday dashboard.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Button asChild className="h-11 px-6 text-sm font-sans">
+                <Link href="https://app.midday.ai/settings/developer">
+                  Get API key
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
+              >
+                <Link href="https://docs.midday.ai/mcp">
+                  View documentation
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
