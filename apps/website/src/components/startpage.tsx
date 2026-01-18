@@ -223,6 +223,8 @@ export function StartPage() {
                   src="https://cdn.midday.ai/video-poster-v2.jpg"
                   alt="Midday dashboard preview"
                   fill
+                  fetchPriority="high"
+                  quality={60}
                   className="object-cover transition-all duration-1000 ease-in-out"
                   style={{
                     filter: isMobilePosterLoaded ? "blur(0px)" : "blur(12px)",
@@ -339,6 +341,8 @@ export function StartPage() {
                   src="https://cdn.midday.ai/video-poster-v2.jpg"
                   alt="Midday dashboard preview"
                   fill
+                  quality={60}
+                  fetchPriority="high"
                   className="object-cover transition-all duration-1000 ease-in-out"
                   style={{
                     filter: isDesktopPosterLoaded ? "blur(0px)" : "blur(12px)",
