@@ -2,20 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { MaterialIcon } from "./homepage/icon-mapping";
-import { TransactionFlowAnimation } from "./homepage/transaction-flow-animation";
 import { BulkReconciliationAnimation } from "./homepage/bulk-reconciliation-animation";
-import { PreAccountingSection } from "./sections/pre-accounting-section";
+import { TransactionFlowAnimation } from "./homepage/transaction-flow-animation";
 import { FeaturesGridSection } from "./sections/features-grid-section";
 import { IntegrationsSection } from "./sections/integrations-section";
+import { PreAccountingSection } from "./sections/pre-accounting-section";
 import { PricingSection } from "./sections/pricing-section";
 import { TestimonialsSection } from "./sections/testimonials-section";
 import { TimeSavingsSection } from "./sections/time-savings-section";
 
 export function Transactions() {
-  const router = useRouter();
-
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -28,7 +24,7 @@ export function Transactions() {
             width={1728}
             height={1080}
             className="w-[1728px] h-screen object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-            priority
+            loading="lazy"
           />
           <Image
             src="/images/grid-dark.svg"
@@ -36,7 +32,7 @@ export function Transactions() {
             width={1728}
             height={1080}
             className="w-[1728px] h-screen object-cover opacity-[12%] hidden dark:block"
-            priority
+            loading="lazy"
           />
         </div>
 
@@ -53,7 +49,7 @@ export function Transactions() {
               width={1728}
               height={1080}
               className="w-full h-[600px] object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-              priority
+              loading="lazy"
             />
             <Image
               src="/images/grid-dark.svg"
@@ -61,7 +57,7 @@ export function Transactions() {
               width={1728}
               height={1080}
               className="w-full h-[600px] object-cover opacity-[12%] hidden dark:block"
-              priority
+              loading="lazy"
             />
           </div>
           <div className="flex flex-col justify-start items-center space-y-6 z-20 px-3 sm:px-4">
@@ -87,10 +83,11 @@ export function Transactions() {
             {/* Transactions Illustration */}
             <div className="flex justify-center w-full">
               <div className="relative w-full max-w-6xl">
-                <div 
+                <div
                   className="absolute bottom-0 left-0 right-0 h-[20%] z-10 pointer-events-none"
                   style={{
-                    background: 'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)'
+                    background:
+                      "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
                 <Image
@@ -138,10 +135,11 @@ export function Transactions() {
             {/* Transactions Illustration */}
             <div className="flex justify-center w-full">
               <div className="relative w-full max-w-6xl">
-                <div 
+                <div
                   className="absolute bottom-0 left-0 right-0 h-[20%] z-10 pointer-events-none"
                   style={{
-                    background: 'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)'
+                    background:
+                      "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
                 <Image
@@ -184,35 +182,89 @@ export function Transactions() {
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Automatic bank syncing</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Automatic bank syncing
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Unified transaction list</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Unified transaction list
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Manual transactions</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Manual transactions
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">CSV import</span>
+                      <span className="font-sans text-sm text-foreground">
+                        CSV import
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Filters and search</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Filters and search
+                      </span>
                     </div>
-                    <Link href="/integrations/fortnox" className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors">
-                      <Image src="/images/fortnox.svg" alt="Fortnox" width={16} height={16} className="object-contain" />
-                      <span className="font-sans text-sm text-foreground">Fortnox</span>
+                    <Link
+                      href="/integrations/fortnox"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors"
+                    >
+                      <Image
+                        src="/images/fortnox.svg"
+                        alt="Fortnox"
+                        width={16}
+                        height={16}
+                        className="object-contain"
+                      />
+                      <span className="font-sans text-sm text-foreground">
+                        Fortnox
+                      </span>
                     </Link>
-                    <Link href="/integrations/xero" className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors">
-                      <Image src="/images/xero.svg" alt="Xero" width={16} height={16} className="object-contain" />
-                      <span className="font-sans text-sm text-foreground">Xero</span>
+                    <Link
+                      href="/integrations/xero"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors"
+                    >
+                      <Image
+                        src="/images/xero.svg"
+                        alt="Xero"
+                        width={16}
+                        height={16}
+                        className="object-contain"
+                      />
+                      <span className="font-sans text-sm text-foreground">
+                        Xero
+                      </span>
                     </Link>
-                    <Link href="/integrations/quickbooks" className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors">
-                      <Image src="/images/quickbooks.svg" alt="QuickBooks" width={16} height={16} className="object-contain" />
-                      <span className="font-sans text-sm text-foreground">QuickBooks</span>
+                    <Link
+                      href="/integrations/quickbooks"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors"
+                    >
+                      <Image
+                        src="/images/quickbooks.svg"
+                        alt="QuickBooks"
+                        width={16}
+                        height={16}
+                        className="object-contain"
+                      />
+                      <span className="font-sans text-sm text-foreground">
+                        QuickBooks
+                      </span>
                     </Link>
-                    <Link href="/integrations/slack" className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors">
-                      <Image src="/images/slack.svg" alt="Slack" width={16} height={16} className="object-contain" />
-                      <span className="font-sans text-sm text-foreground">Slack</span>
+                    <Link
+                      href="/integrations/slack"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors"
+                    >
+                      <Image
+                        src="/images/slack.svg"
+                        alt="Slack"
+                        width={16}
+                        height={16}
+                        className="object-contain"
+                      />
+                      <span className="font-sans text-sm text-foreground">
+                        Slack
+                      </span>
                     </Link>
                   </div>
                 </div>
@@ -237,26 +289,40 @@ export function Transactions() {
                     Categorized and reconciled at scale
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Transactions are automatically categorized and matched in bulk, so you can review, fix, and export everything in minutes instead of one by one.
+                    Transactions are automatically categorized and matched in
+                    bulk, so you can review, fix, and export everything in
+                    minutes instead of one by one.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Automatic categorization</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Automatic categorization
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Custom categories</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Custom categories
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Rules and patterns</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Rules and patterns
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">VAT and tax rates</span>
+                      <span className="font-sans text-sm text-foreground">
+                        VAT and tax rates
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Expense tags</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Expense tags
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Bulk drag and drop receipts</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Bulk drag and drop receipts
+                      </span>
                     </div>
                   </div>
                 </div>

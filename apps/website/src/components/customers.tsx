@@ -1,21 +1,16 @@
-'use client'
+"use client";
 
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
-import { MaterialIcon } from './homepage/icon-mapping'
-import { DashboardAnimation } from './homepage/dashboard-animation'
-import { CustomerStatementAnimation } from './homepage/customer-statement-animation'
-import { CompanyEnrichmentAnimation } from './homepage/company-enrichment-animation'
-import { TestimonialsSection } from './sections/testimonials-section'
-import { FeaturesGridSection } from './sections/features-grid-section'
-import { TimeSavingsSection } from './sections/time-savings-section'
-import { PreAccountingSection } from './sections/pre-accounting-section'
-import { IntegrationsSection } from './sections/integrations-section'
-import { PricingSection } from './sections/pricing-section'
+import Image from "next/image";
+import { CompanyEnrichmentAnimation } from "./homepage/company-enrichment-animation";
+import { CustomerStatementAnimation } from "./homepage/customer-statement-animation";
+import { FeaturesGridSection } from "./sections/features-grid-section";
+import { IntegrationsSection } from "./sections/integrations-section";
+import { PreAccountingSection } from "./sections/pre-accounting-section";
+import { PricingSection } from "./sections/pricing-section";
+import { TestimonialsSection } from "./sections/testimonials-section";
+import { TimeSavingsSection } from "./sections/time-savings-section";
 
 export function Customers() {
-  const router = useRouter()
-
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -28,7 +23,7 @@ export function Customers() {
             width={1728}
             height={1080}
             className="w-[1728px] h-screen object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-            priority
+            loading="lazy"
           />
           <Image
             src="/images/grid-dark.svg"
@@ -36,21 +31,24 @@ export function Customers() {
             width={1728}
             height={1080}
             className="w-[1728px] h-screen object-cover opacity-[12%] hidden dark:block"
-            priority
+            loading="lazy"
           />
         </div>
 
         {/* Mobile Layout */}
         <div className="lg:hidden flex flex-col relative pt-32 pb-8 sm:pt-40 sm:pb-8 md:pt-48 overflow-hidden">
           {/* Grid Pattern Background - Mobile/Tablet Only (Limited Height) */}
-          <div className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0" style={{ height: '600px' }}>
+          <div
+            className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0"
+            style={{ height: "600px" }}
+          >
             <Image
               src="/images/grid-light.svg"
               alt="Grid Pattern"
               width={1728}
               height={1080}
               className="w-full h-[600px] object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-              priority
+              loading="lazy"
             />
             <Image
               src="/images/grid-dark.svg"
@@ -58,7 +56,7 @@ export function Customers() {
               width={1728}
               height={1080}
               className="w-full h-[600px] object-cover opacity-[12%] hidden dark:block"
-              priority
+              loading="lazy"
             />
           </div>
           <div className="flex flex-col justify-start items-center space-y-6 z-20 px-3 sm:px-4">
@@ -73,17 +71,19 @@ export function Customers() {
                 See revenue and activity per customer in one view.
               </p>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto hidden lg:block">
-                See revenue, profitability, and activity per customer in one place without switching tools or exporting data.
+                See revenue, profitability, and activity per customer in one
+                place without switching tools or exporting data.
               </p>
             </div>
 
             {/* Customers Illustration */}
             <div className="flex justify-center w-full">
               <div className="relative w-full max-w-6xl">
-                <div 
+                <div
                   className="absolute bottom-0 left-0 right-0 h-[20%] z-10 pointer-events-none"
                   style={{
-                    background: 'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)'
+                    background:
+                      "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
                 <Image
@@ -116,21 +116,25 @@ export function Customers() {
                 Customers
               </p>
               <h1 className="font-serif text-8xl xl:text-9xl 2xl:text-[12rem] leading-tight text-center">
-                <span className="text-foreground block">Know your customers</span>
+                <span className="text-foreground block">
+                  Know your customers
+                </span>
               </h1>
 
               <p className="text-muted-foreground text-base leading-normal max-w-2xl mx-auto font-sans text-center">
-                See revenue, profitability, and activity per customer in one place without switching tools or exporting data.
+                See revenue, profitability, and activity per customer in one
+                place without switching tools or exporting data.
               </p>
             </div>
 
             {/* Customers Illustration */}
             <div className="flex justify-center w-full">
               <div className="relative w-full max-w-6xl">
-                <div 
+                <div
                   className="absolute bottom-0 left-0 right-0 h-[20%] z-10 pointer-events-none"
                   style={{
-                    background: 'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)'
+                    background:
+                      "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
                 <Image
@@ -168,23 +172,35 @@ export function Customers() {
                     Customer revenue and activity
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    See revenue, invoices, time, and activity per customer in one place, with automatically enriched company details and a shareable customer portal when needed.
+                    See revenue, invoices, time, and activity per customer in
+                    one place, with automatically enriched company details and a
+                    shareable customer portal when needed.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Customer profiles</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Customer profiles
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Revenue per customer</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Revenue per customer
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Customer portal</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Customer portal
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Invoice history</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Invoice history
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Time tracked</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Time tracked
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -209,23 +225,35 @@ export function Customers() {
                     Customer context, built in
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Automatically enriched company profiles give you instant context on customers, without manual research or switching tools.
+                    Automatically enriched company profiles give you instant
+                    context on customers, without manual research or switching
+                    tools.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Company profiles</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Company profiles
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Industry and size</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Industry and size
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Location and local time</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Location and local time
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Funding and ownership</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Funding and ownership
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Web and social presence</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Web and social presence
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -240,7 +268,6 @@ export function Customers() {
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -293,6 +320,5 @@ export function Customers() {
       {/* Pricing Section */}
       <PricingSection />
     </div>
-  )
+  );
 }
-

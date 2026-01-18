@@ -1,21 +1,16 @@
-'use client'
+"use client";
 
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
-import { MaterialIcon } from './homepage/icon-mapping'
-import { AIAssistantAnimation } from './homepage/ai-assistant-animation'
-import { AssistantQuestionAnimation } from './homepage/assistant-question-animation'
-import { DashboardAnimation } from './homepage/dashboard-animation'
-import { TestimonialsSection } from './sections/testimonials-section'
-import { FeaturesGridSection } from './sections/features-grid-section'
-import { TimeSavingsSection } from './sections/time-savings-section'
-import { PreAccountingSection } from './sections/pre-accounting-section'
-import { IntegrationsSection } from './sections/integrations-section'
-import { PricingSection } from './sections/pricing-section'
+import Image from "next/image";
+import { AssistantQuestionAnimation } from "./homepage/assistant-question-animation";
+import { DashboardAnimation } from "./homepage/dashboard-animation";
+import { FeaturesGridSection } from "./sections/features-grid-section";
+import { IntegrationsSection } from "./sections/integrations-section";
+import { PreAccountingSection } from "./sections/pre-accounting-section";
+import { PricingSection } from "./sections/pricing-section";
+import { TestimonialsSection } from "./sections/testimonials-section";
+import { TimeSavingsSection } from "./sections/time-savings-section";
 
 export function Assistant() {
-  const router = useRouter()
-
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -28,7 +23,7 @@ export function Assistant() {
             width={1728}
             height={1080}
             className="w-[1728px] h-screen object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-            priority
+            loading="lazy"
           />
           <Image
             src="/images/grid-dark.svg"
@@ -36,21 +31,24 @@ export function Assistant() {
             width={1728}
             height={1080}
             className="w-[1728px] h-screen object-cover opacity-[12%] hidden dark:block"
-            priority
+            loading="lazy"
           />
         </div>
 
         {/* Mobile Layout */}
         <div className="lg:hidden flex flex-col relative pt-32 pb-8 sm:pt-40 sm:pb-8 md:pt-48 overflow-hidden">
           {/* Grid Pattern Background - Mobile/Tablet Only (Limited Height) */}
-          <div className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0" style={{ height: '600px' }}>
+          <div
+            className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0"
+            style={{ height: "600px" }}
+          >
             <Image
               src="/images/grid-light.svg"
               alt="Grid Pattern"
               width={1728}
               height={1080}
               className="w-full h-[600px] object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-              priority
+              loading="lazy"
             />
             <Image
               src="/images/grid-dark.svg"
@@ -58,7 +56,7 @@ export function Assistant() {
               width={1728}
               height={1080}
               className="w-full h-[600px] object-cover opacity-[12%] hidden dark:block"
-              priority
+              loading="lazy"
             />
           </div>
           <div className="flex flex-col justify-start items-center space-y-6 z-20 px-3 sm:px-4">
@@ -73,17 +71,20 @@ export function Assistant() {
                 Ask questions and get clear answers from your business data.
               </p>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto hidden lg:block">
-                Ask questions about your business and get clear, contextual answers based on your real data, including revenue, expenses, cash flow, and recent changes.
+                Ask questions about your business and get clear, contextual
+                answers based on your real data, including revenue, expenses,
+                cash flow, and recent changes.
               </p>
             </div>
 
             {/* Assistant Illustration */}
             <div className="flex justify-center w-full">
               <div className="relative w-full max-w-6xl">
-                <div 
+                <div
                   className="absolute bottom-0 left-0 right-0 h-[20%] z-10 pointer-events-none"
                   style={{
-                    background: 'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)'
+                    background:
+                      "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
                 <Image
@@ -120,17 +121,20 @@ export function Assistant() {
               </h1>
 
               <p className="text-muted-foreground text-base leading-normal max-w-2xl mx-auto font-sans text-center">
-                Ask questions about your business and get clear, contextual answers based on your real data, including revenue, expenses, cash flow, and recent changes.
+                Ask questions about your business and get clear, contextual
+                answers based on your real data, including revenue, expenses,
+                cash flow, and recent changes.
               </p>
             </div>
 
             {/* Assistant Illustration */}
             <div className="flex justify-center w-full">
               <div className="relative w-full max-w-6xl">
-                <div 
+                <div
                   className="absolute bottom-0 left-0 right-0 h-[20%] z-10 pointer-events-none"
                   style={{
-                    background: 'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)'
+                    background:
+                      "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
                 <Image
@@ -168,23 +172,35 @@ export function Assistant() {
                     Ask questions and generate reports
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Ask questions about revenue, expenses, cash flow, customers, and changes over time, and generate reports, summaries, and breakdowns based on your actual business data.
+                    Ask questions about revenue, expenses, cash flow, customers,
+                    and changes over time, and generate reports, summaries, and
+                    breakdowns based on your actual business data.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Natural language questions</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Natural language questions
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Financial summaries</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Financial summaries
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Visual reports and charts</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Visual reports and charts
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Forecasts and runway</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Forecasts and runway
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">PDF export</span>
+                      <span className="font-sans text-sm text-foreground">
+                        PDF export
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -209,23 +225,35 @@ export function Assistant() {
                     Answers with full context
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    The assistant understands your transactions, invoices, customers, projects, and files so answers are specific to your business, not generic outputs.
+                    The assistant understands your transactions, invoices,
+                    customers, projects, and files so answers are specific to
+                    your business, not generic outputs.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Transactions context</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Transactions context
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Invoices context</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Invoices context
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Customers context</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Customers context
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Projects context</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Projects context
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Files and receipts context</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Files and receipts context
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -292,6 +320,5 @@ export function Assistant() {
       {/* Pricing Section */}
       <PricingSection />
     </div>
-  )
+  );
 }
-

@@ -4,7 +4,6 @@ import { Button } from "@midday/ui/button";
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BulkReconciliationAnimation } from "./homepage/bulk-reconciliation-animation";
 import { DashboardAnimation } from "./homepage/dashboard-animation";
@@ -37,7 +36,6 @@ const howItWorksSteps = [
 ];
 
 export function PreAccounting() {
-  const router = useRouter();
   const [activeStep, setActiveStep] = useState(0);
 
   return (

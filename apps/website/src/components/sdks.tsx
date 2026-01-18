@@ -166,7 +166,7 @@ export function SDKs() {
             width={1728}
             height={1080}
             className="w-[1728px] h-screen object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-            priority
+            loading="lazy"
           />
           <Image
             src="/images/grid-dark.svg"
@@ -174,7 +174,7 @@ export function SDKs() {
             width={1728}
             height={1080}
             className="w-[1728px] h-screen object-cover opacity-[12%] hidden dark:block"
-            priority
+            loading="lazy"
           />
         </div>
 
@@ -191,7 +191,7 @@ export function SDKs() {
               width={1728}
               height={1080}
               className="w-full h-[600px] object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-              priority
+              loading="lazy"
             />
             <Image
               src="/images/grid-dark.svg"
@@ -199,7 +199,7 @@ export function SDKs() {
               width={1728}
               height={1080}
               className="w-full h-[600px] object-cover opacity-[12%] hidden dark:block"
-              priority
+              loading="lazy"
             />
           </div>
           <div className="flex flex-col justify-start items-center z-20 px-4 sm:px-6">

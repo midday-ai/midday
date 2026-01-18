@@ -1,10 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { CommandPanelAnimation } from "./homepage/command-panel-animation";
 import { FileGridAnimation } from "./homepage/file-grid-animation";
-import { MaterialIcon } from "./homepage/icon-mapping";
 import { FeaturesGridSection } from "./sections/features-grid-section";
 import { IntegrationsSection } from "./sections/integrations-section";
 import { PreAccountingSection } from "./sections/pre-accounting-section";
@@ -13,8 +11,6 @@ import { TestimonialsSection } from "./sections/testimonials-section";
 import { TimeSavingsSection } from "./sections/time-savings-section";
 
 export function FileStorage() {
-  const router = useRouter();
-
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -27,7 +23,7 @@ export function FileStorage() {
             width={1728}
             height={1080}
             className="w-[1728px] h-screen object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-            priority
+            loading="lazy"
           />
           <Image
             src="/images/grid-dark.svg"
@@ -35,7 +31,7 @@ export function FileStorage() {
             width={1728}
             height={1080}
             className="w-[1728px] h-screen object-cover opacity-[12%] hidden dark:block"
-            priority
+            loading="lazy"
           />
         </div>
 
@@ -52,7 +48,7 @@ export function FileStorage() {
               width={1728}
               height={1080}
               className="w-full h-[600px] object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-              priority
+              loading="lazy"
             />
             <Image
               src="/images/grid-dark.svg"
@@ -60,7 +56,7 @@ export function FileStorage() {
               width={1728}
               height={1080}
               className="w-full h-[600px] object-cover opacity-[12%] hidden dark:block"
-              priority
+              loading="lazy"
             />
           </div>
           <div className="flex flex-col justify-start items-center space-y-6 z-20 px-3 sm:px-4">

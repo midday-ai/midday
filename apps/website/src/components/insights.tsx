@@ -1,23 +1,18 @@
-'use client'
+"use client";
 
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
-import { MaterialIcon } from './homepage/icon-mapping'
-import { DashboardAnimation } from './homepage/dashboard-animation'
-import { AIAssistantAnimation } from './homepage/ai-assistant-animation'
-import { WidgetsAnimation } from './homepage/widgets-animation'
-import { BurnrateAnimation } from './homepage/burnrate-animation'
-import { TestimonialsSection } from './sections/testimonials-section'
-import { FeaturesGridSection } from './sections/features-grid-section'
-import { TimeSavingsSection } from './sections/time-savings-section'
-import { PreAccountingSection } from './sections/pre-accounting-section'
-import { IntegrationsSection } from './sections/integrations-section'
-import { PricingSection } from './sections/pricing-section'
-import { AudioSummarySection } from './sections/audio-summary-section'
+import Image from "next/image";
+import { AIAssistantAnimation } from "./homepage/ai-assistant-animation";
+import { BurnrateAnimation } from "./homepage/burnrate-animation";
+import { WidgetsAnimation } from "./homepage/widgets-animation";
+import { AudioSummarySection } from "./sections/audio-summary-section";
+import { FeaturesGridSection } from "./sections/features-grid-section";
+import { IntegrationsSection } from "./sections/integrations-section";
+import { PreAccountingSection } from "./sections/pre-accounting-section";
+import { PricingSection } from "./sections/pricing-section";
+import { TestimonialsSection } from "./sections/testimonials-section";
+import { TimeSavingsSection } from "./sections/time-savings-section";
 
 export function Insights() {
-  const router = useRouter()
-
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -30,7 +25,7 @@ export function Insights() {
             width={1728}
             height={1080}
             className="w-[1728px] h-screen object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-            priority
+            loading="lazy"
           />
           <Image
             src="/images/grid-dark.svg"
@@ -38,21 +33,24 @@ export function Insights() {
             width={1728}
             height={1080}
             className="w-[1728px] h-screen object-cover opacity-[12%] hidden dark:block"
-            priority
+            loading="lazy"
           />
         </div>
 
         {/* Mobile Layout */}
         <div className="lg:hidden flex flex-col relative pt-32 pb-8 sm:pt-40 sm:pb-8 md:pt-48 overflow-hidden">
           {/* Grid Pattern Background - Mobile/Tablet Only (Limited Height) */}
-          <div className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0" style={{ height: '600px' }}>
+          <div
+            className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0"
+            style={{ height: "600px" }}
+          >
             <Image
               src="/images/grid-light.svg"
               alt="Grid Pattern"
               width={1728}
               height={1080}
               className="w-full h-[600px] object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-              priority
+              loading="lazy"
             />
             <Image
               src="/images/grid-dark.svg"
@@ -60,7 +58,7 @@ export function Insights() {
               width={1728}
               height={1080}
               className="w-full h-[600px] object-cover opacity-[12%] hidden dark:block"
-              priority
+              loading="lazy"
             />
           </div>
           <div className="flex flex-col justify-start items-center space-y-6 z-20 px-3 sm:px-4">
@@ -75,17 +73,20 @@ export function Insights() {
                 Understand how your business is evolving over time.
               </p>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto hidden lg:block">
-                Understand how your business is evolving over time with live widgets, summaries, and explanations that highlight what's moving, what's stable, and where attention is needed.
+                Understand how your business is evolving over time with live
+                widgets, summaries, and explanations that highlight what's
+                moving, what's stable, and where attention is needed.
               </p>
             </div>
 
             {/* Insights Illustration */}
             <div className="flex justify-center w-full">
               <div className="relative w-full max-w-6xl">
-                <div 
+                <div
                   className="absolute bottom-0 left-0 right-0 h-[20%] z-10 pointer-events-none"
                   style={{
-                    background: 'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)'
+                    background:
+                      "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
                 <Image
@@ -118,21 +119,26 @@ export function Insights() {
                 Insights
               </p>
               <h1 className="font-serif text-8xl xl:text-9xl 2xl:text-[12rem] leading-tight text-center">
-                <span className="text-foreground block">See what's changing</span>
+                <span className="text-foreground block">
+                  See what's changing
+                </span>
               </h1>
 
               <p className="text-muted-foreground text-base leading-normal max-w-2xl mx-auto font-sans text-center">
-                Understand how your business is evolving over time with live widgets, summaries, and explanations that highlight what's moving, what's stable, and where attention is needed.
+                Understand how your business is evolving over time with live
+                widgets, summaries, and explanations that highlight what's
+                moving, what's stable, and where attention is needed.
               </p>
             </div>
 
             {/* Insights Illustration */}
             <div className="flex justify-center w-full">
               <div className="relative w-full max-w-6xl">
-                <div 
+                <div
                   className="absolute bottom-0 left-0 right-0 h-[20%] z-10 pointer-events-none"
                   style={{
-                    background: 'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)'
+                    background:
+                      "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
                 <Image
@@ -170,23 +176,35 @@ export function Insights() {
                     Your business, at a glance
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Key financial widgets give you a live view of revenue, cash, spending, and performance, all customizable to what matters most right now.
+                    Key financial widgets give you a live view of revenue, cash,
+                    spending, and performance, all customizable to what matters
+                    most right now.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Customizable widgets</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Customizable widgets
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Revenue and cash</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Revenue and cash
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Spending breakdowns</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Spending breakdowns
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Time filters</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Time filters
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Multi-currency</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Multi-currency
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -211,23 +229,35 @@ export function Insights() {
                     Weekly financial updates
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Get automatic weekly summaries based on your widgets, showing how revenue, spending, cash, and key metrics changed since the last period.
+                    Get automatic weekly summaries based on your widgets,
+                    showing how revenue, spending, cash, and key metrics changed
+                    since the last period.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Weekly summaries</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Weekly summaries
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Revenue and spending changes</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Revenue and spending changes
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Cash overview</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Cash overview
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Email delivery</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Email delivery
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Voice summaries</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Voice summaries
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -252,20 +282,30 @@ export function Insights() {
                     What changed and why
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Important movements across widgets and categories are highlighted and explained so you understand what's driving change without digging through data.
+                    Important movements across widgets and categories are
+                    highlighted and explained so you understand what's driving
+                    change without digging through data.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Change highlights</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Change highlights
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Category movements</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Category movements
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Context explanations</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Context explanations
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Period comparisons</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Period comparisons
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -280,7 +320,6 @@ export function Insights() {
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -341,6 +380,5 @@ export function Insights() {
       {/* Pricing Section */}
       <PricingSection />
     </div>
-  )
+  );
 }
-

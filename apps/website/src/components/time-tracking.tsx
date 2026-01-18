@@ -1,9 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { DashboardAnimation } from "./homepage/dashboard-animation";
-import { MaterialIcon } from "./homepage/icon-mapping";
 import { InvoicePromptAnimation } from "./homepage/invoice-prompt-animation";
 import { FeaturesGridSection } from "./sections/features-grid-section";
 import { IntegrationsSection } from "./sections/integrations-section";
@@ -14,8 +11,6 @@ import { TimeSavingsSection } from "./sections/time-savings-section";
 import { TimeTrackingCalendarAnimation } from "./time-tracking-calendar-animation";
 
 export function TimeTracking() {
-  const router = useRouter();
-
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -28,7 +23,7 @@ export function TimeTracking() {
             width={1728}
             height={1080}
             className="w-[1728px] h-screen object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-            priority
+            loading="lazy"
           />
           <Image
             src="/images/grid-dark.svg"
@@ -36,7 +31,7 @@ export function TimeTracking() {
             width={1728}
             height={1080}
             className="w-[1728px] h-screen object-cover opacity-[12%] hidden dark:block"
-            priority
+            loading="lazy"
           />
         </div>
 
@@ -53,7 +48,7 @@ export function TimeTracking() {
               width={1728}
               height={1080}
               className="w-full h-[600px] object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-              priority
+              loading="lazy"
             />
             <Image
               src="/images/grid-dark.svg"
@@ -61,7 +56,7 @@ export function TimeTracking() {
               width={1728}
               height={1080}
               className="w-full h-[600px] object-cover opacity-[12%] hidden dark:block"
-              priority
+              loading="lazy"
             />
           </div>
           <div className="flex flex-col justify-start items-center space-y-6 z-20 px-3 sm:px-4">
@@ -231,7 +226,9 @@ export function TimeTracking() {
                     Time tracked by project
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Analyze and report on time tracked across projects with detailed breakdowns, client allocation, and profitability insights.
+                    Analyze and report on time tracked across projects with
+                    detailed breakdowns, client allocation, and profitability
+                    insights.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">

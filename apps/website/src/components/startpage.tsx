@@ -453,7 +453,7 @@ export function StartPage() {
                           width={600}
                           height={450}
                           className="w-full h-full object-contain"
-                          priority
+                          loading="lazy"
                         />
                       )}
                     </div>
@@ -598,7 +598,7 @@ export function StartPage() {
                       width={600}
                       height={450}
                       className="w-full h-full object-contain"
-                      priority
+                      loading="lazy"
                     />
                   )}
                 </div>

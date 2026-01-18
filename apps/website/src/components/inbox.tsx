@@ -1,21 +1,17 @@
-'use client'
+"use client";
 
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
-import Link from 'next/link'
-import { MaterialIcon } from './homepage/icon-mapping'
-import { InboxMatchAnimation } from './homepage/inbox-match-animation'
-import { ReceiptAttachmentAnimation } from './homepage/receipt-attachment-animation'
-import { TestimonialsSection } from './sections/testimonials-section'
-import { FeaturesGridSection } from './sections/features-grid-section'
-import { TimeSavingsSection } from './sections/time-savings-section'
-import { PreAccountingSection } from './sections/pre-accounting-section'
-import { IntegrationsSection } from './sections/integrations-section'
-import { PricingSection } from './sections/pricing-section'
+import Image from "next/image";
+import Link from "next/link";
+import { InboxMatchAnimation } from "./homepage/inbox-match-animation";
+import { ReceiptAttachmentAnimation } from "./homepage/receipt-attachment-animation";
+import { FeaturesGridSection } from "./sections/features-grid-section";
+import { IntegrationsSection } from "./sections/integrations-section";
+import { PreAccountingSection } from "./sections/pre-accounting-section";
+import { PricingSection } from "./sections/pricing-section";
+import { TestimonialsSection } from "./sections/testimonials-section";
+import { TimeSavingsSection } from "./sections/time-savings-section";
 
 export function Inbox() {
-  const router = useRouter()
-
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -28,7 +24,7 @@ export function Inbox() {
             width={1728}
             height={1080}
             className="w-[1728px] h-screen object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-            priority
+            loading="lazy"
           />
           <Image
             src="/images/grid-dark.svg"
@@ -36,21 +32,24 @@ export function Inbox() {
             width={1728}
             height={1080}
             className="w-[1728px] h-screen object-cover opacity-[12%] hidden dark:block"
-            priority
+            loading="lazy"
           />
         </div>
 
         {/* Mobile Layout */}
         <div className="lg:hidden flex flex-col relative pt-32 pb-8 sm:pt-40 sm:pb-8 md:pt-48 overflow-hidden">
           {/* Grid Pattern Background - Mobile/Tablet Only (Limited Height) */}
-          <div className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0" style={{ height: '600px' }}>
+          <div
+            className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none z-0"
+            style={{ height: "600px" }}
+          >
             <Image
               src="/images/grid-light.svg"
               alt="Grid Pattern"
               width={1728}
               height={1080}
               className="w-full h-[600px] object-cover opacity-100 dark:opacity-[12%] dark:hidden"
-              priority
+              loading="lazy"
             />
             <Image
               src="/images/grid-dark.svg"
@@ -58,7 +57,7 @@ export function Inbox() {
               width={1728}
               height={1080}
               className="w-full h-[600px] object-cover opacity-[12%] hidden dark:block"
-              priority
+              loading="lazy"
             />
           </div>
           <div className="flex flex-col justify-start items-center space-y-6 z-20 px-3 sm:px-4">
@@ -73,17 +72,20 @@ export function Inbox() {
                 Receipts and invoices are matched automatically to transactions.
               </p>
               <p className="text-muted-foreground text-base leading-normal font-sans text-center mx-auto hidden lg:block">
-                Receipts and invoices are pulled in from email, uploads, and payments, then matched to transactions so reconciliation doesn't require manual work.
+                Receipts and invoices are pulled in from email, uploads, and
+                payments, then matched to transactions so reconciliation doesn't
+                require manual work.
               </p>
             </div>
 
             {/* Inbox Illustration */}
             <div className="flex justify-center w-full">
               <div className="relative w-full max-w-6xl">
-                <div 
+                <div
                   className="absolute bottom-0 left-0 right-0 h-[20%] z-10 pointer-events-none"
                   style={{
-                    background: 'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)'
+                    background:
+                      "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
                 <Image
@@ -120,17 +122,20 @@ export function Inbox() {
               </h1>
 
               <p className="text-muted-foreground text-base leading-normal max-w-2xl mx-auto font-sans text-center">
-                Receipts and invoices are pulled in from email, uploads, and payments, then matched to transactions so reconciliation doesn't require manual work.
+                Receipts and invoices are pulled in from email, uploads, and
+                payments, then matched to transactions so reconciliation doesn't
+                require manual work.
               </p>
             </div>
 
             {/* Inbox Illustration */}
             <div className="flex justify-center w-full">
               <div className="relative w-full max-w-6xl">
-                <div 
+                <div
                   className="absolute bottom-0 left-0 right-0 h-[20%] z-10 pointer-events-none"
                   style={{
-                    background: 'linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)'
+                    background:
+                      "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 20%, hsla(var(--background), 0.8) 40%, hsla(var(--background), 0.5) 60%, hsla(var(--background), 0.2) 80%, transparent 100%)",
                   }}
                 />
                 <Image
@@ -168,36 +173,89 @@ export function Inbox() {
                     Receipts and invoices collected
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Upload receipts and invoices manually, connect existing folders, or pull them in from connected email accounts.
+                    Upload receipts and invoices manually, connect existing
+                    folders, or pull them in from connected email accounts.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Personal Midday inbox email</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Personal Midday inbox email
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Manual uploads</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Manual uploads
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Bulk uploads</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Bulk uploads
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">OCR scanning</span>
+                      <span className="font-sans text-sm text-foreground">
+                        OCR scanning
+                      </span>
                     </div>
-                    <Link href="/integrations/gmail" className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors">
-                      <Image src="/images/gmail.svg" alt="Gmail" width={16} height={16} className="object-contain" />
-                      <span className="font-sans text-sm text-foreground">Gmail</span>
+                    <Link
+                      href="/integrations/gmail"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors"
+                    >
+                      <Image
+                        src="/images/gmail.svg"
+                        alt="Gmail"
+                        width={16}
+                        height={16}
+                        className="object-contain"
+                      />
+                      <span className="font-sans text-sm text-foreground">
+                        Gmail
+                      </span>
                     </Link>
-                    <Link href="/integrations/outlook" className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors">
-                      <Image src="/images/outlook.svg" alt="Outlook" width={16} height={16} className="object-contain" />
-                      <span className="font-sans text-sm text-foreground">Outlook</span>
+                    <Link
+                      href="/integrations/outlook"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors"
+                    >
+                      <Image
+                        src="/images/outlook.svg"
+                        alt="Outlook"
+                        width={16}
+                        height={16}
+                        className="object-contain"
+                      />
+                      <span className="font-sans text-sm text-foreground">
+                        Outlook
+                      </span>
                     </Link>
-                    <Link href="/integrations/whatsapp" className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors">
-                      <Image src="/images/whatsapp.svg" alt="WhatsApp" width={16} height={16} className="object-contain" />
-                      <span className="font-sans text-sm text-foreground">WhatsApp</span>
+                    <Link
+                      href="/integrations/whatsapp"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors"
+                    >
+                      <Image
+                        src="/images/whatsapp.svg"
+                        alt="WhatsApp"
+                        width={16}
+                        height={16}
+                        className="object-contain"
+                      />
+                      <span className="font-sans text-sm text-foreground">
+                        WhatsApp
+                      </span>
                     </Link>
-                    <Link href="/integrations/slack" className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors">
-                      <Image src="/images/slack.svg" alt="Slack" width={16} height={16} className="object-contain" />
-                      <span className="font-sans text-sm text-foreground">Slack</span>
+                    <Link
+                      href="/integrations/slack"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background hover:bg-accent transition-colors"
+                    >
+                      <Image
+                        src="/images/slack.svg"
+                        alt="Slack"
+                        width={16}
+                        height={16}
+                        className="object-contain"
+                      />
+                      <span className="font-sans text-sm text-foreground">
+                        Slack
+                      </span>
                     </Link>
                   </div>
                 </div>
@@ -222,17 +280,24 @@ export function Inbox() {
                     Matched to transactions
                   </h2>
                   <p className="font-sans text-base text-muted-foreground leading-normal max-w-lg mx-auto lg:mx-0">
-                    Documents are matched to the right transactions and surfaced when something is missing so reconciliation stays simple.
+                    Documents are matched to the right transactions and surfaced
+                    when something is missing so reconciliation stays simple.
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Suggested matches</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Suggested matches
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">Missing receipt detection</span>
+                      <span className="font-sans text-sm text-foreground">
+                        Missing receipt detection
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-background">
-                      <span className="font-sans text-sm text-foreground">One-click approval</span>
+                      <span className="font-sans text-sm text-foreground">
+                        One-click approval
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -299,6 +364,5 @@ export function Inbox() {
       {/* Pricing Section */}
       <PricingSection />
     </div>
-  )
+  );
 }
-

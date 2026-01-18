@@ -97,6 +97,10 @@ export const viewport = {
 export default function Layout({ children }: { children: ReactElement }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://cdn.midday.ai" />
+        <link rel="dns-prefetch" href="https://cdn.midday.ai" />
+      </head>
       <body
         className={cn(
           `${hedvigSans.variable} ${hedvigSerif.variable} font-sans`,
