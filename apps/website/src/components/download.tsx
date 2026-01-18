@@ -2,6 +2,7 @@
 
 import { Button } from "@midday/ui/button";
 import Image from "next/image";
+import { useState } from "react";
 import { FeaturesGridSection } from "./sections/features-grid-section";
 import { IntegrationsSection } from "./sections/integrations-section";
 import { PreAccountingSection } from "./sections/pre-accounting-section";
@@ -10,6 +11,8 @@ import { TestimonialsSection } from "./sections/testimonials-section";
 import { TimeSavingsSection } from "./sections/time-savings-section";
 
 export function Download() {
+  const [isDockLoaded, setIsDockLoaded] = useState(false);
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -25,16 +28,26 @@ export function Download() {
                   alt="Mac Dock"
                   width={2175}
                   height={1193}
-                  className="absolute inset-0 w-full h-full object-contain dark:hidden"
+                  className="absolute inset-0 w-full h-full object-contain dark:hidden transition-all duration-1000 ease-in-out"
+                  style={{
+                    filter: isDockLoaded ? "blur(0px)" : "blur(12px)",
+                    transform: isDockLoaded ? "scale(1)" : "scale(1.05)",
+                  }}
                   priority
+                  onLoad={() => setIsDockLoaded(true)}
                 />
                 <Image
                   src="/images/dock-dark.png"
                   alt="Mac Dock"
                   width={2175}
                   height={1193}
-                  className="absolute inset-0 w-full h-full object-contain hidden dark:block"
+                  className="absolute inset-0 w-full h-full object-contain hidden dark:block transition-all duration-1000 ease-in-out"
+                  style={{
+                    filter: isDockLoaded ? "blur(0px)" : "blur(12px)",
+                    transform: isDockLoaded ? "scale(1)" : "scale(1.05)",
+                  }}
                   priority
+                  onLoad={() => setIsDockLoaded(true)}
                 />
               </div>
             </div>
@@ -79,16 +92,26 @@ export function Download() {
                   alt="Mac Dock"
                   width={2175}
                   height={1193}
-                  className="absolute inset-0 w-full h-full object-contain dark:hidden"
+                  className="absolute inset-0 w-full h-full object-contain dark:hidden transition-all duration-1000 ease-in-out"
+                  style={{
+                    filter: isDockLoaded ? "blur(0px)" : "blur(12px)",
+                    transform: isDockLoaded ? "scale(1)" : "scale(1.05)",
+                  }}
                   priority
+                  onLoad={() => setIsDockLoaded(true)}
                 />
                 <Image
                   src="/images/dock-dark.png"
                   alt="Mac Dock"
                   width={2175}
                   height={1193}
-                  className="absolute inset-0 w-full h-full object-contain hidden dark:block"
+                  className="absolute inset-0 w-full h-full object-contain hidden dark:block transition-all duration-1000 ease-in-out"
+                  style={{
+                    filter: isDockLoaded ? "blur(0px)" : "blur(12px)",
+                    transform: isDockLoaded ? "scale(1)" : "scale(1.05)",
+                  }}
                   priority
+                  onLoad={() => setIsDockLoaded(true)}
                 />
               </div>
             </div>
