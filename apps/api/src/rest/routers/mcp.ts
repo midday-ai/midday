@@ -1,5 +1,6 @@
 import { createMcpServer } from "@api/mcp/server";
 import type { Context } from "@api/rest/types";
+import type { Scope } from "@api/utils/scopes";
 import { StreamableHTTPTransport } from "@hono/mcp";
 import { OpenAPIHono } from "@hono/zod-openapi";
 
@@ -9,8 +10,9 @@ app.all("/", async (c) => {
   const transport = new StreamableHTTPTransport();
   const db = c.get("db");
   const teamId = c.get("teamId");
+  const scopes = (c.get("scopes") as Scope[] | undefined) ?? [];
 
-  const server = createMcpServer({ db, teamId });
+  const server = createMcpServer({ db, teamId, scopes });
 
   await server.connect(transport);
 

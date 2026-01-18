@@ -1,8 +1,14 @@
 import { getTagById, getTags } from "@midday/db/queries";
 import { z } from "zod";
-import { READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
+import { READ_ONLY_ANNOTATIONS, hasScope, type RegisterTools } from "../types";
 
-export const registerTagTools: RegisterTools = (server, { db, teamId }) => {
+export const registerTagTools: RegisterTools = (server, ctx) => {
+  const { db, teamId } = ctx;
+
+  // Require tags.read scope
+  if (!hasScope(ctx, "tags.read")) {
+    return;
+  }
   server.registerTool(
     "tags_list",
     {

@@ -1,7 +1,13 @@
 import { getTeamById, getTeamMembers } from "@midday/db/queries";
-import { READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
+import { READ_ONLY_ANNOTATIONS, hasScope, type RegisterTools } from "../types";
 
-export const registerTeamTools: RegisterTools = (server, { db, teamId }) => {
+export const registerTeamTools: RegisterTools = (server, ctx) => {
+  const { db, teamId } = ctx;
+
+  // Require teams.read scope
+  if (!hasScope(ctx, "teams.read")) {
+    return;
+  }
   server.registerTool(
     "team_get",
     {

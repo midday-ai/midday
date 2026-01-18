@@ -1,8 +1,14 @@
 import { globalSearchSchema } from "@api/schemas/search";
 import { globalSearchQuery } from "@midday/db/queries";
-import { READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
+import { READ_ONLY_ANNOTATIONS, hasScope, type RegisterTools } from "../types";
 
-export const registerSearchTools: RegisterTools = (server, { db, teamId }) => {
+export const registerSearchTools: RegisterTools = (server, ctx) => {
+  const { db, teamId } = ctx;
+
+  // Require search.read scope
+  if (!hasScope(ctx, "search.read")) {
+    return;
+  }
   server.registerTool(
     "search_global",
     {

@@ -3,12 +3,15 @@ import {
   getCustomersSchema,
 } from "@api/schemas/customers";
 import { getCustomerById, getCustomers } from "@midday/db/queries";
-import { READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
+import { READ_ONLY_ANNOTATIONS, hasScope, type RegisterTools } from "../types";
 
-export const registerCustomerTools: RegisterTools = (
-  server,
-  { db, teamId },
-) => {
+export const registerCustomerTools: RegisterTools = (server, ctx) => {
+  const { db, teamId } = ctx;
+
+  // Require customers.read scope
+  if (!hasScope(ctx, "customers.read")) {
+    return;
+  }
   server.registerTool(
     "customers_list",
     {

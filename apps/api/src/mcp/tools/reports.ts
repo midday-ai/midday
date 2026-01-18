@@ -13,9 +13,15 @@ import {
   getRunway,
   getSpending,
 } from "@midday/db/queries";
-import { READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
+import { READ_ONLY_ANNOTATIONS, type RegisterTools, hasScope } from "../types";
 
-export const registerReportTools: RegisterTools = (server, { db, teamId }) => {
+export const registerReportTools: RegisterTools = (server, ctx) => {
+  const { db, teamId } = ctx;
+
+  // Require reports.read scope
+  if (!hasScope(ctx, "reports.read")) {
+    return;
+  }
   server.registerTool(
     "reports_revenue",
     {

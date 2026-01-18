@@ -1,12 +1,15 @@
 import { getDocumentsSchema } from "@api/schemas/documents";
 import { getDocumentById, getDocuments } from "@midday/db/queries";
 import { z } from "zod";
-import { READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
+import { READ_ONLY_ANNOTATIONS, hasScope, type RegisterTools } from "../types";
 
-export const registerDocumentTools: RegisterTools = (
-  server,
-  { db, teamId },
-) => {
+export const registerDocumentTools: RegisterTools = (server, ctx) => {
+  const { db, teamId } = ctx;
+
+  // Require documents.read scope
+  if (!hasScope(ctx, "documents.read")) {
+    return;
+  }
   server.registerTool(
     "documents_list",
     {

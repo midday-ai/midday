@@ -8,9 +8,15 @@ import {
   getInvoiceSummary,
   getInvoices,
 } from "@midday/db/queries";
-import { READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
+import { READ_ONLY_ANNOTATIONS, hasScope, type RegisterTools } from "../types";
 
-export const registerInvoiceTools: RegisterTools = (server, { db, teamId }) => {
+export const registerInvoiceTools: RegisterTools = (server, ctx) => {
+  const { db, teamId } = ctx;
+
+  // Require invoices.read scope
+  if (!hasScope(ctx, "invoices.read")) {
+    return;
+  }
   server.registerTool(
     "invoices_list",
     {

@@ -3,12 +3,15 @@ import {
   getTransactionsSchema,
 } from "@api/schemas/transactions";
 import { getTransactionById, getTransactions } from "@midday/db/queries";
-import { READ_ONLY_ANNOTATIONS, type RegisterTools } from "../types";
+import { READ_ONLY_ANNOTATIONS, hasScope, type RegisterTools } from "../types";
 
-export const registerTransactionTools: RegisterTools = (
-  server,
-  { db, teamId },
-) => {
+export const registerTransactionTools: RegisterTools = (server, ctx) => {
+  const { db, teamId } = ctx;
+
+  // Require transactions.read scope
+  if (!hasScope(ctx, "transactions.read")) {
+    return;
+  }
   server.registerTool(
     "transactions_list",
     {
