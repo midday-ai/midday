@@ -15,6 +15,8 @@ const hedvigSans = Hedvig_Letters_Sans({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-hedvig-sans",
+  preload: true,
+  adjustFontFallback: true,
 });
 
 const hedvigSerif = Hedvig_Letters_Serif({
@@ -22,6 +24,8 @@ const hedvigSerif = Hedvig_Letters_Serif({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-hedvig-serif",
+  preload: true,
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = {

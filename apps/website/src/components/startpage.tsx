@@ -264,6 +264,7 @@ export function StartPage() {
                     height={750}
                     className="w-full h-auto md:!scale-[0.85] dark:hidden"
                     priority
+                    fetchPriority="high"
                   />
                   <Image
                     src="/images/dashboard-dark.svg"
@@ -272,6 +273,7 @@ export function StartPage() {
                     height={750}
                     className="w-full h-auto md:!scale-[0.85] hidden dark:block"
                     priority
+                    fetchPriority="high"
                   />
                 </div>
               </div>
@@ -344,7 +346,7 @@ export function StartPage() {
                   fill
                   quality={50}
                   fetchPriority="high"
-                  sizes="100vw"
+                  sizes="(max-width: 1280px) 100vw, 1280px"
                   className="object-cover transition-all duration-1000 ease-in-out"
                   style={{
                     filter: isDesktopPosterLoaded ? "blur(0px)" : "blur(12px)",
@@ -387,6 +389,7 @@ export function StartPage() {
                       filter: "drop-shadow(0 30px 60px rgba(0,0,0,0.6))",
                     }}
                     priority
+                    fetchPriority="high"
                   />
                   <Image
                     src="/images/dashboard-dark.svg"
@@ -399,6 +402,7 @@ export function StartPage() {
                       filter: "drop-shadow(0 30px 60px rgba(0,0,0,0.6))",
                     }}
                     priority
+                    fetchPriority="high"
                   />
                 </div>
               </div>
@@ -418,7 +422,7 @@ export function StartPage() {
               </h2>
             </div>
             {features.map((feature, index) => (
-              <div key={index} className="space-y-6 sm:space-y-8">
+              <div key={index.toString()} className="space-y-6 sm:space-y-8">
                 <div className="space-y-2 text-center">
                   <h2 className="font-serif text-2xl sm:text-2xl text-foreground max-w-md mx-auto">
                     {feature.title}
@@ -524,7 +528,7 @@ export function StartPage() {
                 </div>
                 {features.map((feature, index) => (
                   <div
-                    key={index}
+                    key={index.toString()}
                     className={`cursor-pointer transition-all duration-300 flex items-start ${
                       activeFeature === index
                         ? "opacity-100"
