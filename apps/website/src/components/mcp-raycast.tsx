@@ -1,0 +1,275 @@
+"use client";
+
+import { RaycastMcpLogo } from "@midday/app-store/logos";
+import { Button } from "@midday/ui/button";
+import { Icons } from "@midday/ui/icons";
+import { Input } from "@midday/ui/input";
+import { useTheme } from "next-themes";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import {
+  oneDark,
+  oneLight,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
+
+function CodeBlock({
+  code,
+  language = "json",
+}: { code: string; language?: string }) {
+  const [copied, setCopied] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = mounted && resolvedTheme === "dark";
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
+  return (
+    <div className="relative group">
+      <div className="bg-secondary border border-border rounded-none overflow-hidden">
+        <SyntaxHighlighter
+          language={language}
+          style={isDark ? oneDark : oneLight}
+          customStyle={{
+            margin: 0,
+            padding: "1rem",
+            fontSize: "0.875rem",
+            background: "transparent",
+            fontFamily:
+              "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
+          }}
+          codeTagProps={{
+            className: "font-mono",
+          }}
+          PreTag="div"
+        >
+          {code}
+        </SyntaxHighlighter>
+      </div>
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="absolute top-3 right-3 p-1.5 bg-background/80 backdrop-blur-sm border border-border text-muted-foreground hover:text-foreground hover:bg-background transition-colors opacity-0 group-hover:opacity-100 rounded-none"
+        aria-label="Copy code"
+      >
+        {copied ? (
+          <Icons.Check size={14} className="text-foreground" />
+        ) : (
+          <Icons.Copy size={14} />
+        )}
+      </button>
+    </div>
+  );
+}
+
+export function MCPRaycast() {
+  const [apiKey, setApiKey] = useState("");
+
+  const config = useMemo(() => {
+    const key = apiKey || "YOUR_API_KEY";
+    return {
+      name: "midday",
+      type: "stdio",
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.midday.ai/mcp"],
+      env: {
+        MCP_AUTH_HEADER: `Bearer ${key}`,
+      },
+    };
+  }, [apiKey]);
+
+  const manualConfig = useMemo(() => {
+    return JSON.stringify(config, null, 2);
+  }, [config]);
+
+  const deepLink = useMemo(() => {
+    const configEncoded = encodeURIComponent(JSON.stringify(config));
+    return `raycast://mcp/install?${configEncoded}`;
+  }, [config]);
+
+  const hasApiKey = apiKey.startsWith("mid_");
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Hero Section */}
+      <div className="bg-background relative overflow-visible">
+        {/* Grid Pattern Background */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+          <Image
+            src="/images/grid-light.svg"
+            alt="Grid Pattern"
+            width={1728}
+            height={1080}
+            className="w-[1728px] h-[600px] object-cover opacity-100 dark:opacity-[12%] dark:hidden"
+            loading="lazy"
+          />
+          <Image
+            src="/images/grid-dark.svg"
+            alt="Grid Pattern"
+            width={1728}
+            height={1080}
+            className="w-[1728px] h-[600px] object-cover opacity-[12%] hidden dark:block"
+            loading="lazy"
+          />
+        </div>
+
+        <div className="relative z-10 pt-32 pb-16 sm:pt-40 sm:pb-20 md:pt-48 px-4 sm:px-6">
+          <div className="max-w-2xl mx-auto">
+            {/* Back Link */}
+            <Link
+              href="/mcp"
+              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 font-sans text-sm"
+            >
+              <Icons.ArrowBack size={16} />
+              All clients
+            </Link>
+
+            {/* Logo and Title */}
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-14 h-14 overflow-hidden rounded-[22%] [&>img]:w-full [&>img]:h-full [&>img]:rounded-none">
+                <RaycastMcpLogo />
+              </div>
+              <div>
+                <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider">
+                  MCP Server
+                </p>
+                <h1 className="font-serif text-3xl sm:text-4xl text-foreground">
+                  Raycast
+                </h1>
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="space-y-4 mb-8">
+              <h2 className="font-serif text-xl sm:text-2xl text-foreground">
+                Financial tools at your fingertips
+              </h2>
+              <p className="font-sans text-base text-muted-foreground leading-relaxed">
+                Access transactions, invoices, and reports directly from Raycast
+                with a keyboard shortcut. Query your financial data without
+                switching apps.
+              </p>
+            </div>
+
+            {/* API Key Input */}
+            <div className="space-y-4 mb-8">
+              <div className="space-y-2">
+                <label
+                  htmlFor="api-key"
+                  className="font-sans text-sm text-foreground"
+                >
+                  Your API key
+                </label>
+                <Input
+                  id="api-key"
+                  type="password"
+                  placeholder="mid_..."
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  className="font-mono text-sm"
+                />
+                <p className="font-sans text-xs text-muted-foreground">
+                  Don't have an API key?{" "}
+                  <Link
+                    href="https://app.midday.ai/settings/developer"
+                    className="underline hover:text-foreground"
+                  >
+                    Create one in Settings → Developer
+                  </Link>
+                </p>
+              </div>
+            </div>
+
+            {/* Install Button */}
+            <div className="space-y-4 mb-12">
+              <Button
+                asChild={hasApiKey}
+                disabled={!hasApiKey}
+                className="w-full sm:w-auto h-11 px-6 text-sm font-sans"
+              >
+                {hasApiKey ? (
+                  <a href={deepLink}>Install in Raycast</a>
+                ) : (
+                  <span>Enter API key to install</span>
+                )}
+              </Button>
+              {hasApiKey && (
+                <p className="font-sans text-xs text-muted-foreground">
+                  Clicking will open Raycast and prompt you to add the Midday
+                  MCP server.
+                </p>
+              )}
+            </div>
+
+            {/* Divider */}
+            <div className="h-px w-full border-t border-border mb-8" />
+
+            {/* Manual Setup */}
+            <div className="space-y-4">
+              <h3 className="font-sans text-sm font-medium text-foreground">
+                Manual setup
+              </h3>
+              <p className="font-sans text-sm text-muted-foreground">
+                Use Raycast's "Install Server" command with this configuration:
+              </p>
+              <CodeBlock code={manualConfig} language="json" />
+            </div>
+
+            {/* Steps */}
+            <div className="mt-12 space-y-4">
+              <h3 className="font-sans text-sm font-medium text-foreground">
+                Setup steps
+              </h3>
+              <ol className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
+                    1
+                  </span>
+                  <span className="font-sans text-sm text-muted-foreground pt-0.5">
+                    Get an API key from{" "}
+                    <Link
+                      href="https://app.midday.ai/settings/developer"
+                      className="underline hover:text-foreground"
+                    >
+                      Settings → Developer
+                    </Link>
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
+                    2
+                  </span>
+                  <span className="font-sans text-sm text-muted-foreground pt-0.5">
+                    Click "Install in Raycast" or use the Install Server command
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-secondary border border-border flex items-center justify-center font-mono text-xs text-muted-foreground">
+                    3
+                  </span>
+                  <span className="font-sans text-sm text-muted-foreground pt-0.5">
+                    @-mention Midday in Raycast AI to query your data
+                  </span>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

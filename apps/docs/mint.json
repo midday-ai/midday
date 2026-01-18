@@ -56,7 +56,7 @@
     },
     {
       "group": "Resources",
-      "pages": ["integrations", "examples"]
+      "pages": ["integrations", "mcp", "examples"]
     },
     {
       "group": "Open source",

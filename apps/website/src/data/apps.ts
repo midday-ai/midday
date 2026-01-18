@@ -164,6 +164,46 @@ const appExtensions: Record<
       "Automated processing",
     ],
   },
+  "cursor-mcp": {
+    slug: "cursor-mcp",
+    features: [
+      "Financial context in your editor",
+      "Query transactions while coding",
+      "One-click install via deeplink",
+      "27 tools for financial data",
+    ],
+    installUrl: "https://midday.ai/mcp/cursor",
+  },
+  "claude-mcp": {
+    slug: "claude-mcp",
+    features: [
+      "Conversations with real numbers",
+      "Works with Claude Code & Desktop",
+      "Query invoices and reports",
+      "Read-only secure access",
+    ],
+    installUrl: "https://midday.ai/mcp/claude",
+  },
+  "raycast-mcp": {
+    slug: "raycast-mcp",
+    features: [
+      "Financial tools at your fingertips",
+      "Keyboard-first access",
+      "One-click install via deeplink",
+      "@-mention in Raycast AI",
+    ],
+    installUrl: "https://midday.ai/mcp/raycast",
+  },
+  "chatgpt-mcp": {
+    slug: "chatgpt-mcp",
+    features: [
+      "Build with the MCP SDK",
+      "Custom integrations",
+      "Programmatic data access",
+      "TypeScript support",
+    ],
+    installUrl: "https://midday.ai/mcp/chatgpt",
+  },
 };
 
 // Merge app-store data with website extensions
@@ -195,6 +235,7 @@ export const apps: WebsiteApp[] = appStoreApps
 
 export const categories = [
   { id: "all", name: "All" },
+  { id: "ai", name: "AI" },
   { id: "inbox", name: "Inbox" },
   { id: "productivity", name: "Productivity" },
   { id: "accounting", name: "Accounting" },
