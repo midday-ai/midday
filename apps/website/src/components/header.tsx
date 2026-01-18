@@ -509,6 +509,12 @@ export function Header({
                                   desc: "Connect your existing tools.",
                                   external: false,
                                 },
+                                {
+                                  href: "/docs",
+                                  title: "Documentation",
+                                  desc: "Learn how to use Midday.",
+                                  external: false,
+                                },
                               ].map((item, index) => (
                                 <div
                                   key={item.href}
@@ -942,6 +948,17 @@ export function Header({
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
                           Integrations
+                        </Link>
+                        <Link
+                          href="/docs"
+                          onClick={() => {
+                            setIsMenuOpen(false);
+                            setIsMobileAppsOpen(false);
+                          }}
+                          className="text-lg font-sans text-left text-muted-foreground hover:text-muted-foreground xl:active:text-muted-foreground focus:outline-none focus-visible:outline-none touch-manipulation transition-colors"
+                          style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
+                          Documentation
                         </Link>
                         <Link
                           href="/mcp"

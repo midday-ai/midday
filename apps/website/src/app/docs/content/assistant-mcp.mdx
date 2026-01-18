@@ -1,0 +1,82 @@
+---
+title: Assistant and MCP Integration
+description: Use the Midday assistant in your own tools via MCP.
+section: assistant
+order: 2
+---
+
+The Midday assistant is also available through the Model Context Protocol (MCP), letting you use it in compatible tools like Claude Desktop, Cursor, and other MCP clients.
+
+## What is MCP?
+
+Model Context Protocol (MCP) is an open standard for connecting AI assistants to external data sources. With MCP, you can query your Midday data from:
+
+- Claude Desktop
+- Cursor IDE
+- Other MCP-compatible applications
+
+## Setting up MCP
+
+### Prerequisites
+
+- A Midday account with an API key
+- An MCP-compatible application
+
+### Get your API key
+
+1. Go to [Settings → Developer](https://app.midday.ai/settings/developer)
+2. Click **Create API key**
+3. Copy the key (you won't see it again)
+
+### Configure your MCP client
+
+Add Midday to your MCP configuration. The exact setup varies by client.
+
+For Claude Desktop, add to your configuration:
+
+```json
+{
+  "mcpServers": {
+    "midday": {
+      "command": "npx",
+      "args": ["-y", "@midday-ai/mcp"],
+      "env": {
+        "MIDDAY_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+## What you can do
+
+Once connected, you can ask your MCP client about your Midday data:
+
+- "What was my revenue last month?"
+- "Show unpaid invoices"
+- "How much did I spend on software?"
+- "What's my runway?"
+
+The assistant queries your actual Midday data and returns accurate results.
+
+## Available tools
+
+The MCP integration provides tools for:
+
+- **Transactions**: List, search, filter
+- **Invoices**: View, list by status
+- **Customers**: List and view details
+- **Time tracking**: View projects and entries
+- **Reports**: Revenue, expenses, runway
+
+## Security
+
+- API keys have read-only access by default
+- Revoke keys anytime from Settings → Developer
+- Each key shows last used date
+
+## Tips
+
+- Use specific questions for best results
+- Include date ranges when relevant
+- The MCP integration has the same capabilities as the in-app assistant

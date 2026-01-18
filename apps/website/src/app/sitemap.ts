@@ -1,5 +1,6 @@
 import { getAllSlugs } from "@/data/apps";
 import { getBlogPosts } from "@/lib/blog";
+import { getAllDocSlugs } from "@/lib/docs";
 import type { MetadataRoute } from "next";
 
 export const baseUrl = "https://midday.ai";
@@ -14,6 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/assistant",
     "/bank-coverage",
     "/customers",
+    "/docs",
     "/download",
     "/file-storage",
     "/inbox",
@@ -47,5 +49,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified,
   }));
 
-  return [...staticRoutes, ...blogPosts, ...integrations];
+  // Documentation pages
+  const docPages = getAllDocSlugs().map((slug) => ({
+    url: `${baseUrl}/docs/${slug}`,
+    lastModified,
+  }));
+
+  return [...staticRoutes, ...blogPosts, ...integrations, ...docPages];
 }
