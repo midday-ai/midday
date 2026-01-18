@@ -47,7 +47,7 @@ const questions = [
 ];
 
 const capabilities = [
-  "40+ tools across transactions, invoices, customers, tracker, and reports",
+  "50+ tools across transactions, invoices, customers, tracker, and reports",
   "Granular permissions—read-only or full access, you choose",
   "Secure authentication with your existing API keys",
   "Works with Cursor, Claude, Raycast, and any MCP-compatible client",
