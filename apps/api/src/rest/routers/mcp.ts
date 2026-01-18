@@ -10,9 +10,11 @@ app.all("/", async (c) => {
   const transport = new StreamableHTTPTransport();
   const db = c.get("db");
   const teamId = c.get("teamId");
+  const session = c.get("session");
+  const userId = session.user.id;
   const scopes = (c.get("scopes") as Scope[] | undefined) ?? [];
 
-  const server = createMcpServer({ db, teamId, scopes });
+  const server = createMcpServer({ db, teamId, userId, scopes });
 
   await server.connect(transport);
 

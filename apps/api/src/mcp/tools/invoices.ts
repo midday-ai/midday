@@ -35,7 +35,7 @@ const DESTRUCTIVE_ANNOTATIONS = {
 } as const;
 
 export const registerInvoiceTools: RegisterTools = (server, ctx) => {
-  const { db, teamId } = ctx;
+  const { db, teamId, userId } = ctx;
 
   // Check scopes
   const hasReadScope = hasScope(ctx, "invoices.read");
@@ -234,6 +234,13 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           paidAt: params.paidAt ?? new Date().toISOString(),
         });
 
+        if (!result) {
+          return {
+            content: [{ type: "text", text: "Failed to mark invoice as paid" }],
+            isError: true,
+          };
+        }
+
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         };
@@ -327,7 +334,7 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           const result = await duplicateInvoice(db, {
             id,
             teamId,
-            userId: "", // Will be handled by the function
+            userId,
             invoiceNumber,
           });
 
@@ -391,6 +398,13 @@ export const registerInvoiceTools: RegisterTools = (server, ctx) => {
           teamId,
           status: "canceled",
         });
+
+        if (!result) {
+          return {
+            content: [{ type: "text", text: "Failed to cancel invoice" }],
+            isError: true,
+          };
+        }
 
         return {
           content: [{ type: "text", text: JSON.stringify(result, null, 2) }],

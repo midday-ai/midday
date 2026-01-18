@@ -14,6 +14,7 @@ import {
   deleteTrackerEntry,
   deleteTrackerProject,
   getTimerStatus,
+  getTrackerEntryById,
   getTrackerProjectById,
   getTrackerProjects,
   getTrackerRecordsByRange,
@@ -175,7 +176,6 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           billable: upsertTrackerProjectSchema.shape.billable,
           rate: upsertTrackerProjectSchema.shape.rate,
           currency: upsertTrackerProjectSchema.shape.currency,
-          status: upsertTrackerProjectSchema.shape.status,
           customerId: upsertTrackerProjectSchema.shape.customerId,
           tags: upsertTrackerProjectSchema.shape.tags,
         },
@@ -195,17 +195,23 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
           };
         }
 
+        // Map existing tags from { id, name } to { id, value } format for upsert
+        const existingTags = existing.tags?.map((tag) => ({
+          id: tag.id,
+          value: tag.name ?? "",
+        }));
+
         const result = await upsertTrackerProject(db, {
           id: params.id,
           teamId,
-          name: params.name ?? existing.name,
-          description: params.description,
-          estimate: params.estimate,
-          billable: params.billable,
-          rate: params.rate,
-          currency: params.currency,
-          customerId: params.customerId,
-          tags: params.tags,
+          name: params.name ?? existing.name ?? "",
+          description: params.description ?? existing.description,
+          estimate: params.estimate ?? existing.estimate,
+          billable: params.billable ?? existing.billable,
+          rate: params.rate ?? existing.rate,
+          currency: params.currency ?? existing.currency,
+          customerId: params.customerId ?? existing.customerId,
+          tags: params.tags ?? existingTags,
         });
 
         return {
@@ -361,11 +367,10 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
       {
         title: "Update Tracker Entry",
         description:
-          "Update an existing time tracking entry. Provide the entry ID and fields to update.",
+          "Update an existing time tracking entry. Provide the entry ID and only the fields you want to update.",
         inputSchema: {
           id: z.string().uuid().describe("The ID of the entry to update"),
           projectId: upsertTrackerEntriesSchema.shape.projectId.optional(),
-          dates: upsertTrackerEntriesSchema.shape.dates,
           start: upsertTrackerEntriesSchema.shape.start.optional(),
           stop: upsertTrackerEntriesSchema.shape.stop.optional(),
           duration: upsertTrackerEntriesSchema.shape.duration.optional(),
@@ -375,13 +380,30 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         annotations: WRITE_ANNOTATIONS,
       },
       async (params) => {
-        // Ensure required fields have values
-        if (!params.projectId || !params.start || !params.stop) {
+        // Fetch the existing entry
+        const existing = await getTrackerEntryById(db, {
+          id: params.id,
+          teamId,
+        });
+
+        if (!existing) {
+          return {
+            content: [{ type: "text", text: "Entry not found" }],
+            isError: true,
+          };
+        }
+
+        // Validate that we have required fields from either params or existing
+        const projectId = params.projectId ?? existing.projectId;
+        const start = params.start ?? existing.start;
+        const stop = params.stop ?? existing.stop;
+
+        if (!projectId || !start || !stop) {
           return {
             content: [
               {
                 type: "text",
-                text: "projectId, start, and stop are required for updating entries",
+                text: "Entry is missing required fields (projectId, start, or stop). Please provide them.",
               },
             ],
             isError: true,
@@ -391,13 +413,13 @@ export const registerTrackerTools: RegisterTools = (server, ctx) => {
         const result = await upsertTrackerEntries(db, {
           id: params.id,
           teamId,
-          projectId: params.projectId,
-          dates: params.dates,
-          start: params.start,
-          stop: params.stop,
-          duration: params.duration ?? 0,
-          description: params.description,
-          assignedId: params.assignedId,
+          projectId,
+          dates: existing.date ? [existing.date] : [],
+          start,
+          stop,
+          duration: params.duration ?? existing.duration ?? 0,
+          description: params.description ?? existing.description,
+          assignedId: params.assignedId ?? existing.assignedId,
         });
 
         return {

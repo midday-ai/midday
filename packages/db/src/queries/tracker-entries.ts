@@ -970,3 +970,22 @@ export async function getBillableHours(
     currency: baseCurrency,
   };
 }
+
+export type GetTrackerEntryByIdParams = {
+  id: string;
+  teamId: string;
+};
+
+export async function getTrackerEntryById(
+  db: Database,
+  params: GetTrackerEntryByIdParams,
+) {
+  const { id, teamId } = params;
+
+  const entry = await db.query.trackerEntries.findFirst({
+    where: (entries, { and, eq }) =>
+      and(eq(entries.id, id), eq(entries.teamId, teamId)),
+  });
+
+  return entry ?? null;
+}
