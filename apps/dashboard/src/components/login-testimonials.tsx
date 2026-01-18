@@ -5,50 +5,25 @@ import { useEffect, useState } from "react";
 
 const testimonials = [
   {
-    name: "Paweł Michalski",
-    title: "VC leaders • Poland",
+    name: "Wilson Zhu",
+    title: "Honest Funding LLC • United States",
     content:
-      "Due to improved invoice reconciliation, we are now saving 1-2 man-days each month, and we have a better understanding of our finances thanks to dashboards.",
-    highlighted: "We are now saving 1-2 man-days each month.",
+      "Before Abacus, I was managing everything in spreadsheets. Now I see my entire portfolio in one place and can finally focus on growing the business instead of tracking it.",
+    highlighted: "Now I see my entire portfolio in one place",
     firstPart:
-      "Due to improved invoice reconciliation, we are now saving 1-2 man-days each month",
+      "Before Abacus, I was managing everything in spreadsheets. Now I see my entire portfolio in one place",
     secondPart:
-      ", and we have a better understanding of our finances thanks to dashboards.",
+      " and can finally focus on growing the business instead of tracking it.",
   },
   {
-    name: "Guy Solan",
-    title: "Thetis Medical • United Kingdom",
+    name: "John DeSimonte",
+    title: "Emmy Capital • United States",
     content:
-      "Without Midday I would've sold my company and lost loads of money. I never had the time to learn Quickbooks or Xero so had no idea what the company cash was doing without ringing up my accountant.",
-    highlighted:
-      "Without Midday I would've sold my company and lost loads of money",
+      "We went from chasing spreadsheets and digging through emails to having everything we need in one dashboard. Abacus cut our admin time in half.",
+    highlighted: "Abacus cut our admin time in half",
     firstPart:
-      "Without Midday I would've sold my company and lost loads of money",
-    secondPart:
-      ". I never had the time to learn Quickbooks or Xero so had no idea what the company cash was doing without ringing up my accountant.",
-  },
-  {
-    name: "Facu Montanaro",
-    title: "Kundo Studio • Argentina",
-    content:
-      "It has completely transformed how I manage my day-to-day tasks. From generating invoices to tracking projects and having all the information centralized in one place, the change has been remarkable.",
-    highlighted:
-      "It has completely transformed how I manage my day-to-day tasks",
-    firstPart: "It has completely transformed how I manage my day-to-day tasks",
-    secondPart:
-      ". From generating invoices to tracking projects and having all the information centralized in one place, the change has been remarkable.",
-  },
-  {
-    name: "Richard Poelderl",
-    title: "Conduct.bln • Germany",
-    content:
-      "I prefer to have one tool for finances, similar to what Deel is for HR. Midday helped me find a compromise with my tax advisor: I'm not using one of his supported clunky tools but an actually UX-friendly tool and can provide him with acceptable .csv. That's a big one!",
-    highlighted:
-      "I prefer to have one tool for finances, similar to what Deel is for HR",
-    firstPart:
-      "I prefer to have one tool for finances, similar to what Deel is for HR",
-    secondPart:
-      ". Midday helped me find a compromise with my tax advisor: I'm not using one of his supported clunky tools but an actually UX-friendly tool and can provide him with acceptable .csv. That's a big one!",
+      "We went from chasing spreadsheets and digging through emails to having everything we need in one dashboard. Abacus cut our admin time in half",
+    secondPart: ".",
   },
 ];
 
