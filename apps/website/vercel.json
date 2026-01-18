@@ -4,7 +4,5 @@
   "github": {
     "enabled": false
   },
-  "installCommand": "cd ../.. && bun install",
-  "buildCommand": "cd ../.. && turbo run build --filter=@midday/website --only",
   "regions": ["fra1", "iad1", "sfo1"]
 }
