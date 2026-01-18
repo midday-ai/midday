@@ -5,6 +5,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 export interface McpContext {
   db: Database;
   teamId: string;
+  userId: string;
   scopes: Scope[];
 }
 

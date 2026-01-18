@@ -5,7 +5,6 @@ import { Icons } from "@midday/ui/icons";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
@@ -161,7 +160,6 @@ function CodeBlock({
 }
 
 export function SDKs() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<SDKTab>("typescript");
 
   const handleLogoClick = (sdk: SDKTab) => {
@@ -287,17 +285,17 @@ export function SDKs() {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-md mx-auto justify-center sm:justify-center mt-8">
               <Button
-                onClick={() => router.push("/login")}
+                asChild
                 className="w-full sm:w-auto h-11 px-6 text-sm font-sans"
               >
-                Get started
+                <Link href="https://app.midday.ai">Get started</Link>
               </Button>
               <Button
+                asChild
                 variant="outline"
-                onClick={() => router.push("/docs")}
                 className="w-full sm:w-auto h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
               >
-                View documentation
+                <Link href="https://api.midday.ai">API documentation</Link>
               </Button>
             </div>
           </div>
@@ -365,18 +363,15 @@ export function SDKs() {
 
             {/* CTA Buttons */}
             <div className="flex gap-6 justify-center mt-8">
-              <Button
-                onClick={() => router.push("/login")}
-                className="h-11 px-6 text-sm font-sans"
-              >
-                Get started
+              <Button asChild className="h-11 px-6 text-sm font-sans">
+                <Link href="https://app.midday.ai">Get started</Link>
               </Button>
               <Button
+                asChild
                 variant="outline"
-                onClick={() => router.push("/docs")}
                 className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
               >
-                View documentation
+                <Link href="https://api.midday.ai">API documentation</Link>
               </Button>
             </div>
           </div>
@@ -838,6 +833,7 @@ if ($response->object !== null) {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <Link
+                href="https://github.com/midday-ai"
                 href={sdkRepos[activeTab]}
                 target="_blank"
                 rel="noopener noreferrer"
