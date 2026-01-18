@@ -6,7 +6,11 @@ import { isDesktopApp } from "@/utils/desktop";
 import { Provider as Analytics } from "@midday/events/client";
 import { Toaster } from "@midday/ui/toaster";
 import type { Metadata } from "next";
-import { Hedvig_Letters_Sans, Hedvig_Letters_Serif } from "next/font/google";
+import {
+  Hedvig_Letters_Sans,
+  Hedvig_Letters_Serif,
+  Noto_Sans_JP,
+} from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { ReactElement } from "react";
 import { Providers } from "./providers";
@@ -70,6 +74,14 @@ const hedvigSerif = Hedvig_Letters_Serif({
   variable: "--font-hedvig-serif",
 });
 
+// Japanese font for Midday-JP
+const notoSansJP = Noto_Sans_JP({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-noto-sans-jp",
+});
+
 export const viewport = {
   width: "device-width",
   initialScale: 1,
@@ -99,7 +111,7 @@ export default async function Layout({
     >
       <body
         className={cn(
-          `${hedvigSans.variable} ${hedvigSerif.variable} font-sans`,
+          `${hedvigSans.variable} ${hedvigSerif.variable} ${notoSansJP.variable} font-sans`,
           "whitespace-pre-line overscroll-none antialiased",
         )}
       >

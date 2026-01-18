@@ -1,6 +1,7 @@
 "use client";
 
 import { useUserMutation, useUserQuery } from "@/hooks/use-user";
+import { useI18n } from "@/locales/client";
 import {
   Card,
   CardContent,
@@ -17,15 +18,16 @@ import {
 } from "@midday/ui/select";
 
 export function TimeFormatSettings() {
+  const t = useI18n();
   const updateUserMutation = useUserMutation();
   const { data: user } = useUserQuery();
 
   return (
-    <Card className="flex justify-between items-center">
+    <Card className="flex flex-col md:flex-row md:justify-between md:items-center">
       <CardHeader>
-        <CardTitle>Time Display Format</CardTitle>
-        <CardDescription>
-          Choose between 12-hour or 24-hour clock format for displaying time.
+        <CardTitle>{t("settings.time_format.title")}</CardTitle>
+        <CardDescription id="time-format-description">
+          {t("settings.time_format.description")}
         </CardDescription>
       </CardHeader>
 
@@ -36,12 +38,16 @@ export function TimeFormatSettings() {
             updateUserMutation.mutate({ timeFormat: +value });
           }}
         >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Time format" />
+          <SelectTrigger
+            className="w-[180px]"
+            aria-label={t("settings.time_format.title")}
+            aria-describedby="time-format-description"
+          >
+            <SelectValue placeholder={t("settings.time_format.placeholder")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="12">12 hours (AM/PM)</SelectItem>
-            <SelectItem value="24">24 hours</SelectItem>
+            <SelectItem value="12">{t("settings.time_format.hour_12")}</SelectItem>
+            <SelectItem value="24">{t("settings.time_format.hour_24")}</SelectItem>
           </SelectContent>
         </Select>
       </CardContent>

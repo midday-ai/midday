@@ -3,6 +3,7 @@
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useUserQuery } from "@/hooks/use-user";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { formatCompactAmount } from "@/utils/format";
 import { getPeriodLabel } from "@/utils/metrics-date-utils";
@@ -14,6 +15,7 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";
 
 export function CategoryExpensesWidget() {
+  const t = useI18n();
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const { sendMessage } = useChatActions();
@@ -33,7 +35,7 @@ export function CategoryExpensesWidget() {
   if (isLoading) {
     return (
       <WidgetSkeleton
-        title="Category Expenses"
+        title={t("widgets.category_expenses.title")}
         icon={<Icons.PieChart className="size-4" />}
         descriptionLines={3}
         showValue={false}
@@ -87,7 +89,7 @@ export function CategoryExpensesWidget() {
 
   return (
     <BaseWidget
-      title="Category Expenses"
+      title={t("widgets.category_expenses.title")}
       description={
         hasCategories ? (
           <div className="flex flex-col gap-2 w-full">
@@ -125,14 +127,14 @@ export function CategoryExpensesWidget() {
         ) : (
           <div className="py-8">
             <p className="text-sm text-muted-foreground">
-              No expenses tracked yet
+              {t("widgets.category_expenses.no_data")}
             </p>
           </div>
         )
       }
       icon={<Icons.PieChart className="size-4" />}
       onClick={hasCategories ? handleViewCategories : undefined}
-      actions={hasCategories ? "View transactions" : undefined}
+      actions={hasCategories ? t("widgets.category_expenses.action") : undefined}
     />
   );
 }

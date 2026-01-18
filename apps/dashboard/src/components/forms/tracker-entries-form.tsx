@@ -3,6 +3,7 @@
 import { useLatestProjectId } from "@/hooks/use-latest-project-id";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useUserQuery } from "@/hooks/use-user";
+import { useI18n } from "@/locales/client";
 import { NEW_EVENT_ID, parseTimeWithMidnightCrossing } from "@/utils/tracker";
 import { TZDate } from "@date-fns/tz";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -53,6 +54,7 @@ export function TrackerEntriesForm({
   isSaving,
   onTimeChange,
 }: Props) {
+  const t = useI18n();
   const { projectId: selectedProjectId } = useTrackerParams();
   const { data: user } = useUserQuery();
   const { latestProjectId } = useLatestProjectId(user?.teamId);
@@ -197,7 +199,7 @@ export function TrackerEntriesForm({
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input placeholder="Description" {...field} />
+                <Input placeholder={t("tracker.entry_description_placeholder")} {...field} />
               </FormControl>
             </FormItem>
           )}
@@ -210,7 +212,7 @@ export function TrackerEntriesForm({
             isSubmitting={isSaving}
             type="submit"
           >
-            {isUpdate ? "Update" : "Add"}
+            {isUpdate ? t("forms.buttons.update") : t("forms.buttons.add_more")}
           </SubmitButton>
         </div>
       </form>

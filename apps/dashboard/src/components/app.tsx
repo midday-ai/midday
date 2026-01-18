@@ -1,3 +1,6 @@
+"use client";
+
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import {
   Accordion,
@@ -42,6 +45,7 @@ export function App({
   category: string;
   userSettings: Record<string, any>;
 }) {
+  const t = useI18n();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const [isLoading, setLoading] = useState(false);
@@ -78,7 +82,7 @@ export function App({
 
           {installed && (
             <div className="text-green-600 bg-green-100 text-[10px] dark:bg-green-900 dark:text-green-300 px-3 py-1 rounded-full font-mono">
-              Installed
+              {t("apps.installed")}
             </div>
           )}
         </div>
@@ -90,7 +94,7 @@ export function App({
             </CardTitle>
             {!active && (
               <span className="text-[#878787] bg-[#F2F1EF] text-[10px] dark:bg-[#1D1D1D] px-3 py-1 rounded-full font-mono">
-                Coming soon
+                {t("apps.coming_soon")}
               </span>
             )}
           </div>
@@ -106,7 +110,7 @@ export function App({
             disabled={!active}
             onClick={() => setParams({ app: id })}
           >
-            Details
+            {t("apps.details")}
           </Button>
 
           {installed ? (
@@ -114,10 +118,11 @@ export function App({
               variant="outline"
               className="w-full"
               onClick={handleDisconnect}
+              aria-busy={disconnectAppMutation.isPending}
             >
               {disconnectAppMutation.isPending
-                ? "Disconnecting..."
-                : "Disconnect"}
+                ? t("apps.disconnecting")
+                : t("apps.disconnect")}
             </Button>
           ) : (
             <Button
@@ -125,8 +130,9 @@ export function App({
               className="w-full"
               onClick={handleOnInitialize}
               disabled={!onInitialize || !active || isLoading}
+              aria-busy={isLoading}
             >
-              Install
+              {t("apps.install")}
             </Button>
           )}
         </div>
@@ -136,7 +142,7 @@ export function App({
             <div className="mb-4">
               <Image
                 src={images[0] ?? ""}
-                alt={name}
+                alt={t("apps.screenshot_alt", { appName: name })}
                 width={465}
                 height={290}
                 quality={100}
@@ -155,7 +161,7 @@ export function App({
                   </div>
 
                   <span className="text-xs text-[#878787]">
-                    {category} • Published by Midday
+                    {category} • {t("apps.published_by")}
                   </span>
                 </div>
               </div>
@@ -166,10 +172,11 @@ export function App({
                     variant="outline"
                     className="w-full"
                     onClick={handleDisconnect}
+                    aria-busy={disconnectAppMutation.isPending}
                   >
                     {disconnectAppMutation.isPending
-                      ? "Disconnecting..."
-                      : "Disconnect"}
+                      ? t("apps.disconnecting")
+                      : t("apps.disconnect")}
                   </Button>
                 ) : (
                   <Button
@@ -177,8 +184,9 @@ export function App({
                     className="w-full border-primary"
                     onClick={handleOnInitialize}
                     disabled={!onInitialize || !active || isLoading}
+                    aria-busy={isLoading}
                   >
-                    Install
+                    {t("apps.install")}
                   </Button>
                 )}
               </div>
@@ -195,7 +203,7 @@ export function App({
               className="mt-4"
             >
               <AccordionItem value="description" className="border-none">
-                <AccordionTrigger>How it works</AccordionTrigger>
+                <AccordionTrigger>{t("apps.how_it_works")}</AccordionTrigger>
                 <AccordionContent className="text-[#878787] text-sm">
                   {description}
                 </AccordionContent>
@@ -203,7 +211,7 @@ export function App({
 
               {settings && Object.keys(settings).length > 0 && (
                 <AccordionItem value="settings" className="border-none">
-                  <AccordionTrigger>Settings</AccordionTrigger>
+                  <AccordionTrigger>{t("apps.settings")}</AccordionTrigger>
                   <AccordionContent className="text-[#878787] text-sm">
                     <AppSettings
                       appId={id}
@@ -232,17 +240,14 @@ export function App({
 
           <div className="absolute bottom-4 pt-8 border-t border-border">
             <p className="text-[10px] text-[#878787]">
-              All apps on the Midday App Store are open-source and
-              peer-reviewed. Midday Labs AB maintains high standards but doesn't
-              endorse third-party apps. Apps published by Midday are officially
-              certified. Report any concerns about app content or behavior.
+              {t("apps.disclaimer")}
             </p>
 
             <a
               href="mailto:support@midday.dev"
               className="text-[10px] text-red-500"
             >
-              Report app
+              {t("apps.report_app")}
             </a>
           </div>
         </SheetContent>

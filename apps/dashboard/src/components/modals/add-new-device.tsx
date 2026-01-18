@@ -1,6 +1,7 @@
 "use client";
 
 import { mfaVerifyAction } from "@/actions/mfa-verify-action";
+import { useI18n } from "@/locales/client";
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Dialog, DialogContent } from "@midday/ui/dialog";
@@ -12,6 +13,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export function AddNewDeviceModal() {
+  const t = useI18n();
   const supabase = createClient();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -105,8 +107,7 @@ export function AddNewDeviceModal() {
 
           <div className="my-8">
             <p className="font-medium pb-1 text-2xl text-[#606060]">
-              Use an authenticator app to scan the following QR code, and
-              provide the code to complete the setup.
+              {t("modals.add_device.description")}
             </p>
           </div>
 
@@ -117,7 +118,7 @@ export function AddNewDeviceModal() {
                   <div className="flex items-center space-x-2 bg-background px-4 py-2 rounded-md shadow-sm">
                     <Spinner size={16} className="text-primary" />
                     <span className="text-sm text-foreground font-medium">
-                      {isRedirecting ? "Closing..." : "Adding device..."}
+                      {isRedirecting ? t("modals.add_device.closing") : t("modals.add_device.adding")}
                     </span>
                   </div>
                 </div>
@@ -146,7 +147,7 @@ export function AddNewDeviceModal() {
               variant="ghost"
               className="text-medium text-sm hover:bg-transparent"
             >
-              Cancel
+              {t("forms.buttons.cancel")}
             </Button>
           </div>
         </div>

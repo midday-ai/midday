@@ -4,6 +4,7 @@ import { useOAuthApplicationParams } from "@/hooks/use-oauth-application-params"
 import { useUpload } from "@/hooks/use-upload";
 import { useUserQuery } from "@/hooks/use-user";
 import { useZodForm } from "@/hooks/use-zod-form";
+import { useI18n } from "@/locales/client";
 import { useOAuthSecretModalStore } from "@/store/oauth-secret-modal";
 import { useTRPC } from "@/trpc/client";
 import { RESOURCES } from "@/utils/scopes";
@@ -114,6 +115,7 @@ type Props = {
 };
 
 export function OAuthApplicationForm({ data }: Props) {
+  const t = useI18n();
   const { setParams } = useOAuthApplicationParams();
   const { setSecret } = useOAuthSecretModalStore();
   const [preset, setPreset] = useState<ScopePreset>(() =>
@@ -307,8 +309,8 @@ export function OAuthApplicationForm({ data }: Props) {
 
     if (imageFiles.length === 0) {
       toast({
-        title: "Invalid file type",
-        description: "Please upload only image files",
+        title: t("oauth.screenshots_invalid_type"),
+        description: t("oauth.screenshots_invalid_type_description"),
       });
       return;
     }
@@ -318,8 +320,8 @@ export function OAuthApplicationForm({ data }: Props) {
     // Check if adding these files would exceed the limit
     if (currentScreenshots.length + imageFiles.length > 4) {
       toast({
-        title: "Too many screenshots",
-        description: "You can only upload up to 4 screenshots",
+        title: t("oauth.screenshots_too_many"),
+        description: t("oauth.screenshots_too_many_description"),
       });
       return;
     }
@@ -347,8 +349,8 @@ export function OAuthApplicationForm({ data }: Props) {
       });
     } catch (error) {
       toast({
-        title: "Upload failed",
-        description: "Failed to upload screenshots. Please try again.",
+        title: t("oauth.screenshots_too_large"),
+        description: t("oauth.screenshots_too_large_description"),
       });
     }
   };
@@ -359,14 +361,14 @@ export function OAuthApplicationForm({ data }: Props) {
       for (const rejection of fileRejections) {
         if (rejection.errors.find(({ code }) => code === "file-too-large")) {
           toast({
-            title: "File too large",
-            description: "Screenshots must be smaller than 3MB",
+            title: t("oauth.screenshots_too_large"),
+            description: t("oauth.screenshots_too_large_description"),
           });
         }
         if (rejection.errors.find(({ code }) => code === "file-invalid-type")) {
           toast({
-            title: "Invalid file type",
-            description: "Please upload only image files",
+            title: t("oauth.screenshots_invalid_type"),
+            description: t("oauth.screenshots_invalid_type_description"),
           });
         }
       }
@@ -431,7 +433,7 @@ export function OAuthApplicationForm({ data }: Props) {
               <AccordionTrigger
                 className={cn(generalErrors && "text-destructive")}
               >
-                General
+                {t("oauth.general")}
               </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-4 flex flex-col">
@@ -459,17 +461,16 @@ export function OAuthApplicationForm({ data }: Props) {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Name</FormLabel>
+                        <FormLabel>{t("oauth.name")}</FormLabel>
                         <FormControl>
                           <Input
                             {...field}
-                            placeholder="My Awesome App"
+                            placeholder={t("oauth.name_placeholder")}
                             autoFocus
                           />
                         </FormControl>
                         <FormDescription>
-                          Application name will be displayed in the OAuth
-                          consent screen
+                          {t("oauth.name_description")}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -481,16 +482,16 @@ export function OAuthApplicationForm({ data }: Props) {
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Description</FormLabel>
+                        <FormLabel>{t("oauth.description")}</FormLabel>
                         <FormControl>
                           <Textarea
                             {...field}
-                            placeholder="A brief description of your application"
+                            placeholder={t("oauth.description_placeholder")}
                             rows={3}
                           />
                         </FormControl>
                         <FormDescription>
-                          Description of your application
+                          {t("oauth.description_note")}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -502,16 +503,16 @@ export function OAuthApplicationForm({ data }: Props) {
                     name="overview"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Overview</FormLabel>
+                        <FormLabel>{t("oauth.overview")}</FormLabel>
                         <FormControl>
                           <Textarea
                             {...field}
-                            placeholder="Detailed overview of your application"
+                            placeholder={t("oauth.overview_placeholder")}
                             rows={5}
                           />
                         </FormControl>
                         <FormDescription>
-                          Detailed overview of your application
+                          {t("oauth.overview_note")}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -523,12 +524,12 @@ export function OAuthApplicationForm({ data }: Props) {
                     name="developerName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Developer Name</FormLabel>
+                        <FormLabel>{t("oauth.developer_name")}</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Acme Corp" />
+                          <Input {...field} placeholder={t("oauth.developer_name_placeholder")} />
                         </FormControl>
                         <FormDescription>
-                          The person or company developing this application
+                          {t("oauth.developer_name_description")}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -542,17 +543,17 @@ export function OAuthApplicationForm({ data }: Props) {
                         name="website"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Website</FormLabel>
+                            <FormLabel>{t("oauth.website")}</FormLabel>
                             <FormControl>
                               <Input
                                 {...field}
                                 value={field.value || ""}
-                                placeholder="https://example.com"
+                                placeholder={t("oauth.website_placeholder")}
                                 type="url"
                               />
                             </FormControl>
                             <FormDescription>
-                              URL to the developer's website or documentation
+                              {t("oauth.website_description")}
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -566,17 +567,17 @@ export function OAuthApplicationForm({ data }: Props) {
                         name="installUrl"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Install URL</FormLabel>
+                            <FormLabel>{t("oauth.install_url")}</FormLabel>
                             <FormControl>
                               <Input
                                 {...field}
                                 value={field.value || ""}
-                                placeholder="https://example.com/install"
+                                placeholder={t("oauth.install_url_placeholder")}
                                 type="url"
                               />
                             </FormControl>
                             <FormDescription>
-                              An optional URL for installing the application
+                              {t("oauth.install_url_description")}
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -592,12 +593,11 @@ export function OAuthApplicationForm({ data }: Props) {
               <AccordionTrigger
                 className={cn(redirectErrors && "text-destructive")}
               >
-                Redirect URIs
+                {t("oauth.redirect_uris")}
               </AccordionTrigger>
               <AccordionContent className="space-y-4">
                 <FormDescription>
-                  All OAuth redirect URLs, All URLs must use HTTPS, except for
-                  localhost.
+                  {t("oauth.redirect_uris_description")}
                 </FormDescription>
 
                 <div className="space-y-3 mt-2">
@@ -611,7 +611,7 @@ export function OAuthApplicationForm({ data }: Props) {
                             <FormControl>
                               <Input
                                 {...field}
-                                placeholder="https://your-app.com/callback"
+                                placeholder={t("oauth.redirect_uri_placeholder")}
                                 autoComplete="off"
                                 autoCapitalize="none"
                                 autoCorrect="off"
@@ -629,7 +629,7 @@ export function OAuthApplicationForm({ data }: Props) {
                           onClick={() => remove(index)}
                           className="text-destructive hover:text-destructive"
                         >
-                          Remove
+                          {t("oauth.remove")}
                         </Button>
                       )}
                     </div>
@@ -642,7 +642,7 @@ export function OAuthApplicationForm({ data }: Props) {
                   onClick={() => append({ url: "" })}
                   className="border-none bg-[#F2F1EF] text-[11px] dark:bg-[#1D1D1D] mt-2"
                 >
-                  Add more
+                  {t("oauth.add_more")}
                 </Button>
 
                 {form.formState.errors.redirectUris && (
@@ -657,7 +657,7 @@ export function OAuthApplicationForm({ data }: Props) {
               <AccordionTrigger
                 className={cn(permissionErrors && "text-destructive")}
               >
-                Permissions
+                {t("oauth.permissions")}
               </AccordionTrigger>
               <AccordionContent>
                 <Tabs
@@ -679,14 +679,14 @@ export function OAuthApplicationForm({ data }: Props) {
                 </Tabs>
 
                 <p className="text-sm text-[#878787] mt-4">
-                  This OAuth application will have{" "}
+                  {t("oauth.permissions_has")}{" "}
                   <span className="font-semibold">
                     {
                       scopePresets.find((scope) => scope.value === preset)
                         ?.description
                     }
-                  </span>
-                  .
+                  </span>{" "}
+                  {t("oauth.permissions_access")}
                 </p>
 
                 <div className="mt-4">
@@ -694,7 +694,7 @@ export function OAuthApplicationForm({ data }: Props) {
                     <ScopeSelector
                       selectedScopes={form.watch("scopes")}
                       onResourceScopeChange={handleResourceScopeChange}
-                      description="Select which scopes this OAuth application can request access to."
+                      description={t("oauth.scope_select_description")}
                       height="max-h-full"
                       errorMessage={form.formState.errors.scopes?.message}
                     />
@@ -707,12 +707,11 @@ export function OAuthApplicationForm({ data }: Props) {
               <AccordionTrigger
                 className={cn(screenshotErrors && "text-destructive")}
               >
-                Screenshots
+                {t("oauth.screenshots")}
               </AccordionTrigger>
               <AccordionContent>
                 <span className="text-[0.8rem] text-muted-foreground">
-                  You can upload up to 4 screenshots that will be displayed on
-                  the apps and integrations page.
+                  {t("oauth.screenshots_description")}
                 </span>
                 <div className="space-y-4 mt-3">
                   <div
@@ -725,18 +724,15 @@ export function OAuthApplicationForm({ data }: Props) {
                     <input {...getInputProps()} />
                     {isDragActive ? (
                       <div>
-                        <p className="text-xs">Drop your screenshots here</p>
+                        <p className="text-xs">{t("oauth.screenshots_drop")}</p>
                       </div>
                     ) : (
                       <div>
                         <p className="text-xs">
-                          Drop your files here, or{" "}
-                          <span className="underline underline-offset-1">
-                            click to browse.
-                          </span>
+                          {t("oauth.screenshots_browse")}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          3MB limit per file.
+                          {t("oauth.screenshots_limit")}
                         </p>
                       </div>
                     )}
@@ -765,7 +761,7 @@ export function OAuthApplicationForm({ data }: Props) {
                               className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
                               onClick={() => removeScreenshot(index)}
                             >
-                              Remove
+                              {t("oauth.remove")}
                             </Button>
                           </div>
                         ))}
@@ -786,7 +782,7 @@ export function OAuthApplicationForm({ data }: Props) {
               <AccordionTrigger
                 className={cn(settingsErrors && "text-destructive")}
               >
-                Settings
+                {t("oauth.settings")}
               </AccordionTrigger>
               <AccordionContent className="space-y-6">
                 <div className="space-y-4">
@@ -796,11 +792,9 @@ export function OAuthApplicationForm({ data }: Props) {
                     render={({ field }) => (
                       <FormItem className="flex items-center justify-between space-x-2">
                         <div className="space-y-1">
-                          <FormLabel className="!mt-0">Allow PKCE</FormLabel>
+                          <FormLabel className="!mt-0">{t("oauth.allow_pkce")}</FormLabel>
                           <FormDescription>
-                            We strongly recommend using the PKCE flow for
-                            increased security. Make sure your application
-                            supports it.
+                            {t("oauth.pkce_description")}
                           </FormDescription>
                         </div>
                         <FormControl>
@@ -820,10 +814,9 @@ export function OAuthApplicationForm({ data }: Props) {
                       render={({ field }) => (
                         <FormItem className="flex items-center justify-between space-x-2">
                           <div className="space-y-1">
-                            <FormLabel className="!mt-0">Active</FormLabel>
+                            <FormLabel className="!mt-0">{t("oauth.active")}</FormLabel>
                             <FormDescription>
-                              Inactive applications cannot be used for
-                              authorization.
+                              {t("oauth.inactive_description")}
                             </FormDescription>
                           </div>
                           <FormControl>
@@ -849,7 +842,7 @@ export function OAuthApplicationForm({ data }: Props) {
             isSubmitting={isPending}
             disabled={!form.formState.isDirty}
           >
-            {data?.id ? "Update" : "Create"}
+            {data?.id ? t("oauth.update") : t("oauth.create")}
           </SubmitButton>
         </div>
       </form>

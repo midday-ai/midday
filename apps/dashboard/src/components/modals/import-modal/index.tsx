@@ -6,6 +6,7 @@ import { useTeamQuery } from "@/hooks/use-team";
 import { useUpload } from "@/hooks/use-upload";
 import { useUserQuery } from "@/hooks/use-user";
 import { useZodForm } from "@/hooks/use-zod-form";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
@@ -30,6 +31,7 @@ import { SelectFile } from "./select-file";
 const pages = ["select-file", "confirm-import"] as const;
 
 export function ImportModal() {
+  const t = useI18n();
   const { data: team } = useTeamQuery();
   const defaultCurrency = team?.baseCurrency || "USD";
   const trpc = useTRPC();
@@ -75,7 +77,7 @@ export function ImportModal() {
           toast({
             duration: 3500,
             variant: "error",
-            title: "Something went wrong please try again.",
+            title: t("modals.import.error"),
           });
         }
       },
@@ -86,7 +88,7 @@ export function ImportModal() {
         toast({
           duration: 3500,
           variant: "error",
-          title: "Something went wrong please try again.",
+          title: t("modals.import.error"),
         });
       },
     }),
@@ -145,7 +147,7 @@ export function ImportModal() {
       toast({
         duration: 3500,
         variant: "error",
-        title: "Something went wrong please try again or contact support.",
+        title: t("modals.import.error_contact"),
       });
     }
   }, [status, toast]);
@@ -170,7 +172,7 @@ export function ImportModal() {
       toast({
         duration: 3500,
         variant: "success",
-        title: "Transactions imported successfully.",
+        title: t("modals.import.success"),
       });
 
       onclose();
@@ -200,15 +202,13 @@ export function ImportModal() {
                 </button>
               )}
               <DialogTitle className="m-0 p-0">
-                {page === "select-file" && "Select file"}
-                {page === "confirm-import" && "Confirm import"}
+                {page === "select-file" && t("modals.import.title")}
+                {page === "confirm-import" && t("modals.import.confirm_title")}
               </DialogTitle>
             </div>
             <DialogDescription>
-              {page === "select-file" &&
-                "Upload a CSV file of your transactions."}
-              {page === "confirm-import" &&
-                "We've mapped each column to what we believe is correct, but please review the data below to confirm it's accurate."}
+              {page === "select-file" && t("modals.import.upload_description")}
+              {page === "confirm-import" && t("modals.import.mapping_description")}
             </DialogDescription>
           </DialogHeader>
 
@@ -263,7 +263,7 @@ export function ImportModal() {
                           disabled={!isValid}
                           className="mt-4"
                         >
-                          Confirm import
+                          {t("modals.import.confirm_import")}
                         </SubmitButton>
 
                         <button
@@ -276,7 +276,7 @@ export function ImportModal() {
                             setFirstRows(null);
                           }}
                         >
-                          Choose another file
+                          {t("modals.import.choose_another")}
                         </button>
                       </>
                     )}

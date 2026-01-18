@@ -1,6 +1,7 @@
 import { FormatAmount } from "@/components/format-amount";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { getPeriodLabel } from "@/utils/metrics-date-utils";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
@@ -11,6 +12,7 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";
 
 export function RevenueSummaryWidget() {
+  const t = useI18n();
   const trpc = useTRPC();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
@@ -30,7 +32,7 @@ export function RevenueSummaryWidget() {
   if (isLoading) {
     return (
       <WidgetSkeleton
-        title="Revenue Summary"
+        title={t("widgets.revenue_summary.title")}
         icon={<Icons.TrendingUp className="size-4" />}
         descriptionLines={2}
       />
@@ -77,7 +79,7 @@ export function RevenueSummaryWidget() {
 
   return (
     <BaseWidget
-      title="Revenue Summary"
+      title={t("widgets.revenue_summary.title")}
       icon={<Icons.TrendingUp className="size-4" />}
       description={
         <div className="flex flex-col gap-1">
@@ -86,7 +88,7 @@ export function RevenueSummaryWidget() {
           </p>
         </div>
       }
-      actions="View revenue trends"
+      actions={t("widgets.revenue_summary.action")}
       onClick={handleViewTrends}
     >
       <div className="flex flex-col gap-2">

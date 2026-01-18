@@ -38,6 +38,11 @@ export const WIDGET_TYPES = [
   "inbox",
   "vault",
   "tax-summary",
+
+  // Japan-specific widgets (Midday-JP)
+  "true-cash",
+  "consumption-tax-summary",
+  "project-roi",
 ] as const;
 
 export type WidgetType = (typeof WIDGET_TYPES)[number];

@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/locales/client";
 import { getUrl } from "@/utils/environment";
 import { isDesktopApp } from "@midday/desktop-client/platform";
 import { createClient } from "@midday/supabase/client";
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export function AppleSignIn({ showLastUsed = false }: Props) {
+  const t = useI18n();
   const [isLoading, setLoading] = useState(false);
   const supabase = createClient();
 
@@ -57,14 +59,14 @@ export function AppleSignIn({ showLastUsed = false }: Props) {
       >
         <div className="flex items-center justify-center gap-2">
           <Icons.Apple size={16} />
-          <span>Continue with Apple</span>
+          <span>{t("auth.continue_with_apple")}</span>
         </div>
       </SubmitButton>
       {/* Last used pill */}
       {showLastUsed && (
         <div className="absolute top-1/2 right-3 transform -translate-y-1/2 pointer-events-none">
           <span className="font-sans text-sm text-muted-foreground/50">
-            Last used
+            {t("auth.last_used")}
           </span>
         </div>
       )}

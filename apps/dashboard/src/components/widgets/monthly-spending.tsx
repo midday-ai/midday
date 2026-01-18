@@ -3,6 +3,7 @@
 import { FormatAmount } from "@/components/format-amount";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { getPeriodLabel } from "@/utils/metrics-date-utils";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
@@ -13,6 +14,7 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";
 
 export function MonthlySpendingWidget() {
+  const t = useI18n();
   const trpc = useTRPC();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
@@ -30,7 +32,7 @@ export function MonthlySpendingWidget() {
   if (isLoading) {
     return (
       <WidgetSkeleton
-        title="Monthly Spending"
+        title={t("widgets.monthly_spending.title")}
         icon={<Icons.Transactions className="size-4" />}
       />
     );
@@ -89,11 +91,11 @@ export function MonthlySpendingWidget() {
 
   return (
     <BaseWidget
-      title="Monthly Spending"
+      title={t("widgets.monthly_spending.title")}
       icon={<Icons.Transactions className="size-4" />}
-      description={getDescription()}
+      description={spending?.totalSpending ? t("widgets.monthly_spending.description") : t("widgets.monthly_spending.no_data")}
       onClick={handleSeeExpenses}
-      actions="See biggest cost"
+      actions={t("widgets.monthly_spending.action")}
     >
       {spending && spending.totalSpending > 0 && (
         <p className="text-3xl">

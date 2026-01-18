@@ -7,6 +7,7 @@ import { useLatestProjectId } from "@/hooks/use-latest-project-id";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { useZodForm } from "@/hooks/use-zod-form";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { uniqueCurrencies } from "@midday/location/currencies";
@@ -63,6 +64,7 @@ type Props = {
 };
 
 export function TrackerProjectForm({ data, defaultCurrency }: Props) {
+  const t = useI18n();
   const isEdit = !!data;
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -155,13 +157,13 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>{t("tracker.name")}</FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   value={field.value ?? ""}
                   autoComplete="off"
-                  placeholder="Project name"
+                  placeholder={t("tracker.name_placeholder")}
                   autoCapitalize="none"
                   autoCorrect="off"
                   spellCheck="false"
@@ -169,7 +171,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
                 />
               </FormControl>
               <FormDescription>
-                This is the project display name.
+                {t("tracker.name_description")}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -181,7 +183,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
           name="customerId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Customer</FormLabel>
+              <FormLabel>{t("tracker.customer")}</FormLabel>
               <FormControl>
                 <SearchCustomers
                   onSelect={(id) =>
@@ -205,7 +207,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
                 />
               </FormControl>
               <FormDescription>
-                Link a customer to enable direct invoicing.
+                {t("tracker.customer_description")}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -214,7 +216,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
 
         <div className="mt-6">
           <Label htmlFor="tags" className="mb-2 block">
-            Expense Tags
+            {t("tracker.expense_tags")}
           </Label>
 
           <SelectTags
@@ -252,7 +254,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
           />
 
           <FormDescription className="mt-2">
-            Tags help categorize and track project expenses.
+            {t("tracker.expense_tags_description")}
           </FormDescription>
         </div>
 
@@ -261,12 +263,12 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>{t("tracker.description")}</FormLabel>
               <FormControl>
                 <Textarea className="resize-none" {...field} />
               </FormControl>
               <FormDescription>
-                Add a short description about the project.
+                {t("tracker.description_placeholder")}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -279,7 +281,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
             name="estimate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Time Estimate</FormLabel>
+                <FormLabel>{t("tracker.time_estimate")}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="0"
@@ -294,8 +296,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
                   />
                 </FormControl>
                 <FormDescription>
-                  Set a goal for how long your project should take to complete
-                  in hours.
+                  {t("tracker.time_estimate_description")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -307,7 +308,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
             name="status"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Status</FormLabel>
+                <FormLabel>{t("tracker.status")}</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -318,8 +319,8 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="in_progress">{t("tracker.status_in_progress")}</SelectItem>
+                    <SelectItem value="completed">{t("tracker.status_completed")}</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -331,7 +332,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
 
         <Collapsible open={form.watch("billable")}>
           <FormItem className="flex justify-between items-center">
-            <FormLabel>Billable</FormLabel>
+            <FormLabel>{t("tracker.billable")}</FormLabel>
 
             <FormField
               control={form.control}
@@ -356,7 +357,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
                 name="rate"
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <FormLabel>Hourly Rate</FormLabel>
+                    <FormLabel>{t("tracker.hourly_rate")}</FormLabel>
                     <FormControl>
                       <CurrencyInput
                         min={0}
@@ -376,7 +377,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
                 name="currency"
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <FormLabel>Currency</FormLabel>
+                    <FormLabel>{t("tracker.currency")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -411,7 +412,7 @@ export function TrackerProjectForm({ data, defaultCurrency }: Props) {
             }
             isSubmitting={upsertTrackerProjectMutation.isPending}
           >
-            {isEdit ? "Update" : "Create"}
+            {isEdit ? t("forms.buttons.update") : t("forms.buttons.create")}
           </SubmitButton>
         </div>
       </form>

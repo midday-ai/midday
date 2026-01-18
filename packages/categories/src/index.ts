@@ -78,3 +78,17 @@ export const CONTRA_REVENUE_CATEGORIES = [
   "customer-refunds",
   "chargebacks-disputes",
 ] as const;
+
+// Japanese categories (Midday-JP)
+export {
+  JAPANESE_ACCOUNT_CODES,
+  CATEGORY_NAMES_JP,
+  JAPANESE_MERCHANT_PATTERNS,
+  getJapaneseAccountBySlug,
+  getJapaneseAccountByCode,
+  getJapaneseAccountsByParent,
+  getDeductibleAccounts,
+  getCategoryNameJa,
+  suggestAccountCode,
+} from "./categories-jp";
+export type { JapaneseAccountCode, JapaneseAccountCodeType } from "./categories-jp";

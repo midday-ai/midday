@@ -123,7 +123,7 @@ export function EditBankAccountModal({
         <div className="p-4">
           <DialogHeader>
             <DialogTitle className="flex justify-between">
-              Edit Account
+              {t("modals.edit_account.title")}
             </DialogTitle>
           </DialogHeader>
 
@@ -134,11 +134,11 @@ export function EditBankAccountModal({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>{t("forms.labels.name")}</FormLabel>
                     <FormControl>
                       <Input
                         autoFocus
-                        placeholder="Company Account"
+                        placeholder={t("forms.placeholders.name")}
                         autoComplete="off"
                         autoCapitalize="none"
                         autoCorrect="off"
@@ -147,7 +147,7 @@ export function EditBankAccountModal({
                       />
                     </FormControl>
                     <FormDescription>
-                      You can change the name of the account here
+                      {t("modals.edit_account.name_description")}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -159,19 +159,19 @@ export function EditBankAccountModal({
                 name="type"
                 render={({ field }) => (
                   <FormItem className="mt-4">
-                    <FormLabel>Type</FormLabel>
+                    <FormLabel>{t("forms.labels.type")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Change account type" />
+                          <SelectValue placeholder={t("modals.edit_account.type_placeholder")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>{accountTypes()}</SelectContent>
                     </Select>
-                    <FormDescription>Change the account type</FormDescription>
+                    <FormDescription>{t("modals.edit_account.type_description")}</FormDescription>
                   </FormItem>
                 )}
               />
@@ -181,7 +181,7 @@ export function EditBankAccountModal({
                 name="balance"
                 render={({ field }) => (
                   <FormItem className="mt-4">
-                    <FormLabel>Balance</FormLabel>
+                    <FormLabel>{t("forms.labels.balance")}</FormLabel>
 
                     <FormControl>
                       <CurrencyInput
@@ -194,7 +194,7 @@ export function EditBankAccountModal({
                     </FormControl>
 
                     <FormDescription>
-                      Change the account balance
+                      {t("modals.edit_account.balance_description")}
                     </FormDescription>
                   </FormItem>
                 )}
@@ -207,7 +207,7 @@ export function EditBankAccountModal({
                     className="w-full"
                     type="submit"
                   >
-                    Save
+                    {t("forms.buttons.save")}
                   </SubmitButton>
                 </div>
               </DialogFooter>

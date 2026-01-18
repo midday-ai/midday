@@ -1,6 +1,7 @@
 "use client";
 
 import { useUserMutation, useUserQuery } from "@/hooks/use-user";
+import { useI18n } from "@/locales/client";
 import {
   Card,
   CardContent,
@@ -17,15 +18,16 @@ import {
 } from "@midday/ui/select";
 
 export function DateFormatSettings() {
+  const t = useI18n();
   const { data: user } = useUserQuery();
   const updateUserMutation = useUserMutation();
 
   return (
-    <Card className="flex justify-between items-center">
+    <Card className="flex flex-col md:flex-row md:justify-between md:items-center">
       <CardHeader>
-        <CardTitle>Date Display Format</CardTitle>
-        <CardDescription>
-          Select the format used to display dates throughout the app.
+        <CardTitle>{t("settings.date_format.title")}</CardTitle>
+        <CardDescription id="date-format-description">
+          {t("settings.date_format.description")}
         </CardDescription>
       </CardHeader>
 
@@ -42,8 +44,12 @@ export function DateFormatSettings() {
             });
           }}
         >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Date format" />
+          <SelectTrigger
+            className="w-[180px]"
+            aria-label={t("settings.date_format.title")}
+            aria-describedby="date-format-description"
+          >
+            <SelectValue placeholder={t("settings.date_format.placeholder")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="dd/MM/yyyy">dd/MM/yyyy</SelectItem>

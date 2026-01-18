@@ -1,3 +1,4 @@
+import { getI18n } from "@/locales/server";
 import {
   Card,
   CardContent,
@@ -14,12 +15,14 @@ import {
 } from "./notification-settings";
 
 export async function NotificationsSettingsList() {
+  const t = await getI18n();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Notifications</CardTitle>
+        <CardTitle>{t("settings.notifications.title")}</CardTitle>
         <CardDescription>
-          Manage your personal notification settings for this team.
+          {t("settings.notifications.description")}
         </CardDescription>
       </CardHeader>
 

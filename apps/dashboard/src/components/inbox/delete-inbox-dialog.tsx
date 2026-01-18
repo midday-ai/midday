@@ -3,6 +3,7 @@
 import { revalidateInbox } from "@/actions/revalidate-action";
 import { useInboxFilterParams } from "@/hooks/use-inbox-filter-params";
 import { useInboxParams } from "@/hooks/use-inbox-params";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
@@ -32,6 +33,7 @@ export function DeleteInboxDialog({
   isOpen,
   onOpenChange,
 }: Props) {
+  const t = useI18n();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -173,41 +175,38 @@ export function DeleteInboxDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2 text-sm">
-            Delete File
+            {t("tables.delete_file.title")}
           </AlertDialogTitle>
           <AlertDialogDescription asChild>
             {hasAttachments ? (
               <div className="space-y-3">
                 <p>
-                  You are about to delete this file from your inbox and vault.
+                  {t("tables.delete_file.description")}
                 </p>
                 <div className="my-6 px-3 py-3 bg-amber-50 border border-amber-200 dark:bg-amber-900/10 dark:border-amber-800/30">
                   <div className="flex items-start gap-2">
                     <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                     <div className="text-sm">
                       <p className="font-medium text-amber-700 dark:text-amber-300 mb-1">
-                        This file is attached to {attachmentCount} transaction
-                        {attachmentCount > 1 ? "s" : ""}
+                        {t("tables.delete_file.attached_to", { count: attachmentCount })}
                       </p>
                       <p className="text-amber-700 dark:text-amber-300">
-                        Deleting will remove the attachment
-                        {attachmentCount > 1 ? "s" : ""} from the transaction
-                        {attachmentCount > 1 ? "s" : ""}.
+                        {t("tables.delete_file.will_remove")}
                       </p>
                     </div>
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Are you sure you want to continue?
+                  {t("tables.delete_file.continue_question")}
                 </p>
               </div>
             ) : (
               <div>
                 <p>
-                  You are about to delete this file from your inbox and vault.
+                  {t("tables.delete_file.description")}
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">
-                  This action cannot be undone.
+                  {t("modals.common.cannot_be_undone")}
                 </p>
               </div>
             )}
@@ -215,15 +214,15 @@ export function DeleteInboxDialog({
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting}>{t("forms.buttons.cancel")}</AlertDialogCancel>
           <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
             {isDeleting ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="size-4 animate-spin" />
-                Deleting...
+                {t("tables.delete_file.deleting")}
               </div>
             ) : (
-              "Delete File"
+              t("tables.delete_file.title")
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

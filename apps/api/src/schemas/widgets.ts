@@ -119,6 +119,22 @@ export const getCustomerLifetimeValueSchema = z.object({
   currency: z.string().optional(),
 });
 
+// Japan-specific widget schemas (Midday-JP)
+export const getTrueCashSchema = z.object({
+  currency: z.string().optional().default("JPY"),
+});
+
+export const getConsumptionTaxSummarySchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  currency: z.string().optional().default("JPY"),
+});
+
+export const getProjectROISchema = z.object({
+  currency: z.string().optional().default("JPY"),
+  limit: z.number().optional().default(5),
+});
+
 export const widgetTypeSchema = z.enum(WIDGET_TYPES);
 
 export const widgetPreferencesSchema = z.object({

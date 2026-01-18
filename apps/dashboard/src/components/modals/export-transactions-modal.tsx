@@ -5,6 +5,7 @@ import { useReviewTransactions } from "@/hooks/use-review-transactions";
 import { useTeamMutation, useTeamQuery } from "@/hooks/use-team";
 import { useUserQuery } from "@/hooks/use-user";
 import { useZodForm } from "@/hooks/use-zod-form";
+import { useI18n } from "@/locales/client";
 import { useExportStore } from "@/store/export";
 import { useTransactionsStore } from "@/store/transactions";
 import { useTRPC } from "@/trpc/client";
@@ -77,6 +78,7 @@ export function ExportTransactionsModal({
   isOpen,
   onOpenChange,
 }: ExportTransactionsModalProps) {
+  const t = useI18n();
   const { exportData, setExportData, setIsExporting } = useExportStore();
   const { rowSelectionByTab, setRowSelection } = useTransactionsStore();
   // Export modal is used from review tab, so use review tab selection
@@ -207,10 +209,9 @@ export function ExportTransactionsModal({
       <DialogContent className="max-w-[500px]">
         <div className="p-4">
           <DialogHeader className="mb-6">
-            <DialogTitle>Export Transactions</DialogTitle>
+            <DialogTitle>{t("modals.export.title")}</DialogTitle>
             <DialogDescription>
-              Export <NumberFlow value={totalCount} /> transaction
-              {totalCount !== 1 ? "s" : ""} to your vault.
+              {t("modals.export.description", { count: totalCount })}
             </DialogDescription>
           </DialogHeader>
 
@@ -228,10 +229,10 @@ export function ExportTransactionsModal({
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
                           <FormLabel className="text-sm font-normal">
-                            CSV
+                            {t("modals.export.csv")}
                           </FormLabel>
                           <p className="text-xs text-[#878787]">
-                            Export as comma-separated values
+                            {t("modals.export.csv_description")}
                           </p>
                         </div>
                         <FormControl>
@@ -257,7 +258,7 @@ export function ExportTransactionsModal({
                         >
                           <AccordionTrigger className="py-3 px-4 hover:no-underline hover:bg-accent/50">
                             <span className="text-sm text-[#878787]">
-                              CSV Settings
+                              {t("modals.export.csv_settings")}
                             </span>
                           </AccordionTrigger>
                           <AccordionContent className="px-4">
@@ -267,7 +268,7 @@ export function ExportTransactionsModal({
                                   htmlFor="delimiter"
                                   className="text-sm"
                                 >
-                                  Delimiter
+                                  {t("modals.export.delimiter")}
                                 </FormLabel>
                                 <FormControl>
                                   <RadioGroup
@@ -281,7 +282,7 @@ export function ExportTransactionsModal({
                                         htmlFor="comma"
                                         className="text-sm font-normal"
                                       >
-                                        Comma (,)
+                                        {t("modals.export.comma")}
                                       </Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
@@ -293,7 +294,7 @@ export function ExportTransactionsModal({
                                         htmlFor="semicolon"
                                         className="text-sm font-normal"
                                       >
-                                        Semicolon (;)
+                                        {t("modals.export.semicolon")}
                                       </Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
@@ -302,7 +303,7 @@ export function ExportTransactionsModal({
                                         htmlFor="tab"
                                         className="text-sm font-normal"
                                       >
-                                        Tab
+                                        {t("modals.export.tab")}
                                       </Label>
                                     </div>
                                   </RadioGroup>
@@ -324,10 +325,10 @@ export function ExportTransactionsModal({
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
                           <FormLabel className="text-sm font-normal">
-                            Excel (XLSX)
+                            {t("modals.export.excel")}
                           </FormLabel>
                           <p className="text-xs text-[#878787]">
-                            Export as Excel spreadsheet
+                            {t("modals.export.excel_description")}
                           </p>
                         </div>
                         <FormControl>
@@ -353,10 +354,10 @@ export function ExportTransactionsModal({
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
                           <FormLabel className="text-sm font-normal">
-                            Send via email
+                            {t("modals.export.send_email")}
                           </FormLabel>
                           <p className="text-xs text-[#878787]">
-                            Email the export to your accountant
+                            {t("modals.export.send_email_description")}
                           </p>
                         </div>
                         <FormControl>
@@ -379,7 +380,7 @@ export function ExportTransactionsModal({
                         <FormControl>
                           <Input
                             type="email"
-                            placeholder="accountant@example.com"
+                            placeholder={t("modals.export.email_placeholder")}
                             {...field}
                           />
                         </FormControl>
@@ -398,7 +399,7 @@ export function ExportTransactionsModal({
                   onClick={() => onOpenChange(false)}
                   disabled={isExporting || form.formState.isSubmitting}
                 >
-                  Cancel
+                  {t("forms.buttons.cancel")}
                 </Button>
                 <Button
                   type="submit"
@@ -412,10 +413,10 @@ export function ExportTransactionsModal({
                   {exportMutation.isPending ? (
                     <div className="flex items-center space-x-2">
                       <Spinner className="size-4" />
-                      <span>Exporting...</span>
+                      <span>{t("modals.export.exporting")}</span>
                     </div>
                   ) : (
-                    <span>Export</span>
+                    <span>{t("forms.buttons.export")}</span>
                   )}
                 </Button>
               </div>

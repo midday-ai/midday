@@ -1,5 +1,6 @@
 import { FormatAmount } from "@/components/format-amount";
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
@@ -9,6 +10,7 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";
 
 export function TopCustomerWidget() {
+  const t = useI18n();
   const trpc = useTRPC();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
@@ -22,7 +24,7 @@ export function TopCustomerWidget() {
   if (isLoading) {
     return (
       <WidgetSkeleton
-        title="Top Customer"
+        title={t("widgets.top_customer.title")}
         icon={<Icons.Star className="size-4" />}
         descriptionLines={2}
         showValue={false}
@@ -64,29 +66,24 @@ export function TopCustomerWidget() {
 
   return (
     <BaseWidget
-      title="Top Customer"
+      title={t("widgets.top_customer.title")}
       icon={<Icons.Star className="size-4" />}
       description={
         <p className="text-sm text-[#666666]">
           {data?.result?.customerName && data?.result?.currency ? (
-            <>
-              Your top customer is{" "}
-              <span className="text-primary">
-                {data.result.customerName} with{" "}
-                <FormatAmount
-                  amount={data.result.totalRevenue}
-                  currency={data.result.currency}
-                />{" "}
-                from {data.result.invoiceCount} invoice
-                {data.result.invoiceCount !== 1 ? "s" : ""} past 30 days
-              </span>
-            </>
+            <span className="text-primary">
+              {data.result.customerName} ·{" "}
+              <FormatAmount
+                amount={data.result.totalRevenue}
+                currency={data.result.currency}
+              />
+            </span>
           ) : (
-            <>No top customer in the past 30 days</>
+            <>{t("widgets.top_customer.no_customers")}</>
           )}
         </p>
       }
-      actions="View top customer"
+      actions={t("widgets.top_customer.action")}
       onClick={handleViewTopCustomer}
     />
   );

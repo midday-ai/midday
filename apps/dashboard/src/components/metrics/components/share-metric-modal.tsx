@@ -3,6 +3,7 @@
 import { CopyInput } from "@/components/copy-input";
 import { OpenURL } from "@/components/open-url";
 import { useUserQuery } from "@/hooks/use-user";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 import { Button } from "@midday/ui/button";
@@ -44,6 +45,7 @@ export function ShareMetricModal({
   to,
   currency,
 }: ShareMetricModalProps) {
+  const t = useI18n();
   const { data: user } = useUserQuery();
   const trpc = useTRPC();
   const [expireAt, setExpireAt] = useState<Date | undefined>(
@@ -103,17 +105,16 @@ export function ShareMetricModal({
       <DialogContent className="max-w-[455px]">
         <div className="p-4 space-y-4">
           <DialogHeader>
-            <DialogTitle>Share metric</DialogTitle>
+            <DialogTitle>{t("modals.share_metric.title")}</DialogTitle>
             <DialogDescription>
-              Create a public link you can share, the chart is a snapshot in
-              time.
+              {t("modals.share_metric.description")}
             </DialogDescription>
           </DialogHeader>
 
           {!createReportMutation.data && !createReportMutation.error && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="expire-date">Expires</Label>
+                <Label htmlFor="expire-date">{t("modals.share_metric.expires")}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -123,7 +124,7 @@ export function ShareMetricModal({
                       disabled={createReportMutation.isPending}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {expireAt ? format(expireAt, "PPP") : "Select a date"}
+                      {expireAt ? format(expireAt, "PPP") : t("modals.share_metric.select_date")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -145,7 +146,7 @@ export function ShareMetricModal({
                   className="w-full"
                   isSubmitting={createReportMutation.isPending}
                 >
-                  Create link
+                  {t("modals.share_metric.create_link")}
                 </SubmitButton>
               </DialogFooter>
             </div>
@@ -154,7 +155,7 @@ export function ShareMetricModal({
           {createReportMutation.error && (
             <div className="space-y-4">
               <div className="text-sm text-destructive">
-                Failed to create share link. Please try again.
+                {t("modals.share_metric.error")}
               </div>
               <DialogFooter>
                 <Button
@@ -162,7 +163,7 @@ export function ShareMetricModal({
                   variant="outline"
                   className="w-full"
                 >
-                  Try again
+                  {t("modals.share_metric.try_again")}
                 </Button>
               </DialogFooter>
             </div>
@@ -181,14 +182,14 @@ export function ShareMetricModal({
 
               {createReportMutation.data.expireAt && (
                 <p className="text-xs text-muted-foreground">
-                  Expires{" "}
+                  {t("modals.share_metric.expires")}{" "}
                   {format(new Date(createReportMutation.data.expireAt), "PPP")}
                 </p>
               )}
 
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1" onClick={openInX}>
-                  Open in
+                  {t("modals.share_metric.open_in")}
                   <FaXTwitter className="ml-1 h-4 w-4" />
                 </Button>
                 <Button
@@ -196,7 +197,7 @@ export function ShareMetricModal({
                   className="flex-1"
                   onClick={openInLinkedIn}
                 >
-                  Open in
+                  {t("modals.share_metric.open_in")}
                   <FaLinkedinIn className="ml-1 h-4 w-4" />
                 </Button>
               </div>

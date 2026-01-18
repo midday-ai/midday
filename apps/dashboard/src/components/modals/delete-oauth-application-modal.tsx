@@ -1,6 +1,7 @@
 "use client";
 
 import { useOAuthApplicationParams } from "@/hooks/use-oauth-application-params";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import {
   AlertDialog,
@@ -31,6 +32,7 @@ export function DeleteOAuthApplicationModal({
   isOpen,
   onOpenChange,
 }: Props) {
+  const t = useI18n();
   const [value, setValue] = useState("");
   const { setParams } = useOAuthApplicationParams();
   const trpc = useTRPC();
@@ -58,29 +60,27 @@ export function DeleteOAuthApplicationModal({
     <AlertDialog open={isOpen} onOpenChange={handleClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>{t("modals.delete_oauth.title")}</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the OAuth
-            application <strong>&quot;{applicationName}&quot;</strong> and all
-            associated data.
+            {t("modals.delete_oauth.description", { name: applicationName })}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="space-y-4 mt-4">
           <div className="p-4 bg-muted">
-            <h4 className="font-medium mb-2">What will happen:</h4>
+            <h4 className="font-medium mb-2">{t("modals.common.what_will_happen")}</h4>
             <ul className="text-sm space-y-1 text-muted-foreground">
-              <li>• All active OAuth tokens will be revoked immediately</li>
-              <li>• Applications using this OAuth app will stop working</li>
-              <li>• All authorization codes will be invalidated</li>
-              <li>• Client credentials will be permanently deleted</li>
-              <li>• This action cannot be undone</li>
+              <li>• {t("modals.delete_oauth.consequences.tokens_revoked")}</li>
+              <li>• {t("modals.delete_oauth.consequences.apps_stop_working")}</li>
+              <li>• {t("modals.delete_oauth.consequences.codes_invalidated")}</li>
+              <li>• {t("modals.delete_oauth.consequences.credentials_deleted")}</li>
+              <li>• {t("modals.delete_oauth.consequences.cannot_undo")}</li>
             </ul>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="confirm-delete">
-              Type <span className="font-medium">DELETE</span> to confirm.
+              {t("modals.delete_oauth.type_delete")}
             </Label>
             <Input
               id="confirm-delete"
@@ -92,7 +92,7 @@ export function DeleteOAuthApplicationModal({
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t("forms.buttons.cancel")}</AlertDialogCancel>
           <AlertDialogAction
             onClick={() =>
               deleteApplicationMutation.mutate({
@@ -105,7 +105,7 @@ export function DeleteOAuthApplicationModal({
             {deleteApplicationMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              "Delete"
+              t("forms.buttons.delete")
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

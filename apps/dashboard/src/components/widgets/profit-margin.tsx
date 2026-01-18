@@ -1,5 +1,6 @@
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { getPeriodLabel } from "@/utils/metrics-date-utils";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
@@ -10,6 +11,7 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";
 
 export function ProfitMarginWidget() {
+  const t = useI18n();
   const trpc = useTRPC();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
@@ -29,7 +31,7 @@ export function ProfitMarginWidget() {
   if (isLoading) {
     return (
       <WidgetSkeleton
-        title="Profit Margin"
+        title={t("widgets.profit_margin.title")}
         icon={<Icons.PieChart className="size-4" />}
         descriptionLines={2}
       />
@@ -80,16 +82,10 @@ export function ProfitMarginWidget() {
 
   return (
     <BaseWidget
-      title="Profit Margin"
+      title={t("widgets.profit_margin.title")}
       icon={<Icons.PieChart className="size-4" />}
-      description={
-        <div className="flex flex-col gap-1">
-          <p className="text-sm text-[#666666]">
-            {revenueTypeLabel} profit margin · {periodLabel}
-          </p>
-        </div>
-      }
-      actions="View margin analysis"
+      description={t("widgets.profit_margin.description")}
+      actions={t("widgets.profit_margin.action")}
       onClick={handleViewAnalysis}
     >
       <div className="flex flex-col gap-2">

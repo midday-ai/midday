@@ -2,6 +2,7 @@
 
 import { useInboxParams } from "@/hooks/use-inbox-params";
 import { useZodForm } from "@/hooks/use-zod-form";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { CurrencyInput } from "@midday/ui/currency-input";
 import { DialogContent, DialogHeader, DialogTitle } from "@midday/ui/dialog";
@@ -30,6 +31,7 @@ const formSchema = z.object({
 });
 
 export function EditInboxModal({ children }: Props) {
+  const t = useI18n();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { params } = useInboxParams();
@@ -87,7 +89,7 @@ export function EditInboxModal({ children }: Props) {
       >
         <div className="p-4">
           <DialogHeader className="mb-4">
-            <DialogTitle>Edit</DialogTitle>
+            <DialogTitle>{t("modals.edit_inbox.title")}</DialogTitle>
           </DialogHeader>
 
           <Form {...form}>
@@ -97,7 +99,7 @@ export function EditInboxModal({ children }: Props) {
                 name="displayName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Display Name</FormLabel>
+                    <FormLabel>{t("modals.edit_inbox.display_name")}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -111,7 +113,7 @@ export function EditInboxModal({ children }: Props) {
                 name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Amount</FormLabel>
+                    <FormLabel>{t("forms.labels.amount")}</FormLabel>
                     <FormControl>
                       <CurrencyInput
                         min={0}
@@ -133,7 +135,7 @@ export function EditInboxModal({ children }: Props) {
                 isSubmitting={updateInboxMutation.isPending}
                 className="mt-4 w-full"
               >
-                Save
+                {t("forms.buttons.save")}
               </SubmitButton>
             </form>
           </Form>

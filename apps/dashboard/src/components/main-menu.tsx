@@ -1,6 +1,7 @@
 "use client";
 
 import { useChatInterface } from "@/hooks/use-chat-interface";
+import { useI18n } from "@/locales/client";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import Link from "next/link";
@@ -22,72 +23,72 @@ const icons = {
 const items = [
   {
     path: "/",
-    name: "Overview",
+    nameKey: "navigation.overview",
   },
   {
     path: "/transactions",
-    name: "Transactions",
+    nameKey: "navigation.transactions",
     children: [
       {
         path: "/transactions/categories",
-        name: "Categories",
+        nameKey: "navigation.categories",
       },
       {
         path: "/transactions?step=connect",
-        name: "Connect bank",
+        nameKey: "navigation.connect_bank",
       },
       {
         path: "/transactions?step=import&hide=true",
-        name: "Import",
+        nameKey: "navigation.import",
       },
-      { path: "/transactions?createTransaction=true", name: "Create new" },
+      { path: "/transactions?createTransaction=true", nameKey: "navigation.create_new" },
     ],
   },
   {
     path: "/inbox",
-    name: "Inbox",
-    children: [{ path: "/inbox/settings", name: "Settings" }],
+    nameKey: "navigation.inbox",
+    children: [{ path: "/inbox/settings", nameKey: "navigation.settings" }],
   },
   {
     path: "/invoices",
-    name: "Invoices",
+    nameKey: "navigation.invoices",
     children: [
-      { path: "/invoices/products", name: "Products" },
-      { path: "/invoices?type=create", name: "Create new" },
+      { path: "/invoices/products", nameKey: "navigation.products" },
+      { path: "/invoices?type=create", nameKey: "navigation.create_new" },
     ],
   },
   {
     path: "/tracker",
-    name: "Tracker",
-    children: [{ path: "/tracker?create=true", name: "Create new" }],
+    nameKey: "navigation.tracker",
+    children: [{ path: "/tracker?create=true", nameKey: "navigation.create_new" }],
   },
   {
     path: "/customers",
-    name: "Customers",
-    children: [{ path: "/customers?createCustomer=true", name: "Create new" }],
+    nameKey: "navigation.customers",
+    children: [{ path: "/customers?createCustomer=true", nameKey: "navigation.create_new" }],
   },
   {
     path: "/vault",
-    name: "Vault",
+    nameKey: "navigation.vault",
   },
   {
     path: "/apps",
-    name: "Apps",
+    nameKey: "navigation.apps",
     children: [
-      { path: "/apps", name: "All" },
-      { path: "/apps?tab=installed", name: "Installed" },
+      { path: "/apps", nameKey: "navigation.all" },
+      { path: "/apps?tab=installed", nameKey: "navigation.installed" },
     ],
   },
   {
     path: "/settings",
-    name: "Settings",
+    nameKey: "navigation.settings",
     children: [
-      { path: "/settings", name: "General" },
-      { path: "/settings/billing", name: "Billing" },
-      { path: "/settings/accounts", name: "Bank Connections" },
-      { path: "/settings/members", name: "Members" },
-      { path: "/settings/notifications", name: "Notifications" },
-      { path: "/settings/developer", name: "Developer" },
+      { path: "/settings", nameKey: "navigation.general" },
+      { path: "/settings/billing", nameKey: "navigation.billing" },
+      { path: "/settings/accounts", nameKey: "navigation.bank_connections" },
+      { path: "/settings/members", nameKey: "navigation.members" },
+      { path: "/settings/notifications", nameKey: "navigation.notifications" },
+      { path: "/settings/developer", nameKey: "navigation.developer" },
     ],
   },
 ];
@@ -107,14 +108,15 @@ const KNOWN_MENU_PATHS = [
 interface ItemProps {
   item: {
     path: string;
-    name: string;
-    children?: { path: string; name: string }[];
+    nameKey: string;
+    children?: { path: string; nameKey: string }[];
   };
   isActive: boolean;
   isExpanded: boolean;
   isItemExpanded: boolean;
   onToggle: (path: string) => void;
   onSelect?: () => void;
+  t: (key: string) => string;
 }
 
 const ChildItem = ({
@@ -124,13 +126,15 @@ const ChildItem = ({
   shouldShow,
   onSelect,
   index,
+  t,
 }: {
-  child: { path: string; name: string };
+  child: { path: string; nameKey: string };
   isActive: boolean;
   isExpanded: boolean;
   shouldShow: boolean;
   onSelect?: () => void;
   index: number;
+  t: (key: string) => string;
 }) => {
   const showChild = isExpanded && shouldShow;
 
@@ -139,14 +143,14 @@ const ChildItem = ({
       prefetch
       href={child.path}
       onClick={() => onSelect?.()}
-      className="block group/child"
+      className="block group/child rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     >
       <div className="relative">
         {/* Child item text */}
         <div
           className={cn(
             "ml-[35px] mr-[15px] h-[32px] flex items-center",
-            "border-l border-[#e6e6e6] dark:border-[#1d1d1d] pl-3",
+            "border-l border-[#e6e6e6] dark:border-[#2a2a2a] pl-3",
             "transition-all duration-200 ease-out",
             showChild
               ? "opacity-100 translate-x-0"
@@ -162,11 +166,11 @@ const ChildItem = ({
             className={cn(
               "text-xs font-medium transition-colors duration-200",
               "text-[#888] group-hover/child:text-primary",
-              "whitespace-nowrap overflow-hidden",
+              "whitespace-nowrap overflow-hidden text-ellipsis",
               isActive && "text-primary",
             )}
           >
-            {child.name}
+            {t(child.nameKey)}
           </span>
         </div>
       </div>
@@ -181,6 +185,7 @@ const Item = ({
   isItemExpanded,
   onToggle,
   onSelect,
+  t,
 }: ItemProps) => {
   const Icon = icons[item.path as keyof typeof icons];
   const pathname = usePathname();
@@ -231,15 +236,18 @@ const Item = ({
                   isActive && "text-primary",
                 )}
               >
-                {item.name}
+                {t(item.nameKey)}
               </span>
               {hasChildren && (
                 <button
                   type="button"
                   onClick={handleChevronClick}
+                  aria-label={t("navigation.toggle_submenu")}
+                  aria-expanded={shouldShowChildren}
                   className={cn(
                     "w-8 h-8 flex items-center justify-center transition-all duration-200 ml-auto mr-3",
                     "text-[#888] hover:text-primary pointer-events-auto",
+                    "focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary rounded",
                     isActive && "text-primary/60",
                     shouldShowChildren && "rotate-180",
                   )}
@@ -271,6 +279,7 @@ const Item = ({
                 shouldShow={shouldShowChildren}
                 onSelect={onSelect}
                 index={index}
+                t={t}
               />
             );
           })}
@@ -286,6 +295,7 @@ type Props = {
 };
 
 export function MainMenu({ onSelect, isExpanded = false }: Props) {
+  const t = useI18n();
   const pathname = usePathname();
   const { isChatPage } = useChatInterface();
   const part = pathname?.split("/")[1];
@@ -327,6 +337,7 @@ export function MainMenu({ onSelect, isExpanded = false }: Props) {
                   setExpandedItem(expandedItem === path ? null : path);
                 }}
                 onSelect={onSelect}
+                t={t}
               />
             );
           })}

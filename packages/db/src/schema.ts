@@ -384,6 +384,16 @@ export const transactions = pgTable(
 				)
 			`,
       ),
+
+    // Japan-specific fields (Midday-JP)
+    taxCategory: text("tax_category").default("standard_10"), // standard_10, reduced_8, exempt, non_taxable
+    hasQualifiedInvoice: boolean("has_qualified_invoice").default(false), // 適格請求書あり
+    invoiceRegistrationNumber: text("invoice_registration_number"), // 取引先のT番号
+    projectId: uuid("project_id"), // プロジェクト紐付け
+    withholdingTaxAmount: numericCasted("withholding_tax_amount", { precision: 15, scale: 2 }), // 源泉徴収税額
+    expenseCategoryCode: text("expense_category_code"), // 勘定科目コード（710: 旅費交通費 等）
+    isDeductible: boolean("is_deductible").default(true), // 経費計上可能フラグ
+    receiptUrl: text("receipt_url"), // 領収書画像URL
   },
   (table) => [
     index("idx_transactions_date").using(
@@ -920,6 +930,19 @@ export const invoices = pgTable(
     // Recurring invoice fields
     invoiceRecurringId: uuid("invoice_recurring_id"),
     recurringSequence: integer("recurring_sequence"), // Which number in the series (1, 2, 3...)
+
+    // Japan-specific fields (Midday-JP)
+    invoiceRegistrationNumber: text("invoice_registration_number"), // T + 13 digits (インボイス登録番号)
+    documentType: text("document_type").default("invoice"), // quotation, delivery_slip, invoice
+    parentDocumentId: uuid("parent_document_id"), // Link quotation -> invoice
+    consumptionTaxAmount: numericCasted("consumption_tax_amount", { precision: 15, scale: 2 }),
+    consumptionTaxRate: numericCasted("consumption_tax_rate", { precision: 5, scale: 4 }).default(0.10),
+    withholdingTaxAmount: numericCasted("withholding_tax_amount", { precision: 15, scale: 2 }),
+    withholdingTaxRate: numericCasted("withholding_tax_rate", { precision: 5, scale: 4 }).default(0.1021),
+    applyWithholdingTax: boolean("apply_withholding_tax").default(false),
+    sealImageUrl: text("seal_image_url"), // 印鑑画像URL
+    paymentTermsText: text("payment_terms_text"), // 「月末締め翌月末払い」等
+    bankAccountInfo: jsonb("bank_account_info"), // 振込先情報
   },
   (table) => [
     index("invoices_created_at_idx").using(

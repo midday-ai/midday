@@ -1,3 +1,4 @@
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { Icons } from "@midday/ui/icons";
 import { useQuery } from "@tanstack/react-query";
@@ -8,6 +9,7 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";
 
 export function VaultWidget() {
+  const t = useI18n();
   const trpc = useTRPC();
   const router = useRouter();
 
@@ -20,7 +22,7 @@ export function VaultWidget() {
   if (isLoading) {
     return (
       <WidgetSkeleton
-        title="File Management"
+        title={t("widgets.vault.title")}
         icon={<Icons.Vault className="size-4" />}
         showValue={false}
       />
@@ -122,11 +124,11 @@ export function VaultWidget() {
 
   return (
     <BaseWidget
-      title="File Management"
+      title={t("widgets.vault.title")}
       icon={<Icons.Vault className="size-4" />}
-      description={getActivityMessage()}
+      description={totalDocuments > 0 ? t("widgets.vault.description") : t("widgets.vault.no_documents")}
       onClick={handleOpenVault}
-      actions="View files"
+      actions={t("widgets.vault.action")}
     />
   );
 }

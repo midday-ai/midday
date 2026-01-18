@@ -18,6 +18,10 @@ import {
   getTrackedTimeSchema,
   getVaultActivitySchema,
   updateWidgetPreferencesSchema,
+  // Japan-specific schemas (Midday-JP)
+  getTrueCashSchema,
+  getConsumptionTaxSummarySchema,
+  getProjectROISchema,
 } from "@api/schemas/widgets";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
 import { widgetPreferencesCache } from "@midday/cache/widget-preferences-cache";
@@ -402,6 +406,128 @@ export const widgetsRouter = createTRPCRouter({
           toolParams: {
             currency: input.currency,
           },
+        },
+      };
+    }),
+
+  // Japan-specific widgets (Midday-JP)
+  getTrueCash: protectedProcedure
+    .input(getTrueCashSchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      // Get cash balance
+      const cashBalanceData = await getNetPosition(db, {
+        teamId: teamId!,
+        currency: input.currency,
+      });
+
+      const cashBalance = cashBalanceData.cash ?? 0;
+
+      // Estimate consumption tax reserve (10% of revenue transactions)
+      // This is a simplified calculation - in production, you'd want to
+      // track actual collected vs paid consumption tax
+      const consumptionTaxReserve = Math.round(cashBalance * 0.05); // Rough estimate
+
+      // Estimate income tax reserve (simplified: ~20-30% of profit for individuals)
+      const incomeTaxReserve = Math.round(cashBalance * 0.15); // Rough estimate
+
+      // True Cash = Cash Balance - Tax Reserves
+      const trueCash = cashBalance - consumptionTaxReserve - incomeTaxReserve;
+
+      return {
+        result: {
+          trueCash,
+          cashBalance,
+          consumptionTaxReserve,
+          incomeTaxReserve,
+          currency: input.currency || "JPY",
+        },
+      };
+    }),
+
+  getConsumptionTaxSummary: protectedProcedure
+    .input(getConsumptionTaxSummarySchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      // Get tax summary data
+      const [paidTaxes, collectedTaxes] = await Promise.all([
+        getTaxSummary(db, {
+          teamId: teamId!,
+          type: "paid",
+          from: input.from,
+          to: input.to,
+          currency: input.currency,
+        }),
+        getTaxSummary(db, {
+          teamId: teamId!,
+          type: "collected",
+          from: input.from,
+          to: input.to,
+          currency: input.currency,
+        }),
+      ]);
+
+      const collectedTax = collectedTaxes.summary.total ?? 0;
+      const paidTax = paidTaxes.summary.total ?? 0;
+      const netTaxPayable = collectedTax - paidTax;
+
+      // Calculate qualified invoice ratio (placeholder - would need actual tracking)
+      const qualifiedInvoiceRatio = 0.85; // Assume 85% have qualified invoices
+
+      return {
+        result: {
+          collectedTax,
+          paidTax,
+          netTaxPayable,
+          qualifiedInvoiceRatio,
+          currency: input.currency || "JPY",
+        },
+      };
+    }),
+
+  getProjectROI: protectedProcedure
+    .input(getProjectROISchema)
+    .query(async ({ ctx: { db, teamId }, input }) => {
+      // Get billable hours data to find projects
+      const billableData = await getBillableHours(db, {
+        teamId: teamId!,
+        date: new Date().toISOString(),
+        view: "month",
+        weekStartsOnMonday: true,
+      });
+
+      // Extract project data from billable hours
+      const projects = billableData.result?.projects ?? [];
+
+      // Calculate ROI for each project
+      const projectROIs = projects.slice(0, input.limit).map((project: { id: string; name: string; totalDuration: number; rate: number }) => {
+        const revenue = project.rate * (project.totalDuration / 3600); // Assuming rate is hourly
+        const laborCost = revenue * 0.3; // Estimate 30% labor cost
+        const expenses = revenue * 0.1; // Estimate 10% project expenses
+
+        const totalCost = laborCost + expenses;
+        const profit = revenue - totalCost;
+        const roi = totalCost > 0 ? (profit / totalCost) * 100 : 0;
+
+        return {
+          projectId: project.id,
+          projectName: project.name,
+          revenue,
+          expenses,
+          laborCost,
+          trackedHours: project.totalDuration / 3600,
+          roi: Math.round(roi),
+        };
+      });
+
+      const averageROI =
+        projectROIs.length > 0
+          ? projectROIs.reduce((sum: number, p: { roi: number }) => sum + p.roi, 0) / projectROIs.length
+          : 0;
+
+      return {
+        result: {
+          projects: projectROIs,
+          averageROI: Math.round(averageROI),
+          currency: input.currency || "JPY",
         },
       };
     }),

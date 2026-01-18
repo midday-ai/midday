@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/locales/client";
 import {
   Accordion,
   AccordionContent,
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export function LoginAccordion({ children }: Props) {
+  const t = useI18n();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -29,7 +31,7 @@ export function LoginAccordion({ children }: Props) {
             onClick={() => setIsOpen(!isOpen)}
             className="w-full bg-[#0e0e0e] dark:bg-[#131313] border border-[#0e0e0e] dark:border-border text-white dark:text-foreground font-sans text-sm py-3 px-4 hover:bg-[#1a1a1a] dark:hover:bg-border/50 transition-colors"
           >
-            {isOpen ? "Hide other options" : "Show other options"}
+            {isOpen ? t("auth.hide_other_options") : t("auth.show_other_options")}
           </button>
         </div>
         <AccordionContent className="pt-4">

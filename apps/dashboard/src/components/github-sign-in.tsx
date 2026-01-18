@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/locales/client";
 import { getUrl } from "@/utils/environment";
 import { isDesktopApp } from "@midday/desktop-client/platform";
 import { createClient } from "@midday/supabase/client";
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function GithubSignIn({ showLastUsed = false }: Props) {
+  const t = useI18n();
   const [isLoading, setLoading] = useState(false);
   const supabase = createClient();
   const searchParams = useSearchParams();
@@ -68,14 +70,14 @@ export function GithubSignIn({ showLastUsed = false }: Props) {
       >
         <div className="flex items-center justify-center gap-2">
           <Icons.Github size={16} />
-          <span>Continue with Github</span>
+          <span>{t("auth.continue_with_github")}</span>
         </div>
       </SubmitButton>
       {/* Last used pill */}
       {showLastUsed && (
         <div className="absolute top-1/2 right-3 transform -translate-y-1/2 pointer-events-none">
           <span className="font-sans text-sm text-muted-foreground/50">
-            Last used
+            {t("auth.last_used")}
           </span>
         </div>
       )}

@@ -1,5 +1,6 @@
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
@@ -10,6 +11,7 @@ import { BaseWidget } from "./base";
 import { WidgetSkeleton } from "./widget-skeleton";
 
 export function InboxWidget() {
+  const t = useI18n();
   const trpc = useTRPC();
   const router = useRouter();
   const { sendMessage } = useChatActions();
@@ -28,7 +30,7 @@ export function InboxWidget() {
   if (isLoading) {
     return (
       <WidgetSkeleton
-        title="Inbox"
+        title={t("widgets.inbox")}
         icon={<Icons.Inbox2 className="size-4" />}
         descriptionLines={2}
         showValue={false}
@@ -117,14 +119,14 @@ export function InboxWidget() {
 
   return (
     <BaseWidget
-      title="Inbox"
+      title={t("widgets.inbox")}
       icon={<Icons.Inbox2 className="size-4" />}
       description={
         <div className="flex flex-col gap-1">
           <p className="text-sm text-[#666666]">{getStatusText()}</p>
         </div>
       }
-      actions="View inbox"
+      actions={t("widgets.inbox")}
       onClick={handleViewInbox}
     />
   );

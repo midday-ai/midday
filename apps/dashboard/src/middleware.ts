@@ -4,8 +4,8 @@ import { createI18nMiddleware } from "next-international/middleware";
 import { type NextRequest, NextResponse } from "next/server";
 
 const I18nMiddleware = createI18nMiddleware({
-  locales: ["en"],
-  defaultLocale: "en",
+  locales: ["en", "ja"],
+  defaultLocale: "ja", // Midday-JP: Japanese as default
   urlMappingStrategy: "rewrite",
 });
 

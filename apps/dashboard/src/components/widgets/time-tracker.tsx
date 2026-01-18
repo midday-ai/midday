@@ -1,4 +1,5 @@
 import { useUserQuery } from "@/hooks/use-user";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
@@ -11,6 +12,7 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";
 
 export function TimeTrackerWidget() {
+  const t = useI18n();
   const trpc = useTRPC();
   const router = useRouter();
   const { data: user } = useUserQuery();
@@ -41,7 +43,7 @@ export function TimeTrackerWidget() {
   if (isLoading) {
     return (
       <WidgetSkeleton
-        title="Time Tracker"
+        title={t("widgets.time_tracker.title")}
         icon={<Icons.Tracker className="size-4" />}
       />
     );
@@ -55,11 +57,11 @@ export function TimeTrackerWidget() {
 
   return (
     <BaseWidget
-      title="Time Tracker"
+      title={t("widgets.time_tracker.title")}
       icon={<Icons.Tracker className="size-4" />}
-      description="Tracked time this week"
+      description={t("widgets.time_tracker.description")}
       onClick={handleOpenTracker}
-      actions="Open time tracker"
+      actions={t("widgets.time_tracker.action")}
     >
       <h2 className="text-2xl font-normal text-[24px] mb-2">
         {secondsToHoursAndMinutes(totalWeeklyTime)}

@@ -3,6 +3,7 @@
 import { revalidateAfterTeamChange } from "@/actions/revalidate-action";
 import { SelectCurrency } from "@/components/select-currency";
 import { useZodForm } from "@/hooks/use-zod-form";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { uniqueCurrencies } from "@midday/location/currencies";
 import {
@@ -43,6 +44,7 @@ export function CreateTeamForm({
   defaultCurrencyPromise,
   defaultCountryCodePromise,
 }: Props) {
+  const t = useI18n();
   const currency = use(defaultCurrencyPromise);
   const countryCode = use(defaultCountryCodePromise);
   const trpc = useTRPC();
@@ -197,12 +199,12 @@ export function CreateTeamForm({
           render={({ field }) => (
             <FormItem className="mt-4 w-full">
               <FormLabel className="text-xs text-[#666] font-normal">
-                Company name
+                {t("team.company_name")}
               </FormLabel>
               <FormControl>
                 <Input
                   autoFocus
-                  placeholder="Ex: Acme Marketing or Acme Co"
+                  placeholder={t("team.company_name_placeholder")}
                   autoComplete="off"
                   autoCapitalize="none"
                   autoCorrect="off"
@@ -222,7 +224,7 @@ export function CreateTeamForm({
           render={({ field }) => (
             <FormItem className="mt-4 w-full">
               <FormLabel className="text-xs text-[#666] font-normal">
-                Country
+                {t("forms.labels.country")}
               </FormLabel>
               <FormControl className="w-full">
                 <CountrySelector
@@ -244,16 +246,14 @@ export function CreateTeamForm({
           render={({ field }) => (
             <FormItem className="mt-4 border-b border-border pb-4">
               <FormLabel className="text-xs text-[#666] font-normal">
-                Base currency
+                {t("team.base_currency")}
               </FormLabel>
               <FormControl>
                 <SelectCurrency currencies={uniqueCurrencies} {...field} />
               </FormControl>
 
               <FormDescription>
-                If you have multiple accounts in different currencies, this will
-                be the default currency for your company. You can change it
-                later.
+                {t("team.base_currency_description")}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -266,15 +266,14 @@ export function CreateTeamForm({
           render={({ field }) => (
             <FormItem className="mt-4 border-b border-border pb-4">
               <FormLabel className="text-xs text-[#666] font-normal">
-                Fiscal year starts
+                {t("team.fiscal_year_starts")}
               </FormLabel>
               <FormControl>
                 <SelectFiscalMonth {...field} />
               </FormControl>
 
               <FormDescription>
-                When does your company's fiscal year begin? This determines
-                default date ranges for reports. You can change it later.
+                {t("team.fiscal_year_description")}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -286,7 +285,7 @@ export function CreateTeamForm({
           type="submit"
           isSubmitting={isFormLocked}
         >
-          Create
+          {t("forms.buttons.create")}
         </SubmitButton>
       </form>
     </Form>

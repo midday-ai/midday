@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/locales/client";
 import {
   Dialog,
   DialogContent,
@@ -23,35 +24,34 @@ export function ChoosePlanModal({
   hasDiscount?: boolean;
   discountPrice?: number;
 }) {
+  const t = useI18n();
+
   const handleClose = (value: boolean) => {
     onOpenChange(value);
   };
 
   const getTitle = () => {
     if (daysLeft && daysLeft > 0) {
-      return `Pro trial - ${daysLeft} ${daysLeft === 1 ? "day" : "days"} left`;
+      return t("modals.choose_plan.trial_days_left", { days: daysLeft });
     }
 
-    return hasDiscount ? "Special Discount Offer" : "Choose plan";
+    return hasDiscount ? t("modals.choose_plan.special_offer") : t("modals.choose_plan.title");
   };
 
   const getDescription = () => {
     if (daysLeft !== undefined) {
       if (daysLeft > 0) {
-        return `Your trial will end in ${daysLeft} ${daysLeft === 1 ? "day" : "days"}, after the trial period you will have read access only.`;
+        return t("modals.choose_plan.trial_ending", { days: daysLeft });
       }
 
-      return "Your trial period has ended. Please choose a plan to continue using Midday.";
+      return t("modals.choose_plan.trial_ended");
     }
 
     if (hasDiscount && discountPrice) {
-      const saveAmount = 99 - discountPrice;
-      const savePercentage = Math.round((saveAmount / 99) * 100);
-
-      return `As a valued early customer, you qualify for our special discount pricing. Get the Pro plan for $${discountPrice}/month instead of the regular $99/month and save ${savePercentage}%.`;
+      return t("modals.choose_plan.early_customer_discount");
     }
 
-    return "Choose a plan to continue using Midday.";
+    return t("modals.choose_plan.choose_plan_continue");
   };
 
   return (
@@ -68,8 +68,8 @@ export function ChoosePlanModal({
           <Plans />
 
           <p className="text-xs text-muted-foreground mt-4">
-            After the trial period ends, you'll have read-only access,{" "}
-            <Link href="/support">contact us</Link> if you have any questions.
+            {t("modals.choose_plan.read_only_after")}{" "}
+            <Link href="/support">{t("navigation.support")}</Link>
           </p>
         </div>
       </DialogContent>

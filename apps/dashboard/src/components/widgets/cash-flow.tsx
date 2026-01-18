@@ -1,6 +1,7 @@
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
 import { useUserQuery } from "@/hooks/use-user";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { formatAmount } from "@/utils/format";
 import { getPeriodLabel } from "@/utils/metrics-date-utils";
@@ -12,6 +13,7 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";
 
 export function CashFlowWidget() {
+  const t = useI18n();
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const { sendMessage } = useChatActions();
@@ -32,7 +34,7 @@ export function CashFlowWidget() {
   if (isLoading) {
     return (
       <WidgetSkeleton
-        title="Cash Flow"
+        title={t("widgets.cash_flow.title")}
         icon={<Icons.Accounts className="size-4" />}
         descriptionLines={2}
       />
@@ -90,16 +92,10 @@ export function CashFlowWidget() {
 
   return (
     <BaseWidget
-      title="Cash Flow"
+      title={t("widgets.cash_flow.title")}
       icon={<Icons.Accounts className="size-4" />}
-      description={
-        <div className="flex flex-col gap-1">
-          <p className="text-sm text-[#666666]">
-            Net cash position · {periodLabel}
-          </p>
-        </div>
-      }
-      actions="View cash flow analysis"
+      description={t("widgets.cash_flow.description")}
+      actions={t("widgets.cash_flow.action")}
       onClick={handleViewAnalysis}
     >
       <div className="flex flex-col gap-2">

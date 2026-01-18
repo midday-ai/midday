@@ -5,6 +5,7 @@ import { useFileUrl } from "@/hooks/use-file-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useUserQuery } from "@/hooks/use-user";
 import { downloadFile } from "@/lib/download";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { getUrl } from "@/utils/environment";
 import {
@@ -41,6 +42,7 @@ type Props = {
 };
 
 export function ActionsMenu({ row }: Props) {
+  const t = useI18n();
   const trpc = useTRPC();
   const { data: user } = useUserQuery();
   const queryClient = useQueryClient();
@@ -236,7 +238,7 @@ export function ActionsMenu({ row }: Props) {
 
     toast({
       duration: 4000,
-      title: "Copied link to clipboard.",
+      title: t("tables.invoices.copied_link"),
       variant: "success",
     });
   };
@@ -260,16 +262,16 @@ export function ActionsMenu({ row }: Props) {
                 })
               }
             >
-              Edit invoice
+              {t("tables.invoices.edit_invoice")}
             </DropdownMenuItem>
           )}
 
           <DropdownMenuItem>
-            <OpenURL href={`${getUrl()}/i/${row.token}`}>Open invoice</OpenURL>
+            <OpenURL href={`${getUrl()}/i/${row.token}`}>{t("tables.invoices.open_invoice")}</OpenURL>
           </DropdownMenuItem>
 
           <DropdownMenuItem onClick={handleCopyLink}>
-            Copy link
+            {t("tables.invoices.copy_link")}
           </DropdownMenuItem>
 
           {row.status !== "draft" && (
@@ -290,7 +292,7 @@ export function ActionsMenu({ row }: Props) {
                 );
               }}
             >
-              Download
+              {t("tables.common.download")}
             </DropdownMenuItem>
           )}
 
@@ -303,14 +305,14 @@ export function ActionsMenu({ row }: Props) {
                 );
               }}
             >
-              Download receipt
+              {t("tables.invoices.download_receipt")}
             </DropdownMenuItem>
           )}
 
           <DropdownMenuItem
             onClick={() => duplicateInvoiceMutation.mutate({ id: row.id })}
           >
-            Duplicate
+            {t("tables.invoices.duplicate")}
           </DropdownMenuItem>
 
           {row.status === "scheduled" && row.scheduledJobId && (
@@ -318,7 +320,7 @@ export function ActionsMenu({ row }: Props) {
               onClick={() => cancelScheduleMutation.mutate({ id: row.id })}
               className="text-[#FF3638]"
             >
-              Cancel schedule
+              {t("tables.invoices.cancel_schedule")}
             </DropdownMenuItem>
           )}
 
@@ -332,14 +334,14 @@ export function ActionsMenu({ row }: Props) {
                 })
               }
             >
-              Mark as unpaid
+              {t("tables.invoices.mark_as_unpaid")}
             </DropdownMenuItem>
           )}
 
           {(row.status === "overdue" || row.status === "unpaid") && (
             <>
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Mark as paid</DropdownMenuSubTrigger>
+                <DropdownMenuSubTrigger>{t("tables.invoices.mark_as_paid")}</DropdownMenuSubTrigger>
                 <DropdownMenuSubContent>
                   <Calendar
                     mode="single"
@@ -376,7 +378,7 @@ export function ActionsMenu({ row }: Props) {
                 }
                 className="text-[#FF3638]"
               >
-                Cancel
+                {t("tables.invoices.cancel")}
               </DropdownMenuItem>
             </>
           )}
@@ -386,7 +388,7 @@ export function ActionsMenu({ row }: Props) {
               onClick={() => deleteInvoiceMutation.mutate({ id: row.id })}
               className="text-[#FF3638]"
             >
-              Delete
+              {t("tables.common.delete")}
             </DropdownMenuItem>
           )}
 
@@ -395,7 +397,7 @@ export function ActionsMenu({ row }: Props) {
               onClick={() => deleteInvoiceMutation.mutate({ id: row.id })}
               className="text-[#FF3638]"
             >
-              Delete
+              {t("tables.common.delete")}
             </DropdownMenuItem>
           )}
 
@@ -411,7 +413,7 @@ export function ActionsMenu({ row }: Props) {
                     setParams({ editRecurringId: row.invoiceRecurringId })
                   }
                 >
-                  Edit series
+                  {t("tables.invoices.edit_series")}
                 </DropdownMenuItem>
               )}
               {canPauseSeries && (
@@ -424,7 +426,7 @@ export function ActionsMenu({ row }: Props) {
                     }
                   }}
                 >
-                  Pause series
+                  {t("tables.invoices.pause_series")}
                 </DropdownMenuItem>
               )}
               {canResumeSeries && (
@@ -437,7 +439,7 @@ export function ActionsMenu({ row }: Props) {
                     }
                   }}
                 >
-                  Resume series
+                  {t("tables.invoices.resume_series")}
                 </DropdownMenuItem>
               )}
               {canCancelSeries && (
@@ -445,7 +447,7 @@ export function ActionsMenu({ row }: Props) {
                   onClick={() => setCancelSeriesOpen(true)}
                   className="text-[#FF3638]"
                 >
-                  Cancel series
+                  {t("tables.invoices.cancel_series")}
                 </DropdownMenuItem>
               )}
             </>
@@ -456,14 +458,13 @@ export function ActionsMenu({ row }: Props) {
       <AlertDialog open={cancelSeriesOpen} onOpenChange={setCancelSeriesOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Cancel recurring series</AlertDialogTitle>
+            <AlertDialogTitle>{t("tables.invoices.cancel_recurring")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will stop all future invoices in this recurring series.
-              Invoices that have already been sent will not be affected.
+              {t("tables.invoices.cancel_recurring_description")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Keep series</AlertDialogCancel>
+            <AlertDialogCancel>{t("tables.invoices.keep_series")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (row.invoiceRecurringId) {
@@ -471,7 +472,7 @@ export function ActionsMenu({ row }: Props) {
                 }
               }}
             >
-              Cancel series
+              {t("tables.invoices.cancel_series")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

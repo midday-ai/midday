@@ -1,6 +1,7 @@
 "use client";
 
 import { verifyOtpAction } from "@/actions/verify-otp-action";
+import { useI18n } from "@/locales/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
@@ -24,6 +25,7 @@ type Props = {
 };
 
 export function OTPSignIn({ className }: Props) {
+  const t = useI18n();
   const verifyOtp = useAction(verifyOtpAction);
   const [isLoading, setLoading] = useState(false);
   const [isSent, setSent] = useState(false);
@@ -71,7 +73,7 @@ export function OTPSignIn({ className }: Props) {
               <div className="flex items-center space-x-2 bg-background px-4 py-2 rounded-md shadow-sm">
                 <Spinner size={16} className="text-primary" />
                 <span className="text-sm text-foreground font-medium">
-                  Verifying...
+                  {t("auth.verifying")}
                 </span>
               </div>
             </div>
@@ -98,7 +100,7 @@ export function OTPSignIn({ className }: Props) {
 
         <div className="flex space-x-2">
           <span className="text-sm text-[#878787]">
-            Didn't receive the email?
+            {t("auth.didnt_receive_email")}
           </span>
           <button
             onClick={() => setSent(false)}
@@ -106,7 +108,7 @@ export function OTPSignIn({ className }: Props) {
             className="text-sm text-primary underline font-medium"
             disabled={verifyOtp.isExecuting || isVerifying}
           >
-            Resend code
+            {t("auth.resend_code")}
           </button>
         </div>
       </div>
@@ -124,7 +126,7 @@ export function OTPSignIn({ className }: Props) {
               <FormItem>
                 <FormControl>
                   <Input
-                    placeholder="Enter email address"
+                    placeholder={t("auth.enter_email")}
                     {...field}
                     autoCapitalize="false"
                     autoCorrect="false"
@@ -140,7 +142,7 @@ export function OTPSignIn({ className }: Props) {
             className="bg-primary px-6 py-4 text-secondary font-medium flex space-x-2 h-[40px] w-full"
             isSubmitting={isLoading}
           >
-            Continue
+            {t("auth.continue")}
           </SubmitButton>
         </div>
       </form>

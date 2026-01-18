@@ -3,6 +3,7 @@
 import { FormatAmount } from "@/components/format-amount";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
@@ -13,6 +14,7 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";
 
 export function CustomerLifetimeValueWidget() {
+  const t = useI18n();
   const trpc = useTRPC();
   const router = useRouter();
   const { sendMessage } = useChatActions();
@@ -30,7 +32,7 @@ export function CustomerLifetimeValueWidget() {
   if (isLoading) {
     return (
       <WidgetSkeleton
-        title="Customer Lifetime Value"
+        title={t("widgets.customer_lifetime_value.title")}
         icon={<Icons.Customers className="size-4" />}
         descriptionLines={3}
       />
@@ -81,7 +83,7 @@ export function CustomerLifetimeValueWidget() {
 
   return (
     <BaseWidget
-      title="Customer Lifetime Value"
+      title={t("widgets.customer_lifetime_value.title")}
       icon={<Icons.Customers className="size-4" />}
       description={
         <div className="flex flex-col gap-3">

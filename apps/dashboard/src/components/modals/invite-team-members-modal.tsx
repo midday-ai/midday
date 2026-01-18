@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/locales/client";
 import {
   DialogContent,
   DialogDescription,
@@ -15,13 +16,15 @@ type InviteTeamMembersModalProps = {
 export function InviteTeamMembersModal({
   onOpenChange,
 }: InviteTeamMembersModalProps) {
+  const t = useI18n();
+
   return (
     <DialogContent className="max-w-[455px]">
       <div className="p-4">
         <DialogHeader>
-          <DialogTitle>Invite Members</DialogTitle>
+          <DialogTitle>{t("modals.invite.title")}</DialogTitle>
           <DialogDescription>
-            Invite new members by email address.
+            {t("modals.invite.description")}
           </DialogDescription>
         </DialogHeader>
 

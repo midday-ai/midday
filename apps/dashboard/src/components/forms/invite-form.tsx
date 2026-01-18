@@ -1,6 +1,7 @@
 "use client";
 
 import { useZodForm } from "@/hooks/use-zod-form";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@midday/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
@@ -34,6 +35,7 @@ type InviteFormProps = {
 };
 
 export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
+  const t = useI18n();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -48,19 +50,19 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
         // Show appropriate feedback based on results
         if (data.sent > 0 && data.skipped === 0) {
           toast({
-            title: "Invites sent",
-            description: `${data.sent} invite${data.sent > 1 ? "s" : ""} sent successfully`,
+            title: t("modals.invite.sent"),
+            description: t("modals.invite.sent_count", { count: data.sent }),
             variant: "success",
           });
         } else if (data.sent > 0 && data.skipped > 0) {
           toast({
-            title: "Invites partially sent",
-            description: `${data.sent} invite${data.sent > 1 ? "s" : ""} sent, ${data.skipped} skipped (already members or invited)`,
+            title: t("modals.invite.partially_sent"),
+            description: `${t("modals.invite.sent_count", { count: data.sent })}, ${t("modals.invite.skipped", { count: data.skipped })}`,
           });
         } else if (data.sent === 0 && data.skipped > 0) {
           toast({
-            title: "No invites sent",
-            description: `All ${data.skipped} invite${data.skipped > 1 ? "s" : ""} were skipped (already members or invited)`,
+            title: t("modals.invite.no_sent"),
+            description: t("modals.invite.skipped", { count: data.skipped }),
           });
         }
 
@@ -105,7 +107,7 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
                 <FormItem className="flex-1">
                   <FormControl>
                     <Input
-                      placeholder="jane@example.com"
+                      placeholder={t("forms.placeholders.email")}
                       type="email"
                       autoComplete="off"
                       autoCapitalize="none"
@@ -129,12 +131,12 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
                   >
                     <FormControl>
                       <SelectTrigger className="min-w-[120px]">
-                        <SelectValue placeholder="Select role" />
+                        <SelectValue placeholder={t("team.select_role")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="owner">Owner</SelectItem>
-                      <SelectItem value="member">Member</SelectItem>
+                      <SelectItem value="owner">{t("team.owner")}</SelectItem>
+                      <SelectItem value="member">{t("team.member")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormItem>
@@ -149,14 +151,14 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
           className="mt-4 border-none bg-[#F2F1EF] text-[11px] dark:bg-[#1D1D1D]"
           onClick={() => append({ email: "", role: "member" })}
         >
-          Add more
+          {t("forms.buttons.add_more")}
         </Button>
 
         <div className="border-t-[1px] pt-4 mt-8 items-center justify-between">
           <div>
             {Object.values(form.formState.errors).length > 0 && (
               <span className="text-sm text-destructive">
-                Please complete the fields above.
+                {t("forms.validation.complete_fields")}
               </span>
             )}
           </div>
@@ -168,7 +170,7 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
                   variant="ghost"
                   className="p-0 hover:bg-transparent font-normal"
                 >
-                  Skip this step
+                  {t("forms.buttons.skip")}
                 </Button>
               </Link>
             ) : (
@@ -180,7 +182,7 @@ export function InviteForm({ onSuccess, skippable = true }: InviteFormProps) {
               isSubmitting={inviteMutation.isPending}
               disabled={inviteMutation.isPending}
             >
-              Send invites
+              {t("modals.invite.send_invites")}
             </SubmitButton>
           </div>
         </div>

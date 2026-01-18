@@ -51,6 +51,10 @@ import { TimeTrackerWidget } from "./time-tracker";
 import { TopCustomerWidget } from "./top-customer";
 import { VaultWidget } from "./vault";
 import { WidgetErrorFallback } from "./widget-error-fallback";
+// Japan-specific widgets (Midday-JP)
+import { TrueCashWidget } from "./true-cash";
+import { ConsumptionTaxSummaryWidget } from "./consumption-tax-summary";
+import { ProjectROIWidget } from "./project-roi";
 import {
   useAvailableWidgets,
   useIsCustomizing,
@@ -133,6 +137,10 @@ const WIDGET_COMPONENTS: Record<WidgetType, React.ComponentType> = {
   "overdue-invoices-alert": OverdueInvoicesAlertWidget,
   "billable-hours": BillableHoursWidget,
   "customer-lifetime-value": CustomerLifetimeValueWidget,
+  // Japan-specific widgets (Midday-JP)
+  "true-cash": TrueCashWidget,
+  "consumption-tax-summary": ConsumptionTaxSummaryWidget,
+  "project-roi": ProjectROIWidget,
 };
 
 export function WidgetsGrid() {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useUserQuery } from "@/hooks/use-user";
+import { useI18n } from "@/locales/client";
 import {
   Card,
   CardDescription,
@@ -11,22 +12,22 @@ import {
 import { AvatarUpload } from "./avatar-upload";
 
 export function UserAvatar() {
+  const t = useI18n();
   const { data: user } = useUserQuery();
 
   return (
     <Card>
       <div className="flex justify-between items-center pr-6">
         <CardHeader>
-          <CardTitle>Avatar</CardTitle>
+          <CardTitle>{t("settings.avatar.title")}</CardTitle>
           <CardDescription>
-            This is your avatar. Click on the avatar to upload a custom one from
-            your files.
+            {t("settings.avatar.description")}
           </CardDescription>
         </CardHeader>
 
         <AvatarUpload userId={user?.id!} avatarUrl={user?.avatarUrl} />
       </div>
-      <CardFooter>An avatar is optional but strongly recommended.</CardFooter>
+      <CardFooter>{t("settings.avatar.footer")}</CardFooter>
     </Card>
   );
 }

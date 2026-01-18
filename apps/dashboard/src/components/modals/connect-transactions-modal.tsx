@@ -4,6 +4,7 @@ import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-
 import { exchangePublicToken } from "@/actions/institutions/exchange-public-token";
 import { useConnectParams } from "@/hooks/use-connect-params";
 import { useTeamQuery } from "@/hooks/use-team";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { track } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
@@ -107,6 +108,7 @@ function SearchResult({
 }
 
 export function ConnectTransactionsModal() {
+  const t = useI18n();
   const trpc = useTRPC();
   const router = useRouter();
   const [plaidToken, setPlaidToken] = useState<string | undefined>();
@@ -203,25 +205,23 @@ export function ConnectTransactionsModal() {
       <DialogContent>
         <div className="p-4">
           <DialogHeader>
-            <DialogTitle>Connect bank account</DialogTitle>
+            <DialogTitle>{t("modals.connect_bank.title")}</DialogTitle>
 
             <DialogDescription>
-              We work with a variety of banking providers to support as many
-              banks as possible. If you can't find yours,{" "}
+              {t("modals.connect_bank.description")}{" "}
               <button
                 type="button"
                 className="underline"
                 onClick={() => setParams({ step: "import" })}
               >
-                manual import
-              </button>{" "}
-              is available as an alternative.
+                {t("modals.connect_bank.manual_import")}
+              </button>
             </DialogDescription>
 
             <div className="pt-4">
               <div className="flex space-x-2 relative">
                 <Input
-                  placeholder="Search bank..."
+                  placeholder={t("modals.connect_bank.search_placeholder")}
                   type="search"
                   onChange={(evt) =>
                     setParams({ search: evt.target.value || null })
@@ -282,10 +282,9 @@ export function ConnectTransactionsModal() {
 
                 {!isLoading && data?.length === 0 && (
                   <div className="flex flex-col items-center justify-center min-h-[350px]">
-                    <p className="font-medium mb-2">No banks found</p>
+                    <p className="font-medium mb-2">{t("modals.connect_bank.no_banks_found")}</p>
                     <p className="text-sm text-center text-[#878787]">
-                      We couldn't find a bank matching your criteria.
-                      <br /> Let us know, or start with manual import.
+                      {t("modals.connect_bank.no_banks_description")}
                     </p>
 
                     <div className="mt-4 flex space-x-2">
@@ -293,7 +292,7 @@ export function ConnectTransactionsModal() {
                         variant="outline"
                         onClick={() => setParams({ step: "import" })}
                       >
-                        Import
+                        {t("forms.buttons.import")}
                       </Button>
 
                       <Button
@@ -301,7 +300,7 @@ export function ConnectTransactionsModal() {
                           router.push("/account/support");
                         }}
                       >
-                        Contact us
+                        {t("modals.connect_bank.contact_us")}
                       </Button>
                     </div>
                   </div>

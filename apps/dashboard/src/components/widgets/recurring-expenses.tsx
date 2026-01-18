@@ -3,6 +3,7 @@
 import { FormatAmount } from "@/components/format-amount";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { getPeriodLabel } from "@/utils/metrics-date-utils";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
@@ -13,6 +14,7 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";
 
 export function RecurringExpensesWidget() {
+  const t = useI18n();
   const trpc = useTRPC();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
@@ -30,7 +32,7 @@ export function RecurringExpensesWidget() {
   if (isLoading) {
     return (
       <WidgetSkeleton
-        title="Recurring Expenses"
+        title={t("widgets.recurring_expenses.title")}
         icon={<Icons.Repeat className="size-4" />}
       />
     );
@@ -40,16 +42,11 @@ export function RecurringExpensesWidget() {
 
   const getDescription = () => {
     if (!recurringData || recurringData.summary.totalExpenses === 0) {
-      return "No recurring expenses";
+      return t("widgets.recurring_expenses.no_data");
     }
 
     const { totalExpenses } = recurringData.summary;
-
-    if (totalExpenses === 1) {
-      return "1 recurring expense";
-    }
-
-    return `${totalExpenses} recurring expenses`;
+    return `${totalExpenses} ${t("widgets.recurring_expenses.count")}`;
   };
 
   const handleToolCall = (params: {
@@ -90,11 +87,11 @@ export function RecurringExpensesWidget() {
 
   return (
     <BaseWidget
-      title="Recurring Expenses"
+      title={t("widgets.recurring_expenses.title")}
       icon={<Icons.Repeat className="size-4" />}
       description={getDescription()}
       onClick={handleViewRecurring}
-      actions="View all recurring"
+      actions={t("widgets.recurring_expenses.action")}
     >
       {recurringData && recurringData.summary.totalExpenses > 0 && (
         <div className="flex items-baseline w-full">

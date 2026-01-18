@@ -1,5 +1,6 @@
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
@@ -9,6 +10,7 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";
 
 export function RunwayWidget() {
+  const t = useI18n();
   const trpc = useTRPC();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
@@ -27,7 +29,7 @@ export function RunwayWidget() {
   if (isLoading) {
     return (
       <WidgetSkeleton
-        title="Cash Runway"
+        title={t("widgets.runway.title")}
         icon={<Icons.Time className="size-4" />}
       />
     );
@@ -56,9 +58,9 @@ export function RunwayWidget() {
 
   return (
     <BaseWidget
-      title="Cash Runway"
+      title={t("widgets.runway.title")}
       icon={<Icons.Time className="size-4" />}
-      description="Your cash runway in months"
+      description={t("widgets.runway.description")}
       onClick={() => {
         handleToolCall({
           toolName: "getRunway",
@@ -71,10 +73,10 @@ export function RunwayWidget() {
           text: "Show cash runway",
         });
       }}
-      actions="View runway"
+      actions={t("widgets.runway.action")}
     >
       <div className="flex flex-col gap-2">
-        <h2 className="text-2xl font-normal">{data?.result} months</h2>
+        <h2 className="text-2xl font-normal">{data?.result} {t("widgets.runway.months")}</h2>
       </div>
     </BaseWidget>
   );

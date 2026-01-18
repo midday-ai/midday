@@ -3,6 +3,7 @@
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useZodForm } from "@/hooks/use-zod-form";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import {
@@ -104,6 +105,7 @@ type Props = {
 };
 
 export function CustomerForm({ data }: Props) {
+  const t = useI18n();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const isEdit = !!data;
@@ -237,7 +239,7 @@ export function CustomerForm({ data }: Props) {
               className="space-y-6"
             >
               <AccordionItem value="general">
-                <AccordionTrigger>General</AccordionTrigger>
+                <AccordionTrigger>{t("customer.general")}</AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-4">
                     <FormField
@@ -246,14 +248,14 @@ export function CustomerForm({ data }: Props) {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-xs text-[#878787] font-normal">
-                            Name
+                            {t("forms.labels.name")}
                           </FormLabel>
                           <FormControl>
                             <Input
                               {...field}
                               value={field.value ?? ""}
                               autoFocus
-                              placeholder="Acme Inc"
+                              placeholder={t("customer.name_placeholder")}
                               autoComplete="off"
                             />
                           </FormControl>
@@ -268,13 +270,13 @@ export function CustomerForm({ data }: Props) {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-xs text-[#878787] font-normal">
-                            Email
+                            {t("forms.labels.email")}
                           </FormLabel>
                           <FormControl>
                             <Input
                               {...field}
                               value={field.value ?? ""}
-                              placeholder="acme@example.com"
+                              placeholder={t("forms.placeholders.email")}
                               type="email"
                               autoComplete="off"
                               onBlur={handleEmailBlur}
@@ -291,18 +293,17 @@ export function CustomerForm({ data }: Props) {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-xs text-[#878787] font-normal">
-                            Billing Email
+                            {t("customer.billing_email")}
                           </FormLabel>
                           <FormControl>
                             <EmailTagInput
                               value={field.value}
                               onChange={field.onChange}
-                              placeholder="finance@example.com, accounting@example.com"
+                              placeholder={t("customer.billing_email_placeholder")}
                             />
                           </FormControl>
                           <FormDescription>
-                            Additional emails to BCC when sending invoices.
-                            Press Enter or comma to add.
+                            {t("customer.billing_email_description")}
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -315,7 +316,7 @@ export function CustomerForm({ data }: Props) {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-xs text-[#878787] font-normal">
-                            Phone
+                            {t("forms.labels.phone")}
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -337,7 +338,7 @@ export function CustomerForm({ data }: Props) {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-xs text-[#878787] font-normal">
-                            Website
+                            {t("forms.labels.website")}
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -358,13 +359,13 @@ export function CustomerForm({ data }: Props) {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-xs text-[#878787] font-normal">
-                            Contact person
+                            {t("customer.contact_person")}
                           </FormLabel>
                           <FormControl>
                             <Input
                               {...field}
                               value={field.value ?? ""}
-                              placeholder="John Doe"
+                              placeholder={t("customer.contact_placeholder")}
                               autoComplete="off"
                             />
                           </FormControl>
@@ -377,13 +378,13 @@ export function CustomerForm({ data }: Props) {
               </AccordionItem>
 
               <AccordionItem value="details">
-                <AccordionTrigger>Details</AccordionTrigger>
+                <AccordionTrigger>{t("customer.details")}</AccordionTrigger>
 
                 <AccordionContent>
                   <div className="space-y-4">
                     <SearchAddressInput
                       onSelect={onSelectAddress}
-                      placeholder="Search for an address"
+                      placeholder={t("customer.search_address")}
                     />
 
                     <FormField
@@ -392,13 +393,13 @@ export function CustomerForm({ data }: Props) {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-xs text-[#878787] font-normal">
-                            Address Line 1
+                            {t("customer.address_line_1")}
                           </FormLabel>
                           <FormControl>
                             <Input
                               {...field}
                               value={field.value ?? ""}
-                              placeholder="123 Main St"
+                              placeholder={t("customer.address_line_1_placeholder")}
                               autoComplete="off"
                             />
                           </FormControl>
@@ -413,13 +414,13 @@ export function CustomerForm({ data }: Props) {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-xs text-[#878787] font-normal">
-                            Address Line 2
+                            {t("customer.address_line_2")}
                           </FormLabel>
                           <FormControl>
                             <Input
                               {...field}
                               value={field.value ?? ""}
-                              placeholder="Suite 100"
+                              placeholder={t("customer.address_line_2_placeholder")}
                               autoComplete="off"
                             />
                           </FormControl>
@@ -435,7 +436,7 @@ export function CustomerForm({ data }: Props) {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-xs text-[#878787] font-normal">
-                              Country
+                              {t("forms.labels.country")}
                             </FormLabel>
                             <FormControl>
                               <CountrySelector
@@ -457,13 +458,13 @@ export function CustomerForm({ data }: Props) {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-xs text-[#878787] font-normal">
-                              City
+                              {t("forms.labels.city")}
                             </FormLabel>
                             <FormControl>
                               <Input
                                 {...field}
                                 value={field.value ?? ""}
-                                placeholder="New York"
+                                placeholder={t("customer.city_placeholder")}
                                 autoComplete="off"
                               />
                             </FormControl>
@@ -480,13 +481,13 @@ export function CustomerForm({ data }: Props) {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-xs text-[#878787] font-normal">
-                              State / Province
+                              {t("forms.labels.state")}
                             </FormLabel>
                             <FormControl>
                               <Input
                                 {...field}
                                 value={field.value ?? ""}
-                                placeholder="NY"
+                                placeholder={t("customer.state_placeholder")}
                                 autoComplete="off"
                               />
                             </FormControl>
@@ -501,13 +502,13 @@ export function CustomerForm({ data }: Props) {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-xs text-[#878787] font-normal">
-                              ZIP Code / Postal Code
+                              {t("forms.labels.zip")}
                             </FormLabel>
                             <FormControl>
                               <Input
                                 {...field}
                                 value={field.value ?? ""}
-                                placeholder="10001"
+                                placeholder={t("customer.zip_placeholder")}
                                 autoComplete="off"
                               />
                             </FormControl>
@@ -522,7 +523,7 @@ export function CustomerForm({ data }: Props) {
                         htmlFor="tags"
                         className="mb-2 text-xs text-[#878787] font-normal block"
                       >
-                        Expense Tags
+                        {t("customer.expense_tags")}
                       </Label>
 
                       <SelectTags
@@ -562,7 +563,7 @@ export function CustomerForm({ data }: Props) {
                       />
 
                       <FormDescription className="mt-2">
-                        Tags help categorize and track customer expenses.
+                        {t("customer.expense_tags_description")}
                       </FormDescription>
                     </div>
 
@@ -573,7 +574,7 @@ export function CustomerForm({ data }: Props) {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-xs text-[#878787] font-normal">
-                              Tax ID / VAT Number
+                              {t("customer.vat_number")}
                             </FormLabel>
                             <FormControl>
                               <VatNumberInput
@@ -593,14 +594,14 @@ export function CustomerForm({ data }: Props) {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-xs text-[#878787] font-normal">
-                            Note
+                            {t("forms.labels.note")}
                           </FormLabel>
                           <FormControl>
                             <Textarea
                               {...field}
                               value={field.value ?? ""}
                               className="flex min-h-[80px] resize-none"
-                              placeholder="Additional information..."
+                              placeholder={t("customer.note_placeholder")}
                               autoComplete="off"
                             />
                           </FormControl>
@@ -622,7 +623,7 @@ export function CustomerForm({ data }: Props) {
               onClick={() => setCustomerParams(null)}
               type="button"
             >
-              Cancel
+              {t("forms.buttons.cancel")}
             </Button>
 
             <SubmitButton
@@ -631,7 +632,7 @@ export function CustomerForm({ data }: Props) {
                 upsertCustomerMutation.isPending || !form.formState.isDirty
               }
             >
-              {isEdit ? "Update" : "Create"}
+              {isEdit ? t("forms.buttons.update") : t("forms.buttons.create")}
             </SubmitButton>
           </div>
         </div>

@@ -1,3 +1,12 @@
+/**
+ * True Cash Widget (Midday-JP)
+ *
+ * Displays "True Cash" - the actual spendable money after accounting
+ * for estimated tax obligations (consumption tax, income tax).
+ *
+ * Formula: True Cash = Cash Balance - Consumption Tax Reserve - Income Tax Reserve
+ */
+
 import { FormatAmount } from "@/components/format-amount";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
@@ -10,7 +19,7 @@ import { BaseWidget } from "./base";
 import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";
 
-export function NetPositionWidget() {
+export function TrueCashWidget() {
   const t = useI18n();
   const trpc = useTRPC();
   const { sendMessage } = useChatActions();
@@ -19,8 +28,8 @@ export function NetPositionWidget() {
   const { currency } = useMetricsFilter();
 
   const { data, isLoading } = useQuery({
-    ...trpc.widgets.getNetPosition.queryOptions({
-      currency,
+    ...trpc.widgets.getTrueCash.queryOptions({
+      currency: currency || "JPY",
     }),
     ...WIDGET_POLLING_CONFIG,
   });
@@ -28,17 +37,18 @@ export function NetPositionWidget() {
   if (isLoading) {
     return (
       <WidgetSkeleton
-        title={t("widgets.net_position.title")}
+        title={t("widgets.true_cash.title")}
         icon={<Icons.Accounts className="size-4" />}
-        descriptionLines={2}
+        descriptionLines={3}
       />
     );
   }
 
-  const netPositionData = data?.result;
-  const netPosition = netPositionData?.netPosition ?? 0;
-  const cash = netPositionData?.cash ?? 0;
-  const creditDebt = netPositionData?.creditDebt ?? 0;
+  const trueCashData = data?.result;
+  const trueCash = trueCashData?.trueCash ?? 0;
+  const cashBalance = trueCashData?.cashBalance ?? 0;
+  const consumptionTaxReserve = trueCashData?.consumptionTaxReserve ?? 0;
+  const incomeTaxReserve = trueCashData?.incomeTaxReserve ?? 0;
 
   const handleToolCall = (params: {
     toolName: string;
@@ -61,39 +71,27 @@ export function NetPositionWidget() {
     });
   };
 
-  const handleViewNetPosition = () => {
+  const handleViewTrueCash = () => {
     handleToolCall({
-      toolName: "getNetPosition",
-      text: "Show my net position",
+      toolName: "getTrueCash",
+      text: "Show my true cash position",
     });
-  };
-
-  const getDescription = () => {
-    const cashCount = netPositionData?.cashAccountCount ?? 0;
-    const creditCount = netPositionData?.creditAccountCount ?? 0;
-    const totalAccounts = cashCount + creditCount;
-
-    if (totalAccounts === 0) {
-      return t("widgets.net_position.no_accounts");
-    }
-
-    return t("widgets.net_position.description");
   };
 
   return (
     <BaseWidget
-      title={t("widgets.net_position.title")}
+      title={t("widgets.true_cash.title")}
       icon={<Icons.Accounts className="size-4" />}
-      description={getDescription()}
-      onClick={handleViewNetPosition}
-      actions={t("widgets.net_position.action")}
+      description={t("widgets.true_cash.description")}
+      onClick={handleViewTrueCash}
+      actions={t("widgets.true_cash.action")}
     >
-      {netPositionData && (
+      {trueCashData && (
         <div className="flex flex-col gap-3">
           <h2 className="text-2xl font-normal">
             <FormatAmount
-              currency={netPositionData.currency || "USD"}
-              amount={netPosition}
+              currency={trueCashData.currency || "JPY"}
+              amount={trueCash}
               minimumFractionDigits={0}
               maximumFractionDigits={0}
             />
@@ -101,23 +99,35 @@ export function NetPositionWidget() {
 
           <div className="flex flex-col gap-1.5 text-sm">
             <div className="flex justify-between items-center">
-              <span className="text-[#666666]">{t("widgets.net_position.cash")}</span>
+              <span className="text-[#666666]">{t("widgets.true_cash.cash_balance")}</span>
               <span>
                 <FormatAmount
-                  currency={netPositionData.currency || "USD"}
-                  amount={cash}
+                  currency={trueCashData.currency || "JPY"}
+                  amount={cashBalance}
                   minimumFractionDigits={0}
                   maximumFractionDigits={0}
                 />
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-[#666666]">{t("widgets.net_position.credit_debt")}</span>
-              <span>
+              <span className="text-[#666666]">{t("widgets.true_cash.consumption_tax_reserve")}</span>
+              <span className="text-orange-500">
                 -
                 <FormatAmount
-                  currency={netPositionData.currency || "USD"}
-                  amount={creditDebt}
+                  currency={trueCashData.currency || "JPY"}
+                  amount={consumptionTaxReserve}
+                  minimumFractionDigits={0}
+                  maximumFractionDigits={0}
+                />
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-[#666666]">{t("widgets.true_cash.income_tax_reserve")}</span>
+              <span className="text-orange-500">
+                -
+                <FormatAmount
+                  currency={trueCashData.currency || "JPY"}
+                  amount={incomeTaxReserve}
                   minimumFractionDigits={0}
                   maximumFractionDigits={0}
                 />

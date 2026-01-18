@@ -1,6 +1,7 @@
 import { FormatAmount } from "@/components/format-amount";
 import { useChatInterface } from "@/hooks/use-chat-interface";
 import { useMetricsFilter } from "@/hooks/use-metrics-filter";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import { useChatActions, useChatId } from "@ai-sdk-tools/store";
 import { Icons } from "@midday/ui/icons";
@@ -10,6 +11,7 @@ import { WIDGET_POLLING_CONFIG } from "./widget-config";
 import { WidgetSkeleton } from "./widget-skeleton";
 
 export function OutstandingInvoicesWidget() {
+  const t = useI18n();
   const trpc = useTRPC();
   const { sendMessage } = useChatActions();
   const chatId = useChatId();
@@ -27,7 +29,7 @@ export function OutstandingInvoicesWidget() {
   if (isLoading) {
     return (
       <WidgetSkeleton
-        title="Outstanding Invoices"
+        title={t("widgets.outstanding_invoices.title")}
         icon={<Icons.Invoice className="size-4" />}
         descriptionLines={2}
         showValue={false}
@@ -69,31 +71,26 @@ export function OutstandingInvoicesWidget() {
 
   return (
     <BaseWidget
-      title="Outstanding Invoices"
+      title={t("widgets.outstanding_invoices.title")}
       icon={<Icons.Invoice className="size-4" />}
       description={
-        <div className="flex flex-col gap-1">
-          {data?.result ? (
-            <p className="text-sm text-[#666666]">
-              You currently have{" "}
-              <span className="text-primary">
-                {data.result.count} unpaid and{" "}
-                <FormatAmount
-                  amount={data.result.totalAmount}
-                  currency={currency || "USD"}
-                />{" "}
-                in outstanding invoices
-              </span>
-            </p>
-          ) : (
-            <p className="text-sm text-[#666666]">
-              You currently have{" "}
-              <span className="text-primary">0 unpaid invoices</span>
-            </p>
-          )}
-        </div>
+        data?.result ? (
+          <p className="text-sm text-[#666666]">
+            <span className="text-primary">
+              {data.result.count} {t("widgets.outstanding_invoices.count")} ·{" "}
+              <FormatAmount
+                amount={data.result.totalAmount}
+                currency={currency || "USD"}
+              />
+            </span>
+          </p>
+        ) : (
+          <p className="text-sm text-[#666666]">
+            {t("widgets.outstanding_invoices.no_invoices")}
+          </p>
+        )
       }
-      actions="View all invoices"
+      actions={t("widgets.outstanding_invoices.action")}
       onClick={handleViewInvoices}
     />
   );

@@ -4,6 +4,7 @@ import { SelectCurrency } from "@/components/select-currency";
 import { useProductParams } from "@/hooks/use-product-params";
 import { useTeamQuery } from "@/hooks/use-team";
 import { useZodForm } from "@/hooks/use-zod-form";
+import { useI18n } from "@/locales/client";
 import { useTRPC } from "@/trpc/client";
 import type { RouterOutputs } from "@api/trpc/routers/_app";
 import { uniqueCurrencies } from "@midday/location/currencies";
@@ -42,6 +43,7 @@ type Props = {
 };
 
 export function ProductForm({ data, defaultCurrency }: Props) {
+  const t = useI18n();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const { setParams } = useProductParams();
@@ -150,11 +152,11 @@ export function ProductForm({ data, defaultCurrency }: Props) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>{t("product.name")}</FormLabel>
               <FormControl>
                 <Input
                   {...field}
-                  placeholder="Product name"
+                  placeholder={t("product.name_placeholder")}
                   autoComplete="off"
                   autoCapitalize="none"
                   autoCorrect="off"
@@ -163,7 +165,7 @@ export function ProductForm({ data, defaultCurrency }: Props) {
                 />
               </FormControl>
               <FormDescription>
-                This is the product display name.
+                {t("product.name_description")}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -175,18 +177,18 @@ export function ProductForm({ data, defaultCurrency }: Props) {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>{t("product.description")}</FormLabel>
               <FormControl>
                 <Textarea
                   {...field}
                   value={field.value || ""}
-                  placeholder="Product description (optional)"
+                  placeholder={t("product.description_placeholder")}
                   rows={3}
                   onChange={(e) => field.onChange(e.target.value)}
                 />
               </FormControl>
               <FormDescription>
-                This is for internal use only and won't appear on invoices.
+                {t("product.description_internal")}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -199,7 +201,7 @@ export function ProductForm({ data, defaultCurrency }: Props) {
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price</FormLabel>
+                <FormLabel>{t("product.price")}</FormLabel>
                 <FormControl>
                   <CurrencyInput
                     min={0}
@@ -212,7 +214,7 @@ export function ProductForm({ data, defaultCurrency }: Props) {
                   />
                 </FormControl>
                 <FormDescription>
-                  Default price for this product.
+                  {t("product.price_description")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -224,18 +226,18 @@ export function ProductForm({ data, defaultCurrency }: Props) {
             name="unit"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Unit</FormLabel>
+                <FormLabel>{t("product.unit")}</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
                     value={field.value || ""}
-                    placeholder="e.g., hour, piece, kg"
+                    placeholder={t("product.unit_placeholder")}
                     autoComplete="off"
                     onChange={(e) => field.onChange(e.target.value)}
                   />
                 </FormControl>
                 <FormDescription>
-                  Unit of measurement (optional).
+                  {t("product.unit_description")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -248,7 +250,7 @@ export function ProductForm({ data, defaultCurrency }: Props) {
           name="currency"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Currency</FormLabel>
+              <FormLabel>{t("forms.labels.currency")}</FormLabel>
               <FormControl>
                 <SelectCurrency
                   currencies={uniqueCurrencies}
@@ -257,7 +259,7 @@ export function ProductForm({ data, defaultCurrency }: Props) {
                 />
               </FormControl>
               <FormDescription>
-                Currency for this product's pricing.
+                {t("product.currency_description")}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -273,12 +275,12 @@ export function ProductForm({ data, defaultCurrency }: Props) {
                 <div className="flex items-center justify-between space-x-2">
                   <div className="space-y-0.5">
                     <FormLabel className="text-sm font-medium">
-                      Active Status
+                      {t("product.active_status")}
                     </FormLabel>
                     <FormDescription className="text-xs text-muted-foreground">
                       {field.value
-                        ? "Product is active and can be used in invoices"
-                        : "Product is inactive and won't appear in invoice suggestions"}
+                        ? t("product.active_description")
+                        : t("product.inactive_description")}
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -302,7 +304,7 @@ export function ProductForm({ data, defaultCurrency }: Props) {
             }
             className="w-full"
           >
-            {data ? "Update" : "Create"}
+            {data ? t("forms.buttons.update") : t("forms.buttons.create")}
           </SubmitButton>
         </div>
       </form>
