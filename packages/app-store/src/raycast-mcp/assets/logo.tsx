@@ -3,7 +3,7 @@ import raycastIcon from "./raycast.png";
 export const Logo = () => {
   return (
     <img
-      src={typeof raycastIcon === "string" ? raycastIcon : raycastIcon.src}
+      src={raycastIcon.src}
       alt="Raycast"
       width={36}
       height={36}

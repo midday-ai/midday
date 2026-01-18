@@ -8,7 +8,20 @@ export default {
   logo: Logo,
   short_description:
     "Connect Cursor to your Midday data via MCP. Ask questions about finances while you code.",
-  description: null,
+  description: `Connect Cursor to your Midday account using the Model Context Protocol (MCP).
+
+**What you can do:**
+- Track time and log expenses without leaving your editor
+- Ask about transactions, invoices, and customers
+- Generate financial reports and summaries
+- Query your business data using natural language
+
+**How it works:**
+1. Click Install to open the setup page
+2. Add your Midday API key to Cursor's MCP configuration
+3. Restart Cursor and @-mention Midday in chat
+
+All queries are **read-only** — your data can be accessed but never modified.`,
   images: [],
   installUrl: "https://midday.ai/mcp/cursor",
 };
