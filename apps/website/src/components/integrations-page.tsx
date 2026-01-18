@@ -65,8 +65,8 @@ export function IntegrationsPage() {
             >
               <div className="flex items-start justify-between mb-4">
                 <div className={cn(
-                  "h-8 flex items-center justify-center",
-                  app.id.includes("-mcp") ? "w-12" : "w-8"
+                  "h-10 flex items-center justify-center overflow-hidden rounded-lg",
+                  app.id.includes("-mcp") ? "w-10" : "w-10"
                 )}>
                   <AppLogo appId={app.id} />
                 </div>
