@@ -170,6 +170,12 @@ export function SDKs() {
     }
   };
 
+  const sdkRepos: Record<SDKTab, string> = {
+    typescript: "https://github.com/midday-ai/midday-ts",
+    go: "https://github.com/midday-ai/midday-go",
+    php: "https://github.com/midday-ai/midday-php",
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -828,6 +834,7 @@ if ($response->object !== null) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <Link
                 href="https://github.com/midday-ai"
+                href={sdkRepos[activeTab]}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-secondary border border-border p-6 hover:border-foreground/20 transition-colors group flex flex-col items-center text-center"
@@ -847,7 +854,7 @@ if ($response->object !== null) {
                 </p>
               </Link>
               <Link
-                href="https://github.com/midday-ai"
+                href={sdkRepos[activeTab]}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-secondary border border-border p-6 hover:border-foreground/20 transition-colors group flex flex-col items-center text-center"
