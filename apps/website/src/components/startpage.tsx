@@ -2,119 +2,34 @@
 
 import { Button } from "@midday/ui/button";
 import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-
-// Dynamic imports for animations (5,500+ lines - loaded after hero)
-const AIAssistantAnimation = dynamic(() =>
-  import("./homepage/ai-assistant-animation").then(
-    (m) => m.AIAssistantAnimation,
-  ),
-);
-const DashboardAnimation = dynamic(() =>
-  import("./homepage/dashboard-animation").then((m) => m.DashboardAnimation),
-);
-const InboxMatchAnimation = dynamic(() =>
-  import("./homepage/inbox-match-animation").then((m) => m.InboxMatchAnimation),
-);
-const InvoicePaymentAnimation = dynamic(() =>
-  import("./homepage/invoice-payment-animation").then(
-    (m) => m.InvoicePaymentAnimation,
-  ),
-);
-const TransactionFlowAnimation = dynamic(() =>
-  import("./homepage/transaction-flow-animation").then(
-    (m) => m.TransactionFlowAnimation,
-  ),
-);
-
-// Dynamic imports for below-the-fold sections (still SSR for SEO)
-const FeaturesGridSection = dynamic(() =>
-  import("./sections/features-grid-section").then((m) => m.FeaturesGridSection),
-);
-const TimeSavingsSection = dynamic(() =>
-  import("./sections/time-savings-section").then((m) => m.TimeSavingsSection),
-);
-const WeeklyAudioSection = dynamic(() =>
-  import("./sections/weekly-audio-section").then((m) => m.WeeklyAudioSection),
-);
-const PreAccountingSection = dynamic(() =>
-  import("./sections/pre-accounting-section").then(
-    (m) => m.PreAccountingSection,
-  ),
-);
-const TestimonialsSection = dynamic(
-  () =>
-    import("./sections/testimonials-section").then(
-      (m) => m.TestimonialsSection,
-    ),
-  { ssr: false }, // MorphingDialog generates dynamic IDs that cause hydration mismatch
-);
-const IntegrationsSection = dynamic(() =>
-  import("./sections/integrations-section").then((m) => m.IntegrationsSection),
-);
-const PricingSection = dynamic(() =>
-  import("./sections/pricing-section").then((m) => m.PricingSection),
-);
+import { useRef, useState } from "react";
+import { AIAssistantAnimation } from "./homepage/ai-assistant-animation";
+import { DashboardAnimation } from "./homepage/dashboard-animation";
+import { InboxMatchAnimation } from "./homepage/inbox-match-animation";
+import { InvoicePaymentAnimation } from "./homepage/invoice-payment-animation";
+import { TransactionFlowAnimation } from "./homepage/transaction-flow-animation";
+import { FeaturesGridSection } from "./sections/features-grid-section";
+import { IntegrationsSection } from "./sections/integrations-section";
+import { PreAccountingSection } from "./sections/pre-accounting-section";
+import { PricingSection } from "./sections/pricing-section";
+import { TestimonialsSection } from "./sections/testimonials-section";
+import { TimeSavingsSection } from "./sections/time-savings-section";
+import { WeeklyAudioSection } from "./sections/weekly-audio-section";
 
 export function StartPage() {
   const [activeFeature, setActiveFeature] = useState(0);
-  const [isMobileVideoLoaded, setIsMobileVideoLoaded] = useState(false);
-  const [isDesktopVideoLoaded, setIsDesktopVideoLoaded] = useState(false);
 
   const videoContainerRef = useRef(null);
-  const mobileVideoRef = useRef<HTMLVideoElement>(null);
-  const desktopVideoRef = useRef<HTMLVideoElement>(null);
-
-  // Handle mobile video load
-  useEffect(() => {
-    const video = mobileVideoRef.current;
-    if (!video) return;
-
-    const handleLoad = () => setIsMobileVideoLoaded(true);
-
-    if (video.readyState >= 3) {
-      setIsMobileVideoLoaded(true);
-    }
-
-    video.addEventListener("canplay", handleLoad);
-    video.addEventListener("loadeddata", handleLoad);
-
-    return () => {
-      video.removeEventListener("canplay", handleLoad);
-      video.removeEventListener("loadeddata", handleLoad);
-    };
-  }, []);
-
-  // Handle desktop video load
-  useEffect(() => {
-    const video = desktopVideoRef.current;
-    if (!video) return;
-
-    const handleLoad = () => setIsDesktopVideoLoaded(true);
-
-    if (video.readyState >= 3) {
-      setIsDesktopVideoLoaded(true);
-    }
-
-    video.addEventListener("canplay", handleLoad);
-    video.addEventListener("loadeddata", handleLoad);
-
-    return () => {
-      video.removeEventListener("canplay", handleLoad);
-      video.removeEventListener("loadeddata", handleLoad);
-    };
-  }, []);
 
   const features = [
     {
-      title: "All transactions in one place",
+      title: "All your transactions, unified",
       subtitle:
         "Every payment in and out of the business is automatically synced from your connected accounts.",
       mobileSubtitle: "Every payment in and out is pulled in automatically.",
       mergedText:
-        "All transactions in one place. Every payment in and out of the business is automatically synced from your connected accounts.",
+        "All your transactions, unified. Every payment in and out of the business is automatically synced from your connected accounts.",
       illustration: "animation",
     },
     {
@@ -206,30 +121,9 @@ export function StartPage() {
 
           <div className="mt-8 mb-8 md:mt-12 overflow-visible">
             <div className="relative overflow-hidden">
-              {/* Poster image with fade and blur effect */}
-              <div
-                className={`absolute inset-0 w-full h-full transition-all duration-1000 ease-in-out z-[1] ${
-                  isMobileVideoLoaded
-                    ? "opacity-0 pointer-events-none"
-                    : "opacity-100"
-                }`}
-                style={{
-                  filter: isMobileVideoLoaded ? "blur(0px)" : "blur(1px)",
-                }}
-              >
-                <img
-                  src="https://midday.ai/cdn-cgi/image/width=800,quality=80,format=auto/https://cdn.midday.ai/video-poster-v2.jpg"
-                  alt=""
-                  className="w-full h-[420px] sm:h-[520px] md:h-[600px] object-cover"
-                  aria-hidden="true"
-                />
-              </div>
-
               <video
-                ref={mobileVideoRef}
-                className={`w-full h-[420px] sm:h-[520px] md:h-[600px] object-cover transition-opacity duration-1000 ease-in-out ${
-                  isMobileVideoLoaded ? "opacity-100" : "opacity-0"
-                }`}
+                className="w-full h-[420px] sm:h-[520px] md:h-[600px] object-cover"
+                poster="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/video-poster-v2.jpg"
                 autoPlay
                 loop
                 muted
@@ -237,12 +131,12 @@ export function StartPage() {
                 preload="auto"
               >
                 <source
-                  src="https://cdn.midday.ai/videos/login-video.mp4"
+                  src="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/videos/login-video.mp4"
                   type="video/mp4"
                 />
               </video>
 
-              <div className="absolute inset-0 flex items-center justify-center p-0 z-[2]">
+              <div className="absolute inset-0 flex items-center justify-center p-0">
                 <div className="relative scale-[0.95] md:scale-100">
                   <Image
                     src="/images/dashboard-light.svg"
@@ -314,30 +208,9 @@ export function StartPage() {
             ref={videoContainerRef}
           >
             <div className="relative overflow-hidden">
-              {/* Poster image with fade and blur effect */}
-              <div
-                className={`absolute inset-0 w-full h-full transition-all duration-1000 ease-in-out z-[1] ${
-                  isDesktopVideoLoaded
-                    ? "opacity-0 pointer-events-none"
-                    : "opacity-100"
-                }`}
-                style={{
-                  filter: isDesktopVideoLoaded ? "blur(0px)" : "blur(1px)",
-                }}
-              >
-                <img
-                  src="https://midday.ai/cdn-cgi/image/width=1400,quality=80,format=auto/https://cdn.midday.ai/video-poster-v2.jpg"
-                  alt=""
-                  className="w-full h-[800px] xl:h-[900px] 3xl:h-[1000px] object-cover"
-                  aria-hidden="true"
-                />
-              </div>
-
               <video
-                ref={desktopVideoRef}
-                className={`w-full h-[800px] xl:h-[900px] 3xl:h-[1000px] object-cover block transition-opacity duration-1000 ease-in-out ${
-                  isDesktopVideoLoaded ? "opacity-100" : "opacity-0"
-                }`}
+                className="w-full h-[800px] xl:h-[900px] 3xl:h-[1000px] object-cover block"
+                poster="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/video-poster-v2.jpg"
                 autoPlay
                 loop
                 muted
@@ -345,12 +218,12 @@ export function StartPage() {
                 preload="auto"
               >
                 <source
-                  src="https://cdn.midday.ai/videos/login-video.mp4"
+                  src="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/videos/login-video.mp4"
                   type="video/mp4"
                 />
               </video>
 
-              <div className="absolute inset-0 p-4 z-[2]">
+              <div className="absolute inset-0 p-4">
                 <div className="h-full flex flex-col items-center justify-center">
                   <Image
                     src="/images/dashboard-light.svg"

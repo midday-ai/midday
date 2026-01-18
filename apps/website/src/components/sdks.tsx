@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { Button } from "@midday/ui/button";
@@ -143,15 +142,24 @@ function CodeBlock({ code, language = "typescript" }: { code: string; language?:
 }
 
 export function SDKs() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<SDKTab>("typescript");
 
   const handleLogoClick = (sdk: SDKTab) => {
     setActiveTab(sdk);
+    scrollToTabs();
+  };
+
+  const scrollToTabs = () => {
     const tabsSection = document.getElementById("sdk-tabs");
     if (tabsSection) {
       tabsSection.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+  };
+
+  const sdkRepos: Record<SDKTab, string> = {
+    typescript: "https://github.com/midday-ai/midday-ts",
+    go: "https://github.com/midday-ai/midday-go",
+    php: "https://github.com/midday-ai/midday-php",
   };
 
   return (
@@ -256,20 +264,13 @@ export function SDKs() {
               </p>
             </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-md mx-auto justify-center sm:justify-center mt-8">
+            {/* CTA Button */}
+            <div className="flex justify-center mt-8">
               <Button
-                onClick={() => router.push("/login")}
+                onClick={scrollToTabs}
                 className="w-full sm:w-auto h-11 px-6 text-sm font-sans"
               >
                 Get started
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => router.push("/docs")}
-                className="w-full sm:w-auto h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
-              >
-                View documentation
               </Button>
             </div>
           </div>
@@ -331,20 +332,13 @@ export function SDKs() {
               </p>
             </div>
 
-            {/* CTA Buttons */}
-            <div className="flex gap-6 justify-center mt-8">
+            {/* CTA Button */}
+            <div className="flex justify-center mt-8">
               <Button
-                onClick={() => router.push("/login")}
+                onClick={scrollToTabs}
                 className="h-11 px-6 text-sm font-sans"
               >
                 Get started
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => router.push("/docs")}
-                className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
-              >
-                View documentation
               </Button>
             </div>
           </div>
@@ -715,7 +709,9 @@ if ($response->object !== null) {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <Link
-                href="/docs"
+                href={sdkRepos[activeTab]}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="bg-secondary border border-border p-6 hover:border-foreground/20 transition-colors group flex flex-col items-center text-center"
               >
                 <div className="mb-4 flex items-center justify-center">
@@ -729,7 +725,9 @@ if ($response->object !== null) {
                 </p>
               </Link>
               <Link
-                href="/docs/examples"
+                href={sdkRepos[activeTab]}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="bg-secondary border border-border p-6 hover:border-foreground/20 transition-colors group flex flex-col items-center text-center"
               >
                 <div className="mb-4 flex items-center justify-center">
