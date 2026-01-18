@@ -18,8 +18,9 @@ export function HeaderIntegrationsPreview() {
         <div className="absolute inset-0 flex items-center justify-center">
           <h1
             className={cn(
-              "font-sans text-4xl sm:text-5xl md:text-6xl leading-none select-none",
+              "font-sans leading-none select-none",
               "text-secondary",
+              "text-3xl sm:text-4xl md:text-4xl lg:text-2xl xl:text-5xl 2xl:text-6xl",
               "[WebkitTextStroke:1px_hsl(var(--muted-foreground))]",
               "[textStroke:1px_hsl(var(--muted-foreground))]",
             )}

@@ -39,11 +39,21 @@ const clients = [
 ];
 
 const questions = [
-  "How much runway do we have at current burn rate?",
-  "Which invoices are overdue and by how much?",
-  "What did we spend on software last quarter?",
+  "How much runway do we have?",
+  "Which invoices are overdue?",
+  "What did we spend on software?",
   "Show me revenue compared to last year",
-  "Who are our top customers by revenue?",
+  "Who are our top customers?",
+  "What's my burn rate?",
+  "Display latest transactions",
+  "Show me expense breakdown",
+  "What is my profit margin?",
+  "How is my revenue trending?",
+  "Where am I spending the most?",
+  "Can I afford to hire?",
+  "What is my runway?",
+  "Display latest invoices",
+  "View all recent payments",
 ];
 
 const capabilities = [
@@ -200,16 +210,11 @@ export function MCP() {
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="max-w-[1400px] mx-auto">
-        <div className="h-px w-full border-t border-border" />
-      </div>
-
       {/* Questions Section */}
       <section className="bg-background py-12 sm:py-16 lg:py-24">
-        <div className="max-w-[1400px] mx-auto">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4 mb-12">
-            <h2 className="font-serif text-2xl sm:text-3xl text-foreground">
+            <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
               Skip the dashboards
             </h2>
             <p className="font-sans text-base text-muted-foreground leading-normal max-w-xl mx-auto">
@@ -217,18 +222,45 @@ export function MCP() {
             </p>
           </div>
 
-          <div className="max-w-2xl mx-auto">
-            <div className="space-y-3">
-              {questions.map((question) => (
-                <div
-                  key={question}
-                  className="bg-secondary border border-border p-4 flex items-start gap-3"
-                >
-                  <span className="font-sans text-sm text-foreground">
-                    "{question}"
-                  </span>
-                </div>
-              ))}
+          <div className="max-w-5xl mx-auto relative">
+            {/* Gradient fade masks */}
+            <div 
+              className="absolute inset-y-0 left-0 w-24 sm:w-32 z-10 pointer-events-none" 
+              style={{
+                background: "linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background)) 30%, hsla(var(--background), 0.8) 50%, hsla(var(--background), 0.4) 70%, transparent 100%)"
+              }}
+            />
+            <div 
+              className="absolute inset-y-0 right-0 w-24 sm:w-32 z-10 pointer-events-none" 
+              style={{
+                background: "linear-gradient(to left, hsl(var(--background)) 0%, hsl(var(--background)) 30%, hsla(var(--background), 0.8) 50%, hsla(var(--background), 0.4) 70%, transparent 100%)"
+              }}
+            />
+            <div className="flex flex-wrap gap-x-1.5 gap-y-1.5 sm:gap-x-2 sm:gap-y-2 justify-center relative z-0">
+              {questions.map((question, index) => {
+                // Random pattern: only indices 0, 2, 6, 9, 12 get white text (less frequent)
+                const highlightedIndices = [0, 2, 6, 9, 12];
+                const textColors = highlightedIndices.includes(index) ? "text-foreground" : "text-muted-foreground";
+                // Show first 8 on mobile, first 12 on tablet, all on desktop
+                let visibilityClass = "";
+                if (index >= 12) {
+                  // Hide on mobile and tablet, show on desktop (lg+)
+                  visibilityClass = "hidden lg:block";
+                } else if (index >= 8) {
+                  // Hide on mobile, show on tablet and desktop (md+)
+                  visibilityClass = "hidden md:block";
+                }
+                return (
+                  <div
+                    key={question}
+                    className={`px-3 py-1.5 bg-secondary rounded-tl-full rounded-tr-full rounded-bl-full ${visibilityClass}`}
+                  >
+                    <p className={`font-sans text-xs sm:text-sm ${textColors} whitespace-nowrap`}>
+                      "{question}"
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -243,7 +275,7 @@ export function MCP() {
       <section className="bg-background py-12 sm:py-16 lg:py-24">
         <div className="max-w-[1400px] mx-auto">
           <div className="text-center space-y-4 mb-12">
-            <h2 className="font-serif text-2xl sm:text-3xl text-foreground">
+            <h2 className="font-serif text-2xl sm:text-2xl text-foreground">
               Read-only by design
             </h2>
             <p className="font-sans text-base text-muted-foreground leading-normal max-w-xl mx-auto">
@@ -276,13 +308,13 @@ export function MCP() {
       </div>
 
       {/* CTA Section */}
-      <section className="bg-background py-12 sm:py-16 lg:py-24">
-        <div className="max-w-[1400px] mx-auto">
-          <div className="text-center space-y-6 max-w-xl mx-auto">
-            <h2 className="font-serif text-2xl sm:text-3xl text-foreground">
+      <div className="max-w-[1400px] mx-auto mt-24 pb-24">
+        <div className="bg-background border border-border p-8 lg:p-12 text-center relative before:absolute before:inset-0 before:bg-[repeating-linear-gradient(-60deg,rgba(219,219,219,0.4),rgba(219,219,219,0.4)_1px,transparent_1px,transparent_6px)] dark:before:bg-[repeating-linear-gradient(-60deg,rgba(44,44,44,0.4),rgba(44,44,44,0.4)_1px,transparent_1px,transparent_6px)] before:pointer-events-none">
+          <div className="relative z-10">
+            <h2 className="font-serif text-2xl sm:text-2xl text-foreground mb-4">
               Get started
             </h2>
-            <p className="font-sans text-base text-muted-foreground leading-normal">
+            <p className="font-sans text-base text-muted-foreground mb-6 max-w-lg mx-auto">
               Choose your AI client above. You'll need an API key from your
               Midday dashboard.
             </p>
@@ -304,7 +336,7 @@ export function MCP() {
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }
