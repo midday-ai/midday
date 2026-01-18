@@ -41,18 +41,26 @@ The MCP server exposes the following tools:
 
 ### Invoices
 
-| Tool | Description |
-|------|-------------|
-| `invoices_list` | List invoices with filtering by status, customer, and date range |
-| `invoices_get` | Get a specific invoice by ID |
-| `invoices_summary` | Get invoice summary with totals and counts by status |
+| Tool | Description | Scope |
+|------|-------------|-------|
+| `invoices_list` | List invoices with filtering by status, customer, and date range | `invoices.read` |
+| `invoices_get` | Get a specific invoice by ID | `invoices.read` |
+| `invoices_summary` | Get invoice summary with totals and counts by status | `invoices.read` |
+| `invoices_update` | Update invoice status or add internal notes | `invoices.write` |
+| `invoices_mark_paid` | Mark an invoice as paid | `invoices.write` |
+| `invoices_cancel` | Cancel an invoice | `invoices.write` |
+| `invoices_delete` | Delete a draft or canceled invoice | `invoices.write` |
+| `invoices_duplicate` | Create a copy of an existing invoice | `invoices.write` |
 
 ### Customers
 
-| Tool | Description |
-|------|-------------|
-| `customers_list` | List customers with search |
-| `customers_get` | Get a specific customer by ID |
+| Tool | Description | Scope |
+|------|-------------|-------|
+| `customers_list` | List customers with search | `customers.read` |
+| `customers_get` | Get a specific customer by ID | `customers.read` |
+| `customers_create` | Create a new customer | `customers.write` |
+| `customers_update` | Update an existing customer | `customers.write` |
+| `customers_delete` | Delete a customer | `customers.write` |
 
 ### Bank Accounts
 
@@ -69,11 +77,20 @@ The MCP server exposes the following tools:
 
 ### Time Tracking
 
-| Tool | Description |
-|------|-------------|
-| `tracker_projects_list` | List time tracking projects |
-| `tracker_projects_get` | Get a specific project by ID |
-| `tracker_entries_list` | List time entries for a date range |
+| Tool | Description | Scope |
+|------|-------------|-------|
+| `tracker_projects_list` | List time tracking projects | `tracker-projects.read` |
+| `tracker_projects_get` | Get a specific project by ID | `tracker-projects.read` |
+| `tracker_projects_create` | Create a new time tracking project | `tracker-projects.write` |
+| `tracker_projects_update` | Update an existing project | `tracker-projects.write` |
+| `tracker_projects_delete` | Delete a project and its entries | `tracker-projects.write` |
+| `tracker_entries_list` | List time entries for a date range | `tracker-entries.read` |
+| `tracker_entries_create` | Create new time tracking entries | `tracker-entries.write` |
+| `tracker_entries_update` | Update an existing entry | `tracker-entries.write` |
+| `tracker_entries_delete` | Delete a time entry | `tracker-entries.write` |
+| `tracker_timer_start` | Start a new timer for a project | `tracker-entries.write` |
+| `tracker_timer_stop` | Stop the current running timer | `tracker-entries.write` |
+| `tracker_timer_status` | Get the status of the current timer | `tracker-entries.read` |
 
 ### Reports & Analytics
 
@@ -155,9 +172,12 @@ console.log(prompt.messages);
 
 All tools include MCP annotations to help AI assistants make better decisions:
 
-- `readOnlyHint: true` - All tools are read-only and safe to call
-- `destructiveHint: false` - No tools modify or delete data
-- `idempotentHint: true` - Tools can be called multiple times safely
+- `readOnlyHint: true/false` - Indicates whether the tool only reads data or can modify it
+- `destructiveHint: true/false` - Indicates whether the tool can delete data (e.g., `customers_delete`, `invoices_delete`)
+- `idempotentHint: true/false` - Indicates whether the tool can be called multiple times with the same result
+- `openWorldHint: false` - All tools operate only on your Midday data
+
+Write tools (those with `readOnlyHint: false`) require the corresponding `.write` scope.
 
 ## Client Configuration
 
@@ -239,22 +259,37 @@ await client.close();
 
 Once connected, you can ask your AI assistant questions like:
 
+**Query data:**
 - "Show me my recent transactions"
 - "What invoices are overdue?"
 - "List all customers"
 - "How much time did I track last week?"
-- "What's my bank account balance?"
 - "What's my burn rate this quarter?"
 - "How many months of runway do I have?"
-- "Search for transactions from Acme Corp"
-- "What's my profit this year compared to last year?"
-- "Show me my spending by category"
 
-The AI will use the appropriate MCP tools to fetch the data and provide answers.
+**Manage invoices (requires `invoices.write`):**
+- "Mark invoice INV-001 as paid"
+- "Cancel the overdue invoice for Acme Corp"
+- "Duplicate last month's invoice for Client X"
+
+**Manage customers (requires `customers.write`):**
+- "Create a new customer called TechStart Inc with email hello@techstart.com"
+- "Update the phone number for Acme Corp"
+- "Add a note to the customer file for BigCo"
+
+**Track time (requires `tracker-projects.write` and `tracker-entries.write`):**
+- "Start a timer for the Website Redesign project"
+- "Stop the current timer"
+- "Log 2 hours for client work yesterday"
+- "Create a new project called Mobile App for client Acme"
+
+The AI will use the appropriate MCP tools to fetch or modify data based on your request and permissions.
 
 ## Security Considerations
 
 - API keys have the same permissions as the scopes you select when creating them
-- Use **Read Only** or **Restricted** scopes for AI assistants when possible
+- Use **Read Only** scopes for AI assistants that only need to query data
+- Use **Full Access** only when you need AI to create/update/delete records
+- You can create **Restricted** keys with specific read/write permissions per resource
 - Rotate keys regularly
 - Never share API keys in public repositories or chat logs

@@ -180,7 +180,7 @@ const appExtensions: Record<
       "Conversations with real numbers",
       "Works with Claude Code & Desktop",
       "Query invoices and reports",
-      "Read-only secure access",
+      "Granular permission controls",
     ],
     installUrl: "https://midday.ai/mcp/claude",
   },

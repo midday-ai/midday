@@ -187,10 +187,15 @@ await client.close();`;
             {/* Requirements */}
             <div className="bg-secondary border border-border p-4 mb-8">
               <p className="font-sans text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">Requirements:</span>{" "}
+                <span className="font-medium text-foreground">
+                  Requirements:
+                </span>{" "}
                 ChatGPT Pro, Plus, Business, Enterprise, or Education account.
                 Enable developer mode in{" "}
-                <span className="font-medium">Settings → Apps → Advanced settings</span>.
+                <span className="font-medium">
+                  Settings → Apps → Advanced settings
+                </span>
+                .
               </p>
             </div>
 
@@ -274,7 +279,8 @@ await client.close();`;
                   >
                     mcp-remote
                   </a>{" "}
-                  to bridge bearer token authentication (installed automatically via npx).
+                  to bridge bearer token authentication (installed automatically
+                  via npx).
                 </p>
               </div>
             )}

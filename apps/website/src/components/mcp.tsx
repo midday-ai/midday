@@ -47,7 +47,8 @@ const questions = [
 ];
 
 const capabilities = [
-  "27 tools across transactions, invoices, customers, and reports",
+  "40+ tools across transactions, invoices, customers, tracker, and reports",
+  "Granular permissions—read-only or full access, you choose",
   "Secure authentication with your existing API keys",
   "Works with Cursor, Claude, Raycast, and any MCP-compatible client",
 ];
@@ -244,10 +245,10 @@ export function MCP() {
         <div className="max-w-[1400px] mx-auto">
           <div className="text-center space-y-4 mb-12">
             <h2 className="font-serif text-2xl sm:text-3xl text-foreground">
-              Read-only by design
+              Secure by design
             </h2>
             <p className="font-sans text-base text-muted-foreground leading-normal max-w-xl mx-auto">
-              Your AI tools can query data but never modify it.
+              Full control over what your AI can access and modify.
             </p>
           </div>
 
@@ -290,15 +291,6 @@ export function MCP() {
               <Button asChild className="h-11 px-6 text-sm font-sans">
                 <Link href="https://app.midday.ai/settings/developer">
                   Get API key
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                className="h-11 px-6 text-sm font-sans bg-background border-border hover:bg-accent"
-              >
-                <Link href="https://docs.midday.ai/mcp">
-                  View documentation
                 </Link>
               </Button>
             </div>
