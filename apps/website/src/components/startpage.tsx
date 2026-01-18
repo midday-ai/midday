@@ -57,6 +57,47 @@ const PricingSection = dynamic(() =>
   import("./sections/pricing-section").then((m) => m.PricingSection),
 );
 
+// Static features data - moved outside component to avoid recreation on each render
+const features = [
+  {
+    title: "All transactions in one place",
+    subtitle:
+      "Every payment in and out of the business is automatically synced from your connected accounts.",
+    mobileSubtitle: "Every payment in and out is pulled in automatically.",
+    illustration: "animation",
+  },
+  {
+    title: "Invoices get paid",
+    subtitle:
+      "Customers can pay invoices online, with payments flowing straight into your finances.",
+    mobileSubtitle:
+      "Customers can pay invoices online with payments flowing straight into your finances.",
+    illustration: "animation",
+  },
+  {
+    title: "Reconciliation gets handled",
+    subtitle:
+      "Payments, receipts, and transactions are automatically matched so records stay accurate.",
+    mobileSubtitle:
+      "Transactions are categorized and reconciled automatically.",
+    illustration: "animation",
+  },
+  {
+    title: "Understand what's happening",
+    subtitle:
+      "Midday explains changes in cash, revenue, and spending as they happen.",
+    mobileSubtitle: "See what's changing and why.",
+    illustration: "animation",
+  },
+  {
+    title: "Stay updated and in control",
+    subtitle:
+      "Weekly summaries and notifications keep you on top without constant checking.",
+    mobileSubtitle: "Weekly summaries keep you up to date.",
+    illustration: "animation",
+  },
+];
+
 export function StartPage() {
   const [activeFeature, setActiveFeature] = useState(0);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
@@ -84,63 +125,6 @@ export function StartPage() {
       video.removeEventListener("loadeddata", handleLoad);
     };
   }, []);
-
-  const features = [
-    {
-      title: "All transactions in one place",
-      subtitle:
-        "Every payment in and out of the business is automatically synced from your connected accounts.",
-      mobileSubtitle: "Every payment in and out is pulled in automatically.",
-      mergedText:
-        "All transactions in one place. Every payment in and out of the business is automatically synced from your connected accounts.",
-      illustration: "animation",
-    },
-    {
-      title: "Invoices get paid",
-      subtitle:
-        "Customers can pay invoices online, with payments flowing straight into your finances.",
-      mobileSubtitle:
-        "Customers can pay invoices online with payments flowing straight into your finances.",
-      mergedText:
-        "Invoices get paid. Customers can pay invoices online, with payments flowing straight into your finances.",
-      illustration: "animation",
-    },
-    {
-      title: "Reconciliation gets handled",
-      subtitle:
-        "Payments, receipts, and transactions are automatically matched so records stay accurate.",
-      mobileSubtitle:
-        "Transactions are categorized and reconciled automatically.",
-      mergedText:
-        "Reconciliation gets handled. Payments, receipts, and transactions are automatically matched so records stay accurate.",
-      illustration: "animation",
-    },
-    {
-      title: "Understand what's happening",
-      subtitle:
-        "Midday explains changes in cash, revenue, and spending as they happen.",
-      mobileSubtitle: "See what's changing and why.",
-      mergedText:
-        "Understand what's happening. Midday explains changes in cash, revenue, and spending as they happen.",
-      illustration: "animation",
-    },
-    {
-      title: "Stay updated and in control",
-      subtitle:
-        "Weekly summaries and notifications keep you on top without constant checking.",
-      mobileSubtitle: "Weekly summaries keep you up to date.",
-      mergedText:
-        "Stay updated and in control. Weekly summaries and notifications keep you on top without constant checking.",
-      illustration: "animation",
-    },
-  ];
-
-  const agentTags: Array<{ label: string; icon: string }> = [
-    { label: "Insights-agent", icon: "insights" },
-    { label: "Inbox-agent", icon: "inbox" },
-    { label: "Invoice-agent", icon: "description" },
-    { label: "Files-agent", icon: "folder_zip" },
-  ];
 
   return (
     <div className="min-h-screen">

@@ -214,7 +214,7 @@ export function Header({
             <div className="hidden xl:flex items-center gap-6">
               {/* Features with Dropdown */}
               <div
-                className="relative"
+                className="relative -mx-3 -my-2"
                 onMouseEnter={() => {
                   if (featuresTimeoutRef.current) {
                     clearTimeout(featuresTimeoutRef.current);
@@ -230,10 +230,17 @@ export function Header({
               >
                 <button
                   type="button"
-                  className="text-sm transition-colors text-muted-foreground hover:text-foreground"
+                  className="text-sm transition-colors text-muted-foreground hover:text-foreground px-3 py-2"
                 >
                   Features
                 </button>
+                {/* Invisible bridge to dropdown */}
+                {isFeaturesOpen && (
+                  <div
+                    className="absolute left-0 right-0 h-4"
+                    style={{ top: "100%" }}
+                  />
+                )}
 
                 {/* Features Dropdown - Full Width */}
                 {isFeaturesOpen && (
@@ -439,7 +446,7 @@ export function Header({
 
               {/* Apps with Dropdown */}
               <div
-                className="relative"
+                className="relative -mx-3 -my-2"
                 onMouseEnter={() => {
                   if (appsTimeoutRef.current) {
                     clearTimeout(appsTimeoutRef.current);
@@ -455,10 +462,17 @@ export function Header({
               >
                 <button
                   type="button"
-                  className="text-sm transition-colors text-muted-foreground hover:text-foreground"
+                  className="text-sm transition-colors text-muted-foreground hover:text-foreground px-3 py-2"
                 >
                   Apps
                 </button>
+                {/* Invisible bridge to dropdown */}
+                {isAppsOpen && (
+                  <div
+                    className="absolute left-0 right-0 h-4"
+                    style={{ top: "100%" }}
+                  />
+                )}
 
                 {/* Apps Dropdown - Full Width */}
                 {isAppsOpen && (
