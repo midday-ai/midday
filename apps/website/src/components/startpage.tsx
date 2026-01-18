@@ -62,6 +62,8 @@ export function StartPage() {
   const [activeFeature, setActiveFeature] = useState(0);
   const [isMobileVideoLoaded, setIsMobileVideoLoaded] = useState(false);
   const [isDesktopVideoLoaded, setIsDesktopVideoLoaded] = useState(false);
+  const [isMobilePosterLoaded, setIsMobilePosterLoaded] = useState(false);
+  const [isDesktopPosterLoaded, setIsDesktopPosterLoaded] = useState(false);
 
   const videoContainerRef = useRef(null);
   const mobileVideoRef = useRef<HTMLVideoElement>(null);
@@ -217,11 +219,19 @@ export function StartPage() {
                   filter: isMobileVideoLoaded ? "blur(0px)" : "blur(1px)",
                 }}
               >
-                <img
-                  src="https://midday.ai/cdn-cgi/image/width=800,quality=80,format=auto/https://cdn.midday.ai/video-poster-v2.jpg"
-                  alt=""
-                  className="w-full h-[420px] sm:h-[520px] md:h-[600px] object-cover"
-                  aria-hidden="true"
+                <Image
+                  src="https://cdn.midday.ai/video-poster-v2.jpg"
+                  alt="Midday dashboard preview"
+                  fill
+                  className="object-cover transition-all duration-1000 ease-in-out"
+                  style={{
+                    filter: isMobilePosterLoaded ? "blur(0px)" : "blur(12px)",
+                    transform: isMobilePosterLoaded
+                      ? "scale(1)"
+                      : "scale(1.05)",
+                  }}
+                  priority
+                  onLoad={() => setIsMobilePosterLoaded(true)}
                 />
               </div>
 
@@ -325,11 +335,19 @@ export function StartPage() {
                   filter: isDesktopVideoLoaded ? "blur(0px)" : "blur(1px)",
                 }}
               >
-                <img
-                  src="https://midday.ai/cdn-cgi/image/width=1400,quality=80,format=auto/https://cdn.midday.ai/video-poster-v2.jpg"
-                  alt=""
-                  className="w-full h-[800px] xl:h-[900px] 3xl:h-[1000px] object-cover"
-                  aria-hidden="true"
+                <Image
+                  src="https://cdn.midday.ai/video-poster-v2.jpg"
+                  alt="Midday dashboard preview"
+                  fill
+                  className="object-cover transition-all duration-1000 ease-in-out"
+                  style={{
+                    filter: isDesktopPosterLoaded ? "blur(0px)" : "blur(12px)",
+                    transform: isDesktopPosterLoaded
+                      ? "scale(1)"
+                      : "scale(1.05)",
+                  }}
+                  priority
+                  onLoad={() => setIsDesktopPosterLoaded(true)}
                 />
               </div>
 
