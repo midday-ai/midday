@@ -324,6 +324,8 @@ export default {
     revenue_summary: {
       title: "Revenue Summary",
       description: "Total revenue for the period",
+      gross: "Gross",
+      net: "Net",
       total_revenue: "Total Revenue",
       no_data: "No revenue data",
       action: "View revenue trends",
@@ -459,6 +461,12 @@ export default {
       recent_documents: "Recent Documents",
       no_documents: "No documents",
       action: "Open Vault",
+    },
+    inbox_widget: {
+      title: "Inbox",
+      description: "Unprocessed items",
+      no_items: "No unprocessed items",
+      action: "Open inbox",
     },
     time_tracker: {
       title: "Time Tracker",
