@@ -1,14 +1,29 @@
 declare module "*.png" {
-  const value: string;
+  const value: {
+    src: string;
+    width: number;
+    height: number;
+    blurDataURL?: string;
+  };
   export default value;
 }
 
 declare module "*.jpeg" {
-  const value: string;
+  const value: {
+    src: string;
+    width: number;
+    height: number;
+    blurDataURL?: string;
+  };
   export default value;
 }
 
 declare module "*.jpg" {
-  const value: string;
+  const value: {
+    src: string;
+    width: number;
+    height: number;
+    blurDataURL?: string;
+  };
   export default value;
 }

@@ -3,7 +3,7 @@ import chatgptIcon from "./chatgpt.png";
 export const Logo = () => {
   return (
     <img
-      src={chatgptIcon.src}
+      src={(chatgptIcon as { src: string }).src}
       alt="ChatGPT"
       width={36}
       height={36}
