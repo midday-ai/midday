@@ -19,9 +19,7 @@ export default {
 **How it works:**
 1. Click Install to open the setup page
 2. Use the ChatGPT Developer config or MCP SDK
-3. Add your Midday API key and start building
-
-All queries are **read-only** — your data can be accessed but never modified.`,
+3. Add your Midday API key and start building`,
   images: [],
   installUrl: "https://midday.ai/mcp/chatgpt",
 };

@@ -1,6 +1,5 @@
-"use client";
-
 import { AppLogo } from "@/components/app-logo";
+import { CustomMDX } from "@/components/mdx";
 import type { WebsiteApp } from "@/data/apps";
 import { apps } from "@/data/apps";
 import { Button } from "@midday/ui/button";
@@ -15,37 +14,6 @@ export function IntegrationDetailPage({ app }: Props) {
   const relatedApps = apps
     .filter((a) => a.category === app.category && a.id !== app.id)
     .slice(0, 3);
-
-  // Parse markdown-style description
-  const renderDescription = (text: string | null) => {
-    if (!text) return null;
-
-    const parts = text.split("\n\n");
-    return parts.map((part) => {
-      if (part.startsWith("**") && part.includes("**\n")) {
-        const [title, ...content] = part.split("\n");
-        const cleanTitle = title?.replace(/\*\*/g, "") || "";
-        return (
-          <div key={cleanTitle} className="mb-6">
-            <h3 className="font-sans text-lg text-foreground mb-2">
-              {cleanTitle}
-            </h3>
-            <p className="font-sans text-base text-muted-foreground leading-relaxed">
-              {content.join(" ")}
-            </p>
-          </div>
-        );
-      }
-      return (
-        <p
-          key={part.slice(0, 50)}
-          className="font-sans text-base text-muted-foreground leading-relaxed mb-4"
-        >
-          {part}
-        </p>
-      );
-    });
-  };
 
   const dashboardUrl = app.active
     ? `https://app.midday.ai/apps?app=${app.id}`
@@ -75,8 +43,8 @@ export function IntegrationDetailPage({ app }: Props) {
           <div className="lg:col-span-2">
             {/* Header */}
             <div className="flex items-start gap-6 mb-8">
-              <div className="w-16 h-16 flex items-center justify-center border border-border p-3">
-                <AppLogo appId={app.id} />
+              <div className="w-16 h-16 flex items-center justify-center">
+                <AppLogo appId={app.id} className="w-14 h-14" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
@@ -107,8 +75,8 @@ export function IntegrationDetailPage({ app }: Props) {
               </p>
 
               {app.description && (
-                <div className="border-t border-border pt-8">
-                  {renderDescription(app.description)}
+                <div className="border-t border-border pt-8 updates app-description">
+                  <CustomMDX source={app.description} />
                 </div>
               )}
             </div>
@@ -170,8 +138,8 @@ export function IntegrationDetailPage({ app }: Props) {
                         href={`/integrations/${relatedApp.slug}`}
                         className="flex items-center gap-3 group"
                       >
-                        <div className="w-8 h-8 flex items-center justify-center">
-                          <AppLogo appId={relatedApp.id} />
+                        <div className="w-10 h-10 flex items-center justify-center">
+                          <AppLogo appId={relatedApp.id} className="w-8 h-8" />
                         </div>
                         <span className="font-sans text-sm text-foreground group-hover:text-muted-foreground transition-colors">
                           {relatedApp.name}

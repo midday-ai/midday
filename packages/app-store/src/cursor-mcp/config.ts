@@ -19,9 +19,7 @@ export default {
 **How it works:**
 1. Click Install to open the setup page
 2. Add your Midday API key to Cursor's MCP configuration
-3. Restart Cursor and @-mention Midday in chat
-
-All queries are **read-only** — your data can be accessed but never modified.`,
+3. Restart Cursor and @-mention Midday in chat`,
   images: [],
   installUrl: "https://midday.ai/mcp/cursor",
 };

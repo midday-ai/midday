@@ -7,9 +7,9 @@ import {
   RaycastMcpLogo,
 } from "@midday/app-store/logos";
 import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
 import Image from "next/image";
 import Link from "next/link";
+import { MaterialIcon } from "./homepage/icon-mapping";
 
 const clients = [
   {
@@ -225,23 +225,27 @@ export function MCP() {
 
           <div className="max-w-5xl mx-auto relative">
             {/* Gradient fade masks */}
-            <div 
-              className="absolute inset-y-0 left-0 w-24 sm:w-32 z-10 pointer-events-none" 
+            <div
+              className="absolute inset-y-0 left-0 w-24 sm:w-32 z-10 pointer-events-none"
               style={{
-                background: "linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background)) 30%, hsla(var(--background), 0.8) 50%, hsla(var(--background), 0.4) 70%, transparent 100%)"
+                background:
+                  "linear-gradient(to right, hsl(var(--background)) 0%, hsl(var(--background)) 30%, hsla(var(--background), 0.8) 50%, hsla(var(--background), 0.4) 70%, transparent 100%)",
               }}
             />
-            <div 
-              className="absolute inset-y-0 right-0 w-24 sm:w-32 z-10 pointer-events-none" 
+            <div
+              className="absolute inset-y-0 right-0 w-24 sm:w-32 z-10 pointer-events-none"
               style={{
-                background: "linear-gradient(to left, hsl(var(--background)) 0%, hsl(var(--background)) 30%, hsla(var(--background), 0.8) 50%, hsla(var(--background), 0.4) 70%, transparent 100%)"
+                background:
+                  "linear-gradient(to left, hsl(var(--background)) 0%, hsl(var(--background)) 30%, hsla(var(--background), 0.8) 50%, hsla(var(--background), 0.4) 70%, transparent 100%)",
               }}
             />
             <div className="flex flex-wrap gap-x-1.5 gap-y-1.5 sm:gap-x-2 sm:gap-y-2 justify-center relative z-0">
               {questions.map((question, index) => {
                 // Random pattern: only indices 0, 2, 6, 9, 12 get white text (less frequent)
                 const highlightedIndices = [0, 2, 6, 9, 12];
-                const textColors = highlightedIndices.includes(index) ? "text-foreground" : "text-muted-foreground";
+                const textColors = highlightedIndices.includes(index)
+                  ? "text-foreground"
+                  : "text-muted-foreground";
                 // Show first 8 on mobile, first 12 on tablet, all on desktop
                 let visibilityClass = "";
                 if (index >= 12) {
@@ -256,7 +260,9 @@ export function MCP() {
                     key={question}
                     className={`px-3 py-1.5 bg-secondary rounded-tl-full rounded-tr-full rounded-bl-full ${visibilityClass}`}
                   >
-                    <p className={`font-sans text-xs sm:text-sm ${textColors} whitespace-nowrap`}>
+                    <p
+                      className={`font-sans text-xs sm:text-sm ${textColors} whitespace-nowrap`}
+                    >
                       "{question}"
                     </p>
                   </div>
@@ -285,12 +291,16 @@ export function MCP() {
           </div>
 
           <div className="max-w-2xl mx-auto">
-            <div className="bg-secondary border border-border p-6">
-              <div className="space-y-4">
+            <div className="bg-secondary border border-border p-6 relative">
+              <div className="space-y-6">
                 {capabilities.map((capability) => (
                   <div key={capability} className="flex items-center gap-3">
                     <div className="w-5 h-5 bg-secondary border border-border flex items-center justify-center flex-shrink-0">
-                      <Icons.Check size={14} className="text-foreground" />
+                      <MaterialIcon
+                        name="check"
+                        className="text-foreground"
+                        size={14}
+                      />
                     </div>
                     <span className="font-sans text-sm text-foreground">
                       {capability}

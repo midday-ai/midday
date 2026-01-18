@@ -62,7 +62,7 @@ export function AppLogo({ appId, className }: AppLogoProps) {
   return (
     <div
       className={cn(
-        "w-full h-full flex items-center justify-center [&>svg]:w-full [&>svg]:h-full [&>svg]:max-w-full [&>svg]:max-h-full",
+        "w-full h-full flex items-center justify-center [&>svg]:w-full [&>svg]:h-full [&>img]:w-full [&>img]:h-full [&>img]:object-contain",
         className,
       )}
     >

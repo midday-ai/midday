@@ -19,9 +19,7 @@ export default {
 **How it works:**
 1. Click Install to open the setup page
 2. Add Midday as an MCP server in Raycast
-3. @-mention Midday in Raycast AI
-
-All queries are **read-only** — your data can be accessed but never modified.`,
+3. @-mention Midday in Raycast AI`,
   images: [],
   installUrl: "https://midday.ai/mcp/raycast",
 };

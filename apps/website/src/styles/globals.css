@@ -147,6 +147,23 @@
   font-weight: 500;
 }
 
+/* App description styles */
+.app-description strong {
+  display: block;
+  padding-top: 1.5em;
+  padding-bottom: 0.5em;
+  color: hsl(var(--foreground));
+}
+
+.app-description strong:first-child {
+  padding-top: 0;
+}
+
+.app-description ul,
+.app-description ol {
+  padding-bottom: 1em;
+}
+
 pre::-webkit-scrollbar {
   display: none;
 }
