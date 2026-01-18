@@ -123,7 +123,7 @@ export function StartPage() {
             <div className="relative overflow-hidden">
               <video
                 className="w-full h-[420px] sm:h-[520px] md:h-[600px] object-cover"
-                poster="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/video-poster-v2.jpg"
+                poster="https://cdn.midday.ai/video-poster-v2.jpg"
                 autoPlay
                 loop
                 muted
@@ -131,7 +131,7 @@ export function StartPage() {
                 preload="auto"
               >
                 <source
-                  src="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/videos/login-video.mp4"
+                  src="https://cdn.midday.ai/videos/login-video.mp4"
                   type="video/mp4"
                 />
               </video>
@@ -210,7 +210,7 @@ export function StartPage() {
             <div className="relative overflow-hidden">
               <video
                 className="w-full h-[800px] xl:h-[900px] 3xl:h-[1000px] object-cover block"
-                poster="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/video-poster-v2.jpg"
+                poster="https://cdn.midday.ai/video-poster-v2.jpg"
                 autoPlay
                 loop
                 muted
@@ -218,7 +218,7 @@ export function StartPage() {
                 preload="auto"
               >
                 <source
-                  src="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/videos/login-video.mp4"
+                  src="https://cdn.midday.ai/videos/login-video.mp4"
                   type="video/mp4"
                 />
               </video>
