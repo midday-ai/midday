@@ -13,7 +13,7 @@ import { baseUrl } from "./sitemap";
 const hedvigSans = Hedvig_Letters_Sans({
   weight: "400",
   subsets: ["latin"],
-  display: "optional", // No flicker - uses font if loads fast, otherwise fallback
+  display: "optional",
   variable: "--font-hedvig-sans",
   preload: true,
   adjustFontFallback: true,
@@ -23,7 +23,7 @@ const hedvigSans = Hedvig_Letters_Sans({
 const hedvigSerif = Hedvig_Letters_Serif({
   weight: "400",
   subsets: ["latin"],
-  display: "optional", // No flicker - uses font if loads fast, otherwise fallback
+  display: "optional",
   variable: "--font-hedvig-serif",
   preload: true,
   adjustFontFallback: true,

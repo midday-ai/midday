@@ -2,10 +2,10 @@
 
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { HeaderIntegrationsPreview } from "./header-integrations-preview";
 
 interface HeaderProps {
@@ -13,10 +13,27 @@ interface HeaderProps {
   hideMenuItems?: boolean;
 }
 
+// Feature pages to prefetch on hover
+const FEATURE_ROUTES = [
+  "/assistant",
+  "/insights",
+  "/transactions",
+  "/inbox",
+  "/time-tracking",
+  "/invoicing",
+  "/customers",
+  "/file-storage",
+  "/pre-accounting",
+];
+
+// App pages to prefetch on hover
+const APP_ROUTES = ["/integrations", "/download", "/docs"];
+
 export function Header({
   transparent = false,
   hideMenuItems = false,
 }: HeaderProps) {
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
   const [isAppsOpen, setIsAppsOpen] = useState(false);
@@ -37,6 +54,26 @@ export function Header({
   const macAppRef = useRef<HTMLAnchorElement>(null);
   const integrationsAppRef = useRef<HTMLAnchorElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
+  const featuresPrefetched = useRef(false);
+  const appsPrefetched = useRef(false);
+
+  // Prefetch feature pages on hover (only once)
+  const prefetchFeatures = useCallback(() => {
+    if (featuresPrefetched.current) return;
+    featuresPrefetched.current = true;
+    for (const route of FEATURE_ROUTES) {
+      router.prefetch(route);
+    }
+  }, [router]);
+
+  // Prefetch app pages on hover (only once)
+  const prefetchApps = useCallback(() => {
+    if (appsPrefetched.current) return;
+    appsPrefetched.current = true;
+    for (const route of APP_ROUTES) {
+      router.prefetch(route);
+    }
+  }, [router]);
 
   // All non-ERP integrations
   const allIntegrations = [
@@ -182,6 +219,7 @@ export function Header({
                   if (featuresTimeoutRef.current) {
                     clearTimeout(featuresTimeoutRef.current);
                   }
+                  prefetchFeatures();
                   setIsFeaturesOpen(true);
                 }}
                 onMouseLeave={() => {
@@ -198,198 +236,186 @@ export function Header({
                 </button>
 
                 {/* Features Dropdown - Full Width */}
-                <AnimatePresence>
-                  {isFeaturesOpen && (
-                    <motion.div
-                      data-features-dropdown
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                      className="fixed left-0 right-0 bg-background border-t border-b border-border shadow-lg z-50 overflow-hidden"
-                      style={{ top: "100%" }}
-                    >
-                      <div className="p-6 xl:p-8 2xl:p-10">
-                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
-                          {/* Column 1 & 2 - Features List (2 columns) */}
-                          <div
-                            className="lg:col-span-2 2xl:max-w-xl"
-                            ref={featuresListRef}
-                          >
-                            <div className="grid grid-cols-2 gap-x-4">
-                              {/* Column 1 */}
-                              <div>
-                                {[
-                                  {
-                                    href: "/assistant",
-                                    title: "Assistant",
-                                    desc: "Ask questions and get clear financial answers",
-                                  },
-                                  {
-                                    href: "/insights",
-                                    title: "Insights",
-                                    desc: "See what's changing",
-                                  },
-                                  {
-                                    href: "/transactions",
-                                    title: "Transactions",
-                                    desc: "All transactions together",
-                                  },
-                                  {
-                                    href: "/inbox",
-                                    title: "Inbox",
-                                    desc: "Receipts handled automatically",
-                                  },
-                                ].map((item, index) => (
-                                  <motion.div
-                                    key={item.href}
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{
-                                      duration: 0.2,
-                                      delay: index * 0.03,
-                                    }}
+                {isFeaturesOpen && (
+                  <div
+                    data-features-dropdown
+                    className="fixed left-0 right-0 bg-background border-t border-b border-border shadow-lg z-50 overflow-hidden opacity-0 animate-dropdown-fade"
+                    style={{ top: "100%" }}
+                  >
+                    <div className="p-6 xl:p-8 2xl:p-10">
+                      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+                        {/* Column 1 & 2 - Features List (2 columns) */}
+                        <div
+                          className="lg:col-span-2 2xl:max-w-xl"
+                          ref={featuresListRef}
+                        >
+                          <div className="grid grid-cols-2 gap-x-4">
+                            {/* Column 1 */}
+                            <div>
+                              {[
+                                {
+                                  href: "/assistant",
+                                  title: "Assistant",
+                                  desc: "Ask questions and get clear financial answers",
+                                },
+                                {
+                                  href: "/insights",
+                                  title: "Insights",
+                                  desc: "See what's changing",
+                                },
+                                {
+                                  href: "/transactions",
+                                  title: "Transactions",
+                                  desc: "All transactions together",
+                                },
+                                {
+                                  href: "/inbox",
+                                  title: "Inbox",
+                                  desc: "Receipts handled automatically",
+                                },
+                              ].map((item, index) => (
+                                <div
+                                  key={item.href}
+                                  className="opacity-0 animate-dropdown-slide"
+                                  style={{ animationDelay: `${index * 30}ms` }}
+                                >
+                                  <Link
+                                    href={item.href}
+                                    className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                                    onClick={() => setIsFeaturesOpen(false)}
                                   >
-                                    <Link
-                                      href={item.href}
-                                      className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
-                                      onClick={() => setIsFeaturesOpen(false)}
-                                    >
-                                      <div className="flex flex-col pl-2">
-                                        <span className="font-sans text-base text-foreground mb-1">
-                                          {item.title}
-                                        </span>
-                                        <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                          {item.desc}
-                                        </span>
-                                      </div>
-                                    </Link>
-                                  </motion.div>
-                                ))}
-                              </div>
-                              {/* Column 2 */}
-                              <div>
-                                {[
-                                  {
-                                    href: "/time-tracking",
-                                    title: "Time tracking",
-                                    desc: "See where time goes",
-                                  },
-                                  {
-                                    href: "/invoicing",
-                                    title: "Invoicing",
-                                    desc: "Get paid faster",
-                                  },
-                                  {
-                                    href: "/customers",
-                                    title: "Customers",
-                                    desc: "Know your customers",
-                                  },
-                                  {
-                                    href: "/file-storage",
-                                    title: "Files",
-                                    desc: "Everything in one place",
-                                  },
-                                ].map((item, index) => (
-                                  <motion.div
-                                    key={item.href}
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{
-                                      duration: 0.2,
-                                      delay: (index + 4) * 0.03,
-                                    }}
+                                    <div className="flex flex-col pl-2">
+                                      <span className="font-sans text-base text-foreground mb-1">
+                                        {item.title}
+                                      </span>
+                                      <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                        {item.desc}
+                                      </span>
+                                    </div>
+                                  </Link>
+                                </div>
+                              ))}
+                            </div>
+                            {/* Column 2 */}
+                            <div>
+                              {[
+                                {
+                                  href: "/time-tracking",
+                                  title: "Time tracking",
+                                  desc: "See where time goes",
+                                },
+                                {
+                                  href: "/invoicing",
+                                  title: "Invoicing",
+                                  desc: "Get paid faster",
+                                },
+                                {
+                                  href: "/customers",
+                                  title: "Customers",
+                                  desc: "Know your customers",
+                                },
+                                {
+                                  href: "/file-storage",
+                                  title: "Files",
+                                  desc: "Everything in one place",
+                                },
+                              ].map((item, index) => (
+                                <div
+                                  key={item.href}
+                                  className="opacity-0 animate-dropdown-slide"
+                                  style={{
+                                    animationDelay: `${(index + 4) * 30}ms`,
+                                  }}
+                                >
+                                  <Link
+                                    href={item.href}
+                                    className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                                    onClick={() => setIsFeaturesOpen(false)}
                                   >
-                                    <Link
-                                      href={item.href}
-                                      className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
-                                      onClick={() => setIsFeaturesOpen(false)}
-                                    >
-                                      <div className="flex flex-col pl-2">
-                                        <span className="font-sans text-base text-foreground mb-1">
-                                          {item.title}
-                                        </span>
-                                        <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                          {item.desc}
-                                        </span>
-                                      </div>
-                                    </Link>
-                                  </motion.div>
-                                ))}
-                              </div>
+                                    <div className="flex flex-col pl-2">
+                                      <span className="font-sans text-base text-foreground mb-1">
+                                        {item.title}
+                                      </span>
+                                      <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                        {item.desc}
+                                      </span>
+                                    </div>
+                                  </Link>
+                                </div>
+                              ))}
                             </div>
                           </div>
+                        </div>
 
-                          {/* Column 3 & 4 - Pre-accounting Preview */}
-                          <div className="lg:col-span-2 flex items-start justify-end">
-                            <Link
-                              ref={preAccountingRef}
-                              href="/pre-accounting"
-                              onClick={() => setIsFeaturesOpen(false)}
-                              className="w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col"
-                            >
-                              <div className="flex-1 flex items-center justify-center bg-background p-4">
-                                <Image
-                                  src="/images/accounting-light.png"
-                                  alt="Pre-accounting"
-                                  width={112}
-                                  height={400}
-                                  className="h-auto w-auto max-h-[80px] object-contain dark:hidden"
-                                />
-                                <Image
-                                  src="/images/accounting-dark.png"
-                                  alt="Pre-accounting"
-                                  width={112}
-                                  height={400}
-                                  className="h-auto w-auto max-h-[80px] object-contain hidden dark:block"
-                                />
+                        {/* Column 3 & 4 - Pre-accounting Preview */}
+                        <div className="lg:col-span-2 flex items-start justify-end">
+                          <Link
+                            ref={preAccountingRef}
+                            href="/pre-accounting"
+                            onClick={() => setIsFeaturesOpen(false)}
+                            className="w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col"
+                          >
+                            <div className="flex-1 flex items-center justify-center bg-background p-4">
+                              <Image
+                                src="/images/accounting-light.png"
+                                alt="Pre-accounting"
+                                width={112}
+                                height={400}
+                                className="h-auto w-auto max-h-[80px] object-contain dark:hidden"
+                              />
+                              <Image
+                                src="/images/accounting-dark.png"
+                                alt="Pre-accounting"
+                                width={112}
+                                height={400}
+                                className="h-auto w-auto max-h-[80px] object-contain hidden dark:block"
+                              />
+                            </div>
+                            <div className="bg-background border-t border-border p-2.5 flex items-center justify-between gap-4">
+                              <div className="flex-1">
+                                <span className="font-sans text-xs text-foreground block">
+                                  Pre-accounting
+                                </span>
+                                <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                  Clean records ready for your accountant
+                                </span>
                               </div>
-                              <div className="bg-background border-t border-border p-2.5 flex items-center justify-between gap-4">
-                                <div className="flex-1">
-                                  <span className="font-sans text-xs text-foreground block">
-                                    Pre-accounting
-                                  </span>
-                                  <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                    Clean records ready for your accountant
-                                  </span>
+                              <div className="flex items-center gap-1.5 flex-shrink-0">
+                                <div className="w-6 h-6 border border-border flex items-center justify-center bg-background">
+                                  <Image
+                                    src="/images/xero.svg"
+                                    alt="Xero"
+                                    width={14}
+                                    height={14}
+                                    className="object-contain opacity-70"
+                                  />
                                 </div>
-                                <div className="flex items-center gap-1.5 flex-shrink-0">
-                                  <div className="w-6 h-6 border border-border flex items-center justify-center bg-background">
-                                    <Image
-                                      src="/images/xero.svg"
-                                      alt="Xero"
-                                      width={14}
-                                      height={14}
-                                      className="object-contain opacity-70"
-                                    />
-                                  </div>
-                                  <div className="w-6 h-6 border border-border flex items-center justify-center bg-background">
-                                    <Image
-                                      src="/images/quickbooks.svg"
-                                      alt="QuickBooks"
-                                      width={14}
-                                      height={14}
-                                      className="object-contain opacity-70"
-                                    />
-                                  </div>
-                                  <div className="w-6 h-6 border border-border flex items-center justify-center bg-background">
-                                    <Image
-                                      src="/images/fortnox.svg"
-                                      alt="Fortnox"
-                                      width={14}
-                                      height={14}
-                                      className="object-contain opacity-70"
-                                    />
-                                  </div>
+                                <div className="w-6 h-6 border border-border flex items-center justify-center bg-background">
+                                  <Image
+                                    src="/images/quickbooks.svg"
+                                    alt="QuickBooks"
+                                    width={14}
+                                    height={14}
+                                    className="object-contain opacity-70"
+                                  />
+                                </div>
+                                <div className="w-6 h-6 border border-border flex items-center justify-center bg-background">
+                                  <Image
+                                    src="/images/fortnox.svg"
+                                    alt="Fortnox"
+                                    width={14}
+                                    height={14}
+                                    className="object-contain opacity-70"
+                                  />
                                 </div>
                               </div>
-                            </Link>
-                          </div>
+                            </div>
+                          </Link>
                         </div>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <Link
@@ -418,6 +444,7 @@ export function Header({
                   if (appsTimeoutRef.current) {
                     clearTimeout(appsTimeoutRef.current);
                   }
+                  prefetchApps();
                   setIsAppsOpen(true);
                 }}
                 onMouseLeave={() => {
@@ -434,191 +461,167 @@ export function Header({
                 </button>
 
                 {/* Apps Dropdown - Full Width */}
-                <AnimatePresence>
-                  {isAppsOpen && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                      className="fixed left-0 right-0 bg-background border-t border-b border-border shadow-lg z-50 overflow-hidden"
-                      style={{
-                        top: "100%",
-                        height:
-                          featuresDropdownHeight !== null
-                            ? `${featuresDropdownHeight}px`
-                            : "auto",
-                      }}
-                    >
-                      <div className="p-6 xl:p-8 2xl:p-10 h-full">
-                        <div className="grid grid-cols-1 lg:grid-cols-6 gap-0 h-full">
-                          {/* Column 1 & 2 - Apps List */}
-                          <div
-                            ref={appsListRef}
-                            className="lg:col-span-2 2xl:max-w-xs lg:pr-4"
+                {isAppsOpen && (
+                  <div
+                    className="fixed left-0 right-0 bg-background border-t border-b border-border shadow-lg z-50 overflow-hidden opacity-0 animate-dropdown-fade"
+                    style={{
+                      top: "100%",
+                      height:
+                        featuresDropdownHeight !== null
+                          ? `${featuresDropdownHeight}px`
+                          : "auto",
+                    }}
+                  >
+                    <div className="p-6 xl:p-8 2xl:p-10 h-full">
+                      <div className="grid grid-cols-1 lg:grid-cols-6 gap-0 h-full">
+                        {/* Column 1 & 2 - Apps List */}
+                        <div
+                          ref={appsListRef}
+                          className="lg:col-span-2 2xl:max-w-xs lg:pr-4"
+                        >
+                          {[
+                            {
+                              href: "/download",
+                              title: "Mac app",
+                              desc: "Your finances, always one click away.",
+                              external: false,
+                            },
+                            {
+                              href: "/integrations",
+                              title: "Integrations",
+                              desc: "Connect your existing tools.",
+                              external: false,
+                            },
+                            {
+                              href: "https://api.midday.ai",
+                              title: "Developer & API",
+                              desc: "Programmatic access to Midday data and workflows.",
+                              external: true,
+                            },
+                            {
+                              href: "/sdks",
+                              title: "SDKs",
+                              desc: "Typed SDKs to build faster with Midday.",
+                              external: false,
+                            },
+                          ].map((item, index) => (
+                            <div
+                              key={`${item.href}-${item.title}`}
+                              className="opacity-0 animate-dropdown-slide"
+                              style={{ animationDelay: `${index * 30}ms` }}
+                            >
+                              {item.external ? (
+                                <a
+                                  href={item.href}
+                                  className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                                  onClick={() => setIsAppsOpen(false)}
+                                >
+                                  <div className="flex flex-col pl-2">
+                                    <span className="font-sans text-base text-foreground mb-1">
+                                      {item.title}
+                                    </span>
+                                    <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                      {item.desc}
+                                    </span>
+                                  </div>
+                                </a>
+                              ) : (
+                                <Link
+                                  href={item.href}
+                                  className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
+                                  onClick={() => setIsAppsOpen(false)}
+                                >
+                                  <div className="flex flex-col pl-2">
+                                    <span className="font-sans text-base text-foreground mb-1">
+                                      {item.title}
+                                    </span>
+                                    <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                      {item.desc}
+                                    </span>
+                                  </div>
+                                </Link>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Columns 3-6 - Image Previews Container */}
+                        <div className="lg:col-span-4 flex items-start justify-end gap-4">
+                          {/* Integrations Preview */}
+                          <Link
+                            ref={integrationsAppRef}
+                            href="/integrations"
+                            onClick={() => setIsAppsOpen(false)}
+                            className="w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col flex-shrink-0"
                           >
-                            {[
-                              {
-                                href: "/download",
-                                title: "Mac app",
-                                desc: "Your finances, always one click away.",
-                                external: false,
-                              },
-                              {
-                                href: "/integrations",
-                                title: "Integrations",
-                                desc: "Connect your existing tools.",
-                                external: false,
-                              },
-                              {
-                                href: "https://api.midday.ai",
-                                title: "Developer & API",
-                                desc: "Programmatic access to Midday data and workflows.",
-                                external: true,
-                              },
-                              {
-                                href: "/sdks",
-                                title: "SDKs",
-                                desc: "Typed SDKs to build faster with Midday.",
-                                external: false,
-                              },
-                            ].map((item, index) => (
-                              <motion.div
-                                key={`${item.href}-${item.title}`}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{
-                                  duration: 0.2,
-                                  delay: index * 0.03,
-                                }}
-                              >
-                                {item.external ? (
-                                  <a
-                                    href={item.href}
-                                    className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
-                                    onClick={() => setIsAppsOpen(false)}
-                                  >
-                                    <div className="flex flex-col pl-2">
-                                      <span className="font-sans text-base text-foreground mb-1">
-                                        {item.title}
-                                      </span>
-                                      <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                        {item.desc}
-                                      </span>
-                                    </div>
-                                  </a>
-                                ) : (
-                                  <Link
-                                    href={item.href}
-                                    className="flex items-center py-3 group hover:bg-secondary transition-colors duration-200"
-                                    onClick={() => setIsAppsOpen(false)}
-                                  >
-                                    <div className="flex flex-col pl-2">
-                                      <span className="font-sans text-base text-foreground mb-1">
-                                        {item.title}
-                                      </span>
-                                      <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                        {item.desc}
-                                      </span>
-                                    </div>
-                                  </Link>
-                                )}
-                              </motion.div>
-                            ))}
-                          </div>
-
-                          {/* Columns 3-6 - Image Previews Container */}
-                          <div className="lg:col-span-4 flex items-start justify-end gap-4">
-                            {/* Integrations Preview */}
-                            <Link
-                              ref={integrationsAppRef}
-                              href="/integrations"
-                              onClick={() => setIsAppsOpen(false)}
-                              className="w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col flex-shrink-0"
-                            >
+                            <div className="flex-1">
+                              <HeaderIntegrationsPreview />
+                            </div>
+                            <div className="bg-background border-t border-border p-2.5 flex items-center justify-between gap-4">
                               <div className="flex-1">
-                                <HeaderIntegrationsPreview />
-                              </div>
-                              <div className="bg-background border-t border-border p-2.5 flex items-center justify-between gap-4">
-                                <div className="flex-1">
-                                  <span className="font-sans text-xs text-foreground block">
-                                    Integrations
-                                  </span>
-                                  <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                    Connect your existing tools.
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-1.5 flex-shrink-0 relative h-6">
-                                  <AnimatePresence mode="popLayout">
-                                    {visibleIntegrations.map((item) => (
-                                      <motion.div
-                                        key={item.key}
-                                        layout
-                                        initial={{ opacity: 0, scale: 0.8 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.8 }}
-                                        transition={{
-                                          duration: 0.4,
-                                          ease: "easeInOut",
-                                        }}
-                                        className="w-6 h-6 border border-border flex items-center justify-center bg-background"
-                                      >
-                                        <Image
-                                          src={
-                                            allIntegrations[item.id]?.src ?? ""
-                                          }
-                                          alt={
-                                            allIntegrations[item.id]?.alt ?? ""
-                                          }
-                                          width={14}
-                                          height={14}
-                                          className="object-contain opacity-70"
-                                        />
-                                      </motion.div>
-                                    ))}
-                                  </AnimatePresence>
-                                </div>
-                              </div>
-                            </Link>
-
-                            {/* Mac App Preview */}
-                            <Link
-                              ref={macAppRef}
-                              href="/download"
-                              onClick={() => setIsAppsOpen(false)}
-                              className="w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col flex-shrink-0"
-                            >
-                              <div className="flex-1 flex items-center justify-center bg-background p-4">
-                                <Image
-                                  src="/images/header-dock-light.png"
-                                  alt="Mac Dock"
-                                  width={1200}
-                                  height={300}
-                                  className="w-3/4 h-auto object-contain dark:hidden"
-                                />
-                                <Image
-                                  src="/images/header-dock-dark.png"
-                                  alt="Mac Dock"
-                                  width={1200}
-                                  height={300}
-                                  className="w-3/4 h-auto object-contain hidden dark:block"
-                                />
-                              </div>
-                              <div className="bg-background border-t border-border p-2.5">
                                 <span className="font-sans text-xs text-foreground block">
-                                  Mac app
+                                  Integrations
                                 </span>
                                 <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                  Your finances, always one click away.
+                                  Connect your existing tools.
                                 </span>
                               </div>
-                            </Link>
-                          </div>
+                              <div className="flex items-center gap-1.5 flex-shrink-0 relative h-6">
+                                {visibleIntegrations.map((item) => (
+                                  <div
+                                    key={item.key}
+                                    className="w-6 h-6 border border-border flex items-center justify-center bg-background transition-all duration-300"
+                                  >
+                                    <Image
+                                      src={allIntegrations[item.id]?.src ?? ""}
+                                      alt={allIntegrations[item.id]?.alt ?? ""}
+                                      width={14}
+                                      height={14}
+                                      className="object-contain opacity-70"
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </Link>
+
+                          {/* Mac App Preview */}
+                          <Link
+                            ref={macAppRef}
+                            href="/download"
+                            onClick={() => setIsAppsOpen(false)}
+                            className="w-[400px] h-[277px] border border-border overflow-hidden cursor-pointer hover:opacity-90 hover:border-foreground/20 hover:scale-[1.02] transition-all duration-200 flex flex-col flex-shrink-0"
+                          >
+                            <div className="flex-1 flex items-center justify-center bg-background p-4">
+                              <Image
+                                src="/images/header-dock-light.png"
+                                alt="Mac Dock"
+                                width={1200}
+                                height={300}
+                                className="w-3/4 h-auto object-contain dark:hidden"
+                              />
+                              <Image
+                                src="/images/header-dock-dark.png"
+                                alt="Mac Dock"
+                                width={1200}
+                                height={300}
+                                className="w-3/4 h-auto object-contain hidden dark:block"
+                              />
+                            </div>
+                            <div className="bg-background border-t border-border p-2.5">
+                              <span className="font-sans text-xs text-foreground block">
+                                Mac app
+                              </span>
+                              <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                                Your finances, always one click away.
+                              </span>
+                            </div>
+                          </Link>
                         </div>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Sign in */}
@@ -684,12 +687,7 @@ export function Header({
                 {isMobileFeaturesOpen && (
                   <>
                     <div className="h-px w-full border-t border-border my-2" />
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="overflow-hidden"
-                    >
+                    <div className="overflow-hidden opacity-0 animate-mobile-slide">
                       <div className="flex flex-col space-y-4 pt-2">
                         <Link
                           href="/assistant"
@@ -780,7 +778,7 @@ export function Header({
                           Files
                         </Link>
                       </div>
-                    </motion.div>
+                    </div>
                   </>
                 )}
               </div>
@@ -847,12 +845,7 @@ export function Header({
                 {isMobileAppsOpen && (
                   <>
                     <div className="h-px w-full border-t border-border my-2" />
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="overflow-hidden"
-                    >
+                    <div className="overflow-hidden opacity-0 animate-mobile-slide">
                       <div className="flex flex-col space-y-4 pt-2">
                         <Link
                           href="/download"
@@ -899,7 +892,7 @@ export function Header({
                           SDKs
                         </Link>
                       </div>
-                    </motion.div>
+                    </div>
                   </>
                 )}
               </div>
