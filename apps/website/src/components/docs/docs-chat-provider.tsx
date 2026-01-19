@@ -22,8 +22,13 @@ const DocsChatContext = createContext<DocsChatContextType | null>(null);
 
 export function useDocsChat() {
   const context = useContext(DocsChatContext);
+  // Return safe defaults during SSR/static generation
   if (!context) {
-    throw new Error("useDocsChat must be used within DocsChatProvider");
+    return {
+      openChat: () => {},
+      sendMessage: () => {},
+      isChatOpen: false,
+    };
   }
   return context;
 }
