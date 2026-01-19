@@ -29,10 +29,27 @@ export type ExaSearchResult = {
  * Extract domain from a URL or website string.
  */
 export function extractDomain(website: string): string {
-  return website
-    .replace(/^https?:\/\//, "")
-    .replace(/^www\./, "")
-    .replace(/\/.*$/, "");
+  let result = website;
+
+  // Remove protocol (without regex to avoid ReDoS)
+  if (result.startsWith("https://")) {
+    result = result.slice(8);
+  } else if (result.startsWith("http://")) {
+    result = result.slice(7);
+  }
+
+  // Remove www. prefix
+  if (result.startsWith("www.")) {
+    result = result.slice(4);
+  }
+
+  // Remove path - use indexOf instead of regex to avoid polynomial backtracking
+  const slashIndex = result.indexOf("/");
+  if (slashIndex !== -1) {
+    result = result.slice(0, slashIndex);
+  }
+
+  return result;
 }
 
 /**
@@ -109,7 +126,13 @@ export function detectCountryCode(params: {
   if (params.vatNumber) {
     const match = params.vatNumber.match(/^([A-Z]{2})/i);
     if (match?.[1]) {
-      return match[1].toUpperCase();
+      const vatPrefix = match[1].toUpperCase();
+      // EU VAT prefixes map directly to country codes (except EL → GR, XI → GB)
+      const vatExceptions: Record<string, string> = {
+        EL: "GR", // Greece uses EL as VAT prefix but GR is the ISO country code
+        XI: "GB", // Northern Ireland post-Brexit uses XI prefix but is part of GB
+      };
+      return vatExceptions[vatPrefix] || vatPrefix;
     }
   }
 

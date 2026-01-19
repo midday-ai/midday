@@ -130,6 +130,11 @@ export async function enrichCustomer(
     timeoutController.abort(new Error("Enrichment timed out"));
   }, timeoutMs);
 
+  // Combine external signal with timeout signal so callers can cancel operations
+  const combinedSignal = externalSignal
+    ? AbortSignal.any([externalSignal, timeoutController.signal])
+    : timeoutController.signal;
+
   try {
     const domain = extractDomain(params.website);
 
@@ -140,7 +145,7 @@ export async function enrichCustomer(
       domain,
     );
 
-    if (externalSignal?.aborted) {
+    if (combinedSignal.aborted) {
       throw new Error("Enrichment cancelled");
     }
 
@@ -153,7 +158,7 @@ export async function enrichCustomer(
 
     const { text: researchText, steps } = await agent.generate({
       prompt,
-      abortSignal: timeoutController.signal,
+      abortSignal: combinedSignal,
     });
 
     const searchRounds = steps.filter((s) => s.toolCalls.length > 0).length;
@@ -165,7 +170,7 @@ export async function enrichCustomer(
       "chars",
     );
 
-    if (externalSignal?.aborted || timeoutController.signal.aborted) {
+    if (combinedSignal.aborted) {
       throw new Error("Enrichment cancelled");
     }
 
@@ -178,7 +183,7 @@ export async function enrichCustomer(
       model: google("gemini-2.0-flash"),
       schema: customerEnrichmentSchema,
       prompt: buildExtractionPrompt(params, researchText),
-      abortSignal: timeoutController.signal,
+      abortSignal: combinedSignal,
     });
 
     // ========================================
@@ -227,10 +232,27 @@ export async function enrichCustomer(
 // ============================================================================
 
 function extractDomain(website: string): string {
-  return website
-    .replace(/^https?:\/\//, "")
-    .replace(/^www\./, "")
-    .replace(/\/.*$/, "");
+  let result = website;
+
+  // Remove protocol (without regex to avoid ReDoS)
+  if (result.startsWith("https://")) {
+    result = result.slice(8);
+  } else if (result.startsWith("http://")) {
+    result = result.slice(7);
+  }
+
+  // Remove www. prefix
+  if (result.startsWith("www.")) {
+    result = result.slice(4);
+  }
+
+  // Remove path - use indexOf instead of regex to avoid polynomial backtracking
+  const slashIndex = result.indexOf("/");
+  if (slashIndex !== -1) {
+    result = result.slice(0, slashIndex);
+  }
+
+  return result;
 }
 
 function buildPrompt(params: EnrichCustomerParams, domain: string): string {
