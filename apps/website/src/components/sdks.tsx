@@ -833,7 +833,6 @@ if ($response->object !== null) {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <Link
-                href="https://github.com/midday-ai"
                 href={sdkRepos[activeTab]}
                 target="_blank"
                 rel="noopener noreferrer"
