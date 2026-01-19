@@ -124,7 +124,7 @@ const sections = [
 
 export default function DocsPage() {
   return (
-    <div className="min-h-[calc(100vh-200px)] pb-24">
+    <div className="min-h-[calc(100vh-200px)] pb-32 md:pb-24">
       {/* Hero with centered chat */}
       <DocsHomeHero />
 

@@ -82,7 +82,7 @@ export function HeroChatInput({ onSubmit }: HeroChatInputProps) {
   );
 
   return (
-    <div className="w-full max-w-xl mx-auto">
+    <div className="w-full max-w-xl mx-auto px-4 md:px-0">
       <form onSubmit={handleSubmit}>
         <div className="relative bg-[#F7F7F7] dark:bg-[#131313]">
           <input
@@ -92,7 +92,7 @@ export function HeroChatInput({ onSubmit }: HeroChatInputProps) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask anything"
-            className="w-full bg-transparent px-4 py-4 pr-12 text-sm outline-none placeholder:text-[rgba(102,102,102,0.5)]"
+            className="w-full bg-transparent px-4 py-3.5 md:py-4 pr-12 text-sm outline-none placeholder:text-[rgba(102,102,102,0.5)]"
           />
           <button
             type="submit"
@@ -104,8 +104,17 @@ export function HeroChatInput({ onSubmit }: HeroChatInputProps) {
         </div>
       </form>
 
-      {/* Animated Suggestions */}
-      <div className="mt-6 relative overflow-hidden group/suggestions animate-fade-blur-in">
+      {/* Mobile Suggestions - simple grid */}
+      <div className="mt-5 flex flex-wrap gap-1.5 justify-center md:hidden">
+        {["Create invoice", "Connect bank", "Track time", "View reports"].map(
+          (suggestion) => (
+            <SuggestionButton key={suggestion} suggestion={suggestion} />
+          ),
+        )}
+      </div>
+
+      {/* Animated Suggestions - desktop only */}
+      <div className="mt-6 relative overflow-hidden group/suggestions animate-fade-blur-in hidden md:block">
         {/* Gradient fade masks */}
         <div
           className="absolute inset-y-0 left-0 w-20 z-10 pointer-events-none"

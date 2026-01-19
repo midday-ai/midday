@@ -36,7 +36,9 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [rateLimitReset, setRateLimitReset] = useState<number | null>(null);
+    const [input, setInput] = useState("");
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
     const abortControllerRef = useRef<AbortController | null>(null);
     const initialMessageSent = useRef(false);
 
@@ -203,19 +205,21 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(
           )}
         >
           {/* Header */}
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
+          <div className="relative flex items-center justify-center md:justify-between px-6 py-5 border-b border-border">
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 hover:bg-secondary transition-colors"
+              className="absolute left-4 md:relative md:left-auto md:order-2 p-1.5 hover:bg-secondary transition-colors shrink-0"
             >
               <Icons.Close className="w-4 h-4" />
             </button>
-            <span className="text-sm font-medium">Ask Midday</span>
+            <h2 className="font-serif text-lg tracking-tight md:order-1">
+              Assistant
+            </h2>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-4 py-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="flex-1 overflow-y-auto px-6 py-8 pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {messages.length === 0 && !isLoading && (
               <div className="h-full flex items-center justify-center">
                 <div className="text-center">
@@ -268,12 +272,12 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(
                       ) : (
                         <Streamdown
                           isAnimating={isLoading}
-                          className="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0 space-y-3 [&>ul]:list-none [&>ul]:m-0 [&>ul]:p-0 [&>ol]:list-none [&>ol]:m-0 [&>ol]:p-0 [&>p]:leading-relaxed"
+                          className="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0 space-y-4"
                           components={{
                             a: ({ href, children }) => (
                               <Link
                                 href={href || "#"}
-                                className="underline underline-offset-2 hover:text-foreground"
+                                className="text-foreground underline underline-offset-2 hover:text-foreground/80"
                               >
                                 {children}
                               </Link>
@@ -282,24 +286,47 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(
                               <p className="leading-relaxed">{children}</p>
                             ),
                             ul: ({ children }) => (
-                              <ul className="list-none m-0 p-0 leading-relaxed">
-                                {children}
-                              </ul>
+                              <ul className="space-y-1.5 pl-4">{children}</ul>
                             ),
                             ol: ({ children }) => (
-                              <ol className="list-none m-0 p-0 leading-relaxed">
+                              <ol className="space-y-1.5 pl-4 list-decimal">
                                 {children}
                               </ol>
                             ),
                             li: ({ children }) => (
-                              <li className="py-0 my-0 leading-relaxed">
+                              <li className="leading-relaxed list-disc marker:text-muted-foreground/50">
                                 {children}
                               </li>
                             ),
+                            h1: ({ children }) => (
+                              <h1 className="font-serif text-lg text-foreground mt-6 mb-2">
+                                {children}
+                              </h1>
+                            ),
+                            h2: ({ children }) => (
+                              <h2 className="font-serif text-base text-foreground mt-5 mb-2">
+                                {children}
+                              </h2>
+                            ),
                             h3: ({ children }) => (
-                              <h3 className="font-medium text-sm text-primary tracking-wide">
+                              <h3 className="font-medium text-sm text-foreground mt-4 mb-1.5">
                                 {children}
                               </h3>
+                            ),
+                            strong: ({ children }) => (
+                              <strong className="font-medium text-foreground">
+                                {children}
+                              </strong>
+                            ),
+                            code: ({ children }) => (
+                              <code className="px-1.5 py-0.5 bg-secondary text-foreground text-xs font-mono rounded">
+                                {children}
+                              </code>
+                            ),
+                            pre: ({ children }) => (
+                              <pre className="p-4 bg-secondary text-foreground text-xs font-mono rounded overflow-x-auto">
+                                {children}
+                              </pre>
                             ),
                           }}
                         >
@@ -349,6 +376,39 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(
               </div>
             )}
           </div>
+
+          {/* Input - shown when there are messages */}
+          {messages.length > 0 && (
+            <div className="border-t border-border px-4 py-4 bg-background">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!input.trim() || isLoading) return;
+                  sendMessageFn(input.trim());
+                  setInput("");
+                }}
+              >
+                <div className="relative bg-[#F7F7F7] dark:bg-[#131313]">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Ask a follow-up..."
+                    disabled={isLoading}
+                    className="w-full bg-transparent px-4 py-3 pr-12 text-sm outline-none placeholder:text-[rgba(102,102,102,0.5)] disabled:opacity-50"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!input.trim() || isLoading}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 size-7 flex items-center justify-center transition-colors bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                  >
+                    <Icons.ArrowUpward className="size-3.5" />
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
         </div>
       </>
     );

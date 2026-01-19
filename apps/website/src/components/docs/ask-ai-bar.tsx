@@ -7,7 +7,6 @@ type AskAiBarProps = {
   description?: string;
 };
 
-// Official OpenAI icon from Simple Icons
 function OpenAIIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -22,7 +21,6 @@ function OpenAIIcon({ className }: { className?: string }) {
   );
 }
 
-// Official Claude icon from Simple Icons (the starburst)
 function ClaudeIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -37,7 +35,6 @@ function ClaudeIcon({ className }: { className?: string }) {
   );
 }
 
-// Official Google Gemini icon from Simple Icons
 function GeminiIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -52,7 +49,6 @@ function GeminiIcon({ className }: { className?: string }) {
   );
 }
 
-// Official Grok icon
 function GrokIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -67,7 +63,6 @@ function GrokIcon({ className }: { className?: string }) {
   );
 }
 
-// Official Perplexity icon from Simple Icons
 function PerplexityIcon({ className }: { className?: string }) {
   return (
     <svg
