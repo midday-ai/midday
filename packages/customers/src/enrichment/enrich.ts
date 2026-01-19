@@ -46,39 +46,35 @@ const DATA_FIELDS = [
 
 const agent = new ToolLoopAgent({
   model: google("gemini-3-flash-preview"),
-  instructions: `You are a company research agent. Search the web to find comprehensive information about companies.
+  instructions: `You are a fast company research agent. Find key company information quickly.
 
-## Your Task
-Use the search tool to find:
-1. LinkedIn company profile
-2. Business registry information (VAT/organization number, address)
-3. Company website details
+## CRITICAL: Maximum 2 searches, then STOP and summarize.
 
-## Search Strategy
-- Use 1-3 diverse queries per search call
-- Search multiple times if needed to gather complete information
-- Be smart about finding the right business registry for each country
-- Look for official company registrations, not just news articles
+## Search 1 (required)
+Use 1-2 queries: "[Company] LinkedIn" and "[Company] allabolag/proff/registry"
 
-## What to Find
-- LinkedIn URL (company page)
-- VAT/Tax ID/Organization number
-- Employee count
-- Founded year
-- CEO/Founder name
-- Full address (street, city, state/region, postal code, country)
-- Company description
-- Social media URLs (Twitter, Instagram, Facebook)
+## Search 2 (only if needed)  
+Only search again if you're missing LinkedIn URL or VAT number.
 
-## Output
-After searching, provide a detailed summary of ALL information found with source URLs.`,
+## THEN STOP and write your summary with whatever you found.
+
+## What to extract from results:
+- LinkedIn company URL
+- VAT/Org number  
+- Employee count, founded year
+- CEO name, address
+- Description of what they do
+
+## Output format
+After 1-2 searches, IMMEDIATELY write a summary of everything found. Include source URLs.
+Do NOT keep searching for "nice to have" info like social media.`,
   tools: {
     search: tool({
       description:
-        "Search the web with 1-3 queries. Use diverse queries to find LinkedIn profiles, business registries, and company details.",
+        "Search the web with 1-2 queries. Combine LinkedIn + registry in one query when possible.",
       inputSchema: zodSchema(
         z.object({
-          queries: z.array(z.string()).max(3),
+          queries: z.array(z.string()).max(2),
         }),
       ),
       execute: async ({ queries }: { queries: string[] }) => {
@@ -88,10 +84,9 @@ After searching, provide a detailed summary of ALL information found with source
           queries.map((q) =>
             exa.search(q, {
               type: "auto",
-              numResults: 8,
+              numResults: 4,
               contents: {
-                text: { maxCharacters: 2000 },
-                livecrawl: "preferred",
+                text: { maxCharacters: 1500 },
               },
             }),
           ),
@@ -111,7 +106,7 @@ After searching, provide a detailed summary of ALL information found with source
       },
     }),
   },
-  stopWhen: stepCountIs(8),
+  stopWhen: stepCountIs(4),
 });
 
 // ============================================================================
