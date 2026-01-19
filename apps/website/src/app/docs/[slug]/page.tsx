@@ -1,5 +1,5 @@
+import { FloatingChatInput } from "@/components/docs/floating-chat-input";
 import { DocsMDX } from "@/components/docs/mdx";
-import { DocsSidebarToggle } from "@/components/docs/sidebar-toggle";
 import { docsNavigation, getAllDocSlugs, getDocBySlug } from "@/lib/docs";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
@@ -69,9 +69,9 @@ export default async function DocPage({ params }: { params: Params }) {
 
   return (
     <div className="min-h-[calc(100vh-200px)] pt-24 md:pt-32">
-      <DocsSidebarToggle navigation={docsNavigation} />
+      <FloatingChatInput navigation={docsNavigation} />
 
-      <div className="max-w-2xl mx-auto px-4 pb-24">
+      <div className="max-w-2xl mx-auto px-4 pb-32">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground mb-12">
           <Link
@@ -129,17 +129,6 @@ export default async function DocPage({ params }: { params: Params }) {
             )}
           </div>
         </nav>
-
-        {/* Back to assistant */}
-        <div className="mt-12 pt-8 border-t border-border text-center">
-          <Link
-            href="/docs"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <span>Have a question? Ask the assistant</span>
-            <Icons.ArrowForward className="w-4 h-4" />
-          </Link>
-        </div>
       </div>
     </div>
   );

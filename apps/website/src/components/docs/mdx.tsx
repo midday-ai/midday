@@ -2,7 +2,13 @@ import { cn } from "@midday/ui/cn";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import type {
+  AnchorHTMLAttributes,
+  ComponentProps,
+  HTMLAttributes,
+  ReactNode,
+} from "react";
+import remarkGfm from "remark-gfm";
 import { highlight } from "sugar-high";
 
 function slugify(str: string): string {
@@ -17,20 +23,20 @@ function slugify(str: string): string {
 }
 
 function createHeading(level: number) {
-  const Heading = ({ children }: { children: React.ReactNode }) => {
+  const Heading = ({ children }: { children: ReactNode }) => {
     const slug = slugify(children as string);
     const Tag = `h${level}` as keyof JSX.IntrinsicElements;
 
     return (
-      <Tag id={slug} className="group relative scroll-mt-24">
+      <Tag id={slug} className="group flex items-baseline scroll-mt-24">
         <a
           href={`#${slug}`}
-          className="absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+          className="-ml-5 w-5 -mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
           aria-label={`Link to ${children}`}
         >
           #
         </a>
-        {children}
+        <span>{children}</span>
       </Tag>
     );
   };
@@ -39,8 +45,7 @@ function createHeading(level: number) {
   return Heading;
 }
 
-interface CustomLinkProps
-  extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+interface CustomLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   href: string;
 }
 
@@ -97,7 +102,7 @@ function InlineCode({ children, className, ...props }: CodeProps) {
   );
 }
 
-function Pre({ children, ...props }: React.HTMLAttributes<HTMLPreElement>) {
+function Pre({ children, ...props }: HTMLAttributes<HTMLPreElement>) {
   return (
     <pre className="overflow-x-auto" {...props}>
       {children}
@@ -105,7 +110,7 @@ function Pre({ children, ...props }: React.HTMLAttributes<HTMLPreElement>) {
   );
 }
 
-interface ImageProps extends React.ComponentProps<typeof Image> {
+interface ImageProps extends ComponentProps<typeof Image> {
   alt: string;
 }
 
@@ -117,7 +122,7 @@ function DocImage(props: ImageProps) {
   );
 }
 
-function Blockquote({ children }: { children: React.ReactNode }) {
+function Blockquote({ children }: { children: ReactNode }) {
   return (
     <blockquote className="border-l-2 border-border pl-4 my-6 text-muted-foreground italic">
       {children}
@@ -129,60 +134,64 @@ function Hr() {
   return <hr className="my-12 border-border" />;
 }
 
-function OrderedList({ children }: { children: React.ReactNode }) {
+function OrderedList({ children }: { children: ReactNode }) {
   return <ol className="my-4 ml-4 list-decimal space-y-2">{children}</ol>;
 }
 
-function UnorderedList({ children }: { children: React.ReactNode }) {
+function UnorderedList({ children }: { children: ReactNode }) {
   return <ul className="my-4 ml-4 list-disc space-y-2">{children}</ul>;
 }
 
-function ListItem({ children }: { children: React.ReactNode }) {
+function ListItem({ children }: { children: ReactNode }) {
   return <li className="pl-1">{children}</li>;
 }
 
-function Paragraph({ children }: { children: React.ReactNode }) {
+function Paragraph({ children }: { children: ReactNode }) {
   return <p className="my-4 leading-7">{children}</p>;
 }
 
-function Strong({ children }: { children: React.ReactNode }) {
+function Strong({ children }: { children: ReactNode }) {
   return <strong className="font-medium text-foreground">{children}</strong>;
 }
 
 interface TableProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 function Table({ children }: TableProps) {
   return (
-    <div className="my-6 overflow-x-auto">
+    <div className="my-6 overflow-x-auto border border-border">
       <table className="w-full text-sm">{children}</table>
     </div>
   );
 }
 
-function TableHead({ children }: { children: React.ReactNode }) {
-  return <thead className="border-b border-border">{children}</thead>;
+function TableHead({ children }: { children: ReactNode }) {
+  return (
+    <thead className="bg-secondary/50 border-b border-border">{children}</thead>
+  );
 }
 
-function TableBody({ children }: { children: React.ReactNode }) {
+function TableBody({ children }: { children: ReactNode }) {
   return <tbody className="divide-y divide-border">{children}</tbody>;
 }
 
-function TableRow({ children }: { children: React.ReactNode }) {
-  return <tr>{children}</tr>;
+function TableRow({ children }: { children: ReactNode }) {
+  return (
+    <tr className="hover:bg-secondary/30 transition-colors">{children}</tr>
+  );
 }
 
-function TableHeader({ children }: { children: React.ReactNode }) {
+function TableHeader({ children }: { children: ReactNode }) {
   return (
-    <th className="py-3 pr-4 text-left font-medium text-foreground">
+    <th className="px-4 py-3 text-left font-medium text-foreground whitespace-nowrap">
       {children}
     </th>
   );
 }
 
-function TableCell({ children }: { children: React.ReactNode }) {
-  return <td className="py-3 pr-4 text-muted-foreground">{children}</td>;
+function TableCell({ children }: { children: ReactNode }) {
+  return <td className="px-4 py-3 text-muted-foreground">{children}</td>;
 }
 
 const components = {
@@ -230,12 +239,20 @@ export function DocsMDX({ source }: DocsMDXProps) {
         // Links
         "[&_a]:text-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:decoration-border hover:[&_a]:decoration-foreground [&_a]:transition-colors",
         // Code
-        "[&_code]:bg-secondary [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-sm [&_code]:text-foreground",
-        "[&_pre]:bg-secondary [&_pre]:border [&_pre]:border-border [&_pre]:p-4 [&_pre]:my-6",
-        "[&_pre_code]:bg-transparent [&_pre_code]:p-0",
+        "[&_code]:bg-secondary [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-sm [&_code]:text-foreground [&_code]:rounded-none",
+        "[&_pre]:bg-secondary [&_pre]:border [&_pre]:border-border [&_pre]:p-4 [&_pre]:my-6 [&_pre]:rounded-none",
+        "[&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:rounded-none",
       )}
     >
-      <MDXRemote source={source} components={components} />
+      <MDXRemote
+        source={source}
+        components={components}
+        options={{
+          mdxOptions: {
+            remarkPlugins: [remarkGfm],
+          },
+        }}
+      />
     </div>
   );
 }

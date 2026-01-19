@@ -1,0 +1,356 @@
+"use client";
+
+import { cn } from "@midday/ui/cn";
+import { Icons } from "@midday/ui/icons";
+import { TextShimmer } from "@midday/ui/text-shimmer";
+import Link from "next/link";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
+import { Streamdown } from "streamdown";
+
+type Message = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+};
+
+type ChatPanelProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  initialMessage?: string;
+};
+
+export type ChatPanelRef = {
+  sendMessage: (message: string) => void;
+};
+
+export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(
+  function ChatPanel({ isOpen, onClose, initialMessage }, ref) {
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [rateLimitReset, setRateLimitReset] = useState<number | null>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
+    const initialMessageSent = useRef(false);
+
+    useEffect(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+
+    // Disable body scroll when panel is open
+    useEffect(() => {
+      if (isOpen) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "";
+      }
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }, [isOpen]);
+
+    // Close on Escape key
+    useEffect(() => {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape" && isOpen) {
+          onClose();
+        }
+      };
+      document.addEventListener("keydown", handleKeyDown);
+      return () => document.removeEventListener("keydown", handleKeyDown);
+    }, [isOpen, onClose]);
+
+    // Send initial message when panel opens with a message
+    useEffect(() => {
+      if (
+        isOpen &&
+        initialMessage &&
+        !initialMessageSent.current &&
+        messages.length === 0
+      ) {
+        initialMessageSent.current = true;
+        sendMessageFn(initialMessage);
+      }
+    }, [isOpen, initialMessage]);
+
+    // Reset when panel closes
+    useEffect(() => {
+      if (!isOpen) {
+        initialMessageSent.current = false;
+      }
+    }, [isOpen]);
+
+    const sendMessageFn = useCallback(
+      async (userMessage: string) => {
+        if (!userMessage.trim() || isLoading) return;
+
+        setError(null);
+        setIsLoading(true);
+
+        const userMsg: Message = {
+          id: crypto.randomUUID(),
+          role: "user",
+          content: userMessage,
+        };
+
+        setMessages((prev) => [...prev, userMsg]);
+
+        abortControllerRef.current = new AbortController();
+
+        try {
+          const response = await fetch("/api/docs/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              messages: [...messages, userMsg].map((m) => ({
+                role: m.role,
+                content: m.content,
+              })),
+            }),
+            signal: abortControllerRef.current.signal,
+          });
+
+          if (response.status === 429) {
+            const resetHeader = response.headers.get("X-RateLimit-Reset");
+            setRateLimitReset(
+              resetHeader ? Number(resetHeader) : Date.now() + 3600000,
+            );
+            setIsLoading(false);
+            return;
+          }
+
+          if (!response.ok) {
+            throw new Error("Failed to send message");
+          }
+
+          const reader = response.body?.getReader();
+          const decoder = new TextDecoder();
+
+          if (!reader) {
+            throw new Error("No response body");
+          }
+
+          const assistantId = crypto.randomUUID();
+          let assistantContent = "";
+
+          setMessages((prev) => [
+            ...prev,
+            { id: assistantId, role: "assistant", content: "" },
+          ]);
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            assistantContent += chunk;
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantId ? { ...m, content: assistantContent } : m,
+              ),
+            );
+          }
+        } catch (err) {
+          if (err instanceof Error && err.name === "AbortError") {
+            return;
+          }
+          setError("Something went wrong. Please try again.");
+          console.error("Chat error:", err);
+        } finally {
+          setIsLoading(false);
+          abortControllerRef.current = null;
+        }
+      },
+      [isLoading, messages],
+    );
+
+    // Expose sendMessage to parent via ref
+    useImperativeHandle(
+      ref,
+      () => ({
+        sendMessage: sendMessageFn,
+      }),
+      [sendMessageFn],
+    );
+
+    const isRateLimited = rateLimitReset && rateLimitReset > Date.now();
+
+    return (
+      <>
+        {/* Backdrop for mobile */}
+        {isOpen && (
+          <div
+            className="fixed inset-0 bg-black/40 z-40 md:hidden"
+            onClick={onClose}
+          />
+        )}
+
+        {/* Panel */}
+        <div
+          className={cn(
+            "fixed top-0 right-0 bottom-0 z-50 w-full md:w-[480px] lg:w-[520px]",
+            "bg-background border-l border-border",
+            "transform transition-transform duration-300 ease-in-out",
+            "flex flex-col",
+            isOpen ? "translate-x-0" : "translate-x-full",
+          )}
+        >
+          {/* Header */}
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 hover:bg-secondary transition-colors"
+            >
+              <Icons.Close className="w-4 h-4" />
+            </button>
+            <span className="text-sm font-medium">Ask Midday</span>
+          </div>
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto px-4 py-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {messages.length === 0 && !isLoading && (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Ask anything about Midday
+                  </p>
+                  <div className="flex flex-wrap gap-1.5 justify-center max-w-md">
+                    {[
+                      "How do I create an invoice?",
+                      "Connect my bank",
+                      "Set up recurring invoices",
+                      "Track time on projects",
+                    ].map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        onClick={() => sendMessageFn(suggestion)}
+                        className="px-3 py-1.5 bg-secondary rounded-tl-full rounded-tr-full rounded-bl-full text-xs text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {(messages.length > 0 || isLoading) && (
+              <div className="space-y-4">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={cn(
+                      "flex items-end gap-2",
+                      message.role === "user"
+                        ? "justify-end"
+                        : "flex-row-reverse justify-end",
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "max-w-[80%] text-sm",
+                        message.role === "user"
+                          ? "bg-[#F7F7F7] dark:bg-[#131313] text-primary px-4 py-2 rounded-2xl rounded-br-none"
+                          : "text-[#666666] dark:text-[#878787]",
+                      )}
+                    >
+                      {message.role === "user" ? (
+                        message.content
+                      ) : (
+                        <Streamdown
+                          isAnimating={isLoading}
+                          className="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0 space-y-3 [&>ul]:list-none [&>ul]:m-0 [&>ul]:p-0 [&>ol]:list-none [&>ol]:m-0 [&>ol]:p-0 [&>p]:leading-relaxed"
+                          components={{
+                            a: ({ href, children }) => (
+                              <Link
+                                href={href || "#"}
+                                className="underline underline-offset-2 hover:text-foreground"
+                              >
+                                {children}
+                              </Link>
+                            ),
+                            p: ({ children }) => (
+                              <p className="leading-relaxed">{children}</p>
+                            ),
+                            ul: ({ children }) => (
+                              <ul className="list-none m-0 p-0 leading-relaxed">
+                                {children}
+                              </ul>
+                            ),
+                            ol: ({ children }) => (
+                              <ol className="list-none m-0 p-0 leading-relaxed">
+                                {children}
+                              </ol>
+                            ),
+                            li: ({ children }) => (
+                              <li className="py-0 my-0 leading-relaxed">
+                                {children}
+                              </li>
+                            ),
+                            h3: ({ children }) => (
+                              <h3 className="font-medium text-sm text-primary tracking-wide">
+                                {children}
+                              </h3>
+                            ),
+                          }}
+                        >
+                          {message.content}
+                        </Streamdown>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {isLoading &&
+                  messages[messages.length - 1]?.role === "user" && (
+                    <div className="flex items-center h-8">
+                      <TextShimmer
+                        className="text-xs font-normal"
+                        duration={0.75}
+                      >
+                        Thinking...
+                      </TextShimmer>
+                    </div>
+                  )}
+
+                <div ref={messagesEndRef} />
+              </div>
+            )}
+
+            {/* Error */}
+            {error && (
+              <p className="text-sm text-destructive mt-6 text-center">
+                {error}
+              </p>
+            )}
+
+            {/* Rate limit */}
+            {isRateLimited && (
+              <div className="text-center py-8">
+                <p className="text-sm text-muted-foreground">
+                  Rate limit reached. Try again later or{" "}
+                  <Link
+                    href="/docs"
+                    className="underline hover:text-foreground"
+                  >
+                    browse the docs
+                  </Link>
+                  .
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </>
+    );
+  },
+);

@@ -1,3 +1,4 @@
+import { DocsChatProvider } from "@/components/docs/docs-chat-provider";
 import type { ReactNode } from "react";
 
 export const metadata = {
@@ -6,5 +7,5 @@ export const metadata = {
 };
 
 export default function DocsLayout({ children }: { children: ReactNode }) {
-  return <>{children}</>;
+  return <DocsChatProvider>{children}</DocsChatProvider>;
 }

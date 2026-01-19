@@ -1,0 +1,258 @@
+---
+title: Invoice Settings
+description: Configure your invoice templates, branding, and payment details.
+section: invoicing
+order: 5
+---
+
+Customize your invoices to match your brand and include all the details your customers need. These settings apply to all invoices you create.
+
+## Access invoice settings
+
+1. Go to [Settings](https://app.midday.ai/settings)
+2. Find the Invoice section
+3. Configure your preferences
+
+## Branding
+
+### Logo
+
+Add your company logo to appear on all invoices:
+
+1. Click **Upload logo**
+2. Select an image file (PNG, JPG, or SVG recommended)
+3. Your logo appears in the header of all invoices
+
+**Tips for logos**:
+- Use a high-resolution image (at least 200px wide)
+- Transparent PNG works best
+- Square or horizontal logos display well
+
+### Company details
+
+Your business information appears on every invoice:
+
+- **Company name**: Your legal business name
+- **Address**: Your business address
+- **Email**: Contact email for invoice queries
+- **Phone**: Optional contact number
+- **Website**: Optional company website
+- **VAT/Tax ID**: Your tax identification number
+
+Set these in [Settings](https://app.midday.ai/settings) under company information.
+
+## Invoice numbering
+
+### Automatic numbering
+
+Midday auto-generates invoice numbers sequentially:
+
+- Format: INV-0001, INV-0002, etc.
+- Increments automatically with each invoice
+- Ensures no duplicate numbers
+
+### Custom prefix
+
+Customize the invoice number prefix:
+
+1. Go to invoice settings
+2. Change the prefix (e.g., "MID-" instead of "INV-")
+3. All new invoices use this prefix
+
+### Manual override
+
+You can change individual invoice numbers when creating:
+
+1. Create or edit an invoice
+2. Click on the invoice number
+3. Enter your custom number
+4. Ensure it's unique
+
+## Payment details
+
+### Bank transfer details
+
+Add your bank account information for wire/transfer payments:
+
+- **Bank name**: Your bank's name
+- **Account number**: Your account number
+- **Routing number**: Bank routing/sort code
+- **IBAN**: For international transfers
+- **SWIFT/BIC**: For international transfers
+
+These details appear on the invoice so customers know where to send payment.
+
+### Multiple payment methods
+
+You can include:
+
+- Bank transfer details
+- Online payment via Stripe (if connected)
+- Other payment instructions in the notes
+
+## Online payments (Stripe)
+
+Connect Stripe to let customers pay invoices online with a credit card.
+
+### Connect Stripe
+
+1. Go to invoice settings
+2. Click **Connect Stripe**
+3. Sign in to your Stripe account (or create one)
+4. Complete the connection
+
+### How it works
+
+Once connected:
+
+- All invoices include a **Pay** button
+- Customers pay via Stripe's secure checkout
+- The invoice automatically marks as paid
+- Funds deposit to your bank account (minus Stripe fees)
+
+### Fees
+
+Stripe charges standard processing fees (typically 2.9% + $0.30 per transaction). Midday doesn't charge additional payment fees.
+
+[Full guide: Accept online payments →](/docs/accept-online-payments)
+
+## Default settings
+
+### Payment terms
+
+Set the default due date for new invoices:
+
+- **Due on receipt**: Payment expected immediately
+- **Net 7**: Due 7 days from invoice date
+- **Net 15**: Due 15 days from invoice date
+- **Net 30**: Due 30 days from invoice date (most common)
+- **Net 60**: Due 60 days from invoice date
+- **Custom**: Set your own number of days
+
+You can change this per invoice when needed.
+
+### Currency
+
+Set your default invoice currency:
+
+- New invoices use this currency by default
+- You can change currency per invoice
+- Multiple currencies are supported
+
+### Tax/VAT
+
+Configure default tax settings:
+
+- **Tax rate**: Default percentage to apply
+- **Tax name**: What to call it (VAT, GST, Sales Tax, etc.)
+- **Tax ID display**: Show your tax ID on invoices
+
+These can be overridden per invoice or per line item.
+
+## Invoice templates
+
+### Built-in templates
+
+Midday includes professional templates that work for most businesses. Your branding (logo, colors, details) applies automatically.
+
+### Template customization
+
+Customize how your invoices look:
+
+- **Color scheme**: Match your brand colors
+- **Layout preferences**: Adjust what information displays where
+- **Footer content**: Custom text at the bottom
+
+## Notes and terms
+
+### Default notes
+
+Add text that appears on every invoice:
+
+- Thank you messages
+- Payment instructions
+- Terms and conditions
+- Late payment policies
+
+Example:
+> Thank you for your business. Payment is due within 30 days. Late payments may incur a 1.5% monthly fee.
+
+### Per-invoice notes
+
+You can add or edit notes on individual invoices for customer-specific messages.
+
+## Products/Services catalog
+
+Save commonly used line items:
+
+1. Go to [Invoices → Products](https://app.midday.ai/invoices/products)
+2. Add products or services you invoice frequently
+3. Include name, description, and default price
+4. Select from the catalog when creating invoices
+
+This saves time if you invoice the same items repeatedly.
+
+## Email settings
+
+### Invoice emails
+
+When you send an invoice, the email includes:
+
+- Your branding
+- Invoice summary
+- PDF attachment
+- Pay button (if Stripe is connected)
+
+### Customize email content
+
+The default email works well for most cases. The subject includes your company name and invoice number.
+
+## Reminders
+
+### Automatic reminders
+
+Set up reminders for unpaid invoices:
+
+- Before due date (e.g., 3 days before)
+- On due date
+- After due date (e.g., 7 days overdue)
+
+Configure in invoice settings.
+
+### Manual reminders
+
+Send reminders manually from any unpaid invoice:
+
+1. Open the invoice
+2. Click **Send reminder**
+3. Customer receives a reminder email
+
+## Best practices
+
+1. **Complete your profile first**: Set up branding and payment details before sending invoices
+2. **Use consistent numbering**: Don't skip numbers or use duplicates
+3. **Include payment details**: Make it easy for customers to pay
+4. **Enable online payments**: Customers pay faster when it's easy
+5. **Set appropriate terms**: Net 30 is standard; adjust for your industry
+6. **Add clear notes**: Include any terms or late payment policies
+
+## Troubleshooting
+
+### Logo not displaying
+
+- Check file format (PNG, JPG, SVG)
+- Ensure file size isn't too large
+- Try re-uploading
+
+### Invoice numbering reset
+
+- Invoice numbers are unique and don't reset
+- Contact support if you need to adjust the sequence
+
+### Payment details not showing
+
+- Verify bank details are entered in settings
+- Check that the invoice isn't set to online-only payment
+
+[Create an invoice →](/docs/create-invoice)
+[Set up recurring invoices →](/docs/set-up-recurring-invoice)

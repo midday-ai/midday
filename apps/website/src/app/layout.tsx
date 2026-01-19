@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Provider as Analytics } from "@midday/events/client";
 import type { Metadata } from "next";
 import { Hedvig_Letters_Sans, Hedvig_Letters_Serif } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { ReactElement } from "react";
 import { baseUrl } from "./sitemap";
 
@@ -109,19 +110,21 @@ export default function Layout({ children }: { children: ReactElement }) {
           "bg-background overflow-x-hidden font-sans antialiased",
         )}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Header />
-          <main className="container mx-auto px-4 overflow-hidden md:overflow-visible">
-            {children}
-          </main>
-          <Footer />
-          <Analytics />
-        </ThemeProvider>
+        <NuqsAdapter>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Header />
+            <main className="container mx-auto px-4 overflow-hidden md:overflow-visible">
+              {children}
+            </main>
+            <Footer />
+            <Analytics />
+          </ThemeProvider>
+        </NuqsAdapter>
       </body>
     </html>
   );

@@ -1,6 +1,6 @@
+import { openai } from "@ai-sdk/openai";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
-import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
 
 const redis = Redis.fromEnv();
@@ -36,46 +36,53 @@ Key product details:
 - The inbox accepts receipts via email forwarding or connected email accounts
 
 Keep answers concise and actionable. Use numbered steps for how-to questions.
-When helpful, reference specific docs pages using markdown links like [Connect Bank](/docs/connect-bank-account).
+When referencing documentation, mention the page name naturally (e.g., "check the Invoicing guide" or "see the Connect Bank documentation") without using markdown link syntax.
 If you don't know something specific about Midday, say so rather than guessing.
 Don't make up features that don't exist.`;
 
 export async function POST(req: Request) {
-  // Rate limit by IP
-  const forwarded = req.headers.get("x-forwarded-for");
-  const ip = forwarded ? forwarded.split(",")[0]?.trim() : "127.0.0.1";
+  const isDev = process.env.NODE_ENV === "development";
 
-  const { success, remaining, reset } = await ratelimit.limit(
-    ip ?? "127.0.0.1",
-  );
+  let remaining = 999;
+  let reset = Date.now() + 3600000;
 
-  if (!success) {
-    return new Response(
-      JSON.stringify({
-        error: "Rate limit exceeded. Try again later.",
-        remaining: 0,
-        resetAt: reset,
-      }),
-      {
-        status: 429,
-        headers: {
-          "Content-Type": "application/json",
-          "X-RateLimit-Remaining": remaining.toString(),
-          "X-RateLimit-Reset": reset.toString(),
+  // Skip rate limiting in development
+  if (!isDev) {
+    const forwarded = req.headers.get("x-forwarded-for");
+    const ip = forwarded ? forwarded.split(",")[0]?.trim() : "127.0.0.1";
+
+    const result = await ratelimit.limit(ip ?? "127.0.0.1");
+    remaining = result.remaining;
+    reset = result.reset;
+
+    if (!result.success) {
+      return new Response(
+        JSON.stringify({
+          error: "Rate limit exceeded. Try again later.",
+          remaining: 0,
+          resetAt: reset,
+        }),
+        {
+          status: 429,
+          headers: {
+            "Content-Type": "application/json",
+            "X-RateLimit-Remaining": remaining.toString(),
+            "X-RateLimit-Reset": reset.toString(),
+          },
         },
-      },
-    );
+      );
+    }
   }
 
   const { messages } = await req.json();
 
-  const result = streamText({
+  const result = await streamText({
     model: openai("gpt-4o-mini"),
     system: DOCS_SYSTEM_PROMPT,
     messages,
   });
 
-  return result.toDataStreamResponse({
+  return result.toTextStreamResponse({
     headers: {
       "X-RateLimit-Remaining": remaining.toString(),
       "X-RateLimit-Reset": reset.toString(),
