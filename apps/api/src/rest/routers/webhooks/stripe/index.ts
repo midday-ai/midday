@@ -4,9 +4,11 @@ import {
   getInvoiceById,
   getInvoiceByPaymentIntentId,
   getTeamByStripeAccountId,
+  getTeamByStripeCustomerId,
   updateInvoice,
   updateTeamById,
 } from "@midday/db/queries";
+import { getPlanByStripePriceId } from "@midday/plans";
 import { triggerJob } from "@midday/job-client";
 import { logger } from "@midday/logger";
 import { HTTPException } from "hono/http-exception";
@@ -25,7 +27,7 @@ app.openapi(
     summary: "Stripe webhook handler",
     operationId: "stripeWebhook",
     description:
-      "Handles Stripe webhook events for invoice payments. Verifies webhook signature and processes payment events.",
+      "Handles Stripe webhook events for subscription billing and invoice payments. Verifies webhook signature and processes payment and subscription events.",
     tags: ["Webhooks"],
     responses: {
       200: {
@@ -51,9 +53,13 @@ app.openapi(
       });
     }
 
-    const webhookSecret = process.env.STRIPE_CONNECT_WEBHOOK_SECRET;
+    // Try subscription webhook secret first, fall back to connect webhook secret
+    const webhookSecret =
+      process.env.STRIPE_WEBHOOK_SECRET ||
+      process.env.STRIPE_CONNECT_WEBHOOK_SECRET;
+
     if (!webhookSecret) {
-      logger.error("STRIPE_CONNECT_WEBHOOK_SECRET not configured");
+      logger.error("STRIPE_WEBHOOK_SECRET not configured");
       throw new HTTPException(500, {
         message: "Webhook secret not configured",
       });
@@ -84,6 +90,229 @@ app.openapi(
 
     try {
       switch (event.type) {
+        // ==========================================
+        // SUBSCRIPTION BILLING EVENTS
+        // ==========================================
+
+        case "checkout.session.completed": {
+          const session = event.data.object as Stripe.Checkout.Session;
+
+          // Only handle subscription checkouts
+          if (session.mode !== "subscription") {
+            logger.debug("Ignoring non-subscription checkout session", {
+              sessionId: session.id,
+              mode: session.mode,
+            });
+            break;
+          }
+
+          const teamId = session.metadata?.teamId;
+          const customerId = session.customer as string;
+          const subscriptionId = session.subscription as string;
+
+          if (!teamId) {
+            logger.warn("Checkout session missing teamId metadata", {
+              sessionId: session.id,
+            });
+            break;
+          }
+
+          // Fetch subscription to get price details
+          const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          const priceId = subscription.items.data[0]?.price.id;
+          const plan = priceId ? getPlanByStripePriceId(priceId) : null;
+
+          if (!plan) {
+            logger.warn("Could not determine plan from subscription", {
+              subscriptionId,
+              priceId,
+            });
+            break;
+          }
+
+          // Update team with subscription details and plan
+          await updateTeamById(db, {
+            id: teamId,
+            data: {
+              stripeCustomerId: customerId,
+              stripeSubscriptionId: subscriptionId,
+              stripePriceId: priceId,
+              plan: plan,
+              subscriptionStatus: "active",
+              canceledAt: null,
+            },
+          });
+
+          logger.info("Team subscription activated via checkout", {
+            teamId,
+            plan,
+            subscriptionId,
+          });
+
+          break;
+        }
+
+        case "customer.subscription.updated": {
+          const subscription = event.data.object as Stripe.Subscription;
+          const customerId = subscription.customer as string;
+          const priceId = subscription.items.data[0]?.price.id;
+
+          // Find team by Stripe customer ID
+          const team = await getTeamByStripeCustomerId(db, customerId);
+
+          if (!team) {
+            logger.warn("No team found for Stripe customer", {
+              customerId,
+              subscriptionId: subscription.id,
+            });
+            break;
+          }
+
+          const plan = priceId ? getPlanByStripePriceId(priceId) : null;
+
+          // Determine subscription status
+          let subscriptionStatus: "active" | "past_due" | null = null;
+          if (subscription.status === "active" || subscription.status === "trialing") {
+            subscriptionStatus = "active";
+          } else if (subscription.status === "past_due") {
+            subscriptionStatus = "past_due";
+          }
+
+          // Check if subscription is canceled
+          const isCanceled = subscription.cancel_at_period_end ||
+            subscription.status === "canceled";
+
+          await updateTeamById(db, {
+            id: team.id,
+            data: {
+              stripeSubscriptionId: subscription.id,
+              stripePriceId: priceId,
+              plan: plan ?? team.plan,
+              subscriptionStatus,
+              canceledAt: isCanceled ? new Date().toISOString() : null,
+            },
+          });
+
+          logger.info("Team subscription updated", {
+            teamId: team.id,
+            plan,
+            status: subscription.status,
+            cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          });
+
+          break;
+        }
+
+        case "customer.subscription.deleted": {
+          const subscription = event.data.object as Stripe.Subscription;
+          const customerId = subscription.customer as string;
+
+          // Find team by Stripe customer ID
+          const team = await getTeamByStripeCustomerId(db, customerId);
+
+          if (!team) {
+            logger.warn("No team found for Stripe customer on deletion", {
+              customerId,
+              subscriptionId: subscription.id,
+            });
+            break;
+          }
+
+          // Downgrade team to trial when subscription is deleted
+          await updateTeamById(db, {
+            id: team.id,
+            data: {
+              stripeSubscriptionId: null,
+              stripePriceId: null,
+              plan: "trial",
+              subscriptionStatus: null,
+              canceledAt: new Date().toISOString(),
+            },
+          });
+
+          logger.info("Team subscription deleted, downgraded to trial", {
+            teamId: team.id,
+            subscriptionId: subscription.id,
+          });
+
+          break;
+        }
+
+        case "invoice.payment_failed": {
+          const invoice = event.data.object as Stripe.Invoice;
+          const customerId = invoice.customer as string;
+          const subscriptionId = invoice.subscription as string;
+
+          // Find team by Stripe customer ID
+          const team = await getTeamByStripeCustomerId(db, customerId);
+
+          if (!team) {
+            logger.warn("No team found for failed invoice payment", {
+              customerId,
+              invoiceId: invoice.id,
+            });
+            break;
+          }
+
+          // Mark subscription as past_due but don't revoke access yet
+          // Stripe will continue to retry payments
+          await updateTeamById(db, {
+            id: team.id,
+            data: {
+              subscriptionStatus: "past_due",
+            },
+          });
+
+          logger.info("Team subscription marked as past_due due to failed payment", {
+            teamId: team.id,
+            invoiceId: invoice.id,
+            subscriptionId,
+          });
+
+          // TODO: Optionally trigger notification to team about failed payment
+
+          break;
+        }
+
+        case "invoice.paid": {
+          const invoice = event.data.object as Stripe.Invoice;
+          const customerId = invoice.customer as string;
+
+          // Find team by Stripe customer ID
+          const team = await getTeamByStripeCustomerId(db, customerId);
+
+          if (!team) {
+            // This might be a non-subscription invoice or a new customer
+            logger.debug("No team found for paid invoice", {
+              customerId,
+              invoiceId: invoice.id,
+            });
+            break;
+          }
+
+          // Ensure subscription is marked as active after successful payment
+          if (team.subscriptionStatus === "past_due") {
+            await updateTeamById(db, {
+              id: team.id,
+              data: {
+                subscriptionStatus: "active",
+              },
+            });
+
+            logger.info("Team subscription restored to active after payment", {
+              teamId: team.id,
+              invoiceId: invoice.id,
+            });
+          }
+
+          break;
+        }
+
+        // ==========================================
+        // INVOICE PAYMENT EVENTS (Stripe Connect)
+        // ==========================================
+
         case "payment_intent.succeeded": {
           const paymentIntent = event.data.object as Stripe.PaymentIntent;
           const invoiceId = paymentIntent.metadata?.invoice_id;

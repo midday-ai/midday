@@ -37,13 +37,16 @@ export const getTeamById = async (db: Database, id: string) => {
       email: teams.email,
       inboxId: teams.inboxId,
       plan: teams.plan,
-      // subscriptionStatus: teams.subscriptionStatus,
+      subscriptionStatus: teams.subscriptionStatus,
       baseCurrency: teams.baseCurrency,
       countryCode: teams.countryCode,
       fiscalYearStartMonth: teams.fiscalYearStartMonth,
       exportSettings: teams.exportSettings,
       stripeAccountId: teams.stripeAccountId,
       stripeConnectStatus: teams.stripeConnectStatus,
+      stripeCustomerId: teams.stripeCustomerId,
+      stripeSubscriptionId: teams.stripeSubscriptionId,
+      stripePriceId: teams.stripePriceId,
     })
     .from(teams)
     .where(eq(teams.id, id));
@@ -60,6 +63,34 @@ export const getTeamByInboxId = async (db: Database, inboxId: string) => {
     })
     .from(teams)
     .where(eq(teams.inboxId, inboxId))
+    .limit(1);
+
+  return result;
+};
+
+/**
+ * Get a team by their Stripe Customer ID.
+ * Used by webhooks to find which team a subscription belongs to.
+ *
+ * @param db - Database instance
+ * @param stripeCustomerId - The Stripe customer ID (cus_xxx)
+ * @returns The team if found, undefined otherwise
+ */
+export const getTeamByStripeCustomerId = async (
+  db: Database,
+  stripeCustomerId: string,
+) => {
+  const [result] = await db
+    .select({
+      id: teams.id,
+      name: teams.name,
+      plan: teams.plan,
+      stripeCustomerId: teams.stripeCustomerId,
+      stripeSubscriptionId: teams.stripeSubscriptionId,
+      stripePriceId: teams.stripePriceId,
+    })
+    .from(teams)
+    .where(eq(teams.stripeCustomerId, stripeCustomerId))
     .limit(1);
 
   return result;

@@ -3,16 +3,19 @@ import {
   getBillingOrdersSchema,
 } from "@api/schemas/billing";
 import { createTRPCRouter, protectedProcedure } from "@api/trpc/init";
-import { api } from "@api/utils/polar";
-import { getTeamById } from "@midday/db/queries";
-import { getDiscount, getPlans } from "@midday/plans";
+import { getTeamById, updateTeamById } from "@midday/db/queries";
+import { getStripePriceId, STRIPE_PRICES } from "@midday/plans";
 import { z } from "zod";
+import Stripe from "stripe";
+
+// Initialize Stripe client
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export const billingRouter = createTRPCRouter({
   createCheckout: protectedProcedure
     .input(createCheckoutSchema)
-    .mutation(async ({ input, ctx: { db, session, teamId, geo } }) => {
-      const { plan, planType, embedOrigin } = input;
+    .mutation(async ({ input, ctx: { db, session, teamId } }) => {
+      const { plan } = input;
 
       // Get team data
       const team = await getTeamById(db, teamId!);
@@ -21,84 +24,121 @@ export const billingRouter = createTRPCRouter({
         throw new Error("Team not found");
       }
 
-      // Get plan configuration
-      const plans = getPlans();
-      const selectedPlan = plans[plan as keyof typeof plans];
+      // Get Stripe price ID for the selected plan
+      const priceId = getStripePriceId(plan);
 
-      if (!selectedPlan) {
+      if (!priceId) {
         throw new Error("Invalid plan");
       }
 
-      // Get discount if applicable
-      const discountId = getDiscount(planType);
+      // Get or create Stripe customer
+      let customerId = team.stripeCustomerId;
 
-      // Get country code from team or geo context
-      const countryCode = team.countryCode ?? geo?.country;
+      if (!customerId) {
+        // Create a new Stripe customer
+        const customer = await stripe.customers.create({
+          email: session.user.email ?? undefined,
+          name: team.name ?? undefined,
+          metadata: {
+            teamId: team.id,
+          },
+        });
 
-      // Create Polar checkout
-      const checkout = await api.checkouts.create({
-        products: [selectedPlan.id],
-        externalCustomerId: team.id,
-        customerEmail: session.user.email ?? undefined,
-        customerName: team.name ?? undefined,
-        customerBillingAddress: countryCode
-          ? { country: countryCode as never }
-          : undefined,
-        discountId: discountId?.id,
+        customerId = customer.id;
+
+        // Save the customer ID to the team
+        await updateTeamById(db, {
+          id: team.id,
+          data: {
+            stripeCustomerId: customerId,
+          },
+        });
+      }
+
+      // Determine success and cancel URLs
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.abacus.com";
+      const successUrl = `${baseUrl}/settings/billing?success=true`;
+      const cancelUrl = `${baseUrl}/settings/billing?canceled=true`;
+
+      // Create Stripe Checkout Session
+      const checkoutSession = await stripe.checkout.sessions.create({
+        customer: customerId,
+        mode: "subscription",
+        line_items: [
+          {
+            price: priceId,
+            quantity: 1,
+          },
+        ],
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        subscription_data: {
+          metadata: {
+            teamId: team.id,
+          },
+        },
         metadata: {
           teamId: team.id,
-          companyName: team.name ?? "",
+          plan,
         },
-        embedOrigin,
+        // Allow promotion codes for discounts
+        allow_promotion_codes: true,
+        // Collect billing address for tax purposes
+        billing_address_collection: "auto",
+        // Configure automatic tax if enabled
+        automatic_tax: { enabled: false },
       });
 
-      return { url: checkout.url };
+      if (!checkoutSession.url) {
+        throw new Error("Failed to create checkout session");
+      }
+
+      return { url: checkoutSession.url };
     }),
 
   orders: protectedProcedure
     .input(getBillingOrdersSchema)
-    .query(async ({ input, ctx: { teamId } }) => {
+    .query(async ({ input, ctx: { db, teamId } }) => {
       try {
-        const customer = await api.customers.getExternal({
-          externalId: teamId!,
-        });
+        // Get team data to find Stripe customer ID
+        const team = await getTeamById(db, teamId!);
 
-        const ordersResult = await api.orders.list({
-          customerId: customer.id,
-          page: input.cursor ? Number(input.cursor) : 1,
+        if (!team?.stripeCustomerId) {
+          return {
+            data: [],
+            meta: {
+              hasNextPage: false,
+              cursor: undefined,
+            },
+          };
+        }
+
+        // Fetch invoices from Stripe
+        const invoices = await stripe.invoices.list({
+          customer: team.stripeCustomerId,
           limit: input.pageSize,
-        });
-
-        const orders = ordersResult.result.items;
-        const pagination = ordersResult.result.pagination;
-
-        // Filter orders to only include those where metadata.teamId matches teamId
-        const filteredOrders = orders.filter((order) => {
-          const organizationId = order.metadata?.teamId;
-          return organizationId === teamId;
+          starting_after: input.cursor || undefined,
         });
 
         return {
-          data: filteredOrders.map((order) => ({
-            id: order.id,
-            createdAt: order.createdAt,
+          data: invoices.data.map((invoice) => ({
+            id: invoice.id,
+            createdAt: new Date(invoice.created * 1000).toISOString(),
             amount: {
-              amount: order.totalAmount,
-              currency: order.currency,
+              amount: invoice.amount_paid,
+              currency: invoice.currency.toUpperCase(),
             },
-            status: order.status,
+            status: invoice.status,
             product: {
-              name: order.product?.name || "Subscription",
+              name: invoice.lines.data[0]?.description || "Subscription",
             },
-            invoiceId: order.isInvoiceGenerated ? order.id : null,
+            invoiceId: invoice.id,
           })),
           meta: {
-            hasNextPage:
-              (input.cursor ? Number(input.cursor) : 1) < pagination.maxPage,
-            cursor:
-              (input.cursor ? Number(input.cursor) : 1) < pagination.maxPage
-                ? ((input.cursor ? Number(input.cursor) : 1) + 1).toString()
-                : undefined,
+            hasNextPage: invoices.has_more,
+            cursor: invoices.data.length > 0
+              ? invoices.data[invoices.data.length - 1]?.id
+              : undefined,
           },
         };
       } catch {
@@ -114,45 +154,33 @@ export const billingRouter = createTRPCRouter({
 
   getInvoice: protectedProcedure
     .input(z.string())
-    .mutation(async ({ input: orderId, ctx: { teamId } }) => {
+    .mutation(async ({ input: invoiceId, ctx: { db, teamId } }) => {
       try {
-        const order = await api.orders.get({
-          id: orderId,
-        });
+        // Get team data to verify ownership
+        const team = await getTeamById(db, teamId!);
 
-        // Verify the order belongs to the team's customer
-        if (order.customer.externalId !== teamId) {
-          throw new Error("Order not found or not authorized");
+        if (!team?.stripeCustomerId) {
+          throw new Error("No billing account found");
         }
 
-        // If invoice doesn't exist, generate it
-        if (!order.isInvoiceGenerated) {
-          await api.orders.generateInvoice({
-            id: orderId,
-          });
+        // Fetch the invoice from Stripe
+        const invoice = await stripe.invoices.retrieve(invoiceId);
 
-          // Return status indicating generation is in progress
-          return {
-            status: "generating",
-          };
+        // Verify the invoice belongs to the team's customer
+        if (invoice.customer !== team.stripeCustomerId) {
+          throw new Error("Invoice not found or not authorized");
         }
 
-        // Try to get the invoice
-        try {
-          const invoice = await api.orders.invoice({
-            id: orderId,
-          });
-
+        if (invoice.invoice_pdf) {
           return {
             status: "ready",
-            downloadUrl: invoice.url,
-          };
-        } catch (invoiceError) {
-          // Invoice might still be generating
-          return {
-            status: "generating",
+            downloadUrl: invoice.invoice_pdf,
           };
         }
+
+        return {
+          status: "generating",
+        };
       } catch (error) {
         console.error("Failed to get invoice download URL:", error);
         throw new Error(
@@ -163,37 +191,37 @@ export const billingRouter = createTRPCRouter({
 
   checkInvoiceStatus: protectedProcedure
     .input(z.string())
-    .query(async ({ input: orderId, ctx: { teamId } }) => {
+    .query(async ({ input: invoiceId, ctx: { db, teamId } }) => {
       try {
-        const order = await api.orders.get({
-          id: orderId,
-        });
+        // Get team data to verify ownership
+        const team = await getTeamById(db, teamId!);
 
-        // Verify the order belongs to the team's customer
-        if (order.customer.externalId !== teamId) {
-          throw new Error("Order not found or not authorized");
-        }
-
-        if (!order.isInvoiceGenerated) {
+        if (!team?.stripeCustomerId) {
           return {
             status: "not_generated",
           };
         }
 
-        try {
-          const invoice = await api.orders.invoice({
-            id: orderId,
-          });
+        // Fetch the invoice from Stripe
+        const invoice = await stripe.invoices.retrieve(invoiceId);
 
+        // Verify the invoice belongs to the team's customer
+        if (invoice.customer !== team.stripeCustomerId) {
           return {
-            status: "ready",
-            downloadUrl: invoice.url,
-          };
-        } catch (invoiceError) {
-          return {
-            status: "generating",
+            status: "not_generated",
           };
         }
+
+        if (invoice.invoice_pdf) {
+          return {
+            status: "ready",
+            downloadUrl: invoice.invoice_pdf,
+          };
+        }
+
+        return {
+          status: "generating",
+        };
       } catch (error) {
         console.error("Failed to check invoice status:", error);
         throw new Error(
@@ -204,11 +232,60 @@ export const billingRouter = createTRPCRouter({
       }
     }),
 
-  getPortalUrl: protectedProcedure.mutation(async ({ ctx: { teamId } }) => {
-    const result = await api.customerSessions.create({
-      externalCustomerId: teamId!,
+  getPortalUrl: protectedProcedure.mutation(async ({ ctx: { db, teamId } }) => {
+    // Get team data
+    const team = await getTeamById(db, teamId!);
+
+    if (!team) {
+      throw new Error("Team not found");
+    }
+
+    if (!team.stripeCustomerId) {
+      throw new Error("No billing account found. Please subscribe to a plan first.");
+    }
+
+    // Determine return URL
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.abacus.com";
+    const returnUrl = `${baseUrl}/settings/billing`;
+
+    // Create Stripe Customer Portal session
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: team.stripeCustomerId,
+      return_url: returnUrl,
     });
 
-    return { url: result.customerPortalUrl };
+    return { url: portalSession.url };
+  }),
+
+  // Get current subscription details
+  getSubscription: protectedProcedure.query(async ({ ctx: { db, teamId } }) => {
+    const team = await getTeamById(db, teamId!);
+
+    if (!team?.stripeSubscriptionId) {
+      return null;
+    }
+
+    try {
+      const subscription = await stripe.subscriptions.retrieve(
+        team.stripeSubscriptionId,
+      );
+
+      const priceId = subscription.items.data[0]?.price.id;
+      const planConfig = Object.values(STRIPE_PRICES).find(
+        (p) => p.priceId === priceId,
+      );
+
+      return {
+        id: subscription.id,
+        status: subscription.status,
+        plan: planConfig?.key ?? null,
+        currentPeriodEnd: new Date(
+          subscription.current_period_end * 1000,
+        ).toISOString(),
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      };
+    } catch {
+      return null;
+    }
   }),
 });

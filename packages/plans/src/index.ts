@@ -2,6 +2,7 @@ const POLAR_ENVIRONMENT = process.env.POLAR_ENVIRONMENT as
   | "production"
   | "sandbox";
 
+// Legacy Polar plans - kept for reference during migration
 export const PLANS = {
   production: {
     starter: {
@@ -26,6 +27,26 @@ export const PLANS = {
       name: "Pro",
       key: "pro",
     },
+  },
+} as const;
+
+// Stripe subscription plans
+export const STRIPE_PRICES = {
+  starter: {
+    priceId: process.env.STRIPE_STARTER_PRICE_ID ?? "price_1Sr6f3BROJBOfZpmxgvC85AG",
+    productId: "prod_Tok9GyBgGAPdxZ",
+    name: "Starter",
+    key: "starter" as const,
+    amount: 39900, // $399 in cents
+    currency: "usd",
+  },
+  pro: {
+    priceId: process.env.STRIPE_PRO_PRICE_ID ?? "price_1Sr6g4BROJBOfZpmZgoC6JB4",
+    productId: "prod_Tok9vsaLyPHvLj",
+    name: "Pro",
+    key: "pro" as const,
+    amount: 49900, // $499 in cents
+    currency: "usd",
   },
 } as const;
 
@@ -62,6 +83,15 @@ export const getDiscount = (planType?: string | null) => {
 export const getPlans = () => {
   return PLANS[POLAR_ENVIRONMENT];
 };
+
+export function getStripePriceId(plan: PlanKey): string {
+  return STRIPE_PRICES[plan].priceId;
+}
+
+export function getPlanByStripePriceId(priceId: string): PlanKey | null {
+  const plan = Object.values(STRIPE_PRICES).find((p) => p.priceId === priceId);
+  return plan?.key ?? null;
+}
 
 export function getPlanByProductId(productId: string): PlanKey {
   const plans = getPlans();

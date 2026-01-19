@@ -1,6 +1,5 @@
 "use client";
 
-import { revalidateAfterCheckout } from "@/actions/revalidate-action";
 import { useTRPC } from "@/trpc/client";
 import { cn } from "@midday/ui/cn";
 import { SubmitButton } from "@midday/ui/submit-button";
@@ -10,131 +9,34 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Check } from "lucide-react";
-import { useTheme } from "next-themes";
-import { useEffect, useRef, useState } from "react";
-
-// Polling timeout in milliseconds (30 seconds)
-const POLLING_TIMEOUT_MS = 30_000;
+import { useState } from "react";
 
 export function Plans() {
   const [isSubmitting, setIsSubmitting] = useState(0);
-  const [isPollingForPlan, setIsPollingForPlan] = useState(false);
-  const isPollingRef = useRef(false); // Ref to track polling state for event handlers
-  const pollingStartedAtRef = useRef<number | null>(null);
   const trpc = useTRPC();
-  const checkoutInstanceRef = useRef<Awaited<
-    ReturnType<typeof PolarEmbedCheckout.create>
-  > | null>(null);
 
-  // Poll for plan update after checkout success
-  const { data: user } = useQuery({
-    ...trpc.user.me.queryOptions(),
-    refetchInterval: (query) => {
-      if (!isPollingForPlan) return false;
-
-      // Plan updated - stop polling
-      // Must explicitly check plan exists to avoid false positives when query returns undefined
-      const plan = query.state.data?.team?.plan;
-      if (plan && plan !== "trial") {
-        return false;
-      }
-
-      // Timeout exceeded - stop polling
-      if (
-        pollingStartedAtRef.current &&
-        Date.now() - pollingStartedAtRef.current > POLLING_TIMEOUT_MS
-      ) {
-        return false;
-      }
-
-      return 1500;
-    },
-  });
   const { data, isLoading } = useQuery(trpc.team.availablePlans.queryOptions());
-  const theme = useTheme().resolvedTheme === "dark" ? "dark" : "light";
-
-  // Initialize PolarEmbedCheckout on mount
-  useEffect(() => {
-    PolarEmbedCheckout.init();
-  }, []);
-
-  // Clean up checkout instance on unmount
-  useEffect(() => {
-    return () => {
-      if (checkoutInstanceRef.current) {
-        checkoutInstanceRef.current.close();
-      }
-    };
-  }, []);
-
-  // Handle polling completion (success or timeout)
-  useEffect(() => {
-    if (!isPollingForPlan) return;
-
-    const isTimedOut =
-      pollingStartedAtRef.current &&
-      Date.now() - pollingStartedAtRef.current > POLLING_TIMEOUT_MS;
-    // Must explicitly check plan exists to avoid false positives when user data is undefined
-    const plan = user?.team?.plan;
-    const planUpdated = plan != null && plan !== "trial";
-
-    if (planUpdated || isTimedOut) {
-      pollingStartedAtRef.current = null;
-      setIsPollingForPlan(false);
-      isPollingRef.current = false;
-
-      if (isTimedOut && !planUpdated) {
-        setIsSubmitting(0);
-      }
-
-      // Revalidate in both cases - webhook may have succeeded but cache is stale
-      revalidateAfterCheckout();
-    }
-  }, [isPollingForPlan, user?.team?.plan]);
 
   const createCheckoutMutation = useMutation(
     trpc.billing.createCheckout.mutationOptions(),
   );
 
-  const handleCheckout = async (plan: "starter" | "pro", planType: string) => {
+  const handleCheckout = async (plan: "starter" | "pro") => {
     try {
       setIsSubmitting(plan === "starter" ? 1 : 2);
 
       const { url } = await createCheckoutMutation.mutateAsync({
         plan,
-        planType,
+        planType: plan,
         embedOrigin: window.location.origin,
       });
 
-      const checkout = await PolarEmbedCheckout.create(url, theme);
-      checkoutInstanceRef.current = checkout;
-
-      // Handle checkout events
-      checkout.addEventListener("success", (event: any) => {
-        // Prevent Polar's automatic redirect
-        event.preventDefault();
-        // Start polling for plan update with timestamp for timeout
-        pollingStartedAtRef.current = Date.now();
-        isPollingRef.current = true;
-        setIsPollingForPlan(true);
-      });
-
-      checkout.addEventListener("close", () => {
-        checkoutInstanceRef.current = null;
-        // Only reset spinner if not polling for plan update
-        if (!isPollingRef.current) {
-          setIsSubmitting(0);
-        }
-      });
-
-      checkout.addEventListener("confirmed", () => {
-        // Payment is being processed
-      });
+      // Redirect to Stripe Checkout
+      window.location.href = url;
     } catch (error) {
-      console.error("Failed to open checkout", error);
+      console.error("Failed to create checkout session", error);
       setIsSubmitting(0);
     }
   };
@@ -146,7 +48,7 @@ export function Plans() {
         <div className="flex flex-col p-6 border bg-background">
           <h2 className="text-xl mb-2 text-left">Starter</h2>
           <div className="mt-1 flex items-baseline">
-            <span className="text-2xl font-medium tracking-tight">$29</span>
+            <span className="text-2xl font-medium tracking-tight">$399</span>
             <span className="ml-1 text-xl font-medium">/mo</span>
             <span className="ml-2 text-xs text-muted-foreground">
               Excl. VAT
@@ -224,7 +126,7 @@ export function Plans() {
                       if (!data?.starter || isLoading) {
                         return;
                       }
-                      handleCheckout("starter", "starter");
+                      handleCheckout("starter");
                     }}
                     disabled={!isLoading && !data?.starter}
                   >
@@ -247,22 +149,11 @@ export function Plans() {
         {/* Pro Plan */}
         <div className="flex flex-col p-6 border border-primary bg-background relative">
           <div className="absolute top-6 right-6 rounded-full text-[#878787] text-[9px] font-normal border px-2 py-1 font-mono">
-            Limited offer
+            Most popular
           </div>
           <h2 className="text-xl text-left mb-2">Pro</h2>
           <div className="mt-1 flex items-baseline">
-            <span
-              className={cn(
-                "text-2xl font-medium tracking-tight",
-                "line-through text-[#878787]",
-              )}
-            >
-              $99
-            </span>
-            <span className="ml-1 text-2xl font-medium tracking-tight">
-              $49
-            </span>
-
+            <span className="text-2xl font-medium tracking-tight">$499</span>
             <span className="ml-1 text-xl font-medium">/mo</span>
             <span className="ml-2 text-xs text-muted-foreground">
               Excl. VAT
@@ -326,7 +217,7 @@ export function Plans() {
           <div className="mt-8 border-t border-border pt-4">
             <SubmitButton
               className="h-9 w-full"
-              onClick={() => handleCheckout("pro", "pro")}
+              onClick={() => handleCheckout("pro")}
               isSubmitting={isSubmitting === 2}
             >
               Choose pro plan

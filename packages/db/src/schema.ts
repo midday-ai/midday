@@ -1587,6 +1587,9 @@ export const teams = pgTable(
     exportSettings: jsonb("export_settings"),
     stripeAccountId: text("stripe_account_id"),
     stripeConnectStatus: text("stripe_connect_status"),
+    stripeCustomerId: text("stripe_customer_id"),
+    stripeSubscriptionId: text("stripe_subscription_id"),
+    stripePriceId: text("stripe_price_id"),
   },
   (table) => [
     unique("teams_inbox_id_key").on(table.inboxId),
