@@ -383,7 +383,13 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  if (!input.trim() || isLoading) return;
+                  if (isLoading) {
+                    // Stop streaming
+                    abortControllerRef.current?.abort();
+                    setIsLoading(false);
+                    return;
+                  }
+                  if (!input.trim()) return;
                   sendMessageFn(input.trim());
                   setInput("");
                 }}
@@ -399,11 +405,22 @@ export const ChatPanel = forwardRef<ChatPanelRef, ChatPanelProps>(
                     className="w-full bg-transparent px-4 py-3 pr-12 text-sm outline-none placeholder:text-[rgba(102,102,102,0.5)] disabled:opacity-50"
                   />
                   <button
-                    type="submit"
-                    disabled={!input.trim() || isLoading}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 size-7 flex items-center justify-center transition-colors bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                    type={isLoading ? "button" : "submit"}
+                    onClick={
+                      isLoading
+                        ? () => {
+                            abortControllerRef.current?.abort();
+                            setIsLoading(false);
+                          }
+                        : undefined
+                    }
+                    className="absolute right-3 top-1/2 -translate-y-1/2 size-7 flex items-center justify-center transition-colors bg-primary text-primary-foreground hover:bg-primary/90"
                   >
-                    <Icons.ArrowUpward className="size-3.5" />
+                    {isLoading ? (
+                      <Icons.Stop className="size-3.5" />
+                    ) : (
+                      <Icons.ArrowUpward className="size-3.5" />
+                    )}
                   </button>
                 </div>
               </form>
