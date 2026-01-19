@@ -1,0 +1,241 @@
+---
+title: Receipt Matching
+description: How Midday's AI automatically matches receipts to transactions and learns from your feedback.
+section: inbox
+order: 1
+---
+
+Midday's inbox captures receipts and invoices, then uses AI to match them to your bank transactions. No more manual filing or searching for receipts at tax time.
+
+## How it works
+
+1. A receipt arrives in your inbox (via email forward, connected email, or upload)
+2. AI extracts the merchant, amount, and date
+3. The system searches your transactions for matches
+4. When confident, it attaches the receipt automatically
+5. Uncertain matches are flagged for your review
+
+## Matching intelligence
+
+The AI uses multiple signals to find the right match:
+
+- **Amount**: Receipt total vs transaction amount (exact matches score highest)
+- **Date**: Purchase date vs transaction clearing date (accounting for banking delays)
+- **Merchant**: Company name on receipt vs bank description
+- **Semantic understanding**: AI understands that "AMZN" means "Amazon.com"
+- **Your patterns**: Past matching decisions for similar merchants
+
+### How scoring works
+
+Each potential match gets a confidence score based on weighted factors:
+
+| Factor | Weight | What it measures |
+|--------|--------|------------------|
+| Semantic similarity | 50% | How similar the merchant names and descriptions are |
+| Amount accuracy | 35% | How close the receipt amount matches the transaction |
+| Currency alignment | 10% | Whether currencies match |
+| Date alignment | 5% | Whether the dates make sense |
+
+## Confidence levels
+
+Based on the confidence score, matches fall into three categories:
+
+### Auto-matched (95%+ confidence)
+
+The AI is highly confident this is correct. The receipt is attached automatically without requiring your review.
+
+This happens when:
+- Amount matches exactly
+- Merchant name is clearly the same
+- Date is within expected range
+- Similar matches have been confirmed before
+
+### Suggested match (70-95% confidence)
+
+The AI thinks this is likely correct but wants your confirmation. You'll see these in your inbox with a "Suggested match" indicator.
+
+Review and either:
+- **Confirm**: The receipt is attached and the AI learns from your confirmation
+- **Reject**: The AI learns this wasn't correct and won't suggest it again
+
+### No match (below 70% confidence)
+
+No transaction was found that meets the confidence threshold. The receipt stays in your inbox as "Pending."
+
+You can:
+- Wait for the transaction to sync (it might not have cleared yet)
+- Manually match to any transaction
+- Leave it unmatched if it doesn't need matching
+
+## How the AI learns
+
+Midday's matching improves over time through several learning mechanisms:
+
+### Merchant pattern learning
+
+When you confirm matches, the AI learns:
+- "This merchant name on receipts matches this description in bank statements"
+- After 3+ confirmed matches with 90%+ accuracy, similar merchants can auto-match
+
+### Team-specific calibration
+
+The system adapts to your team's patterns:
+- If you confirm many suggested matches, thresholds adjust to auto-match more
+- If you reject suggestions, thresholds become more conservative
+
+### Dismissed match memory
+
+When you reject a match, the AI remembers:
+- That specific receipt-transaction pair is never suggested again
+- This prevents the same incorrect suggestion from reappearing
+
+### Post-match learning
+
+Even after matching, the AI learns from your actions:
+- If you later unmatch a receipt, that counts as negative feedback
+- High-confidence matches that were wrong trigger more conservative thresholds
+
+## Getting receipts into Midday
+
+### Email forwarding
+
+Every Midday account has a unique inbox email address:
+
+1. Go to [Inbox → Settings](https://app.midday.ai/inbox/settings)
+2. Copy your inbox email address
+3. Forward receipts to this address
+
+**Pro tip**: Set up automatic forwarding rules in your email client to send receipts automatically.
+
+### Connected email
+
+Connect Gmail or Outlook to automatically capture receipts:
+
+1. Go to [Inbox → Settings](https://app.midday.ai/inbox/settings)
+2. Click **Connect email**
+3. Authorize your email account
+4. Midday scans for receipts and invoices automatically
+
+The AI identifies receipt emails and ignores newsletters, marketing, and other non-receipt content.
+
+[Set up Gmail →](/docs/connect-gmail)
+[Set up Outlook →](/docs/connect-outlook)
+
+### Slack integration
+
+Share receipts directly from Slack:
+
+1. Connect your Slack workspace in [Inbox → Settings](https://app.midday.ai/inbox/settings)
+2. Share any file to the connected channel
+3. It appears in your Midday inbox automatically
+
+Great for teams where receipts come through Slack.
+
+[Set up Slack →](/docs/connect-slack)
+
+### Manual upload
+
+Drag and drop files directly:
+
+1. Go to [Inbox](https://app.midday.ai/inbox)
+2. Click **Upload** or drag files into the window
+3. PDFs and images are processed automatically
+
+## Review matches
+
+Items needing your review appear in the inbox:
+
+1. Go to [Inbox](https://app.midday.ai/inbox)
+2. Items with suggested matches show a confidence indicator
+3. Click to see the suggested transaction
+4. Review the match:
+   - **Confirm** if it's correct
+   - **Select different** to match to another transaction
+   - **Dismiss** if it shouldn't match anything
+
+### What you're confirming
+
+When you confirm a match, you're saying:
+- "This receipt documents this transaction"
+- The receipt attaches to the transaction permanently
+- The AI learns from your confirmation
+
+## Unmatched items
+
+If a receipt doesn't match any transaction:
+
+### Transaction hasn't cleared yet
+
+Bank transactions can take 1-3 days to appear. The receipt will match once the transaction syncs.
+
+### Transaction is in a different account
+
+The purchase might be on an account you haven't connected. Check your connected accounts in [Settings → Accounts](https://app.midday.ai/settings/accounts).
+
+### Manual matching
+
+Match any receipt to any transaction:
+
+1. Open the unmatched receipt
+2. Click **Match manually**
+3. Search for the transaction
+4. Select and confirm
+
+## Inbox settings
+
+### Blocklist
+
+Block senders whose emails you don't want in your inbox:
+
+1. Go to [Inbox → Settings](https://app.midday.ai/inbox/settings)
+2. Add email addresses or domains to the blocklist
+3. Future emails from these senders are ignored
+
+Useful for blocking:
+- Marketing emails that slip through
+- Newsletters
+- Automated notifications that aren't receipts
+
+### Sync settings
+
+Control how connected email accounts are scanned:
+
+- Frequency of scanning
+- How far back to look
+- Which folders to scan
+
+## Tips for reliable matching
+
+### Best practices
+
+- **Forward receipts promptly**: Same-day is best, while the transaction is fresh
+- **Include the full receipt**: Not cropped photos or partial screenshots
+- **Keep bank connections healthy**: Transactions need to be available for matching
+- **Review suggestions regularly**: Don't let the inbox pile up
+
+### What makes a good receipt
+
+The AI works best with receipts that clearly show:
+- Merchant name
+- Total amount
+- Date of purchase
+- (Optional) Line items
+
+Poor quality images, partial receipts, or handwritten notes are harder to match.
+
+### When matching fails
+
+If matching consistently fails for certain merchants:
+
+1. Check if transactions are syncing from that account
+2. Try manually matching a few times—the AI learns from this
+3. Ensure receipt images are clear and complete
+
+## Privacy and security
+
+- Receipts are processed securely and stored encrypted
+- Only your team can access your inbox
+- Connected email access is read-only—Midday can't send emails
+- You can disconnect email accounts anytime
+
+[Learn about data security →](/policy)

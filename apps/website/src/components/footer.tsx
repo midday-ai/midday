@@ -1,8 +1,19 @@
+"use client";
+
 import { cn } from "@midday/ui/cn";
+import { Icons } from "@midday/ui/icons";
+import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export function Footer() {
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   return (
     <footer className="bg-background relative overflow-hidden">
       {/* Top Divider - Full Bleed */}
@@ -102,6 +113,7 @@ export function Footer() {
               </h3>
               <div className="space-y-2.5">
                 {[
+                  { href: "/docs", label: "Documentation", external: false },
                   {
                     href: "https://api.midday.ai",
                     label: "API",
@@ -177,6 +189,33 @@ export function Footer() {
                 </div>
               </div>
             </div>
+
+            {/* Theme Toggle */}
+            <button
+              type="button"
+              onClick={() =>
+                setTheme(resolvedTheme === "dark" ? "light" : "dark")
+              }
+              className="flex items-center gap-2 px-3 py-1.5 border border-border text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors"
+              aria-label="Toggle theme"
+            >
+              {mounted ? (
+                resolvedTheme === "dark" ? (
+                  <Icons.LightMode className="w-4 h-4" />
+                ) : (
+                  <Icons.DarkMode className="w-4 h-4" />
+                )
+              ) : (
+                <div className="w-4 h-4" />
+              )}
+              <span className="font-sans text-sm">
+                {mounted
+                  ? resolvedTheme === "dark"
+                    ? "Light mode"
+                    : "Dark mode"
+                  : "Toggle theme"}
+              </span>
+            </button>
           </div>
         </div>
 

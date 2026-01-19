@@ -1,0 +1,86 @@
+---
+title: Supported Banks
+description: Overview of banks and financial institutions Midday supports.
+section: banking
+order: 2
+---
+
+Midday connects to over 20,000 banks and financial institutions worldwide.
+
+## Coverage by region
+
+### North America
+
+- All major US banks (Chase, Bank of America, Wells Fargo, Citi, etc.)
+- Credit unions
+- Canadian banks (TD, RBC, Scotiabank, etc.)
+- Business banking platforms
+
+### Europe
+
+- UK banks (Barclays, HSBC, Lloyds, Monzo, Starling, etc.)
+- German banks (Deutsche Bank, Commerzbank, N26, etc.)
+- French banks (BNP Paribas, Société Générale, etc.)
+- Dutch banks (ING, ABN AMRO, Rabobank, etc.)
+- Swedish banks (SEB, Nordea, Handelsbanken, Swedbank)
+- And many more across the EU
+
+### Other regions
+
+- Australia (Commonwealth, ANZ, Westpac, NAB)
+- Singapore
+- And expanding to more markets
+
+## Connection methods
+
+### Open Banking (OAuth)
+
+Most banks use secure OAuth connections:
+
+- You authenticate directly with your bank
+- Midday never sees your login credentials
+- Read-only access to transactions
+
+### Credential-based
+
+Some banks require credentials:
+
+- Encrypted and stored securely
+- Used only to sync transactions
+- Can be removed at any time
+
+## Check your bank
+
+1. Go to [Settings → Accounts](https://app.midday.ai/settings/accounts)
+2. Click **Connect bank**
+3. Search for your bank by name
+
+If you don't find your bank:
+
+- Try the full official name
+- Check for separate business banking
+- Use [CSV import](/docs/import-transactions-csv) as a fallback
+
+## Business vs. personal banking
+
+Some banks have separate platforms for business accounts:
+
+- Search for "Business" or "Commercial" versions
+- Business accounts may have different connection requirements
+- Contact your bank if unsure which platform you use
+
+## Connection limits
+
+Depending on your plan:
+
+- Free: Limited number of connected accounts
+- Pro: More connected accounts
+- Check your plan details for specifics
+
+## Requesting a bank
+
+If your bank isn't supported:
+
+1. Email [support@midday.ai](mailto:support@midday.ai) with bank name and country
+2. We'll check if it can be added
+3. Some regional banks have limited API availability

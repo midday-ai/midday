@@ -1,0 +1,206 @@
+---
+title: Troubleshooting
+description: Solutions to common issues and frequently asked questions.
+section: getting-started
+order: 4
+---
+
+Quick solutions to common issues you might encounter with Midday.
+
+## Bank connection issues
+
+### Bank not syncing
+
+If your bank connection stops syncing:
+
+1. Go to [Settings → Accounts](https://app.midday.ai/settings/accounts)
+2. Check if the account shows a warning icon
+3. Click **Reconnect** and re-authenticate with your bank
+4. Wait a few minutes for transactions to sync
+
+**Why this happens**: Banks require re-authentication periodically (often every 90 days) for security.
+
+### Bank not found
+
+If you can't find your bank when connecting:
+
+1. Try searching by the full official name
+2. Check if your bank has a separate business banking platform (search for that instead)
+3. Some smaller banks may not be supported yet
+4. Use [CSV import](/docs/import-transactions-csv) as an alternative
+
+### Missing transactions
+
+If recent transactions aren't appearing:
+
+1. **Wait**: Transactions can take 1-3 days to appear after clearing your bank
+2. **Check the date range**: Make sure you're viewing the correct period
+3. **Sync manually**: Click **Sync** in your account settings to force a refresh
+4. **Verify in your bank**: Confirm the transaction has actually cleared
+
+### Duplicate transactions
+
+If you see duplicate transactions:
+
+1. Check if you connected the same account twice
+2. Look for pending vs. cleared versions of the same transaction
+3. You can hide duplicates by marking them as excluded
+
+## Receipt matching issues
+
+### Receipts not matching
+
+If receipts aren't matching to transactions:
+
+1. **Transaction hasn't cleared**: Wait for the bank transaction to appear
+2. **Different account**: The purchase might be on a different connected account
+3. **Amount mismatch**: Tips, taxes, or currency conversion can cause slight differences
+4. **Manual match**: You can always match manually from the inbox
+
+### Receipt not processing
+
+If an uploaded receipt stays stuck:
+
+1. Check the file format (PDF, JPG, PNG work best)
+2. Ensure the image is clear and readable
+3. Try re-uploading the receipt
+4. Very long receipts may need to be split into pages
+
+### Gmail/Outlook not capturing receipts
+
+If connected email isn't finding receipts:
+
+1. Check the connection is still active in [Inbox Settings](https://app.midday.ai/inbox/settings)
+2. Receipts in spam/junk folders may not be captured
+3. Some receipt formats may not be recognized automatically
+4. Forward important receipts manually as a backup
+
+## Invoice issues
+
+### Customer not receiving invoice
+
+If a customer says they didn't get your invoice:
+
+1. Check the email address is correct in customer details
+2. Ask them to check spam/junk folders
+3. Resend the invoice from the invoice detail page
+4. Share the invoice link directly as a backup
+
+### Online payment not working
+
+If customers can't pay online:
+
+1. Verify Stripe is connected in [Invoice Settings](https://app.midday.ai/settings/invoice)
+2. Check that online payments are enabled for that invoice
+3. Have the customer try a different card or browser
+4. Check your Stripe dashboard for any declined payment details
+
+### Invoice showing wrong currency
+
+To fix invoice currency:
+
+1. Edit the invoice
+2. Change the currency setting
+3. Re-enter amounts if needed
+4. Save and resend
+
+Set a default currency per customer to avoid this in the future.
+
+## Report issues
+
+### Numbers seem wrong
+
+If your reports show unexpected numbers:
+
+1. **Check date range**: Make sure you're viewing the intended period
+2. **Review categories**: Miscategorized transactions affect reports
+3. **Check excluded transactions**: Some transactions might be excluded
+4. **Multiple currencies**: Exchange rates affect converted amounts
+
+### Burn rate is too high
+
+If burn rate seems inflated:
+
+1. Check for **credit card payments** categorized incorrectly (should be "Credit Card Payment" to be excluded)
+2. Look for **internal transfers** between your accounts
+3. Review large one-time expenses that might skew the average
+
+### Runway showing zero
+
+If runway shows zero or seems wrong:
+
+1. Verify you have **cash accounts** connected (checking/savings)
+2. Check that accounts are **enabled** in settings
+3. Make sure transactions are **categorized** (uncategorized expenses don't count toward burn rate)
+
+## Time tracking issues
+
+### Timer not saving
+
+If tracked time isn't saving:
+
+1. Make sure you selected a **project** before starting
+2. Check your internet connection
+3. Don't close the browser tab while timer is running
+4. Use the desktop app for more reliable tracking
+
+### Can't delete time entry
+
+If you can't delete a time entry:
+
+1. Check if it's been **invoiced** (invoiced time can't be deleted)
+2. You may need to remove it from the invoice first
+3. Archived projects may have restrictions
+
+## Account and billing
+
+### Can't access account
+
+If you can't sign in:
+
+1. Try **resetting your password**
+2. Check you're using the correct email
+3. Clear browser cache and cookies
+4. Try a different browser or incognito mode
+
+### Subscription issues
+
+For billing questions:
+
+1. Go to [Settings → Billing](https://app.midday.ai/settings/billing)
+2. View current plan and payment method
+3. Update payment details if needed
+4. Contact support for invoice or refund requests
+
+## Performance issues
+
+### App running slowly
+
+If Midday feels slow:
+
+1. **Clear browser cache**: Old cached data can cause issues
+2. **Check internet**: Slow connection affects load times
+3. **Try a different browser**: Chrome and Firefox work best
+4. **Close other tabs**: Free up browser memory
+
+### Data not loading
+
+If pages aren't loading data:
+
+1. Check your internet connection
+2. Try refreshing the page
+3. Sign out and back in
+4. Clear browser cache
+
+## Still need help?
+
+If you can't find a solution:
+
+1. **Email**: [support@midday.ai](mailto:support@midday.ai)
+2. **Response time**: Usually within 24 hours on business days
+
+When contacting support, include:
+- What you were trying to do
+- What happened instead
+- Any error messages you saw
+- Screenshots if helpful

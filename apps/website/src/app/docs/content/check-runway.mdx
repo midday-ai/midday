@@ -1,0 +1,176 @@
+---
+title: Check Your Runway
+description: See how long your cash will last based on current spending and what affects this calculation.
+section: reports
+order: 3
+---
+
+Runway tells you how many months you can keep operating based on your current cash and spending rate. It's one of the most important metrics for any founder.
+
+## Why runway matters
+
+Knowing your runway helps you:
+
+- **Plan ahead**: Make hiring and investment decisions with confidence
+- **Time fundraising**: Start conversations before you're desperate
+- **Manage stress**: Replace uncertainty with data
+- **Communicate with stakeholders**: Give investors and advisors clear visibility
+
+## View your runway
+
+1. Go to [Overview](https://app.midday.ai)
+2. Find the Runway card
+
+You'll see:
+
+- **Current cash**: Total balance across connected cash accounts
+- **Monthly burn rate**: Average monthly net outflow
+- **Runway**: How many months of cash you have
+
+## How runway is calculated
+
+The formula is straightforward:
+
+```
+Runway (months) = Cash Balance ÷ Average Monthly Burn Rate
+```
+
+### Example
+
+| Input | Value |
+|-------|-------|
+| Cash on hand | $120,000 |
+| Monthly burn rate | $20,000 |
+| **Runway** | **6 months** |
+
+### What counts as cash
+
+Only liquid assets count toward your cash balance:
+
+| Account Type | Examples | Included in Cash? |
+|-------------|----------|-------------------|
+| Depository | Checking, Savings | Yes |
+| Other Asset | Money Market, Treasury | Yes |
+| Credit | Credit Cards | No |
+| Loan | Business Loans | No |
+
+**Why credit cards and loans don't count**: They represent borrowed money, not cash you have. A $50,000 credit limit doesn't extend your runway—it's debt you'll need to repay.
+
+### Burn rate calculation
+
+Burn rate is the average of your monthly expenses over the past 3-6 months. This smoothing prevents one-time expenses from dramatically skewing your runway.
+
+Excluded from burn rate:
+- Credit card payments (prevents double-counting)
+- Internal transfers between accounts
+
+[Learn more about burn rate →](/docs/view-burn-rate)
+
+## Runway benchmarks
+
+| Runway | Status | Action |
+|--------|--------|--------|
+| 12+ months | Comfortable | Keep building, you have time to experiment |
+| 6-12 months | Healthy | Normal operating range for growing businesses |
+| 3-6 months | Caution | Time to focus on extending runway |
+| Under 3 months | Critical | Immediate action needed |
+
+These benchmarks depend on your situation:
+
+- **Profitable businesses** can operate with less runway since they're cash-flow positive
+- **Pre-revenue startups** should aim for 12-18 months to have time to find product-market fit
+- **Seasonal businesses** need enough runway to cover slow periods
+
+## Multi-currency considerations
+
+If you have bank accounts in different currencies:
+
+1. Midday converts all balances to your base currency
+2. Exchange rates are updated regularly
+3. Set your base currency in [Settings](https://app.midday.ai/settings)
+
+Your runway is shown in your base currency for a unified view.
+
+## Disabled accounts
+
+Accounts you've disabled in settings don't count toward:
+- Cash balance (runway numerator)
+- Burn rate (if transactions come from disabled accounts)
+
+Only disable accounts you want to exclude from your financial picture entirely.
+
+## Special runway states
+
+### Infinite runway
+
+If your burn rate is zero or negative (you're profitable), runway shows as infinite. You're making more than you spend—your cash grows over time.
+
+### Zero or missing runway
+
+This means either:
+- Cash balance is zero
+- No expense data to calculate burn rate
+- All cash accounts are disabled
+
+Check that your accounts are connected and transactions are syncing.
+
+## Improving runway
+
+You have two levers: increase cash or decrease burn.
+
+### Increase cash
+- **Accelerate receivables**: Follow up on unpaid invoices, offer early payment discounts
+- **Raise prices**: Even small increases compound over time
+- **Find new revenue**: New customers, upsells, new products
+- **Fundraise**: External capital extends runway (but comes with dilution)
+
+### Decrease burn
+- **Audit subscriptions**: Cancel unused software and services
+- **Negotiate contracts**: Ask vendors for discounts, especially for annual payment
+- **Delay non-essential spending**: Push discretionary purchases to later
+- **Review team costs**: Your largest expense is likely people
+
+### The math of runway extension
+
+| Scenario | Cash | Monthly Burn | Runway |
+|----------|------|--------------|--------|
+| Current | $60,000 | $10,000 | 6 months |
+| Reduce burn by $2,000 | $60,000 | $8,000 | 7.5 months |
+| Add $20,000 cash | $80,000 | $10,000 | 8 months |
+| Both | $80,000 | $8,000 | 10 months |
+
+Small changes in burn rate can significantly extend runway.
+
+## Monitoring runway
+
+- **Weekly glance**: Quick check that nothing unexpected happened
+- **Monthly review**: Deep dive into what's changing and why
+- **Quarterly planning**: Use runway to inform hiring, investment, and strategy
+
+### Set up alerts
+
+Configure notifications to alert you when:
+- Cash drops below a threshold
+- Burn rate spikes unexpectedly
+- Runway falls below a comfortable level
+
+[Configure notifications →](/docs/notification-settings)
+
+## Runway in conversations
+
+### With investors
+Runway is the first metric investors ask about. Being able to say "We have 8 months of runway and are growing 15% monthly" is much better than "We have money for a while."
+
+### With your team
+Sharing runway (at least directionally) helps everyone make better decisions about spending and prioritization.
+
+### With advisors
+Runway context helps advisors give relevant advice. Different strategies apply at 12 months vs. 3 months.
+
+## Related metrics
+
+- [Burn rate](/docs/view-burn-rate): The denominator in runway calculation
+- [Cash balance](/docs/understanding-metrics): The numerator in runway calculation
+- [Revenue and profit](/docs/view-revenue-profit): Affects your burn rate
+
+[Understand all metrics →](/docs/understanding-metrics)

@@ -1,0 +1,205 @@
+---
+title: Automatic Categorization
+description: How Midday uses AI to categorize your transactions and how categories affect your metrics.
+section: banking
+order: 4
+---
+
+Every transaction that flows into Midday is automatically categorized using AI. This saves hours of manual work and keeps your books organized for accounting.
+
+## How it works
+
+When a new transaction arrives, Midday's AI:
+
+1. **Analyzes the merchant**: Identifies the company from the transaction description
+2. **Checks your history**: Looks at how you've categorized similar transactions
+3. **Considers patterns**: Factors in amount, frequency, and context
+4. **Assigns a category**: Picks the most likely category
+
+The AI learns from your corrections. The more you use Midday, the more accurate it becomes for your specific business.
+
+## Category structure
+
+Midday uses a two-level category system designed for business accounting:
+
+### Parent categories (14 total)
+
+1. **Revenue** - Income from your business
+2. **Cost of Goods Sold** - Direct costs of products sold
+3. **Sales & Marketing** - Customer acquisition costs
+4. **Operations** - Day-to-day running costs
+5. **Professional Services** - External expertise
+6. **Human Resources** - Team costs
+7. **Travel & Entertainment** - Business travel
+8. **Technology** - Software and subscriptions
+9. **Banking & Finance** - Financial transactions
+10. **Assets** - Capital purchases
+11. **Liabilities & Debt** - Obligations
+12. **Taxes & Government** - Tax payments
+13. **Owner / Equity** - Founder transactions
+14. **System** - Uncategorized and transfers
+
+### Subcategories
+
+Each parent category contains specific subcategories. For example, Technology includes:
+- Software
+- Non-Software Subscriptions
+
+[See all categories and subcategories →](/docs/categories-reference)
+
+## Excluded categories
+
+Some categories are "excluded" from burn rate calculations to prevent double-counting:
+
+| Category | Why it's excluded |
+|----------|-------------------|
+| Credit Card Payment | The purchases on your card already count; the payment would be double-counting |
+| Internal Transfer | Moving money between accounts isn't spending |
+
+This happens automatically. Your burn rate and runway calculations stay accurate.
+
+[Learn more about how categories affect metrics →](/docs/understanding-metrics)
+
+## Changing a category
+
+If the AI gets it wrong:
+
+1. Click on the transaction
+2. Select the correct category from the dropdown
+3. Save
+
+### What happens when you correct
+
+- The transaction is recategorized immediately
+- The AI learns from your correction
+- Future similar transactions are more likely to be categorized correctly
+- Your financial metrics update to reflect the change
+
+## Bulk categorization
+
+For multiple similar transactions:
+
+1. Go to [Transactions](https://app.midday.ai/transactions)
+2. Use filters to find the transactions (e.g., filter by merchant name)
+3. Select multiple transactions using checkboxes
+4. Choose **Categorize** from the bulk actions menu
+5. Select the category to apply
+6. Confirm
+
+This is useful for:
+- Fixing multiple miscategorized transactions at once
+- Categorizing a backlog of transactions
+- Applying consistent categories to recurring expenses
+
+## How the AI learns
+
+### Merchant patterns
+
+The AI builds patterns based on merchant names:
+
+- "SPOTIFY" → Technology > Software
+- "UBER" → Travel & Entertainment > Travel
+- "AMAZON" → Depends on your history (could be office supplies, software, etc.)
+
+### Your corrections
+
+When you correct a category:
+- That specific merchant pattern is updated
+- Similar merchant names benefit from the learning
+- The AI weighs your choices higher over time
+
+### Team patterns
+
+The AI learns from your entire team's categorization choices, building a model specific to your business.
+
+## Categories and financial metrics
+
+How you categorize transactions directly affects your reports:
+
+| Metric | Affected by |
+|--------|-------------|
+| Revenue | Transactions in Revenue categories |
+| Burn Rate | All expense categories except excluded ones |
+| Profit | Revenue minus expenses |
+| Cash Flow | All income and expense categories |
+
+Accurate categorization means accurate metrics.
+
+## Categories and accounting
+
+### Export to CSV
+
+When you [export transactions](/docs/export-transactions-csv), categories are included. Your accountant can map them to their chart of accounts.
+
+### Export to accounting software
+
+If you connect [Xero](/docs/connect-xero), [QuickBooks](/docs/connect-quickbooks), or [Fortnox](/docs/connect-fortnox):
+
+- Categories map to account codes
+- You configure the mapping during setup
+- Transactions export with the correct account mappings
+
+## Tips for better categorization
+
+### Review regularly
+
+- Check new transactions weekly
+- Correct any miscategorized items promptly
+- The AI learns faster with quick feedback
+
+### Be consistent
+
+- Use the same category for the same type of expense
+- Don't switch between similar categories (pick one)
+- Consistency helps both AI learning and your reports
+
+### Use tags for detail
+
+Categories are intentionally broad (for accounting). Use [tags](/docs/use-tags) for additional detail:
+
+- Project names
+- Client names
+- Tax deduction status
+- Department codes
+
+### Handle ambiguous merchants
+
+Some merchants (like Amazon) could be many categories:
+
+- Office supplies
+- Software
+- Equipment
+- Personal (shouldn't be here!)
+
+Correct these carefully. The AI will learn that Amazon transactions from your account might be different from another business.
+
+## Common questions
+
+### Can I create custom categories?
+
+Midday uses a standard category set that maps to accounting charts of accounts. This ensures consistency for exports and integrations. Use tags for custom groupings.
+
+### What if a transaction fits multiple categories?
+
+Choose the primary purpose. For example:
+- A laptop is Equipment, not Technology
+- Conference travel is Travel, not Marketing
+
+### How do I handle personal transactions?
+
+If a personal transaction accidentally appears:
+1. Categorize it appropriately (or use "Other")
+2. Consider excluding it from reports
+3. Discuss with your accountant for proper handling
+
+### Why did the AI categorize this wrong?
+
+Common reasons:
+- New merchant the AI hasn't seen
+- Ambiguous merchant name
+- Similar merchant to one you categorized differently
+
+Correct it once, and the AI will learn.
+
+[Full category reference →](/docs/categories-reference)
+[How categories affect metrics →](/docs/understanding-metrics)

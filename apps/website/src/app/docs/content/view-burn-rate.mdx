@@ -1,0 +1,166 @@
+---
+title: View Your Burn Rate
+description: Understand your monthly cash consumption and what affects this critical metric.
+section: reports
+order: 2
+---
+
+Burn rate shows how quickly you're consuming cash. It's essential for financial planning, fundraising conversations, and understanding your business health.
+
+## What is burn rate
+
+Burn rate is your net cash outflow over a period:
+
+- **Gross burn**: Total money going out
+- **Net burn**: Money out minus money in
+
+Net burn is more useful—it accounts for revenue offsetting expenses.
+
+## View your burn rate
+
+1. Go to [Overview](https://app.midday.ai)
+2. Find the burn rate card
+
+You'll see:
+
+- Average monthly burn
+- Trend over recent months
+- How it affects your runway
+
+## How burn rate is calculated
+
+Midday calculates burn rate from your expense transactions across all enabled accounts.
+
+### What's included
+
+All expense transactions except those in excluded categories.
+
+### What's excluded
+
+Two categories are automatically excluded from burn rate to prevent double-counting:
+
+| Category | Why it's excluded |
+|----------|-------------------|
+| Credit Card Payment | Prevents counting expenses twice (once on the card, once when paying the bill) |
+| Internal Transfer | Moving money between your own accounts isn't spending |
+
+### The double-counting problem
+
+When you connect both a checking account and credit card, you'll see:
+
+1. **On your credit card**: Individual purchases ($50 for software, $30 for meals, etc.)
+2. **On your checking account**: Payment to credit card ($1,500)
+
+Without exclusions, Midday would count:
+- $50 + $30 + ... = expenses on credit card
+- $1,500 = payment from checking
+- Total = double the actual spending
+
+By excluding credit card payments, only the actual purchases count. This is handled automatically.
+
+### Which accounts affect burn rate
+
+| Account Type | Transactions count toward burn? |
+|-------------|--------------------------------|
+| Depository (checking, savings) | Yes |
+| Other Asset (money market) | Yes |
+| Credit (credit cards) | Yes |
+| Loan | Yes |
+
+All account types contribute transactions to burn rate. The exclusion logic applies to specific transaction categories, not account types.
+
+## Understanding the numbers
+
+### Positive burn rate
+
+You're spending more than you're earning. Normal for:
+
+- Early-stage startups investing in growth
+- Seasonal slow periods
+- Planned investment phases (hiring, expansion)
+
+### Negative burn rate
+
+You're earning more than spending. You're profitable—your runway is essentially infinite.
+
+### Zero burn rate
+
+Breaking even. Income matches expenses.
+
+## Excluding specific transactions
+
+Sometimes a transaction shouldn't count toward burn rate even if it's categorized as an expense:
+
+- One-time equipment purchases
+- Security deposits (you'll get them back)
+- Loans to the company from founders
+
+To exclude a transaction:
+
+1. Click on the transaction
+2. Find the exclude option
+3. The transaction will no longer affect burn rate
+
+Use this sparingly—only for truly exceptional items.
+
+## Trends matter
+
+A single month's burn rate can be misleading due to one-time expenses or income. Look at:
+
+- **3-month average**: Recent trend, shows if things are changing
+- **6-month average**: Overall pattern, smooths out anomalies
+- **Year-over-year**: For seasonal businesses, compare to the same period last year
+
+## Burn rate and runway
+
+Burn rate directly affects your runway:
+
+```
+Runway = Cash Balance ÷ Monthly Burn Rate
+```
+
+Reducing burn rate by $5,000/month on $60,000 cash extends runway from 6 months to 10 months.
+
+[Learn more about runway →](/docs/check-runway)
+
+## Reducing burn rate
+
+If burn rate is too high:
+
+- **Review subscriptions**: Audit software and services you're paying for
+- **Negotiate contracts**: Vendors often offer discounts for annual payment or loyalty
+- **Delay non-essential purchases**: Push discretionary spending to later
+- **Focus on efficiency**: Higher-margin work or automation can help
+
+## Common burn rate issues
+
+### Burn rate seems too high
+
+Check for:
+- Credit card payments not categorized correctly (should be "Credit Card Payment")
+- Internal transfers between accounts not categorized correctly
+- One-time expenses skewing the average
+
+### Burn rate seems too low
+
+Check for:
+- Missing accounts (expenses on unconnected accounts)
+- Transactions incorrectly categorized as transfers
+- Disabled accounts that should be enabled
+
+### Burn rate is zero or missing
+
+This usually means:
+- No expense transactions in the selected period
+- All accounts are disabled
+- Transactions aren't categorized yet
+
+## Tips
+
+- Review burn rate monthly—catch issues early
+- Compare to revenue: high burn with high revenue growth might be the right strategy
+- Plan for spikes: quarterly taxes, annual renewals, seasonal hiring
+- Share with your team: financial visibility helps everyone make better decisions
+
+[See all categories →](/docs/categories-reference)
+[Understand all metrics →](/docs/understanding-metrics)

@@ -1,0 +1,214 @@
+---
+title: Account Settings
+description: Manage your connected bank accounts and their impact on financial metrics.
+section: settings
+order: 1
+---
+
+Your connected bank accounts are the foundation of Midday. This guide explains how to manage accounts and how your settings affect financial metrics.
+
+## View your accounts
+
+1. Go to [Settings → Accounts](https://app.midday.ai/settings/accounts)
+2. See all connected accounts with their:
+   - Account name and bank
+   - Current balance
+   - Account type
+   - Connection status
+   - Enabled/disabled state
+
+## Account types
+
+Midday categorizes accounts by type, which affects how they're used in financial calculations:
+
+| Type | Examples | Counts as Cash | Used in Reports |
+|------|----------|----------------|-----------------|
+| Depository | Checking, Savings | Yes | Cash balance, Runway |
+| Other Asset | Money Market, Treasury | Yes | Cash balance, Runway |
+| Credit | Credit Cards | No | Net position (debt), Balance sheet |
+| Loan | Business Loans | No | Balance sheet |
+
+### Why account types matter
+
+Your **runway** calculation uses only cash accounts (depository + other asset). Credit cards and loans don't extend your runway—they're debt.
+
+Your **burn rate** includes transactions from all enabled accounts.
+
+Your **net position** shows cash minus credit card debt, giving you a realistic picture of your financial position.
+
+[Learn more about metrics →](/docs/understanding-metrics)
+
+## Enable and disable accounts
+
+You can enable or disable any connected account.
+
+### To disable an account
+
+1. Go to [Settings → Accounts](https://app.midday.ai/settings/accounts)
+2. Find the account
+3. Toggle the **Enabled** switch off
+
+### Effects of disabling
+
+When you disable an account:
+
+- **Balance excluded**: The account's balance won't count toward cash balance or runway
+- **Transactions hidden**: Transactions from this account won't appear in lists by default
+- **Reports affected**: Financial reports exclude this account's data
+- **History preserved**: Past data remains; re-enable anytime to restore
+
+### When to disable accounts
+
+Common reasons to disable:
+
+- **Closed accounts**: Keep historical data but exclude from current metrics
+- **Personal accounts**: If you accidentally connected a personal account
+- **Inactive accounts**: Accounts you no longer use actively
+- **Test accounts**: Sandbox or test accounts
+
+## Connect a new account
+
+1. Go to [Settings → Accounts](https://app.midday.ai/settings/accounts)
+2. Click **Connect bank**
+3. Search for your bank
+4. Complete the secure authentication
+5. Select which accounts to connect
+
+### What gets synced
+
+When you connect an account:
+
+- **Historical transactions**: Usually 90 days of past transactions
+- **Current balance**: Updated with each sync
+- **Account details**: Name, type, currency
+
+New transactions sync automatically, typically within minutes of clearing your bank.
+
+[Full guide: Connect bank account →](/docs/connect-bank-account)
+
+## Reconnect an account
+
+Bank connections sometimes need re-authentication. You'll see a notification when this happens.
+
+### To reconnect
+
+1. Go to [Settings → Accounts](https://app.midday.ai/settings/accounts)
+2. Find the account with a connection issue
+3. Click **Reconnect**
+4. Complete the authentication with your bank
+
+### Why reconnection is needed
+
+- **Security**: Banks require periodic re-authorization (often every 90 days)
+- **Password changes**: If you changed your bank password
+- **Bank updates**: Banks sometimes update their security systems
+
+## Manual accounts
+
+For banks that aren't supported for automatic sync, you can create manual accounts.
+
+### Create a manual account
+
+1. Go to [Settings → Accounts](https://app.midday.ai/settings/accounts)
+2. Click **Add manual account**
+3. Enter:
+   - Account name
+   - Account type
+   - Currency
+   - Current balance
+4. Save
+
+### Managing manual accounts
+
+- **Update balance**: Manually update the balance periodically
+- **Import transactions**: Import via CSV
+- **Same features**: Manual accounts work like connected accounts for reporting
+
+[Import transactions from CSV →](/docs/import-transactions-csv)
+
+## Delete a connection
+
+To completely remove a bank connection:
+
+1. Go to [Settings → Accounts](https://app.midday.ai/settings/accounts)
+2. Find the connection
+3. Click **Delete connection**
+4. Confirm deletion
+
+### What happens when you delete
+
+- **Transaction history**: Option to keep or delete historical transactions
+- **Connection removed**: The bank link is severed
+- **Cannot undo**: You'll need to reconnect to restore
+
+Consider **disabling** instead if you want to keep historical data but exclude from current metrics.
+
+## Currency settings
+
+### Account currency
+
+Each account has a currency based on the bank account's denomination. This is set automatically when you connect.
+
+### Base currency
+
+Your team's base currency is used for:
+
+- Displaying totals across accounts
+- Converting foreign currency transactions
+- Financial reports and metrics
+
+Set your base currency in [Settings](https://app.midday.ai/settings).
+
+### Multi-currency handling
+
+If you have accounts in different currencies:
+
+1. Each account's balance is shown in its native currency
+2. Totals are converted to your base currency
+3. Exchange rates are updated regularly
+4. Transaction amounts show both original and converted values
+
+## Troubleshooting
+
+### Account balance doesn't match bank
+
+- **Pending transactions**: Some transactions may not have cleared
+- **Sync delay**: Wait a few minutes and check again
+- **Force sync**: Click the sync button to refresh
+
+### Missing transactions
+
+- **Sync timing**: Transactions appear when they clear (not when pending)
+- **Account disabled**: Check the account is enabled
+- **Date range**: Check you're looking at the right date range
+
+### Connection keeps failing
+
+- **Bank maintenance**: Try again later
+- **Credentials changed**: You may need to reconnect with new credentials
+- **Bank not supported**: Some smaller banks have limited API support
+
+### Wrong account type
+
+If an account is categorized incorrectly:
+
+1. The type is set automatically based on bank data
+2. Contact support if it's clearly wrong
+3. This affects which metrics the account contributes to
+
+## Best practices
+
+1. **Connect all business accounts**: Complete data means accurate metrics
+2. **Disable, don't delete**: Keep historical data by disabling inactive accounts
+3. **Check connections regularly**: Reconnect before they expire
+4. **Use manual accounts sparingly**: Automatic sync is more reliable
+5. **Set base currency correctly**: Ensures accurate multi-currency totals
+
+## Privacy and security
+
+- **Read-only access**: Midday can only view transactions, never move money
+- **Bank-level security**: OAuth authentication with major banks
+- **Encrypted storage**: Account credentials and data are encrypted
+- **You control access**: Disconnect anytime
+
+[Back to settings →](/docs/notification-settings)

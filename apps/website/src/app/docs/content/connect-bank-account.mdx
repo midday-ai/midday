@@ -1,0 +1,82 @@
+---
+title: Connect Bank Account
+description: Link your bank accounts to automatically sync transactions.
+section: banking
+order: 1
+---
+
+Connecting your bank is the foundation of Midday. Once linked, your transactions sync automatically, giving you a complete picture of your business finances.
+
+## How it works
+
+Midday uses secure, read-only connections to sync your transactions. We partner with leading banking providers to support over 20,000 banks worldwide.
+
+- **Read-only access**: We can only view transactions, never move money
+- **Bank-level security**: Connections use OAuth or secure credential encryption
+- **Automatic sync**: New transactions appear within minutes
+
+## Connect your bank
+
+1. Go to [Settings → Accounts](https://app.midday.ai/settings/accounts)
+2. Click **Connect bank**
+3. Search for your bank by name
+4. Select your bank and follow the authentication flow
+5. Choose which accounts to connect
+
+Most banks use secure OAuth, which means you authenticate directly with your bank—Midday never sees your login credentials.
+
+## What gets synced
+
+Once connected, Midday pulls:
+
+- **Transaction history**: Usually 90 days of past transactions
+- **Account balance**: Updated with each sync
+- **Transaction details**: Date, amount, merchant name, category
+
+New transactions typically appear within a few minutes of clearing your bank.
+
+## Multiple accounts and currencies
+
+You can connect multiple bank accounts, even from different banks:
+
+- Business checking and savings accounts
+- Credit card accounts
+- Accounts in different currencies
+
+Each account syncs independently. Multi-currency transactions are converted using the exchange rate from the transaction date.
+
+## Troubleshooting
+
+### Bank not found
+
+If you can't find your bank:
+
+1. Try searching by the full official name
+2. Check if your bank has a separate business banking platform
+3. Use [manual import via CSV](/docs/import-transactions-csv) as a fallback
+
+### Connection issues
+
+If your bank connection stops syncing:
+
+1. Go to [Settings → Accounts](https://app.midday.ai/settings/accounts)
+2. Click **Reconnect** on the affected account
+3. Re-authenticate with your bank
+
+Some banks require re-authentication every 90 days for security.
+
+### Missing transactions
+
+If transactions are missing:
+
+1. Allow a few minutes for sync to complete
+2. Check your bank's online portal to confirm the transaction has cleared
+3. Try clicking **Sync** to force an immediate refresh
+
+## Supported banks
+
+We support 20,000+ banks across North America, Europe, and other regions. Coverage includes:
+
+- All major US and Canadian banks
+- Most European banks (UK, Germany, France, Netherlands, Sweden, and more)
+- Many banks in Australia, Singapore, and other markets

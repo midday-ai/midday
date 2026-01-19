@@ -1,0 +1,284 @@
+---
+title: Understanding Your Metrics
+description: How Midday calculates your financial metrics and what affects each number.
+section: reports
+order: 0
+---
+
+Midday gives you real-time visibility into your business finances. This guide explains how each metric is calculated and what factors affect them.
+
+## Overview
+
+Your financial dashboard shows several key metrics:
+
+- **Cash Balance**: Money available in your accounts
+- **Burn Rate**: How fast you're spending money
+- **Runway**: How long your cash will last
+- **Revenue**: Money coming in
+- **Profit**: What's left after expenses
+- **Net Position**: Cash minus credit card debt
+
+Understanding what goes into each calculation helps you make better decisions.
+
+---
+
+## Cash Balance
+
+Cash balance is the total money available across all your connected cash accounts.
+
+### What counts as cash
+
+| Account Type | Examples | Included in Cash? |
+|-------------|----------|-------------------|
+| Depository | Checking, Savings | Yes |
+| Other Asset | Money Market, Treasury | Yes |
+| Credit | Credit Cards | No |
+| Loan | Business Loans | No |
+
+### Why credit cards don't count
+
+Credit card "available balance" isn't your money—it's borrowed money you'll need to pay back. Midday shows only the cash you actually have.
+
+### Multi-currency accounts
+
+If you have accounts in different currencies, Midday converts them to your base currency using current exchange rates. Set your base currency in [Settings](https://app.midday.ai/settings).
+
+### Disabled accounts
+
+If you disable an account in settings, its balance won't be included in your cash total. This is useful if you have accounts you want to track separately or legacy accounts you no longer use.
+
+---
+
+## Burn Rate
+
+Burn rate measures how much cash you're consuming each month. It's calculated from your expense transactions.
+
+### The formula
+
+```
+Monthly Burn Rate = Total Expenses in Month
+```
+
+Midday calculates averages over 3-6 months to smooth out one-time spikes.
+
+### What's included
+
+All expense transactions from enabled accounts, except:
+
+- **Credit Card Payments**: Excluded to prevent double-counting (see below)
+- **Internal Transfers**: Moving money between your own accounts isn't spending
+
+### Why credit card payments are excluded
+
+This is important to understand. When you connect both a checking account and a credit card:
+
+1. Your credit card shows individual purchases (coffee, software, etc.)
+2. Your checking account shows the payment to your credit card
+
+If both counted as expenses, you'd be counting the same money twice:
+- Once when you bought the item (on the credit card)
+- Again when you paid the credit card bill (from checking)
+
+Midday excludes credit card payments from burn rate automatically. The actual expenses on your credit card still count.
+
+### Manually excluding transactions
+
+Some transactions shouldn't count as burn rate even if they're categorized as expenses. You can exclude individual transactions by marking them as excluded in the transaction details.
+
+Common exclusions:
+- One-time equipment purchases
+- Security deposits (you'll get these back)
+- Founder loans to the company
+
+---
+
+## Runway
+
+Runway tells you how many months you can operate before running out of cash.
+
+### The formula
+
+```
+Runway = Cash Balance ÷ Average Monthly Burn Rate
+```
+
+### Example
+
+- Cash on hand: $120,000
+- Average monthly burn: $20,000
+- Runway: 6 months
+
+### What affects runway
+
+**Cash Balance** (increases runway):
+- Revenue coming in
+- Investment or loans
+- Collecting receivables faster
+
+**Burn Rate** (decreases runway when higher):
+- Operating expenses
+- Hiring
+- Marketing spend
+
+### Healthy runway benchmarks
+
+| Runway | Status |
+|--------|--------|
+| 12+ months | Comfortable |
+| 6-12 months | Healthy |
+| 3-6 months | Caution—time to act |
+| Under 3 months | Critical—immediate action needed |
+
+These benchmarks vary by business stage and industry. An established profitable business might operate with less runway than a startup still finding product-market fit.
+
+### If runway shows zero or infinite
+
+- **Zero**: Your cash balance is zero, or burn rate couldn't be calculated (no expense data)
+- **Infinite**: Your business is profitable—you're making more than you spend
+
+---
+
+## Revenue
+
+Revenue is the total money flowing into your business.
+
+### What counts
+
+All transactions categorized under Revenue:
+- Income
+- Product Sales
+- Service Revenue
+- Consulting Revenue
+- Subscription Revenue
+- Interest Income
+- Other Income
+
+### What reduces revenue
+
+- Customer Refunds
+- Chargebacks & Disputes
+
+These are categorized under Revenue but with negative amounts, reducing your net revenue.
+
+### Revenue vs. cash received
+
+Revenue is based on when money hits your bank account, not when you invoice. If you send an invoice in January but get paid in February, it counts as February revenue.
+
+For accrual-based accounting, work with your accountant on adjustments.
+
+---
+
+## Profit
+
+Profit is what remains after subtracting expenses from revenue.
+
+### The formula
+
+```
+Profit = Revenue - Expenses
+```
+
+Expenses include all non-excluded expense categories.
+
+### Profit margin
+
+```
+Profit Margin = (Profit ÷ Revenue) × 100%
+```
+
+Profit margin shows how efficiently you turn revenue into profit. A 20% margin means you keep $0.20 of every dollar earned.
+
+### Gross vs. net profit
+
+Midday shows net profit (all expenses included). For gross profit (revenue minus only cost of goods sold), filter your reports to exclude operating expenses.
+
+---
+
+## Net Position
+
+Net position gives you a quick view of cash minus outstanding credit card debt.
+
+### The formula
+
+```
+Net Position = Cash Balance - Credit Card Balances
+```
+
+### Why this matters
+
+If you have $50,000 in checking but $15,000 on credit cards, your real position is $35,000. Net position shows you this at a glance.
+
+### What's included
+
+**Cash side**:
+- Depository accounts (checking, savings)
+- Other asset accounts (money market)
+
+**Debt side**:
+- Credit card balances
+
+**Not included in net position**:
+- Loans (shown separately in Balance Sheet)
+- Accounts receivable (unpaid invoices)
+- Accounts payable (bills you owe)
+
+---
+
+## Account types and their impact
+
+Different account types affect different metrics:
+
+| Account Type | Cash Balance | Burn Rate | Net Position (Cash) | Net Position (Debt) | Balance Sheet |
+|-------------|--------------|-----------|---------------------|---------------------|---------------|
+| Depository | Yes | Via transactions | Yes | No | Assets |
+| Other Asset | Yes | Via transactions | Yes | No | Assets |
+| Credit | No | Via transactions | No | Yes | Liabilities |
+| Loan | No | Via transactions | No | No | Liabilities |
+
+### Enabling and disabling accounts
+
+When you disable an account:
+- Its balance is excluded from cash calculations
+- Historical transactions still appear
+- You can re-enable it anytime
+
+This is useful for:
+- Closed accounts you want to keep for records
+- Personal accounts accidentally connected
+- Test or sandbox accounts
+
+---
+
+## Date ranges and comparisons
+
+All metrics can be viewed for different time periods:
+
+- This month / Last month
+- This quarter / Last quarter
+- This year / Last year
+- Custom date range
+
+Comparisons show you:
+- Absolute change ($5,000 more revenue)
+- Percentage change (+12% from last period)
+- Trend direction (improving or declining)
+
+---
+
+## Tips for accurate metrics
+
+1. **Connect all business accounts**: Missing accounts mean incomplete data
+
+2. **Review auto-categorization**: Spend 5 minutes weekly checking that categories are correct
+
+3. **Exclude one-time items**: Large one-time expenses can skew burn rate
+
+4. **Set your base currency**: Ensures multi-currency accounts convert correctly
+
+5. **Keep accounts enabled**: Only disable accounts you truly want excluded
+
+6. **Categorize promptly**: Uncategorized transactions affect accuracy
+
+[Learn about categories →](/docs/categories-reference)
+[Check your runway →](/docs/check-runway)
+[View burn rate →](/docs/view-burn-rate)
