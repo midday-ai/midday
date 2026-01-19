@@ -1,5 +1,4 @@
-import { AppleSignIn } from "@/components/apple-sign-in";
-import { GithubSignIn } from "@/components/github-sign-in";
+import { EmailPasswordSignIn } from "@/components/email-password-sign-in";
 import { GoogleSignIn } from "@/components/google-sign-in";
 import { LoginAccordion } from "@/components/login-accordion";
 import { LoginVideoBackground } from "@/components/login-video-background";
@@ -7,9 +6,8 @@ import { OTPSignIn } from "@/components/otp-sign-in";
 import { Cookies } from "@/utils/constants";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import Link from "next/link";
-import { userAgent } from "next/server";
 
 export const metadata: Metadata = {
   title: "Login | Abacus",
@@ -18,51 +16,21 @@ export const metadata: Metadata = {
 export default async function Page() {
   const cookieStore = await cookies();
   const preferred = cookieStore.get(Cookies.PreferredSignInProvider);
-  const { device } = userAgent({ headers: await headers() });
 
   let moreSignInOptions = null;
-  let preferredSignInOption =
-    device?.vendor === "Apple" ? (
-      <div className="flex flex-col space-y-3 w-full">
-        <GoogleSignIn showLastUsed={preferred?.value === "google"} />
-        <AppleSignIn showLastUsed={preferred?.value === "apple"} />
-      </div>
-    ) : (
-      <GoogleSignIn
-        showLastUsed={!preferred?.value || preferred?.value === "google"}
-      />
-    );
+  let preferredSignInOption = (
+    <GoogleSignIn
+      showLastUsed={!preferred?.value || preferred?.value === "google"}
+    />
+  );
 
   switch (preferred?.value) {
-    case "apple":
-      preferredSignInOption = <AppleSignIn showLastUsed={true} />;
-      moreSignInOptions = (
-        <>
-          <GoogleSignIn />
-          <GithubSignIn />
-          <OTPSignIn className="border-t-[1px] border-border pt-8" />
-        </>
-      );
-      break;
-
-    case "github":
-      preferredSignInOption = <GithubSignIn showLastUsed={true} />;
-      moreSignInOptions = (
-        <>
-          <GoogleSignIn />
-          <AppleSignIn />
-          <OTPSignIn className="border-t-[1px] border-border pt-8" />
-        </>
-      );
-      break;
-
     case "google":
       preferredSignInOption = <GoogleSignIn showLastUsed={true} />;
       moreSignInOptions = (
         <>
-          <AppleSignIn />
-          <GithubSignIn />
           <OTPSignIn className="border-t-[1px] border-border pt-8" />
+          <EmailPasswordSignIn className="border-t-[1px] border-border pt-8" />
         </>
       );
       break;
@@ -72,29 +40,28 @@ export default async function Page() {
       moreSignInOptions = (
         <>
           <GoogleSignIn />
-          <AppleSignIn />
-          <GithubSignIn />
+          <EmailPasswordSignIn className="border-t-[1px] border-border pt-8" />
+        </>
+      );
+      break;
+
+    case "password":
+      preferredSignInOption = <EmailPasswordSignIn />;
+      moreSignInOptions = (
+        <>
+          <GoogleSignIn />
+          <OTPSignIn className="border-t-[1px] border-border pt-8" />
         </>
       );
       break;
 
     default:
-      if (device?.vendor === "Apple") {
-        moreSignInOptions = (
-          <>
-            <GithubSignIn />
-            <OTPSignIn className="border-t-[1px] border-border pt-8" />
-          </>
-        );
-      } else {
-        moreSignInOptions = (
-          <>
-            <AppleSignIn />
-            <GithubSignIn />
-            <OTPSignIn className="border-t-[1px] border-border pt-8" />
-          </>
-        );
-      }
+      moreSignInOptions = (
+        <>
+          <OTPSignIn className="border-t-[1px] border-border pt-8" />
+          <EmailPasswordSignIn className="border-t-[1px] border-border pt-8" />
+        </>
+      );
   }
 
   return (
