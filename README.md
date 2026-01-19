@@ -3,7 +3,7 @@
 <p align="center">
 	<h1 align="center"><b>Abacus</b></h1>
 <p align="center">
-    Your AI-Powered Business & MCA Management Platform
+    Your AI-Powered MCA Portfolio Management Platform
     <br />
     <br />
     <a href="https://github.com/midday-ai/midday/issues">Issues</a>
@@ -18,44 +18,18 @@
 
 ## About Abacus
 
-Abacus is an all-in-one platform designed for **freelancers, contractors, consultants, and solo entrepreneurs** to manage their business operations—as well as **MCA funders and collections teams** to manage their loan portfolios. It integrates various functions typically scattered across multiple platforms into a single, cohesive system with a modern UX.
+Abacus is a portfolio management platform built for **MCA funders and collections teams**. It brings together loan tracking, payment monitoring, collections workflows, and reporting into a single, modern system—replacing scattered spreadsheets and legacy tools with a cohesive platform.
 
 ### Who is Abacus for?
 
-- **Freelancers & Consultants**: Track time, send invoices, manage finances
 - **MCA Funders**: Manage merchant cash advance portfolios with full lifecycle tracking
 - **Collections Teams**: Monitor delinquencies, track payments, manage risk
-- **Business Operations**: Centralize documents, receipts, and financial data
+- **Funder Reps**: Oversee merchant relationships and payment performance
+- **Operations Teams**: Sync data, generate reports, and maintain compliance
 
 ---
 
-## Core Business Features
-
-These features help freelancers and businesses manage their day-to-day operations:
-
-### Time Tracking
-Live time tracking of projects to boost productivity and collaboration, providing insightful project overviews.
-
-### Invoicing
-Create web-based invoices, collaborate in real-time, and synchronize projects seamlessly.
-
-### Magic Inbox
-Automatically matches incoming invoices or receipts to the correct transactions, simplifying financial tracking and organization.
-
-### Vault
-Secure storage for important files like contracts and agreements, keeping everything in one place for easy access.
-
-### Seamless Export
-Facilitates easy export of financial data, packaged neatly in CSV files for accountants.
-
-### Assistant
-Provides AI-powered insights into financial situations, helping users understand spending patterns, cut costs, and find documents.
-
----
-
-## MCA / Loan Management Features
-
-These features support Merchant Cash Advance (MCA) funders, collections teams, and loan servicing operations:
+## Features
 
 ### Authentication & Access Control
 - **Dual auth system**: Borrower authentication via Supabase, Admin authentication via NextAuth
