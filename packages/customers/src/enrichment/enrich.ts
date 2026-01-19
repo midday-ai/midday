@@ -1,4 +1,5 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createLoggerWithContext } from "@midday/logger";
 import {
   ToolLoopAgent,
   generateObject,
@@ -17,6 +18,9 @@ import type {
 } from "./schema";
 import { customerEnrichmentSchema } from "./schema";
 import { verifyEnrichmentData } from "./verify";
+
+// Create logger for enrichment
+const logger = createLoggerWithContext("Enrichment");
 
 // Create Google AI instance
 const google = createGoogleGenerativeAI();
@@ -77,7 +81,7 @@ Do NOT keep searching for "nice to have" info like social media.`,
         }),
       ),
       execute: async ({ queries }: { queries: string[] }) => {
-        console.log("[Agent] Searching:", queries);
+        logger.debug("Agent searching", { queries });
 
         const results = await Promise.all(
           queries.map((q) =>
@@ -92,7 +96,7 @@ Do NOT keep searching for "nice to have" info like social media.`,
         );
 
         const allResults = results.flatMap((r) => r.results || []);
-        console.log("[Agent] Found", allResults.length, "results");
+        logger.debug("Agent found results", { count: allResults.length });
 
         const formatted = allResults
           .map((r) => {
@@ -132,12 +136,10 @@ export async function enrichCustomer(
   try {
     const domain = extractDomain(params.website);
 
-    console.log(
-      "[Enrichment] Starting for",
-      params.companyName,
-      "| Domain:",
+    logger.info("Starting enrichment", {
+      companyName: params.companyName,
       domain,
-    );
+    });
 
     if (combinedSignal.aborted) {
       throw new Error("Enrichment cancelled");
@@ -148,7 +150,7 @@ export async function enrichCustomer(
     // ========================================
     const prompt = buildPrompt(params, domain);
 
-    console.log("[Enrichment] Starting ToolLoopAgent...");
+    logger.debug("Starting agent research");
 
     const { text: researchText, steps } = await agent.generate({
       prompt,
@@ -156,13 +158,10 @@ export async function enrichCustomer(
     });
 
     const searchRounds = steps.filter((s) => s.toolCalls.length > 0).length;
-    console.log(
-      "[Enrichment] Agent finished | Rounds:",
+    logger.debug("Agent research complete", {
       searchRounds,
-      "| Text:",
-      researchText.length,
-      "chars",
-    );
+      textLength: researchText.length,
+    });
 
     if (combinedSignal.aborted) {
       throw new Error("Enrichment cancelled");
@@ -171,7 +170,7 @@ export async function enrichCustomer(
     // ========================================
     // Phase 2: Structured Extraction
     // ========================================
-    console.log("[Enrichment] Extracting structured data...");
+    logger.debug("Extracting structured data");
 
     const { object: extractedData } = await generateObject({
       model: google("gemini-2.0-flash"),
@@ -185,7 +184,7 @@ export async function enrichCustomer(
     // ========================================
     const verified = await verifyEnrichmentData(
       extractedData as CustomerEnrichmentResult,
-      { signal: externalSignal },
+      { signal: combinedSignal },
     );
 
     const verifiedFieldCount = DATA_FIELDS.filter(
@@ -193,13 +192,11 @@ export async function enrichCustomer(
     ).length;
 
     const durationMs = Date.now() - startTime;
-    console.log(
-      "[Enrichment] Complete | Fields:",
+    logger.info("Enrichment complete", {
+      companyName: params.companyName,
       verifiedFieldCount,
-      "| Duration:",
       durationMs,
-      "ms",
-    );
+    });
 
     return {
       raw: extractedData as CustomerEnrichmentResult,
