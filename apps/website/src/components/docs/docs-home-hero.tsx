@@ -16,7 +16,7 @@ export function DocsHomeHero() {
           How can we help?
         </h1>
         <p className="text-muted-foreground text-sm md:text-lg max-w-lg mx-auto leading-relaxed mb-8 md:mb-10 px-4 md:px-0">
-          Get instant answers about invoicing, banking, time tracking, and more.
+          Learn how to run your business smarter with Midday.
         </p>
         <HeroChatInput onSubmit={sendMessage} />
       </div>
