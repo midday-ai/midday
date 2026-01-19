@@ -46,27 +46,26 @@ const DATA_FIELDS = [
 
 const agent = new ToolLoopAgent({
   model: google("gemini-3-flash-preview"),
-  instructions: `You are a fast company research agent. Find key company information quickly.
+  instructions: `You are a fast company research agent. Find key company information in ONE search.
 
-## CRITICAL: Maximum 2 searches, then STOP and summarize.
+## CRITICAL: Do exactly 1 search, then IMMEDIATELY summarize.
 
-## Search 1 (required)
-Use 1-2 queries: "[Company] LinkedIn" and "[Company] allabolag/proff/registry"
+## Your single search
+Use 2 queries:
+1. "[Company] LinkedIn company"
+2. "[Company] OpenCorporates" OR country-specific registry (allabolag.se for Sweden, Companies House for UK, Crunchbase for US startups)
 
-## Search 2 (only if needed)  
-Only search again if you're missing LinkedIn URL or VAT number.
-
-## THEN STOP and write your summary with whatever you found.
+## THEN STOP and write your summary with whatever you found. Do NOT search again.
 
 ## What to extract from results:
 - LinkedIn company URL
-- VAT/Org number  
+- Tax ID/VAT/EIN/Org number
 - Employee count, founded year
-- CEO name, address
+- CEO name, headquarters address
 - Description of what they do
 
 ## Output format
-After 1-2 searches, IMMEDIATELY write a summary of everything found. Include source URLs.
+After searching, IMMEDIATELY write a summary of everything found. Include source URLs.
 Do NOT keep searching for "nice to have" info like social media.`,
   tools: {
     search: tool({
@@ -106,7 +105,7 @@ Do NOT keep searching for "nice to have" info like social media.`,
       },
     }),
   },
-  stopWhen: stepCountIs(4),
+  stopWhen: stepCountIs(3),
 });
 
 // ============================================================================
