@@ -1,3 +1,4 @@
+import { AskAiBar } from "@/components/docs/ask-ai-bar";
 import { FloatingChatInput } from "@/components/docs/floating-chat-input";
 import { DocsMDX } from "@/components/docs/mdx";
 import { docsNavigation, getAllDocSlugs, getDocBySlug } from "@/lib/docs";
@@ -129,6 +130,14 @@ export default async function DocPage({ params }: { params: Params }) {
             )}
           </div>
         </nav>
+
+        {/* Ask AI */}
+        <div className="mt-8 pt-8 border-t border-border">
+          <AskAiBar
+            title={doc.metadata.title}
+            description={doc.metadata.description}
+          />
+        </div>
       </div>
     </div>
   );

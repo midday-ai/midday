@@ -47,6 +47,8 @@ const sections = [
     links: [
       { title: "Introduction", href: "/docs/introduction" },
       { title: "Quick Start", href: "/docs/quick-start" },
+      { title: "Desktop App", href: "/docs/desktop-app" },
+      { title: "Troubleshooting", href: "/docs/troubleshooting" },
     ],
   },
   {
@@ -54,8 +56,8 @@ const sections = [
     links: [
       { title: "Connect Bank", href: "/docs/connect-bank-account" },
       { title: "Categorization", href: "/docs/auto-categorization" },
+      { title: "Multi-Currency", href: "/docs/multi-currency" },
       { title: "Categories Reference", href: "/docs/categories-reference" },
-      { title: "Account Settings", href: "/docs/account-settings" },
     ],
   },
   {

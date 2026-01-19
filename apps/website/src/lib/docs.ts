@@ -120,6 +120,18 @@ export const docsNavigation: DocSection[] = [
         description: "Get running in 5 minutes",
         order: 2,
       },
+      {
+        slug: "desktop-app",
+        title: "Desktop App",
+        description: "Native macOS & Windows app",
+        order: 3,
+      },
+      {
+        slug: "troubleshooting",
+        title: "Troubleshooting",
+        description: "Common issues & FAQ",
+        order: 4,
+      },
     ],
   },
   {
@@ -161,6 +173,12 @@ export const docsNavigation: DocSection[] = [
         title: "Account Settings",
         description: "Manage bank accounts",
         order: 6,
+      },
+      {
+        slug: "multi-currency",
+        title: "Multi-Currency",
+        description: "Multiple currencies & exchange",
+        order: 7,
       },
     ],
   },
