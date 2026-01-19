@@ -1,0 +1,398 @@
+---
+title: Build an OAuth App
+description: Create applications that integrate with Midday using OAuth 2.0.
+section: developer
+order: 2
+---
+
+Build applications that let users connect their Midday accounts. OAuth apps can access financial data on behalf of users, enabling integrations, automations, and custom tools.
+
+## What you can build
+
+With OAuth, you can build:
+
+- **Browser extensions** that display Midday data
+- **Mobile apps** with Midday integration
+- **Automation tools** that sync data between services
+- **Custom dashboards** for specific workflows
+- **Developer tools** like IDE extensions
+- **Public apps** listed in the Midday app directory
+
+## How OAuth works
+
+OAuth 2.0 lets your app request access to a user's Midday data without handling their password:
+
+1. Your app redirects users to Midday's authorization page
+2. Users log in and approve the requested permissions
+3. Midday redirects back with an authorization code
+4. Your app exchanges the code for access tokens
+5. Use access tokens to call the Midday API
+
+## Getting started
+
+### Step 1: Create an OAuth application
+
+1. Go to [Settings → Developer](https://app.midday.ai/settings/developer)
+2. Click **Create OAuth app**
+3. Fill in your application details:
+   - **Name**: Your app's name (shown to users)
+   - **Description**: Brief description
+   - **Website**: Your app's homepage
+   - **Redirect URIs**: URLs to redirect after authorization
+4. Select the **scopes** your app needs
+5. Click **Create**
+
+You'll receive:
+- **Client ID**: Public identifier for your app
+- **Client Secret**: Keep this secret (shown once)
+
+### Step 2: Implement the authorization flow
+
+Redirect users to start authorization:
+
+```
+https://app.midday.ai/oauth/authorize?
+  response_type=code&
+  client_id=YOUR_CLIENT_ID&
+  redirect_uri=YOUR_REDIRECT_URI&
+  scope=transactions.read%20invoices.read&
+  state=RANDOM_STATE_VALUE
+```
+
+**Parameters:**
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `response_type` | Yes | Must be `code` |
+| `client_id` | Yes | Your application's client ID |
+| `redirect_uri` | Yes | Must match a registered redirect URI |
+| `scope` | Yes | Space-separated list of scopes |
+| `state` | Recommended | Random string to prevent CSRF attacks |
+| `code_challenge` | For public clients | PKCE code challenge |
+| `code_challenge_method` | For public clients | Must be `S256` |
+
+### Step 3: Handle the callback
+
+After the user authorizes, Midday redirects to your `redirect_uri`:
+
+```
+https://yourapp.com/callback?code=AUTH_CODE&state=YOUR_STATE
+```
+
+If the user denies access:
+
+```
+https://yourapp.com/callback?error=access_denied&error_description=User%20denied%20access
+```
+
+### Step 4: Exchange code for tokens
+
+Make a POST request to exchange the authorization code:
+
+```bash
+curl -X POST https://api.midday.ai/v1/oauth/token \
+  -H "Content-Type: application/json" \
+  -d '{
+    "grant_type": "authorization_code",
+    "code": "AUTH_CODE",
+    "redirect_uri": "YOUR_REDIRECT_URI",
+    "client_id": "YOUR_CLIENT_ID",
+    "client_secret": "YOUR_CLIENT_SECRET"
+  }'
+```
+
+**Response:**
+
+```json
+{
+  "access_token": "mid_at_xxxxx",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "refresh_token": "mid_rt_xxxxx",
+  "scope": "transactions.read invoices.read"
+}
+```
+
+### Step 5: Make API requests
+
+Install the Midday SDK:
+
+```bash
+npm install @midday-ai/sdk
+```
+
+Use the access token with the SDK:
+
+```typescript
+import { Midday } from "@midday-ai/sdk";
+
+const midday = new Midday({
+  token: "mid_at_xxxxx", // Access token from OAuth flow
+});
+
+// List transactions
+const transactions = await midday.transactions.list({
+  pageSize: 50,
+});
+
+// Get invoices
+const invoices = await midday.invoices.list({
+  pageSize: 20,
+});
+
+// Get financial metrics
+const revenue = await midday.metrics.revenue({
+  from: "2024-01-01",
+  to: "2024-12-31",
+});
+```
+
+## PKCE for public clients
+
+For mobile apps, SPAs, or any client that can't securely store secrets, use PKCE (Proof Key for Code Exchange).
+
+### Generate code verifier and challenge
+
+```typescript
+function base64UrlEncode(buffer: Uint8Array): string {
+  return btoa(String.fromCharCode(...buffer))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
+// Generate a random code verifier
+function generateCodeVerifier(): string {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return base64UrlEncode(array);
+}
+
+// Create SHA-256 hash for code challenge
+async function generateCodeChallenge(verifier: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(verifier);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return base64UrlEncode(new Uint8Array(hash));
+}
+```
+
+### Include in authorization request
+
+```
+https://app.midday.ai/oauth/authorize?
+  response_type=code&
+  client_id=YOUR_CLIENT_ID&
+  redirect_uri=YOUR_REDIRECT_URI&
+  scope=transactions.read&
+  code_challenge=CHALLENGE&
+  code_challenge_method=S256&
+  state=STATE
+```
+
+### Include verifier in token exchange
+
+```bash
+curl -X POST https://api.midday.ai/v1/oauth/token \
+  -H "Content-Type: application/json" \
+  -d '{
+    "grant_type": "authorization_code",
+    "code": "AUTH_CODE",
+    "redirect_uri": "YOUR_REDIRECT_URI",
+    "client_id": "YOUR_CLIENT_ID",
+    "code_verifier": "YOUR_CODE_VERIFIER"
+  }'
+```
+
+Note: Public clients should not send `client_secret`.
+
+## Refreshing tokens
+
+Access tokens expire after 1 hour. Use the refresh token to get new tokens:
+
+```bash
+curl -X POST https://api.midday.ai/v1/oauth/token \
+  -H "Content-Type: application/json" \
+  -d '{
+    "grant_type": "refresh_token",
+    "refresh_token": "mid_rt_xxxxx",
+    "client_id": "YOUR_CLIENT_ID",
+    "client_secret": "YOUR_CLIENT_SECRET"
+  }'
+```
+
+Refresh tokens are valid for 30 days and rotate on each use.
+
+## Revoking tokens
+
+Allow users to disconnect your app by revoking tokens:
+
+```bash
+curl -X POST https://api.midday.ai/v1/oauth/revoke \
+  -H "Content-Type: application/json" \
+  -d '{
+    "token": "mid_at_xxxxx",
+    "client_id": "YOUR_CLIENT_ID",
+    "client_secret": "YOUR_CLIENT_SECRET"
+  }'
+```
+
+## Example: TypeScript implementation
+
+```typescript
+import express from "express";
+import crypto from "crypto";
+import { Midday } from "@midday-ai/sdk";
+
+const app = express();
+
+const CLIENT_ID = process.env.MIDDAY_CLIENT_ID!;
+const CLIENT_SECRET = process.env.MIDDAY_CLIENT_SECRET!;
+const REDIRECT_URI = "http://localhost:3000/callback";
+
+// In production, use a proper session store
+const sessions = new Map<string, { state: string; accessToken?: string }>();
+
+// Step 1: Redirect to authorization
+app.get("/connect", (req, res) => {
+  const sessionId = crypto.randomUUID();
+  const state = crypto.randomUUID();
+  
+  sessions.set(sessionId, { state });
+  res.cookie("session_id", sessionId);
+  
+  const authUrl = new URL("https://app.midday.ai/oauth/authorize");
+  authUrl.searchParams.set("response_type", "code");
+  authUrl.searchParams.set("client_id", CLIENT_ID);
+  authUrl.searchParams.set("redirect_uri", REDIRECT_URI);
+  authUrl.searchParams.set("scope", "transactions.read invoices.read");
+  authUrl.searchParams.set("state", state);
+  
+  res.redirect(authUrl.toString());
+});
+
+// Step 2: Handle callback and exchange code for tokens
+app.get("/callback", async (req, res) => {
+  const { code, state, error } = req.query;
+  const sessionId = req.cookies.session_id;
+  const session = sessions.get(sessionId);
+  
+  if (error) {
+    return res.send("Authorization denied");
+  }
+  
+  // Verify state matches
+  if (state !== session?.state) {
+    return res.status(400).send("Invalid state");
+  }
+  
+  // Exchange code for tokens
+  const response = await fetch("https://api.midday.ai/v1/oauth/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: REDIRECT_URI,
+      client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET,
+    }),
+  });
+  
+  const tokens = await response.json();
+  session.accessToken = tokens.access_token;
+  
+  res.send("Connected successfully!");
+});
+
+// Step 3: Use the SDK with the access token
+app.get("/transactions", async (req, res) => {
+  const sessionId = req.cookies.session_id;
+  const session = sessions.get(sessionId);
+  
+  if (!session?.accessToken) {
+    return res.status(401).send("Not connected");
+  }
+  
+  const midday = new Midday({
+    token: session.accessToken,
+  });
+  
+  const result = await midday.transactions.list({
+    pageSize: 50,
+  });
+  
+  res.json(result);
+});
+
+app.listen(3000, () => {
+  console.log("Server running on http://localhost:3000");
+});
+```
+
+## Managing your app
+
+### Edit application settings
+
+1. Go to [Settings → Developer](https://app.midday.ai/settings/developer)
+2. Click on your OAuth application
+3. Update settings as needed
+4. Click **Save**
+
+### Regenerate client secret
+
+If your client secret is compromised:
+
+1. Go to your OAuth application settings
+2. Click **Regenerate secret**
+3. Update your app with the new secret immediately
+
+The old secret stops working immediately.
+
+### Monitor usage
+
+Track your application's usage:
+
+- Number of authorized users
+- API calls per day
+- Error rates
+
+## Security best practices
+
+### Store secrets securely
+
+- Never commit `client_secret` to version control
+- Use environment variables or secret management
+- Rotate secrets if potentially exposed
+
+### Validate state parameter
+
+Always verify the `state` parameter matches what you sent:
+
+```typescript
+if (req.query.state !== storedState) {
+  throw new Error("Invalid state parameter");
+}
+```
+
+### Use HTTPS everywhere
+
+- All redirect URIs must use HTTPS (except localhost for development)
+- Never send tokens over unencrypted connections
+
+### Request minimal scopes
+
+Only request the scopes your app actually needs. Users are more likely to authorize apps that request limited access.
+
+### Handle token expiration
+
+- Check for 401 responses and refresh tokens automatically
+- Implement proper token refresh logic
+- Handle refresh token expiration gracefully
+
+## Next steps
+
+- [OAuth Scopes Reference](/docs/oauth-scopes) — See all available scopes
+- [OAuth API Endpoints](/docs/oauth-api-endpoints) — Technical endpoint reference
+- [App Review Process](/docs/app-review-process) — Get your app verified
+- [API Reference](/docs/api-reference) — Full API documentation

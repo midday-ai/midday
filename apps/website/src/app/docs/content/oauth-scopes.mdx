@@ -1,0 +1,268 @@
+---
+title: OAuth Scopes Reference
+description: Complete list of OAuth scopes for Midday API access.
+section: developer
+order: 3
+---
+
+Scopes define what data and actions your OAuth application can access. Request only the scopes your app needs—users are more likely to authorize apps with limited, focused permissions.
+
+## How scopes work
+
+- Scopes are requested during the authorization flow
+- Users see the requested permissions before authorizing
+- Your app can only access data allowed by granted scopes
+- Scopes cannot be upgraded without re-authorization
+
+## Scope format
+
+Scopes follow the pattern `resource.permission`:
+
+- `transactions.read` — Read transaction data
+- `invoices.write` — Create, update, delete invoices
+
+## Available scopes
+
+### Transactions
+
+| Scope | Description |
+|-------|-------------|
+| `transactions.read` | View transactions, categories, and attachments |
+| `transactions.write` | Update transaction categories, notes, and attachments |
+
+**Use cases**: Financial dashboards, expense tracking, receipt management
+
+### Invoices
+
+| Scope | Description |
+|-------|-------------|
+| `invoices.read` | View invoices and their status |
+| `invoices.write` | Create, update, send, and delete invoices |
+
+**Use cases**: Invoice automation, payment reminders, accounting sync
+
+### Customers
+
+| Scope | Description |
+|-------|-------------|
+| `customers.read` | View customer information |
+| `customers.write` | Create, update, and delete customers |
+
+**Use cases**: CRM integration, customer portals, contact sync
+
+### Bank Accounts
+
+| Scope | Description |
+|-------|-------------|
+| `bank-accounts.read` | View connected bank accounts and balances |
+| `bank-accounts.write` | Manage bank account settings |
+
+**Use cases**: Cash position monitoring, balance alerts
+
+### Documents
+
+| Scope | Description |
+|-------|-------------|
+| `documents.read` | View documents in the vault |
+| `documents.write` | Upload and organize documents |
+
+**Use cases**: Document management, backup tools, OCR integrations
+
+### Inbox
+
+| Scope | Description |
+|-------|-------------|
+| `inbox.read` | View inbox items (uploaded receipts, pending matches) |
+| `inbox.write` | Process and match inbox items |
+
+**Use cases**: Receipt processing, automated matching
+
+### Tracker Projects
+
+| Scope | Description |
+|-------|-------------|
+| `tracker-projects.read` | View time tracking projects |
+| `tracker-projects.write` | Create, update, and delete projects |
+
+**Use cases**: Project management integration, resource planning
+
+### Tracker Entries
+
+| Scope | Description |
+|-------|-------------|
+| `tracker-entries.read` | View time entries |
+| `tracker-entries.write` | Create, update, and delete time entries |
+
+**Use cases**: Time tracking apps, timesheets, billing automation
+
+### Teams
+
+| Scope | Description |
+|-------|-------------|
+| `teams.read` | View team information and settings |
+| `teams.write` | Update team settings |
+
+**Use cases**: Team management, onboarding tools
+
+### Users
+
+| Scope | Description |
+|-------|-------------|
+| `users.read` | View user information within the team |
+| `users.write` | Update user settings |
+
+**Use cases**: User management, access control
+
+### Tags
+
+| Scope | Description |
+|-------|-------------|
+| `tags.read` | View tags used for organizing data |
+| `tags.write` | Create, update, and delete tags |
+
+**Use cases**: Custom categorization, workflow automation
+
+### Reports
+
+| Scope | Description |
+|-------|-------------|
+| `reports.read` | Access financial reports (revenue, profit, runway, burn rate) |
+
+**Use cases**: Financial dashboards, investor updates, forecasting
+
+### Search
+
+| Scope | Description |
+|-------|-------------|
+| `search.read` | Search across all data |
+
+**Use cases**: Global search, data discovery tools
+
+### Notifications
+
+| Scope | Description |
+|-------|-------------|
+| `notifications.read` | View notifications |
+| `notifications.write` | Mark notifications as read, manage settings |
+
+**Use cases**: Notification aggregators, alert systems
+
+## Meta scopes
+
+For apps that need broad access, meta scopes provide convenient shortcuts:
+
+| Scope | Description |
+|-------|-------------|
+| `apis.read` | Read-only access to all resources |
+| `apis.all` | Full read and write access to all resources |
+
+Use meta scopes sparingly. Most apps should request specific scopes.
+
+## Requesting scopes
+
+Include scopes in the authorization URL as a space-separated list:
+
+```
+https://app.midday.ai/oauth/authorize?
+  response_type=code&
+  client_id=YOUR_CLIENT_ID&
+  redirect_uri=YOUR_REDIRECT_URI&
+  scope=transactions.read%20invoices.read%20customers.read&
+  state=STATE
+```
+
+URL-encode the scope parameter (spaces become `%20`).
+
+## Scope validation
+
+When users authorize your app:
+
+1. Midday validates requested scopes against your app's registered scopes
+2. Invalid or unregistered scopes cause authorization to fail
+3. Users see exactly what permissions they're granting
+
+If you need additional scopes later, users must re-authorize your app.
+
+## Scope combinations
+
+### Financial dashboard
+
+```
+transactions.read invoices.read bank-accounts.read reports.read
+```
+
+### Invoice automation
+
+```
+invoices.read invoices.write customers.read customers.write
+```
+
+### Time tracking integration
+
+```
+tracker-projects.read tracker-projects.write tracker-entries.read tracker-entries.write
+```
+
+### Accounting export
+
+```
+transactions.read invoices.read customers.read documents.read
+```
+
+### Full read-only access
+
+```
+apis.read
+```
+
+## Best practices
+
+### Request minimal scopes
+
+Only request what you need. Users trust apps that ask for limited permissions.
+
+**Good**: `transactions.read` for a spending tracker
+
+**Avoid**: `apis.all` when you only need to read transactions
+
+### Separate read and write
+
+If your app only displays data, don't request write scopes:
+
+```
+transactions.read invoices.read
+```
+
+### Group related scopes
+
+If you need invoices, you likely need customers too:
+
+```
+invoices.read invoices.write customers.read
+```
+
+### Document your requirements
+
+Tell users why you need each scope in your app's description or onboarding flow.
+
+## Checking granted scopes
+
+The token response includes the granted scopes:
+
+```json
+{
+  "access_token": "mid_at_xxxxx",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "refresh_token": "mid_rt_xxxxx",
+  "scope": "transactions.read invoices.read"
+}
+```
+
+Check this against your requested scopes to confirm what was granted.
+
+## Related
+
+- [Build an OAuth App](/docs/build-oauth-app) — Getting started guide
+- [OAuth API Endpoints](/docs/oauth-api-endpoints) — Technical reference
+- [API Reference](/docs/api-reference) — Full API documentation
